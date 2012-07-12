@@ -48,7 +48,7 @@ namespace top{
     double neutralH  = elec.iso03().neutralHadronIso();
     double photon    = elec.iso03().photonIso();
 
-    double rhoIso=chargedH + std::max(neutralH+photon - rho_*Aeff(elec.suClu().eta()), 0.0);
+    double rhoIso=(chargedH + std::max(neutralH+photon - rho_*Aeff(elec.suClu().eta()), 0.0))/elec.pt();
     return rhoIso;
   } 
 

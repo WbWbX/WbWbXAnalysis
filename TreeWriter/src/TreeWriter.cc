@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id$
+// $Id: TreeWriter.cc,v 1.1 2012/07/12 11:35:44 jkiesele Exp $
 //
 //
 
@@ -53,6 +53,8 @@
 #include "../../DataFormats/interface/NTEvent.h"
 #include "../../DataFormats/interface/NTTrack.h"
 #include "../../DataFormats/interface/NTSuClu.h"
+#include "../../DataFormats/interface/elecRhoIsoAdder.h"
+
 
 #include "DataFormats/Candidate/interface/CompositeCandidate.h"
 
@@ -180,8 +182,9 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
    std::cout << "n\n################## Tree writer ########################" 
              <<  "\n#" << treename_
              <<  "\n#                                                     #" 
-             <<  "\n#     includes trigger: " << includetrigger_ <<"                             #"
-             <<  "\n#     includes reco   : " << includereco_    <<"                             #" 
+             <<  "\n#     includes trigger    : " << includetrigger_ <<"                         #"
+             <<  "\n#     includes reco       : " << includereco_          <<"                         #" 
+             <<  "\n#     includes pdfWeights : " << includepdfweights_    <<"                         #" 
              <<  "\n#                                                     #"
              <<  "\n#                                                     #"
              <<  "\n#######################################################" << std::endl;
@@ -655,7 +658,11 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    }
    ntevent.setIsoRho(temprhos);
 
-
+   //add rhoiso to electrons (uses 2011 corrections (second argument set to false));
+   top::elecRhoIsoAdder addrho(!IsRealData, false);
+   if(rho2011_) addrho.setRho(temprhos[2]);
+   else         addrho.setRho(temprhos[0]);
+   addrho.addRhoIso(ntelectrons);
 
    /////pdf weights///////
    if(includepdfweights_ && !IsRealData){

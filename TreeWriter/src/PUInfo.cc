@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id$
+// $Id: PUInfo.cc,v 1.1 2012/07/12 11:35:43 jkiesele Exp $
 //
 //
 
@@ -133,6 +133,7 @@ PUInfo::PUInfo(const edm::ParameterSet& iConfig)
 
    std::cout << "n\n################## PUInfo writer ######################" 
              <<  "\n#" << treename_
+             <<  "\n#     includes pdfWeights : " << includepdfweights_    <<"                         #" 
              <<  "\n#######################################################" << std::endl;
 
 
