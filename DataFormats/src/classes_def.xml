@@ -1,0 +1,23 @@
+<lcgdict>
+  <class name="std::vector<std::string>"/>
+  <class name="std::vector<std::vector<std::string> >"/>
+  <class name="top::NTLepton"/>
+  <class name="std::vector<top::NTLepton>"/>
+  <class name="top::NTMuon"/>
+  <class name="std::vector<top::NTMuon>"/>
+  <class name="top::NTElectron"/>
+  <class name="std::vector<top::NTElectron>"/>
+  <class name="top::NTJet"/>
+  <class name="std::vector<top::NTJet>"/>
+  <class name="top::NTMet"/>
+  <class name="std::vector<top::NTMet>"/>
+  <class name="top::NTEvent"/>
+  <class name="std::vector<top::NTEvent>"/>
+  <class name="top::NTIsolation"/>
+  <class name="std::vector<top::NTIsolation>"/>
+  <class name="top::NTTrack"/>
+  <class name="std::vector<top::NTTrack>"/>
+  <class name="top::NTSuClu"/>
+  <class name="std::vector<top::NTSuClu>"/>
+</lcgdict>
+ 

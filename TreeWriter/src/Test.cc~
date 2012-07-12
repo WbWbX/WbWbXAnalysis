@@ -1,0 +1,553 @@
+// -*- C++ -*-
+//
+// Package:    Test
+// Class:      Test
+// 
+/**\class Test Test.cc DOSS/Test/src/Test.cc
+
+ Description: [one line class summary]
+
+ Implementation:
+     [Notes on implementation]
+*/
+//
+// Original Author:  Jan Kieseler,,,DESY
+//         Created:  Fri May 11 14:22:43 CEST 2012
+// $Id$
+//
+//
+
+
+// system include files
+#include <memory>
+
+// user include files
+#include "PhysicsTools/SelectorUtils/interface/JetIDSelectionFunctor.h"
+#include "PhysicsTools/SelectorUtils/interface/PFJetIDSelectionFunctor.h"
+
+#include "FWCore/Framework/interface/Frameworkfwd.h"
+#include "FWCore/Framework/interface/EDAnalyzer.h"
+
+#include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
+
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "DataFormats/PatCandidates/interface/Electron.h"
+#include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
+#include "DataFormats/PatCandidates/interface/MET.h"
+#include <vector>
+#include <string>
+#include "DataFormats/Common/interface/TriggerResults.h"
+#include "FWCore/Common/interface/TriggerNames.h"
+#include "DataFormats/PatCandidates/interface/TriggerObject.h"
+#include "TTree.h"
+#include "TLorentzVector.h"
+
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "TopAnalysis/DataFormats/interface/NTMuon.h"
+#include "TopAnalysis/DataFormats/interface/NTElectron.h"
+#include "TopAnalysis/DataFormats/interface/NTJet.h"
+#include "TopAnalysis/DataFormats/interface/NTMet.h"
+#include "TopAnalysis/DataFormats/interface/NTEvent.h"
+
+#include "DataFormats/Candidate/interface/CompositeCandidate.h"
+
+#include "DataFormats/Candidate/interface/CandidateFwd.h"
+#include "DataFormats/Common/interface/TriggerResults.h"
+#include "FWCore/Common/interface/TriggerNames.h"
+
+#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
+#include "SimDataFormats/GeneratorProducts/interface/GenRunInfoProduct.h"
+
+
+#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
+//#include "PhysicsTools/Utilities/interface/LumiReWeighting.h"
+//#include "PhysicsTools/Utilities/interface/Lumi3DReWeighting.h"
+
+
+#include <algorithm>
+
+#include <cstring>
+
+//
+// class declaration
+//
+
+class Test : public edm::EDAnalyzer {
+   public:
+      explicit Test(const edm::ParameterSet&);
+      ~Test();
+
+      static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
+
+
+   private:
+ 
+      virtual void beginJob() ;
+      virtual void analyze(const edm::Event&, const edm::EventSetup&);
+      virtual void endJob() ;
+
+      virtual void beginRun(edm::Run const&, edm::EventSetup const&);
+      virtual void endRun(edm::Run const&, edm::EventSetup const&);
+      virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
+      virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
+
+      // ----------member data ---------------------------
+
+  bool checkJetID(std::vector<pat::Jet>::const_iterator);
+
+
+  edm::InputTag muons_, recomuons_, elecs_, recoelecs_, jets_, met_, vertices_, trigresults_, puinfo_;
+  bool includereco_, includetrigger_, pfinput_;
+  TTree* Ntuple;
+  std::vector<top::NTMuon> ntmuons;
+  std::vector<top::NTLepton> ntleptons;
+  std::vector<top::NTElectron> ntelectrons;
+  std::vector<top::NTJet> ntjets;
+  top::NTMet ntmet;
+  top::NTEvent ntevent;
+
+  std::string treename_, btagalgo_;
+
+
+};
+
+//
+// constants, enums and typedefs
+//
+
+//
+// static data member definitions
+//
+
+//
+// constructors and destructor
+//
+Test::Test(const edm::ParameterSet& iConfig)
+{
+   //now do what ever initialization is needed
+  treename_  =iConfig.getParameter<std::string> ("treeName");
+  muons_       =iConfig.getParameter<edm::InputTag>    ( "muonSrc" );
+  recomuons_       =iConfig.getParameter<edm::InputTag>    ( "recoMuonSrc" );
+recoelecs_      =iConfig.getParameter<edm::InputTag>    ( "recoElecSrc" );
+  includereco_  =iConfig.getParameter<bool>    ( "includeReco" );
+  elecs_       =iConfig.getParameter<edm::InputTag>    ( "elecSrc" );
+  jets_       =iConfig.getParameter<edm::InputTag>    ( "jetSrc" );
+  met_       =iConfig.getParameter<edm::InputTag>    ( "metSrc" );
+  vertices_       =iConfig.getParameter<edm::InputTag>    ( "vertexSrc" );
+  includetrigger_  =iConfig.getParameter<bool>    ( "includeTrigger" );
+  trigresults_       =iConfig.getParameter<edm::InputTag>    ( "triggerResults" );
+  // pfinput_       =iConfig.getParameter<bool>    ( "PFInput" );
+  puinfo_       =iConfig.getParameter<edm::InputTag>    ( "PUInfo" );
+   btagalgo_ =iConfig.getParameter<std::string> ("btagAlgo");
+
+   std::cout << "n\n################## Tree writer ########################" 
+             <<  "\n#                                                     #"
+             <<  "\n#                                                     #" 
+             <<  "\n#     includes trigger: " << includetrigger_ <<"                             #"
+             <<  "\n#     includes reco   : " << includereco_    <<"                             #" 
+             <<  "\n#                                                     #"
+             <<  "\n#                                                     #"
+             <<  "\n#######################################################" << std::endl;
+
+
+
+
+}
+
+
+Test::~Test()
+{
+ 
+   // do anything here that needs to be done at desctruction time
+   // (e.g. close files, deallocate resources etc.)
+
+}
+
+
+//
+// member functions
+//
+
+// ------------ method called for each event  ------------
+void
+Test::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+{
+   using namespace edm;
+
+   std::string addForPF;
+   if(pfinput_) addForPF="bla";
+   
+   ntmuons.clear();
+  ntleptons.clear();
+  ntelectrons.clear();
+  ntjets.clear();
+
+  bool IsRealData = false;
+  edm::Handle <reco::GenParticleCollection> genParticles;
+  try {
+    iEvent.getByLabel("prunedGen", genParticles);
+    int aux = genParticles->size();
+    aux = 0+aux;
+  }
+  catch(...) {IsRealData = true;} 
+
+
+   Handle<std::vector<pat::Electron > > elecs;
+   iEvent.getByLabel(elecs_,elecs);
+
+
+   Handle<std::vector<reco::Muon> > recomuons;
+   Handle<std::vector<reco::GsfElectron> > recoelecs;
+   if(includereco_){
+     iEvent.getByLabel(recomuons_,recomuons);
+     iEvent.getByLabel(recoelecs_,recoelecs);
+   }
+   Handle<std::vector<pat::Muon > > muons;
+   iEvent.getByLabel(muons_,muons);
+
+   Handle<std::vector<pat::Jet> > jets;
+   iEvent.getByLabel(jets_,jets);
+
+   Handle<std::vector<pat::MET> > mets;
+   iEvent.getByLabel(met_,mets);
+
+   Handle<std::vector<reco::Vertex> > vertices;
+   iEvent.getByLabel(vertices_, vertices);
+   const reco::VertexCollection vtxs  = *(vertices.product());
+
+
+   
+   if(vtxs.size()>0){
+
+     for(std::vector<pat::Electron >::const_iterator electron=elecs->begin(); electron<elecs->end() ; electron++){
+     
+       top::NTIsolation Iso;
+       Iso.setChargedHadronIso(electron->chargedHadronIso());
+       Iso.setNeutralHadronIso(electron->neutralHadronIso());
+       Iso.setPhotonIso(electron->photonIso());
+       Iso.setPuChargedHadronIso(electron->puChargedHadronIso());
+
+
+       top::NTElectron tempelec;
+       tempelec.setP4(electron->p4());
+       tempelec.setQ(electron->charge());
+       double vz=-9999;
+       double vzerr=-9999;
+       double dbs=100;
+       if(!(electron->gsfTrack().isNull())){
+	 vz=electron->gsfTrack()->dz(vtxs[0].position());                   //
+	 vzerr=electron->gsfTrack()->dzError();  
+	 dbs=fabs(electron->gsfTrack()->dxy(vtxs[0].position()));
+       }              //
+       else if((electron->closestCtfTrackRef()).isNull()){
+	 vz=electron->closestCtfTrackRef()->dz(vtxs[0].position());                   //
+	 vzerr=electron->closestCtfTrackRef()->dzError();  
+	 dbs=fabs(electron->closestCtfTrackRef()->dxy(vtxs[0].position()));
+       }
+       tempelec.setVertexZ(vz);                   //
+       tempelec.setVertexZErr(vzerr);  
+
+       tempelec.setDbs(dbs);                  //
+       tempelec.setNotConv(electron->passConversionVeto());    
+       tempelec.setId(electron->electronIDs());
+       tempelec.setIso03(Iso);                   //
+       //tempelec.setIso04(iso04);                   //
+		       
+
+       if(electron->triggerObjectMatches().size() ==1){ // no ambiguities
+	 tempelec.setMatchedTrig(electron->triggerObjectMatches().begin()->pathNames());
+       }
+       else{
+	 std::vector<std::string> def;
+	 def.push_back("NoUnamTrigMatch");
+	 tempelec.setMatchedTrig(def);
+       }
+
+       ntelectrons.push_back(tempelec);
+
+
+     }
+   
+     for(std::vector<pat::Muon >::const_iterator muon=muons->begin(); muon<muons->end() ; muon++){
+       
+//        double iso03=(muon->pfIsolationR03().sumChargedHadronPt + std::max(0.0, nHadronEt03+ muon->pfIsolationR03().sumPhotonEt - 0.5*( muon->pfIsolationR03().sumPUPt)  ))/muon->pt();
+//        double iso04=(muon->pfIsolationR04().sumChargedHadronPt + std::max(0.0, nHadronEt04+ muon->pfIsolationR04().sumPhotonEt - 0.5*( muon->pfIsolationR04().sumPUPt)  ))/muon->pt();
+
+       top::NTIsolation Iso03;
+       Iso03.setChargedHadronIso(muon->pfIsolationR03().sumChargedHadronPt);
+       Iso03.setNeutralHadronIso(muon->pfIsolationR03().sumNeutralHadronEt); ///
+       Iso03.setPhotonIso(muon->pfIsolationR03().sumPhotonEt);
+       Iso03.setPuChargedHadronIso(muon->pfIsolationR03().sumPUPt);
+
+       top::NTIsolation Iso04;
+       Iso04.setChargedHadronIso(muon->pfIsolationR04().sumChargedHadronPt);
+       Iso04.setNeutralHadronIso(muon->pfIsolationR04().sumNeutralHadronEt); ///
+       Iso04.setPhotonIso(muon->pfIsolationR04().sumPhotonEt);
+       Iso04.setPuChargedHadronIso(muon->pfIsolationR04().sumPUPt);
+
+       top::NTMuon tempmuon;
+
+       //double iso03=0;
+       //double iso04=0;
+
+       tempmuon.setP4   (muon->p4());
+       tempmuon.setQ   (muon->charge());
+       double vz=-9999;
+       double vzerr=-9999;
+       if(!(muon->globalTrack()).isNull()){
+	 vz=muon->globalTrack()->dz(vtxs[0].position());
+	 vzerr=muon->globalTrack()->dzError();
+       }
+       else if(!(muon->innerTrack()).isNull()){
+	 vz=muon->innerTrack()->dz(vtxs[0].position());
+	 vzerr=muon->innerTrack()->dzError();
+       }
+       else if(!(muon->outerTrack()).isNull()){
+	 vz=muon->outerTrack()->dz(vtxs[0].position());
+	 vzerr=muon->outerTrack()->dzError();
+       }
+       tempmuon.setVertexZ   (vz);
+       tempmuon.setVertexZErr   (vzerr);
+
+       tempmuon.setIsGlobal   (muon->isGlobalMuon());
+
+       if(muon->isGlobalMuon()){
+	 tempmuon.setNormChi2   (muon->globalTrack()->normalizedChi2());
+	 if(!(muon->innerTrack().isNull())) 
+	   tempmuon.setTrkHits  (muon->innerTrack()->hitPattern().trackerLayersWithMeasurement());
+	 else
+	   tempmuon.setTrkHits (0);
+	 tempmuon.setMuonHits   (muon->globalTrack()->hitPattern().numberOfValidMuonHits());
+	 tempmuon.setDbs   (fabs(muon->globalTrack()->dxy(vtxs[0].position())));
+	 tempmuon.setIso03   (Iso03);
+	 tempmuon.setIso04   (Iso04);
+       }
+       else{
+	 tempmuon.setNormChi2   (100);
+	 tempmuon.setTrkHits    (0);
+	 tempmuon.setMuonHits    (0);
+	 tempmuon.setDbs  (100);
+	 tempmuon.setIso03    (Iso03);
+	 tempmuon.setIso04    (Iso04);
+       }
+
+       if(muon->triggerObjectMatches().size() ==1){ // no ambiguities
+	 tempmuon.setMatchedTrig(muon->triggerObjectMatches().begin()->pathNames());
+       }
+       else{
+	 std::vector<std::string> def;
+	 def.push_back("NoUnamTrigMatch");
+	 tempmuon.setMatchedTrig(def);
+       }
+
+       ntmuons.push_back(tempmuon);
+     }
+     }
+     if(includereco_){
+       for(std::vector<reco::Muon>::const_iterator recomuon=recomuons->begin(); recomuon<recomuons->end() ; recomuon++){
+	 top::NTLepton templep;
+	 templep.setP4(recomuon->p4());
+	 templep.setQ(recomuon->charge());	 
+	 double vz=-9999;
+	 double vzerr=-9999;
+	 if(!(recomuon->globalTrack().isNull())){
+	   vz=recomuon->globalTrack()->dz(vtxs[0].position());
+	   vzerr=recomuon->globalTrack()->dzError();
+	 }
+	 else if(!(recomuon->innerTrack().isNull())){
+	   vz=recomuon->innerTrack()->dz(vtxs[0].position());
+	   vzerr=recomuon->innerTrack()->dzError();
+	 }
+	 else if(!(recomuon->outerTrack()).isNull()){
+	   vz=recomuon->outerTrack()->dz(vtxs[0].position());
+	   vzerr=recomuon->outerTrack()->dzError();
+	 }
+	 templep.setVertexZ(vz);
+	 templep.setVertexZErr(vzerr);
+
+	 ntleptons.push_back(templep);
+       }
+       for(std::vector<reco::GsfElectron>::const_iterator recoelectron=recoelecs->begin(); recoelectron<recoelecs->end() ; recoelectron++){
+	 top::NTLepton templep;
+	 templep.setP4(recoelectron->p4());
+	 templep.setQ(recoelectron->charge());
+	 double vz=-9999;
+	 double vzerr=-9999;
+	 if(!(recoelectron->gsfTrack().isNull())){
+	   vz=recoelectron->gsfTrack()->dz(vtxs[0].position());
+	   vzerr=recoelectron->gsfTrack()->dzError();
+	 }
+	 else if(!(recoelectron->closestCtfTrackRef().isNull())){
+	   vz=recoelectron->closestCtfTrackRef()->dz(vtxs[0].position());
+	   vzerr=recoelectron->closestCtfTrackRef()->dzError();
+	 }
+	 templep.setVertexZ(vz);
+         templep.setVertexZErr(vzerr);
+	 ntleptons.push_back(templep);
+       }
+     }
+
+
+     for(std::vector<pat::Jet>::const_iterator jet=jets->begin(); jet<jets->end() ; jet++){
+
+       top::NTJet tempjet;
+       tempjet.setId(checkJetID(jet));
+       tempjet.setP4(jet->p4());
+       top::LorentzVector tempgen(0,0,0,0);
+       tempjet.setGenP4(tempgen);
+       if(jet->genJet()){
+	 tempjet.setGenP4(jet->genJet()->p4());
+       }
+       tempjet.setBtag(jet->bDiscriminator(btagalgo_));    //
+       ntjets.push_back(tempjet);
+     }
+
+     ntmet.setMet(0);
+     for(std::vector<pat::MET>::const_iterator met=mets->begin(); met<mets->end() ; met++){
+       ntmet.setMet(met->et());
+       break;
+     
+
+   } //end vtxs.size()>0
+
+
+   std::vector<std::string> firedtriggers;
+
+   if(includetrigger_){ 
+
+     Handle<TriggerResults> trigresults;
+     iEvent.getByLabel(trigresults_, trigresults);
+
+     if(!trigresults.failedToGet()){
+       int n_Triggers = trigresults->size();
+       TriggerNames trigName = iEvent.triggerNames(*trigresults);
+
+       for(int i_Trig = 0; i_Trig<n_Triggers; ++i_Trig){
+	 if(trigresults.product()->accept(i_Trig)){
+	   firedtriggers.push_back(trigName.triggerName(i_Trig));
+	 }
+       }
+     }
+
+   }
+   ntevent.setRunNo(iEvent.id().run());
+   ntevent.setLumiBlock(iEvent.id().luminosityBlock());
+   ntevent.setEventNo(iEvent.id().event());
+   ntevent.setVertexMulti(vertices->size());
+   ntevent.setFiredTriggers(firedtriggers);
+
+   int BXminus=0;
+   int BXzero=0;
+   int BXplus=0;
+
+   if(!IsRealData){
+     edm::Handle<std::vector<PileupSummaryInfo> > PUSInfo;
+     try{
+       iEvent.getByLabel(puinfo_, PUSInfo);
+       for(std::vector<PileupSummaryInfo>::const_iterator PUI=PUSInfo->begin(); PUI<PUSInfo->end();PUI++){
+	 if(PUI->getBunchCrossing()==-1)
+	   BXminus=PUI->getTrueNumInteractions();
+	 else if(PUI->getBunchCrossing()==0)
+	   BXzero=PUI->getTrueNumInteractions();
+	 else if(PUI->getBunchCrossing()==1)
+	   BXplus=PUI->getTrueNumInteractions();
+       }
+     }catch(...){}
+   }
+   ntevent.setTruePU(BXminus,BXzero,BXplus);
+
+
+   Ntuple ->Fill();
+
+}
+
+
+// ------------ method called once each job just before starting event loop  ------------
+void 
+Test::beginJob()
+{
+  edm::Service<TFileService> fs;
+
+  if( !fs ){
+    throw edm::Exception( edm::errors::Configuration,
+                          "TFile Service is not registered in cfg file" );
+  }
+  char * tempname = new char[treename_.length()];
+  strcpy(tempname, treename_.c_str());
+  Ntuple=fs->make<TTree>(tempname ,tempname );
+  //Ntuple->Branch("elePt",&elecpts);
+  //TBranch *branch = Ntuple->Branch("Triggers",&triggers);
+  Ntuple->Branch("NTMuons", "std::vector<top::NTMuon>", &ntmuons);
+  if(includereco_) Ntuple->Branch("NTLeptons", "std::vector<top::NTLepton>", &ntleptons);
+  Ntuple->Branch("NTElectrons", "std::vector<top::NTElectron>", &ntelectrons);
+  Ntuple->Branch("NTJets", "std::vector<top::NTJet>", &ntjets);
+  Ntuple->Branch("NTMet", "top::NTMet", &ntmet);
+  Ntuple->Branch("NTEvent", "top::NTEvent", &ntevent);
+
+}
+
+// ------------ method called once each job just after ending the event loop  ------------
+void 
+Test::endJob() 
+{
+}
+
+// ------------ method called when starting to processes a run  ------------
+void 
+Test::beginRun(edm::Run const&, edm::EventSetup const&)
+{
+}
+
+// ------------ method called when ending the processing of a run  ------------
+void 
+Test::endRun(edm::Run const&, edm::EventSetup const&)
+{
+}
+
+// ------------ method called when starting to processes a luminosity block  ------------
+void 
+Test::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
+{
+}
+
+// ------------ method called when ending the processing of a luminosity block  ------------
+void 
+Test::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
+{
+}
+
+// ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
+void
+Test::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+  //The following says we do not know what parameters are allowed so do no validation
+  // Please change this to state exactly what you do use, even if it is no parameters
+  edm::ParameterSetDescription desc;
+  desc.setUnknown();
+  descriptions.addDefault(desc);
+}
+bool Test::checkJetID(std::vector<pat::Jet>::const_iterator jet)
+{
+  bool hasjetID=false;
+  if(jet->numberOfDaughters() > 1 &&
+     jet->neutralHadronEnergyFraction() < 0.99 &&
+     jet->neutralEmEnergyFraction() < 0.99){
+    if(fabs(jet->eta())<2.4){
+      if( jet->chargedMultiplicity() > 0 &&
+          jet->chargedHadronEnergyFraction() > 0&&
+          jet->chargedEmEnergyFraction() < 0.99)
+	hasjetID=true;
+    }
+    else{
+      hasjetID=true;
+    }
+  }
+
+  
+  return hasjetID;
+}
+
+//define this as a plug-in
+DEFINE_FWK_MODULE(Test);
