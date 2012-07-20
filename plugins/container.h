@@ -19,6 +19,7 @@ namespace top{
     TString getName(){return name_;}
     void setNames(TString name, TString xaxis, TString yaxis){name_=name;xname_=xaxis;yname_=yaxis;}
     void copyNames(top::container1D);
+    void setShowWarnings(bool show){showwarnings_=show;}
  
     void fill(double);            //! fills
     void fillDyn(double);         //! not implemented yet
@@ -54,7 +55,7 @@ namespace top{
     void setLabelSize(double size){labelmultiplier_=size;}       //! 1 for default
     TH1D * getTH1D(TString name=""); //! returns a TH1D pointer with symmetrized errors (TString name); small bug with content(bin)=0 and error(bin)=0
     void writeTH1D(TString name=""); //! writes TH1D->Write() with symmetrized errors (TString name)
-    TGraphAsymmErrors * getTGraph(TString name="");  
+    TGraphAsymmErrors * getTGraph(TString name="",bool noXErrors=false);  
     void writeTGraph(TString name=""); //! writes TGraph (TString name)
 
     
@@ -76,6 +77,7 @@ namespace top{
     void addGlobalRelError(double);
 
   protected:
+    bool showwarnings_;
     float binwidth_;
     std::vector<float> bins_;
     bool canfilldyn_;
@@ -96,6 +98,7 @@ namespace top{
     canfilldyn_=false;
     divideBinomial_=true;
     labelmultiplier_=1;
+    showwarnings_=false;
   }
   container1D::container1D(float binwidth, TString name,TString xaxisname,TString yaxisname){
     binwidth_=binwidth;
@@ -105,6 +108,7 @@ namespace top{
     xname_=xaxisname;
     yname_=yaxisname;
     labelmultiplier_=1;
+    showwarnings_=false;
   }
   container1D::container1D(std::vector<float> bins, TString name,TString xaxisname,TString yaxisname){
     setBins(bins);
@@ -113,6 +117,7 @@ namespace top{
     xname_=xaxisname;
     yname_=yaxisname;
     labelmultiplier_=1;
+    showwarnings_=false;
   }
   container1D::~container1D(){
 
@@ -160,13 +165,13 @@ namespace top{
       what++;
       weight++; //just avoid warnings function not implemented yet. creates new bins based on binwidth_ if needed
     }
-    else{
+    else if(showwarnings_){
       std::cout << "dynamic filling not available with fixed bins!" << std::endl;
     }
   }
   void container1D::setBinErrorUp(int bin, double err){
     if((unsigned int)bin<bins_.size()) errup_[bin] = err;
-    else std::cout << "setBinErrorUp: bin not existent!" << std::endl;
+    else if(showwarnings_)std::cout << "setBinErrorUp: bin not existent!" << std::endl;
   }
   void container1D::setBinErrorDown(int bin, double err){
     if((unsigned int)bin<bins_.size()) errdown_[bin] = err;
@@ -177,7 +182,7 @@ namespace top{
       entries_[bin] =1;
       content_[bin] = content;
     }
-    else{
+    else if(showwarnings_){
       std::cout << "setBinContent: bin not existent!" << std::endl;
     }
   }
@@ -207,7 +212,7 @@ namespace top{
   }
   double container1D::getBinCenter(int bin){
     double center=0;
-    if(!((unsigned int)bin<bins_.size()-1)){
+    if(!((unsigned int)bin<bins_.size()-1) && showwarnings_){
       std::cout << "getBinCenter: bin not existent!" << std::endl;
     }
     else{
@@ -217,7 +222,7 @@ namespace top{
   }
   double container1D::getBinWidth(int bin){
     double width=0;
-    if(!((unsigned int)bin<bins_.size()-1)){
+    if(!((unsigned int)bin<bins_.size()-1) && showwarnings_){
       std::cout << "getBinCenter: bin not existent!" << std::endl;
     }
     else{
@@ -230,7 +235,7 @@ namespace top{
       return content_[bin];
     }
     else{
-      std::cout << "getBinContent: bin not existent!" << std::endl;
+      if(showwarnings_)std::cout << "getBinContent: bin not existent!" << std::endl;
       return 0;
     }
   }
@@ -239,7 +244,7 @@ namespace top{
       return errup_[bin];
     }
     else{
-      std::cout << "getBinErrorUp: bin not existent!" << std::endl;
+      if(showwarnings_)std::cout << "getBinErrorUp: bin not existent!" << std::endl;
       return 0;
     }
   }
@@ -248,7 +253,7 @@ namespace top{
       return errdown_[bin];
     }
     else{
-      std::cout << "getBinErrorDown: bin not existent!" << std::endl;
+      if(showwarnings_) std::cout << "getBinErrorDown: bin not existent!" << std::endl;
       return 0;
     }
   }
@@ -262,7 +267,7 @@ namespace top{
       }
     }
     else{
-      std::cout << "getBinError: bin not existent!" << std::endl;
+      if(showwarnings_)std::cout << "getBinError: bin not existent!" << std::endl;
       return 0;
     }
   }
@@ -342,7 +347,7 @@ namespace top{
     delete h;
   }
 
-  TGraphAsymmErrors * container1D::getTGraph(TString name){
+  TGraphAsymmErrors * container1D::getTGraph(TString name, bool noXErrors){
 
     if(name=="") name=name_;
     double x[getNBins()];
@@ -353,8 +358,14 @@ namespace top{
     double yeh[getNBins()];
     for(int i=1;i<=getNBins();i++){
       x[i-1]=getBinCenter(i);
-      xeh[i-1]=getBinWidth(i)/2;
-      xel[i-1]=getBinWidth(i)/2;
+      if(noXErrors){
+	xeh[i-1]=0;
+	xel[i-1]=0;
+      }
+      else{
+	xeh[i-1]=getBinWidth(i)/2;
+	xel[i-1]=getBinWidth(i)/2;
+      }
       y[i-1]=getBinContent(i);
       yeh[i-1]=getBinErrorUp(i);
       yel[i-1]=getBinErrorDown(i);
@@ -389,7 +400,7 @@ namespace top{
 
   container1D container1D::operator + (container1D second){
     if(bins_ != second.bins_){
-      std::cout << "operator +: not same binning!" << std::endl;
+      if(showwarnings_) std::cout << "operator +: not same binning!" << std::endl;
     }
     else{
       for(unsigned int i=0; i<content_.size(); i++){
@@ -404,7 +415,7 @@ namespace top{
 
   container1D container1D::operator - (container1D second){
     if(bins_ != second.bins_){
-      std::cout << "operator -: not same binning!" << std::endl;
+      if(showwarnings_) std::cout << "operator -: not same binning!" << std::endl;
     }
     else{
       for(unsigned int i=0; i<content_.size(); i++){
@@ -420,7 +431,7 @@ namespace top{
   container1D container1D::operator / (container1D second){
     container1D out= second;
     if(bins_ != second.bins_ || (divideBinomial_!=second.divideBinomial_)){
-      std::cout << "operator /: not same binning or different divide options!" << std::endl;
+      if(showwarnings_) std::cout << "operator /: not same binning or different divide options!" << std::endl;
     }
     else{
       for(unsigned int i=0; i<content_.size(); i++){
@@ -445,7 +456,7 @@ namespace top{
 	  out.errup_[i]=0;
 	  out.errdown_[i]=0;
 	  if(i!=0 && i != content_.size()-1){ 
-	    std::cout << "warning: bin with denominator = 0!" << std::endl;
+	    if(showwarnings_) std::cout << "warning: bin with denominator = 0!" << std::endl;
 	  }
 	}
       }
@@ -454,7 +465,7 @@ namespace top{
   }
   container1D container1D::operator * (container1D second){
     if(bins_ != second.bins_){
-      std::cout << "operator *: not same binning!" << std::endl;
+      if(showwarnings_) std::cout << "operator *: not same binning!" << std::endl;
     }
     else{
       for(unsigned int i=0; i<content_.size(); i++){
@@ -499,7 +510,7 @@ namespace top{
   }
   void container1D::addErrorContainer(container1D deviatingContainer, double weight){
     if(bins_!=deviatingContainer.bins_){
-      std::cout << "addErrorContainer(): not same binning!" << std::endl;
+      if(showwarnings_) std::cout << "addErrorContainer(): not same binning!" << std::endl;
     }
     else{
       for(unsigned int i=0; i<content_.size(); i++){

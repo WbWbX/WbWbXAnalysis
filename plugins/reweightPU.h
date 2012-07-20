@@ -7,6 +7,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include "TString.h"
 
 
 //! PU reweighting. Now provides a PU variation of +-1.
@@ -122,11 +123,12 @@ namespace top{
 
   ////////hardcoded stuff. Not elegant, but unlikely to change that often
 
-    void setMCDistrSum12(std::string scenario="S07"){
+    void setMCDistrSum12(TString scenario="S07"){
       // Distribution used for Summer2012 MC.
       
-      std::cout << "setting MC pileup distribution to summer12" << std::endl;
       
+      std::vector<double> V;
+
       if(scenario == "S07"){
       
       Double_t Summer2012[60] = {
@@ -190,18 +192,15 @@ namespace top{
 	2.221E-07,
 	6.947E-08,
 	2.047E-08
-      };  
+      }; 
 
-
-
-
+      V = std::vector<double>(Summer2012,Summer2012  + sizeof(Summer2012)/sizeof(Summer2012[0]));
+ 
       }
-
       ////////for other PU scenarios!!!
 
+      std::cout << "setting MC pileup distribution to summer12" << std::endl;
 
-
-      std::vector<double> V(Summer2012,Summer2012  + sizeof(Summer2012)/sizeof(Summer2012[0]));
 
       setMCDistribution(V);
 

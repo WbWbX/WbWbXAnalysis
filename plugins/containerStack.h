@@ -12,6 +12,7 @@
 #include "TCanvas.h"
 #include "TPad.h"
 #include "TLine.h"
+#include "TStyle.h"
 
 namespace top{
 
@@ -190,7 +191,7 @@ namespace top{
   }
   void container1DStack::drawControlPlot(TString name, bool drawxaxislabels, double resizelabels){
     if(name=="") name=name_;
-    int dataentry;
+    int dataentry=0;
     for(unsigned int i=0;i<size();i++){
       if(getLegend(i) == dataleg_){
         dataentry=i;
@@ -200,10 +201,8 @@ namespace top{
     containers_[dataentry].setLabelSize(resizelabels);
     TGraphAsymmErrors * g = containers_[dataentry].getTGraph(name);
 
-    container1D datapoints = containers_[dataentry];
-
-    TH1D * h =datapoints.getTH1D(name+"_h"); // needed to be able to set log scale etc.
-    h->Draw();
+    TH1D * h =containers_[dataentry].getTH1D(name+"_h"); // needed to be able to set log scale etc.
+    h->Draw("AXIS");
     if(!drawxaxislabels){
       h->GetXaxis()->SetLabelSize(0);
     }
@@ -228,7 +227,7 @@ namespace top{
   void container1DStack::drawRatioPlot(TString name,double resizelabels){
     //prepare container
     if(name=="") name=name_;
-    int dataentry;
+    int dataentry=0;
     for(unsigned int i=0;i<size();i++){
       if(getLegend(i) == dataleg_){
         dataentry=i;
@@ -265,13 +264,13 @@ namespace top{
     multiplier = multiplier * resizelabels;
     ratio.setLabelSize(multiplier);
 
-    TGraphAsymmErrors * gratio = ratio.getTGraph(name);
+    TGraphAsymmErrors * gratio = ratio.getTGraph(name,true);
     // rescale axis titles etc.
     TH1D * h = ratio.getTH1D(name+"_h_r");
     h->GetYaxis()->SetTitle("data/MC");
     h->GetYaxis()->SetRangeUser(0.5,1.5);
     h->GetYaxis()->SetNdivisions(505);
-    h->Draw();
+    h->Draw("AXIS");
     gratio->Draw("P");
     TGraphAsymmErrors * gmcerr = relmcerr.getTGraph(name+"_relerr");
     gmcerr->SetFillStyle(3002);

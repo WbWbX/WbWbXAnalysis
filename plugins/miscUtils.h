@@ -41,7 +41,7 @@ bool isIn(t element, typename std::vector<t> vec){
 
 
 template <class T, class U>
-vector<T>& operator<<(vector<T>& vec, const U& x) {
+std::vector<T>& operator<<(std::vector<T>& vec, const U& x) {
   vec.push_back((T)x);
     return vec;
 }

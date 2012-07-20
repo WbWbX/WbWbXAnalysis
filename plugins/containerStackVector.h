@@ -26,6 +26,8 @@ namespace top{
 
     void writeAllToTFile(TString);
 
+    void clear(){stacks_.clear();name_="";}
+
   private:
     TString name_;
     std::vector<top::container1DStack> stacks_;
