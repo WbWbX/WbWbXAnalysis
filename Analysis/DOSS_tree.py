@@ -1,23 +1,50 @@
 import FWCore.ParameterSet.Config as cms
 import FWCore.ParameterSet.VarParsing as VarParsing
 
+###parsing stuff###
 
-globalTag='GR_R_52_V7C' #data until 195536
-reportEvery=100
-outputFile='SyncFile'
-isMC=True
-genFilter="top"
-genFilterString='ElectronElectron'
-genFilterInvert=False
-includereco=True
-includetrigger=True
-inputScript='TopAnalysis.Configuration.samples.singlemu_runA_prompt_cff'
-json='Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt'
+options = VarParsing.VarParsing()
+
+options.register ('globalTag','START52_V9',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"global tag")
+options.register ('reportEvery',100,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.int,"report every")
+options.register ('outputFile','def_out',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"output File (w/o .root)")
+options.register ('isMC',True,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"is MC")
+options.register ('genFilter','none',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"gen Filter")
+options.register ('genFilterString','none',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"gen Filter selection string")
+options.register ('genFilterInvert',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"invert gen Filter")
+options.register ('includereco',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"includes info for eff studies")
+options.register ('includetrigger',True,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"includes trigger info for event")
+options.register ('includePDF',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"includes pdf weights info for event")
+options.register ('PDF','cteq65',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"pdf set for weights")
+options.register ('inputScript','TopAnalysis.Configuration.samples.singlemu_runA_prompt_cff',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"input Script")
+options.register ('json','',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"json file in cern afs")
+options.register ('isSync',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"switch on for sync")
+
+options.parseArguments()
+
+globalTag=options.globalTag #'GR_R_52_V7C' #data until 195536
+reportEvery=options.reportEvery #100
+outputFile=options.outputFile #'SyncFile'
+isMC=options.isMC # True
+genFilter=options.genFilter #"top"
+genFilterString=options.genFilterString # 'ElectronElectron'
+genFilterInvert=options.genFilterInvert # False
+includereco=options.includereco # True
+includetrigger=options.includetrigger # True
+includePDFWeights=options.includePDF
+PDF=options.PDF
+inputScript=options.inputScript # 'TopAnalysis.Configuration.samples.singlemu_runA_prompt_cff'
+json=options.json # 'Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt'
+
+syncfile=options.isSync
+
 electronIsoCone="03"
 useGsf = True
-minleptons=2 #leptons in prefilter and ID filter!! must be changed for includereco
+minleptons=1
 
-syncfile=True
+if not includereco:
+    minleptons=2
+
 if syncfile:
     globalTag='START52_V9'
     isMC=True
@@ -102,10 +129,19 @@ process.load('CommonTools/RecoAlgos/HBHENoiseFilter_cfi')
 
 
 #### for MC ##
+
+### PDF weights. if pdf file cannot be accessed, check afs access depending on where your LHAPDF path variable is set
+
+process.pdfWeights = cms.EDProducer("PdfWeightProducer",
+                                    PdfInfoTag = cms.untracked.InputTag("generator"),
+                                    PdfSetNames = cms.untracked.vstring(PDF+".LHgrid")
+                                    )
+
+
 process.load('TtZAnalysis.TreeWriter.puinfo_cff')
 
-process.PUInfo.includePDFWeights = False
-process.PUInfo.pdfWeights = ''
+process.PUInfo.includePDFWeights = includePDFWeights
+process.PUInfo.pdfWeights = "pdfWeights:"+PDF
 
 process.preCutPUInfo = process.PUInfo.clone()
 process.preCutPUInfo.treeName = 'preCutPUInfo'
@@ -167,6 +203,7 @@ if isMC:
                                                      process.pfLeps *
                                                      process.allLeps *
                                                      process.requireMinLeptons)
+            
    
     else:
         process.preFilterSequence = cms.Sequence(process.pfLeps *
@@ -174,6 +211,10 @@ if isMC:
                                                  process.preCutPUInfo * 
                                                  process.requireMinLeptons)# *
                                                  #process.postCutPUInfo)
+    if includePDFWeights:
+        getattr(process, 'preFilterSequence').replace(process.preCutPUInfo,
+                                                      process.pdfWeights *
+                                                      process.preCutPUInfo)
 
 #### for data ###
 else:
@@ -221,6 +262,9 @@ else:
 from PhysicsTools.PatAlgos.tools.pfTools import *
 usePF2PAT(process, runPF2PAT=True, jetAlgo='AK5', runOnMC=isMC, postfix=pfpostfix, jetCorrections=jetCorr, pvCollection=cms.InputTag('goodOfflinePrimaryVertices')) 
 
+#new for 5_2_X not yet implmented in default pf2pat
+
+getattr(process,'patJetCorrFactors'+pfpostfix).rho=cms.InputTag("kt6PFJets","rho","RECO")
 
 process.pfPileUp.checkClosestZVertex = False
 
@@ -364,8 +408,8 @@ process.PFTree.includeReco       = includereco
 process.PFTree.rhoJetsIsoNoPu    = cms.InputTag("kt6PFJetsForIsoNoPU","rho",process.name_())
 process.PFTree.rhoJetsIso        = cms.InputTag("kt6PFJetsForIso","rho",process.name_())
 process.PFTree.useGsfElecs       = useGsf
-process.PFTree.includePDFWeights = False
-process.PFTree.pdfWeights        = ''
+process.PFTree.includePDFWeights = includePDFWeights
+process.PFTree.pdfWeights        = "pdfWeights:"+PDF
 
 ## make tree sequence
 
