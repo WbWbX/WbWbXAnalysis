@@ -8,6 +8,19 @@
 #include <math.h>
 
 namespace top{
+  template <class T>
+  class List{
+  public: 
+    List(){list_.clear();};
+    ~List(){};
+    void push_back(T * cont){list_.push_back(cont);}
+    typename std::vector<T *> getList(){return list_;}
+    
+  private:
+    typename std::vector<T *> list_;
+    
+
+  };
 
   class container1D{
   public:
@@ -93,6 +106,10 @@ namespace top{
 
   };
 
+
+  List<container1D> * c_list=0;
+
+
   ///////make definitions
   container1D::container1D(){
     canfilldyn_=false;
@@ -100,7 +117,7 @@ namespace top{
     labelmultiplier_=1;
     showwarnings_=false;
   }
-  container1D::container1D(float binwidth, TString name,TString xaxisname,TString yaxisname){
+  container1D::container1D(float binwidth, TString name,TString xaxisname,TString yaxisname){ //currently not used
     binwidth_=binwidth;
     canfilldyn_=true;
     divideBinomial_=true;
@@ -109,6 +126,7 @@ namespace top{
     yname_=yaxisname;
     labelmultiplier_=1;
     showwarnings_=false;
+    if(c_list) c_list->push_back(this);
   }
   container1D::container1D(std::vector<float> bins, TString name,TString xaxisname,TString yaxisname){
     setBins(bins);
@@ -118,6 +136,7 @@ namespace top{
     yname_=yaxisname;
     labelmultiplier_=1;
     showwarnings_=false;
+    if(c_list) c_list->push_back(this);
   }
   container1D::~container1D(){
 

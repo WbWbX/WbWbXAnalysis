@@ -17,6 +17,7 @@ namespace top{
     ~container1DStackVector(){}
     void setName(TString Name){name_=Name;}
     void add(top::container1D &, TString, int, double);
+    void addList(top::List<top::container1D> * , TString, int, double);
     std::vector<top::container1DStack> getVector(){return stacks_;}
     top::container1DStack getStack(TString);
     top::container1DStack getStack(unsigned int n){return stacks_[n];}
@@ -49,6 +50,12 @@ namespace top{
       top::container1DStack newstack(container.getName());
       newstack.push_back(container, leg, color, norm);
       stacks_.push_back(newstack);
+    }
+  }
+
+  void container1DStackVector::addList(top::List<top::container1D> * list, TString leg, int color, double norm){
+    for(unsigned int i=0;i<list->getList().size();i++){
+      add(*(list->getList()[i]),leg,color,norm);
     }
   }
 

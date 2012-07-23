@@ -44,6 +44,8 @@ namespace top{
     TH1D *datapileup = (TH1D*)f->Get("pileup");
     setDataTruePUInput(*datapileup);
     delete datapileup;
+    f->Close();
+    delete f;
   }
   
   double getPUweight(double trueBX, int downDefUp=1){
