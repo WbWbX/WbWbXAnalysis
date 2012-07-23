@@ -6,6 +6,9 @@
 #include "TStyle.h"
 #include "TDirectory.h"
 
+// class to handle containerstacks and to add systematics to the MC contributions etc.
+// writes plots with and without ratio to TFiles
+
 
 namespace top{
 

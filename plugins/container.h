@@ -6,22 +6,10 @@
 #include "TGraphAsymmErrors.h"
 #include <iostream>
 #include <math.h>
+#include "List.h"
 
 namespace top{
-  template <class T>
-  class List{
-  public: 
-    List(){list_.clear();};
-    ~List(){};
-    void push_back(T * cont){list_.push_back(cont);}
-    typename std::vector<T *> getList(){return list_;}
-    
-  private:
-    typename std::vector<T *> list_;
-    
-
-  };
-
+  
   class container1D{
   public:
     container1D();
