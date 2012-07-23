@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id: TreeWriter.cc,v 1.1 2012/07/12 11:35:44 jkiesele Exp $
+// $Id: TreeWriter.cc,v 1.2 2012/07/12 12:50:33 jkiesele Exp $
 //
 //
 
@@ -341,6 +341,9 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	 tempelec.setSuClu(suclu);
        }
        // otherwise (0,0,0,0) taken  care of by NTElectron Constructor
+
+       if(electron->genParticleRef().isNonnull()) tempelec.setGenP4(electron->genParticleRef()->p4());
+     
        ntelectrons.push_back(tempelec);
 
 
@@ -431,6 +434,8 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	 def.push_back("NoUnamTrigMatch");
 	 tempmuon.setMatchedTrig(def);
        }
+
+       if(muon->genParticleRef().isNonnull()) tempmuon.setGenP4(muon->genParticleRef()->p4());
 
        ntmuons.push_back(tempmuon);
      }
@@ -533,6 +538,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	 tempjet.setGenPartonFlavour(0);
        }
        tempjet.setBtag(jet->bDiscriminator(btagalgo_));    //
+       tempjet.setEmEnergyFraction(std::min(jet->neutralEmEnergyFraction() + jet->chargedEmEnergyFraction(),jet->emEnergyFraction()));
        ntjets.push_back(tempjet);
      }
 
