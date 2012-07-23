@@ -16,6 +16,7 @@ namespace top{
   void setGenPartonFlavour(int partonFlavour){genPartonFlav_=partonFlavour;}
   void setBtag(double Btag){btag_=Btag;}
   void setId(bool ID){id_=ID;}
+    void setEmEnergyFraction(double EFrac){emenergyfraction_=EFrac;}
 
   //gets
   LorentzVector p4(){return p4_;}
@@ -27,6 +28,7 @@ namespace top{
   double m(){return p4_.M();}
   double btag(){return btag_;}
   bool id(){return id_;}
+    double emEnergyFraction(){return emenergyfraction_;}
 
   //gen
   LorentzVector genP4(){return genP4_;}
@@ -43,6 +45,7 @@ namespace top{
   LorentzVector genP4_;
   int genPartonFlav_;
   double btag_;
+    double emenergyfraction_;
   bool id_;
 
   };

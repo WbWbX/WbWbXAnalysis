@@ -27,7 +27,8 @@ namespace top{
   void setIso03(top::NTIsolation Iso03){iso03_=Iso03;}
   void setIso04(top::NTIsolation Iso04){iso04_=Iso04;}
   void setMatchedTrig(std::vector<std::string> MatchedTrig){matchedTrig_=MatchedTrig;}
-  void setTrackP4(top::LorentzVector trkp4in){trkP4_=trkp4in;}
+    void setTrackP4(top::LorentzVector trkp4in){trkP4_=trkp4in;}
+    void setGenP4(top::LorentzVector GenP4){genP4_=GenP4;}
 
   //gets
 
@@ -48,6 +49,7 @@ namespace top{
 
   std::vector<std::string> matchedTrig(){return matchedTrig_;}
   LorentzVector trackP4(){return trkP4_;}
+    LorentzVector genP4(){return genP4_;}
 
  protected:
 
@@ -59,8 +61,8 @@ namespace top{
   double dbs_;
   top::NTIsolation iso03_;
   top::NTIsolation iso04_;
-  std::vector<std::string> matchedTrig_;
-  LorentzVector trkP4_;
+    std::vector<std::string> matchedTrig_;
+    LorentzVector trkP4_,genP4_;
 
 
 };
