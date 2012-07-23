@@ -6,11 +6,11 @@ import FWCore.ParameterSet.VarParsing as VarParsing
 options = VarParsing.VarParsing()
 
 options.register ('globalTag','START52_V9',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"global tag")
-options.register ('reportEvery',100,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.int,"report every")
+options.register ('reportEvery',1000,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.int,"report every")
 options.register ('outputFile','def_out',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"output File (w/o .root)")
 options.register ('isMC',True,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"is MC")
 options.register ('genFilter','none',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"gen Filter")
-options.register ('genFilterString','none',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"gen Filter selection string")
+options.register ('genFilterString','none',VarParsing.VarParsing.multiplicity.list,VarParsing.VarParsing.varType.string,"gen Filter selection string")
 options.register ('genFilterInvert',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"invert gen Filter")
 options.register ('includereco',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"includes info for eff studies")
 options.register ('includetrigger',True,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"includes trigger info for event")
@@ -19,24 +19,27 @@ options.register ('PDF','cteq65',VarParsing.VarParsing.multiplicity.singleton,Va
 options.register ('inputScript','TopAnalysis.Configuration.samples.singlemu_runA_prompt_cff',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"input Script")
 options.register ('json','',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"json file in cern afs")
 options.register ('isSync',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"switch on for sync")
+options.register('samplename', 'standard', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "which sample to run over - obsolete")
 
 options.parseArguments()
 
-globalTag=options.globalTag #'GR_R_52_V7C' #data until 195536
-reportEvery=options.reportEvery #100
-outputFile=options.outputFile #'SyncFile'
-isMC=options.isMC # True
-genFilter=options.genFilter #"top"
-genFilterString=options.genFilterString # 'ElectronElectron'
-genFilterInvert=options.genFilterInvert # False
-includereco=options.includereco # True
-includetrigger=options.includetrigger # True
-includePDFWeights=options.includePDF
-PDF=options.PDF
-inputScript=options.inputScript # 'TopAnalysis.Configuration.samples.singlemu_runA_prompt_cff'
-json=options.json # 'Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt'
+globalTag=options.globalTag              # START52_V9
+reportEvery=options.reportEvery          # 1000
+outputFile=options.outputFile            # def_out
+isMC=options.isMC                        # True
+genFilter=options.genFilter              # 
+genFilterString=options.genFilterString  # 
+genFilterInvert=options.genFilterInvert  # False
+includereco=options.includereco          # False
+includetrigger=options.includetrigger    # True
+includePDFWeights=options.includePDF     # False
+PDF=options.PDF                          # cteq65
+inputScript=options.inputScript          # TopAnalysis.Configuration.samples.singlemu_runA_prompt_cff
+json=options.json                        # 
 
-syncfile=options.isSync
+syncfile=options.isSync                  # False
+
+print genFilterString
 
 electronIsoCone="03"
 useGsf = True
@@ -188,6 +191,8 @@ if isMC:
             process.generatorZFilter.zDecayModes = cms.vint32(11)
         elif genFilterString=='MuonMuon':
             process.generatorZFilter.zDecayModes = cms.vint32(13)
+        elif genFilterString=='TauTau':
+            process.generatorZFilter.zDecayModes = cms.vint32(15)
         
         if genFilterInvert:
             process.preFilterSequence = cms.Sequence(process.preCutPUInfo * 
@@ -377,7 +382,7 @@ process.superClusters = cms.EDProducer("SuperClusterMerger",
 
 process.treeJets = process.selectedPatJets.clone()
 process.treeJets.src="patJets"+pfpostfix
-process.treeJets.cut = 'pt>25 && abs(eta) < 2.9'
+process.treeJets.cut = 'pt>10' # unfortunately starting at 10 GeV are needed for MET rescaling
 
 process.IDMuons = process.selectedPatMuons.clone()
 process.IDMuons.src = 'patMuons' + pfpostfix
