@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id: TreeWriter.cc,v 1.2 2012/07/12 12:50:33 jkiesele Exp $
+// $Id: TreeWriter.cc,v 1.3 2012/07/23 14:12:10 jkiesele Exp $
 //
 //
 
@@ -538,7 +538,10 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	 tempjet.setGenPartonFlavour(0);
        }
        tempjet.setBtag(jet->bDiscriminator(btagalgo_));    //
-       tempjet.setEmEnergyFraction(std::min(jet->neutralEmEnergyFraction() + jet->chargedEmEnergyFraction(),jet->emEnergyFraction()));
+       double emEnergyfraction=0;
+       if(jet->isPFJet()) emEnergyfraction=jet->chargedEmEnergyFraction()+jet->neutralEmEnergyFraction();
+       else emEnergyfraction=jet->emEnergyFraction();
+       tempjet.setEmEnergyFraction(emEnergyfraction);
        ntjets.push_back(tempjet);
      }
 
