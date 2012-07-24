@@ -42,7 +42,7 @@ namespace top{
     container1D getFullMCContainer();
     void multiplyNorm(TString , double);
     void addGlobalRelMCError(double);
-    void addMCErrorStack(container1DStack);
+    void addMCErrorStack(container1DStack,bool ignoreMCStat=true);
 
     void clear(){containers_.clear();legends_.clear();colors_.clear();norms_.clear();}
     
@@ -137,11 +137,11 @@ namespace top{
       if(legends_[i]!=dataleg_) containers_[i].addGlobalRelError(error);
     }
   }
-  void container1DStack::addMCErrorStack(container1DStack errorstack){
+  void container1DStack::addMCErrorStack(container1DStack errorstack, bool ignoreMCStat){
     for(unsigned int i=0; i<size();i++){
       for(unsigned int j=i;j<errorstack.size();j++){
 	if(legends_[i] == errorstack.legends_[j] && legends_[i]!=dataleg_){
-	  containers_[i].addErrorContainer(errorstack.containers_[j]);
+	  containers_[i].addErrorContainer(errorstack.containers_[j],ignoreMCStat);
 	}
       }
     }
@@ -236,13 +236,16 @@ namespace top{
     }
     container1D data = containers_[dataentry];
     data.copyNames(containers_[dataentry]);
+    data.setShowWarnings(false);   
     container1D mc = getFullMCContainer();
     mc.copyNames(getFullMCContainer());
+    mc.setShowWarnings(false);   
     data.setDivideBinomial(false);
     mc.setDivideBinomial(false);
     container1D ratio=data;
     ratio.copyNames(data);
-    ratio.clear();    
+    ratio.clear(); 
+    ratio.setShowWarnings(false);   
     container1D relmcerr=data;
     relmcerr.copyNames(data);
     relmcerr.clear();
