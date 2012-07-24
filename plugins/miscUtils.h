@@ -30,7 +30,7 @@ template <class T, class U>
 bool noOverlap(T & first, typename std::vector<U> vecsec, double deltaR){
   bool nooverlap=true;
   for(unsigned int i=0;i<vecsec.size();i++){
-    if(!noOverlap(first,vecsec[i]),deltaR){
+    if(!noOverlap(first,vecsec[i],deltaR)){
       nooverlap=false;
       break;
     }
