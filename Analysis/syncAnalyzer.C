@@ -4,6 +4,7 @@
 #include "../plugins/leptonSelector.h"
 #include "../plugins/miscUtils.h"
 #include "../plugins/containerStackVector.h"
+#include "../plugins/JERAdjuster.h"
 #include "TTree.h"
 #include "TFile.h"
 #include <fstream>
@@ -45,6 +46,8 @@ public:
 
   top::PUReweighter & getPUReweighter(){return puweighter_;}
 
+  top::JERAdjuster & getJERAdjuster(){return jeradjuster_;}
+
 private:
 
   bool isInInfo(TString s){return additionalinfo_.Contains(s);}
@@ -55,6 +58,8 @@ private:
   const char * filelist_;
   
   top::PUReweighter puweighter_;
+  top::JERAdjuster jeradjuster_;
+
   top::container1DStackVector * analysisPlots;
 
   TString additionalinfo_;
@@ -431,7 +436,10 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       if(!noOverlap(jet, isoelectrons, 0.3)) continue;
       jetpt3.fill(jet->pt(),puweight);
       jeteta3.fill(jet->eta(),puweight);
-      nolidjets.push_back(*jet);
+      NTJet jerjet=*jet;
+
+      jeradjuster_.recalculate(jerjet);
+      nolidjets.push_back(jerjet);
     }
     jetmulti3.fill(nolidjets.size(),puweight);
 
@@ -557,7 +565,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
 void syncAnalyzer(){
 
-  TString outfile = "syncOut.root";
+  TString outfile = "syncOut_jer.root";
 
   MainAnalyzer analyzermumu("default_mumu","mumu");
   analyzermumu.setLumi(5000);
