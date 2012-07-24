@@ -25,7 +25,7 @@ namespace top{
     top::container1DStack getStack(TString);
     top::container1DStack getStack(unsigned int n){return stacks_[n];}
 
-    void addMCErrorStackVector(top::container1DStackVector);
+    void addMCErrorStackVector(top::container1DStackVector, bool ignoreMCStat=true);
     void addGlobalRelMCError(double);
 
     void writeAllToTFile(TString);
@@ -71,11 +71,11 @@ namespace top{
     }
     return defout;
   }
-  void container1DStackVector::addMCErrorStackVector(top::container1DStackVector stackvec){
+  void container1DStackVector::addMCErrorStackVector(top::container1DStackVector stackvec, bool ignoreMCStat){
     for(std::vector<container1DStack>::iterator istack=stacks_.begin();istack<stacks_.end(); ++istack){
       for(std::vector<container1DStack>::iterator estack=stackvec.stacks_.begin();estack<stackvec.stacks_.end(); ++estack){
 	if(istack->getName() == estack->getName()){
-	  istack->addMCErrorStack(*estack);
+	  istack->addMCErrorStack(*estack,ignoreMCStat);
 	  break;
 	}
       }
