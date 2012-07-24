@@ -5,37 +5,37 @@
 #inputs are seperated by min 2 spaces; use runall4!!
 #
 
-#JOBS  DATASET                                   OUTPUT  NAME                   SAMPLENAME/OPTIONS
+#JOBS  DATASET                                   OUTPUT  NAME                   OPTIONS
 
 ###analysis samples
 
-200  ee_runA_prompt_cff                         ee_runA_prompt                 globalTag=START52_V7 isMC=false json=Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
-300  ee_runB_prompt_cff                         ee_runB_prompt                 globalTag=START52_V7 isMC=false json=Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
-20  ee_runC_prompt_cff                          ee_runC_prompt                  globalTag=START52_V7 isMC=false json=Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
+200  ee_runA_prompt_cff                         ee_runA_prompt                 globalTag=GR_R_52_V7C isMC=false json=Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
+300  ee_runB_prompt_cff                         ee_runB_prompt                 globalTag=GR_R_52_V7C isMC=false json=Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
+20  ee_runC_prompt_cff                          ee_runC_prompt                  globalTag=GR_R_52_V9 isMC=false json=Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
 
 
-200  mumu_runA_prompt_cff                         mumu_runA_prompt                 globalTag=START52_V7 isMC=false json=Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
-300  mumu_runB_prompt_cff                         mumu_runB_prompt                 globalTag=START52_V7 isMC=false json=Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
-20  mumu_runC_prompt_cff                          mumu_runC_prompt                 globalTag=START52_V7 isMC=false json=Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
+200  mumu_runA_prompt_cff                         mumu_runA_prompt                 globalTag=GR_R_52_V7C isMC=false json=Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
+300  mumu_runB_prompt_cff                         mumu_runB_prompt                 globalTag=GR_R_52_V7C isMC=false json=Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
+20  mumu_runC_prompt_cff                          mumu_runC_prompt                 globalTag=GR_R_52_V9 isMC=false json=Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
 
 
-200  mueg_runA_prompt_cff                         mueg_runA_prompt                 globalTag=START52_V7 isMC=false json=Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
-300  mueg_runB_prompt_cff                         mueg_runB_prompt                 globalTag=START52_V7 isMC=false json=Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
-20  mueg_runC_prompt_cff                          mueg_runC_prompt                 globalTag=START52_V7 isMC=false json=Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
+200  mueg_runA_prompt_cff                         mueg_runA_prompt                 globalTag=GR_R_52_V7C isMC=false json=Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
+300  mueg_runB_prompt_cff                         mueg_runB_prompt                 globalTag=GR_R_52_V7C isMC=false json=Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
+20  mueg_runC_prompt_cff                          mueg_runC_prompt                 globalTag=GR_R_52_V9 isMC=false json=Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
 
 ### efficiency data samples
 
-200  met_runA_prompt_cff                          met_runA_prompt             globalTag=START52_V7 isMC=false json=Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
-300  met_runB_prompt_cff                          met_runB_prompt             globalTag=START52_V7 isMC=false json=Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
-10  met_runC_prompt_cff                          met_runC_prompt              globalTag=START52_V7 isMC=false json=Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
+200  met_runA_prompt_cff                          met_runA_prompt             globalTag=GR_R_52_V7C isMC=false json=Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
+300  met_runB_prompt_cff                          met_runB_prompt             globalTag=GR_R_52_V7C isMC=false json=Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
+10  met_runC_prompt_cff                          met_runC_prompt              globalTag=GR_R_52_V9 isMC=false json=Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
 
-200  singlemu_runA_prompt_cff                     singlemu_runA_prompt        globalTag=START52_V7 includereco=true includetrigger=false isMC=false json=Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
-300  singlemu_runB_prompt_cff                     singlemu_runB_prompt        globalTag=START52_V7 includereco=true includetrigger=false isMC=false json=Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
-20  singlemu_runC_prompt_cff                     singlemu_runC_prompt         globalTag=START52_V7 includereco=true includetrigger=false isMC=false json=Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
+200  singlemu_runA_prompt_cff                     singlemu_runA_prompt        globalTag=GR_R_52_V7C includereco=true includetrigger=false isMC=false json=Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
+300  singlemu_runB_prompt_cff                     singlemu_runB_prompt        globalTag=GR_R_52_V7C includereco=true includetrigger=false isMC=false json=Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
+20  singlemu_runC_prompt_cff                     singlemu_runC_prompt         globalTag=GR_R_52_V9 includereco=true includetrigger=false isMC=false json=Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
 
-200  singlee_runA_prompt_cff                      singlee_runA_prompt         globalTag=START52_V7 includereco=true includetrigger=false isMC=false json=Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
-300  singlee_runB_prompt_cff                      singlee_runB_prompt         globalTag=START52_V7 includereco=true includetrigger=false isMC=false json=Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
-20  singlee_runC_prompt_cff                      singlee_runC_prompt          globalTag=START52_V7 includereco=true includetrigger=false isMC=false json=Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
+200  singlee_runA_prompt_cff                      singlee_runA_prompt         globalTag=GR_R_52_V7C includereco=true includetrigger=false isMC=false json=Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
+300  singlee_runB_prompt_cff                      singlee_runB_prompt         globalTag=GR_R_52_V7C includereco=true includetrigger=false isMC=false json=Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
+20  singlee_runC_prompt_cff                      singlee_runC_prompt          globalTag=GR_R_52_V9 includereco=true includetrigger=false isMC=false json=Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
 
 
 ##MC
@@ -67,8 +67,8 @@
 300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_cff                 mumuttbarbg                 genFilter=top genFilterString=MuonMuon,MuonMuonViaTau genFilterInvert=true
 
 300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_cff                 emuttbar                    genFilter=top genFilterString=ElectronMuon
-300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_cff                 emuttbar                    genFilter=top genFilterString=ElectronMuonViaTau
-300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_cff                 emuttbar                    genFilter=top genFilterString=ElectronMuon,ElectronMuonViaTau genFilterInvert=true
+300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_cff                 emuttbarviatau                    genFilter=top genFilterString=ElectronMuonViaTau
+300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_cff                 emuttbarbg                    genFilter=top genFilterString=ElectronMuon,ElectronMuonViaTau genFilterInvert=true
 
 100  mc.Tbar_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola_cff           tbarW
 100  mc.T_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola_cff              tW
