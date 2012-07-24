@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id: TreeWriter.cc,v 1.3 2012/07/23 14:12:10 jkiesele Exp $
+// $Id: TreeWriter.cc,v 1.4 2012/07/24 20:43:42 jkiesele Exp $
 //
 //
 
@@ -545,10 +545,9 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        ntjets.push_back(tempjet);
      }
 
-     ntmet.setMet(0);
+     
      for(std::vector<pat::MET>::const_iterator met=mets->begin(); met<mets->end() ; met++){
-       ntmet.setMet(met->et());
-       ntmet.setPhi(met->phi());
+       ntmet.setP4(met->p4());
        break;
      
      }

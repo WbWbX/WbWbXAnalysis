@@ -2,24 +2,24 @@
 #define NTMet_h
 
 namespace top{
-  
+  typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > LorentzVector;
+ 
   class NTMet{
  public:
   explicit NTMet(){};
   ~NTMet(){};
   //sets
-  void setMet(double Met){met_=Met;}
-  void setPhi(double Phi){phi_=Phi;}
+
+  void setP4(top::LorentzVector P4){p4_=P4;}
 
   //gets
-  double met(){return met_;}
-  double phi(){return phi_;}
-
+  double met(){return p4_.Et();}
+  double phi(){return p4_.Phi();}
+  top::LorentzVector p4(){return p4_;};
 
  protected:
-  double met_;
-  double phi_;
 
+  top::LorentzVector p4_;
   };
 }
 #endif
