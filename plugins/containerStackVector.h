@@ -28,7 +28,7 @@ namespace top{
     void addMCErrorStackVector(top::container1DStackVector, bool ignoreMCStat=true);
     void addGlobalRelMCError(double);
 
-    void writeAllToTFile(TString);
+    void writeAllToTFile(TString, bool recreate=false);
 
     void clear(){stacks_.clear();name_="";}
 
@@ -87,13 +87,16 @@ namespace top{
       stack->addGlobalRelMCError(error);
     }
   }
-  void container1DStackVector::writeAllToTFile(TString filename){
+  void container1DStackVector::writeAllToTFile(TString filename, bool recreate){
     TString name;
 
     if(name_=="") name="no_name";
     else name = name_;
 
-    TFile f = TFile(filename,"RECREATE");
+    TString upre="UPDATE";
+    if(recreate == true) upre="RECREATE";
+
+    TFile f = TFile(filename,upre);
     f.cd();
     TDirectory * d = f.mkdir(name + "_ratio",name + "_ratio");
     d->cd();

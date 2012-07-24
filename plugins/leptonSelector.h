@@ -43,8 +43,17 @@ namespace top{
     void setMassRange(double Massrangemin, double Massrangemax){massrange_[0]=Massrangemin;massrange_[1]=Massrangemax;userhoisoforelectrons_=true;}
 
     void setUseRhoIsoForElectrons(bool userhoisoforelectrons){userhoisoforelectrons_=userhoisoforelectrons;}
-    
-    std::vector<top::NTElectron> selectIDElectrons(std::vector<top::NTElectron> & treeElectrons){
+
+    std::vector<top::NTElectron> selectKinElectrons(std::vector<top::NTElectron> & treeElectrons){
+      std::vector<top::NTElectron> passingelecs;
+      for(std::vector<top::NTElectron>::iterator elec=treeElectrons.begin();elec<treeElectrons.end();++elec){
+	if(elec->pt() < 20) continue;
+	if(fabs(elec->eta()) > 2.5) continue;
+	passingelecs.push_back(*elec);
+      }
+      return passingelecs;
+    }
+    std::vector<top::NTElectron> selectIDElectrons(std::vector<top::NTElectron> & treeElectrons){ //include kin cuts in addition
 
       std::vector<top::NTElectron> passingelecs;
       for(std::vector<top::NTElectron>::iterator elec=treeElectrons.begin();elec<treeElectrons.end();++elec){
@@ -89,8 +98,18 @@ namespace top{
       }
       return passingelecs;
     }
-    
-    std::vector<top::NTMuon> selectIDMuons(std::vector<top::NTMuon> & treeMuons){
+
+
+    std::vector<top::NTMuon> selectKinMuons(std::vector<top::NTMuon> & treeMuons){
+      std::vector<top::NTMuon> passingmuons;    
+      for(std::vector<top::NTMuon>::iterator muon=treeMuons.begin(); muon<treeMuons.end();++muon){
+	if(muon->pt() <= 20)         continue;
+	if(fabs(muon->eta()) >= 2.4) continue;
+	passingmuons.push_back(*muon);
+      }
+      return passingmuons;
+    }
+    std::vector<top::NTMuon> selectIDMuons(std::vector<top::NTMuon> & treeMuons){ //include kinematic cuts in addition!
       
       std::vector<top::NTMuon> passingmuons;
       
@@ -270,6 +289,66 @@ namespace top{
       top::effTriple out(probevec, passes, mass);
       return out;
     } 
+
+    std::pair<std::vector<top::NTElectron> , std::vector<top::NTMuon> > getOppoQHighestPtPair(std::vector<top::NTElectron> &elecs, std::vector<top::NTMuon> & muons){
+      double sumpt=0;
+      //double emupt=0;
+      std::vector<top::NTElectron> outelecs;
+      std::vector<top::NTMuon> outmuons;
+      int channel=99; // ee,mumu,emu
+      unsigned int a=999;
+      unsigned int b=999;
+
+      for(unsigned int i=0;i<elecs.size();i++){
+	for(unsigned int j=i;j<elecs.size();j++){
+	  if(elecs[i].q() * elecs[j].q() < 0 && sumpt < (elecs[i].pt() + elecs[j].pt())){
+	    sumpt=elecs[i].pt() + elecs[j].pt();
+	    a=i;
+	    b=j;
+	    channel=0;
+	  }
+	}
+      }
+      for(unsigned int i=0;i<muons.size();i++){
+	for(unsigned int j=i;j<muons.size();j++){
+	  if(muons[i].q() * muons[j].q() < 0 && sumpt < (muons[i].pt() + muons[j].pt())){
+	    sumpt=muons[i].pt() + muons[j].pt();
+	    a=i;
+	    b=j;
+	    channel=1;
+	  }
+	}
+      }
+      for(unsigned int i=0;i<elecs.size();i++){
+	for(unsigned int j=0;j<muons.size();j++){
+	  if(elecs[i].q() * muons[j].q() < 0 && sumpt < (elecs[i].pt() + muons[j].pt())){
+	    sumpt=elecs[i].pt() + muons[j].pt();
+	    a=i;
+	    b=j;
+	    channel=2;
+	  }
+	}
+      }
+      if(channel == 0){
+	outelecs << elecs[a] << elecs[b];
+      }
+      else if(channel == 1){
+	outmuons << muons[a] << muons[b];
+      }
+      else if(channel == 2){
+	outelecs << elecs[a];
+	outmuons << muons[b];
+      }
+      std::pair<std::vector<top::NTElectron>, std::vector<top::NTMuon> > out(outelecs,outmuons);
+      return out;
+    }
+  
+
+
+
+
+
+
   private:
     double massrange_[2];
     bool userhoisoforelectrons_;

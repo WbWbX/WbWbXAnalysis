@@ -207,6 +207,13 @@ namespace top{
       setMCDistribution(V);
 
   }
+
+    void setAllOne(){
+      for(unsigned int i=0;i<reweights_.size();i++){
+	reweights_[i]=1;
+      }
+      std::cout << "\n\nWARNING!!! SETTING ALL PU WEIGHTS TO 1! ONLY FOR TESTING!!\n\n" << std::endl;
+    }
     
   
   private:

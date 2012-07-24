@@ -3,6 +3,8 @@
 
 #include "TString.h"
 #include <sstream>
+#include <vector>
+#include <math.h>
 
 template<class t>
 TString toTString(t in){
@@ -12,8 +14,6 @@ TString toTString(t in){
   return out;
 }
 
-#include <vector>
-#include <math.h>
 
 
 
@@ -29,8 +29,8 @@ bool noOverlap(t &first, u &sec, double deltaR){
 template <class T, class U>
 bool noOverlap(T & first, typename std::vector<U> vecsec, double deltaR){
   bool nooverlap=true;
-  for(unsigned int i=0;i<vecsec.size();i++){
-    if(!noOverlap(first,vecsec[i],deltaR)){
+  for(typename std::vector<U>::iterator sec=vecsec.begin();sec<vecsec.end();++sec){
+    if(!noOverlap(first,sec,deltaR)){
       nooverlap=false;
       break;
     }
