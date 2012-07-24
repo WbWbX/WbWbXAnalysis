@@ -71,8 +71,8 @@ namespace top{
     container1D operator * (int);               //! simple scalar multiplication. errors are scaled accordingly!!
     container1D & operator = (const container1D &);       //! preserves the name and axis
 
-    void addErrorContainer(container1D,double); //! adds deviation of input container from initial container to errors in quadr with a weight
-    void addErrorContainer(container1D);        //! adds deviation of input container from initial container to errors in quadr
+    void addErrorContainer(container1D,double,bool ignoreMCStat=true); //! adds deviation of input container from initial container to errors in quadr with a weight
+    void addErrorContainer(container1D,bool ignoreMCStat=true);        //! adds deviation of input container from initial container to errors in quadr
     void addGlobalRelErrorUp(double);
     void addGlobalRelErrorDown(double);
     void addGlobalRelError(double);
@@ -113,7 +113,7 @@ namespace top{
     xname_=xaxisname;
     yname_=yaxisname;
     labelmultiplier_=1;
-    showwarnings_=false;
+    showwarnings_=true;
     if(c_list) c_list->push_back(this);
   }
   container1D::container1D(std::vector<float> bins, TString name,TString xaxisname,TString yaxisname){
@@ -123,7 +123,7 @@ namespace top{
     xname_=xaxisname;
     yname_=yaxisname;
     labelmultiplier_=1;
-    showwarnings_=false;
+    showwarnings_=true;
     if(c_list) c_list->push_back(this);
   }
   container1D::~container1D(){
@@ -515,7 +515,7 @@ namespace top{
 
     return *this;
   }
-  void container1D::addErrorContainer(container1D deviatingContainer, double weight){
+  void container1D::addErrorContainer(container1D deviatingContainer, double weight, bool ignoreMCStat){
     if(bins_!=deviatingContainer.bins_){
       if(showwarnings_) std::cout << "addErrorContainer(): not same binning!" << std::endl;
     }
@@ -523,16 +523,36 @@ namespace top{
       for(unsigned int i=0; i<content_.size(); i++){
 	double deviation= weight * (deviatingContainer.content_[i] - content_[i]);
 	if(deviation>0){
-	  errup_[i]=sqrt(pow(errup_[i],2) + pow(deviation,2));
+	  if(ignoreMCStat){
+	    errup_[i]=sqrt(pow(errup_[i],2) + pow(deviation,2));
+	  }
+	  else{
+	    errup_[i]=sqrt(pow(errup_[i],2) + pow(deviation,2)+ pow(deviatingContainer.errup_[i],2));
+	    if(deviatingContainer.errdown_[i] > deviation && i>0 && i<content_.size()-1){ //Underflow and overflow excluded
+	      std::cout << "container1D::addErrorContainer: Uncertainty of error container \""
+			<< name_ <<"\" exceeds deviation in bin " 
+			<< xname_ << ": "<< bins_[i] << " - " << bins_[i+1] << std::endl;
+	    }
+	  }
 	}
-	else{
-	  errdown_[i]=sqrt(pow(errdown_[i],2) + pow(deviation,2));
+	else if(deviation<0){
+	  if(ignoreMCStat){
+	    errdown_[i]=sqrt(pow(errdown_[i],2) + pow(deviation,2));
+	  }
+	  else{
+	    errdown_[i]=sqrt(pow(errdown_[i],2) + pow(deviation,2) +  pow(deviatingContainer.errdown_[i],2));
+	    if(deviatingContainer.errup_[i] > fabs(deviation) && i>0 && i<content_.size()-1){ //Underflow and overflow excluded
+	      std::cout << "container1D::addErrorContainer: Uncertainty of error container \""
+			<< name_ <<"\" exceeds deviation in bin " 
+			<< xname_ << ": "<< bins_[i] << " - " << bins_[i+1] << std::endl;
+	    }
+	  }
 	}
       }
     }
   }
-  void container1D::addErrorContainer(container1D deviatingContainer){
-    addErrorContainer(deviatingContainer,1);
+  void container1D::addErrorContainer(container1D deviatingContainer, bool ignoreMCStat){
+    addErrorContainer(deviatingContainer,1,ignoreMCStat);
   }
 
   void container1D::addGlobalRelErrorUp(double relerr){
