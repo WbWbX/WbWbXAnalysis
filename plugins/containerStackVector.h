@@ -28,6 +28,8 @@ namespace top{
     void addMCErrorStackVector(top::container1DStackVector, bool ignoreMCStat=true);
     void addGlobalRelMCError(double);
 
+    void multiplyNorms(TString, std::vector<double>, std::vector<TString>);   //! multiplies norm of all MC with legendname  ,  with factor  ,  for step identifier string
+
     void writeAllToTFile(TString, bool recreate=false);
 
     void clear(){stacks_.clear();name_="";}
@@ -82,11 +84,30 @@ namespace top{
     }
   }
   void container1DStackVector::addGlobalRelMCError(double error){
-    //still missing. loop over all containers and getFullMCContainer().addGlobalRelError(0.04);
     for(std::vector<container1DStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
       stack->addGlobalRelMCError(error);
     }
   }
+
+  void container1DStackVector::multiplyNorms(TString legendname, std::vector<double> scalefactors, std::vector<TString> identifier){
+    if(! (identifier.size() == scalefactors.size())){
+      std::cout << "container1DStackVector::multiplyNorms: identifiers and scalefactors must be same size!" << std::endl;
+    }
+    else{
+      unsigned int count=0;
+      for(std::vector<container1DStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
+	for(unsigned int i=0;i<scalefactors.size();i++){
+	  if(stack->getName().Contains(identifier[i])){
+	    stack->multiplyNorm(legendname, scalefactors[i]);
+	    count++;
+	  }
+	}
+      }
+      if(count < identifier.size()) std::cout << "container1DStackVector::multiplyNorms: warning: not all identifiers found!" << std::endl;
+      else if(count > identifier.size()) std::cout << "container1DStackVector::multiplyNorms: warning: identifiers ambiguous!" << std::endl;
+    }
+  }
+
   void container1DStackVector::writeAllToTFile(TString filename, bool recreate){
     TString name;
 

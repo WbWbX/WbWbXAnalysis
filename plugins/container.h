@@ -31,6 +31,7 @@ namespace top{
     void setBinWidth(float);
     void setBinErrorUp(int, double);
     void setBinErrorDown(int, double);
+    void setBinError(int, double);
     void setBinContent(int, double);
 
 
@@ -183,6 +184,10 @@ namespace top{
   void container1D::setBinErrorDown(int bin, double err){
     if((unsigned int)bin<bins_.size()) errdown_[bin] = err;
     else std::cout << "setBinErrorDown: bin not existent!" << std::endl;
+  }
+  void container1D::setBinError(int bin, double err){
+    setBinErrorUp(bin, err);
+    setBinErrorDown(bin,err);
   }
   void container1D::setBinContent(int bin, double content){
     if((unsigned int)bin<bins_.size()){
