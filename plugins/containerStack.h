@@ -16,9 +16,7 @@
 
 namespace top{
 
-  //comments:
-  // getFullMCContainer must be only a getter for plotting (sum of all mc containers).
-  // changes to the mc containers should be done on EACH mc container!!
+  
 
 
   class container1DStack{
@@ -39,10 +37,13 @@ namespace top{
     int & getColor (unsigned int i){return colors_[i];};
     double & getNorm  (unsigned int i){return norms_[i];}
     container1D & getContainer(unsigned int i){return containers_[i];}
-    container1D getFullMCContainer();
+    container1D getFullMCContainer();        //! gets the sum of all MC containers (normalized with their stored norm) including error handling
     void multiplyNorm(TString , double);
     void addGlobalRelMCError(double);
-    void addMCErrorStack(container1DStack,bool ignoreMCStat=true);
+    void addMCErrorStack(container1DStack,bool ignoreMCStat=true);  //! considers deviation to "this" container as error, which is added in squares; 
+                                                                    //! if ignoreMCStat=false, the MC stat error of the error container is added in addition 
+                                                                    //! (in squares) and a check is performed whether the mc stat. is sufficient to justify variation
+                                                                    //! errors are only added if legends are the same
 
     void clear(){containers_.clear();legends_.clear();colors_.clear();norms_.clear();}
     
