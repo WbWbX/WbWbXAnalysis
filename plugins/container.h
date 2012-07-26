@@ -55,9 +55,9 @@ namespace top{
     void clear();
 
     void setLabelSize(double size){labelmultiplier_=size;}       //! 1 for default
-    TH1D * getTH1D(TString name=""); //! returns a TH1D pointer with symmetrized errors (TString name); small bug with content(bin)=0 and error(bin)=0
+    TH1D * getTH1D(TString name="", bool dividebybinwidth=true); //! returns a TH1D pointer with symmetrized errors (TString name); small bug with content(bin)=0 and error(bin)=0
     void writeTH1D(TString name=""); //! writes TH1D->Write() with symmetrized errors (TString name)
-    TGraphAsymmErrors * getTGraph(TString name="",bool noXErrors=false);  
+    TGraphAsymmErrors * getTGraph(TString name="",bool noXErrors=false, bool dividebybinwidth=true);  
     void writeTGraph(TString name=""); //! writes TGraph (TString name)
 
     
@@ -326,7 +326,7 @@ namespace top{
 
 
 
-  TH1D * container1D::getTH1D(TString name){ //still missing overflow and underflow
+  TH1D * container1D::getTH1D(TString name, bool dividebybinwidth){ //still missing overflow and underflow
     if(name=="") name=name_;
     double binarray[getNBins()+1];
     for(int i=0; i<=getNBins() ;i++){
@@ -335,8 +335,12 @@ namespace top{
     TH1D *  h = new TH1D(name,name,getNBins(),binarray);
     double entriessum=0;
     for(int i=1;i<=getNBins();i++){
-      h->SetBinContent(i,getBinContent(i));
-      h->SetBinError(i,getBinError(i));
+      double cont=getBinContent(i);
+      if(dividebybinwidth) cont=cont/getBinWidth(i);
+      h->SetBinContent(i,cont);
+      double err=getBinError(i);
+      if(dividebybinwidth) err=err/getBinWidth(i);
+      h->SetBinError(i,err);
       entriessum +=entries_[i];
     }
     h->SetEntries(entriessum);
@@ -359,7 +363,7 @@ namespace top{
     delete h;
   }
 
-  TGraphAsymmErrors * container1D::getTGraph(TString name, bool noXErrors){
+  TGraphAsymmErrors * container1D::getTGraph(TString name, bool noXErrors, bool dividebybinwidth){
 
     if(name=="") name=name_;
     double x[getNBins()];
@@ -378,9 +382,16 @@ namespace top{
 	xeh[i-1]=getBinWidth(i)/2;
 	xel[i-1]=getBinWidth(i)/2;
       }
-      y[i-1]=getBinContent(i);
-      yeh[i-1]=getBinErrorUp(i);
+      if(dividebybinwidth){
+      y[i-1]=getBinContent(i)/getBinWidth(i); 
+      yeh[i-1]=getBinErrorUp(i)/getBinWidth(i); 
+      yel[i-1]=getBinErrorDown(i)/getBinWidth(i);
+      }
+      else{
+      y[i-1]=getBinContent(i); 
+      yeh[i-1]=getBinErrorUp(i); 
       yel[i-1]=getBinErrorDown(i);
+      }
     }
     TGraphAsymmErrors * g = new TGraphAsymmErrors(getNBins(),x,y,xel,xeh,yel,yeh);
     g->SetName(name);

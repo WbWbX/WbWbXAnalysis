@@ -268,15 +268,15 @@ namespace top{
     multiplier = multiplier * resizelabels;
     ratio.setLabelSize(multiplier);
 
-    TGraphAsymmErrors * gratio = ratio.getTGraph(name,true);
+    TGraphAsymmErrors * gratio = ratio.getTGraph(name,true,false); //don't divide by binwidth
     // rescale axis titles etc.
-    TH1D * h = ratio.getTH1D(name+"_h_r");
+    TH1D * h = ratio.getTH1D(name+"_h_r",false); //no bw div
     h->GetYaxis()->SetTitle("data/MC");
     h->GetYaxis()->SetRangeUser(0.5,1.5);
     h->GetYaxis()->SetNdivisions(505);
     h->Draw("AXIS");
     gratio->Draw("P");
-    TGraphAsymmErrors * gmcerr = relmcerr.getTGraph(name+"_relerr");
+    TGraphAsymmErrors * gmcerr = relmcerr.getTGraph(name+"_relerr",false,false);
     gmcerr->SetFillStyle(3002);
     gmcerr->Draw("2,same");
     TLine * l = new TLine(mc.getXMin(),1,mc.getXMax(),1);
