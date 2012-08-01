@@ -5,6 +5,7 @@ import FWCore.ParameterSet.VarParsing as VarParsing
 
 options = VarParsing.VarParsing()
 
+options.register ('is2011',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"is 2011 data/MC")
 options.register ('globalTag','START52_V9',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"global tag")
 options.register ('reportEvery',1000,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.int,"report every")
 options.register ('outputFile','def_out',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"output File (w/o .root)")
@@ -23,6 +24,7 @@ options.register('samplename', 'standard', VarParsing.VarParsing.multiplicity.si
 
 options.parseArguments()
 
+is2011=options.is2011                    # def false
 globalTag=options.globalTag              # START52_V9
 reportEvery=options.reportEvery          # 1000
 outputFile=options.outputFile            # def_out
@@ -341,9 +343,10 @@ process.isoJetSequence = cms.Sequence(process.kt6PFJetsForIso * process.kt6PFJet
 ### for met correction (2011 data) ## warning!! postfix hardcoded!
 
 process.kt6PFJetsPFlow = process.kt6PFJets.clone()
-getattr(process,'patPF2PATSequence'+pfpostfix).replace(getattr(process,'patJets'+pfpostfix),
-                                                       process.kt6PFJetsPFlow *
-                                                       getattr(process,'patJets'+pfpostfix))
+if is2011:
+    getattr(process,'patPF2PATSequence'+pfpostfix).replace(getattr(process,'patJets'+pfpostfix),
+                                                           process.kt6PFJetsPFlow *
+                                                           getattr(process,'patJets'+pfpostfix))
 
 
 ###### Match triggers to leptons
