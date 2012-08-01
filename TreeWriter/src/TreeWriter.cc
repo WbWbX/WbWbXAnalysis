@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id: TreeWriter.cc,v 1.4 2012/07/24 20:43:42 jkiesele Exp $
+// $Id: TreeWriter.cc,v 1.5 2012/07/24 21:00:02 jkiesele Exp $
 //
 //
 
@@ -321,14 +321,15 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        tempelec.setIso03(Iso);                   //
        //tempelec.setIso04(iso04);                   //
 		       
-
-       if(electron->triggerObjectMatches().size() ==1){ // no ambiguities
-	 tempelec.setMatchedTrig(electron->triggerObjectMatches().begin()->pathNames());
-       }
-       else{
-	 std::vector<std::string> def;
+       if(includereco_){
+	 if(electron->triggerObjectMatches().size() ==1){ // no ambiguities
+	   tempelec.setMatchedTrig(electron->triggerObjectMatches().begin()->pathNames());
+	 }
+	 else{
+	   std::vector<std::string> def;
 	 def.push_back("NoUnamTrigMatch");
 	 tempelec.setMatchedTrig(def);
+	 }
        }
        double suclue=0;
        if(includereco_ && !(electron->superCluster().isNull())){
@@ -425,16 +426,16 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	 tempmuon.setIso03    (Iso03);
 	 tempmuon.setIso04    (Iso04);
        }
-
-       if(muon->triggerObjectMatches().size() ==1){ // no ambiguities
-	 tempmuon.setMatchedTrig(muon->triggerObjectMatches().begin()->pathNames());
-       }
-       else{
+       if(includereco_){
+	 if(muon->triggerObjectMatches().size() ==1){ // no ambiguities
+	   tempmuon.setMatchedTrig(muon->triggerObjectMatches().begin()->pathNames());
+	 }
+	 else{
 	 std::vector<std::string> def;
 	 def.push_back("NoUnamTrigMatch");
 	 tempmuon.setMatchedTrig(def);
+	 }
        }
-
        if(muon->genParticleRef().isNonnull()) tempmuon.setGenP4(muon->genParticleRef()->p4());
 
        ntmuons.push_back(tempmuon);
