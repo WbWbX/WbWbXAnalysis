@@ -338,6 +338,13 @@ process.kt6PFJetsForIsoNoPU = process.kt6PFJetsForIso.clone( src = "pfNoPileUp"+
 
 process.isoJetSequence = cms.Sequence(process.kt6PFJetsForIso * process.kt6PFJetsForIsoNoPU)
 
+### for met correction (2011 data) ## warning!! postfix hardcoded!
+
+process.kt6PFJetsPFlow = process.kt6PFJets.clone()
+getattr(process,'patPF2PATSequence'+pfpostfix).replace(getattr(process,'patJets'+pfpostfix),
+                                                       process.kt6PFJetsPFlow *
+                                                       getattr(process,'patJets'+pfpostfix))
+
 
 ###### Match triggers to leptons
 
@@ -381,7 +388,8 @@ else:
 process.superClusters = cms.EDProducer("SuperClusterMerger",
                                        src=cms.VInputTag( cms.InputTag("correctedHybridSuperClusters") , cms.InputTag("correctedMulti5x5SuperClustersWithPreshower") ) )
 
-####### some jet and ID cuts to keep treesize low
+
+####### some jet and ID cuts to speed up and keep treesize low. The leptons are only produced to filter, the tree is filled with leptons without cuts!
 
 process.treeJets = process.selectedPatJets.clone()
 process.treeJets.src="patJets"+pfpostfix
@@ -406,6 +414,16 @@ process.filterIDLeptons = cms.EDFilter("CandViewCountFilter",
                                        minNumber = cms.uint32(minleptons)
                                        )
 
+process.IDLeptonFilterSequence = cms.Sequence(process.IDMuons *
+                                              process.IDElectrons *
+                                              process.IDLeptons *
+                                              process.filterIDLeptons)
+
+getattr(process,'patPF2PATSequence'+pfpostfix).replace(getattr(process,'patMuons'+pfpostfix),
+                                                       getattr(process,'patMuons'+pfpostfix) *
+                                                       process.IDLeptonFilterSequence)
+                                                       
+
 ########## Prepare Tree ##
 
 process.load('TtZAnalysis.TreeWriter.treewriter_cff')
@@ -424,11 +442,7 @@ if not includereco:
 
 ## make tree sequence
 
-process.treeSequence = cms.Sequence(process.IDMuons *
-                                    process.IDElectrons *
-                                    process.IDLeptons *
-                                    process.filterIDLeptons *
-                                    process.triggerMatches *
+process.treeSequence = cms.Sequence(process.triggerMatches *
                                     process.superClusters *
                                     process.treeJets *
                                     process.PFTree)
