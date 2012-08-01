@@ -100,13 +100,14 @@ else:
 realdata = True
 if isMC:
     realdata=False
-if realdata:
-    jsonpath = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/Prompt/' + json 
-    import FWCore.PythonUtilities.LumiList as LumiList
-    import FWCore.ParameterSet.Types as CfgTypes
-    myLumis = LumiList.LumiList(filename = jsonpath).getCMSSWString().split(',')
-    process.source.lumisToProcess = CfgTypes.untracked(CfgTypes.VLuminosityBlockRange())
-    process.source.lumisToProcess.extend(myLumis)
+if json!="nojson":
+    if realdata :
+        jsonpath = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/Prompt/' + json 
+        import FWCore.PythonUtilities.LumiList as LumiList
+        import FWCore.ParameterSet.Types as CfgTypes
+        myLumis = LumiList.LumiList(filename = jsonpath).getCMSSWString().split(',')
+        process.source.lumisToProcess = CfgTypes.untracked(CfgTypes.VLuminosityBlockRange())
+        process.source.lumisToProcess.extend(myLumis)
 
 
 
