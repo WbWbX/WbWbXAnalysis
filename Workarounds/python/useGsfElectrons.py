@@ -10,6 +10,30 @@ from copy import deepcopy
 
 from PhysicsTools.PatAlgos.tools.pfTools import *
 
+def adaptPFIsoElectronsWA(process,module, postfix = "PFIso",dR=""):
+    #FIXME: adaptPFElectrons can use this function.
+    module.isoDeposits = cms.PSet(
+        pfChargedHadrons = cms.InputTag("elPFIsoDepositCharged" + postfix),
+        pfChargedAll = cms.InputTag("elPFIsoDepositChargedAll" + postfix),
+        pfPUChargedHadrons = cms.InputTag("elPFIsoDepositPU" + postfix),
+        pfNeutralHadrons = cms.InputTag("elPFIsoDepositNeutral" + postfix),
+        pfPhotons = cms.InputTag("elPFIsoDepositGamma" + postfix)
+        )
+    module.isolationValues = cms.PSet(
+        pfChargedHadrons = cms.InputTag("elPFIsoValueCharged"+dR+"PFId"+ postfix),
+        pfChargedAll = cms.InputTag("elPFIsoValueChargedAll"+dR+"PFId"+ postfix),
+        pfPUChargedHadrons = cms.InputTag("elPFIsoValuePU"+dR+"PFId" + postfix),
+        pfNeutralHadrons = cms.InputTag("elPFIsoValueNeutral"+dR+"PFId" + postfix),
+        pfPhotons = cms.InputTag("elPFIsoValueGamma"+dR+"PFId" + postfix)
+        )
+    module.isolationValuesNoPFId = cms.PSet(
+        pfChargedHadrons = cms.InputTag("elPFIsoValueCharged"+dR+"NoPFId"+ postfix),
+        pfChargedAll = cms.InputTag("elPFIsoValueChargedAll"+dR+"NoPFId"+ postfix),
+        pfPUChargedHadrons = cms.InputTag("elPFIsoValuePU"+dR+"NoPFId" + postfix),
+        pfNeutralHadrons = cms.InputTag("elPFIsoValueNeutral"+dR+"NoPFId" + postfix),
+        pfPhotons = cms.InputTag("elPFIsoValueGamma"+dR+"NoPFId" + postfix)
+        )
+
 
 def useGsfElectronsInPF2PAT(process, postfix, dR = "04"):
     print "using Gsf Electrons in PF2PAT"
@@ -20,7 +44,7 @@ def useGsfElectronsInPF2PAT(process, postfix, dR = "04"):
     module.useParticleFlow = False
     print "Building particle-based isolation for GsfElectrons in PF2PAT(PFBRECO)"
     print "********************* "
-    adaptPFIsoElectrons( process, module, "PFIso"+postfix, dR )
+    adaptPFIsoElectronsWA( process, module, "PFIso"+postfix, dR )
     getattr(process,'patPF2PATSequence'+postfix).replace( getattr(process,"patElectrons"+postfix),
                                                    process.pfParticleSelectionSequence +
                                                    setupPFElectronIso(process, 'gsfElectrons', "PFIso"+postfix) +
