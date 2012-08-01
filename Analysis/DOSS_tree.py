@@ -16,8 +16,8 @@ options.register ('includereco',False,VarParsing.VarParsing.multiplicity.singlet
 options.register ('includetrigger',True,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"includes trigger info for event")
 options.register ('includePDF',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"includes pdf weights info for event")
 options.register ('PDF','cteq65',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"pdf set for weights")
-options.register ('inputScript','TopAnalysis.Configuration.samples.singlemu_runA_prompt_cff',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"input Script")
-options.register ('json','',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"json file in cern afs")
+options.register ('inputScript','TtZAnalysis.Configuration.samples.mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_cff',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"input Script")
+options.register ('json','nojson',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"json file in cern afs")
 options.register ('isSync',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"switch on for sync")
 options.register('samplename', 'standard', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "which sample to run over - obsolete")
 
@@ -39,7 +39,7 @@ json=options.json                        #
 
 syncfile=options.isSync                  # False
 
-print genFilterString
+#print genFilterString
 
 electronIsoCone="03"
 useGsf = True
@@ -100,14 +100,13 @@ else:
 realdata = True
 if isMC:
     realdata=False
-if json!="nojson":
-    if realdata :
-        jsonpath = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/Prompt/' + json 
-        import FWCore.PythonUtilities.LumiList as LumiList
-        import FWCore.ParameterSet.Types as CfgTypes
-        myLumis = LumiList.LumiList(filename = jsonpath).getCMSSWString().split(',')
-        process.source.lumisToProcess = CfgTypes.untracked(CfgTypes.VLuminosityBlockRange())
-        process.source.lumisToProcess.extend(myLumis)
+if realdata and not (json=="nojson"):
+    jsonpath = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/Prompt/' + json 
+    import FWCore.PythonUtilities.LumiList as LumiList
+    import FWCore.ParameterSet.Types as CfgTypes
+    myLumis = LumiList.LumiList(filename = jsonpath).getCMSSWString().split(',')
+    process.source.lumisToProcess = CfgTypes.untracked(CfgTypes.VLuminosityBlockRange())
+    process.source.lumisToProcess.extend(myLumis)
 
 
 
@@ -266,7 +265,7 @@ else:
 
 
 from PhysicsTools.PatAlgos.tools.pfTools import *
-usePF2PAT(process, runPF2PAT=True, jetAlgo='AK5', runOnMC=isMC, postfix=pfpostfix, jetCorrections=jetCorr, pvCollection=cms.InputTag('goodOfflinePrimaryVertices')) 
+usePF2PAT(process, runPF2PAT=True, jetAlgo='AK5', runOnMC=isMC, postfix=pfpostfix, jetCorrections=jetCorr, pvCollection=cms.InputTag('goodOfflinePrimaryVertices'),typeIMetCorrections=True) 
 
 #new for 5_2_X not yet implmented in default pf2pat
 
@@ -366,13 +365,16 @@ process.patMuonsWithTrigger = cms.EDProducer("PATTriggerMatchMuonEmbedder",
     src = cms.InputTag("patMuons"+ pfpostfix),
     matches = cms.VInputTag("patMuonsTriggerMatches")
                   )
-
-process.triggerMatches =  cms.Sequence(process.patElectronsTriggerMatches *
+if includereco:
+    process.triggerMatches =  cms.Sequence(process.patElectronsTriggerMatches *
                                            process.patMuonsTriggerMatches *
                                            process.patElectronsWithTrigger *
                                            process.patMuonsWithTrigger)
+    process.patTriggerSequence = cms.Sequence(process.patTrigger)
 
-
+else:
+    process.triggerMatches =  cms.Sequence()
+    process.patTriggerSequence = cms.Sequence()
 
 ###### Merge SuperClusters
 
@@ -416,6 +418,9 @@ process.PFTree.rhoJetsIso        = cms.InputTag("kt6PFJetsForIso","rho",process.
 process.PFTree.useGsfElecs       = useGsf
 process.PFTree.includePDFWeights = includePDFWeights
 process.PFTree.pdfWeights        = "pdfWeights:"+PDF
+if not includereco:
+    process.PFTree.muonSrc = 'patMuons' + pfpostfix
+    process.PFTree.elecSrc =  'patElectrons' + pfpostfix
 
 ## make tree sequence
 
@@ -439,7 +444,7 @@ process.path = cms.Path(process.goodOfflinePrimaryVertices *
                         process.preFilterSequence *
                         process.inclusiveVertexing *
                         process.btagging *             #not yet implemented fully in pf2pat sequence..
-                        process.patTrigger *
+                        process.patTriggerSequence *
                         getattr(process,'patPF2PATSequence'+pfpostfix) *
                         process.isoJetSequence *
                         process.treeSequence)
