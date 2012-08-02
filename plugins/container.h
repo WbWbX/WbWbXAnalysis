@@ -66,13 +66,14 @@ namespace top{
     void setDivideBinomial(bool);                                   //! default true
     void setMergeUnderFlowOverFlow(bool merge){mergeufof_=merge;}   //! merges underflow/overflow in first or last bin, respectively
 
-    container1D operator + (container1D);       //! adds stat errors in squares; treats same named systematics as correlated!!
-    container1D operator - (container1D);       //! adds errors in squares; treats same named systematics as correlated!!
-    container1D operator / (container1D);       //! binomial stat error or uncorr error (depends on setDivideBinomial()); treats same named systematics as correlated
-    container1D operator * (container1D);       //! adds stat errors in squares; treats same named systematics as correlated!!
+    container1D operator + (const container1D &);       //! adds stat errors in squares; treats same named systematics as correlated!!
+    container1D operator - (const container1D &);       //! adds errors in squares; treats same named systematics as correlated!!
+    container1D operator / (const container1D &);       //! binomial stat error or uncorr error (depends on setDivideBinomial()); treats same named systematics as correlated
+    container1D operator * (const container1D &);       //! adds stat errors in squares; treats same named systematics as correlated!!
     container1D operator * (double);            //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
     container1D operator * (float);             //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
     container1D operator * (int);               //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
+    
 
     void addErrorContainer(TString,container1D,double,bool ignoreMCStat=true);  //! adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down" 
     void addErrorContainer(TString,container1D ,bool ignoreMCStat=true);        //! adds deviation to (this) as systematic uncertianty with name. name must be ".._up" or ".._down" 
@@ -111,10 +112,24 @@ namespace top{
   };
 
 
+  //some more operators
+  top::container1D operator * (double multiplier, const top::container1D & cont){ //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
+    top::container1D out=cont;
+    return out * multiplier;
+  }
+  top::container1D operator * (float multiplier, const top::container1D & cont){  //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
+    top::container1D out=cont;
+    return out * multiplier;
+  }
+  top::container1D operator * (int multiplier, const top::container1D & cont){    //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
+    top::container1D out=cont;
+    return out * multiplier;
+  }
+
   List<container1D> * c_list=0;
 
 
-  ///////make definitions
+  ///////function definitions
   container1D::container1D(){
     canfilldyn_=false;
     divideBinomial_=true;
@@ -499,7 +514,7 @@ namespace top{
     divideBinomial_=divideBinomial;
   }
 
-  container1D container1D::operator + (container1D second){
+  container1D container1D::operator + (const container1D & second){
 
       top::container1D out=second;
     if(bins_ != second.bins_){
@@ -534,12 +549,13 @@ namespace top{
     return out;
   }
 
-  container1D container1D::operator - (container1D second){
-    second = *this + (second * (-1));
-    return second;
+  container1D container1D::operator - (const container1D & second){
+    container1D out=second;
+    out = *this + (out * (-1));
+    return out;
   }
 
-  container1D container1D::operator / (container1D denominator){  
+  container1D container1D::operator / (const container1D & denominator){  
     container1D out= denominator;
     if(bins_ != denominator.bins_ || (divideBinomial_!=denominator.divideBinomial_)){
       if(showwarnings_) std::cout << "container1D::operator /: not same binning or different divide options!" << std::endl;
@@ -622,7 +638,7 @@ namespace top{
     }
     return out;
   }
-  container1D container1D::operator * (container1D multiplier){ 
+  container1D container1D::operator * (const container1D & multiplier){ 
     container1D out = multiplier;
     if(bins_ != multiplier.bins_){
       if(showwarnings_) std::cout << "container1D::operator *: not same binning!" << std::endl;
