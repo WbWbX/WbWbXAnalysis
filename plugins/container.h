@@ -16,7 +16,7 @@ namespace top{
   class container1D{
   public:
     container1D();
-    container1D(float , TString name="",TString xaxisname="",TString yaxisname="");              //! construct with bin width (for dynamic filling - not yet implemented)
+    container1D(float , TString name="",TString xaxisname="",TString yaxisname="", bool mergeufof=false);              //! construct with bin width (for dynamic filling - not yet implemented)
     container1D(std::vector<float> , TString name="",TString xaxisname="",TString yaxisname="", bool mergeufof=false); //! construct with binning
     ~container1D();
 
@@ -30,11 +30,11 @@ namespace top{
     void fillDyn(double, double); //! not implemented yet
 
     void setBins(std::vector<float>);
-    void setBinWidth(float);
-    void setBinErrorUp(int, double);   //!clears systematics!
-    void setBinErrorDown(int, double);  //!clears systematics!
-    void setBinError(int, double);    //!clears systematics!
-    void setBinContent(int, double);
+    void setBinWidth(float);            //! sets bin width; enables dynamic filling (not implemented yet)
+    void setBinErrorUp(int, double);    //! sets systematics in bin to zero and stat error to given value
+    void setBinErrorDown(int, double);  //! sets systematics in bin to zero and stat error to given value
+    void setBinError(int, double);      //! sets systematics in bin to zero and stat error to given value
+    void setBinContent(int, double);    //! sets bin content, does not change error values!
 
 
     int getBinNo(double); //! returns bin index number for (double variable)
@@ -49,22 +49,22 @@ namespace top{
     double getBinErrorUp(int,TString limittosys="");
     double getBinErrorDown(int,TString limittosys="");
     double getBinError(int,TString limittosys="");
-    double getOverflow();   //!returns -1 if overflow was merged with last bin
-    double getUnderflow();  //!returns -1 if underflow was merged with last bin
+    double getOverflow();                              //!returns -1 if overflow was merged with last bin
+    double getUnderflow();                             //!returns -1 if underflow was merged with last bin
 
-    void setAllErrorsZero(){for(unsigned int i=0;i<staterrup_.size();i++){staterrup_[i]=0;staterrdown_[i]=0;}}
-    void reset();
-    void clear();
+    void setAllErrorsZero(){for(unsigned int i=0;i<staterrup_.size();i++){staterrup_[i]=0;staterrdown_[i]=0;} syserrors_.clear();} //! sets all errors zero
+    void reset();    //! resets all uncertainties and binning, keeps names and axis
+    void clear();    //! sets all bin contents to zero; clears all systematic uncertainties
 
     void setLabelSize(double size){labelmultiplier_=size;}       //! 1 for default
     TH1D * getTH1D(TString name="", bool dividebybinwidth=true); //! returns a TH1D pointer with symmetrized errors (TString name); small bug with content(bin)=0 and error(bin)=0
     void writeTH1D(TString name=""); //! writes TH1D->Write() with symmetrized errors (TString name)
     TGraphAsymmErrors * getTGraph(TString name="",bool noXErrors=false, bool dividebybinwidth=true);  
-    void writeTGraph(TString name=""); //! writes TGraph (TString name)
+    void writeTGraph(TString name=""); //! writes TGraph to TFile (must be opened)
 
     
-    void setDivideBinomial(bool);           //! default true
-    void setMergeUnderFlowOverFlow(bool merge){mergeufof_=merge;}
+    void setDivideBinomial(bool);                                   //! default true
+    void setMergeUnderFlowOverFlow(bool merge){mergeufof_=merge;}   //! merges underflow/overflow in first or last bin, respectively
 
     container1D operator + (container1D);       //! adds stat errors in squares; treats same named systematics as correlated!!
     container1D operator - (container1D);       //! adds errors in squares; treats same named systematics as correlated!!
@@ -74,13 +74,13 @@ namespace top{
     container1D operator * (float);             //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
     container1D operator * (int);               //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
 
-    void addErrorContainer(TString,container1D,double,bool ignoreMCStat=true); //! 
-    void addErrorContainer(TString,container1D ,bool ignoreMCStat=true);        //! 
-    void addGlobalRelErrorUp(TString,double);
-    void addGlobalRelErrorDown(TString,double);
-    void addGlobalRelError(TString,double);
+    void addErrorContainer(TString,container1D,double,bool ignoreMCStat=true);  //! adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down" 
+    void addErrorContainer(TString,container1D ,bool ignoreMCStat=true);        //! adds deviation to (this) as systematic uncertianty with name. name must be ".._up" or ".._down" 
+    void addGlobalRelErrorUp(TString,double);    //! adds a global relative uncertainty with name; "..up" automatically added
+    void addGlobalRelErrorDown(TString,double);  //! adds a global relative uncertainty with name; "..down" automatically added
+    void addGlobalRelError(TString,double);      //! adds a global relative symmetric uncertainty with name; creates ".._up" and ".._down" variation names
 
-    void removeErrorContainer(TString);
+    void removeError(TString); //! removes a systematic uncertainty with name ..
 
   protected:
     bool showwarnings_;
@@ -119,12 +119,13 @@ namespace top{
     canfilldyn_=false;
     divideBinomial_=true;
     labelmultiplier_=1;
-    showwarnings_=false;
+    showwarnings_=true;
     mergeufof_=true;
     wasunderflow_=false;
     wasoverflow_=false;
+    if(c_list) c_list->push_back(this);
   }
-  container1D::container1D(float binwidth, TString name,TString xaxisname,TString yaxisname){ //currently not used
+  container1D::container1D(float binwidth, TString name,TString xaxisname,TString yaxisname, bool mergeufof){ //currently not used
     binwidth_=binwidth;
     canfilldyn_=true;
     divideBinomial_=true;
@@ -134,7 +135,7 @@ namespace top{
     labelmultiplier_=1;
     showwarnings_=true;
     if(c_list) c_list->push_back(this);
-    mergeufof_=true;
+    mergeufof_=mergeufof;
     wasunderflow_=false;
     wasoverflow_=false;
   }
@@ -209,7 +210,9 @@ namespace top{
   void container1D::setBinErrorUp(int bin, double err){
     if((unsigned int)bin<bins_.size()){
       staterrup_[bin] = err;
-      syserrors_.clear();
+      for(unsigned int i=0;i<syserrors_.size();i++){
+	syserrors_[i].second[bin] = 0;
+      }
     }
     else{
       std::cout << "container1D::setBinErrorUp: bin not existent!" << std::endl;
@@ -218,7 +221,9 @@ namespace top{
   void container1D::setBinErrorDown(int bin, double err){
     if((unsigned int)bin<bins_.size()){
       staterrdown_[bin] = err;
-      syserrors_.clear();
+      for(unsigned int i=0;i<syserrors_.size();i++){
+	syserrors_[i].second[bin] = 0;
+      }
     }
     else{
       std::cout << "container1D::setBinErrorDown: bin not existent!" << std::endl;
@@ -456,14 +461,14 @@ namespace top{
 	xel[i-1]=getBinWidth(i)/2;
       }
       if(dividebybinwidth){
-      y[i-1]=getBinContent(i)/getBinWidth(i); 
-      yeh[i-1]=getBinErrorUp(i)/getBinWidth(i); 
-      yel[i-1]=getBinErrorDown(i)/getBinWidth(i);
+	y[i-1]=getBinContent(i)/getBinWidth(i); 
+	yeh[i-1]=getBinErrorUp(i)/getBinWidth(i); 
+	yel[i-1]=getBinErrorDown(i)/getBinWidth(i);
       }
       else{
-      y[i-1]=getBinContent(i); 
-      yeh[i-1]=getBinErrorUp(i); 
-      yel[i-1]=getBinErrorDown(i);
+	y[i-1]=getBinContent(i); 
+	yeh[i-1]=getBinErrorUp(i); 
+	yel[i-1]=getBinErrorDown(i);
       }
     }
     TGraphAsymmErrors * g = new TGraphAsymmErrors(getNBins(),x,y,xel,xeh,yel,yeh);
@@ -741,7 +746,7 @@ namespace top{
     addGlobalRelErrorUp(sysname,relerr);
     addGlobalRelErrorDown(sysname,relerr);
   }
-  void container1D::removeErrorContainer(TString sysname){
+  void container1D::removeError(TString sysname){
     for(unsigned int i=0;i<syserrors_.size();i++){
       if(sysname == syserrors_[i].first) syserrors_.erase(syserrors_.begin()+i);
     }
