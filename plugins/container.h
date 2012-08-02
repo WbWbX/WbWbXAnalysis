@@ -58,8 +58,12 @@ namespace top{
 
     void setLabelSize(double size){labelmultiplier_=size;}       //! 1 for default
     TH1D * getTH1D(TString name="", bool dividebybinwidth=true); //! returns a TH1D pointer with symmetrized errors (TString name); small bug with content(bin)=0 and error(bin)=0
+    operator TH1D(){return *getTH1D();}
+    operator TH1D*(){return getTH1D();}
     void writeTH1D(TString name=""); //! writes TH1D->Write() with symmetrized errors (TString name)
     TGraphAsymmErrors * getTGraph(TString name="",bool noXErrors=false, bool dividebybinwidth=true);  
+    operator TGraphAsymmErrors(){return *getTGraph();}
+    operator TGraphAsymmErrors*(){return getTGraph();}
     void writeTGraph(TString name=""); //! writes TGraph to TFile (must be opened)
 
     
