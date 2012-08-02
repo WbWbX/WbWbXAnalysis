@@ -25,8 +25,9 @@ namespace top{
     top::container1DStack getStack(TString);
     top::container1DStack getStack(unsigned int n){return stacks_[n];}
 
-    void addMCErrorStackVector(top::container1DStackVector, bool ignoreMCStat=true);
-    void addGlobalRelMCError(double);
+    void addMCErrorStackVector(TString,top::container1DStackVector, bool ignoreMCStat=true);
+    void addGlobalRelMCError(TString,double);
+    void removeError(TString);
 
     void multiplyNorms(TString, std::vector<double>, std::vector<TString>);   //! multiplies norm of all MC with legendname  ,  with factor  ,  for step identifier string
 
@@ -73,22 +74,26 @@ namespace top{
     }
     return defout;
   }
-  void container1DStackVector::addMCErrorStackVector(top::container1DStackVector stackvec, bool ignoreMCStat){
+  void container1DStackVector::addMCErrorStackVector(TString sysname,top::container1DStackVector stackvec, bool ignoreMCStat){
     for(std::vector<container1DStack>::iterator istack=stacks_.begin();istack<stacks_.end(); ++istack){
       for(std::vector<container1DStack>::iterator estack=stackvec.stacks_.begin();estack<stackvec.stacks_.end(); ++estack){
 	if(istack->getName() == estack->getName()){
-	  istack->addMCErrorStack(*estack,ignoreMCStat);
+	  istack->addMCErrorStack(sysname,*estack,ignoreMCStat);
 	  break;
 	}
       }
     }
   }
-  void container1DStackVector::addGlobalRelMCError(double error){
+  void container1DStackVector::addGlobalRelMCError(TString sysname,double error){
     for(std::vector<container1DStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
-      stack->addGlobalRelMCError(error);
+      stack->addGlobalRelMCError(sysname,error);
     }
   }
-
+  void container1DStackVector::removeError(TString name){
+    for(std::vector<container1DStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
+      stack->removeError(name);
+    }
+  }
   void container1DStackVector::multiplyNorms(TString legendname, std::vector<double> scalefactors, std::vector<TString> identifier){
     if(! (identifier.size() == scalefactors.size())){
       std::cout << "container1DStackVector::multiplyNorms: identifiers and scalefactors must be same size!" << std::endl;

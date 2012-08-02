@@ -41,11 +41,11 @@ bool noOverlap(T & first, typename std::vector<U> vecsec, double deltaR){
 
 
 template <class t>
-bool isIn(t element, typename std::vector<t> vec){
-  bool IsIn=false;
+int isIn(t element, typename std::vector<t> vec){
+  int IsIn=-1;
   for(unsigned int i=0;i<vec.size();i++){
     if(vec[i] == element){
-      IsIn=true;
+      IsIn=i;
       break;
     }
   }
@@ -59,6 +59,9 @@ std::vector<T>& operator<<(std::vector<T>& vec, const U& x) {
   vec.push_back((T)x);
     return vec;
 }
+
+
+
 
 
 #endif

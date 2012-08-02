@@ -1,5 +1,7 @@
 #ifndef JECUncertainties_h
 #define JECUncertainties_h
+//#include "gROOT.h"
+
 
 #include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
 #include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
@@ -92,11 +94,11 @@ private:
     }
     
     void scaleJetEnergyUp(top::NTJet & jet, int source=100){
-      jet.setP4(jet.p4().Scale(uncertaintyUp(jet, source)));
+      jet.setP4(jet.p4() * (uncertaintyUp(jet, source)));
     }
 
     void scaleJetEnergyDown(top::NTJet & jet, int source=100){
-      jet.setP4(jet.p4().Scale(uncertaintyDown(jet, source)));
+      jet.setP4(jet.p4() * (uncertaintyDown(jet, source)));
     }  
   };
 
