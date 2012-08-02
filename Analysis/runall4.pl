@@ -115,12 +115,12 @@ sub prepare {
   #  $samplename=~s/,/ /g;
     if ($inputSample =~ s/^\.\.//) {
         $cmsRunCmdLine = "outputFile=$outputFile ".
-            "inputScript=TtZAnalysis.$inputSample ".
+            "inputScript=TtZAnalysis.Configuration.$inputSample ".
             #"mode=$mode ".
             "$options";
     } else {
         $cmsRunCmdLine = "outputFile=$outputFile ".
-            "inputScript=TtZAnalysis.samples.$inputSample ".
+            "inputScript=TtZAnalysis.Configuration.samples.$inputSample ".
             #"mode=$mode ".
             "$options";
     }
