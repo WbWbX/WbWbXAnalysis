@@ -168,7 +168,7 @@ process.requireMinLeptons = cms.EDFilter("CandViewCountFilter",
                                          )
 if isMC:
     ##
-    if genFilter=='top':
+    if genFilter=='Top':
         process.load('TopAnalysis.TopFilter.GeneratorTopFilter_cfi')
         process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
         process.decaySubset.fillMode = "kME" # Status3, use kStable for Status2     
