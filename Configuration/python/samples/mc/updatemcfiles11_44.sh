@@ -1,6 +1,9 @@
 #!/bin/bash
 #enter full DAS filename (without AODSIM)
 
+<<<<<<< updatemcfiles11_44.sh
+filenames=(''
+=======
 filenames=('TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1' #not at desy some t2
 'TTJets_TuneZ2_mass169_5_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1' #not at desy ES US
 'TTJets_TuneZ2_mass175_5_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1' #not at desy ES US
@@ -20,6 +23,7 @@ filenames=('TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1' #not
 'ZZ_TuneZ2_7TeV_pythia6_tauola/Fall11-PU_S6_START44_V9B-v1' #not at desy RWTH BE
 'Tbar_TuneZ2_tW-channel-DS_7TeV-powheg-tauola/Fall11-PU_S6_START44_V9B-v1' #not at desy EE UK
 'T_TuneZ2_tW-channel-DS_7TeV-powheg-tauola/Fall11-PU_S6_START44_V9B-v1' #not at desy EE UK
+>>>>>>> 1.2
 )
 
 entries=${#filenames[@]}
