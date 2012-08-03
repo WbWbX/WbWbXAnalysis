@@ -176,7 +176,7 @@ if isMC:
             process.makeGenEvt *
             process.generatorTopFilter 
             )
-        process.generatorTopFilter.channels = [genFilterString]
+        process.generatorTopFilter.channels = genFilterString
         process.generatorTopFilter.invert_selection=genFilterInvert
 
         process.preFilterSequence = cms.Sequence(process.preCutPUInfo * 

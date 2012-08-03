@@ -46,17 +46,17 @@
 
 200  mc.WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball_Summer12-PU_S7_START52_V9-v1_cff               wjets          
 
-300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 eettbar                     genFilter=top genFilterString=ElectronElectron 
-300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 eettbarviatau               genFilter=top genFilterString=ElectronElectronViaTau
-100  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 eettbarbg                     genFilter=top genFilterString=ElectronElectron,ElectronElectronViaTau genFilterInvert=true
+300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 eettbar                     genFilter=Top genFilterString=ElectronElectron 
+300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 eettbarviatau               genFilter=Top genFilterString=ElectronElectronViaTau
+100  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 eettbarbg                     genFilter=Top genFilterString=ElectronElectron,ElectronElectronViaTau genFilterInvert=true
 
-300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 mumuttbar                   genFilter=top genFilterString=MuonMuon 
-300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 mumuttbarviatau             genFilter=top genFilterString=MuonMuonViaTau
-300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 mumuttbarbg                 genFilter=top genFilterString=MuonMuon,MuonMuonViaTau genFilterInvert=true
+300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 mumuttbar                   genFilter=Top genFilterString=MuonMuon 
+300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 mumuttbarviatau             genFilter=Top genFilterString=MuonMuonViaTau
+300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 mumuttbarbg                 genFilter=Top genFilterString=MuonMuon,MuonMuonViaTau genFilterInvert=true
 
-300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 emuttbar                    genFilter=top genFilterString=ElectronMuon
-300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 emuttbarviatau                    genFilter=top genFilterString=ElectronMuonViaTau
-300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 emuttbarbg                    genFilter=top genFilterString=ElectronMuon,ElectronMuonViaTau genFilterInvert=true
+300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 emuttbar                    genFilter=Top genFilterString=ElectronMuon
+300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 emuttbarviatau                    genFilter=Top genFilterString=ElectronMuonViaTau
+300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 emuttbarbg                    genFilter=Top genFilterString=ElectronMuon,ElectronMuonViaTau genFilterInvert=true
 
 100  mc.Tbar_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola_Summer12-PU_S7_START52_V9-v1_cff           tbarW
 100  mc.T_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola_Summer12-PU_S7_START52_V9-v1_cff              tW
