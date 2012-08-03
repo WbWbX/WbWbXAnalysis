@@ -54,6 +54,17 @@ namespace top{
     void drawRatioPlot(TString name="",double resizelabels=1);
 
     TCanvas * makeTCanvas(bool drawratioplot=true);
+
+
+    //define operators (propagate from containers) for easy handling
+
+    container1DStack operator + (const container1DStack &);
+    container1DStack operator - (const container1DStack &);
+    container1DStack operator / (const container1DStack &);
+    container1DStack operator * (const container1DStack &);
+    container1DStack operator * (double);
+    container1DStack operator * (float);
+    container1DStack operator * (int);
     
     
   private:
@@ -366,6 +377,17 @@ namespace top{
     return c;
   }
 
+
+  top::container1DStack container1DStack::operator + (const container1DStack & stack){
+    
+  }
+  top::container1DStack container1DStack::operator - (const container1DStack & stack);
+  top::container1DStack container1DStack::operator / (const container1DStack & stack);
+  top::container1DStack container1DStack::operator * (const container1DStack & stack);
+  top::container1DStack container1DStack::operator * (double);
+  top::container1DStack container1DStack::operator * (float);
+  top::container1DStack container1DStack::operator * (int);
+    
   
 
 }
