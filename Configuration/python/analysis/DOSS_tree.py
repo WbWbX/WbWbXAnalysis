@@ -37,7 +37,7 @@ includetrigger=options.includetrigger    # True
 includePDFWeights=options.includePDF     # False
 PDF=options.PDF                          # cteq65
 inputScript=options.inputScript          # TopAnalysis.Configuration.samples.singlemu_runA_prompt_cff
-json=options.json                        # 
+json=options.json                        # uses cern afs dqm directory ,you must add: Collisions12/8TeV/Prompt/
 
 syncfile=options.isSync                  # False
 
@@ -103,7 +103,7 @@ realdata = True
 if isMC:
     realdata=False
 if realdata and not (json=="nojson"):
-    jsonpath = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/Prompt/' + json 
+    jsonpath = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/' + json 
     import FWCore.PythonUtilities.LumiList as LumiList
     import FWCore.ParameterSet.Types as CfgTypes
     myLumis = LumiList.LumiList(filename = jsonpath).getCMSSWString().split(',')
@@ -195,6 +195,8 @@ if isMC:
             process.generatorZFilter.zDecayModes = cms.vint32(13)
         elif genFilterString=='TauTau':
             process.generatorZFilter.zDecayModes = cms.vint32(15)
+        elif genFilterString=='Leptonic':
+            process.generatorZFilter.zDecayModes = cms.vint32(11,13,15)
         
         if genFilterInvert:
             process.preFilterSequence = cms.Sequence(process.preCutPUInfo * 
