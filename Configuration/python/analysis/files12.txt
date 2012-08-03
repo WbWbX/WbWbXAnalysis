@@ -42,15 +42,15 @@
 200  mc.DYJetsToLL_M-10To50filter_8TeV-madgraph_Summer12-PU_S7_START52_V9-v1_cff                     dymumu1050                  genFilter=Z genFilterString=MuonMuon 
 200  mc.DYJetsToLL_M-10To50filter_8TeV-madgraph_Summer12-PU_S7_START52_V9-v1_cff                     dytautau1050                genFilter=Z genFilterString=TauTau 
 200  mc.DYJetsToLL_M-10To50filter_8TeV-madgraph_Summer12-PU_S7_START52_V9-v1_cff                     dyee1050                    genFilter=Z genFilterString=ElectronElectron
-40   mc.DYJetsToLL_M-10To50filter_8TeV-madgraph_Summer12-PU_S7_START52_V9-v1_cff                     dyee1050                    genFilter=Z genFilterString=Leptonic genFilterInvert=true
+40   mc.DYJetsToLL_M-10To50filter_8TeV-madgraph_Summer12-PU_S7_START52_V9-v1_cff                     dybg1050                    genFilter=Z genFilterString=Leptonic genFilterInvert=true
 
 200  mc.WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball_Summer12-PU_S7_START52_V9-v1_cff               wjets          
 
-300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 eettbar                     genFilter=top genFilterString=ElectronElectron includereco=true
+300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 eettbar                     genFilter=top genFilterString=ElectronElectron 
 300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 eettbarviatau               genFilter=top genFilterString=ElectronElectronViaTau
 100  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 eettbarbg                     genFilter=top genFilterString=ElectronElectron,ElectronElectronViaTau genFilterInvert=true
 
-300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 mumuttbar                   genFilter=top genFilterString=MuonMuon includereco=true
+300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 mumuttbar                   genFilter=top genFilterString=MuonMuon 
 300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 mumuttbarviatau             genFilter=top genFilterString=MuonMuonViaTau
 300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 mumuttbarbg                 genFilter=top genFilterString=MuonMuon,MuonMuonViaTau genFilterInvert=true
 
