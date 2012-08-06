@@ -52,6 +52,8 @@ namespace top{
     double getOverflow();                              //!returns -1 if overflow was merged with last bin
     double getUnderflow();                             //!returns -1 if underflow was merged with last bin
 
+    double integral(bool includeUFOF=false);
+
     void setAllErrorsZero(){for(unsigned int i=0;i<staterrup_.size();i++){staterrup_[i]=0;staterrdown_[i]=0;} syserrors_.clear();} //! sets all errors zero
     void reset();    //! resets all uncertainties and binning, keeps names and axis
     void clear();    //! sets all bin contents to zero; clears all systematic uncertainties
@@ -402,6 +404,22 @@ namespace top{
     return ret;
   }
 
+  double container1D::integral(bool includeUFOF){
+    unsigned int minbin,maxbin;
+    if(includeUFOF){
+      minbin=0;
+      maxin=content_.size();
+    }
+    else{
+      minbin=1;
+      maxbin=content_.size() -1;
+    }
+    double integr=0;
+    for(unsigned int i=minbin;i<maxbin;i++){
+      integr+=content_[i];
+    }
+    return integr;
+  }
 
   void container1D::reset(){
     binwidth_=0;

@@ -28,8 +28,9 @@ namespace top{
     
     void setDataLegend(TString leg="data"){dataleg_=leg;}
     void mergeSameLegends();
-    top::container1D getContribution(TString);
-    top::container1D getContributionsBut(TString);
+    top::container1D getContribution(TString);   //! does not ignore data
+    top::container1D getContributionsBut(TString);  //!does not ignore data
+    top::container1D getContributionsBut(std::vector<TString>);  //!does not ignore data
     TString getName(){return name_;}
     unsigned int size(){return colors_.size();}
     TString getLegend(unsigned int i){return legends_[i];}
@@ -129,6 +130,26 @@ namespace top{
    }
    return out;
  }
+
+  top::container1D container1DStack::getContributionsBut(std::vector<TString> contr){
+    top::container1D out;
+    if(containers_.size() > 0){
+      out=containers_[0];
+      out.clear();
+      for(unsigned int i=0;i<legends_.size();i++){
+	bool get=true;
+	for(std::vector<TString>::iterator name=contr.begin();name<contr.end();++name){
+	  if(*name == legends_[i]){
+	    get=false;
+	    break;
+	  }
+	}
+	if(get) out = out+ containers_[i] * norms_[i];
+      }
+    }
+    return out;
+  }
+
   
   void container1DStack::multiplyNorm(TString legendentry, double multi){
     int i=0;
