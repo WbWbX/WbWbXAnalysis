@@ -102,7 +102,7 @@ sub setMaxEventsPerJob {
 
 sub prepare {
     my ($self, $NJobs, $inputSample, $outputFile, $options) = @_;
-    $options ||= 'standard';
+    $options ||= '';
     $inputSample =~ s/\.py$//;
     my $mode;
     if ($outputFile =~ /^(\w{2,4})_/) {
