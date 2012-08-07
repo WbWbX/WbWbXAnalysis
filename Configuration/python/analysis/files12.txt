@@ -9,68 +9,68 @@
 
 ###analysis samples
 
-200  DoubleElectron_Run2012A-PromptReco-v1_cff         ee_run12A_prompt                 globalTag=GR_R_52_V7C isMC=false json=Collisions12/8TeV/Prompt/Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
-500  DoubleElectron_Run2012B-PromptReco-v1_cff         ee_run12B_prompt                 globalTag=GR_R_52_V7C isMC=false json=Collisions12/8TeV/Prompt/Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
+200  DoubleElectron_Run2012A-PromptReco-v1_cff         8TeV_ee_runA_prompt                 globalTag=GR_R_52_V7C isMC=false json=Collisions12/8TeV/Prompt/Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
+500  DoubleElectron_Run2012B-PromptReco-v1_cff         8TeV_ee_runB_prompt                 globalTag=GR_R_52_V7C isMC=false json=Collisions12/8TeV/Prompt/Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
 
 
-200  DoubleMu_Run2012B-PromptReco-v1_cff        mumu_run12A_prompt                 globalTag=GR_R_52_V7C isMC=false json=Collisions12/8TeV/Prompt/Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
-500  DoubleMu_Run2012C-PromptReco-v1_cff          mumu_run12B_prompt                 globalTag=GR_R_52_V7C isMC=false json=Collisions12/8TeV/Prompt/Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
+200  DoubleMu_Run2012B-PromptReco-v1_cff        8TeV_mumu_runA_prompt                 globalTag=GR_R_52_V7C isMC=false json=Collisions12/8TeV/Prompt/Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
+500  DoubleMu_Run2012C-PromptReco-v1_cff          8TeV_mumu_runB_prompt                 globalTag=GR_R_52_V7C isMC=false json=Collisions12/8TeV/Prompt/Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
 
 
-200  MuEG_Run2012A-PromptReco-v1_cff        mueg_run12A_prompt                 globalTag=GR_R_52_V7C isMC=false json=Collisions12/8TeV/Prompt/Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
-500  MuEG_Run2012B-PromptReco-v1_cff            mueg_run12B_prompt                 globalTag=GR_R_52_V7C isMC=false json=Collisions12/8TeV/Prompt/Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
+200  MuEG_Run2012A-PromptReco-v1_cff        8TeV_mueg_runA_prompt                 globalTag=GR_R_52_V7C isMC=false json=Collisions12/8TeV/Prompt/Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
+500  MuEG_Run2012B-PromptReco-v1_cff            8TeV_mueg_runB_prompt                 globalTag=GR_R_52_V7C isMC=false json=Collisions12/8TeV/Prompt/Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
 
 ### efficiency data samples
 
-200  MET_Run2012A-PromptReco-v1_cff           met_run12A_prompt             globalTag=GR_R_52_V7C isMC=false json=Collisions12/8TeV/Prompt/Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
-300  MET_Run2012B-PromptReco-v1_cff           met_run12B_prompt             globalTag=GR_R_52_V7C isMC=false json=Collisions12/8TeV/Prompt/Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
+200  MET_Run2012A-PromptReco-v1_cff           8TeV_met_runA_prompt             globalTag=GR_R_52_V7C isMC=false json=Collisions12/8TeV/Prompt/Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
+300  MET_Run2012B-PromptReco-v1_cff           8TeV_met_runB_prompt             globalTag=GR_R_52_V7C isMC=false json=Collisions12/8TeV/Prompt/Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
 
-200  SingleMu_Run2012A-PromptReco-v1_cff      singlemu_run12A_prompt        globalTag=GR_R_52_V7C includereco=true includetrigger=false isMC=false json=Collisions12/8TeV/Prompt/Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
-500  SingleMu_Run2012B-PromptReco-v1_cff      singlemu_run12B_prompt        globalTag=GR_R_52_V7C includereco=true includetrigger=false isMC=false json=Collisions12/8TeV/Prompt/Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
+200  SingleMu_Run2012A-PromptReco-v1_cff      8TeV_singlemu_runA_prompt        globalTag=GR_R_52_V7C includereco=true includetrigger=false isMC=false json=Collisions12/8TeV/Prompt/Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
+500  SingleMu_Run2012B-PromptReco-v1_cff      8TeV_singlemu_runB_prompt        globalTag=GR_R_52_V7C includereco=true includetrigger=false isMC=false json=Collisions12/8TeV/Prompt/Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
 
-200  SingleElectron_Run2012A-PromptReco-v1_cff      singlee_run12A_prompt         globalTag=GR_R_52_V7C includereco=true includetrigger=false isMC=false json=Collisions12/8TeV/Prompt/Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
-500  SingleElectron_Run2012B-PromptReco-v1_cff      singlee_run12B_prompt         globalTag=GR_R_52_V7C includereco=true includetrigger=false isMC=false json=Collisions12/8TeV/Prompt/Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
+200  SingleElectron_Run2012A-PromptReco-v1_cff      8TeV_singlee_runA_prompt         globalTag=GR_R_52_V7C includereco=true includetrigger=false isMC=false json=Collisions12/8TeV/Prompt/Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
+500  SingleElectron_Run2012B-PromptReco-v1_cff      8TeV_singlee_runB_prompt         globalTag=GR_R_52_V7C includereco=true includetrigger=false isMC=false json=Collisions12/8TeV/Prompt/Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
 
 
 ##MC
 
-400   mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12-PU_S7_START52_V9-v2_cff         dymumu50inf                 genFilter=Z genFilterString=MuonMuon includereco=true
-200   mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12-PU_S7_START52_V9-v2_cff         dytautau50inf               genFilter=Z genFilterString=TauTau 
-400   mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12-PU_S7_START52_V9-v2_cff         dyee50inf                  genFilter=Z genFilterString=ElectronElectron includereco=true
-40    mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12-PU_S7_START52_V9-v2_cff         dybg50inf                  genFilter=Z genFilterString=Leptonic genFilterInvert=true includereco=true   
+400   mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12-PU_S7_START52_V9-v2_cff         8TeV_dymumu50inf                 genFilter=Z genFilterString=MuonMuon includereco=true
+200   mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12-PU_S7_START52_V9-v2_cff         8TeV_dytautau50inf               genFilter=Z genFilterString=TauTau 
+400   mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12-PU_S7_START52_V9-v2_cff         8TeV_dyee50inf                  genFilter=Z genFilterString=ElectronElectron includereco=true
+200    mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12-PU_S7_START52_V9-v2_cff         8TeV_dybg50inf                  genFilter=Z genFilterString=Leptonic genFilterInvert=true 
 
-200  mc.DYJetsToLL_M-10To50filter_8TeV-madgraph_Summer12-PU_S7_START52_V9-v1_cff                     dymumu1050                  genFilter=Z genFilterString=MuonMuon 
-200  mc.DYJetsToLL_M-10To50filter_8TeV-madgraph_Summer12-PU_S7_START52_V9-v1_cff                     dytautau1050                genFilter=Z genFilterString=TauTau 
-200  mc.DYJetsToLL_M-10To50filter_8TeV-madgraph_Summer12-PU_S7_START52_V9-v1_cff                     dyee1050                    genFilter=Z genFilterString=ElectronElectron
-40   mc.DYJetsToLL_M-10To50filter_8TeV-madgraph_Summer12-PU_S7_START52_V9-v1_cff                     dybg1050                    genFilter=Z genFilterString=Leptonic genFilterInvert=true
+200  mc.DYJetsToLL_M-10To50filter_8TeV-madgraph_Summer12-PU_S7_START52_V9-v1_cff                     8TeV_dymumu1050                  genFilter=Z genFilterString=MuonMuon 
+200  mc.DYJetsToLL_M-10To50filter_8TeV-madgraph_Summer12-PU_S7_START52_V9-v1_cff                     8TeV_dytautau1050                genFilter=Z genFilterString=TauTau 
+200  mc.DYJetsToLL_M-10To50filter_8TeV-madgraph_Summer12-PU_S7_START52_V9-v1_cff                     8TeV_dyee1050                    genFilter=Z genFilterString=ElectronElectron
+40   mc.DYJetsToLL_M-10To50filter_8TeV-madgraph_Summer12-PU_S7_START52_V9-v1_cff                     8TeV_dybg1050                    genFilter=Z genFilterString=Leptonic genFilterInvert=true
 
-200  mc.WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball_Summer12-PU_S7_START52_V9-v1_cff               wjets          
+200  mc.WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball_Summer12-PU_S7_START52_V9-v1_cff               8TeV_wjets          
 
-300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 eettbar                     genFilter=Top genFilterString=ElectronElectron 
-300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 eettbarviatau               genFilter=Top genFilterString=ElectronElectronViaTau
-100  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 eettbarbg                     genFilter=Top genFilterString=ElectronElectron,ElectronElectronViaTau genFilterInvert=true
+300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 8TeV_eettbar                     genFilter=Top genFilterString=ElectronElectron 
+300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 8TeV_eettbarviatau               genFilter=Top genFilterString=ElectronElectronViaTau
+100  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 8TeV_eettbarbg                     genFilter=Top genFilterString=ElectronElectron,ElectronElectronViaTau genFilterInvert=true
 
-300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 mumuttbar                   genFilter=Top genFilterString=MuonMuon 
-300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 mumuttbarviatau             genFilter=Top genFilterString=MuonMuonViaTau
-300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 mumuttbarbg                 genFilter=Top genFilterString=MuonMuon,MuonMuonViaTau genFilterInvert=true
+300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 8TeV_mumuttbar                   genFilter=Top genFilterString=MuonMuon 
+300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 8TeV_mumuttbarviatau             genFilter=Top genFilterString=MuonMuonViaTau
+300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 8TeV_mumuttbarbg                 genFilter=Top genFilterString=MuonMuon,MuonMuonViaTau genFilterInvert=true
 
-300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 emuttbar                    genFilter=Top genFilterString=ElectronMuon
-300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 emuttbarviatau                    genFilter=Top genFilterString=ElectronMuonViaTau
-300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 emuttbarbg                    genFilter=Top genFilterString=ElectronMuon,ElectronMuonViaTau genFilterInvert=true
+300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 8TeV_emuttbar                    genFilter=Top genFilterString=ElectronMuon
+300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 8TeV_emuttbarviatau                    genFilter=Top genFilterString=ElectronMuonViaTau
+300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2_cff                 8TeV_emuttbarbg                    genFilter=Top genFilterString=ElectronMuon,ElectronMuonViaTau genFilterInvert=true
 
-100  mc.Tbar_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola_Summer12-PU_S7_START52_V9-v1_cff           tbarW
-100  mc.T_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola_Summer12-PU_S7_START52_V9-v1_cff              tW
-
-
-200  mc.WW_TuneZ2star_8TeV_pythia6_tauola_Summer12-PU_S7_START52_V9-v1_cff                              wwp 
-200  mc.WWJetsTo2L2Nu_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v1_cff                  wwmg
-200  mc.WZ_TuneZ2star_8TeV_pythia6_tauola_Summer12-PU_S7_START52_V9-v1_cff                              wz                        
-200  mc.ZZ_TuneZ2star_8TeV_pythia6_tauola_Summer12-PU_S7_START52_V9-v1_cff                              zz 
+100  mc.Tbar_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola_Summer12-PU_S7_START52_V9-v1_cff           8TeV_tbarW
+100  mc.T_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola_Summer12-PU_S7_START52_V9-v1_cff              8TeV_tW
 
 
-200  mc.QCD_Pt_20_MuEnrichedPt_15_TuneZ2star_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1_cff       qcdmu15       
-200  mc.QCD_Pt_20_30_EMEnriched_TuneZ2star_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1_cff          qcdem2030     
-200  mc.QCD_Pt_30_80_EMEnriched_TuneZ2star_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1_cff         qcdem5080   
-#200  mc.QCD_Pt_80_170_EMEnriched_TuneZ2star_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1_cff       qcdem80170     #not yet available
+200  mc.WW_TuneZ2star_8TeV_pythia6_tauola_Summer12-PU_S7_START52_V9-v1_cff                              8TeV_wwp   
+200  mc.WWJetsTo2L2Nu_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v1_cff                  8TeV_wwmg  
+200  mc.WZ_TuneZ2star_8TeV_pythia6_tauola_Summer12-PU_S7_START52_V9-v1_cff                              8TeV_wz                         
+200  mc.ZZ_TuneZ2star_8TeV_pythia6_tauola_Summer12-PU_S7_START52_V9-v1_cff                              8TeV_zz   
+
+
+200  mc.QCD_Pt_20_MuEnrichedPt_15_TuneZ2star_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1_cff       8TeV_qcdmu15         
+200  mc.QCD_Pt_20_30_EMEnriched_TuneZ2star_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1_cff          8TeV_qcdem2030       
+200  mc.QCD_Pt_30_80_EMEnriched_TuneZ2star_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1_cff         8TeV_qcdem5080     
+#200  mc.QCD_Pt_80_170_EMEnriched_TuneZ2star_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1_cff       8TeV_qcdem80170     #not yet available
 
 
