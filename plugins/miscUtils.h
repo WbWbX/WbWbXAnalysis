@@ -5,6 +5,7 @@
 #include <sstream>
 #include <vector>
 #include <math.h>
+#include <iostream>
 
 template<class t>
 TString toTString(t in){
@@ -61,7 +62,27 @@ std::vector<T>& operator<<(std::vector<T>& vec, const U& x) {
 }
 
 
+void displayStatusBar(Long64_t event, Long64_t nEvents){
 
+  if(event * 50 % nEvents <50){ //2% steps
+    int statusbar=event * 50 / nEvents +1;
+    std::cout << "\r[";
+    for(int i=0;i<statusbar;i++){
+      std::cout << "=";
+    }
+    for(int i=statusbar;i<50;i++){
+      std::cout << " ";
+    }
+    std::cout << "] " << statusbar*2 << "%   ";
+    flush(std::cout);
+    statusbar++;
+  }
 
+}
 
 #endif
+
+// if((100* entr % nentr)){
+//       cout << "\rprocessing: " << (int) 100*i/n << "%";
+//       fflush(stdin);
+//     }
