@@ -179,6 +179,11 @@ if isMC:
         process.generatorTopFilter.channels = genFilterString
         process.generatorTopFilter.invert_selection=genFilterInvert
 
+        if genFilterInvert:
+            print 'genFilter set to Top: inverted : ' + genFilterString
+        else:
+            print 'genFilter set to Top: ' + genFilterString
+
         process.preFilterSequence = cms.Sequence(process.preCutPUInfo * 
                                                  process.topsequence *
                                                  process.postCutPUInfo *
@@ -189,16 +194,26 @@ if isMC:
 
     elif genFilter=='Z':
         process.load('TopAnalysis.TopFilter.filters.GeneratorZFilter_cfi')
-        if genFilterString=='ElectronElectron':
+        if genFilterString==['ElectronElectron']:
+            print 'genFilter set to Z: Electron Electron'
             process.generatorZFilter.zDecayModes = cms.vint32(11)
-        elif genFilterString=='MuonMuon':
+        elif genFilterString==['MuonMuon']:
+            print 'genFilter set to Z: Muon Muon'
             process.generatorZFilter.zDecayModes = cms.vint32(13)
-        elif genFilterString=='TauTau':
+        elif genFilterString==['TauTau']:
+            print 'genFilter set to Z: Tau Tau'
             process.generatorZFilter.zDecayModes = cms.vint32(15)
-        elif genFilterString=='Leptonic':
+        elif genFilterString==['Leptonic']:
+            print 'genFilter set to Z: all leptonic'
             process.generatorZFilter.zDecayModes = cms.vint32(11,13,15)
+        else:
+            print '\n\n\nWARNING!!! gen Filter set to Z but no specific decay mode selected!!'
+            print genFilterString
+            print 'not valid!'
+            exit(8888)
         
         if genFilterInvert:
+            print 'genFilter Z inverted'
             process.preFilterSequence = cms.Sequence(process.preCutPUInfo * 
                                                      ~process.generatorZFilter *
                                                      process.postCutPUInfo *
