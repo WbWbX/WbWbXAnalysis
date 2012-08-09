@@ -17,7 +17,7 @@ options.register ('includereco',False,VarParsing.VarParsing.multiplicity.singlet
 options.register ('includetrigger',True,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"includes trigger info for event")
 options.register ('includePDF',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"includes pdf weights info for event")
 options.register ('PDF','cteq65',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"pdf set for weights")
-options.register ('inputScript','TtZAnalysis.Configuration.samples.mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_cff',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"input Script")
+options.register ('inputScript','TtZAnalysis.Configuration.samples.mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12-PU_S7_START52_V9-v2_cff',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"input Script")
 options.register ('json','nojson',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"json file in cern afs")
 options.register ('isSync',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"switch on for sync")
 options.register('samplename', 'standard', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "which sample to run over - obsolete")
@@ -29,14 +29,14 @@ globalTag=options.globalTag              # START52_V9
 reportEvery=options.reportEvery          # 1000
 outputFile=options.outputFile            # def_out
 isMC=options.isMC                        # True
-genFilter=options.genFilter              # 
-genFilterString=options.genFilterString  # 
+genFilter=options.genFilter              # 'none'
+genFilterString=options.genFilterString  # 'none'
 genFilterInvert=options.genFilterInvert  # False
 includereco=options.includereco          # False
 includetrigger=options.includetrigger    # True
 includePDFWeights=options.includePDF     # False
 PDF=options.PDF                          # cteq65
-inputScript=options.inputScript          # TopAnalysis.Configuration.samples.singlemu_runA_prompt_cff
+inputScript=options.inputScript          # TtZAnalysis.Configuration.samples.mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12-PU_S7_START52_V9-v2_cff
 json=options.json                        # uses cern afs dqm directory ,you must add: Collisions12/8TeV/Prompt/
 
 syncfile=options.isSync                  # False
@@ -58,6 +58,11 @@ if syncfile:
     includereco=False
     includetrigger=False
     minleptons=2
+
+if includePDFWeights:
+    import os
+    newlha = os.environ['CMSSW_BASE']+'/src/TtZAnalysis/Data/PDFSets'
+    os.environ['LHAPATH']=newlha
 
 
 pfpostfix='PFlow' #unfortunately some things don't seem to work otherwise.. pfjets get lost somehow produces LOADS of overhead...
@@ -180,9 +185,11 @@ if isMC:
         process.generatorTopFilter.invert_selection=genFilterInvert
 
         if genFilterInvert:
-            print 'genFilter set to Top: inverted : ' + genFilterString
+            print 'genFilter set to Top: inverted : ' 
+            print genFilterString
         else:
-            print 'genFilter set to Top: ' + genFilterString
+            print 'genFilter set to Top: ' 
+            print genFilterString
 
         process.preFilterSequence = cms.Sequence(process.preCutPUInfo * 
                                                  process.topsequence *
