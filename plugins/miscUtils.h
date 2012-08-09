@@ -64,8 +64,8 @@ std::vector<T>& operator<<(std::vector<T>& vec, const U& x) {
 
 void displayStatusBar(Long64_t event, Long64_t nEvents){
 
-  if(event * 50 % nEvents <50){ //2% steps
-    int statusbar=event * 50 / nEvents +1;
+  if((event +1)* 50 % nEvents <50){ //2% steps
+    int statusbar=(event+1) * 50 / nEvents ;
     std::cout << "\r[";
     for(int i=0;i<statusbar;i++){
       std::cout << "=";
@@ -76,6 +76,10 @@ void displayStatusBar(Long64_t event, Long64_t nEvents){
     std::cout << "] " << statusbar*2 << "%   ";
     flush(std::cout);
     statusbar++;
+  }
+  if(event==0){
+    std::cout << "[                                                  ] " << "0%   ";
+    flush(std::cout);
   }
 
 }

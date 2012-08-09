@@ -408,7 +408,7 @@ namespace top{
     unsigned int minbin,maxbin;
     if(includeUFOF){
       minbin=0;
-      maxin=content_.size();
+      maxbin=content_.size();
     }
     else{
       minbin=1;

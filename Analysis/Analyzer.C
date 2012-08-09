@@ -52,6 +52,7 @@ public:
 private:
 
   bool isInInfo(TString s){return additionalinfo_.Contains(s);}
+  bool triggersContain(TString , top::NTEvent *);
 
   TString name_,dataname_;
   TString datasetdirectory_;
@@ -67,13 +68,23 @@ private:
   TString additionalinfo_;
 
 };
+bool MainAnalyzer::triggersContain(TString triggername, top::NTEvent * pevent){
+  bool out = false;
+  for(unsigned int i=0;i<pevent->firedTriggers().size();i++){
+    if(((TString)pevent->firedTriggers()[i]).Contains(triggername)){
+      out=true;
+      break;
+    }
+  }
+  return out;
+}
 
 void MainAnalyzer::start(){
 
   using namespace std;
   if(analysisplots_) clear();
   else cout << "warning analysisplots_ is null" << endl;
-  analysisplots_->setName(name_);
+  analysisplots_->setName(name_+"_"+additionalinfo_);
   std::cout << "Starting analysis for " << name_ << std::endl;
   ifstream inputfiles (filelist_);
   string filename;
@@ -130,6 +141,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   //define containers here
 
   //   define binnings
+  vector<float> drbins;
+  for(float i=0;i<40;i++) drbins << i/40;
 
   vector<float> etabinselec;
   etabinselec << -2.5 << -1.8 << -1 << 1 << 1.8 << 2.5 ;
@@ -203,6 +216,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   container1D elecid0(isobins, "electron mva id step 0", "Id", "N_{e}");
   container1D elecid1(isobins, "electron mva id step 1", "Id", "N_{e}");
   container1D elecid2(isobins, "electron mva id step 2", "Id", "N_{e}");
+
+  container1D elecmuondR0(drbins, "electron-muon dR step 0", "dR", "N_{e}*N_{#mu}/bw",true);
 
   container1D muoneta0(etabinsmuon, "muon eta step 0", "#eta_{l}","N_{#mu}");
   container1D muoneta1(etabinsmuon, "muon eta step 1", "#eta_{l}","N_{#mu}");
@@ -366,31 +381,27 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       if(elec->pt() < 20) continue;
       if(fabs(elec->eta()) > 2.5) continue;
       if(!noOverlap(elec, *pMuons, 0.1)) continue;
+
       kinelectrons.push_back(*elec);
     }
 
     rho.setRho(pEvent->isoRho(2));
     rho.addRhoIso(kinelectrons);
-    vector<NTElectron> idelectrons   =lepSel.selectIDElectrons(kinelectrons);
-
     vector<NTMuon> kinmuons         = lepSel.selectKinMuons(*pMuons);
-    vector<NTMuon> idmuons           =lepSel.selectIDMuons(kinmuons);
-
-    vector<NTElectron> isoelectrons  =lepSel.selectIsolatedElectrons(idelectrons);
-    vector<NTMuon> isomuons          =lepSel.selectIsolatedMuons(idmuons);
+    
 
     /////////TRIGGER CUT and kin leptons STEP 0/////////////////////////////
     if(b_ee){
-      if(kinelectrons.size()< 2) continue;
-      //trg
-
+      if(kinelectrons.size()< 2) continue; //has to be 17??!!
+      if(isMC  && !triggersContain("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v" , pEvent) ) continue;
+      if(!isMC && !triggersContain("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v" , pEvent) ) continue;
 
     }
     if(b_mumu){
       if(kinmuons.size() < 2) continue;
       //trg
-      if(isMC && !(isIn((std::string)"HLT_Mu17_Mu8_v16",pEvent->firedTriggers())  || isIn((std::string)"HLT_Mu17_TkMu8_v9",pEvent->firedTriggers()))) continue;
-      if(!isMC && !(isIn((std::string)"HLT_Mu17_Mu8_v16",pEvent->firedTriggers())  || isIn((std::string)"HLT_Mu17_TkMu8_v9",pEvent->firedTriggers()))) continue;
+      if(isMC &&  !(triggersContain("HLT_Mu17_Mu8_v16",pEvent)  || triggersContain("HLT_Mu17_TkMu8_v9",pEvent))) continue;
+      if(!isMC && !(triggersContain("HLT_Mu17_Mu8_v",pEvent)  || triggersContain("HLT_Mu17_TkMu8_v",pEvent))) continue;
 
 
     }
@@ -399,14 +410,24 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       //trg
 
 
-
     }
 
+
+    vector<NTElectron> idelectrons   =lepSel.selectIDElectrons(kinelectrons);
+    vector<NTMuon> idmuons           =lepSel.selectIDMuons(kinmuons);
+
+    vector<NTElectron> isoelectrons  =lepSel.selectIsolatedElectrons(idelectrons);
+    vector<NTMuon> isomuons          =lepSel.selectIsolatedMuons(idmuons);
+    
     for(NTElectronIt elec=kinelectrons.begin();elec<kinelectrons.end();++elec){
       eleceta0.fill(elec->eta(), puweight);
       elecpt0.fill(elec->pt(),puweight);
       eleciso0.fill(elec->rhoIso03(),puweight);
       elecid0.fill(elec->mvaId(),puweight);
+      for(NTMuonIt muon=kinmuons.begin();muon<kinmuons.end();++muon){
+	elecmuondR0.fill(sqrt(pow(elec->eta() - muon->eta(),2) + pow(elec->phi() - muon->phi(),2)), puweight);
+      }
+
     //some other fills
     }
 
@@ -431,6 +452,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       eleceta1.fill(elec->eta(), puweight);
       elecpt1.fill(elec->pt(),puweight);
       eleciso1.fill(elec->rhoIso03(),puweight);
+      elecid1.fill(elec->mvaId(),puweight);
     //some other fills
     }
 
@@ -473,6 +495,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       eleceta2.fill(elec->eta(), puweight);
       elecpt2.fill(elec->pt(),puweight);
       eleciso2.fill(elec->rhoIso03(),puweight);
+      elecid2.fill(elec->mvaId(),puweight);
     //some other fills
     }
 
@@ -783,8 +806,10 @@ void Analyzer(){
 
   cout << "\n\n\n" <<endl; //looks better ;)
 
-  TString outfile = "firsttest_out.root";
-  TString pufolder="/afs/naf.desy.de/user/k/kieseler/scratch/2012/TestArea2/CMSSW_5_2_5/src/TtZAnalysis/Analysis/PUDistr/";
+  TString outfile = "all_test_out.root";
+  TString pufolder="/afs/naf.desy.de/user/k/kieseler/scratch/2012/TestArea2/CMSSW_5_2_5/src/TtZAnalysis/Data/PUDistr/";
+
+  //initialize mumu
 
   MainAnalyzer analyzermumu("default_mumu","mumu");
   analyzermumu.setLumi(5097);
@@ -792,13 +817,81 @@ void Analyzer(){
   analyzermumu.setDataSetDirectory("/scratch/hh/dust/naf/cms/user/kieseler/trees0724/");
   analyzermumu.getPUReweighter()->setDataTruePUInput(pufolder+"Data_PUDist_sysNo_69300_2012AB.root");
   analyzermumu.getPUReweighter()->setMCDistrSum12();
+
+  //start with ee
+
+  MainAnalyzer analyzeree=analyzermumu;
+  analyzeree.setFileList("ee_8TeV_inputfiles.txt");
+  analyzeree.setName("default_ee","ee");
+  analyzeree.start();
+  analyzeree.getPlots()->writeAllToTFile(outfile,true);
+
+  MainAnalyzer eewithlumi=analyzeree;
+  eewithlumi.setName("ee_lumi","ee");
+  eewithlumi.getPlots()->addGlobalRelMCError("Lumi", 0.045);
+  eewithlumi.getPlots()->writeAllToTFile(outfile);
+
+  // jer systematics
+
+  MainAnalyzer analyzereejerup=analyzeree;
+  analyzereejerup.setName("jerup_ee","ee");
+  analyzereejerup.getJERAdjuster()->setSystematics("up");
+  analyzereejerup.start();
+  analyzereejerup.getPlots()->writeAllToTFile(outfile);
+
+
+  MainAnalyzer analyzereejerdown=analyzeree;
+  analyzereejerdown.setName("jerdown_ee","ee");
+  analyzereejerdown.getJERAdjuster()->setSystematics("down");
+  analyzereejerdown.start();
+  analyzereejerdown.getPlots()->writeAllToTFile(outfile);
+
+  MainAnalyzer eewithjerunc=analyzeree;
+  eewithjerunc.setName("jerunc_ee","ee");
+  eewithjerunc.getPlots()->addMCErrorStackVector("JER_up",*analyzereejerup.getPlots());
+  eewithjerunc.getPlots()->addMCErrorStackVector("JER_down",*analyzereejerdown.getPlots());
+  eewithjerunc.getPlots()->writeAllToTFile(outfile);
+
+
+  // pu systematics
+
+  MainAnalyzer analyzereepuup=analyzeree;
+  analyzereepuup.getPUReweighter()->setDataTruePUInput(pufolder+"Data_PUDist_sysUp_72760_2012AB.root"); 
+  analyzereepuup.setName("puup_ee", "ee");
+  analyzereepuup.start();
+  analyzereepuup.getPlots()->writeAllToTFile(outfile);
+
+  MainAnalyzer analyzereepudown=analyzeree;
+  analyzereepudown.getPUReweighter()->setDataTruePUInput(pufolder+"Data_PUDist_sysDown_65835_2012AB.root");
+  analyzereepudown.setName("pudown_ee","ee");
+  analyzereepudown.start();
+  analyzereepudown.getPlots()->writeAllToTFile(outfile);
+
+  MainAnalyzer eewithPU=analyzeree;
+  eewithPU.setName("puunc_ee","ee");
+  eewithPU.getPlots()->addMCErrorStackVector("PU_up",*analyzereepuup.getPlots());
+  eewithPU.getPlots()->addMCErrorStackVector("PU_down",*analyzereepudown.getPlots());
+  eewithPU.getPlots()->writeAllToTFile(outfile);
+  
+  // all systematics
+
+  MainAnalyzer eeWithAll=eewithlumi; //already includes lumi uncert
+  eeWithAll.setName("allunc_ee","ee");
+  eeWithAll.getPlots()->addMCErrorStackVector("PU_up",*analyzereepuup.getPlots());
+  eeWithAll.getPlots()->addMCErrorStackVector("PU_down",*analyzereepudown.getPlots());
+  eeWithAll.getPlots()->addMCErrorStackVector("JER_up",*analyzereejerup.getPlots());
+  eeWithAll.getPlots()->addMCErrorStackVector("JER_down",*analyzereejerdown.getPlots());
+  eeWithAll.getPlots()->writeAllToTFile(outfile);
+
+  // start the mumu analysis
+  
   analyzermumu.start();
 
-  analyzermumu.getPlots()->writeAllToTFile(outfile,true); // after that just update file
-
-  analyzermumu.setName("lumi_mumu","");
-  analyzermumu.getPlots()->addGlobalRelMCError("Lumi", 0.045);
-  analyzermumu.getPlots()->writeAllToTFile(outfile); 
+  analyzermumu.getPlots()->writeAllToTFile(outfile); // after that just update file
+  MainAnalyzer mumuwithlumi=analyzermumu;
+  mumuwithlumi.setName("lumi_mumu","");
+  mumuwithlumi.getPlots()->addGlobalRelMCError("Lumi", 0.045);
+  mumuwithlumi.getPlots()->writeAllToTFile(outfile); 
 
   //make JER systematics
   
@@ -840,21 +933,15 @@ void Analyzer(){
   mumuwithPU.getPlots()->addMCErrorStackVector("PU_down",*analyzermumupudown.getPlots());
   mumuwithPU.getPlots()->writeAllToTFile(outfile);
   
-  //make some other systematics
+  // combine all syst
 
-  /*
-  MainAnalyzer analyzeree("default_ee", "ee somemoreoptions");
-  analyzeree.copySettings(analyzermumu);.q
-
-  analyzeree.start();
-  analyzeree.getPlots()->writeAllToTFile(outfile);
-  
-  MainAnalyzer analyzeremu("default_emu", "emu somemoreoptions");
-  analyzeremu.copySettings(analyzermumu);
-  analyzeremu.start();
-  analyzeremu.getPlots()->writeAllToTFile(outfile);
-
-  */
+  MainAnalyzer mumuWithAll=mumuwithlumi;
+  mumuWithAll.setName("allunc_mumu","mumu");
+  mumuWithAll.getPlots()->addMCErrorStackVector("PU_up",*analyzermumupuup.getPlots());
+  mumuWithAll.getPlots()->addMCErrorStackVector("PU_down",*analyzermumupudown.getPlots());
+  mumuWithAll.getPlots()->addMCErrorStackVector("JER_up",*analyzermumujerup.getPlots());
+  mumuWithAll.getPlots()->addMCErrorStackVector("JER_down",*analyzermumujerdown.getPlots());
+  mumuWithAll.getPlots()->writeAllToTFile(outfile);
 
 
 

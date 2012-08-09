@@ -2,6 +2,7 @@
 #include <vector>
 #include "miscUtils.h"
 #include <algorithm>
+#include <iostream>
 
 namespace top{
 
@@ -17,7 +18,7 @@ namespace top{
     void setResolutionEtaRanges(std::vector<double>);
     void setResolutionFactors(std::vector<double>);
 
-    void setSystematics(TString); //!0: default, -1:down, 1: up
+    void setSystematics(TString); //! def down up
 
   private:
 
@@ -58,14 +59,17 @@ namespace top{
     if(type=="def"){//standard
       resfactors_.clear();
       resfactors_ << 1.288 << 1.134 << 1.096 << 1.057 << 1.052 << 1.052 << 1.057 << 1.096 << 1.134 << 1.288;
+      std::cout << "JER set to default" << std::endl;
     }
     else if(type== "down"){
       resfactors_.clear();
       resfactors_ << 1.428 << 1.228 << 1.162 << 1.114 << 1.115 << 1.115 << 1.114 << 1.162 << 1.228 << 1.428;
+      std::cout << "JER set to syst down" << std::endl;
     }
     else if(type== "up"){
       resfactors_.clear();
       resfactors_ << 1.029 << 1.042 << 1.032 << 1.000 << 0.999 << 0.999 << 1.000 << 1.032 << 1.042 << 1.029;
+      std::cout << "JER set to syst up" << std::endl;
     }
 
   }

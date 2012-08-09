@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id: TreeWriter.cc,v 1.5 2012/07/24 21:00:02 jkiesele Exp $
+// $Id: TreeWriter.cc,v 1.6 2012/08/01 09:03:44 jkiesele Exp $
 //
 //
 
@@ -622,6 +622,9 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	 if(trigresults.product()->accept(i_Trig)){
 	   firedtriggers.push_back(trigName.triggerName(i_Trig));
 	 }
+	 // if(((TString)trigName.triggerName(i_Trig)).Contains("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v")){
+	 //   std::cout << trigName.triggerName(i_Trig) << std::endl;
+	 // } 
        }
      }
 

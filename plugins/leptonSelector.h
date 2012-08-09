@@ -1,12 +1,12 @@
 #ifndef leptonSelector_h
 #define leptonSelector_h
 
-#include "TtZAnalysis/DataFormats/interface/NTElectron.h"
-#include "TtZAnalysis/DataFormats/interface/NTLepton.h"
-#include "TtZAnalysis/DataFormats/interface/NTEvent.h"
-#include "TtZAnalysis/DataFormats/interface/NTMuon.h"
-#include "TtZAnalysis/DataFormats/interface/NTTrack.h"
-#include "TtZAnalysis/DataFormats/interface/NTSuClu.h"
+#include "../DataFormats/interface/NTElectron.h"
+#include "../DataFormats/interface/NTLepton.h"
+#include "../DataFormats/interface/NTEvent.h"
+#include "../DataFormats/interface/NTMuon.h"
+#include "../DataFormats/interface/NTTrack.h"
+#include "../DataFormats/interface/NTSuClu.h"
 
 #include <algorithm>
 #include "TString.h"

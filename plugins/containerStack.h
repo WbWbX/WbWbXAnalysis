@@ -59,10 +59,10 @@ namespace top{
 
     //define operators (propagate from containers) for easy handling
 
-    container1DStack operator + (const container1DStack &);
-    container1DStack operator - (const container1DStack &);
-    container1DStack operator / (const container1DStack &);
-    container1DStack operator * (const container1DStack &);
+    container1DStack operator + ( container1DStack );
+    container1DStack operator - ( container1DStack );
+    container1DStack operator / ( container1DStack );
+    container1DStack operator * ( container1DStack );
     container1DStack operator * (double);
     container1DStack operator * (float);
     container1DStack operator * (int);
@@ -224,7 +224,7 @@ namespace top{
     return  tstack;
   }
   TLegend * container1DStack::makeTLegend(){
-    TLegend *leg = new TLegend(0.70,0.65,0.95,0.90);
+    TLegend *leg = new TLegend(0.55,0.55,0.95,0.90);
     leg->Clear();
     leg->SetFillStyle(0);
     leg->SetBorderSize(0);
@@ -313,10 +313,22 @@ namespace top{
     //prepare container
     if(name=="") name=name_;
     int dataentry=0;
-    for(unsigned int i=0;i<size();i++){
+    bool gotdentry=false;
+    bool gotuf=false;
+    bool gotof=false;
+    for(unsigned int i=0;i<size();i++){ // get datalegend and check if underflow or overflow in any container
       if(getLegend(i) == dataleg_){
         dataentry=i;
-	break;
+	gotdentry=true;
+	if(gotof && gotuf) break;
+      }
+      if(containers_[i].getOverflow() < -0.9){
+	gotof=true;
+	if(gotdentry && gotuf) break;
+      }
+      if(containers_[i].getUnderflow() < -0.9){
+	gotuf=true;
+	if(gotdentry && gotof) break;
       }
     }
     container1D data = containers_[dataentry];
@@ -363,8 +375,22 @@ namespace top{
     gmcerr->Draw("2,same");
     TLine * l = new TLine(mc.getXMin(),1,mc.getXMax(),1);
     l->Draw("same");
-
+    float xmax=containers_[dataentry].getXMax();
+    float xmin=containers_[dataentry].getXMin();
+    if(gPad && containers_[dataentry].getNBins() >0){
+      float yrange=fabs(gPad->GetUymax()-gPad->GetUymin());
+      float xrange = fabs(xmax-xmin);
+      if(gotuf){
+	TLatex * la = new TLatex(containers_[dataentry].getBinCenter(1)-xrange*0.06,gPad->GetUymin()-0.15*yrange,"#leq");
+	la->Draw("same");
+      }
+      if(gotof){
+	TLatex * la2 = new TLatex(containers_[dataentry].getBinCenter(containers_[dataentry].getNBins())+xrange*0.06,gPad->GetUymin()-0.15*yrange,"#leq");
+	la2->Draw("same");
+      }
+    }
   }
+
   TCanvas * container1DStack::makeTCanvas(bool drawratioplot){
     TCanvas * c = new TCanvas(name_+"_c",name_+"_c");
     TH1D * htemp=new TH1D("sometemphisto"+name_,"sometemphisto"+name_,2,0,1); //creates all gPad stuff etc and prevents seg vio, which happens in some cases; weird
@@ -398,16 +424,58 @@ namespace top{
     return c;
   }
 
-
-  top::container1DStack container1DStack::operator + (const container1DStack & stack){
-    
+  //just perform functions on the containers with same names
+  top::container1DStack container1DStack::operator + (container1DStack stack){
+    for(unsigned int i=0;i<containers_.size();i++){
+      for(unsigned int j=0;j<stack.containers_.size();j++){
+	if(containers_[i].getName() == stack.containers_[j].getName()){
+	  stack.containers_[j] = containers_[i] + stack.containers_[j];
+	}
+      }
+    }
+    return stack;
   }
-  top::container1DStack container1DStack::operator - (const container1DStack & stack);
-  top::container1DStack container1DStack::operator / (const container1DStack & stack);
-  top::container1DStack container1DStack::operator * (const container1DStack & stack);
-  top::container1DStack container1DStack::operator * (double);
-  top::container1DStack container1DStack::operator * (float);
-  top::container1DStack container1DStack::operator * (int);
+  top::container1DStack container1DStack::operator - (container1DStack stack){
+    for(unsigned int i=0;i<containers_.size();i++){
+      for(unsigned int j=0;j<stack.containers_.size();j++){
+	if(containers_[i].getName() == stack.containers_[j].getName()){
+	  stack.containers_[j] = containers_[i] - stack.containers_[j];
+	}
+      }
+    }
+    return stack;
+  }
+  top::container1DStack container1DStack::operator / (container1DStack  stack){
+    for(unsigned int i=0;i<containers_.size();i++){
+      for(unsigned int j=0;j<stack.containers_.size();j++){
+	if(containers_[i].getName() == stack.containers_[j].getName()){
+	  stack.containers_[j] = containers_[i] / stack.containers_[j];
+	}
+      }
+    }
+    return stack;
+  }
+  top::container1DStack container1DStack::operator * (container1DStack  stack){
+    for(unsigned int i=0;i<containers_.size();i++){
+      for(unsigned int j=0;j<stack.containers_.size();j++){
+	if(containers_[i].getName() == stack.containers_[j].getName()){
+	  stack.containers_[j] = containers_[i] * stack.containers_[j];
+	}
+      }
+    }
+    return stack;
+  }
+  top::container1DStack container1DStack::operator * (double scalar){
+    top::container1DStack out=*this;
+    for(unsigned int i=0;i<containers_.size();i++) containers_[i] = containers_[i] * scalar;
+    return out;
+  }
+  top::container1DStack container1DStack::operator * (float scalar){
+    return *this * (double)scalar;
+  }
+  top::container1DStack container1DStack::operator * (int scalar){
+    return *this * (double)scalar;
+  }
     
   
 

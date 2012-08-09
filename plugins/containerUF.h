@@ -80,6 +80,9 @@ namespace top{
     std::vector<TString> excludefrombackground;
     excludefrombackground << signalname_ << dataname_;
 
+    gencont.setDivideBinomial(false);
+    selcont.setDivideBinomial(false);
+
     top::container1D efficiencyinv = gencont / selcont;
     top::container1D background = sel_.getContributionsBut(excludefrombackground);
 
