@@ -1,9 +1,0 @@
-<lcgdict>
-  <class name="top::container1D"/>
-  <class name="std::vector<top::container1D>"/>
-  <class name="top::container1DStack"/>
-  <class name="std::vector<top::container1DStack>"/>
-  <class name="top::container1DStackVector"/>
-  <class name="std::vector<top::container1DStackVector>"/>
-</lcgdict>
- 
