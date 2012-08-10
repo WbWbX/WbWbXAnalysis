@@ -23,10 +23,10 @@ namespace top{
 class MainAnalyzer{
 
 public:
-  MainAnalyzer(){filelist_="";dataname_="data";analysisplots_ = new top::container1DStackVector();puweighter_= new top::PUReweighter();jeradjuster_= new top::JERAdjuster();}
+  MainAnalyzer(){filelist_="";dataname_="data";analysisplots_ = new top::container1DStackVector();puweighter_= new top::PUReweighter();jeradjuster_= new top::JERAdjuster();jecuncertainties_=new top::JECUncertainties();}
   MainAnalyzer(const MainAnalyzer &);
-  MainAnalyzer(TString Name, TString additionalinfo){name_=Name;additionalinfo_=additionalinfo;dataname_="data";analysisplots_ = new top::container1DStackVector(Name);puweighter_= new top::PUReweighter();jeradjuster_= new top::JERAdjuster();}
-  ~MainAnalyzer(){if(analysisplots_) delete analysisplots_;if(puweighter_) delete puweighter_;if(jeradjuster_) delete jeradjuster_;};
+  MainAnalyzer(TString Name, TString additionalinfo){name_=Name;additionalinfo_=additionalinfo;dataname_="data";analysisplots_ = new top::container1DStackVector(Name);puweighter_= new top::PUReweighter();jeradjuster_= new top::JERAdjuster();jecuncertainties_=new top::JECUncertainties();}
+  ~MainAnalyzer(){if(analysisplots_) delete analysisplots_;if(puweighter_) delete puweighter_;if(jeradjuster_) delete jeradjuster_;delete jecuncertainties_;};
   void setName(TString Name, TString additionalinfo){name_=Name;additionalinfo_=additionalinfo;analysisplots_->setName(Name);}
   void setLumi(double Lumi){lumi_=Lumi;}
 
@@ -46,6 +46,7 @@ public:
   top::PUReweighter * getPUReweighter(){return puweighter_;}
 
   top::JERAdjuster * getJERAdjuster(){return jeradjuster_;}
+  top::JECUncertainties * getJECUncertainties(){return jecuncertainties_;}
 
   MainAnalyzer & operator= (const MainAnalyzer &);
 
@@ -62,6 +63,7 @@ private:
   
   top::PUReweighter * puweighter_;
   top::JERAdjuster * jeradjuster_;
+  top::JECUncertainties * jecuncertainties_;
 
   top::container1DStackVector * analysisplots_;
 
@@ -120,6 +122,7 @@ MainAnalyzer::MainAnalyzer(const MainAnalyzer & analyzer){
   puweighter_= new top::PUReweighter(*analyzer.puweighter_);
   filelist_=analyzer.filelist_;
   jeradjuster_= new top::JERAdjuster(*analyzer.jeradjuster_);
+  jecuncertainties_= new top::JECUncertainties(*analyzer.jecuncertainties_);
   analysisplots_ = new top::container1DStackVector(*analyzer.analysisplots_);
 }
 
