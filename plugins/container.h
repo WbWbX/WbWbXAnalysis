@@ -83,6 +83,7 @@ namespace top{
 
     void addErrorContainer(TString,container1D,double,bool ignoreMCStat=true);  //! adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down" 
     void addErrorContainer(TString,container1D ,bool ignoreMCStat=true);        //! adds deviation to (this) as systematic uncertianty with name. name must be ".._up" or ".._down" 
+    void addSystematicsFrom(const container1D &);
     void addGlobalRelErrorUp(TString,double);    //! adds a global relative uncertainty with name; "..up" automatically added
     void addGlobalRelErrorDown(TString,double);  //! adds a global relative uncertainty with name; "..down" automatically added
     void addGlobalRelError(TString,double);      //! adds a global relative symmetric uncertainty with name; creates ".._up" and ".._down" variation names
@@ -736,7 +737,7 @@ namespace top{
   
   void container1D::addErrorContainer(TString sysname,container1D deviatingContainer, double weight, bool ignoreMCStat){
     if(bins_!=deviatingContainer.bins_){
-      if(showwarnings_) std::cout << "container1D::addErrorContainer(): not same binning!" << std::endl;
+      std::cout << "container1D::addErrorContainer(): not same binning!" << std::endl;
     }
     else{
       if(! (sysname.Contains("_up") || sysname.Contains("_down"))){
@@ -776,7 +777,28 @@ namespace top{
   void container1D::addErrorContainer(TString sysname,container1D deviatingContainer, bool ignoreMCStat){
     addErrorContainer(sysname,deviatingContainer,1,ignoreMCStat);
   }
-
+  void container1D::addSystematicsFrom(const top::container1D & container){
+    if(bins_!=container.bins_){
+      std::cout << "container1D::addErrorContainer(): not same binning!" << std::endl;
+    }
+    else{
+      for(std::vector<std::pair<TString, std::vector<double> > >::const_iterator syst=container.syserrors_.begin(); syst<container.syserrors_.end();++syst){
+	bool unamb=true;
+	for(unsigned int i=0;i<syserrors_.size();i++){
+	  if(syserrors_[i].first == syst->first){
+	    unamb=false;
+	    break;
+	  }
+	}
+	if(unamb){
+	  syserrors_.push_back(*syst);
+	}
+	else{
+	  if(showwarnings_) std::cout << "container1D::addSystematicsFrom(): systematic uncertainty with name " << syst->first << " already included!" << std::endl;
+	}
+      }
+    }
+  }
   void container1D::addGlobalRelErrorUp(TString sysname,double relerr){
     addErrorContainer(sysname+"_up", ((*this) * (relerr+1)));
   }

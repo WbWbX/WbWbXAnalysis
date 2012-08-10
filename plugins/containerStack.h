@@ -42,6 +42,7 @@ namespace top{
     void multiplyNorm(TString , double);
     void addGlobalRelMCError(TString,double);   //! adds a global systematic variation to the systematics stored (e.g. lumi)
     void addMCErrorStack(TString,container1DStack,bool ignoreMCStat=true);  //! calls container1D::addErrorContainer for each same named member container
+    void addSystematicsFrom(top::container1DStack);
     void removeError(TString);
 
     void clear(){containers_.clear();legends_.clear();colors_.clear();norms_.clear();}
@@ -179,6 +180,19 @@ namespace top{
       }
     }
   }
+
+  void container1DStack::addSystematicsFrom(top::container1DStack stack){
+    for(std::vector<top::container1D>::iterator cont=stack.containers_.begin();cont<stack.containers_.end();++cont){
+      TString name=cont->getName();
+      for(unsigned int i=0;i<containers_.size();i++){
+	if(containers_[i].getName() == name){
+	  containers_[i].addSystematicsFrom(*cont);
+	  break;
+	}
+      }
+    }
+  }
+
   void container1DStack::removeError(TString sysname){
     for(unsigned int i=0; i<size();i++){
       containers_[i].removeError(sysname);

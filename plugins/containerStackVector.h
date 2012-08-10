@@ -27,6 +27,7 @@ namespace top{
 
     void addMCErrorStackVector(TString,top::container1DStackVector, bool ignoreMCStat=true);
     void addGlobalRelMCError(TString,double);
+    void addSystematicsFrom(top::container1DStackVector);
     void removeError(TString);
 
     void multiplyNorms(TString, std::vector<double>, std::vector<TString>);   //! multiplies norm of all MC with legendname  ,  with factor  ,  for step identifier string
@@ -89,6 +90,17 @@ namespace top{
       stack->addGlobalRelMCError(sysname,error);
     }
   }
+  void container1DStackVector::addSystematicsFrom(top::container1DStackVector stackvec){
+   for(std::vector<container1DStack>::iterator istack=stacks_.begin();istack<stacks_.end(); ++istack){
+      for(std::vector<container1DStack>::iterator estack=stackvec.stacks_.begin();estack<stackvec.stacks_.end(); ++estack){
+	if(istack->getName() == estack->getName()){
+	  istack->addSystematicsFrom(*estack);
+	  break;
+	}
+      }
+    }
+  }
+
   void container1DStackVector::removeError(TString name){
     for(std::vector<container1DStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
       stack->removeError(name);
@@ -140,6 +152,9 @@ namespace top{
       c2->Write();
       delete c2;
     }
+
+
+
     f.Close();
     // delete d;
     // delete d2;
