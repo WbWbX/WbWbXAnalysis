@@ -119,6 +119,7 @@ namespace top{
   };
 
 
+  List<container1D> * c_list=0;
 
 } //namespace
 

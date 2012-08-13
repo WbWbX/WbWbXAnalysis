@@ -22,7 +22,6 @@ namespace top{
 
   //////////if you like cut here ;) 
 
-  List<container1D> * c_list=0;
 
 
   ///////function definitions

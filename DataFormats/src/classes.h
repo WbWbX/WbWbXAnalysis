@@ -10,9 +10,6 @@
 #include "../interface/NTTrack.h"
 #include "../interface/NTSuClu.h"
 
-//#include "TtZAnalysis/plugins/container.h"
-//#include "TtZAnalysis/plugins/containerStack.h"
-
 namespace
 {
   struct dictionary {
@@ -38,13 +35,8 @@ namespace
     top::NTSuClu dummy19;
     std::vector<top::NTSuClu> dummy20;
 
-    ///container stuff in case it is to be stored in a root file
 
-    // top::container1D dummy21;
-    // std::vector<top::container1D> dummy22;
-    // top::container1DStack dummy23;
-    // std::vector<top::container1DStack> dummy24;
-
+    
   };
 }
 
