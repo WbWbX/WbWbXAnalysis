@@ -52,7 +52,7 @@ namespace top{
   JECUncertainties::~JECUncertainties(){
     if(totalunc_) delete totalunc_;
       for(unsigned int i=0;i<vsrc_.size();i++){
-	delete vsrc_[i];
+	if(vsrc_[i]) delete vsrc_[i];
       }
     }
 

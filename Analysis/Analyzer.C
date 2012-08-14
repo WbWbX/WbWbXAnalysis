@@ -98,7 +98,7 @@ void MainAnalyzer::start(){
     while(inputfiles.good()){
       inputfiles >> filename; 
       TString temp=filename;
-      if(temp.BeginsWith("#")){
+      if(temp.BeginsWith("#") || temp==""){
 	getline(inputfiles,filename); //just ignore complete line
 	continue;
       }
@@ -176,8 +176,6 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   //and so on
 
   //invoke c_list for automatically registering  all created containers;
-
-  c_list = new List<container1D>();
 
   ///  define containers
 
@@ -792,13 +790,12 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   // Fill all containers in the stackVector
 
   std::cout << "Filling containers to the Stack\n" << std::endl;
-  getPlots()->addList(c_list,legendname,color,norm);
+  getPlots()->addList(legendname,color,norm);
 
 
   delete t;
   f->Close();
   delete f;
-  delete c_list;
   
 
 }
@@ -809,7 +806,7 @@ void Analyzer(){
 
   cout << "\n\n\n" <<endl; //looks better ;)
 
-  TString outfile = "all_test_out.root";
+  TString outfile = "pu_test_out.root";
   TString pufolder="/afs/naf.desy.de/user/k/kieseler/scratch/2012/TestArea2/CMSSW_5_2_5/src/TtZAnalysis/Data/PUDistr/";
 
   //initialize mumu
@@ -829,13 +826,14 @@ void Analyzer(){
   analyzeree.start();
   analyzeree.getPlots()->writeAllToTFile(outfile,true);
 
+  /*
   MainAnalyzer eewithlumi=analyzeree;
   eewithlumi.setName("ee_lumi","ee");
   eewithlumi.getPlots()->addGlobalRelMCError("Lumi", 0.045);
   eewithlumi.getPlots()->writeAllToTFile(outfile);
-
-  // jer systematics
-
+  */
+  // jer systematics 
+  /*
   MainAnalyzer analyzereejerup=analyzeree;
   analyzereejerup.setName("jerup_ee","ee");
   analyzereejerup.getJERAdjuster()->setSystematics("up");
@@ -855,7 +853,7 @@ void Analyzer(){
   eewithjerunc.getPlots()->addMCErrorStackVector("JER_down",*analyzereejerdown.getPlots());
   eewithjerunc.getPlots()->writeAllToTFile(outfile);
 
-
+  */
   // pu systematics
 
   MainAnalyzer analyzereepuup=analyzeree;
@@ -877,7 +875,7 @@ void Analyzer(){
   eewithPU.getPlots()->writeAllToTFile(outfile);
   
   // all systematics
-
+  /*
   MainAnalyzer eeWithAll=eewithlumi; //already includes lumi uncert
   eeWithAll.setName("allunc_ee","ee");
   eeWithAll.getPlots()->addMCErrorStackVector("PU_up",*analyzereepuup.getPlots());
@@ -887,7 +885,7 @@ void Analyzer(){
   eeWithAll.getPlots()->writeAllToTFile(outfile);
 
   // start the mumu analysis
-  
+  */
   analyzermumu.start();
 
   analyzermumu.getPlots()->writeAllToTFile(outfile); // after that just update file
@@ -897,7 +895,7 @@ void Analyzer(){
   mumuwithlumi.getPlots()->writeAllToTFile(outfile); 
 
   //make JER systematics
-  
+  /*
   MainAnalyzer analyzermumujerup=analyzermumu;
   analyzermumujerup.setName("jerup_mumu","mumu");
   analyzermumujerup.getJERAdjuster()->setSystematics("up");
@@ -917,7 +915,7 @@ void Analyzer(){
   mumuwithjerunc.getPlots()->writeAllToTFile(outfile);
 
   //make PU systematics
-  
+  */
   MainAnalyzer analyzermumupuup=analyzermumu;
   analyzermumupuup.getPUReweighter()->setDataTruePUInput(pufolder+"Data_PUDist_sysUp_72760_2012AB.root"); 
   analyzermumupuup.setName("puup_mumu", "mumu");
@@ -937,7 +935,7 @@ void Analyzer(){
   mumuwithPU.getPlots()->writeAllToTFile(outfile);
   
   // combine all syst
-
+  /*
   MainAnalyzer mumuWithAll=mumuwithlumi;
   mumuWithAll.setName("allunc_mumu","mumu");
   mumuWithAll.getPlots()->addMCErrorStackVector("PU_up",*analyzermumupuup.getPlots());
@@ -946,7 +944,7 @@ void Analyzer(){
   mumuWithAll.getPlots()->addMCErrorStackVector("JER_down",*analyzermumujerdown.getPlots());
   mumuWithAll.getPlots()->writeAllToTFile(outfile);
 
-
+  */
 
 
 }

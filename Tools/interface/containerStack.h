@@ -20,8 +20,9 @@ namespace top{
   class container1DStack{
     
   public:
-    container1DStack(){};
-    container1DStack(TString name) : name_(name), dataleg_("data") {}
+    container1DStack();
+    container1DStack(TString);
+    ~container1DStack();
 
     void push_back(top::container1D, TString, int, double);
     
@@ -67,6 +68,7 @@ namespace top{
     container1DStack operator * (float);
     container1DStack operator * (int);
     
+    static std::vector<top::container1DStack*> cs_list;
     
   private:
     TString name_;

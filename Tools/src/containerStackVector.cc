@@ -3,6 +3,27 @@
 namespace top{
 
 
+  std::vector<container1DStackVector*> container1DStackVector::csv_list;
+
+  container1DStackVector::container1DStackVector(){
+    csv_list.push_back(this);
+  }
+  container1DStackVector::container1DStackVector(TString Name){
+    name_=Name;
+    csv_list.push_back(this);
+  }
+  container1DStackVector::~container1DStackVector(){
+    for(unsigned int i=0;i<csv_list.size();i++){
+      if(csv_list[i] == this) csv_list.erase(csv_list.begin()+i);
+      break;
+    }
+  }
+  void container1DStackVector::listStacks(){
+    for(std::vector<top::container1DStack>::iterator stack=stacks_.begin();stack<stacks_.end();++stack){
+      std::cout << stack->getName() << std::endl;
+    }
+  }
+
   void container1DStackVector::add(top::container1D & container, TString leg , int color , double norm){
     bool found=false;
     for(std::vector<top::container1DStack>::iterator s=stacks_.begin();s<stacks_.end();++s){
@@ -19,9 +40,9 @@ namespace top{
     }
   }
 
-  void container1DStackVector::addList(top::List<top::container1D> * list, TString leg, int color, double norm){
-    for(unsigned int i=0;i<list->getList().size();i++){
-      add(*(list->getList()[i]),leg,color,norm);
+  void container1DStackVector::addList(TString leg, int color, double norm){
+    for(unsigned int i=0;i<container1D::c_list.size();i++){
+      add(*container1D::c_list[i],leg,color,norm);
     }
   }
 
@@ -111,7 +132,6 @@ namespace top{
       c2->Write();
       delete c2;
     }
-
 
 
     f->Close();

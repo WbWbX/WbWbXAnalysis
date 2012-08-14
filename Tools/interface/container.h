@@ -90,6 +90,8 @@ namespace top{
 
     void removeError(TString); //! removes a systematic uncertainty with name ..
 
+    static std::vector<container1D*> c_list;
+
   protected:
     bool showwarnings_;
     float binwidth_;
@@ -117,10 +119,7 @@ namespace top{
     double getDominantVariationDown(TString,int);
 
   };
-
-
-  List<container1D> * c_list=0;
-
+  
 } //namespace
 
 

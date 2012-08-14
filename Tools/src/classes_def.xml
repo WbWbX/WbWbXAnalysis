@@ -1,4 +1,8 @@
 <lcgdict>
+  <class name="std::vector<TString>"/>
+  <class name="std::pair<TString,std::vector<double> >"/>
+  <class name="std::vector<std::pair<TString,std::vector<double> > >"/>
+  <class name="std::vector<long int>"/>
   <class name="top::container1D"/>
   <class name="std::vector<top::container1D>"/>
   <class name="top::container1DStack"/>

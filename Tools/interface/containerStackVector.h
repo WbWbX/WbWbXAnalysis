@@ -16,12 +16,15 @@ namespace top{
   class container1DStackVector{
 
   public:
-    container1DStackVector(){}
-    container1DStackVector(TString Name){name_=Name;}
-    ~container1DStackVector(){}
+    container1DStackVector();
+    container1DStackVector(TString);
+    ~container1DStackVector();
     void setName(TString Name){name_=Name;}
+    TString getName(){return name_;}
+    void listStacks();
+
     void add(top::container1D &, TString, int, double);
-    void addList(top::List<top::container1D> * , TString, int, double);
+    void addList( TString, int, double);
     std::vector<top::container1DStack> getVector(){return stacks_;}
     top::container1DStack getStack(TString);
     top::container1DStack getStack(unsigned int n){return stacks_[n];}
@@ -36,6 +39,7 @@ namespace top{
     void writeAllToTFile(TString, bool recreate=false);
 
     void clear(){stacks_.clear();name_="";}
+    static std::vector<container1DStackVector*> csv_list;
 
   private:
     TString name_;

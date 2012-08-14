@@ -1,7 +1,6 @@
 #include "../interface/container.h"
 
 
-
   //some more operators
   top::container1D operator * (double multiplier, const top::container1D & cont){ //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
     top::container1D out=cont;
@@ -21,9 +20,10 @@
 namespace top{
 
   //////////if you like cut here ;) 
-
-
-
+  
+  //std::vector<top::container1D*> container1D::c_list = new ;
+  std::vector<container1D*> container1D::c_list;
+  
   ///////function definitions
   container1D::container1D(){
     canfilldyn_=false;
@@ -33,7 +33,7 @@ namespace top{
     mergeufof_=true;
     wasunderflow_=false;
     wasoverflow_=false;
-    if(c_list) c_list->push_back(this);
+    c_list.push_back(this);
   }
   container1D::container1D(float binwidth, TString name,TString xaxisname,TString yaxisname, bool mergeufof){ //currently not used
     binwidth_=binwidth;
@@ -44,7 +44,7 @@ namespace top{
     yname_=yaxisname;
     labelmultiplier_=1;
     showwarnings_=true;
-    if(c_list) c_list->push_back(this);
+    c_list.push_back(this);
     mergeufof_=mergeufof;
     wasunderflow_=false;
     wasoverflow_=false;
@@ -57,13 +57,16 @@ namespace top{
     yname_=yaxisname;
     labelmultiplier_=1;
     showwarnings_=true;
-    if(c_list) c_list->push_back(this);
+    c_list.push_back(this);
     mergeufof_=mergeufof;
     wasunderflow_=false;
     wasoverflow_=false;
   }
   container1D::~container1D(){
-
+    for(unsigned int i=0;i<c_list.size();i++){
+      if(c_list[i] == this) c_list.erase(c_list.begin()+i);
+      break;
+    }
   }
 
   void container1D::setBins(std::vector<float> bins){

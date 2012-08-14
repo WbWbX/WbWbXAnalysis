@@ -79,7 +79,7 @@ namespace top{
       ////////for other PU scenarios!!!
 
       std::cout << "setting MC pileup distribution to summer12_"+scenario << std::endl;
-      V.insert(V.begin(),1); //fill zero bin
+      //    V.insert(V.begin(),1); //fill zero bin
       mcpu_=V;
       mcint_=0;
       for(unsigned int i=1;i<mcpu_.size();i++) mcint_ += mcpu_[i];

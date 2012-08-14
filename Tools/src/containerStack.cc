@@ -2,7 +2,21 @@
 
 namespace top{
 
-void container1DStack::push_back(top::container1D cont, TString legend, int color, double norm){
+  std::vector<top::container1DStack*> container1DStack::cs_list;
+
+  container1DStack::container1DStack(){
+    cs_list.push_back(this);
+  }
+  container1DStack::container1DStack(TString name) : name_(name), dataleg_("data") {
+    cs_list.push_back(this);
+  }
+  container1DStack::~container1DStack(){ 
+    for(unsigned int i=0;i<cs_list.size();i++){
+      if(cs_list[i] == this) cs_list.erase(cs_list.begin()+i);
+      break;
+    }
+  }
+  void container1DStack::push_back(top::container1D cont, TString legend, int color, double norm){
    bool wasthere=false;
    for(unsigned int i=0;i<legends_.size();i++){
      if(legend == legends_[i]){
