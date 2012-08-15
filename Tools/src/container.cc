@@ -20,9 +20,8 @@
 namespace top{
 
   //////////if you like cut here ;) 
-  
-  //std::vector<top::container1D*> container1D::c_list = new ;
   std::vector<container1D*> container1D::c_list;
+  bool container1D::c_makelist=false;
   
   ///////function definitions
   container1D::container1D(){
@@ -33,7 +32,7 @@ namespace top{
     mergeufof_=true;
     wasunderflow_=false;
     wasoverflow_=false;
-    c_list.push_back(this);
+    if(c_makelist)c_list.push_back(this);
   }
   container1D::container1D(float binwidth, TString name,TString xaxisname,TString yaxisname, bool mergeufof){ //currently not used
     binwidth_=binwidth;
@@ -44,7 +43,7 @@ namespace top{
     yname_=yaxisname;
     labelmultiplier_=1;
     showwarnings_=true;
-    c_list.push_back(this);
+    if(c_makelist)c_list.push_back(this);
     mergeufof_=mergeufof;
     wasunderflow_=false;
     wasoverflow_=false;
@@ -57,7 +56,7 @@ namespace top{
     yname_=yaxisname;
     labelmultiplier_=1;
     showwarnings_=true;
-    c_list.push_back(this);
+    if(c_makelist)c_list.push_back(this);
     mergeufof_=mergeufof;
     wasunderflow_=false;
     wasoverflow_=false;
@@ -294,20 +293,23 @@ namespace top{
   }
 
   double container1D::integral(bool includeUFOF){
-    unsigned int minbin,maxbin;
-    if(includeUFOF){
-      minbin=0;
-      maxbin=content_.size();
+    if(bins_.size()>0){
+      unsigned int minbin,maxbin;
+      if(includeUFOF){
+	minbin=0;
+	maxbin=content_.size();
+      }
+      else{
+	minbin=1;
+	maxbin=content_.size() -1;
+      }
+      double integr=0;
+      for(unsigned int i=minbin;i<maxbin;i++){
+	integr+=content_[i];
+      }
+      return integr;
     }
-    else{
-      minbin=1;
-      maxbin=content_.size() -1;
-    }
-    double integr=0;
-    for(unsigned int i=minbin;i<maxbin;i++){
-      integr+=content_[i];
-    }
-    return integr;
+    else return 0;
   }
 
   void container1D::reset(){
@@ -528,7 +530,13 @@ namespace top{
 	  double content=content_[i] / denominator.content_[i];
 	  double errup, errdown;
 	  if(divideBinomial_){
-	    errup=sqrt(content*(1-content)/denominator.content_[i]);
+	    if(content <=1){
+	      errup=sqrt(content*(1-content)/denominator.content_[i]);
+	    }
+	    else{
+	      errup=0;
+	      std::cout << "container1D::operator /: binomial division switched on, but content >1!" <<std::endl;
+	    }
 	    errdown=errup;
 	  }
 	  else{ 

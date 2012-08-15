@@ -1,23 +1,22 @@
 tree_8TeV_ee_runA_prompt.root data 1 1
 tree_8TeV_ee_runB_prompt.root	data 1 1
 #
-#channel_specific_mc
+#mc
 #
 tree_8TeV_eettbar.root t#bar{t} 633 225.5
 tree_8TeV_eettbarviatau.root t#bar{t} 633 225.2
 tree_8TeV_eettbarbg.root t#bar{t}bg 634 225.2
-tree_8TeV_dyee1050.root DY#rightarrowee 858 860
-tree_8TeV_dyee50inf.root DY#rightarrowee 858 3532.8
-#
-#rest_mc
-#
-tree_8TeV_dybg1050.root DYbg 865 860
 tree_8TeV_tW.root singleTop 616 11.2
 tree_8TeV_tbarW.root singleTop 616 11.2
 tree_8TeV_wwp.root VV 390 5.8
 tree_8TeV_zz.root VV 390 9
 tree_8Tev_wz.root VV 390 22.4
+tree_8TeV_wjets.root Wjets 413 37509
 tree_8TeV_dytautau1050.root DY#rightarrow#tau#tau 868 860
 tree_8TeV_dytautau50inf.root DY#rightarrow#tau#tau 868 3532.8
+tree_8TeV_dyee1050.root DY#rightarrowee 858 860
+tree_8TeV_dyee50inf.root DY#rightarrowee 858 3532.8
+#
+#rest_mc
+#
 tree_8TeV_qcdmu15.root QCD 400 0
-tree_8TeV_wjets.root Wjets 413 37509

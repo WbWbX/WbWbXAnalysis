@@ -69,7 +69,9 @@ namespace top{
     container1DStack operator * (int);
     
     static std::vector<top::container1DStack*> cs_list;
-    
+    static bool cs_makelist;
+    static void cs_clearlist(){cs_list.clear();}
+
   private:
     TString name_;
     std::vector<top::container1D> containers_;

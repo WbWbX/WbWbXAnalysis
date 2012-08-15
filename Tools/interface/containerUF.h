@@ -12,19 +12,19 @@ namespace top{
 
   public:
 
-    container1DUF();
-    container1DUF(const top::container1DStack &, const top::container1DStack &, TString signalname, TString dataname="data");
+    container1DUF(){};
+    container1DUF(const top::container1DStack &, const top::container1DStack &, TString , double , TString dataname="data");
     container1DUF(const top::container1D &);
-    ~container1D(){};
+    ~container1DUF(){};
 
     void setGenStack(const top::container1DStack &gen){gen_=gen;}
     void setSelectedStack(const top::container1DStack &sel){sel_=sel;}
-    void setSignal(TString signalname){signalname_=signalname}
+    void setSignal(TString signalname){signalname_=signalname;}
     void setDataName(TString name){dataname_=name;}
 
     void simpleUnfold();
 
-    top::container1D breakDownSystematicsInBin(int);
+    top::container1DUF breakDownSystematicsInBin(int);
 
 
     //some plotting stuff - still missing
@@ -34,19 +34,22 @@ namespace top{
   private:
     top::container1DStack gen_;
     top::container1DStack sel_;
+    double lumi_;
     TString dataname_;
     TString signalname_;
+    std::vector<TString> binnames_;
 
   };
 
 
   //functions split here if you like
 
-  container1DUF::container1DUF(const top::container1DStack &gen, const top::container1DStack &sel, TString signalname, TString dataname){
+  container1DUF::container1DUF(const top::container1DStack &gen, const top::container1DStack &sel, TString signalname, double lumi, TString dataname){
     gen_=gen;
     sel_=sel;
     dataname_=dataname;
     signalname_=signalname;
+    lumi_=lumi;
     simpleUnfold();
   }
 
@@ -80,25 +83,39 @@ namespace top{
     std::vector<TString> excludefrombackground;
     excludefrombackground << signalname_ << dataname_;
 
-    gencont.setDivideBinomial(false);
-    selcont.setDivideBinomial(false);
+    //   gencont.setDivideBinomial(false);
+    // selcont.setDivideBinomial(false);
+    gencont.getTH1D()->Draw();
 
-    top::container1D efficiencyinv = gencont / selcont;
+
+    top::container1D efficiency = selcont / gencont;
     top::container1D background = sel_.getContributionsBut(excludefrombackground);
+    
+    // efficiency.getTH1D()->Draw();
 
     //get data
     top::container1D data=sel_.getContribution(dataname_);
 
+    top::container1D select = (data - background);
+    // select.getTH1D()->Draw();
+
     // and do the "unfolding"
-    top::container1D output = (data - background) * efficiencyinv;
+    data.setDivideBinomial(false);
+    background.setDivideBinomial(false);
+    efficiency.setDivideBinomial(false);
+
+    top::container1D output = (data - background) / efficiency;
+      output=output * (1/lumi_);
+
+      //  output.getTH1D()->Draw();
 
     *this = container1DUF(output);
 
   }
-  top::container1D container1DUF::breakDownSystematicsInBin(int bin){
-    top::container1D out;
+  top::container1DUF container1DUF::breakDownSystematicsInBin(int bin){
+    top::container1DUF out;
 
-
+    bin++;
     return out;
   }
 

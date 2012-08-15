@@ -32,6 +32,7 @@ namespace top{
     void setFile(const char * );
     
     void applyJECUncertainties(std::vector<top::NTJet>::iterator );
+    void applyJECUncertainties(top::NTJet &jet);
 
     JECUncertainties & operator = (const JECUncertainties &);
 
@@ -58,7 +59,7 @@ namespace top{
 
   JECUncertainties::JECUncertainties(const JECUncertainties& junc){
     filename_=junc.filename_;
-    if(filename_ && *filename_ != '\0') setFile(junc.filename_);
+    setFile(junc.filename_);
     nomupdown_=junc.nomupdown_;
     source_=junc.source_;
     ninit_=junc.ninit_;
@@ -108,19 +109,31 @@ namespace top{
       totalunc_ = new JetCorrectionUncertainty(*(new JetCorrectorParameters(filename, "Total")));
       ninit_=false;
     }
+    filename_=filename;
   }
   
   void JECUncertainties::applyJECUncertainties(std::vector<top::NTJet>::iterator jet){
-      if(nomupdown_ < 0){
-	jet->setP4( jet->p4() * (1 + getUncertainty(source_,jet->eta(), jet->pt(), false)) );
+    if(nomupdown_ < 0){ //down
+	jet->setP4( jet->p4() * (1 - getUncertainty(source_,jet->eta(), jet->pt(), false)) );
       }
-      else if(nomupdown_ > 0){
+    else if(nomupdown_ > 0){ //up
 	jet->setP4( jet->p4() * (1 + getUncertainty(source_,jet->eta(), jet->pt(), true)) );
       }
       else{
       }
     }
 
+  void JECUncertainties::applyJECUncertainties(top::NTJet &jet){
+    if(nomupdown_ < 0){ //down
+      jet.setP4( jet.p4() * (1 - getUncertainty(source_,jet.eta(), jet.pt(), false)) );
+      }
+    else if(nomupdown_ > 0){ //up
+      jet.setP4( jet.p4() * (1 + getUncertainty(source_,jet.eta(), jet.pt(), true)) );
+    }
+    else{
+    }
+  }
+  
   double JECUncertainties::getUncertainty(unsigned int src, double eta, double pt, bool up){
     double dunc=0;
     if(!ninit_){

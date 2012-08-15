@@ -7,11 +7,11 @@ namespace
 {
   struct dictionary {
 
+    std::vector<double> klklkl;
+    std::vector<TString> kkj;
     std::pair<TString,std::vector<double> > jj;
     std::vector<std::pair<TString,std::vector<double> > > j;
     std::vector<long int> kl;
-
-    std::vector<TString> kkj;
 
     top::container1D a;
     std::vector<top::container1D> b;

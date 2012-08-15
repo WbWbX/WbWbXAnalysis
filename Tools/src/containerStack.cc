@@ -3,12 +3,13 @@
 namespace top{
 
   std::vector<top::container1DStack*> container1DStack::cs_list;
+  bool container1DStack::cs_makelist=false;
 
   container1DStack::container1DStack(){
-    cs_list.push_back(this);
+    if(cs_makelist)cs_list.push_back(this);
   }
   container1DStack::container1DStack(TString name) : name_(name), dataleg_("data") {
-    cs_list.push_back(this);
+    if(cs_makelist) cs_list.push_back(this);
   }
   container1DStack::~container1DStack(){ 
     for(unsigned int i=0;i<cs_list.size();i++){
@@ -21,12 +22,14 @@ namespace top{
    for(unsigned int i=0;i<legends_.size();i++){
      if(legend == legends_[i]){
        containers_[i] = containers_[i] * norms_[i] + cont * norm;
+       containers_[i].setName("c_" +legend);
        norms_[i]=1;
        wasthere=true;
        break;
      }
    }
    if(!wasthere){
+     cont.setName("c_" +legend);
      containers_.push_back(cont);
      legends_.push_back(legend);
      colors_.push_back(color);
@@ -44,14 +47,18 @@ namespace top{
      out=containers_[0];
      out.clear();
      int i=0;
+     bool notfound=true;
      for(std::vector<TString>::iterator name=legends_.begin();name<legends_.end();++name){
        if(contr == *name){
 	 out=out + containers_[i] * norms_[i] ;
+	 notfound=false;
 	 break;
        }
        i++;
      }
+     if(notfound) std::cout << "container1DStack::getContribution: " << contr << " not found!" <<std::endl;
    }
+   
    return out;
  }
   top::container1D container1DStack::getContributionsBut(TString contr){
@@ -144,7 +151,7 @@ namespace top{
 	return containers_[i];
       }
     }
-    if(!found) std::cout << "container1DStack::getContainer: container with name " << name << " not found, returning first container!" << std::endl;
+    if(!found) std::cout << "container1DStack::getContainer: container with name " << name << " not found, returning first container! all names are formatted: c_legendentry" << std::endl;
     return containers_[0];;
   }
   top::container1D container1DStack::getFullMCContainer(){

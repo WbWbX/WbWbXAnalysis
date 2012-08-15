@@ -4,13 +4,14 @@ namespace top{
 
 
   std::vector<container1DStackVector*> container1DStackVector::csv_list;
+  bool container1DStackVector::csv_makelist=false;
 
   container1DStackVector::container1DStackVector(){
-    csv_list.push_back(this);
+    if(csv_makelist)csv_list.push_back(this);
   }
   container1DStackVector::container1DStackVector(TString Name){
     name_=Name;
-    csv_list.push_back(this);
+    if(csv_makelist)csv_list.push_back(this);
   }
   container1DStackVector::~container1DStackVector(){
     for(unsigned int i=0;i<csv_list.size();i++){
@@ -86,7 +87,7 @@ namespace top{
       stack->removeError(name);
     }
   }
-  void container1DStackVector::multiplyNorms(TString legendname, std::vector<double> scalefactors, std::vector<TString> identifier){
+  void container1DStackVector::multiplyNorms(TString legendname, std::vector<double> scalefactors, std::vector<TString> identifier,bool showmessages){
     if(! (identifier.size() == scalefactors.size())){
       std::cout << "container1DStackVector::multiplyNorms: identifiers and scalefactors must be same size!" << std::endl;
     }
@@ -96,12 +97,13 @@ namespace top{
 	for(unsigned int i=0;i<scalefactors.size();i++){
 	  if(stack->getName().Contains(identifier[i])){
 	    stack->multiplyNorm(legendname, scalefactors[i]);
+	    if(showmessages) std::cout << "rescaling " << stack->getName() << "  " <<legendname << " by " << scalefactors[i] << " for " << std::endl;
 	    count++;
 	  }
 	}
       }
       if(count < identifier.size()) std::cout << "container1DStackVector::multiplyNorms: warning: not all identifiers found!" << std::endl;
-      else if(count > identifier.size()) std::cout << "container1DStackVector::multiplyNorms: warning: identifiers ambiguous!" << std::endl;
+      else if(count > identifier.size() && showmessages) std::cout << "container1DStackVector::multiplyNorms: warning: identifiers where ambiguous! Scaled more than one stack per identifier (intended?)" << std::endl;
     }
   }
 
@@ -116,6 +118,28 @@ namespace top{
 
     TFile *f = new TFile(filename,upre);
     f->cd();
+    TTree * t=0;
+    if(f->Get("stored_objects")){
+      t = (TTree*) f->Get("stored_objects");
+    }
+    else{
+      t = new TTree("stored_objects","stored_objects");
+    }
+    if(t->GetBranch("allContainerStackVectors")){ //branch does not exist yet
+      bool temp=csv_makelist;
+      csv_makelist=false;
+      container1DStackVector * csv = this;
+      t->SetBranchAddress("allContainerStackVectors",&csv);
+      csv_makelist=temp;
+    }
+    else{
+      t->Branch("allContainerStackVectors",this);
+      std::cout << "container1DStackVector::writeAllToTFile: added branch" << std::endl;
+    }
+    t->Fill();
+    t->Write("",TObject::kOverwrite);
+    delete t;
+
     TDirectory * d = f->mkdir(name + "_ratio",name + "_ratio");
     d->cd();
     for(std::vector<container1DStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){

@@ -6,7 +6,6 @@
 #include "TGraphAsymmErrors.h"
 #include <iostream>
 #include <math.h>
-#include "List.h"
 #include <utility>
 #include "TPad.h"
 #include "miscUtils.h"
@@ -21,6 +20,7 @@ namespace top{
     ~container1D();
 
     TString getName(){return name_;}
+    void setName(TString Name){name_=Name;}
     void setNames(TString name, TString xaxis, TString yaxis){name_=name;xname_=xaxis;yname_=yaxis;}
     void setShowWarnings(bool show){showwarnings_=show;}
  
@@ -90,7 +90,9 @@ namespace top{
 
     void removeError(TString); //! removes a systematic uncertainty with name ..
 
+    static bool c_makelist;
     static std::vector<container1D*> c_list;
+    static void c_clearlist(){c_list.clear();}
 
   protected:
     bool showwarnings_;
