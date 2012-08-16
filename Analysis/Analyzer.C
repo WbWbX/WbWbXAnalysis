@@ -34,6 +34,7 @@ public:
 
   void setFileList(const char* filelist){filelist_=filelist;}
   void setDataSetDirectory(TString dir){datasetdirectory_=dir;}
+  void setShowStatusBar(bool show){showstatusbar_=show;}
 
   top::container1DStackVector * getPlots(){return analysisplots_;}
 
@@ -54,6 +55,8 @@ private:
 
   bool isInInfo(TString s){return additionalinfo_.Contains(s);}
   bool triggersContain(TString , top::NTEvent *);
+
+  bool showstatusbar_;
 
   TString name_,dataname_;
   TString datasetdirectory_;
@@ -124,6 +127,7 @@ MainAnalyzer::MainAnalyzer(const MainAnalyzer & analyzer){
   jeradjuster_= new top::JERAdjuster(*analyzer.jeradjuster_);
   jecuncertainties_= new top::JECUncertainties(*analyzer.jecuncertainties_);
   analysisplots_ = new top::container1DStackVector(*analyzer.analysisplots_);
+  showstatusbar_=analyzer.showstatusbar_;
 }
 
 MainAnalyzer & MainAnalyzer::operator = (const MainAnalyzer & analyzer){
@@ -372,7 +376,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   Long64_t nEntries=t->GetEntries();
   if(norm==0) nEntries=0; //skip for norm0
   for(Long64_t entry=0;entry<nEntries;entry++){
-    displayStatusBar(entry,nEntries);
+    if(showstatusbar_) displayStatusBar(entry,nEntries);
     t->GetEntry(entry);
 
     
@@ -522,24 +526,29 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     ///////// 20 GeV cut /// STEP 3 ///////////////////
 
     if(invLepMass < 20) continue;
+    
+
+    // create jec jets for met and ID jets
+
 
     // create ID Jets and correct JER
 
     vector<NTJet> nolidjets;
+    LorentzVector metDeltaP4;
 
     for(NTJetIt jet=pJets->begin();jet<pJets->end();++jet){
+      LorentzVector oldp4=jet->p4();
+      if(isMC){
+	getJECUncertainties()->applyJECUncertainties(jet);
+	getJERAdjuster()->correctJet(jet);
+      } //corrected
+      if(jet->emEnergyFraction() < 10) continue; //pt thresh for met
+
+      
       if(!(jet->id())) continue;
       if(!noOverlap(jet, isomuons, 0.3)) continue;
       if(!noOverlap(jet, isoelectrons, 0.3)) continue;
 
-      if(isMC){ 
-	jecuncertainties_->applyJECUncertainties(jet);
-	NTJet jerjet=getJERAdjuster()->getCorrectedJet(*jet);
-	nolidjets.push_back(jerjet);
-      }
-      else{
-      nolidjets.push_back(*jet);
-      }
     }
 
     //fill container
@@ -823,19 +832,22 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 void Analyzer(){
   using namespace std;
 
+
+
   cout << "\n\n\n" <<endl; //looks better ;)
 
-  TString outfile = "0815_out.root";
+  TString outfile = "0816_out.root";
   TString pufolder="/afs/naf.desy.de/user/k/kieseler/scratch/2012/TestArea2/CMSSW_5_2_5/src/TtZAnalysis/Data/PUDistr/";
 
   //initialize mumu
 
 
   MainAnalyzer analyzermumu("default_mumu","mumu");
+  analyzermumu.setShowStatusBar(false);  //for running with text output mode
   analyzermumu.setLumi(5097);
   analyzermumu.setFileList("mumu_8TeV_inputfiles.txt");
   analyzermumu.setDataSetDirectory("/scratch/hh/dust/naf/cms/user/kieseler/trees0724/");
-  analyzermumu.getPUReweighter()->setDataTruePUInput(pufolder+"Data_PUDist_sysNo_69300_2012AB.root");
+  analyzermumu.getPUReweighter()->setDataTruePUInput(pufolder+"data_pu_190456-196531_def.root");
   analyzermumu.getJECUncertainties()->setFile("/afs/naf.desy.de/user/k/kieseler/scratch/2012/TestArea2/CMSSW_5_2_5/src/TtZAnalysis/Data/JECUnc/Summer12_V2_DATA_AK5PF_UncertaintySources.txt");
   analyzermumu.getPUReweighter()->setMCDistrSum12();
 
@@ -844,13 +856,13 @@ void Analyzer(){
   MainAnalyzer analyzeree=analyzermumu;
   analyzeree.setFileList("ee_8TeV_inputfiles.txt");
   analyzeree.setName("default_ee","ee");
-  // analyzeree.
   analyzeree.start();
   analyzeree.getPlots()->writeAllToTFile(outfile,true);
 
   
   MainAnalyzer eewithlumi=analyzeree;
   eewithlumi.setName("ee_lumi","ee");
+
   eewithlumi.getPlots()->addGlobalRelMCError("Lumi", 0.045);
   eewithlumi.getPlots()->writeAllToTFile(outfile);
   
@@ -901,13 +913,13 @@ void Analyzer(){
   // pu systematics
 
   MainAnalyzer analyzereepuup=analyzeree;
-  analyzereepuup.getPUReweighter()->setDataTruePUInput(pufolder+"Data_PUDist_sysUp_72760_2012AB.root"); 
+  analyzereepuup.getPUReweighter()->setDataTruePUInput(pufolder+"data_pu_190456-196531_up.root"); 
   analyzereepuup.setName("puup_ee", "ee");
   analyzereepuup.start();
   analyzereepuup.getPlots()->writeAllToTFile(outfile);
 
   MainAnalyzer analyzereepudown=analyzeree;
-  analyzereepudown.getPUReweighter()->setDataTruePUInput(pufolder+"Data_PUDist_sysDown_65835_2012AB.root");
+  analyzereepudown.getPUReweighter()->setDataTruePUInput(pufolder+"data_pu_190456-196531_down.root");
   analyzereepudown.setName("pudown_ee","ee");
   analyzereepudown.start();
   analyzereepudown.getPlots()->writeAllToTFile(outfile);
@@ -1005,13 +1017,13 @@ void Analyzer(){
   //make PU systematics
   
   MainAnalyzer analyzermumupuup=analyzermumu;
-  analyzermumupuup.getPUReweighter()->setDataTruePUInput(pufolder+"Data_PUDist_sysUp_72760_2012AB.root"); 
+  analyzermumupuup.getPUReweighter()->setDataTruePUInput(pufolder+"data_pu_190456-196531_up.root"); 
   analyzermumupuup.setName("puup_mumu", "mumu");
   analyzermumupuup.start();
   analyzermumupuup.getPlots()->writeAllToTFile(outfile);
 
   MainAnalyzer analyzermumupudown=analyzermumu;
-  analyzermumupudown.getPUReweighter()->setDataTruePUInput(pufolder+"Data_PUDist_sysDown_65835_2012AB.root");
+  analyzermumupudown.getPUReweighter()->setDataTruePUInput(pufolder+"data_pu_190456-196531_down.root");
   analyzermumupudown.setName("pudown_mumu","mumu");
   analyzermumupudown.start();
   analyzermumupudown.getPlots()->writeAllToTFile(outfile);
