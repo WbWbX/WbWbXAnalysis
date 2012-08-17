@@ -241,7 +241,7 @@ namespace top{
   double container1D::getBinErrorDown(int bin,TString limittosys){
     double fullerr2=0;
     if((unsigned int)bin<bins_.size()){
-      fullerr2=pow(staterrup_[bin],2); //stat
+      fullerr2=pow(staterrdown_[bin],2); //stat
       if(limittosys=""){
 	// make vector of all sys stripped
 	std::vector<TString> sources;
