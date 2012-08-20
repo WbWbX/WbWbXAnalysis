@@ -15,7 +15,7 @@
 #include "TCanvas.h"
 #include "TROOT.h"
 #include "makeplotsnice.h"
-#include "TtZAnalysis/plugins/container.h"
+#include "TtZAnalysis/Tools/interface/container.h"
 
 using namespace std;
 
@@ -38,10 +38,10 @@ public:
   void setBinsEta(std::vector<float> binseta){binseta_.clear();binseta_=binseta;};
   void setBinsPt(std::vector<float> binspt){binspt_.clear();binspt_=binspt;}
 
-  top::container1D getEtaPlot(){return etaeff_;}
-  top::container1D getPtPlot(){return pteff_;}
-  top::container1D getCorrelationPt(){return corrpt_;}
-  top::container1D getCorrelationEta(){return correta_;}
+  top::container1D  getEtaPlot(){return etaeff_;}
+  top::container1D  getPtPlot(){return pteff_;}
+  top::container1D  getCorrelationPt(){return corrpt_;}
+  top::container1D  getCorrelationEta(){return correta_;}
   top::container1D getDPhiPlot(){return dphieff_;}
   top::container1D getCorrelationDPhi(){return corrdphi_;}
 
@@ -177,7 +177,7 @@ notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v")
 
   //mode="ee";
   //isMC=true;
-  bool is52v9=false;
+    bool is52v9=false; //dont change!!!! concerns triggers
   bool CiCId=false;
   float maxEntries=0;
   bool doPUweight=true;
@@ -366,12 +366,7 @@ notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v")
   for(float i=0;i<n;i++){  //main loop
 
     t1->GetEntry(i);
-    int entr=i;
-    int nentr=n;
-    if((100* entr % nentr)){
-      cout << "\rprocessing: " << (int) 100*i/n << "%";
-      fflush(stdin);
-    }
+    displayStatusBar(i,n);
     
    //  if(!isMC){
 
@@ -472,18 +467,7 @@ notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v")
       if(elec->rhoIso03()>0.15 ) continue;
       if(CiCId && (0x00 == (0x01 & (int) elec->id("cicTightMC"))) ) continue; //for CiC bit test
       if(!CiCId && (elec->mvaId() < -0.1)) continue;
-      bool isCleaned=true;
-      //DeltaR cleaning against muons:
-      for(vector<top::NTMuon>::iterator muon=pMuons->begin();muon<pMuons->end();muon++){
-	if(!(muon->isGlobal())) continue;
-	double dR=0.1;
-	double Rsq=(muon->eta() - elec->eta())*(muon->eta() - elec->eta()) + (muon->phi()-elec->phi())*(muon->phi()-elec->phi());
-	if(Rsq < dR*dR){
-	  isCleaned=false;
-	  break;
-	}
-      }
-      if(!isCleaned) continue;
+      if(!noOverlap(elec,*pMuons,0.1)) continue;
 
       selectedElecs.push_back(*elec);
     }
@@ -522,26 +506,9 @@ notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v")
     for(vector<NTJet>::iterator jet=pJets->begin();jet<pJets->end();jet++){
       if(jet->pt() < 30) continue;
       if(fabs(jet->eta()) >2.5) continue;
-      double dR=0.3;
-      //do cleaning
-      bool cleanjet=true;
-      for(vector<NTMuon>::iterator muon=selectedMuons.begin(); muon<selectedMuons.end(); muon++){
-	double sqR=(muon->phi()-jet->phi())*(muon->phi()-jet->phi()) + (muon->eta()-jet->eta())*(muon->eta()-jet->eta());
-	if(dR*dR > sqR){
-	  cleanjet=false;
-	  break;
-	}
-      }
-      for(vector<NTElectron>::iterator electron=selectedElecs.begin(); electron<selectedElecs.end(); electron++){
-	double sqR=(electron->phi()-jet->phi())*(electron->phi()-jet->phi()) + (electron->eta()-jet->eta())*(electron->eta()-jet->eta());
-	if(dR*dR > sqR){
-	  cleanjet=false;
-	  break;
-	}
-      }
-      if(!cleanjet) continue;
+      if(!noOverlap(jet,selectedMuons,0.3)) continue; //cleaning
+      if(!noOverlap(jet,selectedElecs,0.3)) continue;
       if((!jet->id())) continue;
-      //if(jet->btag() >-999) cout << jet->btag() << endl;
 
       selected_jets.push_back(*jet);
     }
@@ -765,14 +732,19 @@ notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v")
   }
   if(isMC) cout <<trigin << "  fraction of incorp MC triggers wrt datamettriggers: " << trigin/(double)mettriggers.size() << endl;
 
+  
 
   c_pteff = c_trigpt / c_selpt;
   c_etaeff = c_trigeta / c_seleta;
   c_dphieff = c_trigdphi / c_seldphi;
-
-  c_corrpt = (c_pteff * (c_selmettrigpt/c_selpt))/(c_selbothtrigpt/c_selpt);
+  // container1D c_tempmeteff=c_selmettrigpt/c_selpt;
+  //  c_tempmeteff.setDivideBinomial(false);
+  std::cout << "making correlation plots, ignore warnings!" <<std::endl;
+   c_corrpt = (c_pteff * (c_selmettrigpt/c_selpt))/(c_selbothtrigpt/c_selpt);
   c_correta = (c_etaeff * (c_selmettrigeta/c_seleta))/(c_selbothtrigeta/c_seleta);
   c_corrdphi = (c_dphieff * (c_selmettrigdphi/c_seldphi))/(c_selbothtrigdphi/c_seldphi);
+
+  std::cout << "stop ignoring warning ;)" << std::endl;
 
   etaeff_=c_etaeff;
   pteff_=c_pteff;
@@ -795,20 +767,20 @@ notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v")
 
     TString add="";
     if(isMC) add="MC";
-    etaeff_.writeTGraph("eta eff"+add);
-    etaeff_.writeTH1D("axis eta");
+    etaeff_.writeTGraph("eta eff"+add,false);
+    etaeff_.writeTH1D("axis eta",false);
 
-    pteff_.writeTGraph("pt eff"+add);
-    pteff_.writeTH1D("axis pt");
+    pteff_.writeTGraph("pt eff"+add,false);
+    pteff_.writeTH1D("axis pt",false);
 
-    dphieff_.writeTGraph("dphi eff"+add);
-    dphieff_.writeTH1D("axis dphi");
+    dphieff_.writeTGraph("dphi eff"+add,false);
+    dphieff_.writeTH1D("axis dphi",false);
 
-    correta_.writeTGraph("correta"+add);
+    correta_.writeTGraph("correta"+add,false);
 
-    correta_.writeTGraph("corrpt"+add);
+    correta_.writeTGraph("corrpt"+add,false);
 
-    corrdphi_.writeTGraph("corrdphi"+add);
+    corrdphi_.writeTGraph("corrdphi"+add,false);
 
   }
 
@@ -843,9 +815,9 @@ void analyze(){
   triggerAnalyzer ta_eeMC, ta_mumuMC, ta_emuMC;
   ta_mumuMC.setBinsEta(binsmumueta);
 
-  const char * datafile = "/scratch/hh/current/cms/user/kieseler/2012/trees0704/metData_23_06.root";
+  const char * datafile = "/scratch/hh/dust/naf/cms/user/kieseler/trees0724/tree_8TeV_met_runAB_prompt.root";
 
-  const char * pileuproot = "/afs/naf.desy.de/user/k/kieseler/public/dataPileUp_23_06.root";
+  const char * pileuproot = "/afs/naf.desy.de/user/k/kieseler/scratch/2012/TestArea2/CMSSW_5_2_5/src/TtZAnalysis/Data/PUDistr/data_pu_190456-196531_def.root";
 
 
   vector<double> eed=ta_eed.Eff("ee",    datafile,pileuproot, false,getTeX);
@@ -855,10 +827,9 @@ void analyze(){
   
   
   
-  vector<double> eeMC=ta_eeMC.Eff("ee",    "/scratch/hh/current/cms/user/kieseler/2012/trees0704/tree_eettbar.root.root",pileuproot,true,getTeX);
-  
-  vector<double> mumuMC=ta_mumuMC.Eff("mumu",  "/scratch/hh/current/cms/user/kieseler/2012/trees0704/tree_mumuttbar.root.root",pileuproot,true,getTeX);
-  vector<double> emuMC=ta_emuMC.Eff("emu",   "/scratch/hh/current/cms/user/kieseler/2012/trees0704/tree_emuttbar.root.root",pileuproot,true,getTeX);
+  vector<double> eeMC=ta_eeMC.Eff("ee",    "/scratch/hh/dust/naf/cms/user/kieseler/trees0724/tree_8TeV_eettbar.root",pileuproot,true,getTeX);
+  vector<double> mumuMC=ta_mumuMC.Eff("mumu",  "/scratch/hh/dust/naf/cms/user/kieseler/trees0724/tree_8TeV_mumuttbar.root",pileuproot,true,getTeX);
+  vector<double> emuMC=ta_emuMC.Eff("emu",   "/scratch/hh/dust/naf/cms/user/kieseler/trees0724/tree_8TeV_emuttbar.root",pileuproot,true,getTeX);
 
 
   cout.precision(3);
@@ -919,94 +890,112 @@ cout << "$e\\mu$ & " << emud[0] <<" $\\pm$ " << emud[1] << " (stat.) & "
   container1D MC;
 
 
-  TFile* f5 = new TFile("test_triggerplots/triggerSummaryEE.root","RECREATE");
+  TFile* f5 = new TFile("temp_triggerplots/triggerSummaryEE.root","RECREATE");
 
   ta_eed.writeAll();
   ta_eeMC.writeAll();
   data=ta_eed.getEtaPlot();
   MC=ta_eeMC.getEtaPlot();
+  data.setDivideBinomial(false);
+  MC.setDivideBinomial(false);
   scalefactor=data/MC;
-  scalefactor.addGlobalRelError(0.01);
+  scalefactor.addGlobalRelError("rel_sys",0.01);
   scalefactor.writeTGraph("scalefactor eta");
-  scalefactor.addErrorContainer(scalefactor*ta_eeMC.getCorrelationEta(),ratiomultiplier);
+  scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_eeMC.getCorrelationEta(),ratiomultiplier);
   scalefactor.writeTGraph("scalefactor eta incl corrErr");
 
   data=ta_eed.getPtPlot();
   MC=ta_eeMC.getPtPlot();
+  data.setDivideBinomial(false);
+  MC.setDivideBinomial(false);
   scalefactor=data/MC;
-  scalefactor.addGlobalRelError(0.01);
-  scalefactor.writeTGraph("scalefactor pt");
-  scalefactor.addErrorContainer(scalefactor*ta_eeMC.getCorrelationPt(),ratiomultiplier);
-  scalefactor.writeTGraph("scalefactor pt incl corrErr");
+  scalefactor.addGlobalRelError("rel_sys",0.01);
+  scalefactor.writeTGraph("scalefactor pt",false);
+  scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_eeMC.getCorrelationPt(),ratiomultiplier);
+  scalefactor.writeTGraph("scalefactor pt incl corrErr",false);
 
   data=ta_eed.getDPhiPlot();
   MC=ta_eeMC.getDPhiPlot();
+  data.setDivideBinomial(false);
+  MC.setDivideBinomial(false);
   scalefactor=data/MC;
-  scalefactor.addGlobalRelError(0.01);
-  scalefactor.writeTGraph("scalefactor dphi");
-  scalefactor.addErrorContainer(scalefactor*ta_eeMC.getCorrelationDPhi(),ratiomultiplier);
-  scalefactor.writeTGraph("scalefactor dphi incl corrErr");
+  scalefactor.addGlobalRelError("rel_sys",0.01);
+  scalefactor.writeTGraph("scalefactor dphi",false);
+  scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_eeMC.getCorrelationDPhi(),ratiomultiplier);
+  scalefactor.writeTGraph("scalefactor dphi incl corrErr",false);
 
   f5->Close();
 
   
-  TFile* f6 = new TFile("test_triggerplots/triggerSummaryMUMU.root","RECREATE");ta_mumud.writeAll();
+  TFile* f6 = new TFile("temp_triggerplots/triggerSummaryMUMU.root","RECREATE");ta_mumud.writeAll();
 
   ta_mumud.writeAll();
   ta_mumuMC.writeAll();
   data=ta_mumud.getEtaPlot();
   MC=ta_mumuMC.getEtaPlot();
+  data.setDivideBinomial(false);
+  MC.setDivideBinomial(false);
   scalefactor=data/MC;
-  scalefactor.addGlobalRelError(0.01);
-  scalefactor.writeTGraph("scalefactor eta");
-  scalefactor.addErrorContainer(scalefactor*ta_mumuMC.getCorrelationEta(),ratiomultiplier);
-  scalefactor.writeTGraph("scalefactor eta incl corrErr");
+  scalefactor.addGlobalRelError("rel_sys",0.01);
+  scalefactor.writeTGraph("scalefactor eta",false);
+  scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_mumuMC.getCorrelationEta(),ratiomultiplier);
+  scalefactor.writeTGraph("scalefactor eta incl corrErr",false);
 
   data=ta_mumud.getPtPlot();
   MC=ta_mumuMC.getPtPlot();
+  data.setDivideBinomial(false);
+  MC.setDivideBinomial(false);
   scalefactor=data/MC;
-  scalefactor.addGlobalRelError(0.01);
+  scalefactor.addGlobalRelError("rel_sys",0.01);
   scalefactor.writeTGraph("scalefactor pt");
-  scalefactor.addErrorContainer(scalefactor*ta_mumuMC.getCorrelationPt(),ratiomultiplier);
+  scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_mumuMC.getCorrelationPt(),ratiomultiplier);
   scalefactor.writeTGraph("scalefactor pt incl corrErr");
 
   data=ta_mumud.getDPhiPlot();
   MC=ta_mumuMC.getDPhiPlot();
+  data.setDivideBinomial(false);
+  MC.setDivideBinomial(false);
   scalefactor=data/MC;
-  scalefactor.addGlobalRelError(0.01);
-  scalefactor.writeTGraph("scalefactor dphi");
-  scalefactor.addErrorContainer(scalefactor*ta_mumuMC.getCorrelationDPhi(),ratiomultiplier);
-  scalefactor.writeTGraph("scalefactor dphi incl corrErr");
+  scalefactor.addGlobalRelError("rel_sys",0.01);
+  scalefactor.writeTGraph("scalefactor dphi",false);
+  scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_mumuMC.getCorrelationDPhi(),ratiomultiplier);
+  scalefactor.writeTGraph("scalefactor dphi incl corrErr",false);
 
   f6->Close();
 
-  TFile* f7 = new TFile("test_triggerplots/triggerSummaryEMU.root","RECREATE");
+  TFile* f7 = new TFile("temp_triggerplots/triggerSummaryEMU.root","RECREATE");
 
   ta_emud.writeAll();
   ta_emuMC.writeAll();
   data=ta_emud.getEtaPlot();
   MC=ta_emuMC.getEtaPlot();
+  data.setDivideBinomial(false);
+  MC.setDivideBinomial(false);
   scalefactor=data/MC;
-  scalefactor.addGlobalRelError(0.01);
-  scalefactor.writeTGraph("scalefactor eta");
-  scalefactor.addErrorContainer(scalefactor*ta_emuMC.getCorrelationEta(),ratiomultiplier);
-  scalefactor.writeTGraph("scalefactor eta incl corrErr");
+  scalefactor.addGlobalRelError("rel_sys",0.01);
+  scalefactor.writeTGraph("scalefactor eta",false);
+  scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_emuMC.getCorrelationEta(),ratiomultiplier);
+  scalefactor.writeTGraph("scalefactor eta incl corrErr",false);
 
   data=ta_emud.getPtPlot();
   MC=ta_emuMC.getPtPlot();
+  data.setDivideBinomial(false);
+  MC.setDivideBinomial(false);
   scalefactor=data/MC;
-  scalefactor.addGlobalRelError(0.01);
-  scalefactor.writeTGraph("scalefactor pt");
-  scalefactor.addErrorContainer(scalefactor*ta_emuMC.getCorrelationPt(),ratiomultiplier);
-  scalefactor.writeTGraph("scalefactor pt incl corrErr");
+  scalefactor.addGlobalRelError("rel_sys",0.01);
+  scalefactor.writeTGraph("scalefactor pt",false);
+  scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_emuMC.getCorrelationPt(),ratiomultiplier);
+  scalefactor.writeTGraph("scalefactor pt incl corrErr",false);
 
   data=ta_emud.getDPhiPlot();
   MC=ta_emuMC.getDPhiPlot();
+  data.setDivideBinomial(false);
+  MC.setDivideBinomial(false);
   scalefactor=data/MC;
-  scalefactor.addGlobalRelError(0.01);
-  scalefactor.writeTGraph("scalefactor dphi");
-  scalefactor.addErrorContainer(scalefactor*ta_emuMC.getCorrelationDPhi(),ratiomultiplier);
-  scalefactor.writeTGraph("scalefactor dphi incl corrErr");
+  scalefactor.addGlobalRelError("rel_sys",0.01);
+  scalefactor.writeTGraph("scalefactor dphi",false);
+  scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_emuMC.getCorrelationDPhi(),ratiomultiplier);
+  scalefactor.writeTGraph("scalefactor dphi incl corrErr",false);
 
   f7->Close();
 
@@ -1015,5 +1004,5 @@ cout << "$e\\mu$ & " << emud[0] <<" $\\pm$ " << emud[1] << " (stat.) & "
 
 void do_triggerAnalyzer(){
   analyze();
-  miniscript("5fbTrig/"); //makes plots nice and puts output to directory
+  miniscript("plots/"); //makes plots nice and puts output to directory
 }

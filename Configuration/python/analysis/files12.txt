@@ -70,7 +70,7 @@
 
 200  mc.QCD_Pt_20_MuEnrichedPt_15_TuneZ2star_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1_cff       8TeV_qcdmu15         
 200  mc.QCD_Pt_20_30_EMEnriched_TuneZ2star_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1_cff          8TeV_qcdem2030       
-200  mc.QCD_Pt_30_80_EMEnriched_TuneZ2star_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1_cff         8TeV_qcdem5080     
+200  mc.QCD_Pt_30_80_EMEnriched_TuneZ2star_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1_cff         8TeV_qcdem3080     
 #200  mc.QCD_Pt_80_170_EMEnriched_TuneZ2star_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1_cff       8TeV_qcdem80170     #not yet available
 
 

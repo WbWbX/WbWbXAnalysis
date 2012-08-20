@@ -62,11 +62,11 @@ namespace top{
     TH1D * getTH1D(TString name="", bool dividebybinwidth=true); //! returns a TH1D pointer with symmetrized errors (TString name); small bug with content(bin)=0 and error(bin)=0
     operator TH1D(){return *getTH1D();}
     operator TH1D*(){return getTH1D();}
-    void writeTH1D(TString name=""); //! writes TH1D->Write() with symmetrized errors (TString name)
-    TGraphAsymmErrors * getTGraph(TString name="",bool noXErrors=false, bool dividebybinwidth=true);  
+    void writeTH1D(TString name="",bool dividebybinwidth=true); //! writes TH1D->Write() with symmetrized errors (TString name)
+    TGraphAsymmErrors * getTGraph(TString name="", bool dividebybinwidth=true,bool noXErrors=false);  
     operator TGraphAsymmErrors(){return *getTGraph();}
     operator TGraphAsymmErrors*(){return getTGraph();}
-    void writeTGraph(TString name=""); //! writes TGraph to TFile (must be opened)
+    void writeTGraph(TString name="",bool dividebybinwidth=true,bool noXErrors=false); //! writes TGraph to TFile (must be opened)
 
     
     void setDivideBinomial(bool);                                   //! default true

@@ -365,14 +365,14 @@ namespace top{
     return h;
   }
 
-  void container1D::writeTH1D(TString name){
-    TH1D * h = getTH1D(name);
+  void container1D::writeTH1D(TString name, bool dividebybinwidth){
+    TH1D * h = getTH1D(name,dividebybinwidth);
     h->Draw();
     h->Write();
     delete h;
   }
 
-  TGraphAsymmErrors * container1D::getTGraph(TString name, bool noXErrors, bool dividebybinwidth){
+  TGraphAsymmErrors * container1D::getTGraph(TString name, bool dividebybinwidth, bool noXErrors){
 
     if(name=="") name=name_;
     double x[getNBins()];
@@ -418,8 +418,8 @@ namespace top{
 
     return g;
   }
-  void container1D::writeTGraph(TString name){
-    TGraphAsymmErrors * g=getTGraph();
+  void container1D::writeTGraph(TString name, bool dividebybinwidth, bool noXErrors){
+    TGraphAsymmErrors * g=getTGraph(name,dividebybinwidth);
     g->SetName(name);
     g->Draw("AP");
     g->Write();

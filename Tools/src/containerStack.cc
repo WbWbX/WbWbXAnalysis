@@ -318,7 +318,7 @@ namespace top{
     //   multiplier = multiplier * resizelabels;
     ratio.setLabelSize(multiplier * resizelabels);
 
-    TGraphAsymmErrors * gratio = ratio.getTGraph(name,true,false); //don't divide by binwidth
+    TGraphAsymmErrors * gratio = ratio.getTGraph(name,false,true); //don't divide by binwidth, no x errors
     // rescale axis titles etc.
     TH1D * h = ratio.getTH1D(name+"_h_r",false); //no bw div
     h->GetYaxis()->SetTitle("data/MC");
@@ -339,10 +339,12 @@ namespace top{
       float xrange = fabs(xmax-xmin);
       if(gotuf){
 	TLatex * la = new TLatex(containers_[dataentry].getBinCenter(1)-xrange*0.06,gPad->GetUymin()-0.15*yrange,"#leq");
+	la->SetTextSize(la->GetTextSize() * multiplier * resizelabels);
 	la->Draw("same");
       }
       if(gotof){
 	TLatex * la2 = new TLatex(containers_[dataentry].getBinCenter(containers_[dataentry].getNBins())+xrange*0.06,gPad->GetUymin()-0.15*yrange,"#leq");
+	la2->SetTextSize(la2->GetTextSize() * multiplier * resizelabels);
 	la2->Draw("same");
       }
     }

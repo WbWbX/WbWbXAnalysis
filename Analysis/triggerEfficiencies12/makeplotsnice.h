@@ -87,7 +87,7 @@ void makeplot(TString inputfile, TString add){
 void miniscript(TString outdir){
 
   // TString dir="/afs/naf.desy.de/user/k/kieseler/public/forCarmen/latestgreatesttriggerplots3/";
-  TString rootsdir="test_triggerplots/";
+  TString rootsdir="temp_triggerplots/";
 
   TCanvas * c = new TCanvas("def","def");
   c->Clear();
