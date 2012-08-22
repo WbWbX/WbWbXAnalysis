@@ -6,6 +6,7 @@ import FWCore.ParameterSet.VarParsing as VarParsing
 options = VarParsing.VarParsing()
 
 options.register ('is2011',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"is 2011 data/MC")
+options.register ('crab',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"uses crab")
 options.register ('globalTag','START52_V9',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"global tag")
 options.register ('reportEvery',1000,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.int,"report every")
 options.register ('outputFile','def_out',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"output File (w/o .root)")
@@ -25,6 +26,7 @@ options.register('samplename', 'standard', VarParsing.VarParsing.multiplicity.si
 options.parseArguments()
 
 is2011=options.is2011                    # def false
+crab=options.crab                        # False
 globalTag=options.globalTag              # START52_V9
 reportEvery=options.reportEvery          # 1000
 outputFile=options.outputFile            # def_out
@@ -77,6 +79,17 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.load('Configuration.EventContent.EventContent_cff')
 
+if not isMC and not is2011: # https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagJetProbabilityCalibration?redirectedfrom=CMS.SWGuideBTagJetProbabilityCalibration#Calibration_in_52x_and_53x_Data
+    process.GlobalTag.toGet = cms.VPSet(
+        cms.PSet(record = cms.string("BTagTrackProbability2DRcd"),
+                 tag = cms.string("TrackProbabilityCalibration_2D_2012DataTOT_v1_offline"),
+                 connect = cms.untracked.string("frontier://FrontierPrep/CMS_COND_BTAU")),
+        cms.PSet(record = cms.string("BTagTrackProbability3DRcd"),
+                 tag = cms.string("TrackProbabilityCalibration_3D_2012DataTOT_v1_offline"),
+                 connect = cms.untracked.string("frontier://FrontierPrep/CMS_COND_BTAU"))
+        )
+
+
 
 #Options
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True))
@@ -91,8 +104,8 @@ process.GlobalTag.globaltag = globalTag + '::All'
 #process.source = cms.Source('PoolSource',fileNames=cms.untracked.vstring( inputFiles ), skipEvents=cms.untracked.uint32( skipEvents ) )
 process.out    = cms.OutputModule("PoolOutputModule", outputCommands =  cms.untracked.vstring(), fileName = cms.untracked.string( outputFile + '_PatTuple') )
 
-################# Input script
-if syncfile:
+################# Input script (some default one for crab
+if syncfile or crab:
     process.source = cms.Source('PoolSource',fileNames=cms.untracked.vstring( '/store/mc/Summer12/TTJets_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S7_START52_V5-v1/0000/FEBE99BB-3881-E111-B1F3-003048D42DC8.root' ))
 
 else:     
@@ -484,7 +497,7 @@ process.treeSequence = cms.Sequence(process.triggerMatches *
 process.path = cms.Path(process.goodOfflinePrimaryVertices *
                         process.preFilterSequence *
                         process.inclusiveVertexing *
-                        process.btagging *             #not yet implemented fully in pf2pat sequence..
+                        process.btagging *             #not yet implemented fully in pf2pat sequence../ needed for new btagging tag
                         process.patTriggerSequence *
                         getattr(process,'patPF2PATSequence'+pfpostfix) *
                         process.isoJetSequence *
