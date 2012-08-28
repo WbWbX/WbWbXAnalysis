@@ -262,7 +262,7 @@ namespace top{
 
   TGraphAsymmErrors * container1DStack::makeMCErrors(){
     TGraphAsymmErrors * g =getFullMCContainer().getTGraph();
-    g->SetFillStyle(3002);
+    g->SetFillStyle(3005);
     return g;
   }
 
@@ -328,7 +328,7 @@ namespace top{
     h->Draw("AXIS");
     gratio->Draw("P");
     TGraphAsymmErrors * gmcerr = relmcerr.getTGraph(name+"_relerr",false,false);
-    gmcerr->SetFillStyle(3002);
+    gmcerr->SetFillStyle(3005);
     gmcerr->Draw("2,same");
     TLine * l = new TLine(mc.getXMin(),1,mc.getXMax(),1);
     l->Draw("same");

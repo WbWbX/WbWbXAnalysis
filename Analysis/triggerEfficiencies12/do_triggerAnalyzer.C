@@ -277,7 +277,7 @@ notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v")
     }
     if(mode=="mumu"){
       dileptriggersMC.push_back("HLT_Mu17_Mu8_v16");
-      dileptriggersMC.push_back("HLT_Mu17_TkMu8_v9");
+      //dileptriggersMC.push_back("HLT_Mu17_TkMu8_v9");
     }
     if(mode=="emu"){
       dileptriggersMC.push_back("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v4");
@@ -290,7 +290,7 @@ notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v")
     }
     if(mode=="mumu"){
       dileptriggersMC.push_back("HLT_Mu17_Mu8_v16 ");
-      dileptriggersMC.push_back("HLT_Mu17_TkMu8_v9");
+      //dileptriggersMC.push_back("HLT_Mu17_TkMu8_v9");
     }
     if(mode=="emu"){
       dileptriggersMC.push_back("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v6");
@@ -817,7 +817,7 @@ void analyze(){
 
   const char * datafile = "/scratch/hh/dust/naf/cms/user/kieseler/trees0724/tree_8TeV_met_runAB_prompt.root";
 
-  const char * pileuproot = "/afs/naf.desy.de/user/k/kieseler/scratch/2012/TestArea2/CMSSW_5_2_5/src/TtZAnalysis/Data/PUDistr/data_pu_190456-196531_def.root";
+  const char * pileuproot = "/afs/naf.desy.de/user/k/kieseler/scratch/2012/TestArea2/CMSSW_5_2_5/src/TtZAnalysis/Data/PUDistr/data_pu_190456-196531_735_def.root";
 
 
   vector<double> eed=ta_eed.Eff("ee",    datafile,pileuproot, false,getTeX);
@@ -827,9 +827,9 @@ void analyze(){
   
   
   
-  vector<double> eeMC=ta_eeMC.Eff("ee",    "/scratch/hh/dust/naf/cms/user/kieseler/trees0724/tree_8TeV_eettbar.root",pileuproot,true,getTeX);
-  vector<double> mumuMC=ta_mumuMC.Eff("mumu",  "/scratch/hh/dust/naf/cms/user/kieseler/trees0724/tree_8TeV_mumuttbar.root",pileuproot,true,getTeX);
-  vector<double> emuMC=ta_emuMC.Eff("emu",   "/scratch/hh/dust/naf/cms/user/kieseler/trees0724/tree_8TeV_emuttbar.root",pileuproot,true,getTeX);
+  vector<double> eeMC=ta_eeMC.Eff("ee",    "/scratch/hh/dust/naf/cms/user/kieseler/trees0724/tree_8TeV_dyee50inf.root",pileuproot,true,getTeX);
+  vector<double> mumuMC=ta_mumuMC.Eff("mumu",  "/scratch/hh/dust/naf/cms/user/kieseler/trees0724/tree_8TeV_dymumu50inf.root",pileuproot,true,getTeX);
+  vector<double> emuMC=ta_emuMC.Eff("emu",   "/scratch/hh/dust/naf/cms/user/kieseler/trees0724/tree_8TeV_dyee50inf.root",pileuproot,true,getTeX);
 
 
   cout.precision(3);
@@ -890,7 +890,7 @@ cout << "$e\\mu$ & " << emud[0] <<" $\\pm$ " << emud[1] << " (stat.) & "
   container1D MC;
 
 
-  TFile* f5 = new TFile("temp_triggerplots/triggerSummaryEE.root","RECREATE");
+  TFile* f5 = new TFile("plots/triggerSummaryEE.root","RECREATE");
 
   ta_eed.writeAll();
   ta_eeMC.writeAll();
@@ -900,9 +900,9 @@ cout << "$e\\mu$ & " << emud[0] <<" $\\pm$ " << emud[1] << " (stat.) & "
   MC.setDivideBinomial(false);
   scalefactor=data/MC;
   scalefactor.addGlobalRelError("rel_sys",0.01);
-  scalefactor.writeTGraph("scalefactor eta");
+  scalefactor.writeTGraph("scalefactor eta",false);
   scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_eeMC.getCorrelationEta(),ratiomultiplier);
-  scalefactor.writeTGraph("scalefactor eta incl corrErr");
+  scalefactor.writeTGraph("scalefactor eta incl corrErr",false);
 
   data=ta_eed.getPtPlot();
   MC=ta_eeMC.getPtPlot();
@@ -927,7 +927,7 @@ cout << "$e\\mu$ & " << emud[0] <<" $\\pm$ " << emud[1] << " (stat.) & "
   f5->Close();
 
   
-  TFile* f6 = new TFile("temp_triggerplots/triggerSummaryMUMU.root","RECREATE");ta_mumud.writeAll();
+  TFile* f6 = new TFile("plots/triggerSummaryMUMU.root","RECREATE");ta_mumud.writeAll();
 
   ta_mumud.writeAll();
   ta_mumuMC.writeAll();
@@ -947,9 +947,9 @@ cout << "$e\\mu$ & " << emud[0] <<" $\\pm$ " << emud[1] << " (stat.) & "
   MC.setDivideBinomial(false);
   scalefactor=data/MC;
   scalefactor.addGlobalRelError("rel_sys",0.01);
-  scalefactor.writeTGraph("scalefactor pt");
+  scalefactor.writeTGraph("scalefactor pt",false);
   scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_mumuMC.getCorrelationPt(),ratiomultiplier);
-  scalefactor.writeTGraph("scalefactor pt incl corrErr");
+  scalefactor.writeTGraph("scalefactor pt incl corrErr",false);
 
   data=ta_mumud.getDPhiPlot();
   MC=ta_mumuMC.getDPhiPlot();
@@ -963,7 +963,7 @@ cout << "$e\\mu$ & " << emud[0] <<" $\\pm$ " << emud[1] << " (stat.) & "
 
   f6->Close();
 
-  TFile* f7 = new TFile("temp_triggerplots/triggerSummaryEMU.root","RECREATE");
+  TFile* f7 = new TFile("plots/triggerSummaryEMU.root","RECREATE");
 
   ta_emud.writeAll();
   ta_emuMC.writeAll();

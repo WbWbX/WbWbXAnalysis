@@ -54,7 +54,7 @@ namespace top{
 
     double integral(bool includeUFOF=false);
 
-    void setAllErrorsZero(){for(unsigned int i=0;i<staterrup_.size();i++){staterrup_[i]=0;staterrdown_[i]=0;} syserrors_.clear();} //! sets all errors zero
+    
     void reset();    //! resets all uncertainties and binning, keeps names and axis
     void clear();    //! sets all bin contents to zero; clears all systematic uncertainties
 
@@ -89,6 +89,10 @@ namespace top{
     void addGlobalRelError(TString,double);      //! adds a global relative symmetric uncertainty with name; creates ".._up" and ".._down" variation names
 
     void removeError(TString); //! removes a systematic uncertainty with name ..
+    void renameSyst(TString , TString);
+
+    void transformStatToSyst(TString);
+    void setAllErrorsZero(){for(unsigned int i=0;i<staterrup_.size();i++){staterrup_[i]=0;staterrdown_[i]=0;} syserrors_.clear();} //! sets all errors zero
 
     static bool c_makelist;
     static std::vector<container1D*> c_list;

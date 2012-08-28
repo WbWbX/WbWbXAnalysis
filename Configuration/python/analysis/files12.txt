@@ -13,8 +13,8 @@
 500  DoubleElectron_Run2012B-PromptReco-v1_cff         8TeV_ee_runB_prompt                 globalTag=GR_R_52_V7C isMC=false json=Collisions12/8TeV/Prompt/Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
 
 
-200  DoubleMu_Run2012B-PromptReco-v1_cff        8TeV_mumu_runA_prompt                 globalTag=GR_R_52_V7C isMC=false json=Collisions12/8TeV/Prompt/Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
-500  DoubleMu_Run2012C-PromptReco-v1_cff          8TeV_mumu_runB_prompt                 globalTag=GR_R_52_V7C isMC=false json=Collisions12/8TeV/Prompt/Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
+200  DoubleMu_Run2012A-PromptReco-v1_cff        8TeV_mumu_runA_prompt                 globalTag=GR_R_52_V7C isMC=false json=Collisions12/8TeV/Prompt/Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
+500  DoubleMu_Run2012B-PromptReco-v1_cff          8TeV_mumu_runB_prompt                 globalTag=GR_R_52_V7C isMC=false json=Collisions12/8TeV/Prompt/Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt
 
 
 200  MuEG_Run2012A-PromptReco-v1_cff        8TeV_mueg_runA_prompt                 globalTag=GR_R_52_V7C isMC=false json=Collisions12/8TeV/Prompt/Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt

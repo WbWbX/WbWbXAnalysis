@@ -85,8 +85,10 @@ namespace top{
 
     //   gencont.setDivideBinomial(false);
     // selcont.setDivideBinomial(false);
-    gencont.getTH1D()->Draw();
+    // gencont.getTH1D()->Draw();
 
+
+    // binomial error for efficiency
 
     top::container1D efficiency = selcont / gencont;
     top::container1D background = sel_.getContributionsBut(excludefrombackground);
@@ -103,6 +105,8 @@ namespace top{
     data.setDivideBinomial(false);
     background.setDivideBinomial(false);
     efficiency.setDivideBinomial(false);
+
+    efficiency.transformStatToSyst("MC_stat"); //when using multiple of these don't forget to rename!
 
     top::container1D output = (data - background) / efficiency;
       output=output * (1/lumi_);

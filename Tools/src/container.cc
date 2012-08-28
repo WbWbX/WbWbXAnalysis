@@ -711,6 +711,34 @@ namespace top{
     }
   }
 
+  void container1D::transformStatToSyst(TString sysname){
+
+    std::pair<TString, std::vector<double> > up(sysname+"_up", staterrup_);
+    std::pair<TString, std::vector<double> > down(sysname+"_down", staterrdown_);
+    syserrors_.push_back(up);
+    syserrors_.push_back(down);
+    for(unsigned int i=0;i<staterrup_.size();i++){
+      staterrup_[i]=0;
+      staterrdown_[i]=0;
+    }
+  }
+
+  void container1D::renameSyst(TString old, TString New){
+    int found=0;
+    for(unsigned int i=0;i<syserrors_.size();i++){
+      if(old+"_up" == syserrors_[i].first){
+	syserrors_[i].first = New +"_up";
+	found++;
+      }
+      else if(old+"_down" == syserrors_[i].first){
+	syserrors_[i].first = New +"_down";
+	found++;
+      }
+      if(found == 2) break;
+    }
+    if(found !=2) std::cout << "container1D::renameSyst: Entry " << old << " not found!" << std::endl;
+  }
+
   //protected
 
   TString container1D::stripVariation(TString in){

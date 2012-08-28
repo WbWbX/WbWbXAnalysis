@@ -71,7 +71,7 @@ void makeplot(TString inputfile, TString add){
 
   gPad->SetLeftMargin(0.15);
   gPad->SetBottomMargin(0.15);
-  h->Draw();
+  h->Draw("AXIS");
   sfc->Draw("P,e1,same");
   sf->Draw("P,e1,same");
   mc->Draw("P,e1,same");
@@ -87,7 +87,7 @@ void makeplot(TString inputfile, TString add){
 void miniscript(TString outdir){
 
   // TString dir="/afs/naf.desy.de/user/k/kieseler/public/forCarmen/latestgreatesttriggerplots3/";
-  TString rootsdir="temp_triggerplots/";
+  TString rootsdir=outdir;
 
   TCanvas * c = new TCanvas("def","def");
   c->Clear();

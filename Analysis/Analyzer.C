@@ -157,6 +157,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   etabinsmuon << -2.4 << -1.5 << -0.8 << 0.8 << 1.5 << 2.4;
   vector<float> etabinsjets;
   etabinsjets << -2.8 << -2.5 << -1.8 << -1 << 1 << 1.8 << 2.5 << 2.8;
+  vector<float> etabinsdil;
+  etabinsdil << -2.4 << -2 << -1.6 << -1.2 << -0.8 << -0.4 << 0.4 << 0.8 << 1.2 << 1.6 << 2 << 2.4;
   vector<float> ptbinsfull;
   ptbinsfull << 0 << 10 << 20 << 25 << 30 << 35 << 40 << 45 << 50 << 60 << 70 << 100 << 200;
   vector<float> ptbins;
@@ -191,6 +193,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
   container1D generated(selectionbins, "generated events", "gen", "N_{gen}");
   container1D generated2(selectionbins, "generated filtered events", "gen", "N_{gen}");
+
+
+  container1D diletaZgen(etabinsdil, "dilepton eta gen", "#eta_{ll}", "N_{evt}");
 
   container1D selection(selectionbins, "selection steps", "step", "N_{sel}");
 
@@ -265,6 +270,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   container1D vertexmulti6(multibinsvertx, "vertex multiplicity step 6", "n_{vtx}", "N_{evt}");
   container1D vertexmulti7(multibinsvertx, "vertex multiplicity step 7", "n_{vtx}", "N_{evt}");
   container1D vertexmulti8(multibinsvertx, "vertex multiplicity step 8", "n_{vtx}", "N_{evt}");
+
+  container1D diletaZ3(etabinsdil, "dilepton eta step 3", "#eta_{ll}", "N_{evt}");
 
   container1D invmass2(massbins, "dilepton invariant mass step 2", "m_{ll} [GeV]", "N_{evt}");
   container1D invmass3(massbins, "dilepton invariant mass step 3", "m_{ll} [GeV]", "N_{evt}");
@@ -503,18 +510,22 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     leppair = lepSel.getOppoQHighestPtPair(isoelectrons, isomuons);
 
     double invLepMass=0;
+    LorentzVector dilp4;
 
     if(b_ee){
       if(leppair.first.size() <2) continue;
-      invLepMass=(leppair.first[0].p4() + leppair.first[1].p4()).M();
+      dilp4=leppair.first[0].p4() + leppair.first[1].p4();
+      invLepMass=dilp4.M();
     }
     else if(b_mumu){
       if(leppair.second.size() < 2) continue;
-      invLepMass=(leppair.second[0].p4() + leppair.second[1].p4()).M();
+      dilp4=leppair.second[0].p4() + leppair.second[1].p4();
+      invLepMass=dilp4.M();
     }
     else if(b_emu){
          if(leppair.first.size() < 1 || leppair.second.size() < 1) continue;
-         invLepMass=(leppair.first[0].p4() + leppair.second[0].p4()).M();
+	 dilp4=leppair.first[0].p4() + leppair.second[0].p4();
+         invLepMass=dilp4.M();
     }
 
     for(NTElectronIt elec=isoelectrons.begin();elec<isoelectrons.end();++elec){
@@ -615,6 +626,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       selection.fill(10,puweight);
 
       isZrange=true;
+
+      diletaZ3.fill(dilp4.Eta(),puweight);
+
     }
 
     bool Znotemu=isZrange;
