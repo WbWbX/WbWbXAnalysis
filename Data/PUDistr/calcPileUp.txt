@@ -1,3 +1,3 @@
-#for 2012 69300 pm 5% (73.5 found to be better)
+#for 2012 69300 pm 5% (73.5 found to be better; fixed by a bugfix)
 
-pileupCalc.py -i ../Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt --inputLumiJSON ../pileup_JSON_DCSONLY_190389-196531_patch2.txt --calcMode true --minBiasXsec 73500 --maxPileupBin 50 --numPileupBins 50  data_pu_190456-196531_735_def.root
+pileupCalc.py -i ../Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt --inputLumiJSON ../pileup_JSON_DCSONLY_190389-196531_patch2.txt --calcMode true --minBiasXsec 65835 --maxPileupBin 50 --numPileupBins 50  data_pu_190456-196531_new_down.root
