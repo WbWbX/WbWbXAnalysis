@@ -890,7 +890,7 @@ void Analyzer(){
   analyzermumu.setLumi(5097);
   analyzermumu.setFileList("mumu_8TeV_inputfiles.txt");
   analyzermumu.setDataSetDirectory("/scratch/hh/dust/naf/cms/user/kieseler/trees0724/");
-  analyzermumu.getPUReweighter()->setDataTruePUInput(pufolder+"data_pu_190456-196531_735_def.root");
+  analyzermumu.getPUReweighter()->setDataTruePUInput(pufolder+"data_pu_190456-196531_new_def.root");
   analyzermumu.getJECUncertainties()->setFile("/afs/naf.desy.de/user/k/kieseler/scratch/2012/TestArea2/CMSSW_5_2_5/src/TtZAnalysis/Data/JECUnc/Summer12_V2_DATA_AK5PF_UncertaintySources.txt");
   analyzermumu.getPUReweighter()->setMCDistrSum12();
 
@@ -980,13 +980,13 @@ void Analyzer(){
   // pu systematics
 
   MainAnalyzer analyzereepuup=analyzeree;
-  analyzereepuup.getPUReweighter()->setDataTruePUInput(pufolder+"data_pu_190456-196531_735_up.root"); 
+  analyzereepuup.getPUReweighter()->setDataTruePUInput(pufolder+"data_pu_190456-196531_new_up.root"); 
   analyzereepuup.setName("puup_ee", "ee");
   analyzereepuup.start();
   analyzereepuup.getPlots()->writeAllToTFile(outfile);
 
   MainAnalyzer analyzereepudown=analyzeree;
-  analyzereepudown.getPUReweighter()->setDataTruePUInput(pufolder+"data_pu_190456-196531_735_down.root");
+  analyzereepudown.getPUReweighter()->setDataTruePUInput(pufolder+"data_pu_190456-196531_new_down.root");
   analyzereepudown.setName("pudown_ee","ee");
   analyzereepudown.start();
   analyzereepudown.getPlots()->writeAllToTFile(outfile);
@@ -1110,13 +1110,13 @@ void Analyzer(){
   //make PU systematics
   
   MainAnalyzer analyzermumupuup=analyzermumu;
-  analyzermumupuup.getPUReweighter()->setDataTruePUInput(pufolder+"data_pu_190456-196531_735_up.root"); 
+  analyzermumupuup.getPUReweighter()->setDataTruePUInput(pufolder+"data_pu_190456-196531_new_up.root"); 
   analyzermumupuup.setName("puup_mumu", "mumu");
   analyzermumupuup.start();
   analyzermumupuup.getPlots()->writeAllToTFile(outfile);
 
   MainAnalyzer analyzermumupudown=analyzermumu;
-  analyzermumupudown.getPUReweighter()->setDataTruePUInput(pufolder+"data_pu_190456-196531_735_down.root");
+  analyzermumupudown.getPUReweighter()->setDataTruePUInput(pufolder+"data_pu_190456-196531_new_down.root");
   analyzermumupudown.setName("pudown_mumu","mumu");
   analyzermumupudown.start();
   analyzermumupudown.getPlots()->writeAllToTFile(outfile);
