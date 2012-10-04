@@ -273,28 +273,28 @@ notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v")
   vector<string> dileptriggersMC;
   if(!is52v9){
     if(mode=="ee"){
-      dileptriggersMC.push_back("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v15");
+      dileptriggersMC.push_back("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
     }
     if(mode=="mumu"){
-      dileptriggersMC.push_back("HLT_Mu17_Mu8_v16");
-      //dileptriggersMC.push_back("HLT_Mu17_TkMu8_v9");
+      dileptriggersMC.push_back("HLT_Mu17_Mu8_v");
+      dileptriggersMC.push_back("HLT_Mu17_TkMu8_v");
     }
     if(mode=="emu"){
-      dileptriggersMC.push_back("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v4");
-      dileptriggersMC.push_back("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v4");
+      dileptriggersMC.push_back("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
+      dileptriggersMC.push_back("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
     }
   }
   else{
     if(mode=="ee"){
-      dileptriggersMC.push_back("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v17"); //17
+      dileptriggersMC.push_back("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v"); //17
     }
     if(mode=="mumu"){
-      dileptriggersMC.push_back("HLT_Mu17_Mu8_v16 ");
+      dileptriggersMC.push_back("HLT_Mu17_Mu8_v");
       //dileptriggersMC.push_back("HLT_Mu17_TkMu8_v9");
     }
     if(mode=="emu"){
-      dileptriggersMC.push_back("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v6");
-      dileptriggersMC.push_back("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v6");
+      dileptriggersMC.push_back("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
+      dileptriggersMC.push_back("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
     }
 
   }
@@ -817,7 +817,7 @@ void analyze(){
 
   const char * datafile = "/scratch/hh/dust/naf/cms/user/kieseler/trees0724/tree_8TeV_met_runAB_prompt.root";
 
-  const char * pileuproot = "/afs/naf.desy.de/user/k/kieseler/scratch/2012/TestArea2/CMSSW_5_2_5/src/TtZAnalysis/Data/PUDistr/data_pu_190456-196531_735_def.root";
+  const char * pileuproot = "/afs/naf.desy.de/user/k/kieseler/scratch/2012/TestArea2/CMSSW_5_2_5/src/TtZAnalysis/Data/PUDistr/data_pu_190456-196531_corr_def.root";
 
 
   vector<double> eed=ta_eed.Eff("ee",    datafile,pileuproot, false,getTeX);
@@ -827,9 +827,9 @@ void analyze(){
   
   
   
-  vector<double> eeMC=ta_eeMC.Eff("ee",    "/scratch/hh/dust/naf/cms/user/kieseler/trees0724/tree_8TeV_dyee50inf.root",pileuproot,true,getTeX);
-  vector<double> mumuMC=ta_mumuMC.Eff("mumu",  "/scratch/hh/dust/naf/cms/user/kieseler/trees0724/tree_8TeV_dymumu50inf.root",pileuproot,true,getTeX);
-  vector<double> emuMC=ta_emuMC.Eff("emu",   "/scratch/hh/dust/naf/cms/user/kieseler/trees0724/tree_8TeV_dyee50inf.root",pileuproot,true,getTeX);
+  vector<double> eeMC=ta_eeMC.Eff("ee",    "/scratch/hh/dust/naf/cms/user/kieseler/trees0724/tree_8TeV_eettbar.root",pileuproot,true,getTeX);
+  vector<double> mumuMC=ta_mumuMC.Eff("mumu",  "/scratch/hh/dust/naf/cms/user/kieseler/trees0724/tree_8TeV_mumuttbar.root",pileuproot,true,getTeX);
+  vector<double> emuMC=ta_emuMC.Eff("emu",   "/scratch/hh/dust/naf/cms/user/kieseler/trees0724/tree_8TeV_emuttbar.root",pileuproot,true,getTeX);
 
 
   cout.precision(3);

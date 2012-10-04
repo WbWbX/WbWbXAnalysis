@@ -1,11 +1,11 @@
-#include "../DataFormats/src/classes.h" //gets all the dataformats
-#include "../DataFormats/interface/elecRhoIsoAdder.h"
-#include "../plugins/reweightPU.h"
-#include "../plugins/leptonSelector.h"
-#include "../Tools/interface/miscUtils.h"
-#include "../Tools/interface/containerStackVector.h"
-#include "../plugins/JERAdjuster.h"
-#include "../plugins/JECUncertainties.h"
+#include "TtZAnalysis/DataFormats/src/classes.h" //gets all the dataformats
+#include "TtZAnalysis/DataFormats/interface/elecRhoIsoAdder.h"
+#include "TtZAnalysis/plugins/reweightPU.h"
+#include "TtZAnalysis/plugins/leptonSelector.h"
+#include "TtZAnalysis/Tools/interface/miscUtils.h"
+#include "TtZAnalysis/Tools/interface/containerStackVector.h"
+#include "TtZAnalysis/plugins/JERAdjuster.h"
+#include "TtZAnalysis/plugins/JECUncertainties.h"
 #include "TTree.h"
 #include "TFile.h"
 #include <fstream>
@@ -432,8 +432,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     }
     if(b_mumu){
       if(kinmuons.size() < 2) continue;
-      //trg
-      if(isMC &&  !(triggersContain("HLT_Mu17_Mu8_v16",pEvent)  || triggersContain("HLT_Mu17_TkMu8_v9",pEvent))) continue;
+      //trg wildcards
+      if(isMC &&  !(triggersContain("HLT_Mu17_Mu8_v",pEvent)  || triggersContain("HLT_Mu17_TkMu8_v",pEvent))) continue;
       if(!isMC && !(triggersContain("HLT_Mu17_Mu8_v",pEvent)  || triggersContain("HLT_Mu17_TkMu8_v",pEvent))) continue;
 
 
@@ -879,20 +879,26 @@ void Analyzer(){
 
   cout << "\n\n\n" <<endl; //looks better ;)
 
-  TString outfile = "0817_out.root";
+  TString outfile = "fullWith5fb.root";
   TString pufolder="/afs/naf.desy.de/user/k/kieseler/scratch/2012/TestArea2/CMSSW_5_2_5/src/TtZAnalysis/Data/PUDistr/";
 
   //initialize mumu
 
+  double lumiunc12=0.036;
+
+  bool runInNotQuietMode=true;
+
 
   MainAnalyzer analyzermumu("default_mumu","mumu");
-  analyzermumu.setShowStatusBar(false);  //for running with text output mode
+  analyzermumu.setShowStatusBar(runInNotQuietMode);  //for running with text output mode
   analyzermumu.setLumi(5097);
   analyzermumu.setFileList("mumu_8TeV_inputfiles.txt");
   analyzermumu.setDataSetDirectory("/scratch/hh/dust/naf/cms/user/kieseler/trees0724/");
-  analyzermumu.getPUReweighter()->setDataTruePUInput(pufolder+"data_pu_190456-196531_new_def.root");
+  analyzermumu.getPUReweighter()->setDataTruePUInput(pufolder+"data_pu_190456-196531_corr_def.root");
   analyzermumu.getJECUncertainties()->setFile("/afs/naf.desy.de/user/k/kieseler/scratch/2012/TestArea2/CMSSW_5_2_5/src/TtZAnalysis/Data/JECUnc/Summer12_V2_DATA_AK5PF_UncertaintySources.txt");
   analyzermumu.getPUReweighter()->setMCDistrSum12();
+  analyzermumu.start();
+  analyzermumu.getPlots()->writeAllToTFile(outfile,true);
 
   //start with ee
 
@@ -900,13 +906,15 @@ void Analyzer(){
   analyzeree.setFileList("ee_8TeV_inputfiles.txt");
   analyzeree.setName("default_ee","ee");
   analyzeree.start();
-  analyzeree.getPlots()->writeAllToTFile(outfile,true);
+  analyzeree.getPlots()->writeAllToTFile(outfile,false);
 
   
+  
+
   MainAnalyzer eewithlumi=analyzeree;
   eewithlumi.setName("ee_lumi","ee");
 
-  eewithlumi.getPlots()->addGlobalRelMCError("Lumi", 0.045);
+  eewithlumi.getPlots()->addGlobalRelMCError("8TeV_Lumi", lumiunc12);
   eewithlumi.getPlots()->writeAllToTFile(outfile);
   
   // jer systematics 
@@ -980,29 +988,29 @@ void Analyzer(){
   // pu systematics
 
   MainAnalyzer analyzereepuup=analyzeree;
-  analyzereepuup.getPUReweighter()->setDataTruePUInput(pufolder+"data_pu_190456-196531_new_up.root"); 
-  analyzereepuup.setName("puup_ee", "ee");
+  analyzereepuup.getPUReweighter()->setDataTruePUInput(pufolder+"data_pu_190456-196531_corr_up.root"); 
+  analyzereepuup.setName("8TeV_puup_ee", "ee");
   analyzereepuup.start();
   analyzereepuup.getPlots()->writeAllToTFile(outfile);
 
   MainAnalyzer analyzereepudown=analyzeree;
-  analyzereepudown.getPUReweighter()->setDataTruePUInput(pufolder+"data_pu_190456-196531_new_down.root");
-  analyzereepudown.setName("pudown_ee","ee");
+  analyzereepudown.getPUReweighter()->setDataTruePUInput(pufolder+"data_pu_190456-196531_corr_down.root");
+  analyzereepudown.setName("8TeV_pudown_ee","ee");
   analyzereepudown.start();
   analyzereepudown.getPlots()->writeAllToTFile(outfile);
 
   MainAnalyzer eewithPU=analyzeree;
-  eewithPU.setName("puunc_ee","ee");
-  eewithPU.getPlots()->addMCErrorStackVector("PU_up",*analyzereepuup.getPlots());
-  eewithPU.getPlots()->addMCErrorStackVector("PU_down",*analyzereepudown.getPlots());
+  eewithPU.setName("8TeV_puunc_ee","ee");
+  eewithPU.getPlots()->addMCErrorStackVector("8TEV_PU_up",*analyzereepuup.getPlots());
+  eewithPU.getPlots()->addMCErrorStackVector("8TEV_PU_down",*analyzereepudown.getPlots());
   eewithPU.getPlots()->writeAllToTFile(outfile);
   
   // all systematics
   
   MainAnalyzer eeWithAll=eewithlumi; //already includes lumi uncert
   eeWithAll.setName("allunc_ee","ee");
-  eeWithAll.getPlots()->addMCErrorStackVector("PU_up",*analyzereepuup.getPlots());
-  eeWithAll.getPlots()->addMCErrorStackVector("PU_down",*analyzereepudown.getPlots());
+  eeWithAll.getPlots()->addMCErrorStackVector("8TEV_PU_up",*analyzereepuup.getPlots());
+  eeWithAll.getPlots()->addMCErrorStackVector("8TEV_PU_down",*analyzereepudown.getPlots());
   eeWithAll.getPlots()->addMCErrorStackVector("JER_up",*analyzereejerup.getPlots());
   eeWithAll.getPlots()->addMCErrorStackVector("JER_down",*analyzereejerdown.getPlots());
   eeWithAll.getPlots()->addMCErrorStackVector("CORR_JES_up",*analyzereecorr_jesup.getPlots());
@@ -1038,7 +1046,7 @@ void Analyzer(){
   analyzermumu.getPlots()->writeAllToTFile(outfile); // after that just update file
   MainAnalyzer mumuwithlumi=analyzermumu;
   mumuwithlumi.setName("lumi_mumu","");
-  mumuwithlumi.getPlots()->addGlobalRelMCError("Lumi", 0.045);
+  mumuwithlumi.getPlots()->addGlobalRelMCError("8TEV_Lumi", lumiunc12);
   mumuwithlumi.getPlots()->writeAllToTFile(outfile); 
 
   //make JER systematics
@@ -1110,29 +1118,29 @@ void Analyzer(){
   //make PU systematics
   
   MainAnalyzer analyzermumupuup=analyzermumu;
-  analyzermumupuup.getPUReweighter()->setDataTruePUInput(pufolder+"data_pu_190456-196531_new_up.root"); 
+  analyzermumupuup.getPUReweighter()->setDataTruePUInput(pufolder+"data_pu_190456-196531_corr_up.root"); 
   analyzermumupuup.setName("puup_mumu", "mumu");
   analyzermumupuup.start();
   analyzermumupuup.getPlots()->writeAllToTFile(outfile);
 
   MainAnalyzer analyzermumupudown=analyzermumu;
-  analyzermumupudown.getPUReweighter()->setDataTruePUInput(pufolder+"data_pu_190456-196531_new_down.root");
+  analyzermumupudown.getPUReweighter()->setDataTruePUInput(pufolder+"data_pu_190456-196531_corr_down.root");
   analyzermumupudown.setName("pudown_mumu","mumu");
   analyzermumupudown.start();
   analyzermumupudown.getPlots()->writeAllToTFile(outfile);
 
   MainAnalyzer mumuwithPU=analyzermumu;
   mumuwithPU.setName("puunc_mumu","mumu");
-  mumuwithPU.getPlots()->addMCErrorStackVector("PU_up",*analyzermumupuup.getPlots());
-  mumuwithPU.getPlots()->addMCErrorStackVector("PU_down",*analyzermumupudown.getPlots());
+  mumuwithPU.getPlots()->addMCErrorStackVector("8TEV_PU_up",*analyzermumupuup.getPlots());
+  mumuwithPU.getPlots()->addMCErrorStackVector("8TEV_PU_down",*analyzermumupudown.getPlots());
   mumuwithPU.getPlots()->writeAllToTFile(outfile);
   
   // combine all syst
   
   MainAnalyzer mumuWithAll=mumuwithlumi;
   mumuWithAll.setName("allunc_mumu","mumu");
-  mumuWithAll.getPlots()->addMCErrorStackVector("PU_up",*analyzermumupuup.getPlots());
-  mumuWithAll.getPlots()->addMCErrorStackVector("PU_down",*analyzermumupudown.getPlots());
+  mumuWithAll.getPlots()->addMCErrorStackVector("8TEV_PU_up",*analyzermumupuup.getPlots());
+  mumuWithAll.getPlots()->addMCErrorStackVector("8TEV_PU_down",*analyzermumupudown.getPlots());
   mumuWithAll.getPlots()->addMCErrorStackVector("JER_up",*analyzermumujerup.getPlots());
   mumuWithAll.getPlots()->addMCErrorStackVector("JER_down",*analyzermumujerdown.getPlots());
   mumuWithAll.getPlots()->addMCErrorStackVector("CORR_JES_up",*analyzermumucorr_jesup.getPlots());
@@ -1167,5 +1175,5 @@ void Analyzer(){
 
   std::cout <<"\n\n\n\n\nFINISHED!" <<std::endl;
 
-
+  
 }
