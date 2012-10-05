@@ -9,6 +9,7 @@ options.register ('is2011',False,VarParsing.VarParsing.multiplicity.singleton,Va
 options.register ('crab',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"uses crab")
 options.register ('globalTag','START52_V9',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"global tag")
 options.register ('reportEvery',1000,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.int,"report every")
+options.register ('maxEvents',-1,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.int,"maximum events")
 options.register ('outputFile','def_out',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"output File (w/o .root)")
 options.register ('isMC',True,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"is MC")
 options.register ('genFilter','none',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"gen Filter")
@@ -29,6 +30,7 @@ is2011=options.is2011                    # def false
 crab=options.crab                        # False
 globalTag=options.globalTag              # START52_V9
 reportEvery=options.reportEvery          # 1000
+maxEvents=options.maxEvents              # -1 overwrites the one specified in input script. be careful!!
 outputFile=options.outputFile            # def_out
 isMC=options.isMC                        # True
 genFilter=options.genFilter              # 'none'
@@ -114,6 +116,9 @@ else:
         exit(8888)
     
     process.load(inputScript)
+
+
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32 (maxEvents) )
 
 #########JSON###
 # limit to json file (if passed as parameter)
