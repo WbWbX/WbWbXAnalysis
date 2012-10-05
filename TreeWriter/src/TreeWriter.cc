@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id: TreeWriter.cc,v 1.8 2012/08/28 09:56:54 jkiesele Exp $
+// $Id: TreeWriter.cc,v 1.9 2012/10/05 13:13:11 jkiesele Exp $
 //
 //
 
@@ -299,7 +299,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	 
 
        top::NTElectron tempelec;
-       // if(electron->ecalDrivenMomentum())
+       if(electron->ecalDrivenMomentum())
        //   tempelec.setECalP4(electron->ecalDrivenMomentum());
        
        tempelec.setP4(electron->p4());
@@ -369,7 +369,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
        top::NTElectron tempelec;
        //  if(electron->ecalDrivenMomentum())
-       //   tempelec.setECalP4(electron->ecalDrivenMomentum());
+       tempelec.setECalP4(electron->ecalDrivenMomentum());
        
        tempelec.setP4(electron->p4());
        double vz=-9999;
