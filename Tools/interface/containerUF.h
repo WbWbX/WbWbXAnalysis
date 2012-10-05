@@ -4,7 +4,11 @@
 #include "containerStack.h"
 #include "TString.h"
 
-// container with some more plotting options and unfolding
+// container with some more plotting options and (very simple) unfolding
+
+// make containerUFStack class inherits from normal stack?!? (check protected,private etc. such that all functions on member containers_ now apply for a vector of containerUF.. might be tricky / or not? in case of doubt containers_ ->private
+
+//include Alan Caldwells stat error interpretation?? -> check with someone, how they feel about it.
 
 namespace top{
 
@@ -106,7 +110,7 @@ namespace top{
     background.setDivideBinomial(false);
     efficiency.setDivideBinomial(false);
 
-    efficiency.transformStatToSyst("MC_stat"); //when using multiple of these don't forget to rename!
+    efficiency.transformStatToSyst("MC_stat"); //when using multiple of these don't forget to rename!!!
 
     top::container1D output = (data - background) / efficiency;
       output=output * (1/lumi_);
@@ -117,9 +121,16 @@ namespace top{
 
   }
   top::container1DUF container1DUF::breakDownSystematicsInBin(int bin){
-    top::container1DUF out;
+    std::vector<float> sysbins;
+    for(unsigned int i=0;i<syserrors_.size();i++){
+      sysbins << i;
+    }
+    top::container1D temp(sysbins,"source","contribution","");
+    for(unsigned int i=0;i<syserrors_.size();i++){
 
-    bin++;
+
+    }
+    
     return out;
   }
 

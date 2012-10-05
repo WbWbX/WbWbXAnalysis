@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id: TreeWriter.cc,v 1.7 2012/08/09 12:55:09 jkiesele Exp $
+// $Id: TreeWriter.cc,v 1.8 2012/08/28 09:56:54 jkiesele Exp $
 //
 //
 
@@ -111,14 +111,15 @@ class TreeWriter : public edm::EDAnalyzer {
   bool rho2011_;
   bool usegsf_;
 
-  edm::InputTag muons_, recomuons_, elecs_, recoelecs_, jets_, met_, vertices_, trigresults_, puinfo_, recotracks_, recosuclus_,rhojetsiso_,rhojetsisonopu_,rhoiso_,pdfweights_;
+  edm::InputTag muons_, recomuons_, pfelecs_, gsfelecs_,recoelecs_, jets_, met_, vertices_, trigresults_, puinfo_, recotracks_, recosuclus_,rhojetsiso_,rhojetsisonopu_,rhoiso_,pdfweights_;
   //rhojets_,rhojetsiso_,rhojetsnopu_,rhojetsisonopu_,rhoiso_;
 
   bool includereco_, includetrigger_, pfinput_,includepdfweights_;
   TTree* Ntuple;
   std::vector<top::NTMuon> ntmuons;
   std::vector<top::NTLepton> ntleptons;
-  std::vector<top::NTElectron> ntelectrons;
+  std::vector<top::NTElectron> ntpfelectrons;
+  std::vector<top::NTElectron> ntgsfelectrons;
   std::vector<top::NTJet> ntjets;
   std::vector<top::NTTrack> nttracks;
   std::vector<top::NTSuClu> ntsuclus;
@@ -146,7 +147,8 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
   //now do what ever initialization is needed
   treename_    =iConfig.getParameter<std::string>        ("treeName");
   muons_       =iConfig.getParameter<edm::InputTag>    ( "muonSrc" );
-  elecs_       =iConfig.getParameter<edm::InputTag>    ( "elecSrc" );
+  gsfelecs_       =iConfig.getParameter<edm::InputTag>    ( "elecGSFSrc" );
+  pfelecs_       =iConfig.getParameter<edm::InputTag>    ( "elecPFSrc" );
   jets_        =iConfig.getParameter<edm::InputTag>    ( "jetSrc" );
   btagalgo_    =iConfig.getParameter<std::string>       ("btagAlgo");
   met_         =iConfig.getParameter<edm::InputTag>    ( "metSrc" );
@@ -174,7 +176,6 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
 
   rhoiso_       =iConfig.getParameter<edm::InputTag>    ( "rhoIso" );
 
-  usegsf_  =iConfig.getParameter<bool>             ( "useGsfElecs" );
 
   includepdfweights_ = iConfig.getParameter<bool>             ( "includePDFWeights" );
   pdfweights_  =iConfig.getParameter<edm::InputTag>    ( "pdfWeights"          );
@@ -219,7 +220,8 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    
    ntmuons.clear();
    ntleptons.clear();
-   ntelectrons.clear();
+   ntpfelectrons.clear();
+   ntgsfelectrons.clear();
    ntjets.clear();
    nttracks.clear();
    ntsuclus.clear();
@@ -234,8 +236,10 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   catch(...) {IsRealData = true;} 
 
 
-   Handle<std::vector<pat::Electron > > elecs;
-   iEvent.getByLabel(elecs_,elecs);
+   Handle<std::vector<pat::Electron > > pfelecs;
+   iEvent.getByLabel(pfelecs_,pfelecs);
+   Handle<std::vector<pat::Electron > > gsfelecs;
+   iEvent.getByLabel(gsfelecs_,gsfelecs);
 
 
    Handle<std::vector<reco::Muon> > recomuons;
@@ -280,23 +284,24 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    
    if(vtxs.size()>0){
 
-     for(std::vector<pat::Electron >::const_iterator electron=elecs->begin(); electron<elecs->end() ; electron++){
+
+     ///////////////////////////////////////////////E L E C T R O N S//////////
+     //recent changes: stares two collections (gsf and pf), ecaldrivenmomentum in BOTH BE CAREFUL WHEN CHANGING
+
+     for(std::vector<pat::Electron >::const_iterator electron=pfelecs->begin(); electron<pfelecs->end() ; ++electron){
      
        top::NTIsolation Iso;
-       if(usegsf_){    // in case it has to be accessed differently - according to electron twiki it works that way
-	 Iso.setChargedHadronIso(electron->chargedHadronIso());
-	 Iso.setNeutralHadronIso(electron->neutralHadronIso());
-	 Iso.setPhotonIso(electron->photonIso());
-	 Iso.setPuChargedHadronIso(electron->puChargedHadronIso());
-       }
-       else{
-	 Iso.setChargedHadronIso(electron->chargedHadronIso());
-	 Iso.setNeutralHadronIso(electron->neutralHadronIso());
-	 Iso.setPhotonIso(electron->photonIso());
-	 Iso.setPuChargedHadronIso(electron->puChargedHadronIso());
-       }
+       
+       Iso.setChargedHadronIso(electron->chargedHadronIso());
+       Iso.setNeutralHadronIso(electron->neutralHadronIso());
+       Iso.setPhotonIso(electron->photonIso());
+       Iso.setPuChargedHadronIso(electron->puChargedHadronIso());
+	 
 
        top::NTElectron tempelec;
+       // if(electron->ecalDrivenMomentum())
+       //   tempelec.setECalP4(electron->ecalDrivenMomentum());
+       
        tempelec.setP4(electron->p4());
        tempelec.setQ(electron->charge());
        double vz=-9999;
@@ -345,10 +350,81 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
        if(electron->genParticleRef().isNonnull()) tempelec.setGenP4(electron->genParticleRef()->p4());
      
-       ntelectrons.push_back(tempelec);
+       ntpfelectrons.push_back(tempelec);
 
 
      }
+     ////gsf electron/////
+
+
+     for(std::vector<pat::Electron >::const_iterator electron=gsfelecs->begin(); electron<gsfelecs->end() ; ++electron){
+     
+       top::NTIsolation Iso;
+       
+       Iso.setChargedHadronIso(electron->chargedHadronIso());
+       Iso.setNeutralHadronIso(electron->neutralHadronIso());
+       Iso.setPhotonIso(electron->photonIso());
+       Iso.setPuChargedHadronIso(electron->puChargedHadronIso());
+	 
+
+       top::NTElectron tempelec;
+       //  if(electron->ecalDrivenMomentum())
+       //   tempelec.setECalP4(electron->ecalDrivenMomentum());
+       
+       tempelec.setP4(electron->p4());
+       double vz=-9999;
+       double vzerr=-9999;
+       double dbs=100;
+       if(!(electron->gsfTrack().isNull())){
+	 vz=electron->gsfTrack()->dz(vtxs[0].position());                   //
+	 vzerr=electron->gsfTrack()->dzError();  
+	 dbs=fabs(electron->gsfTrack()->dxy(vtxs[0].position()));
+       }              //
+       else if((electron->closestCtfTrackRef()).isNull()){
+	 vz=electron->closestCtfTrackRef()->dz(vtxs[0].position());                   //
+	 vzerr=electron->closestCtfTrackRef()->dzError();  
+	 dbs=fabs(electron->closestCtfTrackRef()->dxy(vtxs[0].position()));
+       }
+       tempelec.setVertexZ(vz);                   //
+       tempelec.setVertexZErr(vzerr);  
+
+       tempelec.setDbs(dbs);                  //
+       tempelec.setNotConv(electron->passConversionVeto());    
+       tempelec.setId(electron->electronIDs());
+       tempelec.setIso03(Iso);                   //
+       //tempelec.setIso04(iso04);                   //
+		       
+       if(includereco_){
+	 if(electron->triggerObjectMatches().size() ==1){ // no ambiguities
+	   tempelec.setMatchedTrig(electron->triggerObjectMatches().begin()->pathNames());
+	 }
+	 else{
+	   std::vector<std::string> def;
+	 def.push_back("NoUnamTrigMatch");
+	 tempelec.setMatchedTrig(def);
+	 }
+       }
+       double suclue=0;
+       if(includereco_ && !(electron->superCluster().isNull())){
+	 suclue=electron->superCluster()->rawEnergy();
+	 math::XYZPoint suclupoint=electron->superCluster()->position();
+	 double magnitude=sqrt(suclupoint.mag2());
+	 top::LorentzVector suclup4(suclue*suclupoint.x() / magnitude,suclue*suclupoint.y() / magnitude,suclue*suclupoint.z() / magnitude,suclue);
+	 top::NTSuClu suclu;
+	 suclu.setP4(suclup4);
+	 tempelec.setSuClu(suclu);
+       }
+       // otherwise (0,0,0,0) taken  care of by NTElectron Constructor
+
+       if(electron->genParticleRef().isNonnull()) tempelec.setGenP4(electron->genParticleRef()->p4());
+     
+       ntgsfelectrons.push_back(tempelec);
+
+
+     }
+
+
+     /////////////////////////////////// M U O N S//////////////////
    
      for(std::vector<pat::Muon >::const_iterator muon=muons->begin(); muon<muons->end() ; muon++){
        
@@ -676,7 +752,8 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    top::elecRhoIsoAdder addrho(!IsRealData, false);
    if(rho2011_) addrho.setRho(temprhos[2]);
    else         addrho.setRho(temprhos[0]);
-   addrho.addRhoIso(ntelectrons);
+   addrho.addRhoIso(ntpfelectrons);
+   addrho.addRhoIso(ntgsfelectrons);
 
    /////pdf weights///////
    if(includepdfweights_ && !IsRealData){
@@ -712,7 +789,8 @@ TreeWriter::beginJob()
     Ntuple->Branch("NTTracks", "std::vector<top::NTTrack>", &nttracks);
     Ntuple->Branch("NTSuClu", "std::vector<top::NTSuClu>", &ntsuclus);
   }
-  Ntuple->Branch("NTElectrons", "std::vector<top::NTElectron>", &ntelectrons);
+  Ntuple->Branch("NTPFElectrons", "std::vector<top::NTElectron>", &ntpfelectrons);
+  Ntuple->Branch("NTElectrons", "std::vector<top::NTElectron>", &ntgsfelectrons);
   Ntuple->Branch("NTJets", "std::vector<top::NTJet>", &ntjets);
   Ntuple->Branch("NTMet", "top::NTMet", &ntmet);
   Ntuple->Branch("NTEvent", "top::NTEvent", &ntevent);

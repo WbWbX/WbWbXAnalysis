@@ -23,6 +23,7 @@ namespace top{
   //sets
   void setDbs(double Dbs){dbs_=Dbs;}
   void setNotConv(bool IsNotConv){isNotConv_=IsNotConv;}
+  void setECalP4(LorentzVector ECalp4){ecalp4_=ECalp4;}
   void setId(std::vector<std::pair<std::string,float> > Ids , bool keepMvaOnly=true){
 
     ids_=Ids;
@@ -41,6 +42,7 @@ namespace top{
 
   //gets
   double dbs(){return dbs_;}
+  LorentzVector ECalP4(){return ecalp4_;}
   bool isNotConv(){return isNotConv_;}
   std::vector<std::pair<std::string,float> > ids(){return ids_;}
   top::NTIsolation iso03(){return iso03_;}
@@ -74,6 +76,7 @@ namespace top{
   std::vector<std::pair<std::string,float> > ids_;
   top::NTIsolation iso03_;
   double rhoIso03_;
+  LorentzVector ecalp4_;
   //top::NTIsolation iso04_;
 
   std::vector<std::string> matchedTrig_;

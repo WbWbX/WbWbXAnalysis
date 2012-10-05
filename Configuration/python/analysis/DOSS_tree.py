@@ -326,22 +326,28 @@ getattr(process, 'patPF2PATSequence'+pfpostfix).replace(getattr(process,'patElec
 ########
 #   adapt electrons to R=03 and use gsf
 
-if useGsf:
-    from TtZAnalysis.Workarounds.useGsfElectrons import *
+from TtZAnalysis.Workarounds.useGsfElectrons import *
 
-    useGsfElectronsInPF2PAT(process,pfpostfix,electronIsoCone)
-    # bugfixes made in pfTools and ofIsolation
+process.patPFElectronsPFlow = getattr(process,'patElectrons'+pfpostfix).clone()
+getattr(process,'patPF2PATSequence'+pfpostfix).replace(getattr(process,'patElectrons'+pfpostfix),
+                                                     getattr(process,'patElectrons'+pfpostfix) *
+                                                     process.patPFElectronsPFlow)
 
 
+useGsfElectronsInPF2PAT(process,pfpostfix,electronIsoCone)
+# bugfixes made in pfTools and ofIsolation
+    
 
-else:
-    getattr(process,'patElectrons'+pfpostfix).isolationValues = cms.PSet(
-        pfChargedHadrons = cms.InputTag("elPFIsoValueCharged"+electronIsoCone+"PFId"),
-        pfChargedAll = cms.InputTag("elPFIsoValueChargedAll"+electronIsoCone+"PFId"),
-        pfPUChargedHadrons = cms.InputTag("elPFIsoValuePU"+electronIsoCone+"PFId"),
-        pfNeutralHadrons = cms.InputTag("elPFIsoValueNeutral"+electronIsoCone+"PFId"),
-        pfPhotons = cms.InputTag("elPFIsoValueGamma"+electronIsoCone+"PFId")
-        )
+    
+getattr(process,'patPFElectrons'+pfpostfix).isolationValues = cms.PSet(
+    pfChargedHadrons = cms.InputTag("elPFIsoValueCharged"+electronIsoCone+"PFId"+pfpostfix),
+    pfChargedAll = cms.InputTag("elPFIsoValueChargedAll"+electronIsoCone+"PFId"+pfpostfix),
+    pfPUChargedHadrons = cms.InputTag("elPFIsoValuePU"+electronIsoCone+"PFId"+pfpostfix),
+    pfNeutralHadrons = cms.InputTag("elPFIsoValueNeutral"+electronIsoCone+"PFId"+pfpostfix),
+    pfPhotons = cms.InputTag("elPFIsoValueGamma"+electronIsoCone+"PFId"+pfpostfix)
+    )
+
+
 
 ######### end of electron implementation ########
 
@@ -363,7 +369,7 @@ getattr(process,'pfNoTau'+pfpostfix).bottomCollection = cms.InputTag('pfJetsForT
 
 ###### make isolation cut invalid
 
-getattr(process,'pfIsolatedElectrons'+pfpostfix).isolationCut = 99999 ## not even necessary if gsf electrons are used..
+getattr(process,'pfIsolatedElectrons'+pfpostfix).isolationCut = 99999 
 getattr(process,'pfIsolatedMuons'+pfpostfix).isolationCut = 99999 
 
 ####### Fix not automatically implemented b-tagging modules/vertices:
@@ -391,7 +397,7 @@ if is2011:
 from PhysicsTools.PatAlgos.tools.trigTools import *
 switchOnTrigger( process )
 
-process.patElectronsTriggerMatches = cms.EDProducer("PATTriggerMatcherDRDPtLessByR",
+process.patGSFElectronsTriggerMatches = cms.EDProducer("PATTriggerMatcherDRDPtLessByR",
     matchedCuts = cms.string('path("*")'),
     src = cms.InputTag("patElectrons"+ pfpostfix),
     maxDPtRel = cms.double(0.5),
@@ -400,22 +406,32 @@ process.patElectronsTriggerMatches = cms.EDProducer("PATTriggerMatcherDRDPtLessB
     resolveAmbiguities = cms.bool(True),
     matched = cms.InputTag("patTrigger")
 )
-process.patMuonsTriggerMatches = process.patElectronsTriggerMatches.clone()
+process.patPFElectronsTriggerMatches = process.patGSFElectronsTriggerMatches.clone()
+process.patPFElectronsTriggerMatches.src = 'patPFElectrons'+pfpostfix
+
+
+
+process.patMuonsTriggerMatches = process.patGSFElectronsTriggerMatches.clone()
 process.patMuonsTriggerMatches.src = 'patMuons'+ pfpostfix
 
-process.patElectronsWithTrigger = cms.EDProducer("PATTriggerMatchElectronEmbedder",
+process.patGSFElectronsWithTrigger = cms.EDProducer("PATTriggerMatchElectronEmbedder",
     src = cms.InputTag("patElectrons"+ pfpostfix),
-    matches = cms.VInputTag("patElectronsTriggerMatches")
+    matches = cms.VInputTag("patGSFElectronsTriggerMatches")
                   )
+process.patPFElectronsWithTrigger = process.patGSFElectronsWithTrigger.clone()
+process.patPFElectronsWithTrigger.src = "patPFElectrons"+pfpostfix
+
 
 process.patMuonsWithTrigger = cms.EDProducer("PATTriggerMatchMuonEmbedder",
     src = cms.InputTag("patMuons"+ pfpostfix),
     matches = cms.VInputTag("patMuonsTriggerMatches")
                   )
 if includereco:
-    process.triggerMatches =  cms.Sequence(process.patElectronsTriggerMatches *
+    process.triggerMatches =  cms.Sequence(process.patGSFElectronsTriggerMatches *
+                                           process.patPFElectronsTriggerMatches *
                                            process.patMuonsTriggerMatches *
-                                           process.patElectronsWithTrigger *
+                                           process.patGSFElectronsWithTrigger *
+                                           process.patPFElectronsWithTrigger *
                                            process.patMuonsWithTrigger)
     process.patTriggerSequence = cms.Sequence(process.patTrigger)
 
@@ -433,7 +449,7 @@ process.superClusters = cms.EDProducer("SuperClusterMerger",
 
 process.treeJets = process.selectedPatJets.clone()
 process.treeJets.src="patJets"+pfpostfix
-process.treeJets.cut = 'pt>10' # unfortunately starting at 10 GeV are needed for MET rescaling
+process.treeJets.cut = 'pt>8' # unfortunately starting at 10 GeV are needed for MET rescaling
 
 process.IDMuons = process.selectedPatMuons.clone()
 process.IDMuons.src = 'patMuons' + pfpostfix
@@ -443,20 +459,34 @@ process.IDElectrons = process.selectedPatElectrons.clone()
 process.IDElectrons.src = 'patElectrons' + pfpostfix
 process.IDElectrons.cut = cms.string( 'pt > 18  && abs(eta) < 2.7')
 
-process.IDLeptons = cms.EDProducer("CandViewMerger",
+process.IDPFElectrons = process.selectedPatElectrons.clone()
+process.IDPFElectrons.src = 'patPFElectrons' + pfpostfix
+process.IDPFElectrons.cut = cms.string( 'pt > 18  && abs(eta) < 2.7')
+
+
+process.MuonGSFMerge = cms.EDProducer("CandViewMerger",
                                      src = cms.VInputTag(cms.InputTag("IDMuons"),  cms.InputTag("IDElectrons"))
                                      )
 
+process.MuonPFMerge = cms.EDProducer("CandViewMerger",
+                                     src = cms.VInputTag(cms.InputTag("IDMuons"),  cms.InputTag("IDPFElectrons"))
+                                     )
 
 
-process.filterIDLeptons = cms.EDFilter("CandViewCountFilter",
-                                       src = cms.InputTag('IDLeptons'),
+process.filterIDLeptons = cms.EDFilter("SimpleCounter",
+                                       src = cms.VInputTag(cms.InputTag("IDMuons"),  
+                                                           cms.InputTag("IDElectrons"),   
+                                                           cms.InputTag("IDPFElectrons"),
+                                                           cms.InputTag("MuonGSFMerge"),
+                                                           cms.InputTag("MuonPFMerge")),
                                        minNumber = cms.uint32(minleptons)
                                        )
 
 process.IDLeptonFilterSequence = cms.Sequence(process.IDMuons *
                                               process.IDElectrons *
-                                              process.IDLeptons *
+                                              process.IDPFElectrons *
+                                              process.MuonGSFMerge *
+                                              process.MuonPFMerge *
                                               process.filterIDLeptons)
 
 getattr(process,'patPF2PATSequence'+pfpostfix).replace(getattr(process,'patMuons'+pfpostfix),
@@ -473,12 +503,12 @@ process.PFTree.includeTrigger    = includetrigger
 process.PFTree.includeReco       = includereco
 process.PFTree.rhoJetsIsoNoPu    = cms.InputTag("kt6PFJetsForIsoNoPU","rho",process.name_())
 process.PFTree.rhoJetsIso        = cms.InputTag("kt6PFJetsForIso","rho",process.name_())
-process.PFTree.useGsfElecs       = useGsf
 process.PFTree.includePDFWeights = includePDFWeights
 process.PFTree.pdfWeights        = "pdfWeights:"+PDF
 if not includereco:
     process.PFTree.muonSrc = 'patMuons' + pfpostfix
-    process.PFTree.elecSrc =  'patElectrons' + pfpostfix
+    process.PFTree.elecGSFSrc =  'patElectrons' + pfpostfix
+    process.PFTree.elecPFSrc =  'patPFElectrons' + pfpostfix
 
 ## make tree sequence
 
@@ -510,14 +540,3 @@ process.outpath    = cms.EndPath()
 
 
 
-
-
-#### do a lot of cleanup
-
-#process.path.remove(process.phPFIsoValueCharged03PFId * process.phPFIsoValueChargedAll03PFId * process.phPFIsoValueGamma03PFId * process.phPFIsoValueNeutral03PFId * process.phPFIsoValuePU03PFId)
-#process.path.remove(process.muPFIsoValueCharged03 * process.muPFIsoValueChargedAll03 * process.muPFIsoValueGamma03 * process.muPFIsoValueNeutral03 * process.muPFIsoValueGammaHighThreshold03 * process.muPFIsoValueNeutralHighThreshold03 * process.muPFIsoValuePU03)
-#process.path.remove(process.elPFIsoValueCharged04PFId * process.elPFIsoValueChargedAll04PFId * process.elPFIsoValueGamma04PFId * process.elPFIsoValueNeutral04PFId * process.elPFIsoValuePU04PFId)
-#process.path.remove(process.elPFIsoValueCharged04PFIdPFIso * process.elPFIsoValueChargedAll04PFIdPFIso * process.elPFIsoValueGamma04PFIdPFIso * process.elPFIsoValueNeutral04PFIdPFIso * process.elPFIsoValuePU04PFIdPFIso)
-#process.path.remove(process.elPFIsoValueCharged04NoPFIdPFIso * process.elPFIsoValueChargedAll04NoPFIdPFIso * process.elPFIsoValueGamma04NoPFIdPFIso * process.elPFIsoValueNeutral04NoPFIdPFIso * process.elPFIsoValuePU04NoPFIdPFIso)
-
-#process.path.remove(process.selectedPatElectrons * process.selectedPatMuons * process.selectedPatTaus * process.selectedPatJets * process.selectedPatPFParticles * process.selectedPatCandidateSummary * process.countPatElectrons * process.countPatMuons * process.countPatTaus * process.countPatLeptons * process.countPatJets * process.countPatPFParticles)
