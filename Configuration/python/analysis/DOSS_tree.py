@@ -7,7 +7,7 @@ options = VarParsing.VarParsing()
 
 options.register ('is2011',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"is 2011 data/MC")
 options.register ('crab',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"uses crab")
-options.register ('globalTag','START52_V9',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"global tag")
+options.register ('globalTag','START53_V11',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"global tag")
 options.register ('reportEvery',1000,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.int,"report every")
 options.register ('maxEvents',-1,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.int,"maximum events")
 options.register ('outputFile','def_out',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"output File (w/o .root)")
@@ -28,7 +28,7 @@ options.parseArguments()
 
 is2011=options.is2011                    # def false
 crab=options.crab                        # False
-globalTag=options.globalTag              # START52_V9
+globalTag=options.globalTag              # START53_V11
 reportEvery=options.reportEvery          # 1000
 maxEvents=options.maxEvents              # -1 overwrites the one specified in input script. be careful!!
 outputFile=options.outputFile            # def_out
@@ -311,7 +311,7 @@ else:
 from PhysicsTools.PatAlgos.tools.pfTools import *
 usePF2PAT(process, runPF2PAT=True, jetAlgo='AK5', runOnMC=isMC, postfix=pfpostfix, jetCorrections=jetCorr, pvCollection=cms.InputTag('goodOfflinePrimaryVertices'),typeIMetCorrections=True) 
 
-#new for 5_2_X not yet implmented in default pf2pat
+#new for 5_2_X not yet implmented in default pf2pat in 5_3 it is??? doesn't hurt here
 
 getattr(process,'patJetCorrFactors'+pfpostfix).rho=cms.InputTag("kt6PFJets","rho","RECO")
 
@@ -339,10 +339,12 @@ getattr(process,'patPF2PATSequence'+pfpostfix).replace(getattr(process,'patElect
                                                      process.patPFElectronsPFlow)
 
 
+####### make default patElectrons collection fed by gsf
 useGsfElectronsInPF2PAT(process,pfpostfix,electronIsoCone)
 # bugfixes made in pfTools and ofIsolation
     
 
+####### adapt pfElectrons 
     
 getattr(process,'patPFElectrons'+pfpostfix).isolationValues = cms.PSet(
     pfChargedHadrons = cms.InputTag("elPFIsoValueCharged"+electronIsoCone+"PFId"+pfpostfix),
