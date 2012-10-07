@@ -34,7 +34,7 @@ void do_sync(const char * file){
   vector<NTMuon> * pMuons = 0;
   t->SetBranchAddress("NTMuons",&pMuons); 
   vector<NTElectron> * pElectrons = 0;
-  t->SetBranchAddress("NTElectrons",&pElectrons);
+  t->SetBranchAddress("NTPFElectrons",&pElectrons);
   vector<NTJet> * pJets=0;
   t->SetBranchAddress("NTJets",&pJets);
   NTMet * pMet = 0;
@@ -85,7 +85,10 @@ void do_sync(const char * file){
       
       kinelectrons.push_back(*elec);
     }
-    
+
+    //two leps cut
+
+
     rho.setRho(pEvent->isoRho(2));
     rho.addRhoIso(kinelectrons);
     vector<NTMuon> kinmuons         = lepSel.selectKinMuons(*pMuons);
@@ -95,6 +98,10 @@ void do_sync(const char * file){
 
     vector<NTElectron> isoelectrons  =lepSel.selectIsolatedElectrons(idelectrons);
     vector<NTMuon> isomuons          =lepSel.selectIsolatedMuons(idmuons);
+
+
+    if(kinelectrons.size() + kinmuons.size() < 2) continue;
+
 
     totalkinelectrons+=kinelectrons.size();
     totalkinmuons+=kinmuons.size();
@@ -143,8 +150,17 @@ void do_sync(const char * file){
 
 void syncAnalyzer(){
 
-  do_sync("/scratch/hh/dust/naf/cms/user/kieseler/trees0822/tree_8TeV_eettbar.root");
+  std::cout << "DOSS" << std::endl;
+  do_sync("/scratch/hh/dust/naf/cms/user/kieseler/sync/tree_def_out.root");
 
-  // do_sync("");
+
+  std::cout << "\n\nlatinos..." << std::endl;
+  do_sync("/scratch/hh/dust/naf/cms/user/kieseler/sync/tree_latinosYieldSkim_numEvent10000.root.root");
 
 }
+
+
+//differences (7.10.):
+//  new_latinos... selects more events to be written in the tree (due to gsf electrons??) but after selection everything is consistent
+//  jets differ SIGNIFICANTLY! even when using the most similar collections
+//  both have loads of overlap wrt isomuons/isoelectrons

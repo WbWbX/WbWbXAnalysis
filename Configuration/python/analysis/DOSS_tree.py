@@ -47,6 +47,8 @@ syncfile=options.isSync                  # False
 
 #print genFilterString
 
+print "\n\n"
+
 electronIsoCone="03"
 useGsf = True
 minleptons=1

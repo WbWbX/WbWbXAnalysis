@@ -3,8 +3,8 @@ import FWCore.ParameterSet.Config as cms
 PFTree   = cms.EDAnalyzer('TreeWriter',
                           treeName = cms.string('pfTree'),
                           muonSrc = cms.InputTag('patMuonsWithTrigger'),
-                          elecGSFSrc = cms.InputTag('patElectronsGSFWithTrigger'),
-                          elecPFSrc = cms.InputTag('patElectronsPFWithTrigger'),
+                          elecGSFSrc = cms.InputTag('patGSFElectronsWithTrigger'),
+                          elecPFSrc = cms.InputTag('patPFElectronsWithTrigger'),
                           jetSrc = cms.InputTag('treeJets'),
                           btagAlgo = cms.string('combinedSecondaryVertexBJetTags'),
                           metSrc = cms.InputTag('patMETs'), #
