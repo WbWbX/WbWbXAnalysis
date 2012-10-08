@@ -14,6 +14,8 @@ options.register ('outputFile','def_out',VarParsing.VarParsing.multiplicity.sing
 options.register ('isMC',True,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"is MC")
 options.register ('genFilter','none',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"gen Filter")
 options.register ('genFilterString','none',VarParsing.VarParsing.multiplicity.list,VarParsing.VarParsing.varType.string,"gen Filter selection string")
+options.register ('genFilterMassLow',0,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.int,"gen Filter mass range low")
+options.register ('genFilterMassHigh',0,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.int,"gen Filter mass range high")
 options.register ('genFilterInvert',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"invert gen Filter")
 options.register ('includereco',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"includes info for eff studies")
 options.register ('includetrigger',True,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"includes trigger info for event")
@@ -221,6 +223,9 @@ if isMC:
 
     elif genFilter=='Z':
         process.load('TopAnalysis.TopFilter.filters.GeneratorZFilter_cfi')
+        if not options.genFilterMassHigh == 0:
+            process.generatorZFilter.diLeptonMassIntervals=(options.genFilterMassLow,options.genFilterMassHigh)
+
         if genFilterString==['ElectronElectron']:
             print 'genFilter set to Z: Electron Electron'
             process.generatorZFilter.zDecayModes = cms.vint32(11)
@@ -238,6 +243,9 @@ if isMC:
             print genFilterString
             print 'not valid!'
             exit(8888)
+        print "massrange: " 
+        print options.genFilterMassLow
+        print options.genFilterMassHigh
         
         if genFilterInvert:
             print 'genFilter Z inverted'
