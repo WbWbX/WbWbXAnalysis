@@ -6,15 +6,15 @@
 
 500  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_cff     8TeV_eettbar                    genFilter=Top genFilterString=ElectronElectron 
 
-500  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_cff     8TeV_mumuttbar                  genFilter=Top genFilterString=MuonMuon 
+#500  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_cff     8TeV_mumuttbar                  genFilter=Top genFilterString=MuonMuon 
 
-500  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_cff     8TeV_emuttbar                   genFilter=Top genFilterString=ElectronMuon
+#500  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_cff     8TeV_emuttbar                   genFilter=Top genFilterString=ElectronMuon
 
-300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_cff     8TeV_eettbarviatau              genFilter=Top genFilterString=ElectronElectronViaTau
+#300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_cff     8TeV_eettbarviatau              genFilter=Top genFilterString=ElectronElectronViaTau
 
-300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_cff     8TeV_mumuttbarviatau            genFilter=Top genFilterString=MuonMuonViaTau
+#300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_cff     8TeV_mumuttbarviatau            genFilter=Top genFilterString=MuonMuonViaTau
 
-300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_cff     8TeV_emuttbarviatau             genFilter=Top genFilterString=ElectronMuonViaTau
+#300  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_cff     8TeV_emuttbarviatau             genFilter=Top genFilterString=ElectronMuonViaTau
 
 
 
