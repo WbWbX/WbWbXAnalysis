@@ -1,77 +1,41 @@
 #!/bin/sh
 
-# emu
-
-wget 'https://cmsweb.cern.ch/das/makepy?dataset=/MuEG/Run2012A-PromptReco-v1/AOD&instance=cms_dbs_prod_global' -O MuEG_Run2012A-PromptReco-v1_cff.py --no-check-certificate
-
-wget 'https://cmsweb.cern.ch/das/makepy?dataset=/MuEG/Run2012B-PromptReco-v1/AOD&instance=cms_dbs_prod_global' -O MuEG_Run2012B-PromptReco-v1_cff.py --no-check-certificate
-
-wget 'https://cmsweb.cern.ch/das/makepy?dataset=/MuEG/Run2012A-recover_29Jun2012-v1/AOD&instance=cms_dbs_prod_global' -O MuEG_Run2012A-recover_29Jun2012-v1_cff.py --no-check-certificate
-
-
-wget 'https://cmsweb.cern.ch/das/makepy?dataset=/MuEG/Run2012C-PromptReco-v1/AOD&instance=cms_dbs_prod_global' -O MuEG_Run2012C-PromptReco-v1_cff.py --no-check-certificate
-
-
-#double e
-
-wget 'https://cmsweb.cern.ch/das/makepy?dataset=/DoubleElectron/Run2012A-PromptReco-v1/AOD&instance=cms_dbs_prod_global' -O DoubleElectron_Run2012A-PromptReco-v1_cff.py --no-check-certificate
-
-wget 'https://cmsweb.cern.ch/das/makepy?dataset=/DoubleElectron/Run2012B-PromptReco-v1/AOD&instance=cms_dbs_prod_global' -O DoubleElectron_Run2012B-PromptReco-v1_cff.py --no-check-certificate
-
-
-wget 'https://cmsweb.cern.ch/das/makepy?dataset=/DoubleElectron/Run2012A-recover_29Jun2012-v1/AOD&instance=cms_dbs_prod_global' -O DoubleElectron_Run2012A-recover_29Jun2012-v1_cff.py --no-check-certificate
-
-
-wget 'https://cmsweb.cern.ch/das/makepy?dataset=/DoubleElectron/Run2012C-PromptReco-v1/AOD&instance=cms_dbs_prod_global' -O DoubleElectron_Run2012C-PromptReco-v1_cff.py --no-check-certificate
-
-#double mu
-
-wget 'https://cmsweb.cern.ch/das/makepy?dataset=/DoubleMu/Run2012A-PromptReco-v1/AOD&instance=cms_dbs_prod_global' -O DoubleMu_Run2012A-PromptReco-v1_cff.py --no-check-certificate
-
-wget 'https://cmsweb.cern.ch/das/makepy?dataset=/DoubleMu/Run2012B-PromptReco-v1/AOD&instance=cms_dbs_prod_global' -O DoubleMu_Run2012B-PromptReco-v1_cff.py --no-check-certificate
+filenames=('DoubleElectron/Run2012A-13Jul2012-v1'
+'DoubleMu/Run2012A-13Jul2012-v1'
+'MuEG/Run2012A-13Jul2012-v1'
+'DoubleElectron/Run2012A-recover-06Aug2012-v1'
+'DoubleMu/Run2012A-recover-06Aug2012-v1'
+'MuEG/Run2012A-recover-06Aug2012-v1'
+'DoubleElectron/Run2012B-13Jul2012-v1'
+'DoubleMu/Run2012B-13Jul2012-v4'
+'MuEG/Run2012B-13Jul2012-v1'
+'DoubleElectron/Run2012C-24Aug2012-v1'
+'DoubleMu/Run2012C-24Aug2012-v1'
+'MuEG/Run2012C-24Aug2012-v1'
+'SingleMu/Run2012A-13Jul2012-v1'
+'SingleElectron/Run2012A-13Jul2012-v1'
+'MET/Run2012A-13Jul2012-v1'
+'SingleMu/Run2012B-13Jul2012-v1'
+'SingleElectron/Run2012B-13Jul2012-v1'
+'MET/Run2012B-13Jul2012-v1'
+'SingleElectron/Run2012C-24Aug2012-v1'
+'SingleMu/Run2012C-24Aug2012-v1'
+'MET/Run2012C-24Aug2012-v1'
+)
 
 
-wget 'https://cmsweb.cern.ch/das/makepy?dataset=/DoubleMu/Run2012A-recover_29Jun2012-v1/AOD&instance=cms_dbs_prod_global' -O DoubleMu_Run2012A-recover_29Jun2012-v1_cff.py --no-check-certificate
+entries=${#filenames[@]}
 
+pre='https://cmsweb.cern.ch/das/makepy?dataset=/'
+post='/AOD&instance=cms_dbs_prod_global'
 
-wget 'https://cmsweb.cern.ch/das/makepy?dataset=/DoubleMu/Run2012C-PromptReco-v1/AOD&instance=cms_dbs_prod_global' -O DoubleMu_Run2012C-PromptReco-v1_cff.py --no-check-certificate
+for (( i=0;i<$entries;i++)); do
 
+    address=$pre${filenames[${i}]}$post
+    # savename=`echo ${filenames[${i}]} | awk '{split($0,a,"/"); print a[1]}'`
+    savename=`echo ${filenames[${i}]} | sed 's/\//_/g'`   #too long
+    wget $address -O ${savename}_cff.py --no-check-certificate
+  #  echo $address
+    echo $savename
 
-
-#met
-
-wget 'https://cmsweb.cern.ch/das/makepy?dataset=/MET/Run2012A-PromptReco-v1/AOD&instance=cms_dbs_prod_global' -O MET_Run2012A-PromptReco-v1_cff.py --no-check-certificate
-
-wget 'https://cmsweb.cern.ch/das/makepy?dataset=/MET/Run2012B-PromptReco-v1/AOD&instance=cms_dbs_prod_global' -O MET_Run2012B-PromptReco-v1_cff.py --no-check-certificate
-
-
-#wget 'https://cmsweb.cern.ch/das/makepy?dataset=&instance=cms_dbs_prod_global' -O _cff.py --no-check-certificate
-
-
-wget 'https://cmsweb.cern.ch/das/makepy?dataset=/MET/Run2012C-PromptReco-v1/AOD&instance=cms_dbs_prod_global' -O MET_Run2012C-PromptReco-v1_cff.py --no-check-certificate
-
-
-#single e
-
-wget 'https://cmsweb.cern.ch/das/makepy?dataset=/SingleElectron/Run2012A-PromptReco-v1/AOD&instance=cms_dbs_prod_global' -O SingleElectron_Run2012A-PromptReco-v1_cff.py --no-check-certificate
-
-wget 'https://cmsweb.cern.ch/das/makepy?dataset=/SingleElectron/Run2012B-PromptReco-v1/AOD&instance=cms_dbs_prod_global' -O SingleElectron_Run2012B-PromptReco-v1_cff.py --no-check-certificate
-
-
-#wget 'https://cmsweb.cern.ch/das/makepy?dataset=&instance=cms_dbs_prod_global' -O _cff.py --no-check-certificate
-
-
-wget 'https://cmsweb.cern.ch/das/makepy?dataset=/SingleElectron/Run2012C-PromptReco-v1/AOD&instance=cms_dbs_prod_global' -O SingleElectron_Run2012C-PromptReco-v1_cff.py --no-check-certificate
-
-
-#single mu
-
-wget 'https://cmsweb.cern.ch/das/makepy?dataset=/SingleMu/Run2012A-PromptReco-v1/AOD&instance=cms_dbs_prod_global' -O SingleMu_Run2012A-PromptReco-v1_cff.py --no-check-certificate
-
-wget 'https://cmsweb.cern.ch/das/makepy?dataset=/SingleMu/Run2012B-PromptReco-v1/AOD&instance=cms_dbs_prod_global' -O SingleMu_Run2012B-PromptReco-v1_cff.py --no-check-certificate
-
-
-#wget 'https://cmsweb.cern.ch/das/makepy?dataset=&instance=cms_dbs_prod_global' -O _cff.py --no-check-certificate
-
-
-wget 'https://cmsweb.cern.ch/das/makepy?dataset=/SingleMu/Run2012C-PromptReco-v1/AOD&instance=cms_dbs_prod_global' -O SingleMu_Run2012C-PromptReco-v1_cff.py --no-check-certificate
+done 
