@@ -39,6 +39,7 @@ namespace top{
   void setMatchedTrig(std::vector<std::string> MatchedTrig){matchedTrig_=MatchedTrig;}
 
   void setSuClu(NTSuClu SuCluin){suClu_=SuCluin;}
+  void setMHits(int mhits){mHits_=mhits;}
 
   //gets
   double dbs(){return dbs_;}
@@ -67,6 +68,7 @@ namespace top{
 
   std::vector<std::string> matchedTrig(){return matchedTrig_;}
   NTSuClu suClu(){return suClu_;}
+  int mHits(){return mHits_;}
 
  protected:
   float mvaId_;
@@ -78,6 +80,7 @@ namespace top{
   double rhoIso03_;
   LorentzVector ecalp4_;
   //top::NTIsolation iso04_;
+  int mHits_;
 
   std::vector<std::string> matchedTrig_;
 

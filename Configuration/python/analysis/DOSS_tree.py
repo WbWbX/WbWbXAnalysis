@@ -19,7 +19,7 @@ options.register ('includereco',False,VarParsing.VarParsing.multiplicity.singlet
 options.register ('includetrigger',True,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"includes trigger info for event")
 options.register ('includePDF',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"includes pdf weights info for event")
 options.register ('PDF','cteq65',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"pdf set for weights")
-options.register ('inputScript','TtZAnalysis.Configuration.samples.mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12-PU_S7_START52_V9-v2_cff',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"input Script")
+options.register ('inputScript','TtZAnalysis.Configuration.samples.mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_cff',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"input Script")
 options.register ('json','nojson',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"json file in cern afs")
 options.register ('isSync',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"switch on for sync")
 options.register('samplename', 'standard', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "which sample to run over - obsolete")
@@ -370,6 +370,15 @@ getattr(process,'patPF2PATSequence'+pfpostfix).replace(getattr(process,'pfJets'+
 
 getattr(process,'pfJets'+pfpostfix).src='pfNoPileUp'+pfpostfix
 getattr(process,'patJets'+pfpostfix).jetSource = 'pfJets'+pfpostfix
+
+#getattr(process,'patPF2PATSequence'+pfpostfix).remove(getattr(process,'pfJets'+pfpostfix))
+#getattr(process,'patPF2PATSequence'+pfpostfix).replace(getattr(process,'pfNoPileUp'+pfpostfix),
+#                                                       getattr(process,'pfNoPileUp'+pfpostfix) *
+#                                                       getattr(process,'pfJets'+pfpostfix))
+                                                       
+
+
+##just for taus
 getattr(process,'pfNoJet'+pfpostfix).bottomCollection = 'pfNoPileUp'+pfpostfix
 
 massSearchReplaceAnyInputTag((getattr(process, 'pfTauSequence'+pfpostfix)),cms.InputTag('pfJets'+pfpostfix), cms.InputTag('pfJetsForTaus'),True)
@@ -429,7 +438,7 @@ process.patGSFElectronsWithTrigger = cms.EDProducer("PATTriggerMatchElectronEmbe
                   )
 process.patPFElectronsWithTrigger = process.patGSFElectronsWithTrigger.clone()
 process.patPFElectronsWithTrigger.src = "patPFElectrons"+pfpostfix
-
+process.patPFElectronsWithTrigger.matches = ['patPFElectronsTriggerMatches']
 
 process.patMuonsWithTrigger = cms.EDProducer("PATTriggerMatchMuonEmbedder",
     src = cms.InputTag("patMuons"+ pfpostfix),

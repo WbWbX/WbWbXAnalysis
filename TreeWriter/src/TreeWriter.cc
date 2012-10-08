@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id: TreeWriter.cc,v 1.10 2012/10/05 14:31:49 jkiesele Exp $
+// $Id: TreeWriter.cc,v 1.11 2012/10/05 14:38:34 jkiesele Exp $
 //
 //
 
@@ -307,10 +307,13 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        double vz=-9999;
        double vzerr=-9999;
        double dbs=100;
+       int mhits=-1;
        if(!(electron->gsfTrack().isNull())){
 	 vz=electron->gsfTrack()->dz(vtxs[0].position());                   //
 	 vzerr=electron->gsfTrack()->dzError();  
 	 dbs=fabs(electron->gsfTrack()->dxy(vtxs[0].position()));
+
+	 mhits=electron->gsfTrack()->trackerExpectedHitsInner().numberOfHits();
        }              //
        else if((electron->closestCtfTrackRef()).isNull()){
 	 vz=electron->closestCtfTrackRef()->dz(vtxs[0].position());                   //
@@ -325,6 +328,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        tempelec.setId(electron->electronIDs());
        tempelec.setIso03(Iso);                   //
        //tempelec.setIso04(iso04);                   //
+       tempelec.setMHits(mhits);
 		       
        if(includereco_){
 	 if(electron->triggerObjectMatches().size() ==1){ // no ambiguities
@@ -375,10 +379,15 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        double vz=-9999;
        double vzerr=-9999;
        double dbs=100;
+
+       int mhits=-1;
+
        if(!(electron->gsfTrack().isNull())){
 	 vz=electron->gsfTrack()->dz(vtxs[0].position());                   //
 	 vzerr=electron->gsfTrack()->dzError();  
 	 dbs=fabs(electron->gsfTrack()->dxy(vtxs[0].position()));
+
+	 mhits=electron->gsfTrack()->trackerExpectedHitsInner().numberOfHits();
        }              //
        else if((electron->closestCtfTrackRef()).isNull()){
 	 vz=electron->closestCtfTrackRef()->dz(vtxs[0].position());                   //
@@ -393,6 +402,9 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        tempelec.setId(electron->electronIDs());
        tempelec.setIso03(Iso);                   //
        //tempelec.setIso04(iso04);                   //
+       tempelec.setMHits(mhits);
+
+
 		       
        if(includereco_){
 	 if(electron->triggerObjectMatches().size() ==1){ // no ambiguities
