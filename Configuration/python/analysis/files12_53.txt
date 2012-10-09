@@ -1,10 +1,13 @@
 
+#defaults: isMC=true, includetrigger=true, includereco=false
+#inputs are seperated by min 2 spaces; use runall4!!
+#
 
-500  mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12_DR53X-PU_S10_START53_V7A-v1_cff           8TeV_dymumu60120                genFilter=Z genFilterString=MuonMuon genFilterMassLow=60 genFilterMassHigh=120 includereco=true
+#500  mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12_DR53X-PU_S10_START53_V7A-v1_cff           8TeV_dymumu60120                genFilter=Z genFilterString=MuonMuon genFilterMassLow=60 genFilterMassHigh=120 includereco=true
 
-500  mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12_DR53X-PU_S10_START53_V7A-v1_cff           8TeV_dyee60120                  genFilter=Z genFilterString=ElectronElectron genFilterMassLow=60 genFilterMassHigh=120 includereco=true
+#500  mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12_DR53X-PU_S10_START53_V7A-v1_cff           8TeV_dyee60120                  genFilter=Z genFilterString=ElectronElectron genFilterMassLow=60 genFilterMassHigh=120 includereco=true
 
-500  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_cff     8TeV_eettbar                    genFilter=Top genFilterString=ElectronElectron 
+#500  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_cff     8TeV_eettbar                    genFilter=Top genFilterString=ElectronElectron 
 
 #500  mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_cff     8TeV_mumuttbar                  genFilter=Top genFilterString=MuonMuon 
 
@@ -26,3 +29,21 @@
 
 #100  mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12_DR53X-PU_S10_START53_V7A-v1_cff           8TeV_dymumu120inf                genFilter=Z genFilterString=MuonMuon genFilterMassLow=120 genFilterMassHigh=1e9
 #100  mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12_DR53X-PU_S10_START53_V7A-v1_cff           8TeV_dyee120inf                  genFilter=Z genFilterString=ElectronElectron genFilterMassLow=120 genFilterMassHigh=1e9
+
+
+## data for efficiencies
+
+SingleElectron_Run2012A-13Jul2012-v1_cff           8TeV_singlee_runA_13Jul   isMC=false globalTag=FT_R_53_V6 json=HCP.json includereco=true includetrigger=false
+SingleElectron_Run2012A-recover-06Aug2012-v1_cff   8TeV_singlee_runA_06Aug   isMC=false globalTag=FT_R_53_V6 json=HCP.json includereco=true includetrigger=false
+SingleElectron_Run2012B-13Jul2012-v1_cff           8TeV_singlee_runB_13Jul   isMC=false globalTag=FT_R_53_V6 json=HCP.json includereco=true includetrigger=false
+SingleElectron_Run2012C-24Aug2012-v1_cff           8TeV_singlee_runC_24Aug   isMC=false globalTag=FT_R_53_V10 json=HCP.json includereco=true includetrigger=false
+
+SingleMu_Run2012A-13Jul2012-v1_cff                8TeV_singlemu_runA_13Jul   isMC=false globalTag=FT_R_53_V6 json=HCP.json includereco=true includetrigger=false
+SingleMu_Run2012A-recover-06Aug2012-v1_cff        8TeV_singlemu_runA_06Aug   isMC=false globalTag=FT_R_53_V6 json=HCP.json includereco=true includetrigger=false
+SingleMu_Run2012B-13Jul2012-v1_cff                8TeV_singlemu_runB_13Jul   isMC=false globalTag=FT_R_53_V6 json=HCP.json includereco=true includetrigger=false
+SingleMu_Run2012C-24Aug2012-v1_cff                8TeV_singlemu_runC_24Aug   isMC=false globalTag=FT_R_53_V10 json=HCP.json includereco=true includetrigger=false
+
+MET_Run2012A-13Jul2012-v1_cff                8TeV_MET_runA_13Jul   isMC=false globalTag=FT_R_53_V6 json=HCP.json
+MET_Run2012A-recover-06Aug2012-v1_cff        8TeV_MET_runA_06Aug   isMC=false globalTag=FT_R_53_V6 json=HCP.json
+MET_Run2012B-13Jul2012-v1_cff                8TeV_MET_runB_13Jul   isMC=false globalTag=FT_R_53_V6 json=HCP.json
+MET_Run2012C-24Aug2012-v1_cff                8TeV_MET_runC_24Aug   isMC=false globalTag=FT_R_53_V10 json=HCP.json

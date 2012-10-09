@@ -22,7 +22,7 @@ options.register ('includetrigger',True,VarParsing.VarParsing.multiplicity.singl
 options.register ('includePDF',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"includes pdf weights info for event")
 options.register ('PDF','cteq65',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"pdf set for weights")
 options.register ('inputScript','TtZAnalysis.Configuration.samples.mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_cff',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"input Script")
-options.register ('json','nojson',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"json file in cern afs")
+options.register ('json','nojson',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"json files")
 options.register ('isSync',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"switch on for sync")
 options.register('samplename', 'standard', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "which sample to run over - obsolete")
 
@@ -43,7 +43,7 @@ includetrigger=options.includetrigger    # True
 includePDFWeights=options.includePDF     # False
 PDF=options.PDF                          # cteq65
 inputScript=options.inputScript          # TtZAnalysis.Configuration.samples.mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12-PU_S7_START52_V9-v2_cff
-json=options.json                        # uses cern afs dqm directory ,you must add: Collisions12/8TeV/Prompt/
+json=options.json                        # give full path!!json files in TtZAnalysis/Data/
 
 syncfile=options.isSync                  # False
 
@@ -104,6 +104,7 @@ process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True))
 #Message Logger Stuff
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.MessageLogger.destinations = ['cout', 'cerr']
+#process.MessageLogger.suppressWarning=['particleFlowDisplacedVertexCandidate','The interpolated laser correction is <= zero! (0). Using 1. as correction factor.']
 process.MessageLogger.cerr.FwkReport.reportEvery = reportEvery
 
 process.GlobalTag.globaltag = globalTag + '::All'
@@ -130,7 +131,9 @@ realdata = True
 if isMC:
     realdata=False
 if realdata and not (json=="nojson"):
-    jsonpath = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/' + json 
+    import os
+    jsonpath = os.environ['CMSSW_BASE']+'/src/TtZAnalysis/Data/'+json 
+
     import FWCore.PythonUtilities.LumiList as LumiList
     import FWCore.ParameterSet.Types as CfgTypes
     myLumis = LumiList.LumiList(filename = jsonpath).getCMSSWString().split(',')
@@ -275,14 +278,34 @@ if isMC:
                                                       process.pdfWeights *
                                                       process.preCutPUInfo)
 
+    if is2011:
+        ## load pythia bug filter
+
+        process.load("GeneratorInterface.GenFilters.TotalKinematicsFilter_cfi")
+        process.totalKinematicsFilter.tolerance = 5
+        
+        getattr(process, 'preFilterSequence').replace(process.preCutPUInfo,
+                                                      process.TotalKinematicsFilter *
+                                                      process.preCutPUInfo)
+
 #### for data ###
 else:
-    
+    ## add extra filter for ECal laser Calib
+
     process.preFilterSequence = cms.Sequence(process.HBHENoiseFilter *
                                              process.noscraping *
                                              process.pfLeps *
                                              process.allLeps *
+                                             process.preCutPUInfo *
                                              process.requireMinLeptons)
+    if not is2011:
+        process.load('RecoMET.METFilters.ecalLaserCorrFilter_cfi')
+        getattr(process, 'preFilterSequence').replace(process.preCutPUInfo,
+                                                      process.ecalLaserCorrFilter *
+                                                      process.preCutPUInfo)
+
+    
+    
 
 
 
@@ -551,8 +574,8 @@ process.treeSequence = cms.Sequence(process.triggerMatches *
 ###### Path
 
 process.path = cms.Path(process.goodOfflinePrimaryVertices *
+                        process.inclusiveVertexing *   ## does it prevent segfaults
                         process.preFilterSequence *
-                        process.inclusiveVertexing *
                         process.btagging *             #not yet implemented fully in pf2pat sequence../ needed for new btagging tag
                         process.patTriggerSequence *
                         getattr(process,'patPF2PATSequence'+pfpostfix) *
