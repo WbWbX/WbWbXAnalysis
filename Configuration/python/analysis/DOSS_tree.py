@@ -21,7 +21,7 @@ options.register ('includereco',False,VarParsing.VarParsing.multiplicity.singlet
 options.register ('includetrigger',True,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"includes trigger info for event")
 options.register ('includePDF',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"includes pdf weights info for event")
 options.register ('PDF','cteq65',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"pdf set for weights")
-options.register ('inputScript','TtZAnalysis.Configuration.samples.mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_cff',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"input Script")
+options.register ('inputScript','TtZAnalysis.Configuration.samples.mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"input Script")
 options.register ('json','nojson',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"json files")
 options.register ('isSync',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"switch on for sync")
 options.register('samplename', 'standard', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "which sample to run over - obsolete")
@@ -285,7 +285,7 @@ if isMC:
         process.totalKinematicsFilter.tolerance = 5
         
         getattr(process, 'preFilterSequence').replace(process.preCutPUInfo,
-                                                      process.TotalKinematicsFilter *
+                                                      process.totalKinematicsFilter *
                                                       process.preCutPUInfo)
 
 #### for data ###
@@ -423,7 +423,7 @@ getattr(process,'pfIsolatedMuons'+pfpostfix).isolationCut = 99999
 
 ####### Fix not automatically implemented b-tagging modules/vertices:
 
-process.load('RecoVertex.AdaptiveVertexFinder.inclusiveVertexing_cff')
+# process.load('RecoVertex.AdaptiveVertexFinder.inclusiveVertexing_cff')
 
 ######### build jets for rho value ## only if 2011 rho is used (hopefully not for that long..)
 
@@ -568,15 +568,17 @@ process.treeSequence = cms.Sequence(process.triggerMatches *
 
 
 
+##### does this prevent segfaults?
+
 
 
 
 ###### Path
 
 process.path = cms.Path(process.goodOfflinePrimaryVertices *
-                        process.inclusiveVertexing *   ## does it prevent segfaults
+                      #  process.inclusiveVertexing *   ## segfaults?!?! in the newest release or MC
                         process.preFilterSequence *
-                        process.btagging *             #not yet implemented fully in pf2pat sequence../ needed for new btagging tag
+                      #  process.btagging *             #not yet implemented fully in pf2pat sequence../ needed for new btagging tag
                         process.patTriggerSequence *
                         getattr(process,'patPF2PATSequence'+pfpostfix) *
                         process.isoJetSequence *
