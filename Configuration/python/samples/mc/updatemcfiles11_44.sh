@@ -32,7 +32,7 @@ for (( i=0;i<$entries;i++)); do
     address=$pre${filenames[${i}]}$post
    # savename=`echo ${filenames[${i}]} | awk '{split($0,a,"/"); print a[1]}'`
     savename=`echo ${filenames[${i}]} | sed 's/\//_/g'`   #too long
-    savename=`echo ${filenames[${i}]} | sed 's/-/_/g'`   #too long
+    savename=`echo ${savename} | sed 's/-/_/g'`   #too long
     wget $address -O ${savename}_cff.py --no-check-certificate
   #  echo $address
   #  echo $savename
