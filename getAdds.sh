@@ -1,6 +1,6 @@
 #!/bin/sh
 cd ..
-cmsenv
+eval `scramv1 runtime -sh`
 # the things I use from the TopAnalysis code
 #
 cvs co -d TopAnalysis/TopFilter/plugins/ UserCode/Bromo/TopAnalysis/TopFilter/plugins/GeneratorZFilter.cc
@@ -72,4 +72,4 @@ echo '
 
 
 
-echo '\n\ncompile if you like'
+echo "\n\ncompile if you like"
