@@ -9,6 +9,8 @@ cvs co -d TopAnalysis/TopFilter/ UserCode/Bromo/TopAnalysis/TopFilter/BuildFile.
 cvs co -d TopAnalysis/TopFilter/python/filters/ UserCode/Bromo/TopAnalysis/TopFilter/python/filters/GeneratorTopFilter_cfi.py
 cvs co -d TopAnalysis/TopFilter/python/filters/ UserCode/Bromo/TopAnalysis/TopFilter/python/filters/GeneratorZFilter_cfi.py
 
+
+
 # get sample files
 
 echo "adding samplefiles (update from DAS)"
@@ -34,6 +36,9 @@ cd EGamma/EGammaAnalysisTools/data
 cat download.url | xargs wget
 #cd ../../../
 
+echo "Ecal Filter"
+
+addpkg RecoMET/METFilters V00-00-10
 
 echo 'checking out release V08-09-42 - check if newest one'
 

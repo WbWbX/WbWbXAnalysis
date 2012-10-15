@@ -8,17 +8,17 @@
 #500  mc.DYJetsToLL_M_50_TuneZ2Star_8TeV_madgraph_tarball_Summer12_DR53X_PU_S10_START53_V7A_v1_cff     8TeV_dymumu60120     genFilter=Z genFilterString=MuonMuon genFilterMassLow=60 genFilterMassHigh=120 includereco=true
 #500  mc.DYJetsToLL_M_50_TuneZ2Star_8TeV_madgraph_tarball_Summer12_DR53X_PU_S10_START53_V7A_v1_cff     8TeV_dyee60120       genFilter=Z genFilterString=ElectronElectron genFilterMassLow=60 genFilterMassHigh=120 includereco=true
 
-100  mc.DYJetsToLL_M_50_TuneZ2Star_8TeV_madgraph_tarball_Summer12_DR53X_PU_S10_START53_V7A_v1_cff     8TeV_dymumu5060      genFilter=Z genFilterString=MuonMuon genFilterMassLow=50 genFilterMassHigh=60
-100  mc.DYJetsToLL_M_50_TuneZ2Star_8TeV_madgraph_tarball_Summer12_DR53X_PU_S10_START53_V7A_v1_cff     8TeV_dyee5060        genFilter=Z genFilterString=ElectronElectron genFilterMassLow=50 genFilterMassHigh=60
+#100  mc.DYJetsToLL_M_50_TuneZ2Star_8TeV_madgraph_tarball_Summer12_DR53X_PU_S10_START53_V7A_v1_cff     8TeV_dymumu5060      genFilter=Z genFilterString=MuonMuon genFilterMassLow=50 genFilterMassHigh=60
+#100  mc.DYJetsToLL_M_50_TuneZ2Star_8TeV_madgraph_tarball_Summer12_DR53X_PU_S10_START53_V7A_v1_cff     8TeV_dyee5060        genFilter=Z genFilterString=ElectronElectron genFilterMassLow=50 genFilterMassHigh=60
 
-100  mc.DYJetsToLL_M_50_TuneZ2Star_8TeV_madgraph_tarball_Summer12_DR53X_PU_S10_START53_V7A_v1_cff     8TeV_dymumu120inf    genFilter=Z genFilterString=MuonMuon genFilterMassLow=120 genFilterMassHigh=100000
-100  mc.DYJetsToLL_M_50_TuneZ2Star_8TeV_madgraph_tarball_Summer12_DR53X_PU_S10_START53_V7A_v1_cff     8TeV_dyee120inf      genFilter=Z genFilterString=ElectronElectron genFilterMassLow=120 genFilterMassHigh=100000
+#100  mc.DYJetsToLL_M_50_TuneZ2Star_8TeV_madgraph_tarball_Summer12_DR53X_PU_S10_START53_V7A_v1_cff     8TeV_dymumu120inf    genFilter=Z genFilterString=MuonMuon genFilterMassLow=120 genFilterMassHigh=100000
+#100  mc.DYJetsToLL_M_50_TuneZ2Star_8TeV_madgraph_tarball_Summer12_DR53X_PU_S10_START53_V7A_v1_cff     8TeV_dyee120inf      genFilter=Z genFilterString=ElectronElectron genFilterMassLow=120 genFilterMassHigh=100000
 
-500  mc.DYJetsToLL_M_50_TuneZ2Star_8TeV_madgraph_tarball_Summer12_DR53X_PU_S10_START53_V7A_v1_cff      8TeV_dytautau50inf   genFilter=Z genFilterString=TauTau
+#500  mc.DYJetsToLL_M_50_TuneZ2Star_8TeV_madgraph_tarball_Summer12_DR53X_PU_S10_START53_V7A_v1_cff      8TeV_dytautau50inf   genFilter=Z genFilterString=TauTau
 
-200  mc.DYJetsToLL_M_10To50filter_8TeV_madgraph_Summer12_DR53X_PU_S10_START53_V7A_v1_cff                     8TeV_dymumu1050        genFilter=Z genFilterString=MuonMuon 
-200  mc.DYJetsToLL_M_10To50filter_8TeV_madgraph_Summer12_DR53X_PU_S10_START53_V7A_v1_cff                     8TeV_dytautau1050      genFilter=Z genFilterString=TauTau 
-200  mc.DYJetsToLL_M_10To50filter_8TeV_madgraph_Summer12_DR53X_PU_S10_START53_V7A_v1_cff                     8TeV_dyee1050          genFilter=Z genFilterString=ElectronElectron
+#200  mc.DYJetsToLL_M_10To50filter_8TeV_madgraph_Summer12_DR53X_PU_S10_START53_V7A_v1_cff                     8TeV_dymumu1050        genFilter=Z genFilterString=MuonMuon 
+#200  mc.DYJetsToLL_M_10To50filter_8TeV_madgraph_Summer12_DR53X_PU_S10_START53_V7A_v1_cff                     8TeV_dytautau1050      genFilter=Z genFilterString=TauTau 
+#200  mc.DYJetsToLL_M_10To50filter_8TeV_madgraph_Summer12_DR53X_PU_S10_START53_V7A_v1_cff                     8TeV_dyee1050          genFilter=Z genFilterString=ElectronElectron
 
 #####TTBAR
 
@@ -32,22 +32,22 @@
 
 #### BOSON STUFF
 
-#300  WJetsToLNu_TuneZ2Star_8TeV_madgraph_tarball_Summer12_DR53X_PU_S10_START53_V7A_v2_cff    8TeV_wjets 
+300  mc.WJetsToLNu_TuneZ2Star_8TeV_madgraph_tarball_Summer12_DR53X_PU_S10_START53_V7A_v2_cff    8TeV_wjets  
 
-#100  WW_TuneZ2star_8TeV_pythia6_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff              8TeV_wwp
-#100  WZ_TuneZ2star_8TeV_pythia6_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff  	      8TeV_wz    
-#100  ZZ_TuneZ2star_8TeV_pythia6_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff              8TeV_zz   
+100  mc.WW_TuneZ2star_8TeV_pythia6_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff              8TeV_wwp
+100  mc.WZ_TuneZ2star_8TeV_pythia6_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff  	      8TeV_wz    
+100  mc.ZZ_TuneZ2star_8TeV_pythia6_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff              8TeV_zz   
 
 
 
 #####QCD
 
-#200  QCD_Pt_20_MuEnrichedPt_15_TuneZ2star_8TeV_pythia6_Summer12_DR53X_PU_S10_START53_V7A_v3_cff      8TeV_qcdmu15         
+200  mc.QCD_Pt_20_MuEnrichedPt_15_TuneZ2star_8TeV_pythia6_Summer12_DR53X_PU_S10_START53_V7A_v3_cff      8TeV_qcdmu15         
 
-#200  QCD_Pt_20_30_BCtoE_TuneZ2star_8TeV_pythia6_Summer12_DR53X_PU_S10_START53_V7A_v1_cff             8TeV_qcdbce2030
-#200  QCD_Pt_20_30_EMEnriched_TuneZ2star_8TeV_pythia6_Summer12_DR53X_PU_S10_START53_V7A_v1_cff        8TeV_qcdem2030  
-#200  QCD_Pt_30_80_EMEnriched_TuneZ2star_8TeV_pythia6_Summer12_DR53X_PU_S10_START53_V7A_v1_cff        8TeV_qcdem3080  
-#200  QCD_Pt_80_170_EMEnriched_TuneZ2star_8TeV_pythia6_Summer12_DR53X_PU_S10_START53_V7A_v1_cff       8TeV_qcdem80170  
+200  mc.QCD_Pt_20_30_BCtoE_TuneZ2star_8TeV_pythia6_Summer12_DR53X_PU_S10_START53_V7A_v1_cff             8TeV_qcdbce2030
+200  mc.QCD_Pt_20_30_EMEnriched_TuneZ2star_8TeV_pythia6_Summer12_DR53X_PU_S10_START53_V7A_v1_cff        8TeV_qcdem2030  
+200  mc.QCD_Pt_30_80_EMEnriched_TuneZ2star_8TeV_pythia6_Summer12_DR53X_PU_S10_START53_V7A_v1_cff        8TeV_qcdem3080  
+200  mc.QCD_Pt_80_170_EMEnriched_TuneZ2star_8TeV_pythia6_Summer12_DR53X_PU_S10_START53_V7A_v1_cff       8TeV_qcdem80170  
 
 
 ###########DATA FT_53_V6_AN2
