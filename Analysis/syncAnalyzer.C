@@ -10,6 +10,7 @@
 #include "TFile.h"
 #include <fstream>
 #include <iostream>
+#include "TCanvas.h"
 
 namespace top{
   typedef std::vector<top::NTElectron>::iterator NTElectronIt;
@@ -20,10 +21,11 @@ namespace top{
 }
 
 //need function for find container in vector by name and create if not existing
-void do_sync(const char * file){
+void do_sync(const char * file, const char* output){
 
   using namespace top;
   using namespace std;
+
 
   TFile * f = new TFile(file);
   TTree * t = (TTree*) f->Get("PFTree/pfTree");
@@ -43,6 +45,7 @@ void do_sync(const char * file){
   t->SetBranchAddress("NTEvent",&pEvent); 
 
 
+  TH1D * h = new TH1D(file,file,20,0,20);
 
   ////just some counters
 
@@ -120,10 +123,12 @@ void do_sync(const char * file){
       if(jet->pt()<30) continue;
       if(fabs(jet->eta())>2.5) continue;
       if(!(jet->id())) continue;
-      // if(!noOverlap(jet, isomuons, 0.3)) continue;
-      // if(!noOverlap(jet, isoelectrons, 0.3)) continue;
+      //  if(!noOverlap(jet, isomuons, 0.3)) continue;
+      //  if(!noOverlap(jet, isoelectrons, 0.3)) continue;
       hardjets.push_back(*jet);
     }
+
+    h->Fill(hardjets.size());
 
     totalhardjets+=hardjets.size();
 
@@ -140,8 +145,13 @@ void do_sync(const char * file){
   cout << "hardjets definition might be the same as in real analysis! doesn't matter for sync." << endl;
 
 
+  TCanvas * c = new TCanvas("","");
+  h->Draw();
+  c->Print(((TString) output) + ".eps");
+
   f->Close(); //deletes all pointers
   delete f;
+
 
 }
 
@@ -150,12 +160,16 @@ void do_sync(const char * file){
 
 void syncAnalyzer(){
 
+
   std::cout << "DOSS" << std::endl;
-  do_sync("/scratch/hh/dust/naf/cms/user/kieseler/sync/tree_def_out.root");
+  do_sync("/scratch/hh/dust/naf/cms/user/kieseler/sync/tree_def_out.root","doss_chs");
+
 
 
   std::cout << "\n\nlatinos..." << std::endl;
-  do_sync("/scratch/hh/dust/naf/cms/user/kieseler/sync/tree_latinosYieldSkim_numEvent10000.root.root");
+  do_sync("/scratch/hh/dust/naf/cms/user/kieseler/sync/tree_latinosYieldSkim_numEvent10000.root.root","lat_chs");
+
+
 
 }
 

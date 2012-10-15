@@ -1,4 +1,4 @@
-#!/bin/sh
+cd#!/bin/sh
 cd ..
 # the things I use from the TopAnalysis code
 #
@@ -15,10 +15,10 @@ cvs co -d TopAnalysis/TopFilter/python/filters/ UserCode/Bromo/TopAnalysis/TopFi
 
 echo "adding samplefiles (update from DAS)"
 
-cd TtZAnalysis/Configuration/python/samples
-./update_samplefiles2012.sh
-cd mc
-./updatemcfiles12.sh
+#cd TtZAnalysis/Configuration/python/samples
+#./update_samplefiles2012.sh
+#cd mc
+#./updatemcfiles12.sh
 cd $CMSSW_BASE/src
 
 # the private JEC uncertainties code (standalone)
