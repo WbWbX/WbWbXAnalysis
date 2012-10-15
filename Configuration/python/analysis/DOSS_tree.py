@@ -26,7 +26,10 @@ options.register ('json','nojson',VarParsing.VarParsing.multiplicity.singleton,V
 options.register ('isSync',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"switch on for sync")
 options.register('samplename', 'standard', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "which sample to run over - obsolete")
 
-options.parseArguments()
+import sys
+
+if hasattr(sys, "argv"):
+    options.parseArguments()
 
 is2011=options.is2011                    # def false
 crab=options.crab                        # False
