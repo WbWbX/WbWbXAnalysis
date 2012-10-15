@@ -1,5 +1,6 @@
-cd#!/bin/sh
+#!/bin/sh
 cd ..
+cmsenv
 # the things I use from the TopAnalysis code
 #
 cvs co -d TopAnalysis/TopFilter/plugins/ UserCode/Bromo/TopAnalysis/TopFilter/plugins/GeneratorZFilter.cc
