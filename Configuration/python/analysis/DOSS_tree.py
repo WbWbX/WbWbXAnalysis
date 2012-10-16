@@ -46,7 +46,7 @@ includetrigger=options.includetrigger    # True
 includePDFWeights=options.includePDF     # False
 PDF=options.PDF                          # cteq65
 inputScript=options.inputScript          # TtZAnalysis.Configuration.samples.mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12-PU_S7_START52_V9-v2_cff
-json=options.json                        # give full path!!json files in TtZAnalysis/Data/
+json=options.json                        # give full path!!json files in TtZAnalysis/Data/data
 
 syncfile=options.isSync                  # False
 
@@ -72,7 +72,7 @@ if syncfile:
 
 if includePDFWeights:
     import os
-    newlha = os.environ['CMSSW_BASE']+'/src/TtZAnalysis/Data/PDFSets'
+    newlha = os.environ['CMSSW_BASE']+'/src/TtZAnalysis/Data/data/PDFSets'
     os.environ['LHAPATH']=newlha
 
 
@@ -135,7 +135,7 @@ if isMC:
     realdata=False
 if realdata and not (json=="nojson"):
     import os
-    jsonpath = os.environ['CMSSW_BASE']+'/src/TtZAnalysis/Data/'+json 
+    jsonpath = os.environ['CMSSW_BASE']+'/src/TtZAnalysis/Data/data/'+json 
 
     import FWCore.PythonUtilities.LumiList as LumiList
     import FWCore.ParameterSet.Types as CfgTypes
