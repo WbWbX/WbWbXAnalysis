@@ -10,6 +10,15 @@ cvs co -d TopAnalysis/TopFilter/ UserCode/Bromo/TopAnalysis/TopFilter/BuildFile.
 cvs co -d TopAnalysis/TopFilter/python/filters/ UserCode/Bromo/TopAnalysis/TopFilter/python/filters/GeneratorTopFilter_cfi.py
 cvs co -d TopAnalysis/TopFilter/python/filters/ UserCode/Bromo/TopAnalysis/TopFilter/python/filters/GeneratorZFilter_cfi.py
 
+cvs co -d TopAnalysis/Configuration/analysis/diLeptonic  UserCode/Bromo/TopAnalysis/Configuration/analysis/diLeptonic/runallGC.pl
+
+cd ${CMSSW_BASE}/src/TtZAnalysis/Configuration/python/analysis
+ln -s ${CMSSW_BASE}/src/TopAnalysis/Configuration/analysis/diLeptonic/runallGC.pl runallGC.pl
+
+cd $CMSSW_BASE/src/TtZAnalysis/Configuration/python/analysis
+svn co https://ekptrac.physik.uni-karlsruhe.de/public/grid-control/tags/stable/grid-control
+cd $CMSSW_BASE/src
+
 
 
 # get sample files

@@ -1,7 +1,8 @@
 #!/bin/sh
 ./getAdds.sh
 cd $CMSSW_BASE/src
-rm TtZAnalysis/Tools/interface/container*
-rm TtZAnalysis/Tools/src/container*
-rm TtZAnalysis/Tools/src/classes*
-rm TtZAnalysis/plugins/*.h
+rm -f TtZAnalysis/Tools/interface/container*
+rm -f TtZAnalysis/Tools/src/container*
+rm -f TtZAnalysis/Tools/src/classes*
+rm -f TtZAnalysis/plugins/*.h
+rm -r -f CondFormats
