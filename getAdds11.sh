@@ -48,9 +48,6 @@ cd EGamma/EGammaAnalysisTools/data
 cat download.url | xargs wget
 #cd ../../../
 
-echo "Ecal Filter"
-
-addpkg RecoMET/METFilters V00-00-10
 
 echo 'checking out release V08-07-50 - check if newest one'
 
