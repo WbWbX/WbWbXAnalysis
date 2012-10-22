@@ -15,8 +15,10 @@ cvs co -d TopAnalysis/Configuration/analysis/diLeptonic  UserCode/Bromo/TopAnaly
 cd ${CMSSW_BASE}/src/TtZAnalysis/Configuration/python/analysis
 ln -s ${CMSSW_BASE}/src/TopAnalysis/Configuration/analysis/diLeptonic/runallGC.pl runallGC.pl
 
-cd $CMSSW_BASE/src/TtZAnalysis/Configuration/python/analysis
+cd $CMSSW_BASE
+cd ..
 svn co https://ekptrac.physik.uni-karlsruhe.de/public/grid-control/tags/stable/grid-control
+ln -s $CMSSW_BASE/src/TtZAnalysis/Configuration/python/analysis analysis
 cd $CMSSW_BASE/src
 
 
