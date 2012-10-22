@@ -115,10 +115,10 @@ process.GlobalTag.globaltag = globalTag + '::All'
 process.out    = cms.OutputModule("PoolOutputModule", outputCommands =  cms.untracked.vstring(), fileName = cms.untracked.string( outputFile + '_PatTuple') )
 
 ################# Input script (some default one for crab
-if syncfile or crab:
-    process.source = cms.Source('PoolSource',fileNames=cms.untracked.vstring( '/store/mc/Summer12/TTJets_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S7_START52_V5-v1/0000/FEBE99BB-3881-E111-B1F3-003048D42DC8.root' ))
+#if syncfile or crab:
+process.source = cms.Source('PoolSource',fileNames=cms.untracked.vstring( '/store/mc/Summer12/TTJets_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S7_START52_V5-v1/0000/FEBE99BB-3881-E111-B1F3-003048D42DC8.root' ))
 
-else:     
+if not (syncfile or crab):     
     if inputScript=='':
         print "need input script"
         exit(8888)
@@ -147,7 +147,7 @@ if realdata and not (json=="nojson"):
 
 
 #### TFile Service
-outFileName = 'tree_' + outputFile + '.root'
+outFileName = outputFile + '.root'
 
 process.TFileService = cms.Service("TFileService",
     fileName = cms.string(outFileName)
