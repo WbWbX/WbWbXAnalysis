@@ -13,7 +13,7 @@
 #FT_R_44_V9	Nov8	 FT44_V9_AN1
 
 
-150000  /DoubleElectron/Run2011A-08Nov2011-v1/AOD        tree_7TeV_ee_runA_08Nov    isMC=false globalTag=FT44_V9_AN1 json=ReRecoNov2011.json.txt crab=true is2011=true
-150000  /DoubleElectron/Run2011B-19Nov2011-v1/AOD        tree_7TeV_ee_runB_19Nov    isMC=false globalTag=FT44_V11_AN1 json=ReRecoNov2011.json.txt crab=true is2011=true
-150000  /DoubleMu/Run2011A-08Nov2011-v1/AOD              tree_7TeV_mumu_runA_08Nov  isMC=false globalTag=FT44_V9_AN1 json=ReRecoNov2011.json.txt crab=true is2011=true
-150000  /DoubleMu/Run2011B-19Nov2011-v1/AOD              tree_7TeV_mumu_runB_19Nov  isMC=false globalTag=FT44_V11_AN1 json=ReRecoNov2011.json.txt crab=true is2011=true
+150000  /DoubleElectron/Run2011A-08Nov2011-v1/AOD        tree_7TeV_ee_runA_08Nov    is2011=true isMC=false globalTag=FT44_V9_AN1 crab=true     ReRecoNov2011.json
+150000  /DoubleElectron/Run2011B-19Nov2011-v1/AOD        tree_7TeV_ee_runB_19Nov    is2011=true isMC=false globalTag=FT44_V11_AN1 crab=true    ReRecoNov2011.json
+150000  /DoubleMu/Run2011A-08Nov2011-v1/AOD              tree_7TeV_mumu_runA_08Nov  is2011=true isMC=false globalTag=FT44_V9_AN1 crab=true     ReRecoNov2011.json
+150000  /DoubleMu/Run2011B-19Nov2011-v1/AOD              tree_7TeV_mumu_runB_19Nov  is2011=true isMC=false globalTag=FT44_V11_AN1 crab=true    ReRecoNov2011.json
