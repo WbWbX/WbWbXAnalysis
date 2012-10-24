@@ -14,15 +14,17 @@
 #include <utility>
 #include "TCanvas.h"
 #include "TROOT.h"
+#include "TChain.h"
 #include "makeplotsnice.h"
 #include "TtZAnalysis/Tools/interface/container.h"
+#include "TtZAnalysis/Tools/interface/miscUtils.h"
 
 using namespace std;
 
 
 
-  double ratiomultiplier=1;
-
+double ratiomultiplier=1;
+TString whichelectrons="NTPFElectrons";
 
 
 
@@ -47,7 +49,7 @@ public:
 
 
 
-  vector<double> Eff(string mode="ee",  const char * inputFile="  ", const char * pufile_ =" ", bool IsMC=true, bool makeTeXTable=false){
+  vector<double> Eff(string mode="ee",  TChain * t1=0, const char * pufile_ =" ", bool IsMC=true, bool makeTeXTable=false){
 
   isMC=IsMC;
 
@@ -168,11 +170,11 @@ notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v")
 
   //inputFile="/scratch/hh/current/cms/user/kieseler/2012/trees0525/tree_mumu_mumu_allmodes_met_ttbar.root.root";
   //inputFile="/scratch/hh/current/cms/user/kieseler/2012/trees0525/tree_mumu_mumu_allmodes_met_runB_prompt.root.root";
-  const char * directoryname="TestTreePF";
-  const char * treename="pfTree";
+  // const char * directoryname="TestTreePF";
+  // const char * treename="pfTree";
 
   //new naming
-    directoryname="PFTree";
+  //  directoryname="PFTree";
   
 
   //mode="ee";
@@ -202,7 +204,7 @@ notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v")
     vector<float> dphi;
 
     for(float i=0;i<=10;i++){
-      dphi.push_back(3.1415 * i/10);
+      dphi.push_back(2*3.1415 * i/10);
     }
 
     container1D c_pteff  = container1D(binspt_);
@@ -226,13 +228,13 @@ notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v")
     container1D c_corrdphi = container1D(dphi);
 
 
-  TFile f1(inputFile);
+    //  TFile f1(inputFile);
   TFile f2(pufile_);
   TH1D datapileup=*((TH1D*)f2.Get("pileup"));
 
   // create tree
-  TDirectory * d= (TDirectory*) f1.Get(directoryname); //just the TDirectory, the tree is in
-  TTree *t1 = (TTree*)d->Get(treename); //tree name
+  //  TDirectory * d= (TDirectory*) f1.Get(directoryname); //just the TDirectory, the tree is in
+  //  TTree *t1 = (TTree*)d->Get(treename); //tree name
 
 
   //set trigger paths for 5E33 and 7E33 with upper run no cut
@@ -311,7 +313,7 @@ notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v")
   vector<NTMuon> * pMuons = 0;
   t1->SetBranchAddress("NTMuons",&pMuons); 
   vector<NTElectron> * pElectrons = 0;
-  t1->SetBranchAddress("NTElectrons",&pElectrons); 
+  t1->SetBranchAddress(whichelectrons,&pElectrons); 
   vector<NTJet> * pJets = 0;
   t1->SetBranchAddress("NTJets",&pJets); 
   NTMet * pMet = 0;
@@ -797,6 +799,20 @@ private:
   bool isMC;
 };
 
+TChain * makeChain(std::vector<TString> paths){
+  TChain * chain = new TChain(paths[0]);
+  for(std::vector<TString>::iterator path=paths.begin();path<paths.end();++path){
+    chain->Add((*path)+"/PFTree/pfTree");
+  }
+  return chain;
+}
+
+TChain * makeChain(TString path){
+  TChain * chain = new TChain(path);
+  
+  chain->Add(path+"/PFTree/pfTree");
+  return chain;
+}
 
 void analyze(){
 
@@ -815,21 +831,49 @@ void analyze(){
   triggerAnalyzer ta_eeMC, ta_mumuMC, ta_emuMC;
   ta_mumuMC.setBinsEta(binsmumueta);
 
-  const char * datafile = "/scratch/hh/dust/naf/cms/user/kieseler/trees0724/tree_8TeV_met_runAB_prompt.root";
+  TString datadir="/scratch/hh/dust/naf/cms/user/kieseler/GridControl_workingDir/dontdel_MET_24Oct/";
 
-  const char * pileuproot = "/afs/naf.desy.de/user/k/kieseler/scratch/2012/TestArea2/CMSSW_5_2_5/src/TtZAnalysis/Data/PUDistr/data_pu_190456-196531_corr_def.root";
+  std::vector<TString> datafiles;
+  datafiles << datadir + "tree_8TeV_MET_runA_06Aug.root" 
+	    << datadir + "tree_8TeV_MET_runA_13Jul.root" 
+	    << datadir + "tree_8TeV_MET_runB_13Jul.root" 
+	    << datadir + "tree_8TeV_MET_runC_24Aug.root" 
+	    << datadir + "tree_8TeV_MET_runC_prompt.root";
+
+  //const char * datafile = "/scratch/hh/dust/naf/cms/user/kieseler/trees0724/tree_8TeV_met_runAB_prompt.root";
+
+  const char * pileuproot = "/scratch/hh/dust/naf/cms/user/kieseler/GridControl_workingDir/dontdel_MET_24Oct/MET_prel_PU.root";
+
+  //////// NOT REALLY VALID PU reweighting!!!
+
+  TChain * datachain=makeChain(datafiles);
 
 
-  vector<double> eed=ta_eed.Eff("ee",    datafile,pileuproot, false,getTeX);
-  vector<double> mumud=ta_mumud.Eff("mumu",  datafile,pileuproot, false,getTeX);
-  vector<double> emud= ta_emud.Eff("emu",   datafile,pileuproot, false,getTeX);
+  vector<double> eed=ta_eed.Eff("ee",    datachain,pileuproot, false,getTeX);
+  vector<double> mumud=ta_mumud.Eff("mumu",  datachain,pileuproot, false,getTeX);
+  vector<double> emud= ta_emud.Eff("emu",   datachain,pileuproot, false,getTeX);
 
+ 
+
+  std::vector<TString> eemcfiles,mumumcfiles,emumcfiles;
+  eemcfiles << "/scratch/hh/dust/naf/cms/user/kieseler/53trees/tree_8TeV_eettbar.root"
+	    << "/scratch/hh/dust/naf/cms/user/diezcar/2012_Rel533/2012-10-08T17:25:32-naf_DOSS_tree_py_for_8TeV_eettbarviatau_8TeV_eettbarviatau/tree_8TeV_eettbarviatau.root" ;
+
+  mumumcfiles <<"/scratch/hh/dust/naf/cms/user/diezcar/2012_Rel533/2012-10-08T17:25:31-naf_DOSS_tree_py_for_8TeV_mumuttbar_8TeV_mumuttbar/tree_8TeV_mumuttbar.root" 
+	      <<"/scratch/hh/dust/naf/cms/user/diezcar/2012_Rel533/2012-10-08T17:25:32-naf_DOSS_tree_py_for_8TeV_mumuttbarviatau_8TeV_mumuttbarviatau/tree_8TeV_mumuttbarviatau.root" ;
+
+  emumcfiles << "/scratch/hh/dust/naf/cms/user/kieseler/53trees/tree_8TeV_emuttbar.root"
+	     << "/scratch/hh/dust/naf/cms/user/diezcar/2012_Rel533/2012-10-08T17:25:32-naf_DOSS_tree_py_for_8TeV_emuttbarviatau_8TeV_emuttbarviatau/tree_8TeV_emuttbarviatau.root";
+
+
+
+  TChain * eechain=makeChain(eemcfiles);
+  TChain * mumuchain=makeChain(mumumcfiles);
+  TChain * emuchain=makeChain(emumcfiles);
   
-  
-  
-  vector<double> eeMC=ta_eeMC.Eff("ee",    "/scratch/hh/dust/naf/cms/user/kieseler/trees0724/tree_8TeV_eettbar.root",pileuproot,true,getTeX);
-  vector<double> mumuMC=ta_mumuMC.Eff("mumu",  "/scratch/hh/dust/naf/cms/user/kieseler/trees0724/tree_8TeV_mumuttbar.root",pileuproot,true,getTeX);
-  vector<double> emuMC=ta_emuMC.Eff("emu",   "/scratch/hh/dust/naf/cms/user/kieseler/trees0724/tree_8TeV_emuttbar.root",pileuproot,true,getTeX);
+  vector<double> eeMC=ta_eeMC.Eff("ee",  eechain  ,pileuproot,true,getTeX);
+  vector<double> mumuMC=ta_mumuMC.Eff("mumu", mumuchain ,pileuproot,true,getTeX);
+  vector<double> emuMC=ta_emuMC.Eff("emu",  emuchain ,pileuproot,true,getTeX);
 
 
   cout.precision(3);
