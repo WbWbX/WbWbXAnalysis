@@ -26,7 +26,7 @@ using namespace std;
 double ratiomultiplier=1;
 TString whichelectrons="NTPFElectrons";
 
-
+double jetptcut=30;
 
 class triggerAnalyzer{
 
@@ -45,7 +45,9 @@ public:
   top::container1D  getCorrelationPt(){return corrpt_;}
   top::container1D  getCorrelationEta(){return correta_;}
   top::container1D getDPhiPlot(){return dphieff_;}
+  top::container1D getDPhiPlot2(){return dphieff2_;}
   top::container1D getCorrelationDPhi(){return corrdphi_;}
+  top::container1D getCorrelationDPhi2(){return corrdphi2_;}
 
 
 
@@ -227,6 +229,12 @@ notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v")
     container1D c_selbothtrigdphi = container1D(dphi);
     container1D c_corrdphi = container1D(dphi);
 
+    container1D c_dphieff2 = container1D(dphi);
+    container1D c_seldphi2 = container1D(dphi);
+    container1D c_trigdphi2 = container1D(dphi);
+    container1D c_selmettrigdphi2 = container1D(dphi);
+    container1D c_selbothtrigdphi2 = container1D(dphi);
+    container1D c_corrdphi2 = container1D(dphi);
 
     //  TFile f1(inputFile);
   TFile f2(pufile_);
@@ -506,7 +514,7 @@ notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v")
 
     vector<NTJet> selected_jets;
     for(vector<NTJet>::iterator jet=pJets->begin();jet<pJets->end();jet++){
-      if(jet->pt() < 30) continue;
+      if(jet->pt() < jetptcut) continue;
       if(fabs(jet->eta()) >2.5) continue;
       if(!noOverlap(jet,selectedMuons,0.3)) continue; //cleaning
       if(!noOverlap(jet,selectedElecs,0.3)) continue;
@@ -531,14 +539,16 @@ notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v")
 	c_selpt.fill(selectedElecs[1].pt(),puweight);
 	c_seleta.fill(selectedElecs[0].eta(),puweight);
 	c_seleta.fill(selectedElecs[1].eta(),puweight);
-	c_seldphi.fill(fabs(selectedElecs[0].phi() - pMet->phi()));
+	c_seldphi.fill(fabs(selectedElecs[0].phi() - pMet->phi()),puweight);
+	c_seldphi2.fill(fabs(selectedElecs[1].phi() - pMet->phi()),puweight);
       }
       else if(mode=="mumu"){
 	c_selpt.fill(selectedMuons[0].pt(),puweight);
 	c_selpt.fill(selectedMuons[1].pt(),puweight);
 	c_seleta.fill(selectedMuons[0].eta(),puweight);
 	c_seleta.fill(selectedMuons[1].eta(),puweight);
-	c_seldphi.fill(fabs(selectedMuons[0].phi() - pMet->phi()));
+	c_seldphi.fill(fabs(selectedMuons[0].phi() - pMet->phi()),puweight);
+	c_seldphi2.fill(fabs(selectedMuons[1].phi() - pMet->phi()),puweight);
 
       }
       else if(mode =="emu"){
@@ -546,7 +556,8 @@ notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v")
 	c_selpt.fill(selectedMuons[0].pt(),puweight);
 	c_seleta.fill(selectedElecs[0].eta(),puweight);
 	c_seleta.fill(selectedMuons[0].eta(),puweight);
-	c_seldphi.fill(fabs(selectedElecs[0].phi() - pMet->phi()));
+	c_seldphi.fill(fabs(selectedElecs[0].phi() - pMet->phi()),puweight);
+	c_seldphi2.fill(fabs(selectedMuons[0].phi() - pMet->phi()),puweight);
 
       }
     }
@@ -563,14 +574,16 @@ notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v")
 	c_trigpt.fill(selectedElecs[1].pt(),puweight);
 	c_trigeta.fill(selectedElecs[0].eta(),puweight);
 	c_trigeta.fill(selectedElecs[1].eta(),puweight);
-	c_trigdphi.fill(fabs(selectedElecs[0].phi() - pMet->phi()));
+	c_trigdphi.fill(fabs(selectedElecs[0].phi() - pMet->phi()),puweight);
+	c_trigdphi2.fill(fabs(selectedElecs[1].phi() - pMet->phi()),puweight);
       }
       else if(mode=="mumu"){
 	c_trigpt.fill(selectedMuons[0].pt(),puweight);
 	c_trigpt.fill(selectedMuons[1].pt(),puweight);
 	c_trigeta.fill(selectedMuons[0].eta(),puweight);
 	c_trigeta.fill(selectedMuons[1].eta(),puweight);
-	c_trigdphi.fill(fabs(selectedMuons[0].phi() - pMet->phi()));
+	c_trigdphi.fill(fabs(selectedMuons[0].phi() - pMet->phi()),puweight);
+	c_trigdphi2.fill(fabs(selectedMuons[1].phi() - pMet->phi()),puweight);
 
       }
       else if(mode =="emu"){
@@ -578,7 +591,8 @@ notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v")
 	c_trigpt.fill(selectedMuons[0].pt(),puweight);
 	c_trigeta.fill(selectedElecs[0].eta(),puweight);
 	c_trigeta.fill(selectedMuons[0].eta(),puweight);
-	c_trigdphi.fill(fabs(selectedElecs[0].phi() - pMet->phi()));
+	c_trigdphi.fill(fabs(selectedElecs[0].phi() - pMet->phi()),puweight);
+	c_trigdphi2.fill(fabs(selectedMuons[0].phi() - pMet->phi()),puweight);
 
       }
 
@@ -598,14 +612,16 @@ notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v")
 	c_selmettrigpt.fill(selectedElecs[1].pt(),puweight);
 	c_selmettrigeta.fill(selectedElecs[0].eta(),puweight);
 	c_selmettrigeta.fill(selectedElecs[1].eta(),puweight);
-	c_selmettrigdphi.fill(fabs(selectedElecs[0].phi() - pMet->phi()));
+	c_selmettrigdphi.fill(fabs(selectedElecs[0].phi() - pMet->phi()),puweight);
+	c_selmettrigdphi2.fill(fabs(selectedElecs[1].phi() - pMet->phi()),puweight);
       }
       else if(mode=="mumu"){
 	c_selmettrigpt.fill(selectedMuons[0].pt(),puweight);
 	c_selmettrigpt.fill(selectedMuons[1].pt(),puweight);
 	c_selmettrigeta.fill(selectedMuons[0].eta(),puweight);
 	c_selmettrigeta.fill(selectedMuons[1].eta(),puweight);
-	c_selmettrigdphi.fill(fabs(selectedMuons[0].phi() - pMet->phi()));
+	c_selmettrigdphi.fill(fabs(selectedMuons[0].phi() - pMet->phi()),puweight);
+	c_selmettrigdphi2.fill(fabs(selectedMuons[1].phi() - pMet->phi()),puweight);
 
       }
       else if(mode =="emu"){
@@ -613,7 +629,8 @@ notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v")
 	c_selmettrigpt.fill(selectedMuons[0].pt(),puweight);
 	c_selmettrigeta.fill(selectedElecs[0].eta(),puweight);
 	c_selmettrigeta.fill(selectedMuons[0].eta(),puweight);
-	c_selmettrigdphi.fill(fabs(selectedElecs[0].phi() - pMet->phi()));
+	c_selmettrigdphi.fill(fabs(selectedElecs[0].phi() - pMet->phi()),puweight);
+	c_selmettrigdphi2.fill(fabs(selectedMuons[0].phi() - pMet->phi()),puweight);
 
       }
       sel_MetTrig[0].second  +=puweight;
@@ -631,14 +648,16 @@ notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v")
 	c_selbothtrigpt.fill(selectedElecs[1].pt(),puweight);
 	c_selbothtrigeta.fill(selectedElecs[0].eta(),puweight);
 	c_selbothtrigeta.fill(selectedElecs[1].eta(),puweight);
-	c_selbothtrigdphi.fill(fabs(selectedElecs[0].phi() - pMet->phi()));
+	c_selbothtrigdphi.fill(fabs(selectedElecs[0].phi() - pMet->phi()),puweight);
+	c_selbothtrigdphi2.fill(fabs(selectedElecs[1].phi() - pMet->phi()),puweight);
       }
       else if(mode=="mumu"){
 	c_selbothtrigpt.fill(selectedMuons[0].pt(),puweight);
 	c_selbothtrigpt.fill(selectedMuons[1].pt(),puweight);
 	c_selbothtrigeta.fill(selectedMuons[0].eta(),puweight);
 	c_selbothtrigeta.fill(selectedMuons[1].eta(),puweight);
-	c_selbothtrigdphi.fill(fabs(selectedMuons[0].phi() - pMet->phi()));
+	c_selbothtrigdphi.fill(fabs(selectedMuons[0].phi() - pMet->phi()),puweight);
+	c_selbothtrigdphi2.fill(fabs(selectedMuons[1].phi() - pMet->phi()),puweight);
 
       }
       else if(mode =="emu"){
@@ -646,7 +665,8 @@ notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v")
 	c_selbothtrigpt.fill(selectedMuons[0].pt(),puweight);
 	c_selbothtrigeta.fill(selectedElecs[0].eta(),puweight);
 	c_selbothtrigeta.fill(selectedMuons[0].eta(),puweight);
-	c_selbothtrigdphi.fill(fabs(selectedElecs[0].phi() - pMet->phi()));
+	c_selbothtrigdphi.fill(fabs(selectedElecs[0].phi() - pMet->phi()),puweight);
+	c_selbothtrigdphi2.fill(fabs(selectedMuons[0].phi() - pMet->phi()),puweight);
       }
 
       sel_BothTrig[0].second  +=puweight;
@@ -739,25 +759,30 @@ notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v")
   c_pteff = c_trigpt / c_selpt;
   c_etaeff = c_trigeta / c_seleta;
   c_dphieff = c_trigdphi / c_seldphi;
+  c_dphieff2 = c_trigdphi2 / c_seldphi2;
   // container1D c_tempmeteff=c_selmettrigpt/c_selpt;
   //  c_tempmeteff.setDivideBinomial(false);
   std::cout << "making correlation plots, ignore warnings!" <<std::endl;
    c_corrpt = (c_pteff * (c_selmettrigpt/c_selpt))/(c_selbothtrigpt/c_selpt);
   c_correta = (c_etaeff * (c_selmettrigeta/c_seleta))/(c_selbothtrigeta/c_seleta);
   c_corrdphi = (c_dphieff * (c_selmettrigdphi/c_seldphi))/(c_selbothtrigdphi/c_seldphi);
+  c_corrdphi2 = (c_dphieff2 * (c_selmettrigdphi2/c_seldphi2))/(c_selbothtrigdphi2/c_seldphi2);
 
   std::cout << "stop ignoring warning ;)" << std::endl;
 
   etaeff_=c_etaeff;
   pteff_=c_pteff;
   dphieff_=c_dphieff;
+  dphieff2_=c_dphieff2;
   correta_=c_correta;
   corrpt_=c_corrpt;
   corrdphi_=c_corrdphi;
+  corrdphi2_=c_corrdphi2;
 
   etaeff_.setDivideBinomial(false);
   pteff_.setDivideBinomial(false);
   dphieff_.setDivideBinomial(false);
+  dphieff2_.setDivideBinomial(false);
 
   return output;
 
@@ -777,12 +802,14 @@ notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v")
 
     dphieff_.writeTGraph("dphi eff"+add,false);
     dphieff_.writeTH1D("axis dphi",false);
+    dphieff2_.writeTGraph("dphi2 eff"+add,false);
+    dphieff2_.writeTH1D("axis dphi2",false);
 
     correta_.writeTGraph("correta"+add,false);
-
-    correta_.writeTGraph("corrpt"+add,false);
+    corrpt_.writeTGraph("corrpt"+add,false);
 
     corrdphi_.writeTGraph("corrdphi"+add,false);
+    corrdphi2_.writeTGraph("corrdphi2"+add,false);
 
   }
 
@@ -796,6 +823,8 @@ private:
   top::container1D corrpt_;
   top::container1D dphieff_;
   top::container1D corrdphi_;
+  top::container1D dphieff2_;
+  top::container1D corrdphi2_;
   bool isMC;
 };
 
@@ -968,6 +997,16 @@ cout << "$e\\mu$ & " << emud[0] <<" $\\pm$ " << emud[1] << " (stat.) & "
   scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_eeMC.getCorrelationDPhi(),ratiomultiplier);
   scalefactor.writeTGraph("scalefactor dphi incl corrErr",false);
 
+
+  data=ta_eed.getDPhiPlot2();
+  MC=ta_eeMC.getDPhiPlot2();
+  data.setDivideBinomial(false);
+  MC.setDivideBinomial(false);
+  scalefactor=data/MC;
+  scalefactor.addGlobalRelError("rel_sys",0.01);
+  scalefactor.writeTGraph("scalefactor dphi2",false);
+  scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_eeMC.getCorrelationDPhi2(),ratiomultiplier);
+  scalefactor.writeTGraph("scalefactor dphi2 incl corrErr",false);
   f5->Close();
 
   
@@ -1005,6 +1044,16 @@ cout << "$e\\mu$ & " << emud[0] <<" $\\pm$ " << emud[1] << " (stat.) & "
   scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_mumuMC.getCorrelationDPhi(),ratiomultiplier);
   scalefactor.writeTGraph("scalefactor dphi incl corrErr",false);
 
+  data=ta_mumud.getDPhiPlot2();
+  MC=ta_mumuMC.getDPhiPlot2();
+  data.setDivideBinomial(false);
+  MC.setDivideBinomial(false);
+  scalefactor=data/MC;
+  scalefactor.addGlobalRelError("rel_sys",0.01);
+  scalefactor.writeTGraph("scalefactor dphi2",false);
+  scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_mumuMC.getCorrelationDPhi2(),ratiomultiplier);
+  scalefactor.writeTGraph("scalefactor dphi2 incl corrErr",false);
+
   f6->Close();
 
   TFile* f7 = new TFile("plots/triggerSummaryEMU.root","RECREATE");
@@ -1040,6 +1089,17 @@ cout << "$e\\mu$ & " << emud[0] <<" $\\pm$ " << emud[1] << " (stat.) & "
   scalefactor.writeTGraph("scalefactor dphi",false);
   scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_emuMC.getCorrelationDPhi(),ratiomultiplier);
   scalefactor.writeTGraph("scalefactor dphi incl corrErr",false);
+
+
+  data=ta_emud.getDPhiPlot2();
+  MC=ta_emuMC.getDPhiPlot2();
+  data.setDivideBinomial(false);
+  MC.setDivideBinomial(false);
+  scalefactor=data/MC;
+  scalefactor.addGlobalRelError("rel_sys",0.01);
+  scalefactor.writeTGraph("scalefactor dphi2",false);
+  scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_emuMC.getCorrelationDPhi2(),ratiomultiplier);
+  scalefactor.writeTGraph("scalefactor dphi2 incl corrErr",false);
 
   f7->Close();
 

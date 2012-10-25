@@ -39,7 +39,7 @@ void makeplot(TString inputfile, TString add){
   else if(add=="eta")
     h->GetXaxis()->SetTitle("#eta");
   else 
-    h->GetXaxis()->SetTitle("#delta#phi_{l,met}");
+    h->GetXaxis()->SetTitle("| #delta#phi_{l,met} |");
 
   h->GetYaxis()->SetTitleSize(0.06);
   h->GetXaxis()->SetTitleSize(0.05);
@@ -101,6 +101,9 @@ void miniscript(TString outdir){
   makeplot(rootsdir+"triggerSummaryEE.root", "dphi");
   c->Print(outdir+"corr_eedphi.pdf");
   c->Clear();
+  makeplot(rootsdir+"triggerSummaryEE.root", "dphi2");
+  c->Print(outdir+"corr_eedphi2.pdf");
+  c->Clear();
   makeplot(rootsdir+"triggerSummaryMUMU.root", "pt");
   c->Print(outdir+"corr_mumupt.pdf");
   c->Clear();
@@ -110,6 +113,9 @@ void miniscript(TString outdir){
   makeplot(rootsdir+"triggerSummaryMUMU.root", "dphi");
   c->Print(outdir+"corr_mumudphi.pdf");
   c->Clear();
+  makeplot(rootsdir+"triggerSummaryMUMU.root", "dphi2");
+  c->Print(outdir+"corr_mumudphi2.pdf");
+  c->Clear();
   makeplot(rootsdir+"triggerSummaryEMU.root", "pt");
   c->Print(outdir+"corr_emupt.pdf");
   c->Clear();
@@ -118,6 +124,9 @@ void miniscript(TString outdir){
   c->Clear();
   makeplot(rootsdir+"triggerSummaryEMU.root", "dphi");
   c->Print(outdir+"corr_emudphi.pdf");
+  c->Clear();
+  makeplot(rootsdir+"triggerSummaryEMU.root", "dphi2");
+  c->Print(outdir+"corr_emudphi2.pdf");
   //c->Clear();
 
 
