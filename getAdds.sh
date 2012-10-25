@@ -3,6 +3,14 @@ cd ..
 eval `scramv1 runtime -sh`
 # the things I use from the TopAnalysis code
 #
+
+if [[ "${CMSSW_VERSION}" != "CMSSW_5_3_3_patch3" && "${CMSSW_VERSION}" != "CMSSW_5_3_5" ]];
+then
+    echo 'warning! '"$CMSSW_VERSION"' not supported for automatic checkout of pat packages! add them manually!'
+fi
+
+exit
+
 cvs co -d TopAnalysis/TopFilter/plugins/ UserCode/Bromo/TopAnalysis/TopFilter/plugins/GeneratorZFilter.cc
 cvs co -d TopAnalysis/TopFilter/plugins/ UserCode/Bromo/TopAnalysis/TopFilter/plugins/GeneratorTopFilter.cc
 cvs co -d TopAnalysis/TopFilter/plugins/ UserCode/Bromo/TopAnalysis/TopFilter/plugins/BuildFile.xml
@@ -15,17 +23,13 @@ cvs co -d TopAnalysis/Configuration/analysis/diLeptonic  UserCode/Bromo/TopAnaly
 cd ${CMSSW_BASE}/src/TtZAnalysis/Configuration/python/analysis
 ln -s ${CMSSW_BASE}/src/TopAnalysis/Configuration/analysis/diLeptonic/runallGC.pl runallGC.pl
 
-cd $CMSSW_BASE
-cd ..
-svn co https://ekptrac.physik.uni-karlsruhe.de/public/grid-control/tags/stable/grid-control
-ln -s $CMSSW_BASE/src/TtZAnalysis/Configuration/python/analysis analysis
+cd $CMSSW_BASE/src/TtZAnalysis/Data
+ln -s /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/PileUp PileUpJsons
 cd $CMSSW_BASE/src
-
-
 
 # get sample files
 
-echo "adding samplefiles (update from DAS)"
+#echo "adding samplefiles (update from DAS)"
 
 #cd TtZAnalysis/Configuration/python/samples
 #./update_samplefiles2012.sh
@@ -52,7 +56,10 @@ echo "Ecal Filter"
 
 addpkg RecoMET/METFilters V00-00-10
 
-echo 'checking out release V08-09-42 - check if newest one'
+if [[ "$CMSSW_VERSION" == "CMSSW_5_3_3_patch3"  ]]
+then
+
+echo "checking out release V08-09-42 for ${CMSSW_VERSION} "
 
 addpkg DataFormats/PatCandidates       V06-05-06-02
 addpkg PhysicsTools/PatAlgos           V08-09-42
@@ -66,6 +73,18 @@ addpkg DataFormats/TrackReco   V10-02-02
 addpkg DataFormats/VertexReco   V02-00-04 
 
 echo 'checked out release V08-09-42 - check if newest one'
+
+fi
+
+if [[ "$CMSSW_VERSION" == "CMSSW_5_3_5" ]]
+then
+
+echo "checking out pat release V08-09-43 for ${CMSSW_VERSION} "
+
+addpkg DataFormats/PatCandidates V06-05-06-03
+addpkg PhysicsTools/PatAlgos     V08-09-43
+
+fi
 
 #some copy-paste in case you want to use my root macros and the classes on command line
 echo 'you will need this in the rootlogon.C:'
