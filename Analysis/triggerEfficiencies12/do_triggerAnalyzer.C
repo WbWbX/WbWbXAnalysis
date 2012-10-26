@@ -871,7 +871,7 @@ void analyze(){
 
   //const char * datafile = "/scratch/hh/dust/naf/cms/user/kieseler/trees0724/tree_8TeV_met_runAB_prompt.root";
 
-  const char * pileuproot = "/scratch/hh/dust/naf/cms/user/kieseler/GridControl_workingDir/dontdel_MET_24Oct/MET_prel_PU.root";
+  const char * pileuproot = "/scratch/hh/dust/naf/cms/user/kieseler/GridControl_workingDir/dontdel_MET_24Oct/HCP_PU.root";
 
   //////// NOT REALLY VALID PU reweighting!!!
 
@@ -1108,5 +1108,5 @@ cout << "$e\\mu$ & " << emud[0] <<" $\\pm$ " << emud[1] << " (stat.) & "
 
 void do_triggerAnalyzer(){
   analyze();
-  miniscript("plots/"); //makes plots nice and puts output to directory
+  miniscript("plots12fb/"); //makes plots nice and puts output to directory
 }
