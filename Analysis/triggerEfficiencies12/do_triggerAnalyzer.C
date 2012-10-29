@@ -21,7 +21,7 @@
 
 using namespace std;
 
-
+//ratiomulti affects plots AND syst error in tables
 
 double ratiomultiplier=0;
 TString whichelectrons="NTPFElectrons";
@@ -185,7 +185,7 @@ notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v")
   //isMC=true;
     bool is52v9=false; //dont change!!!! concerns triggers
   bool CiCId=false;
-  float maxEntries=0;
+  // float maxEntries=0;
   bool doPUweight=true;
 
   //////////////////////////////////
@@ -1028,7 +1028,7 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
   f5->Close();
 
   
-  TFile* f6 = new TFile("plots/triggerSummaryMUMU.root","RECREATE");ta_mumud.writeAll();
+  TFile* f6 = new TFile("plots/triggerSummaryMUMU.root","RECREATE");//ta_mumud.writeAll();
 
   ta_mumud.writeAll();
   ta_mumuMC.writeAll();
@@ -1128,5 +1128,5 @@ void do_triggerAnalyzer(){
   analyze();
   miniscript("plots/"); //makes plots nice and puts output to directory
 
-  if(breakat5fb) std::cout << "THESE ARE THE NUMBERS AND PLOTS FOR 5fb-1!!!"
+  if(breakat5fb) std::cout << "THESE ARE THE NUMBERS AND PLOTS FOR 5fb-1!!!" std::endl;
 }
