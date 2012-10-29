@@ -9,43 +9,43 @@
 
 ## Drell Yan stuff
 
-100000  /DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM     tree_7TeV_dymumu60120     genFilter=Z genFilterString=MuonMuon genFilterMassLow=60 genFilterMassHigh=120 includereco=true is2011=true crab=true
-100000  /DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM     tree_7TeV_dyee60120       genFilter=Z genFilterString=ElectronElectron genFilterMassLow=60 genFilterMassHigh=120 includereco=true is2011=true crab=true
+100000  /DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM     tree_7TeV_dymumu60120     genFilter=Z genFilterString=MuonMuon genFilterMassLow=60 genFilterMassHigh=120 includereco=true is2011=true crab=true globalTag=START44_V9B
+100000  /DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM     tree_7TeV_dyee60120       genFilter=Z genFilterString=ElectronElectron genFilterMassLow=60 genFilterMassHigh=120 includereco=true is2011=true crab=true globalTag=START44_V9B
 
-250000  /DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM     tree_7TeV_dymumu5060      genFilter=Z genFilterString=MuonMuon genFilterMassLow=50 genFilterMassHigh=60 is2011=true crab=true
-250000  /DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM     tree_7TeV_dyee5060        genFilter=Z genFilterString=ElectronElectron genFilterMassLow=50 genFilterMassHigh=60 is2011=true crab=true
+250000  /DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM     tree_7TeV_dymumu5060      genFilter=Z genFilterString=MuonMuon genFilterMassLow=50 genFilterMassHigh=60 is2011=true crab=true globalTag=START44_V9B
+250000  /DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM     tree_7TeV_dyee5060        genFilter=Z genFilterString=ElectronElectron genFilterMassLow=50 genFilterMassHigh=60 is2011=true crab=true globalTag=START44_V9B
 
-250000  /DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM     tree_7TeV_dymumu120inf    genFilter=Z genFilterString=MuonMuon genFilterMassLow=120 genFilterMassHigh=100000 is2011=true crab=true
-250000  /DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM     tree_7TeV_dyee120inf      genFilter=Z genFilterString=ElectronElectron genFilterMassLow=120 genFilterMassHigh=100000 is2011=true crab=true
+250000  /DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM     tree_7TeV_dymumu120inf    genFilter=Z genFilterString=MuonMuon genFilterMassLow=120 genFilterMassHigh=100000 is2011=true crab=true globalTag=START44_V9B
+250000  /DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM     tree_7TeV_dyee120inf      genFilter=Z genFilterString=ElectronElectron genFilterMassLow=120 genFilterMassHigh=100000 is2011=true crab=true globalTag=START44_V9B
 
-100000  /DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM      tree_7TeV_dytautau50inf   genFilter=Z genFilterString=TauTau is2011=true crab=true
+100000  /DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM      tree_7TeV_dytautau50inf   genFilter=Z genFilterString=TauTau is2011=true crab=true globalTag=START44_V9B
 
-130000  /DYJetsToLL_M-10To50_TuneZ2_7TeV-madgraph/Fall11-PU_S6_START44_V9B-v1/AODSIM         tree_7TeV_dymumu1050        genFilter=Z genFilterString=MuonMuon is2011=true crab=true
-130000  /DYJetsToLL_M-10To50_TuneZ2_7TeV-madgraph/Fall11-PU_S6_START44_V9B-v1/AODSIM         tree_7TeV_dytautau1050      genFilter=Z genFilterString=TauTau is2011=true crab=true
-130000  /DYJetsToLL_M-10To50_TuneZ2_7TeV-madgraph/Fall11-PU_S6_START44_V9B-v1/AODSIM         tree_7TeV_dyee1050          genFilter=Z genFilterString=ElectronElectron is2011=true crab=true
+130000  /DYJetsToLL_M-10To50_TuneZ2_7TeV-madgraph/Fall11-PU_S6_START44_V9B-v1/AODSIM         tree_7TeV_dymumu1050        genFilter=Z genFilterString=MuonMuon is2011=true crab=true globalTag=START44_V9B
+130000  /DYJetsToLL_M-10To50_TuneZ2_7TeV-madgraph/Fall11-PU_S6_START44_V9B-v1/AODSIM         tree_7TeV_dytautau1050      genFilter=Z genFilterString=TauTau is2011=true crab=true globalTag=START44_V9B
+130000  /DYJetsToLL_M-10To50_TuneZ2_7TeV-madgraph/Fall11-PU_S6_START44_V9B-v1/AODSIM         tree_7TeV_dyee1050          genFilter=Z genFilterString=ElectronElectron is2011=true crab=true globalTag=START44_V9B
 
 #####TTBAR
 
-100000  /TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM     tree_7TeV_eettbar                    genFilter=Top genFilterString=ElectronElectron is2011=true crab=true
-100000  /TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM     tree_7TeV_mumuttbar                  genFilter=Top genFilterString=MuonMuon is2011=true crab=true
-100000  /TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM     tree_7TeV_emuttbar                   genFilter=Top genFilterString=ElectronMuon is2011=true crab=true
-150000  /TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM     tree_7TeV_eettbarviatau              genFilter=Top genFilterString=ElectronElectronViaTau is2011=true crab=true
-150000  /TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM     tree_7TeV_mumuttbarviatau            genFilter=Top genFilterString=MuonMuonViaTau is2011=true crab=true
-150000  /TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM     tree_7TeV_emuttbarviatau             genFilter=Top genFilterString=ElectronMuonViaTau is2011=true crab=true
+100000  /TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM     tree_7TeV_eettbar                    genFilter=Top genFilterString=ElectronElectron is2011=true crab=true globalTag=START44_V9B
+100000  /TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM     tree_7TeV_mumuttbar                  genFilter=Top genFilterString=MuonMuon is2011=true crab=true globalTag=START44_V9B
+100000  /TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM     tree_7TeV_emuttbar                   genFilter=Top genFilterString=ElectronMuon is2011=true crab=true globalTag=START44_V9B
+150000  /TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM     tree_7TeV_eettbarviatau              genFilter=Top genFilterString=ElectronElectronViaTau is2011=true crab=true globalTag=START44_V9B
+150000  /TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM     tree_7TeV_mumuttbarviatau            genFilter=Top genFilterString=MuonMuonViaTau is2011=true crab=true globalTag=START44_V9B
+150000  /TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM     tree_7TeV_emuttbarviatau             genFilter=Top genFilterString=ElectronMuonViaTau is2011=true crab=true globalTag=START44_V9B
 
 ##########single top
 
-100000  /T_TuneZ2_tW-channel-DS_7TeV-powheg-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM         tree_7TeV_tW          is2011=true crab=true
-100000  /Tbar_TuneZ2_tW-channel-DS_7TeV-powheg-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM      tree_7TeV_tbarW       is2011=true crab=true
+100000  /T_TuneZ2_tW-channel-DS_7TeV-powheg-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM         tree_7TeV_tW          is2011=true crab=true globalTag=START44_V9B
+100000  /Tbar_TuneZ2_tW-channel-DS_7TeV-powheg-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM      tree_7TeV_tbarW       is2011=true crab=true globalTag=START44_V9B
 
 
 #### BOSON STUFF
 
-100000  /WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM   tree_7TeV_wjets      is2011=true crab=true
+100000  /WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM   tree_7TeV_wjets      is2011=true crab=true globalTag=START44_V9B
 
-100000  /WWTo2L2Nu_TuneZ2_7TeV_pythia6_tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM    tree_7TeV_wwp     is2011=true crab=true
-100000  /WZ_TuneZ2_7TeV_pythia6_tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM	    tree_7TeV_wz      is2011=true crab=true
-100000  /ZZ_TuneZ2_7TeV_pythia6_tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM           tree_7TeV_zz      is2011=true crab=true
+100000  /WWTo2L2Nu_TuneZ2_7TeV_pythia6_tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM    tree_7TeV_wwp     is2011=true crab=true globalTag=START44_V9B
+100000  /WZ_TuneZ2_7TeV_pythia6_tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM	    tree_7TeV_wz      is2011=true crab=true globalTag=START44_V9B
+100000  /ZZ_TuneZ2_7TeV_pythia6_tauola/Fall11-PU_S6_START44_V9B-v1/AODSIM           tree_7TeV_zz      is2011=true crab=true globalTag=START44_V9B
 
 
 
