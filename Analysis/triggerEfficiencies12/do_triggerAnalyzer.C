@@ -23,10 +23,12 @@ using namespace std;
 
 
 
-double ratiomultiplier=1;
+double ratiomultiplier=0;
 TString whichelectrons="NTPFElectrons";
 
 double jetptcut=30;
+
+bool breakat5fb=true;
 
 class triggerAnalyzer{
 
@@ -60,77 +62,77 @@ public:
 
   std::vector<string> mettriggers;
   
-  mettriggers.push_back("HLT_DiCentralPFJet50_PFMET80_v4");
-  mettriggers.push_back("HLT_MET120_HBHENoiseCleaned_v3");
-  mettriggers.push_back("HLT_PFHT350_PFMET100_v4");
-  mettriggers.push_back("HLT_PFHT400_PFMET100_v4");
-  mettriggers.push_back("HLT_MonoCentralPFJet80_PFMETnoMu95_NHEF0p95_v3");
-  mettriggers.push_back("HLT_MET120_v10");
-  mettriggers.push_back("HLT_DiCentralPFJet30_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v4");
-  mettriggers.push_back("HLT_CentralPFJet80_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v4");
-  mettriggers.push_back("HLT_DiCentralJet20_BTagIP_MET65_HBHENoiseFiltered_dPhi1_v4");
-  mettriggers.push_back("HLT_DiCentralJet20_CaloMET65_BTagCSV07_PFMHT80_v3");
-  mettriggers.push_back("HLT_MET80_Track50_dEdx3p6_v4");
-  mettriggers.push_back("HLT_MET80_Track60_dEdx3p7_v4");
-  mettriggers.push_back("HLT_MET200_v10");
-  mettriggers.push_back("HLT_MET200_HBHENoiseCleaned_v3");
-  mettriggers.push_back("HLT_MET300_v2");
-  mettriggers.push_back("HLT_MET300_HBHENoiseCleaned_v3");
-  mettriggers.push_back("HLT_PFMET150_v3");
-  mettriggers.push_back("HLT_DiPFJet40_PFMETnoMu65_MJJ800VBF_AllJets_v3");
-  mettriggers.push_back("HLT_DiPFJet40_PFMETnoMu65_MJJ600VBF_LeadingJets_v3");
-  mettriggers.push_back("HLT_PFMET180_v3");
-  mettriggers.push_back("HLT_MET80_v3");
-  mettriggers.push_back("HLT_Photon70_CaloIdXL_PFMET100_v3");
-  mettriggers.push_back("HLT_MonoCentralPFJet80_PFMETnoMu95_NHEF0p95_v4");
-  mettriggers.push_back("HLT_DiPFJet40_PFMETnoMu65_MJJ600VBF_LeadingJets_v4");
-  mettriggers.push_back("HLT_CentralPFJet80_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v5");
-  mettriggers.push_back("HLT_DiCentralPFJet50_PFMET80_v5");
-  mettriggers.push_back("HLT_DiCentralPFJet30_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v5");
-  mettriggers.push_back("HLT_PFMET150_v4");
-  mettriggers.push_back("HLT_PFMET180_v4");
-  mettriggers.push_back("HLT_DiCentralJet20_CaloMET65_BTagCSV07_PFMHT80_v4");
-  mettriggers.push_back("HLT_Photon70_CaloIdXL_PFMET100_v4");
-  mettriggers.push_back("HLT_PFHT350_PFMET100_v5");
-  mettriggers.push_back("HLT_PFHT400_PFMET100_v5");
-  mettriggers.push_back("HLT_DiPFJet40_PFMETnoMu65_MJJ800VBF_AllJets_v4");
-  mettriggers.push_back("HLT_MonoCentralPFJet80_PFMETnoMu95_NHEF0p95_v2");
-  mettriggers.push_back("HLT_DiCentralPFJet50_PFMET80_v3");
-  mettriggers.push_back("HLT_DiCentralPFJet30_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v3");
-  mettriggers.push_back("HLT_CentralPFJet80_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v3");
-  mettriggers.push_back("HLT_DiCentralJet20_CaloMET65_BTagCSV07_PFMHT80_v2");
-  mettriggers.push_back("HLT_MET80_Track50_dEdx3p6_v3");
-  mettriggers.push_back("HLT_MET80_Track60_dEdx3p7_v3");
-  mettriggers.push_back("HLT_Photon70_CaloIdXL_PFMET100_v2");
-  mettriggers.push_back("HLT_DiCentralJet20_BTagIP_MET65_HBHENoiseFiltered_dPhi1_v3");
-  mettriggers.push_back("HLT_PFHT350_PFMET100_v3");
-  mettriggers.push_back("HLT_MET120_HBHENoiseCleaned_v2");
-  mettriggers.push_back("HLT_DiPFJet40_PFMETnoMu65_MJJ600VBF_LeadingJets_v2");
-  mettriggers.push_back("HLT_PFMET150_v2");
-  mettriggers.push_back("HLT_MET120_v9");
-  mettriggers.push_back("HLT_MET200_v9");
-  mettriggers.push_back("HLT_MET200_HBHENoiseCleaned_v2");
-  mettriggers.push_back("HLT_MET300_v1");
-  mettriggers.push_back("HLT_MET300_HBHENoiseCleaned_v2");
-  mettriggers.push_back("HLT_MET400_v4");
-  mettriggers.push_back("HLT_MET400_HBHENoiseCleaned_v2");
-  mettriggers.push_back("HLT_PFHT400_PFMET100_v3");
-  mettriggers.push_back("HLT_PFMET180_v2");
-  mettriggers.push_back("HLT_DiPFJet40_PFMETnoMu65_MJJ800VBF_AllJets_v2");
-  mettriggers.push_back("HLT_MET80_v2");
-  mettriggers.push_back("HLT_MET400_v5");
-  mettriggers.push_back("HLT_MET400_HBHENoiseCleaned_v3");
-  mettriggers.push_back("HLT_PFHT350_PFMET100_v6");
-  mettriggers.push_back("HLT_PFHT400_PFMET100_v6");
-  mettriggers.push_back("HLT_DiCentralPFJet50_PFMET80_v6");
-  mettriggers.push_back("HLT_MonoCentralPFJet80_PFMETnoMu95_NHEF0p95_v5");
-  mettriggers.push_back("HLT_DiCentralPFJet30_PFMET80_BTagCSV07_v1");
-  mettriggers.push_back("HLT_DiPFJet40_PFMETnoMu65_MJJ600VBF_LeadingJets_v5");
-  mettriggers.push_back("HLT_DiCentralPFJet30_PFMET80_v2");
-  mettriggers.push_back("HLT_DiPFJet40_PFMETnoMu65_MJJ800VBF_AllJets_v5");
-  mettriggers.push_back("HLT_DiCentralJetSumpT100_dPhi05_DiCentralPFJet60_25_PFMET100_HBHENoiseCleaned_v1");
-  mettriggers.push_back("HLT_DisplacedPhoton65_CaloIdVL_IsoL_PFMET25_v1");
-  mettriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v1");
+  mettriggers.push_back("HLT_DiCentralPFJet50_PFMET80_v");
+  mettriggers.push_back("HLT_MET120_HBHENoiseCleaned_v");
+  mettriggers.push_back("HLT_PFHT350_PFMET100_v");
+  mettriggers.push_back("HLT_PFHT400_PFMET100_v");
+  mettriggers.push_back("HLT_MonoCentralPFJet80_PFMETnoMu95_NHEF0p95_v");
+  mettriggers.push_back("HLT_MET120_v");
+  mettriggers.push_back("HLT_DiCentralPFJet30_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v");
+  mettriggers.push_back("HLT_CentralPFJet80_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v");
+  mettriggers.push_back("HLT_DiCentralJet20_BTagIP_MET65_HBHENoiseFiltered_dPhi1_v");
+  mettriggers.push_back("HLT_DiCentralJet20_CaloMET65_BTagCSV07_PFMHT80_v");
+  mettriggers.push_back("HLT_MET80_Track50_dEdx3p6_v");
+  mettriggers.push_back("HLT_MET80_Track60_dEdx3p7_v");
+  mettriggers.push_back("HLT_MET200_v");
+  mettriggers.push_back("HLT_MET200_HBHENoiseCleaned_v");
+  mettriggers.push_back("HLT_MET300_v");
+  mettriggers.push_back("HLT_MET300_HBHENoiseCleaned_v");
+  mettriggers.push_back("HLT_PFMET150_v");
+  mettriggers.push_back("HLT_DiPFJet40_PFMETnoMu65_MJJ800VBF_AllJets_v");
+  mettriggers.push_back("HLT_DiPFJet40_PFMETnoMu65_MJJ600VBF_LeadingJets_v");
+  mettriggers.push_back("HLT_PFMET180_v");
+  mettriggers.push_back("HLT_MET80_v");
+  mettriggers.push_back("HLT_Photon70_CaloIdXL_PFMET100_v");
+  mettriggers.push_back("HLT_MonoCentralPFJet80_PFMETnoMu95_NHEF0p95_v");
+  mettriggers.push_back("HLT_DiPFJet40_PFMETnoMu65_MJJ600VBF_LeadingJets_v");
+  mettriggers.push_back("HLT_CentralPFJet80_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v");
+  mettriggers.push_back("HLT_DiCentralPFJet50_PFMET80_v");
+  mettriggers.push_back("HLT_DiCentralPFJet30_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v");
+  mettriggers.push_back("HLT_PFMET150_v");
+  mettriggers.push_back("HLT_PFMET180_v");
+  mettriggers.push_back("HLT_DiCentralJet20_CaloMET65_BTagCSV07_PFMHT80_v");
+  mettriggers.push_back("HLT_Photon70_CaloIdXL_PFMET100_v");
+  mettriggers.push_back("HLT_PFHT350_PFMET100_v");
+  mettriggers.push_back("HLT_PFHT400_PFMET100_v");
+  mettriggers.push_back("HLT_DiPFJet40_PFMETnoMu65_MJJ800VBF_AllJets_v");
+  mettriggers.push_back("HLT_MonoCentralPFJet80_PFMETnoMu95_NHEF0p95_v");
+  mettriggers.push_back("HLT_DiCentralPFJet50_PFMET80_v");
+  mettriggers.push_back("HLT_DiCentralPFJet30_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v");
+  mettriggers.push_back("HLT_CentralPFJet80_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v");
+  mettriggers.push_back("HLT_DiCentralJet20_CaloMET65_BTagCSV07_PFMHT80_v");
+  mettriggers.push_back("HLT_MET80_Track50_dEdx3p6_v");
+  mettriggers.push_back("HLT_MET80_Track60_dEdx3p7_v");
+  mettriggers.push_back("HLT_Photon70_CaloIdXL_PFMET100_v");
+  mettriggers.push_back("HLT_DiCentralJet20_BTagIP_MET65_HBHENoiseFiltered_dPhi1_v");
+  mettriggers.push_back("HLT_PFHT350_PFMET100_v");
+  mettriggers.push_back("HLT_MET120_HBHENoiseCleaned_v");
+  mettriggers.push_back("HLT_DiPFJet40_PFMETnoMu65_MJJ600VBF_LeadingJets_v");
+  mettriggers.push_back("HLT_PFMET150_v");
+  mettriggers.push_back("HLT_MET120_v");
+  mettriggers.push_back("HLT_MET200_v");
+  mettriggers.push_back("HLT_MET200_HBHENoiseCleaned_v");
+  mettriggers.push_back("HLT_MET300_v");
+  mettriggers.push_back("HLT_MET300_HBHENoiseCleaned_v");
+  mettriggers.push_back("HLT_MET400_v");
+  mettriggers.push_back("HLT_MET400_HBHENoiseCleaned_v");
+  mettriggers.push_back("HLT_PFHT400_PFMET100_v");
+  mettriggers.push_back("HLT_PFMET180_v");
+  mettriggers.push_back("HLT_DiPFJet40_PFMETnoMu65_MJJ800VBF_AllJets_v");
+  mettriggers.push_back("HLT_MET80_v");
+  mettriggers.push_back("HLT_MET400_v");
+  mettriggers.push_back("HLT_MET400_HBHENoiseCleaned_v");
+  mettriggers.push_back("HLT_PFHT350_PFMET100_v");
+  mettriggers.push_back("HLT_PFHT400_PFMET100_v");
+  mettriggers.push_back("HLT_DiCentralPFJet50_PFMET80_v");
+  mettriggers.push_back("HLT_MonoCentralPFJet80_PFMETnoMu95_NHEF0p95_v");
+  mettriggers.push_back("HLT_DiCentralPFJet30_PFMET80_BTagCSV07_v");
+  mettriggers.push_back("HLT_DiPFJet40_PFMETnoMu65_MJJ600VBF_LeadingJets_v");
+  mettriggers.push_back("HLT_DiCentralPFJet30_PFMET80_v");
+  mettriggers.push_back("HLT_DiPFJet40_PFMETnoMu65_MJJ800VBF_AllJets_v");
+  mettriggers.push_back("HLT_DiCentralJetSumpT100_dPhi05_DiCentralPFJet60_25_PFMET100_HBHENoiseCleaned_v");
+  mettriggers.push_back("HLT_DisplacedPhoton65_CaloIdVL_IsoL_PFMET25_v");
+  mettriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v");
 
 
 
@@ -300,7 +302,7 @@ notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v")
     }
     if(mode=="mumu"){
       dileptriggersMC.push_back("HLT_Mu17_Mu8_v");
-      //dileptriggersMC.push_back("HLT_Mu17_TkMu8_v9");
+      dileptriggersMC.push_back("HLT_Mu17_TkMu8_v");
     }
     if(mode=="emu"){
       dileptriggersMC.push_back("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
@@ -329,9 +331,9 @@ notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v")
   NTEvent * pEvent = 0;
   t1->SetBranchAddress("NTEvent",&pEvent); 
 
-  float n = (int) t1->GetEntries(); //299569 for ttbaree
-  if(maxEntries!=0)
-    n=min(maxEntries,n);
+  float n = t1->GetEntries(); //299569 for ttbaree
+  // if(maxEntries!=0)
+  //  n=min(maxEntries,n);
   cout << n << endl;
 
 
@@ -373,15 +375,21 @@ notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v")
 
   vector<pair<TString, int> >triggersummary;
 
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
   for(float i=0;i<n;i++){  //main loop
 
     t1->GetEntry(i);
     displayStatusBar(i,n);
-    
-   //  if(!isMC){
 
-//       if(pEvent->runNo() < 193336) continue;
-//     }
+    /// for 5fb
+     if(breakat5fb && !isMC){
+
+       if(pEvent->runNo() > 196531){
+	 std::cout << "breaking at run " << pEvent->runNo() << std::endl;
+	 break;
+       }
+     }
 
     bool firedDilepTrigger=false;
     bool firedMet=false;
@@ -832,6 +840,7 @@ TChain * makeChain(std::vector<TString> paths){
   TChain * chain = new TChain(paths[0]);
   for(std::vector<TString>::iterator path=paths.begin();path<paths.end();++path){
     chain->Add((*path)+"/PFTree/pfTree");
+    std::cout << "added " << *path << " to chain." << std::endl;
   }
   return chain;
 }
@@ -840,6 +849,7 @@ TChain * makeChain(TString path){
   TChain * chain = new TChain(path);
   
   chain->Add(path+"/PFTree/pfTree");
+    std::cout << "added " << path << " to chain." << std::endl;
   return chain;
 }
 
@@ -871,8 +881,9 @@ void analyze(){
 
   //const char * datafile = "/scratch/hh/dust/naf/cms/user/kieseler/trees0724/tree_8TeV_met_runAB_prompt.root";
 
-  const char * pileuproot = "/scratch/hh/dust/naf/cms/user/kieseler/GridControl_workingDir/dontdel_MET_24Oct/HCP_PU.root";
+  const char * pileuproot = "/scratch/hh/dust/naf/cms/user/kieseler/GridControl_workingDir/dontdel_MET_24Oct/HCP_PU.root";//HCP_PU.root";//HCP_5.3fb_PU.root";
 
+  if(breakat5fb) pileuproot = "/scratch/hh/dust/naf/cms/user/kieseler/GridControl_workingDir/dontdel_MET_24Oct/HCP_5.3fb_PU.root";
   //////// NOT REALLY VALID PU reweighting!!!
 
   TChain * datachain=makeChain(datafiles);
@@ -910,10 +921,15 @@ void analyze(){
  
 
   cout << "\n\n TeX table:" <<endl;
+
+  cout << "\\begin{table}\n\\center\n\\begin{tabular}{c | c | c | c}" << endl;
+  cout << " & $\\epsilon_{data}$ & $\\epsilon_{MC}$ & $\\epsilon_{data}/\\epsilon_{MC}$ \\\\ \\hline" << endl;
+
   cout << "$ee$ & " << eed[0] <<" $\\pm$ " << eed[1] << " (stat.) & " 
        << eeMC[0] << " $\\pm$ " << eeMC[1] << " (stat.) & " << eed[0]/eeMC[0] 
        << " $\\pm$ " << sqrt((eed[1]/eeMC[0])*(eed[1]/eeMC[0]) + (eed[0]/(eeMC[0]*eeMC[0]))*eeMC[1]*eeMC[1]*(eed[0]/(eeMC[0]*eeMC[0]))) << " (stat.)  " 
        <<  " $\\pm$ " << sqrt(0.01*eed[0]/eeMC[0]*eed[0]/eeMC[0]*0.01  +fabs(ratiomultiplier*eed[0]/eeMC[0] * eeMC[2])*fabs(ratiomultiplier*eed[0]/eeMC[0] * eeMC[2])) << " (syst.) \\\\" << endl;
+  
 
 cout << "$\\mu\\mu$ & " << mumud[0] <<" $\\pm$ " << mumud[1] << " (stat.) & " 
        << mumuMC[0] << " $\\pm$ " << mumuMC[1] << " (stat.) & " << mumud[0]/mumuMC[0] 
@@ -925,8 +941,10 @@ cout << "$e\\mu$ & " << emud[0] <<" $\\pm$ " << emud[1] << " (stat.) & "
        << " $\\pm$ " << sqrt((emud[1]/emuMC[0])*(emud[1]/emuMC[0]) + (emud[0]/(emuMC[0]*emuMC[0]))*emuMC[1]*emuMC[1]*(emud[0]/(emuMC[0]*emuMC[0]))) << " (stat.)  " 
      <<  " $\\pm$ " << sqrt(0.01*emud[0]/emuMC[0]*emud[0]/emuMC[0]*0.01+fabs(ratiomultiplier*emud[0]/emuMC[0] * emuMC[2])*fabs(ratiomultiplier*emud[0]/emuMC[0] * emuMC[2])) << " (syst.) \\\\" << endl;
 
+cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC and resulting scaling factors}\n\\end{table}" << endl;
 
- cout << "\n\n" << "channel & $ee$ & $\\mu\\mu$ & $e\\mu$ \\\\ \\hline" <<endl;
+ cout << "\n\n\\begin{table}\n\\center\n\\begin{tabular}{c | c | c | c}" << endl;
+ cout  << " & $ee$ & $\\mu\\mu$ & $e\\mu$ \\\\ \\hline" <<endl;
 
  cout.precision(3);
  cout.setf(ios::fixed,ios::floatfield);
@@ -945,7 +963,7 @@ cout << "$e\\mu$ & " << emud[0] <<" $\\pm$ " << emud[1] << " (stat.) & "
    i++;i++;
  }
 
-
+ cout << "\\end{tabular}\n\\caption{Trigger scale factors for different ttbar selection steps}\n\\end{table}" << endl;
 
 
 //   container1D getEtaPlot(){return etaeff_;}
@@ -1108,5 +1126,7 @@ cout << "$e\\mu$ & " << emud[0] <<" $\\pm$ " << emud[1] << " (stat.) & "
 
 void do_triggerAnalyzer(){
   analyze();
-  miniscript("plots12fb/"); //makes plots nice and puts output to directory
+  miniscript("plots/"); //makes plots nice and puts output to directory
+
+  if(breakat5fb) std::cout << "THESE ARE THE NUMBERS AND PLOTS FOR 5fb-1!!!"
 }

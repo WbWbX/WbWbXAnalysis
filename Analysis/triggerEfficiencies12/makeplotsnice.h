@@ -33,7 +33,7 @@ void makeplot(TString inputfile, TString add){
   sfc->SetLineColor(8);
   sf ->SetLineColor(8);
   mc->SetLineColor(kRed);
-  h->GetYaxis()->SetTitle("#epsilon");
+  h->GetYaxis()->SetTitle("#epsilon,SF");
   if(add=="pt") 
     h->GetXaxis()->SetTitle("p_{T} [GeV]");
   else if(add=="eta")
