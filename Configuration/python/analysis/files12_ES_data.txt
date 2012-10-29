@@ -2,20 +2,20 @@
 
 #events per job - - dataset - - outputfile (w/o .root) - - options - - json
 
-200000  /MET/Run2012A-13Jul2012-v1/AOD           tree_8TeV_MET_runA_13Jul    isMC=false globalTag=FT_53_V6_AN2 crab=true     HCP.json
-200000  /MET/Run2012A-recover-06Aug2012-v1/AOD   tree_8TeV_MET_runA_06Aug    isMC=false globalTag=FT_53_V6C_AN2 crab=true   HCP.json
-200000  /MET/Run2012B-13Jul2012-v1/AOD           tree_8TeV_MET_runB_13Jul    isMC=false globalTag=FT_53_V6_AN2 crab=true     HCP.json
-200000  /MET/Run2012C-24Aug2012-v1/AOD           tree_8TeV_MET_runC_24Aug    isMC=false globalTag=FT_53_V10_AN2 crab=true    HCP.json
-200000  /MET/Run2012C-PromptReco-v2/AOD          tree_8TeV_MET_runC_prompt   isMC=false globalTag=FT_53_V10_AN2 crab=true    HCP.json
+#200000  /MET/Run2012A-13Jul2012-v1/AOD           tree_8TeV_MET_runA_13Jul    isMC=false globalTag=FT_53_V6_AN2 crab=true     HCP.json
+#200000  /MET/Run2012A-recover-06Aug2012-v1/AOD   tree_8TeV_MET_runA_06Aug    isMC=false globalTag=FT_53_V6C_AN2 crab=true   HCP.json
+#200000  /MET/Run2012B-13Jul2012-v1/AOD           tree_8TeV_MET_runB_13Jul    isMC=false globalTag=FT_53_V6_AN2 crab=true     HCP.json
+#200000  /MET/Run2012C-24Aug2012-v1/AOD           tree_8TeV_MET_runC_24Aug    isMC=false globalTag=FT_53_V10_AN2 crab=true    HCP.json
+#200000  /MET/Run2012C-PromptReco-v2/AOD          tree_8TeV_MET_runC_prompt   isMC=false globalTag=FT_53_V10_AN2 crab=true    HCP.json
 
-150000  /SingleElectron/Run2012A-13Jul2012-v1/AOD           tree_8TeV_singlee_runA_13Jul    isMC=false globalTag=FT_53_V6_AN2 includereco=true includetrigger=false crab=true    HCP.json
-150000  /SingleElectron/Run2012A-recover-06Aug2012-v1/AOD   tree_8TeV_singlee_runA_06Aug    isMC=false globalTag=FT_53_V6C_AN2 includereco=true includetrigger=false crab=true   HCP.json
-150000  /SingleElectron/Run2012B-13Jul2012-v1/AOD           tree_8TeV_singlee_runB_13Jul    isMC=false globalTag=FT_53_V6_AN2 includereco=true includetrigger=false crab=true    HCP.json
-150000  /SingleElectron/Run2012C-24Aug2012-v1/AOD           tree_8TeV_singlee_runC_24Aug    isMC=false globalTag=FT_53_V10_AN2 includereco=true includetrigger=false crab=true   HCP.json
-150000  /SingleElectron/Run2012C-PromptReco-v2/AOD          tree_8TeV_singlee_runC_prompt   isMC=false globalTag=FT_53_V10_AN2 includereco=true includetrigger=false crab=true   HCP.json
+110000  /SingleMu/Run2012A-13Jul2012-v1/AOD                tree_8TeV_singlemu_runA_13Jul    isMC=false globalTag=FT_53_V6_AN2 includereco=true includetrigger=false crab=true    HCP.json
+110000  /SingleMu/Run2012A-recover-06Aug2012-v1/AOD        tree_8TeV_singlemu_runA_06Aug    isMC=false globalTag=FT_53_V6C_AN2 includereco=true includetrigger=false crab=true   HCP.json
+110000  /SingleMu/Run2012B-13Jul2012-v1/AOD                tree_8TeV_singlemu_runB_13Jul    isMC=false globalTag=FT_53_V6_AN2 includereco=true includetrigger=false crab=true    HCP.json
+#110000  /SingleMu/Run2012C-24Aug2012-v1/AOD                tree_8TeV_singlemu_runC_24Aug    isMC=false globalTag=FT_53_V10_AN2 includereco=true includetrigger=false crab=true   HCP.json
+#110000  /SingleMu/Run2012C-PromptReco-v2/AOD               tree_8TeV_singlemu_runC_prompt   isMC=false globalTag=FT_53_V10_AN2 includereco=true includetrigger=false crab=true   HCP.json
 
-150000  /SingleMu/Run2012A-13Jul2012-v1/AOD                tree_8TeV_singlemu_runA_13Jul    isMC=false globalTag=FT_53_V6_AN2 includereco=true includetrigger=false crab=true    HCP.json
-150000  /SingleMu/Run2012A-recover-06Aug2012-v1/AOD        tree_8TeV_singlemu_runA_06Aug    isMC=false globalTag=FT_53_V6C_AN2 includereco=true includetrigger=false crab=true   HCP.json
-150000  /SingleMu/Run2012B-13Jul2012-v1/AOD                tree_8TeV_singlemu_runB_13Jul    isMC=false globalTag=FT_53_V6_AN2 includereco=true includetrigger=false crab=true    HCP.json
-150000  /SingleMu/Run2012C-24Aug2012-v1/AOD                tree_8TeV_singlemu_runC_24Aug    isMC=false globalTag=FT_53_V10_AN2 includereco=true includetrigger=false crab=true   HCP.json
-150000  /SingleMu/Run2012C-PromptReco-v2/AOD               tree_8TeV_singlemu_runC_prompt   isMC=false globalTag=FT_53_V10_AN2 includereco=true includetrigger=false crab=true   HCP.json
+110000  /SingleElectron/Run2012A-13Jul2012-v1/AOD           tree_8TeV_singlee_runA_13Jul    isMC=false globalTag=FT_53_V6_AN2 includereco=true includetrigger=false crab=true    HCP.json
+110000  /SingleElectron/Run2012A-recover-06Aug2012-v1/AOD   tree_8TeV_singlee_runA_06Aug    isMC=false globalTag=FT_53_V6C_AN2 includereco=true includetrigger=false crab=true   HCP.json
+110000  /SingleElectron/Run2012B-13Jul2012-v1/AOD           tree_8TeV_singlee_runB_13Jul    isMC=false globalTag=FT_53_V6_AN2 includereco=true includetrigger=false crab=true    HCP.json
+#110000  /SingleElectron/Run2012C-24Aug2012-v1/AOD           tree_8TeV_singlee_runC_24Aug    isMC=false globalTag=FT_53_V10_AN2 includereco=true includetrigger=false crab=true   HCP.json
+#110000  /SingleElectron/Run2012C-PromptReco-v2/AOD          tree_8TeV_singlee_runC_prompt   isMC=false globalTag=FT_53_V10_AN2 includereco=true includetrigger=false crab=true   HCP.json
