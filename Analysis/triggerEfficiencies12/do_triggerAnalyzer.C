@@ -26,9 +26,12 @@ using namespace std;
 double ratiomultiplier=0;
 TString whichelectrons="NTPFElectrons";
 
+bool useRhoIso=false;
+
 double jetptcut=30;
 
 bool breakat5fb=true;
+bool checktriggerpaths=true;
 
 class triggerAnalyzer{
 
@@ -92,7 +95,7 @@ public:
   mettriggers.push_back("HLT_PFMET150_v");
   mettriggers.push_back("HLT_PFMET180_v");
   mettriggers.push_back("HLT_DiCentralJet20_CaloMET65_BTagCSV07_PFMHT80_v");
-  mettriggers.push_back("HLT_Photon70_CaloIdXL_PFMET100_v");
+  mettriggers.push_back("HLT_Photon70_CaloIdXL_PFMET100_v"); 
   mettriggers.push_back("HLT_PFHT350_PFMET100_v");
   mettriggers.push_back("HLT_PFHT400_PFMET100_v");
   mettriggers.push_back("HLT_DiPFJet40_PFMETnoMu65_MJJ800VBF_AllJets_v");
@@ -133,7 +136,7 @@ public:
   mettriggers.push_back("HLT_DiCentralJetSumpT100_dPhi05_DiCentralPFJet60_25_PFMET100_HBHENoiseCleaned_v");
   mettriggers.push_back("HLT_DisplacedPhoton65_CaloIdVL_IsoL_PFMET25_v");
   mettriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v");
-
+  
 
 
   //just for testing
@@ -141,33 +144,41 @@ public:
   //mettriggers.push_back("HLT_MET120_v10");
 
   vector<string> notinMCtriggers;
-notinMCtriggers.push_back("HLT_DiCentralPFJet30_PFMET80_BTagCSV07_v");
+  notinMCtriggers.push_back("HLT_DiCentralPFJet30_PFMET80_BTagCSV07_v");
 notinMCtriggers.push_back("HLT_DiCentralPFJet30_PFMET80_v");
 notinMCtriggers.push_back("HLT_DiCentralJetSumpT100_dPhi05_DiCentralPFJet60_25_PFMET100_HBHENoiseCleaned_v");
 notinMCtriggers.push_back("HLT_DisplacedPhoton65_CaloIdVL_IsoL_PFMET25_v");
 notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v");
+  
+ notinMCtriggers.push_back("HLT_DiCentralPFJet30_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v");
+notinMCtriggers.push_back("HLT_CentralPFJet80_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v");
+notinMCtriggers.push_back("HLT_DiCentralJet20_BTagIP_MET65_HBHENoiseFiltered_dPhi1_v");
+notinMCtriggers.push_back("HLT_DiCentralJet20_CaloMET65_BTagCSV07_PFMHT80_v");
+notinMCtriggers.push_back("HLT_CentralPFJet80_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v");
+notinMCtriggers.push_back("HLT_DiCentralPFJet30_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v");
+notinMCtriggers.push_back("HLT_DiCentralJet20_CaloMET65_BTagCSV07_PFMHT80_v");
+notinMCtriggers.push_back("HLT_DiCentralPFJet30_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v");
+notinMCtriggers.push_back("HLT_CentralPFJet80_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v");
+notinMCtriggers.push_back("HLT_DiCentralJet20_CaloMET65_BTagCSV07_PFMHT80_v");
+notinMCtriggers.push_back("HLT_DiCentralJet20_BTagIP_MET65_HBHENoiseFiltered_dPhi1_v");
 
- for(vector<string>::iterator triggername=mettriggers.begin();triggername<mettriggers.end();triggername++){
+ notinMCtriggers.push_back("DiCentralJet");  //get rid of all dijet stuff
+notinMCtriggers.push_back("DiCentralPFJet");
+
+ for(unsigned int j=0; j< mettriggers.size();j++){
    for(unsigned int i=0;i<notinMCtriggers.size();i++){
-     if( ((TString) *triggername).Contains(notinMCtriggers[i]) ){
-        mettriggers.erase(triggername);
+     if( ((TString)mettriggers[j]).Contains(notinMCtriggers[i]) ){
+       mettriggers[j]="notrig";
      }
    }
  }
 
 
+ // mettriggers=notinMCtriggers;
   std::vector<string> mettriggersMC;
  
 
   mettriggersMC=mettriggers;
-  for(unsigned int i=0;i<mettriggersMC.size();i++){
-    size_t sz=mettriggersMC[i].size();
-    mettriggersMC[i].resize(sz-1,'s');
-    //cout << mettriggersMC[i] << endl;
-  }
-  // two have number more than 1 digit
-  mettriggersMC.push_back("HLT_MET120_v");
-  mettriggersMC.push_back("HLT_MET200_v");
 
 
   //////////////////////////////////////////////////////////////////////
@@ -183,7 +194,7 @@ notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v")
 
   //mode="ee";
   //isMC=true;
-    bool is52v9=false; //dont change!!!! concerns triggers
+  // bool is52v9=false; //OBSOLETE
   bool CiCId=false;
   // float maxEntries=0;
   bool doPUweight=true;
@@ -282,8 +293,8 @@ notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v")
     dileptriggers.push_back(trig4);
   }
 
-  vector<string> dileptriggersMC;
-  if(!is52v9){
+  vector<string> dileptriggersMC; // the version numbers where set as wildcards, so if statement obsolete!
+  // if(!is52v9){
     if(mode=="ee"){
       dileptriggersMC.push_back("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
     }
@@ -295,8 +306,8 @@ notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v")
       dileptriggersMC.push_back("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
       dileptriggersMC.push_back("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
     }
-  }
-  else{
+    //  }
+  /*  else{
     if(mode=="ee"){
       dileptriggersMC.push_back("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v"); //17
     }
@@ -309,7 +320,7 @@ notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v")
       dileptriggersMC.push_back("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
     }
 
-  }
+    } */
 
 
   
@@ -482,8 +493,9 @@ notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v")
       if(fabs(elec->eta())>2.5 ) continue;
       if(fabs(elec->dbs()) >0.04 ) continue;
       if(!(elec->isNotConv()) ) continue;
-      if(elec->rhoIso03()>0.15 ) continue;
-      if(CiCId && (0x00 == (0x01 & (int) elec->id("cicTightMC"))) ) continue; //for CiC bit test
+      if(useRhoIso && elec->rhoIso03()>0.15 ) continue;
+      if(!useRhoIso && elec->isoVal03()>0.15) continue;
+      //  if(CiCId && (0x00 == (0x01 & (int) elec->id("cicTightMC"))) ) continue; //for CiC bit test
       if(!CiCId && (elec->mvaId() < -0.1)) continue;
       if(!noOverlap(elec,*pMuons,0.1)) continue;
 
@@ -722,6 +734,62 @@ notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v")
   }
   //output=effdeffR;
 
+////////////////////////////////////check MC triggers
+
+/// show contribution of each trigger in data
+
+  if(checktriggerpaths){
+    
+    cout << "\ncontribution of different triggers:\n" << endl;
+    for(unsigned int i=0;i<triggersummary.size();i++){
+      cout << triggersummary[i].second << "\t" << triggersummary[i].first << endl;
+    }
+    
+    
+    ///  triggersummary mettriggers
+      int trigin=0;
+      vector<unsigned int> notinc;
+      for(unsigned int i=0; i<mettriggersMC.size(); i++){
+	bool inc=false;
+	//	if(!(mettriggersMC[i].Contains("HLT"))) continue;
+	for(unsigned int j=0; j<triggersummary.size();j++){
+	  // cout << mettriggers[i] << " vs " << triggersummary[j].first << endl;
+	  if(triggersummary[j].first.Contains(mettriggersMC[i])){
+	    trigin++;
+	    inc=true;
+	    break;
+	  }
+	}
+	if(!inc) notinc.push_back(i);
+      }
+      
+      
+      cout << trigin << " total; fraction of found triggers wrt datamettriggers: " << trigin/(double)mettriggers.size() << endl;
+      cout << "\ntriggers in metMCtrigger list and not found in triggered triggers:\n" << endl;
+
+      for(unsigned int i=0; i<notinc.size();i++){
+	cout << mettriggersMC[notinc[i]] << endl;
+      }
+
+      // trigin=0;
+      // notinc.clear();
+      // for(unsigned int i=0; i<triggersummary.size(); i++){
+      // 	bool inc=false;
+      // 	for(unsigned int j=0; j<mettriggersMC.size();j++){
+      // 	  // cout << mettriggers[i] << " vs " << triggersummary[j].first << endl;
+      // 	  if(triggersummary[i].first.Contains(mettriggersMC[j])){
+      // 	    trigin++;
+      // 	    inc=true;
+      // 	    break;
+      // 	  }
+      // 	}
+      // 	if(!inc) notinc.push_back(i);
+      // }
+
+      // cout << "triggers with M"
+    
+  }
+
   if(makeTeXTable){
    
     if(!isMC) cout <<  '\n' << mode << " \t\t& $N_{sel}$ \t& $N_{sel}^{trig}$ \t& $\\epsilon_d$ \t& $\\delta\\epsilon$ (stat.) \\\\ \\hline" << endl;
@@ -741,27 +809,7 @@ notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v")
   }
 
 
-  ////////////////////////////////////check MC triggers
-
-
-
-  ///  triggersummary mettriggers
-  int trigin=0;
-  vector<unsigned int> notinc;
-  for(unsigned int i=0; i<mettriggersMC.size(); i++){
-    bool inc=false;
-    for(unsigned int j=0; j<triggersummary.size();j++){
-      //cout << mettriggers[i] << " vs " << triggersummary[j].first << endl;
-      if(triggersummary[j].first.Contains(mettriggersMC[i])){
-	trigin++;
-	inc=true;
-      break;
-      }
-    }
-    if(!inc) notinc.push_back(i);
-  }
-  if(isMC) cout <<trigin << "  fraction of incorp MC triggers wrt datamettriggers: " << trigin/(double)mettriggers.size() << endl;
-
+  
   
 
   c_pteff = c_trigpt / c_selpt;
@@ -1128,5 +1176,5 @@ void do_triggerAnalyzer(){
   analyze();
   miniscript("plots/"); //makes plots nice and puts output to directory
 
-  if(breakat5fb) std::cout << "THESE ARE THE NUMBERS AND PLOTS FOR 5fb-1!!!" std::endl;
+  if(breakat5fb) std::cout << "THESE ARE THE NUMBERS AND PLOTS FOR 5fb-1!!!" << std::endl;
 }
