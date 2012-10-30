@@ -20,6 +20,9 @@ cd ..
 svn co https://ekptrac.physik.uni-karlsruhe.de/public/grid-control/tags/stable/grid-control
 ln -s $CMSSW_BASE/src/TtZAnalysis/Configuration/python/analysis analysis
 cd $CMSSW_BASE/src
+cd $CMSSW_BASE/src/TtZAnalysis/Data
+ln -s /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/PileUp PileUpJsons
+cd $CMSSW_BASE/src
 
 
 

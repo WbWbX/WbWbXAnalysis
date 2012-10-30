@@ -918,7 +918,7 @@ void analyze(){
   triggerAnalyzer ta_eeMC, ta_mumuMC, ta_emuMC;
   ta_mumuMC.setBinsEta(binsmumueta);
 
-  TString datadir="/scratch/hh/dust/naf/cms/user/kieseler/GridControl_workingDir/dontdel_MET_24Oct/";
+  TString datadir="/scratch/hh/dust/naf/cms/user/kieseler/trees_8TeV_ES/";
 
   std::vector<TString> datafiles;
   datafiles << datadir + "tree_8TeV_MET_runA_06Aug.root" 
@@ -944,13 +944,13 @@ void analyze(){
  
 
   std::vector<TString> eemcfiles,mumumcfiles,emumcfiles;
-  eemcfiles << "/scratch/hh/dust/naf/cms/user/kieseler/53trees/tree_8TeV_eettbar.root"
+  eemcfiles << "/scratch/hh/dust/naf/cms/user/kieseler/trees_8TeV_MC/tree_8TeV_eettbar.root"
 	    << "/scratch/hh/dust/naf/cms/user/diezcar/2012_Rel533/2012-10-08T17:25:32-naf_DOSS_tree_py_for_8TeV_eettbarviatau_8TeV_eettbarviatau/tree_8TeV_eettbarviatau.root" ;
 
   mumumcfiles <<"/scratch/hh/dust/naf/cms/user/diezcar/2012_Rel533/2012-10-08T17:25:31-naf_DOSS_tree_py_for_8TeV_mumuttbar_8TeV_mumuttbar/tree_8TeV_mumuttbar.root" 
 	      <<"/scratch/hh/dust/naf/cms/user/diezcar/2012_Rel533/2012-10-08T17:25:32-naf_DOSS_tree_py_for_8TeV_mumuttbarviatau_8TeV_mumuttbarviatau/tree_8TeV_mumuttbarviatau.root" ;
 
-  emumcfiles << "/scratch/hh/dust/naf/cms/user/kieseler/53trees/tree_8TeV_emuttbar.root"
+  emumcfiles << "/scratch/hh/dust/naf/cms/user/kieseler/trees_8TeV_MC/tree_8TeV_emuttbar.root"
 	     << "/scratch/hh/dust/naf/cms/user/diezcar/2012_Rel533/2012-10-08T17:25:32-naf_DOSS_tree_py_for_8TeV_emuttbarviatau_8TeV_emuttbarviatau/tree_8TeV_emuttbarviatau.root";
 
 

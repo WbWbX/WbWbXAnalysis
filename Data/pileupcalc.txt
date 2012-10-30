@@ -1,1 +1,1 @@
-pileupCalc.py --minBiasXsec 69400 --inputLumiJSON /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/PileUp/pileup_JSON_DCSONLY_190389-204506_corr.txt --maxPileupBin 70 --numPileupBins 70 --calcMode true -i MET_2310.json MET_2310_PU.root
+pileupCalc.py --minBiasXsec 69400 --inputLumiJSON /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/PileUp/pileup_JSON_DCSONLY_190389-204506_corr.txt --maxPileupBin 60 --numPileupBins 60 --calcMode true -i HCP.json HCP_PU.root
