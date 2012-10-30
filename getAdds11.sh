@@ -15,20 +15,8 @@ cvs co -d TopAnalysis/Configuration/analysis/diLeptonic  UserCode/Bromo/TopAnaly
 cd ${CMSSW_BASE}/src/TtZAnalysis/Configuration/python/analysis
 ln -s ${CMSSW_BASE}/src/TopAnalysis/Configuration/analysis/diLeptonic/runallGC.pl runallGC.pl
 
-cd $CMSSW_BASE
-cd ..
-svn co https://ekptrac.physik.uni-karlsruhe.de/public/grid-control/tags/stable/grid-control
-ln -s $CMSSW_BASE/src/TtZAnalysis/Configuration/python/analysis analysis
-cd $CMSSW_BASE/src
-cd $CMSSW_BASE/src/TtZAnalysis/Data
-ln -s /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/PileUp PileUpJsons
-cd $CMSSW_BASE/src
-
-
 
 # get sample files
-
-echo "adding samplefiles (update from DAS)"
 
 #cd TtZAnalysis/Configuration/python/samples
 #./update_samplefiles2012.sh
