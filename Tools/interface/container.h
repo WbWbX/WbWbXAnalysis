@@ -10,6 +10,8 @@
 #include "TPad.h"
 #include "miscUtils.h"
 
+////////bins include their border on the right side!!
+
 namespace top{
   
   class container1D{
@@ -92,7 +94,7 @@ namespace top{
     void renameSyst(TString , TString);
 
     void transformStatToSyst(TString);
-    void setAllErrorsZero(){for(unsigned int i=0;i<staterrup_.size();i++){staterrup_[i]=0;staterrdown_[i]=0;} syserrors_.clear();} //! sets all errors zero
+    void setAllErrorsZero(){for(unsigned int i=0;i<staterrup_.size();i++){staterrup_[i]=0;staterrdown_[i]=0;} syserrors_.clear();} //! sets all errors zero (onlystat!!!)
 
     static bool c_makelist;
     static std::vector<container1D*> c_list;
@@ -106,9 +108,9 @@ namespace top{
     std::vector<double> content_;
     std::vector<long int> entries_;
     std::vector<double> staterrup_;
-    std::vector<double> staterrdown_;
+    std::vector<double> staterrdown_;  //has POSITIVE entries
 
-    std::vector<std::pair<TString, std::vector<double> > > syserrors_;
+    std::vector<std::pair<TString, std::vector<double> > > syserrors_; //syst (name, each bin) stores absolute values!
 
     bool mergeufof_;
     bool wasunderflow_;

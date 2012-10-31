@@ -28,11 +28,17 @@ namespace top{
 
     void simpleUnfold();
 
-    top::container1DUF breakDownSystematicsInBin(int);
+    void setBinName(int, TString );
+
+    void coutBinContents();
+
+
+    top::container1DUF breakDownRelSystematicsInBin(int);
 
 
     //some plotting stuff - still missing
 
+    TGraphAsymmErrors * getTGraph(TString name="", bool dividebybinwidth=true,bool noXErrors=false);
 
 
   private:
@@ -80,6 +86,9 @@ namespace top{
   void container1DUF::simpleUnfold(){
 
     // find signal in gen and sel
+    bool listing=top::container1D::c_makelist; //protection agains unwanted listing of intermediate containers
+    top::container1D::c_makelist=false;
+
     top::container1D gencont=gen_.getContribution(signalname_);
     top::container1D selcont=sel_.getContribution(signalname_);
    
@@ -118,20 +127,99 @@ namespace top{
       //  output.getTH1D()->Draw();
 
     *this = container1DUF(output);
+    top::container1D::c_makelist=listing;
 
   }
-  top::container1DUF container1DUF::breakDownSystematicsInBin(int bin){
-    std::vector<float> sysbins;
-    for(unsigned int i=0;i<syserrors_.size();i++){
-      sysbins << i;
+  
+  void container1DUF::setBinName(int bin, TString name){
+    if(binnames_.size() ==0){
+      for(unsigned int i=0;i<bins_.size();i++) binnames_ << "";
     }
-    top::container1D temp(sysbins,"source","contribution","");
-    for(unsigned int i=0;i<syserrors_.size();i++){
+    binnames_.at(bin) = name;
+  }
+  
 
 
+  top::container1DUF container1DUF::breakDownRelSystematicsInBin(int bin){ //maybe add total syst
+
+    std::vector<float> newbins;
+    for(float i=0;i<=syserrors_.size();i++){ //+1 for total bin
+      newbins << i;
     }
-    
-    return out;
+
+    container1DUF syscont(newbins);
+
+
+    if(bin < 0 || (size_t)bin >= bins_.size()){
+      std::cout << "top::container1DUF::breakDownSystematicsInBin: bin not in range!" << std::endl;
+    }
+    else{
+      //    double totalup=0;
+      //   double totaldown=0;
+      for(unsigned int i=0;i<syserrors_.size();i++){
+	int outputbin = syscont.getBinNo(i+0.5);
+	syscont.setBinContent(outputbin, 1);
+	syscont.setBinName(outputbin, syserrors_.at(i).first);
+
+	if(syserrors_.at(i).second.at(bin) > 0){
+	  syscont.setBinErrorUp(outputbin, syserrors_.at(i).second.at(bin)/fabs(content_.at(bin)));
+	  //	  totalup+=pow(syserrors_.at(i).second.at(bin)/fabs(content_.at(bin)),2);
+	}
+	else{
+	  syscont.setBinErrorDown(outputbin, syserrors_.at(i).second.at(bin)/fabs(content_.at(bin)));
+	  //	  totaldown+=pow(syserrors_.at(i).second.at(bin)/fabs(content_.at(bin)),2);
+	}
+      }
+    }
+    return syscont;
+  }
+
+  void container1DUF::coutBinContents(){
+
+    for(unsigned int i=0;i<bins_.size()-1;i++){
+      //bin names and ranges
+      if(i==0) std::cout << "UF\t";
+      else if(binnames_.size()>0 && binnames_.at(i) !="") std::cout << binnames_.at(i) <<'\t';
+      else std::cout << bins_.at(i) << "-" << bins_.at(i+1) <<'\t';
+
+      //bin content
+      std::cout << content_.at(i) << "\t( +" << staterrup_.at(i) << "\t " << staterrdown_.at(i) << " (stat.))";
+      if(syserrors_.size()>0){
+	std::cout << "\t+" << getBinErrorUp(i) << "\t -" << getBinErrorDown(i) << " \t(total)";
+      }
+      std::cout << std::endl;
+    }
+    if(bins_.size()>0){ //and the missing overflow bin
+      std::cout << "OF\t"
+		<< content_.at(bins_.size()-1) << "\t( +" << staterrup_.at(bins_.size()-1) 
+		<< "\t " << staterrdown_.at(bins_.size()-1) << " (stat.))";
+      if(syserrors_.size()>0){
+	std::cout << "\t+" << getBinErrorUp(bins_.size()-1) << "\t -" << getBinErrorDown(bins_.size()-1) << " \t(total)";
+	std::cout << std::endl;
+      }
+    }
+  }
+
+  //..setBinLabel(bin,label)
+
+
+  TGraphAsymmErrors * container1DUF::getTGraph(TString name, bool dividebybinwidth,bool noXErrors){
+    TGraphAsymmErrors * g=container1D::getTGraph(name, dividebybinwidth, noXErrors);
+
+    if(binnames_.size()>0){
+
+      float binsarr[(size_t)bins_.size()-1];
+      for(unsigned int i=1;i<bins_.size();i++){ binsarr[i-1]=bins_.at(i); std::cout << bins_.at(i) << "  " << binsarr[i-1] << std::endl; }
+      std::cout << bins_.size()-2 << std::endl;
+      g->GetXaxis()->Set((int)bins_.size()-2, (Float_t*)binsarr);
+
+      for(unsigned int i=1;i<bins_.size()-1;i++){
+	//	int graphbin=g->GetXaxis()->FindBin(i);
+		g->GetXaxis()->SetBinLabel(i,binnames_.at(i));
+      }
+      g->GetXaxis()->SetRangeUser(bins_.at(1),bins_.at(bins_.size()-1));
+    }
+    return g;
   }
 
 }

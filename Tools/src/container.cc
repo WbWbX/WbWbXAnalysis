@@ -714,7 +714,9 @@ namespace top{
   void container1D::transformStatToSyst(TString sysname){
 
     std::pair<TString, std::vector<double> > up(sysname+"_up", staterrup_);
-    std::pair<TString, std::vector<double> > down(sysname+"_down", staterrdown_);
+    std::vector<double> statdownwithsign;
+    for(unsigned int i=0;i<staterrdown_.size();i++) statdownwithsign.push_back(-staterrdown_.at(i));
+    std::pair<TString, std::vector<double> > down(sysname+"_down", statdownwithsign);
     syserrors_.push_back(up);
     syserrors_.push_back(down);
     for(unsigned int i=0;i<staterrup_.size();i++){
