@@ -28,7 +28,7 @@ bool noOverlap(t &first, u &sec, double deltaR){
 }
 
 template <class T, class U>
-bool noOverlap(T & first, typename std::vector<U> vecsec, double deltaR){
+bool noOverlap(T & first, typename std::vector<U> &vecsec, double deltaR){
   bool nooverlap=true;
   for(typename std::vector<U>::iterator sec=vecsec.begin();sec<vecsec.end();++sec){
     if(!noOverlap(first,sec,deltaR)){
@@ -39,17 +39,6 @@ bool noOverlap(T & first, typename std::vector<U> vecsec, double deltaR){
   return nooverlap;
 }
 
-template <class T, class U>
-bool noOverlap(T & first, typename std::vector<U*> vecsec, double deltaR){
-  bool nooverlap=true;
-  for(typename std::vector<U>::iterator sec=vecsec->begin();sec<vecsec->end();++sec){
-    if(!noOverlap(first,sec,deltaR)){
-      nooverlap=false;
-      break;
-    }
-  }
-  return nooverlap;
-}
 
 
 

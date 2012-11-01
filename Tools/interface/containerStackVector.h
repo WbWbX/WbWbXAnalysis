@@ -37,7 +37,9 @@ namespace top{
 
     void multiplyNorms(TString, std::vector<double>, std::vector<TString>, bool showmessages=false);   //! multiplies norm of all MC with legendname  ,  with factor  ,  for step identifier string
 
-    void writeAllToTFile(TString, bool recreate=false);
+    void writeAllToTFile(TString, bool recreate=false, TString treename="stored_objects");
+    void loadFromTree(TTree *, TString);
+    void listAllInTree(TTree *);
 
     void clear(){stacks_.clear();name_="";}
     static std::vector<container1DStackVector*> csv_list;

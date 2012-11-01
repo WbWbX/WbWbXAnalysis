@@ -54,6 +54,7 @@ namespace top{
         return *s;
       }
     }
+    std::cout << "container1DStackVector::getStack: "<< name << " not found. returning empty Stack" << std::endl;
     return defout;
   }
   void container1DStackVector::addMCErrorStackVector(TString sysname,top::container1DStackVector stackvec, bool ignoreMCStat){
@@ -107,7 +108,7 @@ namespace top{
     }
   }
 
-  void container1DStackVector::writeAllToTFile(TString filename, bool recreate){
+  void container1DStackVector::writeAllToTFile(TString filename, bool recreate, TString treename){
     TString name;
 
     if(name_=="") name="no_name";
@@ -119,11 +120,11 @@ namespace top{
     TFile *f = new TFile(filename,upre);
     f->cd();
     TTree * t=0;
-    if(f->Get("stored_objects")){
-      t = (TTree*) f->Get("stored_objects");
+    if(f->Get(treename)){
+      t = (TTree*) f->Get(treename);
     }
     else{
-      t = new TTree("stored_objects","stored_objects");
+      t = new TTree(treename,treename);
     }
     if(t->GetBranch("allContainerStackVectors")){ //branch does not exist yet
       bool temp=csv_makelist;
@@ -164,5 +165,27 @@ namespace top{
     // delete d2;
   }
 
-
+  void container1DStackVector::loadFromTree(TTree * t, TString name){
+    
+    container1DStackVector * csv=0;
+    t->SetBranchAddress("allContainerStackVectors", &csv);
+    bool found=false;
+    for(float n=0;n<t->GetEntries();n++){
+      t->GetEntry(n);
+      if(csv->getName() == name){
+	*this=*csv; //copy
+	found=true;
+	break;
+      }
+    }
+    if(!found) std::cout << "container1DStackVector::loadFromTree: " << name << " not found in tree " << t->GetName() << std::endl;
+  }
+  void container1DStackVector::listAllInTree(TTree * t){
+    container1DStackVector * csv=0;
+    t->SetBranchAddress("allContainerStackVectors", &csv);
+    for(float n=0;n<t->GetEntries();n++){
+      t->GetEntry(n);
+      std::cout << csv->getName() << std::endl;
+    }
+  }
 }
