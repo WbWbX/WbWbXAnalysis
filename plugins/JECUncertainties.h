@@ -10,6 +10,7 @@
 //#include "CondFormats/JetMETObjects/src/SimpleJetCorrectionUncertainty.cc"
 //#include "CondFormats/JetMETObjects/src/JetCorrectionUncertainty.cc"
 #include <vector>
+#include <fstream>
 
 #include "../DataFormats/interface/NTJet.h"
 #include "TString.h"
@@ -109,20 +110,28 @@ namespace top{
 	 "PileUpJetRate"}; //15
       
       if(newset) std::cout << "setting JEC uncertainties file to: " << filename << std::endl;
+      std::ifstream check_file(filename);
+      if(check_file.good()){
 
-      for (int isrc = 0; isrc < nsrc; isrc++) {
-	
-	const char *name = srcnames[isrc];
-	JetCorrectorParameters *p = new JetCorrectorParameters(filename, name);
+	for (int isrc = 0; isrc < nsrc; isrc++) {
+	  
+	  const char *name = srcnames[isrc];
+	  JetCorrectorParameters *p = new JetCorrectorParameters(filename, name);
 	JetCorrectionUncertainty *unc = new JetCorrectionUncertainty(*p);
 	vsrc_.push_back(unc);
-      } 
-      
-      // Total uncertainty
-      totalunc_ = new JetCorrectionUncertainty(*(new JetCorrectorParameters(filename, "Total")));
-      ninit_=false;
+	} 
+	
+	// Total uncertainty
+	totalunc_ = new JetCorrectionUncertainty(*(new JetCorrectorParameters(filename, "Total")));
+	ninit_=false;
+	
+	filename_=filename;
+      }
+      else{
+	std::cout << "JECUncertainties::setFile: File "<< filename <<" does not exist! quitting!" << std::endl;
+	std::exit(EXIT_FAILURE);
+      }
     }
-    filename_=filename;
   }
   
   void JECUncertainties::applyJECUncertainties(std::vector<top::NTJet>::iterator jet){
