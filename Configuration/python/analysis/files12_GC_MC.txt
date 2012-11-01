@@ -1,0 +1,47 @@
+
+#defaults: isMC=true, includetrigger=true, includereco=false
+#inputs are seperated by min 2 spaces; use runall4!!
+#
+
+## Drell Yan stuff 
+
+#80000  /DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     8TeV_dymumu60120     genFilter=Z genFilterString=MuonMuon genFilterMassLow=60 genFilterMassHigh=120 includereco=true
+#80000  /DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     8TeV_dyee60120       genFilter=Z genFilterString=ElectronElectron genFilterMassLow=60 genFilterMassHigh=120 includereco=true
+
+#130000  /DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     8TeV_dymumu5060      genFilter=Z genFilterString=MuonMuon genFilterMassLow=50 genFilterMassHigh=60
+#130000  /DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     8TeV_dyee5060        genFilter=Z genFilterString=ElectronElectron genFilterMassLow=50 genFilterMassHigh=60
+
+#130000  /DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     8TeV_dymumu120inf    genFilter=Z genFilterString=MuonMuon genFilterMassLow=120 genFilterMassHigh=100000
+#130000  /DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     8TeV_dyee120inf      genFilter=Z genFilterString=ElectronElectron genFilterMassLow=120 genFilterMassHigh=100000
+
+#100000  /DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM      8TeV_dytautau50inf   genFilter=Z genFilterString=TauTau
+
+#140000  /DYJetsToLL_M-10To50filter_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM                     8TeV_dymumu1050        genFilter=Z genFilterString=MuonMuon 
+#140000  /DYJetsToLL_M-10To50filter_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM                     8TeV_dytautau1050      genFilter=Z genFilterString=TauTau 
+#140000  /DYJetsToLL_M-10To50filter_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM                     8TeV_dyee1050          genFilter=Z genFilterString=ElectronElectron
+
+#####TTBAR /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM
+
+#80000   /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     8TeV_eettbar                    genFilter=Top genFilterString=ElectronElectron 
+#80000   /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     8TeV_mumuttbar                  genFilter=Top genFilterString=MuonMuon 
+#80000   /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     8TeV_emuttbar                   genFilter=Top genFilterString=ElectronMuon
+#130000  /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     8TeV_eettbarviatau              genFilter=Top genFilterString=ElectronElectronViaTau
+#130000  /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     8TeV_mumuttbarviatau            genFilter=Top genFilterString=MuonMuonViaTau
+#130000  /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     8TeV_emuttbarviatau             genFilter=Top genFilterString=ElectronMuonViaTau
+80000   /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     8TeV_eettbarbg                genFilter=Top genFilterString=ElectronElectron,ElectronElectronViaTau genFilterInvert=true
+80000   /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     8TeV_mumuttbarbg                genFilter=Top genFilterString=MuonMuon,MuonMuonViaTau genFilterInvert=true
+80000   /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     8TeV_emuttbarbg                genFilter=Top genFilterString=ElectronMuon,ElectronMuonViaTau genFilterInvert=true
+
+
+#### BOSON STUFF
+
+#140000  /WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7A-v2/AODSIM    8TeV_wjets  
+
+#140000  /WW_TuneZ2star_8TeV_pythia6_tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM              8TeV_wwp
+#140000  /WZ_TuneZ2star_8TeV_pythia6_tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM              8TeV_wz    
+#140000  /ZZ_TuneZ2star_8TeV_pythia6_tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM              8TeV_zz   
+
+
+
+#####QCD
+# still missing

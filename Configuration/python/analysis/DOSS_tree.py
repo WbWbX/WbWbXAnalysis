@@ -48,6 +48,9 @@ PDF=options.PDF                          # cteq65
 inputScript=options.inputScript          # TtZAnalysis.Configuration.samples.mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12-PU_S7_START52_V9-v2_cff
 json=options.json                        # give full path!!json files in TtZAnalysis/Data/data
 
+crab=True # for GC
+
+
 syncfile=options.isSync                  # False
 
 #print genFilterString
