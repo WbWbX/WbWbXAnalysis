@@ -22,6 +22,7 @@
 using namespace std;
 
 //ratiomulti affects plots AND syst error in tables
+// NOOOOO relative paths!!
 
 double ratiomultiplier=0;
 TString whichelectrons="NTPFElectrons";
@@ -30,7 +31,7 @@ bool useRhoIso=false;
 
 double jetptcut=30;
 
-bool breakat5fb=true;
+bool breakat5fb=false;
 bool checktriggerpaths=true;
 
 class triggerAnalyzer{
@@ -1038,7 +1039,7 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
   container1D MC;
 
 
-  TFile* f5 = new TFile("plots/triggerSummaryEE.root","RECREATE");
+  TFile* f5 = new TFile("triggerSummaryEE.root","RECREATE");
 
   ta_eed.writeAll();
   ta_eeMC.writeAll();
@@ -1085,7 +1086,7 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
   f5->Close();
 
   
-  TFile* f6 = new TFile("plots/triggerSummaryMUMU.root","RECREATE");//ta_mumud.writeAll();
+  TFile* f6 = new TFile("triggerSummaryMUMU.root","RECREATE");//ta_mumud.writeAll();
 
   ta_mumud.writeAll();
   ta_mumuMC.writeAll();
@@ -1131,7 +1132,7 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
 
   f6->Close();
 
-  TFile* f7 = new TFile("plots/triggerSummaryEMU.root","RECREATE");
+  TFile* f7 = new TFile("triggerSummaryEMU.root","RECREATE");
 
   ta_emud.writeAll();
   ta_emuMC.writeAll();
@@ -1183,7 +1184,7 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
 
 void do_triggerAnalyzer(){
   analyze();
-  miniscript("plots/"); //makes plots nice and puts output to directory
+  miniscript(""); //makes plots nice and puts output to directory
 
   if(breakat5fb) std::cout << "THESE ARE THE NUMBERS AND PLOTS FOR 5fb-1!!!" << std::endl;
 }
