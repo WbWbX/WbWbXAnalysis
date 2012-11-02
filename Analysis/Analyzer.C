@@ -4,6 +4,7 @@
 #include "TtZAnalysis/plugins/leptonSelector.h"
 #include "TtZAnalysis/Tools/interface/miscUtils.h"
 #include "TtZAnalysis/Tools/interface/containerStackVector.h"
+#include "TtZAnalysis/Tools/interface/containerUF.h"
 #include "TtZAnalysis/plugins/JERAdjuster.h"
 #include "TtZAnalysis/plugins/JECUncertainties.h"
 #include "TTree.h"
@@ -19,6 +20,7 @@ namespace top{
 }
 
 //// run in batch mode otherwise it is dramatically slowed down by all the drawing stuff; the latter might also produce seg violations in the canvas libs.
+//// name Z contribution "Z" or something similar for generator stuff and so on
 
 class MainAnalyzer{
 
@@ -197,7 +199,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
   container1D diletaZgen(etabinsdil, "dilepton eta gen", "#eta_{ll}", "N_{evt}");
 
-  container1D selection(selectionbins, "selection steps", "step", "N_{sel}");
+  container1D selection(selectionbins, "some selection steps", "step", "N_{sel}");
+
+  container1D final_selection(selectionbins, "final selection steps", "step", "N_{sel}"); // 1 Z, 2 1btag, 3 1 btag jet40, 4 2btag jet40
 
   container1D eleceta0(etabinselec, "electron eta step 0", "#eta_{l}","N_{e}");
   container1D eleceta1(etabinselec, "electron eta step 1", "#eta_{l}","N_{e}");
@@ -371,6 +375,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 	generated2.setBinError(i, sqrt(fgen));
       }
     }
+    else{
+      generated2=generated;
+    }
 
   }
   else{
@@ -486,7 +493,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       elecpt1.fill(elec->pt(),puweight);
       eleciso1.fill(elec->rhoIso03(),puweight);
       elecid1.fill(elec->mvaId(),puweight);
-    //some other fills
+      //some other fills
     }
 
     for(NTMuonIt muon=idmuons.begin();muon<idmuons.end();++muon){
@@ -624,6 +631,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       
       invmass10.fill(invLepMass,puweight);
       selection.fill(10,puweight);
+
+      final_selection.fill(1,puweight);
 
       isZrange=true;
 
@@ -839,6 +848,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       met8.fill(adjustedmet.met(), puweight);
       btagmulti8.fill(btaggedjets.size(),puweight);
 
+      final_selection.fill(2,puweight);
+
     }
     if(isZrange){
       invmassZ8.fill(invLepMass,puweight);
@@ -849,6 +860,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       selection.fill(9,puweight);
       btagmulti9.fill(btaggedjets.size(),puweight);
       met9.fill(adjustedmet.met(), puweight);
+
+      final_selection.fill(3,puweight);
+
     }
     if(isZrange){
       invmassZ9.fill(invLepMass,puweight);
@@ -879,29 +893,32 @@ void Analyzer(){
 
   cout << "\n\n\n" <<endl; //looks better ;)
 
-  TString outfile = "fullWith5fb.root";
-  TString pufolder="/afs/naf.desy.de/user/k/kieseler/scratch/2012/TestArea2/CMSSW_5_2_5/src/TtZAnalysis/Data/PUDistr/";
+  TString outfile = "sometest.root";
+  // TString pufolder="/afs/naf.desy.de/user/k/kieseler/scratch/2012/TestArea2/CMSSW_5_2_5/src/TtZAnalysis/Data/PUDistr/";
+
+  TString cmssw_base="/afs/naf.desy.de/user/k/kieseler/scratch/2012/HCP2/CMSSW_5_3_3_patch3";
 
   //initialize mumu
 
-  double lumiunc12=0.036;
+  double lumi=12100;
+  double lumiunc12=0.036; //?
 
   bool runInNotQuietMode=true;
 
 
   MainAnalyzer analyzermumu("default_mumu","mumu");
   analyzermumu.setShowStatusBar(runInNotQuietMode);  //for running with text output mode
-  analyzermumu.setLumi(5097);
+  analyzermumu.setLumi(lumi);
   analyzermumu.setFileList("mumu_8TeV_inputfiles.txt");
-  analyzermumu.setDataSetDirectory("/scratch/hh/dust/naf/cms/user/kieseler/trees0724/");
-  analyzermumu.getPUReweighter()->setDataTruePUInput(pufolder+"data_pu_190456-196531_corr_def.root");
-  analyzermumu.getJECUncertainties()->setFile("/afs/naf.desy.de/user/k/kieseler/scratch/2012/TestArea2/CMSSW_5_2_5/src/TtZAnalysis/Data/JECUnc/Summer12_V2_DATA_AK5PF_UncertaintySources.txt");
+  analyzermumu.setDataSetDirectory("/scratch/hh/dust/naf/cms/user/kieseler/trees_8TeV_MC/");
+  analyzermumu.getPUReweighter()->setDataTruePUInput("/scratch/hh/dust/naf/cms/user/kieseler/trees_8TeV_MC/HCP_PU.root");
+  analyzermumu.getJECUncertainties()->setFile(cmssw_base+"/src/TtZAnalysis/Data/Summer12_V2_DATA_AK5PF_UncertaintySources.txt");
   analyzermumu.getPUReweighter()->setMCDistrSum12();
   analyzermumu.start();
   analyzermumu.getPlots()->writeAllToTFile(outfile,true);
 
   //start with ee
-
+  
   MainAnalyzer analyzeree=analyzermumu;
   analyzeree.setFileList("ee_8TeV_inputfiles.txt");
   analyzeree.setName("default_ee","ee");
@@ -909,7 +926,7 @@ void Analyzer(){
   analyzeree.getPlots()->writeAllToTFile(outfile,false);
 
   
-  
+  /*
 
   MainAnalyzer eewithlumi=analyzeree;
   eewithlumi.setName("ee_lumi","ee");
@@ -1008,7 +1025,7 @@ void Analyzer(){
   // all systematics
   
   MainAnalyzer eeWithAll=eewithlumi; //already includes lumi uncert
-  eeWithAll.setName("allunc_ee","ee");
+  eeWithAll.setName("8TeV_allunc_ee","ee");
   eeWithAll.getPlots()->addMCErrorStackVector("8TEV_PU_up",*analyzereepuup.getPlots());
   eeWithAll.getPlots()->addMCErrorStackVector("8TEV_PU_down",*analyzereepudown.getPlots());
   eeWithAll.getPlots()->addMCErrorStackVector("JER_up",*analyzereejerup.getPlots());
@@ -1119,13 +1136,13 @@ void Analyzer(){
   
   MainAnalyzer analyzermumupuup=analyzermumu;
   analyzermumupuup.getPUReweighter()->setDataTruePUInput(pufolder+"data_pu_190456-196531_corr_up.root"); 
-  analyzermumupuup.setName("puup_mumu", "mumu");
+  analyzermumupuup.setName("8TeV_puup_mumu", "mumu");
   analyzermumupuup.start();
   analyzermumupuup.getPlots()->writeAllToTFile(outfile);
 
   MainAnalyzer analyzermumupudown=analyzermumu;
   analyzermumupudown.getPUReweighter()->setDataTruePUInput(pufolder+"data_pu_190456-196531_corr_down.root");
-  analyzermumupudown.setName("pudown_mumu","mumu");
+  analyzermumupudown.setName("8TeV_pudown_mumu","mumu");
   analyzermumupudown.start();
   analyzermumupudown.getPlots()->writeAllToTFile(outfile);
 
@@ -1138,7 +1155,7 @@ void Analyzer(){
   // combine all syst
   
   MainAnalyzer mumuWithAll=mumuwithlumi;
-  mumuWithAll.setName("allunc_mumu","mumu");
+  mumuWithAll.setName("8TeV_allunc_mumu","mumu");
   mumuWithAll.getPlots()->addMCErrorStackVector("8TEV_PU_up",*analyzermumupuup.getPlots());
   mumuWithAll.getPlots()->addMCErrorStackVector("8TEV_PU_down",*analyzermumupudown.getPlots());
   mumuWithAll.getPlots()->addMCErrorStackVector("JER_up",*analyzermumujerup.getPlots());
@@ -1172,6 +1189,8 @@ void Analyzer(){
   scales.clear();
 
 
+ 
+  */
 
   std::cout <<"\n\n\n\n\nFINISHED!" <<std::endl;
 

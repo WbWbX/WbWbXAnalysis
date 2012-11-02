@@ -173,6 +173,12 @@ notinMCtriggers.push_back("DiCentralPFJet");
    }
  }
 
+ if(checktriggerpaths){
+   cout << "used MET triggers: " << endl;
+   for(unsigned int i=0;i<mettriggers.size();i++){
+     if(mettriggers.at(i) != "notrig") cout << mettriggers.at(i) << endl;
+   }
+ }
 
  // mettriggers=notinMCtriggers;
   std::vector<string> mettriggersMC;
@@ -851,9 +857,12 @@ notinMCtriggers.push_back("DiCentralPFJet");
     TString add="";
     if(isMC) add="MC";
     etaeff_.writeTGraph("eta eff"+add,false);
+    etaeff_.writeTH1D("TH eta eff"+add,false);
     etaeff_.writeTH1D("axis eta",false);
 
+
     pteff_.writeTGraph("pt eff"+add,false);
+    pteff_.writeTH1D("TH pt eff"+add,false);
     pteff_.writeTH1D("axis pt",false);
 
     dphieff_.writeTGraph("dphi eff"+add,false);
