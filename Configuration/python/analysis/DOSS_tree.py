@@ -119,7 +119,7 @@ process.out    = cms.OutputModule("PoolOutputModule", outputCommands =  cms.untr
 
 ################# Input script (some default one for crab
 #if syncfile or crab:
-process.source = cms.Source('PoolSource',fileNames=cms.untracked.vstring( '/store/mc/Summer12/TTJets_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S7_START52_V5-v1/0000/FEBE99BB-3881-E111-B1F3-003048D42DC8.root' ))
+process.source = cms.Source('PoolSource',fileNames=cms.untracked.vstring( '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/A89D210D-1BE2-E111-9EFB-0030487F1797.root' ))
 
 if not (syncfile or crab):     
     if inputScript=='':
