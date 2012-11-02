@@ -46,7 +46,7 @@ includetrigger=options.includetrigger    # True
 includePDFWeights=options.includePDF     # False
 PDF=options.PDF                          # cteq65
 inputScript=options.inputScript          # TtZAnalysis.Configuration.samples.mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12-PU_S7_START52_V9-v2_cff
-json=options.json                        # give full path!!json files in TtZAnalysis/Data/data
+json=options.json                        # give full path!!json files in TtZAnalysis/Data/data ONLY needed with nafjobsplitter
 
 crab=True # for GC
 
