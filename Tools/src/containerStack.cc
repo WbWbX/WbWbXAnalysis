@@ -141,6 +141,12 @@ namespace top{
       containers_[i].removeError(sysname);
     }
   }
+
+  void container1DStack::renameSyst(TString old, TString New){
+    for(unsigned int i=0; i<size();i++){
+      containers_[i].renameSyst(old,New);
+    }
+  }
   top::container1D & container1DStack::getContainer(TString name){
     bool found=false;
     for(unsigned int i=0;i<containers_.size();i++){

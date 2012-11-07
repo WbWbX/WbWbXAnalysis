@@ -34,6 +34,7 @@ namespace top{
     void addGlobalRelMCError(TString,double);
     void addRelSystematicsFrom(top::container1DStackVector);
     void removeError(TString);
+    void renameSyst(TString,TString); //! old new
 
     void multiplyNorms(TString, std::vector<double>, std::vector<TString>, bool showmessages=false);   //! multiplies norm of all MC with legendname  ,  with factor  ,  for step identifier string
 

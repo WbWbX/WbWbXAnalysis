@@ -18,9 +18,11 @@ cvs co -d TopAnalysis/TopFilter/python/filters/ UserCode/Bromo/TopAnalysis/TopFi
 cvs co -d TopAnalysis/TopFilter/python/filters/ UserCode/Bromo/TopAnalysis/TopFilter/python/filters/GeneratorZFilter_cfi.py
 
 cvs co -d TopAnalysis/Configuration/analysis/diLeptonic  UserCode/Bromo/TopAnalysis/Configuration/analysis/diLeptonic/runallGC.pl
+cvs co -d TopAnalysis/Configuration/analysis/diLeptonic  UserCode/Bromo/TopAnalysis/Configuration/analysis/diLeptonic/runallCrab.pl
 
 cd ${CMSSW_BASE}/src/TtZAnalysis/Configuration/python/analysis
 ln -s ${CMSSW_BASE}/src/TopAnalysis/Configuration/analysis/diLeptonic/runallGC.pl runallGC.pl
+ln -s ${CMSSW_BASE}/src/TopAnalysis/Configuration/analysis/diLeptonic/runallCrab.pl runallCrab.pl
 
 cd $CMSSW_BASE/src/TtZAnalysis/Data
 ln -s /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/PileUp PileUpJsons

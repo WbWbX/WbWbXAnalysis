@@ -88,6 +88,11 @@ namespace top{
       stack->removeError(name);
     }
   }
+  void container1DStackVector::renameSyst(TString old, TString New){
+    for(std::vector<container1DStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
+      stack->renameSyst(old,New);
+    }
+  }
   void container1DStackVector::multiplyNorms(TString legendname, std::vector<double> scalefactors, std::vector<TString> identifier,bool showmessages){
     if(! (identifier.size() == scalefactors.size())){
       std::cout << "container1DStackVector::multiplyNorms: identifiers and scalefactors must be same size!" << std::endl;

@@ -91,7 +91,7 @@ namespace top{
     void addGlobalRelError(TString,double);      //! adds a global relative symmetric uncertainty with name; creates ".._up" and ".._down" variation names
 
     void removeError(TString); //! removes a systematic uncertainty with name ..
-    void renameSyst(TString , TString);
+    void renameSyst(TString , TString); //! old, new
 
     void transformStatToSyst(TString);
     void setAllErrorsZero(){for(unsigned int i=0;i<staterrup_.size();i++){staterrup_[i]=0;staterrdown_[i]=0;} syserrors_.clear();} //! sets all errors zero (onlystat!!!)

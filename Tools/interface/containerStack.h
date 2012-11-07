@@ -44,6 +44,7 @@ namespace top{
     void addMCErrorStack(TString,container1DStack,bool ignoreMCStat=true);  //! calls container1D::addErrorContainer for each same named member container
     void addRelSystematicsFrom(top::container1DStack);
     void removeError(TString);
+    void renameSyst(TString, TString); //! old, new
 
     void clear(){containers_.clear();legends_.clear();colors_.clear();norms_.clear();}
     
