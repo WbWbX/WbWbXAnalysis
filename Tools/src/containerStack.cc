@@ -36,6 +36,25 @@ namespace top{
      norms_.push_back(norm);
    }
  }
+  void container1DStack::removeContribution(TString legendname){
+    bool found=false;
+    std::vector<TString>::iterator leg=legends_.begin();
+    std::vector<int>::iterator col=colors_.begin();
+    std::vector<double>::iterator norm=norms_.begin();
+    for(std::vector<top::container1D>::iterator cont=containers_.begin();cont<containers_.end();++cont){
+      if(*leg == legendname){
+	legends_.erase(leg);
+	containers_.erase(cont);
+	colors_.erase(col);
+	norms_.erase(norm);
+	found=true;
+	break;
+      }
+      ++leg;++col;++norm;
+    }
+    if(!found) std::cout << "container1DStack::removeContribution: " << legendname << " not found." <<std::endl;
+
+  }
 
  void container1DStack::mergeSameLegends(){
    //redundant

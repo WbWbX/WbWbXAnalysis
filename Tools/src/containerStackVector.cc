@@ -57,6 +57,12 @@ namespace top{
     std::cout << "container1DStackVector::getStack: "<< name << " not found. returning empty Stack" << std::endl;
     return defout;
   }
+  void container1DStackVector::removeContribution(TString contribution){
+    for(std::vector<top::container1DStack>::iterator stack=stacks_.begin(); stack < stacks_.end(); ++stack){
+      stack->removeContribution(contribution);
+    }
+  }
+
   void container1DStackVector::addMCErrorStackVector(TString sysname,top::container1DStackVector stackvec, bool ignoreMCStat){
     for(std::vector<container1DStack>::iterator istack=stacks_.begin();istack<stacks_.end(); ++istack){
       for(std::vector<container1DStack>::iterator estack=stackvec.stacks_.begin();estack<stackvec.stacks_.end(); ++estack){

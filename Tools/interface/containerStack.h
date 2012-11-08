@@ -24,13 +24,15 @@ namespace top{
     container1DStack(TString);
     ~container1DStack();
 
-    void push_back(top::container1D, TString, int, double);
+    void push_back(top::container1D, TString, int, double); //! adds container with, name, colour, norm to stack
+    void removeContribution(TString); //! removes contribution
     
     void setDataLegend(TString leg="data"){dataleg_=leg;}
-    void mergeSameLegends();
-    top::container1D getContribution(TString);   //! does not ignore data
-    top::container1D getContributionsBut(TString);  //!does not ignore data
-    top::container1D getContributionsBut(std::vector<TString>);  //!does not ignore data
+    void mergeSameLegends();       //! shouldn't be necessary
+    top::container1D getContribution(TString);   //! does not ignore data; makes copy, doesn't change member containers!
+    top::container1D getContributionsBut(TString);  //!does not ignore data; makes copy, doesn't change member containers!
+    top::container1D getContributionsBut(std::vector<TString>);  //!does not ignore data; makes copy, doesn't change member containers!
+
     TString getName(){return name_;}
     unsigned int size(){return colors_.size();}
     TString getLegend(unsigned int i){return legends_[i];}

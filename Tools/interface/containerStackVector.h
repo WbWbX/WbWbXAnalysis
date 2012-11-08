@@ -29,6 +29,7 @@ namespace top{
     std::vector<top::container1DStack> getVector(){return stacks_;}
     top::container1DStack getStack(TString);
     top::container1DStack getStack(unsigned int n){return stacks_[n];}
+    void removeContribution(TString);
 
     void addMCErrorStackVector(TString,top::container1DStackVector, bool ignoreMCStat=true);
     void addGlobalRelMCError(TString,double);
