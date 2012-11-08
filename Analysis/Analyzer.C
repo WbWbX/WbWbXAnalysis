@@ -19,6 +19,8 @@ namespace top{
   typedef std::vector<top::NTSuClu>::iterator NTSuCluIt;
 }
 
+///// now available: removeContribution; use it to run on the systematics etc (only signal) or pdf stuff (remove nominal,for(i) add pdf[i], xsec, remove pdf[i])
+
 //// run in batch mode otherwise it is dramatically slowed down by all the drawing stuff; the latter might also produce seg violations in the canvas libs.
 //// name Z contribution "Z" or something similar for generator stuff and so on
 
