@@ -24,6 +24,9 @@ cd ${CMSSW_BASE}/src/TtZAnalysis/Configuration/python/analysis
 ln -s ${CMSSW_BASE}/src/TopAnalysis/Configuration/analysis/diLeptonic/runallGC.pl runallGC.pl
 ln -s ${CMSSW_BASE}/src/TopAnalysis/Configuration/analysis/diLeptonic/runallCrab.pl runallCrab.pl
 
+ln -s  ${CMSSW_BASE}/src/TtZAnalysis/Configuration/python/analysis/ReRecoNov2011.json ${CMSSW_BASE}/src/TtZAnalysis/Data/ReRecoNov2011.json
+ln -s  ${CMSSW_BASE}/src/TtZAnalysis/Configuration/python/analysis/HCP.json ${CMSSW_BASE}/src/TtZAnalysis/Data/HCP.json
+
 cd $CMSSW_BASE/src/TtZAnalysis/Data
 ln -s /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/PileUp PileUpJsons
 cd $CMSSW_BASE/src

@@ -26,6 +26,10 @@ ln -s ${CMSSW_BASE}/src/TopAnalysis/Configuration/analysis/diLeptonic/runallCrab
 #./updatemcfiles12.sh
 cd $CMSSW_BASE/src
 
+ln -s  ${CMSSW_BASE}/src/TtZAnalysis/Configuration/python/analysis/ReRecoNov2011.json ${CMSSW_BASE}/src/TtZAnalysis/Data/ReRecoNov2011.json
+ln -s  ${CMSSW_BASE}/src/TtZAnalysis/Configuration/python/analysis/HCP.json ${CMSSW_BASE}/src/TtZAnalysis/Data/HCP.json
+
+
 # the private JEC uncertainties code (standalone)
 
 echo "modified JEC Uncertainty utility.."
