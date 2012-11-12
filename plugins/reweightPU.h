@@ -98,10 +98,28 @@ namespace top{
       mcpu_.clear();
       std::cout << "\n\nWARNING!!! RESETTING ALL PU WEIGHTS! ONLY FOR TESTING!!\n\n" << std::endl;
     }
-    
-  
-  private:
 
+    void setMCDistrFall11(TString scenario="S06"){
+      
+      std::vector<double> V;
+      
+      if(scenario=="S06"){
+	Double_t Fall2011[50] = {  0.003388501,  0.010357558,  0.024724258,  0.042348605,  0.058279812,  0.068851751,  0.072914824,  0.071579609,  0.066811668,  0.060672356,  0.054528356,  0.04919354,  0.044886042,  0.041341896,  0.0384679,  0.035871463,  0.03341952,  0.030915649,  0.028395374,  0.025798107,  0.023237445,  0.020602754,  0.0180688,  0.015559693,  0.013211063,  0.010964293,  0.008920993,  0.007080504,  0.005499239,  0.004187022,  0.003096474,  0.002237361,  0.001566428,  0.001074149,  0.000721755,  0.000470838,  0.00030268,  0.000184665,  0.000112883,  6.74043E-05,  3.82178E-05,  2.22847E-05,  1.20933E-05,  6.96173E-06,  3.4689E-06,  1.96172E-06,  8.49283E-07,  5.02393E-07,  2.15311E-07,  9.56938E-08};
+	V = std::vector<double>(Fall2011,Fall2011  + sizeof(Fall2011)/sizeof(Fall2011[0]));
+      }
+      else{
+	std::cout << "PUReweighter::setMCDistrSum12: scenario " << scenario << "not known!" << std::endl;
+      }
+      
+      std::cout << "setting MC pileup distribution to Fall11_"+scenario << std::endl;
+      mcpu_=V;
+      mcint_=0;
+      for(unsigned int i=1;i<mcpu_.size();i++) mcint_ += mcpu_[i];
+    }
+    
+    
+  private:
+    
     std::vector<double> datapu_;
     std::vector<double> mcpu_;
     double dataint_;
