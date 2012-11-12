@@ -1,1 +1,8 @@
+#!/bin/sh
+
+
 pileupCalc.py --minBiasXsec 69400 --inputLumiJSON /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/PileUp/pileup_JSON_DCSONLY_190389-204506_corr.txt --maxPileupBin 60 --numPileupBins 60 --calcMode true -i HCP.json HCP_PU.root
+
+
+#up: 72870
+#down 65930
