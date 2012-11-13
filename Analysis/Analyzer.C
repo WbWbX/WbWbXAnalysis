@@ -179,8 +179,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   for(float i=0;i<50;i++) isobins << i/50;
   vector<float> selectionbins;
   for(float i=-0.5;i<11.5;i++) selectionbins << i;
-  vector<float> genbin;
-  genbin << 0.5 << 1.5;
+  vector<float> onebin;
+  onebin << 0.5 << 1.5;
 
 
   //and so on
@@ -195,37 +195,44 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   container1D::c_clearlist(); // should be empty just in case
   container1D::c_makelist=true; //switch on automatic listing
 
-  container1D generated(selectionbins, "generated events", "gen", "N_{gen}");
-  container1D generated2(selectionbins, "generated filtered events", "gen", "N_{gen}");
+  container1D generated(onebin, "generated events", "gen", "N_{gen}");
+  container1D generated2(onebin, "generated filtered events", "gen", "N_{gen}");
 
 
   container1D diletaZgen(etabinsdil, "dilepton eta gen", "#eta_{ll}", "N_{evt}");
 
   container1D selection(selectionbins, "some selection steps", "step", "N_{sel}");
 
-  container1D final_selection(selectionbins, "final selection steps", "step", "N_{sel}"); // 1 Z, 2 1btag, 3 1 btag jet40, 4 2btag jet40
+
+  // need to be different containers to get the background renormalization right
+
+  container1D ttfinal_selection8 (onebin, "ttbar selection step 8", "step", "N_{sel}"); // NO Z,  1btag
+  container1D ttfinal_selection9 (onebin, "ttbar selection step 9", "step", "N_{sel}"); // NO Z,  2btag 
+  container1D ttfinal_selection10(onebin, "ttbar selection step 10", "step", "N_{sel}"); // NO Z, jet stuff?
+  container1D Zfinal_selection20 (onebin, "Z final selection step 20", "step", "N_{sel}"); //2 -4 the same
+
 
   container1D eleceta0(etabinselec, "electron eta step 0", "#eta_{l}","N_{e}");
   container1D eleceta1(etabinselec, "electron eta step 1", "#eta_{l}","N_{e}");
   container1D eleceta2(etabinselec, "electron eta step 2", "#eta_{l}","N_{e}");
   container1D eleceta3(etabinselec, "electron eta step 3", "#eta_{l}","N_{e}");
+  container1D eleceta20(etabinselec, "electron eta step 20", "#eta_{l}","N_{e}");
   container1D eleceta4(etabinselec, "electron eta step 4", "#eta_{l}","N_{e}");
   container1D eleceta5(etabinselec, "electron eta step 5", "#eta_{l}","N_{e}");
   container1D eleceta6(etabinselec, "electron eta step 6", "#eta_{l}","N_{e}");
   container1D eleceta7(etabinselec, "electron eta step 7", "#eta_{l}","N_{e}");
   container1D eleceta8(etabinselec, "electron eta step 8", "#eta_{l}","N_{e}");
-  container1D eleceta10(etabinselec, "electron eta step 10", "#eta_{l}","N_{e}");
 
   container1D elecpt0(ptbinsfull, "electron pt step 0", "p_{T} [GeV]", "N_{e}");
   container1D elecpt1(ptbinsfull, "electron pt step 1", "p_{T} [GeV]", "N_{e}");
   container1D elecpt2(ptbinsfull, "electron pt step 2", "p_{T} [GeV]", "N_{e}");
   container1D elecpt3(ptbinsfull, "electron pt step 3", "p_{T} [GeV]", "N_{e}");
+  container1D elecpt20(ptbinsfull, "electron pt step 20", "p_{T} [GeV]", "N_{e}");
   container1D elecpt4(ptbinsfull, "electron pt step 4", "p_{T} [GeV]", "N_{e}");
   container1D elecpt5(ptbinsfull, "electron pt step 5", "p_{T} [GeV]", "N_{e}");
   container1D elecpt6(ptbinsfull, "electron pt step 6", "p_{T} [GeV]", "N_{e}");
   container1D elecpt7(ptbinsfull, "electron pt step 7", "p_{T} [GeV]", "N_{e}");
   container1D elecpt8(ptbinsfull, "electron pt step 8", "p_{T} [GeV]", "N_{e}");
-  container1D elecpt10(ptbinsfull, "electron pt step 10", "p_{T} [GeV]", "N_{e}");
 
   container1D eleciso0(isobins, "electron isolation step 0", "Iso", "N_{e}");
   container1D eleciso1(isobins, "electron isolation step 1", "Iso", "N_{e}");
@@ -243,23 +250,23 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   container1D muoneta1(etabinsmuon, "muon eta step 1", "#eta_{l}","N_{#mu}");
   container1D muoneta2(etabinsmuon, "muon eta step 2", "#eta_{l}","N_{#mu}");
   container1D muoneta3(etabinsmuon, "muon eta step 3", "#eta_{l}","N_{#mu}");
+  container1D muoneta20(etabinsmuon, "muon eta step 20", "#eta_{l}","N_{#mu}");
   container1D muoneta4(etabinsmuon, "muon eta step 4", "#eta_{l}","N_{#mu}");
   container1D muoneta5(etabinsmuon, "muon eta step 5", "#eta_{l}","N_{#mu}");
   container1D muoneta6(etabinsmuon, "muon eta step 6", "#eta_{l}","N_{#mu}");
   container1D muoneta7(etabinsmuon, "muon eta step 7", "#eta_{l}","N_{#mu}");
   container1D muoneta8(etabinsmuon, "muon eta step 8", "#eta_{l}","N_{#mu}");
-  container1D muoneta10(etabinsmuon, "muon eta step 10", "#eta_{l}","N_{#mu}");
 
   container1D muonpt0(ptbinsfull, "muon pt step 0", "p_{T} [GeV]", "N_{#mu}");
   container1D muonpt1(ptbinsfull, "muon pt step 1", "p_{T} [GeV]", "N_{#mu}");
   container1D muonpt2(ptbinsfull, "muon pt step 2", "p_{T} [GeV]", "N_{#mu}");
   container1D muonpt3(ptbinsfull, "muon pt step 3", "p_{T} [GeV]", "N_{#mu}");
+  container1D muonpt20(ptbinsfull, "muon pt step 20", "p_{T} [GeV]", "N_{#mu}");
   container1D muonpt4(ptbinsfull, "muon pt step 4", "p_{T} [GeV]", "N_{#mu}");
   container1D muonpt5(ptbinsfull, "muon pt step 5", "p_{T} [GeV]", "N_{#mu}");
   container1D muonpt6(ptbinsfull, "muon pt step 6", "p_{T} [GeV]", "N_{#mu}");
   container1D muonpt7(ptbinsfull, "muon pt step 7", "p_{T} [GeV]", "N_{#mu}");
   container1D muonpt8(ptbinsfull, "muon pt step 8", "p_{T} [GeV]", "N_{#mu}");
-  container1D muonpt10(ptbinsfull, "muon pt step 10", "p_{T} [GeV]", "N_{#mu}");
 
   container1D muoniso0(isobins, "muon isolation step 0", "Iso", "N_{#mu}");
   container1D muoniso1(isobins, "muon isolation step 1", "Iso", "N_{#mu}");
@@ -271,6 +278,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   container1D vertexmulti1(multibinsvertx, "vertex multiplicity step 1", "n_{vtx}", "N_{evt}");
   container1D vertexmulti2(multibinsvertx, "vertex multiplicity step 2", "n_{vtx}", "N_{evt}");
   container1D vertexmulti3(multibinsvertx, "vertex multiplicity step 3", "n_{vtx}", "N_{evt}");
+  container1D vertexmulti20(multibinsvertx, "vertex multiplicity step 20", "n_{vtx}", "N_{evt}");
   container1D vertexmulti4(multibinsvertx, "vertex multiplicity step 4", "n_{vtx}", "N_{evt}");
   container1D vertexmulti5(multibinsvertx, "vertex multiplicity step 5", "n_{vtx}", "N_{evt}");
   container1D vertexmulti6(multibinsvertx, "vertex multiplicity step 6", "n_{vtx}", "N_{evt}");
@@ -281,13 +289,13 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
   container1D invmass2(massbins, "dilepton invariant mass step 2", "m_{ll} [GeV]", "N_{evt}");
   container1D invmass3(massbins, "dilepton invariant mass step 3", "m_{ll} [GeV]", "N_{evt}");
+  container1D invmass20(massbins, "dilepton invariant mass step 20", "m_{ll} [GeV]", "N_{evt}"); //Z
   container1D invmass4(massbins, "dilepton invariant mass step 4", "m_{ll} [GeV]", "N_{evt}");
   container1D invmass5(massbins, "dilepton invariant mass step 5", "m_{ll} [GeV]", "N_{evt}");
   container1D invmass6(massbins, "dilepton invariant mass step 6", "m_{ll} [GeV]", "N_{evt}");
   container1D invmass7(massbins, "dilepton invariant mass step 7", "m_{ll} [GeV]", "N_{evt}");
   container1D invmass8(massbins, "dilepton invariant mass step 8", "m_{ll} [GeV]", "N_{evt}");
   container1D invmass9(massbins, "dilepton invariant mass step 8", "m_{ll} [GeV]", "N_{evt}");
-  container1D invmass10(massbins, "dilepton invariant mass step 10", "m_{ll} [GeV]", "N_{evt}"); //Z
 
   container1D invmassZ5(massbins, "dilepton invariant massZ step 5", "m_{ll} [GeV]", "N_{evt}");
   container1D invmassZ6(massbins, "dilepton invariant massZ step 6", "m_{ll} [GeV]", "N_{evt}");
@@ -621,20 +629,20 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     if(invLepMass > 76 && invLepMass < 106){
       
       for(NTElectronIt elec=isoelectrons.begin();elec<isoelectrons.end();++elec){
-	eleceta10.fill(elec->eta(), puweight);
-	elecpt10.fill(elec->pt(),puweight);
+	eleceta20.fill(elec->eta(), puweight);
+	elecpt20.fill(elec->pt(),puweight);
 	//some other fills
       }
       
       for(NTMuonIt muon=isomuons.begin();muon<isomuons.end();++muon){
-	muoneta10.fill(muon->eta(), puweight);
-	muonpt10.fill(muon->pt(),puweight);
+	muoneta20.fill(muon->eta(), puweight);
+	muonpt20.fill(muon->pt(),puweight);
       }
       
-      invmass10.fill(invLepMass,puweight);
-      selection.fill(10,puweight);
+      invmass20.fill(invLepMass,puweight);
+      
 
-      final_selection.fill(1,puweight);
+      Zfinal_selection20.fill(1,puweight);
 
       isZrange=true;
 
@@ -850,7 +858,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       met8.fill(adjustedmet.met(), puweight);
       btagmulti8.fill(btaggedjets.size(),puweight);
 
-      final_selection.fill(2,puweight);
+      ttfinal_selection8.fill(1,puweight);
 
     }
     if(isZrange){
@@ -863,7 +871,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       btagmulti9.fill(btaggedjets.size(),puweight);
       met9.fill(adjustedmet.met(), puweight);
 
-      final_selection.fill(3,puweight);
+      ttfinal_selection9.fill(1,puweight);
 
     }
     if(isZrange){
@@ -895,25 +903,27 @@ void Analyzer(){
 
   cout << "\n\n\n" <<endl; //looks better ;)
 
-  TString outfile = "sometest.root";
+  TString outfile = "analysis_output.root";
   // TString pufolder="/afs/naf.desy.de/user/k/kieseler/scratch/2012/TestArea2/CMSSW_5_2_5/src/TtZAnalysis/Data/PUDistr/";
 
   TString cmssw_base="/afs/naf.desy.de/user/k/kieseler/scratch/2012/HCP2/CMSSW_5_3_3_patch3";
 
   //initialize mumu
 
-  double lumi=12100;
-  double lumiunc12=0.036; //?
+  double lumi8TeV=12100;
+  double lumi8TeVunc=0.036; //?
+  double lumi7TeV=5100;
+  double lumi7TeVunc=0.025; //?
 
   bool runInNotQuietMode=true;
 
 
-  MainAnalyzer analyzermumu("default_mumu","mumu");
+  MainAnalyzer analyzermumu("8TeV_default_mumu","mumu");
   analyzermumu.setShowStatusBar(runInNotQuietMode);  //for running with text output mode
-  analyzermumu.setLumi(lumi);
+  analyzermumu.setLumi(lumi8TeV);
   analyzermumu.setFileList("mumu_8TeV_inputfiles.txt");
-  analyzermumu.setDataSetDirectory("/scratch/hh/dust/naf/cms/user/kieseler/trees_8TeV_MC/");
-  analyzermumu.getPUReweighter()->setDataTruePUInput("/scratch/hh/dust/naf/cms/user/kieseler/trees_8TeV_MC/HCP_PU.root");
+  analyzermumu.setDataSetDirectory("/scratch/hh/dust/naf/cms/user/kieseler/trees_8TeV/");
+  analyzermumu.getPUReweighter()->setDataTruePUInput(cmssw_base+"/src/TtZAnalysis/Data/HCP.json.txt_PU.root");
   analyzermumu.getJECUncertainties()->setFile(cmssw_base+"/src/TtZAnalysis/Data/Summer12_V2_DATA_AK5PF_UncertaintySources.txt");
   analyzermumu.getPUReweighter()->setMCDistrSum12();
   analyzermumu.start();
@@ -923,11 +933,30 @@ void Analyzer(){
   
   MainAnalyzer analyzeree=analyzermumu;
   analyzeree.setFileList("ee_8TeV_inputfiles.txt");
-  analyzeree.setName("default_ee","ee");
+  analyzeree.setName("8TeV_default_ee","ee");
   analyzeree.start();
   analyzeree.getPlots()->writeAllToTFile(outfile,false);
 
   
+  // to have something to play with prepare the default 7 TeV analyzer
+  MainAnalyzer analyzer7ee;//=analyzermumu;
+  analyzer7ee.setFileList("ee_7TeV_inputfiles.txt");
+  analyzer7ee.setLumi(lumi7TeV);
+  analyzer7ee.setShowStatusBar(runInNotQuietMode);
+  analyzer7ee.setName("7TeV_default_ee","ee");
+  analyzer7ee.setDataSetDirectory("/scratch/hh/dust/naf/cms/user/kieseler/trees_7TeV/");
+  analyzer7ee.getPUReweighter()->setDataTruePUInput(cmssw_base+"/src/TtZAnalysis/Data/ReRecoNov2011.json_PU.root");
+  analyzer7ee.getPUReweighter()->setMCDistrFall11();
+  analyzer7ee.getJECUncertainties()->setFile(cmssw_base+"/src/TtZAnalysis/Data/JEC11_V12_AK5PF_UncertaintySources.txt");
+  analyzer7ee.start();
+  analyzer7ee.getPlots()->writeAllToTFile(outfile,false);
+
+  MainAnalyzer analyzer7mumu=analyzer7ee;
+  analyzer7mumu.setFileList("mumu_7TeV_inputfiles.txt");
+  analyzer7mumu.setName("7TeV_default_mumu","mumu");
+  analyzer7mumu.start();
+  analyzer7mumu.getPlots()->writeAllToTFile(outfile,false);
+
   /*
 
   MainAnalyzer eewithlumi=analyzeree;

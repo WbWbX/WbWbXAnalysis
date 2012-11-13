@@ -955,15 +955,15 @@ void analyze(){
 
   std::vector<TString> eemcfiles,mumumcfiles,emumcfiles;
   eemcfiles << "/scratch/hh/dust/naf/cms/user/kieseler/trees_8TeV_MC/tree_8TeV_eettbar.root"
-	    << "/scratch/hh/dust/naf/cms/user/diezcar/2012_Rel533/2012-10-08T17:25:32-naf_DOSS_tree_py_for_8TeV_eettbarviatau_8TeV_eettbarviatau/tree_8TeV_eettbarviatau.root" ;
+    	    << "/scratch/hh/dust/naf/cms/user/diezcar/2012_Rel533/2012-10-08T17:25:32-naf_DOSS_tree_py_for_8TeV_eettbarviatau_8TeV_eettbarviatau/tree_8TeV_eettbarviatau.root" ;
 
   mumumcfiles <<"/scratch/hh/dust/naf/cms/user/diezcar/2012_Rel533/2012-10-08T17:25:31-naf_DOSS_tree_py_for_8TeV_mumuttbar_8TeV_mumuttbar/tree_8TeV_mumuttbar.root" 
-	      <<"/scratch/hh/dust/naf/cms/user/diezcar/2012_Rel533/2012-10-08T17:25:32-naf_DOSS_tree_py_for_8TeV_mumuttbarviatau_8TeV_mumuttbarviatau/tree_8TeV_mumuttbarviatau.root" ;
+    	      <<"/scratch/hh/dust/naf/cms/user/diezcar/2012_Rel533/2012-10-08T17:25:32-naf_DOSS_tree_py_for_8TeV_mumuttbarviatau_8TeV_mumuttbarviatau/tree_8TeV_mumuttbarviatau.root" ;
 
   emumcfiles << "/scratch/hh/dust/naf/cms/user/kieseler/trees_8TeV_MC/tree_8TeV_emuttbar.root"
-	     << "/scratch/hh/dust/naf/cms/user/diezcar/2012_Rel533/2012-10-08T17:25:32-naf_DOSS_tree_py_for_8TeV_emuttbarviatau_8TeV_emuttbarviatau/tree_8TeV_emuttbarviatau.root";
+    	     << "/scratch/hh/dust/naf/cms/user/diezcar/2012_Rel533/2012-10-08T17:25:32-naf_DOSS_tree_py_for_8TeV_emuttbarviatau_8TeV_emuttbarviatau/tree_8TeV_emuttbarviatau.root";
 
-
+  // changed back again  std::cout << "SET UP ONLY FOR DIRECT DECAY!!!!!!! this version is NOT checked in in cvs" << std::endl;
 
   TChain * eechain=makeChain(eemcfiles);
   TChain * mumuchain=makeChain(mumumcfiles);

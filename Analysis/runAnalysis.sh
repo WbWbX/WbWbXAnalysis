@@ -2,7 +2,7 @@
 
 #runs analysis und puts analysis code and output to an extra directory with date flag
 
-dirstring="Analysis_$(date +%F_%H:%M)"
+dirstring="${1}$(date +%F_%H:%M)"
 
 echo "\n\nrunning in directory ${dirstring}."
 
