@@ -1039,7 +1039,7 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
   container1D MC;
 
 
-  TFile* f5 = new TFile("triggerSummaryEE.root","RECREATE");
+  TFile* f5 = new TFile("triggerSummary_ee.root","RECREATE");
 
   ta_eed.writeAll();
   ta_eeMC.writeAll();
@@ -1052,6 +1052,7 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
   scalefactor.writeTGraph("scalefactor eta",false);
   scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_eeMC.getCorrelationEta(),ratiomultiplier);
   scalefactor.writeTGraph("scalefactor eta incl corrErr",false);
+  scalefactor.writeTH1D("TH scalefactor eta incl corrErr",false);
 
   data=ta_eed.getPtPlot();
   MC=ta_eeMC.getPtPlot();
@@ -1062,6 +1063,7 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
   scalefactor.writeTGraph("scalefactor pt",false);
   scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_eeMC.getCorrelationPt(),ratiomultiplier);
   scalefactor.writeTGraph("scalefactor pt incl corrErr",false);
+  scalefactor.writeTH1D("TH scalefactor pt incl corrErr",false);
 
   data=ta_eed.getDPhiPlot();
   MC=ta_eeMC.getDPhiPlot();
@@ -1072,6 +1074,7 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
   scalefactor.writeTGraph("scalefactor dphi",false);
   scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_eeMC.getCorrelationDPhi(),ratiomultiplier);
   scalefactor.writeTGraph("scalefactor dphi incl corrErr",false);
+  scalefactor.writeTH1D("TH scalefactor dphi incl corrErr",false);
 
 
   data=ta_eed.getDPhiPlot2();
@@ -1083,10 +1086,11 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
   scalefactor.writeTGraph("scalefactor dphi2",false);
   scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_eeMC.getCorrelationDPhi2(),ratiomultiplier);
   scalefactor.writeTGraph("scalefactor dphi2 incl corrErr",false);
+  scalefactor.writeTH1D("TH scalefactor dphi2 incl corrErr",false);
   f5->Close();
 
   
-  TFile* f6 = new TFile("triggerSummaryMUMU.root","RECREATE");//ta_mumud.writeAll();
+  TFile* f6 = new TFile("triggerSummary_mumu.root","RECREATE");//ta_mumud.writeAll();
 
   ta_mumud.writeAll();
   ta_mumuMC.writeAll();
@@ -1099,6 +1103,7 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
   scalefactor.writeTGraph("scalefactor eta",false);
   scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_mumuMC.getCorrelationEta(),ratiomultiplier);
   scalefactor.writeTGraph("scalefactor eta incl corrErr",false);
+  scalefactor.writeTH1D("TH scalefactor eta incl corrErr",false);
 
   data=ta_mumud.getPtPlot();
   MC=ta_mumuMC.getPtPlot();
@@ -1109,6 +1114,7 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
   scalefactor.writeTGraph("scalefactor pt",false);
   scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_mumuMC.getCorrelationPt(),ratiomultiplier);
   scalefactor.writeTGraph("scalefactor pt incl corrErr",false);
+  scalefactor.writeTH1D("TH scalefactor pt incl corrErr",false);
 
   data=ta_mumud.getDPhiPlot();
   MC=ta_mumuMC.getDPhiPlot();
@@ -1119,6 +1125,7 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
   scalefactor.writeTGraph("scalefactor dphi",false);
   scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_mumuMC.getCorrelationDPhi(),ratiomultiplier);
   scalefactor.writeTGraph("scalefactor dphi incl corrErr",false);
+  scalefactor.writeTH1D("TH scalefactor dphi incl corrErr",false);
 
   data=ta_mumud.getDPhiPlot2();
   MC=ta_mumuMC.getDPhiPlot2();
@@ -1129,10 +1136,11 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
   scalefactor.writeTGraph("scalefactor dphi2",false);
   scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_mumuMC.getCorrelationDPhi2(),ratiomultiplier);
   scalefactor.writeTGraph("scalefactor dphi2 incl corrErr",false);
+  scalefactor.writeTH1D("TH scalefactor dphi2 incl corrErr",false);
 
   f6->Close();
 
-  TFile* f7 = new TFile("triggerSummaryEMU.root","RECREATE");
+  TFile* f7 = new TFile("triggerSummary_emu.root","RECREATE");
 
   ta_emud.writeAll();
   ta_emuMC.writeAll();
@@ -1145,6 +1153,7 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
   scalefactor.writeTGraph("scalefactor eta",false);
   scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_emuMC.getCorrelationEta(),ratiomultiplier);
   scalefactor.writeTGraph("scalefactor eta incl corrErr",false);
+  scalefactor.writeTH1D("TH scalefactor eta incl corrErr",false);
 
   data=ta_emud.getPtPlot();
   MC=ta_emuMC.getPtPlot();
@@ -1155,6 +1164,7 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
   scalefactor.writeTGraph("scalefactor pt",false);
   scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_emuMC.getCorrelationPt(),ratiomultiplier);
   scalefactor.writeTGraph("scalefactor pt incl corrErr",false);
+  scalefactor.writeTH1D("TH scalefactor pt incl corrErr",false);
 
   data=ta_emud.getDPhiPlot();
   MC=ta_emuMC.getDPhiPlot();
@@ -1165,6 +1175,7 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
   scalefactor.writeTGraph("scalefactor dphi",false);
   scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_emuMC.getCorrelationDPhi(),ratiomultiplier);
   scalefactor.writeTGraph("scalefactor dphi incl corrErr",false);
+  scalefactor.writeTH1D("TH scalefactor dphi incl corrErr",false);
 
 
   data=ta_emud.getDPhiPlot2();
@@ -1176,6 +1187,7 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
   scalefactor.writeTGraph("scalefactor dphi2",false);
   scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_emuMC.getCorrelationDPhi2(),ratiomultiplier);
   scalefactor.writeTGraph("scalefactor dphi2 incl corrErr",false);
+  scalefactor.writeTH1D("TH scalefactor dphi2 incl corrErr",false);
 
   f7->Close();
 
