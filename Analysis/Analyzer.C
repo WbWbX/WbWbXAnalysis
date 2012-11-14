@@ -344,7 +344,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   //get the lepton selector (maybe directly in the code.. lets see)
 
   leptonSelector lepSel;
-  lepSel.setUseRhoIsoForElectrons(true);
+  lepSel.setUseRhoIsoForElectrons(false);
   double oldnorm=norm;
 
   /////some boolians //channels
@@ -396,12 +396,14 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   cout << "running on: " << inputfile << "    legend: " << legendname << "\nxsec: " << oldnorm << ", genEvents: " << genentries <<endl;
   // get main analysis tree
 
+  /////////prepare collections
+
   TTree * t = (TTree*) f->Get("PFTree/pfTree");
 
   vector<NTMuon> * pMuons = 0;
   t->SetBranchAddress("NTMuons",&pMuons); 
   vector<NTElectron> * pElectrons = 0;
-  t->SetBranchAddress("NTElectrons",&pElectrons);
+  t->SetBranchAddress("NTPFElectrons",&pElectrons);
   vector<NTJet> * pJets=0;
   t->SetBranchAddress("NTJets",&pJets);
   NTMet * pMet = 0;
@@ -472,7 +474,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     for(NTElectronIt elec=kinelectrons.begin();elec<kinelectrons.end();++elec){
       eleceta0.fill(elec->eta(), puweight);
       elecpt0.fill(elec->pt(),puweight);
-      eleciso0.fill(elec->rhoIso03(),puweight);
+      eleciso0.fill(elec->isoVal03(),puweight);
       elecid0.fill(elec->mvaId(),puweight);
       for(NTMuonIt muon=kinmuons.begin();muon<kinmuons.end();++muon){
 	elecmuondR0.fill(sqrt(pow(elec->eta() - muon->eta(),2) + pow(elec->phi() - muon->phi(),2)), puweight);
@@ -501,7 +503,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     for(NTElectronIt elec=idelectrons.begin();elec<idelectrons.end();++elec){
       eleceta1.fill(elec->eta(), puweight);
       elecpt1.fill(elec->pt(),puweight);
-      eleciso1.fill(elec->rhoIso03(),puweight);
+      eleciso1.fill(elec->isoVal03(),puweight);
       elecid1.fill(elec->mvaId(),puweight);
       //some other fills
     }
@@ -548,7 +550,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     for(NTElectronIt elec=isoelectrons.begin();elec<isoelectrons.end();++elec){
       eleceta2.fill(elec->eta(), puweight);
       elecpt2.fill(elec->pt(),puweight);
-      eleciso2.fill(elec->rhoIso03(),puweight);
+      eleciso2.fill(elec->isoVal03(),puweight);
       elecid2.fill(elec->mvaId(),puweight);
     //some other fills
     }
@@ -607,7 +609,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     for(NTElectronIt elec=isoelectrons.begin();elec<isoelectrons.end();++elec){
       eleceta3.fill(elec->eta(), puweight);
       elecpt3.fill(elec->pt(),puweight);
-      eleciso3.fill(elec->rhoIso03(),puweight);
+      eleciso3.fill(elec->isoVal03(),puweight);
     //some other fills
     }
 
@@ -678,7 +680,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     for(NTElectronIt elec=isoelectrons.begin();elec<isoelectrons.end();++elec){
       eleceta4.fill(elec->eta(), puweight);
       elecpt4.fill(elec->pt(),puweight);
-      eleciso4.fill(elec->rhoIso03(),puweight);
+      eleciso4.fill(elec->isoVal03(),puweight);
     //some other fills
     }
 
@@ -713,7 +715,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       for(NTElectronIt elec=isoelectrons.begin();elec<isoelectrons.end();++elec){
 	eleceta5.fill(elec->eta(), puweight);
 	elecpt5.fill(elec->pt(),puweight);
-	//	eleciso5.fill(elec->rhoIso03(),puweight);
+	//	eleciso5.fill(elec->isoVal03(),puweight);
 	//some other fills
       }
       
@@ -758,7 +760,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       for(NTElectronIt elec=isoelectrons.begin();elec<isoelectrons.end();++elec){
 	eleceta6.fill(elec->eta(), puweight);
 	elecpt6.fill(elec->pt(),puweight);
-	//	eleciso6.fill(elec->rhoIso03(),puweight);
+	//	eleciso6.fill(elec->isoVal03(),puweight);
 	//some other fills
       }
       
@@ -803,7 +805,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       for(NTElectronIt elec=isoelectrons.begin();elec<isoelectrons.end();++elec){
 	eleceta7.fill(elec->eta(), puweight);
 	elecpt7.fill(elec->pt(),puweight);
-	//	eleciso7.fill(elec->rhoIso03(),puweight);
+	//	eleciso7.fill(elec->isoVal03(),puweight);
 	//some other fills
       }
       
@@ -841,7 +843,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       for(NTElectronIt elec=isoelectrons.begin();elec<isoelectrons.end();++elec){
 	eleceta8.fill(elec->eta(), puweight);
 	elecpt8.fill(elec->pt(),puweight);
-	//	eleciso8.fill(elec->rhoIso03(),puweight);
+	//	eleciso8.fill(elec->isoVal03(),puweight);
 	//some other fills
       }
       
@@ -905,15 +907,17 @@ void Analyzer(){
 
   TString outfile = "analysis_output.root";
   // TString pufolder="/afs/naf.desy.de/user/k/kieseler/scratch/2012/TestArea2/CMSSW_5_2_5/src/TtZAnalysis/Data/PUDistr/";
+  // reorder the whole stuff in a way. specify ee mumu 7TeV 8TeV and then do the systematics "in parallel" to better keep track. maybe even produce a vector of analyzers as done for getCrossSections.C
+
 
   TString cmssw_base="/afs/naf.desy.de/user/k/kieseler/scratch/2012/HCP2/CMSSW_5_3_3_patch3";
 
   //initialize mumu
 
   double lumi8TeV=12100;
-  double lumi8TeVunc=0.036; //?
+  double lumi8TeVunc=0.036; //?!
   double lumi7TeV=5100;
-  double lumi7TeVunc=0.025; //?
+  double lumi7TeVunc=0.025; //?!
 
   bool runInNotQuietMode=true;
 
