@@ -32,7 +32,7 @@ if hasattr(sys, "argv"):
     options.parseArguments()
 
 is2011=options.is2011                    # def false
-crab=options.crab                        # False
+crab=options.crab                        # False   OBSOLETE!!!!!
 globalTag=options.globalTag              # START53_V11
 reportEvery=options.reportEvery          # 1000
 maxEvents=options.maxEvents              # -1. overwrites the one specified in input script. be careful!!
@@ -48,8 +48,10 @@ PDF=options.PDF                          # cteq65
 inputScript=options.inputScript          # TtZAnalysis.Configuration.samples.mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12-PU_S7_START52_V9-v2_cff
 json=options.json                        # give full path!!json files in TtZAnalysis/Data/data ONLY needed with nafjobsplitter
 
-crab=True # for GC
+crab=True # for GC/Crab
 
+if not crab:
+    print "\n\nDO NOT RUN ON CRAB OR GC WITH THIS SETTING!!!!!!\n\n"
 
 syncfile=options.isSync                  # False
 
