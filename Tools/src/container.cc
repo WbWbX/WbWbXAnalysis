@@ -217,7 +217,7 @@ namespace top{
     double fullerr2=0;
     if((unsigned int)bin<bins_.size()){
       fullerr2=pow(staterrup_[bin],2); //stat
-      if(limittosys=""){
+      if(limittosys==""){
 	// make vector of all sys stripped
 	std::vector<TString> sources;
 	for(unsigned int i=0;i<syserrors_.size();i++){
@@ -242,7 +242,7 @@ namespace top{
     double fullerr2=0;
     if((unsigned int)bin<bins_.size()){
       fullerr2=pow(staterrdown_[bin],2); //stat
-      if(limittosys=""){
+      if(limittosys==""){
 	// make vector of all sys stripped
 	std::vector<TString> sources;
 	for(unsigned int i=0;i<syserrors_.size();i++){
@@ -660,8 +660,8 @@ namespace top{
 			<< name_ <<"\" exceeds deviation(*weight) in bin " 
 			<< xname_ << ": "<< bins_[i] << " - " << bins_[i+1] << std::endl;
 	    }
-	    if(deviation < 0) deviation = - sqrt(pow(deviation,2) + pow(deviatingContainer.getBinErrorDown(i),2));
-	    else sqrt(pow(deviation,2) + pow(weight * deviatingContainer.getBinErrorUp(i),2));
+	    if(deviation < 0) deviation = - sqrt(pow(deviation,2) + pow(weight * deviatingContainer.getBinErrorDown(i),2));
+	    else deviation = sqrt(pow(deviation,2) + pow(weight * deviatingContainer.getBinErrorUp(i),2));
 	  }
 	  devvec.push_back(deviation);
 	}

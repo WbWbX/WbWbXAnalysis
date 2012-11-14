@@ -4,6 +4,8 @@
 #include "containerStack.h"
 #include "TString.h"
 
+// add function to make a tex table of the contents (syst)
+
 // container with some more plotting options and (very simple) unfolding
 
 // make containerUFStack class inherits from normal stack?!? (check protected,private etc. such that all functions on member containers_ now apply for a vector of containerUF.. might be tricky / or not? in case of doubt containers_ ->private
