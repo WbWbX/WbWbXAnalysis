@@ -591,8 +591,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 	dpy += oldp4.Py() - jet->p4().Py();
       }
       if(!(jet->id())) continue;
-      if(!noOverlap(jet, isomuons, 0.3)) continue;
-      if(!noOverlap(jet, isoelectrons, 0.3)) continue;
+      if(!noOverlap(jet, isomuons, 0.4)) continue;
+      if(!noOverlap(jet, isoelectrons, 0.4)) continue;
       nolidjets.push_back(*jet);
     }
 
