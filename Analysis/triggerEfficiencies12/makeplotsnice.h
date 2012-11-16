@@ -38,8 +38,12 @@ void makeplot(TString inputfile, TString add){
     h->GetXaxis()->SetTitle("p_{T} [GeV]");
   else if(add=="eta")
     h->GetXaxis()->SetTitle("#eta");
-  else 
+  else if(add=="dphi" || add=="dphi2"){
     h->GetXaxis()->SetTitle("| #delta#phi_{l,met} |");
+  }
+  else if(add=="vmulti"){
+    h->GetXaxis()->SetTitle("n_{vtx}");
+  }
 
   h->GetYaxis()->SetTitleSize(0.06);
   h->GetXaxis()->SetTitleSize(0.05);
@@ -108,6 +112,11 @@ void miniscript(TString outdir){
   c->Print(outdir+"corr_eedphi2.pdf");
   c->Print(outdir+"corr_eedphi2.eps");
   c->Clear();
+  makeplot(rootsdir+"triggerSummary_ee.root", "vmulti");
+  c->Print(outdir+"corr_eevmulti.pdf");
+  c->Print(outdir+"corr_eevmulti.eps");
+  c->Clear();
+
   makeplot(rootsdir+"triggerSummary_mumu.root", "pt");
   c->Print(outdir+"corr_mumupt.pdf");
   c->Print(outdir+"corr_mumupt.eps");
@@ -124,6 +133,11 @@ void miniscript(TString outdir){
   c->Print(outdir+"corr_mumudphi2.pdf");
   c->Print(outdir+"corr_mumudphi2.eps");
   c->Clear();
+  makeplot(rootsdir+"triggerSummary_mumu.root", "vmulti");
+  c->Print(outdir+"corr_mumuvmulti.pdf");
+  c->Print(outdir+"corr_mumuvmulti.eps");
+  c->Clear();
+
   makeplot(rootsdir+"triggerSummary_emu.root", "pt");
   c->Print(outdir+"corr_emupt.pdf");
   c->Print(outdir+"corr_emupt.eps");
@@ -139,7 +153,11 @@ void miniscript(TString outdir){
   makeplot(rootsdir+"triggerSummary_emu.root", "dphi2");
   c->Print(outdir+"corr_emudphi2.pdf");
   c->Print(outdir+"corr_emudphi2.eps");
-  //c->Clear();
+  c->Clear();
+  makeplot(rootsdir+"triggerSummary_emu.root", "vmulti");
+  c->Print(outdir+"corr_emuvmulti.pdf");
+  c->Print(outdir+"corr_emuvmulti.eps");
+  c->Clear();
 
 
 }

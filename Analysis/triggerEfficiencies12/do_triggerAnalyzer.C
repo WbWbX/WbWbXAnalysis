@@ -31,7 +31,7 @@ bool useRhoIso=false;
 
 double jetptcut=30;
 
-bool breakat5fb=false;
+bool breakat5fb=true;
 bool checktriggerpaths=true;
 
 class triggerAnalyzer{
@@ -51,9 +51,11 @@ public:
   top::container1D  getCorrelationPt(){return corrpt_;}
   top::container1D  getCorrelationEta(){return correta_;}
   top::container1D getDPhiPlot(){return dphieff_;}
+  top::container1D getVmultiPlot(){return vmultieff_;}
   top::container1D getDPhiPlot2(){return dphieff2_;}
   top::container1D getCorrelationDPhi(){return corrdphi_;}
   top::container1D getCorrelationDPhi2(){return corrdphi2_;}
+  top::container1D getCorrelationVmulti(){return corrvmulti_;}
 
 
 
@@ -223,11 +225,12 @@ notinMCtriggers.push_back("DiCentralPFJet");
     //  TDirectory * histdir=new TDirectory(mode+MCadd);
     //  histdir->cd();
 
-    vector<float> dphi;
+    vector<float> dphi,vmulti;
 
     for(float i=0;i<=10;i++){
       dphi.push_back(2*3.1415 * i/10);
     }
+    for(float i=0;i<50;i++) vmulti << i;
 
     container1D c_pteff  = container1D(binspt_);
     container1D c_etaeff = container1D(binseta_);
@@ -248,6 +251,13 @@ notinMCtriggers.push_back("DiCentralPFJet");
     container1D c_selmettrigdphi = container1D(dphi);
     container1D c_selbothtrigdphi = container1D(dphi);
     container1D c_corrdphi = container1D(dphi);
+
+    container1D c_vmultieff = container1D(vmulti);
+    container1D c_selvmulti = container1D(vmulti);
+    container1D c_trigvmulti = container1D(vmulti);
+    container1D c_selmettrigvmulti = container1D(vmulti);
+    container1D c_selbothtrigvmulti = container1D(vmulti);
+    container1D c_corrvmulti = container1D(vmulti);
 
     container1D c_dphieff2 = container1D(dphi);
     container1D c_seldphi2 = container1D(dphi);
@@ -484,12 +494,12 @@ notinMCtriggers.push_back("DiCentralPFJet");
       if(!(fabs(muon->eta())<2.4) ) continue;
       if(!(muon->pt() >20))   continue;
       if(!(muon->isGlobal() || muon->isTracker()) ) continue;
-      //if(muon->trkHits()<3) continue;
-      //if(muon->trkHits() <= 5 ) continue;
-      //if(muon->muonHits() <1) continue;
-      //if(muon->dbs()> 0.02) continue;
+      //  if(muon->trkHits()<3) continue;
+      //  if(muon->trkHits() <= 5 ) continue;
+      // if(muon->muonHits() <1) continue;
+      // if(muon->dbs()> 0.2) continue;
       if(muon->isoVal04() > 0.2 ) continue;
-      //if(muon->normChi2() >10) continue;
+      //  if(muon->normChi2() >10) continue;
       selectedMuons.push_back(*muon);
     }
     if(mode == "mumu" && selectedMuons.size() < 2) continue;
@@ -561,6 +571,7 @@ notinMCtriggers.push_back("DiCentralPFJet");
 
     if(b_dilepton){
       sel_woTrig[0].second      +=puweight;
+      c_selvmulti.fill(pEvent->vertexMulti() ,puweight);
       if(mode=="ee"){
 	c_selpt.fill(selectedElecs[0].pt(),puweight);
 	c_selpt.fill(selectedElecs[1].pt(),puweight);
@@ -596,6 +607,7 @@ notinMCtriggers.push_back("DiCentralPFJet");
   if(firedDilepTrigger){
     if(b_dilepton){
       sel_Trig[0].second  +=puweight;
+      c_trigvmulti.fill(pEvent->vertexMulti() ,puweight);
       if(mode=="ee"){
 	c_trigpt.fill(selectedElecs[0].pt(),puweight);
 	c_trigpt.fill(selectedElecs[1].pt(),puweight);
@@ -633,6 +645,7 @@ notinMCtriggers.push_back("DiCentralPFJet");
 
   if(firedMet){
     if(b_dilepton){
+      c_selmettrigvmulti.fill(pEvent->vertexMulti() ,puweight);
       if(mode=="ee"){
 
 	c_selmettrigpt.fill(selectedElecs[0].pt(),puweight);
@@ -670,6 +683,7 @@ notinMCtriggers.push_back("DiCentralPFJet");
 
   if(firedMet && firedDilepTrigger){
     if(b_dilepton){
+      c_selbothtrigvmulti.fill(pEvent->vertexMulti() ,puweight);
       if(mode=="ee"){
 	c_selbothtrigpt.fill(selectedElecs[0].pt(),puweight);
 	c_selbothtrigpt.fill(selectedElecs[1].pt(),puweight);
@@ -823,6 +837,9 @@ notinMCtriggers.push_back("DiCentralPFJet");
   c_etaeff = c_trigeta / c_seleta;
   c_dphieff = c_trigdphi / c_seldphi;
   c_dphieff2 = c_trigdphi2 / c_seldphi2;
+
+  c_vmultieff = c_trigvmulti / c_selvmulti;
+
   // container1D c_tempmeteff=c_selmettrigpt/c_selpt;
   //  c_tempmeteff.setDivideBinomial(false);
   std::cout << "making correlation plots, ignore warnings!" <<std::endl;
@@ -831,21 +848,26 @@ notinMCtriggers.push_back("DiCentralPFJet");
   c_corrdphi = (c_dphieff * (c_selmettrigdphi/c_seldphi))/(c_selbothtrigdphi/c_seldphi);
   c_corrdphi2 = (c_dphieff2 * (c_selmettrigdphi2/c_seldphi2))/(c_selbothtrigdphi2/c_seldphi2);
 
+  c_corrvmulti = (c_vmultieff * (c_selmettrigvmulti/c_selvmulti))/(c_selbothtrigvmulti/c_selvmulti);
+
   std::cout << "stop ignoring warning ;)" << std::endl;
 
   etaeff_=c_etaeff;
   pteff_=c_pteff;
   dphieff_=c_dphieff;
   dphieff2_=c_dphieff2;
+  vmultieff_=c_vmultieff;
   correta_=c_correta;
   corrpt_=c_corrpt;
   corrdphi_=c_corrdphi;
   corrdphi2_=c_corrdphi2;
+  corrvmulti_=c_corrvmulti;
 
   etaeff_.setDivideBinomial(false);
   pteff_.setDivideBinomial(false);
   dphieff_.setDivideBinomial(false);
   dphieff2_.setDivideBinomial(false);
+  vmultieff_.setDivideBinomial(false);
 
   return output;
 
@@ -871,11 +893,18 @@ notinMCtriggers.push_back("DiCentralPFJet");
     dphieff2_.writeTGraph("dphi2 eff"+add,false);
     dphieff2_.writeTH1D("axis dphi2",false);
 
+
+    vmultieff_.writeTGraph("vmulti eff"+add,false);
+    vmultieff_.writeTH1D("axis vmulti",false);
+
     correta_.writeTGraph("correta"+add,false);
     corrpt_.writeTGraph("corrpt"+add,false);
 
     corrdphi_.writeTGraph("corrdphi"+add,false);
     corrdphi2_.writeTGraph("corrdphi2"+add,false);
+
+
+    corrvmulti_.writeTGraph("corrvmulti"+add,false);
 
   }
 
@@ -888,7 +917,9 @@ private:
   top::container1D correta_;
   top::container1D corrpt_;
   top::container1D dphieff_;
+  top::container1D vmultieff_;
   top::container1D corrdphi_;
+  top::container1D corrvmulti_;
   top::container1D dphieff2_;
   top::container1D corrdphi2_;
   bool isMC;
@@ -1087,6 +1118,20 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
   scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_eeMC.getCorrelationDPhi2(),ratiomultiplier);
   scalefactor.writeTGraph("scalefactor dphi2 incl corrErr",false);
   scalefactor.writeTH1D("TH scalefactor dphi2 incl corrErr",false);
+
+  data=ta_eed.getVmultiPlot();
+  MC=ta_eeMC.getVmultiPlot();
+  data.setDivideBinomial(false);
+  MC.setDivideBinomial(false);
+  scalefactor=data/MC;
+  scalefactor.addGlobalRelError("rel_sys",0.01);
+  scalefactor.writeTGraph("scalefactor vmulti",false);
+  scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_eeMC.getCorrelationVmulti(),ratiomultiplier);
+  scalefactor.writeTGraph("scalefactor vmulti incl corrErr",false);
+  scalefactor.writeTH1D("TH scalefactor vmulti incl corrErr",false);
+
+
+
   f5->Close();
 
   
@@ -1138,6 +1183,18 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
   scalefactor.writeTGraph("scalefactor dphi2 incl corrErr",false);
   scalefactor.writeTH1D("TH scalefactor dphi2 incl corrErr",false);
 
+
+  data=ta_mumud.getVmultiPlot();
+  MC=ta_mumuMC.getVmultiPlot();
+  data.setDivideBinomial(false);
+  MC.setDivideBinomial(false);
+  scalefactor=data/MC;
+  scalefactor.addGlobalRelError("rel_sys",0.01);
+  scalefactor.writeTGraph("scalefactor vmulti",false);
+  scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_mumuMC.getCorrelationVmulti(),ratiomultiplier);
+  scalefactor.writeTGraph("scalefactor vmulti incl corrErr",false);
+  scalefactor.writeTH1D("TH scalefactor vmulti incl corrErr",false);
+
   f6->Close();
 
   TFile* f7 = new TFile("triggerSummary_emu.root","RECREATE");
@@ -1188,6 +1245,19 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
   scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_emuMC.getCorrelationDPhi2(),ratiomultiplier);
   scalefactor.writeTGraph("scalefactor dphi2 incl corrErr",false);
   scalefactor.writeTH1D("TH scalefactor dphi2 incl corrErr",false);
+
+
+  data=ta_emud.getVmultiPlot();
+  MC=ta_emuMC.getVmultiPlot();
+  data.setDivideBinomial(false);
+  MC.setDivideBinomial(false);
+  scalefactor=data/MC;
+  scalefactor.addGlobalRelError("rel_sys",0.01);
+  scalefactor.writeTGraph("scalefactor vmulti",false);
+  scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_emuMC.getCorrelationVmulti(),ratiomultiplier);
+  scalefactor.writeTGraph("scalefactor vmulti incl corrErr",false);
+  scalefactor.writeTH1D("TH scalefactor vmulti incl corrErr",false);
+
 
   f7->Close();
 
