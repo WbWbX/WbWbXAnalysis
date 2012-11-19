@@ -176,6 +176,53 @@ namespace top{
     // delete d2;
   }
 
+  void container1DStackVector::writeAllToTFile(TFile * f, TString treename){
+    TString name;
+    if(name_=="") name="no_name";
+    else name = name_;
+
+    f->cd();
+    TTree * t=0;
+    if(f->Get(treename)){
+      t = (TTree*) f->Get(treename);
+    }
+    else{
+    t = new TTree(treename,treename);
+    }
+    if(t->GetBranch("allContainerStackVectors")){ //branch does not exist yet
+      bool temp=csv_makelist;
+      csv_makelist=false;
+      container1DStackVector * csv = this;
+      t->SetBranchAddress("allContainerStackVectors",&csv);
+      csv_makelist=temp;
+    }
+    else{
+      t->Branch("allContainerStackVectors",this);
+      std::cout << "container1DStackVector::writeAllToTFile: added branch" << std::endl;
+    }
+    t->Fill();
+    t->Write("",TObject::kOverwrite);
+    delete t;
+    
+    TDirectory * d = f->mkdir(name + "_ratio",name + "_ratio");
+    d->cd();
+    for(std::vector<container1DStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
+      TCanvas * c=stack->makeTCanvas();
+      c->Write();
+      delete c;
+  }
+    //d.Close();
+    // f.cd();
+    TDirectory * d2 = f->mkdir(name,name);
+    d2->cd();
+    for(std::vector<container1DStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
+      TCanvas * c2=stack->makeTCanvas(false);
+      c2->Write();
+    delete c2;
+    }
+  }
+  
+  
   void container1DStackVector::loadFromTree(TTree * t, TString name){
     
     container1DStackVector * csv=0;
@@ -199,4 +246,5 @@ namespace top{
       std::cout << csv->getName() << std::endl;
     }
   }
+
 }

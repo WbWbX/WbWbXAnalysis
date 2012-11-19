@@ -40,6 +40,7 @@ namespace top{
     void multiplyNorms(TString, std::vector<double>, std::vector<TString>, bool showmessages=false);   //! multiplies norm of all MC with legendname  ,  with factor  ,  for step identifier string
 
     void writeAllToTFile(TString, bool recreate=false, TString treename="stored_objects");
+    void writeAllToTFile(TFile * , TString treename="stored_objects");
     void loadFromTree(TTree *, TString);
     void listAllInTree(TTree *);
 

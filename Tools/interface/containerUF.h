@@ -23,6 +23,9 @@ namespace top{
     container1DUF(const top::container1D &);
     ~container1DUF(){};
 
+    bool nameContains(TString);
+    bool nameContains(std::vector<TString>);
+
     void setGenStack(const top::container1DStack &gen){gen_=gen;}
     void setSelectedStack(const top::container1DStack &sel){sel_=sel;}
     void setSignal(TString signalname){signalname_=signalname;}
@@ -83,6 +86,22 @@ namespace top{
     xname_=cont.xname_;
     yname_=cont.yname_;
     labelmultiplier_=cont.labelmultiplier_;
+  }
+
+
+  bool container1DUF::nameContains(TString somestring){
+    if(name_.Contains(somestring))
+      return true;
+    else
+      return false;
+  }
+  bool container1DUF::nameContains(std::vector<TString> somestrings){
+    for(unsigned int i=0;i<somestrings.size();i++){
+      if(!nameContains(somestrings.at(i) ) ){
+	return false;
+      }
+    }
+    return true;
   }
 
   void container1DUF::simpleUnfold(){

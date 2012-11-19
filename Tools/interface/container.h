@@ -69,7 +69,6 @@ namespace top{
     operator TGraphAsymmErrors(){return *getTGraph();}
     operator TGraphAsymmErrors*(){return getTGraph();}
     void writeTGraph(TString name="",bool dividebybinwidth=true,bool noXErrors=false); //! writes TGraph to TFile (must be opened)
-
     
     void setDivideBinomial(bool);                                   //! default true
     void setMergeUnderFlowOverFlow(bool merge){mergeufof_=merge;}   //! merges underflow/overflow in first or last bin, respectively
