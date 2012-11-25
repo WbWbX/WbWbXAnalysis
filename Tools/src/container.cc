@@ -311,7 +311,17 @@ namespace top{
     }
     else return 0;
   }
+  double container1D::cIntegral(float from, float to){
+    //select bins
+    unsigned int minbin=getBinNo(from);
+    unsigned int maxbin=getBinNo(to);
 
+    double integr=0;
+    for(unsigned int i=minbin;i<=maxbin;i++){
+      integr+=content_.at(i);
+    }
+    return integr;
+  }
   void container1D::reset(){
     binwidth_=0;
     bins_.clear();

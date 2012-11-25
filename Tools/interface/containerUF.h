@@ -117,6 +117,11 @@ namespace top{
     std::vector<TString> excludefrombackground;
     excludefrombackground << signalname_ << dataname_;
 
+    for(unsigned int i=0;i<excludefrombackground.size();i++){
+      cout << excludefrombackground.at(i) << " " ;
+    }
+    cout << endl;
+
     //   gencont.setDivideBinomial(false);
     // selcont.setDivideBinomial(false);
     // gencont.getTH1D()->Draw();
@@ -124,16 +129,28 @@ namespace top{
 
     // binomial error for efficiency
 
+    cout << "gen in bin 1: " << gencont.getBinContent(1) << endl;
+    cout << "genandsel in bin 1: " << selcont.getBinContent(1) << endl;
+
     top::container1D efficiency = selcont / gencont;
+
+    cout << "eff in bin 1: "<< efficiency.getBinContent(1) << endl;
+
     top::container1D background = sel_.getContributionsBut(excludefrombackground);
+
+    cout << "bg in bin 1: " << background.getBinContent(1) << endl;
     
     // efficiency.getTH1D()->Draw();
 
     //get data
     top::container1D data=sel_.getContribution(dataname_);
 
+    cout << "data in bin 1: " << data.getBinContent(1) << endl;
+
     top::container1D select = (data - background);
     // select.getTH1D()->Draw();
+
+    cout << "sel signal in bin 1: " << select.getBinContent(1) << endl;
 
     // and do the "unfolding"
     data.setDivideBinomial(false);
@@ -144,6 +161,8 @@ namespace top{
 
     top::container1D output = (data - background) / efficiency;
       output=output * (1/lumi_);
+
+      cout << "xsec in bin 1: " << output.getBinContent(1) << endl;
 
       //  output.getTH1D()->Draw();
 

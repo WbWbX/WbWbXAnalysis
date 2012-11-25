@@ -55,6 +55,7 @@ namespace top{
     double getUnderflow();                             //!returns -1 if underflow was merged with last bin
 
     double integral(bool includeUFOF=false);
+    double cIntegral(float from=0, float to=0);       //! includes the full bin "from" or "to" is in
 
     
     void reset();    //! resets all uncertainties and binning, keeps names and axis
