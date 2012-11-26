@@ -37,7 +37,7 @@ namespace top{
       for(unsigned int i=0;i<resranges_.size();i++){
 	if(jet.eta() < resranges_[i]){
 	  if(i!=0){ //not outside range
-	    double factor = std::max(0.,(double)(jet.genP4().Pt() + resfactors_[i-1] * (jet.pt() - jet.genP4().Pt())));
+	    double factor = std::max(0.,(double)(jet.pt() + resfactors_[i-1] * (jet.pt() - jet.genP4().Pt())));
 	    top::LorentzVector newp4=jet.p4() * factor/jet.pt();
 	     jet.setP4(newp4);
 	  }
@@ -59,7 +59,7 @@ namespace top{
       for(unsigned int i=0;i<resranges_.size();i++){
 	if(jet->eta() < resranges_[i]){
 	  if(i!=0){ //not outside range
-	    double factor = std::max(0.,(double)(jet->genP4().Pt() + resfactors_[i-1] * (jet->pt() - jet->genP4().Pt())));
+	    double factor = std::max(0.,(double)(jet->pt() + resfactors_[i-1] * (jet->pt() - jet->genP4().Pt())));
 	    top::LorentzVector newp4=jet->p4() * factor/jet->pt();
 	    jet->setP4(newp4);
 	  }
