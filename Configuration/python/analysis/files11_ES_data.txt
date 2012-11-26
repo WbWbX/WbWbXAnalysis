@@ -1,0 +1,16 @@
+# config file for grid-cntrol jobs with 2011 MC
+
+#events per job - - dataset - - outputfile (w/o .root) - - options
+
+
+#defaults: isMC=true, includetrigger=true, includereco=false
+#inputs are seperated by min 2 spaces; use runall4!!
+#
+
+
+
+#FT_R_44_V11	Nov19	 FT44_V11_AN1
+#FT_R_44_V9	Nov8	 FT44_V9_AN1
+
+
+100  /MET/Run2011B-03Feb2012-v1/AOD        tree_7TeV_MET_runB_03Feb    is2011=true isMC=false globalTag=FT44_V11_AN1     ReRecoNov2011.json
