@@ -361,7 +361,11 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     b_emu=true;
     cout << "\nrunning in emu mode" <<endl;
   }
-
+  bool is7TeV=false;
+  if(name_.Contains("7TeV") ||  isInInfo("7TeV")){
+    is7TeV=true;
+    cout << "running with 2011 data/MC!" <<endl;
+  }
 
   TFile *f=TFile::Open(inputfile);
   double genentries=0;
@@ -403,7 +407,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   vector<NTMuon> * pMuons = 0;
   t->SetBranchAddress("NTMuons",&pMuons); 
   vector<NTElectron> * pElectrons = 0;
-  t->SetBranchAddress("NTPFElectrons",&pElectrons);
+  t->SetBranchAddress("NTPFElectrons",&pElectrons);           // ##TRAP##
   vector<NTJet> * pJets=0;
   t->SetBranchAddress("NTJets",&pJets);
   NTMet * pMet = 0;
@@ -432,29 +436,49 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     for(NTElectronIt elec=pElectrons->begin();elec<pElectrons->end();++elec){
       if(elec->pt() < 20) continue;
       if(fabs(elec->eta()) > 2.5) continue;
-      if(!noOverlap(elec, *pMuons, 0.1)) continue;
+      //  if(!noOverlap(elec, *pMuons, 0.1)) continue;        //obsolete when using pfElectrons!!!! MAKE SURE ##TRAP##
 
       kinelectrons.push_back(*elec);
     }
 
-    rho.setRho(pEvent->isoRho(2));
-    rho.addRhoIso(kinelectrons);
+    //   rho.setRho(pEvent->isoRho(2));
+    //    rho.addRhoIso(kinelectrons);
     vector<NTMuon> kinmuons         = lepSel.selectKinMuons(*pMuons);
     
 
     /////////TRIGGER CUT and kin leptons STEP 0/////////////////////////////
     if(b_ee){
       if(kinelectrons.size()< 2) continue; //has to be 17??!!
-      if(isMC  && !triggersContain("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v" , pEvent) ) continue;
-      if(!isMC && !triggersContain("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v" , pEvent) ) continue;
+      if(is7TeV){
+	if(!(triggersContain("Ele17_SW_TightCaloEleId_Ele8_HE_L1R_v", pEvent) || triggersContain("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v", pEvent) || triggersContain("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v", pEvent))) continue;
+	
+      }
+      else{                           
+	if(isMC  && !triggersContain("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v" , pEvent) ) continue;
+	if(!isMC && !triggersContain("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v" , pEvent) ) continue;
+      }
 
     }
     if(b_mumu){
       if(kinmuons.size() < 2) continue;
       //trg wildcards
-      if(isMC &&  !(triggersContain("HLT_Mu17_Mu8_v",pEvent)  || triggersContain("HLT_Mu17_TkMu8_v",pEvent))) continue;
-      if(!isMC && !(triggersContain("HLT_Mu17_Mu8_v",pEvent)  || triggersContain("HLT_Mu17_TkMu8_v",pEvent))) continue;
+      if(is7TeV){
+	if(isMC && !triggersContain("HLT_DoubleMu7", pEvent)) continue;
 
+	if(!isMC){
+	  if(pEvent->runNo() < 163869){
+	    if(!triggersContain("HLT_DoubleMu7", pEvent)) continue;
+	  }
+	  else{
+	    if(!triggersContain("HLT_Mu13_Mu8_v", pEvent)) continue;
+	  }
+	}
+
+      }
+      else{
+	if(isMC &&  !(triggersContain("HLT_Mu17_Mu8_v",pEvent)  || triggersContain("HLT_Mu17_TkMu8_v",pEvent))) continue;
+	if(!isMC && !(triggersContain("HLT_Mu17_Mu8_v",pEvent)  || triggersContain("HLT_Mu17_TkMu8_v",pEvent))) continue;
+      }
 
     }
     if(b_emu){
@@ -577,18 +601,21 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     // create ID Jets and correct JER
 
     vector<NTJet> nolidjets;
+    nolidjets.clear();
     double dpx=0;
     double dpy=0;
+    vector<NTJet> treejets=*pJets;
 
-    for(NTJetIt jet=pJets->begin();jet<pJets->end();++jet){ //ALSO THE RESOLUTION AFFECTS MET. HERE INTENDED!!! GOOD?
+    for(NTJetIt jet=treejets.begin();jet<treejets.end();++jet){ //ALSO THE RESOLUTION AFFECTS MET. HERE INTENDED!!! GOOD?
       LorentzVector oldp4=jet->p4();
-      if(isMC){
+      if(isMC){// && !is7TeV){               
 	getJECUncertainties()->applyJECUncertainties(jet);
 	getJERAdjuster()->correctJet(jet);
-      } //corrected
-      if(jet->emEnergyFraction() < 0.9 && jet->pt() > 10){
-	dpx += oldp4.Px() - jet->p4().Px();
-	dpy += oldp4.Py() - jet->p4().Py();
+	//corrected
+	if(jet->emEnergyFraction() < 0.9 && jet->pt() > 10){
+	  dpx += oldp4.Px() - jet->p4().Px();
+	  dpy += oldp4.Py() - jet->p4().Py();
+	}
       }
       if(!(jet->id())) continue;
       if(!noOverlap(jet, isomuons, 0.4)) continue;
@@ -660,7 +687,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     /////// create  hard jets ////////
 
     vector<NTJet> hardjets;
-
+    hardjets.clear();
     for(NTJetIt jet=nolidjets.begin();jet<nolidjets.end();++jet){
       if(jet->pt()<30) continue;
       if(fabs(jet->eta())>2.5) continue;
@@ -671,37 +698,37 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
 
     if(!Znotemu){
+      
+      for(NTJetIt jet=hardjets.begin();jet<hardjets.end();++jet){
+	jetpt4.fill(jet->pt(),puweight);
+	jeteta4.fill(jet->eta(),puweight);
+      }
+      
+      for(NTElectronIt elec=isoelectrons.begin();elec<isoelectrons.end();++elec){
+	eleceta4.fill(elec->eta(), puweight);
+	elecpt4.fill(elec->pt(),puweight);
+	eleciso4.fill(elec->isoVal03(),puweight);
+	//some other fills
+      }
+      
+      for(NTMuonIt muon=isomuons.begin();muon<isomuons.end();++muon){
+	muoneta4.fill(muon->eta(), puweight);
+	muonpt4.fill(muon->pt(),puweight);
+	muoniso4.fill(muon->isoVal04(),puweight);
+      }
 
-    for(NTJetIt jet=hardjets.begin();jet<hardjets.end();++jet){
-      jetpt4.fill(jet->pt(),puweight);
-      jeteta4.fill(jet->eta(),puweight);
-    }
-
-    for(NTElectronIt elec=isoelectrons.begin();elec<isoelectrons.end();++elec){
-      eleceta4.fill(elec->eta(), puweight);
-      elecpt4.fill(elec->pt(),puweight);
-      eleciso4.fill(elec->isoVal03(),puweight);
-    //some other fills
-    }
-
-    for(NTMuonIt muon=isomuons.begin();muon<isomuons.end();++muon){
-      muoneta4.fill(muon->eta(), puweight);
-      muonpt4.fill(muon->pt(),puweight);
-      muoniso4.fill(muon->isoVal04(),puweight);
-    }
-
-    invmass4.fill(invLepMass,puweight);
-    vertexmulti4.fill(pEvent->vertexMulti(),puweight);
-    jetmulti4.fill(hardjets.size(),puweight);
-    selection.fill(4,puweight);
-
+      invmass4.fill(invLepMass,puweight);
+      vertexmulti4.fill(pEvent->vertexMulti(),puweight);
+      jetmulti4.fill(hardjets.size(),puweight);
+      selection.fill(4,puweight);
+      
     }
     if(isZrange){ //Z done above
 
     }
 
 
-    ///////////////////// at least one jet cut STEP 5 ////////////
+    ///////////////////// at least one jet cut STEP 5 ////////////  
 
     if(hardjets.size() < 1) continue;
 
@@ -742,8 +769,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     ///adjust MET ///
 
     NTMet adjustedmet = *pMet;
-    double nmpx=pMet->p4().Px() - dpx;
-    double nmpy=pMet->p4().Py() - dpy;
+    double nmpx=pMet->p4().Px() + dpx;
+    double nmpy=pMet->p4().Py() + dpy;
     adjustedmet.setP4(LorentzVector(nmpx,nmpy,0,sqrt(pow(nmpx,2)+pow(nmpy,2))));
     
 
@@ -920,8 +947,8 @@ void Analyzer(){
   double lumi7TeVunc=0.025; //?!
 
   bool runInNotQuietMode=true;
-
-
+  
+  
   MainAnalyzer analyzermumu("8TeV_default_mumu","mumu");
   analyzermumu.setShowStatusBar(runInNotQuietMode);  //for running with text output mode
   analyzermumu.setLumi(lumi8TeV);
@@ -949,10 +976,10 @@ void Analyzer(){
   analyzer7ee.setShowStatusBar(runInNotQuietMode);
   analyzer7ee.setName("7TeV_default_ee","ee");
   analyzer7ee.setDataSetDirectory("/scratch/hh/dust/naf/cms/user/kieseler/trees_7TeV/");
-  analyzer7ee.getPUReweighter()->setDataTruePUInput(cmssw_base+"/src/TtZAnalysis/Data/ReRecoNov2011.json_PU.root");
+  analyzer7ee.getPUReweighter()->setDataTruePUInput(cmssw_base+"/src/TtZAnalysis/Data/ReRecoNov2011_2.json_PU.root");
   analyzer7ee.getPUReweighter()->setMCDistrFall11();
   analyzer7ee.getJECUncertainties()->setFile(cmssw_base+"/src/TtZAnalysis/Data/JEC11_V12_AK5PF_UncertaintySources.txt");
-  analyzer7ee.start();
+   analyzer7ee.start();
   analyzer7ee.getPlots()->writeAllToTFile(outfile,false);
 
   MainAnalyzer analyzer7mumu=analyzer7ee;

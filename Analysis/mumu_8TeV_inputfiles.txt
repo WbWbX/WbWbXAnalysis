@@ -7,7 +7,7 @@ tree_8TeV_mumu_runC_prompt.root data 1 1
 #mc
 #
 tree_8TeV_mumuttbar.root t#bar{t} 633 225.5
-tree_8TeV_mumuttbarviatau.root t#bar{t} 633 225.2
+tree_8TeV_mumuttbarviatau.root t#bar{t}#tau 632 225.2
 tree_8TeV_mumuttbarbg.root t#bar{t}bg 634 225.2
 tree_8TeV_tW.root singleTop 616 11.2
 tree_8TeV_tbarW.root singleTop 616 11.2
