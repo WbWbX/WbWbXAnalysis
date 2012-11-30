@@ -25,7 +25,7 @@ namespace top{
     
     JECUncertainties(){ninit_=true;sources_.clear();filename_=0;}
     JECUncertainties(const JECUncertainties &);
-    JECUncertainties(const char * filename){ninit_=true;sources_.clear();setFile(filename);filename_=filename;}
+    JECUncertainties(TString  filename){ninit_=true;sources_.clear();setFile(filename);filename_=filename;}
     ~JECUncertainties();
 
     std::vector<unsigned int> &  sources(){return sources_;}
@@ -40,7 +40,7 @@ namespace top{
   private:
     std::vector<JetCorrectionUncertainty*> vsrc_;
     JetCorrectionUncertainty* totalunc_;
-    const char * filename_;
+    TString filename_;
     int nomupdown_;
     //int source_;
     bool ninit_;
@@ -59,7 +59,7 @@ namespace top{
 
 #define EXTSRC
 #ifndef EXTSRC
-
+/*
 
 namespace top{
 
@@ -199,5 +199,5 @@ namespace top{
   }
   
 }
-    
+*/
 #endif

@@ -39,8 +39,8 @@ namespace top{
   }
 
 
-  void JECUncertainties::setFile(const char * filename, bool newset){
-    if(*filename != '\0'){
+  void JECUncertainties::setFile(TString filename, bool newset){
+    if(filename != ""){
       const int nsrc = 16;
       const char* srcnames[nsrc] =
 	{"Absolute",       //0
@@ -61,19 +61,19 @@ namespace top{
 	 "PileUpJetRate"}; //15
       
       if(newset) std::cout << "setting JEC uncertainties file to: " << filename << std::endl;
-      std::ifstream check_file(filename);
+      std::ifstream check_file(filename.Data());
       if(check_file.good()){
 
 	for (int isrc = 0; isrc < nsrc; isrc++) {
 	  
 	  const char *name = srcnames[isrc];
-	  JetCorrectorParameters *p = new JetCorrectorParameters(filename, name);
+	  JetCorrectorParameters *p = new JetCorrectorParameters(filename.Data(), name);
 	JetCorrectionUncertainty *unc = new JetCorrectionUncertainty(*p);
 	vsrc_.push_back(unc);
 	} 
 	
 	// Total uncertainty
-	totalunc_ = new JetCorrectionUncertainty(*(new JetCorrectorParameters(filename, "Total")));
+	totalunc_ = new JetCorrectionUncertainty(*(new JetCorrectorParameters(filename.Data(), "Total")));
 	ninit_=false;
 	
 	filename_=filename;
