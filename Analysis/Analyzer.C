@@ -6,10 +6,13 @@
 #include "TtZAnalysis/Tools/interface/containerStackVector.h"
 #include "TtZAnalysis/Tools/interface/containerUF.h"
 #include "TtZAnalysis/plugins/JERAdjuster.h"
-#include "TtZAnalysis/plugins/JECUncertainties.h"
+#include "TtZAnalysis/Tools/interface/JECUncertainties.h"
+#include "TtZAnalysis/Tools/interface/bTagSF.h"
 #include "TTree.h"
 #include "TFile.h"
 #include <fstream>
+
+#include <stdlib.h>
 
 namespace top{
   typedef std::vector<top::NTElectron>::iterator NTElectronIt;
@@ -27,10 +30,26 @@ namespace top{
 class MainAnalyzer{
 
 public:
-  MainAnalyzer(){filelist_="";dataname_="data";analysisplots_ = new top::container1DStackVector();puweighter_= new top::PUReweighter();jeradjuster_= new top::JERAdjuster();jecuncertainties_=new top::JECUncertainties();}
+  MainAnalyzer(){
+    filelist_="";
+    dataname_="data";
+    analysisplots_ = new top::container1DStackVector();
+    puweighter_= new top::PUReweighter();
+    jeradjuster_= new top::JERAdjuster();
+    jecuncertainties_=new top::JECUncertainties();
+    btagsf_=new top::bTagSF();
+  }
   MainAnalyzer(const MainAnalyzer &);
-  MainAnalyzer(TString Name, TString additionalinfo){name_=Name;additionalinfo_=additionalinfo;dataname_="data";analysisplots_ = new top::container1DStackVector(Name);puweighter_= new top::PUReweighter();jeradjuster_= new top::JERAdjuster();jecuncertainties_=new top::JECUncertainties();}
-  ~MainAnalyzer(){if(analysisplots_) delete analysisplots_;if(puweighter_) delete puweighter_;if(jeradjuster_) delete jeradjuster_;if(jecuncertainties_) delete jecuncertainties_;};
+  MainAnalyzer(TString Name, TString additionalinfo){
+    name_=Name;additionalinfo_=additionalinfo;
+    dataname_="data";
+    analysisplots_ = new top::container1DStackVector(Name);
+    puweighter_= new top::PUReweighter();
+    jeradjuster_= new top::JERAdjuster();
+    jecuncertainties_=new top::JECUncertainties();
+    btagsf_=new top::bTagSF();
+  }
+  ~MainAnalyzer(){if(analysisplots_) delete analysisplots_;if(puweighter_) delete puweighter_;if(jeradjuster_) delete jeradjuster_;if(jecuncertainties_) delete jecuncertainties_; if(btagsf_) delete btagsf_;};
   void setName(TString Name, TString additionalinfo){name_=Name;additionalinfo_=additionalinfo;analysisplots_->setName(Name);}
   void setLumi(double Lumi){lumi_=Lumi;}
 
@@ -53,6 +72,8 @@ public:
   top::JERAdjuster * getJERAdjuster(){return jeradjuster_;}
   top::JECUncertainties * getJECUncertainties(){return jecuncertainties_;}
 
+  top::bTagSF * getBTagSF(){return btagsf_;}
+
   MainAnalyzer & operator= (const MainAnalyzer &);
 
 private:
@@ -71,6 +92,7 @@ private:
   top::PUReweighter * puweighter_;
   top::JERAdjuster * jeradjuster_;
   top::JECUncertainties * jecuncertainties_;
+  top::bTagSF * btagsf_;
 
   top::container1DStackVector * analysisplots_;
 
@@ -130,6 +152,7 @@ MainAnalyzer::MainAnalyzer(const MainAnalyzer & analyzer){
   filelist_=analyzer.filelist_;
   jeradjuster_= new top::JERAdjuster(*analyzer.jeradjuster_);
   jecuncertainties_= new top::JECUncertainties(*analyzer.jecuncertainties_);
+  btagsf_ = new top::bTagSF(*analyzer.btagsf_);
   analysisplots_ = new top::container1DStackVector(*analyzer.analysisplots_);
   showstatusbar_=analyzer.showstatusbar_;
 }
@@ -397,6 +420,11 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   else{
       norm=1;
   }
+
+
+  
+  getBTagSF()->prepareEff(inputfile , norm );
+
   cout << "running on: " << inputfile << "    legend: " << legendname << "\nxsec: " << oldnorm << ", genEvents: " << genentries <<endl;
   // get main analysis tree
 
@@ -814,6 +842,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     ///make btagged jets //
     vector<NTJet> btaggedjets;
     for(NTJetIt jet = hardjets.begin();jet<hardjets.end();++jet){
+      getBTagSF()->fillEff(*jet, puweight);
+      //  cout << jet->genPartonFlavour() << endl;
       if(jet->btag() < 0.244) continue;
       btaggedjets.push_back(*jet);
     }
@@ -853,8 +883,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       invmassZ7.fill(invLepMass,puweight);
     }
 
-
-
+    double bsf=getBTagSF()->getSF(hardjets);
+    puweight= puweight * bsf;
 
     ///////////////////// btag cut STEP 8 //////////////////////////
 
@@ -920,6 +950,13 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   delete t;
   f->Close();
   delete f;
+
+TFile file = TFile("testbtag.root","UPDATE");
+file.ls();
+  getBTagSF()->makeEffs();
+
+file.Close();
+
   
 
 }
@@ -937,8 +974,8 @@ void Analyzer(){
   // reorder the whole stuff in a way. specify ee mumu 7TeV 8TeV and then do the systematics "in parallel" to better keep track. maybe even produce a vector of analyzers as done for getCrossSections.C
 
 
-  TString cmssw_base="/afs/naf.desy.de/user/k/kieseler/scratch/2012/HCP2/CMSSW_5_3_3_patch3";
-
+  TString cmssw_base=getenv("CMSSW_BASE");
+  TString scram_arch=getenv("SCRAM_ARCH");
   //initialize mumu
 
   double lumi8TeV=12100;
@@ -947,36 +984,53 @@ void Analyzer(){
   double lumi7TeVunc=0.025; //?!
 
   bool runInNotQuietMode=true;
-  
+
+  TString treedir="/scratch/hh/dust/naf/cms/user/kieseler";
+  if( scram_arch.Contains("osx")){
+    cout << "running locally" << endl;
+    treedir="/Users/kiesej/CMS_data_nobk";
+  }
   
   MainAnalyzer analyzermumu("8TeV_default_mumu","mumu");
   analyzermumu.setShowStatusBar(runInNotQuietMode);  //for running with text output mode
   analyzermumu.setLumi(lumi8TeV);
   analyzermumu.setFileList("mumu_8TeV_inputfiles.txt");
-  analyzermumu.setDataSetDirectory("/scratch/hh/dust/naf/cms/user/kieseler/trees_8TeV/");
+  analyzermumu.setDataSetDirectory(treedir+"/trees_8TeV/");
   analyzermumu.getPUReweighter()->setDataTruePUInput(cmssw_base+"/src/TtZAnalysis/Data/HCP.json.txt_PU.root");
   analyzermumu.getJECUncertainties()->setFile(cmssw_base+"/src/TtZAnalysis/Data/Summer12_V2_DATA_AK5PF_UncertaintySources.txt");
   analyzermumu.getPUReweighter()->setMCDistrSum12();
-  analyzermumu.start();
-  analyzermumu.getPlots()->writeAllToTFile(outfile,true);
+  analyzermumu.getBTagSF()->setMakeEff(true);
+  //  analyzermumu.start();
+  // analyzermumu.getPlots()->writeAllToTFile(outfile,true);
 
   //start with ee
   
+
   MainAnalyzer analyzeree=analyzermumu;
   analyzeree.setFileList("ee_8TeV_inputfiles.txt");
   analyzeree.setName("8TeV_default_ee","ee");
+  analyzeree.getBTagSF()->setMakeEff(true);
+  analyzeree.start();
+  // TFile * btagfile = new TFile("btags.root","UPDATE");
+  // analyzeree.getBTagSF()->writeToTFile(btagfile);
+  // btagfile->Close();
+  // delete btagfile;
+  analyzeree.getPlots()->writeAllToTFile(outfile,true);
+
+  analyzeree.setName("8TeV_btag_ee","ee");
+  analyzeree.getBTagSF()->setMakeEff(false);
   analyzeree.start();
   analyzeree.getPlots()->writeAllToTFile(outfile,false);
 
-  
+  /*
   // to have something to play with prepare the default 7 TeV analyzer
   MainAnalyzer analyzer7ee;//=analyzermumu;
   analyzer7ee.setFileList("ee_7TeV_inputfiles.txt");
   analyzer7ee.setLumi(lumi7TeV);
   analyzer7ee.setShowStatusBar(runInNotQuietMode);
   analyzer7ee.setName("7TeV_default_ee","ee");
-  analyzer7ee.setDataSetDirectory("/scratch/hh/dust/naf/cms/user/kieseler/trees_7TeV/");
-  analyzer7ee.getPUReweighter()->setDataTruePUInput(cmssw_base+"/src/TtZAnalysis/Data/ReRecoNov2011_2.json_PU.root");
+  analyzer7ee.setDataSetDirectory(treedir+"/trees_7TeV/");
+  analyzer7ee.getPUReweighter()->setDataTruePUInput(cmssw_base+"/src/TtZAnalysis/Data/ReRecoNov2011.json_PU.root");
   analyzer7ee.getPUReweighter()->setMCDistrFall11();
   analyzer7ee.getJECUncertainties()->setFile(cmssw_base+"/src/TtZAnalysis/Data/JEC11_V12_AK5PF_UncertaintySources.txt");
    analyzer7ee.start();
@@ -987,7 +1041,7 @@ void Analyzer(){
   analyzer7mumu.setName("7TeV_default_mumu","mumu");
   analyzer7mumu.start();
   analyzer7mumu.getPlots()->writeAllToTFile(outfile,false);
-
+  */
   /*
 
   MainAnalyzer eewithlumi=analyzeree;
