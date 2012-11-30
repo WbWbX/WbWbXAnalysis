@@ -2,6 +2,7 @@
 #include "../interface/container.h"
 #include "../interface/containerStack.h"
 #include "../interface/containerStackVector.h"
+#include "../interface/bTagSF.h"
 
 namespace
 {
@@ -20,6 +21,8 @@ namespace
     top::container1DStackVector aaa;
     std::vector<top::container1DStackVector> bbb;
 
+    top::bTagSF ggg;
+    std::vector<top::bTagSF> kggg;
 
     
   };

@@ -23,14 +23,14 @@ namespace top{
 
   public:
     
-    JECUncertainties(){ninit_=true;sources_.clear();filename_=0;}
+    JECUncertainties(){ninit_=true;sources_.clear();filename_="";}
     JECUncertainties(const JECUncertainties &);
     JECUncertainties(TString  filename){ninit_=true;sources_.clear();setFile(filename);filename_=filename;}
     ~JECUncertainties();
 
     std::vector<unsigned int> &  sources(){return sources_;}
     void setVariation(TString);
-    void setFile(const char * , bool newset=true);
+    void setFile(TString , bool newset=true);
     
     void applyJECUncertainties(std::vector<top::NTJet>::iterator );
     void applyJECUncertainties(top::NTJet &jet);

@@ -10,5 +10,7 @@
   <class name="std::vector<top::container1DStack>"/>
   <class name="top::container1DStackVector"/>
   <class name="std::vector<top::container1DStackVector>"/>
+  <class name="top::bTagSF"/>
+  <class name="std::vector<top::bTagSF>"/>
 </lcgdict>
  
