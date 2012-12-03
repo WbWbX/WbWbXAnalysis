@@ -20,7 +20,7 @@
 50   /DYJetsToLL_M-10To50filter_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM                     tree_8TeV_dytautau1050      genFilter=Z genFilterString=TauTau 
 50   /DYJetsToLL_M-10To50filter_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM                     tree_8TeV_dyee1050          genFilter=Z genFilterString=ElectronElectron
 
-#####TTBAR /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM
+#####TTBAR 
 
 150   /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_eettbar                    genFilter=Top genFilterString=ElectronElectron 
 150   /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_mumuttbar                  genFilter=Top genFilterString=MuonMuon 
@@ -45,3 +45,9 @@
 
 #####QCD
 # still missing
+
+
+100   /QCD_Pt_20_30_EMEnriched_TuneZ2star_8TeV_pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM          tree_8TeV_qcdem2030             
+100   /QCD_Pt_30_80_EMEnriched_TuneZ2star_8TeV_pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM          tree_8TeV_qcdem3080             
+100   /QCD_Pt_80_170_EMEnriched_TuneZ2star_8TeV_pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM         tree_8TeV_qcdem80170           
+100   /QCD_Pt_20_MuEnrichedPt_15_TuneZ2star_8TeV_pythia6/Summer12_DR53X-PU_S10_START53_V7A-v3/AODSIM        tree_8TeV_qcdmu15              
