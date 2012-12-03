@@ -119,6 +119,12 @@ namespace top{
     }
   }
 
+  void container1DStackVector::multiplyAllMCNorms(double multiplier){
+    for(std::vector<container1DStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
+      stack->multiplyAllMCNorms(multiplier);
+    }
+  }
+
   void container1DStackVector::writeAllToTFile(TString filename, bool recreate, TString treename){
     TString name;
 

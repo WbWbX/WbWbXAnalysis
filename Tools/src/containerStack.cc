@@ -124,6 +124,13 @@ namespace top{
     }
   }
 
+  void container1DStack::multiplyAllMCNorms(double multiplier){
+    for(unsigned int i=0;i<norms_.size();i++){
+      if(legends_.at(i)!=dataleg_)
+	norms_.at(i)=norms_.at(i) * multiplier;
+    }
+  }
+
   void container1DStack::addGlobalRelMCError(TString sysname,double error){
     for(unsigned int i=0;i<containers_.size();i++){
       if(legends_[i]!=dataleg_) containers_[i].addGlobalRelError(sysname,error);

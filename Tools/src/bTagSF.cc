@@ -107,7 +107,7 @@ void bTagSF::fillEff(top::NTJet &jet, double puweight){ // puweights applied lat
     if(jet.btag() > wp_) 
       histp_->at(3).Fill(jet.pt(),abs_eta,fullweight);
   }  
-  else if(fabs(jet.genPartonFlavour()) < 4 && fabs(jet.genPartonFlavour()) > 0){ // light jets
+  else if(fabs(jet.genPartonFlavour()) > 0){ // light jets (including gluon jets)
     histp_->at(4).Fill(jet.pt(),abs_eta,fullweight);
     if(jet.btag() > wp_) 
       histp_->at(5).Fill(jet.pt(),abs_eta,fullweight);
@@ -139,8 +139,8 @@ double bTagSF::getSF(std::vector<top::NTJet> & jets){
     std::exit (EXIT_FAILURE);
   }
 
-  double OneMinusEff=1;
-  double OneMinusSEff=1;
+  double sumStuffEff=0.9999999999;
+  double sumStuffSfEff=0.9999999999;
   
   for(unsigned int jetiter=0;jetiter<jets.size();jetiter++){
     top::NTJet jet=jets.at(jetiter);
@@ -178,7 +178,7 @@ double bTagSF::getSF(std::vector<top::NTJet> & jets){
       else if(syst_==1)             //cjets up
 	sf=CJetSF(pt,abs_eta,1,multi);
     }
-    else if(abs(jet.genPartonFlavour()) < 4 && abs(jet.genPartonFlavour()) > 0){
+    else if(abs(jet.genPartonFlavour()) > 0){ // (including gluon jets)
       effh=2;
       if(fabs((float)syst_) < 1.1) // default
 	sf=LJetSF(pt,abs_eta);
@@ -220,11 +220,11 @@ double bTagSF::getSF(std::vector<top::NTJet> & jets){
       else
 	eff=effhistp_->at(effh).GetBinContent ( ptbin, etabin );
     }
-    OneMinusEff = OneMinusEff* ( 1-eff );
-    OneMinusSEff= OneMinusSEff* ( 1-sf*eff );
+    sumStuffEff = sumStuffEff* ( 1-eff );
+    sumStuffSfEff= sumStuffSfEff* ( 1-sf*eff );
   }
 
-  return ( 1.-OneMinusSEff ) / ( 1.-OneMinusEff );
+  return ( 1.-sumStuffSfEff ) / ( 1.-sumStuffEff );
 }
 
 
