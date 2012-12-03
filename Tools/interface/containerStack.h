@@ -42,6 +42,7 @@ namespace top{
     container1D & getContainer(TString);
     container1D getFullMCContainer();           //! gets the sum of all MC containers (normalized with their stored norm) including error handling
     void multiplyNorm(TString , double);
+    void multiplyAllMCNorms(double);
     void addGlobalRelMCError(TString,double);   //! adds a global systematic variation to the systematics stored (e.g. lumi)
     void addMCErrorStack(TString,container1DStack,bool ignoreMCStat=true);  //! calls container1D::addErrorContainer for each same named member container
     void addRelSystematicsFrom(top::container1DStack);
