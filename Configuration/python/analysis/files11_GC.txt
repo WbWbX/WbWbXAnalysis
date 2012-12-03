@@ -56,7 +56,11 @@
 #####QCD
 
 
-
+       
+100  /QCD_Pt-20to30_EMEnriched_TuneZ2_7TeV-pythia6/Fall11-PU_S6_START44_V9B-v1/AODSIM          tree_7TeV_qcdem2030       is2011=true globalTag=START44_V9B
+100  /QCD_Pt-30to80_EMEnriched_TuneZ2_7TeV-pythia/Fall11-PU_S6_START44_V9B-v1/AODSIM           tree_7TeV_qcdem3080       is2011=true globalTag=START44_V9B
+100  /QCD_Pt-80to170_EMEnriched_TuneZ2_7TeV-pythia6/Fall11-PU_S6_START44_V9B-v1/AODSIM         tree_7TeV_qcdem80170      is2011=true globalTag=START44_V9B
+100  /QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/Fall11-PU_S6_START44_V9B-v1/AODSIM         tree_7TeV_qcdmu15         is2011=true globalTag=START44_V9B
 
 
 ######### systematics #############
