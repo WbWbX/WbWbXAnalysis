@@ -29,18 +29,19 @@ namespace top{
 
   };
 
-  // // following recommendation https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution
+  // // following recommendation https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution;   https://twiki.cern.ch/twiki/bin/viewauth/CMS/TWikiTopRefSyst
 
   top::NTJet JERAdjuster::getCorrectedJet(NTJet jet){
-    top::LorentzVector zero(0,0,0,0);
-    if(jet.genP4() != zero){
-      for(unsigned int i=0;i<resranges_.size();i++){
-	if(jet.eta() < resranges_[i]){
-	  if(i!=0){ //not outside range
-	    double factor = std::max(0.,(double)(jet.pt() + resfactors_[i-1] * (jet.pt() - jet.genP4().Pt())));
-	    top::LorentzVector newp4=jet.p4() * factor/jet.pt();
-	     jet.setP4(newp4);
-	  }
+    if(jet.genP4().Pt() < 1){
+      return jet;
+    }
+    for(unsigned int i=0;i<resranges_.size();i++){
+      if(jet.eta() < resranges_[i]){
+	if(i!=0){ //not outside range
+	  double deltapt = resfactors_[i-1] * (jet.pt() - jet.genP4().Pt());
+	  double scale = std::max(0., jet.pt() + deltapt)/jet.pt();
+	  top::LorentzVector newp4=jet.p4() * scale;
+	  jet.setP4(newp4);
 	}
       }
     }
@@ -55,12 +56,13 @@ namespace top{
   }
   void JERAdjuster::correctJet(std::vector<top::NTJet>::iterator jet){
     top::LorentzVector zero(0,0,0,0);
-    if(jet->genP4() != zero){
+    if(jet->genP4().Pt() > 1){
       for(unsigned int i=0;i<resranges_.size();i++){
 	if(jet->eta() < resranges_[i]){
 	  if(i!=0){ //not outside range
-	    double factor = std::max(0.,(double)(jet->pt() + resfactors_[i-1] * (jet->pt() - jet->genP4().Pt())));
-	    top::LorentzVector newp4=jet->p4() * factor/jet->pt();
+	    double deltapt = (1. - resfactors_[i-1]) * (jet->pt() - jet->genP4().Pt());
+	    double scale = std::max(0., jet->pt() + deltapt)/jet->pt();
+	    top::LorentzVector newp4=jet->p4() * scale;
 	    jet->setP4(newp4);
 	  }
 	}

@@ -23,14 +23,14 @@ namespace top{
 
   public:
     
-    JECUncertainties(){ninit_=true;sources_.clear();filename_=0;}
+    JECUncertainties(){ninit_=true;sources_.clear();filename_="";}
     JECUncertainties(const JECUncertainties &);
     JECUncertainties(const char * filename){ninit_=true;sources_.clear();setFile(filename);filename_=filename;}
     ~JECUncertainties();
 
     std::vector<unsigned int> &  sources(){return sources_;}
     void setVariation(TString);
-    void setFile(const char * , bool newset=true);
+    void setFile(TString , bool newset=true);
     
     void applyJECUncertainties(std::vector<top::NTJet>::iterator );
     void applyJECUncertainties(top::NTJet &jet);
@@ -40,7 +40,7 @@ namespace top{
   private:
     std::vector<JetCorrectionUncertainty*> vsrc_;
     JetCorrectionUncertainty* totalunc_;
-    const char * filename_;
+    TString filename_;
     int nomupdown_;
     //int source_;
     bool ninit_;
@@ -88,8 +88,8 @@ namespace top{
   }
 
 
-  void JECUncertainties::setFile(const char * filename, bool newset){
-    if(*filename != '\0'){
+  void JECUncertainties::setFile(TString filename, bool newset){
+    if(filename != ""){
       const int nsrc = 16;
       const char* srcnames[nsrc] =
 	{"Absolute",       //0
@@ -116,13 +116,13 @@ namespace top{
 	for (int isrc = 0; isrc < nsrc; isrc++) {
 	  
 	  const char *name = srcnames[isrc];
-	  JetCorrectorParameters *p = new JetCorrectorParameters(filename, name);
+	  JetCorrectorParameters *p = new JetCorrectorParameters(filename.Data(), name);
 	JetCorrectionUncertainty *unc = new JetCorrectionUncertainty(*p);
 	vsrc_.push_back(unc);
 	} 
 	
 	// Total uncertainty
-	totalunc_ = new JetCorrectionUncertainty(*(new JetCorrectorParameters(filename, "Total")));
+	totalunc_ = new JetCorrectionUncertainty(*(new JetCorrectorParameters(filename.Data(), "Total")));
 	ninit_=false;
 	
 	filename_=filename;
