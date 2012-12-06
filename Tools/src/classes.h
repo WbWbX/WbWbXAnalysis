@@ -23,7 +23,7 @@ namespace
 
 
     std::vector<TH2D> ijij;
-    std::map<TString,vector<TH2D> > kokd;
+    std::map<TString,std::vector<TH2D> > kokd;
     top::bTagSF ggg;
     std::vector<top::bTagSF> kggg;
 

@@ -99,6 +99,16 @@ namespace top{
       stack->renameSyst(old,New);
     }
   }
+
+  void container1DStackVector::multiplyNorm(TString legendname, double multi, TString step){
+    for(std::vector<container1DStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
+      if(stack->getName().Contains(step)){
+	stack->multiplyNorm(legendname, multi);
+	
+      }
+    }
+  }
+
   void container1DStackVector::multiplyNorms(TString legendname, std::vector<double> scalefactors, std::vector<TString> identifier,bool showmessages){
     if(! (identifier.size() == scalefactors.size())){
       std::cout << "container1DStackVector::multiplyNorms: identifiers and scalefactors must be same size!" << std::endl;

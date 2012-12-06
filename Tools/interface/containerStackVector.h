@@ -2,7 +2,7 @@
 #define containerStackVector_h
 
 #include "containerStack.h"
-#include <vector>
+//#include <vector>
 #include "TStyle.h"
 #include "TDirectory.h"
 #include "TFile.h"
@@ -37,7 +37,8 @@ namespace top{
     void removeError(TString);
     void renameSyst(TString,TString); //! old new
 
-    void multiplyNorms(TString, std::vector<double>, std::vector<TString>, bool showmessages=false);   //! multiplies norm of all MC with legendname  ,  with factor  ,  for step identifier string
+    void multiplyNorm(TString, double, TString); //! legendname, multiplier, stepID
+    void multiplyNorms(TString, std::vector<double>, std::vector<TString>, bool showmessages=false);   //! multiplies norm of all MC with legendname  ,  with factor  ,  for step identifier string (step_string contains the id string)
     void multiplyAllMCNorms(double);
 
     void writeAllToTFile(TString, bool recreate=false, TString treename="stored_objects");
