@@ -10,6 +10,9 @@
 #include "../interface/NTTrack.h"
 #include "../interface/NTSuClu.h"
 
+#include "../interface/NTInflatedMuon.h"
+#include "../interface/NTInflatedElectron.h"
+
 namespace
 {
   struct dictionary {
@@ -35,6 +38,10 @@ namespace
     top::NTSuClu dummy19;
     std::vector<top::NTSuClu> dummy20;
 
+    top::NTInflatedMuon ihih;
+    std::vector<top::NTInflatedMuon> kkk;
+    top::NTInflatedElectron issshih;
+    std::vector<top::NTInflatedElectron> kkssk;
 
     
   };
