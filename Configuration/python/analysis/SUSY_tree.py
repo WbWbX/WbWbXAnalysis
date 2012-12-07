@@ -398,23 +398,14 @@ getattr(process,'patPFElectrons'+pfpostfix).isolationValues = cms.PSet(
 
 
 ######### end of electron implementation ########
-######SUSY STUFF####### adapt Muons to get pfIso in reco muons BRUTAL but fast..
+######SUSY STUFF####### adapt Muons to get pfIso in reco muons BRUTAL but fast..elecs the same
 
 
-getattr(process,'patMuons'+pfpostfix).useParticleFlow = False
-getattr(process,'muPFIsoDepositNeutral'+pfpostfix).src = "muons"
-getattr(process,'muPFIsoDepositChargedAll'+pfpostfix).src = "muons"
-getattr(process,'muPFIsoDepositPU'+pfpostfix).src = "muons"
-getattr(process,'muPFIsoDepositGamma'+pfpostfix).src = "muons"
-getattr(process,'muPFIsoDepositCharged'+pfpostfix).src = "muons"
+from TtZAnalysis.Workarounds.usePFIsoCone import *
 
-getattr(process,'patMuons'+pfpostfix).isolationValues = cms.PSet(
-    pfNeutralHadrons = cms.InputTag("muPFIsoValueNeutral03"+pfpostfix),
-    pfChargedAll = cms.InputTag("muPFIsoValueChargedAll03"+pfpostfix),
-    pfPUChargedHadrons = cms.InputTag("muPFIsoValuePU03"+pfpostfix),
-    pfPhotons = cms.InputTag("muPFIsoValueGamma03"+pfpostfix),
-    pfChargedHadrons = cms.InputTag("muPFIsoValueCharged03"+pfpostfix)
-    )
+usePFIsoCone(process)
+
+##now use standard default patsequence
 
 
 
@@ -475,7 +466,7 @@ switchOnTrigger( process )
 
 process.patGSFElectronsTriggerMatches = cms.EDProducer("PATTriggerMatcherDRDPtLessByR",
     matchedCuts = cms.string('path("*")'),
-    src = cms.InputTag("patElectrons"+ pfpostfix),
+    src = cms.InputTag("patElectrons"),
     maxDPtRel = cms.double(0.5),
     resolveByMatchQuality = cms.bool(True),
     maxDeltaR = cms.double(0.5),
@@ -488,10 +479,10 @@ process.patPFElectronsTriggerMatches.src = 'patPFElectrons'+pfpostfix
 
 
 process.patMuonsTriggerMatches = process.patGSFElectronsTriggerMatches.clone()
-process.patMuonsTriggerMatches.src = 'patMuons'+ pfpostfix
+process.patMuonsTriggerMatches.src = 'patMuons'
 
 process.patGSFElectronsWithTrigger = cms.EDProducer("PATTriggerMatchElectronEmbedder",
-    src = cms.InputTag("patElectrons"+ pfpostfix),
+    src = cms.InputTag("patElectrons"),
     matches = cms.VInputTag("patGSFElectronsTriggerMatches")
                   )
 process.patPFElectronsWithTrigger = process.patGSFElectronsWithTrigger.clone()
@@ -499,7 +490,7 @@ process.patPFElectronsWithTrigger.src = "patPFElectrons"+pfpostfix
 process.patPFElectronsWithTrigger.matches = ['patPFElectronsTriggerMatches']
 
 process.patMuonsWithTrigger = cms.EDProducer("PATTriggerMatchMuonEmbedder",
-    src = cms.InputTag("patMuons"+ pfpostfix),
+    src = cms.InputTag("patMuons"),
     matches = cms.VInputTag("patMuonsTriggerMatches")
                   )
 if includereco:
@@ -528,15 +519,15 @@ process.treeJets.src="patJets"+pfpostfix
 process.treeJets.cut = 'pt>8' # unfortunately starting at 10 GeV are needed for MET rescaling
 
 process.IDMuons = process.selectedPatMuons.clone()
-process.IDMuons.src = 'patMuons' + pfpostfix
+process.IDMuons.src = 'patMuons'
 process.IDMuons.cut = cms.string('pt > 18  && abs(eta) < 2.7')
 
 process.IDElectrons = process.selectedPatElectrons.clone()
-process.IDElectrons.src = 'patElectrons' + pfpostfix
+process.IDElectrons.src = 'patElectrons'
 process.IDElectrons.cut = cms.string( 'pt > 18  && abs(eta) < 2.7')
 
 process.IDPFElectrons = process.selectedPatElectrons.clone()
-process.IDPFElectrons.src = 'patPFElectrons' + pfpostfix
+process.IDPFElectrons.src = 'patPFElectrons'+pfpostfix
 process.IDPFElectrons.cut = cms.string( 'pt > 18  && abs(eta) < 2.7')
 
 
@@ -582,8 +573,8 @@ process.PFTree.rhoJetsIso        = cms.InputTag("kt6PFJetsForIso","rho",process.
 process.PFTree.includePDFWeights = includePDFWeights
 process.PFTree.pdfWeights        = "pdfWeights:"+PDF
 if not includereco:
-    process.PFTree.muonSrc = 'patMuons' + pfpostfix
-    process.PFTree.elecGSFSrc =  'patElectrons' + pfpostfix
+    process.PFTree.muonSrc = 'patMuons'
+    process.PFTree.elecGSFSrc =  'patElectrons'
     process.PFTree.elecPFSrc =  'patPFElectrons' + pfpostfix
 
 ## make tree sequence
@@ -607,6 +598,7 @@ process.path = cms.Path(process.goodOfflinePrimaryVertices *
                         process.preFilterSequence *
                       #  process.btagging *             #not yet implemented fully in pf2pat sequence../ needed for new btagging tag
                         process.patTriggerSequence *
+                        process.patDefaultSequence *
                         getattr(process,'patPF2PATSequence'+pfpostfix) *
                         process.isoJetSequence *
                         process.treeSequence)
