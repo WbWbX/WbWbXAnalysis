@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id: SusyTreeWriter.cc,v 1.1 2012/12/07 21:28:32 jkiesele Exp $
+// $Id: SusyTreeWriter.cc,v 1.2 2012/12/08 11:06:17 jkiesele Exp $
 //
 //
 
@@ -188,6 +188,7 @@ SusyTreeWriter::SusyTreeWriter(const edm::ParameterSet& iConfig)
              <<  "\n#     includes pdfWeights : " << includepdfweights_    <<"                         #" 
              <<  "\n#                                                     #"
              <<  "\n#    WARNING!!! PF ELECS ARE COMMENTED! NO PF OUTPUT! #"
+             <<  "\n#    WARNING!!! Elec collections get 2012 rho corrections by default #"
              <<  "\n#######################################################" << std::endl;
 
 
@@ -782,8 +783,8 @@ SusyTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      //}
    ntevent.setIsoRho(temprhos);
 
-   //add rhoiso to electrons (if uses 2011 corrections (second argument set to false));
-   top::elecRhoIsoAdder addrho(!IsRealData, !rho2011_);
+   //add rhoiso to electrons (if uses 2011 corrections (second argument set to false)); ##RHO2012##
+   top::elecRhoIsoAdder addrho(!IsRealData, true);
    if(rho2011_) addrho.setRho(temprhos[2]);
    else         addrho.setRho(temprhos[0]);
    addrho.addRhoIso(ntpfelectrons);
