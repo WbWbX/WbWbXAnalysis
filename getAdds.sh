@@ -9,6 +9,12 @@ then
     echo 'warning! '"$CMSSW_VERSION"' not supported for automatic checkout of pat packages! add them manually!'
 fi
 
+if [[ $1 == "SUSY" ]];
+then
+    echo 'checking out additional SUSY packagesf for efficiency studies.'
+    cvs co -d WWAnalysis/SkimStep UserCode/Mangano/WWAnalysis/SkimStep 
+fi
+
 
 cvs co -d TopAnalysis/TopFilter/plugins/ UserCode/Bromo/TopAnalysis/TopFilter/plugins/GeneratorZFilter.cc
 cvs co -d TopAnalysis/TopFilter/plugins/ UserCode/Bromo/TopAnalysis/TopFilter/plugins/GeneratorTopFilter.cc
