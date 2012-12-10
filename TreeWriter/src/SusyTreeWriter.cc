@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id: SusyTreeWriter.cc,v 1.2 2012/12/08 11:06:17 jkiesele Exp $
+// $Id: SusyTreeWriter.cc,v 1.3 2012/12/08 11:36:22 jkiesele Exp $
 //
 //
 
@@ -388,7 +388,7 @@ SusyTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        double ipfe_d=0;
        if(electron->isPF()) ipfe_d=1;
        tempelec.setMember("isPFElectron",ipfe_d);
-
+       electron->electronID("bla");
        
        tempelec.setP4(electron->p4());
        double vz=-9999;
