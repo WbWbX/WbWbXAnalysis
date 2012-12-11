@@ -21,7 +21,7 @@ options.register ('includereco',False,VarParsing.VarParsing.multiplicity.singlet
 options.register ('includetrigger',True,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"includes trigger info for event")
 options.register ('includePDF',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"includes pdf weights info for event")
 options.register ('PDF','cteq65',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"pdf set for weights")
-options.register ('inputScript','TtZAnalysis.Configuration.samples.mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"input Script")
+options.register ('inputScript','',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"input Script")
 options.register ('json','nojson',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"json files")
 options.register ('isSync',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"switch on for sync")
 options.register('samplename', 'standard', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "which sample to run over - obsolete")
@@ -123,11 +123,8 @@ process.out    = cms.OutputModule("PoolOutputModule", outputCommands =  cms.untr
 #if syncfile or crab:
 process.source = cms.Source('PoolSource',fileNames=cms.untracked.vstring( '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/A89D210D-1BE2-E111-9EFB-0030487F1797.root' ))
 
-if not (syncfile or crab):     
-    if inputScript=='':
-        print "need input script"
-        exit(8888)
-    
+#if not (syncfile or crab):     
+if not inputScript=='':
     process.load(inputScript)
 
 
@@ -404,6 +401,21 @@ getattr(process,'patPFElectrons'+pfpostfix).isolationValues = cms.PSet(
 from TtZAnalysis.Workarounds.usePFIsoCone import *
 
 usePFIsoCone(process)
+
+process.EIdSequence = cms.Sequence()
+
+from WWAnalysis.SkimStep.electronIDs_cff import addElectronIDs
+eidModules = addElectronIDs(process,process.EIdSequence)
+
+getattr(process,'patDefaultSequence').replace(process.patElectrons,
+                                        process.EIdSequence *
+                                        process.patElectrons)
+
+for module in eidModules:
+    setattr(process.patElectrons.electronIDSources,module.label(),cms.InputTag(module.label()))
+
+if not isMC:
+    removeMCMatching( process)
 
 ##now use standard default patsequence
 
