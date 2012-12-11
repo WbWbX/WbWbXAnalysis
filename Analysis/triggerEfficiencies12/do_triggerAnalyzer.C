@@ -31,7 +31,7 @@ bool useRhoIso=false;
 
 double jetptcut=30;
 
-bool breakat5fb=true;
+bool breakat5fb=false;
 bool checktriggerpaths=true;
 
 class triggerAnalyzer{
@@ -41,6 +41,8 @@ public:
     binseta_.push_back(-2.5);binseta_.push_back(-1.5);binseta_.push_back(-0.8);binseta_.push_back(0.8);binseta_.push_back(1.5);binseta_.push_back(2.5);
 
     binspt_.push_back(20);binspt_.push_back(30);binspt_.push_back(40);binspt_.push_back(50);binspt_.push_back(200);
+
+    TH1::AddDirectory(kFALSE);
      };
   ~triggerAnalyzer(){};
   void setBinsEta(std::vector<float> binseta){binseta_.clear();binseta_=binseta;};
@@ -56,6 +58,8 @@ public:
   top::container1D getCorrelationDPhi(){return corrdphi_;}
   top::container1D getCorrelationDPhi2(){return corrdphi2_;}
   top::container1D getCorrelationVmulti(){return corrvmulti_;}
+
+  TH2D getEta2D(){return eta_2dim;}
 
 
 
@@ -221,7 +225,10 @@ notinMCtriggers.push_back("DiCentralPFJet");
     TString MCadd="";
     if(isMC) MCadd="MC";
 
-    
+    eta_2dim =  TH2D("eta2d", "eta2d", nbinseta, binseta, nbinseta, binseta);
+    TH2D eta_2dimsel =  TH2D("eta2dsel", "eta2dsel", nbinseta, binseta, nbinseta, binseta);
+    TH2D eta_2dimtrig =  TH2D("eta2dtrig", "eta2dtrig", nbinseta, binseta, nbinseta, binseta);
+
     //  TDirectory * histdir=new TDirectory(mode+MCadd);
     //  histdir->cd();
 
@@ -579,6 +586,9 @@ notinMCtriggers.push_back("DiCentralPFJet");
 	c_seleta.fill(selectedElecs[1].eta(),puweight);
 	c_seldphi.fill(fabs(selectedElecs[0].phi() - pMet->phi()),puweight);
 	c_seldphi2.fill(fabs(selectedElecs[1].phi() - pMet->phi()),puweight);
+
+	eta_2dimsel.Fill(selectedElecs[0].eta(),selectedElecs[1].eta(),puweight);
+
       }
       else if(mode=="mumu"){
 	c_selpt.fill(selectedMuons[0].pt(),puweight);
@@ -588,6 +598,8 @@ notinMCtriggers.push_back("DiCentralPFJet");
 	c_seldphi.fill(fabs(selectedMuons[0].phi() - pMet->phi()),puweight);
 	c_seldphi2.fill(fabs(selectedMuons[1].phi() - pMet->phi()),puweight);
 
+	eta_2dimsel.Fill(selectedMuons[0].eta(),selectedMuons[1].eta(),puweight);
+
       }
       else if(mode =="emu"){
 	c_selpt.fill(selectedElecs[0].pt(),puweight);
@@ -596,6 +608,8 @@ notinMCtriggers.push_back("DiCentralPFJet");
 	c_seleta.fill(selectedMuons[0].eta(),puweight);
 	c_seldphi.fill(fabs(selectedElecs[0].phi() - pMet->phi()),puweight);
 	c_seldphi2.fill(fabs(selectedMuons[0].phi() - pMet->phi()),puweight);
+
+	eta_2dimsel.Fill(selectedElecs[0].eta(),selectedMuons[0].eta(),puweight);
 
       }
     }
@@ -615,6 +629,8 @@ notinMCtriggers.push_back("DiCentralPFJet");
 	c_trigeta.fill(selectedElecs[1].eta(),puweight);
 	c_trigdphi.fill(fabs(selectedElecs[0].phi() - pMet->phi()),puweight);
 	c_trigdphi2.fill(fabs(selectedElecs[1].phi() - pMet->phi()),puweight);
+
+	eta_2dimtrig.Fill(selectedElecs[0].eta(),selectedElecs[1].eta(),puweight);
       }
       else if(mode=="mumu"){
 	c_trigpt.fill(selectedMuons[0].pt(),puweight);
@@ -624,6 +640,8 @@ notinMCtriggers.push_back("DiCentralPFJet");
 	c_trigdphi.fill(fabs(selectedMuons[0].phi() - pMet->phi()),puweight);
 	c_trigdphi2.fill(fabs(selectedMuons[1].phi() - pMet->phi()),puweight);
 
+	eta_2dimtrig.Fill(selectedMuons[0].eta(),selectedMuons[1].eta(),puweight);
+
       }
       else if(mode =="emu"){
 	c_trigpt.fill(selectedElecs[0].pt(),puweight);
@@ -632,6 +650,8 @@ notinMCtriggers.push_back("DiCentralPFJet");
 	c_trigeta.fill(selectedMuons[0].eta(),puweight);
 	c_trigdphi.fill(fabs(selectedElecs[0].phi() - pMet->phi()),puweight);
 	c_trigdphi2.fill(fabs(selectedMuons[0].phi() - pMet->phi()),puweight);
+
+	eta_2dimtrig.Fill(selectedElecs[0].eta(),selectedMuons[0].eta(),puweight);
 
       }
 
@@ -840,6 +860,13 @@ notinMCtriggers.push_back("DiCentralPFJet");
 
   c_vmultieff = c_trigvmulti / c_selvmulti;
 
+
+  eta_2dim= divideTH2DBinomial(eta_2dimtrig,eta_2dimsel);
+  eta_2dim.GetXaxis()->SetTitle("#eta");
+  eta_2dim.GetYaxis()->SetTitle("#eta");
+
+
+
   // container1D c_tempmeteff=c_selmettrigpt/c_selpt;
   //  c_tempmeteff.setDivideBinomial(false);
   std::cout << "making correlation plots, ignore warnings!" <<std::endl;
@@ -893,6 +920,8 @@ notinMCtriggers.push_back("DiCentralPFJet");
     dphieff2_.writeTGraph("dphi2 eff"+add,false);
     dphieff2_.writeTH1D("axis dphi2",false);
 
+    eta_2dim.SetName("eta2d eff"+add);
+    eta_2dim.Write();
 
     vmultieff_.writeTGraph("vmulti eff"+add,false);
     vmultieff_.writeTH1D("axis vmulti",false);
@@ -923,6 +952,9 @@ private:
   top::container1D dphieff2_;
   top::container1D corrdphi2_;
   bool isMC;
+
+  TH2D eta_2dim;
+
 };
 
 TChain * makeChain(std::vector<TString> paths){
@@ -1068,7 +1100,7 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
   container1D scalefactor;
   container1D data;
   container1D MC;
-
+  TH2D SFdd,datadd,MCdd;
 
   TFile* f5 = new TFile("triggerSummary_ee.root","RECREATE");
 
@@ -1084,6 +1116,13 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
   scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_eeMC.getCorrelationEta(),ratiomultiplier);
   scalefactor.writeTGraph("scalefactor eta incl corrErr",false);
   scalefactor.writeTH1D("TH scalefactor eta incl corrErr",false);
+
+  datadd=ta_eed.getEta2D();
+  MCdd=ta_eeMC.getEta2D();
+  SFdd = divideTH2D(datadd, MCdd);
+  SFdd.SetName("scalefactor eta2d");
+  SFdd.SetTitle("scalefactor eta2d");
+  SFdd.Write();
 
   data=ta_eed.getPtPlot();
   MC=ta_eeMC.getPtPlot();
@@ -1150,6 +1189,13 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
   scalefactor.writeTGraph("scalefactor eta incl corrErr",false);
   scalefactor.writeTH1D("TH scalefactor eta incl corrErr",false);
 
+  datadd=ta_mumud.getEta2D();
+  MCdd=ta_mumuMC.getEta2D();
+  SFdd = divideTH2D(datadd, MCdd);
+  SFdd.SetName("scalefactor eta2d");
+  SFdd.SetTitle("scalefactor eta2d");
+  SFdd.Write();
+
   data=ta_mumud.getPtPlot();
   MC=ta_mumuMC.getPtPlot();
   data.setDivideBinomial(false);
@@ -1211,6 +1257,14 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
   scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_emuMC.getCorrelationEta(),ratiomultiplier);
   scalefactor.writeTGraph("scalefactor eta incl corrErr",false);
   scalefactor.writeTH1D("TH scalefactor eta incl corrErr",false);
+
+
+  datadd=ta_emud.getEta2D();
+  MCdd=ta_emuMC.getEta2D();
+  SFdd = divideTH2D(datadd, MCdd);
+  SFdd.SetName("scalefactor eta2d");
+  SFdd.SetTitle("scalefactor eta2d");
+  SFdd.Write();
 
   data=ta_emud.getPtPlot();
   MC=ta_emuMC.getPtPlot();
