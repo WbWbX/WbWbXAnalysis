@@ -9,6 +9,9 @@
 #include "TStyle.h"
 #include "TGraphAsymmErrors.h"
 
+#include "TH2D.h"
+
+
 void makeplot(TString inputfile, TString add){
 
   TLegend * leg =  new TLegend(0.35,0.15,0.70,0.42);
@@ -45,6 +48,7 @@ void makeplot(TString inputfile, TString add){
     h->GetXaxis()->SetTitle("n_{vtx}");
   }
 
+  if(!add.Contains("2d")){
   h->GetYaxis()->SetTitleSize(0.06);
   h->GetXaxis()->SetTitleSize(0.05);
   h->GetYaxis()->SetLabelSize(0.05);
@@ -82,6 +86,40 @@ void makeplot(TString inputfile, TString add){
   d->Draw("P,e1,same");
   leg->Draw("same");
 
+  }
+  ///2D stuff if f->GetName(Contains emu...
+
+  else if(add.Contains("2d")){
+
+
+    TH2D *hsf = (TH2D*)f->Get(add);
+    hsf->GetYaxis()->SetTitleSize(0.06);
+    hsf->GetXaxis()->SetTitleSize(0.05);
+    hsf->GetYaxis()->SetLabelSize(0.05);
+    hsf->GetXaxis()->SetLabelSize(0.05);
+    TString xaxistitle=(TString) hsf->GetXaxis()->GetTitle() + "_{e_1}";
+    TString yaxistitle=(TString) hsf->GetYaxis()->GetTitle() + "_{e_2}";
+    TString filename=f->GetName();
+    if(filename.Contains("_emu")){
+      xaxistitle=(TString) hsf->GetXaxis()->GetTitle() + "_{e}";
+      yaxistitle=(TString) hsf->GetYaxis()->GetTitle() + "_{#mu}";
+    }
+    else if(filename.Contains("_mumu")){
+      xaxistitle=(TString) hsf->GetXaxis()->GetTitle() + "_{#mu_1}";
+      yaxistitle=(TString) hsf->GetYaxis()->GetTitle() + "_{#mu_2}";
+    }
+
+    hsf->GetXaxis()->SetTitle(xaxistitle);
+    hsf->GetYaxis()->SetTitle(yaxistitle);
+
+    gPad->SetLeftMargin(0.15);
+    gPad->SetBottomMargin(0.15);
+  
+    hsf->Draw("colz");
+    hsf->Draw("text,e,same");
+
+  }
+
   //different markers
   // dot data
   //stuff for other
@@ -100,6 +138,19 @@ void miniscript(TString outdir){
   c->Print(outdir+"corr_eept.pdf");
   c->Print(outdir+"corr_eept.eps");
   c->Clear();
+  // makeplot(rootsdir+"triggerSummary_ee.root","scalefactor eta2d");
+  // c->Print(outdir+"corr_eesfeta2d.pdf");
+  // c->Print(outdir+"corr_eesfeta2d.eps");
+  // c->Clear();
+  // makeplot(rootsdir+"triggerSummary_ee.root","eta2d eff");
+  // c->Print(outdir+"corr_eesfeta2d.pdf");
+  // c->Print(outdir+"corr_eesfeta2d.eps");
+  // c->Clear();
+  // makeplot(rootsdir+"triggerSummary_ee.root","eta2d effMC");
+  // c->Print(outdir+"corr_eesfeta2d.pdf");
+  // c->Print(outdir+"corr_eesfeta2d.eps");
+  // c->Clear();
+
   makeplot(rootsdir+"triggerSummary_ee.root", "eta");
   c->Print(outdir+"corr_eeeta.pdf");
   c->Print(outdir+"corr_eeeta.eps");
