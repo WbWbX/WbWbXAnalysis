@@ -42,10 +42,15 @@ public:
 
     binspt_.push_back(20);binspt_.push_back(30);binspt_.push_back(40);binspt_.push_back(50);binspt_.push_back(200);
 
+
+    binseta2d_ << 0 << 0.9 << 1.2 << 2.1 << 2.4; //mu standard
+    
+
     TH1::AddDirectory(kFALSE);
      };
   ~triggerAnalyzer(){};
   void setBinsEta(std::vector<float> binseta){binseta_.clear();binseta_=binseta;};
+  void setBinsEta2d(std::vector<float> binseta2d){binseta2d_.clear();binseta2d_=binseta2d;};
   void setBinsPt(std::vector<float> binspt){binspt_.clear();binspt_=binspt;}
 
   top::container1D  getEtaPlot(){return etaeff_;}
@@ -215,19 +220,19 @@ notinMCtriggers.push_back("DiCentralPFJet");
   //////////////////////////////////
 
 
-  Int_t nbinseta=binseta_.size()-1;
+  Int_t nbinseta2d=binseta2d_.size()-1;
   Int_t nbinspt=binspt_.size()-1;
-    Double_t binseta[nbinseta+1];
+  Double_t binseta2d[nbinseta2d+1];
     Double_t binspt[nbinspt+1];
 
-    copy(binseta_.begin(), binseta_.end(), binseta);
+    copy(binseta2d_.begin(), binseta2d_.end(), binseta2d);
     copy(binspt_.begin(), binspt_.end(), binspt);
     TString MCadd="";
     if(isMC) MCadd="MC";
 
-    eta_2dim =  TH2D("eta2d", "eta2d", nbinseta, binseta, nbinseta, binseta);
-    TH2D eta_2dimsel =  TH2D("eta2dsel", "eta2dsel", nbinseta, binseta, nbinseta, binseta);
-    TH2D eta_2dimtrig =  TH2D("eta2dtrig", "eta2dtrig", nbinseta, binseta, nbinseta, binseta);
+    eta_2dim =  TH2D("eta2d", "eta2d", nbinseta2d, binseta2d, nbinseta2d, binseta2d);
+    TH2D eta_2dimsel =  TH2D("eta2dsel", "eta2dsel", nbinseta2d, binseta2d, nbinseta2d, binseta2d);
+    TH2D eta_2dimtrig =  TH2D("eta2dtrig", "eta2dtrig", nbinseta2d, binseta2d, nbinseta2d, binseta2d);
 
     //  TDirectory * histdir=new TDirectory(mode+MCadd);
     //  histdir->cd();
@@ -700,7 +705,7 @@ notinMCtriggers.push_back("DiCentralPFJet");
     if(b_dilepton && b_ZVeto && b_oneJet && b_twoJets)          sel_MetTrig[3].second +=puweight;
     if(b_dilepton && b_ZVeto && b_oneJet && b_twoJets && b_met) sel_MetTrig[4].second    +=puweight;
   }
-
+ 
   if(firedMet && firedDilepTrigger){
     if(b_dilepton){
       c_selbothtrigvmulti.fill(pEvent->vertexMulti() ,puweight);
@@ -940,6 +945,7 @@ notinMCtriggers.push_back("DiCentralPFJet");
 
 private:
   std::vector<float> binseta_;
+  std::vector<float> binseta2d_;
   std::vector<float> binspt_;
   top::container1D etaeff_;
   top::container1D pteff_;
