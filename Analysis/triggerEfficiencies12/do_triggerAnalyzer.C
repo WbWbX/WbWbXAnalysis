@@ -34,7 +34,7 @@ double jetptcut=30;
 
 bool breakat5fb=false;
 bool checktriggerpaths=false;
-bool coutalltriggerpaths=true;
+bool coutalltriggerpaths=false;
 
 class triggerAnalyzer{
 
@@ -1063,17 +1063,17 @@ void analyze(){
   vector<double> mumud=ta_mumud.Eff("mumu",  datachain,pileuproot, false,getTeX);
   vector<double> emud= ta_emud.Eff("emu",   datachain,pileuproot, false,getTeX);
 
- 
+  TString MCdir="/scratch/hh/dust/naf/cms/user/kieseler/trees_8TeV/";
 
   std::vector<TString> eemcfiles,mumumcfiles,emumcfiles;
-  eemcfiles << "/scratch/hh/dust/naf/cms/user/kieseler/trees_8TeV_MC/tree_8TeV_eettbar.root"
-    	    << "/scratch/hh/dust/naf/cms/user/diezcar/2012_Rel533/2012-10-08T17:25:32-naf_DOSS_tree_py_for_8TeV_eettbarviatau_8TeV_eettbarviatau/tree_8TeV_eettbarviatau.root" ;
+  eemcfiles << MCdir+"tree_8TeV_eettbar.root"
+    	    << MCdir+"tree_8TeV_eettbarviatau.root" ;
 
-  mumumcfiles <<"/scratch/hh/dust/naf/cms/user/diezcar/2012_Rel533/2012-10-08T17:25:31-naf_DOSS_tree_py_for_8TeV_mumuttbar_8TeV_mumuttbar/tree_8TeV_mumuttbar.root" 
-    	      <<"/scratch/hh/dust/naf/cms/user/diezcar/2012_Rel533/2012-10-08T17:25:32-naf_DOSS_tree_py_for_8TeV_mumuttbarviatau_8TeV_mumuttbarviatau/tree_8TeV_mumuttbarviatau.root" ;
+  mumumcfiles << MCdir+"tree_8TeV_mumuttbar.root" 
+    	      << MCdir+"tree_8TeV_mumuttbarviatau.root" ;
 
-  emumcfiles << "/scratch/hh/dust/naf/cms/user/kieseler/trees_8TeV_MC/tree_8TeV_emuttbar.root"
-    	     << "/scratch/hh/dust/naf/cms/user/diezcar/2012_Rel533/2012-10-08T17:25:32-naf_DOSS_tree_py_for_8TeV_emuttbarviatau_8TeV_emuttbarviatau/tree_8TeV_emuttbarviatau.root";
+  emumcfiles << MCdir+"tree_8TeV_emuttbar.root"
+    	     << MCdir+"tree_8TeV_emuttbarviatau.root";
 
   // changed back again  std::cout << "SET UP ONLY FOR DIRECT DECAY!!!!!!! this version is NOT checked in in cvs" << std::endl;
 
