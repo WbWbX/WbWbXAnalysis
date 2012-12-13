@@ -8,6 +8,7 @@
 #include "TPad.h"
 #include "TStyle.h"
 #include "TGraphAsymmErrors.h"
+#include "TtZAnalysis/Tools/interface/miscUtils.h"
 
 #include "TH2D.h"
 
@@ -46,6 +47,9 @@ void makeplot(TString inputfile, TString add){
   }
   else if(add=="vmulti"){
     h->GetXaxis()->SetTitle("n_{vtx}");
+  }
+  else if(add=="jetmulti"){
+    h->GetXaxis()->SetTitle("n_{jet}");
   }
 
   if(!add.Contains("2d")){
@@ -131,84 +135,23 @@ void miniscript(TString outdir){
   // TString dir="/afs/naf.desy.de/user/k/kieseler/public/forCarmen/latestgreatesttriggerplots3/";
   TString rootsdir=outdir;
 
+  std::vector<TString> channels, plots;
+  channels << "ee" << "mumu" << "emu" ;
+  plots << "pt" << "eta" << "dphi" << "dphi2" << "vmulti" << "jetmulti";
+
   TCanvas * c = new TCanvas("def","def");
   c->Clear();
   c->cd();
-  makeplot(rootsdir+"triggerSummary_ee.root", "pt");
-  c->Print(outdir+"corr_eept.pdf");
-  c->Print(outdir+"corr_eept.eps");
-  c->Clear();
-  // makeplot(rootsdir+"triggerSummary_ee.root","scalefactor eta2d");
-  // c->Print(outdir+"corr_eesfeta2d.pdf");
-  // c->Print(outdir+"corr_eesfeta2d.eps");
-  // c->Clear();
-  // makeplot(rootsdir+"triggerSummary_ee.root","eta2d eff");
-  // c->Print(outdir+"corr_eesfeta2d.pdf");
-  // c->Print(outdir+"corr_eesfeta2d.eps");
-  // c->Clear();
-  // makeplot(rootsdir+"triggerSummary_ee.root","eta2d effMC");
-  // c->Print(outdir+"corr_eesfeta2d.pdf");
-  // c->Print(outdir+"corr_eesfeta2d.eps");
-  // c->Clear();
 
-  makeplot(rootsdir+"triggerSummary_ee.root", "eta");
-  c->Print(outdir+"corr_eeeta.pdf");
-  c->Print(outdir+"corr_eeeta.eps");
-  c->Clear();
-  makeplot(rootsdir+"triggerSummary_ee.root", "dphi");
-  c->Print(outdir+"corr_eedphi.pdf");
-  c->Print(outdir+"corr_eedphi.eps");
-  c->Clear();
-  makeplot(rootsdir+"triggerSummary_ee.root", "dphi2");
-  c->Print(outdir+"corr_eedphi2.pdf");
-  c->Print(outdir+"corr_eedphi2.eps");
-  c->Clear();
-  makeplot(rootsdir+"triggerSummary_ee.root", "vmulti");
-  c->Print(outdir+"corr_eevmulti.pdf");
-  c->Print(outdir+"corr_eevmulti.eps");
-  c->Clear();
-
-  makeplot(rootsdir+"triggerSummary_mumu.root", "pt");
-  c->Print(outdir+"corr_mumupt.pdf");
-  c->Print(outdir+"corr_mumupt.eps");
-  c->Clear();
-  makeplot(rootsdir+"triggerSummary_mumu.root", "eta");
-  c->Print(outdir+"corr_mumueta.pdf");
-  c->Print(outdir+"corr_mumueta.eps");
-  c->Clear();
-  makeplot(rootsdir+"triggerSummary_mumu.root", "dphi");
-  c->Print(outdir+"corr_mumudphi.pdf");
-  c->Print(outdir+"corr_mumudphi.eps");
-  c->Clear();
-  makeplot(rootsdir+"triggerSummary_mumu.root", "dphi2");
-  c->Print(outdir+"corr_mumudphi2.pdf");
-  c->Print(outdir+"corr_mumudphi2.eps");
-  c->Clear();
-  makeplot(rootsdir+"triggerSummary_mumu.root", "vmulti");
-  c->Print(outdir+"corr_mumuvmulti.pdf");
-  c->Print(outdir+"corr_mumuvmulti.eps");
-  c->Clear();
-
-  makeplot(rootsdir+"triggerSummary_emu.root", "pt");
-  c->Print(outdir+"corr_emupt.pdf");
-  c->Print(outdir+"corr_emupt.eps");
-  c->Clear();
-  makeplot(rootsdir+"triggerSummary_emu.root", "eta");
-  c->Print(outdir+"corr_emueta.pdf");
-  c->Print(outdir+"corr_emueta.eps");
-  c->Clear();
-  makeplot(rootsdir+"triggerSummary_emu.root", "dphi");
-  c->Print(outdir+"corr_emudphi.pdf");
-  c->Print(outdir+"corr_emudphi.eps");
-  c->Clear();
-  makeplot(rootsdir+"triggerSummary_emu.root", "dphi2");
-  c->Print(outdir+"corr_emudphi2.pdf");
-  c->Print(outdir+"corr_emudphi2.eps");
-  c->Clear();
-  makeplot(rootsdir+"triggerSummary_emu.root", "vmulti");
-  c->Print(outdir+"corr_emuvmulti.pdf");
-  c->Print(outdir+"corr_emuvmulti.eps");
-  c->Clear();
+  for(unsigned int i=0;i<channels.size();i++){
+    for(unsigned int j=0;j<plots.size();j++){
+      makeplot(rootsdir+"triggerSummary_"+channels.at(i)+".root", plots.at(j));
+      c->Print(outdir+"corr_"+channels.at(i)+plots.at(j)+".pdf");
+      c->Print(outdir+"corr_"+channels.at(i)+plots.at(j)+".eps");
+      c->Clear();
+    }
+  }
+  
 
 
 }

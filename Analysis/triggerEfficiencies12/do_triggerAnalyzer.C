@@ -18,6 +18,7 @@
 #include "makeplotsnice.h"
 #include "TtZAnalysis/Tools/interface/container.h"
 #include "TtZAnalysis/Tools/interface/miscUtils.h"
+#include <map>
 
 using namespace std;
 
@@ -32,7 +33,8 @@ bool useRhoIso=false;
 double jetptcut=30;
 
 bool breakat5fb=false;
-bool checktriggerpaths=true;
+bool checktriggerpaths=false;
+bool coutalltriggerpaths=true;
 
 class triggerAnalyzer{
 
@@ -59,10 +61,12 @@ public:
   top::container1D  getCorrelationEta(){return correta_;}
   top::container1D getDPhiPlot(){return dphieff_;}
   top::container1D getVmultiPlot(){return vmultieff_;}
+  top::container1D getJetmultiPlot(){return jetmultieff_;}
   top::container1D getDPhiPlot2(){return dphieff2_;}
   top::container1D getCorrelationDPhi(){return corrdphi_;}
   top::container1D getCorrelationDPhi2(){return corrdphi2_;}
   top::container1D getCorrelationVmulti(){return corrvmulti_;}
+  top::container1D getCorrelationJetmulti(){return corrjetmulti_;}
 
   TH2D getEta2D(){return eta_2dim;}
 
@@ -237,12 +241,13 @@ notinMCtriggers.push_back("DiCentralPFJet");
     //  TDirectory * histdir=new TDirectory(mode+MCadd);
     //  histdir->cd();
 
-    vector<float> dphi,vmulti;
+    vector<float> dphi,vmulti,jetmulti;
 
     for(float i=0;i<=10;i++){
       dphi.push_back(2*3.1415 * i/10);
     }
     for(float i=0;i<50;i++) vmulti << i;
+    for(float i=-0.5;i<8.5;i++) jetmulti << i;
 
     container1D c_pteff  = container1D(binspt_);
     container1D c_etaeff = container1D(binseta_);
@@ -270,6 +275,14 @@ notinMCtriggers.push_back("DiCentralPFJet");
     container1D c_selmettrigvmulti = container1D(vmulti);
     container1D c_selbothtrigvmulti = container1D(vmulti);
     container1D c_corrvmulti = container1D(vmulti);
+
+
+    container1D c_jetmultieff = container1D(jetmulti);
+    container1D c_seljetmulti = container1D(jetmulti);
+    container1D c_trigjetmulti = container1D(jetmulti);
+    container1D c_selmettrigjetmulti = container1D(jetmulti);
+    container1D c_selbothtrigjetmulti = container1D(jetmulti);
+    container1D c_corrjetmulti = container1D(jetmulti);
 
     container1D c_dphieff2 = container1D(dphi);
     container1D c_seldphi2 = container1D(dphi);
@@ -374,7 +387,7 @@ notinMCtriggers.push_back("DiCentralPFJet");
   float n = t1->GetEntries(); //299569 for ttbaree
   // if(maxEntries!=0)
   //  n=min(maxEntries,n);
-  cout << n << endl;
+  cout  << "Entries in tree: " << n << endl;
 
 
   pair<string,double> dilepton("dilepton", 0);
@@ -413,7 +426,8 @@ notinMCtriggers.push_back("DiCentralPFJet");
   sel_BothTrig.push_back(twoJets);
   sel_BothTrig.push_back(met);
 
-  vector<pair<TString, int> >triggersummary;
+  vector<pair<TString, int > >triggersummary;
+ 
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -430,7 +444,8 @@ notinMCtriggers.push_back("DiCentralPFJet");
 	 break;
        }
      }
-
+    if(i==n-1) std::cout << "last run number: " << pEvent->runNo() << std::endl;
+   
     bool firedDilepTrigger=false;
     bool firedMet=false;
     bool b_dilepton=false;
@@ -450,19 +465,7 @@ notinMCtriggers.push_back("DiCentralPFJet");
     trigs=pEvent->firedTriggers();
     for(unsigned int trigit=0;trigit<trigs.size();trigit++){
       TString trig=trigs[trigit];
-      bool newtrigger=false;
-      if(trig.Contains("MET")){
-	newtrigger=true;
-	for(unsigned int J=0; J<triggersummary.size();J++){
-	  if(triggersummary[J].first == trig){
-	    newtrigger=false;
-	    triggersummary[J].second++;
-	  }
-	}
-      }
-      pair<TString, int> temppair;
-      temppair.first = trig; temppair.second = 1;
-      if(newtrigger) triggersummary.push_back(temppair);
+      
 
       if(isMC){
 	for(unsigned int ctrig=0;ctrig<dileptriggersMC.size(); ctrig++){
@@ -477,7 +480,21 @@ notinMCtriggers.push_back("DiCentralPFJet");
 	    break;
 	  }
 	}
+	bool newtrigger=false;
+	if(trig.Contains("MET")){
+	  newtrigger=true;
+	  for(unsigned int J=0; J<triggersummary.size();J++){
+	    if(triggersummary[J].first == trig){
+	      newtrigger=false;
+	      triggersummary[J].second++;
+	    }
+	  }
+	}
+	pair<TString, int> temppair;
+	temppair.first = trig; temppair.second =1;
+	if(newtrigger) triggersummary.push_back(temppair);
       }
+
       else{
 	for(unsigned int ctrig=0;ctrig<dileptriggers.size(); ctrig++){
 	  if(trig.Contains(dileptriggers[ctrig].first) && pEvent->runNo() < dileptriggers[ctrig].second){
@@ -492,6 +509,7 @@ notinMCtriggers.push_back("DiCentralPFJet");
 	  }
 	}
       }
+
     }
     if(!isMC && !firedMet) continue;
 
@@ -555,8 +573,10 @@ notinMCtriggers.push_back("DiCentralPFJet");
 	b_dilepton=true;
     }
 
+    if(!b_dilepton) continue; ///////////
 
-
+    /////////trigger check/////////
+    
     ////////////////dilepton selection
     if((mode == "mumu" || mode=="ee" ) && (mass > 106 || mass < 76)) b_ZVeto=true;
     if(mode=="emu")  b_ZVeto=true;
@@ -565,7 +585,7 @@ notinMCtriggers.push_back("DiCentralPFJet");
     for(vector<NTJet>::iterator jet=pJets->begin();jet<pJets->end();jet++){
       if(jet->pt() < jetptcut) continue;
       if(fabs(jet->eta()) >2.5) continue;
-      if(!noOverlap(jet,selectedMuons,0.3)) continue; //cleaning
+      if(!noOverlap(jet,selectedMuons,0.3)) continue; //cleaning  ##TRAP## changed to 0.4 /doesn't matter for final eff
       if(!noOverlap(jet,selectedElecs,0.3)) continue;
       if((!jet->id())) continue;
 
@@ -584,6 +604,7 @@ notinMCtriggers.push_back("DiCentralPFJet");
     if(b_dilepton){
       sel_woTrig[0].second      +=puweight;
       c_selvmulti.fill(pEvent->vertexMulti() ,puweight);
+      c_seljetmulti.fill(selected_jets.size() ,puweight);
       if(mode=="ee"){
 	c_selpt.fill(selectedElecs[0].pt(),puweight);
 	c_selpt.fill(selectedElecs[1].pt(),puweight);
@@ -592,7 +613,7 @@ notinMCtriggers.push_back("DiCentralPFJet");
 	c_seldphi.fill(fabs(selectedElecs[0].phi() - pMet->phi()),puweight);
 	c_seldphi2.fill(fabs(selectedElecs[1].phi() - pMet->phi()),puweight);
 
-	eta_2dimsel.Fill(selectedElecs[0].eta(),selectedElecs[1].eta(),puweight);
+	eta_2dimsel.Fill(fabs(selectedElecs[0].eta()),fabs(selectedElecs[1].eta()),puweight);
 
       }
       else if(mode=="mumu"){
@@ -603,7 +624,7 @@ notinMCtriggers.push_back("DiCentralPFJet");
 	c_seldphi.fill(fabs(selectedMuons[0].phi() - pMet->phi()),puweight);
 	c_seldphi2.fill(fabs(selectedMuons[1].phi() - pMet->phi()),puweight);
 
-	eta_2dimsel.Fill(selectedMuons[0].eta(),selectedMuons[1].eta(),puweight);
+	eta_2dimsel.Fill(fabs(selectedMuons[0].eta()),fabs(selectedMuons[1].eta()),puweight);
 
       }
       else if(mode =="emu"){
@@ -614,7 +635,7 @@ notinMCtriggers.push_back("DiCentralPFJet");
 	c_seldphi.fill(fabs(selectedElecs[0].phi() - pMet->phi()),puweight);
 	c_seldphi2.fill(fabs(selectedMuons[0].phi() - pMet->phi()),puweight);
 
-	eta_2dimsel.Fill(selectedElecs[0].eta(),selectedMuons[0].eta(),puweight);
+	eta_2dimsel.Fill(fabs(selectedElecs[0].eta()),fabs(selectedMuons[0].eta()),puweight);
 
       }
     }
@@ -627,6 +648,7 @@ notinMCtriggers.push_back("DiCentralPFJet");
     if(b_dilepton){
       sel_Trig[0].second  +=puweight;
       c_trigvmulti.fill(pEvent->vertexMulti() ,puweight);
+      c_trigjetmulti.fill(selected_jets.size() ,puweight);
       if(mode=="ee"){
 	c_trigpt.fill(selectedElecs[0].pt(),puweight);
 	c_trigpt.fill(selectedElecs[1].pt(),puweight);
@@ -635,7 +657,7 @@ notinMCtriggers.push_back("DiCentralPFJet");
 	c_trigdphi.fill(fabs(selectedElecs[0].phi() - pMet->phi()),puweight);
 	c_trigdphi2.fill(fabs(selectedElecs[1].phi() - pMet->phi()),puweight);
 
-	eta_2dimtrig.Fill(selectedElecs[0].eta(),selectedElecs[1].eta(),puweight);
+	eta_2dimtrig.Fill(fabs(selectedElecs[0].eta()),fabs(selectedElecs[1].eta()),puweight);
       }
       else if(mode=="mumu"){
 	c_trigpt.fill(selectedMuons[0].pt(),puweight);
@@ -645,7 +667,7 @@ notinMCtriggers.push_back("DiCentralPFJet");
 	c_trigdphi.fill(fabs(selectedMuons[0].phi() - pMet->phi()),puweight);
 	c_trigdphi2.fill(fabs(selectedMuons[1].phi() - pMet->phi()),puweight);
 
-	eta_2dimtrig.Fill(selectedMuons[0].eta(),selectedMuons[1].eta(),puweight);
+	eta_2dimtrig.Fill(fabs(selectedMuons[0].eta()),fabs(selectedMuons[1].eta()),puweight);
 
       }
       else if(mode =="emu"){
@@ -656,7 +678,7 @@ notinMCtriggers.push_back("DiCentralPFJet");
 	c_trigdphi.fill(fabs(selectedElecs[0].phi() - pMet->phi()),puweight);
 	c_trigdphi2.fill(fabs(selectedMuons[0].phi() - pMet->phi()),puweight);
 
-	eta_2dimtrig.Fill(selectedElecs[0].eta(),selectedMuons[0].eta(),puweight);
+	eta_2dimtrig.Fill(fabs(selectedElecs[0].eta()),fabs(selectedMuons[0].eta()),puweight);
 
       }
 
@@ -671,6 +693,7 @@ notinMCtriggers.push_back("DiCentralPFJet");
   if(firedMet){
     if(b_dilepton){
       c_selmettrigvmulti.fill(pEvent->vertexMulti() ,puweight);
+      c_selmettrigjetmulti.fill(selected_jets.size() ,puweight);
       if(mode=="ee"){
 
 	c_selmettrigpt.fill(selectedElecs[0].pt(),puweight);
@@ -709,6 +732,7 @@ notinMCtriggers.push_back("DiCentralPFJet");
   if(firedMet && firedDilepTrigger){
     if(b_dilepton){
       c_selbothtrigvmulti.fill(pEvent->vertexMulti() ,puweight);
+      c_selbothtrigjetmulti.fill(selected_jets.size() ,puweight);
       if(mode=="ee"){
 	c_selbothtrigpt.fill(selectedElecs[0].pt(),puweight);
 	c_selbothtrigpt.fill(selectedElecs[1].pt(),puweight);
@@ -783,6 +807,15 @@ notinMCtriggers.push_back("DiCentralPFJet");
 ////////////////////////////////////check MC triggers
 
 /// show contribution of each trigger in data
+
+
+  if(coutalltriggerpaths){
+    cout << "all triggers containing MET" << endl;
+    for(unsigned int i=0;i<triggersummary.size();i++){
+      cout << triggersummary[i].first << "\" << ";
+    }
+    cout << endl;
+  }
 
   if(checktriggerpaths){
     
@@ -865,6 +898,8 @@ notinMCtriggers.push_back("DiCentralPFJet");
 
   c_vmultieff = c_trigvmulti / c_selvmulti;
 
+  c_jetmultieff = c_trigjetmulti / c_seljetmulti;
+  
 
   eta_2dim= divideTH2DBinomial(eta_2dimtrig,eta_2dimsel);
   eta_2dim.GetXaxis()->SetTitle("#eta");
@@ -881,6 +916,7 @@ notinMCtriggers.push_back("DiCentralPFJet");
   c_corrdphi2 = (c_dphieff2 * (c_selmettrigdphi2/c_seldphi2))/(c_selbothtrigdphi2/c_seldphi2);
 
   c_corrvmulti = (c_vmultieff * (c_selmettrigvmulti/c_selvmulti))/(c_selbothtrigvmulti/c_selvmulti);
+c_corrjetmulti = (c_jetmultieff * (c_selmettrigjetmulti/c_seljetmulti))/(c_selbothtrigjetmulti/c_seljetmulti);
 
   std::cout << "stop ignoring warning ;)" << std::endl;
 
@@ -889,17 +925,20 @@ notinMCtriggers.push_back("DiCentralPFJet");
   dphieff_=c_dphieff;
   dphieff2_=c_dphieff2;
   vmultieff_=c_vmultieff;
+  jetmultieff_=c_jetmultieff;
   correta_=c_correta;
   corrpt_=c_corrpt;
   corrdphi_=c_corrdphi;
   corrdphi2_=c_corrdphi2;
   corrvmulti_=c_corrvmulti;
+  corrjetmulti_=c_corrjetmulti;
 
   etaeff_.setDivideBinomial(false);
   pteff_.setDivideBinomial(false);
   dphieff_.setDivideBinomial(false);
   dphieff2_.setDivideBinomial(false);
   vmultieff_.setDivideBinomial(false);
+  jetmultieff_.setDivideBinomial(false);
 
   return output;
 
@@ -931,14 +970,17 @@ notinMCtriggers.push_back("DiCentralPFJet");
     vmultieff_.writeTGraph("vmulti eff"+add,false);
     vmultieff_.writeTH1D("axis vmulti",false);
 
+    jetmultieff_.writeTGraph("jetmulti eff"+add,false);
+    jetmultieff_.writeTH1D("axis jetmulti",false);
+
     correta_.writeTGraph("correta"+add,false);
     corrpt_.writeTGraph("corrpt"+add,false);
 
     corrdphi_.writeTGraph("corrdphi"+add,false);
     corrdphi2_.writeTGraph("corrdphi2"+add,false);
 
-
     corrvmulti_.writeTGraph("corrvmulti"+add,false);
+    corrjetmulti_.writeTGraph("corrvmulti"+add,false);
 
   }
 
@@ -955,6 +997,8 @@ private:
   top::container1D vmultieff_;
   top::container1D corrdphi_;
   top::container1D corrvmulti_;
+  top::container1D jetmultieff_;
+  top::container1D corrjetmulti_;
   top::container1D dphieff2_;
   top::container1D corrdphi2_;
   bool isMC;
@@ -1000,13 +1044,12 @@ void analyze(){
   TString datadir="/scratch/hh/dust/naf/cms/user/kieseler/trees_8TeV_ES/";
 
   std::vector<TString> datafiles;
-  datafiles << datadir + "tree_8TeV_MET_runA_06Aug.root" 
-	    << datadir + "tree_8TeV_MET_runA_13Jul.root" 
-	    << datadir + "tree_8TeV_MET_runB_13Jul.root" 
-	    << datadir + "tree_8TeV_MET_runC_24Aug.root" 
-	    << datadir + "tree_8TeV_MET_runC_prompt.root";
-
-  //const char * datafile = "/scratch/hh/dust/naf/cms/user/kieseler/trees0724/tree_8TeV_met_runAB_prompt.root";
+  datafiles  << datadir + "tree_8TeV_MET_runA_06Aug.root" 
+	     << datadir + "tree_8TeV_MET_runA_13Jul.root" 
+	     << datadir + "tree_8TeV_MET_runB_13Jul.root" 
+	     << datadir + "tree_8TeV_MET_runC_24Aug.root" 
+	     << datadir + "tree_8TeV_MET_runC_prompt.root";
+ 
 
   const char * pileuproot = "/scratch/hh/dust/naf/cms/user/kieseler/GridControl_workingDir/dontdel_MET_24Oct/HCP_PU.root";//HCP_PU.root";//HCP_5.3fb_PU.root";
 
@@ -1176,6 +1219,18 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
   scalefactor.writeTH1D("TH scalefactor vmulti incl corrErr",false);
 
 
+  data=ta_eed.getJetmultiPlot();
+  MC=ta_eeMC.getJetmultiPlot();
+  data.setDivideBinomial(false);
+  MC.setDivideBinomial(false);
+  scalefactor=data/MC;
+  scalefactor.addGlobalRelError("rel_sys",0.01);
+  scalefactor.writeTGraph("scalefactor jetmulti",false);
+  scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_eeMC.getCorrelationJetmulti(),ratiomultiplier);
+  scalefactor.writeTGraph("scalefactor jetmulti incl corrErr",false);
+  scalefactor.writeTH1D("TH scalefactor jetmulti incl corrErr",false);
+
+
 
   f5->Close();
 
@@ -1246,6 +1301,17 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
   scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_mumuMC.getCorrelationVmulti(),ratiomultiplier);
   scalefactor.writeTGraph("scalefactor vmulti incl corrErr",false);
   scalefactor.writeTH1D("TH scalefactor vmulti incl corrErr",false);
+
+  data=ta_mumud.getJetmultiPlot();
+  MC=ta_mumuMC.getJetmultiPlot();
+  data.setDivideBinomial(false);
+  MC.setDivideBinomial(false);
+  scalefactor=data/MC;
+  scalefactor.addGlobalRelError("rel_sys",0.01);
+  scalefactor.writeTGraph("scalefactor jetmulti",false);
+  scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_mumuMC.getCorrelationJetmulti(),ratiomultiplier);
+  scalefactor.writeTGraph("scalefactor jetmulti incl corrErr",false);
+  scalefactor.writeTH1D("TH scalefactor jetmulti incl corrErr",false);
 
   f6->Close();
 
@@ -1318,6 +1384,17 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
   scalefactor.writeTGraph("scalefactor vmulti incl corrErr",false);
   scalefactor.writeTH1D("TH scalefactor vmulti incl corrErr",false);
 
+
+  data=ta_emud.getJetmultiPlot();
+  MC=ta_emuMC.getJetmultiPlot();
+  data.setDivideBinomial(false);
+  MC.setDivideBinomial(false);
+  scalefactor=data/MC;
+  scalefactor.addGlobalRelError("rel_sys",0.01);
+  scalefactor.writeTGraph("scalefactor jetmulti",false);
+  scalefactor.addErrorContainer("corr_ratio_up",scalefactor*ta_emuMC.getCorrelationJetmulti(),ratiomultiplier);
+  scalefactor.writeTGraph("scalefactor jetmulti incl corrErr",false);
+  scalefactor.writeTH1D("TH scalefactor jetmulti incl corrErr",false);
 
   f7->Close();
 
