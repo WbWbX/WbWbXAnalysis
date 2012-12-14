@@ -1,0 +1,356 @@
+#ifndef CORRELATIONCHECKER_H
+#define CORRELATIONCHECKER_H
+
+#include <vector>
+#include "TString.h"
+#include "TtZAnalysis/Tools/interface/miscUtils.h"
+#include "TtZAnalysis/DataFormats/interface/NTMuon.h"
+#include "TtZAnalysis/DataFormats/interface/NTElectron.h"
+#include "TtZAnalysis/DataFormats/interface/NTEvent.h"
+#include "TtZAnalysis/DataFormats/interface/NTJet.h"
+#include "TtZAnalysis/DataFormats/interface/NTMet.h"
+
+#include <iostream>
+#include "TFile.h"
+#include "TTree.h"
+#include "TChain.h"
+
+//vector with triggers to be checked
+//check function
+//output
+// MC input trees (vector<TString> and then add to chain)
+
+namespace top{
+
+
+  class correlationChecker{
+  private:
+    std::vector<TString> checkdiltriggers_;
+    std::vector<TString> checkmettriggers_;
+    std::vector<TString> inputfiles_;
+    TString mode_;
+
+  public:
+
+    TString whichelectrons;
+
+    correlationChecker(TString mode=""){mode_=mode; whichelectrons="NTPFElectrons";};
+    ~correlationChecker(){};
+    std::vector<TString> & dileptonTriggers(){return checkdiltriggers_;}
+    std::vector<TString> & crossTriggers(){return checkmettriggers_;}
+    std::vector<TString> & inputfiles(){return inputfiles_;}
+
+    TChain * makeChain(std::vector<TString> paths){
+      TChain * chain = new TChain(paths[0]);
+      for(std::vector<TString>::iterator path=paths.begin();path<paths.end();++path){
+	chain->Add((*path)+"/PFTree/pfTree");
+	std::cout << "added " << *path << " to chain." << std::endl;
+      }
+      return chain;
+    }
+    ///////////////
+    void getCorrelations(TString mode=""){
+
+      if(mode=="") mode=mode_;
+
+      using namespace std;
+      using namespace top;
+
+      cout << "\nchecking " << checkmettriggers_.size() << " in total" <<endl;
+
+      bool useRhoIso=false;
+
+      cout << "warning! no PU corrections applied here. Use numbers only for first estimate!!!\n" <<endl;
+      TChain * t1 = makeChain(inputfiles_);
+
+      vector<NTMuon> * pMuons = 0;
+      t1->SetBranchAddress("NTMuons",&pMuons); 
+      vector<NTElectron> * pElectrons = 0;
+      t1->SetBranchAddress(whichelectrons,&pElectrons); 
+      vector<NTJet> * pJets = 0;
+      t1->SetBranchAddress("NTJets",&pJets); 
+      NTMet * pMet = 0;
+      t1->SetBranchAddress("NTMet",&pMet); 
+      NTEvent * pEvent = 0;
+      t1->SetBranchAddress("NTEvent",&pEvent); 
+
+      float n = t1->GetEntries();
+
+      vector<double> metfired,dilfired,bothfired;
+      for(unsigned int i=0;i<checkmettriggers_.size();i++){
+	metfired  << 0;
+	dilfired  << 0;
+	bothfired << 0;
+      }
+      double dileptonevents=0;
+
+      for(float i=0;i<n;i++){  //main loop
+
+	t1->GetEntry(i);
+	displayStatusBar(i,n);
+
+	if(pEvent->vertexMulti() <1) continue;
+	if(mode=="ee" && pElectrons->size()<2) continue;
+	if(mode=="mumu" && pMuons->size()<2) continue;
+
+	//dilepton preselection ////////////////////
+	bool b_dilepton=false;
+	double puweight=1;
+
+	vector<NTMuon> selectedMuons;
+	for(vector<top::NTMuon>::iterator muon=pMuons->begin();muon<pMuons->end();muon++){
+	  if(!(fabs(muon->eta())<2.4) ) continue;
+	  if(!(muon->pt() >20))   continue;
+	  if(!(muon->isGlobal() || muon->isTracker()) ) continue;
+	  //  if(muon->trkHits()<3) continue;
+	  //  if(muon->trkHits() <= 5 ) continue;
+	  // if(muon->muonHits() <1) continue;
+	  // if(muon->dbs()> 0.2) continue;
+	  if(muon->isoVal04() > 0.2 ) continue;
+	  //  if(muon->normChi2() >10) continue;
+	  selectedMuons.push_back(*muon);
+	}
+	if(mode == "mumu" && selectedMuons.size() < 2) continue;
+
+	vector<NTElectron> selectedElecs;
+	for(vector<NTElectron>::iterator elec=pElectrons->begin();elec<pElectrons->end();elec++){
+	  if(elec->pt()<20 ) continue;
+	  if(fabs(elec->eta())>2.5 ) continue;
+	  if(fabs(elec->dbs()) >0.04 ) continue;
+	  if(!(elec->isNotConv()) ) continue;
+	  if(useRhoIso && elec->rhoIso03()>0.15 ) continue;
+	  if(!useRhoIso && elec->isoVal03()>0.15) continue;
+	  //  if(CiCId && (0x00 == (0x01 & (int) elec->id("cicTightMC"))) ) continue; //for CiC bit test
+	  if(elec->mvaId() < -0.1) continue;
+	  if(!noOverlap(elec,*pMuons,0.1)) continue;
+
+	  selectedElecs.push_back(*elec);
+	}
+	double mass=0;
+	if(mode=="ee"){
+	  if(selectedElecs.size() <2) continue;
+	  if(selectedElecs[0].q() == selectedElecs[1].q()) continue;
+	  mass=(selectedElecs[0].p4() + selectedElecs[1].p4()).M();
+	  if(mass > 20)
+	    b_dilepton=true;
+	}
+
+	if(mode=="mumu"){
+	  if(selectedMuons.size() < 2) continue;
+	  if(selectedMuons[0].q() == selectedMuons[1].q()) continue;
+	  mass=(selectedMuons[0].p4() + selectedMuons[1].p4()).M();
+	  if(mass > 20) 
+	    b_dilepton=true;
+	}
+
+	if(mode=="emu"){
+	  if(selectedMuons.size() < 1 || selectedElecs.size() < 1) continue;
+	  if(selectedMuons[0].q() * selectedElecs[0].q() == 1) continue;
+	  mass=(selectedMuons[0].p4() + selectedElecs[0].p4()).M();
+	  if(mass > 20) 
+	    b_dilepton=true;
+	}
+
+	if(!b_dilepton) continue; ///////////////////////
+	dileptonevents+=puweight;
+
+	/////////check triggers/////////
+
+	vector<string> trigs;
+	trigs=pEvent->firedTriggers();
+	bool dilfired_b=false;
+
+	//dilepton trigger
+	for(unsigned int etrigit=0;etrigit<trigs.size();etrigit++){
+	  for(unsigned int dtrigit=0;dtrigit<checkdiltriggers_.size();dtrigit++){
+	    if(((TString)trigs.at(etrigit)).Contains(checkdiltriggers_.at(dtrigit))){
+	      dilfired_b=true;
+	      break;
+	    }
+	  }
+	  for(unsigned int ctrigit=0;ctrigit<checkmettriggers_.size();ctrigit++){
+	    if(dilfired_b) dilfired.at(ctrigit) += puweight;
+	  }
+	  if(dilfired_b) break;
+	}
+	/////and met triggers
+	for(unsigned int etrigit=0;etrigit<trigs.size();etrigit++){
+	  for(unsigned int ctrigit=0;ctrigit<checkmettriggers_.size();ctrigit++){
+	    if(((TString)trigs.at(etrigit)).Contains(checkmettriggers_.at(ctrigit))){
+	      metfired.at(ctrigit) += puweight;
+	      // cout << "bla" << endl;
+	      if(dilfired_b) bothfired.at(ctrigit) += puweight;
+	      break;
+	    }
+	  }
+	}
+
+      }//main loop
+      cout << endl;
+
+      //  cout << dileptonevents << endl;
+
+      vector<double> ratios;
+      vector<double> ratioerrs;
+      vector<double> signif;
+
+      for(unsigned int ctrig=0;ctrig<checkmettriggers_.size();ctrig++){
+	//	cout << checkmettriggers_.at(ctrig) <<endl;
+	double ratio = (metfired.at(ctrig) * dilfired.at(ctrig))/(bothfired.at(ctrig) * dileptonevents);
+	double err= 1/sqrt(bothfired.at(ctrig));
+        ratios << ratio;
+	ratioerrs << err;
+	signif << fabs(1-ratio)*err;
+      }
+      vector<unsigned int> order=getOrderAscending(signif);
+
+      cout <<"\n\nList of triggers:\n\n" <<endl;
+
+      cout.precision(4);
+      for(unsigned int i=0;i<order.size();i++){
+	unsigned int it=order.at(i);
+	cout << "sig: " << signif.at(it)
+	     << "\tR: " << ratios.at(it)
+	     << "\tRerr: " << ratioerrs.at(it)
+	     << "\t" << checkmettriggers_.at(it) << endl;
+
+      }
+    }
+
+    void getTriggers(TString restr, TString mode=""){
+      if(mode=="") mode=mode_;
+
+      using namespace std;
+      using namespace top;
+
+      map<TString, double> triggerlist;
+
+      cout << "\ngetting triggers with dilepton contribution restricted to " << restr <<endl;
+
+      bool useRhoIso=false;
+
+      cout << "warning! no PU corrections applied here. Use numbers only for first estimate!!!\n" <<endl;
+      TChain * t1 = makeChain(inputfiles_);
+
+      vector<NTMuon> * pMuons = 0;
+      t1->SetBranchAddress("NTMuons",&pMuons); 
+      vector<NTElectron> * pElectrons = 0;
+      t1->SetBranchAddress(whichelectrons,&pElectrons); 
+      vector<NTJet> * pJets = 0;
+      t1->SetBranchAddress("NTJets",&pJets); 
+      NTMet * pMet = 0;
+      t1->SetBranchAddress("NTMet",&pMet); 
+      NTEvent * pEvent = 0;
+      t1->SetBranchAddress("NTEvent",&pEvent); 
+
+      float n = t1->GetEntries();
+
+      vector<double> metfired,dilfired,bothfired;
+      for(unsigned int i=0;i<checkmettriggers_.size();i++){
+	metfired  << 0;
+	dilfired  << 0;
+	bothfired << 0;
+      }
+      double dileptonevents=0;
+
+      for(float i=0;i<n;i++){  //main loop
+
+	t1->GetEntry(i);
+	displayStatusBar(i,n);
+
+	if(pEvent->vertexMulti() <1) continue;
+	if(mode=="ee" && pElectrons->size()<2) continue;
+	if(mode=="mumu" && pMuons->size()<2) continue;
+
+	//dilepton preselection ////////////////////
+	bool b_dilepton=false;
+	double puweight=1;
+
+	vector<NTMuon> selectedMuons;
+	for(vector<top::NTMuon>::iterator muon=pMuons->begin();muon<pMuons->end();muon++){
+	  if(!(fabs(muon->eta())<2.4) ) continue;
+	  if(!(muon->pt() >20))   continue;
+	  if(!(muon->isGlobal() || muon->isTracker()) ) continue;
+	  //  if(muon->trkHits()<3) continue;
+	  //  if(muon->trkHits() <= 5 ) continue;
+	  // if(muon->muonHits() <1) continue;
+	  // if(muon->dbs()> 0.2) continue;
+	  if(muon->isoVal04() > 0.2 ) continue;
+	  //  if(muon->normChi2() >10) continue;
+	  selectedMuons.push_back(*muon);
+	}
+	if(mode == "mumu" && selectedMuons.size() < 2) continue;
+
+	vector<NTElectron> selectedElecs;
+	for(vector<NTElectron>::iterator elec=pElectrons->begin();elec<pElectrons->end();elec++){
+	  if(elec->pt()<20 ) continue;
+	  if(fabs(elec->eta())>2.5 ) continue;
+	  if(fabs(elec->dbs()) >0.04 ) continue;
+	  if(!(elec->isNotConv()) ) continue;
+	  if(useRhoIso && elec->rhoIso03()>0.15 ) continue;
+	  if(!useRhoIso && elec->isoVal03()>0.15) continue;
+	  //  if(CiCId && (0x00 == (0x01 & (int) elec->id("cicTightMC"))) ) continue; //for CiC bit test
+	  if(elec->mvaId() < -0.1) continue;
+	  if(!noOverlap(elec,*pMuons,0.1)) continue;
+
+	  selectedElecs.push_back(*elec);
+	}
+	double mass=0;
+	if(mode=="ee"){
+	  if(selectedElecs.size() <2) continue;
+	  if(selectedElecs[0].q() == selectedElecs[1].q()) continue;
+	  mass=(selectedElecs[0].p4() + selectedElecs[1].p4()).M();
+	  if(mass > 20)
+	    b_dilepton=true;
+	}
+
+	if(mode=="mumu"){
+	  if(selectedMuons.size() < 2) continue;
+	  if(selectedMuons[0].q() == selectedMuons[1].q()) continue;
+	  mass=(selectedMuons[0].p4() + selectedMuons[1].p4()).M();
+	  if(mass > 20) 
+	    b_dilepton=true;
+	}
+
+	if(mode=="emu"){
+	  if(selectedMuons.size() < 1 || selectedElecs.size() < 1) continue;
+	  if(selectedMuons[0].q() * selectedElecs[0].q() == 1) continue;
+	  mass=(selectedMuons[0].p4() + selectedElecs[0].p4()).M();
+	  if(mass > 20) 
+	    b_dilepton=true;
+	}
+
+	if(!b_dilepton) continue; ///////////////////////
+	vector<string> trigs;
+	trigs=pEvent->firedTriggers();
+
+
+	for(unsigned int etrigit=0;etrigit<trigs.size();etrigit++){
+	  if(((TString)trigs.at(etrigit)).Contains(restr)){
+	    triggerlist[trigs.at(etrigit)] +=puweight;
+	  }
+	}
+      }//
+      vector<TString> trigs;
+      vector<double> trigcontr;
+      for(map<TString,double>::iterator it=triggerlist.begin();it!=triggerlist.end();++it){
+	trigs << it->first;
+	trigcontr << it->second;
+      }
+      vector<unsigned int> order=getOrderAscending(trigcontr);
+      for(unsigned int i=order.size(); i>0 ;i--){
+	unsigned int it=order.at(i-1);
+	cout << trigcontr.at(it)
+	     << "\t"
+	     << trigs.at(it)
+	     << endl;
+      }
+      //and then sort by statistics or something
+    }
+
+  };
+
+
+}//namespace
+
+#endif
