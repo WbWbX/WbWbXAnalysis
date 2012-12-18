@@ -10,5 +10,6 @@ mkdir $dirstring
 cd $dirstring
 cp ../do_triggerAnalyzer.C .
 cp ../makeplotsnice.h .
+cp ../make2dplots.h .
 nohup root -l -b -q do_triggerAnalyzer.C++ > output.txt 
 echo "done with ${dirstring}"
