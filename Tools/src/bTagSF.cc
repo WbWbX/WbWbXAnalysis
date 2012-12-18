@@ -146,7 +146,7 @@ double bTagSF::getSF(std::vector<top::NTJet> & jets){
     top::NTJet jet=jets.at(jetiter);
 
     if(jet.genPartonFlavour() == 0)
-      return 1;
+      continue;
 
     double pt=jet.pt();
     double abs_eta=fabs(jet.eta());
@@ -253,9 +253,9 @@ void bTagSF::makeEffs(){
 	}
       }
     }
-    effhistp_->at(0).Write();
-    effhistp_->at(1).Write();
-    effhistp_->at(2).Write();
+    //  effhistp_->at(0).Write();
+    // effhistp_->at(1).Write();
+    // effhistp_->at(2).Write();
   }
 }
 
