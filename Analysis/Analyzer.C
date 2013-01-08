@@ -53,6 +53,9 @@ public:
   void setName(TString Name, TString additionalinfo){name_=Name;additionalinfo_=additionalinfo;analysisplots_->setName(Name);}
   void setLumi(double Lumi){lumi_=Lumi;}
 
+  void replaceInName(TString replace, TString with){name_.ReplaceAll(replace,with);}
+  TString getName(){return name_;}
+
   void analyze(TString, TString, int, double);
 
   void setFileList(const char* filelist){filelist_=filelist;}
@@ -143,7 +146,7 @@ void MainAnalyzer::start(){
 }
 
 MainAnalyzer::MainAnalyzer(const MainAnalyzer & analyzer){
-  name_=analyzer.name_+"_clone";
+  name_=analyzer.name_;
   lumi_=analyzer.lumi_;
   additionalinfo_=analyzer.additionalinfo_;
   dataname_=analyzer.dataname_;
@@ -204,6 +207,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   for(float i=-0.5;i<11.5;i++) selectionbins << i;
   vector<float> onebin;
   onebin << 0.5 << 1.5;
+
+  vector<float> bsfs;
+  for(float i=0;i<100;i++) bsfs << 0.9 + 0.3 * (i/100);
 
 
   //and so on
@@ -347,16 +353,17 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   container1D jeteta7(etabinsjets, "jet eta step 7", "#eta_{jet}","N_{jets}");
   container1D jeteta8(etabinsjets, "jet eta step 8", "#eta_{jet}","N_{jets}");
 
-  container1D met6u(ptbins, "missing transverse energie uncorr step 6","E_{T,miss} [GeV]", "N_{evt}");
-  container1D met6(ptbins, "missing transverse energie step 6","E_{T,miss} [GeV]", "N_{evt}");
-  container1D met7(ptbins, "missing transverse energie step 7","E_{T,miss} [GeV]", "N_{evt}");
-  container1D met8(ptbins, "missing transverse energie step 8","E_{T,miss} [GeV]", "N_{evt}");
-  container1D met9(ptbins, "missing transverse energie step 9","E_{T,miss} [GeV]", "N_{evt}");
+  container1D met6u(ptbins, "missing transverse energy uncorr step 6","E_{T,miss} [GeV]", "N_{evt}");
+  container1D met6(ptbins, "missing transverse energy step 6","E_{T,miss} [GeV]", "N_{evt}");
+  container1D met7(ptbins, "missing transverse energy step 7","E_{T,miss} [GeV]", "N_{evt}");
+  container1D met8(ptbins, "missing transverse energy step 8","E_{T,miss} [GeV]", "N_{evt}");
+  container1D met9(ptbins, "missing transverse energy step 9","E_{T,miss} [GeV]", "N_{evt}");
 
   container1D btagmulti7(multibinsbtag, "b-jet multiplicity step 7", "n_{b-tags}", "N_{jets}",true);
   container1D btagmulti8(multibinsbtag, "b-jet multiplicity step 8", "n_{b-tags}", "N_{jets}",true);
   container1D btagmulti9(multibinsbtag, "b-jet multiplicity step 9", "n_{b-tags}", "N_{jets}",true);
 
+  container1D btagScFs(bsfs, "b-tag event SFs", "SF_{evt}", "N_{evt}",true);
 
 
   container1D::c_makelist=false; //switch off automatic listing
@@ -442,6 +449,11 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   t->SetBranchAddress("NTMet",&pMet); 
   NTEvent * pEvent = 0;
   t->SetBranchAddress("NTEvent",&pEvent); 
+
+
+  // just for sync reasons
+
+  double sel_step[]={0,0,0,0,0,0,0,0,0};
     
   // start main loop /////////////////////////////////////////////////////////
   Long64_t nEntries=t->GetEntries();
@@ -450,6 +462,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     if(showstatusbar_) displayStatusBar(entry,nEntries);
     t->GetEntry(entry);
 
+    
+    //  if(!isMC && pEvent->runNo() > 196531) continue; // ##TRAP##
     
     double puweight;
     if(!isMC) puweight=1;
@@ -464,7 +478,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     for(NTElectronIt elec=pElectrons->begin();elec<pElectrons->end();++elec){
       if(elec->pt() < 20) continue;
       if(fabs(elec->eta()) > 2.5) continue;
-      //  if(!noOverlap(elec, *pMuons, 0.1)) continue;        //obsolete when using pfElectrons!!!! MAKE SURE ##TRAP##
+       if(!noOverlap(elec, *pMuons, 0.1)) continue;        //obsolete when using pfElectrons!!!! MAKE SURE ##TRAP##
 
       kinelectrons.push_back(*elec);
     }
@@ -479,11 +493,14 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       if(kinelectrons.size()< 2) continue; //has to be 17??!!
       if(is7TeV){
 	if(!(triggersContain("Ele17_SW_TightCaloEleId_Ele8_HE_L1R_v", pEvent) || triggersContain("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v", pEvent) || triggersContain("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v", pEvent))) continue;
-	
+	if(isMC) puweight= puweight * 0.992; //ONLY trigger #TRAP#
       }
       else{                           
 	if(isMC  && !triggersContain("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v" , pEvent) ) continue;
 	if(!isMC && !triggersContain("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v" , pEvent) ) continue;
+
+	if(isMC) puweight= puweight * 0.938; //full lep+id+trig SF from AN 12 389 ###TRAP##
+
       }
 
     }
@@ -501,11 +518,17 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 	    if(!triggersContain("HLT_Mu13_Mu8_v", pEvent)) continue;
 	  }
 	}
+	else{
+	  puweight= puweight * 0.946; //ONLY trigger!
+	}
 
       }
       else{
 	if(isMC &&  !(triggersContain("HLT_Mu17_Mu8_v",pEvent)  || triggersContain("HLT_Mu17_TkMu8_v",pEvent))) continue;
 	if(!isMC && !(triggersContain("HLT_Mu17_Mu8_v",pEvent)  || triggersContain("HLT_Mu17_TkMu8_v",pEvent))) continue;
+
+	if(isMC) puweight= puweight * 0.962; //full lep+id+trig SF from AN 12 389 ###TRAP###
+
       }
 
     }
@@ -544,6 +567,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     vertexmulti0.fill(pEvent->vertexMulti(),puweight);
     selection.fill(0,puweight);
 
+    sel_step[0]+=puweight;
 
     //////////two ID leptons STEP 1///////////////////////////////
 
@@ -569,6 +593,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
     vertexmulti1.fill(pEvent->vertexMulti(),puweight);
     selection.fill(1,puweight);
+
+    sel_step[1]+=puweight;
 
     //////// require two iso leptons  STEP 2  //////
 
@@ -617,6 +643,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     vertexmulti2.fill(pEvent->vertexMulti(),puweight);
     selection.fill(2,puweight);
 
+    sel_step[2]+=puweight;
 
     ///////// 20 GeV cut /// STEP 3 ///////////////////
 
@@ -679,6 +706,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     selection.fill(3,puweight);
 
     jetmulti3.fill(nolidjets.size(),puweight);
+
+    sel_step[3]+=puweight;
 
     ////////////////////Z Selection//////////////////
     bool isZrange=false;
@@ -749,6 +778,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       vertexmulti4.fill(pEvent->vertexMulti(),puweight);
       jetmulti4.fill(hardjets.size(),puweight);
       selection.fill(4,puweight);
+
+      sel_step[4]+=puweight;
       
     }
     if(isZrange){ //Z done above
@@ -784,6 +815,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       vertexmulti5.fill(pEvent->vertexMulti(),puweight);
       jetmulti5.fill(hardjets.size(),puweight);
       selection.fill(5,puweight);
+
+      sel_step[5]+=puweight;
 
     }
     if(isZrange){
@@ -831,6 +864,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       selection.fill(6,puweight);
       met6u.fill(pMet->met(),puweight);
       met6.fill(adjustedmet.met(), puweight);
+
+      sel_step[6]+=puweight;
     }
     if(isZrange){
       invmassZ6.fill(invLepMass,puweight);
@@ -878,12 +913,15 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       selection.fill(7, puweight);
       met7.fill(adjustedmet.met(), puweight);
       btagmulti7.fill(btaggedjets.size(),puweight);
+
+      sel_step[7]+=puweight;
     }
     if(isZrange){
       invmassZ7.fill(invLepMass,puweight);
     }
 
-    double bsf=getBTagSF()->getSF(hardjets);
+    double bsf=getBTagSF()->getSF(hardjets); // returns 1 for data!!!
+    btagScFs.fill(bsf, puweight);
     puweight= puweight * bsf;
 
     ///////////////////// btag cut STEP 8 //////////////////////////
@@ -918,6 +956,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       btagmulti8.fill(btaggedjets.size(),puweight);
 
       ttfinal_selection8.fill(1,puweight);
+      sel_step[8]+=puweight;
 
     }
     if(isZrange){
@@ -946,16 +985,26 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   // std::cout << "Filling containers to the Stack\n" << std::endl;
   getPlots()->addList(legendname,color,norm);
 
+  for(unsigned int i=0;i<9;i++){
+    std::cout << "selection step "<< toTString(i)<< " "  << sel_step[i];
+    if(i==3)
+      cout << "  => sync step 1";
+    if(i==4)
+      cout << "  => sync step 2";
+    if(i==6)
+      cout << "  => sync step 3";
+    if(i==7)
+      cout << "  => sync step 4";
+    if(i==8)
+      cout << "  => sync step 5";
+    std::cout  << std::endl;
+  }
 
   delete t;
   f->Close();
   delete f;
 
-TFile file = TFile("testbtag.root","UPDATE");
-file.ls();
   getBTagSF()->makeEffs();
-
-file.Close();
 
   
 
@@ -964,7 +1013,7 @@ file.Close();
 
 void Analyzer(){
   using namespace std;
-
+  using namespace top;
 
 
   cout << "\n\n\n" <<endl; //looks better ;)
@@ -990,323 +1039,220 @@ void Analyzer(){
     cout << "running locally" << endl;
     treedir="/Users/kiesej/CMS_data_nobk";
   }
+
+  //prepare defaults and get btag SF
   
-  MainAnalyzer analyzermumu("8TeV_default_mumu","mumu");
-  analyzermumu.setShowStatusBar(runInNotQuietMode);  //for running with text output mode
-  analyzermumu.setLumi(lumi8TeV);
-  analyzermumu.setFileList("mumu_8TeV_inputfiles.txt");
-  analyzermumu.setDataSetDirectory(treedir+"/trees_8TeV/");
-  analyzermumu.getPUReweighter()->setDataTruePUInput(cmssw_base+"/src/TtZAnalysis/Data/HCP.json.txt_PU.root");
-  analyzermumu.getJECUncertainties()->setFile(cmssw_base+"/src/TtZAnalysis/Data/Summer12_V2_DATA_AK5PF_UncertaintySources.txt");
-  analyzermumu.getPUReweighter()->setMCDistrSum12();
-  analyzermumu.getBTagSF()->setMakeEff(true);
-  //  analyzermumu.start();
-  // analyzermumu.getPlots()->writeAllToTFile(outfile,true);
-
-  //start with ee
-  
-
-  MainAnalyzer analyzeree=analyzermumu;
-  analyzeree.setFileList("ee_8TeV_inputfiles.txt");
-  analyzeree.setName("8TeV_default_ee","ee");
-  analyzeree.getBTagSF()->setMakeEff(true);
-  analyzeree.start();
-  // TFile * btagfile = new TFile("btags.root","UPDATE");
-  // analyzeree.getBTagSF()->writeToTFile(btagfile);
-  // btagfile->Close();
-  // delete btagfile;
-  analyzeree.getPlots()->writeAllToTFile(outfile,true);
-
-  analyzeree.setName("8TeV_btag_ee","ee");
-  analyzeree.getBTagSF()->setMakeEff(false);
-  analyzeree.start();
-  analyzeree.getPlots()->writeAllToTFile(outfile,false);
-
-  /*
-  // to have something to play with prepare the default 7 TeV analyzer
-  MainAnalyzer analyzer7ee;//=analyzermumu;
-  analyzer7ee.setFileList("ee_7TeV_inputfiles.txt");
-  analyzer7ee.setLumi(lumi7TeV);
-  analyzer7ee.setShowStatusBar(runInNotQuietMode);
-  analyzer7ee.setName("7TeV_default_ee","ee");
-  analyzer7ee.setDataSetDirectory(treedir+"/trees_7TeV/");
-  analyzer7ee.getPUReweighter()->setDataTruePUInput(cmssw_base+"/src/TtZAnalysis/Data/ReRecoNov2011.json_PU.root");
-  analyzer7ee.getPUReweighter()->setMCDistrFall11();
-  analyzer7ee.getJECUncertainties()->setFile(cmssw_base+"/src/TtZAnalysis/Data/JEC11_V12_AK5PF_UncertaintySources.txt");
-   analyzer7ee.start();
-  analyzer7ee.getPlots()->writeAllToTFile(outfile,false);
-
-  MainAnalyzer analyzer7mumu=analyzer7ee;
-  analyzer7mumu.setFileList("mumu_7TeV_inputfiles.txt");
-  analyzer7mumu.setName("7TeV_default_mumu","mumu");
-  analyzer7mumu.start();
-  analyzer7mumu.getPlots()->writeAllToTFile(outfile,false);
-  */
-  /*
-
-  MainAnalyzer eewithlumi=analyzeree;
-  eewithlumi.setName("ee_lumi","ee");
-
-  eewithlumi.getPlots()->addGlobalRelMCError("8TeV_Lumi", lumiunc12);
-  eewithlumi.getPlots()->writeAllToTFile(outfile);
-  
-  // jer systematics 
-  
-  MainAnalyzer analyzereejerup=analyzeree;
-  analyzereejerup.setName("jerup_ee","ee");
-  analyzereejerup.getJERAdjuster()->setSystematics("up");
-  analyzereejerup.start();
-  analyzereejerup.getPlots()->writeAllToTFile(outfile);
-
-
-  MainAnalyzer analyzereejerdown=analyzeree;
-  analyzereejerdown.setName("jerdown_ee","ee");
-  analyzereejerdown.getJERAdjuster()->setSystematics("down");
-  analyzereejerdown.start();
-  analyzereejerdown.getPlots()->writeAllToTFile(outfile);
-
-  MainAnalyzer eewithjerunc=analyzeree;
-  eewithjerunc.setName("jerunc_ee","ee");
-  eewithjerunc.getPlots()->addMCErrorStackVector("JER_up",*analyzereejerup.getPlots());
-  eewithjerunc.getPlots()->addMCErrorStackVector("JER_down",*analyzereejerdown.getPlots());
-  eewithjerunc.getPlots()->writeAllToTFile(outfile);
-
-  // jes systematics corr
-
-  MainAnalyzer analyzereecorr_jesup=analyzeree;
-  analyzereecorr_jesup.setName("corr_jesup_ee","ee");
-  analyzereecorr_jesup.getJECUncertainties()->sources() << 1 << 2 << 3 << 4 << 5 << 6 << 7 << 8 << 9 << 10 << 12 << 13 << 15;
-  analyzereecorr_jesup.getJECUncertainties()->setVariation("up");
-  analyzereecorr_jesup.start();
-  analyzereecorr_jesup.getPlots()->writeAllToTFile(outfile);
-
-
-  MainAnalyzer analyzereecorr_jesdown=analyzereecorr_jesup;
-  analyzereecorr_jesdown.setName("corr_jesdown_ee","ee");
-  analyzereecorr_jesdown.getJECUncertainties()->setVariation("down");
-  analyzereecorr_jesdown.start();
-  analyzereecorr_jesdown.getPlots()->writeAllToTFile(outfile);
-
-  MainAnalyzer eewithcorr_jesunc=analyzeree;
-  eewithcorr_jesunc.setName("corr_jesunc_ee","ee");
-  eewithcorr_jesunc.getPlots()->addMCErrorStackVector("CORR_JES_up",*analyzereecorr_jesup.getPlots());
-  eewithcorr_jesunc.getPlots()->addMCErrorStackVector("CORR_JES_down",*analyzereecorr_jesdown.getPlots());
-  eewithcorr_jesunc.getPlots()->writeAllToTFile(outfile);
-
-
-  // jes systematics uncorr
-
-  MainAnalyzer analyzeree8TeV_jesup=analyzeree;
-  analyzeree8TeV_jesup.setName("8TeV_jesup_ee","ee");
-  analyzeree8TeV_jesup.getJECUncertainties()->sources() << 0 << 11 << 14;
-  analyzeree8TeV_jesup.getJECUncertainties()->setVariation("up");
-  analyzeree8TeV_jesup.start();
-  analyzeree8TeV_jesup.getPlots()->writeAllToTFile(outfile);
-
-
-  MainAnalyzer analyzeree8TeV_jesdown=analyzeree8TeV_jesup;
-  analyzeree8TeV_jesdown.setName("8TeV_jesdown_ee","ee");
-  analyzeree8TeV_jesdown.getJECUncertainties()->setVariation("down");
-  analyzeree8TeV_jesdown.start();
-  analyzeree8TeV_jesdown.getPlots()->writeAllToTFile(outfile);
-
-  MainAnalyzer eewith8TeV_jesunc=analyzeree;
-  eewith8TeV_jesunc.setName("8TeV_jesunc_ee","ee");
-  eewith8TeV_jesunc.getPlots()->addMCErrorStackVector("8TEV_JES_up",*analyzeree8TeV_jesup.getPlots());
-  eewith8TeV_jesunc.getPlots()->addMCErrorStackVector("8TEV_JES_down",*analyzeree8TeV_jesdown.getPlots());
-  eewith8TeV_jesunc.getPlots()->writeAllToTFile(outfile);
-
-
-
-  // pu systematics
-
-  MainAnalyzer analyzereepuup=analyzeree;
-  analyzereepuup.getPUReweighter()->setDataTruePUInput(pufolder+"data_pu_190456-196531_corr_up.root"); 
-  analyzereepuup.setName("8TeV_puup_ee", "ee");
-  analyzereepuup.start();
-  analyzereepuup.getPlots()->writeAllToTFile(outfile);
-
-  MainAnalyzer analyzereepudown=analyzeree;
-  analyzereepudown.getPUReweighter()->setDataTruePUInput(pufolder+"data_pu_190456-196531_corr_down.root");
-  analyzereepudown.setName("8TeV_pudown_ee","ee");
-  analyzereepudown.start();
-  analyzereepudown.getPlots()->writeAllToTFile(outfile);
-
-  MainAnalyzer eewithPU=analyzeree;
-  eewithPU.setName("8TeV_puunc_ee","ee");
-  eewithPU.getPlots()->addMCErrorStackVector("8TEV_PU_up",*analyzereepuup.getPlots());
-  eewithPU.getPlots()->addMCErrorStackVector("8TEV_PU_down",*analyzereepudown.getPlots());
-  eewithPU.getPlots()->writeAllToTFile(outfile);
-  
-  // all systematics
-  
-  MainAnalyzer eeWithAll=eewithlumi; //already includes lumi uncert
-  eeWithAll.setName("8TeV_allunc_ee","ee");
-  eeWithAll.getPlots()->addMCErrorStackVector("8TEV_PU_up",*analyzereepuup.getPlots());
-  eeWithAll.getPlots()->addMCErrorStackVector("8TEV_PU_down",*analyzereepudown.getPlots());
-  eeWithAll.getPlots()->addMCErrorStackVector("JER_up",*analyzereejerup.getPlots());
-  eeWithAll.getPlots()->addMCErrorStackVector("JER_down",*analyzereejerdown.getPlots());
-  eeWithAll.getPlots()->addMCErrorStackVector("CORR_JES_up",*analyzereecorr_jesup.getPlots());
-  eeWithAll.getPlots()->addMCErrorStackVector("CORR_JES_down",*analyzereecorr_jesdown.getPlots());
-  eeWithAll.getPlots()->addMCErrorStackVector("8TEV_JES_up",*analyzeree8TeV_jesup.getPlots());
-  eeWithAll.getPlots()->addMCErrorStackVector("8TEV_JES_down",*analyzeree8TeV_jesdown.getPlots());
-
-  // do rescaling stuff
-  std::vector<TString> ident;
-  std::vector<double> scales;
-  for(int i=4;i<=9;i++){
-    TString stepstring="step "+toTString(i);
-    double dymcee = eeWithAll.getPlots()->getStack("dilepton invariant massZ "+stepstring).getContribution("DY#rightarrowee").integral();
-    double dee = eeWithAll.getPlots()->getStack("dilepton invariant massZ "+stepstring).getContribution("data").integral();
-    std::vector<TString> allbutdyanddata;
-    allbutdyanddata << "data" << "DY#rightarrowee";
-    double ddyee = eeWithAll.getPlots()->getStack("dilepton invariant massZ "+stepstring).getContributionsBut(allbutdyanddata).integral();
-    if(dymcee==0) dymcee=1;
-    double scale = (dee-ddyee)/dymcee;
-    scales << scale;
-    ident << stepstring;
-    std::cout << "Scalefactor for DY ee " << stepstring << ": " << scale << std::endl;
-  }
-  eeWithAll.getPlots()->multiplyNorms("DY#rightarrowee", scales, ident);
-  eeWithAll.getPlots()->writeAllToTFile(outfile);
-  ident.clear();
-  scales.clear();
-
-  // start the mumu analysis
-  
-  analyzermumu.start();
-
-  analyzermumu.getPlots()->writeAllToTFile(outfile); // after that just update file
-  MainAnalyzer mumuwithlumi=analyzermumu;
-  mumuwithlumi.setName("lumi_mumu","");
-  mumuwithlumi.getPlots()->addGlobalRelMCError("8TEV_Lumi", lumiunc12);
-  mumuwithlumi.getPlots()->writeAllToTFile(outfile); 
-
-  //make JER systematics
-  
-  MainAnalyzer analyzermumujerup=analyzermumu;
-  analyzermumujerup.setName("jerup_mumu","mumu");
-  analyzermumujerup.getJERAdjuster()->setSystematics("up");
-  analyzermumujerup.start();
-  analyzermumujerup.getPlots()->writeAllToTFile(outfile);
-
-  MainAnalyzer analyzermumujerdown=analyzermumu;
-  analyzermumujerdown.setName("jerdown_mumu","mumu");
-  analyzermumujerdown.getJERAdjuster()->setSystematics("down");
-  analyzermumujerdown.start();
-  analyzermumujerdown.getPlots()->writeAllToTFile(outfile);
-
-  MainAnalyzer mumuwithjerunc=analyzermumu;
-  mumuwithjerunc.setName("jerunc_mumu","mumu");
-  mumuwithjerunc.getPlots()->addMCErrorStackVector("JER_up",*analyzermumujerup.getPlots());
-  mumuwithjerunc.getPlots()->addMCErrorStackVector("JER_down",*analyzermumujerdown.getPlots());
-  mumuwithjerunc.getPlots()->writeAllToTFile(outfile);
-
-// corr_jes systematics
-
-  MainAnalyzer analyzermumucorr_jesup=analyzermumu;
-  analyzermumucorr_jesup.setName("corr_jesup_mumu","mumu");
-  analyzermumucorr_jesup.getJECUncertainties()->setVariation("up");
-  analyzermumucorr_jesup.start();
-  analyzermumucorr_jesup.getPlots()->writeAllToTFile(outfile);
-
-
-  MainAnalyzer analyzermumucorr_jesdown=analyzermumu;
-  analyzermumucorr_jesdown.setName("corr_jesdown_mumu","mumu");
-  analyzermumucorr_jesdown.getJECUncertainties()->setVariation("down");
-  analyzermumucorr_jesdown.start();
-  analyzermumucorr_jesdown.getPlots()->writeAllToTFile(outfile);
-
-  MainAnalyzer mumuwithcorr_jesunc=analyzermumu;
-  mumuwithcorr_jesunc.setName("corr_jesunc_mumu","mumu");
-  mumuwithcorr_jesunc.getPlots()->addMCErrorStackVector("CORR_JES_up",*analyzermumucorr_jesup.getPlots());
-  mumuwithcorr_jesunc.getPlots()->addMCErrorStackVector("CORR_JES_down",*analyzermumucorr_jesdown.getPlots());
-  mumuwithcorr_jesunc.getPlots()->writeAllToTFile(outfile);
-
-
-  // jes systematics uncorr
-
-  MainAnalyzer analyzermumu8TeV_jesup=analyzermumu;
-  analyzermumu8TeV_jesup.setName("8TeV_jesup_mumu","mumu");
-  analyzermumu8TeV_jesup.getJECUncertainties()->sources() << 0 << 11 << 14;
-  analyzermumu8TeV_jesup.getJECUncertainties()->setVariation("up");
-  analyzermumu8TeV_jesup.start();
-  analyzermumu8TeV_jesup.getPlots()->writeAllToTFile(outfile);
-
-
-  MainAnalyzer analyzermumu8TeV_jesdown=analyzermumu8TeV_jesup;
-  analyzermumu8TeV_jesdown.setName("8TeV_jesdown_mumu","mumu");
-  analyzermumu8TeV_jesdown.getJECUncertainties()->setVariation("down");
-  analyzermumu8TeV_jesdown.start();
-  analyzermumu8TeV_jesdown.getPlots()->writeAllToTFile(outfile);
-
-  MainAnalyzer mumuwith8TeV_jesunc=analyzermumu;
-  mumuwith8TeV_jesunc.setName("8TeV_jesunc_mumu","mumu");
-  mumuwith8TeV_jesunc.getPlots()->addMCErrorStackVector("8TEV_JES_up",*analyzermumu8TeV_jesup.getPlots());
-  mumuwith8TeV_jesunc.getPlots()->addMCErrorStackVector("8TEV_JES_down",*analyzermumu8TeV_jesdown.getPlots());
-  mumuwith8TeV_jesunc.getPlots()->writeAllToTFile(outfile);
-
-
-
-  //make PU systematics
-  
-  MainAnalyzer analyzermumupuup=analyzermumu;
-  analyzermumupuup.getPUReweighter()->setDataTruePUInput(pufolder+"data_pu_190456-196531_corr_up.root"); 
-  analyzermumupuup.setName("8TeV_puup_mumu", "mumu");
-  analyzermumupuup.start();
-  analyzermumupuup.getPlots()->writeAllToTFile(outfile);
-
-  MainAnalyzer analyzermumupudown=analyzermumu;
-  analyzermumupudown.getPUReweighter()->setDataTruePUInput(pufolder+"data_pu_190456-196531_corr_down.root");
-  analyzermumupudown.setName("8TeV_pudown_mumu","mumu");
-  analyzermumupudown.start();
-  analyzermumupudown.getPlots()->writeAllToTFile(outfile);
-
-  MainAnalyzer mumuwithPU=analyzermumu;
-  mumuwithPU.setName("puunc_mumu","mumu");
-  mumuwithPU.getPlots()->addMCErrorStackVector("8TEV_PU_up",*analyzermumupuup.getPlots());
-  mumuwithPU.getPlots()->addMCErrorStackVector("8TEV_PU_down",*analyzermumupudown.getPlots());
-  mumuwithPU.getPlots()->writeAllToTFile(outfile);
-  
-  // combine all syst
-  
-  MainAnalyzer mumuWithAll=mumuwithlumi;
-  mumuWithAll.setName("8TeV_allunc_mumu","mumu");
-  mumuWithAll.getPlots()->addMCErrorStackVector("8TEV_PU_up",*analyzermumupuup.getPlots());
-  mumuWithAll.getPlots()->addMCErrorStackVector("8TEV_PU_down",*analyzermumupudown.getPlots());
-  mumuWithAll.getPlots()->addMCErrorStackVector("JER_up",*analyzermumujerup.getPlots());
-  mumuWithAll.getPlots()->addMCErrorStackVector("JER_down",*analyzermumujerdown.getPlots());
-  mumuWithAll.getPlots()->addMCErrorStackVector("CORR_JES_up",*analyzermumucorr_jesup.getPlots());
-  mumuWithAll.getPlots()->addMCErrorStackVector("CORR_JES_down",*analyzermumucorr_jesdown.getPlots());
-  mumuWithAll.getPlots()->addMCErrorStackVector("8TEV_JES_up",*analyzermumu8TeV_jesup.getPlots());
-  mumuWithAll.getPlots()->addMCErrorStackVector("8TEV_JES_down",*analyzermumu8TeV_jesdown.getPlots());
-
-
-
-
-  ident.clear();
-  scales.clear();
-  for(int i=4;i<=9;i++){
-    TString stepstring="step "+toTString(i);
-    double dymcmumu = mumuWithAll.getPlots()->getStack("dilepton invariant massZ "+stepstring).getContribution("DY#rightarrow#mu#mu").integral();
-    double dmumu = mumuWithAll.getPlots()->getStack("dilepton invariant massZ "+stepstring).getContribution("data").integral();
-    std::vector<TString> allbutdyanddata;
-    allbutdyanddata << "data" << "DY#rightarrow#mu#mu";
-    double ddymumu = mumuWithAll.getPlots()->getStack("dilepton invariant massZ "+stepstring).getContributionsBut(allbutdyanddata).integral();
-    if(dymcmumu==0) dymcmumu=1;
-    double scale = (dmumu-ddymumu)/dymcmumu;
-    scales << scale;
-    ident << stepstring;
-    std::cout << "Scalefactor for DY #mu#mu " << stepstring << ": " << scale << std::endl;
-  }
-  mumuWithAll.getPlots()->multiplyNorms("DY#rightarrow#mu#mu", scales, ident);
-  mumuWithAll.getPlots()->writeAllToTFile(outfile);
-  ident.clear();
-  scales.clear();
-
-
+  MainAnalyzer mumu_8TeV("8TeV_nobtag_mumu","mumu");
+  mumu_8TeV.setShowStatusBar(runInNotQuietMode);  //for running with text output mode
+  mumu_8TeV.setLumi(lumi8TeV);
+  mumu_8TeV.setFileList("mumu_8TeV_inputfiles.txt");
+  mumu_8TeV.setDataSetDirectory(treedir+"/trees_8TeV/");
+  mumu_8TeV.getPUReweighter()->setDataTruePUInput(cmssw_base+"/src/TtZAnalysis/Data/HCP.json.txt_PU.root");
+  mumu_8TeV.getJECUncertainties()->setFile(cmssw_base+"/src/TtZAnalysis/Data/Summer12_V2_DATA_AK5PF_UncertaintySources.txt");
+  mumu_8TeV.getPUReweighter()->setMCDistrSum12();
+  mumu_8TeV.getBTagSF()->setMakeEff(true);
+  mumu_8TeV.start();
+  TFile * btagfile = new TFile("mumu_8TeV_btags.root","RECREATE");
+  mumu_8TeV.getBTagSF()->writeToTFile(btagfile);
+  btagfile->Close();
+  delete btagfile;
+  mumu_8TeV.getPlots()->writeAllToTFile(outfile,true);
+  mumu_8TeV.getBTagSF()->setMakeEff(false);
+  mumu_8TeV.setName("8TeV_default_mumu","mumu");
+  mumu_8TeV.start();
+  mumu_8TeV.getPlots()->writeAllToTFile(outfile,false);
  
+  MainAnalyzer ee_8TeV=mumu_8TeV;
+  ee_8TeV.setFileList("ee_8TeV_inputfiles.txt");
+  ee_8TeV.setName("8TeV_nobtag_ee","ee");
+  ee_8TeV.getBTagSF()->setMakeEff(true);
+  ee_8TeV.start();
+  btagfile = new TFile("ee_8TeV_btags.root","RECREATE");
+  ee_8TeV.getBTagSF()->writeToTFile(btagfile);
+  btagfile->Close();
+  delete btagfile;
+  ee_8TeV.getPlots()->writeAllToTFile(outfile,false);
+  ee_8TeV.getBTagSF()->setMakeEff(false);
+  ee_8TeV.setName("8TeV_default_ee","ee");
+  ee_8TeV.start();
+  ee_8TeV.getPlots()->writeAllToTFile(outfile,false);
+  
+  // to have something to play with prepare the nobtag 7 TeV analyzer
+  MainAnalyzer ee_7TeV;//=analyzermumu;
+  ee_7TeV.setFileList("ee_7TeV_inputfiles.txt");
+  ee_7TeV.setLumi(lumi7TeV);
+  ee_7TeV.setShowStatusBar(runInNotQuietMode);
+  ee_7TeV.setName("7TeV_nobtag_ee","ee");
+  ee_7TeV.setDataSetDirectory(treedir+"/trees_7TeV/");
+  ee_7TeV.getPUReweighter()->setDataTruePUInput(cmssw_base+"/src/TtZAnalysis/Data/ReRecoNov2011.json_PU.root");
+  ee_7TeV.getPUReweighter()->setMCDistrFall11();
+  ee_7TeV.getJECUncertainties()->setFile(cmssw_base+"/src/TtZAnalysis/Data/JEC11_V12_AK5PF_UncertaintySources.txt");
+  ee_7TeV.getBTagSF()->setMakeEff(true);
+  ee_7TeV.getBTagSF()->setIs2011(true);
+  ee_7TeV.start();
+  btagfile = new TFile("ee_7TeV_btags.root","RECREATE");
+  ee_7TeV.getBTagSF()->writeToTFile(btagfile);
+  btagfile->Close();
+  delete btagfile;
+  ee_7TeV.getPlots()->writeAllToTFile(outfile,false);
+  ee_7TeV.getBTagSF()->setMakeEff(false);
+  ee_7TeV.setName("7TeV_default_ee","ee");
+  ee_7TeV.start();
+  ee_7TeV.getPlots()->writeAllToTFile(outfile,false);
+  
+  MainAnalyzer mumu_7TeV=ee_7TeV;
+  mumu_7TeV.setFileList("mumu_7TeV_inputfiles.txt");
+  mumu_7TeV.setName("7TeV_nobtag_mumu","mumu");
+  mumu_7TeV.getBTagSF()->setMakeEff(true);
+  mumu_7TeV.start();
+  btagfile = new TFile("all_btags.root","RECREATE");
+  mumu_7TeV.getBTagSF()->writeToTFile(btagfile);
+  btagfile->Close();
+  delete btagfile;
+  mumu_7TeV.getPlots()->writeAllToTFile(outfile,false);
+  mumu_7TeV.getBTagSF()->setMakeEff(false);
+  mumu_7TeV.setName("7TeV_default_mumu","mumu");
+  mumu_7TeV.start();
+  mumu_7TeV.getPlots()->writeAllToTFile(outfile,false);
+
+  
+  ///////////////////////////////////////
+
+  vector<MainAnalyzer> full_ana, full_errana;
+  full_ana << ee_7TeV << mumu_7TeV << ee_8TeV << mumu_8TeV;
+  full_errana << ee_7TeV << mumu_7TeV << ee_8TeV << mumu_8TeV;
+
+
+
+  for(unsigned int i=0; i<full_ana.size(); i++){
+
+
+    TString energystring="8TeV";
+    if(full_ana.at(i).getName().Contains("7TeV")) energystring="7TeV";
+
+
+    //b systematics (correlated)
+
+    MainAnalyzer temp=full_ana.at(i);
+    temp.getBTagSF()->setSystematic("light up");
+    temp.replaceInName("default","btag_light_up");
+    temp.start();
+    temp.getPlots()->writeAllToTFile(outfile,false);
+    full_errana.at(i).getPlots()->addMCErrorStackVector("btag_light_up",*temp.getPlots());
+
+    temp=full_ana.at(i);
+    temp.getBTagSF()->setSystematic("light down");
+    temp.replaceInName("default","btag_light_down");
+    temp.start();
+    temp.getPlots()->writeAllToTFile(outfile,false);
+    full_errana.at(i).getPlots()->addMCErrorStackVector("btag_light_down",*temp.getPlots());
+
+    temp=full_ana.at(i);
+    temp.getBTagSF()->setSystematic("heavy up");
+    temp.replaceInName("default","btag_heavy_up");
+    temp.start();
+    temp.getPlots()->writeAllToTFile(outfile,false);
+    full_errana.at(i).getPlots()->addMCErrorStackVector("btag_heavy_up",*temp.getPlots());
+
+    temp=full_ana.at(i);
+    temp.getBTagSF()->setSystematic("heavy down");
+    temp.replaceInName("default","btag_heavy_down");
+    temp.start();
+    temp.getPlots()->writeAllToTFile(outfile,false);
+    full_errana.at(i).getPlots()->addMCErrorStackVector("btag_heavy_down",*temp.getPlots());
+
+
+    // JER correlated
+
+    temp=full_ana.at(i);
+    temp.replaceInName("default","JER_up");
+    temp.getJERAdjuster()->setSystematics("up");
+    temp.start();
+    temp.getPlots()->writeAllToTFile(outfile,false);
+    full_errana.at(i).getPlots()->addMCErrorStackVector("JER_up",*temp.getPlots());
+
+    temp=full_ana.at(i);
+    temp.replaceInName("default","JER_down");
+    temp.getJERAdjuster()->setSystematics("down");
+    temp.start();
+    temp.getPlots()->writeAllToTFile(outfile,false);
+    full_errana.at(i).getPlots()->addMCErrorStackVector("JER_down",*temp.getPlots());
+
+
+    // JES correlated
+
+    temp=full_ana.at(i);
+    temp.replaceInName("default","JES_up");
+    temp.getJECUncertainties()->sources() << 1 << 2 << 3 << 4 << 5 << 6 << 7 << 8 << 9 << 10 << 12 << 13 << 15;
+    temp.getJECUncertainties()->setVariation("up");
+    temp.start();
+    temp.getPlots()->writeAllToTFile(outfile,false);
+    full_errana.at(i).getPlots()->addMCErrorStackVector("JES_corr_up",*temp.getPlots());
+
+    temp=full_ana.at(i);
+    temp.replaceInName("default","JES_down");
+    temp.getJECUncertainties()->sources() << 1 << 2 << 3 << 4 << 5 << 6 << 7 << 8 << 9 << 10 << 12 << 13 << 15;
+    temp.getJECUncertainties()->setVariation("down");
+    temp.start();
+    temp.getPlots()->writeAllToTFile(outfile,false);
+    full_errana.at(i).getPlots()->addMCErrorStackVector("JES_corr_down",*temp.getPlots());
+
+    //JES uncorrelated
+
+    temp=full_ana.at(i);
+    temp.replaceInName("default","JES_"+energystring+"_up");
+    temp.getJECUncertainties()->sources() << 0 << 11 << 14;
+    temp.getJECUncertainties()->setVariation("up");
+    temp.start();
+    temp.getPlots()->writeAllToTFile(outfile,false);
+    full_errana.at(i).getPlots()->addMCErrorStackVector("JES_"+energystring+"_up",*temp.getPlots());
+
+    temp=full_ana.at(i);
+    temp.replaceInName("default","JES_"+energystring+"_down");
+    temp.getJECUncertainties()->sources() << 0 << 11 << 14;
+    temp.getJECUncertainties()->setVariation("down");
+    temp.start();
+    temp.getPlots()->writeAllToTFile(outfile,false);
+    full_errana.at(i).getPlots()->addMCErrorStackVector("JES_"+energystring+"_down",*temp.getPlots());
+
+    //PileUp
+    //7 TeV
+    TString pufile;
+
+    pufile=cmssw_base+"/src/TtZAnalysis/Data/"+"HCP.json.txt_PU_up.root";
+    if(energystring=="7TeV")
+      pufile=cmssw_base+"/src/TtZAnalysis/Data/"+"ReRecoNov2011.json_PU_up.root";
+
+    temp=full_ana.at(i);
+    temp.replaceInName("default","PU_"+energystring+"_up");
+    temp.getPUReweighter()->setDataTruePUInput(pufile);
+    temp.start();
+    temp.getPlots()->writeAllToTFile(outfile,false);
+    full_errana.at(i).getPlots()->addMCErrorStackVector("PU_"+energystring+"_up",*temp.getPlots());
+    
+    pufile=cmssw_base+"/src/TtZAnalysis/Data/"+"HCP.json.txt_PU_down.root";
+    if(energystring=="7TeV")
+      pufile=cmssw_base+"/src/TtZAnalysis/Data/"+"ReRecoNov2011.json_PU_up.root";
+
+    temp=full_ana.at(i);
+    temp.replaceInName("default","PU_"+energystring+"_down");
+    temp.getPUReweighter()->setDataTruePUInput(pufile);
+    temp.start();
+    temp.getPlots()->writeAllToTFile(outfile,false);
+    full_errana.at(i).getPlots()->addMCErrorStackVector("PU_"+energystring+"_down",*temp.getPlots());
+
+    //matching etc. to be yet done
+
+
+ /*
+full_ana.at(i).
   */
+
+
+    full_errana.at(i).getPlots()->writeAllToTFile(outfile,false);
+  }
+
+
 
   std::cout <<"\n\n\n\n\nFINISHED!" <<std::endl;
 
