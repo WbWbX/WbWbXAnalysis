@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id: SusyTreeWriter.cc,v 1.3 2012/12/08 11:36:22 jkiesele Exp $
+// $Id: SusyTreeWriter.cc,v 1.4 2012/12/10 12:57:43 jkiesele Exp $
 //
 //
 
@@ -384,11 +384,11 @@ SusyTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        //  if(electron->ecalDrivenMomentum())
        tempelec.setECalP4(electron->ecalDrivenMomentum());
 
-       tempelec.setMember("WP80Id");    /// ##CHECK##
+       tempelec.setMember("vbtf11WP80",(double) electron->electronID("vbtf11WP80"));    /// ##CHECK##
        double ipfe_d=0;
        if(electron->isPF()) ipfe_d=1;
        tempelec.setMember("isPFElectron",ipfe_d);
-       electron->electronID("bla");
+       ;
        
        tempelec.setP4(electron->p4());
        double vz=-9999;
