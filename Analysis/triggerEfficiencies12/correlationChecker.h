@@ -29,16 +29,17 @@ namespace top{
     std::vector<TString> checkmettriggers_;
     std::vector<TString> inputfiles_;
     TString mode_;
+    TString whichelectrons_;
 
   public:
 
-    TString whichelectrons;
 
-    correlationChecker(TString mode=""){mode_=mode; whichelectrons="NTPFElectrons";};
+    correlationChecker(TString mode=""){mode_=mode; whichelectrons_="NTPFElectrons";};
     ~correlationChecker(){};
     std::vector<TString> & dileptonTriggers(){return checkdiltriggers_;}
     std::vector<TString> & crossTriggers(){return checkmettriggers_;}
     std::vector<TString> & inputfiles(){return inputfiles_;}
+    void setElectrons(TString elecs){whichelectrons_=elecs;}
 
     TChain * makeChain(std::vector<TString> paths){
       TChain * chain = new TChain(paths[0]);
@@ -66,7 +67,7 @@ namespace top{
       vector<NTMuon> * pMuons = 0;
       t1->SetBranchAddress("NTMuons",&pMuons); 
       vector<NTElectron> * pElectrons = 0;
-      t1->SetBranchAddress(whichelectrons,&pElectrons); 
+      t1->SetBranchAddress(whichelectrons_,&pElectrons); 
       vector<NTJet> * pJets = 0;
       t1->SetBranchAddress("NTJets",&pJets); 
       NTMet * pMet = 0;
@@ -83,6 +84,11 @@ namespace top{
 	bothfired << 0;
       }
       double dileptonevents=0;
+
+
+      double totaldil=0;
+      double totalmet=0;
+      double totalboth=0;
 
       for(float i=0;i<n;i++){  //main loop
 
@@ -165,6 +171,7 @@ namespace top{
 	  for(unsigned int dtrigit=0;dtrigit<checkdiltriggers_.size();dtrigit++){
 	    if(((TString)trigs.at(etrigit)).Contains(checkdiltriggers_.at(dtrigit))){
 	      dilfired_b=true;
+	      
 	      break;
 	    }
 	  }
@@ -174,16 +181,21 @@ namespace top{
 	  if(dilfired_b) break;
 	}
 	/////and met triggers
+	bool anymetfired_b=false;
 	for(unsigned int etrigit=0;etrigit<trigs.size();etrigit++){
 	  for(unsigned int ctrigit=0;ctrigit<checkmettriggers_.size();ctrigit++){
 	    if(((TString)trigs.at(etrigit)).Contains(checkmettriggers_.at(ctrigit))){
 	      metfired.at(ctrigit) += puweight;
+	      anymetfired_b=true;
 	      // cout << "bla" << endl;
 	      if(dilfired_b) bothfired.at(ctrigit) += puweight;
 	      break;
 	    }
 	  }
 	}
+	if(dilfired_b)                  totaldil +=puweight;
+	if(anymetfired_b)               totalmet +=puweight;
+	if(anymetfired_b && dilfired_b) totalboth+=puweight;
 
       }//main loop
       cout << endl;
@@ -194,13 +206,18 @@ namespace top{
       vector<double> ratioerrs;
       vector<double> signif;
 
+
       for(unsigned int ctrig=0;ctrig<checkmettriggers_.size();ctrig++){
 	//	cout << checkmettriggers_.at(ctrig) <<endl;
+	
 	double ratio = (metfired.at(ctrig) * dilfired.at(ctrig))/(bothfired.at(ctrig) * dileptonevents);
-	double err= 1/sqrt(bothfired.at(ctrig));
+	double effboth=bothfired.at(ctrig)/dileptonevents;
+
+	double err= sqrt(effboth*(1-effboth))/sqrt(dileptonevents) * ratio/effboth;
+
         ratios << ratio;
 	ratioerrs << err;
-	signif << fabs(1-ratio)*err;
+	signif << fabs(1-ratio)+fabs(err);
       }
       vector<unsigned int> order=getOrderAscending(signif);
 
@@ -215,6 +232,17 @@ namespace top{
 	     << "\t" << checkmettriggers_.at(it) << endl;
 
       }
+      for(unsigned int i=0;i<order.size();i++){
+	unsigned int it=order.at(i);
+	cout << " << " <<  checkmettriggers_.at(it);
+      }
+      double totalratio = totalmet * totaldil/(totalboth * dileptonevents);
+      double totalerr=sqrt(totalboth/dileptonevents * ( 1- totalboth/dileptonevents) / dileptonevents) * totalratio / (totalboth/dileptonevents);
+
+      cout  << "\n\ntotal ratio: " << totalratio << " +- "<< totalerr << endl;
+
+
+
     }
 
     void getTriggers(TString restr, TString mode=""){
@@ -235,7 +263,7 @@ namespace top{
       vector<NTMuon> * pMuons = 0;
       t1->SetBranchAddress("NTMuons",&pMuons); 
       vector<NTElectron> * pElectrons = 0;
-      t1->SetBranchAddress(whichelectrons,&pElectrons); 
+      t1->SetBranchAddress(whichelectrons_,&pElectrons); 
       vector<NTJet> * pJets = 0;
       t1->SetBranchAddress("NTJets",&pJets); 
       NTMet * pMet = 0;
@@ -251,7 +279,7 @@ namespace top{
 	dilfired  << 0;
 	bothfired << 0;
       }
-      double dileptonevents=0;
+      //   double dileptonevents=0;
 
       for(float i=0;i<n;i++){  //main loop
 
@@ -345,7 +373,14 @@ namespace top{
 	     << trigs.at(it)
 	     << endl;
       }
-      //and then sort by statistics or something
+      
+      for(unsigned int i=order.size(); i>0 ;i--){
+	unsigned int it=order.at(i-1);
+	cout << " << \"" << trigs.at(it) << "\"";
+      }
+      cout << endl;
+
+
     }
 
   };

@@ -82,113 +82,8 @@ public:
 
   std::vector<string> mettriggers;
   
-  mettriggers.push_back("HLT_DiCentralPFJet50_PFMET80_v");
-  mettriggers.push_back("HLT_MET120_HBHENoiseCleaned_v");
-  mettriggers.push_back("HLT_PFHT350_PFMET100_v");
-  mettriggers.push_back("HLT_PFHT400_PFMET100_v");
-  mettriggers.push_back("HLT_MonoCentralPFJet80_PFMETnoMu95_NHEF0p95_v");
-  mettriggers.push_back("HLT_MET120_v");
-  mettriggers.push_back("HLT_DiCentralPFJet30_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v");
-  mettriggers.push_back("HLT_CentralPFJet80_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v");
-  mettriggers.push_back("HLT_DiCentralJet20_BTagIP_MET65_HBHENoiseFiltered_dPhi1_v");
-  mettriggers.push_back("HLT_DiCentralJet20_CaloMET65_BTagCSV07_PFMHT80_v");
-  mettriggers.push_back("HLT_MET80_Track50_dEdx3p6_v");
-  mettriggers.push_back("HLT_MET80_Track60_dEdx3p7_v");
-  mettriggers.push_back("HLT_MET200_v");
-  mettriggers.push_back("HLT_MET200_HBHENoiseCleaned_v");
-  mettriggers.push_back("HLT_MET300_v");
-  mettriggers.push_back("HLT_MET300_HBHENoiseCleaned_v");
-  mettriggers.push_back("HLT_PFMET150_v");
-  mettriggers.push_back("HLT_DiPFJet40_PFMETnoMu65_MJJ800VBF_AllJets_v");
-  mettriggers.push_back("HLT_DiPFJet40_PFMETnoMu65_MJJ600VBF_LeadingJets_v");
-  mettriggers.push_back("HLT_PFMET180_v");
-  mettriggers.push_back("HLT_MET80_v");
-  mettriggers.push_back("HLT_Photon70_CaloIdXL_PFMET100_v");
-  mettriggers.push_back("HLT_MonoCentralPFJet80_PFMETnoMu95_NHEF0p95_v");
-  mettriggers.push_back("HLT_DiPFJet40_PFMETnoMu65_MJJ600VBF_LeadingJets_v");
-  mettriggers.push_back("HLT_CentralPFJet80_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v");
-  mettriggers.push_back("HLT_DiCentralPFJet50_PFMET80_v");
-  mettriggers.push_back("HLT_DiCentralPFJet30_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v");
-  mettriggers.push_back("HLT_PFMET150_v");
-  mettriggers.push_back("HLT_PFMET180_v");
-  mettriggers.push_back("HLT_DiCentralJet20_CaloMET65_BTagCSV07_PFMHT80_v");
-  mettriggers.push_back("HLT_Photon70_CaloIdXL_PFMET100_v"); 
-  mettriggers.push_back("HLT_PFHT350_PFMET100_v");
-  mettriggers.push_back("HLT_PFHT400_PFMET100_v");
-  mettriggers.push_back("HLT_DiPFJet40_PFMETnoMu65_MJJ800VBF_AllJets_v");
-  mettriggers.push_back("HLT_MonoCentralPFJet80_PFMETnoMu95_NHEF0p95_v");
-  mettriggers.push_back("HLT_DiCentralPFJet50_PFMET80_v");
-  mettriggers.push_back("HLT_DiCentralPFJet30_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v");
-  mettriggers.push_back("HLT_CentralPFJet80_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v");
-  mettriggers.push_back("HLT_DiCentralJet20_CaloMET65_BTagCSV07_PFMHT80_v");
-  mettriggers.push_back("HLT_MET80_Track50_dEdx3p6_v");
-  mettriggers.push_back("HLT_MET80_Track60_dEdx3p7_v");
-  mettriggers.push_back("HLT_Photon70_CaloIdXL_PFMET100_v");
-  mettriggers.push_back("HLT_DiCentralJet20_BTagIP_MET65_HBHENoiseFiltered_dPhi1_v");
-  mettriggers.push_back("HLT_PFHT350_PFMET100_v");
-  mettriggers.push_back("HLT_MET120_HBHENoiseCleaned_v");
-  mettriggers.push_back("HLT_DiPFJet40_PFMETnoMu65_MJJ600VBF_LeadingJets_v");
-  mettriggers.push_back("HLT_PFMET150_v");
-  mettriggers.push_back("HLT_MET120_v");
-  mettriggers.push_back("HLT_MET200_v");
-  mettriggers.push_back("HLT_MET200_HBHENoiseCleaned_v");
-  mettriggers.push_back("HLT_MET300_v");
-  mettriggers.push_back("HLT_MET300_HBHENoiseCleaned_v");
-  mettriggers.push_back("HLT_MET400_v");
-  mettriggers.push_back("HLT_MET400_HBHENoiseCleaned_v");
-  mettriggers.push_back("HLT_PFHT400_PFMET100_v");
-  mettriggers.push_back("HLT_PFMET180_v");
-  mettriggers.push_back("HLT_DiPFJet40_PFMETnoMu65_MJJ800VBF_AllJets_v");
-  mettriggers.push_back("HLT_MET80_v");
-  mettriggers.push_back("HLT_MET400_v");
-  mettriggers.push_back("HLT_MET400_HBHENoiseCleaned_v");
-  mettriggers.push_back("HLT_PFHT350_PFMET100_v");
-  mettriggers.push_back("HLT_PFHT400_PFMET100_v");
-  mettriggers.push_back("HLT_DiCentralPFJet50_PFMET80_v");
-  mettriggers.push_back("HLT_MonoCentralPFJet80_PFMETnoMu95_NHEF0p95_v");
-  mettriggers.push_back("HLT_DiCentralPFJet30_PFMET80_BTagCSV07_v");
-  mettriggers.push_back("HLT_DiPFJet40_PFMETnoMu65_MJJ600VBF_LeadingJets_v");
-  mettriggers.push_back("HLT_DiCentralPFJet30_PFMET80_v");
-  mettriggers.push_back("HLT_DiPFJet40_PFMETnoMu65_MJJ800VBF_AllJets_v");
-  mettriggers.push_back("HLT_DiCentralJetSumpT100_dPhi05_DiCentralPFJet60_25_PFMET100_HBHENoiseCleaned_v");
-  mettriggers.push_back("HLT_DisplacedPhoton65_CaloIdVL_IsoL_PFMET25_v");
-  mettriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v");
-  
+  mettriggers << "HLT_L2Mu60_1Hit_MET40_v" << "HLT_MET65_HBHENoiseFiltered_v" << "HLT_MET65_HBHENoiseFiltered_v" << "HLT_CentralJet80_MET65_v" << "HLT_DiJet60_MET45_v" << "HLT_L2Mu60_1Hit_MET60_v" << "HLT_DiCentralJet20_BTagIP_MET65_v" << "HLT_DiCentralJet20_MET80_v" << "HLT_CentralJet80_MET80_v" << "HLT_MET100_HBHENoiseFiltered_v" << "HLT_MET100_HBHENoiseFiltered_v" << "HLT_CentralJet80_MET100_v" << "HLT_DiCentralJet20_MET100_HBHENoiseFiltered_v" << "HLT_MET120_HBHENoiseFiltered_v" << "HLT_MET120_HBHENoiseFiltered_v" << "HLT_MediumIsoPFTau35_Trk20_MET60_v" << "HLT_MediumIsoPFTau35_Trk20_MET70_v" << "HLT_CentralJet80_MET160_v" << "HLT_MET200_HBHENoiseFiltered_v" << "HLT_MET200_HBHENoiseFiltered_v" << "HLT_MET400_v";
 
-
-  //just for testing
-  // mettriggers.clear();
-  //mettriggers.push_back("HLT_MET120_v10");
-
-  vector<string> notinMCtriggers;
-  notinMCtriggers.push_back("HLT_DiCentralPFJet30_PFMET80_BTagCSV07_v");
-notinMCtriggers.push_back("HLT_DiCentralPFJet30_PFMET80_v");
-notinMCtriggers.push_back("HLT_DiCentralJetSumpT100_dPhi05_DiCentralPFJet60_25_PFMET100_HBHENoiseCleaned_v");
-notinMCtriggers.push_back("HLT_DisplacedPhoton65_CaloIdVL_IsoL_PFMET25_v");
-notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v");
-
- notinMCtriggers.push_back("HLT_DiCentralPFJet30_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v");
-notinMCtriggers.push_back("HLT_CentralPFJet80_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v");
-notinMCtriggers.push_back("HLT_DiCentralJet20_BTagIP_MET65_HBHENoiseFiltered_dPhi1_v");
-notinMCtriggers.push_back("HLT_DiCentralJet20_CaloMET65_BTagCSV07_PFMHT80_v");
-notinMCtriggers.push_back("HLT_CentralPFJet80_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v");
-notinMCtriggers.push_back("HLT_DiCentralPFJet30_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v");
-notinMCtriggers.push_back("HLT_DiCentralJet20_CaloMET65_BTagCSV07_PFMHT80_v");
-notinMCtriggers.push_back("HLT_DiCentralPFJet30_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v");
-notinMCtriggers.push_back("HLT_CentralPFJet80_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v");
-notinMCtriggers.push_back("HLT_DiCentralJet20_CaloMET65_BTagCSV07_PFMHT80_v");
-notinMCtriggers.push_back("HLT_DiCentralJet20_BTagIP_MET65_HBHENoiseFiltered_dPhi1_v");
-
- notinMCtriggers.push_back("DiCentralJet");  //get rid of all dijet stuff
-notinMCtriggers.push_back("DiCentralPFJet");
-
- for(unsigned int j=0; j< mettriggers.size();j++){
-   for(unsigned int i=0;i<notinMCtriggers.size();i++){
-     if( ((TString)mettriggers[j]).Contains(notinMCtriggers[i]) ){
-       mettriggers[j]="notrig";
-     }
-   }
- }
 
  if(checktriggerpaths){
    cout << "used MET triggers: " << endl;
@@ -319,32 +214,25 @@ notinMCtriggers.push_back("DiCentralPFJet");
   vector<pair<string, double> >dileptriggers;
 
   if(mode=="ee"){
-    pair<string, double> trig1("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",193805.);
+    pair<string, double> trig1("Ele17_SW_TightCaloEleId_Ele8_HE_L1R_v",999999.);
     dileptriggers.push_back(trig1);
     pair<string, double> trig2("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999.);
     dileptriggers.push_back(trig2);
+    pair<string, double> trig3("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v",999999.);
+    dileptriggers.push_back(trig3);
 
   }
   if(mode=="mumu"){
-    pair<string, double> trig1("HLT_Mu17_Mu8_v",193805);
+    pair<string, double> trig1("HLT_DoubleMu7",163869);
     dileptriggers.push_back(trig1);
-    pair<string, double> trig2("HLT_Mu17_TkMu8_v",193805);
+    pair<string, double> trig2("HLT_Mu13_Mu8_v",999999);
     dileptriggers.push_back(trig2);
-    pair<string, double> trig3("HLT_Mu17_Mu8_v",999999);
-    dileptriggers.push_back(trig3);
-    pair<string, double> trig4("HLT_Mu17_TkMu8_v",999999);
-    dileptriggers.push_back(trig4);
   }
 
   if(mode=="emu"){
-    pair<string, double> trig1("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",193805);
+    pair<string, double> trig1("bla",193805);
     dileptriggers.push_back(trig1);
-    pair<string, double> trig2("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",193805);
-    dileptriggers.push_back(trig2);
-    pair<string, double> trig3("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999);
-    dileptriggers.push_back(trig3);
-    pair<string, double> trig4("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999);
-    dileptriggers.push_back(trig4);
+    
   }
 
   vector<string> dileptriggersMC; // the version numbers where set as wildcards, so if statement obsolete!
@@ -353,12 +241,11 @@ notinMCtriggers.push_back("DiCentralPFJet");
       dileptriggersMC.push_back("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
     }
     if(mode=="mumu"){
-      dileptriggersMC.push_back("HLT_Mu17_Mu8_v");
-      dileptriggersMC.push_back("HLT_Mu17_TkMu8_v");
+      dileptriggersMC.push_back("HLT_DoubleMu7");
     }
     if(mode=="emu"){
-      dileptriggersMC.push_back("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
-      dileptriggersMC.push_back("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
+      //    dileptriggersMC.push_back("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
+      //   dileptriggersMC.push_back("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
     }
     //  }
   /*  else{
@@ -382,8 +269,10 @@ notinMCtriggers.push_back("DiCentralPFJet");
   ///////////PU reweighting
   
   PUReweighter PUweight;
-  if(isMC) PUweight.setDataTruePUInput(datapileup);
-  if(isMC)PUweight.setMCDistrSum12();
+  if(isMC){ PUweight.setDataTruePUInput(datapileup);
+    PUweight.setMCDistrFall11();
+
+  }
 
   vector<NTMuon> * pMuons = 0;
   t1->SetBranchAddress("NTMuons",&pMuons); 
@@ -1091,39 +980,37 @@ void analyze(){
   triggerAnalyzer ta_mumuMC=ta_mumud;
   triggerAnalyzer ta_emuMC=ta_emud;
 
-  TString datadir="/scratch/hh/dust/naf/cms/user/kieseler/trees_8TeV_ES/";
+  TString datadir="/scratch/hh/dust/naf/cms/user/kieseler/trees_7TeV_ES/";
 
   std::vector<TString> datafiles;
-  datafiles  << datadir + "tree_8TeV_MET_runA_06Aug.root" 
-	     << datadir + "tree_8TeV_MET_runA_13Jul.root" 
-    	     << datadir + "tree_8TeV_MET_runB_13Jul.root" 
-    	     << datadir + "tree_8TeV_MET_runC_24Aug.root" 
-   	     << datadir + "tree_8TeV_MET_runC_prompt.root";
+  datafiles  << datadir + "tree_7TeV_METBTag_runA_08Nov.root"
+	     << datadir + "tree_7TeV_MET_runB_03Feb.root";
  
 
   const char * pileuproot = "/afs/naf.desy.de/user/k/kieseler/HCP2/TtZAnalysis/Data/HCP.json.txt_PU.root";//HCP_PU.root";//HCP_5.3fb_PU.root";
 
-  if(breakat5fb) pileuproot = "/scratch/hh/dust/naf/cms/user/kieseler/GridControl_workingDir/dontdel_MET_24Oct/HCP_5.3fb_PU.root";
+  //  if(breakat5fb) pileuproot = "/scratch/hh/dust/naf/cms/user/kieseler/GridControl_workingDir/dontdel_MET_24Oct/ReRecoNov2011_2.json_PU.root";
   //////// NOT REALLY VALID PU reweighting!!!
 
   TChain * datachain=makeChain(datafiles);
 
 
-  vector<double> eed=ta_eed.Eff("ee",    datachain,pileuproot, false,getTeX);
-  vector<double> mumud=ta_mumud.Eff("mumu",  datachain,pileuproot, false,getTeX);
-  vector<double> emud= ta_emud.Eff("emu",   datachain,pileuproot, false,getTeX);
+  vector<double> eed=ta_eed.Eff("ee",       datachain,pileuproot, false,getTeX);
+  vector<double> mumud=ta_mumud.Eff("mumu", datachain,pileuproot, false,getTeX);
+  vector<double> emud;//= ta_emud.Eff("emu",   datachain,pileuproot, false,getTeX);
+  emud << 0 << 0 << 0;
 
-  TString MCdir="/scratch/hh/dust/naf/cms/user/kieseler/trees_8TeV/";
+  TString MCdir="/scratch/hh/dust/naf/cms/user/kieseler/trees_7TeV/";
 
   std::vector<TString> eemcfiles,mumumcfiles,emumcfiles;
-  eemcfiles << MCdir+"tree_8TeV_eettbar.root"
-    	    << MCdir+"tree_8TeV_eettbarviatau.root" ;
+  eemcfiles << MCdir+"tree_7TeV_eettbar.root"
+    	    << MCdir+"tree_7TeV_eettbarviatau.root" ;
 
-  mumumcfiles << MCdir+"tree_8TeV_mumuttbar.root" 
-    	      << MCdir+"tree_8TeV_mumuttbarviatau.root" ;
+  mumumcfiles << MCdir+"tree_7TeV_mumuttbar.root" 
+    	      << MCdir+"tree_7TeV_mumuttbarviatau.root" ;
 
-  emumcfiles << MCdir+"tree_8TeV_emuttbar.root"
-    	     << MCdir+"tree_8TeV_emuttbarviatau.root";
+  emumcfiles << MCdir+"tree_7TeV_emuttbar.root"
+    	     << MCdir+"tree_7TeV_emuttbarviatau.root";
 
   // changed back again  std::cout << "SET UP ONLY FOR DIRECT DECAY!!!!!!! this version is NOT checked in in cvs" << std::endl;
 
@@ -1133,8 +1020,8 @@ void analyze(){
   
   vector<double> eeMC=ta_eeMC.Eff("ee",  eechain  ,pileuproot,true,getTeX);
   vector<double> mumuMC=ta_mumuMC.Eff("mumu", mumuchain ,pileuproot,true,getTeX);
-  vector<double> emuMC=ta_emuMC.Eff("emu",  emuchain ,pileuproot,true,getTeX);
-
+  vector<double> emuMC;//=ta_emuMC.Eff("emu",  emuchain ,pileuproot,true,getTeX);
+  emuMC << 0 << 0 << 0;
 
   cout.precision(3);
   // get correction factors
@@ -1387,7 +1274,7 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
   scalefactor.writeTH1D("TH scalefactor jetmulti incl corrErr",false);
 
   f6->Close();
-
+  /*
   TFile* f7 = new TFile("triggerSummary_emu.root","RECREATE");
 
   ta_emud.writeAll();
@@ -1483,10 +1370,10 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
 
   f7->Close();
 
-  
+  */
 }
 
-void do_triggerAnalyzer(){
+void do_triggerAnalyzer11(){
   analyze();
   miniscript(); //makes plots nice and puts output to directory
 

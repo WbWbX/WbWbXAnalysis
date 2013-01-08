@@ -1,10 +1,10 @@
 #include "TtZAnalysis/Tools/interface/containerStackVector.h"
 #include "TtZAnalysis/Tools/interface/containerUF.h"
 #include "TtZAnalysis/Tools/interface/miscUtils.h"
+#include <cstdlib>
 
 top::container1DStackVector rescaleDY(top::container1DStackVector vec, std::vector<TString> contributions, double scalescale=1, bool textout=true, TString identifier="dilepton invariant massZ "){
-  return vec;
-
+ 
   std::vector<TString> ident;
   std::vector<double> scales;
   for(int i=5;i<=9;i++){
@@ -30,13 +30,10 @@ top::container1DStackVector rescaleDY(top::container1DStackVector vec, std::vect
     rescaled.multiplyNorms(contributions.at(i), scales, ident);
   }
   return rescaled;
-}
-
-void addBGScalingErrors(){
-
-
 
 }
+
+
 
 //////// change all these 4 thingies to a vector!! is easier to handle (esp if emu gets involved for some reason)
 
@@ -55,10 +52,10 @@ void getCrossSections(){
 
   TString inputdir="";
 
-  TFile * inputFile         = new TFile("tauallE_2012-11-22_17:51/analysis_output.root");
+  TFile * inputFile         = new TFile("syncOv_2012-12-06_14:43/analysis_output.root");
 
-  double lumi7TeV=5; //lumi uncertainty is added in Analyzer.C
-  double lumi8TeV=12;
+  double lumi7TeV=5100; //lumi uncertainty is added in Analyzer.C
+  double lumi8TeV=12100;
 
   TString ttstep="8";  // 8: 1btag, 9: 2btag, 10, not yet ... all only have one bin
 
@@ -72,14 +69,14 @@ void getCrossSections(){
 
   container1DStackVector tempvec,tempvec2;
 
-  tempvec.loadFromTree(storedObjects, "8TeV_default_ee_ee");
+  tempvec.loadFromTree(storedObjects, "8TeV_btag_ee_ee");
   vecsfull << tempvec;
-  tempvec.loadFromTree(storedObjects, "7TeV_default_ee_ee");
+  //  tempvec.loadFromTree(storedObjects, "7TeV_btag_ee_ee");
+  //  vecsfull << tempvec;
+  tempvec.loadFromTree(storedObjects, "8TeV_btag_mumu_mumu");
   vecsfull << tempvec;
-  tempvec.loadFromTree(storedObjects, "8TeV_default_mumu_mumu");
-  vecsfull << tempvec;
-  tempvec.loadFromTree(storedObjects, "7TeV_default_mumu_mumu");
-  vecsfull << tempvec;
+  //  tempvec.loadFromTree(storedObjects, "7TeV_btag_mumu_mumu");
+  //  vecsfull << tempvec;
 
   
 	   
@@ -90,20 +87,25 @@ void getCrossSections(){
 
   //////do the DY rescaling
 
-
-  TFile * outfile = new TFile("fullcontrol_and_xsec_graphs.root","RECREATE");
+  TString outfile="fullcontrol_and_xsec_graphs.root";
+  TFile * tempfile = new TFile(outfile,"RECREATE");
+  tempfile->Close();
+  delete tempfile;
 
   vector<TString> dycontributions;
   dycontributions << "Z#rightarrowll" << "DY#rightarrowll";
 
   for(unsigned int i=0;i<vecsfull.size();i++){
     //scale DY
+
+    cout << "scaling DY for " << vecsfull.at(i).getName() << endl;
+
     container1DStackVector temp=rescaleDY(vecsfull.at(i), dycontributions);
     temp.setName(temp.getName() + "_dyScaled");
-    temp.writeAllToTFile  (outfile);
+    temp.writeAllToTFile  (outfile,false);
     dyVecFull << temp;
 
-    continue;
+    // continue;
     //vary DY
     container1DStackVector scaledtempup,scaledtempdown;
     scaledtempup   = rescaleDY(vecsfull.at(i), dycontributions, 1.5, false);
@@ -120,13 +122,51 @@ void getCrossSections(){
       temp.addMCErrorStackVector("8TeV_DY_down",scaledtempdown);
     }
     temp.setName(temp.getName() + "_dyErrors");
-    temp.writeAllToTFile  (outfile);
+    temp.writeAllToTFile  (outfile,false);
     dyVecFullWithDYErrors << temp;
 
   }
 
 
+  vector<container1DStackVector> fullbgerrors=dyVecFullWithDYErrors;
 
+
+  for(unsigned int i=0;i<dyVecFullWithDYErrors.size();i++){
+
+    TString add="8TeV_";
+    if(dyVecFullWithDYErrors.at(i).getName().Contains("7TeV"))
+      add="7TeV_";
+
+    cout << "doing background variation for " << dyVecFullWithDYErrors.at(i).getName() << endl;
+
+    vector<TString> bgcontr; bgcontr << "t#bar{t}bg" << "singleTop" << "VV" << "Wjets" << "DY#rightarrow#tau#tau";
+    vector<double> scales;   scales  << 0.3          << 0.3         << 0.3  << 0.3     << 0.5;
+
+
+    container1DStackVector temp3=dyVecFullWithDYErrors.at(i);
+
+    for(unsigned int j=0;j<bgcontr.size();j++){
+
+      container1DStackVector temp=dyVecFullWithDYErrors.at(i);
+      container1DStackVector temp2=dyVecFullWithDYErrors.at(i);
+      
+      temp.multiplyNorm( bgcontr.at(j),1+scales.at(j),"step "+ttstep);
+      temp2.multiplyNorm(bgcontr.at(j),1-scales.at(j),"step "+ttstep);
+      
+      //Z selection: step 20 just scale by 100%
+      
+      temp.multiplyNorm( bgcontr.at(j),2,"step 20");
+      temp2.multiplyNorm(bgcontr.at(j),0,"step 20");
+      
+      //  cout <<       bgcontr.at(j) << endl;
+
+      temp3.addMCErrorStackVector(add+bgcontr.at(j)+"_up",temp);
+      temp3.addMCErrorStackVector(add+bgcontr.at(j)+"_down",temp2);
+    }
+    temp3.setName(temp3.getName() + "_BGErrors");
+    fullbgerrors << temp3;
+    temp3.writeAllToTFile  (outfile,false);
+  }
 
 
   //// fill stuff to containerUF and do the "unfolding" selected distr is the same for Z and tt after gen filter?! 
@@ -156,30 +196,35 @@ void getCrossSections(){
     xsecs << tempZ;
   }
 
-
+  for(unsigned int i=0;i<xsecs.size();i++){
+    cout << "\n" << xsecs.at(i).getName() << endl;
+    xsecs.at(i).coutBinContents();
+    container1DUF sys = xsecs.at(i).breakDownRelSystematicsInBin(1);
+    sys.coutBinContents();
+  }
 
   //do other stuff by looping over xsec.at(i) and as for .Contains(7TeV / 8TeV) && Contains(Z__ bzw ttbar__) (ee, mumu)
 
-  vector<TString> s7TeVee,s7TeVmumu,s8TeVee,s8TeVmumu;
-  s7TeVee   << "ee"   << "7TeV";
-  s7TeVmumu << "mumu" << "7TeV";
-  s8TeVee << "ee" << "8TeV";
-  s8TeVmumu << "mumu" << "8TeV";
+  // vector<TString> s7TeVee,s7TeVmumu,s8TeVee,s8TeVmumu;
+  // s7TeVee   << "ee"   << "7TeV";
+  // s7TeVmumu << "mumu" << "7TeV";
+  // s8TeVee << "ee" << "8TeV";
+  // s8TeVmumu << "mumu" << "8TeV";
 
-  for(unsigned int i=0;i<xsecs.size();i++){
-    for(unsigned int j=0;j<xsecs.size();j++){
-      /// do the double ratios
-      if(xsecs.at(i).nameContains(s7TeVee)){
-	//	cout << s7TeVee << endl;
-	//	xsecs.at(i).coutBinContents(); 
-      }
-      else if(xsecs.at(i).nameContains(s8TeVee)){
-	//	cout << s8TeVee << endl;
-	xsecs.at(i).coutBinContents(); 
-      }
+  // for(unsigned int i=0;i<xsecs.size();i++){
+  //   for(unsigned int j=0;j<xsecs.size();j++){
+  //     /// do the double ratios
+  //     if(xsecs.at(i).nameContains(s7TeVee)){
+  // 	//	cout << s7TeVee << endl;
+  // 	//	xsecs.at(i).coutBinContents(); 
+  //     }
+  //     else if(xsecs.at(i).nameContains(s8TeVee)){
+  // 	//	cout << s8TeVee << endl;
+  // 	xsecs.at(i).coutBinContents(); 
+  //     }
       
-    }
-  }
+  //   }
+  // }
 
 
   //// because I am curious, double ratio ;)
@@ -217,6 +262,5 @@ void getCrossSections(){
   mumuinputfile7TeV->Close();
     */
 
-  outfile->Close();
-  delete outfile;
+ 
 }
