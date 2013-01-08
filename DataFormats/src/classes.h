@@ -9,6 +9,7 @@
 #include "../interface/NTIsolation.h"
 #include "../interface/NTTrack.h"
 #include "../interface/NTSuClu.h"
+#include "../interface/NTTrigger.h"
 
 #include "../interface/NTInflatedMuon.h"
 #include "../interface/NTInflatedElectron.h"
@@ -37,6 +38,8 @@ namespace
     std::vector<top::NTTrack> dummy18;
     top::NTSuClu dummy19;
     std::vector<top::NTSuClu> dummy20;
+    top::NTTrigger dummy21;
+    std::vector<top::NTTrigger> dummy22;
 
     top::NTInflatedMuon ihih;
     std::vector<top::NTInflatedMuon> kkk;
