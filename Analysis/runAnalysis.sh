@@ -10,5 +10,7 @@ mkdir $dirstring
 cd $dirstring
 cp ../*inputfiles.txt .
 sed 's/runInNotQuietMode=true/runInNotQuietMode=false/' <../Analyzer.C > Analyzer.C
+sed 's/testMode=true/testMode=false/' Analyzer.C
+
 nohup root -l -b -q Analyzer.C++ > output.txt
 echo "done with ${dirstring}"

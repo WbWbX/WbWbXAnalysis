@@ -14,6 +14,8 @@
 
 #include <stdlib.h>
 
+bool testmode=true;
+
 namespace top{
   typedef std::vector<top::NTElectron>::iterator NTElectronIt;
   typedef std::vector<top::NTMuon>::iterator NTMuonIt;
@@ -53,7 +55,7 @@ public:
   void setName(TString Name, TString additionalinfo){name_=Name;additionalinfo_=additionalinfo;analysisplots_->setName(Name);}
   void setLumi(double Lumi){lumi_=Lumi;}
 
-  void replaceInName(TString replace, TString with){name_.ReplaceAll(replace,with);}
+  void replaceInName(TString replace, TString with){name_.ReplaceAll(replace,with);analysisplots_->setName(name_);}
   TString getName(){return name_;}
 
   void analyze(TString, TString, int, double);
@@ -81,6 +83,8 @@ public:
 
 private:
 
+  void copyAll(const MainAnalyzer &);
+
   bool isInInfo(TString s){return additionalinfo_.Contains(s);}
   bool triggersContain(TString , top::NTEvent *);
 
@@ -90,7 +94,7 @@ private:
   TString datasetdirectory_;
   double lumi_;
 
-  const char * filelist_;
+  TString filelist_;
   
   top::PUReweighter * puweighter_;
   top::JERAdjuster * jeradjuster_;
@@ -120,7 +124,7 @@ void MainAnalyzer::start(){
   else cout << "warning analysisplots_ is null" << endl;
   analysisplots_->setName(name_+"_"+additionalinfo_);
   std::cout << "Starting analysis for " << name_ << std::endl;
-  ifstream inputfiles (filelist_);
+  ifstream inputfiles (filelist_.Data());
   string filename;
   string legentry;
   int color;
@@ -145,7 +149,7 @@ void MainAnalyzer::start(){
   
 }
 
-MainAnalyzer::MainAnalyzer(const MainAnalyzer & analyzer){
+void MainAnalyzer::copyAll(const MainAnalyzer & analyzer){
   name_=analyzer.name_;
   lumi_=analyzer.lumi_;
   additionalinfo_=analyzer.additionalinfo_;
@@ -160,9 +164,13 @@ MainAnalyzer::MainAnalyzer(const MainAnalyzer & analyzer){
   showstatusbar_=analyzer.showstatusbar_;
 }
 
+MainAnalyzer::MainAnalyzer(const MainAnalyzer & analyzer){
+  copyAll(analyzer);
+}
+
 MainAnalyzer & MainAnalyzer::operator = (const MainAnalyzer & analyzer){
-  *this=MainAnalyzer(analyzer);
-  return *this;
+   copyAll(analyzer);
+   return *this;
 }
 
 void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, double norm){ // do analysis here and store everything in analysisplots_
@@ -458,6 +466,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   // start main loop /////////////////////////////////////////////////////////
   Long64_t nEntries=t->GetEntries();
   if(norm==0) nEntries=0; //skip for norm0
+
+  if(testMode) nEntries=100;
+
   for(Long64_t entry=0;entry<nEntries;entry++){
     if(showstatusbar_) displayStatusBar(entry,nEntries);
     t->GetEntry(entry);
@@ -1040,6 +1051,8 @@ void Analyzer(){
     treedir="/Users/kiesej/CMS_data_nobk";
   }
 
+  bool onlytest=false;
+
   //prepare defaults and get btag SF
   
   MainAnalyzer mumu_8TeV("8TeV_nobtag_mumu","mumu");
@@ -1051,7 +1064,7 @@ void Analyzer(){
   mumu_8TeV.getJECUncertainties()->setFile(cmssw_base+"/src/TtZAnalysis/Data/Summer12_V2_DATA_AK5PF_UncertaintySources.txt");
   mumu_8TeV.getPUReweighter()->setMCDistrSum12();
   mumu_8TeV.getBTagSF()->setMakeEff(true);
-  mumu_8TeV.start();
+  if(!onlytest) mumu_8TeV.start();
   TFile * btagfile = new TFile("mumu_8TeV_btags.root","RECREATE");
   mumu_8TeV.getBTagSF()->writeToTFile(btagfile);
   btagfile->Close();
@@ -1059,14 +1072,14 @@ void Analyzer(){
   mumu_8TeV.getPlots()->writeAllToTFile(outfile,true);
   mumu_8TeV.getBTagSF()->setMakeEff(false);
   mumu_8TeV.setName("8TeV_default_mumu","mumu");
-  mumu_8TeV.start();
+  if(!onlytest) mumu_8TeV.start();
   mumu_8TeV.getPlots()->writeAllToTFile(outfile,false);
  
   MainAnalyzer ee_8TeV=mumu_8TeV;
   ee_8TeV.setFileList("ee_8TeV_inputfiles.txt");
   ee_8TeV.setName("8TeV_nobtag_ee","ee");
   ee_8TeV.getBTagSF()->setMakeEff(true);
-  ee_8TeV.start();
+  if(!onlytest) ee_8TeV.start();
   btagfile = new TFile("ee_8TeV_btags.root","RECREATE");
   ee_8TeV.getBTagSF()->writeToTFile(btagfile);
   btagfile->Close();
@@ -1074,11 +1087,11 @@ void Analyzer(){
   ee_8TeV.getPlots()->writeAllToTFile(outfile,false);
   ee_8TeV.getBTagSF()->setMakeEff(false);
   ee_8TeV.setName("8TeV_default_ee","ee");
-  ee_8TeV.start();
+  if(!onlytest) ee_8TeV.start();
   ee_8TeV.getPlots()->writeAllToTFile(outfile,false);
   
-  // to have something to play with prepare the nobtag 7 TeV analyzer
-  MainAnalyzer ee_7TeV;//=analyzermumu;
+  //to have something to play with prepare the nobtag 7 TeV analyzer
+  MainAnalyzer ee_7TeV;
   ee_7TeV.setFileList("ee_7TeV_inputfiles.txt");
   ee_7TeV.setLumi(lumi7TeV);
   ee_7TeV.setShowStatusBar(runInNotQuietMode);
@@ -1089,7 +1102,7 @@ void Analyzer(){
   ee_7TeV.getJECUncertainties()->setFile(cmssw_base+"/src/TtZAnalysis/Data/JEC11_V12_AK5PF_UncertaintySources.txt");
   ee_7TeV.getBTagSF()->setMakeEff(true);
   ee_7TeV.getBTagSF()->setIs2011(true);
-  ee_7TeV.start();
+  if(!onlytest) ee_7TeV.start();
   btagfile = new TFile("ee_7TeV_btags.root","RECREATE");
   ee_7TeV.getBTagSF()->writeToTFile(btagfile);
   btagfile->Close();
@@ -1097,14 +1110,14 @@ void Analyzer(){
   ee_7TeV.getPlots()->writeAllToTFile(outfile,false);
   ee_7TeV.getBTagSF()->setMakeEff(false);
   ee_7TeV.setName("7TeV_default_ee","ee");
-  ee_7TeV.start();
+  if(!onlytest) ee_7TeV.start();
   ee_7TeV.getPlots()->writeAllToTFile(outfile,false);
   
   MainAnalyzer mumu_7TeV=ee_7TeV;
   mumu_7TeV.setFileList("mumu_7TeV_inputfiles.txt");
   mumu_7TeV.setName("7TeV_nobtag_mumu","mumu");
   mumu_7TeV.getBTagSF()->setMakeEff(true);
-  mumu_7TeV.start();
+  if(!onlytest) mumu_7TeV.start();
   btagfile = new TFile("all_btags.root","RECREATE");
   mumu_7TeV.getBTagSF()->writeToTFile(btagfile);
   btagfile->Close();
@@ -1112,7 +1125,7 @@ void Analyzer(){
   mumu_7TeV.getPlots()->writeAllToTFile(outfile,false);
   mumu_7TeV.getBTagSF()->setMakeEff(false);
   mumu_7TeV.setName("7TeV_default_mumu","mumu");
-  mumu_7TeV.start();
+  if(!onlytest) mumu_7TeV.start();
   mumu_7TeV.getPlots()->writeAllToTFile(outfile,false);
 
   
@@ -1122,7 +1135,7 @@ void Analyzer(){
   full_ana << ee_7TeV << mumu_7TeV << ee_8TeV << mumu_8TeV;
   full_errana << ee_7TeV << mumu_7TeV << ee_8TeV << mumu_8TeV;
 
-
+  cout << "doing systematics" << endl;
 
   for(unsigned int i=0; i<full_ana.size(); i++){
 
@@ -1132,60 +1145,63 @@ void Analyzer(){
 
 
     //b systematics (correlated)
+    cout << "doing b-tag systematics" << endl;
 
     MainAnalyzer temp=full_ana.at(i);
     temp.getBTagSF()->setSystematic("light up");
     temp.replaceInName("default","btag_light_up");
-    temp.start();
+    if(!onlytest) temp.start();
     temp.getPlots()->writeAllToTFile(outfile,false);
     full_errana.at(i).getPlots()->addMCErrorStackVector("btag_light_up",*temp.getPlots());
 
     temp=full_ana.at(i);
     temp.getBTagSF()->setSystematic("light down");
     temp.replaceInName("default","btag_light_down");
-    temp.start();
+    if(!onlytest) temp.start();
     temp.getPlots()->writeAllToTFile(outfile,false);
     full_errana.at(i).getPlots()->addMCErrorStackVector("btag_light_down",*temp.getPlots());
 
     temp=full_ana.at(i);
     temp.getBTagSF()->setSystematic("heavy up");
     temp.replaceInName("default","btag_heavy_up");
-    temp.start();
+    if(!onlytest) temp.start();
     temp.getPlots()->writeAllToTFile(outfile,false);
     full_errana.at(i).getPlots()->addMCErrorStackVector("btag_heavy_up",*temp.getPlots());
 
     temp=full_ana.at(i);
     temp.getBTagSF()->setSystematic("heavy down");
     temp.replaceInName("default","btag_heavy_down");
-    temp.start();
+    if(!onlytest) temp.start();
     temp.getPlots()->writeAllToTFile(outfile,false);
     full_errana.at(i).getPlots()->addMCErrorStackVector("btag_heavy_down",*temp.getPlots());
 
 
     // JER correlated
+    cout << "doing JER systematics" << endl;
 
     temp=full_ana.at(i);
     temp.replaceInName("default","JER_up");
     temp.getJERAdjuster()->setSystematics("up");
-    temp.start();
+    if(!onlytest) temp.start();
     temp.getPlots()->writeAllToTFile(outfile,false);
     full_errana.at(i).getPlots()->addMCErrorStackVector("JER_up",*temp.getPlots());
 
     temp=full_ana.at(i);
     temp.replaceInName("default","JER_down");
     temp.getJERAdjuster()->setSystematics("down");
-    temp.start();
+    if(!onlytest) temp.start();
     temp.getPlots()->writeAllToTFile(outfile,false);
     full_errana.at(i).getPlots()->addMCErrorStackVector("JER_down",*temp.getPlots());
 
 
     // JES correlated
+    cout << "doing JES systematics" << endl;
 
     temp=full_ana.at(i);
     temp.replaceInName("default","JES_up");
     temp.getJECUncertainties()->sources() << 1 << 2 << 3 << 4 << 5 << 6 << 7 << 8 << 9 << 10 << 12 << 13 << 15;
     temp.getJECUncertainties()->setVariation("up");
-    temp.start();
+    if(!onlytest) temp.start();
     temp.getPlots()->writeAllToTFile(outfile,false);
     full_errana.at(i).getPlots()->addMCErrorStackVector("JES_corr_up",*temp.getPlots());
 
@@ -1193,7 +1209,7 @@ void Analyzer(){
     temp.replaceInName("default","JES_down");
     temp.getJECUncertainties()->sources() << 1 << 2 << 3 << 4 << 5 << 6 << 7 << 8 << 9 << 10 << 12 << 13 << 15;
     temp.getJECUncertainties()->setVariation("down");
-    temp.start();
+    if(!onlytest) temp.start();
     temp.getPlots()->writeAllToTFile(outfile,false);
     full_errana.at(i).getPlots()->addMCErrorStackVector("JES_corr_down",*temp.getPlots());
 
@@ -1203,7 +1219,7 @@ void Analyzer(){
     temp.replaceInName("default","JES_"+energystring+"_up");
     temp.getJECUncertainties()->sources() << 0 << 11 << 14;
     temp.getJECUncertainties()->setVariation("up");
-    temp.start();
+    if(!onlytest) temp.start();
     temp.getPlots()->writeAllToTFile(outfile,false);
     full_errana.at(i).getPlots()->addMCErrorStackVector("JES_"+energystring+"_up",*temp.getPlots());
 
@@ -1211,11 +1227,13 @@ void Analyzer(){
     temp.replaceInName("default","JES_"+energystring+"_down");
     temp.getJECUncertainties()->sources() << 0 << 11 << 14;
     temp.getJECUncertainties()->setVariation("down");
-    temp.start();
+    if(!onlytest) temp.start();
     temp.getPlots()->writeAllToTFile(outfile,false);
     full_errana.at(i).getPlots()->addMCErrorStackVector("JES_"+energystring+"_down",*temp.getPlots());
 
     //PileUp
+    cout << "doing PU systematics" << endl;
+
     //7 TeV
     TString pufile;
 
@@ -1226,7 +1244,7 @@ void Analyzer(){
     temp=full_ana.at(i);
     temp.replaceInName("default","PU_"+energystring+"_up");
     temp.getPUReweighter()->setDataTruePUInput(pufile);
-    temp.start();
+    if(!onlytest) if(!onlytest) temp.start();
     temp.getPlots()->writeAllToTFile(outfile,false);
     full_errana.at(i).getPlots()->addMCErrorStackVector("PU_"+energystring+"_up",*temp.getPlots());
     
@@ -1237,7 +1255,7 @@ void Analyzer(){
     temp=full_ana.at(i);
     temp.replaceInName("default","PU_"+energystring+"_down");
     temp.getPUReweighter()->setDataTruePUInput(pufile);
-    temp.start();
+    if(!onlytest) temp.start();
     temp.getPlots()->writeAllToTFile(outfile,false);
     full_errana.at(i).getPlots()->addMCErrorStackVector("PU_"+energystring+"_down",*temp.getPlots());
 
@@ -1247,8 +1265,8 @@ void Analyzer(){
  /*
 full_ana.at(i).
   */
-
-
+    cout << "writing full error output" << endl;
+    full_errana.at(i).replaceInName("default","allErrors");
     full_errana.at(i).getPlots()->writeAllToTFile(outfile,false);
   }
 
