@@ -25,6 +25,7 @@ options.register ('inputScript','TtZAnalysis.Configuration.samples.mc.TTJets_Mas
 options.register ('json','nojson',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"json files")
 options.register ('isSync',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"switch on for sync")
 options.register('samplename', 'standard', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "which sample to run over - obsolete")
+options.register ('laseroff',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"use ECal Laser filter")
 
 import sys
 
@@ -47,6 +48,8 @@ includePDFWeights=options.includePDF     # False
 PDF=options.PDF                          # cteq65
 inputScript=options.inputScript          # TtZAnalysis.Configuration.samples.mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12-PU_S7_START52_V9-v2_cff
 json=options.json                        # give full path!!json files in TtZAnalysis/Data/data ONLY needed with nafjobsplitter
+laseroff=options.laseroff
+
 
 crab=True # for GC/Crab
 
@@ -306,11 +309,12 @@ else:
                                              process.allLeps *
                                              process.preCutPUInfo *
                                              process.requireMinLeptons)
-    if not is2011:
+    if not is2011 and not laseroff:
         process.load('RecoMET.METFilters.ecalLaserCorrFilter_cfi')
         getattr(process, 'preFilterSequence').replace(process.preCutPUInfo,
                                                       process.ecalLaserCorrFilter *
                                                       process.preCutPUInfo)
+        print "\n\nusing ECal Filter\n\n"
 
     
     
