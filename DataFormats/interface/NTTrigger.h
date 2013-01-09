@@ -67,7 +67,7 @@ namespace top{
     }
 
 
-    // private:
+    private:
 
     std::vector<bool> fired_;
 
