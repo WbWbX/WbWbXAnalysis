@@ -467,7 +467,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   Long64_t nEntries=t->GetEntries();
   if(norm==0) nEntries=0; //skip for norm0
 
-  if(testMode) nEntries=100;
+  if(testmode) nEntries=100;
 
   for(Long64_t entry=0;entry<nEntries;entry++){
     if(showstatusbar_) displayStatusBar(entry,nEntries);
