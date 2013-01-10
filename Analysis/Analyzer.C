@@ -29,6 +29,40 @@ namespace top{
 //// run in batch mode otherwise it is dramatically slowed down by all the drawing stuff; the latter might also produce seg violations in the canvas libs.
 //// name Z contribution "Z" or something similar for generator stuff and so on
 
+
+void rescaleDY(top::container1DStackVector & vec, std::vector<TString> contributions, double scalescale=1, bool textout=true, TString identifier="dilepton invariant massZ "){
+ 
+  std::vector<TString> ident;
+  std::vector<double> scales;
+  for(int i=5;i<=9;i++){
+    TString stepstring="step "+toTString(i);
+    double dymc = 0;
+    std::vector<TString> allbutdyanddata;
+
+    for(unsigned int j=0;j<contributions.size();j++){
+      dymc += vec.getStack(identifier+stepstring).getContribution(contributions.at(j)).integral();
+      allbutdyanddata << contributions.at(j);
+    }
+    double d = vec.getStack(identifier+stepstring).getContribution("data").integral();
+    allbutdyanddata << "data";
+    double rest = vec.getStack(identifier+stepstring).getContributionsBut(allbutdyanddata).integral();
+    if(rest==0) rest=1;
+    double scale = (d-rest)/dymc;
+    scales << scale*scalescale;
+    ident << stepstring;
+    if(textout) std::cout << "Scalefactor for "<< vec.getName() << " " << stepstring << ": " << scale << std::endl;
+  }
+  //  top::container1DStackVector rescaled=vec;
+  for(unsigned int i=0;i<contributions.size();i++){
+    vec.multiplyNorms(contributions.at(i), scales, ident);
+  }
+  // return rescaled;
+
+}
+
+
+
+
 class MainAnalyzer{
 
 public:
@@ -1051,6 +1085,10 @@ void Analyzer(){
     treedir="/Users/kiesej/CMS_data_nobk";
   }
 
+
+  vector<TString> dycontributions;
+  dycontributions << "Z#rightarrowll" << "DY#rightarrowll";
+
   bool onlytest=false;
 
   //prepare defaults and get btag SF
@@ -1073,6 +1111,7 @@ void Analyzer(){
   mumu_8TeV.getBTagSF()->setMakeEff(false);
   mumu_8TeV.setName("8TeV_default_mumu","mumu");
   if(!onlytest) mumu_8TeV.start();
+  rescaleDY(*mumu_8TeV.getPlots(),dycontributions);
   mumu_8TeV.getPlots()->writeAllToTFile(outfile,false);
  
   MainAnalyzer ee_8TeV=mumu_8TeV;
@@ -1088,6 +1127,7 @@ void Analyzer(){
   ee_8TeV.getBTagSF()->setMakeEff(false);
   ee_8TeV.setName("8TeV_default_ee","ee");
   if(!onlytest) ee_8TeV.start();
+  rescaleDY(*ee_8TeV.getPlots(),dycontributions);
   ee_8TeV.getPlots()->writeAllToTFile(outfile,false);
   
   //to have something to play with prepare the nobtag 7 TeV analyzer
@@ -1111,6 +1151,7 @@ void Analyzer(){
   ee_7TeV.getBTagSF()->setMakeEff(false);
   ee_7TeV.setName("7TeV_default_ee","ee");
   if(!onlytest) ee_7TeV.start();
+  rescaleDY(*ee_7TeV.getPlots(),dycontributions);
   ee_7TeV.getPlots()->writeAllToTFile(outfile,false);
   
   MainAnalyzer mumu_7TeV=ee_7TeV;
@@ -1126,6 +1167,7 @@ void Analyzer(){
   mumu_7TeV.getBTagSF()->setMakeEff(false);
   mumu_7TeV.setName("7TeV_default_mumu","mumu");
   if(!onlytest) mumu_7TeV.start();
+  rescaleDY(*mumu_7TeV.getPlots(),dycontributions);
   mumu_7TeV.getPlots()->writeAllToTFile(outfile,false);
 
   
