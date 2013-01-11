@@ -101,6 +101,7 @@ public:
   top::container1DStackVector * getPlots(){return analysisplots_;}
 
   void start();
+  void start(TString);
 
   void clear(){analysisplots_->clear();}
 
@@ -182,6 +183,7 @@ void MainAnalyzer::start(){
   }
   
 }
+
 
 void MainAnalyzer::copyAll(const MainAnalyzer & analyzer){
   name_=analyzer.name_;
@@ -1083,6 +1085,10 @@ void Analyzer(){
   if( scram_arch.Contains("osx")){
     cout << "running locally" << endl;
     treedir="/Users/kiesej/CMS_data_nobk";
+  }
+  else if (getenv("SGE_CELL") == ""){
+    cout <<"running on WGS" << endl;
+    treedir = "/data/user/kiesej/Analysis2012/trees";
   }
 
 
