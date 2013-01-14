@@ -33,7 +33,7 @@ namespace top{
 //// name Z contribution "Z" or something similar for generator stuff and so on
 
 
-void rescaleDY(top::container1DStackVector & vec, std::vector<TString> contributions, double scalescale=1, bool textout=true, TString identifier="dilepton invariant massZ "){
+void rescaleDY(top::container1DStackVector * vec, std::vector<TString> contributions, double scalescale=1, bool textout=true, TString identifier="dilepton invariant massZ "){
  
   std::vector<TString> ident;
   std::vector<double> scales;
@@ -43,21 +43,21 @@ void rescaleDY(top::container1DStackVector & vec, std::vector<TString> contribut
     std::vector<TString> allbutdyanddata;
 
     for(unsigned int j=0;j<contributions.size();j++){
-      dymc += vec.getStack(identifier+stepstring).getContribution(contributions.at(j)).integral();
+      dymc += vec->getStack(identifier+stepstring).getContribution(contributions.at(j)).integral();
       allbutdyanddata << contributions.at(j);
     }
-    double d = vec.getStack(identifier+stepstring).getContribution("data").integral();
+    double d = vec->getStack(identifier+stepstring).getContribution("data").integral();
     allbutdyanddata << "data";
-    double rest = vec.getStack(identifier+stepstring).getContributionsBut(allbutdyanddata).integral();
+    double rest = vec->getStack(identifier+stepstring).getContributionsBut(allbutdyanddata).integral();
     if(rest==0) rest=1;
     double scale = (d-rest)/dymc;
     scales << scale*scalescale;
     ident << stepstring;
-    if(textout) std::cout << "Scalefactor for "<< vec.getName() << " " << stepstring << ": " << scale << std::endl;
+    if(textout) std::cout << "Scalefactor for "<< vec->getName() << " " << stepstring << ": " << scale << std::endl;
   }
   //  top::container1DStackVector rescaled=vec;
   for(unsigned int i=0;i<contributions.size();i++){
-    vec.multiplyNorms(contributions.at(i), scales, ident);
+    vec->multiplyNorms(contributions.at(i), scales, ident);
   }
   // return rescaled;
 
@@ -104,7 +104,7 @@ public:
   top::container1DStackVector * getPlots(){return analysisplots_;}
 
   void start();
-  void start(TString);
+  //  void start(TString);
 
   void clear(){analysisplots_->clear();}
 
@@ -157,6 +157,9 @@ bool MainAnalyzer::triggersContain(TString triggername, top::NTEvent * pevent){
 
 void MainAnalyzer::start(){
 
+
+  dycontributions << "Z#rightarrowll" << "DY#rightarrowll";
+
   using namespace std;
   if(analysisplots_) clear();
   else cout << "warning analysisplots_ is null" << endl;
@@ -185,7 +188,7 @@ void MainAnalyzer::start(){
     cout << "MainAnalyzer::start(): input file list not found" << endl;
   }
 
-  rescaleDY(*getPlots(), dycontributions);
+  rescaleDY(analysisplots_, dycontributions);
   
 }
 
@@ -1091,7 +1094,7 @@ void Analyzer(){
     cout << "running locally" << endl;
     treedir="/Users/kiesej/CMS_data_nobk";
   }
-  else if (getenv("SGE_CELL") == ""){
+  else if ((TString)getenv("SGE_CELL") == ""){
     cout <<"running on WGS" << endl;
     treedir = "/data/user/kiesej/Analysis2012/trees";
   }
@@ -1100,7 +1103,6 @@ void Analyzer(){
 
   bool onlytest=false;
 
-  dycontributions << "Z#rightarrowll" << "DY#rightarrowll";
 
   //prepare defaults and get btag SF
   
