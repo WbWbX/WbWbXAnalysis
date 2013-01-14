@@ -6,6 +6,8 @@
 #include <string>
 #include <iostream>
 #include <cstdlib>
+#include "TObject.h"
+#include "TFile.h"
 /*
 for future changes:
 convert mapping vector to a map (faster lookup) use mapping_.size() as next index filled in map
@@ -17,10 +19,42 @@ convert mapping vector to a map (faster lookup) use mapping_.size() as next inde
 
 namespace top{
 
+
+
+  class triggerMap : public TObject{
+
+    ClassDef(triggerMap,1) ;
+
+  public:
+    triggerMap(){}
+    triggerMap(std::vector<std::string> Map){map=Map;}
+    ~triggerMap(){}
+
+    // private:
+
+    std::vector<std::string> map;
+
+  };
+
+
   class NTTrigger {
   public:
     NTTrigger(){}
     ~NTTrigger(){}
+
+    //io options
+    void writeMap(){
+      triggerMap m(mapping_);
+      //m.SetName("triggerMap");
+      m.Write();
+    }
+
+    void readMap(TFile *f){
+      triggerMap *temp=new triggerMap();
+      f->GetObject("top::triggerMap",temp);
+      mapping_=temp->map;
+      delete temp;
+    }
 
     //sets
     void insert(const std::vector<std::string> & triggerNames){ //! fill in the vector of fired triggers
@@ -103,7 +137,7 @@ namespace top{
 
   };
 
-  std::vector<std::string> top::NTTrigger::mapping_;
+  std::vector<std::string>  top::NTTrigger::mapping_;
 
 }
 #endif
