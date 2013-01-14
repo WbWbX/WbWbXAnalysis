@@ -16,6 +16,9 @@
 
 bool testmode=true;
 
+
+std::vector<TString> dycontributions;
+
 namespace top{
   typedef std::vector<top::NTElectron>::iterator NTElectronIt;
   typedef std::vector<top::NTMuon>::iterator NTMuonIt;
@@ -181,6 +184,8 @@ void MainAnalyzer::start(){
   else{
     cout << "MainAnalyzer::start(): input file list not found" << endl;
   }
+
+  rescaleDY(*getPlots(), dycontributions);
   
 }
 
@@ -1092,10 +1097,10 @@ void Analyzer(){
   }
 
 
-  vector<TString> dycontributions;
-  dycontributions << "Z#rightarrowll" << "DY#rightarrowll";
 
   bool onlytest=false;
+
+  dycontributions << "Z#rightarrowll" << "DY#rightarrowll";
 
   //prepare defaults and get btag SF
   
@@ -1117,7 +1122,7 @@ void Analyzer(){
   mumu_8TeV.getBTagSF()->setMakeEff(false);
   mumu_8TeV.setName("8TeV_default_mumu","mumu");
   if(!onlytest) mumu_8TeV.start();
-  rescaleDY(*mumu_8TeV.getPlots(),dycontributions);
+  // rescaleDY(*mumu_8TeV.getPlots(),dycontributions);
   mumu_8TeV.getPlots()->writeAllToTFile(outfile,false);
  
   MainAnalyzer ee_8TeV=mumu_8TeV;
@@ -1133,7 +1138,7 @@ void Analyzer(){
   ee_8TeV.getBTagSF()->setMakeEff(false);
   ee_8TeV.setName("8TeV_default_ee","ee");
   if(!onlytest) ee_8TeV.start();
-  rescaleDY(*ee_8TeV.getPlots(),dycontributions);
+  // rescaleDY(*ee_8TeV.getPlots(),dycontributions);
   ee_8TeV.getPlots()->writeAllToTFile(outfile,false);
   
   //to have something to play with prepare the nobtag 7 TeV analyzer
@@ -1157,7 +1162,7 @@ void Analyzer(){
   ee_7TeV.getBTagSF()->setMakeEff(false);
   ee_7TeV.setName("7TeV_default_ee","ee");
   if(!onlytest) ee_7TeV.start();
-  rescaleDY(*ee_7TeV.getPlots(),dycontributions);
+  // rescaleDY(*ee_7TeV.getPlots(),dycontributions);
   ee_7TeV.getPlots()->writeAllToTFile(outfile,false);
   
   MainAnalyzer mumu_7TeV=ee_7TeV;
@@ -1173,7 +1178,7 @@ void Analyzer(){
   mumu_7TeV.getBTagSF()->setMakeEff(false);
   mumu_7TeV.setName("7TeV_default_mumu","mumu");
   if(!onlytest) mumu_7TeV.start();
-  rescaleDY(*mumu_7TeV.getPlots(),dycontributions);
+  // rescaleDY(*mumu_7TeV.getPlots(),dycontributions);
   mumu_7TeV.getPlots()->writeAllToTFile(outfile,false);
 
   
