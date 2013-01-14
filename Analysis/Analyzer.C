@@ -35,8 +35,8 @@ namespace top{
 
 void rescaleDY(top::container1DStackVector * vec, std::vector<TString> contributions, double scalescale=1, bool textout=true, TString identifier="dilepton invariant massZ "){
  
-  std::vector<TString> ident;
-  std::vector<double> scales;
+  std::vector<TString> ident;ident.clear();
+  std::vector<double> scales;scales.clear();
   for(int i=5;i<=9;i++){
     TString stepstring="step "+toTString(i);
     double dymc = 0;
@@ -59,7 +59,6 @@ void rescaleDY(top::container1DStackVector * vec, std::vector<TString> contribut
   for(unsigned int i=0;i<contributions.size();i++){
     vec->multiplyNorms(contributions.at(i), scales, ident);
   }
-  // return rescaled;
 
 }
 
@@ -157,7 +156,7 @@ bool MainAnalyzer::triggersContain(TString triggername, top::NTEvent * pevent){
 
 void MainAnalyzer::start(){
 
-
+  dycontributions.clear();
   dycontributions << "Z#rightarrowll" << "DY#rightarrowll";
 
   using namespace std;
