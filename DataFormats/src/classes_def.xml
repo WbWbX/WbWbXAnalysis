@@ -25,5 +25,6 @@
   <class name="std::vector<top::NTInflatedElectron>"/>
   <class name="top::NTTrigger"/>
   <class name="std::vector<top::NTTrigger>"/>
+  <class name="top::triggerMap"/>
 </lcgdict>
  
