@@ -153,7 +153,7 @@ namespace top{
     else{
       t = new TTree(treename,treename);
     }
-    if(t->GetBranch("allContainerStackVectors")){ //branch does not exist yet
+    if(t->GetBranch("allContainerStackVectors")){ //branch does  exist
       bool temp=csv_makelist;
       csv_makelist=false;
       container1DStackVector * csv = this;
