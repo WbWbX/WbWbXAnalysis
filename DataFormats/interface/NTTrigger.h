@@ -7,7 +7,8 @@
 #include <iostream>
 #include <cstdlib>
 #include "TObject.h"
-#include "TFile.h"
+//#include "TFile.h"
+#include "TTree.h"
 /*
 for future changes:
 convert mapping vector to a map (faster lookup) use mapping_.size() as next index filled in map
@@ -19,44 +20,38 @@ convert mapping vector to a map (faster lookup) use mapping_.size() as next inde
 
 namespace top{
 
-
-
-  class triggerMap : public TObject{
-
-    ClassDef(triggerMap,1) ;
-
-  public:
-    triggerMap(){}
-    triggerMap(std::vector<std::string> Map){map=Map;}
-    ~triggerMap(){}
-
-    // private:
-
-    std::vector<std::string> map;
-
-  };
-
-
+ 
   class NTTrigger {
   public:
     NTTrigger(){}
     ~NTTrigger(){}
 
     //io options
-    void writeMap(){
-      triggerMap m(mapping_);
-      //m.SetName("triggerMap");
-      m.Write();
+    
+    void readMapFromTree(TTree * t){
+      std::vector<bool> tempfired=fired_;
+      std::vector<std::string> * p = 0;
+      t->SetBranchAddress("NTTriggerMaps",&p); 
+      for(float i=0;i<t->GetEntries();i++){
+	t->GetEntry(i);
+	insert(*p);
+      }
+
+      fired_=tempfired;
+
     }
 
-    void readMap(TFile *f){
-      triggerMap *temp=new triggerMap();
-      f->GetObject("top::triggerMap",temp);
-      mapping_=temp->map;
-      delete temp;
+    void writeMapToTree(TTree *t){
+      std::vector<std::string> temp;
+      if(t->GetBranch("NTTriggerMaps"))
+	t->SetBranchAddress("NTTriggerMaps", &temp);
+      else
+	t->Branch("NTTriggerMaps", "std::vector<std::string>", &temp);
+
+      temp=getMap();
+      t->Fill();
     }
 
-    //sets
     void insert(const std::vector<std::string> & triggerNames){ //! fill in the vector of fired triggers
       for(unsigned int i=0;i<triggerNames.size(); i++){
 	insert(triggerNames.at(i));
@@ -128,6 +123,7 @@ namespace top{
       else return fired_.at(index);
     }
 
+    static std::vector<std::string> & getMap(){return mapping_;}
 
     private:
 

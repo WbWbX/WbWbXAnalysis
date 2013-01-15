@@ -27,6 +27,5 @@
   <class name="std::vector<top::NTGenLepton>"/>
   <class name="top::NTTrigger"/>
   <class name="std::vector<top::NTTrigger>"/>
-  <class name="top::triggerMap"/>
 </lcgdict>
  
