@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id: SusyTreeWriter.cc,v 1.4 2012/12/10 12:57:43 jkiesele Exp $
+// $Id: SusyTreeWriter.cc,v 1.5 2013/01/08 10:04:02 jkiesele Exp $
 //
 //
 
@@ -54,6 +54,7 @@
 #include "../../DataFormats/interface/NTTrack.h"
 #include "../../DataFormats/interface/NTSuClu.h"
 #include "../../DataFormats/interface/elecRhoIsoAdder.h"
+#include "../../DataFormats/interface/NTTrigger.h"
 
 
 #include "DataFormats/Candidate/interface/CompositeCandidate.h"
@@ -125,9 +126,14 @@ class SusyTreeWriter : public edm::EDAnalyzer {
   std::vector<top::NTSuClu> ntsuclus;
   top::NTMet ntmet;
   top::NTEvent ntevent;
+  top::NTTrigger nttrigger;
 
   std::string treename_, btagalgo_;
 
+  std::vector<float> stopMass,chiMass;
+  bool firstevent;
+
+  edm::Service<TFileService> fs;
 
 };
 
@@ -192,7 +198,7 @@ SusyTreeWriter::SusyTreeWriter(const edm::ParameterSet& iConfig)
              <<  "\n#######################################################" << std::endl;
 
 
-
+   firstevent=true;
 
 }
 
@@ -216,6 +222,8 @@ SusyTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
    using namespace edm;
 
+   
+
    std::string addForPF;
    if(pfinput_) addForPF="bla";
    
@@ -226,6 +234,9 @@ SusyTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    ntjets.clear();
    nttracks.clear();
    ntsuclus.clear();
+
+   top::NTTrigger clear;
+   nttrigger=clear;
 
   bool IsRealData = false;
   edm::Handle <reco::GenParticleCollection> genParticles;
@@ -505,13 +516,15 @@ SusyTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        else if(!(muon->innerTrack()).isNull()){
 	 vz=muon->innerTrack()->dz(vtxs[0].position());
 	 vzerr=muon->innerTrack()->dzError();
-	 tempmuon.setMember("vPixelHits",muon->innerTrack()->hitPattern().numberOfValidPixelHits());
 	 
        }
        else if(!(muon->outerTrack()).isNull()){
 	 vz=muon->outerTrack()->dz(vtxs[0].position());
 	 vzerr=muon->outerTrack()->dzError();
        }
+       if(!(muon->innerTrack()).isNull())
+	 tempmuon.setMember("vPixelHits",muon->innerTrack()->hitPattern().numberOfValidPixelHits());
+
        tempmuon.setVertexZ   (vz);
        tempmuon.setVertexZErr   (vzerr);
 
@@ -524,6 +537,7 @@ SusyTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	   tempmuon.setTrkHits  (muon->innerTrack()->hitPattern().trackerLayersWithMeasurement());
 	 else
 	   tempmuon.setTrkHits (0);
+
 	 tempmuon.setMuonHits   (muon->globalTrack()->hitPattern().numberOfValidMuonHits());
 	 tempmuon.setDbs   (fabs(muon->globalTrack()->dxy(vtxs[0].position())));
 	 tempmuon.setIso03   (Iso03);
@@ -732,7 +746,7 @@ SusyTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        for(int i_Trig = 0; i_Trig<n_Triggers; ++i_Trig){
 	 if(trigresults.product()->accept(i_Trig)){
 	   firedtriggers.push_back(trigName.triggerName(i_Trig));
-
+	   nttrigger.insert(trigName.triggerName(i_Trig));
 	   // if(((TString)trigName.triggerName(i_Trig)).Contains("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v")){
 	   // std::cout << trigName.triggerName(i_Trig) << std::endl;
 	   //} 
@@ -747,6 +761,8 @@ SusyTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    ntevent.setEventNo(iEvent.id().event());
    ntevent.setVertexMulti(vertices->size());
    ntevent.setFiredTriggers(firedtriggers);
+
+
 
    float BXminus=0;
    float BXzero=0;
@@ -798,17 +814,61 @@ SusyTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      ntevent.setPDFWeights(*weightHandle);
    }
 
+   ///////SUSY generator info////
+
+   if(!IsRealData){
+     //    edm::Handle<GenEventInfoProduct> genEvtInfo;
+     // iEvent.getByLabel("generator", genEvtInfo);
+     //T_Event_PtHat =  genEvtInfo->hasBinningValues() ? (genEvtInfo->binningValues())[0] : 0.0;
+     // T_Event_processID= genEvtInfo->signalProcessID();
+  
+  
+     for (size_t i = 0; i < genParticles->size(); ++i){
+       const reco::GenParticle & p = (*genParticles)[i];
+       int id = p.pdgId();
+       //  int st = p.status();
+    
+       if (abs(id) == 1000006) {
+	 stopMass.push_back(p.mass());
+      
+	 size_t ndau = p.numberOfDaughters();
+	 bool foundTop = false;
+      
+	 for( size_t j = 0; j < ndau; ++ j ) {
+	
+	   if( abs( p.daughter(j)->pdgId() ) == 6 ) { // if the i-th daughter is a top or an anti-top
+	     foundTop = true;
+	  
+	     top::LorentzVector LVstop( p.px(), p.py(), p.pz(), p.energy() );
+	     top::LorentzVector LVtop( p.daughter(j)->px(), p.daughter(j)->py(), p.daughter(j)->pz(), p.daughter(j)->energy() );
+	  
+	     chiMass.push_back( (LVstop-LVtop).M() );
+	     //std::cout << "chi0 mass = " << (LVstop-LVtop).M() << endl; 
+	     break;
+	   }
+
+	   if( !foundTop )// stop/anti-stop has no top/anti-top daughter! m_chi0 set to an unphysical value
+	     chiMass.push_back(-99.);
+	 }
+       }
+     }	
+   }
+
+
+
+   firstevent=false;
+
    Ntuple ->Fill();
 
    }
+
 
 
 // ------------ method called once each job just before starting event loop  ------------
 void 
 SusyTreeWriter::beginJob()
 {
-  edm::Service<TFileService> fs;
-
+ 
   if( !fs ){
     throw edm::Exception( edm::errors::Configuration,
                           "TFile Service is not registered in cfg file" );
@@ -829,13 +889,27 @@ SusyTreeWriter::beginJob()
   Ntuple->Branch("NTJets", "std::vector<top::NTJet>", &ntjets);
   Ntuple->Branch("NTMet", "top::NTMet", &ntmet);
   Ntuple->Branch("NTEvent", "top::NTEvent", &ntevent);
+  Ntuple->Branch("NTTrigger", "top::NTTrigger", &nttrigger);
 
+  Ntuple->Branch("stopMass",  &stopMass);
+  Ntuple->Branch("chiMass", &chiMass);
+
+
+  //std::vector<std::string>
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
 void 
 SusyTreeWriter::endJob() 
 {
+
+  if( !fs ){
+    throw edm::Exception( edm::errors::Configuration,
+                          "TFile Service is not registered in cfg file" );
+  }
+  TTree * TT;
+  TT=fs->make<TTree>("TriggerMaps" ,"TriggerMaps" );
+  nttrigger.writeMapToTree(TT);
 }
 
 // ------------ method called when starting to processes a run  ------------
