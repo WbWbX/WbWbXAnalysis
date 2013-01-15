@@ -23,6 +23,8 @@
   <class name="std::vector<top::NTInflatedMuon>"/>
   <class name="top::NTInflatedElectron"/>
   <class name="std::vector<top::NTInflatedElectron>"/>
+  <class name="top::NTGenLepton"/>
+  <class name="std::vector<top::NTGenLepton>"/>
   <class name="top::NTTrigger"/>
   <class name="std::vector<top::NTTrigger>"/>
   <class name="top::triggerMap"/>

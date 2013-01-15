@@ -14,6 +14,9 @@
 #include "../interface/NTInflatedMuon.h"
 #include "../interface/NTInflatedElectron.h"
 
+
+#include "../interface/NTGenLepton.h"
+
 namespace
 {
   struct dictionary {
@@ -40,11 +43,16 @@ namespace
     std::vector<top::NTSuClu> dummy20;
     top::NTTrigger dummy21;
     std::vector<top::NTTrigger> dummy22;
+    top::triggerMap kjlk;
 
     top::NTInflatedMuon ihih;
     std::vector<top::NTInflatedMuon> kkk;
     top::NTInflatedElectron issshih;
     std::vector<top::NTInflatedElectron> kkssk;
+
+
+    top::NTGenLepton ihisdh;
+    std::vector<top::NTGenLepton> asfkkk;
 
     
   };
