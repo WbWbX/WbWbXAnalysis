@@ -15,7 +15,7 @@ namespace top{
     void setPdgId(int id){pdgid_=id;}
     void setMothers(std::vector<int> mothers){mothers_=mothers;}
     void setDaughters(std::vector<int> daughters){daughters_=daughters;}
-    void setStatus(int status){status_=status;}
+    void setStatus(int Status){status_=Status;}
 
     int pdgId(){return pdgid_;}
     int status(){return status_;}
