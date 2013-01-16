@@ -12,10 +12,13 @@ namespace top{
     ~NTGenLepton(){}
 
     void setP4(LorentzVector p4In){p4_=p4In;}
-    void setPdgID(int id){pdgid_=id;}
+    void setPdgId(int id){pdgid_=id;}
     void setMothers(std::vector<int> mothers){mothers_=mothers;}
+    void setDaughters(std::vector<int> daughters){daughters_=daughters;}
+    void setStatus(int status){status_=status;}
 
     int pdgId(){return pdgid_;}
+    int status(){return status_;}
 
     LorentzVector p4(){return p4_;}
     double pt(){return p4_.Pt();}
@@ -28,13 +31,15 @@ namespace top{
 
     int getMother(){if(mothers_.size()>0) return mothers_.at(0); else return 0;}
     std::vector<int> getMothers(){return mothers_;}
+    int getDaughter(){if(daughters_.size()>0) return daughters_.at(0); else return 0;}
+    std::vector<int> getDaughters(){return daughters_;}
 
   private:
 
 
-    int pdgid_;
+    int pdgid_, status_;
     LorentzVector p4_;
-    std::vector<int> mothers_;
+    std::vector<int> mothers_, daughters_;
 
   };
 }
