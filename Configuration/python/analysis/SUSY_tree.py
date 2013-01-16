@@ -589,6 +589,9 @@ process.PFTree.rhoJetsIso        = cms.InputTag("kt6PFJetsForIso","rho",process.
 
 process.PFTree.includePDFWeights = includePDFWeights
 process.PFTree.pdfWeights        = "pdfWeights:"+PDF
+
+process.PFTree.includeGen        = isSignal
+
 if not includereco:
     process.PFTree.muonSrc = 'kinMuons'
     process.PFTree.elecGSFSrc =  'kinElectrons'
@@ -610,7 +613,7 @@ process.treeSequence = cms.Sequence(process.triggerMatches *
 
 ###### Path
 
-##should only be valid for the 52X MC
+##should only be valid for the 52X MC!! ##TRAP##
 process.PFTree.rhoIso = cms.InputTag("kt6PFJetsForIsoNoPU","rho", process.name_())
 process.patPF2PATSequencePFlow.replace(process.patJetCorrFactorsPFlow,
                                        process.kt6PFJets *

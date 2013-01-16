@@ -572,6 +572,7 @@ process.PFTree.rhoJetsIsoNoPu    = cms.InputTag("kt6PFJetsForIsoNoPU","rho",proc
 process.PFTree.rhoJetsIso        = cms.InputTag("kt6PFJetsForIso","rho",process.name_())
 process.PFTree.includePDFWeights = includePDFWeights
 process.PFTree.pdfWeights        = "pdfWeights:"+PDF
+process.PFTree.includeGen        = isSignal
 if not includereco:
     process.PFTree.muonSrc = 'kinMuons' + pfpostfix
     process.PFTree.elecGSFSrc =  'kinElectrons' + pfpostfix
