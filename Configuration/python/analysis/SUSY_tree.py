@@ -26,6 +26,9 @@ options.register ('json','nojson',VarParsing.VarParsing.multiplicity.singleton,V
 options.register ('isSync',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"switch on for sync")
 options.register('samplename', 'standard', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "which sample to run over - obsolete")
 
+
+options.register ('isSignal',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"is SignalMC")
+
 import sys
 
 if hasattr(sys, "argv"):
@@ -48,6 +51,11 @@ PDF=options.PDF                          # cteq65
 inputScript=options.inputScript          # TtZAnalysis.Configuration.samples.mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12-PU_S7_START52_V9-v2_cff
 json=options.json                        # give full path!!json files in TtZAnalysis/Data/data ONLY needed with nafjobsplitter
 
+isSignal=options.isSignal
+
+if not isMC:
+    isSignal=False
+
 crab=True # for GC/Crab
 
 if not crab:
@@ -58,6 +66,7 @@ syncfile=options.isSync                  # False
 #print genFilterString
 
 print "\n\n"
+print "Lepton Cut is 8 GeV! Do offline selection (10 / 20)"
 
 electronIsoCone="03"
 useGsf = True
@@ -201,6 +210,11 @@ process.requireMinLeptons = cms.EDFilter("CandViewCountFilter",
                                          src = cms.InputTag('allLeps'),
                                          minNumber = cms.uint32(minleptons)
                                          )
+
+process.requireRecoLeps =  cms.Sequence(process.pfLeps *
+                                        process.allLeps *
+                                        process.requireMinLeptons)
+
 if isMC:
     ##
     if genFilter=='Top':
@@ -223,10 +237,8 @@ if isMC:
 
         process.preFilterSequence = cms.Sequence(process.preCutPUInfo * 
                                                  process.topsequence *
-                                                 process.postCutPUInfo *
-                                                 process.pfLeps *
-                                                 process.allLeps *
-                                                 process.requireMinLeptons
+                                                 process.postCutPUInfo #*
+                                                 #process.requireRecoLeps
                                                  )
 
     elif genFilter=='Z':
@@ -259,25 +271,18 @@ if isMC:
             print 'genFilter Z inverted'
             process.preFilterSequence = cms.Sequence(process.preCutPUInfo * 
                                                      ~process.generatorZFilter *
-                                                     process.postCutPUInfo *
-                                                     process.pfLeps *
-                                                     process.allLeps *
-                                                     process.requireMinLeptons)
+                                                     process.postCutPUInfo )#*
+                                                    # process.requireRecoLeps)
         else:
             process.preFilterSequence = cms.Sequence(process.preCutPUInfo * 
                                                      process.generatorZFilter *
-                                                     process.postCutPUInfo*
-                                                     process.pfLeps *
-                                                     process.allLeps *
-                                                     process.requireMinLeptons)
+                                                     process.postCutPUInfo)#*
+                                                    # process.requireRecoLeps)
             
    
     else:
-        process.preFilterSequence = cms.Sequence(process.pfLeps *
-                                                 process.allLeps *
-                                                 process.preCutPUInfo * 
-                                                 process.requireMinLeptons)# *
-                                                 #process.postCutPUInfo)
+        process.preFilterSequence = cms.Sequence(process.preCutPUInfo )#* 
+                                                 #process.requireRecoLeps)
     if includePDFWeights:
         getattr(process, 'preFilterSequence').replace(process.preCutPUInfo,
                                                       process.pdfWeights *
@@ -299,19 +304,17 @@ else:
 
     process.preFilterSequence = cms.Sequence(process.HBHENoiseFilter *
                                              process.noscraping *
-                                             process.pfLeps *
-                                             process.allLeps *
-                                             process.preCutPUInfo *
-                                             process.requireMinLeptons)
+                                             process.preCutPUInfo)
     if not is2011:
         process.load('RecoMET.METFilters.ecalLaserCorrFilter_cfi')
         getattr(process, 'preFilterSequence').replace(process.preCutPUInfo,
                                                       process.ecalLaserCorrFilter *
                                                       process.preCutPUInfo)
 
+### if its not signal do some pre filtering:
     
-    
-
+if not isSignal:
+    process.preFilterSequence += process.requireRecoLeps
 
 
 
@@ -322,7 +325,7 @@ from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
 
 process.goodOfflinePrimaryVertices = cms.EDFilter(
     "PrimaryVertexObjectFilter",
-    filterParams = pvSelector.clone( minNdof = cms.double(4.0), maxZ = cms.double(24.0) ),
+    filterParams = pvSelector.clone( minNdof = cms.double(4.0), maxZ = cms.double(24.0), maxRho  = cms.double(2) ),
     src=cms.InputTag('offlinePrimaryVertices')
     )
 
@@ -530,47 +533,48 @@ process.treeJets = process.selectedPatJets.clone()
 process.treeJets.src="patJets"+pfpostfix
 process.treeJets.cut = 'pt>8' # unfortunately starting at 10 GeV are needed for MET rescaling
 
-process.IDMuons = process.selectedPatMuons.clone()
-process.IDMuons.src = 'patMuons'
-process.IDMuons.cut = cms.string('pt > 18  && abs(eta) < 2.7')
+process.kinMuons = process.selectedPatMuons.clone()
+process.kinMuons.src = 'patMuons'
+process.kinMuons.cut = cms.string('pt > 8  && abs(eta) < 2.7')
 
-process.IDElectrons = process.selectedPatElectrons.clone()
-process.IDElectrons.src = 'patElectrons'
-process.IDElectrons.cut = cms.string( 'pt > 18  && abs(eta) < 2.7')
+process.kinElectrons = process.selectedPatElectrons.clone()
+process.kinElectrons.src = 'patElectrons'
+process.kinElectrons.cut = cms.string( 'pt > 8  && abs(eta) < 2.7')
 
-process.IDPFElectrons = process.selectedPatElectrons.clone()
-process.IDPFElectrons.src = 'patPFElectrons'+pfpostfix
-process.IDPFElectrons.cut = cms.string( 'pt > 18  && abs(eta) < 2.7')
+process.kinPFElectrons = process.selectedPatElectrons.clone()
+process.kinPFElectrons.src = 'patPFElectrons'+pfpostfix
+process.kinPFElectrons.cut = cms.string( 'pt > 8  && abs(eta) < 2.7')
 
 
 process.MuonGSFMerge = cms.EDProducer("CandViewMerger",
-                                     src = cms.VInputTag(cms.InputTag("IDMuons"),  cms.InputTag("IDElectrons"))
+                                     src = cms.VInputTag(cms.InputTag("kinMuons"),  cms.InputTag("kinElectrons"))
                                      )
 
 process.MuonPFMerge = cms.EDProducer("CandViewMerger",
-                                     src = cms.VInputTag(cms.InputTag("IDMuons"),  cms.InputTag("IDPFElectrons"))
+                                     src = cms.VInputTag(cms.InputTag("kinMuons"),  cms.InputTag("kinPFElectrons"))
                                      )
 
 
-process.filterIDLeptons = cms.EDFilter("SimpleCounter",
-                                       src = cms.VInputTag(cms.InputTag("IDMuons"),  
-                                                           cms.InputTag("IDElectrons"),   
-                                                           cms.InputTag("IDPFElectrons"),
+process.filterkinLeptons = cms.EDFilter("SimpleCounter",
+                                       src = cms.VInputTag(cms.InputTag("kinMuons"),  
+                                                           cms.InputTag("kinElectrons"),   
+                                                           cms.InputTag("kinPFElectrons"),
                                                            cms.InputTag("MuonGSFMerge"),
                                                            cms.InputTag("MuonPFMerge")),
                                        minNumber = cms.uint32(minleptons)
                                        )
 
-process.IDLeptonFilterSequence = cms.Sequence(process.IDMuons *
-                                              process.IDElectrons *
-                                              process.IDPFElectrons *
+process.kinLeptonFilterSequence = cms.Sequence(process.kinMuons *
+                                              process.kinElectrons *
+                                              process.kinPFElectrons *
                                               process.MuonGSFMerge *
                                               process.MuonPFMerge *
-                                              process.filterIDLeptons)
+                                              process.filterkinLeptons)
 
-getattr(process,'patPF2PATSequence'+pfpostfix).replace(getattr(process,'patMuons'+pfpostfix),
+if not isSignal:
+    getattr(process,'patPF2PATSequence'+pfpostfix).replace(getattr(process,'patMuons'+pfpostfix),
                                                        getattr(process,'patMuons'+pfpostfix) *
-                                                       process.IDLeptonFilterSequence)
+                                                       process.kinLeptonFilterSequence)
                                                        
 
 ########## Prepare Tree ##
@@ -582,12 +586,13 @@ process.PFTree.includeTrigger    = includetrigger
 process.PFTree.includeReco       = includereco
 process.PFTree.rhoJetsIsoNoPu    = cms.InputTag("kt6PFJetsForIsoNoPU","rho",process.name_())
 process.PFTree.rhoJetsIso        = cms.InputTag("kt6PFJetsForIso","rho",process.name_())
+
 process.PFTree.includePDFWeights = includePDFWeights
 process.PFTree.pdfWeights        = "pdfWeights:"+PDF
 if not includereco:
-    process.PFTree.muonSrc = 'patMuons'
-    process.PFTree.elecGSFSrc =  'patElectrons'
-    process.PFTree.elecPFSrc =  'patPFElectrons' + pfpostfix
+    process.PFTree.muonSrc = 'kinMuons'
+    process.PFTree.elecGSFSrc =  'kinElectrons'
+    process.PFTree.elecPFSrc =  'kinPFElectrons' + pfpostfix
 
 ## make tree sequence
 
@@ -604,6 +609,15 @@ process.treeSequence = cms.Sequence(process.triggerMatches *
 
 
 ###### Path
+
+##should only be valid for the 52X MC
+process.PFTree.rhoIso = cms.InputTag("kt6PFJetsForIsoNoPU","rho", process.name_())
+process.patPF2PATSequencePFlow.replace(process.patJetCorrFactorsPFlow,
+                                       process.kt6PFJets *
+                                       process.patJetCorrFactorsPFlow)
+
+#massSearchReplaceAnyInputTag((getattr(process, 'pfTauSequence'+pfpostfix)),cms.InputTag('pfJets'+pfpostfix), cms.InputTag('pfJetsForTaus'),True)
+process.patJetCorrFactorsPFlow.rho = cms.InputTag("kt6PFJets","rho", process.name_())
 
 process.path = cms.Path(process.goodOfflinePrimaryVertices *
                       #  process.inclusiveVertexing *   ## segfaults?!?! in the newest release or MC
