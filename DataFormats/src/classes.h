@@ -43,7 +43,6 @@ namespace
     std::vector<top::NTSuClu> dummy20;
     top::NTTrigger dummy21;
     std::vector<top::NTTrigger> dummy22;
-    top::triggerMap kjlk;
 
     top::NTInflatedMuon ihih;
     std::vector<top::NTInflatedMuon> kkk;
