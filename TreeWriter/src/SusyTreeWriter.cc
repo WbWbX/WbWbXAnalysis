@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id: SusyTreeWriter.cc,v 1.5 2013/01/08 10:04:02 jkiesele Exp $
+// $Id: SusyTreeWriter.cc,v 1.6 2013/01/15 09:55:09 jkiesele Exp $
 //
 //
 
@@ -55,6 +55,7 @@
 #include "../../DataFormats/interface/NTSuClu.h"
 #include "../../DataFormats/interface/elecRhoIsoAdder.h"
 #include "../../DataFormats/interface/NTTrigger.h"
+#include "../../DataFormats/interface/NTGenLepton.h"
 
 
 #include "DataFormats/Candidate/interface/CompositeCandidate.h"
@@ -79,6 +80,8 @@
 #include <algorithm>
 
 #include <cstring>
+
+#include "../interface/genTools.h"
 
 //
 // class declaration
@@ -127,6 +130,9 @@ class SusyTreeWriter : public edm::EDAnalyzer {
   top::NTMet ntmet;
   top::NTEvent ntevent;
   top::NTTrigger nttrigger;
+
+  std::vector<top::NTGenLepton> ntgenmuons, ntgenelecs;
+  bool viaTau_;
 
   std::string treename_, btagalgo_;
 
@@ -234,6 +240,8 @@ SusyTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    ntjets.clear();
    nttracks.clear();
    ntsuclus.clear();
+   ntgenelecs.clear();
+   ntgenmuons.clear();
 
    top::NTTrigger clear;
    nttrigger=clear;
@@ -814,7 +822,7 @@ SusyTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      ntevent.setPDFWeights(*weightHandle);
    }
 
-   ///////SUSY generator info////
+   ///////fill gen info and SUSY generator info////
 
    if(!IsRealData){
      //    edm::Handle<GenEventInfoProduct> genEvtInfo;
@@ -822,8 +830,12 @@ SusyTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      //T_Event_PtHat =  genEvtInfo->hasBinningValues() ? (genEvtInfo->binningValues())[0] : 0.0;
      // T_Event_processID= genEvtInfo->signalProcessID();
   
+     std::vector<const reco::GenParticle *> allgen;
   
      for (size_t i = 0; i < genParticles->size(); ++i){
+
+       allgen.push_back(&(genParticles->at(i)));
+
        const reco::GenParticle & p = (*genParticles)[i];
        int id = p.pdgId();
        //  int st = p.status();
@@ -852,7 +864,46 @@ SusyTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	 }
        }
      }	
-   }
+
+     //  const std::vector<reco::GenParticle> * allgen = &(*genParticles);
+
+
+     std::vector<int> elecpdg; elecpdg.push_back(11);elecpdg.push_back(-11);
+     std::vector<int> muonpdg; muonpdg.push_back(13);muonpdg.push_back(-13);
+
+     std::vector<const reco::GenParticle *> genElecsZ = top::getGenLepsFromZ(allgen, elecpdg, viaTau_);
+     std::vector<const reco::GenParticle *> genMuonsZ = top::getGenLepsFromZ(allgen, muonpdg, viaTau_);
+
+     //both empty for top
+
+     std::vector<const reco::GenParticle *> genElecsTop = top::getGenLepsFromTop(allgen, elecpdg, viaTau_);
+     std::vector<const reco::GenParticle *> genMuonsTop = top::getGenLepsFromTop(allgen, muonpdg, viaTau_);
+
+     std::vector<const reco::GenParticle *> genElecs=genElecsTop;
+     std::vector<const reco::GenParticle *> genMuons=genMuonsTop;
+
+     genElecs.insert(genElecs.end(),genElecsZ.begin(),genElecsZ.end());
+     genMuons.insert(genMuons.end(),genMuonsZ.begin(),genMuonsZ.end());
+
+
+     top::NTGenLepton tempgenlep;
+     const reco::GenParticle * genP;
+     for(unsigned int i=0;i<genElecs.size();i++){
+       genP=genElecs.at(i);
+       tempgenlep.setP4(genP->p4());
+       tempgenlep.setPdgId(genP->pdgId());
+       ntgenelecs.push_back(tempgenlep);
+     } 
+     for(unsigned int i=0;i<genMuons.size();i++){
+       genP=genMuons.at(i);
+       tempgenlep.setP4(genP->p4());
+       tempgenlep.setPdgId(genP->pdgId());
+       ntgenmuons.push_back(tempgenlep);
+     }
+
+
+
+   } // isMc end
 
 
 
@@ -873,6 +924,13 @@ SusyTreeWriter::beginJob()
     throw edm::Exception( edm::errors::Configuration,
                           "TFile Service is not registered in cfg file" );
   }
+
+  viaTau_=false;
+  if(((TString)fs->file().GetName()).Contains("tau")){
+    viaTau_=true;
+    std::cout << "\n\n\n################## applying viatau gencut on NTGenLeptons! #########\n\n\n" << std::endl; 
+  }
+
   char * tempname = new char[treename_.length()];
   strcpy(tempname, treename_.c_str());
   Ntuple=fs->make<TTree>(tempname ,tempname );
@@ -894,6 +952,8 @@ SusyTreeWriter::beginJob()
   Ntuple->Branch("stopMass",  &stopMass);
   Ntuple->Branch("chiMass", &chiMass);
 
+  Ntuple->Branch("NTGenElectrons", "std::vector<top::NTGenLepton>", &ntgenelecs);
+  Ntuple->Branch("NTGenMuons",     "std::vector<top::NTGenLepton>", &ntgenmuons);
 
   //std::vector<std::string>
 }

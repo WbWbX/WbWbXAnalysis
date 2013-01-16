@@ -29,5 +29,7 @@ PFTree   = cms.EDAnalyzer('TreeWriter',
                           rhoJetsIso = cms.InputTag("kt6PFJets"), #
                           
                           includePDFWeights = cms.bool(False),
-                          pdfWeights = cms.InputTag('')
+                          pdfWeights = cms.InputTag(''),
+
+                          includeGen = cms.bool(False)
                           )
