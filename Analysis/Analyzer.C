@@ -929,6 +929,13 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
 
     ///make btagged jets //
+    
+
+   
+    //////////////////// MET cut STEP 7//////////////////////////////////
+    if(adjustedmet.met() < 40) continue;
+
+
     vector<NTJet> btaggedjets;
     for(NTJetIt jet = hardjets.begin();jet<hardjets.end();++jet){
       getBTagSF()->fillEff(*jet, puweight);
@@ -936,10 +943,6 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       if(jet->btag() < 0.244) continue;
       btaggedjets.push_back(*jet);
     }
-
-   
-    //////////////////// MET cut STEP 7//////////////////////////////////
-    if(adjustedmet.met() < 40) continue;
 
     if(!Znotemu){
 
