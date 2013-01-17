@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id: SusyTreeWriter.cc,v 1.6 2013/01/15 09:55:09 jkiesele Exp $
+// $Id: SusyTreeWriter.cc,v 1.7 2013/01/16 16:24:40 jkiesele Exp $
 //
 //
 
@@ -118,7 +118,7 @@ class SusyTreeWriter : public edm::EDAnalyzer {
   edm::InputTag muons_, recomuons_, pfelecs_, gsfelecs_,recoelecs_, jets_, met_, vertices_, trigresults_, puinfo_, recotracks_, recosuclus_,rhojetsiso_,rhojetsisonopu_,rhoiso_,pdfweights_;
   //rhojets_,rhojetsiso_,rhojetsnopu_,rhojetsisonopu_,rhoiso_;
 
-  bool includereco_, includetrigger_, pfinput_,includepdfweights_;
+  bool includereco_, includetrigger_, pfinput_,includepdfweights_,includegen_;
   TTree* Ntuple;
   std::vector<top::NTInflatedMuon> ntmuons;
   std::vector<top::NTLepton> ntleptons;
@@ -191,6 +191,9 @@ SusyTreeWriter::SusyTreeWriter(const edm::ParameterSet& iConfig)
 
   includepdfweights_ = iConfig.getParameter<bool>             ( "includePDFWeights" );
   pdfweights_  =iConfig.getParameter<edm::InputTag>    ( "pdfWeights"          );
+
+
+  includegen_ = iConfig.getParameter<bool>             ( "includeGen" );
 
    std::cout << "n\n################## Tree writer ########################" 
              <<  "\n#" << treename_
@@ -824,7 +827,7 @@ SusyTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    ///////fill gen info and SUSY generator info////
 
-   if(!IsRealData){
+   if(!IsRealData && includegen_){
      //    edm::Handle<GenEventInfoProduct> genEvtInfo;
      // iEvent.getByLabel("generator", genEvtInfo);
      //T_Event_PtHat =  genEvtInfo->hasBinningValues() ? (genEvtInfo->binningValues())[0] : 0.0;

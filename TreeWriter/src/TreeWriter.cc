@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id: TreeWriter.cc,v 1.12 2012/10/08 13:29:06 jkiesele Exp $
+// $Id: TreeWriter.cc,v 1.13 2013/01/16 16:24:40 jkiesele Exp $
 //
 //
 
@@ -117,7 +117,7 @@ class TreeWriter : public edm::EDAnalyzer {
   edm::InputTag muons_, recomuons_, pfelecs_, gsfelecs_,recoelecs_, jets_, met_, vertices_, trigresults_, puinfo_, recotracks_, recosuclus_,rhojetsiso_,rhojetsisonopu_,rhoiso_,pdfweights_;
   //rhojets_,rhojetsiso_,rhojetsnopu_,rhojetsisonopu_,rhoiso_;
 
-  bool includereco_, includetrigger_, pfinput_,includepdfweights_;
+  bool includereco_, includetrigger_, pfinput_,includepdfweights_,includegen_;
   TTree* Ntuple;
   std::vector<top::NTMuon> ntmuons;
   std::vector<top::NTLepton> ntleptons;
@@ -188,6 +188,9 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
 
   includepdfweights_ = iConfig.getParameter<bool>             ( "includePDFWeights" );
   pdfweights_  =iConfig.getParameter<edm::InputTag>    ( "pdfWeights"          );
+
+
+  includegen_ = iConfig.getParameter<bool>             ( "includeGen" );
 
    std::cout << "n\n################## Tree writer ########################" 
              <<  "\n#" << treename_
@@ -790,7 +793,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    /////// Fill generator info
 
-   if(!IsRealData){
+   if(!IsRealData && includegen_){
      std::vector<const reco::GenParticle *> allgen;
   
      for (size_t i = 0; i < genParticles->size(); ++i)
