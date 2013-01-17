@@ -133,12 +133,8 @@ process.out    = cms.OutputModule("PoolOutputModule", outputCommands =  cms.untr
 ################# Input script (some default one for crab
 #if syncfile or crab:
 process.source = cms.Source('PoolSource',fileNames=cms.untracked.vstring( '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/A89D210D-1BE2-E111-9EFB-0030487F1797.root' ))
-
-if not (syncfile or crab):     
-    if inputScript=='':
-        print "need input script"
-        exit(8888)
     
+if not inputScript=='':
     process.load(inputScript)
 
 
@@ -574,9 +570,9 @@ process.PFTree.includePDFWeights = includePDFWeights
 process.PFTree.pdfWeights        = "pdfWeights:"+PDF
 process.PFTree.includeGen        = isSignal
 if not includereco:
-    process.PFTree.muonSrc = 'kinMuons' + pfpostfix
-    process.PFTree.elecGSFSrc =  'kinElectrons' + pfpostfix
-    process.PFTree.elecPFSrc =  'kinPFElectrons' + pfpostfix
+    process.PFTree.muonSrc = 'kinMuons'
+    process.PFTree.elecGSFSrc =  'kinElectrons'
+    process.PFTree.elecPFSrc =  'kinPFElectrons'
 
 ## make tree sequence
 
