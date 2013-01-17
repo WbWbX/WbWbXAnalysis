@@ -555,6 +555,12 @@ if not isSignal:
     getattr(process,'patPF2PATSequence'+pfpostfix).replace(getattr(process,'patMuons'+pfpostfix),
                                                            getattr(process,'patMuons'+pfpostfix) *
                                                            process.kinLeptonFilterSequence)
+else:
+    getattr(process,'patPF2PATSequence'+pfpostfix).replace(getattr(process,'patMuons'+pfpostfix),
+                                                           getattr(process,'patMuons'+pfpostfix) *
+                                                           process.kinMuons *
+                                                           process.kinElectrons *
+                                                           process.kinPFElectrons )
                                                        
 
 ########## Prepare Tree ##

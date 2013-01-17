@@ -10,7 +10,7 @@ options.register ('crab',False,VarParsing.VarParsing.multiplicity.singleton,VarP
 options.register ('globalTag','START53_V11',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"global tag")
 options.register ('reportEvery',1000,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.int,"report every")
 options.register ('maxEvents',-1,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.int,"maximum events")
-options.register ('outputFile','def_out',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"output File (w/o .root)")
+options.register ('outputFile','def_out_susy',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"output File (w/o .root)")
 options.register ('isMC',True,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"is MC")
 options.register ('genFilter','none',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"gen Filter")
 options.register ('genFilterString','none',VarParsing.VarParsing.multiplicity.list,VarParsing.VarParsing.varType.string,"gen Filter selection string")
@@ -577,6 +577,14 @@ if not isSignal:
                                                        process.kinLeptonFilterSequence)
                                                        
 
+else:
+    getattr(process,'patPF2PATSequence'+pfpostfix).replace(getattr(process,'patMuons'+pfpostfix),
+                                                           getattr(process,'patMuons'+pfpostfix) *
+                                                           process.kinMuons *
+                                                           process.kinElectrons *
+                                                           process.kinPFElectrons )
+                                                       
+
 ########## Prepare Tree ##
 
 process.load('TtZAnalysis.TreeWriter.susytreewriter_cff')
@@ -595,7 +603,7 @@ process.PFTree.includeGen        = isSignal
 if not includereco:
     process.PFTree.muonSrc = 'kinMuons'
     process.PFTree.elecGSFSrc =  'kinElectrons'
-    process.PFTree.elecPFSrc =  'kinPFElectrons' + pfpostfix
+    process.PFTree.elecPFSrc =  'kinPFElectrons'
 
 ## make tree sequence
 
@@ -613,14 +621,15 @@ process.treeSequence = cms.Sequence(process.triggerMatches *
 
 ###### Path
 
-##should only be valid for the 52X MC!! ##TRAP##
-process.PFTree.rhoIso = cms.InputTag("kt6PFJetsForIsoNoPU","rho", process.name_())
-process.patPF2PATSequencePFlow.replace(process.patJetCorrFactorsPFlow,
-                                       process.kt6PFJets *
-                                       process.patJetCorrFactorsPFlow)
+##should only be valid for the 52X FS MC!! ##TRAP##
+if globalTag=="START52_V9":
+    process.PFTree.rhoIso = cms.InputTag("kt6PFJetsForIsoNoPU","rho", process.name_())
+    process.patPF2PATSequencePFlow.replace(process.patJetCorrFactorsPFlow,
+                                           process.kt6PFJets *
+                                           process.patJetCorrFactorsPFlow)
 
-#massSearchReplaceAnyInputTag((getattr(process, 'pfTauSequence'+pfpostfix)),cms.InputTag('pfJets'+pfpostfix), cms.InputTag('pfJetsForTaus'),True)
-process.patJetCorrFactorsPFlow.rho = cms.InputTag("kt6PFJets","rho", process.name_())
+    process.patJetCorrFactorsPFlow.rho = cms.InputTag("kt6PFJets","rho", process.name_())
+
 
 process.path = cms.Path(process.goodOfflinePrimaryVertices *
                       #  process.inclusiveVertexing *   ## segfaults?!?! in the newest release or MC
