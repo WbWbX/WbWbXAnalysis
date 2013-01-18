@@ -340,12 +340,15 @@ process.goodOfflinePrimaryVertices = cms.EDFilter(
 ###########default pat and pf2pat########
 # pat sequence
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
-### this is necessary to avoid the conflict between PAT and RECO configurations
+### this is necessary to avoid the conflict between PAT and RECO configurations  latinos...implementation! OLD! see isojet stuff below
 ### see: https://hypernews.cern.ch/HyperNews/CMS/get/JetMET/1357.html
-process.kt6PFJets.doRhoFastjet = True
-process.kt6PFJets.doAreaFastjet = True
-process.kt6PFJets.voronoiRfact = 0.9
-process.kt6PFJets.Rho_EtaMax   = cms.double( 4.4)
+#process.kt6PFJets.doRhoFastjet = True
+#process.kt6PFJets.doAreaFastjet = True
+#process.kt6PFJets.voronoiRfact = 0.9
+#process.kt6PFJets.Rho_EtaMax   = cms.double( 4.4)
+
+
+
 
 if isMC:
     jetCorr =('AK5PFchs', ['L1FastJet','L2Relative','L3Absolute'])
@@ -439,13 +442,21 @@ getattr(process,'pfIsolatedMuons'+pfpostfix).isolationCut = 99999
 # process.load('RecoVertex.AdaptiveVertexFinder.inclusiveVertexing_cff')
 
 ######### build jets for rho value ## only if 2011 rho is used (hopefully not for that long..)
+# https://twiki.cern.ch/twiki/bin/viewauth/CMS/EgammaEARhoCorrection
 
-process.kt6PFJetsForIso = process.kt6PFJets.clone( Rho_EtaMax = cms.double(2.5))
+process.kt6PFJetsForIso = process.kt4PFJets.clone(rParam = 0.6, doRhoFastjet = True,  Rho_EtaMax = cms.double(2.5))
 process.kt6PFJetsForIsoNoPU = process.kt6PFJetsForIso.clone( src = "pfNoPileUp"+ pfpostfix)
 
 process.isoJetSequence = cms.Sequence(process.kt6PFJetsForIso * process.kt6PFJetsForIsoNoPU)
 
-### for met correction (2011 data) ## warning!! postfix hardcoded!
+### for met/jet correction (2011 data) ## warning!! postfix hardcoded! using prescription:
+# https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#JetEnCorPFnoPU
+
+process.kt6PFJets = process.kt4PFJets.clone(
+    rParam = cms.double(0.6),
+    doAreaFastjet = cms.bool(True),
+    doRhoFastjet = cms.bool(True)
+    )
 
 process.kt6PFJetsPFlow = process.kt6PFJets.clone()
 if is2011:
