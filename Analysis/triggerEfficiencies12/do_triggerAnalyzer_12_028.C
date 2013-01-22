@@ -554,11 +554,12 @@ notinMCtriggers.push_back("DiCentralPFJet");
       if(fabs(elec->eta())>2.5 ) continue;
       if(fabs(elec->dbs()) >0.04 ) continue;
       if(!(elec->isNotConv()) ) continue;
-      if(useRhoIso && elec->rhoIso03()>0.15 ) continue;
-      if(!useRhoIso && elec->isoVal03()>0.15) continue;
+      // if(useRhoIso && elec->rhoIso03()>0.15 ) continue;
+      if(elec->isoVal03()>0.15) continue;
       //  if(CiCId && (0x00 == (0x01 & (int) elec->id("cicTightMC"))) ) continue; //for CiC bit test
-      if(!CiCId && (elec->mvaId() < -0.1)) continue;
-      if(!noOverlap(elec,*pMuons,0.1)) continue;
+      if(elec->mvaId() < 0.5) continue;
+      // if(!noOverlap(elec,*pMuons,0.1)) continue;
+      if(elec->mHits() > 0) continue;
 
       selectedElecs.push_back(*elec);
     }
@@ -1084,10 +1085,11 @@ void analyze(){
   using namespace std;
   using namespace top;
 
-  std::vector<float> binsmumueta, bins2dee;
+  std::vector<float> binsmumueta, bins2dee, bins2dmu;
   binsmumueta.push_back(-2.4);binsmumueta.push_back(-2.1);binsmumueta.push_back(-1.2);binsmumueta.push_back(-0.9);binsmumueta.push_back(0.9);binsmumueta.push_back(1.2);binsmumueta.push_back(2.1);binsmumueta.push_back(2.4);
 
-  bins2dee << 0 << 1.479 << 2.4;
+  bins2dee << 0 << 1.479 << 2.5;
+  bins2dmu << 0 << 0.9 << 2.4;
 
   triggerAnalyzer ta_eed;
   triggerAnalyzer ta_mumud;

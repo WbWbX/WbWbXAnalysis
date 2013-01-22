@@ -1068,6 +1068,11 @@ TChain * makeChain(TString path){
   return chain;
 }
 
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 void analyze(){
 
   bool getTeX=true;
@@ -1222,6 +1227,11 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
   SFdd.SetName("scalefactor eta2d");
   SFdd.SetTitle("scalefactor eta2d");
   SFdd.Write();
+  SFdd.SetName("scalefactor eta2d with syst");
+  SFdd.SetTitle("scalefactor eta2d with syst");
+  addRelError(SFdd, 0.01);
+  SFdd.Write();
+
 
   data=ta_eed.getPtPlot();
   MC=ta_eeMC.getPtPlot();
@@ -1318,6 +1328,11 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
   SFdd.SetName("scalefactor eta2d");
   SFdd.SetTitle("scalefactor eta2d");
   SFdd.Write();
+  SFdd.SetName("scalefactor eta2d with syst");
+  SFdd.SetTitle("scalefactor eta2d with syst");
+  addRelError(SFdd, 0.01);
+  SFdd.Write();
+
 
   data=ta_mumud.getPtPlot();
   MC=ta_mumuMC.getPtPlot();
@@ -1410,6 +1425,11 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
   SFdd.SetName("scalefactor eta2d");
   SFdd.SetTitle("scalefactor eta2d");
   SFdd.Write();
+  SFdd.SetName("scalefactor eta2d with syst");
+  SFdd.SetTitle("scalefactor eta2d with syst");
+  addRelError(SFdd, 0.01);
+  SFdd.Write();
+
 
   data=ta_emud.getPtPlot();
   MC=ta_emuMC.getPtPlot();
