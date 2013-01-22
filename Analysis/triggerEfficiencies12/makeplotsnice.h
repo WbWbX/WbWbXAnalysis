@@ -9,7 +9,7 @@
 #include "TStyle.h"
 #include "TGraphAsymmErrors.h"
 #include "TtZAnalysis/Tools/interface/miscUtils.h"
-
+#include <iostream>
 #include "TH2D.h"
 
 void make2dplots(TString inputfile, TString plot, TString channel){
@@ -17,11 +17,16 @@ void make2dplots(TString inputfile, TString plot, TString channel){
   TFile *f = new TFile(inputfile);
 
   std::vector<TString> plots; plots << plot+" eff" << plot+" effMC" << "scalefactor "+plot;
+  //std::vector<TString> plots;plots<< "scalefactor "+plot;
 
   TCanvas *c = new TCanvas();
 
   for(unsigned int i=0;i<plots.size();i++){
-
+    std::cout << "checking " << plots.at(i) << std::endl;
+    if(!(f->Get(plots.at(i)))){
+      std::cout << "plot " << plots.at(i) << " not found" << std::endl;
+      continue;
+    }
     TH2D * h = (TH2D*)f->Get(plots.at(i));
    
     gStyle->SetOptTitle(0);
@@ -72,9 +77,20 @@ void makeplot(TString inputfile, TString plot, TString channel){
 
     TFile *f = new TFile(inputfile);
 
-    
-    if(!((TString)f->Get(plot +" eff")->ClassName()).Contains("TH2D")){
-  
+
+    if(f->Get(plot) && ((TString)f->Get(plot)->ClassName()).Contains("TH2D")){
+      make2dplots(inputfile, plot, channel);
+    }
+    if(f->Get(plot +" eff") && (((TString)f->Get(plot +" eff")->ClassName()).Contains("TH2D"))){
+      make2dplots(inputfile, plot, channel);
+    }
+    if(f->Get("scalefactor "+plot) && (((TString)f->Get("scalefactor "+plot)->ClassName()).Contains("TH2D"))){
+      make2dplots(inputfile, plot, channel);
+    }
+    else{
+
+      std::cout << "making 1D plot for " << plot << " " << channel << std::endl;
+      
       TCanvas * c = new TCanvas();
       c->Clear();
       c->cd();
@@ -157,11 +173,7 @@ void makeplot(TString inputfile, TString plot, TString channel){
 
     }
 
-    else { //TH2D
-      make2dplots(inputfile, plot, channel);
-
-    }
-
+    
     //different markers
     // dot data
     //stuff for other
@@ -177,12 +189,13 @@ void makeplot(TString inputfile, TString plot, TString channel){
 
     std::vector<TString> channels, plots;
     channels << "ee" << "mumu" << "emu" ;
-    plots << "eta2d" << "pt" << "eta" << "dphi" << "dphi2" << "vmulti" << "jetmulti" << "drlep";
+    plots << "eta2d" << "eta2d with syst" << "pt" << "eta" << "dphi" << "dphi2" << "vmulti" << "jetmulti" << "drlep";
 
  
 
     for(unsigned int i=0;i<channels.size();i++){
       for(unsigned int j=0;j<plots.size();j++){
+	std::cout << "making plot for " << "triggerSummary_"+channels.at(i)+".root" << " plot "  << plots.at(j) <<endl;
 	makeplot(rootsdir+"triggerSummary_"+channels.at(i)+".root", plots.at(j),channels.at(i));
       }
     }
