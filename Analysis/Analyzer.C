@@ -977,7 +977,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       invmassZ7.fill(invLepMass,puweight);
     }
 
-    double bsf=getBTagSF()->getSF(hardjets); // returns 1 for data!!!
+    double bsf=getBTagSF()->getSF(btaggedjets); // returns 1 for data!!!
     btagScFs.fill(bsf, puweight);
     puweight= puweight * bsf;
 
