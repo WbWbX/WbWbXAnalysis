@@ -1256,6 +1256,7 @@ void Analyzer(){
 
     temp=full_ana.at(i);
     temp.replaceInName("default","JES_up");
+    temp.getJECUncertainties()->sources().clear();
     temp.getJECUncertainties()->sources() << 1 << 2 << 3 << 4 << 5 << 6 << 7 << 8 << 9 << 10 << 12 << 13 << 15;
     temp.getJECUncertainties()->setVariation("up");
     if(!onlytest) temp.start();
@@ -1264,6 +1265,7 @@ void Analyzer(){
 
     temp=full_ana.at(i);
     temp.replaceInName("default","JES_down");
+    temp.getJECUncertainties()->sources().clear();
     temp.getJECUncertainties()->sources() << 1 << 2 << 3 << 4 << 5 << 6 << 7 << 8 << 9 << 10 << 12 << 13 << 15;
     temp.getJECUncertainties()->setVariation("down");
     if(!onlytest) temp.start();
@@ -1274,6 +1276,7 @@ void Analyzer(){
 
     temp=full_ana.at(i);
     temp.replaceInName("default","JES_"+energystring+"_up");
+    temp.getJECUncertainties()->sources().clear();
     temp.getJECUncertainties()->sources() << 0 << 11 << 14;
     temp.getJECUncertainties()->setVariation("up");
     if(!onlytest) temp.start();
@@ -1282,6 +1285,7 @@ void Analyzer(){
 
     temp=full_ana.at(i);
     temp.replaceInName("default","JES_"+energystring+"_down");
+    temp.getJECUncertainties()->sources().clear();
     temp.getJECUncertainties()->sources() << 0 << 11 << 14;
     temp.getJECUncertainties()->setVariation("down");
     if(!onlytest) temp.start();
@@ -1307,7 +1311,7 @@ void Analyzer(){
     
     pufile=cmssw_base+"/src/TtZAnalysis/Data/"+"HCP.json.txt_PU_down.root";
     if(energystring=="7TeV")
-      pufile=cmssw_base+"/src/TtZAnalysis/Data/"+"ReRecoNov2011.json_PU_up.root";
+      pufile=cmssw_base+"/src/TtZAnalysis/Data/"+"ReRecoNov2011.json_PU_down.root";
 
     temp=full_ana.at(i);
     temp.replaceInName("default","PU_"+energystring+"_down");
