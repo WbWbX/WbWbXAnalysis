@@ -6,6 +6,7 @@
 #include <vector>
 #include <math.h>
 #include <iostream>
+#include <algorithm>
 #include "TH1D.h"
 #include "TH2D.h"
 
@@ -20,11 +21,39 @@ TString toTString(t in){
 TH2D divideTH2DBinomial(TH2D &h1, TH2D &h2);
 TH2D divideTH2D(TH2D &h1, TH2D &h2);
 
+void addRelError(TH2D &h, double err){
+  for(int binx=1;binx<=h.GetNbinsX()+1;binx++){
+    for(int biny=1;biny<=h.GetNbinsY()+1;biny++){
+      double add=h.GetBinContent(binx,biny) * err;
+      double newerr=sqrt(pow(h.GetBinError(binx,biny),2) + pow(add,2));
+      h.SetBinError(binx,biny,newerr);
+    }
+  }
+}
+
 
 TH1D divideTH1DBinomial(TH1D &h1, TH1D &h2);
 
+template <class t>
+std::vector<unsigned int> getOrderAscending(typename std::vector<t> vec){
+  typename std::vector<t> vec2=vec;
+  std::sort (vec.begin(), vec.end());
+  std::vector<unsigned int> out;
+  for(unsigned int i=0;i<vec.size();i++){
+    for(unsigned int j=0;j<vec2.size();j++){
+      if(vec.at(i) == vec2.at(j)){
+	out.push_back(j);
+	break;
+      }
+    }
+  }
+  return out;
+}
 
-
+template <class t, class u>
+double dR(t &first, u &sec){
+  return sqrt(pow(first.eta() - sec.eta(),2) + pow(first.phi() - sec.phi(),2));
+}
 
 
 template <class t, class u>
