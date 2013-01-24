@@ -550,7 +550,8 @@ notinMCtriggers.push_back("DiCentralPFJet");
 
     vector<NTElectron> selectedElecs;
     for(vector<NTElectron>::iterator elec=pElectrons->begin();elec<pElectrons->end();elec++){
-      if(elec->pt()<20 ) continue;
+      // if(elec->pt()<20 ) continue;
+      if(elec->ECalP4().Pt()<20) continue;
       if(fabs(elec->eta())>2.5 ) continue;
       if(fabs(elec->dbs()) >0.04 ) continue;
       if(!(elec->isNotConv()) ) continue;
@@ -1098,6 +1099,7 @@ void analyze(){
   ta_eed.setBinsEta2dY(bins2dee);
   triggerAnalyzer ta_emud;
   ta_emud.setBinsEta2dX(bins2dee);
+  ta_emud.setBinsEta2dY(bins2dmu);
   triggerAnalyzer ta_eeMC=ta_eed;
   triggerAnalyzer ta_mumuMC=ta_mumud;
   triggerAnalyzer ta_emuMC=ta_emud;
