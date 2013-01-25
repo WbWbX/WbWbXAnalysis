@@ -403,9 +403,14 @@ getattr(process,'patPFElectrons'+pfpostfix).isolationValues = cms.PSet(
     pfPhotons = cms.InputTag("elPFIsoValueGamma"+electronIsoCone+"PFId"+pfpostfix)
     )
 
+    
 
 
 ######### end of electron implementation ########
+##### MUONS ########
+
+
+
 
 ################Jets########## 
 
@@ -582,7 +587,8 @@ process.PFTree.metSrc            = 'patMETs'+pfpostfix
 process.PFTree.includeTrigger    = includetrigger
 process.PFTree.includeReco       = includereco
 process.PFTree.rhoJetsIsoNoPu    = cms.InputTag("kt6PFJetsForIsoNoPU","rho",process.name_())
-process.PFTree.rhoJetsIso        = cms.InputTag("kt6PFJetsForIso","rho",process.name_())
+process.PFTree.rhoJetsIso        = cms.InputTag("kt6PFJetsForIso","rho",process.name_()) ## only used if rho 2011
+process.PFTree.includeRho2011    = is2011
 process.PFTree.includePDFWeights = includePDFWeights
 process.PFTree.pdfWeights        = "pdfWeights:"+PDF
 process.PFTree.includeGen        = isSignal

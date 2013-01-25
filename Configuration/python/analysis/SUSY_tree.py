@@ -29,6 +29,8 @@ options.register('samplename', 'standard', VarParsing.VarParsing.multiplicity.si
 
 options.register ('isSignal',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"is SignalMC")
 
+options.register ('isFastSim',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"is FastSim")
+
 import sys
 
 if hasattr(sys, "argv"):
@@ -52,6 +54,7 @@ inputScript=options.inputScript          # TtZAnalysis.Configuration.samples.mc.
 json=options.json                        # give full path!!json files in TtZAnalysis/Data/data ONLY needed with nafjobsplitter
 
 isSignal=options.isSignal
+isFastSim=options.isFastSim
 
 if not isMC:
     isSignal=False
@@ -130,7 +133,9 @@ process.out    = cms.OutputModule("PoolOutputModule", outputCommands =  cms.untr
 
 ################# Input script (some default one for crab
 #if syncfile or crab:
-process.source = cms.Source('PoolSource',fileNames=cms.untracked.vstring( '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/A89D210D-1BE2-E111-9EFB-0030487F1797.root' ))
+#process.source = cms.Source('PoolSource',fileNames=cms.untracked.vstring( '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/A89D210D-1BE2-E111-9EFB-0030487F1797.root' ))
+process.source = cms.Source('PoolSource',fileNames=cms.untracked.vstring( 'file:TTJets_TuneZ2star_8TeV_madgraph_tauola_cff_py_GEN_FASTSIM_HLT_PU.root' ))
+
 
 #if not (syncfile or crab):     
 if not inputScript=='':
@@ -403,7 +408,7 @@ getattr(process,'patPFElectrons'+pfpostfix).isolationValues = cms.PSet(
 
 from TtZAnalysis.Workarounds.usePFIsoCone import *
 
-usePFIsoCone(process)
+usePFIsoCone(process) #adapts iso cone usePFIsoCone(process, postfix = "PFIso", dRMuons = "03", dRElectrons="03") for RECO!!! objects
 
 process.EIdSequence = cms.Sequence()
 
@@ -602,6 +607,7 @@ process.load('TtZAnalysis.TreeWriter.susytreewriter_cff')
 process.PFTree.metSrc            = 'patMETs'+pfpostfix
 process.PFTree.includeTrigger    = includetrigger
 process.PFTree.includeReco       = includereco
+process.PFTree.includeRho2011    = is2011
 process.PFTree.rhoJetsIsoNoPu    = cms.InputTag("kt6PFJetsForIsoNoPU","rho",process.name_())
 process.PFTree.rhoJetsIso        = cms.InputTag("kt6PFJetsForIso","rho",process.name_())
 
@@ -632,13 +638,14 @@ process.treeSequence = cms.Sequence(process.triggerMatches *
 ###### Path
 
 ##should only be valid for the 52X FS MC!! ##TRAP##
-if globalTag=="START52_V9":
-    process.PFTree.rhoIso = cms.InputTag("kt6PFJetsForIsoNoPU","rho", process.name_())
+if isFastSim:
+    #process.PFTree.rhoIso = cms.InputTag("kt6PFJetsForIsoNoPU","rho", process.name_())
+    process.PFTree.rhoIso = cms.InputTag("kt6PFJets","rho", "HLT")
     process.patPF2PATSequencePFlow.replace(process.patJetCorrFactorsPFlow,
                                            process.kt6PFJets *
                                            process.patJetCorrFactorsPFlow)
 
-    process.patJetCorrFactorsPFlow.rho = cms.InputTag("kt6PFJets","rho", process.name_())
+    process.patJetCorrFactorsPFlow.rho = cms.InputTag("kt6PFJets","rho", "HLT")
 
 
 process.path = cms.Path(process.goodOfflinePrimaryVertices *
