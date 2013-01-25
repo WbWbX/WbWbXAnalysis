@@ -24,7 +24,7 @@ PFTree   = cms.EDAnalyzer('SusyTreeWriter',
                           
                           PUInfo = cms.InputTag('addPileupInfo'),
                           rhoIso = cms.InputTag("kt6PFJets","rho", "RECO"),
-                          includeRho2011 = cms.bool(True),
+                          includeRho2011 = cms.bool(False),
                           rhoJetsIsoNoPu = cms.InputTag("kt6PFJets"), #
                           rhoJetsIso = cms.InputTag("kt6PFJets"), #
                           

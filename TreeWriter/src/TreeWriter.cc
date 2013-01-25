@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id: TreeWriter.cc,v 1.14 2013/01/17 19:03:10 jkiesele Exp $
+// $Id: TreeWriter.cc,v 1.15 2013/01/25 09:15:48 jkiesele Exp $
 //
 //
 
@@ -770,12 +770,12 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    iEvent.getByLabel(rhoiso_,rho);
    temprhos.push_back(*rho);
-   if(rho2011_){
+   // if(rho2011_){
      iEvent.getByLabel(rhojetsisonopu_,rho);
      temprhos.push_back(*rho);
      iEvent.getByLabel(rhojetsiso_,rho);
      temprhos.push_back(*rho);
-   }
+     // }
    ntevent.setIsoRho(temprhos);
 
    //add rhoiso to electrons (uses 2011 corrections (second argument set to false));
