@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id: SusyTreeWriter.cc,v 1.7 2013/01/16 16:24:40 jkiesele Exp $
+// $Id: SusyTreeWriter.cc,v 1.8 2013/01/17 19:03:10 jkiesele Exp $
 //
 //
 
@@ -811,7 +811,7 @@ SusyTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    ntevent.setIsoRho(temprhos);
 
    //add rhoiso to electrons (if uses 2011 corrections (second argument set to false)); ##RHO2012##
-   top::elecRhoIsoAdder addrho(!IsRealData, true);
+   top::elecRhoIsoAdder addrho(!IsRealData, !rho2011_);
    if(rho2011_) addrho.setRho(temprhos[2]);
    else         addrho.setRho(temprhos[0]);
    addrho.addRhoIso(ntpfelectrons);

@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id: TreeWriter.cc,v 1.13 2013/01/16 16:24:40 jkiesele Exp $
+// $Id: TreeWriter.cc,v 1.14 2013/01/17 19:03:10 jkiesele Exp $
 //
 //
 
@@ -237,6 +237,8 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    ntjets.clear();
    nttracks.clear();
    ntsuclus.clear();
+   ntgenmuons.clear();
+   ntgenelecs.clear();
 
 
    top::NTTrigger clear;
@@ -777,7 +779,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    ntevent.setIsoRho(temprhos);
 
    //add rhoiso to electrons (uses 2011 corrections (second argument set to false));
-   top::elecRhoIsoAdder addrho(!IsRealData, false);
+   top::elecRhoIsoAdder addrho(!IsRealData, !rho2011_);
    if(rho2011_) addrho.setRho(temprhos[2]);
    else         addrho.setRho(temprhos[0]);
    addrho.addRhoIso(ntpfelectrons);
@@ -798,6 +800,21 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   
      for (size_t i = 0; i < genParticles->size(); ++i)
        allgen.push_back(&(genParticles->at(i)));
+
+     // std::vector<const reco::GenParticle *> test;
+     // for(size_t i=0;i<allgen.size();i++){
+     //   if(allgen.at(i)->status()==1){
+     // 	 test=top::getFullDecayChainRecursive(allgen.at(i));
+     // 	 for(size_t i=0;i<test.size()-1;i++){
+     // 	   if(!(test.at(i)->mother(0))) continue;
+     // 	   std::cout << test.at(i)->mother(0)->pdgId() << "  "<< test.at(i)->pdgId() << std::endl;
+     // 	 }
+     //   }
+     //   // std::cout << "\n" << std::endl;
+     // }
+
+     
+    
 
 std::vector<int> elecpdg; elecpdg.push_back(11);elecpdg.push_back(-11);
      std::vector<int> muonpdg; muonpdg.push_back(13);muonpdg.push_back(-13);
@@ -822,11 +839,13 @@ std::vector<int> elecpdg; elecpdg.push_back(11);elecpdg.push_back(-11);
      for(unsigned int i=0;i<genElecs.size();i++){
        genP=genElecs.at(i);
        tempgenlep.setP4(genP->p4());
+       tempgenlep.setStatus(genP->status());
        tempgenlep.setPdgId(genP->pdgId());
        ntgenelecs.push_back(tempgenlep);
      } 
      for(unsigned int i=0;i<genMuons.size();i++){
        genP=genMuons.at(i);
+       tempgenlep.setStatus(genP->status());
        tempgenlep.setP4(genP->p4());
        tempgenlep.setPdgId(genP->pdgId());
        ntgenmuons.push_back(tempgenlep);

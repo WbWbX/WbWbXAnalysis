@@ -29,6 +29,28 @@ std::vector<const reco::GenParticle *> getGenFromMother(const reco::GenParticle 
   // std::vector<const reco::GenParticle *> getGenFromMother(std::vector<reco::GenParticle>::const_iterator& mother, int Id, bool recursive){ 
   //   return getGenFromMother(&*mother, Id, recursive);
   // }
+
+  std::vector<const reco::GenParticle *> getFullDecayChainRecursive(const reco::GenParticle * part, int vetoId){//only fill in status 1!! does it work?!? doesn't... or does? more than one mother?!?
+    std::vector<const reco::GenParticle *> out;
+
+    for(unsigned int i=0;i<part->numberOfMothers();i++){
+      const reco::GenParticle * tempP= dynamic_cast<const reco::GenParticle*>(part->mother(i));
+      if(vetoId){
+	if(tempP->pdgId() == vetoId)
+	  break;
+      }
+      out.push_back(tempP);
+      if(tempP->numberOfMothers()>0){
+	std::vector<const reco::GenParticle *> temp=getFullDecayChainRecursive(tempP, vetoId);
+	out.insert(out.end(),temp.begin(),temp.end());
+      }
+      if(tempP->numberOfMothers()>1){
+	std::cout << "more than one mother... weird" << std::endl;
+      }
+    }
+    return out;
+  }
+
   
   
 
