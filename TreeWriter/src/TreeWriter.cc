@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id: TreeWriter.cc,v 1.15 2013/01/25 09:15:48 jkiesele Exp $
+// $Id: TreeWriter.cc,v 1.16 2013/01/25 10:39:38 jkiesele Exp $
 //
 //
 
@@ -465,6 +465,10 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        // Iso03.setNeutralHadronIso(muon->pfIsolationR03().sumNeutralHadronEt); ///
        // Iso03.setPhotonIso(muon->pfIsolationR03().sumPhotonEt);
        // Iso03.setPuChargedHadronIso(muon->pfIsolationR03().sumPUPt);
+       Iso03.setChargedHadronIso(muon->chargedHadronIso());
+       Iso03.setNeutralHadronIso(muon->neutralHadronIso());
+       Iso03.setPhotonIso(muon->photonIso());
+       Iso03.setPuChargedHadronIso(muon->puChargedHadronIso());
 
        top::NTIsolation Iso04;
        Iso04.setChargedHadronIso(muon->chargedHadronIso());
