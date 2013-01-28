@@ -32,6 +32,8 @@ options.register ('isSignal',False,VarParsing.VarParsing.multiplicity.singleton,
 
 import sys
 
+newMuons=True
+
 if hasattr(sys, "argv"):
     options.parseArguments()
 
@@ -409,6 +411,22 @@ getattr(process,'patPFElectrons'+pfpostfix).isolationValues = cms.PSet(
 ######### end of electron implementation ########
 ##### MUONS ########
 
+if newMuons:
+
+    print "Muon Cone size 0.3 is used!!!!!\n\n\n"
+
+    getattr(process,'pfIsolatedMuons'+pfpostfix).doDeltaBetaCorrection = True
+    getattr(process,'pfIsolatedMuons'+pfpostfix).deltaBetaIsolationValueMap = cms.InputTag("muPFIsoValuePU03"+pfpostfix, "", "")
+    getattr(process,'pfIsolatedMuons'+pfpostfix).isolationValueMapsCharged = [cms.InputTag("muPFIsoValueCharged03"+pfpostfix)]
+    getattr(process,'pfIsolatedMuons'+pfpostfix).isolationValueMapsNeutral = [cms.InputTag("muPFIsoValueNeutral03"+pfpostfix), cms.InputTag("muPFIsoValueGamma03"+pfpostfix)]
+
+    getattr(process,'patMuons'+pfpostfix).isolationValues = cms.PSet(
+        pfNeutralHadrons = cms.InputTag("muPFIsoValueNeutral03"+pfpostfix),
+        pfChargedAll = cms.InputTag("muPFIsoValueChargedAll03"+pfpostfix),
+        pfPUChargedHadrons = cms.InputTag("muPFIsoValuePU03"+pfpostfix),
+        pfPhotons = cms.InputTag("muPFIsoValueGamma03"+pfpostfix),
+        pfChargedHadrons = cms.InputTag("muPFIsoValueCharged03"+pfpostfix)
+        )
 
 
 
