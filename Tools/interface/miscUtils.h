@@ -1,5 +1,5 @@
-#ifndef topMiscUtils_h
-#define topMiscUtils_h
+#ifndef TOPMISCUTILS_h
+#define TOPMISCUTILS_h
 
 #include "TString.h"
 #include <sstream>
@@ -21,15 +21,7 @@ TString toTString(t in){
 TH2D divideTH2DBinomial(TH2D &h1, TH2D &h2);
 TH2D divideTH2D(TH2D &h1, TH2D &h2);
 
-void addRelError(TH2D &h, double err){
-  for(int binx=1;binx<=h.GetNbinsX()+1;binx++){
-    for(int biny=1;biny<=h.GetNbinsY()+1;biny++){
-      double add=h.GetBinContent(binx,biny) * err;
-      double newerr=sqrt(pow(h.GetBinError(binx,biny),2) + pow(add,2));
-      h.SetBinError(binx,biny,newerr);
-    }
-  }
-}
+void addRelError(TH2D &h, double err);
 
 
 TH1D divideTH1DBinomial(TH1D &h1, TH1D &h2);

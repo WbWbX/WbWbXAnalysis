@@ -2,6 +2,17 @@
 
 
 namespace top{
+  void addRelError(TH2D &h, double err){
+    for(int binx=1;binx<=h.GetNbinsX()+1;binx++){
+      for(int biny=1;biny<=h.GetNbinsY()+1;biny++){
+	double add=h.GetBinContent(binx,biny) * err;
+	double newerr=sqrt(pow(h.GetBinError(binx,biny),2) + pow(add,2));
+	h.SetBinError(binx,biny,newerr);
+      }
+    }
+  }
+
+
   void displayStatusBar(Long64_t event, Long64_t nEvents){
     
     if((event +1)* 50 % nEvents <50){ //2% steps
