@@ -28,7 +28,7 @@
 
 ####MC # extra tag for FS?!?! does only affect the jets..
 
-200  /SMS-T2tt_FineBin_Mstop-225to1200_mLSP-0to1000_8TeVPythia6Z/Summer12-START52_V9_FSIM-v1/AODSIM    tree_8TeV_susy          globalTag=START52_V9
+600  /SMS-T2tt_FineBin_Mstop-225to1200_mLSP-0to1000_8TeVPythia6Z/Summer12-START52_V9_FSIM-v1/AODSIM    tree_8TeV_susy          globalTag=START52_V9 isFastSim=true
 
 ## DY samples
 
