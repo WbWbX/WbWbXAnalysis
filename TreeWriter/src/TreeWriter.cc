@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id: TreeWriter.cc,v 1.16 2013/01/25 10:39:38 jkiesele Exp $
+// $Id: TreeWriter.cc,v 1.17 2013/01/28 16:35:06 jkiesele Exp $
 //
 //
 
@@ -325,7 +325,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        double vz=-9999;
        double vzerr=-9999;
        double dbs=100;
-       int mhits=-1;
+       int mhits=99;
        if(!(electron->gsfTrack().isNull())){
 	 vz=electron->gsfTrack()->dz(vtxs[0].position());                   //
 	 vzerr=electron->gsfTrack()->dzError();  
@@ -394,11 +394,12 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        tempelec.setECalP4(electron->ecalDrivenMomentum());
        
        tempelec.setP4(electron->p4());
+       tempelec.setQ(electron->charge());
        double vz=-9999;
        double vzerr=-9999;
        double dbs=100;
 
-       int mhits=-1;
+       int mhits=99;
 
        if(!(electron->gsfTrack().isNull())){
 	 vz=electron->gsfTrack()->dz(vtxs[0].position());                   //
@@ -891,7 +892,7 @@ TreeWriter::beginJob()
   Ntuple->Branch("NTJets", "std::vector<top::NTJet>", &ntjets);
   Ntuple->Branch("NTMet", "top::NTMet", &ntmet);
   Ntuple->Branch("NTEvent", "top::NTEvent", &ntevent);
-  Ntuple->Branch("NTTrigger", "top::NTTrigger", &nttrigger);
+  //  Ntuple->Branch("NTTrigger", "top::NTTrigger", &nttrigger);
 
   Ntuple->Branch("NTGenElectrons", "std::vector<top::NTGenLepton>", &ntgenelecs);
   Ntuple->Branch("NTGenMuons",     "std::vector<top::NTGenLepton>", &ntgenmuons);
@@ -902,13 +903,13 @@ TreeWriter::beginJob()
 void 
 TreeWriter::endJob() 
 {
-if( !fs ){
+  /*if( !fs ){
     throw edm::Exception( edm::errors::Configuration,
                           "TFile Service is not registered in cfg file" );
   }
   TTree * TT;
   TT=fs->make<TTree>("TriggerMaps" ,"TriggerMaps" );
-  nttrigger.writeMapToTree(TT);
+  nttrigger.writeMapToTree(TT);*/
 }
 
 // ------------ method called when starting to processes a run  ------------

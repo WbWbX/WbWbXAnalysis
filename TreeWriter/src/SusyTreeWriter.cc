@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id: SusyTreeWriter.cc,v 1.8 2013/01/17 19:03:10 jkiesele Exp $
+// $Id: SusyTreeWriter.cc,v 1.9 2013/01/25 09:15:48 jkiesele Exp $
 //
 //
 
@@ -413,11 +413,12 @@ SusyTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        ;
        
        tempelec.setP4(electron->p4());
+       tempelec.setQ(electron->charge());
        double vz=-9999;
        double vzerr=-9999;
        double dbs=100;
 
-       int mhits=-1;
+       int mhits=99;
 
        if(!(electron->gsfTrack().isNull())){
 	 vz=electron->gsfTrack()->dz(vtxs[0].position());                   //
@@ -757,7 +758,7 @@ SusyTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        for(int i_Trig = 0; i_Trig<n_Triggers; ++i_Trig){
 	 if(trigresults.product()->accept(i_Trig)){
 	   firedtriggers.push_back(trigName.triggerName(i_Trig));
-	   nttrigger.insert(trigName.triggerName(i_Trig));
+	   //  nttrigger.insert(trigName.triggerName(i_Trig));
 	   // if(((TString)trigName.triggerName(i_Trig)).Contains("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v")){
 	   // std::cout << trigName.triggerName(i_Trig) << std::endl;
 	   //} 
@@ -950,7 +951,7 @@ SusyTreeWriter::beginJob()
   Ntuple->Branch("NTJets", "std::vector<top::NTJet>", &ntjets);
   Ntuple->Branch("NTMet", "top::NTMet", &ntmet);
   Ntuple->Branch("NTEvent", "top::NTEvent", &ntevent);
-  Ntuple->Branch("NTTrigger", "top::NTTrigger", &nttrigger);
+  //  Ntuple->Branch("NTTrigger", "top::NTTrigger", &nttrigger);
 
   Ntuple->Branch("stopMass",  &stopMass);
   Ntuple->Branch("chiMass", &chiMass);
@@ -965,14 +966,14 @@ SusyTreeWriter::beginJob()
 void 
 SusyTreeWriter::endJob() 
 {
-
+  /*
   if( !fs ){
     throw edm::Exception( edm::errors::Configuration,
                           "TFile Service is not registered in cfg file" );
   }
   TTree * TT;
   TT=fs->make<TTree>("TriggerMaps" ,"TriggerMaps" );
-  nttrigger.writeMapToTree(TT);
+  nttrigger.writeMapToTree(TT);*/
 }
 
 // ------------ method called when starting to processes a run  ------------
