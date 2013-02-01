@@ -29,10 +29,10 @@ options.register ('laseroff',False,VarParsing.VarParsing.multiplicity.singleton,
 
 
 options.register ('isSignal',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"is SignalMC")
+options.register ('muCone03',True,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"use iso con of 0.3")
 
 import sys
 
-newMuons=True
 
 if hasattr(sys, "argv"):
     options.parseArguments()
@@ -57,6 +57,7 @@ laseroff=options.laseroff
 
 
 isSignal=options.isSignal
+newMuons=options.muCone03
 
 if not isMC:
     isSignal=False
