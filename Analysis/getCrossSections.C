@@ -3,35 +3,6 @@
 #include "TtZAnalysis/Tools/interface/miscUtils.h"
 #include <cstdlib>
 
-top::container1DStackVector rescaleDY(top::container1DStackVector vec, std::vector<TString> contributions, double scalescale=1, bool textout=true, TString identifier="dilepton invariant massZ "){
- 
-  std::vector<TString> ident;
-  std::vector<double> scales;
-  for(int i=5;i<=9;i++){
-    TString stepstring="step "+toTString(i);
-    double dymc = 0;
-    std::vector<TString> allbutdyanddata;
-
-    for(unsigned int j=0;j<contributions.size();j++){
-      dymc += vec.getStack(identifier+stepstring).getContribution(contributions.at(j)).integral();
-      allbutdyanddata << contributions.at(j);
-    }
-    double d = vec.getStack(identifier+stepstring).getContribution("data").integral();
-    allbutdyanddata << "data";
-    double rest = vec.getStack(identifier+stepstring).getContributionsBut(allbutdyanddata).integral();
-    if(rest==0) rest=1;
-    double scale = (d-rest)/dymc;
-    scales << scale*scalescale;
-    ident << stepstring;
-    if(textout) std::cout << "Scalefactor for "<< vec.getName() << " " << stepstring << ": " << scale << std::endl;
-  }
-  top::container1DStackVector rescaled=vec;
-  for(unsigned int i=0;i<contributions.size();i++){
-    rescaled.multiplyNorms(contributions.at(i), scales, ident);
-  }
-  return rescaled;
-
-}
 
 
 
@@ -42,6 +13,9 @@ void getCrossSections(){
   using namespace std;
   using namespace top;
 
+
+  bool writeAllOut=true;
+
   // get input files
   // select some stuff
   // make some correlation stuff (containerUF)
@@ -50,9 +24,9 @@ void getCrossSections(){
 
   // load files and full information from containerstackverctors
 
-  TString inputdir="";
+  TString inputdir="/scratch/hh/dust/naf/cms/user/kieseler/Analysis/CMSSW_5_3_5/src/TtZAnalysis/Analysis/23012013_2013-01-23_14:53";
 
-  TFile * inputFile         = new TFile("syncOv_2012-12-06_14:43/analysis_output.root");
+  TFile * inputFile         = new TFile(inputdir+"/analysis_output.root");
 
   double lumi7TeV=5100; //lumi uncertainty is added in Analyzer.C
   double lumi8TeV=12100;
@@ -65,18 +39,18 @@ void getCrossSections(){
 
  
   vector<container1DStackVector> vecsfull; //without DY rescaling .. ee8TeV ee7TeV mumu8TeV mumu7TeV comb8TeV comb7TeV MUST be kept
-  vector<container1DStackVector> dyVecFull, dyVecFullWithDYErrors;
+  vector<container1DStackVector> dyVecFull, fullbgerrors;
 
   container1DStackVector tempvec,tempvec2;
 
-  tempvec.loadFromTree(storedObjects, "8TeV_btag_ee_ee");
+  tempvec.loadFromTree(storedObjects, "8TeV_allErrors_ee");
   vecsfull << tempvec;
-  //  tempvec.loadFromTree(storedObjects, "7TeV_btag_ee_ee");
-  //  vecsfull << tempvec;
-  tempvec.loadFromTree(storedObjects, "8TeV_btag_mumu_mumu");
+  tempvec.loadFromTree(storedObjects, "7TeV_allErrors_ee");
   vecsfull << tempvec;
-  //  tempvec.loadFromTree(storedObjects, "7TeV_btag_mumu_mumu");
-  //  vecsfull << tempvec;
+  tempvec.loadFromTree(storedObjects, "8TeV_allErrors_mumu");
+  vecsfull << tempvec;
+  tempvec.loadFromTree(storedObjects, "7TeV_allErrors_mumu");
+  vecsfull << tempvec;
 
   
 	   
@@ -86,89 +60,76 @@ void getCrossSections(){
   // operator + not (yet) defined for csv; runs into problems when using containers to get efficiencies
 
   //////do the DY rescaling
-
   TString outfile="fullcontrol_and_xsec_graphs.root";
+
+  if(writeAllOut){
   TFile * tempfile = new TFile(outfile,"RECREATE");
   tempfile->Close();
   delete tempfile;
-
-  vector<TString> dycontributions;
-  dycontributions << "Z#rightarrowll" << "DY#rightarrowll";
-
-  for(unsigned int i=0;i<vecsfull.size();i++){
-    //scale DY
-
-    cout << "scaling DY for " << vecsfull.at(i).getName() << endl;
-
-    container1DStackVector temp=rescaleDY(vecsfull.at(i), dycontributions);
-    temp.setName(temp.getName() + "_dyScaled");
-    temp.writeAllToTFile  (outfile,false);
-    dyVecFull << temp;
-
-    // continue;
-    //vary DY
-    container1DStackVector scaledtempup,scaledtempdown;
-    scaledtempup   = rescaleDY(vecsfull.at(i), dycontributions, 1.5, false);
-    scaledtempdown = rescaleDY(vecsfull.at(i), dycontributions, 0.5, false);
-
-
-    //assume no correlation between the variations.. might be wrong? would be nice if ;)
-    if(scaledtempup.getName().Contains("7TeV")){
-      temp.addMCErrorStackVector("7TeV_DY_up",scaledtempup);
-      temp.addMCErrorStackVector("7TeV_DY_down",scaledtempdown);
-    }
-    else{
-      temp.addMCErrorStackVector("8TeV_DY_up",scaledtempup);
-      temp.addMCErrorStackVector("8TeV_DY_down",scaledtempdown);
-    }
-    temp.setName(temp.getName() + "_dyErrors");
-    temp.writeAllToTFile  (outfile,false);
-    dyVecFullWithDYErrors << temp;
-
   }
 
-
-  vector<container1DStackVector> fullbgerrors=dyVecFullWithDYErrors;
-
-
-  for(unsigned int i=0;i<dyVecFullWithDYErrors.size();i++){
+  for(unsigned int i=0;i<vecsfull.size();i++){
 
     TString add="8TeV_";
-    if(dyVecFullWithDYErrors.at(i).getName().Contains("7TeV"))
+    if(vecsfull.at(i).getName().Contains("7TeV"))
       add="7TeV_";
 
-    cout << "doing background variation for " << dyVecFullWithDYErrors.at(i).getName() << endl;
+    cout << "doing ttbar background variation for " << vecsfull.at(i).getName() << endl;
 
-    vector<TString> bgcontr; bgcontr << "t#bar{t}bg" << "singleTop" << "VV" << "Wjets" << "DY#rightarrow#tau#tau";
-    vector<double> scales;   scales  << 0.3          << 0.3         << 0.3  << 0.3     << 0.5;
+    vector<TString> bgcontr; bgcontr << "t#bar{t}bg" << "singleTop" << "VV" << "Wjets" << "DY#rightarrow#tau#tau" << "Z#rightarrowll"  << "DY#rightarrowll";
+    vector<double> scales;   scales  << 0.3          << 0.3         << 0.3  << 0.3     << 0.5                     << 0.5               << 0.5;
 
 
-    container1DStackVector temp3=dyVecFullWithDYErrors.at(i);
+    container1DStackVector temp3=vecsfull.at(i);
 
     for(unsigned int j=0;j<bgcontr.size();j++){
 
-      container1DStackVector temp=dyVecFullWithDYErrors.at(i);
-      container1DStackVector temp2=dyVecFullWithDYErrors.at(i);
+      container1DStackVector temp=vecsfull.at(i);
+      container1DStackVector temp2=vecsfull.at(i);
       
       temp.multiplyNorm( bgcontr.at(j),1+scales.at(j),"step "+ttstep);
       temp2.multiplyNorm(bgcontr.at(j),1-scales.at(j),"step "+ttstep);
       
       //Z selection: step 20 just scale by 100%
-      
-      temp.multiplyNorm( bgcontr.at(j),2,"step 20");
-      temp2.multiplyNorm(bgcontr.at(j),0,"step 20");
-      
+
       //  cout <<       bgcontr.at(j) << endl;
 
       temp3.addMCErrorStackVector(add+bgcontr.at(j)+"_up",temp);
       temp3.addMCErrorStackVector(add+bgcontr.at(j)+"_down",temp2);
     }
+
+    cout << "doing Z background variation for " << vecsfull.at(i).getName() << endl;
+
+    vector<TString> Zbg; Zbg << "t#bar{t}"<< "t#bar{t}#tau" << "t#bar{t}bg" << "singleTop" << "VV" << "Wjets" << "DY#rightarrow#tau#tau";
+    for(unsigned int j=0;j<bgcontr.size();j++){
+
+      container1DStackVector temp=vecsfull.at(i);
+      container1DStackVector temp2=vecsfull.at(i);
+      
+      temp.multiplyNorm( Zbg.at(j),2,"step 20");
+      temp2.multiplyNorm(Zbg.at(j),0,"step 20");
+
+
+      temp3.addMCErrorStackVector(add+bgcontr.at(j)+"_Z_up",temp);
+      temp3.addMCErrorStackVector(add+bgcontr.at(j)+"_Z_down",temp2);
+
+    }
+
+
+
     temp3.setName(temp3.getName() + "_BGErrors");
     fullbgerrors << temp3;
-    temp3.writeAllToTFile  (outfile,false);
+    cout << "writing " << temp3.getName() << endl;
+    if(writeAllOut) temp3.writeAllToTFile  (outfile,false);
   }
+  
 
 
+
+
+
+
+    
   //// fill stuff to containerUF and do the "unfolding" selected distr is the same for Z and tt after gen filter?! 
 
   TString ttgenerateddistr = "generated filtered events";
@@ -180,29 +141,105 @@ void getCrossSections(){
 
   vector<container1DUF> xsecs;
 
-  for(unsigned int i=0;i<dyVecFullWithDYErrors.size();i++){
+  for(unsigned int i=0;i<fullbgerrors.size();i++){
     double templumi=0;
-    if(dyVecFullWithDYErrors.at(i).getName().Contains("7TeV"))
+    if(fullbgerrors.at(i).getName().Contains("7TeV"))
       templumi=lumi7TeV;
     else
       templumi=lumi8TeV;
     //ttbar xsecs
-    container1DUF temp(dyVecFullWithDYErrors.at(i).getStack(ttgenerateddistr), dyVecFullWithDYErrors.at(i).getStack(ttselecteddistr),   ttSignalName, templumi);
-    temp.setName("ttbar__"+dyVecFullWithDYErrors.at(i).getName());
+    container1DUF temp(fullbgerrors.at(i).getStack(ttgenerateddistr), fullbgerrors.at(i).getStack(ttselecteddistr),   ttSignalName, templumi);
+    temp.setName("ttbar__"+fullbgerrors.at(i).getName());
+    std::cout << "\n this was for " << temp.getName() <<std::endl;
     xsecs << temp;
     //Z xsecs
-    container1DUF tempZ(dyVecFullWithDYErrors.at(i).getStack(Zgenerateddistr), dyVecFullWithDYErrors.at(i).getStack(Zselecteddistr),   ZSignalName, templumi);
-    tempZ.setName("Z__"+dyVecFullWithDYErrors.at(i).getName());
+    container1DUF tempZ(fullbgerrors.at(i).getStack(Zgenerateddistr), fullbgerrors.at(i).getStack(Zselecteddistr),   ZSignalName, templumi);
+    tempZ.setName("Z__"+fullbgerrors.at(i).getName());
+    std::cout << "\n this was for " << tempZ.getName() <<std::endl;
     xsecs << tempZ;
+    cout << "\n" << endl;
   }
 
+  std::cout << "UNFOLDING DONE!!\n\n\n\n" <<std::endl;
+
+  
+  TCanvas * c =new TCanvas();
+  TH1D * h;
+  container1DUF sys;
   for(unsigned int i=0;i<xsecs.size();i++){
     cout << "\n" << xsecs.at(i).getName() << endl;
     xsecs.at(i).coutBinContents();
-    container1DUF sys = xsecs.at(i).breakDownRelSystematicsInBin(1);
+    sys = xsecs.at(i).breakDownRelSystematicsInBin(1);
     sys.coutBinContents();
+    h=sys.getTH1D("",false);
+    h->GetXaxis()->SetLabelSize(0.015);
+    h->Draw("AXIS");
+    sys.getTGraph("",false)->Draw("same");
+    c->Print("plots/"+xsecs.at(i).getName()+".pdf");
+    cout << "\n\n" << endl;
+    xsecs.at(i).removeError("MC_stat_up");
+    xsecs.at(i).removeError("MC_stat_down");
+    //  break;
   }
 
+  // do ratios:
+
+  // ee 8TeV tt,Z
+  // ee 7TeV tt,Z
+  // mumu 8TeV tt,Z
+  // mumu 7TeV tt,Z
+
+  std::cout << xsecs.size() << std::endl;
+
+
+//dont forget renamng MC_stat syst/
+
+  //single ratios
+  container1DUF doubleRee=xsecs.at(0) / xsecs.at(1) / (xsecs.at(2) / xsecs.at(3));
+  container1DUF doubleRmumu=xsecs.at(4) / xsecs.at(5) / (xsecs.at(6) / xsecs.at(7));
+
+  c->Clear();
+
+  TFile file(outfile,"UPDATE");
+  file.ls();
+
+  TLine *l = new TLine(0, 1.23, 1, 1.23);
+
+  std::cout << "double Ratio ee" <<std::endl;
+  doubleRee.coutBinContents();
+  h=doubleRee.getTH1D("doubleR_ee",false);
+  h->Draw("AXIS");
+  h->Write();
+  doubleRee.getTGraph("",false)->Draw("same");
+  l->SetLineColor(kRed);
+  l->Draw("same");
+  c->Print("plots/doubleRee.pdf");
+  sys = doubleRee.breakDownRelSystematicsInBin(1);
+  h=sys.getTH1D("",false);
+  h->GetXaxis()->SetLabelSize(0.015);
+  h->Draw("AXIS");
+  sys.getTGraph("",false)->Draw("same");
+  c->Print("plots/doubleRee_sys.pdf");
+ 
+  std::cout << "double Ratio mumu" <<std::endl;
+  doubleRmumu.coutBinContents();
+  doubleRmumu.getTH1D("doubleR_mumu",false)->Draw("AXIS");
+  doubleRmumu.getTGraph("",false)->Draw("same");
+  l->SetLineColor(kRed);
+  l->Draw("same");
+  c->Print("plots/doubleRmumu.pdf");
+  sys = doubleRmumu.breakDownRelSystematicsInBin(1);
+  h=sys.getTH1D("",false);
+  h->GetXaxis()->SetLabelSize(0.015);
+  h->Draw("AXIS");
+  sys.getTGraph("",false)->Draw("same");
+  c->Print("plots/doubleRmumu_sys.pdf");
+ 
+
+
+  // 
+
+  /*
   //do other stuff by looping over xsec.at(i) and as for .Contains(7TeV / 8TeV) && Contains(Z__ bzw ttbar__) (ee, mumu)
 
   // vector<TString> s7TeVee,s7TeVmumu,s8TeVee,s8TeVmumu;
