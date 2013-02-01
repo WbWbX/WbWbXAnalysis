@@ -18,6 +18,14 @@ TString toTString(t in){
   return out;
 }
 
+template<class t>
+TString toString(t in){
+  std::ostringstream s;
+  s << in;
+  std::string out=s.str();
+  return out;
+}
+
 TH2D divideTH2DBinomial(TH2D &h1, TH2D &h2);
 TH2D divideTH2D(TH2D &h1, TH2D &h2);
 
