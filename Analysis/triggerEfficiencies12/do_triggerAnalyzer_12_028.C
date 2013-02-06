@@ -40,7 +40,7 @@ class triggerAnalyzer{
 
 public:
   triggerAnalyzer(){
-    binseta_.push_back(-2.5);binseta_.push_back(-1.5);binseta_.push_back(-0.8);binseta_.push_back(0.8);binseta_.push_back(1.5);binseta_.push_back(2.5); // ee standard
+    binseta_.push_back(-2.5);binseta_.push_back(-1.5);binseta_.push_back(-0.8);binseta_.push_back(0.8);binseta_.push_back(1.5);binseta_.push_back(2.4); // ee standard
     binspt_ << 20 << 25 << 30 << 35 << 40 << 50 << 60 << 100 << 200;
     binseta2dx_ << 0 << 0.9 << 1.2 << 2.1 << 2.4; //mu standard
     binseta2dy_=binseta2dx_;
@@ -600,7 +600,7 @@ notinMCtriggers.push_back("DiCentralPFJet");
     vector<NTJet> selected_jets;
     for(vector<NTJet>::iterator jet=pJets->begin();jet<pJets->end();jet++){
       if(jet->pt() < jetptcut) continue;
-      if(fabs(jet->eta()) >2.5) continue;
+      if(fabs(jet->eta()) >2.4) continue;
       if(!noOverlap(jet,selectedMuons,0.3)) continue; //cleaning  ##TRAP## changed to 0.4 /doesn't matter for final eff
       if(!noOverlap(jet,selectedElecs,0.3)) continue;
       if((!jet->id())) continue;
@@ -1089,7 +1089,7 @@ void analyze(){
   std::vector<float> binsmumueta, bins2dee, bins2dmu;
   binsmumueta.push_back(-2.4);binsmumueta.push_back(-2.1);binsmumueta.push_back(-1.2);binsmumueta.push_back(-0.9);binsmumueta.push_back(0.9);binsmumueta.push_back(1.2);binsmumueta.push_back(2.1);binsmumueta.push_back(2.4);
 
-  bins2dee << 0 << 1.479 << 2.5;
+  bins2dee << 0 << 1.479 << 2.4;
   bins2dmu << 0 << 0.9 << 2.4;
 
   triggerAnalyzer ta_eed;
