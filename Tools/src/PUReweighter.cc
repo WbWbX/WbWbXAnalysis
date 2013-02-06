@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 #include "TString.h"
-#include "PUReweighter.h"
+#include "../interface/PUReweighter.h"
 
 //! PU reweighting. Now provides a PU variation of +-1.
 //! contradicts to the official recommendation to use different data distributions with varied total inelastic cross section by +-5%
