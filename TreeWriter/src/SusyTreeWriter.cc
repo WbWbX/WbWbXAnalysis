@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id: SusyTreeWriter.cc,v 1.9 2013/01/25 09:15:48 jkiesele Exp $
+// $Id: SusyTreeWriter.cc,v 1.10 2013/01/31 16:08:48 jkiesele Exp $
 //
 //
 
@@ -828,7 +828,7 @@ SusyTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    ///////fill gen info and SUSY generator info////
 
-   if(!IsRealData && includegen_){
+   if(!IsRealData){
      //    edm::Handle<GenEventInfoProduct> genEvtInfo;
      // iEvent.getByLabel("generator", genEvtInfo);
      //T_Event_PtHat =  genEvtInfo->hasBinningValues() ? (genEvtInfo->binningValues())[0] : 0.0;
@@ -871,7 +871,7 @@ SusyTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
      //  const std::vector<reco::GenParticle> * allgen = &(*genParticles);
 
-
+     if(includegen_){
      std::vector<int> elecpdg; elecpdg.push_back(11);elecpdg.push_back(-11);
      std::vector<int> muonpdg; muonpdg.push_back(13);muonpdg.push_back(-13);
 
@@ -905,7 +905,7 @@ SusyTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        ntgenmuons.push_back(tempgenlep);
      }
 
-
+     }
 
    } // isMc end
 
