@@ -126,7 +126,7 @@ void makeplot(TString inputfile, TString plot, TString channel){
       else if(plot=="jetmulti"){
 	h->GetXaxis()->SetTitle("n_{jet}");
       }
-      else if (plot="drlep"){
+      else if (plot=="drlep"){
 	h->GetXaxis()->SetTitle("#DeltaR(l_{1},l_{2})");
       }
 
