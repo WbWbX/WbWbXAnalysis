@@ -28,7 +28,6 @@ using namespace std;
 double ratiomultiplier=0;
 TString whichelectrons="NTPFElectrons";
 
-bool useRhoIso=false;
 
 double jetptcut=30;
 
