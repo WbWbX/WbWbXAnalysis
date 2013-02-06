@@ -26,7 +26,7 @@ using namespace std;
 // NOOOOO relative paths!!
 
 double ratiomultiplier=0;
-TString whichelectrons="NTPFElectrons";
+TString whichelectrons="NTElectrons";
 
 bool useRhoIso=false;
 
@@ -542,7 +542,7 @@ notinMCtriggers.push_back("DiCentralPFJet");
       //  if(muon->trkHits() <= 5 ) continue;
       // if(muon->muonHits() <1) continue;
       // if(muon->dbs()> 0.2) continue;
-      if(muon->isoVal03() > 0.15 ) continue;
+      if(muon->isoVal04() > 0.2 ) continue;
       //  if(muon->normChi2() >10) continue;
       selectedMuons.push_back(*muon);
     }
@@ -550,17 +550,16 @@ notinMCtriggers.push_back("DiCentralPFJet");
 
     vector<NTElectron> selectedElecs;
     for(vector<NTElectron>::iterator elec=pElectrons->begin();elec<pElectrons->end();elec++){
-      // if(elec->pt()<20 ) continue;
-      if(elec->ECalP4().Pt()<20) continue;
-      if(fabs(elec->eta())>2.4 ) continue;   //!!!!
+      if(elec->ECalP4().Pt()<20 ) continue;
+      if(fabs(elec->eta())>2.5 ) continue;
       if(fabs(elec->dbs()) >0.04 ) continue;
       if(!(elec->isNotConv()) ) continue;
-      // if(useRhoIso && elec->rhoIso03()>0.15 ) continue;
-      if(elec->isoVal03()>0.15) continue;
+      if(elec->rhoIso03()>0.15 ) continue;
+      if(elec->mHits() >0) continue;
+      // if(!useRhoIso && elec->isoVal03()>0.15) continue;
       //  if(CiCId && (0x00 == (0x01 & (int) elec->id("cicTightMC"))) ) continue; //for CiC bit test
       if(elec->mvaId() < 0.5) continue;
-      // if(!noOverlap(elec,*pMuons,0.1)) continue;
-      if(elec->mHits() > 0) continue;
+      //  if(!noOverlap(elec,*pMuons,0.1)) continue;
 
       selectedElecs.push_back(*elec);
     }
@@ -1072,11 +1071,7 @@ TChain * makeChain(TString path){
 
 
 
-
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 void analyze(){
@@ -1104,7 +1099,7 @@ void analyze(){
   triggerAnalyzer ta_mumuMC=ta_mumud;
   triggerAnalyzer ta_emuMC=ta_emud;
 
-  TString datadir="/scratch/hh/dust/naf/cms/user/kieseler/trees_ES_R03/";
+  TString datadir="/scratch/hh/dust/naf/cms/user/kieseler/trees_ES_R04_gsf/";
 
   std::vector<TString> datafiles;
   datafiles  << datadir + "tree_8TeV_MET_runA_06Aug.root" 
@@ -1126,7 +1121,7 @@ void analyze(){
   vector<double> mumud=ta_mumud.Eff("mumu",  datachain,pileuproot, false,getTeX);
   vector<double> emud= ta_emud.Eff("emu",   datachain,pileuproot, false,getTeX);
 
-  TString MCdir=datadir;
+  TString MCdir=datadir;//"/scratch/hh/dust/naf/cms/user/kieseler/trees_8TeV/";
 
   std::vector<TString> eemcfiles,mumumcfiles,emumcfiles;
   eemcfiles << MCdir+"tree_8TeV_eettbar.root"
@@ -1240,6 +1235,7 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
   addRelError(SFdd, 0.01);
   SFdd.Write();
 
+
   data=ta_eed.getPtPlot();
   MC=ta_eeMC.getPtPlot();
   data.setDivideBinomial(false);
@@ -1340,6 +1336,7 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
   addRelError(SFdd, 0.01);
   SFdd.Write();
 
+
   data=ta_mumud.getPtPlot();
   MC=ta_mumuMC.getPtPlot();
   data.setDivideBinomial(false);
@@ -1436,6 +1433,7 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
   addRelError(SFdd, 0.01);
   SFdd.Write();
 
+
   data=ta_emud.getPtPlot();
   MC=ta_emuMC.getPtPlot();
   data.setDivideBinomial(false);
@@ -1511,7 +1509,7 @@ cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC
   
 }
 
-void do_triggerAnalyzer_12_028(){
+void do_triggerAnalyzer_tW(){
   analyze();
   miniscript(); //makes plots nice and puts output to directory
 
