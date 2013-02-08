@@ -16,10 +16,15 @@ void make2dplots(TString inputfile, TString plot, TString channel){
 
   TFile *f = new TFile(inputfile);
 
-  std::vector<TString> plots; plots << plot+" eff" << plot+" effMC" << "scalefactor "+plot;
+  std::vector<TString> plots; plots << plot+"_eff" << plot+"_effMC" << "scalefactor_"+plot;
   //std::vector<TString> plots;plots<< "scalefactor "+plot;
 
   TCanvas *c = new TCanvas();
+
+  if(gStyle)
+    gStyle->SetPaintTextFormat("5.3f");
+  else
+    std::cout << "gStyle not available" <<std::endl;
 
   for(unsigned int i=0;i<plots.size();i++){
     std::cout << "checking " << plots.at(i) << std::endl;
@@ -81,10 +86,10 @@ void makeplot(TString inputfile, TString plot, TString channel){
     if(f->Get(plot) && ((TString)f->Get(plot)->ClassName()).Contains("TH2D")){
       make2dplots(inputfile, plot, channel);
     }
-    if(f->Get(plot +" eff") && (((TString)f->Get(plot +" eff")->ClassName()).Contains("TH2D"))){
+    if(f->Get(plot +"_eff") && (((TString)f->Get(plot +"_eff")->ClassName()).Contains("TH2D"))){
       make2dplots(inputfile, plot, channel);
     }
-    if(f->Get("scalefactor "+plot) && (((TString)f->Get("scalefactor "+plot)->ClassName()).Contains("TH2D"))){
+    if(f->Get("scalefactor_"+plot) && (((TString)f->Get("scalefactor_"+plot)->ClassName()).Contains("TH2D"))){
       make2dplots(inputfile, plot, channel);
     }
     else{
@@ -97,10 +102,10 @@ void makeplot(TString inputfile, TString plot, TString channel){
 
       TH1D *h = (TH1D*)f->Get("axis "+plot);
 
-      TGraphAsymmErrors *sfc=(TGraphAsymmErrors*) f->Get("scalefactor "+plot+" incl corrErr");
-      TGraphAsymmErrors *sf=(TGraphAsymmErrors*) f->Get("scalefactor "+plot);
-      TGraphAsymmErrors *d=(TGraphAsymmErrors*) f->Get(plot+" eff");
-      TGraphAsymmErrors *mc=(TGraphAsymmErrors*) f->Get(plot+" effMC");
+      TGraphAsymmErrors *sfc=(TGraphAsymmErrors*) f->Get("scalefactor_"+plot+"_incl corrErr");
+      TGraphAsymmErrors *sf=(TGraphAsymmErrors*) f->Get("scalefactor_"+plot);
+      TGraphAsymmErrors *d=(TGraphAsymmErrors*) f->Get(plot+"_eff");
+      TGraphAsymmErrors *mc=(TGraphAsymmErrors*) f->Get(plot+"_effMC");
 
       h->SetAxisRange(0.5,1.1,"Y");
       // set style
@@ -189,7 +194,7 @@ void makeplot(TString inputfile, TString plot, TString channel){
 
     std::vector<TString> channels, plots;
     channels << "ee" << "mumu" << "emu" ;
-    plots << "eta2d" << "eta2d with syst" << "pt" << "eta" << "dphi" << "dphi2" << "vmulti" << "jetmulti" << "drlep";
+    plots << "eta2d" << "eta2d_with_syst" << "pt" << "eta" << "dphi" << "dphi2" << "vmulti" << "jetmulti" << "drlep";
 
  
 
