@@ -15,7 +15,13 @@
 #include "../interface/NTInflatedElectron.h"
 
 
+
 #include "../interface/NTGenLepton.h"
+#include "../interface/NTGenParticle.h"
+
+#include "../interface/NTBTagSF.h"
+#include "../interface/NTJECUncertainties.h"
+#include "../interface/NTJERAdjuster.h"
 
 namespace
 {
@@ -53,6 +59,15 @@ namespace
     top::NTGenLepton ihisdh;
     std::vector<top::NTGenLepton> asfkkk;
 
+    top::NTBTagSF ked;
+    top::NTJECUncertainties kkss;
+    top::NTJERAdjuster ksdsk;
+    std::vector<top::NTBTagSF> kedV;
+    std::vector<top::NTJECUncertainties> kkssV;
+    std::vector<top::NTJERAdjuster> ksdskV;
+
+    top::NTGenParticle ewfik;
+    std::vector<top::NTGenParticle> swded;
     
   };
 }

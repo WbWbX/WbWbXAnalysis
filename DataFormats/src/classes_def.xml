@@ -25,6 +25,14 @@
   <class name="std::vector<top::NTInflatedElectron>"/>
   <class name="top::NTGenLepton"/>
   <class name="std::vector<top::NTGenLepton>"/>
+  <class name="top::NTGenParticle"/>
+  <class name="std::vector<top::NTGenParticle>"/>
+  <class name="top::NTBTagSF"/>
+  <class name="std::vector<top::NTBTagSF>"/>
+  <class name="top::NTJECUncertainties"/>
+  <class name="std::vector<top::NTJECUncertainties>"/>
+  <class name="top::NTJERAdjuster"/>
+  <class name="std::vector<top::NTJERAdjuster>"/>
   <class name="top::NTTrigger"/>
   <class name="std::vector<top::NTTrigger>"/>
 </lcgdict>
