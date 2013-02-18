@@ -17,9 +17,11 @@ namespace top{
   void setBtag(double Btag){btag_=Btag;}
   void setId(bool ID){id_=ID;}
     void setEmEnergyFraction(double EFrac){emenergyfraction_=EFrac;}
+    void setUncorrP4(LorentzVector p4Inunc){p4unc_=p4Inunc;}
 
   //gets
-  LorentzVector p4(){return p4_;}
+    // const LorentzVector & p4(){return p4_;}
+LorentzVector  p4(){return p4_;}
   double pt(){return p4_.Pt();}
   double E() {return p4_.E();}
   double e() {return p4_.E();}
@@ -31,7 +33,9 @@ namespace top{
     double emEnergyFraction(){return emenergyfraction_;}
 
   //gen
-  LorentzVector genP4(){return genP4_;}
+    //   const LorentzVector & uncorrP4(){return p4unc_;} 
+    //  const LorentzVector & genP4(){return genP4_;}
+    LorentzVector  genP4(){return genP4_;}
   double genPt(){return genP4_.Pt();}
   double genE() {return genP4_.E();}
   double genPhi(){return genP4_.Phi();}
@@ -42,7 +46,7 @@ namespace top{
 
  protected:
   LorentzVector p4_;
-  LorentzVector genP4_;
+    LorentzVector genP4_,p4unc_;
   int genPartonFlav_;
   double btag_;
     double emenergyfraction_;

@@ -9,7 +9,7 @@ namespace top{
   class NTJERAdjuster : public JERBase{
 
   public:
-    NTJERAdjuster(){setSystematics("def");}
+    NTJERAdjuster(){}
     ~NTJERAdjuster(){}
 
     void correctJets(std::vector<top::NTJet*> & jets){
