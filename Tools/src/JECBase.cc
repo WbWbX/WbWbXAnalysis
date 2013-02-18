@@ -3,9 +3,12 @@
 namespace top{
 
   void JECBase::copyFrom(const top::JECBase & old){
+    totalunc_=0;
+    is2012_=old.is2012_;
     if(!old.pathToFile_.empty())
       setFile(old.pathToFile_, true); // JECUncertainties... don't provide a copy contructor..
     noupdown_=old.noupdown_;
+    sources_=old.sources_;
   }
 
   JECBase::JECBase(const top::JECBase & old){
@@ -39,9 +42,18 @@ namespace top{
       std::cout << "setting JEC uncertainties file to: " << pathToFile << std::endl;
     pathToFile_=pathToFile;
 
+    //delete old JEC
+    
+    if(totalunc_) delete totalunc_;
+    for(unsigned int i=0;i<vsrc_.size();i++){
+      if(vsrc_[i]) delete vsrc_[i];
+    }
+    vsrc_.clear();    
+
+
     const int nsrc = 16;
     const char* srcnames[nsrc] =
-      {"Absolute",       //0
+      {"Absolute",       //0                         //uncorr
        "HighPtExtra",    //1
        "SinglePion",     //2
        "Flavor",         //3
@@ -52,19 +64,57 @@ namespace top{
        "RelativeStatEC2",//8 
        "RelativeStatHF", //9
        "RelativeFSR",    //10
-       "PileUpDataMC",   //11
+       "PileUpDataMC",   //11                         //uncorr
        "PileUpOOT",      //12
        "PileUpPt",       //13
-       "PileUpBias",     //14 
+       "PileUpBias",     //14                         //uncorr
        "PileUpJetRate"}; //15
+
+    
+    const int nsrc12 = 19;
+    const char* srcnames12[nsrc12] =
+      {"Absolute",                        //0  //uncorr
+       "HighPtExtra", /*"SinglePion"*/    //1
+       "SinglePionECAL"/*new*/,           //2
+       "SinglePionHCAL"/*new*/,           //3
+       "Flavor",                          //4
+       "Time",                            //5
+       "RelativeJEREC1",                  //6
+       "RelativeJEREC2",                  //7
+       "RelativeJERHF",                   //8
+       "RelativePtEC1"/*new*/,            //9
+       "RelativePtEC2"/*new*/,            //10
+       "RelativePtHF"/*new*/,             //11
+       "RelativeStatEC2",                 //12
+       "RelativeStatHF",                  //13
+       /*"RelativeFSR"*/               
+       /*"RelativeSample"*/ 
+       /*new*/
+       "PileUpDataMC",                    //14        //uncorr
+       /*"PileUpOOT",*/   
+       "PileUpBias",                      //15      //uncorr
+       /*"PileUpJetRate"*/
+       /*"PileUpPt",*/ 
+       "PileUpPtBB"/*new*/,               //16      //uncorr?
+       "PileUpPtEC"/*new*/,               //17      //uncorr?
+       "PileUpPtHF"/*new*/};              //18      //uncorr?
+    
       
-    std::cout << "setting JEC uncertainties file to: " << pathToFile << std::endl;
-      
-    for (int isrc = 0; isrc < nsrc; isrc++) {
-      const char *name = srcnames[isrc];
-      JetCorrectionUncertainty *unc = new JetCorrectionUncertainty(JetCorrectorParameters(pathToFile.data(), name));
-      vsrc_.push_back(unc);
-    }   
+
+    if(is2012_){
+      for (int isrc = 0; isrc < nsrc12; isrc++) {
+	const char *name = srcnames12[isrc];
+	JetCorrectionUncertainty *unc = new JetCorrectionUncertainty(JetCorrectorParameters(pathToFile.data(), name));
+	vsrc_.push_back(unc);
+      }  
+    }
+    else{
+      for (int isrc = 0; isrc < nsrc; isrc++) {
+	const char *name = srcnames[isrc];
+	JetCorrectionUncertainty *unc = new JetCorrectionUncertainty(JetCorrectorParameters(pathToFile.data(), name));
+	vsrc_.push_back(unc);
+      }   
+    }
     totalunc_ = new JetCorrectionUncertainty(JetCorrectorParameters(pathToFile.data(), "Total"));  
   }
 

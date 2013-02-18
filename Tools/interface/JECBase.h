@@ -18,13 +18,14 @@ namespace top{
   class JECBase{
   public:
 
-    JECBase(){}
+    JECBase(){is2012_=true;totalunc_=0;}
     JECBase(const top::JECBase &);
     JECBase & operator = (const top::JECBase &);
     ~JECBase();
 
     void setFile(std::string pathToFile, bool quiet=false);
     void setSystematics(std::string); //! up, down, no
+    void setIs2012(bool is){is2012_=is; std::cout << "JEC mode changed; set File again!" << std::endl;}
 
     std::vector<unsigned int> &  sources(){return sources_;}
 
@@ -37,7 +38,7 @@ namespace top{
     JetCorrectionUncertainty* totalunc_;
     int noupdown_;
     std::vector<unsigned int> sources_;
-
+    bool is2012_;
     void copyFrom(const top::JECBase &);
 
   };
