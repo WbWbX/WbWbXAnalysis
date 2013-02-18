@@ -3,29 +3,29 @@
 #inputs are seperated by min 2 spaces; use runall4!!
 
 
-#### 8TeV
+#### 8TeV GR_P_V41_AN3
 
 ### data
 
-150  /DoubleElectron/Run2012A-13Jul2012-v1/AOD                 tree_8TeV_ee_runA_13Jul   isMC=false globalTag=FT_53_V6_AN2     HCP.json
-20   /DoubleElectron/Run2012A-recover-06Aug2012-v1/AOD         tree_8TeV_ee_runA_06Aug   isMC=false globalTag=FT_53_V6C_AN2    HCP.json
-250  /DoubleElectron/Run2012B-13Jul2012-v1/AOD                 tree_8TeV_ee_runB_13Jul   isMC=false globalTag=FT_53_V6_AN2     HCP.json
-20   /DoubleElectron/Run2012C-24Aug2012-v1/AOD                 tree_8TeV_ee_runC_24Aug   isMC=false globalTag=FT_53_V10_AN2    HCP.json
-300  /DoubleElectron/Run2012C-PromptReco-v2/AOD                tree_8TeV_ee_runC_prompt  isMC=false globalTag=FT_53_V10_AN2    HCP.json
+150  /DoubleElectron/Run2012A-13Jul2012-v1/AOD                 tree_8TeV_ee_runA_13Jul   isMC=false globalTag=FT_53_V6_AN3     HCP.json
+20   /DoubleElectron/Run2012A-recover-06Aug2012-v1/AOD         tree_8TeV_ee_runA_06Aug   isMC=false globalTag=FT_53_V6C_AN3    HCP.json
+250  /DoubleElectron/Run2012B-13Jul2012-v1/AOD                 tree_8TeV_ee_runB_13Jul   isMC=false globalTag=FT_53_V6_AN3     HCP.json
+20   /DoubleElectron/Run2012C-24Aug2012-v1/AOD                 tree_8TeV_ee_runC_24Aug   isMC=false globalTag=FT53_V10A_AN3    HCP.json
+300  /DoubleElectron/Run2012C-PromptReco-v2/AOD                tree_8TeV_ee_runC_prompt  isMC=false globalTag=GR_P_V41_AN3    HCP.json
 
 
-150  /DoubleMu/Run2012A-13Jul2012-v1/AOD                    tree_8TeV_mumu_runA_13Jul   isMC=false globalTag=FT_53_V6_AN2     HCP.json
-20   /DoubleMu/Run2012A-recover-06Aug2012-v1/AOD            tree_8TeV_mumu_runA_06Aug   isMC=false globalTag=FT_53_V6C_AN2    HCP.json
-250  /DoubleMu/Run2012B-13Jul2012-v4/AOD                    tree_8TeV_mumu_runB_13Jul   isMC=false globalTag=FT_53_V6_AN2     HCP.json
-20   /DoubleMu/Run2012C-24Aug2012-v1/AOD                    tree_8TeV_mumu_runC_24Aug   isMC=false globalTag=FT_53_V10_AN2    HCP.json
-300  /DoubleMu/Run2012C-PromptReco-v2/AOD                   tree_8TeV_mumu_runC_prompt  isMC=false globalTag=FT_53_V10_AN2    HCP.json
+150  /DoubleMu/Run2012A-13Jul2012-v1/AOD                    tree_8TeV_mumu_runA_13Jul   isMC=false globalTag=FT_53_V6_AN3     HCP.json
+20   /DoubleMu/Run2012A-recover-06Aug2012-v1/AOD            tree_8TeV_mumu_runA_06Aug   isMC=false globalTag=FT_53_V6C_AN3    HCP.json
+250  /DoubleMu/Run2012B-13Jul2012-v4/AOD                    tree_8TeV_mumu_runB_13Jul   isMC=false globalTag=FT_53_V6_AN3     HCP.json
+20   /DoubleMu/Run2012C-24Aug2012-v1/AOD                    tree_8TeV_mumu_runC_24Aug   isMC=false globalTag=FT53_V10A_AN3    HCP.json
+300  /DoubleMu/Run2012C-PromptReco-v2/AOD                   tree_8TeV_mumu_runC_prompt  isMC=false globalTag=GR_P_V41_AN3    HCP.json
 
 
-#150  /MuEG/Run2012A-13Jul2012-v1/AOD             tree_8TeV_mumu_runA_13Jul   isMC=false globalTag=FT_53_V6_AN2     HCP.json
-#20   /MuEG/Run2012A-recover-06Aug2012-v1/AOD     tree_8TeV_mumu_runA_06Aug   isMC=false globalTag=FT_53_V6C_AN2    HCP.json
-#250  /MuEG/Run2012B-13Jul2012-v1/AOD             tree_8TeV_mumu_runB_13Jul   isMC=false globalTag=FT_53_V6_AN2     HCP.json
-#20   /MuEG/Run2012C-24Aug2012-v1/AOD             tree_8TeV_mumu_runC_24Aug   isMC=false globalTag=FT_53_V10_AN2    HCP.json
-#300  /MuEG/Run2012C-PromptReco-v2/AOD            tree_8TeV_mumu_runC_prompt  isMC=false globalTag=FT_53_V10_AN2    HCP.json
+#150  /MuEG/Run2012A-13Jul2012-v1/AOD             tree_8TeV_mumu_runA_13Jul   isMC=false globalTag=FT_53_V6_AN3     HCP.json
+#20   /MuEG/Run2012A-recover-06Aug2012-v1/AOD     tree_8TeV_mumu_runA_06Aug   isMC=false globalTag=FT_53_V6C_AN3    HCP.json
+#250  /MuEG/Run2012B-13Jul2012-v1/AOD             tree_8TeV_mumu_runB_13Jul   isMC=false globalTag=FT_53_V6_AN3     HCP.json
+#20   /MuEG/Run2012C-24Aug2012-v1/AOD             tree_8TeV_mumu_runC_24Aug   isMC=false globalTag=FT53_V10A_AN3    HCP.json
+#300  /MuEG/Run2012C-PromptReco-v2/AOD            tree_8TeV_mumu_runC_prompt  isMC=false globalTag=GR_P_V41_AN3    HCP.json
   
 
 
@@ -61,6 +61,10 @@
 100   /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_mumuttbarbg                genFilter=Top genFilterString=MuonMuon,MuonMuonViaTau genFilterInvert=true
 #100   /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_emuttbarbg                genFilter=Top genFilterString=ElectronMuon,ElectronMuonViaTau genFilterInvert=true
 
+######single top
+
+20  /T_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM                     tree_8TeV_tW
+20  /Tbar_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM                 tree_8TeV_tbarW
 
 #### BOSON STUFF
 
@@ -69,6 +73,8 @@
 100  /WW_TuneZ2star_8TeV_pythia6_tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM              tree_8TeV_wwp
 100  /WZ_TuneZ2star_8TeV_pythia6_tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM              tree_8TeV_wz    
 100  /ZZ_TuneZ2star_8TeV_pythia6_tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM              tree_8TeV_zz   
+
+
 
 
 
