@@ -1,25 +1,34 @@
-tree_7TeV_ee_runA_08Nov.root data 1 1
-tree_7TeV_ee_runB_19Nov.root data 1 1
+def tree_7TeV_ee_runA_08Nov.root data 1 1
+def tree_7TeV_ee_runB_19Nov.root data 1 1
 #
 #mcChangeToDYSignalSample
 #
-tree_7TeV_eettbar.root t#bar{t} 633 165
-tree_7TeV_eettbarviatau.root t#bar{t}#tau 632 165
-tree_7TeV_eettbarbg.root t#bar{t}bg 634 165
-tree_7TeV_tW.root singleTop 616 7.9
-tree_7TeV_tbarW.root singleTop 616 7.9
-tree_7TeV_wwp.root VV 390 43
-tree_7TeV_zz.root VV 390 5.9
-tree_7TeV_wz.root VV 390 18
-tree_7TeV_wjets.root Wjets 413 31314
-tree_7TeV_dytautau1050.root DY#rightarrow#tau#tau 868 11908
-tree_7TeV_dytautau50inf.root DY#rightarrow#tau#tau 868 3048
-tree_7TeV_dyee1050.root DY#rightarrowll 858 11908
-tree_7TeV_dyee5060.root DY#rightarrowll 858 3048
-tree_7TeV_dyee120inf.root DY#rightarrowll 858 3048
-tree_7TeV_dyee60120.root Z#rightarrowll 852 3048
+def tree_7TeV_eettbar.root t#bar{t} 633 165
+def tree_7TeV_eettbarviatau.root t#bar{t}#tau 632 165
+def tree_7TeV_eettbarbg.root t#bar{t}bg 634 165
+def tree_7TeV_tW.root singleTop 616 7.9
+def tree_7TeV_tbarW.root singleTop 616 7.9
+def tree_7TeV_wwp.root VV 390 43
+def tree_7TeV_zz.root VV 390 5.9
+def tree_7TeV_wz.root VV 390 18
+def tree_7TeV_wjets.root Wjets 413 31314
+def tree_7TeV_dytautau1050.root DY#rightarrow#tau#tau 868 11908
+def tree_7TeV_dytautau50inf.root DY#rightarrow#tau#tau 868 3048
+def tree_7TeV_dyee1050.root DY#rightarrowll 858 11908
+def tree_7TeV_dyee5060.root DY#rightarrowll 858 3048
+def tree_7TeV_dyee120inf.root DY#rightarrowll 858 3048
+def tree_7TeV_dyee60120.root Z#rightarrowll 852 3048
 #
 #rest_mc
 #
 #tree_7TeV_qcdem2030.root_QCD_400_2914860
 #tree_7TeV_qcdem3080.root_QCD_400_4622103
+ttmup tree_7TeV_eettbarmup.root t#bar{t} 633 225.5
+ttmup tree_7TeV_eettbarviataumup.root t#bar{t}#tau 632 225.2
+ttmdown tree_7TeV_eettbarmdown.root t#bar{t} 633 225.5
+ttmdown tree_7TeV_eettbarviataumdown.root t#bar{t}#tau 632 225.2
+#
+Zmup tree_7TeV_dyee60120mup.root Z#rightarrowll 852 3532.8
+Zmdown tree_7TeV_dyee60120mdown.root Z#rightarrowll 852 3532.8
+
+
