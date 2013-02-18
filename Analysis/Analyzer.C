@@ -1,12 +1,13 @@
 #include "TtZAnalysis/DataFormats/src/classes.h" //gets all the dataformats
 #include "TtZAnalysis/DataFormats/interface/elecRhoIsoAdder.h"
 #include "TtZAnalysis/plugins/reweightPU.h"
-#include "TtZAnalysis/plugins/leptonSelector.h"
+#include "TtZAnalysis/plugins/leptonSelector2.h"
 #include "TtZAnalysis/Tools/interface/miscUtils.h"
 #include "TtZAnalysis/Tools/interface/containerStackVector.h"
 #include "TtZAnalysis/Tools/interface/containerUF.h"
-#include "TtZAnalysis/plugins/JERAdjuster.h"
-#include "TtZAnalysis/Tools/interface/JECUncertainties.h"
+#include "TtZAnalysis/DataFormats/interface/NTJERAdjuster.h"
+#include "TtZAnalysis/DataFormats/interface/NTJECUncertainties.h"
+#include "TtZAnalysis/DataFormats/interface/NTBTagSF.h"
 #include "TtZAnalysis/Tools/interface/bTagSF.h"
 #include "TTree.h"
 #include "TFile.h"
@@ -71,27 +72,27 @@ public:
   MainAnalyzer(){
     filelist_="";
     dataname_="data";
-    analysisplots_ = new top::container1DStackVector();
-    puweighter_= new top::PUReweighter();
-    jeradjuster_= new top::JERAdjuster();
-    jecuncertainties_=new top::JECUncertainties();
-    btagsf_=new top::bTagSF();
+    //  analysisplots_ = new top::container1DStackVector();
+    //  puweighter_= new top::PUReweighter();
+    //  jeradjuster_= new top::NTJERAdjuster();
+    //  jecuncertainties_=new top::NTJECUncertainties();
+    // btagsf_=new top::NTBTagSF();
   }
   MainAnalyzer(const MainAnalyzer &);
   MainAnalyzer(TString Name, TString additionalinfo){
     name_=Name;additionalinfo_=additionalinfo;
     dataname_="data";
-    analysisplots_ = new top::container1DStackVector(Name);
-    puweighter_= new top::PUReweighter();
-    jeradjuster_= new top::JERAdjuster();
-    jecuncertainties_=new top::JECUncertainties();
-    btagsf_=new top::bTagSF();
+    //  analysisplots_ = new top::container1DStackVector(Name);
+    //  puweighter_= new top::PUReweighter();
+    //  jeradjuster_= new top::NTJERAdjuster();
+    //  jecuncertainties_=new top::NTJECUncertainties();
+    //  btagsf_=new top::NTBTagSF();
   }
-  ~MainAnalyzer(){if(analysisplots_) delete analysisplots_;if(puweighter_) delete puweighter_;if(jeradjuster_) delete jeradjuster_;if(jecuncertainties_) delete jecuncertainties_; if(btagsf_) delete btagsf_;};
-  void setName(TString Name, TString additionalinfo){name_=Name;additionalinfo_=additionalinfo;analysisplots_->setName(Name);}
+  ~MainAnalyzer(){}//if(analysisplots_) delete analysisplots_;if(puweighter_) delete puweighter_;if(jeradjuster_) delete jeradjuster_;if(jecuncertainties_) delete jecuncertainties_; };
+  void setName(TString Name, TString additionalinfo){name_=Name;additionalinfo_=additionalinfo;analysisplots_.setName(Name);}
   void setLumi(double Lumi){lumi_=Lumi;}
 
-  void replaceInName(TString replace, TString with){name_.ReplaceAll(replace,with);analysisplots_->setName(name_);}
+  void replaceInName(TString replace, TString with){name_.ReplaceAll(replace,with);analysisplots_.setName(name_);}
   TString getName(){return name_;}
 
   void analyze(TString, TString, int, double);
@@ -100,21 +101,21 @@ public:
   void setDataSetDirectory(TString dir){datasetdirectory_=dir;}
   void setShowStatusBar(bool show){showstatusbar_=show;}
 
-  top::container1DStackVector * getPlots(){return analysisplots_;}
+  top::container1DStackVector * getPlots(){return & analysisplots_;}
 
-  void start();
+  void start(TString ident="def");
   //  void start(TString);
 
-  void clear(){analysisplots_->clear();}
+  void clear(){analysisplots_.clear();}
 
   void setAdditionalInfoString(TString add){additionalinfo_=add;} //!for adding things like JEC up or other systematics options
 
-  top::PUReweighter * getPUReweighter(){return puweighter_;}
+  top::PUReweighter * getPUReweighter(){return & puweighter_;}
 
-  top::JERAdjuster * getJERAdjuster(){return jeradjuster_;}
-  top::JECUncertainties * getJECUncertainties(){return jecuncertainties_;}
+  top::NTJERAdjuster * getJERAdjuster(){return & jeradjuster_;}
+  top::NTJECUncertainties * getJECUncertainties(){return & jecuncertainties_;}
 
-  top::bTagSF * getBTagSF(){return btagsf_;}
+  top::NTBTagSF * getBTagSF(){return &btagsf_;}
 
   MainAnalyzer & operator= (const MainAnalyzer &);
 
@@ -133,12 +134,12 @@ private:
 
   TString filelist_;
   
-  top::PUReweighter * puweighter_;
-  top::JERAdjuster * jeradjuster_;
-  top::JECUncertainties * jecuncertainties_;
-  top::bTagSF * btagsf_;
+  top::PUReweighter  puweighter_;
+  top::NTJERAdjuster  jeradjuster_;
+  top::NTJECUncertainties  jecuncertainties_;
+  top::NTBTagSF  btagsf_;
 
-  top::container1DStackVector * analysisplots_;
+  top::container1DStackVector  analysisplots_;
 
   TString additionalinfo_;
 
@@ -154,30 +155,32 @@ bool MainAnalyzer::triggersContain(TString triggername, top::NTEvent * pevent){
   return out;
 }
 
-void MainAnalyzer::start(){
+void MainAnalyzer::start(TString ident){
 
   dycontributions.clear();
   dycontributions << "Z#rightarrowll" << "DY#rightarrowll";
 
   using namespace std;
-  if(analysisplots_) clear();
-  else cout << "warning analysisplots_ is null" << endl;
-  analysisplots_->setName(name_+"_"+additionalinfo_);
+  // if(analysisplots_) 
+    clear();
+    //else cout << "warning analysisplots_ is null" << endl;
+  analysisplots_.setName(name_+"_"+additionalinfo_);
   std::cout << "Starting analysis for " << name_ << std::endl;
   ifstream inputfiles (filelist_.Data());
-  string filename;
+  string filename, identifier;
   string legentry;
   int color;
   double norm;
   string oldfilename="";
   if(inputfiles.is_open()){
     while(inputfiles.good()){
-      inputfiles >> filename; 
-      TString temp=filename;
-      if(temp.BeginsWith("#") || temp==""){
+      inputfiles >> identifier;
+      TString temp=identifier;
+      if(temp != ident){
 	getline(inputfiles,filename); //just ignore complete line
 	continue;
       }
+      inputfiles >> filename; 
       inputfiles >> legentry >> color >> norm;
       if(oldfilename != filename) analyze(datasetdirectory_+(TString) filename, (TString)legentry, color, norm);
       oldfilename=filename;
@@ -187,7 +190,7 @@ void MainAnalyzer::start(){
     cout << "MainAnalyzer::start(): input file list not found" << endl;
   }
 
-  rescaleDY(analysisplots_, dycontributions);
+  rescaleDY(&analysisplots_, dycontributions);
   
 }
 
@@ -198,12 +201,12 @@ void MainAnalyzer::copyAll(const MainAnalyzer & analyzer){
   additionalinfo_=analyzer.additionalinfo_;
   dataname_=analyzer.dataname_;
   datasetdirectory_=analyzer.datasetdirectory_;
-  puweighter_= new top::PUReweighter(*analyzer.puweighter_);
+  puweighter_= analyzer.puweighter_;
   filelist_=analyzer.filelist_;
-  jeradjuster_= new top::JERAdjuster(*analyzer.jeradjuster_);
-  jecuncertainties_= new top::JECUncertainties(*analyzer.jecuncertainties_);
-  btagsf_ = new top::bTagSF(*analyzer.btagsf_);
-  analysisplots_ = new top::container1DStackVector(*analyzer.analysisplots_);
+  jeradjuster_= analyzer.jeradjuster_;
+  jecuncertainties_= analyzer.jecuncertainties_;
+  btagsf_ = analyzer.btagsf_;
+  analysisplots_ = analyzer.analysisplots_;
   showstatusbar_=analyzer.showstatusbar_;
 }
 
@@ -212,8 +215,8 @@ MainAnalyzer::MainAnalyzer(const MainAnalyzer & analyzer){
 }
 
 MainAnalyzer & MainAnalyzer::operator = (const MainAnalyzer & analyzer){
-   copyAll(analyzer);
-   return *this;
+  copyAll(analyzer);
+  return *this;
 }
 
 void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, double norm){ // do analysis here and store everything in analysisplots_
@@ -260,7 +263,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   onebin << 0.5 << 1.5;
 
   vector<float> bsfs;
-  for(float i=0;i<100;i++) bsfs << 0.9 + 0.3 * (i/100);
+  for(float i=0;i<120;i++) bsfs <<  (i/100);
 
 
   //and so on
@@ -424,8 +427,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
   //get the lepton selector (maybe directly in the code.. lets see)
 
-  leptonSelector lepSel;
-  lepSel.setUseRhoIsoForElectrons(false);
+  //leptonSelector2 lepSel;
+  //lepSel.setUseRhoIsoForElectrons(false);
   double oldnorm=norm;
 
   /////some boolians //channels
@@ -476,12 +479,13 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
   }
   else{
-      norm=1;
+    norm=1;
   }
 
 
   
-  getBTagSF()->prepareEff(inputfile , norm );
+  // getBTagSF()->prepareEff(inputfile , norm );
+  getBTagSF()->setSampleName(toString(inputfile));
 
   cout << "running on: " << inputfile << "    legend: " << legendname << "\nxsec: " << oldnorm << ", genEvents: " << genentries <<endl;
   // get main analysis tree
@@ -510,112 +514,141 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   Long64_t nEntries=t->GetEntries();
   if(norm==0) nEntries=0; //skip for norm0
 
-  if(testmode) nEntries=100;
+  if(testmode) nEntries=10;
 
   for(Long64_t entry=0;entry<nEntries;entry++){
     if(showstatusbar_) displayStatusBar(entry,nEntries);
     t->GetEntry(entry);
 
-    
+    //make collections
+
+    vector<NTJet *> treejets,nolidjets,hardjets;
+    for(size_t i=0;i<pJets->size();i++){
+      treejets << &(pJets->at(i));
+    }
+
+
+    vector<NTMuon*> kinmuons,idmuons,isomuons;
+    for(size_t i=0;i<pMuons->size();i++){
+      if(pMuons->at(i).pt() < 20)       continue;
+      if(fabs(pMuons->at(i).eta())>2.4) continue;
+      kinmuons << &(pMuons->at(i));
+      ///select id muons
+      if(!(pMuons->at(i).isGlobal() || pMuons->at(i).isTracker()) ) continue;
+      idmuons <<  &(pMuons->at(i));
+
+      if(pMuons->at(i).isoVal04() > 0.2) continue;
+      isomuons <<  &(pMuons->at(i));
+
+    }
+
+    vector<NTElectron *> kinelectrons,idelectrons,isoelectrons;
+    for(size_t i=0;i<pElectrons->size();i++){
+      if(pElectrons->at(i).ECalP4().Pt() < 20)  continue;
+      if(fabs(pElectrons->at(i).eta()) > 2.5) continue;
+      if(!noOverlap(&(pElectrons->at(i)), kinmuons, 0.1)) continue;   ////!!!CHANGE
+      kinelectrons  << &(pElectrons->at(i));
+
+      ///select id electrons
+      if(fabs(pElectrons->at(i).dbs()) >0.04 ) continue;
+      if(!(pElectrons->at(i).isNotConv()) ) continue;
+      if(pElectrons->at(i).mvaId() < 0.5) continue;
+      if(pElectrons->at(i).mHits() > 0) continue;
+
+      idelectrons <<  &(pElectrons->at(i));
+
+      //select iso electrons
+      if(pElectrons->at(i).isoVal03()>0.15) continue;
+      isoelectrons <<  &(pElectrons->at(i));
+    }
+
     //  if(!isMC && pEvent->runNo() > 196531) continue; // ##TRAP##
     
+
+
     double puweight;
     if(!isMC) puweight=1;
     else puweight = getPUReweighter()->getPUweight(pEvent->truePU());
 
     //lepton collections
-    elecRhoIsoAdder rho(isMC,false);
+    //  elecRhoIsoAdder rho(isMC,false);
+    bool trigger=true;
+    if(trigger){
+      /////////TRIGGER CUT and kin leptons STEP 0/////////////////////////////
+      if(b_ee){
+	if(kinelectrons.size()< 2) continue; //has to be 17??!!
+	if(is7TeV){
+	  if(!(triggersContain("Ele17_SW_TightCaloEleId_Ele8_HE_L1R_v", pEvent) || triggersContain("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v", pEvent) || triggersContain("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v", pEvent))) continue;
+	  if(isMC) puweight= puweight * 0.992; //ONLY trigger #TRAP#
+	}
+	else{                           
+	  if(isMC  && !triggersContain("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v" , pEvent) ) continue;
+	  if(!isMC && !triggersContain("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v" , pEvent) ) continue;
 
-    vector<NTElectron> kinelectrons;
+	  if(isMC) puweight= puweight * 0.938; //full lep+id+trig SF from AN 12 389 ###TRAP##
 
-    ////// clean electrons against muons and make kin cuts on the fly//////
-    for(NTElectronIt elec=pElectrons->begin();elec<pElectrons->end();++elec){
-      if(elec->pt() < 20) continue;
-      if(fabs(elec->eta()) > 2.5) continue;
-       if(!noOverlap(elec, *pMuons, 0.1)) continue;        //obsolete when using pfElectrons!!!! MAKE SURE ##TRAP##
-
-      kinelectrons.push_back(*elec);
-    }
-
-    //   rho.setRho(pEvent->isoRho(2));
-    //    rho.addRhoIso(kinelectrons);
-    vector<NTMuon> kinmuons         = lepSel.selectKinMuons(*pMuons);
-    
-
-    /////////TRIGGER CUT and kin leptons STEP 0/////////////////////////////
-    if(b_ee){
-      if(kinelectrons.size()< 2) continue; //has to be 17??!!
-      if(is7TeV){
-	if(!(triggersContain("Ele17_SW_TightCaloEleId_Ele8_HE_L1R_v", pEvent) || triggersContain("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v", pEvent) || triggersContain("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v", pEvent))) continue;
-	if(isMC) puweight= puweight * 0.992; //ONLY trigger #TRAP#
-      }
-      else{                           
-	if(isMC  && !triggersContain("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v" , pEvent) ) continue;
-	if(!isMC && !triggersContain("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v" , pEvent) ) continue;
-
-	if(isMC) puweight= puweight * 0.938; //full lep+id+trig SF from AN 12 389 ###TRAP##
+	}
 
       }
+      if(b_mumu){
+	if(kinmuons.size() < 2) continue;
+	//trg wildcards
+	if(is7TeV){
+	  if(isMC && !triggersContain("HLT_DoubleMu7", pEvent)) continue;
 
-    }
-    if(b_mumu){
-      if(kinmuons.size() < 2) continue;
-      //trg wildcards
-      if(is7TeV){
-	if(isMC && !triggersContain("HLT_DoubleMu7", pEvent)) continue;
-
-	if(!isMC){
-	  if(pEvent->runNo() < 163869){
-	    if(!triggersContain("HLT_DoubleMu7", pEvent)) continue;
+	  if(!isMC){
+	    if(pEvent->runNo() < 163869){
+	      if(!triggersContain("HLT_DoubleMu7", pEvent)) continue;
+	    }
+	    else{
+	      if(!triggersContain("HLT_Mu13_Mu8_v", pEvent)) continue;
+	    }
 	  }
 	  else{
-	    if(!triggersContain("HLT_Mu13_Mu8_v", pEvent)) continue;
+	    puweight= puweight * 0.946; //ONLY trigger!
 	  }
+
 	}
 	else{
-	  puweight= puweight * 0.946; //ONLY trigger!
+	  if(isMC &&  !(triggersContain("HLT_Mu17_Mu8_v",pEvent)  || triggersContain("HLT_Mu17_TkMu8_v",pEvent))) continue;
+	  if(!isMC && !(triggersContain("HLT_Mu17_Mu8_v",pEvent)  || triggersContain("HLT_Mu17_TkMu8_v",pEvent))) continue;
+
+	  if(isMC) puweight= puweight * 0.962; //full lep+id+trig SF from AN 12 389 ###TRAP###
+
 	}
 
       }
-      else{
-	if(isMC &&  !(triggersContain("HLT_Mu17_Mu8_v",pEvent)  || triggersContain("HLT_Mu17_TkMu8_v",pEvent))) continue;
-	if(!isMC && !(triggersContain("HLT_Mu17_Mu8_v",pEvent)  || triggersContain("HLT_Mu17_TkMu8_v",pEvent))) continue;
+      if(b_emu){
+	if(kinelectrons.size() + kinmuons.size() < 2) continue;
+	//trg
 
-	if(isMC) puweight= puweight * 0.962; //full lep+id+trig SF from AN 12 389 ###TRAP###
+	if(!isMC) puweight=1;
 
       }
+    }
+    /////// make collections
+
+    for(size_t i=0;i<kinelectrons.size();i++){
+
+      //fill plots for kinelecs
+      eleceta0.fill(kinelectrons.at(i)->eta(), puweight);
+      elecpt0.fill(kinelectrons.at(i)->pt(),puweight);
+      eleciso0.fill(kinelectrons.at(i)->isoVal03(),puweight);
+      elecid0.fill(kinelectrons.at(i)->mvaId(),puweight);
+
 
     }
-    if(b_emu){
-      if(kinelectrons.size() + kinmuons.size() < 2) continue;
-      //trg
-
-
-    }
-
-
-    vector<NTElectron> idelectrons   =lepSel.selectIDElectrons(kinelectrons);
-    vector<NTMuon> idmuons           =lepSel.selectIDMuons(kinmuons);
-
-    vector<NTElectron> isoelectrons  =lepSel.selectIsolatedElectrons(idelectrons);
-    vector<NTMuon> isomuons          =lepSel.selectIsolatedMuons(idmuons);
-    
-    for(NTElectronIt elec=kinelectrons.begin();elec<kinelectrons.end();++elec){
-      eleceta0.fill(elec->eta(), puweight);
-      elecpt0.fill(elec->pt(),puweight);
-      eleciso0.fill(elec->isoVal03(),puweight);
-      elecid0.fill(elec->mvaId(),puweight);
-      for(NTMuonIt muon=kinmuons.begin();muon<kinmuons.end();++muon){
-	elecmuondR0.fill(sqrt(pow(elec->eta() - muon->eta(),2) + pow(elec->phi() - muon->phi(),2)), puweight);
-      }
 
     //some other fills
-    }
+  
 
-    for(NTMuonIt muon=kinmuons.begin();muon<kinmuons.end();++muon){
-      muoneta0.fill(muon->eta(), puweight);
-      muonpt0.fill(muon->pt(),puweight);
-      muoniso0.fill(muon->isoVal04(),puweight);
+    for(size_t i=0;i<kinmuons.size();i++){
+      muoneta0.fill(kinmuons.at(i)->eta(), puweight);
+      muonpt0.fill(kinmuons.at(i)->pt(),puweight);
+      muoniso0.fill(kinmuons.at(i)->isoVal04(),puweight);
+
+      
+
     }
 
     vertexmulti0.fill(pEvent->vertexMulti(),puweight);
@@ -630,18 +663,18 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     if(b_emu && idmuons.size() + idelectrons.size() < 2) continue;
 
 
-    for(NTElectronIt elec=idelectrons.begin();elec<idelectrons.end();++elec){
-      eleceta1.fill(elec->eta(), puweight);
-      elecpt1.fill(elec->pt(),puweight);
-      eleciso1.fill(elec->isoVal03(),puweight);
-      elecid1.fill(elec->mvaId(),puweight);
+    for(size_t i=0;i<idelectrons.size();i++){
+      eleceta1.fill(idelectrons.at(i)->eta(), puweight);
+      elecpt1.fill(idelectrons.at(i)->pt(),puweight);
+      eleciso1.fill(idelectrons.at(i)->isoVal03(),puweight);
+      elecid1.fill(idelectrons.at(i)->mvaId(),puweight);
       //some other fills
     }
 
-    for(NTMuonIt muon=idmuons.begin();muon<idmuons.end();++muon){
-      muoneta1.fill(muon->eta(), puweight);
-      muonpt1.fill(muon->pt(),puweight);
-      muoniso1.fill(muon->isoVal04(),puweight);
+    for(size_t i=0;i<idmuons.size();i++){
+      muoneta1.fill(idmuons.at(i)->eta(), puweight);
+      muonpt1.fill(idmuons.at(i)->pt(),puweight);
+      muoniso1.fill(idmuons.at(i)->isoVal04(),puweight);
     }
 
 
@@ -655,42 +688,43 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     if(b_ee && isoelectrons.size() < 2) continue;
     if(b_mumu && isomuons.size() < 2 ) continue;
     if(b_emu && isomuons.size() + isoelectrons.size() < 2) continue;
-
+    
     //make pair
-    pair<vector<NTElectron>, vector<NTMuon> > leppair;
-    leppair = lepSel.getOppoQHighestPtPair(isoelectrons, isomuons);
+    pair<vector<NTElectron*>, vector<NTMuon*> > leppair;
+    leppair = getOppoQHighestPtPair(isoelectrons, isomuons);
 
     double invLepMass=0;
     LorentzVector dilp4;
 
     if(b_ee){
-      if(leppair.first.size() <2) continue;
-      dilp4=leppair.first[0].p4() + leppair.first[1].p4();
-      invLepMass=dilp4.M();
+    if(leppair.first.size() <2) continue;
+    dilp4=leppair.first[0]->p4() + leppair.first[1]->p4();
+    invLepMass=dilp4.M();
     }
     else if(b_mumu){
-      if(leppair.second.size() < 2) continue;
-      dilp4=leppair.second[0].p4() + leppair.second[1].p4();
-      invLepMass=dilp4.M();
+    if(leppair.second.size() < 2) continue;
+    dilp4=leppair.second[0]->p4() + leppair.second[1]->p4();
+    invLepMass=dilp4.M();
     }
     else if(b_emu){
-         if(leppair.first.size() < 1 || leppair.second.size() < 1) continue;
-	 dilp4=leppair.first[0].p4() + leppair.second[0].p4();
-         invLepMass=dilp4.M();
+    if(leppair.first.size() < 1 || leppair.second.size() < 1) continue;
+    dilp4=leppair.first[0]->p4() + leppair.second[0]->p4();
+    invLepMass=dilp4.M();
+    }
+   
+
+    for(size_t i=0;i<isoelectrons.size();i++){
+      eleceta2.fill(isoelectrons.at(i)->eta(), puweight);
+      elecpt2.fill(isoelectrons.at(i)->pt(),puweight);
+      eleciso2.fill(isoelectrons.at(i)->isoVal03(),puweight);
+      elecid2.fill(isoelectrons.at(i)->mvaId(),puweight);
+      //some other fills
     }
 
-    for(NTElectronIt elec=isoelectrons.begin();elec<isoelectrons.end();++elec){
-      eleceta2.fill(elec->eta(), puweight);
-      elecpt2.fill(elec->pt(),puweight);
-      eleciso2.fill(elec->isoVal03(),puweight);
-      elecid2.fill(elec->mvaId(),puweight);
-    //some other fills
-    }
-
-    for(NTMuonIt muon=isomuons.begin();muon<isomuons.end();++muon){
-      muoneta2.fill(muon->eta(), puweight);
-      muonpt2.fill(muon->pt(),puweight);
-      muoniso2.fill(muon->isoVal04(),puweight);
+    for(size_t i=0;i<isomuons.size();i++){
+      muoneta2.fill(isomuons.at(i)->eta(), puweight);
+      muonpt2.fill(isomuons.at(i)->pt(),puweight);
+      muoniso2.fill(isomuons.at(i)->isoVal04(),puweight);
     }
 
     invmass2.fill(invLepMass,puweight);
@@ -701,7 +735,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
     ///////// 20 GeV cut /// STEP 3 ///////////////////
 
-    if(invLepMass < 20) continue;
+    if(invLepMass < 20) 
+      continue;
     
 
     // create jec jets for met and ID jets
@@ -709,50 +744,55 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
     // create ID Jets and correct JER
 
-    vector<NTJet> nolidjets;
-    nolidjets.clear();
+
     double dpx=0;
     double dpy=0;
-    vector<NTJet> treejets=*pJets;
-
-    for(NTJetIt jet=treejets.begin();jet<treejets.end();++jet){ //ALSO THE RESOLUTION AFFECTS MET. HERE INTENDED!!! GOOD?
-      LorentzVector oldp4=jet->p4();
-      if(isMC){// && !is7TeV){               
-	getJECUncertainties()->applyJECUncertainties(jet);
-	getJERAdjuster()->correctJet(jet);
+    for(size_t i=0;i<treejets.size();i++){ //ALSO THE RESOLUTION AFFECTS MET. HERE INTENDED!!! GOOD?
+      LorentzVector oldp4=treejets.at(i)->p4();
+      if(isMC){// && !is7TeV){     
+	bool useJetForMet=false;
+	if(treejets.at(i)->emEnergyFraction() < 0.9 && treejets.at(i)->pt() > 10)
+	  useJetForMet=true; //dont even do something 
+         
+	getJECUncertainties()->applyToJet(treejets.at(i));
+	getJERAdjuster()->correctJet(treejets.at(i));
 	//corrected
-	if(jet->emEnergyFraction() < 0.9 && jet->pt() > 10){
-	  dpx += oldp4.Px() - jet->p4().Px();
-	  dpy += oldp4.Py() - jet->p4().Py();
+	if(useJetForMet){
+	  dpx += oldp4.Px() - treejets.at(i)->p4().Px();
+	  dpy += oldp4.Py() - treejets.at(i)->p4().Py();
 	}
       }
-      if(!(jet->id())) continue;
-      if(!noOverlap(jet, isomuons, 0.4)) continue;
-      if(!noOverlap(jet, isoelectrons, 0.4)) continue;
-      nolidjets.push_back(*jet);
+      if(!(treejets.at(i)->id())) continue;
+      if(!noOverlap(treejets.at(i), isomuons, 0.4)) continue;
+      if(!noOverlap(treejets.at(i), isoelectrons, 0.4)) continue;
+      nolidjets << (treejets.at(i));
+
+      if(treejets.at(i)->pt() < 30 || fabs(treejets.at(i)->eta())>2.5) continue;
+      hardjets << treejets.at(i);
+
     }
 
 
 
     //fill container
 
-    for(NTJetIt jet=nolidjets.begin();jet<nolidjets.end();++jet){
+    for(size_t i=0;i<nolidjets.size();i++){ 
 
-      jetpt3.fill(jet->pt(),puweight);
-      jeteta3.fill(jet->eta(),puweight);
+      jetpt3.fill( nolidjets.at(i)->pt(),puweight);
+      jeteta3.fill(nolidjets.at(i)->eta(),puweight);
     }
 
-    for(NTElectronIt elec=isoelectrons.begin();elec<isoelectrons.end();++elec){
-      eleceta3.fill(elec->eta(), puweight);
-      elecpt3.fill(elec->pt(),puweight);
-      eleciso3.fill(elec->isoVal03(),puweight);
-    //some other fills
+    for(size_t i=0;i<isoelectrons.size();i++){
+      eleceta3.fill(isoelectrons.at(i)->eta(), puweight);
+      elecpt3.fill(isoelectrons.at(i)->pt(),puweight);
+      eleciso3.fill(isoelectrons.at(i)->isoVal03(),puweight);
+      //some other fills
     }
 
-    for(NTMuonIt muon=isomuons.begin();muon<isomuons.end();++muon){
-      muoneta3.fill(muon->eta(), puweight);
-      muonpt3.fill(muon->pt(),puweight);
-      muoniso3.fill(muon->isoVal04(),puweight);
+    for(size_t i=0;i<isomuons.size();i++){
+      muoneta3.fill(isomuons.at(i)->eta(), puweight);
+      muonpt3.fill(isomuons.at(i)->pt(),puweight);
+      muoniso3.fill(isomuons.at(i)->isoVal04(),puweight);
     }
 
     invmass3.fill(invLepMass,puweight);
@@ -768,15 +808,15 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
     if(invLepMass > 76 && invLepMass < 106){
       
-      for(NTElectronIt elec=isoelectrons.begin();elec<isoelectrons.end();++elec){
-	eleceta20.fill(elec->eta(), puweight);
-	elecpt20.fill(elec->pt(),puweight);
+      for(size_t i=0;i<isoelectrons.size();i++){
+	eleceta20.fill(isoelectrons.at(i)->eta(), puweight);
+	elecpt20.fill(isoelectrons.at(i)->pt(),puweight);
 	//some other fills
       }
       
-      for(NTMuonIt muon=isomuons.begin();muon<isomuons.end();++muon){
-	muoneta20.fill(muon->eta(), puweight);
-	muonpt20.fill(muon->pt(),puweight);
+      for(size_t i=0;i<isomuons.size();i++){
+	muoneta20.fill(isomuons.at(i)->eta(), puweight);
+	muonpt20.fill(isomuons.at(i)->pt(),puweight);
       }
       
       invmass20.fill(invLepMass,puweight);
@@ -786,7 +826,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
       isZrange=true;
 
-      diletaZ3.fill(dilp4.Eta(),puweight);
+      //  diletaZ3.fill(dilp4.Eta(),puweight);
 
     }
 
@@ -797,35 +837,27 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     
     /////// create  hard jets ////////
 
-    vector<NTJet> hardjets;
-    hardjets.clear();
-    for(NTJetIt jet=nolidjets.begin();jet<nolidjets.end();++jet){
-      if(jet->pt()<30) continue;
-      if(fabs(jet->eta())>2.5) continue;
-      hardjets.push_back(*jet);
-    }
-    
     //fill
 
 
     if(!Znotemu){
       
-      for(NTJetIt jet=hardjets.begin();jet<hardjets.end();++jet){
-	jetpt4.fill(jet->pt(),puweight);
-	jeteta4.fill(jet->eta(),puweight);
+      for(size_t i=0;i<hardjets.size();i++){
+	jetpt4.fill(hardjets.at(i)->pt(),puweight);
+	jeteta4.fill(hardjets.at(i)->eta(),puweight);
       }
       
-      for(NTElectronIt elec=isoelectrons.begin();elec<isoelectrons.end();++elec){
-	eleceta4.fill(elec->eta(), puweight);
-	elecpt4.fill(elec->pt(),puweight);
-	eleciso4.fill(elec->isoVal03(),puweight);
+      for(size_t i=0;i<isoelectrons.size();i++){
+	eleceta4.fill(isoelectrons.at(i)->eta(), puweight);
+	elecpt4.fill(isoelectrons.at(i)->pt(),puweight);
+	eleciso4.fill(isoelectrons.at(i)->isoVal03(),puweight);
 	//some other fills
       }
       
-      for(NTMuonIt muon=isomuons.begin();muon<isomuons.end();++muon){
-	muoneta4.fill(muon->eta(), puweight);
-	muonpt4.fill(muon->pt(),puweight);
-	muoniso4.fill(muon->isoVal04(),puweight);
+      for(size_t i=0;i<isomuons.size();i++){
+	muoneta4.fill(isomuons.at(i)->eta(), puweight);
+	muonpt4.fill(isomuons.at(i)->pt(),puweight);
+	muoniso4.fill(isomuons.at(i)->isoVal04(),puweight);
       }
 
       invmass4.fill(invLepMass,puweight);
@@ -847,22 +879,22 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
     if(!Znotemu){
 
-      for(NTJetIt jet=hardjets.begin();jet<hardjets.end();++jet){
-	jetpt5.fill(jet->pt(),puweight);
-	jeteta5.fill(jet->eta(),puweight);
+      for(size_t i=0;i<hardjets.size();i++){
+	jetpt5.fill(hardjets.at(i)->pt(),puweight);
+	jeteta5.fill(hardjets.at(i)->eta(),puweight);
       }
       
-      for(NTElectronIt elec=isoelectrons.begin();elec<isoelectrons.end();++elec){
-	eleceta5.fill(elec->eta(), puweight);
-	elecpt5.fill(elec->pt(),puweight);
+      for(size_t i=0;i<isoelectrons.size();i++){
+	eleceta5.fill(isoelectrons.at(i)->eta(), puweight);
+	elecpt5.fill(isoelectrons.at(i)->pt(),puweight);
 	//	eleciso5.fill(elec->isoVal03(),puweight);
 	//some other fills
       }
       
-      for(NTMuonIt muon=isomuons.begin();muon<isomuons.end();++muon){
-	muoneta5.fill(muon->eta(), puweight);
-	muonpt5.fill(muon->pt(),puweight);
-	//	muoniso5.fill(muon->isoVal04(),puweight);
+      for(size_t i=0;i<isomuons.size();i++){
+	muoneta5.fill(isomuons.at(i)->eta(), puweight);
+	muonpt5.fill(isomuons.at(i)->pt(),puweight);
+	//	muoniso5.fill(isomuons.at(i)->isoVal04(),puweight);
       }
       
       invmass5.fill(invLepMass,puweight);
@@ -886,7 +918,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     NTMet adjustedmet = *pMet;
     double nmpx=pMet->p4().Px() + dpx;
     double nmpy=pMet->p4().Py() + dpy;
-    adjustedmet.setP4(LorentzVector(nmpx,nmpy,0,sqrt(pow(nmpx,2)+pow(nmpy,2))));
+    adjustedmet.setP4(LorentzVector(nmpx,nmpy,0,sqrt(nmpx*nmpx+nmpy*nmpy)));
     
 
 
@@ -894,22 +926,22 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
     if(!Znotemu){
 
-      for(NTJetIt jet=hardjets.begin();jet<hardjets.end();++jet){
-	jetpt6.fill(jet->pt(),puweight);
-	jeteta6.fill(jet->eta(),puweight);
+      for(size_t i=0;i<hardjets.size();i++){
+	jetpt6.fill(hardjets.at(i)->pt(),puweight);
+	jeteta6.fill(hardjets.at(i)->eta(),puweight);
       }
       
-      for(NTElectronIt elec=isoelectrons.begin();elec<isoelectrons.end();++elec){
-	eleceta6.fill(elec->eta(), puweight);
-	elecpt6.fill(elec->pt(),puweight);
-	//	eleciso6.fill(elec->isoVal03(),puweight);
+      for(size_t i=0;i<isoelectrons.size();i++){
+	eleceta6.fill(isoelectrons.at(i)->eta(), puweight);
+	elecpt6.fill(isoelectrons.at(i)->pt(),puweight);
+	//	eleciso6.fill(isoelectrons.at(i)->isoVal03(),puweight);
 	//some other fills
       }
       
-      for(NTMuonIt muon=isomuons.begin();muon<isomuons.end();++muon){
-	muoneta6.fill(muon->eta(), puweight);
-	muonpt6.fill(muon->pt(),puweight);
-	//	muoniso6.fill(muon->isoVal04(),puweight);
+      for(size_t i=0;i<isomuons.size();i++){
+	muoneta6.fill(isomuons.at(i)->eta(), puweight);
+	muonpt6.fill(isomuons.at(i)->pt(),puweight);
+	//	muoniso6.fill(isomuons.at(i)->isoVal04(),puweight);
       }
       
       invmass6.fill(invLepMass,puweight);
@@ -936,32 +968,32 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     if(adjustedmet.met() < 40) continue;
 
 
-    vector<NTJet> btaggedjets;
-    for(NTJetIt jet = hardjets.begin();jet<hardjets.end();++jet){
-      getBTagSF()->fillEff(*jet, puweight);
-      //  cout << jet->genPartonFlavour() << endl;
-      if(jet->btag() < 0.244) continue;
-      btaggedjets.push_back(*jet);
+    vector<NTJet*> btaggedjets;
+    for(size_t i=0;i<hardjets.size();i++){
+      getBTagSF()->fillEff(hardjets.at(i), puweight);
+      //  cout << hardjets.at(i)->genPartonFlavour() << endl;
+      if(hardjets.at(i)->btag() < 0.244) continue;
+      btaggedjets.push_back(hardjets.at(i));
     }
 
     if(!Znotemu){
 
-      for(NTJetIt jet=hardjets.begin();jet<hardjets.end();++jet){
-	jetpt7.fill(jet->pt(),puweight);
-	jeteta7.fill(jet->eta(),puweight);
+      for(size_t i=0;i<hardjets.size();i++){
+	jetpt7.fill(hardjets.at(i)->pt(),puweight);
+	jeteta7.fill(hardjets.at(i)->eta(),puweight);
       }
       
-      for(NTElectronIt elec=isoelectrons.begin();elec<isoelectrons.end();++elec){
-	eleceta7.fill(elec->eta(), puweight);
-	elecpt7.fill(elec->pt(),puweight);
-	//	eleciso7.fill(elec->isoVal03(),puweight);
+      for(size_t i=0;i<isoelectrons.size();i++){
+	eleceta7.fill(isoelectrons.at(i)->eta(), puweight);
+	elecpt7.fill(isoelectrons.at(i)->pt(),puweight);
+	//	eleciso7.fill(isoelectrons.at(i)->isoVal03(),puweight);
 	//some other fills
       }
       
-      for(NTMuonIt muon=isomuons.begin();muon<isomuons.end();++muon){
-	muoneta7.fill(muon->eta(), puweight);
-	muonpt7.fill(muon->pt(),puweight);
-	//	muoniso7.fill(muon->isoVal04(),puweight);
+      for(size_t i=0;i<isomuons.size();i++){
+	muoneta7.fill(isomuons.at(i)->eta(), puweight);
+	muonpt7.fill(isomuons.at(i)->pt(),puweight);
+	//	muoniso7.fill(isomuons.at(i)->isoVal04(),puweight);
       }
       
       invmass7.fill(invLepMass,puweight);
@@ -977,32 +1009,35 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       invmassZ7.fill(invLepMass,puweight);
     }
 
-    double bsf=getBTagSF()->getSF(btaggedjets); // returns 1 for data!!!
-    btagScFs.fill(bsf, puweight);
-    puweight= puweight * bsf;
 
     ///////////////////// btag cut STEP 8 //////////////////////////
 
     if(btaggedjets.size() < 1) continue;
 
+    double bsf=1;//getBTagSF()->getSF(hardjets); // returns 1 for data!!!
+    bsf=getBTagSF()->getNTEventWeight(hardjets);
+    //  if(bsf < 0.3) cout << bsf << endl;
+    btagScFs.fill(bsf, puweight);
+    puweight= puweight * bsf;
+
     if(!Znotemu){
 
-      for(NTJetIt jet=hardjets.begin();jet<hardjets.end();++jet){
-	jetpt8.fill(jet->pt(),puweight);
-	jeteta8.fill(jet->eta(),puweight);
+      for(size_t i=0;i<hardjets.size();i++){
+	jetpt8.fill(hardjets.at(i)->pt(),puweight);
+	jeteta8.fill(hardjets.at(i)->eta(),puweight);
       }
       
-      for(NTElectronIt elec=isoelectrons.begin();elec<isoelectrons.end();++elec){
-	eleceta8.fill(elec->eta(), puweight);
-	elecpt8.fill(elec->pt(),puweight);
-	//	eleciso8.fill(elec->isoVal03(),puweight);
+      for(size_t i=0;i<isoelectrons.size();i++){
+	eleceta8.fill(isoelectrons.at(i)->eta(), puweight);
+	elecpt8.fill(isoelectrons.at(i)->pt(),puweight);
+	//	eleciso8.fill(isoelectrons.at(i)->isoVal03(),puweight);
 	//some other fills
       }
       
-      for(NTMuonIt muon=isomuons.begin();muon<isomuons.end();++muon){
-	muoneta8.fill(muon->eta(), puweight);
-	muonpt8.fill(muon->pt(),puweight);
-	//	muoniso8.fill(muon->isoVal04(),puweight);
+      for(size_t i=0;i<isomuons.size();i++){
+	muoneta8.fill(isomuons.at(i)->eta(), puweight);
+	muonpt8.fill(isomuons.at(i)->pt(),puweight);
+	//	muoniso8.fill(isomuons.at(i)->isoVal04(),puweight);
       }
       
       invmass8.fill(invLepMass,puweight);
@@ -1034,7 +1069,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     }
 
 
-  } //main event loop ends
+  }//main event loop ends
   std::cout << std::endl; //for status bar
 
   // Fill all containers in the stackVector
@@ -1072,6 +1107,14 @@ void Analyzer(){
   using namespace std;
   using namespace top;
 
+  /////some switches for sed/////
+
+  //bool sed_doBTag
+
+
+ 
+
+
 
   cout << "\n\n\n" <<endl; //looks better ;)
 
@@ -1080,11 +1123,11 @@ void Analyzer(){
   // reorder the whole stuff in a way. specify ee mumu 7TeV 8TeV and then do the systematics "in parallel" to better keep track. maybe even produce a vector of analyzers as done for getCrossSections.C
 
 
-  TString cmssw_base=getenv("CMSSW_BASE");
+  string cmssw_base=getenv("CMSSW_BASE");
   TString scram_arch=getenv("SCRAM_ARCH");
   //initialize mumu
 
-  double lumi8TeV=12100;
+  double lumi8TeV=12200;
   double lumi8TeVunc=0.036; //?!
   double lumi7TeV=5100;
   double lumi7TeVunc=0.025; //?!
@@ -1092,6 +1135,7 @@ void Analyzer(){
   bool runInNotQuietMode=true;
 
   TString treedir="/scratch/hh/dust/naf/cms/user/kieseler";
+  TString treedir7="/scratch/hh/dust/naf/cms/user/diezcar/trees_jan";
   if( scram_arch.Contains("osx")){
     cout << "running locally" << endl;
     treedir="/Users/kiesej/CMS_data_nobk";
@@ -1112,23 +1156,25 @@ void Analyzer(){
   mumu_8TeV.setShowStatusBar(runInNotQuietMode);  //for running with text output mode
   mumu_8TeV.setLumi(lumi8TeV);
   mumu_8TeV.setFileList("mumu_8TeV_inputfiles.txt");
-  mumu_8TeV.setDataSetDirectory(treedir+"/trees_8TeV/");
-  mumu_8TeV.getPUReweighter()->setDataTruePUInput(cmssw_base+"/src/TtZAnalysis/Data/HCP.json.txt_PU.root");
-  mumu_8TeV.getJECUncertainties()->setFile(cmssw_base+"/src/TtZAnalysis/Data/Summer12_V2_DATA_AK5PF_UncertaintySources.txt");
+  mumu_8TeV.setDataSetDirectory(treedir+"/trees_8TeV_newJEC/");
+  mumu_8TeV.getPUReweighter()->setDataTruePUInput((TString)cmssw_base+"/src/TtZAnalysis/Data/HCP.json.txt_PU.root");
+  mumu_8TeV.getJECUncertainties()->setFile(cmssw_base+"/src/TtZAnalysis/Data/Fall12_V7_DATA_UncertaintySources_AK5PF.txt");
   mumu_8TeV.getPUReweighter()->setMCDistrSum12();
   mumu_8TeV.getBTagSF()->setMakeEff(true);
   if(!onlytest) mumu_8TeV.start();
   TFile * btagfile = new TFile("mumu_8TeV_btags.root","RECREATE");
-  mumu_8TeV.getBTagSF()->writeToTFile(btagfile);
+  // mumu_8TeV.getBTagSF()->writeToTFile(btagfile);
   btagfile->Close();
   delete btagfile;
   mumu_8TeV.getPlots()->writeAllToTFile(outfile,true);
   mumu_8TeV.getBTagSF()->setMakeEff(false);
   mumu_8TeV.setName("8TeV_default_mumu","mumu");
-  if(!onlytest) mumu_8TeV.start();
+   if(!onlytest) mumu_8TeV.start();
   // rescaleDY(*mumu_8TeV.getPlots(),dycontributions);
   mumu_8TeV.getPlots()->writeAllToTFile(outfile,false);
  
+  
+
   MainAnalyzer ee_8TeV=mumu_8TeV;
   ee_8TeV.setFileList("ee_8TeV_inputfiles.txt");
   ee_8TeV.setName("8TeV_nobtag_ee","ee");
@@ -1145,21 +1191,23 @@ void Analyzer(){
   // rescaleDY(*ee_8TeV.getPlots(),dycontributions);
   ee_8TeV.getPlots()->writeAllToTFile(outfile,false);
   
+ 
   //to have something to play with prepare the nobtag 7 TeV analyzer
   MainAnalyzer ee_7TeV;
   ee_7TeV.setFileList("ee_7TeV_inputfiles.txt");
   ee_7TeV.setLumi(lumi7TeV);
   ee_7TeV.setShowStatusBar(runInNotQuietMode);
   ee_7TeV.setName("7TeV_nobtag_ee","ee");
-  ee_7TeV.setDataSetDirectory(treedir+"/trees_7TeV/");
-  ee_7TeV.getPUReweighter()->setDataTruePUInput(cmssw_base+"/src/TtZAnalysis/Data/ReRecoNov2011.json_PU.root");
+  ee_7TeV.setDataSetDirectory(treedir7+"/trees_7TeV/");
+  ee_7TeV.getPUReweighter()->setDataTruePUInput((TString)cmssw_base+"/src/TtZAnalysis/Data/ReRecoNov2011.json_PU.root");
   ee_7TeV.getPUReweighter()->setMCDistrFall11();
+  ee_7TeV.getJECUncertainties()->setIs2012(false);
   ee_7TeV.getJECUncertainties()->setFile(cmssw_base+"/src/TtZAnalysis/Data/JEC11_V12_AK5PF_UncertaintySources.txt");
   ee_7TeV.getBTagSF()->setMakeEff(true);
   ee_7TeV.getBTagSF()->setIs2011(true);
   if(!onlytest) ee_7TeV.start();
   btagfile = new TFile("ee_7TeV_btags.root","RECREATE");
-  ee_7TeV.getBTagSF()->writeToTFile(btagfile);
+  //  ee_7TeV.getBTagSF()->writeToTFile(btagfile);
   btagfile->Close();
   delete btagfile;
   ee_7TeV.getPlots()->writeAllToTFile(outfile,false);
@@ -1175,7 +1223,7 @@ void Analyzer(){
   mumu_7TeV.getBTagSF()->setMakeEff(true);
   if(!onlytest) mumu_7TeV.start();
   btagfile = new TFile("all_btags.root","RECREATE");
-  mumu_7TeV.getBTagSF()->writeToTFile(btagfile);
+  //  mumu_7TeV.getBTagSF()->writeToTFile(btagfile);
   btagfile->Close();
   delete btagfile;
   mumu_7TeV.getPlots()->writeAllToTFile(outfile,false);
@@ -1200,11 +1248,12 @@ void Analyzer(){
     TString energystring="8TeV";
     if(full_ana.at(i).getName().Contains("7TeV")) energystring="7TeV";
 
-
+    
     //b systematics (correlated)
     cout << "doing b-tag systematics" << endl;
 
     MainAnalyzer temp=full_ana.at(i);
+    
     temp.getBTagSF()->setSystematic("light up");
     temp.replaceInName("default","btag_light_up");
     if(!onlytest) temp.start();
@@ -1251,23 +1300,33 @@ void Analyzer(){
     full_errana.at(i).getPlots()->addMCErrorStackVector("JER_down",*temp.getPlots());
 
 
+    
+
     // JES correlated
     cout << "doing JES systematics" << endl;
 
+    std::vector<unsigned int> JECsources_corr,JECsources_uncorr;
+    if(energystring == "7TeV"){
+      JECsources_corr << 1 << 2 << 3 << 4 << 5 << 6 << 7 << 8 << 9 << 10 << 12 << 13 << 15;
+      JECsources_uncorr << 0 << 11 << 14;
+    }
+    else{
+      JECsources_corr << 1 << 2 << 3 << 4 << 5 << 6 << 7 << 8 << 9 << 10 << 11 << 12 << 13;
+      JECsources_uncorr << 0 << 14 << 15 << 16 << 17 << 18;
+    }
+    
     temp=full_ana.at(i);
     temp.replaceInName("default","JES_up");
-    temp.getJECUncertainties()->sources().clear();
-    temp.getJECUncertainties()->sources() << 1 << 2 << 3 << 4 << 5 << 6 << 7 << 8 << 9 << 10 << 12 << 13 << 15;
-    temp.getJECUncertainties()->setVariation("up");
+    temp.getJECUncertainties()->sources() = JECsources_corr;
+    temp.getJECUncertainties()->setSystematics("up");
     if(!onlytest) temp.start();
     temp.getPlots()->writeAllToTFile(outfile,false);
     full_errana.at(i).getPlots()->addMCErrorStackVector("JES_corr_up",*temp.getPlots());
 
     temp=full_ana.at(i);
     temp.replaceInName("default","JES_down");
-    temp.getJECUncertainties()->sources().clear();
-    temp.getJECUncertainties()->sources() << 1 << 2 << 3 << 4 << 5 << 6 << 7 << 8 << 9 << 10 << 12 << 13 << 15;
-    temp.getJECUncertainties()->setVariation("down");
+    temp.getJECUncertainties()->sources() = JECsources_corr;
+    temp.getJECUncertainties()->setSystematics("down");
     if(!onlytest) temp.start();
     temp.getPlots()->writeAllToTFile(outfile,false);
     full_errana.at(i).getPlots()->addMCErrorStackVector("JES_corr_down",*temp.getPlots());
@@ -1276,18 +1335,16 @@ void Analyzer(){
 
     temp=full_ana.at(i);
     temp.replaceInName("default","JES_"+energystring+"_up");
-    temp.getJECUncertainties()->sources().clear();
-    temp.getJECUncertainties()->sources() << 0 << 11 << 14;
-    temp.getJECUncertainties()->setVariation("up");
+    temp.getJECUncertainties()->sources() = JECsources_uncorr;
+    temp.getJECUncertainties()->setSystematics("up");
     if(!onlytest) temp.start();
     temp.getPlots()->writeAllToTFile(outfile,false);
     full_errana.at(i).getPlots()->addMCErrorStackVector("JES_"+energystring+"_up",*temp.getPlots());
 
     temp=full_ana.at(i);
     temp.replaceInName("default","JES_"+energystring+"_down");
-    temp.getJECUncertainties()->sources().clear();
-    temp.getJECUncertainties()->sources() << 0 << 11 << 14;
-    temp.getJECUncertainties()->setVariation("down");
+    temp.getJECUncertainties()->sources() = JECsources_uncorr;
+    temp.getJECUncertainties()->setSystematics("down");
     if(!onlytest) temp.start();
     temp.getPlots()->writeAllToTFile(outfile,false);
     full_errana.at(i).getPlots()->addMCErrorStackVector("JES_"+energystring+"_down",*temp.getPlots());
@@ -1322,13 +1379,68 @@ void Analyzer(){
 
     //matching etc. to be yet done
 
+    //treedir + "/trees_"+energystring+"/"  btagging has to be set properly
+    /*
+      temp=full_ana.at(i);
+      temp.replaceInName("default","ttmatch_up");
+      if(!onlytest) temp.start("ttmup");
+      temp.getPlots()->writeAllToTFile(outfile,false);
+      full_errana.at(i).getPlots()->addMCErrorStackVector("ttmatch_up",*temp.getPlots());
 
- /*
-full_ana.at(i).
-  */
+      temp=full_ana.at(i);
+      temp.replaceInName("default","ttmatch_down");
+      if(!onlytest) temp.start("ttmdown");
+      temp.getPlots()->writeAllToTFile(outfile,false);
+      full_errana.at(i).getPlots()->addMCErrorStackVector("ttmatch_down",*temp.getPlots());
+
+      temp=full_ana.at(i);
+      temp.replaceInName("default","Zmatch_up");
+      if(!onlytest) temp.start("Zmup");
+      temp.getPlots()->writeAllToTFile(outfile,false);
+      full_errana.at(i).getPlots()->addMCErrorStackVector("Zmatch_up",*temp.getPlots());
+
+      temp=full_ana.at(i);
+      temp.replaceInName("default","Zmatch_down");
+      if(!onlytest) temp.start("Zmdown");
+      temp.getPlots()->writeAllToTFile(outfile,false);
+      full_errana.at(i).getPlots()->addMCErrorStackVector("Zmatch_down",*temp.getPlots());
+    */
+  
+    /*
+      temp=full_ana.at(i);
+      temp.replaceInName("default","ttscale_up");
+      if(!onlytest) temp.start("ttsup");
+      temp.getPlots()->writeAllToTFile(outfile,false);
+      full_errana.at(i).getPlots()->addMCErrorStackVector("ttscale_up",*temp.getPlots());
+
+      temp=full_ana.at(i);
+      temp.replaceInName("default","ttscale_down");
+      if(!onlytest) temp.start("ttsdown");
+      temp.getPlots()->writeAllToTFile(outfile,false);
+      full_errana.at(i).getPlots()->addMCErrorStackVector("ttscale_down",*temp.getPlots());
+
+      temp=full_ana.at(i);
+      temp.replaceInName("default","Zscale_up");
+      if(!onlytest) temp.start("Zsup");
+      temp.getPlots()->writeAllToTFile(outfile,false);
+      full_errana.at(i).getPlots()->addMCErrorStackVector("Zscale_up",*temp.getPlots());
+
+      temp=full_ana.at(i);
+      temp.replaceInName("default","Zscale_down");
+      if(!onlytest) temp.start("Zsdown");
+      temp.getPlots()->writeAllToTFile(outfile,false);
+      full_errana.at(i).getPlots()->addMCErrorStackVector("Zscale_down",*temp.getPlots());
+    */
+  
+
     cout << "writing full error output" << endl;
     full_errana.at(i).replaceInName("default","allErrors");
     full_errana.at(i).getPlots()->writeAllToTFile(outfile,false);
+
+    cout << "\n\n\n\n\n******************** \ndone with " << ((double)(1+i))/((double)full_ana.size())
+	 << " of the systematic variations\n\n\n\n\n******************" << endl;
+
+
   }
 
 

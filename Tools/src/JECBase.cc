@@ -156,7 +156,8 @@ namespace top{
 	  JetCorrectionUncertainty *unc = vsrc_[sources_[i]];
 	  unc->setJetPt(pt);
 	  unc->setJetEta(eta);
-	  dunc=sqrt(dunc*dunc + (unc->getUncertainty(up))*(unc->getUncertainty(up)));
+	  double uncert=unc->getUncertainty(up);
+	  dunc=sqrt(dunc*dunc + uncert*uncert);
 	}
 	else{
 	  std::cout << "JECBase::applyJECUncertainties: source " << sources_[i] << " doesn't exist." << std::endl;

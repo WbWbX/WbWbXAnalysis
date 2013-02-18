@@ -2,6 +2,12 @@
 #include "../interface/container.h"
 #include "../interface/containerStack.h"
 #include "../interface/containerStackVector.h"
+#include "../interface/JERBase.h"
+#include "../interface/JECBase.h"
+#include "../interface/bTagBase.h"
+
+
+
 #include "../interface/bTagSF.h"
 
 namespace
@@ -24,11 +30,22 @@ namespace
 
     std::vector<TH2D> ijij;
     std::map<TString,std::vector<TH2D> > kokd;
-    top::bTagSF ggg;
-    std::vector<top::bTagSF> kggg;
 
 
     
+
+    top::bTagBase ked;
+    top::JECBase kkss;
+    top::JERBase ksdsk;
+    std::vector<top::bTagBase> kedV;
+    std::vector<top::JECBase> kkssV;
+    std::vector<top::JERBase> ksdskV;
+
+
+
+    //to be removed in the future
+    top::bTagSF ggg;
+    std::vector<top::bTagSF> kggg;
   };
 }
 

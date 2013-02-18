@@ -11,6 +11,9 @@
 #include "TH2D.h"
 
 template<class t>
+t square(const t & in){return in*in;}
+
+template<class t>
 TString toTString(t in){
   std::ostringstream s;
   s << in;
@@ -19,7 +22,7 @@ TString toTString(t in){
 }
 
 template<class t>
-TString toString(t in){
+std::string toString(t in){
   std::ostringstream s;
   s << in;
   std::string out=s.str();
@@ -52,24 +55,45 @@ std::vector<unsigned int> getOrderAscending(typename std::vector<t> vec){
 
 template <class t, class u>
 double dR(t &first, u &sec){
-  return sqrt(pow(first.eta() - sec.eta(),2) + pow(first.phi() - sec.phi(),2));
+  return sqrt((first.eta() - sec.eta())*(first.eta() - sec.eta()) + (first.phi() - sec.phi())*(first.phi() - sec.phi()));
 }
 
-
+/*
 template <class t, class u>
 bool noOverlap(t &first, u &sec, double deltaR){
     bool nooverlap=true;
-      if(pow(deltaR,2) > pow(first->eta() - sec->eta(),2) + pow(first->phi() - sec->phi(),2)){
+      if(deltaR*deltaR > square(first.eta() - sec.eta()) + square(first.phi() - sec.phi())){
 	nooverlap=false;
       }
   return nooverlap;
 }
-
+*/
+template <class t, class u>
+bool noOverlap(t *first, u *sec, double deltaR){
+    bool nooverlap=true;
+      if((deltaR*deltaR) > square(first->eta() - sec->eta()) + square(first->phi() - sec->phi())){
+	nooverlap=false;
+      }
+  return nooverlap;
+}
+/*
 template <class T, class U>
 bool noOverlap(T & first, typename std::vector<U> &vecsec, double deltaR){
   bool nooverlap=true;
   for(typename std::vector<U>::iterator sec=vecsec.begin();sec<vecsec.end();++sec){
     if(!noOverlap(first,sec,deltaR)){
+      nooverlap=false;
+      break;
+    }
+  }
+  return nooverlap;
+}
+*/
+template <class T, class U>
+bool noOverlap(T * first, typename std::vector<U*> &vecsec, double deltaR){
+  bool nooverlap=true;
+  for(size_t i=0;i<vecsec.size();i++){
+    if(!noOverlap(first,vecsec.at(i),deltaR)){
       nooverlap=false;
       break;
     }

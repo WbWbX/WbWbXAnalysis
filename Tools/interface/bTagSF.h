@@ -43,7 +43,7 @@ public:
   std::vector<TH2D> * getEffHistos(TString );
 
 
-private:
+  //private:
   // TH2D bjets,bjetstagged;
   // TH2D cjets,cjetstagged;
   // TH2D ljets,ljetstagged;

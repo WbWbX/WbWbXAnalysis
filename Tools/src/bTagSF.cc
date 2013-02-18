@@ -15,7 +15,7 @@ bTagSF::bTagSF(double WP){
 
   is2011_=false;
 
-  // init the SF histos and put all info from btag POG here; ONLY here! -- doesnt work
+  // init the SF histos and put all info from btag POG here; ONLY here! -- doesnt work 
   double  ptbins[]  = {30.,40.,50.,60.,70.,80.,100.,120.,160.,210.,260.,320.,400.,500.,670.};    // errors are written to TH2Ds
   unsigned int npt=15;
   double  etabins[] = {0.0,0.5,1.0,1.5,2.0,2.4,3.0};
@@ -151,8 +151,6 @@ double bTagSF::getSF(std::vector<top::NTJet> & jets){
     double pt=jet.pt();
     double abs_eta=fabs(jet.eta());
 
-    if(cbflatineta_) abs_eta=1;
-    
     double sf=1;
     double multi=1;
     unsigned int effh=100;
@@ -160,6 +158,8 @@ double bTagSF::getSF(std::vector<top::NTJet> & jets){
       multi=1.5;
     
     if(abs(jet.genPartonFlavour()) == 5){
+      if(cbflatineta_) abs_eta=1;
+    
       effh=0;
 
       if(abs(syst_>1) || syst_==0)  //default
@@ -170,6 +170,8 @@ double bTagSF::getSF(std::vector<top::NTJet> & jets){
 	sf=BJetSF(pt,abs_eta,1,multi);
     }
     else if(abs(jet.genPartonFlavour()) == 4){
+      if(cbflatineta_) abs_eta=1;
+    
       effh=1;
       if(abs(syst_>1) || syst_==0)  //default
 	sf=CJetSF(pt,abs_eta);
@@ -294,7 +296,7 @@ void bTagSF::setSystematic(TString ID){ //consider SF_c and SF_b as correlated, 
 double bTagSF::BJetSF( double pt, double eta , int sys, double multiplier){
     //CSVL b-jet SF
     //From BTV-11-004 and https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFb-mujet_payload.txt
-
+  /*
   double abs_eta=fabs(eta);
   abs_eta++; // not used right now;
 
@@ -319,6 +321,55 @@ double bTagSF::BJetSF( double pt, double eta , int sys, double multiplier){
       return sf+(abserr*multiplier);
     else 
       return 1;
+  */
+    double abs_eta=fabs(eta);
+    abs_eta++; // not used right now; #TRAP#
+
+    if ( pt < 30 ) pt = 30;
+    if ( pt > 670 ) pt = 669;
+
+    double  ptbins[]  = {30.,40.,50.,60.,70.,80.,100.,120.,160.,210.,260.,320.,400.,500.,670.}; 
+    const unsigned int npt=15;
+    //   double  etabins[] = {0.0,0.5,1.0,1.5,2.0,2.4,3.0};
+    //   const unsigned int neta=7;
+
+  
+    double sf11= 1.02658*((1.+(0.0195388*pt))/(1.+(0.0209145*pt)));
+    if(sys==0 && is2011_)
+      return sf11;    
+
+    double sf12 = 0.981149*((1. -0.000713295*pt)/(1. -0.000703264*pt));
+    if(sys==0)
+      return sf12;
+   
+    double sf=sf12;
+    if(is2011_)
+      sf=sf11;
+
+    double SFb_error11[] = { 0.0188743, 0.0161816, 0.0139824, 0.0152644, 0.0161226, 0.0157396, 0.0161619, 0.0168747, 0.0257175, 0.026424, 0.0264928, 0.0315127, 0.030734, 0.0438259 };
+    double SFb_error12[] = {0.0484285, 0.0126178, 0.0120027, 0.0141137, 0.0145441, 0.0131145, 0.0168479, 0.0160836, 0.0126209, 0.0136017, 0.019182, 0.0198805, 0.0386531, 0.0392831, 0.0481008, 0.0474291 }; //moriond13 values tt and mu+jets
+
+    double abserr=0;
+    if(is2011_){
+      for(unsigned int i=1;i<npt;i++){
+	if(ptbins[i] > pt){
+	  abserr=SFb_error11[i-1];
+	}
+      }
+    }
+    else{
+      for(unsigned int i=1;i<npt;i++){
+	if(ptbins[i] > pt){
+	  abserr=SFb_error12[i-1];
+	}
+      }
+    }
+    if(sys<0)
+      return sf-(abserr*multiplier);
+    if(sys>0)
+      return sf+(abserr*multiplier);
+    else 
+      return sf;
 }
 
 
@@ -335,6 +386,7 @@ double bTagSF::LJetSF ( double pt, double eta, int sys, double multiplier){
     double eta_abs = fabs(eta);
 
 
+  double x =pt;
     multiplier++; // to avoid warnings
 
     double sf=1;
@@ -355,7 +407,7 @@ double bTagSF::LJetSF ( double pt, double eta, int sys, double multiplier){
         }
       }
     }    
-    else{
+    /* else{
       if ( pt > 670 ) {
         sf =((((0.956023+(0.000825106*pt))+(-3.18828e-06*(pt*pt)))+(2.81787e-09*(pt*(pt*pt)))) * (0.979396 + 0.000205898*pt + 2.49868e-07*pt*pt)) ;
       } 
@@ -370,8 +422,20 @@ double bTagSF::LJetSF ( double pt, double eta, int sys, double multiplier){
 	  sf =((((0.979816+(0.000138797*pt))+(-3.14503e-07*(pt*pt)))+(2.38124e-10*(pt*(pt*pt)))) * (0.979396 + 0.000205898*pt + 2.49868e-07*pt*pt)) ;
         }
       }
-      
+    */
+    else{//new 2013 ones
+      if ( eta_abs <= 0.5 ) {
+	sf =((1.04901+(0.00152181*x))+(-3.43568e-06*(x*x)))+(2.17219e-09*(x*(x*x)));
+      } else if ( eta_abs <= 1.0 ) {
+	sf =((0.991915+(0.00172552*x))+(-3.92652e-06*(x*x)))+(2.56816e-09*(x*(x*x)));
+      } else if ( eta_abs <= 1.5 ) {
+	sf =((0.962127+(0.00192796*x))+(-4.53385e-06*(x*x)))+(3.0605e-09*(x*(x*x)));
+      } else {
+	sf =((1.06121+(0.000332747*x))+(-8.81201e-07*(x*x)))+(7.43896e-10*(x*(x*x)));
+      }  
+
     }
+
     if(sys==0)
       return sf;
     else

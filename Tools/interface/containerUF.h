@@ -4,6 +4,9 @@
 #include "containerStack.h"
 #include "TString.h"
 
+
+
+
 // add function to make a tex table of the contents (syst)
 
 // container with some more plotting options and (very simple) unfolding
@@ -18,7 +21,7 @@ namespace top{
 
   public:
 
-    container1DUF(){};
+    container1DUF(){debug_=false;};
     container1DUF(const top::container1DStack &, const top::container1DStack &, TString , double , TString dataname="data");
     container1DUF(const top::container1D &);
     ~container1DUF(){};
@@ -44,8 +47,10 @@ namespace top{
     //some plotting stuff - still missing
 
     TGraphAsymmErrors * getTGraph(TString name="", bool dividebybinwidth=true,bool noXErrors=false);
+    TH1D * getTH1D(TString name="", bool dividebybinwidth=true);
 
 
+    bool debug_;
   private:
     top::container1DStack gen_;
     top::container1DStack sel_;
@@ -53,6 +58,7 @@ namespace top{
     TString dataname_;
     TString signalname_;
     std::vector<TString> binnames_;
+
 
   };
 
@@ -66,6 +72,7 @@ namespace top{
     signalname_=signalname;
     lumi_=lumi;
     simpleUnfold();
+    debug_=false;
   }
 
   container1DUF::container1DUF(const top::container1D & cont){ //convert
@@ -86,6 +93,7 @@ namespace top{
     xname_=cont.xname_;
     yname_=cont.yname_;
     labelmultiplier_=cont.labelmultiplier_;
+    debug_=false;
   }
 
 
@@ -117,10 +125,10 @@ namespace top{
     std::vector<TString> excludefrombackground;
     excludefrombackground << signalname_ << dataname_;
 
-    for(unsigned int i=0;i<excludefrombackground.size();i++){
-      cout << excludefrombackground.at(i) << " " ;
-    }
-    cout << endl;
+    // for(unsigned int i=0;i<excludefrombackground.size();i++){
+    //   cout << excludefrombackground.at(i) << " " ;
+    // }
+    // cout << endl;
 
     //   gencont.setDivideBinomial(false);
     // selcont.setDivideBinomial(false);
@@ -129,41 +137,66 @@ namespace top{
 
     // binomial error for efficiency
 
-    cout << "gen in bin 1: " << gencont.getBinContent(1) << endl;
-    cout << "genandsel in bin 1: " << selcont.getBinContent(1) << endl;
+    //  cout << "gen in bin 1: " << gencont.getBinContent(1) << endl;
+    //  cout << "genandsel in bin 1: " << selcont.getBinContent(1) << endl;
+
+ if(debug_)    std::cout << "rel contribution from syst to selected\n" << std::endl;
+
+    for(size_t i=0;i<selcont.syserrors_.size();i++){
+    if(debug_)   std::cout << selcont.syserrors_.at(i).first << "  " << selcont.syserrors_.at(i).second.at(1)/selcont.content_.at(1) << std::endl;
+
+    }
 
     top::container1D efficiency = selcont / gencont;
 
-    cout << "eff in bin 1: "<< efficiency.getBinContent(1) << endl;
+    //   cout << "eff in bin 1: "<< efficiency.getBinContent(1) << endl;
 
     top::container1D background = sel_.getContributionsBut(excludefrombackground);
 
-    cout << "bg in bin 1: " << background.getBinContent(1) << endl;
+  if(debug_)   std::cout << "\n\nrel contribution from syst to background\n" << std::endl;
+
+    for(size_t i=0;i<background.syserrors_.size();i++){
+    if(debug_)   std::cout << background.syserrors_.at(i).first << "  " << background.syserrors_.at(i).second.at(1)/background.content_.at(1) << std::endl;
+
+    }
+
+
+
+    //  cout << "bg in bin 1: " << background.getBinContent(1) << endl;
     
     // efficiency.getTH1D()->Draw();
 
     //get data
     top::container1D data=sel_.getContribution(dataname_);
 
-    cout << "data in bin 1: " << data.getBinContent(1) << endl;
+    //   cout << "data in bin 1: " << data.getBinContent(1) << endl;
 
     top::container1D select = (data - background);
     // select.getTH1D()->Draw();
 
-    cout << "sel signal in bin 1: " << select.getBinContent(1) << endl;
+    //   cout << "sel signal in bin 1: " << select.getBinContent(1) << endl;
 
     // and do the "unfolding"
     data.setDivideBinomial(false);
     background.setDivideBinomial(false);
     efficiency.setDivideBinomial(false);
 
+  if(debug_)   std::cout <<"\n\n" << name_ << endl;
+
     efficiency.transformStatToSyst("MC_stat"); //when using multiple of these don't forget to rename!!!
+    for(size_t i=0;i<efficiency.syserrors_.size();i++){
+      if(debug_)   std::cout << efficiency.syserrors_.at(i).first << "  " << efficiency.syserrors_.at(i).second.at(1)/efficiency.content_.at(1) << std::endl;
+
+    }
+    //  efficiency.breakDownRelSystematicsInBin(1).coutBinContents();
+
 
     top::container1D output = (data - background) / efficiency;
       output=output * (1/lumi_);
-
+      cout << name_ << endl;
       cout << "xsec in bin 1: " << output.getBinContent(1) << endl;
-
+      cout << "selected events (data) total: " << data.integral() <<endl;
+      cout << "statErr % \t\t: " << 100/sqrt(data.integral()) <<'\n'<<endl;
       //  output.getTH1D()->Draw();
 
     *this = container1DUF(output);
@@ -202,6 +235,7 @@ namespace top{
 	syscont.setBinName(outputbin, syserrors_.at(i).first);
 
 	if(syserrors_.at(i).second.at(bin) > 0){
+	  //	  std::cout << "\n err up for breakDown: " << syserrors_.at(i).first << "  "  << syserrors_.at(i).second.at(bin)/fabs(content_.at(bin)) << std::endl;
 	  syscont.setBinErrorUp(outputbin, syserrors_.at(i).second.at(bin)/fabs(content_.at(bin)));
 	  //	  totalup+=pow(syserrors_.at(i).second.at(bin)/fabs(content_.at(bin)),2);
 	}
@@ -219,15 +253,15 @@ namespace top{
     for(unsigned int i=0;i<bins_.size()-1;i++){
       //bin names and ranges
       if(i==0) std::cout << "UF\t";
-      else if(binnames_.size()>0 && binnames_.at(i) !="") std::cout << binnames_.at(i) <<'\t';
-      else std::cout << bins_.at(i) << "-" << bins_.at(i+1) <<'\t';
+      else if(binnames_.size()>0 && binnames_.at(i) !="") std::cout << binnames_.at(i) <<'\n';
+      else std::cout << bins_.at(i) << "-" << bins_.at(i+1) <<'\n';
 
       //bin content
       std::cout << content_.at(i) << "\t( +" << staterrup_.at(i) << "\t " << staterrdown_.at(i) << " (stat.))";
       if(syserrors_.size()>0){
 	std::cout << "\t+" << getBinErrorUp(i) << "\t -" << getBinErrorDown(i) << " \t(total)";
       }
-      std::cout << std::endl;
+      std::cout << "\n" << std::endl;
     }
     if(bins_.size()>0){ //and the missing overflow bin
       std::cout << "OF\t"
@@ -237,6 +271,7 @@ namespace top{
 	std::cout << "\t+" << getBinErrorUp(bins_.size()-1) << "\t -" << getBinErrorDown(bins_.size()-1) << " \t(total)";
 	std::cout << std::endl;
       }
+      std::cout << "\n" << std::endl;
     }
   }
 
@@ -246,20 +281,36 @@ namespace top{
   TGraphAsymmErrors * container1DUF::getTGraph(TString name, bool dividebybinwidth,bool noXErrors){
     TGraphAsymmErrors * g=container1D::getTGraph(name, dividebybinwidth, noXErrors);
 
-    if(binnames_.size()>0){
+
+
+    if(binnames_.size()>0 && 1==3){
 
       float binsarr[(size_t)bins_.size()-1];
-      for(unsigned int i=1;i<bins_.size();i++){ binsarr[i-1]=bins_.at(i); std::cout << bins_.at(i) << "  " << binsarr[i-1] << std::endl; }
-      std::cout << bins_.size()-2 << std::endl;
+      for(unsigned int i=1;i<bins_.size();i++){ binsarr[i-1]=bins_.at(i); if(debug_) std::cout << bins_.at(i) << "  " << binsarr[i-1] << std::endl; }
+      if(debug_)  std::cout << bins_.size()-2 << std::endl;
       g->GetXaxis()->Set((int)bins_.size()-2, (Float_t*)binsarr);
 
       for(unsigned int i=1;i<bins_.size()-1;i++){
-	//	int graphbin=g->GetXaxis()->FindBin(i);
-		g->GetXaxis()->SetBinLabel(i,binnames_.at(i));
+	int graphbin=g->GetXaxis()->FindBin(i);
+
+	g->GetXaxis()->SetBinLabel(graphbin,binnames_.at(i));
       }
       g->GetXaxis()->SetRangeUser(bins_.at(1),bins_.at(bins_.size()-1));
     }
     return g;
+
+  }
+
+  TH1D * container1DUF::getTH1D(TString name, bool dividebybinwidth){ 
+    TH1D * h = container1D::getTH1D(name, dividebybinwidth);
+    if(binnames_.size() >0){
+      for(int i=1; i<binnames_.size()-1;i++){
+	int bin=h->FindBin(getBinCenter(i));
+	if(bin!=0)
+	  h->GetXaxis()->SetBinLabel(bin,binnames_.at(i));
+      }
+    }
+    return h;
   }
 
 }
