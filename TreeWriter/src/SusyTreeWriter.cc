@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id: SusyTreeWriter.cc,v 1.10 2013/01/31 16:08:48 jkiesele Exp $
+// $Id: SusyTreeWriter.cc,v 1.11 2013/02/06 12:24:37 jkiesele Exp $
 //
 //
 
@@ -245,6 +245,9 @@ SusyTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    ntsuclus.clear();
    ntgenelecs.clear();
    ntgenmuons.clear();
+
+   stopMass.clear();
+   chiMass.clear();
 
    top::NTTrigger clear;
    nttrigger=clear;
