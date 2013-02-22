@@ -8,8 +8,6 @@
 
 
 
-#include "../interface/bTagSF.h"
-
 namespace
 {
   struct dictionary {
@@ -42,10 +40,6 @@ namespace
     std::vector<top::JERBase> ksdskV;
 
 
-
-    //to be removed in the future
-    top::bTagSF ggg;
-    std::vector<top::bTagSF> kggg;
   };
 }
 

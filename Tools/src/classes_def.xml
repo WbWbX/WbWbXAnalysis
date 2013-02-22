@@ -18,7 +18,5 @@
   <class name="std::vector<top::JERBase>"/>
   <class name="top::JECBase"/>
   <class name="std::vector<top::JECBase>"/>
-  <class name="top::bTagSF"/>
-  <class name="std::vector<top::bTagSF>"/>
 </lcgdict>
  
