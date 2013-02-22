@@ -3,7 +3,7 @@
 #include "TtZAnalysis/Tools/interface/miscUtils.h"
 #include <cstdlib>
 
-
+#include "makePlotsScript.h"
 
 
 //////// change all these 4 thingies to a vector!! is easier to handle (esp if emu gets involved for some reason)
@@ -24,12 +24,17 @@ void getCrossSections(){
 
   // load files and full information from containerstackverctors
 
-  TString inputdir="/scratch/hh/dust/naf/cms/user/kieseler/Analysis/CMSSW_5_3_5/src/TtZAnalysis/Analysis/23012013_2013-01-23_14:53";
+  TString inputdir="/scratch/hh/dust/naf/cms/user/kieseler/Analysis/CMSSW_5_3_7/src/TtZAnalysis/Analysis/newFull_2013-02-18_23:13";
+
+  TString outdir="plots_2102_fC";
+  TString Tsyst_cmd=("mkdir "+outdir);
+  const char * syst_cmd= Tsyst_cmd;
+  system(syst_cmd);
 
   TFile * inputFile         = new TFile(inputdir+"/analysis_output.root");
 
   double lumi7TeV=5100; //lumi uncertainty is added in Analyzer.C
-  double lumi8TeV=12100;
+  double lumi8TeV=12200;
 
   TString ttstep="8";  // 8: 1btag, 9: 2btag, 10, not yet ... all only have one bin
 
@@ -60,7 +65,7 @@ void getCrossSections(){
   // operator + not (yet) defined for csv; runs into problems when using containers to get efficiencies
 
   //////do the DY rescaling
-  TString outfile="fullcontrol_and_xsec_graphs.root";
+  TString outfile=outdir+"/fullcontrol_and_xsec_graphs.root";
 
   if(writeAllOut){
   TFile * tempfile = new TFile(outfile,"RECREATE");
@@ -73,6 +78,8 @@ void getCrossSections(){
     TString add="8TeV_";
     if(vecsfull.at(i).getName().Contains("7TeV"))
       add="7TeV_";
+
+    add="";
 
     cout << "doing ttbar background variation for " << vecsfull.at(i).getName() << endl;
 
@@ -175,7 +182,7 @@ void getCrossSections(){
     h->GetXaxis()->SetLabelSize(0.015);
     h->Draw("AXIS");
     sys.getTGraph("",false)->Draw("same");
-    c->Print("plots/"+xsecs.at(i).getName()+".pdf");
+    c->Print(outdir+"/"+xsecs.at(i).getName()+".pdf");
     cout << "\n\n" << endl;
     xsecs.at(i).removeError("MC_stat_up");
     xsecs.at(i).removeError("MC_stat_down");
@@ -213,13 +220,13 @@ void getCrossSections(){
   doubleRee.getTGraph("",false)->Draw("same");
   l->SetLineColor(kRed);
   l->Draw("same");
-  c->Print("plots/doubleRee.pdf");
+  c->Print(outdir+"/doubleRee.pdf");
   sys = doubleRee.breakDownRelSystematicsInBin(1);
   h=sys.getTH1D("",false);
   h->GetXaxis()->SetLabelSize(0.015);
   h->Draw("AXIS");
   sys.getTGraph("",false)->Draw("same");
-  c->Print("plots/doubleRee_sys.pdf");
+  c->Print(outdir+"/doubleRee_sys.pdf");
  
   std::cout << "double Ratio mumu" <<std::endl;
   doubleRmumu.coutBinContents();
@@ -227,13 +234,13 @@ void getCrossSections(){
   doubleRmumu.getTGraph("",false)->Draw("same");
   l->SetLineColor(kRed);
   l->Draw("same");
-  c->Print("plots/doubleRmumu.pdf");
+  c->Print(outdir+"/doubleRmumu.pdf");
   sys = doubleRmumu.breakDownRelSystematicsInBin(1);
   h=sys.getTH1D("",false);
   h->GetXaxis()->SetLabelSize(0.015);
   h->Draw("AXIS");
   sys.getTGraph("",false)->Draw("same");
-  c->Print("plots/doubleRmumu_sys.pdf");
+  c->Print(outdir+"/doubleRmumu_sys.pdf");
  
 
 
@@ -298,6 +305,7 @@ void getCrossSections(){
   eeinputfile7TeV->Close();
   mumuinputfile7TeV->Close();
     */
-
+  
+  makePlotsScript(outdir);
  
 }
