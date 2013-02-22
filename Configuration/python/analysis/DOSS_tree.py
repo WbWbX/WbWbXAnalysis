@@ -110,14 +110,37 @@ process.load('Configuration.EventContent.EventContent_cff')
 if not isMC and not is2011: # https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagJetProbabilityCalibration?redirectedfrom=CMS.SWGuideBTagJetProbabilityCalibration#Calibration_in_52x_and_53x_Data
     process.GlobalTag.toGet = cms.VPSet(
         cms.PSet(record = cms.string("BTagTrackProbability2DRcd"),
-                 tag = cms.string("TrackProbabilityCalibration_2D_2012DataTOT_v1_offline"),
+                 tag = cms.string("TrackProbabilityCalibration_2D_Data53X_v2"),
                  connect = cms.untracked.string("frontier://FrontierPrep/CMS_COND_BTAU")),
         cms.PSet(record = cms.string("BTagTrackProbability3DRcd"),
-                 tag = cms.string("TrackProbabilityCalibration_3D_2012DataTOT_v1_offline"),
+                 tag = cms.string("TrackProbabilityCalibration_3D_Data53X_v2"),
+                 connect = cms.untracked.string("frontier://FrontierPrep/CMS_COND_BTAU"))
+        )
+
+if isMC and not is2011:
+
+    process.GlobalTag.toGet = cms.VPSet(
+        cms.PSet(record = cms.string("BTagTrackProbability2DRcd"),
+                 tag = cms.string("TrackProbabilityCalibration_2D_MC53X_v2"),
+                 connect = cms.untracked.string("frontier://FrontierPrep/CMS_COND_BTAU")),
+        cms.PSet(record = cms.string("BTagTrackProbability3DRcd"),
+                 tag = cms.string("TrackProbabilityCalibration_3D_MC53X_v2"),
                  connect = cms.untracked.string("frontier://FrontierPrep/CMS_COND_BTAU"))
         )
 
 
+if isMC and is2011:
+
+    process.GlobalTag.toGet = cms.VPSet(
+        cms.PSet(record = cms.string("BTagTrackProbability2DRcd"),
+                 tag = cms.string("TrackProbabilityCalibration_2D_MC_80_Ali44_v1"),
+                 connect = cms.untracked.string("frontier://FrontierPrep/CMS_COND_BTAU")),
+        cms.PSet(record = cms.string("BTagTrackProbability3DRcd"),
+                 tag = cms.string("TrackProbabilityCalibration_3D_MC_80_Ali44_v1"),
+                 connect = cms.untracked.string("frontier://FrontierPrep/CMS_COND_BTAU"))
+        )
+
+#data 2011 is ok
 
 #Options
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True))
