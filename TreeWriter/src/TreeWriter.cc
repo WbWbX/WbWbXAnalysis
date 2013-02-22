@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id: TreeWriter.cc,v 1.17 2013/01/28 16:35:06 jkiesele Exp $
+// $Id: TreeWriter.cc,v 1.18 2013/01/31 16:08:48 jkiesele Exp $
 //
 //
 
@@ -109,6 +109,11 @@ class TreeWriter : public edm::EDAnalyzer {
 
   bool checkJetID(std::vector<pat::Jet>::const_iterator);
 
+  std::vector<bool> checkTriggers(const edm::Event&);
+  std::vector<std::string> triggers_;
+  std::vector<bool> triggerBools_;
+  void setTriggers();
+
   bool pfElecCands_;
   bool pfMuonCands_;
   bool rho2011_;
@@ -203,7 +208,7 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
              <<  "\n#######################################################" << std::endl;
 
 
-
+   setTriggers();
 
 }
 
@@ -239,6 +244,8 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    ntsuclus.clear();
    ntgenmuons.clear();
    ntgenelecs.clear();
+
+   triggerBools_.clear();
 
 
    top::NTTrigger clear;
@@ -717,6 +724,10 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      
    } //end vtxs.size()>0
 
+   /////////triggers as boolians and if switched on as strings
+
+   triggerBools_=checkTriggers(iEvent);
+
 
    std::vector<std::string> firedtriggers;
 
@@ -892,6 +903,9 @@ TreeWriter::beginJob()
   Ntuple->Branch("NTJets", "std::vector<top::NTJet>", &ntjets);
   Ntuple->Branch("NTMet", "top::NTMet", &ntmet);
   Ntuple->Branch("NTEvent", "top::NTEvent", &ntevent);
+
+  Ntuple->Branch("TriggerBools", "std::vector<bool>", &triggerBools_);
+
   //  Ntuple->Branch("NTTrigger", "top::NTTrigger", &nttrigger);
 
   Ntuple->Branch("NTGenElectrons", "std::vector<top::NTGenLepton>", &ntgenelecs);
@@ -903,13 +917,15 @@ TreeWriter::beginJob()
 void 
 TreeWriter::endJob() 
 {
-  /*if( !fs ){
+  if( !fs ){
     throw edm::Exception( edm::errors::Configuration,
                           "TFile Service is not registered in cfg file" );
   }
   TTree * TT;
   TT=fs->make<TTree>("TriggerMaps" ,"TriggerMaps" );
-  nttrigger.writeMapToTree(TT);*/
+  TT->Branch("TriggerStrings",     "std::vector<std::string>", &triggers_);
+  TT->Fill();
+  
 }
 
 // ------------ method called when starting to processes a run  ------------
@@ -964,6 +980,55 @@ bool TreeWriter::checkJetID(std::vector<pat::Jet>::const_iterator jet)
 
   
   return hasjetID;
+}
+/*
+ * makes a contains(bla)
+ */
+std::vector<bool> TreeWriter::checkTriggers(const edm::Event& iEvent){
+  using namespace edm;
+
+  std::vector<bool> output;
+  output.resize(triggers_.size(),false);
+  
+
+  Handle<TriggerResults> trigresults;
+  iEvent.getByLabel(trigresults_, trigresults);
+
+  if(!trigresults.failedToGet()){
+    int n_Triggers = trigresults->size();
+    TriggerNames trigName = iEvent.triggerNames(*trigresults);
+
+    for(int i_Trig = 0; i_Trig<n_Triggers; ++i_Trig){
+      if(trigresults.product()->accept(i_Trig)){
+	std::string firedtrig=trigName.triggerName(i_Trig);
+	for(size_t i=0;i<triggers_.size();i++){
+	  if(firedtrig.find(triggers_[i]) != std::string::npos)
+	    output[i]=true;
+	}
+      }	  
+    }
+  }
+  return output;
+}
+
+void TreeWriter::setTriggers(){
+  
+  triggers_.push_back("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
+  triggers_.push_back("HLT_Mu17_Mu8_v");
+  triggers_.push_back("HLT_Mu17_TkMu8_v");
+  //
+  triggers_.push_back("HLT_Ele17_SW_TightCaloEleId_Ele8_HE_L1R_v");
+  triggers_.push_back("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v");
+  triggers_.push_back("HLT_DoubleMu7");
+  triggers_.push_back("HLT_Mu13_Mu8_v");
+  /*
+  triggers_.push_back();
+  triggers_.push_back();
+  triggers_.push_back();
+  triggers_.push_back();
+  triggers_.push_back();
+*/
+
 }
 
 //define this as a plug-in
