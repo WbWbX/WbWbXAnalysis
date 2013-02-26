@@ -124,6 +124,13 @@ std::vector<T>& operator<<(std::vector<T>& vec, const U& x) {
     return vec;
 }
 
+template <class T, class U>
+std::vector<T>& operator<<(std::vector<T>& vec, const std::vector<U> & x) {
+  vec.insert(vec.end(),x.begin(),x.end());
+    return vec;
+}
+
+
 namespace top{
   void displayStatusBar(Long64_t event, Long64_t nEvents);
 }
