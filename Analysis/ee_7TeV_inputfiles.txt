@@ -4,7 +4,7 @@ def tree_7TeV_ee_runB_19Nov.root data 1 1
 #mcChangeToDYSignalSample
 #
 def tree_7TeV_eettbar.root t#bar{t} 633 165
-def tree_7TeV_eettbarviatau.root t#bar{t}#tau 632 165
+def tree_7TeV_eettbarviatau.root t#bar{t}(#tau) 632 165
 def tree_7TeV_eettbarbg.root t#bar{t}bg 634 165
 def tree_7TeV_tW.root singleTop 616 7.9
 def tree_7TeV_tbarW.root singleTop 616 7.9
@@ -21,12 +21,13 @@ def tree_7TeV_dyee60120.root Z#rightarrowll 852 3048
 #
 #rest_mc
 #
-#tree_7TeV_qcdem2030.root_QCD_400_2914860
-#tree_7TeV_qcdem3080.root_QCD_400_4622103
+def tree_7TeV_qcdem2030.root QCD 400 2914860
+def tree_7TeV_qcdem3080.root QCD 400 4622103
+#
 ttmup tree_7TeV_eettbarmup.root t#bar{t} 633 225.5
-ttmup tree_7TeV_eettbarviataumup.root t#bar{t}#tau 632 225.2
+ttmup tree_7TeV_eettbarviataumup.root t#bar{t}(#tau) 632 225.2
 ttmdown tree_7TeV_eettbarmdown.root t#bar{t} 633 225.5
-ttmdown tree_7TeV_eettbarviataumdown.root t#bar{t}#tau 632 225.2
+ttmdown tree_7TeV_eettbarviataumdown.root t#bar{t}(#tau) 632 225.2
 #
 Zmup tree_7TeV_dyee60120mup.root Z#rightarrowll 852 3532.8
 Zmdown tree_7TeV_dyee60120mdown.root Z#rightarrowll 852 3532.8

@@ -4,7 +4,7 @@ def tree_7TeV_mumu_runB_19Nov.root data 1 1
 #mc
 #
 def tree_7TeV_mumuttbar.root t#bar{t} 633 165
-def tree_7TeV_mumuttbarviatau.root t#bar{t}#tau 632 165
+def tree_7TeV_mumuttbarviatau.root t#bar{t}(#tau) 632 165
 def tree_7TeV_mumuttbarbg.root t#bar{t}bg 634 165
 def tree_7TeV_tW.root singleTop 616 7.9
 def tree_7TeV_tbarW.root singleTop 616 7.9
@@ -21,11 +21,12 @@ def tree_7TeV_dymumu60120.root Z#rightarrowll 852 3048
 #
 #rest_mc
 #
-#tree_7TeV_qcdmu15.root_QCD_400_134680
+def tree_7TeV_qcdmu15.root QCD 400 134680
+#
 ttmup tree_7TeV_mumuttbarmup.root t#bar{t} 633 225.5
-ttmup tree_7TeV_mumuttbarviataumup.root t#bar{t}#tau 632 225.2
+ttmup tree_7TeV_mumuttbarviataumup.root t#bar{t}(#tau) 632 225.2
 ttmdown tree_7TeV_mumuttbarmdown.root t#bar{t} 633 225.5
-ttmdown tree_7TeV_mumuttbarviataumdown.root t#bar{t}#tau 632 225.2
+ttmdown tree_7TeV_mumuttbarviataumdown.root t#bar{t}(#tau) 632 225.2
 #
 Zmup tree_7TeV_dymumu60120mup.root Z#rightarrowll 852 3532.8
 Zmdown tree_7TeV_dymumu60120mdown.root Z#rightarrowll 852 3532.8

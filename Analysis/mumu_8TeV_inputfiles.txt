@@ -7,7 +7,7 @@ def tree_8TeV_mumu_runC_prompt.root data 1 1
 #mc
 #
 def tree_8TeV_mumuttbar.root t#bar{t} 633 234
-def tree_8TeV_mumuttbarviatau.root t#bar{t}#tau 632 234
+def tree_8TeV_mumuttbarviatau.root t#bar{t}(#tau) 632 234
 def tree_8TeV_mumuttbarbg.root t#bar{t}bg 634 234
 def tree_8TeV_tW.root singleTop 616 11.2
 def tree_8TeV_tbarW.root singleTop 616 11.2
@@ -27,9 +27,9 @@ def tree_8TeV_dymumu60120.root Z#rightarrowll 852 3532.8
 def tree_8TeV_qcdmu15.root QCD 400 134680
 #
 ttmup tree_8TeV_mumuttbarmup.root t#bar{t} 633 234
-ttmup tree_8TeV_mumuttbarviataumup.root t#bar{t}#tau 632 234
+ttmup tree_8TeV_mumuttbarviataumup.root t#bar{t}(#tau) 632 234
 ttmdown tree_8TeV_mumuttbarmdown.root t#bar{t} 633 234
-ttmdown tree_8TeV_mumuttbarviataumdown.root t#bar{t}#tau 632 234
+ttmdown tree_8TeV_mumuttbarviataumdown.root t#bar{t}(#tau) 632 234
 #
 Zmup tree_8TeV_dymumu60120mup.root Z#rightarrowll 852 3532.8
 Zmdown tree_8TeV_dymumu60120mdown.root Z#rightarrowll 852 3532.8
