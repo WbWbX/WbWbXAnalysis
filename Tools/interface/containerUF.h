@@ -23,6 +23,7 @@ namespace top{
 
     container1DUF(){debug_=false;};
     container1DUF(const top::container1DStack &, const top::container1DStack &, TString , double , TString dataname="data");
+    container1DUF(const top::container1DStack &, const top::container1DStack &, std::vector<TString> , double lumi, TString dataname="data");
     container1DUF(const top::container1D &);
     ~container1DUF(){};
 
@@ -31,7 +32,8 @@ namespace top{
 
     void setGenStack(const top::container1DStack &gen){gen_=gen;}
     void setSelectedStack(const top::container1DStack &sel){sel_=sel;}
-    void setSignal(TString signalname){signalname_=signalname;}
+    void setSignal(TString signalname){signalnames_.clear(); signalnames_ << signalname;}
+    void setSignals(std::vector<TString> signalnames){signalnames_ = signalnames;}
     void setDataName(TString name){dataname_=name;}
 
     void simpleUnfold();
@@ -56,7 +58,7 @@ namespace top{
     top::container1DStack sel_;
     double lumi_;
     TString dataname_;
-    TString signalname_;
+    std::vector<TString> signalnames_;
     std::vector<TString> binnames_;
 
 
@@ -69,7 +71,16 @@ namespace top{
     gen_=gen;
     sel_=sel;
     dataname_=dataname;
-    signalname_=signalname;
+    signalnames_ << signalname;
+    lumi_=lumi;
+    simpleUnfold();
+    debug_=false;
+  }
+  container1DUF::container1DUF(const top::container1DStack &gen, const top::container1DStack &sel, std::vector<TString> signalnames, double lumi, TString dataname){
+    gen_=gen;
+    sel_=sel;
+    dataname_=dataname;
+    signalnames_ = signalnames;
     lumi_=lumi;
     simpleUnfold();
     debug_=false;
@@ -118,12 +129,20 @@ namespace top{
     bool listing=top::container1D::c_makelist; //protection agains unwanted listing of intermediate containers
     top::container1D::c_makelist=false;
 
-    top::container1D gencont=gen_.getContribution(signalname_);
-    top::container1D selcont=sel_.getContribution(signalname_);
+    if(signalnames_.size()<1)
+      return;
+
+    top::container1D gencont=gen_.getContribution(signalnames_[0]);
+    top::container1D selcont=sel_.getContribution(signalnames_[0]);
+
+    for(size_t i=1;i<signalnames_.size();i++){
+      gencont = gencont + gen_.getContribution(signalnames_[i]);
+      selcont = selcont + sel_.getContribution(signalnames_[i]);
+    }
    
     // get efficiency and background
     std::vector<TString> excludefrombackground;
-    excludefrombackground << signalname_ << dataname_;
+    excludefrombackground << signalnames_ << dataname_;
 
     // for(unsigned int i=0;i<excludefrombackground.size();i++){
     //   cout << excludefrombackground.at(i) << " " ;
@@ -304,7 +323,7 @@ namespace top{
   TH1D * container1DUF::getTH1D(TString name, bool dividebybinwidth){ 
     TH1D * h = container1D::getTH1D(name, dividebybinwidth);
     if(binnames_.size() >0){
-      for(int i=1; i<binnames_.size()-1;i++){
+      for(int i=1; i<(int)binnames_.size()-1;i++){ // some cast to avoid warnings...
 	int bin=h->FindBin(getBinCenter(i));
 	if(bin!=0)
 	  h->GetXaxis()->SetBinLabel(bin,binnames_.at(i));
