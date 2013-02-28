@@ -492,7 +492,7 @@ notinMCtriggers.push_back("DiCentralPFJet");
 	//	cout << stopMass << endl;
 	//	cout <<chiMass << endl;
 	bool rightmass=false;
-	if(stopMass > 305 && stopMass < 355)// && (stopMass - chiMass) > 195 && (stopMass - chiMass) < 255)
+	if(stopMass > 305 && stopMass < 355 && (stopMass - chiMass) > 195 && (stopMass - chiMass) < 255)
 	    rightmass=true;
 	if(!rightmass)
 	  continue;
