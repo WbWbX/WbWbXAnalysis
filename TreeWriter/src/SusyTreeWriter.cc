@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id: SusyTreeWriter.cc,v 1.11 2013/02/06 12:24:37 jkiesele Exp $
+// $Id: SusyTreeWriter.cc,v 1.12 2013/02/20 13:37:27 jkiesele Exp $
 //
 //
 
@@ -847,7 +847,7 @@ SusyTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        int id = p.pdgId();
        //  int st = p.status();
     
-       if (abs(id) == 1000006) {
+       if (fabs(fabs(id) - 1000006) < 0.1) {
 	 stopMass.push_back(p.mass());
       
 	 size_t ndau = p.numberOfDaughters();
@@ -855,14 +855,14 @@ SusyTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       
 	 for( size_t j = 0; j < ndau; ++ j ) {
 	
-	   if( abs( p.daughter(j)->pdgId() ) == 6 ) { // if the i-th daughter is a top or an anti-top
+	   if( fabs(fabs( p.daughter(j)->pdgId()) -6) < 0.1 ) { // if the i-th daughter is a top or an anti-top
 	     foundTop = true;
 	  
 	     top::LorentzVector LVstop( p.px(), p.py(), p.pz(), p.energy() );
 	     top::LorentzVector LVtop( p.daughter(j)->px(), p.daughter(j)->py(), p.daughter(j)->pz(), p.daughter(j)->energy() );
 	  
 	     chiMass.push_back( (LVstop-LVtop).M() );
-	     //std::cout << "chi0 mass = " << (LVstop-LVtop).M() << endl; 
+	     //  std::cout << "chi0 mass = " << (LVstop-LVtop).M() << std::endl; 
 	     break;
 	   }
 
