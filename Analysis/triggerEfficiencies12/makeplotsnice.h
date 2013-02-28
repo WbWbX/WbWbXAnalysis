@@ -41,6 +41,8 @@ void make2dplots(TString inputfile, TString plot, TString channel){
     h->GetXaxis()->SetTitleSize(0.05);
     h->GetYaxis()->SetLabelSize(0.05);
     h->GetXaxis()->SetLabelSize(0.05);
+    h->SetMarkerSize(2.0);
+
    
     if(((TString)f->GetName()).Contains("mumu")){
       h->GetXaxis()->SetTitle("#eta_{#mu_{1}}");
@@ -83,6 +85,9 @@ void makeplot(TString inputfile, TString plot, TString channel){
     TFile *f = new TFile(inputfile);
 
 
+ std::cout << "searching for plot " << plot << " " << channel << std::endl;
+      
+
     if(f->Get(plot) && ((TString)f->Get(plot)->ClassName()).Contains("TH2D")){
       make2dplots(inputfile, plot, channel);
     }
@@ -93,6 +98,8 @@ void makeplot(TString inputfile, TString plot, TString channel){
       make2dplots(inputfile, plot, channel);
     }
     else{
+      if(!(f->Get(plot+"_eff")) || !(f->Get(plot+"_eff")))
+	 return;
 
       std::cout << "making 1D plot for " << plot << " " << channel << std::endl;
       
@@ -100,9 +107,9 @@ void makeplot(TString inputfile, TString plot, TString channel){
       c->Clear();
       c->cd();
 
-      TH1D *h = (TH1D*)f->Get("axis "+plot);
+      TH1D *h = (TH1D*)f->Get("axis_"+plot);
 
-      TGraphAsymmErrors *sfc=(TGraphAsymmErrors*) f->Get("scalefactor_"+plot+"_incl corrErr");
+      TGraphAsymmErrors *sfc=(TGraphAsymmErrors*) f->Get("scalefactor_"+plot+"_incl_corrErr");
       TGraphAsymmErrors *sf=(TGraphAsymmErrors*) f->Get("scalefactor_"+plot);
       TGraphAsymmErrors *d=(TGraphAsymmErrors*) f->Get(plot+"_eff");
       TGraphAsymmErrors *mc=(TGraphAsymmErrors*) f->Get(plot+"_effMC");
