@@ -7,12 +7,12 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include "Math/GenVector/LorentzVector.h"
+#include "mathdefs.h"
 
 
 
 namespace top{
-  typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > LorentzVector;
+  // typedef ROOT::Math::PolarLorentzVector<ROOT::Math::PxPyPzE4D<double> > PolarLorentzVector;
 
 
   class JECBase{
@@ -29,7 +29,13 @@ namespace top{
 
     std::vector<unsigned int> &  sources(){return sources_;}
 
-    void applyJECUncertainties(top::LorentzVector &);
+    void applyJECUncertainties(top::PolarLorentzVector &);
+    void applyJECUncertainties(top::LorentzVector & v){
+      top::PolarLorentzVector vp;
+      vp=v;
+      applyJECUncertainties(vp);
+      v=vp;
+    }
 
   protected:
 

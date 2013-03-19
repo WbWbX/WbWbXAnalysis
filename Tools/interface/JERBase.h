@@ -1,7 +1,7 @@
 #ifndef JERBASE_H
 #define JERBASE_H
 
-#include "Math/GenVector/LorentzVector.h"
+#include "mathdefs.h"
 #include <vector>
 #include "TtZAnalysis/Tools/interface/miscUtils.h"
 #include <algorithm>
@@ -11,7 +11,7 @@
 
 namespace top{
 
-  typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > LorentzVector;
+  // typedef ROOT::Math::PolarLorentzVector<ROOT::Math::PxPyPzE4D<double> > PolarLorentzVector;
 
   class JERBase{
   public:
@@ -23,7 +23,14 @@ namespace top{
 
     void setSystematics(std::string type);
 
-    void correctP4(top::LorentzVector & ,const top::LorentzVector & );
+    void correctP4(top::PolarLorentzVector & ,const top::PolarLorentzVector & );
+    void correctP4(top::LorentzVector & v,const top::LorentzVector & vv){
+      top::PolarLorentzVector vp,vvp;
+      vp=v;
+      vvp=vv;
+      correctP4(vp,vvp);
+      v=vp;
+    }
 
   protected:
 

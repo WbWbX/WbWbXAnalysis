@@ -10,7 +10,7 @@
 #include <iostream>
 #include <string>
 
-#include "Math/GenVector/LorentzVector.h"
+#include "mathdefs.h"
 
 /*
 workflow:
@@ -29,7 +29,6 @@ ALL VALUES FOR WP=0.244
  */
 namespace top{
 
-  typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > LorentzVector;
   
   class bTagBase {
   public:
@@ -41,10 +40,15 @@ namespace top{
     void setSampleName(const std::string &); //checks if effs should be made, if sample exists,..
 
     void setMakeEff(bool makee){makeeffs_=makee;}
-    void fillEff(const top::LorentzVector & , int, double, double); //p4 and genpartonFlavour, bDiscrValue  and PUweight
+    void fillEff(const top::PolarLorentzVector & , int, double, double);      //p4 and genpartonFlavour, bDiscrValue  and PUweight
+    void fillEff(const top::LorentzVector & v, int i , double d, double dd){
+      top::PolarLorentzVector vp;
+      vp=v;
+      fillEff(vp,i,d,dd);
+    } 
     void makeEffs(); //include check whether stat is too small?
 
-    double getEventWeight(const std::vector< top::LorentzVector > &, std::vector<int>); //jets.p4 & and jets.genpartonFlavour
+    double getEventWeight(const std::vector< top::PolarLorentzVector > &, std::vector<int>); //jets.p4 & and jets.genpartonFlavour
     
     //maybe make another function that utilises the random tool provided by the btv. it might need efficiencies, so the rest can stay the same, just add a swtch
 
@@ -62,7 +66,7 @@ namespace top{
 //    TH2D * getEffHisto(const std::string &, const std::string &); //! returns efficiency histo for samplename, histoname
 //    TH2D * getHisto(const std::string &, const std::string &);    //! returns histo for samplename, histoname
 
-    // protected:
+    // protected: //only commented for testing reasons
 
     std::map<std::string, std::vector<TH2D> > histos_;      //! bjets, btagged, cjets, ctagged, ljets, ltagged
     std::map<std::string, std::vector<TH2D> > effhistos_;   //! beff, ceff, leff
