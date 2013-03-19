@@ -11,6 +11,18 @@
 #include "TH2D.h"
 
 template<class t>
+bool isApprox(t a, t b, double eps=0.01){
+  if(fabs(a-b)<eps)
+    return true;
+  else
+    return false;
+}
+template<class t>
+bool isAbsApprox(t a, t b, double eps=0.01){
+  return (isApprox(a,b,eps) || isApprox(a,-b,eps));
+}
+
+template<class t>
 t square(const t & in){return in*in;}
 
 template<class t>
