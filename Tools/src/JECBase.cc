@@ -130,7 +130,7 @@ namespace top{
   }
 
 
-  void JECBase::applyJECUncertainties(top::LorentzVector & p4In){
+  void JECBase::applyJECUncertainties(top::PolarLorentzVector & p4In){
 
     if(!(totalunc_)) // nothing set. exit?!?
       return;

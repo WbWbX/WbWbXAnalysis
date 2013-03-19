@@ -76,7 +76,7 @@ namespace top{
   }
 
  
-  void bTagBase::fillEff(const top::LorentzVector & p4, int genPartonFlavour, double bDiscrVal, double puweight){
+  void bTagBase::fillEff(const top::PolarLorentzVector & p4, int genPartonFlavour, double bDiscrVal, double puweight){
     if(!makeeffs_)
       return;
     if(!histp_){ //protection
@@ -149,7 +149,7 @@ namespace top{
   }
 
 
-  double bTagBase::getEventWeight(const std::vector<top::LorentzVector > &p4s , std::vector<int> genPartonFlavours){
+  double bTagBase::getEventWeight(const std::vector<top::PolarLorentzVector > &p4s , std::vector<int> genPartonFlavours){
     //skip protection for performance purposes?
     if(makeeffs_) return 1.;
 

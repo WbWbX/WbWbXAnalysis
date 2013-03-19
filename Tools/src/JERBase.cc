@@ -25,7 +25,7 @@ namespace top{
 
   }
 
-  void JERBase::correctP4(top::LorentzVector & toBeCorrectedRecoP4,const  top::LorentzVector & genP4){
+  void JERBase::correctP4(top::PolarLorentzVector & toBeCorrectedRecoP4,const  top::PolarLorentzVector & genP4){
     if(genP4.Pt() < 1)
       return;
     for(unsigned int i=0;i<resranges_.size();i++){
