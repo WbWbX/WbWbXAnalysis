@@ -10,9 +10,9 @@ namespace top{
 
   double elecRhoIsoAdder::getRhoIso(top::NTElectron & elec){
 
-    double chargedH  = elec.iso03().chargedHadronIso();
-    double neutralH  = elec.iso03().neutralHadronIso();
-    double photon    = elec.iso03().photonIso();
+    double chargedH  = elec.iso().chargedHadronIso();
+    double neutralH  = elec.iso().neutralHadronIso();
+    double photon    = elec.iso().photonIso();
 
     double rhoIso=(chargedH + std::max(neutralH+photon - rho_*Aeff(elec.suClu().eta()), 0.0))/elec.pt();
     return rhoIso;
@@ -20,9 +20,9 @@ namespace top{
 
   double elecRhoIsoAdder::getRhoIso(top::NTInflatedElectron & elec){
 
-    double chargedH  = elec.iso03().chargedHadronIso();
-    double neutralH  = elec.iso03().neutralHadronIso();
-    double photon    = elec.iso03().photonIso();
+    double chargedH  = elec.iso().chargedHadronIso();
+    double neutralH  = elec.iso().neutralHadronIso();
+    double photon    = elec.iso().photonIso();
 
     double rhoIso=(chargedH + std::max(neutralH+photon - rho_*Aeff(elec.suClu().eta()), 0.0))/elec.pt();
     return rhoIso;
@@ -32,7 +32,7 @@ namespace top{
   void  elecRhoIsoAdder::addRhoIso(top::NTElectron & elec){
     checkCorrectInput();
     double rhoiso=getRhoIso(elec);
-    elec.setRhoIso03(rhoiso);
+    elec.setRhoIso(rhoiso);
   }
 
   void  elecRhoIsoAdder::addRhoIso(std::vector<top::NTElectron> & electrons){
@@ -45,7 +45,7 @@ namespace top{
   void  elecRhoIsoAdder::addRhoIso(top::NTInflatedElectron & elec){
     checkCorrectInput();
     double rhoiso=getRhoIso(elec);
-    elec.setRhoIso03(rhoiso);
+    elec.setRhoIso(rhoiso);
   }
 
   void  elecRhoIsoAdder::addRhoIso(std::vector<top::NTInflatedElectron> & electrons){

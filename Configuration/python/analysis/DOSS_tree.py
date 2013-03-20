@@ -31,6 +31,8 @@ options.register ('laseroff',False,VarParsing.VarParsing.multiplicity.singleton,
 options.register ('isSignal',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"is SignalMC")
 options.register ('muCone03',True,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"use iso con of 0.3")
 
+options.register ('wantSummary',True,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"prints trigger summary")
+
 import sys
 
 
@@ -58,14 +60,12 @@ laseroff=options.laseroff
 
 isSignal=options.isSignal
 newMuons=options.muCone03
+wantSummary=options.wantSummary
+
 
 if not isMC:
     isSignal=False
 
-crab=True # for GC/Crab
-
-if not crab:
-    print "\n\nDO NOT RUN ON CRAB OR GC WITH THIS SETTING!!!!!!\n\n"
 
 syncfile=options.isSync                  # False
 
@@ -143,7 +143,7 @@ if isMC and is2011:
 #data 2011 is ok
 
 #Options
-process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True))
+process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(wantSummary))
 
 
 #Message Logger Stuff
@@ -157,7 +157,7 @@ process.GlobalTag.globaltag = globalTag + '::All'
 process.out    = cms.OutputModule("PoolOutputModule", outputCommands =  cms.untracked.vstring(), fileName = cms.untracked.string( outputFile + '_PatTuple') )
 
 ################# Input script (some default one for crab
-#if syncfile or crab:
+
 process.source = cms.Source('PoolSource',fileNames=cms.untracked.vstring( '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/A89D210D-1BE2-E111-9EFB-0030487F1797.root' ))
     
 if not inputScript=='':
@@ -193,16 +193,6 @@ process.TFileService = cms.Service("TFileService",
 
 
 #####pre filter sequences#######
-
-
-process.noscraping = cms.EDFilter("FilterOutScraping",
-                                applyfilter = cms.untracked.bool(True),
-                                debugOn = cms.untracked.bool(False),
-                                numtrack = cms.untracked.uint32(10),
-                                thresh = cms.untracked.double(0.25)
-                                )
-process.load('CommonTools/RecoAlgos/HBHENoiseFilter_cfi')
-
 
 #### for MC ##
 
@@ -242,11 +232,18 @@ process.requireRecoLeps =  cms.Sequence(process.pfLeps *
                                         process.allLeps *
                                         process.requireMinLeptons)
 
+process.preFilterSequence = cms.Sequence()
+
 if isMC:
     ##
     if genFilter=='Top':
         process.load('TopAnalysis.TopFilter.filters.GeneratorTopFilter_cfi')
         process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
+
+        #process.load("TopAnalysis.TopUtils.GenLevelBJetProducer_cfi")
+        #process.produceGenLevelBJets.deltaR = 5.0
+        #process.produceGenLevelBJets.noBBbarResonances = True
+
         process.decaySubset.fillMode = "kME" # Status3, use kStable for Status2     
         process.topsequence = cms.Sequence( 
             process.makeGenEvt *
@@ -329,10 +326,9 @@ if isMC:
 else:
     ## add extra filter for ECal laser Calib
 
-    process.preFilterSequence = cms.Sequence(process.HBHENoiseFilter *
-                                             process.noscraping *
-                                             process.preCutPUInfo *
+    process.preFilterSequence = cms.Sequence(process.preCutPUInfo *
                                              process.requireRecoLeps)
+
     if not is2011:
         process.load('RecoMET.METFilters.ecalLaserCorrFilter_cfi')
         getattr(process, 'preFilterSequence').replace(process.preCutPUInfo,
@@ -342,7 +338,80 @@ else:
     
     
 
+#from PhysicsTools.PatAlgos.patTemplate_cfg import *
+
+## The good primary vertex filter ____________________________________________||
+process.primaryVertexFilter = cms.EDFilter(
+    "VertexSelector",
+    src = cms.InputTag("offlinePrimaryVertices"),
+    cut = cms.string("!isFake && ndof > 4 && abs(z) <= 24 && position.Rho <= 2"),
+    filter = cms.bool(True)
+    )
+
+## The beam scraping filter __________________________________________________||
+process.noscraping = cms.EDFilter(
+    "FilterOutScraping",
+    applyfilter = cms.untracked.bool(True),
+    debugOn = cms.untracked.bool(False),
+    numtrack = cms.untracked.uint32(10),
+    thresh = cms.untracked.double(0.25)
+    )
+
+## The iso-based HBHE noise filter ___________________________________________||
+process.load('CommonTools.RecoAlgos.HBHENoiseFilter_cfi')
+
+## The CSC beam halo tight filter ____________________________________________||
+process.load('RecoMET.METAnalyzers.CSCHaloFilter_cfi')
+
+## The HCAL laser filter _____________________________________________________||
+process.load("RecoMET.METFilters.hcalLaserEventFilter_cfi")
+
+## The ECAL dead cell trigger primitive filter _______________________________||
+process.load('RecoMET.METFilters.EcalDeadCellTriggerPrimitiveFilter_cfi')
+process.EcalDeadCellTriggerPrimitiveFilter.tpDigiCollection = cms.InputTag("ecalTPSkimNA")
+
+
+## The EE bad SuperCrystal filter ____________________________________________||
+process.load('RecoMET.METFilters.eeBadScFilter_cfi')
+
+## The ECAL laser correction filter
+###process.load('RecoMET.METFilters.ecalLaserCorrFilter_cfi')
+## already plugged in before
+
+## The Good vertices collection needed by the tracking failure filter ________||
+process.goodVertices = cms.EDFilter(
+  "VertexSelector",
+  filter = cms.bool(False),
+  src = cms.InputTag("offlinePrimaryVertices"),
+  cut = cms.string("!isFake && ndof > 4 && abs(z) <= 24 && position.rho < 2")
+)
+
+## The tracking failure filter _______________________________________________||
+process.load('RecoMET.METFilters.trackingFailureFilter_cfi')
+
+## The tracking POG filters __________________________________________________||
+#process.load('RecoMET.METFilters.trackingPOGFilters_cff')
+
+process.filtersSeq = cms.Sequence(
+   process.primaryVertexFilter *
+   process.noscraping *
+   process.HBHENoiseFilter *
+   process.CSCTightHaloFilter *
+   process.hcalLaserEventFilter *
+   process.EcalDeadCellTriggerPrimitiveFilter *
+   process.goodVertices * process.trackingFailureFilter *
+   process.eeBadScFilter #*
+   #process.ecalLaserCorrFilter * ##is already in prefilterseq... nasty but ok
+   #process.trkPOGFilters
+)
+
+if isMC:
+    process.filtersSeq = cms.Sequence(process.goodVertices 
+                                      )
+
+
 ### if its not signal do some pre filtering:
+
     
 if not isSignal:
     process.preFilterSequence += process.requireRecoLeps
@@ -352,16 +421,15 @@ if not isSignal:
 ##########Do primary vertex filtering###
 
 
-from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
+#from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
 
-process.goodOfflinePrimaryVertices = cms.EDFilter(
-    "PrimaryVertexObjectFilter",
-    filterParams = pvSelector.clone( minNdof = cms.double(4.0), maxZ = cms.double(24.0) ),
-    src=cms.InputTag('offlinePrimaryVertices')
-    )
-
-
-
+process.goodOfflinePrimaryVertices = cms.EDFilter( "PrimaryVertexObjectFilter" , 
+                                                   filterParams = cms.PSet( minNdof = cms.double( 4. ) , 
+                                                                            maxZ = cms.double( 24. ) , 
+                                                                            maxRho = cms.double( 2. ) ) , 
+                                                   filter = cms.bool( True) , 
+                                                   src = cms.InputTag( 'offlinePrimaryVertices' ) )
+#
 
 ###########default pat and pf2pat########
 # pat sequence
@@ -384,7 +452,7 @@ else:
 
 
 from PhysicsTools.PatAlgos.tools.pfTools import *
-usePF2PAT(process, runPF2PAT=True, jetAlgo='AK5', runOnMC=isMC, postfix=pfpostfix, jetCorrections=jetCorr, pvCollection=cms.InputTag('goodOfflinePrimaryVertices'),typeIMetCorrections=True) 
+usePF2PAT(process, runPF2PAT=True, jetAlgo='AK5', runOnMC=isMC, postfix=pfpostfix, jetCorrections=jetCorr, pvCollection=cms.InputTag('goodVertices'),typeIMetCorrections=True) 
 
 
 if not is2011:
@@ -457,13 +525,20 @@ if newMuons:
 ################Jets########## 
 
 ###break top projection and repair taus
-process.pfJetsForTaus = getattr(process,'pfJets'+pfpostfix).clone()
-getattr(process,'patPF2PATSequence'+pfpostfix).replace(getattr(process,'pfJets'+pfpostfix),
-                                                       getattr(process,'pfJets'+pfpostfix) *
-                                                       process.pfJetsForTaus)
 
-getattr(process,'pfJets'+pfpostfix).src='pfNoPileUp'+pfpostfix
-getattr(process,'patJets'+pfpostfix).jetSource = 'pfJets'+pfpostfix
+getattr(process,'pfNoMuon'+pfpostfix).enable = False
+getattr(process,'pfNoElectron'+pfpostfix).enable = False
+getattr(process,'pfNoJet'+pfpostfix).enable = False
+getattr(process,'pfNoTau'+pfpostfix).enable = False
+
+
+#process.pfJetsForTaus = getattr(process,'pfJets'+pfpostfix).clone()
+#getattr(process,'patPF2PATSequence'+pfpostfix).replace(getattr(process,'pfJets'+pfpostfix),
+#                                                       getattr(process,'pfJets'+pfpostfix) *
+#                                                       process.pfJetsForTaus)
+
+#getattr(process,'pfJets'+pfpostfix).src='pfNoPileUp'+pfpostfix
+#getattr(process,'patJets'+pfpostfix).jetSource = 'pfJets'+pfpostfix
 
 #getattr(process,'patPF2PATSequence'+pfpostfix).remove(getattr(process,'pfJets'+pfpostfix))
 #getattr(process,'patPF2PATSequence'+pfpostfix).replace(getattr(process,'pfNoPileUp'+pfpostfix),
@@ -473,10 +548,10 @@ getattr(process,'patJets'+pfpostfix).jetSource = 'pfJets'+pfpostfix
 
 
 ##just for taus
-getattr(process,'pfNoJet'+pfpostfix).bottomCollection = 'pfNoPileUp'+pfpostfix
+#getattr(process,'pfNoJet'+pfpostfix).bottomCollection = 'pfNoPileUp'+pfpostfix
 
-massSearchReplaceAnyInputTag((getattr(process, 'pfTauSequence'+pfpostfix)),cms.InputTag('pfJets'+pfpostfix), cms.InputTag('pfJetsForTaus'),True)
-getattr(process,'pfNoTau'+pfpostfix).bottomCollection = cms.InputTag('pfJetsForTaus')
+#massSearchReplaceAnyInputTag((getattr(process, 'pfTauSequence'+pfpostfix)),cms.InputTag('pfJets'+pfpostfix), cms.InputTag('pfJetsForTaus'),True)
+#getattr(process,'pfNoTau'+pfpostfix).bottomCollection = cms.InputTag('pfJetsForTaus')
 
 
 ###### make isolation cut invalid
@@ -569,7 +644,8 @@ process.superClusters = cms.EDProducer("SuperClusterMerger",
 
 process.treeJets = process.selectedPatJets.clone()
 process.treeJets.src="patJets"+pfpostfix
-process.treeJets.cut = 'pt>8' # unfortunately starting at 10 GeV are needed for MET rescaling
+process.treeJets.cut = 'eta < 5 && pt>5' # unfortunately starting at 10 GeV are needed for MET rescaling 8GeV should be ok as corrected pt
+### cut at uncorrected pt > 10 GeV on tree writer level
 
 process.kinMuons = process.selectedPatMuons.clone()
 process.kinMuons.src = 'patMuons' + pfpostfix
@@ -577,11 +653,11 @@ process.kinMuons.cut = cms.string('pt > 18  && abs(eta) < 2.7')
 
 process.kinElectrons = process.selectedPatElectrons.clone()
 process.kinElectrons.src = 'patElectrons' + pfpostfix
-process.kinElectrons.cut = cms.string( 'pt > 18  && abs(eta) < 2.7')
+process.kinElectrons.cut = cms.string( 'pt > 10  && abs(eta) < 2.7') # because of ECalP4 to be on the safe side
 
 process.kinPFElectrons = process.selectedPatElectrons.clone()
 process.kinPFElectrons.src = 'patPFElectrons' + pfpostfix
-process.kinPFElectrons.cut = cms.string( 'pt > 18  && abs(eta) < 2.7')
+process.kinPFElectrons.cut = cms.string( 'pt > 10  && abs(eta) < 2.7')
 
 
 process.MuonGSFMerge = cms.EDProducer("CandViewMerger",
@@ -613,7 +689,11 @@ if not isSignal:
     getattr(process,'patPF2PATSequence'+pfpostfix).replace(getattr(process,'patMuons'+pfpostfix),
                                                            getattr(process,'patMuons'+pfpostfix) *
                                                            process.kinLeptonFilterSequence)
-else:
+
+    
+
+else: ## is Signal
+
     getattr(process,'patPF2PATSequence'+pfpostfix).replace(getattr(process,'patMuons'+pfpostfix),
                                                            getattr(process,'patMuons'+pfpostfix) *
                                                            process.kinMuons *
@@ -625,6 +705,8 @@ else:
 
 process.load('TtZAnalysis.TreeWriter.treewriter_cff')
 
+
+process.PFTree.vertexSrc         = 'goodVertices'
 process.PFTree.metSrc            = 'patMETs'+pfpostfix
 process.PFTree.includeTrigger    = includetrigger
 process.PFTree.includeReco       = includereco
@@ -655,14 +737,19 @@ process.treeSequence = cms.Sequence(process.triggerMatches *
 
 ###### Path
 
-process.path = cms.Path(process.goodOfflinePrimaryVertices *
-                      #  process.inclusiveVertexing *   ## segfaults?!?! in the newest release or MC
+process.path = cms.Path( process.goodOfflinePrimaryVertices *
+                         process.filtersSeq *
+                        #  process.inclusiveVertexing *   ## segfaults?!?! in the newest release or MC
                         process.preFilterSequence *
                       #  process.btagging *             #not yet implemented fully in pf2pat sequence../ needed for new btagging tag
                         process.patTriggerSequence *
                         getattr(process,'patPF2PATSequence'+pfpostfix) *
-                        process.isoJetSequence *
-                        process.treeSequence)
+                        process.isoJetSequence  *
+                        process.treeSequence
+                         )
+
+#massSearchReplaceAnyInputTag(process.path,cms.InputTag('goodOfflinePrimaryVertices'), cms.InputTag('goodVertices'),True)
+
 
 #### plug in vertex filter and change collections
 

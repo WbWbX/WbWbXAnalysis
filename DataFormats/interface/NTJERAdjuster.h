@@ -18,7 +18,7 @@ namespace top{
       }
     }
     void correctJet(top::NTJet* jet){
-      top::LorentzVector temp=jet->p4();
+      top::PolarLorentzVector temp=jet->p4();
       correctP4(temp, jet->genP4());
       jet->setP4(temp);
     }

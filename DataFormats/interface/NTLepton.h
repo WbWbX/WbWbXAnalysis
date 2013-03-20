@@ -1,11 +1,9 @@
 #ifndef NTLepton_h
 #define NTLepton_h
 
+#include "mathdefs.h"
 
-#include "Math/GenVector/LorentzVector.h"
 namespace top{
-  typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > LorentzVector;
-
 
 
 class NTLepton{
@@ -14,14 +12,18 @@ class NTLepton{
   ~NTLepton(){};
   //sets
   void setP4(LorentzVector p4In){p4_=p4In;}
-  void setGenP4(LorentzVector GenP4In){genP4_=GenP4In;}
+  void setP4(PolarLorentzVector p4In){p4_=p4In;}
   void setQ(int qIn){q_=qIn;}
-  void setVertexZ(double VertexZ){vertexZ_=VertexZ;}
-  void setVertexZErr(double VertexZErr){vertexZErr_=VertexZErr;}
+  void setDz(double DZ){dZ_=DZ;}
+  void setDzErr(double DZErr){dZErr_=DZErr;}
+
+  void setGenMatch(int matchid){genid_=matchid;}
+  void setGenP4(PolarLorentzVector genP4In){genP4_=genP4In;}
+  void setGenP4(LorentzVector genP4In){genP4_=genP4In;}
 
   //gets
-  LorentzVector p4(){return p4_;}
-  LorentzVector genP4(){return genP4_;}
+  const PolarLorentzVector & p4(){return p4_;}
+  const PolarLorentzVector & genP4(){return genP4_;}
   double pt(){return p4_.Pt();}
   double E() {return p4_.E();}
   double e() {return p4_.E();}
@@ -29,15 +31,19 @@ class NTLepton{
   double eta(){return p4_.Eta();}
   double m(){return p4_.M();}
   int q(){ return q_;}
-  double vertexZ(){return vertexZ_;}
-  double vertexZErr(){return vertexZErr_;}
+  double dZ(){return dZ_;}
+  double dZErr(){return dZErr_;}
+
+  int genMatch(){return genid_;}
+
 
  protected:
-  LorentzVector p4_;
-  LorentzVector genP4_;
+  PolarLorentzVector p4_;  
   int q_;
-  double vertexZ_;
-  double vertexZErr_;
+  PolarLorentzVector genP4_;
+  double dZ_;
+  double dZErr_;
+  int genid_;
 
 
 };

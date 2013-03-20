@@ -24,7 +24,7 @@ namespace top{
 
   double NTBTagSF::getNTEventWeight(const std::vector<top::NTJet *> & jets){
     // std::vector<const top::LorentzVector *> p4s;p4s.clear();
-    std::vector< top::LorentzVector> p4sv; p4sv.clear();//!change asap when new dataformats ready 
+    std::vector< top::PolarLorentzVector> p4sv; p4sv.clear();//!change asap when new dataformats ready 
     std::vector<int> genPartonFlavours;
     for(size_t i=0;i<jets.size();i++){
       //  top::LorentzVector * p4= &(jets.at(i)->p4());

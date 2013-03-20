@@ -24,12 +24,14 @@ PFTree   = cms.EDAnalyzer('TreeWriter',
                           
                           PUInfo = cms.InputTag('addPileupInfo'),
                           rhoIso = cms.InputTag("kt6PFJets","rho", "RECO"),
-                          includeRho2011 = cms.bool(False),
+                          includeRho2011 = cms.bool(True),
                           rhoJetsIsoNoPu = cms.InputTag("kt6PFJets"), #
                           rhoJetsIso = cms.InputTag("kt6PFJets"), #
                           
                           includePDFWeights = cms.bool(False),
                           pdfWeights = cms.InputTag(''),
 
-                          includeGen = cms.bool(False)
+                          includeGen = cms.bool(False),
+                          genParticles = cms.InputTag('genParticles'),
+                          genJets = cms.InputTag('ak5GenJets')
                           )

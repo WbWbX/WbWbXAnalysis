@@ -20,7 +20,7 @@ namespace top{
     std::vector<unsigned int> &  sources(){JecBase_.sources().clear(); return JecBase_.sources();}
 
     void applyToJet(top::NTJet * jet ){
-      top::LorentzVector p4in = jet->p4();
+      top::PolarLorentzVector p4in = jet->p4();
       JecBase_.applyJECUncertainties(p4in);
       jet->setP4(p4in);
     }

@@ -27,6 +27,9 @@
   <class name="std::vector<top::NTGenLepton>"/>
   <class name="top::NTGenParticle"/>
   <class name="std::vector<top::NTGenParticle>"/>
+  <class name="std::vector<top::NTGenParticle*>"/>
+  <class name="top::NTGenJet"/>
+  <class name="std::vector<top::NTGenJet>"/>
   <class name="top::NTBTagSF"/>
   <class name="std::vector<top::NTBTagSF>"/>
   <class name="top::NTJECUncertainties"/>

@@ -2,7 +2,7 @@
 #define NTMuon_h
 
 
-#include "Math/GenVector/LorentzVector.h"
+#include "mathdefs.h"
 #include "NTLepton.h"
 #include "NTIsolation.h"
 #include <vector>
@@ -14,58 +14,54 @@ namespace top{
 
 
   class NTMuon : public NTLepton {
- public:
-  explicit NTMuon(){q_=0;};
-  ~NTMuon(){};
-  //sets
-  void setIsGlobal(bool IsGlobal){isGlobal_=IsGlobal;}
-  void setIsTracker(bool IsTracker){isTracker_=IsTracker;}
-  void setNormChi2(double NormChi2){normChi2_=NormChi2;}
-  void setTrkHits(int TrkHits){trkHits_=TrkHits;}
-  void setMuonHits(int MuonHits){muonHits_=MuonHits;}
-  void setDbs(double Dbs){dbs_=Dbs;}
-  void setIso03(top::NTIsolation Iso03){iso03_=Iso03;}
-  void setIso04(top::NTIsolation Iso04){iso04_=Iso04;}
-  void setMatchedTrig(std::vector<std::string> MatchedTrig){matchedTrig_=MatchedTrig;}
+  public:
+    explicit NTMuon(){q_=0;};
+    ~NTMuon(){};
+    //sets
+    void setIsGlobal(bool IsGlobal){isGlobal_=IsGlobal;}
+    void setIsTracker(bool IsTracker){isTracker_=IsTracker;}
+    void setNormChi2(double NormChi2){normChi2_=NormChi2;}
+    void setTrkHits(int TrkHits){trkHits_=TrkHits;}
+    void setMuonHits(int MuonHits){muonHits_=MuonHits;}
+    void setDbs(double Dbs){dbs_=Dbs;}
+    void setIso(top::NTIsolation Iso){iso_=Iso;}
+    void setMatchedTrig(std::vector<std::string> MatchedTrig){matchedTrig_=MatchedTrig;}
     void setTrackP4(top::LorentzVector trkp4in){trkP4_=trkp4in;}
-    void setGenP4(top::LorentzVector GenP4){genP4_=GenP4;}
+    void setIfPf(bool ispf){ispf_=ispf;}
+  
 
-  //gets
+    //gets
 
-  bool isGlobal(){return isGlobal_;}
-  bool isTracker(){return isTracker_;}
-  double normChi2(){return normChi2_;}
-  int trkHits(){return trkHits_;}
-  int muonHits(){return muonHits_;}
-  double dbs(){return dbs_;}
-  top::NTIsolation iso03(){return iso03_;}
-  top::NTIsolation iso04(){return iso04_;}
-  double isoVal03(){
-    return (iso03_.chargedHadronIso() + std::max(0.0,iso03_.neutralHadronIso() + iso03_.photonIso() - 0.5*iso03_.puChargedHadronIso()))/p4_.pt();
-  }
-  double isoVal04(){
-    return (iso04_.chargedHadronIso() + std::max(0.0,iso04_.neutralHadronIso() + iso04_.photonIso() - 0.5*iso04_.puChargedHadronIso()))/p4_.pt();
-  }
+    bool isGlobal(){return isGlobal_;}
+    bool isTracker(){return isTracker_;}
+    double normChi2(){return normChi2_;}
+    int trkHits(){return trkHits_;}
+    int muonHits(){return muonHits_;}
+    double dbs(){return dbs_;}
+    top::NTIsolation iso(){return iso_;}
+    double isoVal(){
+return (iso_.chargedHadronIso() + std::max(0.0,iso_.neutralHadronIso() + iso_.photonIso() - 0.5*iso_.puChargedHadronIso()))/p4_.pt();
+}
+    std::vector<std::string> matchedTrig(){return matchedTrig_;}
+    PolarLorentzVector trackP4(){return trkP4_;}
+    bool isPf(){return ispf_;}
 
-  std::vector<std::string> matchedTrig(){return matchedTrig_;}
-  LorentzVector trackP4(){return trkP4_;}
-    LorentzVector genP4(){return genP4_;}
+  protected:
 
- protected:
-
-  bool isGlobal_;
-  bool isTracker_;
-  double normChi2_;
-  int trkHits_;
-  int muonHits_;
-  double dbs_;
-  top::NTIsolation iso03_;
-  top::NTIsolation iso04_;
+    bool isGlobal_;
+    bool isTracker_;
+    bool ispf_;
+    double normChi2_;
+    int trkHits_;
+  
+    int muonHits_;
+    double dbs_;
+    top::NTIsolation iso_;
     std::vector<std::string> matchedTrig_;
-    LorentzVector trkP4_,genP4_;
+    PolarLorentzVector trkP4_;
 
 
-};
+  };
 
 }
 

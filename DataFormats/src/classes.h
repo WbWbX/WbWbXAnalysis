@@ -18,6 +18,7 @@
 
 #include "../interface/NTGenLepton.h"
 #include "../interface/NTGenParticle.h"
+#include "../interface/NTGenJet.h"
 
 #include "../interface/NTBTagSF.h"
 #include "../interface/NTJECUncertainties.h"
@@ -68,6 +69,10 @@ namespace
 
     top::NTGenParticle ewfik;
     std::vector<top::NTGenParticle> swded;
+    top::NTGenJet ewfffffik;
+    std::vector<top::NTGenJet> swgggfded;
+
+    std::vector< top::NTGenParticle *> jfffd;
     
   };
 }

@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id: TreeWriter.cc,v 1.18 2013/01/31 16:08:48 jkiesele Exp $
+// $Id: TreeWriter.cc,v 1.19 2013/02/22 10:39:16 jkiesele Exp $
 //
 //
 
@@ -43,6 +43,7 @@
 #include "DataFormats/PatCandidates/interface/TriggerObject.h"
 #include "TTree.h"
 #include "TLorentzVector.h"
+#include "DataFormats/JetReco/interface/GenJet.h"
 
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
@@ -56,6 +57,9 @@
 #include "../../DataFormats/interface/elecRhoIsoAdder.h"
 #include "../../DataFormats/interface/NTTrigger.h"
 #include "../../DataFormats/interface/NTGenLepton.h"
+#include "../../DataFormats/interface/NTGenParticle.h"
+#include "../../DataFormats/interface/NTGenJet.h"
+#include "../../DataFormats/interface/mathdefs.h"
 
 
 #include "DataFormats/Candidate/interface/CompositeCandidate.h"
@@ -81,6 +85,7 @@
 
 #include <cstring>
 #include "../interface/genTools.h"
+#include "TtZAnalysis/Tools/interface/miscUtils.h"
 
 //
 // class declaration
@@ -113,13 +118,20 @@ class TreeWriter : public edm::EDAnalyzer {
   std::vector<std::string> triggers_;
   std::vector<bool> triggerBools_;
   void setTriggers();
+  top::NTGenParticle makeNTGen(const reco::GenParticle *, const std::map<const reco::GenParticle*, int>&);
+  bool isInGenCollection(const reco::GenParticle * , const std::vector<const reco::GenParticle * > &);
+  bool isInGenCollection(const reco::GenJet * , const std::vector<const reco::GenJet * > &);
+  template<typename t,typename u>
+  int findGenMatchIdx(t * , std::vector<u> & , double dR=0.4);
+ 
+  
 
   bool pfElecCands_;
   bool pfMuonCands_;
   bool rho2011_;
   bool usegsf_;
 
-  edm::InputTag muons_, recomuons_, pfelecs_, gsfelecs_,recoelecs_, jets_, met_, vertices_, trigresults_, puinfo_, recotracks_, recosuclus_,rhojetsiso_,rhojetsisonopu_,rhoiso_,pdfweights_;
+  edm::InputTag muons_, recomuons_, pfelecs_, gsfelecs_,recoelecs_, jets_, met_, vertices_, trigresults_, puinfo_, recotracks_, recosuclus_,rhojetsiso_,rhojetsisonopu_,rhoiso_,pdfweights_, genparticles_, genjets_;
   //rhojets_,rhojetsiso_,rhojetsnopu_,rhojetsisonopu_,rhoiso_;
 
   bool includereco_, includetrigger_, pfinput_,includepdfweights_,includegen_;
@@ -135,7 +147,10 @@ class TreeWriter : public edm::EDAnalyzer {
   top::NTEvent ntevent;
   top::NTTrigger nttrigger;
 
-  std::vector<top::NTGenLepton> ntgenmuons, ntgenelecs;
+  std::vector<top::NTGenParticle> ntgenmuons3, ntgenelecs3,ntgentaus3,ntgenmuons1, ntgenelecs1,ntgentaus1, allntgen;
+  std::vector<top::NTGenJet> ntgenjets;
+  int channel_; // 11 for ee 13 for mumu 1113 for emu 151113 etc for via tau
+
   bool viaTau_;
 
   std::string treename_, btagalgo_;
@@ -196,6 +211,8 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
 
 
   includegen_ = iConfig.getParameter<bool>             ( "includeGen" );
+  genparticles_ = iConfig.getParameter<edm::InputTag>             ( "genParticles" );
+  genjets_ = iConfig.getParameter<edm::InputTag>             ( "genJets" );
 
    std::cout << "n\n################## Tree writer ########################" 
              <<  "\n#" << treename_
@@ -207,6 +224,8 @@ TreeWriter::TreeWriter(const edm::ParameterSet& iConfig)
              <<  "\n#                                                     #"
              <<  "\n#######################################################" << std::endl;
 
+
+   std::cout << "\n\n JETS ARE REQUIRED TO HAVE AT LEAST 10GeV UNCORR PT\n\n" << std::endl;
 
    setTriggers();
 
@@ -231,9 +250,12 @@ void
 TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
    using namespace edm;
+   using namespace top;
 
    std::string addForPF;
    if(pfinput_) addForPF="bla";
+
+   LorentzVector p4zero(0,0,0,0);
    
    ntmuons.clear();
    ntleptons.clear();
@@ -242,8 +264,15 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    ntjets.clear();
    nttracks.clear();
    ntsuclus.clear();
-   ntgenmuons.clear();
-   ntgenelecs.clear();
+   ntgenmuons3.clear();
+   ntgenelecs1.clear();
+   ntgenelecs3.clear();
+   ntgenmuons1.clear();
+   ntgentaus3.clear();
+   ntgentaus1.clear();
+
+   allntgen.clear();
+   ntgenjets.clear();
 
    triggerBools_.clear();
 
@@ -254,11 +283,281 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   bool IsRealData = false;
   edm::Handle <reco::GenParticleCollection> genParticles;
   try {
-    iEvent.getByLabel("genParticles", genParticles);
-    int aux = genParticles->size();
-    aux = 0+aux;
+    iEvent.getByLabel(genparticles_, genParticles);
+    IsRealData = false;
   }
-  catch(...) {IsRealData = true;} 
+  catch(...) {
+    IsRealData = true;
+  } 
+
+  //////////////generator stuff/////////////////
+
+  std::map<const reco::GenParticle *, int> genidmap,smallIdMap;
+  std::map<const reco::GenJet *, int> jetidmap;
+
+
+  std::vector<const reco::GenParticle *> allgen, tops, Zs, Ws, bs, leps3,leps1,nus;
+
+  std::vector<const reco::GenParticle*>  mergedgen;
+  std::vector<const reco::GenJet *> allgenjets;
+
+   if(!IsRealData && includegen_){
+
+
+
+     std::vector<const reco::GenParticle*> temp;
+
+     const reco::GenParticle * daughter; 
+     const reco::GenParticle * mother;
+     //make allgen vector and fill id map
+
+     //   std::cout << "bla" << std::endl;
+
+     for (size_t i = 0; i < genParticles->size(); ++i){
+       allgen.push_back(&(genParticles->at(i)));
+       genidmap[&(genParticles->at(i))] = i;
+     }
+     
+
+     // access genidmap.at(genparticlepointer) to get (int) id
+
+     //now create mother/daughter links, getdecaychain etc
+
+     //fill initial particles
+
+     for(size_t i=0;i<allgen.size();i++){
+       if(isAbsApprox(allgen.at(i)->pdgId(), 6)){ //(anti)top quark
+	 tops << allgen.at(i);
+       }
+
+       if(isAbsApprox(allgen.at(i)->pdgId(), 23)){ //Z boson
+	 Zs <<  allgen.at(i);
+       }
+     }
+
+
+     std::map<const reco::GenParticle*, const reco::GenParticle*> mothdaugh; //mother daughter for leps3 leps1
+     std::map<const reco::GenParticle*, const reco::GenParticle*> daughmoth; //mother daughter for leps3 leps1
+
+     //get Z decay leptons stat 3
+     for(size_t i=0;i<Zs.size();i++){
+       //get leptonic decay chain of Z
+       mother=Zs[i];
+       leps3 << getGenFromMother(mother,11);
+       leps3 << getGenFromMother(mother,-11);
+       leps3 << getGenFromMother(mother,13);
+       leps3 << getGenFromMother(mother,-13);
+       leps3 << getGenFromMother(mother,15);
+       leps3 << getGenFromMother(mother,-15);
+     }
+     //get top decay Ws
+     for(size_t i=0;i<tops.size();i++){
+       mother=tops[i];
+       Ws << getGenFromMother(mother, 24);
+       Ws << getGenFromMother(mother, -24);
+       bs << getGenFromMother(mother, 5);
+       bs << getGenFromMother(mother, -5);
+     }
+
+
+     //get leps3 from W decay
+     for(size_t i=0;i<Ws.size();i++){
+       mother=Ws[i];
+       leps3 << getGenFromMother(mother,11);
+       leps3 << getGenFromMother(mother,-11);
+       leps3 << getGenFromMother(mother,13);
+       leps3 << getGenFromMother(mother,-13);
+       leps3 << getGenFromMother(mother,15);
+       leps3 << getGenFromMother(mother,-15);
+     }
+
+     //status 1 particles 
+
+
+
+     for(size_t j=0;j<leps3.size();j++){ 
+       mother=leps3[j];
+       
+       size_t i=0;
+       size_t ndaugh=mother->numberOfDaughters();
+
+
+       //  std::cout << "\nchecking daughters of leps3" << std::endl;
+       while(i<ndaugh){
+	 
+	 daughter = dynamic_cast<const reco::GenParticle*>(mother->daughter(i));
+
+	 i++;
+
+	 if(isAbsApprox(daughter->pdgId(),11) || isAbsApprox(daughter->pdgId(),13) || isAbsApprox(daughter->pdgId(),15)){
+	   if(isAbsApprox(daughter->status(),1)){
+	     leps1 << daughter;
+	     mothdaugh[leps3[j]] = daughter;
+	     daughmoth[daughter]=leps3[j];
+	     break;
+	   }
+	   else{
+	     mother=daughter;
+	     //   std::cout << "switched mother "<< std::endl;
+	     i=0;
+	     ndaugh=mother->numberOfDaughters();
+	   }
+	 }
+
+	
+       }
+     }
+   
+
+     /* 
+	bs might change again etc...
+	asso to b-hadrons, bjets etc will change, stop impl here until solved
+
+
+     */
+
+      mergedgen << tops << Zs << bs << Ws << leps3 << leps1;
+
+      NTGenParticle tempntgen;
+      //smallIdMap
+
+      //make new id map for ordering
+      //  std::cout << std::endl;
+      for(size_t j=0;j<mergedgen.size();j++){
+	//	std::cout << mergedgen.at(j)->pdgId() << "    " << mergedgen.at(j)->status() << std::endl;
+	smallIdMap[mergedgen.at(j)]=j;
+      }
+
+      for(size_t j=0;j<mergedgen.size();j++){
+	mother=mergedgen.at(j);
+	tempntgen=makeNTGen(mother,smallIdMap);
+
+
+	//put small function to get mothers until one of the particles in mergedgen is reached, same for daughters
+	bool gotmoth=false;
+	bool gotdaugh=false;
+
+	for(size_t  i=0;i<mother->numberOfDaughters();i++){
+	  daughter = dynamic_cast<const reco::GenParticle*>(mother->daughter(i));
+	  if(isInGenCollection(daughter, mergedgen)){
+	    tempntgen.setDaughter(smallIdMap.at(daughter));
+	    gotdaugh=true;
+	  }
+	}
+	if(!gotdaugh && mothdaugh.find(mother) != mothdaugh.end()){
+	  tempntgen.setDaughter(smallIdMap.at(mothdaugh.at(mother)));
+	}
+	for(size_t  i=0;i<mother->numberOfMothers();i++){
+	  const reco::GenParticle* mothmoth = dynamic_cast<const reco::GenParticle*>(mother->mother(i));
+	  if(isInGenCollection(mothmoth, mergedgen)){
+	    tempntgen.setMother(smallIdMap.at(mothmoth));
+	    gotmoth=true;
+	  }
+	}
+	if(!gotmoth && daughmoth.find(mother) != daughmoth.end()){
+	  tempntgen.setMother(smallIdMap.at(daughmoth.at(mother)));
+	}
+	
+
+	allntgen << tempntgen;
+      }
+
+
+
+      // would be some merging of bs etc... see nazars stuff
+
+      // fill genJets
+
+
+     edm::Handle<reco::GenJetCollection> genJets;
+     iEvent.getByLabel(genjets_, genJets);
+
+
+     NTGenJet tempgenjet;
+
+
+// jetidmap
+
+
+     for(size_t i=0;i<genJets->size();i++){
+       allgenjets << & genJets->at(i);
+       jetidmap[allgenjets[i]]=i;
+       //fill map and pointer vector
+     }
+
+     for(size_t i=0;i<allgenjets.size();i++){
+       //some requirement for jets
+
+       tempgenjet.setP4(allgenjets.at(i)->p4());
+       tempgenjet.setGenId(jetidmap.at(allgenjets[i])); //use a map here
+       //  tempgenjet.setMother(int)
+       ntgenjets << tempgenjet;
+     }
+
+
+
+
+   }//isMC and includegen end
+
+
+
+ // a lot has to be done here!!!
+	 // genJet b matching (get best! dr match cone 0.5
+	 // associate b as mother of jet
+	 // association via id int. e.g. e.g. some class variable that just counts futher in each fill
+	 // first fill all the parton stuff, then the matched jets. 
+	 // direct asso done on analysis level by checking. If has to be checked several times, make temp asso map
+	 // also store neutrinos. just for fun. 12 14 16
+	 // ids...: 
+	 /*
+	   one vector soulution: once filled properly, easy asso, fast, additional analysis level tools to get collections.. 
+	   seperate vectors: complicated or lot of hardcoded asso, easy to handle on analysis level, but slower
+
+	   how to make a nice asso? static member asso map?
+
+	   first give "random" ids. at end of each event loop, make asso via vector links and fill one vector..
+	   remaining prob: jet-b asso. reco-gen asso.. ok .. just associate in a "hard" way: 
+	   b->always jet, genlep->stat3->recolep
+	   genneutr->nothing
+
+	   do selection as you like. step by step or in an enormous entangled loop
+
+	   protoype loop:
+	   int id
+	   for each gen(i) in recogenpart:
+	   do some selection
+	   ntgen <- gen(i)
+	   ntgen.setGenId(id)
+	   id++ (at each filling step, also for daughters) !!! the important part.
+
+
+	   at the end:
+	   vector<ntgen> new=ntgenvec
+	   for each ntgen(i) in ntgenvec
+	   for each j in ntgenvec
+	   moth=ntgenvec(i).mother
+	   daught=ntgenvec.daught
+	   search for corresponding entries j in ntgenvec
+	   new.setMother/Duaghter(j)
+
+	   use new 
+	   do the same for ntgenjets<-recojets
+	   do the same for genleptsstat3<-recoleps
+
+	   the genStuff has to be filled BEFORE the reco stuff is done. To be able to do the asso (ids already created)
+	   create temp map in tree writer of map<int id, reco:genParticle * asso genpart> for all gen<->reco asso
+
+
+	   functions: reco: 
+	   get:	   genMatch
+	   set:    setGenMatch
+
+	   gen:
+	   get:    genId
+	   set:    setGenId
+
+	  */
+
 
 
    Handle<std::vector<pat::Electron > > pfelecs;
@@ -325,6 +624,16 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
        top::NTElectron tempelec;
        //if(electron->ecalDrivenMomentum())
+       int genidx=findGenMatchIdx(&*electron,allntgen,0.4);
+       //do gen asso
+       if(genidx>=0){
+	 tempelec.setGenMatch(genidx);
+	 tempelec.setGenP4(allntgen.at(genidx).p4());
+       }
+       else{
+	 tempelec.setGenP4(p4zero);
+	 tempelec.setGenMatch(-1);
+       }
        tempelec.setECalP4(electron->ecalDrivenMomentum());
        
        tempelec.setP4(electron->p4());
@@ -345,13 +654,13 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	 vzerr=electron->closestCtfTrackRef()->dzError();  
 	 dbs=fabs(electron->closestCtfTrackRef()->dxy(vtxs[0].position()));
        }
-       tempelec.setVertexZ(vz);                   //
-       tempelec.setVertexZErr(vzerr);  
+       tempelec.setDz(vz);                   //
+       tempelec.setDzErr(vzerr);  
 
        tempelec.setDbs(dbs);                  //
        tempelec.setNotConv(electron->passConversionVeto());    
        tempelec.setId(electron->electronIDs());
-       tempelec.setIso03(Iso);                   //
+       tempelec.setIso(Iso);                   //
        //tempelec.setIso04(iso04);                   //
        tempelec.setMHits(mhits);
 		       
@@ -377,7 +686,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        }
        // otherwise (0,0,0,0) taken  care of by NTElectron Constructor
 
-       if(electron->genParticleRef().isNonnull()) tempelec.setGenP4(electron->genParticleRef()->p4());
+       //  if(electron->genParticleRef().isNonnull()) tempelec.setGenP4(electron->genParticleRef()->p4());
      
        ntpfelectrons.push_back(tempelec);
 
@@ -398,8 +707,21 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
        top::NTElectron tempelec;
        //  if(electron->ecalDrivenMomentum())
+
+       //do gen asso
+       int genidx=findGenMatchIdx(&*electron,allntgen,0.4);
+       //do gen asso
+       if(genidx>=0){
+	 tempelec.setGenMatch(genidx);
+	 tempelec.setGenP4(allntgen.at(genidx).p4());
+       }
+       else{
+	 tempelec.setGenP4(p4zero);
+	 tempelec.setGenMatch(-1);
+       }
+
        tempelec.setECalP4(electron->ecalDrivenMomentum());
-       
+       tempelec.setIsPf(electron->isPF());
        tempelec.setP4(electron->p4());
        tempelec.setQ(electron->charge());
        double vz=-9999;
@@ -420,13 +742,13 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	 vzerr=electron->closestCtfTrackRef()->dzError();  
 	 dbs=fabs(electron->closestCtfTrackRef()->dxy(vtxs[0].position()));
        }
-       tempelec.setVertexZ(vz);                   //
-       tempelec.setVertexZErr(vzerr);  
+       tempelec.setDz(vz);                   //
+       tempelec.setDzErr(vzerr);  
 
        tempelec.setDbs(dbs);                  //
        tempelec.setNotConv(electron->passConversionVeto());    
        tempelec.setId(electron->electronIDs());
-       tempelec.setIso03(Iso);                   //
+       tempelec.setIso(Iso);                   //
        //tempelec.setIso04(iso04);                   //
        tempelec.setMHits(mhits);
 
@@ -454,7 +776,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        }
        // otherwise (0,0,0,0) taken  care of by NTElectron Constructor
 
-       if(electron->genParticleRef().isNonnull()) tempelec.setGenP4(electron->genParticleRef()->p4());
+       //   if(electron->genParticleRef().isNonnull()) tempelec.setGenP4(electron->genParticleRef()->p4());
      
        ntgsfelectrons.push_back(tempelec);
 
@@ -468,30 +790,27 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        
 //        
 
-       top::NTIsolation Iso03;
-       // Iso03.setChargedHadronIso(muon->pfIsolationR03().sumChargedHadronPt);
-       // Iso03.setNeutralHadronIso(muon->pfIsolationR03().sumNeutralHadronEt); ///
-       // Iso03.setPhotonIso(muon->pfIsolationR03().sumPhotonEt);
-       // Iso03.setPuChargedHadronIso(muon->pfIsolationR03().sumPUPt);
-       Iso03.setChargedHadronIso(muon->chargedHadronIso());
-       Iso03.setNeutralHadronIso(muon->neutralHadronIso());
-       Iso03.setPhotonIso(muon->photonIso());
-       Iso03.setPuChargedHadronIso(muon->puChargedHadronIso());
+       top::NTIsolation Iso;
+       Iso.setChargedHadronIso(muon->chargedHadronIso());
+       Iso.setNeutralHadronIso(muon->neutralHadronIso());
+       Iso.setPhotonIso(muon->photonIso());
+       Iso.setPuChargedHadronIso(muon->puChargedHadronIso());
 
-       top::NTIsolation Iso04;
-       Iso04.setChargedHadronIso(muon->chargedHadronIso());
-       Iso04.setNeutralHadronIso(muon->neutralHadronIso());
-       Iso04.setPhotonIso(muon->photonIso());
-       Iso04.setPuChargedHadronIso(muon->puChargedHadronIso());
-       // Iso04.setChargedHadronIso(muon->pfIsolationR04().sumChargedHadronPt);
-       // Iso04.setNeutralHadronIso(muon->pfIsolationR04().sumNeutralHadronEt); ///
-       // Iso04.setPhotonIso(muon->pfIsolationR04().sumPhotonEt);
-       // Iso04.setPuChargedHadronIso(muon->pfIsolationR04().sumPUPt);
 
        top::NTMuon tempmuon;
 
-       //double iso03=0;
-       //double iso04=0;
+ //do gen asso
+      int genidx=findGenMatchIdx(&*muon,allntgen,0.4);
+       //do gen asso
+       if(genidx>=0){
+	 tempmuon.setGenMatch(genidx);
+	 tempmuon.setGenP4(allntgen.at(genidx).p4());
+       }
+       else{
+	 tempmuon.setGenP4(p4zero);
+	 tempmuon.setGenMatch(-1);
+       }
+
 
        tempmuon.setP4   (muon->p4());
        tempmuon.setQ   (muon->charge());
@@ -519,8 +838,8 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	 vz=muon->outerTrack()->dz(vtxs[0].position());
 	 vzerr=muon->outerTrack()->dzError();
        }
-       tempmuon.setVertexZ   (vz);
-       tempmuon.setVertexZErr   (vzerr);
+       tempmuon.setDz   (vz);
+       tempmuon.setDzErr   (vzerr);
 
        tempmuon.setIsGlobal   (muon->isGlobalMuon());
        tempmuon.setIsTracker (muon->isTrackerMuon());
@@ -533,16 +852,14 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	   tempmuon.setTrkHits (0);
 	 tempmuon.setMuonHits   (muon->globalTrack()->hitPattern().numberOfValidMuonHits());
 	 tempmuon.setDbs   (fabs(muon->globalTrack()->dxy(vtxs[0].position())));
-	 tempmuon.setIso03   (Iso03);
-	 tempmuon.setIso04   (Iso04);
+	 tempmuon.setIso   (Iso);
        }
        else{
 	 tempmuon.setNormChi2   (100);
 	 tempmuon.setTrkHits    (0);
 	 tempmuon.setMuonHits    (0);
 	 tempmuon.setDbs  (100);
-	 tempmuon.setIso03    (Iso03);
-	 tempmuon.setIso04    (Iso04);
+	 tempmuon.setIso    (Iso);
        }
        if(includereco_){
 	 if(muon->triggerObjectMatches().size() ==1){ // no ambiguities
@@ -554,7 +871,7 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	 tempmuon.setMatchedTrig(def);
 	 }
        }
-       if(muon->genParticleRef().isNonnull()) tempmuon.setGenP4(muon->genParticleRef()->p4());
+       //   if(muon->genParticleRef().isNonnull()) tempmuon.setGenP4(muon->genParticleRef()->p4());
 
        ntmuons.push_back(tempmuon);
      }
@@ -579,8 +896,8 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	     vz=recomuon->outerTrack()->dz(vtxs[0].position());
 	     vzerr=recomuon->outerTrack()->dzError();
 	   }
-	   templep.setVertexZ(vz);
-	   templep.setVertexZErr(vzerr);
+	   templep.setDz(vz);
+	   templep.setDzErr(vzerr);
 
 	   ntleptons.push_back(templep);
 	 }
@@ -596,8 +913,8 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	     vz=recomuon->trackRef()->dz(vtxs[0].position());
 	     vzerr=recomuon->trackRef()->dzError();
 	   }
-	   templep.setVertexZ(vz);
-	   templep.setVertexZErr(vzerr);
+	   templep.setDz(vz);
+	   templep.setDzErr(vzerr);
 
 	   ntleptons.push_back(templep);
 
@@ -619,8 +936,8 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	     vz=recoelectron->closestCtfTrackRef()->dz(vtxs[0].position());
 	     vzerr=recoelectron->closestCtfTrackRef()->dzError();
 	   }
-	   templep.setVertexZ(vz);
-	   templep.setVertexZErr(vzerr);
+	   templep.setDz(vz);
+	   templep.setDzErr(vzerr);
 	   ntleptons.push_back(templep);
 	 }
        }
@@ -635,8 +952,8 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	     vz=recoelec->trackRef()->dz(vtxs[0].position());
 	     vzerr=recoelec->trackRef()->dzError();
 	   }
-	   templep.setVertexZ(vz);
-	   templep.setVertexZErr(vzerr);
+	   templep.setDz(vz);
+	   templep.setDzErr(vzerr);
 
 	   ntleptons.push_back(templep);
        }
@@ -645,22 +962,37 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      }
      for(std::vector<pat::Jet>::const_iterator jet=jets->begin(); jet<jets->end() ; jet++){
 
+
        top::NTJet tempjet;
+
+       pat::Jet uncJet=jet->correctedJet("Uncorrected");
+       if(uncJet.pt() < 10) continue;
+       double corr_factor=jet->pt() / uncJet.pt();
+       tempjet.setCorrFactor(corr_factor);
+
        tempjet.setId(checkJetID(jet));
        tempjet.setP4(jet->p4());
        if(jet->genJet()){
 	 tempjet.setGenP4(jet->genJet()->p4());
 	 tempjet.setGenPartonFlavour(jet->partonFlavour());
+	 int genidx=findGenMatchIdx((jet->genJet()),ntgenjets,0.1);
+	 tempjet.setGenMatch(genidx);
+	 
        }
        else{
-	 tempjet.setGenP4(jet->p4());
+	 tempjet.setGenP4(p4zero);
 	 tempjet.setGenPartonFlavour(0);
+	 tempjet.setGenMatch(-1);
        }
        tempjet.setBtag(jet->bDiscriminator(btagalgo_));    //
        double emEnergyfraction=0;
        if(jet->isPFJet()) emEnergyfraction=jet->chargedEmEnergyFraction()+jet->neutralEmEnergyFraction();
        else emEnergyfraction=jet->emEnergyFraction();
        tempjet.setEmEnergyFraction(emEnergyfraction);
+
+     
+      
+
        ntjets.push_back(tempjet);
      }
 
@@ -684,8 +1016,8 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	   if((p1+p2).M() > 55 && (p1+p2).M() < 125){
 	     nttrack.setP4(p1);
 	     nttrack.setQ(track->charge());
-	     nttrack.setVertexZ(track->dz(vtxs[0].position()));
-	     nttrack.setVertexZErr(track->dzError());
+	     nttrack.setDz(track->dz(vtxs[0].position()));
+	     nttrack.setDzErr(track->dzError());
 
 	     nttracks.push_back(nttrack);
 	     break;
@@ -811,70 +1143,10 @@ TreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    /////// Fill generator info
 
-   if(!IsRealData && includegen_){
-     std::vector<const reco::GenParticle *> allgen;
-  
-     for (size_t i = 0; i < genParticles->size(); ++i)
-       allgen.push_back(&(genParticles->at(i)));
-
-     // std::vector<const reco::GenParticle *> test;
-     // for(size_t i=0;i<allgen.size();i++){
-     //   if(allgen.at(i)->status()==1){
-     // 	 test=top::getFullDecayChainRecursive(allgen.at(i));
-     // 	 for(size_t i=0;i<test.size()-1;i++){
-     // 	   if(!(test.at(i)->mother(0))) continue;
-     // 	   std::cout << test.at(i)->mother(0)->pdgId() << "  "<< test.at(i)->pdgId() << std::endl;
-     // 	 }
-     //   }
-     //   // std::cout << "\n" << std::endl;
-     // }
-
-     
-    
-
-std::vector<int> elecpdg; elecpdg.push_back(11);elecpdg.push_back(-11);
-     std::vector<int> muonpdg; muonpdg.push_back(13);muonpdg.push_back(-13);
-
-     std::vector<const reco::GenParticle *> genElecsZ = top::getGenLepsFromZ(allgen, elecpdg, viaTau_);
-     std::vector<const reco::GenParticle *> genMuonsZ = top::getGenLepsFromZ(allgen, muonpdg, viaTau_);
-
-     //both empty for top
-
-     std::vector<const reco::GenParticle *> genElecsTop = top::getGenLepsFromTop(allgen, elecpdg, viaTau_);
-     std::vector<const reco::GenParticle *> genMuonsTop = top::getGenLepsFromTop(allgen, muonpdg, viaTau_);
-
-     std::vector<const reco::GenParticle *> genElecs=genElecsTop;
-     std::vector<const reco::GenParticle *> genMuons=genMuonsTop;
-
-     genElecs.insert(genElecs.end(),genElecsZ.begin(),genElecsZ.end());
-     genMuons.insert(genMuons.end(),genMuonsZ.begin(),genMuonsZ.end());
-
-
-     top::NTGenLepton tempgenlep;
-     const reco::GenParticle * genP;
-     for(unsigned int i=0;i<genElecs.size();i++){
-       genP=genElecs.at(i);
-       tempgenlep.setP4(genP->p4());
-       tempgenlep.setStatus(genP->status());
-       tempgenlep.setPdgId(genP->pdgId());
-       ntgenelecs.push_back(tempgenlep);
-     } 
-     for(unsigned int i=0;i<genMuons.size();i++){
-       genP=genMuons.at(i);
-       tempgenlep.setStatus(genP->status());
-       tempgenlep.setP4(genP->p4());
-       tempgenlep.setPdgId(genP->pdgId());
-       ntgenmuons.push_back(tempgenlep);
-     }
-
-
-
-   } // isMc end
-
 
    Ntuple ->Fill();
 
-   }
+}
 
 
 // ------------ method called once each job just before starting event loop  ------------
@@ -908,8 +1180,12 @@ TreeWriter::beginJob()
 
   //  Ntuple->Branch("NTTrigger", "top::NTTrigger", &nttrigger);
 
-  Ntuple->Branch("NTGenElectrons", "std::vector<top::NTGenLepton>", &ntgenelecs);
-  Ntuple->Branch("NTGenMuons",     "std::vector<top::NTGenLepton>", &ntgenmuons);
+  Ntuple->Branch("NTGenParticles", "std::vector<top::NTGenParticle>", &allntgen);
+  Ntuple->Branch("NTGenJets", "std::vector<top::NTGenJet>", &ntgenjets);
+  // Ntuple->Branch("NTGenMEMuons",     "std::vector<top::NTGenParticle>", &ntgenmuons3);
+  // Ntuple->Branch("NTGenElectrons", "std::vector<top::NTGenParticle>", &ntgenelecs1);
+  // Ntuple->Branch("NTGenMuons",     "std::vector<top::NTGenParticle>", &ntgenmuons1);
+  Ntuple->Branch("Channel",channel_);
 
 }
 
@@ -1029,6 +1305,102 @@ void TreeWriter::setTriggers(){
   triggers_.push_back();
 */
 
+}
+
+
+top::NTGenParticle TreeWriter::makeNTGen(const reco::GenParticle * p, const std::map<const reco::GenParticle * , int> & idmap){
+  top::NTGenParticle out;
+  out.setP4(p->p4());
+  out.setPdgId(p->pdgId());
+  out.setStatus(p->status());
+  out.setGenId(idmap.at(p));
+  return out;
+}
+// searchdaughter(particle *, vectorparticle * daughters)
+// searchmother(particle * , vector * possiblemothers)
+ 
+bool  TreeWriter::isInGenCollection(const reco::GenParticle * p, const std::vector<const reco::GenParticle * > & coll){
+  for(size_t i=0;i<coll.size();i++){
+    if(coll.at(i) == p)
+      return true;
+  }
+  return false;
+}
+bool  TreeWriter::isInGenCollection(const reco::GenJet * p, const std::vector<const reco::GenJet * > & coll){
+  for(size_t i=0;i<coll.size();i++){
+    if(coll.at(i) == p)
+      return true;
+  }
+  return false;
+}
+
+
+template<class t, class u>
+int TreeWriter::findGenMatchIdx(t * patinput , std::vector<u> & gen, double dR){
+  double drmin2=100;
+  int idx=-1;
+  for(size_t i=0;i<gen.size();i++){
+    double DRs=(patinput->eta() - gen.at(i).eta())*(patinput->eta() - gen.at(i).eta()) + (patinput->phi() - gen.at(i).phi())*(patinput->phi() - gen.at(i).phi());
+    if(drmin2 > DRs){
+      drmin2 = DRs;
+      idx=i;
+    }
+  }
+  if(drmin2 < dR*dR)
+    return idx;
+  else
+    return -1;
+}
+
+std::vector<top::NTGenParticle> getFullDecayChainTop(const reco::GenParticle * p){
+
+  std::vector<top::NTGenParticle>  out;
+  /*
+  const reco::GenParticle * mother,daughter;
+  mother=p;
+  size_t ndaug=mother->numberOfDaughters();
+  bool gotStatus3=false;
+  bool gotB=false;
+
+ for(size_t i;i<ndaug;i++){
+    daughter=dynamic_cast<const reco::GenParticle*>(mother->daughter(i));
+    //first check for bs
+    if(!isAbsApprox(daughter->pdgId(),5)) 
+      continue;
+    if(gotStatus3 && !isAbsApprox(daughter->status(),1))
+      continue;
+
+    gotB=true;
+    out << daughter;
+    mother=daughter;
+    ndaug=mother->numberOfDaughters();
+    i=0;
+    gotStatus3=true;
+ }
+
+ gotStatus3=false;
+ mother=p;
+ size_t ndaug=mother->numberOfDaughters();
+
+
+  for(size_t i;i<ndaug;i++){
+    daughter=dynamic_cast<const reco::GenParticle*>(mother->daughter(i));
+    //first check for bs
+
+    if(checkrest && isAbsApprox(daughter->pdgId(),24)){ //got a W, make rest of decay chain
+      out << daughter;
+      mother=daughter;
+      ndaug=mother->numberOfDaughters();
+      i=0;
+      continue;
+    }
+    else if(isAbsApprox(daughter->pdgId(),11) || ){ //got leps status 3
+
+
+
+  }
+  */
+  return out;
 }
 
 //define this as a plug-in
