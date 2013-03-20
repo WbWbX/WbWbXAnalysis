@@ -8,7 +8,7 @@ use File::Path;
 use POSIX;
 
 my %arg;
-getopts('d:c:r:sj:m:f:R:gh', \%arg);
+getopts('d:c:r:sj:m:f:R:q', \%arg);
 
 unless ( $arg{d} && $arg{c} && -f $arg{c}) {
     print <<'USAGE';
@@ -18,12 +18,10 @@ Syntax:
 Run runallGC.pl to run over all data samples given in files.txt using the
 configuration file configFile.py - and use GridControl to submit jobs
 
-A directory on the sonar user space named "GridControl_workingDir" will
+A directory on the sonar user space named "NAF_workingDir" will
 be created to contain working directories and output.
 
-Set environment variable HN_USER to your hypernews name!
-
--g      run on the grid
+-q      run in queue (default 48h) does not work right now
 
 -r regexp
 If a regexp is given only jobs matching regexp will be submitted (case sensitive).
@@ -33,7 +31,7 @@ If a regexp is given only jobs NOT matching the regexp will be submitted (case s
 
 -s                    really submit jobs using GridControl
 -j NJobs              submit NJobs for each dataset. 
--m maxEventsPerJob    Overwrites default value from files.txt
+//-m maxEventsPerJob    Overwrites default value from files.txt
 
 -o output            output directory when output is downloaded from dcache
 
@@ -48,6 +46,7 @@ USAGE
 }
 
 my $source = $arg{f} ? $arg{f} : 'files.txt';
+my $queue = $arg{q} ? $arg{q} : '48';
 open my $IN, '<', $source or die "Cannot open input file: $!\n";
 
 my @run;
@@ -110,7 +109,6 @@ while(my $line = <$IN>) {
     else{
 	$allOptions="\"outputFile=$outputFile $options\"";
     }
-
     
 
 #run script, killall script should be sufficient
