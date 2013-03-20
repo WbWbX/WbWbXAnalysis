@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id: TreeWriter.cc,v 1.19 2013/02/22 10:39:16 jkiesele Exp $
+// $Id: TreeWriter.cc,v 1.20 2013/03/20 18:00:48 jkiesele Exp $
 //
 //
 
@@ -1297,6 +1297,11 @@ void TreeWriter::setTriggers(){
   triggers_.push_back("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v");
   triggers_.push_back("HLT_DoubleMu7");
   triggers_.push_back("HLT_Mu13_Mu8_v");
+
+  //single lep for efficiencies
+  triggers_.push_back("HLT_IsoMu24_v");
+  triggers_.push_back("HLT_IsoMu24_eta2p1_v");
+  triggers_.push_back("HLT_Ele27_WP80_v");
   /*
   triggers_.push_back();
   triggers_.push_back();
