@@ -1,6 +1,9 @@
 #!/bin/sh
 cd ..
 eval `scramv1 runtime -sh`
+
+cd ${CMSSW_BASE}/src
+
 # the things I use from the TopAnalysis code
 #
 
@@ -15,6 +18,7 @@ then
     cvs co -d WWAnalysis/SkimStep UserCode/Mangano/WWAnalysis/SkimStep 
 fi
 
+#generator filter
 
 cvs co -d TopAnalysis/TopFilter/plugins/ UserCode/Bromo/TopAnalysis/TopFilter/plugins/GeneratorZFilter.cc
 cvs co -d TopAnalysis/TopFilter/plugins/ UserCode/Bromo/TopAnalysis/TopFilter/plugins/GeneratorTopFilter.cc
@@ -23,8 +27,28 @@ cvs co -d TopAnalysis/TopFilter/ UserCode/Bromo/TopAnalysis/TopFilter/BuildFile.
 cvs co -d TopAnalysis/TopFilter/python/filters/ UserCode/Bromo/TopAnalysis/TopFilter/python/filters/GeneratorTopFilter_cfi.py
 cvs co -d TopAnalysis/TopFilter/python/filters/ UserCode/Bromo/TopAnalysis/TopFilter/python/filters/GeneratorZFilter_cfi.py
 
+#scripts
+
+cvs co -d TopAnalysis/TopUtils/scripts UserCode/Bromo/TopAnalysis/TopUtils/scripts
+
+#b-jet stuff
+
+cvs co -d TopAnalysis/TopUtils/python/ UserCode/Bromo/TopAnalysis/TopUtils/python/GenLevelBJetProducer_cff.py
+cvs co -d TopAnalysis/TopUtils/python/ UserCode/Bromo/TopAnalysis/TopUtils/python/GenLevelBJetProducer_cfi.py
+cvs co -d TopAnalysis/TopUtils/python/ UserCode/Bromo/TopAnalysis/TopUtils/python/GenJetParticles_cff.py
+cvs co -d TopAnalysis/TopUtils/python/ UserCode/Bromo/TopAnalysis/TopUtils/python/GenJetParticles_cfi.py
+
+cvs co -d TopAnalysis/TopUtils/plugins /UserCode/Bromo/TopAnalysis/TopUtils/plugins/GenLevelBJetProducer.cc
+cvs co -d TopAnalysis/TopUtils/plugins /UserCode/Bromo/TopAnalysis/TopUtils/plugins/myInputGenJetsParticleSelector.cc
+cvs co -d TopAnalysis/TopUtils/plugins /UserCode/Bromo/TopAnalysis/TopUtils/plugins/myInputGenJetsParticleSelector.h
+
+#runallStuff
+
 cvs co -d TopAnalysis/Configuration/analysis/diLeptonic  UserCode/Bromo/TopAnalysis/Configuration/analysis/diLeptonic/runallGC.pl
 cvs co -d TopAnalysis/Configuration/analysis/diLeptonic  UserCode/Bromo/TopAnalysis/Configuration/analysis/diLeptonic/runallCrab.pl
+
+
+
 
 cd ${CMSSW_BASE}/src/TtZAnalysis/Configuration/python/analysis
 ln -s ${CMSSW_BASE}/src/TopAnalysis/Configuration/analysis/diLeptonic/runallGC.pl runallGC.pl
@@ -62,9 +86,16 @@ cd EGamma/EGammaAnalysisTools/data
 cat download.url | xargs wget
 #cd ../../../
 
-echo "Ecal Filter"
+echo "MET  Filter"
 
 addpkg RecoMET/METFilters V00-00-10
+cvs co -r V00-00-08 RecoMET/METAnalyzers
+cvs co -r V00-03-23 CommonTools/RecoAlgos
+# Additional packages for the tracking POG filters
+cvs co -r V01-00-11-01 DPGAnalysis/Skims
+cvs co -r V00-11-17 DPGAnalysis/SiStripTools
+cvs co -r V00-00-08 DataFormats/TrackerCommon
+cvs co -r V01-09-05 RecoLocalTracker/SubCollectionProducers
 
 if [[ "$CMSSW_VERSION" == "CMSSW_5_3_3_patch3"  ]]
 then
@@ -93,6 +124,16 @@ echo "checking out pat release V08-09-43 for ${CMSSW_VERSION} "
 
 addpkg DataFormats/PatCandidates V06-05-06-03
 addpkg PhysicsTools/PatAlgos     V08-09-43
+
+fi
+
+if [[ "$CMSSW_VERSION" == "CMSSW_5_3_7" ]]
+then
+
+addpkg DataFormats/PatCandidates V06-05-06-03
+addpkg PhysicsTools/PatAlgos     V08-09-48
+addpkg DataFormats/StdDictionaries V00-02-14
+addpkg FWCore/GuiBrowsers V00-00-70
 
 fi
 
