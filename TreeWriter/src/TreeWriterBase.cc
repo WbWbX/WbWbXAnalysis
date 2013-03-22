@@ -1,178 +1,12 @@
-// -*- C++ -*-
-//
-// Package:    TreeWriter_ttH
-// Class:      TreeWriter_ttH
-// 
-/**\class TreeWriter_ttH TreeWriter_ttH.cc DOSS/TreeWriter_ttH/src/TreeWriter_ttH.cc
-
- Description: [one line class summary]
-
- Implementation:
-     [Notes on implementation]
-*/
-//
-// Original Author:  Jan Kieseler,,,DESY
-//         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id: TreeWriter_ttH.cc,v 1.21 2013/03/20 18:42:40 jkiesele Exp $
-//
-//
+#include "../interface/TreeWriterBase.h"
 
 
-// system include files
-#include <memory>
 
-// user include files
-#include "PhysicsTools/SelectorUtils/interface/JetIDSelectionFunctor.h"
-#include "PhysicsTools/SelectorUtils/interface/PFJetIDSelectionFunctor.h"
-
-#include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/EDAnalyzer.h"
-
-#include "FWCore/Framework/interface/Event.h"
-#include "FWCore/Framework/interface/MakerMacros.h"
-
-#include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "DataFormats/PatCandidates/interface/Electron.h"
-#include "DataFormats/PatCandidates/interface/Muon.h"
-#include "DataFormats/PatCandidates/interface/Jet.h"
-#include "DataFormats/PatCandidates/interface/MET.h"
-#include <vector>
-#include <string>
-#include "DataFormats/Common/interface/TriggerResults.h"
-#include "FWCore/Common/interface/TriggerNames.h"
-#include "DataFormats/PatCandidates/interface/TriggerObject.h"
-#include "TTree.h"
-#include "TLorentzVector.h"
-#include "DataFormats/JetReco/interface/GenJet.h"
-
-#include "CommonTools/UtilAlgos/interface/TFileService.h"
-#include "FWCore/ServiceRegistry/interface/Service.h"
-#include "../../DataFormats/interface/NTMuon.h"
-#include "../../DataFormats/interface/NTElectron.h"
-#include "../../DataFormats/interface/NTJet.h"
-#include "../../DataFormats/interface/NTMet.h"
-#include "../../DataFormats/interface/NTEvent.h"
-#include "../../DataFormats/interface/NTTrack.h"
-#include "../../DataFormats/interface/NTSuClu.h"
-#include "../../DataFormats/interface/elecRhoIsoAdder.h"
-#include "../../DataFormats/interface/NTTrigger.h"
-#include "../../DataFormats/interface/NTGenLepton.h"
-#include "../../DataFormats/interface/NTGenParticle.h"
-#include "../../DataFormats/interface/NTGenJet.h"
-#include "../../DataFormats/interface/mathdefs.h"
-
-
-#include "DataFormats/Candidate/interface/CompositeCandidate.h"
-
-#include "DataFormats/Candidate/interface/CandidateFwd.h"
-#include "DataFormats/Common/interface/TriggerResults.h"
-#include "FWCore/Common/interface/TriggerNames.h"
-
-#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
-#include "SimDataFormats/GeneratorProducts/interface/GenRunInfoProduct.h"
-
-#include "DataFormats/EgammaReco/interface/SuperCluster.h"
-#include "DataFormats/EgammaReco/interface/SuperClusterFwd.h"
-#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
-//#include "PhysicsTools/Utilities/interface/LumiReWeighting.h"
-//#include "PhysicsTools/Utilities/interface/Lumi3DReWeighting.h"
-
-#include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
-
-#include "DataFormats/TrackReco/interface/Track.h"
-
-#include <algorithm>
-
-#include <cstring>
-#include "../interface/genTools.h"
-#include "TtZAnalysis/Tools/interface/miscUtils.h"
-
-//
-// class declaration
-//
-
-class TreeWriter_ttH : public edm::EDAnalyzer {
-   public:
-      explicit TreeWriter_ttH(const edm::ParameterSet&);
-      ~TreeWriter_ttH();
-
-      static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
-
-
-   private:
- 
-      virtual void beginJob() ;
-      virtual void analyze(const edm::Event&, const edm::EventSetup&);
-      virtual void endJob() ;
-
-      virtual void beginRun(edm::Run const&, edm::EventSetup const&);
-      virtual void endRun(edm::Run const&, edm::EventSetup const&);
-      virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
-      virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
-
-      // ----------member data ---------------------------
-
-  bool checkJetID(std::vector<pat::Jet>::const_iterator);
-
-  std::vector<bool> checkTriggers(const edm::Event&);
-  std::vector<std::string> triggers_;
-  std::vector<bool> triggerBools_;
-  void setTriggers();
-  top::NTGenParticle makeNTGen(const reco::GenParticle *, const std::map<const reco::GenParticle*, int>&);
-  bool isInGenCollection(const reco::GenParticle * , const std::vector<const reco::GenParticle * > &);
-  bool isInGenCollection(const reco::GenJet * , const std::vector<const reco::GenJet * > &);
-  template<typename t,typename u>
-  int findGenMatchIdx(t * , std::vector<u> & , double dR=0.4);
- 
-  
-
-  bool pfElecCands_;
-  bool pfMuonCands_;
-  bool rho2011_;
-  bool usegsf_;
-
-  edm::InputTag muons_, recomuons_, pfelecs_, gsfelecs_,recoelecs_, jets_, met_, vertices_, trigresults_, puinfo_, recotracks_, recosuclus_,rhojetsiso_,rhojetsisonopu_,rhoiso_,pdfweights_, genparticles_, genjets_;
-  //rhojets_,rhojetsiso_,rhojetsnopu_,rhojetsisonopu_,rhoiso_;
-
-  bool includereco_, includetrigger_, pfinput_,includepdfweights_,includegen_;
-  TTree* Ntuple;
-  std::vector<top::NTMuon> ntmuons;
-  std::vector<top::NTLepton> ntleptons;
-  std::vector<top::NTElectron> ntpfelectrons;
-  std::vector<top::NTElectron> ntgsfelectrons;
-  std::vector<top::NTJet> ntjets;
-  std::vector<top::NTTrack> nttracks;
-  std::vector<top::NTSuClu> ntsuclus;
-  top::NTMet ntmet;
-  top::NTEvent ntevent;
-  top::NTTrigger nttrigger;
-
-  std::vector<top::NTGenParticle> ntgenmuons3, ntgenelecs3,ntgentaus3,ntgenmuons1, ntgenelecs1,ntgentaus1, allntgen;
-  std::vector<top::NTGenJet> ntgenjets;
-  int channel_; // 11 for ee 13 for mumu 1113 for emu 151113 etc for via tau
-
-  bool viaTau_;
-
-  std::string treename_, btagalgo_;
-
-  edm::Service<TFileService> fs;
-
-
-};
-
-//
-// constants, enums and typedefs
-//
-
-//
-// static data member definitions
-//
-
-//
-// constructors and destructor
-//
-TreeWriter_ttH::TreeWriter_ttH(const edm::ParameterSet& iConfig)
+TreeWriterBase::TreeWriterBase(const edm::ParameterSet& iConfig)
 {
+
+  debugmode  =iConfig.getParameter<bool>              ( "debugmode" );
+
   //now do what ever initialization is needed
   treename_    =iConfig.getParameter<std::string>        ("treeName");
   muons_       =iConfig.getParameter<edm::InputTag>    ( "muonSrc" );
@@ -181,6 +15,7 @@ TreeWriter_ttH::TreeWriter_ttH(const edm::ParameterSet& iConfig)
   jets_        =iConfig.getParameter<edm::InputTag>    ( "jetSrc" );
   btagalgo_    =iConfig.getParameter<std::string>       ("btagAlgo");
   met_         =iConfig.getParameter<edm::InputTag>    ( "metSrc" );
+  mvamet_         =iConfig.getParameter<edm::InputTag>    ( "mvaMetSrc" );
   vertices_    =iConfig.getParameter<edm::InputTag>    ( "vertexSrc" );
 
   includereco_  =iConfig.getParameter<bool>              ( "includeReco" );
@@ -232,7 +67,7 @@ TreeWriter_ttH::TreeWriter_ttH(const edm::ParameterSet& iConfig)
 }
 
 
-TreeWriter_ttH::~TreeWriter_ttH()
+TreeWriterBase::~TreeWriterBase()
 {
  
    // do anything here that needs to be done at desctruction time
@@ -247,10 +82,13 @@ TreeWriter_ttH::~TreeWriter_ttH()
 
 // ------------ method called for each event  ------------
 void
-TreeWriter_ttH::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
    using namespace edm;
    using namespace top;
+
+
+   if(debugmode) std::cout << "event loop started" << std::endl;
 
    std::string addForPF;
    if(pfinput_) addForPF="bla";
@@ -304,6 +142,7 @@ TreeWriter_ttH::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    if(!IsRealData && includegen_){
 
 
+     if(debugmode) std::cout << "includegen enetered" << std::endl;
 
      std::vector<const reco::GenParticle*> temp;
 
@@ -491,7 +330,7 @@ TreeWriter_ttH::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        tempgenjet.setP4(allgenjets.at(i)->p4());
        tempgenjet.setGenId(jetidmap.at(allgenjets[i])); //use a map here
        //  tempgenjet.setMother(int)
-       ntgenjets << tempgenjet;
+       ntgenjets.push_back( tempgenjet);
      }
 
 
@@ -500,6 +339,7 @@ TreeWriter_ttH::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    }//isMC and includegen end
 
 
+   if(debugmode) std::cout <<"includegen left" << std::endl;
 
  // a lot has to be done here!!!
 	 // genJet b matching (get best! dr match cone 0.5
@@ -600,31 +440,50 @@ TreeWriter_ttH::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    Handle<std::vector<pat::MET> > mets;
    iEvent.getByLabel(met_,mets);
 
+   Handle<std::vector<pat::MET> > mvamets;
+   iEvent.getByLabel(mvamet_,mvamets);
+
    Handle<std::vector<reco::Vertex> > vertices;
    iEvent.getByLabel(vertices_, vertices);
-   const reco::VertexCollection vtxs  = *(vertices.product());
+   vtxs  = *(vertices.product());
 
 
    
    if(vtxs.size()>0){
 
 
+   if(debugmode) std::cout << "vtxs.size()>0" << std::endl;
+
      ///////////////////////////////////////////////E L E C T R O N S//////////
      //recent changes: stares two collections (gsf and pf), ecaldrivenmomentum in BOTH BE CAREFUL WHEN CHANGING
 
-     for(std::vector<pat::Electron >::const_iterator electron=pfelecs->begin(); electron<pfelecs->end() ; ++electron){
-     
-       top::NTIsolation Iso;
-       
-       Iso.setChargedHadronIso(electron->chargedHadronIso());
-       Iso.setNeutralHadronIso(electron->neutralHadronIso());
-       Iso.setPhotonIso(electron->photonIso());
-       Iso.setPuChargedHadronIso(electron->puChargedHadronIso());
-	 
 
+     math::XYZPoint beamSpotPosition;
+     beamSpotPosition.SetCoordinates(0,0,0);
+
+     edm::Handle<reco::BeamSpot> bsHandle;
+     iEvent.getByLabel("offlineBeamSpot",bsHandle);
+
+     double BSx=0,BSy=0,BSz=0;
+     if( (bsHandle.isValid()) ){
+       reco::BeamSpot bs = *bsHandle;
+       BSx = bs.x0();
+       BSy = bs.y0();
+       BSz = bs.z0();
+       beamSpotPosition = bsHandle->position();
+     }
+
+
+
+   if(debugmode) std::cout << "electron loops" << std::endl;
+
+     for(size_t i=0;i<pfelecs->size();i++){
+     
        top::NTElectron tempelec;
+          tempelec=makeNTElectron(pfelecs->at(i));
+
        //if(electron->ecalDrivenMomentum())
-       int genidx=findGenMatchIdx(&*electron,allntgen,0.4);
+       int genidx=findGenMatchIdx(&pfelecs->at(i),allntgen,0.4);
        //do gen asso
        if(genidx>=0){
 	 tempelec.setGenMatch(genidx);
@@ -634,83 +493,20 @@ TreeWriter_ttH::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	 tempelec.setGenP4(p4zero);
 	 tempelec.setGenMatch(-1);
        }
-       tempelec.setECalP4(electron->ecalDrivenMomentum());
        
-       tempelec.setP4(electron->p4());
-       tempelec.setQ(electron->charge());
-       double vz=-9999;
-       double vzerr=-9999;
-       double dbs=100;
-       int mhits=99;
-       if(!(electron->gsfTrack().isNull())){
-	 vz=electron->gsfTrack()->dz(vtxs[0].position());                   //
-	 vzerr=electron->gsfTrack()->dzError();  
-	 dbs=fabs(electron->gsfTrack()->dxy(vtxs[0].position()));
-
-	 mhits=electron->gsfTrack()->trackerExpectedHitsInner().numberOfHits();
-       }              //
-       else if((electron->closestCtfTrackRef()).isNull()){
-	 vz=electron->closestCtfTrackRef()->dz(vtxs[0].position());                   //
-	 vzerr=electron->closestCtfTrackRef()->dzError();  
-	 dbs=fabs(electron->closestCtfTrackRef()->dxy(vtxs[0].position()));
-       }
-       tempelec.setDz(vz);                   //
-       tempelec.setDzErr(vzerr);  
-
-       tempelec.setDbs(dbs);                  //
-       tempelec.setNotConv(electron->passConversionVeto());    
-       tempelec.setId(electron->electronIDs());
-       tempelec.setIso(Iso);                   //
-       //tempelec.setIso04(iso04);                   //
-       tempelec.setMHits(mhits);
-		       
-       if(includereco_){
-	 if(electron->triggerObjectMatches().size() ==1){ // no ambiguities
-	   tempelec.setMatchedTrig(electron->triggerObjectMatches().begin()->pathNames());
-	 }
-	 else{
-	   std::vector<std::string> def;
-	 def.push_back("NoUnamTrigMatch");
-	 tempelec.setMatchedTrig(def);
-	 }
-       }
-       double suclue=0;
-       if(includereco_ && !(electron->superCluster().isNull())){
-	 suclue=electron->superCluster()->rawEnergy();
-	 math::XYZPoint suclupoint=electron->superCluster()->position();
-	 double magnitude=sqrt(suclupoint.mag2());
-	 top::LorentzVector suclup4(suclue*suclupoint.x() / magnitude,suclue*suclupoint.y() / magnitude,suclue*suclupoint.z() / magnitude,suclue);
-	 top::NTSuClu suclu;
-	 suclu.setP4(suclup4);
-	 tempelec.setSuClu(suclu);
-       }
-       // otherwise (0,0,0,0) taken  care of by NTElectron Constructor
-
-       //  if(electron->genParticleRef().isNonnull()) tempelec.setGenP4(electron->genParticleRef()->p4());
-     
        ntpfelectrons.push_back(tempelec);
-
 
      }
      ////gsf electron/////
 
 
-     for(std::vector<pat::Electron >::const_iterator electron=gsfelecs->begin(); electron<gsfelecs->end() ; ++electron){
+     for(size_t i=0;i<gsfelecs->size();i++){
      
-       top::NTIsolation Iso;
-       
-       Iso.setChargedHadronIso(electron->chargedHadronIso());
-       Iso.setNeutralHadronIso(electron->neutralHadronIso());
-       Iso.setPhotonIso(electron->photonIso());
-       Iso.setPuChargedHadronIso(electron->puChargedHadronIso());
-	 
-
        top::NTElectron tempelec;
-       //  if(electron->ecalDrivenMomentum())
+         tempelec=makeNTElectron(gsfelecs->at(i));
 
-       //do gen asso
-       int genidx=findGenMatchIdx(&*electron,allntgen,0.4);
-       //do gen asso
+       int genidx=findGenMatchIdx(&gsfelecs->at(i),allntgen,0.4);
+     
        if(genidx>=0){
 	 tempelec.setGenMatch(genidx);
 	 tempelec.setGenP4(allntgen.at(genidx).p4());
@@ -720,64 +516,6 @@ TreeWriter_ttH::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	 tempelec.setGenMatch(-1);
        }
 
-       tempelec.setECalP4(electron->ecalDrivenMomentum());
-       tempelec.setIsPf(electron->isPF());
-       tempelec.setP4(electron->p4());
-       tempelec.setQ(electron->charge());
-       double vz=-9999;
-       double vzerr=-9999;
-       double dbs=100;
-
-       int mhits=99;
-
-       if(!(electron->gsfTrack().isNull())){
-	 vz=electron->gsfTrack()->dz(vtxs[0].position());                   //
-	 vzerr=electron->gsfTrack()->dzError();  
-	 dbs=fabs(electron->gsfTrack()->dxy(vtxs[0].position()));
-
-	 mhits=electron->gsfTrack()->trackerExpectedHitsInner().numberOfHits();
-       }              //
-       else if((electron->closestCtfTrackRef()).isNull()){
-	 vz=electron->closestCtfTrackRef()->dz(vtxs[0].position());                   //
-	 vzerr=electron->closestCtfTrackRef()->dzError();  
-	 dbs=fabs(electron->closestCtfTrackRef()->dxy(vtxs[0].position()));
-       }
-       tempelec.setDz(vz);                   //
-       tempelec.setDzErr(vzerr);  
-
-       tempelec.setDbs(dbs);                  //
-       tempelec.setNotConv(electron->passConversionVeto());    
-       tempelec.setId(electron->electronIDs());
-       tempelec.setIso(Iso);                   //
-       //tempelec.setIso04(iso04);                   //
-       tempelec.setMHits(mhits);
-
-
-		       
-       if(includereco_){
-	 if(electron->triggerObjectMatches().size() ==1){ // no ambiguities
-	   tempelec.setMatchedTrig(electron->triggerObjectMatches().begin()->pathNames());
-	 }
-	 else{
-	   std::vector<std::string> def;
-	 def.push_back("NoUnamTrigMatch");
-	 tempelec.setMatchedTrig(def);
-	 }
-       }
-       double suclue=0;
-       if(includereco_ && !(electron->superCluster().isNull())){
-	 suclue=electron->superCluster()->rawEnergy();
-	 math::XYZPoint suclupoint=electron->superCluster()->position();
-	 double magnitude=sqrt(suclupoint.mag2());
-	 top::LorentzVector suclup4(suclue*suclupoint.x() / magnitude,suclue*suclupoint.y() / magnitude,suclue*suclupoint.z() / magnitude,suclue);
-	 top::NTSuClu suclu;
-	 suclu.setP4(suclup4);
-	 tempelec.setSuClu(suclu);
-       }
-       // otherwise (0,0,0,0) taken  care of by NTElectron Constructor
-
-       //   if(electron->genParticleRef().isNonnull()) tempelec.setGenP4(electron->genParticleRef()->p4());
-     
        ntgsfelectrons.push_back(tempelec);
 
 
@@ -786,21 +524,15 @@ TreeWriter_ttH::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
      /////////////////////////////////// M U O N S//////////////////
    
-     for(std::vector<pat::Muon >::const_iterator muon=muons->begin(); muon<muons->end() ; muon++){
-       
-//        
 
-       top::NTIsolation Iso;
-       Iso.setChargedHadronIso(muon->chargedHadronIso());
-       Iso.setNeutralHadronIso(muon->neutralHadronIso());
-       Iso.setPhotonIso(muon->photonIso());
-       Iso.setPuChargedHadronIso(muon->puChargedHadronIso());
+   if(debugmode) std::cout << "muon loops" << std::endl;
 
-
+     for(size_t i=0;i<muons->size();i++){
+   
        top::NTMuon tempmuon;
+       tempmuon=makeNTMuon(muons->at(i));
 
- //do gen asso
-      int genidx=findGenMatchIdx(&*muon,allntgen,0.4);
+       int genidx=findGenMatchIdx(&muons->at(i),allntgen,0.4);
        //do gen asso
        if(genidx>=0){
 	 tempmuon.setGenMatch(genidx);
@@ -811,72 +543,16 @@ TreeWriter_ttH::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	 tempmuon.setGenMatch(-1);
        }
 
-
-       tempmuon.setP4   (muon->p4());
-       tempmuon.setQ   (muon->charge());
-       double vz=-9999;
-       double vzerr=-9999;
-       if(includereco_ && !(muon->innerTrack()).isNull()){
-	 top::LorentzVector trkp4(muon->innerTrack()->px(),muon->innerTrack()->py(),muon->innerTrack()->pz(),muon->innerTrack()->p());
-	 tempmuon.setTrackP4(trkp4);
-       }
-       else{
-	 top::LorentzVector dummy(0,0,0,0);
-	 tempmuon.setTrackP4(dummy);
-       }
-
-       if(!(muon->globalTrack()).isNull()){
-	 vz=muon->globalTrack()->dz(vtxs[0].position());
-	 vzerr=muon->globalTrack()->dzError();
-       }
-       else if(!(muon->innerTrack()).isNull()){
-	 vz=muon->innerTrack()->dz(vtxs[0].position());
-	 vzerr=muon->innerTrack()->dzError();
-	 
-       }
-       else if(!(muon->outerTrack()).isNull()){
-	 vz=muon->outerTrack()->dz(vtxs[0].position());
-	 vzerr=muon->outerTrack()->dzError();
-       }
-       tempmuon.setDz   (vz);
-       tempmuon.setDzErr   (vzerr);
-
-       tempmuon.setIsGlobal   (muon->isGlobalMuon());
-       tempmuon.setIsTracker (muon->isTrackerMuon());
-
-       if(muon->isGlobalMuon()){
-	 tempmuon.setNormChi2   (muon->globalTrack()->normalizedChi2());
-	 if(!(muon->innerTrack().isNull())) 
-	   tempmuon.setTrkHits  (muon->innerTrack()->hitPattern().trackerLayersWithMeasurement());
-	 else
-	   tempmuon.setTrkHits (0);
-	 tempmuon.setMuonHits   (muon->globalTrack()->hitPattern().numberOfValidMuonHits());
-	 tempmuon.setDbs   (fabs(muon->globalTrack()->dxy(vtxs[0].position())));
-	 tempmuon.setIso   (Iso);
-       }
-       else{
-	 tempmuon.setNormChi2   (100);
-	 tempmuon.setTrkHits    (0);
-	 tempmuon.setMuonHits    (0);
-	 tempmuon.setDbs  (100);
-	 tempmuon.setIso    (Iso);
-       }
-       if(includereco_){
-	 if(muon->triggerObjectMatches().size() ==1){ // no ambiguities
-	   tempmuon.setMatchedTrig(muon->triggerObjectMatches().begin()->pathNames());
-	 }
-	 else{
-	 std::vector<std::string> def;
-	 def.push_back("NoUnamTrigMatch");
-	 tempmuon.setMatchedTrig(def);
-	 }
-       }
-       //   if(muon->genParticleRef().isNonnull()) tempmuon.setGenP4(muon->genParticleRef()->p4());
-
        ntmuons.push_back(tempmuon);
      }
    
+
+
      if(includereco_){
+
+
+       if(debugmode) std::cout <<"includereco entered" << std::endl;
+
        if(!pfMuonCands_){
 	 for(std::vector<reco::Muon>::const_iterator recomuon=recomuons->begin(); recomuon<recomuons->end() ; recomuon++){
 	   top::NTLepton templep;
@@ -896,8 +572,8 @@ TreeWriter_ttH::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	     vz=recomuon->outerTrack()->dz(vtxs[0].position());
 	     vzerr=recomuon->outerTrack()->dzError();
 	   }
-	   templep.setDz(vz);
-	   templep.setDzErr(vzerr);
+	   templep.setDzV(vz);
+	   templep.setDzVErr(vzerr);
 
 	   ntleptons.push_back(templep);
 	 }
@@ -913,8 +589,8 @@ TreeWriter_ttH::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	     vz=recomuon->trackRef()->dz(vtxs[0].position());
 	     vzerr=recomuon->trackRef()->dzError();
 	   }
-	   templep.setDz(vz);
-	   templep.setDzErr(vzerr);
+	   templep.setDzV(vz);
+	   templep.setDzVErr(vzerr);
 
 	   ntleptons.push_back(templep);
 
@@ -936,8 +612,8 @@ TreeWriter_ttH::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	     vz=recoelectron->closestCtfTrackRef()->dz(vtxs[0].position());
 	     vzerr=recoelectron->closestCtfTrackRef()->dzError();
 	   }
-	   templep.setDz(vz);
-	   templep.setDzErr(vzerr);
+	   templep.setDzV(vz);
+	   templep.setDzVErr(vzerr);
 	   ntleptons.push_back(templep);
 	 }
        }
@@ -952,62 +628,59 @@ TreeWriter_ttH::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	     vz=recoelec->trackRef()->dz(vtxs[0].position());
 	     vzerr=recoelec->trackRef()->dzError();
 	   }
-	   templep.setDz(vz);
-	   templep.setDzErr(vzerr);
+	   templep.setDzV(vz);
+	   templep.setDzVErr(vzerr);
 
 	   ntleptons.push_back(templep);
        }
      }
 
      }
-     for(std::vector<pat::Jet>::const_iterator jet=jets->begin(); jet<jets->end() ; jet++){
 
+
+   if(debugmode) std::cout << "jet loop" << std::endl;
+
+     for(size_t i=0;i<jets->size();i++){
+
+       pat::Jet uncJet=jets->at(i).correctedJet("Uncorrected");
+       if(uncJet.pt() < 10) continue;
 
        top::NTJet tempjet;
-
-       pat::Jet uncJet=jet->correctedJet("Uncorrected");
-       if(uncJet.pt() < 10) continue;
-       double corr_factor=jet->pt() / uncJet.pt();
-       tempjet.setCorrFactor(corr_factor);
-
-       tempjet.setId(checkJetID(jet));
-       tempjet.setP4(jet->p4());
-       if(jet->genJet()){
-	 tempjet.setGenP4(jet->genJet()->p4());
-	 tempjet.setGenPartonFlavour(jet->partonFlavour());
-	 int genidx=findGenMatchIdx((jet->genJet()),ntgenjets,0.1);
-	 tempjet.setGenMatch(genidx);
-	 
-       }
-       else{
-	 tempjet.setGenP4(p4zero);
-	 tempjet.setGenPartonFlavour(0);
-	 tempjet.setGenMatch(-1);
-       }
-       tempjet.setBtag(jet->bDiscriminator(btagalgo_));    //
-       double emEnergyfraction=0;
-       if(jet->isPFJet()) emEnergyfraction=jet->chargedEmEnergyFraction()+jet->neutralEmEnergyFraction();
-       else emEnergyfraction=jet->emEnergyFraction();
-       tempjet.setEmEnergyFraction(emEnergyfraction);
-
-     
+       tempjet=makeNTJet(jets->at(i));
+      
+       int genidx=findGenMatchIdx((jets->at(i).genJet()),ntgenjets,0.1);
+       tempjet.setGenMatch(genidx);
       
 
        ntjets.push_back(tempjet);
      }
 
+
+     if(debugmode) std::cout << "met loops" << std::endl;
      
      for(std::vector<pat::MET>::const_iterator met=mets->begin(); met<mets->end() ; met++){
        ntmet.setP4(met->p4());
        break;
      
      }
+
+     for(std::vector<pat::MET>::const_iterator met=mvamets->begin(); met<mvamets->end() ; met++){
+       ntmvamet.setP4(met->p4());
+       break;
+     
+     }
+
+
      if(includereco_){
+
+
+       if(debugmode) std::cout <<"reco track&suclu  loop" << std::endl;
+
        for(std::vector<reco::Track>::const_iterator track=recotracks->begin();track<recotracks->end();track++){
-	 if(track->pt() < 17) continue;
+	 if(track->pt() < 8) continue;
 	 if(fabs(track->eta()) > 2.6) continue;
 	 for(std::vector<reco::Track>::const_iterator track2=recotracks->begin();track2<recotracks->end();track2++){
-	   if(track2->pt() < 17) continue;
+	   if(track2->pt() < 8) continue;
 	   if(fabs(track2->eta()) > 2.6) continue;
 	   if(track->charge() == track2->charge()) continue;
 	   top::NTTrack nttrack;
@@ -1016,8 +689,8 @@ TreeWriter_ttH::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	   if((p1+p2).M() > 55 && (p1+p2).M() < 125){
 	     nttrack.setP4(p1);
 	     nttrack.setQ(track->charge());
-	     nttrack.setDz(track->dz(vtxs[0].position()));
-	     nttrack.setDzErr(track->dzError());
+	     nttrack.setDzV(track->dz(vtxs[0].position()));
+	     nttrack.setDzVErr(track->dzError());
 
 	     nttracks.push_back(nttrack);
 	     break;
@@ -1031,7 +704,7 @@ TreeWriter_ttH::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	 math::XYZPoint suclupoint=suclu->position();
 	 double magnitude=sqrt(suclupoint.mag2());
 	 top::LorentzVector suclup4(suclue*suclupoint.x() / magnitude,suclue*suclupoint.y() / magnitude,suclue*suclupoint.z() / magnitude,suclue);
-	 if(suclup4.Pt() < 10) continue;
+	 if(suclup4.Pt() < 8) continue;
 
 	 for(std::vector<reco::SuperCluster>::const_iterator suclu2=recosuclus->begin(); suclu2<recosuclus->end(); suclu2++){
 
@@ -1042,7 +715,7 @@ TreeWriter_ttH::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	   double magnitude2=sqrt(suclupoint2.mag2());
 	   top::LorentzVector suclup42(suclue2*suclupoint2.x() / magnitude2,suclue2*suclupoint2.y() / magnitude2,suclue2*suclupoint2.z() / magnitude2,suclue2);
 
-	   if(suclup42.Pt() < 10) continue;
+	   if(suclup42.Pt() < 8) continue;
 
 	   if((suclup4+suclup42).M() > 55 && (suclup4+suclup42).M()<125 ){
 	     top::NTSuClu tempsuclu;
@@ -1065,6 +738,9 @@ TreeWriter_ttH::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    if(includetrigger_){ 
 
+
+   if(debugmode) std::cout << "include trigger loop" << std::endl;
+
      Handle<TriggerResults> trigresults;
      iEvent.getByLabel(trigresults_, trigresults);
 
@@ -1085,6 +761,10 @@ TreeWriter_ttH::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      }
 
    }
+
+
+   if(debugmode) std::cout << "event info" << std::endl;
+
    ntevent.setRunNo(iEvent.id().run());
    ntevent.setLumiBlock(iEvent.id().luminosityBlock());
    ntevent.setEventNo(iEvent.id().event());
@@ -1116,6 +796,9 @@ TreeWriter_ttH::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    //rhoiso,,rhojetsiso,,rhojetsisonopu
    edm::Handle<double> rho;
 
+
+   if(debugmode) std::cout << "add rho iso" << std::endl;
+
    iEvent.getByLabel(rhoiso_,rho);
    temprhos.push_back(*rho);
    // if(rho2011_){
@@ -1135,6 +818,9 @@ TreeWriter_ttH::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    /////pdf weights///////
    if(includepdfweights_ && !IsRealData){
+
+
+     if(debugmode) std::cout << "include pdf weights" << std::endl;
      edm::Handle<std::vector<double> > weightHandle;
      iEvent.getByLabel(pdfweights_, weightHandle);
 
@@ -1144,27 +830,42 @@ TreeWriter_ttH::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    /////// Fill generator info
 
 
-   Ntuple ->Fill();
+   if(debugmode) std::cout << "fill ntuple" << std::endl;
+
+   if(debugmode && !Ntuple) std::cout << "ntuple pointer broken" << std::endl;
+
+   Ntuple->Fill();
+
+
+
+   if(debugmode) std::cout << "event loop finished" << std::endl;
 
 }
 
 
 // ------------ method called once each job just before starting event loop  ------------
 void 
-TreeWriter_ttH::beginJob()
+TreeWriterBase::beginJob()
 {
-  edm::Service<TFileService> fs;
+  // edm::Service<TFileService> fs;
 
   if( !fs ){
     throw edm::Exception( edm::errors::Configuration,
                           "TFile Service is not registered in cfg file" );
   }
-  char * tempname = new char[treename_.length()];
-  strcpy(tempname, treename_.c_str());
-  Ntuple=fs->make<TTree>(tempname ,tempname );
+
+
+  if(debugmode) std::cout << "setbranches" << std::endl;
+
+  //  char * tempname = new char[treename_.length()];
+  //strcpy(tempname, treename_.c_str());
+  Ntuple=(fs->make<TTree>("PFTree" ,"PFTree" ));
   //Ntuple->Branch("elePt",&elecpts);
   //TBranch *branch = Ntuple->Branch("Triggers",&triggers);
+
+  
   Ntuple->Branch("NTMuons", "std::vector<top::NTMuon>", &ntmuons);
+  
   if(includereco_){
     Ntuple->Branch("NTLeptons", "std::vector<top::NTLepton>", &ntleptons);
     Ntuple->Branch("NTTracks", "std::vector<top::NTTrack>", &nttracks);
@@ -1173,7 +874,10 @@ TreeWriter_ttH::beginJob()
   Ntuple->Branch("NTPFElectrons", "std::vector<top::NTElectron>", &ntpfelectrons);
   Ntuple->Branch("NTElectrons", "std::vector<top::NTElectron>", &ntgsfelectrons);
   Ntuple->Branch("NTJets", "std::vector<top::NTJet>", &ntjets);
+  
   Ntuple->Branch("NTMet", "top::NTMet", &ntmet);
+  
+  Ntuple->Branch("NTMvaMet", "top::NTMet", &ntmvamet);
   Ntuple->Branch("NTEvent", "top::NTEvent", &ntevent);
 
   Ntuple->Branch("TriggerBools", "std::vector<bool>", &triggerBools_);
@@ -1182,16 +886,20 @@ TreeWriter_ttH::beginJob()
 
   Ntuple->Branch("NTGenParticles", "std::vector<top::NTGenParticle>", &allntgen);
   Ntuple->Branch("NTGenJets", "std::vector<top::NTGenJet>", &ntgenjets);
+
   // Ntuple->Branch("NTGenMEMuons",     "std::vector<top::NTGenParticle>", &ntgenmuons3);
   // Ntuple->Branch("NTGenElectrons", "std::vector<top::NTGenParticle>", &ntgenelecs1);
   // Ntuple->Branch("NTGenMuons",     "std::vector<top::NTGenParticle>", &ntgenmuons1);
-  Ntuple->Branch("Channel",channel_);
+  //  Ntuple->Branch("Channel",channel_);
+
+  
+   if(debugmode) std::cout <<"branches set" << std::endl;
 
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
 void 
-TreeWriter_ttH::endJob() 
+TreeWriterBase::endJob() 
 {
   if( !fs ){
     throw edm::Exception( edm::errors::Configuration,
@@ -1206,47 +914,47 @@ TreeWriter_ttH::endJob()
 
 // ------------ method called when starting to processes a run  ------------
 void 
-TreeWriter_ttH::beginRun(edm::Run const&, edm::EventSetup const&)
+TreeWriterBase::beginRun(edm::Run const&, edm::EventSetup const&)
 {
 }
 
 // ------------ method called when ending the processing of a run  ------------
 void 
-TreeWriter_ttH::endRun(edm::Run const&, edm::EventSetup const&)
+TreeWriterBase::endRun(edm::Run const&, edm::EventSetup const&)
 {
 }
 
 // ------------ method called when starting to processes a luminosity block  ------------
 void 
-TreeWriter_ttH::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
+TreeWriterBase::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
 {
 }
 
 // ------------ method called when ending the processing of a luminosity block  ------------
 void 
-TreeWriter_ttH::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
+TreeWriterBase::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
 {
 }
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
 void
-TreeWriter_ttH::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+TreeWriterBase::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   //The following says we do not know what parameters are allowed so do no validation
   // Please change this to state exactly what you do use, even if it is no parameters
   edm::ParameterSetDescription desc;
   desc.setUnknown();
   descriptions.addDefault(desc);
 }
-bool TreeWriter_ttH::checkJetID(std::vector<pat::Jet>::const_iterator jet)
+bool TreeWriterBase::checkJetID(const pat::Jet & jet)
 {
   bool hasjetID=false;
-  if(jet->numberOfDaughters() > 1 &&
-     jet->neutralHadronEnergyFraction() < 0.99 &&
-     jet->neutralEmEnergyFraction() < 0.99){
-    if(fabs(jet->eta())<2.4){
-      if( jet->chargedMultiplicity() > 0 &&
-          jet->chargedHadronEnergyFraction() > 0&&
-          jet->chargedEmEnergyFraction() < 0.99)
+  if(jet.numberOfDaughters() > 1 &&
+     jet.neutralHadronEnergyFraction() < 0.99 &&
+     jet.neutralEmEnergyFraction() < 0.99){
+    if(fabs(jet.eta())<2.4){
+      if( jet.chargedMultiplicity() > 0 &&
+          jet.chargedHadronEnergyFraction() > 0&&
+          jet.chargedEmEnergyFraction() < 0.99)
 	hasjetID=true;
     }
     else{
@@ -1257,10 +965,12 @@ bool TreeWriter_ttH::checkJetID(std::vector<pat::Jet>::const_iterator jet)
   
   return hasjetID;
 }
+
+
 /*
  * makes a contains(bla)
  */
-std::vector<bool> TreeWriter_ttH::checkTriggers(const edm::Event& iEvent){
+std::vector<bool> TreeWriterBase::checkTriggers(const edm::Event& iEvent){
   using namespace edm;
 
   std::vector<bool> output;
@@ -1287,7 +997,7 @@ std::vector<bool> TreeWriter_ttH::checkTriggers(const edm::Event& iEvent){
   return output;
 }
 
-void TreeWriter_ttH::setTriggers(){
+void TreeWriterBase::setTriggers(){
   
   triggers_.push_back("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
   triggers_.push_back("HLT_Mu17_Mu8_v");
@@ -1313,7 +1023,7 @@ void TreeWriter_ttH::setTriggers(){
 }
 
 
-top::NTGenParticle TreeWriter_ttH::makeNTGen(const reco::GenParticle * p, const std::map<const reco::GenParticle * , int> & idmap){
+top::NTGenParticle TreeWriterBase::makeNTGen(const reco::GenParticle * p, const std::map<const reco::GenParticle * , int> & idmap){
   top::NTGenParticle out;
   out.setP4(p->p4());
   out.setPdgId(p->pdgId());
@@ -1324,14 +1034,14 @@ top::NTGenParticle TreeWriter_ttH::makeNTGen(const reco::GenParticle * p, const 
 // searchdaughter(particle *, vectorparticle * daughters)
 // searchmother(particle * , vector * possiblemothers)
  
-bool  TreeWriter_ttH::isInGenCollection(const reco::GenParticle * p, const std::vector<const reco::GenParticle * > & coll){
+bool  TreeWriterBase::isInGenCollection(const reco::GenParticle * p, const std::vector<const reco::GenParticle * > & coll){
   for(size_t i=0;i<coll.size();i++){
     if(coll.at(i) == p)
       return true;
   }
   return false;
 }
-bool  TreeWriter_ttH::isInGenCollection(const reco::GenJet * p, const std::vector<const reco::GenJet * > & coll){
+bool  TreeWriterBase::isInGenCollection(const reco::GenJet * p, const std::vector<const reco::GenJet * > & coll){
   for(size_t i=0;i<coll.size();i++){
     if(coll.at(i) == p)
       return true;
@@ -1341,7 +1051,10 @@ bool  TreeWriter_ttH::isInGenCollection(const reco::GenJet * p, const std::vecto
 
 
 template<class t, class u>
-int TreeWriter_ttH::findGenMatchIdx(t * patinput , std::vector<u> & gen, double dR){
+int TreeWriterBase::findGenMatchIdx(t * patinput , std::vector<u> & gen, double dR){
+  if(!patinput)
+    return -1;
+
   double drmin2=100;
   int idx=-1;
   for(size_t i=0;i<gen.size();i++){
@@ -1357,56 +1070,3 @@ int TreeWriter_ttH::findGenMatchIdx(t * patinput , std::vector<u> & gen, double 
     return -1;
 }
 
-std::vector<top::NTGenParticle> getFullDecayChainTop(const reco::GenParticle * p){
-
-  std::vector<top::NTGenParticle>  out;
-  /*
-  const reco::GenParticle * mother,daughter;
-  mother=p;
-  size_t ndaug=mother->numberOfDaughters();
-  bool gotStatus3=false;
-  bool gotB=false;
-
- for(size_t i;i<ndaug;i++){
-    daughter=dynamic_cast<const reco::GenParticle*>(mother->daughter(i));
-    //first check for bs
-    if(!isAbsApprox(daughter->pdgId(),5)) 
-      continue;
-    if(gotStatus3 && !isAbsApprox(daughter->status(),1))
-      continue;
-
-    gotB=true;
-    out << daughter;
-    mother=daughter;
-    ndaug=mother->numberOfDaughters();
-    i=0;
-    gotStatus3=true;
- }
-
- gotStatus3=false;
- mother=p;
- size_t ndaug=mother->numberOfDaughters();
-
-
-  for(size_t i;i<ndaug;i++){
-    daughter=dynamic_cast<const reco::GenParticle*>(mother->daughter(i));
-    //first check for bs
-
-    if(checkrest && isAbsApprox(daughter->pdgId(),24)){ //got a W, make rest of decay chain
-      out << daughter;
-      mother=daughter;
-      ndaug=mother->numberOfDaughters();
-      i=0;
-      continue;
-    }
-    else if(isAbsApprox(daughter->pdgId(),11) || ){ //got leps status 3
-
-
-
-  }
-  */
-  return out;
-}
-
-//define this as a plug-in
-DEFINE_FWK_MODULE(TreeWriter_ttH);
