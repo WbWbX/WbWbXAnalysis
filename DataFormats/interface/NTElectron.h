@@ -21,7 +21,6 @@ namespace top{
     explicit NTElectron(){q_=0;rhoIso_=-99;};
     ~NTElectron(){};
     //sets
-    void setDbs(double Dbs){dbs_=Dbs;}
     void setNotConv(bool IsNotConv){isNotConv_=IsNotConv;}
     void setECalP4(LorentzVector ECalp4){ecalp4_=ECalp4;}
     void setId(std::vector<std::pair<std::string,float> > Ids , bool keepMvaOnly=true){
@@ -43,7 +42,6 @@ namespace top{
     void setIsPf(bool is){ispf_=is;}
 
     //gets
-    double dbs(){return dbs_;}
     PolarLorentzVector ECalP4(){return ecalp4_;}
     bool isNotConv(){return isNotConv_;}
     std::vector<std::pair<std::string,float> > ids(){return ids_;}
@@ -99,7 +97,6 @@ namespace top{
   protected:
     float mvaId_;
     top::NTSuClu suClu_;
-    double dbs_;
     bool isNotConv_,ispf_;
     std::vector<std::pair<std::string,float> > ids_;
     top::NTIsolation iso_;
