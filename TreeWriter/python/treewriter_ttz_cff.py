@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-PFTree   = cms.EDAnalyzer('TreeWriterTtH',
+PFTree   = cms.EDAnalyzer('TreeWriterTtZ',
                           treeName = cms.string('pfTree'),
                           muonSrc = cms.InputTag('patMuonsWithTrigger'),
                           elecGSFSrc = cms.InputTag('patGSFElectronsWithTrigger'),

@@ -18,7 +18,7 @@ options.register ('genFilterMassLow',0,VarParsing.VarParsing.multiplicity.single
 options.register ('genFilterMassHigh',0,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.int,"gen Filter mass range high")
 options.register ('genFilterInvert',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"invert gen Filter")
 options.register ('includereco',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"includes info for eff studies")
-options.register ('includetrigger',True,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"includes trigger info for event")
+options.register ('includetrigger',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"includes full trigger string info for event")
 options.register ('includePDF',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"includes pdf weights info for event")
 options.register ('PDF','cteq65',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"pdf set for weights")
 options.register ('inputScript','TtZAnalysis.Configuration.samples.mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"input Script")
@@ -32,6 +32,14 @@ options.register ('isSignal',False,VarParsing.VarParsing.multiplicity.singleton,
 options.register ('muCone03',True,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"use iso con of 0.3")
 
 options.register ('wantSummary',True,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"prints trigger summary")
+options.register ('ttH',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"writes the ttH tree")
+options.register ('susy',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"writes the Susy tree")
+
+
+
+
+options.register ('debug',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"enters debug mode")
+
 
 import sys
 
@@ -61,7 +69,9 @@ laseroff=options.laseroff
 isSignal=options.isSignal
 newMuons=options.muCone03
 wantSummary=options.wantSummary
+ttH=options.ttH
 
+debug=options.debug
 
 if not isMC:
     isSignal=False
@@ -702,12 +712,17 @@ else: ## is Signal
                                                        
 
 ########## Prepare Tree ##
+if ttH:
+    process.load('TtZAnalysis.TreeWriter.treewriter_tth_cff')
+#else if susy:
 
-process.load('TtZAnalysis.TreeWriter.treewriter_cff')
+else:
+    process.load('TtZAnalysis.TreeWriter.treewriter_ttz_cff')
 
 
 process.PFTree.vertexSrc         = 'goodVertices'
 process.PFTree.metSrc            = 'patMETs'+pfpostfix
+process.PFTree.mvaMetSrc            = 'patMETs'+pfpostfix
 process.PFTree.includeTrigger    = includetrigger
 process.PFTree.includeReco       = includereco
 process.PFTree.rhoJetsIsoNoPu    = cms.InputTag("kt6PFJetsForIsoNoPU","rho",process.name_())
@@ -720,6 +735,8 @@ if not includereco:
     process.PFTree.muonSrc = 'kinMuons'
     process.PFTree.elecGSFSrc =  'kinElectrons'
     process.PFTree.elecPFSrc =  'kinPFElectrons'
+
+process.PFTree.debugmode= debug
 
 ## make tree sequence
 
