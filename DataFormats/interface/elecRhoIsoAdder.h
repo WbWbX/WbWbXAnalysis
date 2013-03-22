@@ -2,7 +2,6 @@
 #define ELECRHOISOADDER_H
 
 #include "NTElectron.h"
-#include "NTInflatedElectron.h"
 #include <vector>
 #include <iostream>
 #include <algorithm>
@@ -25,16 +24,12 @@ namespace top{
     void addRhoIso(std::vector<top::NTElectron> &);
     void addRhoIso(top::NTElectron &);
 
-    void addRhoIso(std::vector<top::NTInflatedElectron> &);
-    void addRhoIso(top::NTInflatedElectron &);
-
 
   private:
 
     void checkCorrectInput();
 
     double getRhoIso(top::NTElectron &);
-    double getRhoIso(top::NTInflatedElectron &);
     double Aeff(double);
 
     double rho_;

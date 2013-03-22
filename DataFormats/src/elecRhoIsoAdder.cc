@@ -18,16 +18,7 @@ namespace top{
     return rhoIso;
   } 
 
-  double elecRhoIsoAdder::getRhoIso(top::NTInflatedElectron & elec){
-
-    double chargedH  = elec.iso().chargedHadronIso();
-    double neutralH  = elec.iso().neutralHadronIso();
-    double photon    = elec.iso().photonIso();
-
-    double rhoIso=(chargedH + std::max(neutralH+photon - rho_*Aeff(elec.suClu().eta()), 0.0))/elec.pt();
-    return rhoIso;
-  } 
-
+ 
 
   void  elecRhoIsoAdder::addRhoIso(top::NTElectron & elec){
     checkCorrectInput();
@@ -42,17 +33,7 @@ namespace top{
   }
 
 
-  void  elecRhoIsoAdder::addRhoIso(top::NTInflatedElectron & elec){
-    checkCorrectInput();
-    double rhoiso=getRhoIso(elec);
-    elec.setRhoIso(rhoiso);
-  }
-
-  void  elecRhoIsoAdder::addRhoIso(std::vector<top::NTInflatedElectron> & electrons){
-    for(std::vector<top::NTInflatedElectron>::iterator elec=electrons.begin();elec<electrons.end();++elec){
-      addRhoIso(*elec);
-    }
-  }
+ 
 
   double elecRhoIsoAdder::Aeff(double suclueta){
     double aeff=0;
