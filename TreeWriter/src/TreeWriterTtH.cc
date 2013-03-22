@@ -170,6 +170,11 @@ top::NTElectron TreeWriterTtH::makeNTElectron(const pat::Electron & electron){
   tempelec.setD0V(d0V); 
   tempelec.setD0Bs(d0Bs); 
 
+  tempelec.setNotConv(electron.passConversionVeto());    
+  tempelec.setId(electron.electronIDs());
+  tempelec.setIso(Iso);                        //
+  tempelec.setMHits(mhits);
+
 
 		       
   if(includereco_){
