@@ -84,7 +84,7 @@ echo "Electron MVA stuff"
 cvs co -r V00-00-13 -d EGamma/EGammaAnalysisTools UserCode/EGamma/EGammaAnalysisTools
 cd EGamma/EGammaAnalysisTools/data
 cat download.url | xargs wget
-#cd ../../../
+cd $CMSSW_BASE/src
 
 echo "MET  Filter"
 
