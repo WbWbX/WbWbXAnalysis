@@ -23,25 +23,25 @@
 
 
 
-90  /MET/Run2012A-13Jul2012-v1/AOD           tree_8TeV_MET_runA_13Jul    includetrigger=true muCone03=false isMC=false globalTag=FT_53_V6_AN2     HCP.json
-20  /MET/Run2012A-recover-06Aug2012-v1/AOD   tree_8TeV_MET_runA_06Aug    includetrigger=true muCone03=false isMC=false globalTag=FT_53_V6C_AN2   HCP.json
-100  /MET/Run2012B-13Jul2012-v1/AOD           tree_8TeV_MET_runB_13Jul    includetrigger=true muCone03=false isMC=false globalTag=FT_53_V6_AN2     HCP.json
-10   /MET/Run2012C-24Aug2012-v1/AOD           tree_8TeV_MET_runC_24Aug    includetrigger=true muCone03=false isMC=false globalTag=FT_53_V10_AN2    HCP.json
-150  /MET/Run2012C-PromptReco-v2/AOD          tree_8TeV_MET_runC_prompt   includetrigger=true muCone03=false isMC=false globalTag=FT_53_V10_AN2    HCP.json
-150  /MET/Run2012D-PromptReco-v1/AOD         tree_8TeV_MET_runD_prompt   includetrigger=true muCone03=false isMC=false globalTag=FT_53_V10_AN2    HCP.json
+90  /MET/Run2012A-13Jul2012-v1/AOD           tree_8TeV_MET_runA_13Jul    includetrigger=true muCone03=false isMC=false globalTag=FT_53_V6C_AN4     ttH.json
+20  /MET/Run2012A-recover-06Aug2012-v1/AOD   tree_8TeV_MET_runA_06Aug    includetrigger=true muCone03=false isMC=false globalTag=FT_53_V6C_AN4   ttH.json
+100  /MET/Run2012B-13Jul2012-v1/AOD           tree_8TeV_MET_runB_13Jul    includetrigger=true muCone03=false isMC=false globalTag=FT_53_V6C_AN4     ttH.json
+10   /MET/Run2012C-24Aug2012-v1/AOD           tree_8TeV_MET_runC_24Aug    includetrigger=true muCone03=false isMC=false globalTag=FT53_V10A_AN4    ttH.json
+150  /MET/Run2012C-PromptReco-v2/AOD          tree_8TeV_MET_runC_prompt   includetrigger=true muCone03=false isMC=false globalTag=GR_P_V42_AN4    ttH.json
+150  /MET/Run2012D-PromptReco-v1/AOD         tree_8TeV_MET_runD_prompt   includetrigger=true muCone03=false isMC=false globalTag=GR_P_V42_AN4    ttH.json
 
-100  /SingleMu/Run2012A-13Jul2012-v1/AOD                tree_8TeV_singlemu_runA_13Jul    includetrigger=true muCone03=false isMC=false globalTag=FT_53_V6_AN2 includereco=true includetrigger=false    HCP.json
-40   /SingleMu/Run2012A-recover-06Aug2012-v1/AOD        tree_8TeV_singlemu_runA_06Aug    includetrigger=true muCone03=false isMC=false globalTag=FT_53_V6C_AN2 includereco=true includetrigger=false   HCP.json
-300  /SingleMu/Run2012B-13Jul2012-v1/AOD                tree_8TeV_singlemu_runB_13Jul    includetrigger=true muCone03=false isMC=false globalTag=FT_53_V6_AN2 includereco=true includetrigger=false    HCP.json
-40   /SingleMu/Run2012C-24Aug2012-v1/AOD                tree_8TeV_singlemu_runC_24Aug    includetrigger=true muCone03=false isMC=false globalTag=FT_53_V10_AN2 includereco=true includetrigger=false   HCP.json
-450  /SingleMu/Run2012C-PromptReco-v2/AOD               tree_8TeV_singlemu_runC_prompt   includetrigger=true muCone03=false isMC=false globalTag=FT_53_V10_AN2 includereco=true includetrigger=false   HCP.json
-#450  /SingleMu/Run2012D-PromptReco-v1/AOD               tree_8TeV_singlemu_runD_prompt   includetrigger=true muCone03=false isMC=false globalTag=FT_53_V10_AN2 includereco=true includetrigger=false   HCP.json
+100  /SingleMu/Run2012A-13Jul2012-v1/AOD                tree_8TeV_singlemu_runA_13Jul    includetrigger=true muCone03=false isMC=false globalTag=FT_53_V6C_AN4 includereco=true includetrigger=false    ttH.json
+40   /SingleMu/Run2012A-recover-06Aug2012-v1/AOD        tree_8TeV_singlemu_runA_06Aug    includetrigger=true muCone03=false isMC=false globalTag=FT_53_V6C_AN4 includereco=true includetrigger=false   ttH.json
+300  /SingleMu/Run2012B-13Jul2012-v1/AOD                tree_8TeV_singlemu_runB_13Jul    includetrigger=true muCone03=false isMC=false globalTag=FT_53_V6C_AN4 includereco=true includetrigger=false    ttH.json
+40   /SingleMu/Run2012C-24Aug2012-v1/AOD                tree_8TeV_singlemu_runC_24Aug    includetrigger=true muCone03=false isMC=false globalTag=FT53_V10A_AN4 includereco=true includetrigger=false   ttH.json
+450  /SingleMu/Run2012C-PromptReco-v2/AOD               tree_8TeV_singlemu_runC_prompt   includetrigger=true muCone03=false isMC=false globalTag=GR_P_V42_AN4 includereco=true includetrigger=false   ttH.json
+#450  /SingleMu/Run2012D-PromptReco-v1/AOD               tree_8TeV_singlemu_runD_prompt   includetrigger=true muCone03=false isMC=false globalTag=GR_P_V42_AN4 includereco=true includetrigger=false   ttH.json
 #not at desy yet
 
-100  /SingleElectron/Run2012A-13Jul2012-v1/AOD           tree_8TeV_singlee_runA_13Jul    includetrigger=true muCone03=false isMC=false globalTag=FT_53_V6_AN2 includereco=true includetrigger=false    HCP.json
-40   /SingleElectron/Run2012A-recover-06Aug2012-v1/AOD   tree_8TeV_singlee_runA_06Aug    includetrigger=true muCone03=false isMC=false globalTag=FT_53_V6C_AN2 includereco=true includetrigger=false   HCP.json
-300  /SingleElectron/Run2012B-13Jul2012-v1/AOD           tree_8TeV_singlee_runB_13Jul    includetrigger=true muCone03=false isMC=false globalTag=FT_53_V6_AN2 includereco=true includetrigger=false    HCP.json
-40   /SingleElectron/Run2012C-24Aug2012-v1/AOD           tree_8TeV_singlee_runC_24Aug    includetrigger=true muCone03=false isMC=false globalTag=FT_53_V10_AN2 includereco=true includetrigger=false   HCP.json
-450  /SingleElectron/Run2012C-PromptReco-v2/AOD          tree_8TeV_singlee_runC_prompt   includetrigger=true muCone03=false isMC=false globalTag=FT_53_V10_AN2 includereco=true includetrigger=false   HCP.json
-#450  /SingleElectron/Run2012D-PromptReco-v1/AOD          tree_8TeV_singlee_runD_prompt   includetrigger=true muCone03=false isMC=false globalTag=FT_53_V10_AN2 includereco=true includetrigger=false   HCP.json
+100  /SingleElectron/Run2012A-13Jul2012-v1/AOD           tree_8TeV_singlee_runA_13Jul    includetrigger=true muCone03=false isMC=false globalTag=FT_53_V6C_AN4 includereco=true includetrigger=false    ttH.json
+40   /SingleElectron/Run2012A-recover-06Aug2012-v1/AOD   tree_8TeV_singlee_runA_06Aug    includetrigger=true muCone03=false isMC=false globalTag=FT_53_V6C_AN4 includereco=true includetrigger=false   ttH.json
+300  /SingleElectron/Run2012B-13Jul2012-v1/AOD           tree_8TeV_singlee_runB_13Jul    includetrigger=true muCone03=false isMC=false globalTag=FT_53_V6C_AN4 includereco=true includetrigger=false    ttH.json
+40   /SingleElectron/Run2012C-24Aug2012-v1/AOD           tree_8TeV_singlee_runC_24Aug    includetrigger=true muCone03=false isMC=false globalTag=FT53_V10A_AN4 includereco=true includetrigger=false   ttH.json
+450  /SingleElectron/Run2012C-PromptReco-v2/AOD          tree_8TeV_singlee_runC_prompt   includetrigger=true muCone03=false isMC=false globalTag=GR_P_V42_AN4 includereco=true includetrigger=false   ttH.json
+#450  /SingleElectron/Run2012D-PromptReco-v1/AOD          tree_8TeV_singlee_runD_prompt   includetrigger=true muCone03=false isMC=false globalTag=GR_P_V42_AN4 includereco=true includetrigger=false   ttH.json
 #not at desy yet
