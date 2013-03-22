@@ -19,10 +19,6 @@
   <class name="std::vector<top::NTTrack>"/>
   <class name="top::NTSuClu"/>
   <class name="std::vector<top::NTSuClu>"/>
-  <class name="top::NTInflatedMuon"/>
-  <class name="std::vector<top::NTInflatedMuon>"/>
-  <class name="top::NTInflatedElectron"/>
-  <class name="std::vector<top::NTInflatedElectron>"/>
   <class name="top::NTGenLepton"/>
   <class name="std::vector<top::NTGenLepton>"/>
   <class name="top::NTGenParticle"/>

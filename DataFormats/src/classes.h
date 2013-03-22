@@ -11,9 +11,6 @@
 #include "../interface/NTSuClu.h"
 #include "../interface/NTTrigger.h"
 
-#include "../interface/NTInflatedMuon.h"
-#include "../interface/NTInflatedElectron.h"
-
 
 
 #include "../interface/NTGenLepton.h"
@@ -51,10 +48,6 @@ namespace
     top::NTTrigger dummy21;
     std::vector<top::NTTrigger> dummy22;
 
-    top::NTInflatedMuon ihih;
-    std::vector<top::NTInflatedMuon> kkk;
-    top::NTInflatedElectron issshih;
-    std::vector<top::NTInflatedElectron> kkssk;
 
 
     std::map<std::string, double> ksdjsda;
