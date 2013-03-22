@@ -15,4 +15,10 @@ echo 'deleting tools not compiling in CMSSW_4_4_X'
 
 
 rm -f ${CMSSW_BASE}/src/TtZAnalysis/Tools/src/container*
+rm -f ${CMSSW_BASE}/src/TtZAnalysis/Tools/src/classes.h
+rm -f ${CMSSW_BASE}/src/TtZAnalysis/Tools/src/classes_def.xml
 rm -f ${CMSSW_BASE}/src/TtZAnalysis/Tools/interface/container*
+
+rm -f ${CMSSW_BASE}/src/RecoMET/METFilters/plugins/EcalDeadCellBoundaryEnergyFilter.cc
+rm -f ${CMSSW_BASE}/src/RecoMET/METFilters/plugins/HcalLaserEventFilter.cc
+rm -f ${CMSSW_BASE}/src/RecoMET/METFilters/plugins/EcalLaserCorrFilter.cc
