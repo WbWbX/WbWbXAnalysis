@@ -38,9 +38,9 @@ cvs co -d TopAnalysis/TopUtils/python/ UserCode/Bromo/TopAnalysis/TopUtils/pytho
 cvs co -d TopAnalysis/TopUtils/python/ UserCode/Bromo/TopAnalysis/TopUtils/python/GenJetParticles_cff.py
 cvs co -d TopAnalysis/TopUtils/python/ UserCode/Bromo/TopAnalysis/TopUtils/python/GenJetParticles_cfi.py
 
-cvs co -d TopAnalysis/TopUtils/plugins /UserCode/Bromo/TopAnalysis/TopUtils/plugins/GenLevelBJetProducer.cc
-cvs co -d TopAnalysis/TopUtils/plugins /UserCode/Bromo/TopAnalysis/TopUtils/plugins/myInputGenJetsParticleSelector.cc
-cvs co -d TopAnalysis/TopUtils/plugins /UserCode/Bromo/TopAnalysis/TopUtils/plugins/myInputGenJetsParticleSelector.h
+cvs co -d TopAnalysis/TopUtils/plugins UserCode/Bromo/TopAnalysis/TopUtils/plugins/GenLevelBJetProducer.cc
+cvs co -d TopAnalysis/TopUtils/plugins UserCode/Bromo/TopAnalysis/TopUtils/plugins/myInputGenJetsParticleSelector.cc
+cvs co -d TopAnalysis/TopUtils/plugins UserCode/Bromo/TopAnalysis/TopUtils/plugins/myInputGenJetsParticleSelector.h
 
 #runallStuff
 
