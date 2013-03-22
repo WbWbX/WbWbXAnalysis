@@ -148,6 +148,7 @@ top::NTElectron TreeWriterTtZ::makeNTElectron(const pat::Electron & electron){
 
   if(!(electron.gsfTrack().isNull())){
     vz=electron.gsfTrack()->dz(vtxs[0].position());                   //
+    vzbs=electron.gsfTrack()->dz(beamSpotPosition);                   //
     vzerr=electron.gsfTrack()->dzError();  
     d0V=fabs(electron.gsfTrack()->dxy(vtxs[0].position()));
     d0Bs=fabs(electron.gsfTrack()->dxy(beamSpotPosition));
@@ -156,6 +157,7 @@ top::NTElectron TreeWriterTtZ::makeNTElectron(const pat::Electron & electron){
   }              //
   else if(!(electron.closestCtfTrackRef()).isNull()){
     vz=electron.closestCtfTrackRef()->dz(vtxs[0].position());                   //
+    vzbs=electron.closestCtfTrackRef()->dz(beamSpotPosition);                   //
     vzerr=electron.closestCtfTrackRef()->dzError();  
     d0V=fabs(electron.closestCtfTrackRef()->dxy(vtxs[0].position()));
     d0Bs=fabs(electron.closestCtfTrackRef()->dxy(beamSpotPosition));

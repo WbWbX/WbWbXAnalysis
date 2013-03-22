@@ -150,6 +150,7 @@ top::NTElectron TreeWriterTtH::makeNTElectron(const pat::Electron & electron){
 
   if(!(electron.gsfTrack().isNull())){
     vz=electron.gsfTrack()->dz(vtxs[0].position());                   //
+    vzbs=electron.gsfTrack()->dz(beamSpotPosition);                   //
     vzerr=electron.gsfTrack()->dzError();  
     d0V=fabs(electron.gsfTrack()->dxy(vtxs[0].position()));
     d0Bs=fabs(electron.gsfTrack()->dxy(beamSpotPosition));
@@ -158,20 +159,16 @@ top::NTElectron TreeWriterTtH::makeNTElectron(const pat::Electron & electron){
   }              //
   else if(!(electron.closestCtfTrackRef()).isNull()){
     vz=electron.closestCtfTrackRef()->dz(vtxs[0].position());                   //
+    vzbs=electron.closestCtfTrackRef()->dz(beamSpotPosition);                   //
     vzerr=electron.closestCtfTrackRef()->dzError();  
     d0V=fabs(electron.closestCtfTrackRef()->dxy(vtxs[0].position()));
     d0Bs=fabs(electron.closestCtfTrackRef()->dxy(beamSpotPosition));
   }
   tempelec.setDzV(vz);                   //
   tempelec.setDzVErr(vzerr);  
-  tempelec.setDzBs(vzbs);  
-  tempelec.setD0Bs(d0Bs);   
-  tempelec.setD0V(d0V);     
-             //
-  tempelec.setNotConv(electron.passConversionVeto());    
-  tempelec.setId(electron.electronIDs());
-  tempelec.setIso(Iso);                        //
-  tempelec.setMHits(mhits);
+  tempelec.setDzBs(vzbs);     
+  tempelec.setD0V(d0V); 
+  tempelec.setD0Bs(d0Bs); 
 
 
 		       

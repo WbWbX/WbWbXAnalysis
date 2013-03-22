@@ -350,6 +350,11 @@ else:
 
 #from PhysicsTools.PatAlgos.patTemplate_cfg import *
 
+
+filtervertices=True
+if isSignal:
+    filtervertices=False
+
 ## The good primary vertex filter ____________________________________________||
 process.primaryVertexFilter = cms.EDFilter(
     "VertexSelector",
@@ -409,7 +414,8 @@ process.filtersSeq = cms.Sequence(
    process.CSCTightHaloFilter *
    process.hcalLaserEventFilter *
    process.EcalDeadCellTriggerPrimitiveFilter *
-   process.goodVertices * process.trackingFailureFilter *
+   process.goodVertices * 
+   process.trackingFailureFilter *
    process.eeBadScFilter #*
    #process.ecalLaserCorrFilter * ##is already in prefilterseq... nasty but ok
    #process.trkPOGFilters
@@ -423,7 +429,8 @@ if is2011:
         process.CSCTightHaloFilter *
         #process.hcalLaserEventFilter *
        # process.EcalDeadCellTriggerPrimitiveFilter *
-        process.goodVertices * process.trackingFailureFilter *
+        process.goodVertices * 
+        process.trackingFailureFilter *
         process.eeBadScFilter #*
         #process.ecalLaserCorrFilter * ##is already in prefilterseq... nasty but ok
         #process.trkPOGFilters
@@ -447,9 +454,6 @@ if not isSignal:
 
 #from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
 
-filtervertices=True
-if isSignal:
-    filtervertices=False
 
 process.goodOfflinePrimaryVertices = cms.EDFilter( "PrimaryVertexObjectFilter" , 
                                                    filterParams = cms.PSet( minNdof = cms.double( 4. ) , 
@@ -677,15 +681,15 @@ process.treeJets.cut = 'eta < 5 && pt>5' # unfortunately starting at 10 GeV are 
 
 process.kinMuons = process.selectedPatMuons.clone()
 process.kinMuons.src = 'patMuons' + pfpostfix
-process.kinMuons.cut = cms.string('pt > 18  && abs(eta) < 2.7')
+process.kinMuons.cut = cms.string('pt > 8  && abs(eta) < 2.7')
 
 process.kinElectrons = process.selectedPatElectrons.clone()
 process.kinElectrons.src = 'patElectrons' + pfpostfix
-process.kinElectrons.cut = cms.string( 'pt > 10  && abs(eta) < 2.7') # because of ECalP4 to be on the safe side
+process.kinElectrons.cut = cms.string( 'pt > 8  && abs(eta) < 2.7') # because of ECalP4 to be on the safe side
 
 process.kinPFElectrons = process.selectedPatElectrons.clone()
 process.kinPFElectrons.src = 'patPFElectrons' + pfpostfix
-process.kinPFElectrons.cut = cms.string( 'pt > 10  && abs(eta) < 2.7')
+process.kinPFElectrons.cut = cms.string( 'pt > 8  && abs(eta) < 2.7')
 
 
 process.MuonGSFMerge = cms.EDProducer("CandViewMerger",
