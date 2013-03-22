@@ -355,7 +355,7 @@ process.primaryVertexFilter = cms.EDFilter(
     "VertexSelector",
     src = cms.InputTag("offlinePrimaryVertices"),
     cut = cms.string("!isFake && ndof > 4 && abs(z) <= 24 && position.Rho <= 2"),
-    filter = cms.bool(True)
+    filter = cms.bool(filtervertices)
     )
 
 ## The beam scraping filter __________________________________________________||
@@ -447,11 +447,15 @@ if not isSignal:
 
 #from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
 
+filtervertices=True
+if isSignal:
+    filtervertices=False
+
 process.goodOfflinePrimaryVertices = cms.EDFilter( "PrimaryVertexObjectFilter" , 
                                                    filterParams = cms.PSet( minNdof = cms.double( 4. ) , 
                                                                             maxZ = cms.double( 24. ) , 
                                                                             maxRho = cms.double( 2. ) ) , 
-                                                   filter = cms.bool( True) , 
+                                                   filter = cms.bool( filtervertices) , 
                                                    src = cms.InputTag( 'offlinePrimaryVertices' ) )
 #
 
