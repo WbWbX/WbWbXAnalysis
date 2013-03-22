@@ -10,6 +10,7 @@ options.register ('crab',False,VarParsing.VarParsing.multiplicity.singleton,VarP
 options.register ('globalTag','START53_V7G',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"global tag")
 options.register ('reportEvery',1000,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.int,"report every")
 options.register ('maxEvents',-1,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.int,"maximum events")
+options.register ('skipEvents', 0, VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, "skip N events")
 options.register ('outputFile','def_out',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"output File (w/o .root)")
 options.register ('isMC',True,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"is MC")
 options.register ('genFilter','none',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"gen Filter")
@@ -26,6 +27,7 @@ options.register ('json','nojson',VarParsing.VarParsing.multiplicity.singleton,V
 options.register ('isSync',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"switch on for sync")
 options.register('samplename', 'standard', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "which sample to run over - obsolete")
 options.register ('laseroff',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"use ECal Laser filter")
+
 
 
 options.register ('isSignal',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"is SignalMC")
@@ -156,6 +158,7 @@ if isMC and is2011:
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(wantSummary))
 
 
+
 #Message Logger Stuff
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.MessageLogger.destinations = ['cout', 'cerr']
@@ -175,6 +178,8 @@ if not inputScript=='':
 
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32 (maxEvents) )
+if options.skipEvents > 0:
+    process.source.skipEvents = cms.untracked.uint32(options.skipEvents)
 
 #########JSON###
 # limit to json file (if passed as parameter)
