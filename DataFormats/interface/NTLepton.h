@@ -14,8 +14,11 @@ class NTLepton{
   void setP4(LorentzVector p4In){p4_=p4In;}
   void setP4(PolarLorentzVector p4In){p4_=p4In;}
   void setQ(int qIn){q_=qIn;}
-  void setDz(double DZ){dZ_=DZ;}
-  void setDzErr(double DZErr){dZErr_=DZErr;}
+  void setDzV(double DZV){dZV_=DZV;}
+  void setDzVErr(double DZErr){dZVErr_=DZErr;}
+  void setDzBs(double in){dZBs_=in;}
+  void setD0V(double in){d0V_=in;}
+  void setD0Bs(double in){d0Bs_=in;}
 
   void setGenMatch(int matchid){genid_=matchid;}
   void setGenP4(PolarLorentzVector genP4In){genP4_=genP4In;}
@@ -31,8 +34,11 @@ class NTLepton{
   double eta(){return p4_.Eta();}
   double m(){return p4_.M();}
   int q(){ return q_;}
-  double dZ(){return dZ_;}
-  double dZErr(){return dZErr_;}
+  double dzV(){return dZV_;}
+  double dzVErr(){return dZVErr_;}
+  double dZBs(){return dZBs_;}
+  double d0V(){return d0V_;}
+  double d0Bs(){return d0Bs_;}
 
   int genMatch(){return genid_;}
 
@@ -41,8 +47,11 @@ class NTLepton{
   PolarLorentzVector p4_;  
   int q_;
   PolarLorentzVector genP4_;
-  double dZ_;
-  double dZErr_;
+  double dZV_;
+  double dZVErr_;
+  double dZBs_;
+  double d0Bs_;
+  double d0V_;
   int genid_;
 
 

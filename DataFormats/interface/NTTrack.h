@@ -13,8 +13,8 @@ namespace top{
 
     void setP4(LorentzVector p4In){p4_=p4In;}
     void setQ(int qIn){q_=qIn;}
-    void setDz(double Dz){dz_=Dz;}
-    void setDzErr(double DzErr){dzErr_=DzErr;}
+    void setDzV(double Dz){dzV_=Dz;}
+    void setDzVErr(double DzErr){dzVErr_=DzErr;}
 
     const PolarLorentzVector & p4(){return p4_;}
     double pt(){return p4_.Pt();}
@@ -22,13 +22,13 @@ namespace top{
     double eta(){return p4_.Eta();}
     double p() {return p4_.E();}
     int q(){ return q_;}
-    double dz(){return dz_;}
-    double dzErr(){return dzErr_;}
+    double dzV(){return dzV_;}
+    double dzVErr(){return dzVErr_;}
   protected:
     PolarLorentzVector p4_;
     int q_;
-    double dz_;
-    double dzErr_;
+    double dzV_;
+    double dzVErr_;
 
   };
 

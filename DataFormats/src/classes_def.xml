@@ -38,5 +38,8 @@
   <class name="std::vector<top::NTJERAdjuster>"/>
   <class name="top::NTTrigger"/>
   <class name="std::vector<top::NTTrigger>"/>
+  <class name="std::map<std::string,double>"/>
+  <class name="std::map<int,double>"/>
+
 </lcgdict>
  

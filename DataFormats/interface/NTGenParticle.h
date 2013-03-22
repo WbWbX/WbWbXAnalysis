@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "mathdefs.h"
+#include <map>
 
 namespace top{
 
@@ -47,6 +48,30 @@ namespace top{
     void clearDaughters(){daughterits_.clear();}
     void clearMothers(){motherits_.clear();}
 
+    //extra
+
+    void setMember(std::string Membername, double value){
+      memberss_[Membername]=value;
+    }
+    double getMember(std::string membername){
+      if(memberss_.find(membername) != memberss_.end())
+	return memberss_.find(membername)->second;
+      else
+	return -99999999999;
+    }
+    void setMember(int Memberidx, double value){
+      members_[Memberidx]=value;
+    }
+    double getMember(int memberidx){
+      if(members_.find(memberidx) != members_.end())
+	return members_.find(memberidx)->second;
+      else
+	return -99999999999;
+    }
+
+
+
+
   protected:
 
 
@@ -54,6 +79,9 @@ namespace top{
     PolarLorentzVector p4_;
     std::vector<size_t> motherits_,daughterits_;
     //std::vector<int> mothers_, daughters_;
+
+    std::map<std::string, double> memberss_;
+    std::map<int, double> members_;
 
   };
 }

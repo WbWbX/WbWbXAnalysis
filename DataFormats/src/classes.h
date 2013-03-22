@@ -57,6 +57,9 @@ namespace
     std::vector<top::NTInflatedElectron> kkssk;
 
 
+    std::map<std::string, double> ksdjsda;
+    std::map<int, double> ijdfj;
+
     top::NTGenLepton ihisdh;
     std::vector<top::NTGenLepton> asfkkk;
 

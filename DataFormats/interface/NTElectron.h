@@ -9,6 +9,7 @@
 #include <string>
 
 #include <utility>
+#include <map>
 
 namespace top{
 
@@ -72,6 +73,29 @@ namespace top{
     int mHits(){return mHits_;}
     bool isPf(){return ispf_;}
 
+
+ //extra
+
+    void setMember(std::string Membername, double value){
+      memberss_[Membername]=value;
+    }
+    double getMember(std::string membername){
+      if(memberss_.find(membername) != memberss_.end())
+	return memberss_.find(membername)->second;
+      else
+	return -99999999999;
+    }
+    void setMember(int Memberidx, double value){
+      members_[Memberidx]=value;
+    }
+    double getMember(int memberidx){
+      if(members_.find(memberidx) != members_.end())
+	return members_.find(memberidx)->second;
+      else
+	return -99999999999;
+    }
+
+
   protected:
     float mvaId_;
     top::NTSuClu suClu_;
@@ -85,6 +109,9 @@ namespace top{
     int mHits_;
 
     std::vector<std::string> matchedTrig_;
+
+    std::map<std::string, double> memberss_;
+    std::map<int, double> members_;
 
   };
 
