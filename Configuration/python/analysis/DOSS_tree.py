@@ -183,7 +183,7 @@ if isMC:
     realdata=False
 if realdata and not (json=="nojson"):
     import os
-    jsonpath = os.environ['CMSSW_BASE']+'/src/TtZAnalysis/Data/data/'+json 
+    jsonpath = json 
 
     import FWCore.PythonUtilities.LumiList as LumiList
     import FWCore.ParameterSet.Types as CfgTypes
@@ -413,6 +413,20 @@ process.filtersSeq = cms.Sequence(
    process.eeBadScFilter #*
    #process.ecalLaserCorrFilter * ##is already in prefilterseq... nasty but ok
    #process.trkPOGFilters
+)
+
+if is2011:
+    process.filtersSeq = cms.Sequence(
+        process.primaryVertexFilter *
+        process.noscraping *
+        process.HBHENoiseFilter *
+        process.CSCTightHaloFilter *
+        #process.hcalLaserEventFilter *
+       # process.EcalDeadCellTriggerPrimitiveFilter *
+        process.goodVertices * process.trackingFailureFilter *
+        process.eeBadScFilter #*
+        #process.ecalLaserCorrFilter * ##is already in prefilterseq... nasty but ok
+        #process.trkPOGFilters
 )
 
 if isMC:
