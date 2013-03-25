@@ -32,7 +32,7 @@ namespace top{
       }
     }
     void setIso(top::NTIsolation Iso){iso_=Iso;}
-    void setRhoIso(double rhoIso){rhoIso_=rhoIso;}
+    void setRhoIso(double RhoIso){rhoIso_=RhoIso;}
     //void setIso04(top::NTIsolation Iso04){iso04_=Iso04;}
 
     void setMatchedTrig(std::vector<std::string> MatchedTrig){matchedTrig_=MatchedTrig;}
