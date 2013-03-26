@@ -16,7 +16,7 @@ void make2dplots(TString inputfile, TString plot, TString channel){
 
   TFile *f = new TFile(inputfile);
 
-  std::vector<TString> plots; plots << plot+"_eff" << plot+"_effMC" << "scalefactor_"+plot;
+  std::vector<TString> plots; plots << plot+"_eff" << plot+"_effMC" << plot+"_scalefactor" << plot+ "_scalefactor_with_syst" ;
   //std::vector<TString> plots;plots<< "scalefactor "+plot;
 
   TCanvas *c = new TCanvas();
@@ -27,7 +27,7 @@ void make2dplots(TString inputfile, TString plot, TString channel){
     std::cout << "gStyle not available" <<std::endl;
 
   for(unsigned int i=0;i<plots.size();i++){
-    std::cout << "checking " << plots.at(i) << std::endl;
+    //    std::cout << "checking " << plots.at(i) << std::endl;
     if(!(f->Get(plots.at(i)))){
       std::cout << "plot " << plots.at(i) << " not found" << std::endl;
       continue;
@@ -85,7 +85,7 @@ void makeplot(TString inputfile, TString plot, TString channel){
     TFile *f = new TFile(inputfile);
 
 
- std::cout << "searching for plot " << plot << " " << channel << std::endl;
+    //std::cout << "searching for plot " << plot << " " << channel << std::endl;
       
 
     if(f->Get(plot) && ((TString)f->Get(plot)->ClassName()).Contains("TH2D")){
@@ -94,14 +94,14 @@ void makeplot(TString inputfile, TString plot, TString channel){
     if(f->Get(plot +"_eff") && (((TString)f->Get(plot +"_eff")->ClassName()).Contains("TH2D"))){
       make2dplots(inputfile, plot, channel);
     }
-    if(f->Get("scalefactor_"+plot) && (((TString)f->Get("scalefactor_"+plot)->ClassName()).Contains("TH2D"))){
+    if(f->Get(plot+"_scalefactor") && (((TString)f->Get(plot+"_scalefactor")->ClassName()).Contains("TH2D"))){
       make2dplots(inputfile, plot, channel);
     }
     else{
       if(!(f->Get(plot+"_eff")) || !(f->Get(plot+"_eff")))
 	 return;
 
-      std::cout << "making 1D plot for " << plot << " " << channel << std::endl;
+      //   std::cout << "making 1D plot for " << plot << " " << channel << std::endl;
       
       TCanvas * c = new TCanvas();
       c->Clear();
@@ -109,8 +109,8 @@ void makeplot(TString inputfile, TString plot, TString channel){
 
       TH1D *h = (TH1D*)f->Get("axis_"+plot);
 
-      TGraphAsymmErrors *sfc=(TGraphAsymmErrors*) f->Get("scalefactor_"+plot+"_incl_corrErr");
-      TGraphAsymmErrors *sf=(TGraphAsymmErrors*) f->Get("scalefactor_"+plot);
+      TGraphAsymmErrors *sfc=(TGraphAsymmErrors*) f->Get(plot+"_scalefactor_incl_corrErr");
+      TGraphAsymmErrors *sf=(TGraphAsymmErrors*) f->Get(plot+"_scalefactor");
       TGraphAsymmErrors *d=(TGraphAsymmErrors*) f->Get(plot+"_eff");
       TGraphAsymmErrors *mc=(TGraphAsymmErrors*) f->Get(plot+"_effMC");
 
@@ -201,13 +201,13 @@ void makeplot(TString inputfile, TString plot, TString channel){
 
     std::vector<TString> channels, plots;
     channels << "ee" << "mumu" << "emu" ;
-    plots << "eta2d" << "eta2d_with_syst" << "pt" << "eta" << "dphi" << "dphi2" << "vmulti" << "jetmulti" << "drlep";
+    plots << "eta2d" <<  "pt" << "eta" << "dphi" << "dphi2" << "vmulti" << "jetmulti" << "drlep";
 
  
 
     for(unsigned int i=0;i<channels.size();i++){
       for(unsigned int j=0;j<plots.size();j++){
-	std::cout << "making plot for " << "triggerSummary_"+channels.at(i)+".root" << " plot "  << plots.at(j) <<endl;
+	//	std::cout << "making plot for " << "triggerSummary_"+channels.at(i)+".root" << " plot "  << plots.at(j) <<endl;
 	makeplot(rootsdir+"triggerSummary_"+channels.at(i)+".root", plots.at(j),channels.at(i));
       }
     }
