@@ -29,9 +29,6 @@ using namespace std;
 // NOOOOO relative paths!!
 
 double ratiomultiplier=0;
-TString whichelectrons_="NTPFElectrons";
-
-bool useRhoIso=false;
 
 double jetptcut=30;
 
@@ -53,9 +50,8 @@ public:
     TH1::AddDirectory(kFALSE);
     mode_=0;
     isMC_=false;
-
     breakat5fb_=false;
-
+    includecorr_=true;
   }
   ~triggerAnalyzer(){};
 
@@ -97,7 +93,7 @@ public:
 
   void setPUFile(TString file){pufile_=file;};
 
-
+  void setIncludeCorr(bool inc){includecorr_=inc;}
 
   std::vector<double> Eff(){
 
@@ -319,7 +315,7 @@ public:
 
     for(size_t i=0;i<container1D::c_list.size();i++){
 
-      std::cout << container1D::c_list.at(i)->getName() <<std::endl;
+      //  std::cout << container1D::c_list.at(i)->getName() <<std::endl;
 
     }
 
@@ -444,7 +440,7 @@ public:
     Long64_t n = t_->GetEntries();
     cout  << "Entries in tree: " << n << endl;
 
-    n*=0.001;
+    //TRAPTEST//   n*=0.001;
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     for(Long64_t i=0;i<n;i++){  //main loop
@@ -551,7 +547,9 @@ public:
 	}
 
       }
-      if(!isMC_ && !firedMet) continue;
+      if(includecorr_ && !firedMet) continue;
+      
+      if(!includecorr_ && !isMC_ && !firedMet) continue;
 
       // lepton selection and event selection (at least two leptons etc)
 
@@ -1009,6 +1007,7 @@ protected:
   bool isMC_;
   bool checktriggerpaths_;
   bool coutalltriggerpaths_;
+  bool includecorr_;
   int mode_; // -1: ee 0: emu 1:mumu
   TString pufile_;
 
