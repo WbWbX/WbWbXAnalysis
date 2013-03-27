@@ -279,22 +279,22 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	for(size_t  i=0;i<mother->numberOfDaughters();i++){
 	  daughter = dynamic_cast<const reco::GenParticle*>(mother->daughter(i));
 	  if(isInGenCollection(daughter, mergedgen)){
-	    tempntgen.setDaughter(smallIdMap.at(daughter));
+	    tempntgen.setDaughter(smallIdMap.find(daughter)->second);
 	    gotdaugh=true;
 	  }
 	}
 	if(!gotdaugh && mothdaugh.find(mother) != mothdaugh.end()){
-	  tempntgen.setDaughter(smallIdMap.at(mothdaugh.at(mother)));
+	  tempntgen.setDaughter(smallIdMap.find(mothdaugh.at(mother))->second);
 	}
 	for(size_t  i=0;i<mother->numberOfMothers();i++){
 	  const reco::GenParticle* mothmoth = dynamic_cast<const reco::GenParticle*>(mother->mother(i));
 	  if(isInGenCollection(mothmoth, mergedgen)){
-	    tempntgen.setMother(smallIdMap.at(mothmoth));
+	    tempntgen.setMother(smallIdMap.find(mothmoth)->second);
 	    gotmoth=true;
 	  }
 	}
 	if(!gotmoth && daughmoth.find(mother) != daughmoth.end()){
-	  tempntgen.setMother(smallIdMap.at(daughmoth.at(mother)));
+	  tempntgen.setMother(smallIdMap.find(daughmoth.at(mother))->second);
 	}
 	
 
@@ -477,50 +477,49 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    if(debugmode) std::cout << "electron loops" << std::endl;
 
-     for(size_t i=0;i<pfelecs->size();i++){
-     
-       top::NTElectron tempelec;
-          tempelec=makeNTElectron(pfelecs->at(i));
+ 
+     ////Electrons/////
 
-       //if(electron->ecalDrivenMomentum())
-       int genidx=findGenMatchIdx(&pfelecs->at(i),allntgen,0.4);
-       //do gen asso
-       if(genidx>=0){
-	 tempelec.setGenMatch(genidx);
-	 tempelec.setGenP4(allntgen.at(genidx).p4());
+
+     edm::Handle<std::vector<pat::Electron> >  temppatelecs=gsfelecs;
+
+     for(size_t vecs=0;vecs<2;vecs++){
+
+       for(size_t i=0;i<temppatelecs->size();i++){
+     
+	 top::NTElectron tempelec;
+	 tempelec=makeNTElectron(temppatelecs->at(i));
+
+	 int genidx=-1;
+
+	 if(temppatelecs->at(i).genParticle()){ // pat genmatch exists;
+
+	   if(smallIdMap.find(temppatelecs->at(i).genParticle()) != smallIdMap.end())
+	     genidx=smallIdMap.find(temppatelecs->at(i).genParticle())->second;                // use pat match
+	   else
+	     genidx=findGenMatchIdx(temppatelecs->at(i).genParticle(),allntgen,0.1); //match pat match to closest from ntgen collection
+
+	   if(genidx>=0){
+	     tempelec.setGenMatch(genidx);
+	     tempelec.setGenP4(allntgen.at(genidx).p4());
+	   }
+	   // else: particle is not coming (directly) coming from signal process (or higher order - not reflected in ntallgen)
+	
+	 }
+	 else{
+	   tempelec.setGenP4(p4zero);
+	   tempelec.setGenMatch(-1);
+	 }
+	 if(vecs ==0)
+	   ntgsfelectrons.push_back(tempelec);
+	 if(vecs ==1)
+	   ntpfelectrons.push_back(tempelec);
        }
-       else{
-	 tempelec.setGenP4(p4zero);
-	 tempelec.setGenMatch(-1);
-       }
-       
-       ntpfelectrons.push_back(tempelec);
+
+       temppatelecs=pfelecs;
 
      }
-     ////gsf electron/////
-
-
-     for(size_t i=0;i<gsfelecs->size();i++){
-     
-       top::NTElectron tempelec;
-         tempelec=makeNTElectron(gsfelecs->at(i));
-
-       int genidx=findGenMatchIdx(&gsfelecs->at(i),allntgen,0.4);
-     
-       if(genidx>=0){
-	 tempelec.setGenMatch(genidx);
-	 tempelec.setGenP4(allntgen.at(genidx).p4());
-       }
-       else{
-	 tempelec.setGenP4(p4zero);
-	 tempelec.setGenMatch(-1);
-       }
-
-       ntgsfelectrons.push_back(tempelec);
-
-
-     }
-
+   
 
      /////////////////////////////////// M U O N S//////////////////
    
@@ -532,16 +531,26 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        top::NTMuon tempmuon;
        tempmuon=makeNTMuon(muons->at(i));
 
-       int genidx=findGenMatchIdx(&muons->at(i),allntgen,0.4);
-       //do gen asso
-       if(genidx>=0){
-	 tempmuon.setGenMatch(genidx);
-	 tempmuon.setGenP4(allntgen.at(genidx).p4());
-       }
-       else{
-	 tempmuon.setGenP4(p4zero);
-	 tempmuon.setGenMatch(-1);
-       }
+       int genidx=-1;
+
+	 if(muons->at(i).genParticle()){ // pat genmatch exists;
+
+	   if(smallIdMap.find(muons->at(i).genParticle()) != smallIdMap.end())
+	     genidx=smallIdMap.find(muons->at(i).genParticle())->second;                // use pat match
+	   else
+	     genidx=findGenMatchIdx(muons->at(i).genParticle(),allntgen,0.1); //match pat match to closest from ntgen collection
+
+	   if(genidx>=0){
+	     tempmuon.setGenMatch(genidx);
+	     tempmuon.setGenP4(allntgen.at(genidx).p4());
+	   }
+	   // else: particle is not coming (directly) coming from signal process (or higher order - not reflected in ntallgen)
+	 }
+	 else{
+	   tempmuon.setGenP4(p4zero);
+	   tempmuon.setGenMatch(-1);
+	 }
+      
 
        ntmuons.push_back(tempmuon);
      }
@@ -949,7 +958,7 @@ bool TreeWriterBase::checkJetID(const pat::Jet & jet)
 {
   bool hasjetID=false;
   if(jet.numberOfDaughters() > 1 &&
-     jet.neutralHadronEnergyFraction() < 0.99 &&
+     (jet.neutralHadronEnergyFraction() + jet.HFHadronEnergy() / jet.energy() ) < 0.99 &&
      jet.neutralEmEnergyFraction() < 0.99){
     if(fabs(jet.eta())<2.4){
       if( jet.chargedMultiplicity() > 0 &&
@@ -1052,6 +1061,9 @@ bool  TreeWriterBase::isInGenCollection(const reco::GenJet * p, const std::vecto
 
 template<class t, class u>
 int TreeWriterBase::findGenMatchIdx(t * patinput , std::vector<u> & gen, double dR){
+
+  double Dptmax=0.5;
+
   if(!patinput)
     return -1;
 
@@ -1064,7 +1076,7 @@ int TreeWriterBase::findGenMatchIdx(t * patinput , std::vector<u> & gen, double 
       idx=i;
     }
   }
-  if(drmin2 < dR*dR)
+  if(drmin2 < dR*dR && Dptmax > fabs(patinput->pt() - gen.at(idx).pt())/patinput->pt())
     return idx;
   else
     return -1;
