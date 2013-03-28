@@ -21,7 +21,9 @@ PFTree   = cms.EDAnalyzer('TreeWriterTtH',
 
                           writeMatchedHLTObjects = cms.vstring("HLT_IsoMu24_v*",
                                                                "HLT_IsoMu24_eta2p1_v*",
-                                                               "HLT_Ele27_WP80_v*"),
+                                                               "HLT_Ele27_WP80_v*",
+                                                               "hltL3MuonCandidates",
+                                                               "hltL3ElectronCandidates"),
                           
                                   
                           includeTrigger = cms.bool(True),
