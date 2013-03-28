@@ -7,12 +7,12 @@ public:
   explicit TreeWriterTtH(const edm::ParameterSet & ParSet) : TreeWriterBase(ParSet) {
 
 
-    checkMatchedHLTPaths_    =ParSet.getParameter<std::vector<std::string> >        ("checkMatchedHLTPaths");
+    writeMatchedHLTObjects_    =ParSet.getParameter<std::vector<std::string> >        ("writeMatchedHLTObjects");
 
-    //   checkMatchedHLTPaths_ << "HLT_IsoMu24_v" << "HLT_IsoMu24_eta2p1_v";
-    std::cout << "Writing matched triggers:" << std::endl;
-    for(size_t i=0;i<checkMatchedHLTPaths_.size() ;i++)
-      std::cout << checkMatchedHLTPaths_.at(i) << " " ;
+    //   writeMatchedHLTObjects_ << "HLT_IsoMu24_v" << "HLT_IsoMu24_eta2p1_v";
+    std::cout << "Writing matched triggersObjects:" << std::endl;
+    for(size_t i=0;i<writeMatchedHLTObjects_.size() ;i++)
+      std::cout << writeMatchedHLTObjects_.at(i) << " " ;
     std::cout << std::endl;
     
 
@@ -29,7 +29,7 @@ public:
   top::NTJet makeNTJet(const pat::Jet &);
 
 
-  std::vector<std::string> checkMatchedHLTPaths_;
+  std::vector<std::string> writeMatchedHLTObjects_;
 
 
 };
@@ -113,10 +113,13 @@ top::NTMuon TreeWriterTtH::makeNTMuon(const pat::Muon & muon){
   if(includereco_){
 
     std::vector<std::string> matched;
-    for(size_t i=0;i<checkMatchedHLTPaths_.size();i++){
-      if(muon.triggerObjectMatchesByPath(checkMatchedHLTPaths_.at(i)).size() > 0)
-	//	std::cout << "found matched object to path " << checkMatchedHLTPaths_.at(i) << std::endl;
-	matched << checkMatchedHLTPaths_[i];
+    for(size_t i=0;i<writeMatchedHLTObjects_.size();i++){
+      if(muon.triggerObjectMatchesByPath(writeMatchedHLTObjects_.at(i)).size() > 0)
+	matched << writeMatchedHLTObjects_[i];
+      if(muon.triggerObjectMatchesByCollection(writeMatchedHLTObjects_.at(i)).size() >0)
+	matched << writeMatchedHLTObjects_[i];
+      if(muon.triggerObjectMatchesByFilter(writeMatchedHLTObjects_.at(i)).size() >0)
+	matched << writeMatchedHLTObjects_[i];
     }
     tempmuon.setMatchedTrig(matched);
     
@@ -193,9 +196,13 @@ top::NTElectron TreeWriterTtH::makeNTElectron(const pat::Electron & electron){
   if(includereco_){
     
     std::vector<std::string> matched;
-    for(size_t i=0;i<checkMatchedHLTPaths_.size();i++){
-      if(electron.triggerObjectMatchesByPath(checkMatchedHLTPaths_.at(i)).size() > 0)
-	matched << checkMatchedHLTPaths_[i];
+    for(size_t i=0;i<writeMatchedHLTObjects_.size();i++){
+      if(electron.triggerObjectMatchesByPath(writeMatchedHLTObjects_.at(i)).size() > 0)
+	matched << writeMatchedHLTObjects_[i];
+      if(electron.triggerObjectMatchesByCollection(writeMatchedHLTObjects_.at(i)).size() >0)
+	matched << writeMatchedHLTObjects_[i];
+      if(electron.triggerObjectMatchesByFilter(writeMatchedHLTObjects_.at(i)).size() >0)
+	matched << writeMatchedHLTObjects_[i];
     }
     tempelec.setMatchedTrig(matched);
   }
