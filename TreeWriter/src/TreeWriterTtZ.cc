@@ -4,7 +4,18 @@ class TreeWriterTtZ : public TreeWriterBase{
 
 public:
 
-  explicit TreeWriterTtZ(const edm::ParameterSet & ParSet) : TreeWriterBase(ParSet) {}
+  explicit TreeWriterTtZ(const edm::ParameterSet & ParSet) : TreeWriterBase(ParSet) {
+
+
+    checkMatchedHLTPaths_    =ParSet.getParameter<std::vector<std::string> >        ("checkMatchedHLTPaths");
+
+    //   checkMatchedHLTPaths_ << "HLT_IsoMu24_v" << "HLT_IsoMu24_eta2p1_v";
+    std::cout << "Writing matched triggers:" << std::endl;
+    for(size_t i=0;i<checkMatchedHLTPaths_.size() ;i++)
+      std::cout << checkMatchedHLTPaths_.at(i) << " " ;
+    std::cout << std::endl;
+    
+  }
   ~TreeWriterTtZ(){}
 
 
@@ -16,6 +27,8 @@ public:
   top::NTJet makeNTJet(const pat::Jet &);
 
 
+
+  std::vector<std::string> checkMatchedHLTPaths_;
 
 
 
@@ -102,14 +115,14 @@ top::NTMuon TreeWriterTtZ::makeNTMuon(const pat::Muon & muon){
   
   }
   if(includereco_){
-    if(muon.triggerObjectMatches().size() ==1){ // no ambiguities
-      tempmuon.setMatchedTrig(muon.triggerObjectMatches().begin()->pathNames());
+   
+    std::vector<std::string> matched;
+    for(size_t i=0;i<checkMatchedHLTPaths_.size();i++){
+      if(muon.triggerObjectMatchesByPath(checkMatchedHLTPaths_.at(i)).size() > 0)
+	//	std::cout << "found matched object to path " << checkMatchedHLTPaths_.at(i) << std::endl;
+	matched << checkMatchedHLTPaths_[i];
     }
-    else{
-      std::vector<std::string> def;
-      def.push_back("NoUnamTrigMatch");
-      tempmuon.setMatchedTrig(def);
-    }
+    tempmuon.setMatchedTrig(matched);
   }
   ////////space for extra cuts
 
@@ -176,14 +189,13 @@ top::NTElectron TreeWriterTtZ::makeNTElectron(const pat::Electron & electron){
 
 		       
   if(includereco_){
-    if(electron.triggerObjectMatches().size() ==1){ // no ambiguities
-      tempelec.setMatchedTrig(electron.triggerObjectMatches().begin()->pathNames());
+   
+    std::vector<std::string> matched;
+    for(size_t i=0;i<checkMatchedHLTPaths_.size();i++){
+      if(electron.triggerObjectMatchesByPath(checkMatchedHLTPaths_.at(i)).size() > 0)
+	matched << checkMatchedHLTPaths_[i];
     }
-    else{
-      std::vector<std::string> def;
-      def.push_back("NoUnamTrigMatch");
-      tempelec.setMatchedTrig(def);
-    }
+    tempelec.setMatchedTrig(matched);
   }
   double suclue=0;
   if(includereco_ && !(electron.superCluster().isNull())){

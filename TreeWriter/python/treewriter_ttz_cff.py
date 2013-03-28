@@ -19,7 +19,12 @@ PFTree   = cms.EDAnalyzer('TreeWriterTtZ',
                           recoTrackSrc = cms.InputTag('generalTracks'),
                           recoSuCluSrc = cms.InputTag('superClusters'),
                           
-                                  
+                          checkMatchedHLTPaths = cms.vstring("HLT_IsoMu24_v*",
+                                                             "HLT_IsoMu24_eta2p1_v*",
+                                                             "HLT_Ele27_WP80_v*"),
+                          
+                                                                    
+
                           includeTrigger = cms.bool(True),
                           triggerResults = cms.InputTag('TriggerResults','','HLT'),
                           
