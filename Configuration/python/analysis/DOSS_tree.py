@@ -643,7 +643,7 @@ process.patGSFElectronsTriggerMatches = cms.EDProducer("PATTriggerMatcherDRDPtLe
     src = cms.InputTag("patElectrons"+ pfpostfix),
     maxDPtRel = cms.double(10),
     resolveByMatchQuality = cms.bool(True),
-    maxDeltaR = cms.double(0.1),
+    maxDeltaR = cms.double(0.2),
     resolveAmbiguities = cms.bool(True),
     matched = cms.InputTag("patTrigger")
 )
@@ -655,11 +655,13 @@ process.patPFElectronsTriggerMatches.src = 'patPFElectrons'+pfpostfix
 process.patMuonsTriggerMatches = process.patGSFElectronsTriggerMatches.clone()
 process.patMuonsTriggerMatches.src = 'patMuons'+ pfpostfix
 process.patMuonsTriggerMatches.matchedCuts = cms.string("path(\"HLT_IsoMu24_v*\") || path(\"HLT_IsoMu24_eta2p1_v*\")")
+process.patMuonsTriggerMatches.maxDeltaR = cms.double(0.1)
 
 process.patGSFElectronsWithTrigger = cms.EDProducer("PATTriggerMatchElectronEmbedder",
                                                     src = cms.InputTag("patElectrons"+ pfpostfix),
                                                     matches = cms.VInputTag("patGSFElectronsTriggerMatches")
                                                     )
+
 process.patPFElectronsWithTrigger = process.patGSFElectronsWithTrigger.clone()
 process.patPFElectronsWithTrigger.src = "patPFElectrons"+pfpostfix
 process.patPFElectronsWithTrigger.matches = ['patPFElectronsTriggerMatches']
