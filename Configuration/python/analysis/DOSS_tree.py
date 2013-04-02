@@ -31,7 +31,7 @@ options.register ('laseroff',False,VarParsing.VarParsing.multiplicity.singleton,
 
 
 options.register ('isSignal',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"is SignalMC")
-options.register ('muCone03',True,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"use iso con of 0.3")
+options.register ('muCone03',True,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"use iso cone of 0.3")
 
 options.register ('wantSummary',True,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"prints trigger summary")
 options.register ('ttH',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"writes the ttH tree")
@@ -629,12 +629,21 @@ if is2011:
 from PhysicsTools.PatAlgos.tools.trigTools import *
 switchOnTrigger( process )
 
+process.patTrigger.onlyStandAlone = True
+
+#process.reducedPatTrigger = cms.EDProducer("TriggerObjectFilterByCollection",
+#    src = cms.InputTag("patTrigger"),
+#    collections = cms.vstring("hltL1extraParticles", "hltL2MuonCandidates", "hltL3MuonCandidates", "hltGlbTrkMuonCands", "hltMuTrackJpsiCtfTrackCands", "hltMuTrackJpsiEffCtfTrackCands", "hltMuTkMuJpsiTrackerMuonCands"),
+#) 
+
+#process.patTrigger.addL1Algos = True
+
 process.patGSFElectronsTriggerMatches = cms.EDProducer("PATTriggerMatcherDRDPtLessByR",
-    matchedCuts = cms.string('path("*")'),
+    matchedCuts = cms.string("path(\"HLT_Ele27_WP80_v*\")"),
     src = cms.InputTag("patElectrons"+ pfpostfix),
-    maxDPtRel = cms.double(0.5),
+    maxDPtRel = cms.double(10),
     resolveByMatchQuality = cms.bool(True),
-    maxDeltaR = cms.double(0.5),
+    maxDeltaR = cms.double(0.1),
     resolveAmbiguities = cms.bool(True),
     matched = cms.InputTag("patTrigger")
 )
@@ -645,21 +654,25 @@ process.patPFElectronsTriggerMatches.src = 'patPFElectrons'+pfpostfix
 
 process.patMuonsTriggerMatches = process.patGSFElectronsTriggerMatches.clone()
 process.patMuonsTriggerMatches.src = 'patMuons'+ pfpostfix
+process.patMuonsTriggerMatches.matchedCuts = cms.string("path(\"HLT_IsoMu24_v*\") || path(\"HLT_IsoMu24_eta2p1_v*\")")
 
 process.patGSFElectronsWithTrigger = cms.EDProducer("PATTriggerMatchElectronEmbedder",
-    src = cms.InputTag("patElectrons"+ pfpostfix),
-    matches = cms.VInputTag("patGSFElectronsTriggerMatches")
-                  )
+                                                    src = cms.InputTag("patElectrons"+ pfpostfix),
+                                                    matches = cms.VInputTag("patGSFElectronsTriggerMatches")
+                                                    )
 process.patPFElectronsWithTrigger = process.patGSFElectronsWithTrigger.clone()
 process.patPFElectronsWithTrigger.src = "patPFElectrons"+pfpostfix
 process.patPFElectronsWithTrigger.matches = ['patPFElectronsTriggerMatches']
 
 process.patMuonsWithTrigger = cms.EDProducer("PATTriggerMatchMuonEmbedder",
-    src = cms.InputTag("patMuons"+ pfpostfix),
-    matches = cms.VInputTag("patMuonsTriggerMatches")
-                  )
+                                             src = cms.InputTag("patMuons"+ pfpostfix),
+                                             matches = cms.VInputTag("patMuonsTriggerMatches")
+                                             )
+
+
 if includereco:
-    process.triggerMatches =  cms.Sequence(process.patGSFElectronsTriggerMatches *
+    process.triggerMatches =  cms.Sequence(#process.reducedPatTrigger *
+                                           process.patGSFElectronsTriggerMatches *
                                            process.patPFElectronsTriggerMatches *
                                            process.patMuonsTriggerMatches *
                                            process.patGSFElectronsWithTrigger *
@@ -686,6 +699,7 @@ process.treeJets.cut = 'eta < 5 && pt>5' # unfortunately starting at 10 GeV are 
 
 process.kinMuons = process.selectedPatMuons.clone()
 process.kinMuons.src = 'patMuons' + pfpostfix
+#process.kinMuons.cut = cms.string('pt > 30  && abs(eta) < 2.1')
 process.kinMuons.cut = cms.string('pt > 8  && abs(eta) < 2.7')
 
 process.kinElectrons = process.selectedPatElectrons.clone()
