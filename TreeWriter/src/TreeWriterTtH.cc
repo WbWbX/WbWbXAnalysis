@@ -114,13 +114,17 @@ top::NTMuon TreeWriterTtH::makeNTMuon(const pat::Muon & muon){
 
     std::vector<std::string> matched;
     for(size_t i=0;i<writeMatchedHLTObjects_.size();i++){
-      if(muon.triggerObjectMatchesByPath(writeMatchedHLTObjects_.at(i)).size() > 0)
+      if(muon.triggerObjectMatchesByPath(writeMatchedHLTObjects_.at(i)).size() > 0){
 	matched << writeMatchedHLTObjects_[i];
-      if(muon.triggerObjectMatchesByCollection(writeMatchedHLTObjects_.at(i)).size() >0)
+      }
+      if(muon.triggerObjectMatchesByCollection(writeMatchedHLTObjects_.at(i)).size() >0){
 	matched << writeMatchedHLTObjects_[i];
-      if(muon.triggerObjectMatchesByFilter(writeMatchedHLTObjects_.at(i)).size() >0)
+      }
+      if(muon.triggerObjectMatchesByFilter(writeMatchedHLTObjects_.at(i)).size() >0){
 	matched << writeMatchedHLTObjects_[i];
+      }
     }
+    if(debugmode) std:: cout << "muon:matched HLTObjects size: " << matched.size() << std::endl;
     tempmuon.setMatchedTrig(matched);
     
   }
@@ -204,6 +208,8 @@ top::NTElectron TreeWriterTtH::makeNTElectron(const pat::Electron & electron){
       if(electron.triggerObjectMatchesByFilter(writeMatchedHLTObjects_.at(i)).size() >0)
 	matched << writeMatchedHLTObjects_[i];
     }
+    if(debugmode) std:: cout << "electron:matched HLTObjects size: " << matched.size() << std::endl;
+   
     tempelec.setMatchedTrig(matched);
   }
   double suclue=0;
