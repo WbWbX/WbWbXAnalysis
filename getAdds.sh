@@ -7,14 +7,14 @@ cd ${CMSSW_BASE}/src
 # the things I use from the TopAnalysis code
 #
 
-if [[ "${CMSSW_VERSION}" != "CMSSW_5_3_3_patch3" && "${CMSSW_VERSION}" != "CMSSW_5_3_5"  "${CMSSW_VERSION}" != "CMSSW_5_3_7"]];
+if [[ "${CMSSW_VERSION}" != "CMSSW_5_3_3_patch3" && "${CMSSW_VERSION}" != "CMSSW_5_3_5" && "${CMSSW_VERSION}" != "CMSSW_5_3_7" ]];
 then
     echo 'warning! '"$CMSSW_VERSION"' not supported for automatic checkout of pat packages! add them manually!'
 fi
 
 if [[ $1 == "SUSY" ]];
 then
-    echo 'checking out additional SUSY packagesf for efficiency studies.'
+    echo 'checking out additional SUSY packages for efficiency studies.'
     cvs co -d WWAnalysis/SkimStep UserCode/Mangano/WWAnalysis/SkimStep 
 fi
 
