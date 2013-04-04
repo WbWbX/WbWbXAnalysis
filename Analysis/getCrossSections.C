@@ -1,6 +1,6 @@
 #include "TtZAnalysis/Tools/interface/containerStackVector.h"
 #include "TtZAnalysis/Tools/interface/containerUF.h"
-#include "TtZAnalysis/Tools/interface/miscUtils.h"
+#include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 #include <cstdlib>
 
 #include "makePlotsScript.h"
@@ -11,7 +11,7 @@
 void getCrossSections(){
 
   using namespace std;
-  using namespace top;
+  using namespace ztop;
 
 
   bool writeAllOut=true;

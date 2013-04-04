@@ -18,7 +18,7 @@
 */
 
 
-namespace top{
+namespace ztop{
   /*
   class NTTriggerMap {
   public:

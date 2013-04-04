@@ -15,23 +15,23 @@
 
 //include Alan Caldwells stat error interpretation?? -> check with someone, how they feel about it.
 
-namespace top{
+namespace ztop{
 
   class container1DUF : public container1D{
 
   public:
 
     container1DUF(){debug_=false;};
-    container1DUF(const top::container1DStack &, const top::container1DStack &, TString , double , TString dataname="data");
-    container1DUF(const top::container1DStack &, const top::container1DStack &, std::vector<TString> , double lumi, TString dataname="data");
-    container1DUF(const top::container1D &);
+    container1DUF(const ztop::container1DStack &, const ztop::container1DStack &, TString , double , TString dataname="data");
+    container1DUF(const ztop::container1DStack &, const ztop::container1DStack &, std::vector<TString> , double lumi, TString dataname="data");
+    container1DUF(const ztop::container1D &);
     ~container1DUF(){};
 
     bool nameContains(TString);
     bool nameContains(std::vector<TString>);
 
-    void setGenStack(const top::container1DStack &gen){gen_=gen;}
-    void setSelectedStack(const top::container1DStack &sel){sel_=sel;}
+    void setGenStack(const ztop::container1DStack &gen){gen_=gen;}
+    void setSelectedStack(const ztop::container1DStack &sel){sel_=sel;}
     void setSignal(TString signalname){signalnames_.clear(); signalnames_ << signalname;}
     void setSignals(std::vector<TString> signalnames){signalnames_ = signalnames;}
     void setDataName(TString name){dataname_=name;}
@@ -43,7 +43,7 @@ namespace top{
     void coutBinContents();
 
 
-    top::container1DUF breakDownRelSystematicsInBin(int);
+    ztop::container1DUF breakDownRelSystematicsInBin(int);
 
 
     //some plotting stuff - still missing
@@ -54,8 +54,8 @@ namespace top{
 
     bool debug_;
   private:
-    top::container1DStack gen_;
-    top::container1DStack sel_;
+    ztop::container1DStack gen_;
+    ztop::container1DStack sel_;
     double lumi_;
     TString dataname_;
     std::vector<TString> signalnames_;
@@ -67,7 +67,7 @@ namespace top{
 
   //functions split here if you like
 
-  container1DUF::container1DUF(const top::container1DStack &gen, const top::container1DStack &sel, TString signalname, double lumi, TString dataname){
+  container1DUF::container1DUF(const ztop::container1DStack &gen, const ztop::container1DStack &sel, TString signalname, double lumi, TString dataname){
     gen_=gen;
     sel_=sel;
     dataname_=dataname;
@@ -76,7 +76,7 @@ namespace top{
     simpleUnfold();
     debug_=false;
   }
-  container1DUF::container1DUF(const top::container1DStack &gen, const top::container1DStack &sel, std::vector<TString> signalnames, double lumi, TString dataname){
+  container1DUF::container1DUF(const ztop::container1DStack &gen, const ztop::container1DStack &sel, std::vector<TString> signalnames, double lumi, TString dataname){
     gen_=gen;
     sel_=sel;
     dataname_=dataname;
@@ -86,7 +86,7 @@ namespace top{
     debug_=false;
   }
 
-  container1DUF::container1DUF(const top::container1D & cont){ //convert
+  container1DUF::container1DUF(const ztop::container1D & cont){ //convert
     showwarnings_=cont.showwarnings_;
     binwidth_=cont.binwidth_;
     bins_=cont.bins_;
@@ -126,14 +126,14 @@ namespace top{
   void container1DUF::simpleUnfold(){
 
     // find signal in gen and sel
-    bool listing=top::container1D::c_makelist; //protection agains unwanted listing of intermediate containers
-    top::container1D::c_makelist=false;
+    bool listing=ztop::container1D::c_makelist; //protection agains unwanted listing of intermediate containers
+    ztop::container1D::c_makelist=false;
 
     if(signalnames_.size()<1)
       return;
 
-    top::container1D gencont=gen_.getContribution(signalnames_[0]);
-    top::container1D selcont=sel_.getContribution(signalnames_[0]);
+    ztop::container1D gencont=gen_.getContribution(signalnames_[0]);
+    ztop::container1D selcont=sel_.getContribution(signalnames_[0]);
 
     for(size_t i=1;i<signalnames_.size();i++){
       gencont = gencont + gen_.getContribution(signalnames_[i]);
@@ -166,11 +166,11 @@ namespace top{
 
     }
 
-    top::container1D efficiency = selcont / gencont;
+    ztop::container1D efficiency = selcont / gencont;
 
     //   cout << "eff in bin 1: "<< efficiency.getBinContent(1) << endl;
 
-    top::container1D background = sel_.getContributionsBut(excludefrombackground);
+    ztop::container1D background = sel_.getContributionsBut(excludefrombackground);
 
   if(debug_)   std::cout << "\n\nrel contribution from syst to background\n" << std::endl;
 
@@ -186,11 +186,11 @@ namespace top{
     // efficiency.getTH1D()->Draw();
 
     //get data
-    top::container1D data=sel_.getContribution(dataname_);
+    ztop::container1D data=sel_.getContribution(dataname_);
 
     //   cout << "data in bin 1: " << data.getBinContent(1) << endl;
 
-    top::container1D select = (data - background);
+    ztop::container1D select = (data - background);
     // select.getTH1D()->Draw();
 
     //   cout << "sel signal in bin 1: " << select.getBinContent(1) << endl;
@@ -210,7 +210,7 @@ namespace top{
     //  efficiency.breakDownRelSystematicsInBin(1).coutBinContents();
 
 
-    top::container1D output = (data - background) / efficiency;
+    ztop::container1D output = (data - background) / efficiency;
       output=output * (1/lumi_);
       cout << name_ << endl;
       cout << "xsec in bin 1: " << output.getBinContent(1) << endl;
@@ -219,7 +219,7 @@ namespace top{
       //  output.getTH1D()->Draw();
 
     *this = container1DUF(output);
-    top::container1D::c_makelist=listing;
+    ztop::container1D::c_makelist=listing;
 
   }
   
@@ -232,7 +232,7 @@ namespace top{
   
 
 
-  top::container1DUF container1DUF::breakDownRelSystematicsInBin(int bin){ //maybe add total syst
+  ztop::container1DUF container1DUF::breakDownRelSystematicsInBin(int bin){ //maybe add total syst
 
     std::vector<float> newbins;
     for(float i=0;i<=syserrors_.size();i++){ //+1 for total bin
@@ -243,7 +243,7 @@ namespace top{
 
 
     if(bin < 0 || (size_t)bin >= bins_.size()){
-      std::cout << "top::container1DUF::breakDownSystematicsInBin: bin not in range!" << std::endl;
+      std::cout << "ztop::container1DUF::breakDownSystematicsInBin: bin not in range!" << std::endl;
     }
     else{
       //    double totalup=0;

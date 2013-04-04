@@ -6,7 +6,7 @@
 #include <iostream>
 #include <algorithm>
 
-namespace top{
+namespace ztop{
 
   class elecRhoIsoAdder{
 
@@ -21,15 +21,15 @@ namespace top{
 
     void setRho(double rho){rho_=rho;};
 
-    void addRhoIso(std::vector<top::NTElectron> &);
-    void addRhoIso(top::NTElectron &);
+    void addRhoIso(std::vector<ztop::NTElectron> &);
+    void addRhoIso(ztop::NTElectron &);
 
 
   private:
 
     void checkCorrectInput();
 
-    double getRhoIso(top::NTElectron &);
+    double getRhoIso(ztop::NTElectron &);
     double Aeff(double);
 
     double rho_;

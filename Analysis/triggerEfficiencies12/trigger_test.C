@@ -3,15 +3,15 @@
 
 
 double 
-triggerAnalyzer::selectDileptons(std::vector<top::NTMuon> * inputMuons, std::vector<top::NTElectron> * inputElectrons){
+triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::vector<ztop::NTElectron> * inputElectrons){
 
   for(size_t i=0;i<inputMuons->size();i++){
-    top::NTMuon * muon = &inputMuons->at(i);
+    ztop::NTMuon * muon = &inputMuons->at(i);
 
     selectedMuons_ << muon;
   }
   for(size_t i=0;i<inputElectrons->size();i++){
-    top::NTElectron * elec = &inputElectrons->at(i);
+    ztop::NTElectron * elec = &inputElectrons->at(i);
 
 
     selectedElecs_ << elec;
@@ -33,7 +33,7 @@ void blabla(){
   
 
   using namespace std;
-  using namespace top;
+  using namespace ztop;
 
   std::vector<float> binsmumueta, bins2dee, bins2dmu;
   binsmumueta.push_back(-2.4);binsmumueta.push_back(-2.1);binsmumueta.push_back(-1.2);binsmumueta.push_back(-0.9);binsmumueta.push_back(0.9);binsmumueta.push_back(1.2);binsmumueta.push_back(2.1);binsmumueta.push_back(2.4);

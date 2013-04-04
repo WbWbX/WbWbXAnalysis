@@ -4,19 +4,13 @@
   <class name="std::pair<TString,std::vector<double> >"/>
   <class name="std::vector<std::pair<TString,std::vector<double> > >"/>
   <class name="std::vector<long int>"/>
-  <class name="top::container1D"/>
-  <class name="std::vector<top::container1D>"/>
-  <class name="top::container1DStack"/>
-  <class name="std::vector<top::container1DStack>"/>
-  <class name="top::container1DStackVector"/>
-  <class name="std::vector<top::container1DStackVector>"/>
+  <class name="ztop::container1D"/>
+  <class name="std::vector<ztop::container1D>"/>
+  <class name="ztop::container1DStack"/>
+  <class name="std::vector<ztop::container1DStack>"/>
+  <class name="ztop::container1DStackVector"/>
+  <class name="std::vector<ztop::container1DStackVector>"/>
   <class name="std::vector<TH2D>"/>
   <class name="std::map<TString,std::vector<TH2D> >"/>
-  <class name="top::bTagBase"/>
-  <class name="std::vector<top::bTagBase>"/>
-  <class name="top::JERBase"/>
-  <class name="std::vector<top::JERBase>"/>
-  <class name="top::JECBase"/>
-  <class name="std::vector<top::JECBase>"/>
 </lcgdict>
  

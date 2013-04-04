@@ -1,11 +1,11 @@
 #ifndef NTJECUNCERTAINTIES_H
 #define NTJECUNCERTAINTIES_H
 
-#include "TtZAnalysis/Tools/interface/JECBase.h"
+#include "TopAnalysis/ZTopUtils/interface/JECBase.h"
 #include "TtZAnalysis/DataFormats/interface/NTJet.h"
 
 
-namespace top{
+namespace ztop{
 
   class NTJECUncertainties{
 
@@ -19,12 +19,12 @@ namespace top{
 
     std::vector<unsigned int> &  sources(){JecBase_.sources().clear(); return JecBase_.sources();}
 
-    void applyToJet(top::NTJet * jet ){
-      top::PolarLorentzVector p4in = jet->p4();
+    void applyToJet(ztop::NTJet * jet ){
+      ztop::PolarLorentzVector p4in = jet->p4();
       JecBase_.applyJECUncertainties(p4in);
       jet->setP4(p4in);
     }
-    void applyToJets(std::vector<top::NTJet *> jets){
+    void applyToJets(std::vector<ztop::NTJet *> jets){
       for(size_t i=0;i<jets.size();i++)
 	applyToJet(jets.at(i));
     }

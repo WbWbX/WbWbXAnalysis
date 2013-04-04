@@ -2,10 +2,6 @@
 #include "../interface/container.h"
 #include "../interface/containerStack.h"
 #include "../interface/containerStackVector.h"
-#include "../interface/JERBase.h"
-#include "../interface/JECBase.h"
-#include "../interface/bTagBase.h"
-
 
 
 namespace
@@ -18,12 +14,12 @@ namespace
     std::vector<std::pair<TString,std::vector<double> > > j;
     std::vector<long int> kl;
 
-    top::container1D a;
-    std::vector<top::container1D> b;
-    top::container1DStack aa;
-    std::vector<top::container1DStack> bb;
-    top::container1DStackVector aaa;
-    std::vector<top::container1DStackVector> bbb;
+    ztop::container1D a;
+    std::vector<ztop::container1D> b;
+    ztop::container1DStack aa;
+    std::vector<ztop::container1DStack> bb;
+    ztop::container1DStackVector aaa;
+    std::vector<ztop::container1DStackVector> bbb;
 
 
     std::vector<TH2D> ijij;
@@ -32,12 +28,6 @@ namespace
 
     
 
-    top::bTagBase ked;
-    top::JECBase kkss;
-    top::JERBase ksdsk;
-    std::vector<top::bTagBase> kedV;
-    std::vector<top::JECBase> kkssV;
-    std::vector<top::JERBase> ksdskV;
 
 
   };

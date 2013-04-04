@@ -11,7 +11,7 @@
 #include <utility>
 #include <map>
 
-namespace top{
+namespace ztop{
 
 
 
@@ -31,9 +31,9 @@ namespace top{
 	ids_.clear();
       }
     }
-    void setIso(top::NTIsolation Iso){iso_=Iso;}
+    void setIso(ztop::NTIsolation Iso){iso_=Iso;}
     void setRhoIso(double RhoIso){rhoIso_=RhoIso;}
-    //void setIso04(top::NTIsolation Iso04){iso04_=Iso04;}
+    //void setIso04(ztop::NTIsolation Iso04){iso04_=Iso04;}
 
     void setMatchedTrig(std::vector<std::string> MatchedTrig){matchedTrig_=MatchedTrig;}
 
@@ -45,8 +45,8 @@ namespace top{
     PolarLorentzVector ECalP4(){return ecalp4_;}
     bool isNotConv(){return isNotConv_;}
     std::vector<std::pair<std::string,float> > ids(){return ids_;}
-    top::NTIsolation iso(){return iso_;}
-    //top::NTIsolation iso04(){return iso04_;}
+    ztop::NTIsolation iso(){return iso_;}
+    //ztop::NTIsolation iso04(){return iso04_;}
 
 
     double isoVal(){
@@ -96,13 +96,13 @@ namespace top{
 
   protected:
     float mvaId_;
-    top::NTSuClu suClu_;
+    ztop::NTSuClu suClu_;
     bool isNotConv_,ispf_;
     std::vector<std::pair<std::string,float> > ids_;
-    top::NTIsolation iso_;
+    ztop::NTIsolation iso_;
     double rhoIso_;
     PolarLorentzVector ecalp4_;
-    //top::NTIsolation iso04_;
+    //ztop::NTIsolation iso04_;
     int mHits_;
 
     std::vector<std::string> matchedTrig_;

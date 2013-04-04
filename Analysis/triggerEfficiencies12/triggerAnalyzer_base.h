@@ -9,7 +9,6 @@
 #include "TtZAnalysis/DataFormats/interface/NTEvent.h"
 #include "TtZAnalysis/DataFormats/interface/NTJet.h"
 #include "TtZAnalysis/DataFormats/interface/NTMet.h"
-#include "TtZAnalysis/Tools/interface/PUReweighter.h"
 #include <vector>
 #include <algorithm>
 #include <string>
@@ -19,11 +18,13 @@
 #include "TChain.h"
 #include "makeplotsnice.h"
 #include "TtZAnalysis/Tools/interface/container.h"
-#include "TtZAnalysis/Tools/interface/miscUtils.h"
+#include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
+#include "TopAnalysis/ZtopUtils/interface/PUReweighter.h"
 #include <map>
 #include <stdlib.h>
 
-using namespace std;
+using namespace std; //nasty.. but ok here
+    using namespace ztop;
 
 //ratiomulti affects plots AND syst error in tables
 // NOOOOO relative paths!!
@@ -56,8 +57,8 @@ public:
   ~triggerAnalyzer(){};
 
   //virtual 
-  double selectDileptons(std::vector<top::NTMuon> * , std::vector<top::NTElectron> * );
-  //! fills selectedElecs_ and std::vector<top::NTMuon* > selectedMuons_
+  double selectDileptons(std::vector<ztop::NTMuon> * , std::vector<ztop::NTElectron> * );
+  //! fills selectedElecs_ and std::vector<ztop::NTMuon* > selectedMuons_
 
   void setElectrons(TString elecs){whichelectrons_=elecs;}
 
@@ -66,21 +67,21 @@ public:
   void setBinsEta2dY(std::vector<float> binseta2dy){binseta2dy_.clear();binseta2dy_=binseta2dy;};
   void setBinsPt(std::vector<float> binspt){binspt_.clear();binspt_=binspt;}
 
-  top::container1D  getEtaPlot(){return etaeff_;}
-  top::container1D  getPtPlot(){return pteff_;}
-  top::container1D  getCorrelationPt(){return corrpt_;}
-  top::container1D  getCorrelationEta(){return correta_;}
-  top::container1D getDPhiPlot(){return dphieff_;}
-  top::container1D getVmultiPlot(){return vmultieff_;}
-  top::container1D getJetmultiPlot(){return jetmultieff_;}
-  top::container1D getDPhiPlot2(){return dphieff2_;}
-  top::container1D getCorrelationDPhi(){return corrdphi_;}
-  top::container1D getCorrelationDPhi2(){return corrdphi2_;}
-  top::container1D getCorrelationVmulti(){return corrvmulti_;}
-  top::container1D getCorrelationJetmulti(){return corrjetmulti_;}
+  ztop::container1D  getEtaPlot(){return etaeff_;}
+  ztop::container1D  getPtPlot(){return pteff_;}
+  ztop::container1D  getCorrelationPt(){return corrpt_;}
+  ztop::container1D  getCorrelationEta(){return correta_;}
+  ztop::container1D getDPhiPlot(){return dphieff_;}
+  ztop::container1D getVmultiPlot(){return vmultieff_;}
+  ztop::container1D getJetmultiPlot(){return jetmultieff_;}
+  ztop::container1D getDPhiPlot2(){return dphieff2_;}
+  ztop::container1D getCorrelationDPhi(){return corrdphi_;}
+  ztop::container1D getCorrelationDPhi2(){return corrdphi2_;}
+  ztop::container1D getCorrelationVmulti(){return corrvmulti_;}
+  ztop::container1D getCorrelationJetmulti(){return corrjetmulti_;}
 
-  top::container1D getDrlepPlot(){return drlepeff_;}
-  top::container1D getCorrelationDrlep(){return corrdrlep_;}
+  ztop::container1D getDrlepPlot(){return drlepeff_;}
+  ztop::container1D getCorrelationDrlep(){return corrdrlep_;}
 
   TH2D getEta2D(){return eta_2dim;}
 
@@ -99,7 +100,7 @@ public:
 
 
 
-    using namespace top;
+    using namespace ztop;
     using namespace std;
 
     std::vector<string> mettriggers;
@@ -1011,26 +1012,26 @@ protected:
   int mode_; // -1: ee 0: emu 1:mumu
   TString pufile_;
 
-  std::vector< top::NTElectron *> selectedElecs_;
-  std::vector< top::NTMuon *> selectedMuons_;
+  std::vector< ztop::NTElectron *> selectedElecs_;
+  std::vector< ztop::NTMuon *> selectedMuons_;
 
   TChain * t_;
 
-  top::container1D etaeff_;
-  top::container1D pteff_;
-  top::container1D correta_;
-  top::container1D corrpt_;
-  top::container1D dphieff_;
-  top::container1D vmultieff_;
-  top::container1D corrdphi_;
-  top::container1D corrvmulti_;
-  top::container1D jetmultieff_;
-  top::container1D corrjetmulti_;
-  top::container1D dphieff2_;
-  top::container1D corrdphi2_;
+  ztop::container1D etaeff_;
+  ztop::container1D pteff_;
+  ztop::container1D correta_;
+  ztop::container1D corrpt_;
+  ztop::container1D dphieff_;
+  ztop::container1D vmultieff_;
+  ztop::container1D corrdphi_;
+  ztop::container1D corrvmulti_;
+  ztop::container1D jetmultieff_;
+  ztop::container1D corrjetmulti_;
+  ztop::container1D dphieff2_;
+  ztop::container1D corrdphi2_;
 
-  top::container1D drlepeff_;
-  top::container1D corrdrlep_;
+  ztop::container1D drlepeff_;
+  ztop::container1D corrdrlep_;
 
   // bool isMC;
 
@@ -1067,7 +1068,7 @@ TChain * makeChain(TString path){
 
 ///
 
-// so include this header define your dilepton selection virtual double selectDileptons(std::vector<top::NTMuon> * inputMuons, std::vector<top::NTElectron> * inputElectrons) and run  analyze(std::vector<TString> datafiles, std::vector<TString> eemcfiles,std::vector<TString> mumumcfiles,std::vector<TString> emumcfiles)
+// so include this header define your dilepton selection virtual double selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::vector<ztop::NTElectron> * inputElectrons) and run  analyze(std::vector<TString> datafiles, std::vector<TString> eemcfiles,std::vector<TString> mumumcfiles,std::vector<TString> emumcfiles)
 
 
 
@@ -1078,7 +1079,7 @@ TChain * makeChain(TString path){
 
 void analyze(triggerAnalyzer ta_eed, triggerAnalyzer ta_eeMC, triggerAnalyzer ta_mumud, triggerAnalyzer ta_mumuMC, triggerAnalyzer ta_emud, triggerAnalyzer ta_emuMC){
 
-  using namespace top;
+  using namespace ztop;
   using namespace std;
 
   vector<double> eed=ta_eed.Eff();

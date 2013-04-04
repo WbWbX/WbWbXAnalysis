@@ -12,7 +12,7 @@
 // writes plots with and without ratio to TFiles
 
 
-namespace top{
+namespace ztop{
 
   class container1DStackVector{
 
@@ -24,16 +24,16 @@ namespace top{
     TString getName(){return name_;}
     void listStacks();
 
-    void add(top::container1D &, TString, int, double);
+    void add(ztop::container1D &, TString, int, double);
     void addList( TString, int, double);
-    std::vector<top::container1DStack> getVector(){return stacks_;}
-    top::container1DStack getStack(TString);
-    top::container1DStack getStack(unsigned int n){return stacks_[n];}
+    std::vector<ztop::container1DStack> getVector(){return stacks_;}
+    ztop::container1DStack getStack(TString);
+    ztop::container1DStack getStack(unsigned int n){return stacks_[n];}
     void removeContribution(TString);
 
-    void addMCErrorStackVector(TString,top::container1DStackVector, bool ignoreMCStat=true);
+    void addMCErrorStackVector(TString,ztop::container1DStackVector, bool ignoreMCStat=true);
     void addGlobalRelMCError(TString,double);
-    void addRelSystematicsFrom(top::container1DStackVector);
+    void addRelSystematicsFrom(ztop::container1DStackVector);
     void removeError(TString);
     void renameSyst(TString,TString); //! old new
 
@@ -53,7 +53,7 @@ namespace top{
 
   private:
     TString name_;
-    std::vector<top::container1DStack> stacks_;
+    std::vector<ztop::container1DStack> stacks_;
 
 
 

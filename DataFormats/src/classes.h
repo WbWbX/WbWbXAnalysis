@@ -27,48 +27,48 @@ namespace
 
     std::vector<std::string> dummy1;
     std::vector<std::vector<std::string> > dummy2;
-    top::NTLepton dummy5;
-    std::vector<top::NTLepton> dummy6;
-    top::NTMuon dummy3;
-    std::vector<top::NTMuon> dummy4;
-    top::NTElectron dummy7;
-    std::vector<top::NTElectron> dummy8;
-    top::NTJet dummy9;
-    std::vector<top::NTJet> dummy10;
-    top::NTMet dummy11;
-    std::vector<top::NTMet> dummy12;
-    top::NTEvent dummy13;
-    std::vector<top::NTEvent> dummy14;
-    top::NTIsolation dummy15;
-    std::vector<top::NTIsolation> dummy16;
-    top::NTTrack dummy17;
-    std::vector<top::NTTrack> dummy18;
-    top::NTSuClu dummy19;
-    std::vector<top::NTSuClu> dummy20;
-    top::NTTrigger dummy21;
-    std::vector<top::NTTrigger> dummy22;
+    ztop::NTLepton dummy5;
+    std::vector<ztop::NTLepton> dummy6;
+    ztop::NTMuon dummy3;
+    std::vector<ztop::NTMuon> dummy4;
+    ztop::NTElectron dummy7;
+    std::vector<ztop::NTElectron> dummy8;
+    ztop::NTJet dummy9;
+    std::vector<ztop::NTJet> dummy10;
+    ztop::NTMet dummy11;
+    std::vector<ztop::NTMet> dummy12;
+    ztop::NTEvent dummy13;
+    std::vector<ztop::NTEvent> dummy14;
+    ztop::NTIsolation dummy15;
+    std::vector<ztop::NTIsolation> dummy16;
+    ztop::NTTrack dummy17;
+    std::vector<ztop::NTTrack> dummy18;
+    ztop::NTSuClu dummy19;
+    std::vector<ztop::NTSuClu> dummy20;
+    ztop::NTTrigger dummy21;
+    std::vector<ztop::NTTrigger> dummy22;
 
 
 
     std::map<std::string, double> ksdjsda;
     std::map<int, double> ijdfj;
 
-    top::NTGenLepton ihisdh;
-    std::vector<top::NTGenLepton> asfkkk;
+    ztop::NTGenLepton ihisdh;
+    std::vector<ztop::NTGenLepton> asfkkk;
 
-    top::NTBTagSF ked;
-    top::NTJECUncertainties kkss;
-    top::NTJERAdjuster ksdsk;
-    std::vector<top::NTBTagSF> kedV;
-    std::vector<top::NTJECUncertainties> kkssV;
-    std::vector<top::NTJERAdjuster> ksdskV;
+    ztop::NTBTagSF ked;
+    ztop::NTJECUncertainties kkss;
+    ztop::NTJERAdjuster ksdsk;
+    std::vector<ztop::NTBTagSF> kedV;
+    std::vector<ztop::NTJECUncertainties> kkssV;
+    std::vector<ztop::NTJERAdjuster> ksdskV;
 
-    top::NTGenParticle ewfik;
-    std::vector<top::NTGenParticle> swded;
-    top::NTGenJet ewfffffik;
-    std::vector<top::NTGenJet> swgggfded;
+    ztop::NTGenParticle ewfik;
+    std::vector<ztop::NTGenParticle> swded;
+    ztop::NTGenJet ewfffffik;
+    std::vector<ztop::NTGenJet> swgggfded;
 
-    std::vector< top::NTGenParticle *> jfffd;
+    std::vector< ztop::NTGenParticle *> jfffd;
     
   };
 }

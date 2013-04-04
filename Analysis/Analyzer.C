@@ -8,7 +8,7 @@
 #include "TtZAnalysis/DataFormats/interface/NTJERAdjuster.h"
 #include "TtZAnalysis/DataFormats/interface/NTJECUncertainties.h"
 #include "TtZAnalysis/DataFormats/interface/NTBTagSF.h"
-#include "TtZAnalysis/Tools/interface/bTagSF.h"
+//#include "TtZAnalysis/Tools/interface/bTagSF.h"
 #include "TTree.h"
 #include "TFile.h"
 #include <fstream>
@@ -20,12 +20,12 @@ bool testmode=true;
 
 std::vector<TString> dycontributions;
 
-namespace top{
-  typedef std::vector<top::NTElectron>::iterator NTElectronIt;
-  typedef std::vector<top::NTMuon>::iterator NTMuonIt;
-  typedef std::vector<top::NTJet>::iterator NTJetIt;
-  typedef std::vector<top::NTTrack>::iterator NTTrackIt;
-  typedef std::vector<top::NTSuClu>::iterator NTSuCluIt;
+namespace ztop{
+  typedef std::vector<ztop::NTElectron>::iterator NTElectronIt;
+  typedef std::vector<ztop::NTMuon>::iterator NTMuonIt;
+  typedef std::vector<ztop::NTJet>::iterator NTJetIt;
+  typedef std::vector<ztop::NTTrack>::iterator NTTrackIt;
+  typedef std::vector<ztop::NTSuClu>::iterator NTSuCluIt;
 }
 
 ///// now available: removeContribution; use it to run on the systematics etc (only signal) or pdf stuff (remove nominal,for(i) add pdf[i], xsec, remove pdf[i])
@@ -34,7 +34,7 @@ namespace top{
 //// name Z contribution "Z" or something similar for generator stuff and so on
 
 
-void rescaleDY(top::container1DStackVector * vec, std::vector<TString> contributions, double scalescale=1, bool textout=true, TString identifier="dilepton invariant massZ "){
+void rescaleDY(ztop::container1DStackVector * vec, std::vector<TString> contributions, double scalescale=1, bool textout=true, TString identifier="dilepton invariant massZ "){
  
   std::vector<TString> ident;ident.clear();
   std::vector<double> scales;scales.clear();
@@ -56,7 +56,7 @@ void rescaleDY(top::container1DStackVector * vec, std::vector<TString> contribut
     ident << stepstring;
     if(textout) std::cout << "Scalefactor for "<< vec->getName() << " " << stepstring << ": " << scale << std::endl;
   }
-  //  top::container1DStackVector rescaled=vec;
+  //  ztop::container1DStackVector rescaled=vec;
   for(unsigned int i=0;i<contributions.size();i++){
     vec->multiplyNorms(contributions.at(i), scales, ident);
   }
@@ -72,21 +72,21 @@ public:
   MainAnalyzer(){
     filelist_="";
     dataname_="data";
-    //  analysisplots_ = new top::container1DStackVector();
-    //  puweighter_= new top::PUReweighter();
-    //  jeradjuster_= new top::NTJERAdjuster();
-    //  jecuncertainties_=new top::NTJECUncertainties();
-    // btagsf_=new top::NTBTagSF();
+    //  analysisplots_ = new ztop::container1DStackVector();
+    //  puweighter_= new ztop::PUReweighter();
+    //  jeradjuster_= new ztop::NTJERAdjuster();
+    //  jecuncertainties_=new ztop::NTJECUncertainties();
+    // btagsf_=new ztop::NTBTagSF();
   }
   MainAnalyzer(const MainAnalyzer &);
   MainAnalyzer(TString Name, TString additionalinfo){
     name_=Name;additionalinfo_=additionalinfo;
     dataname_="data";
-    //  analysisplots_ = new top::container1DStackVector(Name);
-    //  puweighter_= new top::PUReweighter();
-    //  jeradjuster_= new top::NTJERAdjuster();
-    //  jecuncertainties_=new top::NTJECUncertainties();
-    //  btagsf_=new top::NTBTagSF();
+    //  analysisplots_ = new ztop::container1DStackVector(Name);
+    //  puweighter_= new ztop::PUReweighter();
+    //  jeradjuster_= new ztop::NTJERAdjuster();
+    //  jecuncertainties_=new ztop::NTJECUncertainties();
+    //  btagsf_=new ztop::NTBTagSF();
   }
   ~MainAnalyzer(){}//if(analysisplots_) delete analysisplots_;if(puweighter_) delete puweighter_;if(jeradjuster_) delete jeradjuster_;if(jecuncertainties_) delete jecuncertainties_; };
   void setName(TString Name, TString additionalinfo){name_=Name;additionalinfo_=additionalinfo;analysisplots_.setName(Name);}
@@ -101,7 +101,7 @@ public:
   void setDataSetDirectory(TString dir){datasetdirectory_=dir;}
   void setShowStatusBar(bool show){showstatusbar_=show;}
 
-  top::container1DStackVector * getPlots(){return & analysisplots_;}
+  ztop::container1DStackVector * getPlots(){return & analysisplots_;}
 
   void start(TString ident="def");
   //  void start(TString);
@@ -110,12 +110,12 @@ public:
 
   void setAdditionalInfoString(TString add){additionalinfo_=add;} //!for adding things like JEC up or other systematics options
 
-  top::PUReweighter * getPUReweighter(){return & puweighter_;}
+  ztop::PUReweighter * getPUReweighter(){return & puweighter_;}
 
-  top::NTJERAdjuster * getJERAdjuster(){return & jeradjuster_;}
-  top::NTJECUncertainties * getJECUncertainties(){return & jecuncertainties_;}
+  ztop::NTJERAdjuster * getJERAdjuster(){return & jeradjuster_;}
+  ztop::NTJECUncertainties * getJECUncertainties(){return & jecuncertainties_;}
 
-  top::NTBTagSF * getBTagSF(){return &btagsf_;}
+  ztop::NTBTagSF * getBTagSF(){return &btagsf_;}
 
   MainAnalyzer & operator= (const MainAnalyzer &);
 
@@ -124,7 +124,7 @@ private:
   void copyAll(const MainAnalyzer &);
 
   bool isInInfo(TString s){return additionalinfo_.Contains(s);}
-  bool triggersContain(TString , top::NTEvent *);
+  bool triggersContain(TString , ztop::NTEvent *);
 
   bool showstatusbar_;
 
@@ -134,17 +134,17 @@ private:
 
   TString filelist_;
   
-  top::PUReweighter  puweighter_;
-  top::NTJERAdjuster  jeradjuster_;
-  top::NTJECUncertainties  jecuncertainties_;
-  top::NTBTagSF  btagsf_;
+  ztop::PUReweighter  puweighter_;
+  ztop::NTJERAdjuster  jeradjuster_;
+  ztop::NTJECUncertainties  jecuncertainties_;
+  ztop::NTBTagSF  btagsf_;
 
-  top::container1DStackVector  analysisplots_;
+  ztop::container1DStackVector  analysisplots_;
 
   TString additionalinfo_;
 
 };
-bool MainAnalyzer::triggersContain(TString triggername, top::NTEvent * pevent){
+bool MainAnalyzer::triggersContain(TString triggername, ztop::NTEvent * pevent){
   bool out = false;
   for(unsigned int i=0;i<pevent->firedTriggers().size();i++){
     if(((TString)pevent->firedTriggers()[i]).Contains(triggername)){
@@ -222,7 +222,7 @@ MainAnalyzer & MainAnalyzer::operator = (const MainAnalyzer & analyzer){
 void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, double norm){ // do analysis here and store everything in analysisplots_
 
   using namespace std;
-  using namespace top;
+  using namespace ztop;
 
 
   bool isMC=true;
@@ -1105,7 +1105,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
 void Analyzer(){
   using namespace std;
-  using namespace top;
+  using namespace ztop;
 
   /////some switches for sed/////
 

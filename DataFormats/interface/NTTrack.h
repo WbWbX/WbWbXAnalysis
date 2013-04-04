@@ -3,7 +3,7 @@
 
 
 #include "mathdefs.h"
-namespace top{
+namespace ztop{
  
   class NTTrack{
 

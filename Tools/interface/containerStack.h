@@ -15,7 +15,7 @@
 #include "TLatex.h"
 #include "TGaxis.h"
 
-namespace top{
+namespace ztop{
 
   class container1DStack{
     
@@ -24,14 +24,14 @@ namespace top{
     container1DStack(TString);
     ~container1DStack();
 
-    void push_back(top::container1D, TString, int, double); //! adds container with, name, colour, norm to stack
+    void push_back(ztop::container1D, TString, int, double); //! adds container with, name, colour, norm to stack
     void removeContribution(TString); //! removes contribution
     
     void setDataLegend(TString leg="data"){dataleg_=leg;}
     void mergeSameLegends();       //! shouldn't be necessary
-    top::container1D getContribution(TString);   //! does not ignore data; makes copy, doesn't change member containers!
-    top::container1D getContributionsBut(TString);  //!does not ignore data; makes copy, doesn't change member containers!
-    top::container1D getContributionsBut(std::vector<TString>);  //!does not ignore data; makes copy, doesn't change member containers!
+    ztop::container1D getContribution(TString);   //! does not ignore data; makes copy, doesn't change member containers!
+    ztop::container1D getContributionsBut(TString);  //!does not ignore data; makes copy, doesn't change member containers!
+    ztop::container1D getContributionsBut(std::vector<TString>);  //!does not ignore data; makes copy, doesn't change member containers!
 
     TString getName(){return name_;}
     unsigned int size(){return colors_.size();}
@@ -45,7 +45,7 @@ namespace top{
     void multiplyAllMCNorms(double);
     void addGlobalRelMCError(TString,double);   //! adds a global systematic variation to the systematics stored (e.g. lumi)
     void addMCErrorStack(TString,container1DStack,bool ignoreMCStat=true);  //! calls container1D::addErrorContainer for each same named member container
-    void addRelSystematicsFrom(top::container1DStack);
+    void addRelSystematicsFrom(ztop::container1DStack);
     void removeError(TString);
     void renameSyst(TString, TString); //! old, new
 
@@ -72,13 +72,13 @@ namespace top{
     container1DStack operator * (float);
     container1DStack operator * (int);
     
-    static std::vector<top::container1DStack*> cs_list;
+    static std::vector<ztop::container1DStack*> cs_list;
     static bool cs_makelist;
     static void cs_clearlist(){cs_list.clear();}
 
   private:
     TString name_;
-    std::vector<top::container1D> containers_;
+    std::vector<ztop::container1D> containers_;
     std::vector<TString> legends_;
     std::vector<int> colors_;
     std::vector<double> norms_;

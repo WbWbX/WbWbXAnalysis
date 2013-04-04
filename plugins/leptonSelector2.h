@@ -10,19 +10,19 @@
 
 #include <algorithm>
 #include "TString.h"
-#include "../Tools/interface/miscUtils.h"
+#include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 
 
 //selectpassingProbes does NOT include the isolation cut!!!! be careful
 
-namespace top{
+namespace ztop{
   
 
-  std::pair<std::vector<top::NTElectron* > , std::vector<top::NTMuon* > > getOppoQHighestPtPair(const std::vector<top::NTElectron*> &elecs, const std::vector<top::NTMuon*> & muons){
+  std::pair<std::vector<ztop::NTElectron* > , std::vector<ztop::NTMuon* > > geztoppoQHighestPtPair(const std::vector<ztop::NTElectron*> &elecs, const std::vector<ztop::NTMuon*> & muons){
     double sumpt=0;
     //double emupt=0;
-    std::vector<top::NTElectron*> outelecs;
-    std::vector<top::NTMuon*> outmuons;
+    std::vector<ztop::NTElectron*> outelecs;
+    std::vector<ztop::NTMuon*> outmuons;
     int channel=99; // ee,mumu,emu
     unsigned int a=999;
     unsigned int b=999;
@@ -67,7 +67,7 @@ namespace top{
       outelecs << elecs[a];
       outmuons << muons[b];
     }
-    std::pair<std::vector<top::NTElectron*>, std::vector<top::NTMuon*> > out(outelecs,outmuons);
+    std::pair<std::vector<ztop::NTElectron*>, std::vector<ztop::NTMuon*> > out(outelecs,outmuons);
     return out;
   }
 

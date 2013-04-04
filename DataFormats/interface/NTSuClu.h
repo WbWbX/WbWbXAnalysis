@@ -1,7 +1,7 @@
 #ifndef NTSuClu_h
 #define NTSuClu_h
 
-namespace top{
+namespace ztop{
   typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > LorentzVector;
   class NTSuClu{
   public:

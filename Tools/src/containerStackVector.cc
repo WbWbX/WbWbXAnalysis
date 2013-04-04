@@ -1,6 +1,6 @@
 #include "../interface/containerStackVector.h"
 
-namespace top{
+namespace ztop{
 
 
   std::vector<container1DStackVector*> container1DStackVector::csv_list;
@@ -20,14 +20,14 @@ namespace top{
     }
   }
   void container1DStackVector::listStacks(){
-    for(std::vector<top::container1DStack>::iterator stack=stacks_.begin();stack<stacks_.end();++stack){
+    for(std::vector<ztop::container1DStack>::iterator stack=stacks_.begin();stack<stacks_.end();++stack){
       std::cout << stack->getName() << std::endl;
     }
   }
 
-  void container1DStackVector::add(top::container1D & container, TString leg , int color , double norm){
+  void container1DStackVector::add(ztop::container1D & container, TString leg , int color , double norm){
     bool found=false;
-    for(std::vector<top::container1DStack>::iterator s=stacks_.begin();s<stacks_.end();++s){
+    for(std::vector<ztop::container1DStack>::iterator s=stacks_.begin();s<stacks_.end();++s){
       if(s->getName() == container.getName()){
 	s->push_back(container, leg, color, norm);
 	found=true;
@@ -35,7 +35,7 @@ namespace top{
       }
     }
     if(!found){
-      top::container1DStack newstack(container.getName());
+      ztop::container1DStack newstack(container.getName());
       newstack.push_back(container, leg, color, norm);
       stacks_.push_back(newstack);
     }
@@ -47,9 +47,9 @@ namespace top{
     }
   }
 
-  top::container1DStack container1DStackVector::getStack(TString name){
-    top::container1DStack defout("DUMMY");
-    for(std::vector<top::container1DStack>::iterator s=stacks_.begin();s<stacks_.end();++s){
+  ztop::container1DStack container1DStackVector::getStack(TString name){
+    ztop::container1DStack defout("DUMMY");
+    for(std::vector<ztop::container1DStack>::iterator s=stacks_.begin();s<stacks_.end();++s){
       if(name == s->getName()){
         return *s;
       }
@@ -58,12 +58,12 @@ namespace top{
     return defout;
   }
   void container1DStackVector::removeContribution(TString contribution){
-    for(std::vector<top::container1DStack>::iterator stack=stacks_.begin(); stack < stacks_.end(); ++stack){
+    for(std::vector<ztop::container1DStack>::iterator stack=stacks_.begin(); stack < stacks_.end(); ++stack){
       stack->removeContribution(contribution);
     }
   }
 
-  void container1DStackVector::addMCErrorStackVector(TString sysname,top::container1DStackVector stackvec, bool ignoreMCStat){
+  void container1DStackVector::addMCErrorStackVector(TString sysname,ztop::container1DStackVector stackvec, bool ignoreMCStat){
     for(std::vector<container1DStack>::iterator istack=stacks_.begin();istack<stacks_.end(); ++istack){
       for(std::vector<container1DStack>::iterator estack=stackvec.stacks_.begin();estack<stackvec.stacks_.end(); ++estack){
 	if(istack->getName() == estack->getName()){
@@ -78,7 +78,7 @@ namespace top{
       stack->addGlobalRelMCError(sysname,error);
     }
   }
-  void container1DStackVector::addRelSystematicsFrom(top::container1DStackVector stackvec){
+  void container1DStackVector::addRelSystematicsFrom(ztop::container1DStackVector stackvec){
    for(std::vector<container1DStack>::iterator istack=stacks_.begin();istack<stacks_.end(); ++istack){
       for(std::vector<container1DStack>::iterator estack=stackvec.stacks_.begin();estack<stackvec.stacks_.end(); ++estack){
 	if(istack->getName() == estack->getName()){

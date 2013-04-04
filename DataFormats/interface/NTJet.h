@@ -4,7 +4,7 @@
 #include "mathdefs.h"
 #include <map>
 
-namespace top{
+namespace ztop{
  
 
   class NTJet{

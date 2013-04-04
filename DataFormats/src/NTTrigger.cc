@@ -2,9 +2,9 @@
 
 
 
-namespace top{
+namespace ztop{
 
-  std::vector<std::string>  top::NTTrigger::mapping_;
+  std::vector<std::string>  ztop::NTTrigger::mapping_;
 
   void NTTrigger::readMapFromTree(TTree * t){
     std::vector<bool> tempfired=fired_;

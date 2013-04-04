@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id: PUInfo.cc,v 1.1 2012/07/12 11:35:43 jkiesele Exp $
+// $Id: PUInfo.cc,v 1.2 2012/07/12 12:50:33 jkiesele Exp $
 //
 //
 
@@ -104,7 +104,7 @@ class PUInfo : public edm::EDAnalyzer {
  
   bool includepdfweights_;
 
-  top::NTEvent ntevent;
+  ztop::NTEvent ntevent;
 
   std::string treename_;
 
@@ -231,7 +231,7 @@ PUInfo::beginJob()
   strcpy(tempname, treename_.c_str());
   Ntuple=fs->make<TTree>(tempname ,tempname );
   
-  Ntuple->Branch("NTEvent", "top::NTEvent", &ntevent);
+  Ntuple->Branch("NTEvent", "ztop::NTEvent", &ntevent);
 
 }
 

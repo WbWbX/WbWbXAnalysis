@@ -4,7 +4,7 @@
 //#include "Math/GenVector/LorentzVector.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
 
-namespace top{
+namespace ztop{
   typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > LorentzVector;
   typedef ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<double> > PolarLorentzVector;
 

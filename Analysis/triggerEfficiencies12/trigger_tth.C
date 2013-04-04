@@ -3,17 +3,17 @@
 
 
 double 
-triggerAnalyzer::selectDileptons(std::vector<top::NTMuon> * inputMuons, std::vector<top::NTElectron> * inputElectrons){
+triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::vector<ztop::NTElectron> * inputElectrons){
 
   using namespace std;
-  using namespace top;
+  using namespace ztop;
 
   size_t tightidx=99999;
 
-  std::vector<top::NTMuon*> tightmuons,loosemuons;
+  std::vector<ztop::NTMuon*> tightmuons,loosemuons;
 
   for(size_t i=0;i<inputMuons->size();i++){
-    top::NTMuon * muon = &inputMuons->at(i);
+    ztop::NTMuon * muon = &inputMuons->at(i);
 
     if(muon->pt() < 20) continue;
     if(muon->isoVal() > 0.12) continue;
@@ -34,7 +34,7 @@ triggerAnalyzer::selectDileptons(std::vector<top::NTMuon> * inputMuons, std::vec
   }
 
   for(size_t i=0;i<inputMuons->size();i++){
-    top::NTMuon * muon = &inputMuons->at(i);
+    ztop::NTMuon * muon = &inputMuons->at(i);
 
 
     if(i==tightidx) continue; //avoid double-counting
@@ -55,7 +55,7 @@ triggerAnalyzer::selectDileptons(std::vector<top::NTMuon> * inputMuons, std::vec
   tightidx=99999;
 
   for(size_t i=0;i<inputElectrons->size();i++){
-    top::NTElectron * elec = &inputElectrons->at(i);
+    ztop::NTElectron * elec = &inputElectrons->at(i);
 
     if(elec->pt() < 20) continue;
     if(elec->isoVal() > 0.1) continue;
@@ -71,7 +71,7 @@ triggerAnalyzer::selectDileptons(std::vector<top::NTMuon> * inputMuons, std::vec
   }
 
   for(size_t i=0;i<inputElectrons->size();i++){
-    top::NTElectron * elec = &inputElectrons->at(i);
+    ztop::NTElectron * elec = &inputElectrons->at(i);
 
     if(tightidx == i) continue;
 
@@ -102,9 +102,9 @@ triggerAnalyzer::selectDileptons(std::vector<top::NTMuon> * inputMuons, std::vec
     mass=(tightelecs.at(0)->p4() + looseelecs.at(0)->p4()).M();
   }
   else if(mode_==0){ //emu
-    std::vector<top::NTMuon*> allselmuons;
+    std::vector<ztop::NTMuon*> allselmuons;
     allselmuons << tightmuons << loosemuons;
-    std::vector<top::NTElectron*> allselelecs;
+    std::vector<ztop::NTElectron*> allselelecs;
     allselelecs << tightelecs << looseelecs;
 
     //possibilty 1: combine tight mu and any elec
@@ -142,7 +142,7 @@ void trigger_tth(){
   
 
   using namespace std;
-  using namespace top;
+  using namespace ztop;
 
   std::vector<float> binsmumueta, bins2dee, bins2dmu, binsptmue, binspte, bins2dmumu;
   binsmumueta.push_back(-2.4);binsmumueta.push_back(-2.1);binsmumueta.push_back(-1.2);binsmumueta.push_back(-0.9);binsmumueta.push_back(0.9);binsmumueta.push_back(1.2);binsmumueta.push_back(2.1);binsmumueta.push_back(2.4);

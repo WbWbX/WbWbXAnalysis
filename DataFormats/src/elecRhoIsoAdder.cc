@@ -1,6 +1,6 @@
 #include "../interface/elecRhoIsoAdder.h"
 
-namespace top{
+namespace ztop{
 
 
   void elecRhoIsoAdder::checkCorrectInput(){
@@ -8,7 +8,7 @@ namespace top{
     else incorr_=true;
   }
 
-  double elecRhoIsoAdder::getRhoIso(top::NTElectron & elec){
+  double elecRhoIsoAdder::getRhoIso(ztop::NTElectron & elec){
 
     double chargedH  = elec.iso().chargedHadronIso();
     double neutralH  = elec.iso().neutralHadronIso();
@@ -20,14 +20,14 @@ namespace top{
 
  
 
-  void  elecRhoIsoAdder::addRhoIso(top::NTElectron & elec){
+  void  elecRhoIsoAdder::addRhoIso(ztop::NTElectron & elec){
     checkCorrectInput();
     double rhoiso=getRhoIso(elec);
     elec.setRhoIso(rhoiso);
   }
 
-  void  elecRhoIsoAdder::addRhoIso(std::vector<top::NTElectron> & electrons){
-    for(std::vector<top::NTElectron>::iterator elec=electrons.begin();elec<electrons.end();++elec){
+  void  elecRhoIsoAdder::addRhoIso(std::vector<ztop::NTElectron> & electrons){
+    for(std::vector<ztop::NTElectron>::iterator elec=electrons.begin();elec<electrons.end();++elec){
       addRhoIso(*elec);
     }
   }

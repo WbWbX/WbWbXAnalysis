@@ -2,22 +2,22 @@
 
 
   //some more operators
-  top::container1D operator * (double multiplier, const top::container1D & cont){ //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
-    top::container1D out=cont;
+  ztop::container1D operator * (double multiplier, const ztop::container1D & cont){ //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
+    ztop::container1D out=cont;
     return out * multiplier;
   }
-  top::container1D operator * (float multiplier, const top::container1D & cont){  //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
-    top::container1D out=cont;
+  ztop::container1D operator * (float multiplier, const ztop::container1D & cont){  //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
+    ztop::container1D out=cont;
     return out * multiplier;
   }
-  top::container1D operator * (int multiplier, const top::container1D & cont){    //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
-    top::container1D out=cont;
+  ztop::container1D operator * (int multiplier, const ztop::container1D & cont){    //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
+    ztop::container1D out=cont;
     return out * multiplier;
   }
 
 
 
-namespace top{
+namespace ztop{
 
   //////////if you like cut here ;) 
   std::vector<container1D*> container1D::c_list;
@@ -442,7 +442,7 @@ namespace top{
 
   container1D container1D::operator + (const container1D & second){
 
-      top::container1D out=second;
+      ztop::container1D out=second;
     if(bins_ != second.bins_){
       if(showwarnings_) std::cout << "operator +: not same binning!" << std::endl;
     }
@@ -683,7 +683,7 @@ namespace top{
   void container1D::addErrorContainer(TString sysname,container1D deviatingContainer, bool ignoreMCStat){
     addErrorContainer(sysname,deviatingContainer,1,ignoreMCStat);
   }
-  void container1D::addRelSystematicsFrom(const top::container1D & container){
+  void container1D::addRelSystematicsFrom(const ztop::container1D & container){
     if(bins_!=container.bins_){
       std::cout << "container1D::addErrorContainer(): not same binning!" << std::endl;
     }

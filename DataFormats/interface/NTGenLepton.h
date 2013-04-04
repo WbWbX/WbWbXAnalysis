@@ -3,7 +3,7 @@
 
 
 #include "Math/GenVector/LorentzVector.h"
-namespace top{
+namespace ztop{
   typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > LorentzVector;
 
   class NTGenLepton{

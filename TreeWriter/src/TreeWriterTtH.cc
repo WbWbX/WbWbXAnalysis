@@ -24,9 +24,9 @@ public:
 
 
 
-  top::NTMuon makeNTMuon(const pat::Muon &);
-  top::NTElectron makeNTElectron(const pat::Electron &);
-  top::NTJet makeNTJet(const pat::Jet &);
+  ztop::NTMuon makeNTMuon(const pat::Muon &);
+  ztop::NTElectron makeNTElectron(const pat::Electron &);
+  ztop::NTJet makeNTJet(const pat::Jet &);
 
 
   std::vector<std::string> writeMatchedHLTObjects_;
@@ -34,14 +34,14 @@ public:
 
 };
 
-top::NTMuon TreeWriterTtH::makeNTMuon(const pat::Muon & muon){
+ztop::NTMuon TreeWriterTtH::makeNTMuon(const pat::Muon & muon){
   
-  top::LorentzVector p4zero(0,0,0,0);
-  top::NTMuon tempmuon;
+  ztop::LorentzVector p4zero(0,0,0,0);
+  ztop::NTMuon tempmuon;
 
   tempmuon.setIsPf(muon.isPFMuon());
 
-  top::NTIsolation Iso;
+  ztop::NTIsolation Iso;
   Iso.setChargedHadronIso(muon.chargedHadronIso());
   Iso.setNeutralHadronIso(muon.neutralHadronIso());
   Iso.setPhotonIso(muon.photonIso());
@@ -53,7 +53,7 @@ top::NTMuon TreeWriterTtH::makeNTMuon(const pat::Muon & muon){
   tempmuon.setQ   (muon.charge());
 
   if(includereco_ && !(muon.innerTrack()).isNull()){
-    top::LorentzVector trkp4(muon.innerTrack()->px(),muon.innerTrack()->py(),muon.innerTrack()->pz(),muon.innerTrack()->p());
+    ztop::LorentzVector trkp4(muon.innerTrack()->px(),muon.innerTrack()->py(),muon.innerTrack()->pz(),muon.innerTrack()->p());
     tempmuon.setTrackP4(trkp4);
   }
   else{
@@ -115,13 +115,13 @@ top::NTMuon TreeWriterTtH::makeNTMuon(const pat::Muon & muon){
     std::vector<std::string> matched;
     for(size_t i=0;i<writeMatchedHLTObjects_.size();i++){
       if(muon.triggerObjectMatchesByPath(writeMatchedHLTObjects_.at(i)).size() > 0){
-	matched << writeMatchedHLTObjects_[i];
+	matched.push_back(writeMatchedHLTObjects_[i]);
       }
       if(muon.triggerObjectMatchesByCollection(writeMatchedHLTObjects_.at(i)).size() >0){
-	matched << writeMatchedHLTObjects_[i];
+	matched.push_back(writeMatchedHLTObjects_[i]);
       }
       if(muon.triggerObjectMatchesByFilter(writeMatchedHLTObjects_.at(i)).size() >0){
-	matched << writeMatchedHLTObjects_[i];
+	matched.push_back(writeMatchedHLTObjects_[i]);
       }
     }
     if(debugmode) std:: cout << "muon:matched HLTObjects size: " << matched.size() << std::endl;
@@ -137,13 +137,13 @@ top::NTMuon TreeWriterTtH::makeNTMuon(const pat::Muon & muon){
 
   return tempmuon;
 }
-top::NTElectron TreeWriterTtH::makeNTElectron(const pat::Electron & electron){
+ztop::NTElectron TreeWriterTtH::makeNTElectron(const pat::Electron & electron){
   
-  top::LorentzVector p4zero(0,0,0,0);
+  ztop::LorentzVector p4zero(0,0,0,0);
 
-   top::NTElectron tempelec;
+   ztop::NTElectron tempelec;
 
-  top::NTIsolation Iso;
+  ztop::NTIsolation Iso;
        
   Iso.setChargedHadronIso(electron.chargedHadronIso());
   Iso.setNeutralHadronIso(electron.neutralHadronIso());
@@ -202,11 +202,11 @@ top::NTElectron TreeWriterTtH::makeNTElectron(const pat::Electron & electron){
     std::vector<std::string> matched;
     for(size_t i=0;i<writeMatchedHLTObjects_.size();i++){
       if(electron.triggerObjectMatchesByPath(writeMatchedHLTObjects_.at(i)).size() > 0)
-	matched << writeMatchedHLTObjects_[i];
+	matched.push_back(writeMatchedHLTObjects_[i]);
       if(electron.triggerObjectMatchesByCollection(writeMatchedHLTObjects_.at(i)).size() >0)
-	matched << writeMatchedHLTObjects_[i];
+	matched.push_back(writeMatchedHLTObjects_[i]);
       if(electron.triggerObjectMatchesByFilter(writeMatchedHLTObjects_.at(i)).size() >0)
-	matched << writeMatchedHLTObjects_[i];
+	matched.push_back(writeMatchedHLTObjects_[i]);
     }
     if(debugmode) std:: cout << "electron:matched HLTObjects size: " << matched.size() << std::endl;
    
@@ -217,8 +217,8 @@ top::NTElectron TreeWriterTtH::makeNTElectron(const pat::Electron & electron){
     suclue=electron.superCluster()->rawEnergy();
     math::XYZPoint suclupoint=electron.superCluster()->position();
     double magnitude=sqrt(suclupoint.mag2());
-    top::LorentzVector suclup4(suclue*suclupoint.x() / magnitude,suclue*suclupoint.y() / magnitude,suclue*suclupoint.z() / magnitude,suclue);
-    top::NTSuClu suclu;
+    ztop::LorentzVector suclup4(suclue*suclupoint.x() / magnitude,suclue*suclupoint.y() / magnitude,suclue*suclupoint.z() / magnitude,suclue);
+    ztop::NTSuClu suclu;
     suclu.setP4(suclup4);
     tempelec.setSuClu(suclu);
   }
@@ -241,11 +241,11 @@ top::NTElectron TreeWriterTtH::makeNTElectron(const pat::Electron & electron){
 
   return tempelec;
 }
-top::NTJet TreeWriterTtH::makeNTJet(const pat::Jet & jet){
+ztop::NTJet TreeWriterTtH::makeNTJet(const pat::Jet & jet){
   
-  top::LorentzVector p4zero(0,0,0,0);
+  ztop::LorentzVector p4zero(0,0,0,0);
 
-  top::NTJet tempjet;
+  ztop::NTJet tempjet;
 
   pat::Jet uncJet=jet.correctedJet("Uncorrected");
  

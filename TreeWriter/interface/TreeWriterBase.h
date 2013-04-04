@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id: TreeWriterBase.cc,v 1.21 2013/03/20 18:42:40 jkiesele Exp $
+// $Id: TreeWriterBase.h,v 1.1 2013/03/22 11:33:55 jkiesele Exp $
 //
 //
 
@@ -89,7 +89,7 @@
 
 #include <cstring>
 #include "../interface/genTools.h"
-#include "TtZAnalysis/Tools/interface/miscUtils.h"
+#include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 
 //
 // class declaration
@@ -104,9 +104,9 @@ public:
       static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
 
-  virtual top::NTMuon makeNTMuon(const pat::Muon &)=0;
-  virtual top::NTElectron makeNTElectron(const pat::Electron &)=0;
-  virtual top::NTJet makeNTJet(const pat::Jet &)=0;
+  virtual ztop::NTMuon makeNTMuon(const pat::Muon &)=0;
+  virtual ztop::NTElectron makeNTElectron(const pat::Electron &)=0;
+  virtual ztop::NTJet makeNTJet(const pat::Jet &)=0;
 
 
   //  protected: //nasty
@@ -138,7 +138,7 @@ public:
   std::vector<std::string> triggers_;
   std::vector<bool> triggerBools_;
   void setTriggers();
-  top::NTGenParticle makeNTGen(const reco::GenParticle *, const std::map<const reco::GenParticle*, int>&);
+  ztop::NTGenParticle makeNTGen(const reco::GenParticle *, const std::map<const reco::GenParticle*, int>&);
   bool isInGenCollection(const reco::GenParticle * , const std::vector<const reco::GenParticle * > &);
   bool isInGenCollection(const reco::GenJet * , const std::vector<const reco::GenJet * > &);
   template<typename t,typename u>
@@ -157,20 +157,20 @@ public:
 
   bool includereco_, includetrigger_, pfinput_,includepdfweights_,includegen_;
   TTree * Ntuple;
-  std::vector<top::NTMuon> ntmuons;
-  std::vector<top::NTLepton> ntleptons;
-  std::vector<top::NTElectron> ntpfelectrons;
-  std::vector<top::NTElectron> ntgsfelectrons;
-  std::vector<top::NTJet> ntjets;
-  std::vector<top::NTTrack> nttracks;
-  std::vector<top::NTSuClu> ntsuclus;
-  top::NTMet ntmet;
-  top::NTMet ntmvamet;
-  top::NTEvent ntevent;
-  top::NTTrigger nttrigger;
+  std::vector<ztop::NTMuon> ntmuons;
+  std::vector<ztop::NTLepton> ntleptons;
+  std::vector<ztop::NTElectron> ntpfelectrons;
+  std::vector<ztop::NTElectron> ntgsfelectrons;
+  std::vector<ztop::NTJet> ntjets;
+  std::vector<ztop::NTTrack> nttracks;
+  std::vector<ztop::NTSuClu> ntsuclus;
+  ztop::NTMet ntmet;
+  ztop::NTMet ntmvamet;
+  ztop::NTEvent ntevent;
+  ztop::NTTrigger nttrigger;
 
-  std::vector<top::NTGenParticle> ntgenmuons3, ntgenelecs3,ntgentaus3,ntgenmuons1, ntgenelecs1,ntgentaus1, allntgen;
-  std::vector<top::NTGenJet> ntgenjets;
+  std::vector<ztop::NTGenParticle> ntgenmuons3, ntgenelecs3,ntgentaus3,ntgenmuons1, ntgenelecs1,ntgentaus1, allntgen;
+  std::vector<ztop::NTGenJet> ntgenjets;
   int channel_; // 11 for ee 13 for mumu 1113 for emu 151113 etc for via tau
 
   bool viaTau_;

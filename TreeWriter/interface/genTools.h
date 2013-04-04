@@ -5,7 +5,7 @@
 
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 
-namespace top{
+namespace ztop{
 
   std::vector<const reco::GenParticle *> getGenFromMother(const reco::GenParticle * mother, int Id);
   

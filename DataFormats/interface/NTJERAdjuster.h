@@ -2,9 +2,9 @@
 #define JERADJUSTER_H
 
 #include "TtZAnalysis/DataFormats/interface/NTJet.h"
-#include "TtZAnalysis/Tools/interface/JERBase.h"
+#include "TopAnalysis/ZTopUtils/interface/JERBase.h"
 
-namespace top{
+namespace ztop{
 
   class NTJERAdjuster : public JERBase{
 
@@ -12,13 +12,13 @@ namespace top{
     NTJERAdjuster(){}
     ~NTJERAdjuster(){}
 
-    void correctJets(std::vector<top::NTJet*> & jets){
+    void correctJets(std::vector<ztop::NTJet*> & jets){
       for(size_t i=0;i<jets.size();i++){
 	correctJet(jets.at(i));
       }
     }
-    void correctJet(top::NTJet* jet){
-      top::PolarLorentzVector temp=jet->p4();
+    void correctJet(ztop::NTJet* jet){
+      ztop::PolarLorentzVector temp=jet->p4();
       correctP4(temp, jet->genP4());
       jet->setP4(temp);
     }

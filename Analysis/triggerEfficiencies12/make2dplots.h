@@ -11,7 +11,7 @@
 #include "TStyle.h"
 #include "TGraphAsymmErrors.h"
 #include <vector>
-#include "TtZAnalysis/Tools/interface/miscUtils.h"
+#include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 
 void make2dplots(TString inputfile, TString plot, TString output){
 

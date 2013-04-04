@@ -8,11 +8,11 @@
 #include <math.h>
 #include <utility>
 #include "TPad.h"
-#include "miscUtils.h"
+#include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 
 ////////bins include their border on the right side!!
 
-namespace top{
+namespace ztop{
   
   class container1D{
   public:
@@ -132,9 +132,9 @@ namespace top{
 
 
   //some more operators
-top::container1D operator * (double multiplier, const top::container1D & cont);
-top::container1D operator * (float multiplier, const top::container1D & cont);  //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
-top::container1D operator * (int multiplier, const top::container1D & cont);    //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
+ztop::container1D operator * (double multiplier, const ztop::container1D & cont);
+ztop::container1D operator * (float multiplier, const ztop::container1D & cont);  //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
+ztop::container1D operator * (int multiplier, const ztop::container1D & cont);    //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
 
 
 

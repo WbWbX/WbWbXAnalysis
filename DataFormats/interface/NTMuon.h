@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <map>
 
-namespace top{
+namespace ztop{
 
 
 
@@ -25,9 +25,9 @@ namespace top{
     void setTrkHits(int TrkHits){trkHits_=TrkHits;}
     void setPixHits(int PixHits){pixHits_=PixHits;}
     void setMuonHits(int MuonHits){muonHits_=MuonHits;}
-    void setIso(top::NTIsolation Iso){iso_=Iso;}
+    void setIso(ztop::NTIsolation Iso){iso_=Iso;}
     void setMatchedTrig(std::vector<std::string> MatchedTrig){matchedTrig_=MatchedTrig;}
-    void setTrackP4(top::LorentzVector trkp4in){trkP4_=trkp4in;}
+    void setTrackP4(ztop::LorentzVector trkp4in){trkP4_=trkp4in;}
     void setIsPf(bool ispf){ispf_=ispf;}
   
 
@@ -39,7 +39,7 @@ namespace top{
     int trkHits(){return trkHits_;}
     int pixHits(){return pixHits_;}
     int muonHits(){return muonHits_;}
-    top::NTIsolation iso(){return iso_;}
+    ztop::NTIsolation iso(){return iso_;}
     double isoVal(){
 return (iso_.chargedHadronIso() + std::max(0.0,iso_.neutralHadronIso() + iso_.photonIso() - 0.5*iso_.puChargedHadronIso()))/p4_.pt();
 }
@@ -78,7 +78,7 @@ return (iso_.chargedHadronIso() + std::max(0.0,iso_.neutralHadronIso() + iso_.ph
     int trkHits_,pixHits_;
   
     int muonHits_;
-    top::NTIsolation iso_;
+    ztop::NTIsolation iso_;
     std::vector<std::string> matchedTrig_;
     PolarLorentzVector trkP4_;
 

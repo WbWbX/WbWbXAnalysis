@@ -1,7 +1,7 @@
 #ifndef NTIsolation_h
 #define NTIsolation_h
 
-namespace top{
+namespace ztop{
 
   class NTIsolation{
   public:

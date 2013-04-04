@@ -3,7 +3,7 @@
 #include "TString.h"
 #include <vector>
 
-namespace top{
+namespace ztop{
   class NTEvent{
   public:
     explicit NTEvent(){}

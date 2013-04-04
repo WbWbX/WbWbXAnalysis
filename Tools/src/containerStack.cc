@@ -1,8 +1,8 @@
 #include "../interface/containerStack.h"
 
-namespace top{
+namespace ztop{
 
-  std::vector<top::container1DStack*> container1DStack::cs_list;
+  std::vector<ztop::container1DStack*> container1DStack::cs_list;
   bool container1DStack::cs_makelist=false;
 
   container1DStack::container1DStack(){
@@ -17,7 +17,7 @@ namespace top{
       break;
     }
   }
-  void container1DStack::push_back(top::container1D cont, TString legend, int color, double norm){
+  void container1DStack::push_back(ztop::container1D cont, TString legend, int color, double norm){
    bool wasthere=false;
    for(unsigned int i=0;i<legends_.size();i++){
      if(legend == legends_[i]){
@@ -41,7 +41,7 @@ namespace top{
     std::vector<TString>::iterator leg=legends_.begin();
     std::vector<int>::iterator col=colors_.begin();
     std::vector<double>::iterator norm=norms_.begin();
-    for(std::vector<top::container1D>::iterator cont=containers_.begin();cont<containers_.end();++cont){
+    for(std::vector<ztop::container1D>::iterator cont=containers_.begin();cont<containers_.end();++cont){
       if(*leg == legendname){
 	legends_.erase(leg);
 	containers_.erase(cont);
@@ -60,8 +60,8 @@ namespace top{
    //redundant
  }
 
- top::container1D container1DStack::getContribution(TString contr){
-   top::container1D out;
+ ztop::container1D container1DStack::getContribution(TString contr){
+   ztop::container1D out;
    if(containers_.size() > 0){
      out=containers_[0];
      out.clear();
@@ -80,8 +80,8 @@ namespace top{
    
    return out;
  }
-  top::container1D container1DStack::getContributionsBut(TString contr){
-   top::container1D out;
+  ztop::container1D container1DStack::getContributionsBut(TString contr){
+   ztop::container1D out;
    if(containers_.size() > 0){
      out=containers_[0];
      out.clear();
@@ -94,8 +94,8 @@ namespace top{
    return out;
  }
 
-  top::container1D container1DStack::getContributionsBut(std::vector<TString> contr){
-    top::container1D out;
+  ztop::container1D container1DStack::getContributionsBut(std::vector<TString> contr){
+    ztop::container1D out;
     if(containers_.size() > 0){
       out=containers_[0];
       out.clear();
@@ -150,8 +150,8 @@ namespace top{
     }
   }
 
-  void container1DStack::addRelSystematicsFrom(top::container1DStack stack){
-    for(std::vector<top::container1D>::iterator cont=stack.containers_.begin();cont<stack.containers_.end();++cont){
+  void container1DStack::addRelSystematicsFrom(ztop::container1DStack stack){
+    for(std::vector<ztop::container1D>::iterator cont=stack.containers_.begin();cont<stack.containers_.end();++cont){
       TString name=cont->getName();
       for(unsigned int i=0;i<containers_.size();i++){
 	if(containers_[i].getName() == name){
@@ -173,7 +173,7 @@ namespace top{
       containers_[i].renameSyst(old,New);
     }
   }
-  top::container1D & container1DStack::getContainer(TString name){
+  ztop::container1D & container1DStack::getContainer(TString name){
     bool found=false;
     for(unsigned int i=0;i<containers_.size();i++){
       if(containers_[i].getName() == name){
@@ -186,7 +186,7 @@ namespace top{
     if(!found) std::cout << "container1DStack::getContainer: container with name " << name << " not found, returning first container! all names are formatted: c_legendentry" << std::endl;
     return containers_[0];;
   }
-  top::container1D container1DStack::getFullMCContainer(){
+  ztop::container1D container1DStack::getFullMCContainer(){
     container1D out=containers_[0];
     out.clear();
     for(unsigned int i=0;i<containers_.size();i++){
@@ -416,7 +416,7 @@ namespace top{
   }
 
   //just perform functions on the containers with same names
-  top::container1DStack container1DStack::operator + (container1DStack stack){
+  ztop::container1DStack container1DStack::operator + (container1DStack stack){
     for(unsigned int i=0;i<containers_.size();i++){
       for(unsigned int j=0;j<stack.containers_.size();j++){
 	if(containers_[i].getName() == stack.containers_[j].getName()){
@@ -426,7 +426,7 @@ namespace top{
     }
     return stack;
   }
-  top::container1DStack container1DStack::operator - (container1DStack stack){
+  ztop::container1DStack container1DStack::operator - (container1DStack stack){
     for(unsigned int i=0;i<containers_.size();i++){
       for(unsigned int j=0;j<stack.containers_.size();j++){
 	if(containers_[i].getName() == stack.containers_[j].getName()){
@@ -436,7 +436,7 @@ namespace top{
     }
     return stack;
   }
-  top::container1DStack container1DStack::operator / (container1DStack  stack){
+  ztop::container1DStack container1DStack::operator / (container1DStack  stack){
     for(unsigned int i=0;i<containers_.size();i++){
       for(unsigned int j=0;j<stack.containers_.size();j++){
 	if(containers_[i].getName() == stack.containers_[j].getName()){
@@ -446,7 +446,7 @@ namespace top{
     }
     return stack;
   }
-  top::container1DStack container1DStack::operator * (container1DStack  stack){
+  ztop::container1DStack container1DStack::operator * (container1DStack  stack){
     for(unsigned int i=0;i<containers_.size();i++){
       for(unsigned int j=0;j<stack.containers_.size();j++){
 	if(containers_[i].getName() == stack.containers_[j].getName()){
@@ -456,15 +456,15 @@ namespace top{
     }
     return stack;
   }
-  top::container1DStack container1DStack::operator * (double scalar){
-    top::container1DStack out=*this;
+  ztop::container1DStack container1DStack::operator * (double scalar){
+    ztop::container1DStack out=*this;
     for(unsigned int i=0;i<containers_.size();i++) containers_[i] = containers_[i] * scalar;
     return out;
   }
-  top::container1DStack container1DStack::operator * (float scalar){
+  ztop::container1DStack container1DStack::operator * (float scalar){
     return *this * (double)scalar;
   }
-  top::container1DStack container1DStack::operator * (int scalar){
+  ztop::container1DStack container1DStack::operator * (int scalar){
     return *this * (double)scalar;
   }
     

@@ -85,7 +85,8 @@ void
 TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
    using namespace edm;
-   using namespace top;
+   using namespace ztop;
+   //using namespace zztop;
 
 
    if(debugmode) std::cout << "event loop started" << std::endl;
@@ -115,7 +116,7 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    triggerBools_.clear();
 
 
-   top::NTTrigger clear;
+   ztop::NTTrigger clear;
    nttrigger=clear;
 
   bool IsRealData = false;
@@ -487,7 +488,7 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
        for(size_t i=0;i<temppatelecs->size();i++){
      
-	 top::NTElectron tempelec;
+	 ztop::NTElectron tempelec;
 	 tempelec=makeNTElectron(temppatelecs->at(i));
 
 	 int genidx=-1;
@@ -528,7 +529,7 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
      for(size_t i=0;i<muons->size();i++){
    
-       top::NTMuon tempmuon;
+       ztop::NTMuon tempmuon;
        tempmuon=makeNTMuon(muons->at(i));
 
        int genidx=-1;
@@ -564,7 +565,7 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
        if(!pfMuonCands_){
 	 for(std::vector<reco::Muon>::const_iterator recomuon=recomuons->begin(); recomuon<recomuons->end() ; recomuon++){
-	   top::NTLepton templep;
+	   ztop::NTLepton templep;
 	   templep.setP4(recomuon->p4());
 	   templep.setQ(recomuon->charge());	 
 	   double vz=-9999;
@@ -589,7 +590,7 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        }
        else{
 	 for(std::vector<reco::PFCandidate>::const_iterator recomuon=recopfmuons->begin(); recomuon<recopfmuons->end() ; recomuon++){
-	   top::NTLepton templep;
+	   ztop::NTLepton templep;
 	   templep.setP4(recomuon->p4());
 	   templep.setQ(recomuon->charge());	 
 	   double vz=-9999;
@@ -608,7 +609,7 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
        if(!pfElecCands_){
 	 for(std::vector<reco::GsfElectron>::const_iterator recoelectron=recoelecs->begin(); recoelectron<recoelecs->end() ; recoelectron++){
-	   top::NTLepton templep;
+	   ztop::NTLepton templep;
 	   templep.setP4(recoelectron->p4());
 	   templep.setQ(recoelectron->charge());
 	   double vz=-9999;
@@ -628,7 +629,7 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        }
        else{
 	 for(std::vector<reco::PFCandidate>::const_iterator recoelec=recopfelecs->begin(); recoelec<recopfelecs->end() ; recoelec++){
-	   top::NTLepton templep;
+	   ztop::NTLepton templep;
 	   templep.setP4(recoelec->p4());
 	   templep.setQ(recoelec->charge());	 
 	   double vz=-9999;
@@ -654,7 +655,7 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        pat::Jet uncJet=jets->at(i).correctedJet("Uncorrected");
        if(uncJet.pt() < 10) continue;
 
-       top::NTJet tempjet;
+       ztop::NTJet tempjet;
        tempjet=makeNTJet(jets->at(i));
       
        int genidx=findGenMatchIdx((jets->at(i).genJet()),ntgenjets,0.1);
@@ -692,9 +693,9 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	   if(track2->pt() < 8) continue;
 	   if(fabs(track2->eta()) > 2.6) continue;
 	   if(track->charge() == track2->charge()) continue;
-	   top::NTTrack nttrack;
-	   top::LorentzVector p1(track->px(), track->py(), track->pz(), track->p());
-	   top::LorentzVector p2(track2->px(), track2->py(), track2->pz(), track2->p());
+	   ztop::NTTrack nttrack;
+	   ztop::LorentzVector p1(track->px(), track->py(), track->pz(), track->p());
+	   ztop::LorentzVector p2(track2->px(), track2->py(), track2->pz(), track2->p());
 	   if((p1+p2).M() > 55 && (p1+p2).M() < 125){
 	     nttrack.setP4(p1);
 	     nttrack.setQ(track->charge());
@@ -712,7 +713,7 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	 double suclue=suclu->rawEnergy();
 	 math::XYZPoint suclupoint=suclu->position();
 	 double magnitude=sqrt(suclupoint.mag2());
-	 top::LorentzVector suclup4(suclue*suclupoint.x() / magnitude,suclue*suclupoint.y() / magnitude,suclue*suclupoint.z() / magnitude,suclue);
+	 ztop::LorentzVector suclup4(suclue*suclupoint.x() / magnitude,suclue*suclupoint.y() / magnitude,suclue*suclupoint.z() / magnitude,suclue);
 	 if(suclup4.Pt() < 8) continue;
 
 	 for(std::vector<reco::SuperCluster>::const_iterator suclu2=recosuclus->begin(); suclu2<recosuclus->end(); suclu2++){
@@ -722,12 +723,12 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	   double suclue2=suclu2->rawEnergy();
 	   math::XYZPoint suclupoint2=suclu2->position();
 	   double magnitude2=sqrt(suclupoint2.mag2());
-	   top::LorentzVector suclup42(suclue2*suclupoint2.x() / magnitude2,suclue2*suclupoint2.y() / magnitude2,suclue2*suclupoint2.z() / magnitude2,suclue2);
+	   ztop::LorentzVector suclup42(suclue2*suclupoint2.x() / magnitude2,suclue2*suclupoint2.y() / magnitude2,suclue2*suclupoint2.z() / magnitude2,suclue2);
 
 	   if(suclup42.Pt() < 8) continue;
 
 	   if((suclup4+suclup42).M() > 55 && (suclup4+suclup42).M()<125 ){
-	     top::NTSuClu tempsuclu;
+	     ztop::NTSuClu tempsuclu;
 	     tempsuclu.setP4(suclup4);
 	     ntsuclus.push_back(tempsuclu);
 	     break;
@@ -819,7 +820,7 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    ntevent.setIsoRho(temprhos);
 
    //add rhoiso to electrons (uses 2011 corrections (second argument set to false));
-   top::elecRhoIsoAdder addrho(!IsRealData, !rho2011_);
+   ztop::elecRhoIsoAdder addrho(!IsRealData, !rho2011_);
    if(rho2011_) addrho.setRho(temprhos[2]);
    else         addrho.setRho(temprhos[0]);
    addrho.addRhoIso(ntpfelectrons);
@@ -873,32 +874,32 @@ TreeWriterBase::beginJob()
   //TBranch *branch = Ntuple->Branch("Triggers",&triggers);
 
   
-  Ntuple->Branch("NTMuons", "std::vector<top::NTMuon>", &ntmuons);
+  Ntuple->Branch("NTMuons", "std::vector<ztop::NTMuon>", &ntmuons);
   
   if(includereco_){
-    Ntuple->Branch("NTLeptons", "std::vector<top::NTLepton>", &ntleptons);
-    Ntuple->Branch("NTTracks", "std::vector<top::NTTrack>", &nttracks);
-    Ntuple->Branch("NTSuClu", "std::vector<top::NTSuClu>", &ntsuclus);
+    Ntuple->Branch("NTLeptons", "std::vector<ztop::NTLepton>", &ntleptons);
+    Ntuple->Branch("NTTracks", "std::vector<ztop::NTTrack>", &nttracks);
+    Ntuple->Branch("NTSuClu", "std::vector<ztop::NTSuClu>", &ntsuclus);
   }
-  Ntuple->Branch("NTPFElectrons", "std::vector<top::NTElectron>", &ntpfelectrons);
-  Ntuple->Branch("NTElectrons", "std::vector<top::NTElectron>", &ntgsfelectrons);
-  Ntuple->Branch("NTJets", "std::vector<top::NTJet>", &ntjets);
+  Ntuple->Branch("NTPFElectrons", "std::vector<ztop::NTElectron>", &ntpfelectrons);
+  Ntuple->Branch("NTElectrons", "std::vector<ztop::NTElectron>", &ntgsfelectrons);
+  Ntuple->Branch("NTJets", "std::vector<ztop::NTJet>", &ntjets);
   
-  Ntuple->Branch("NTMet", "top::NTMet", &ntmet);
+  Ntuple->Branch("NTMet", "ztop::NTMet", &ntmet);
   
-  Ntuple->Branch("NTMvaMet", "top::NTMet", &ntmvamet);
-  Ntuple->Branch("NTEvent", "top::NTEvent", &ntevent);
+  Ntuple->Branch("NTMvaMet", "ztop::NTMet", &ntmvamet);
+  Ntuple->Branch("NTEvent", "ztop::NTEvent", &ntevent);
 
   Ntuple->Branch("TriggerBools", "std::vector<bool>", &triggerBools_);
 
-  //  Ntuple->Branch("NTTrigger", "top::NTTrigger", &nttrigger);
+  //  Ntuple->Branch("NTTrigger", "ztop::NTTrigger", &nttrigger);
 
-  Ntuple->Branch("NTGenParticles", "std::vector<top::NTGenParticle>", &allntgen);
-  Ntuple->Branch("NTGenJets", "std::vector<top::NTGenJet>", &ntgenjets);
+  Ntuple->Branch("NTGenParticles", "std::vector<ztop::NTGenParticle>", &allntgen);
+  Ntuple->Branch("NTGenJets", "std::vector<ztop::NTGenJet>", &ntgenjets);
 
-  // Ntuple->Branch("NTGenMEMuons",     "std::vector<top::NTGenParticle>", &ntgenmuons3);
-  // Ntuple->Branch("NTGenElectrons", "std::vector<top::NTGenParticle>", &ntgenelecs1);
-  // Ntuple->Branch("NTGenMuons",     "std::vector<top::NTGenParticle>", &ntgenmuons1);
+  // Ntuple->Branch("NTGenMEMuons",     "std::vector<ztop::NTGenParticle>", &ntgenmuons3);
+  // Ntuple->Branch("NTGenElectrons", "std::vector<ztop::NTGenParticle>", &ntgenelecs1);
+  // Ntuple->Branch("NTGenMuons",     "std::vector<ztop::NTGenParticle>", &ntgenmuons1);
   //  Ntuple->Branch("Channel",channel_);
 
   
@@ -1032,8 +1033,8 @@ void TreeWriterBase::setTriggers(){
 }
 
 
-top::NTGenParticle TreeWriterBase::makeNTGen(const reco::GenParticle * p, const std::map<const reco::GenParticle * , int> & idmap){
-  top::NTGenParticle out;
+ztop::NTGenParticle TreeWriterBase::makeNTGen(const reco::GenParticle * p, const std::map<const reco::GenParticle * , int> & idmap){
+  ztop::NTGenParticle out;
   out.setP4(p->p4());
   out.setPdgId(p->pdgId());
   out.setStatus(p->status());
