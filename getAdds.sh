@@ -31,6 +31,10 @@ cvs co -d TopAnalysis/TopFilter/python/filters/ UserCode/Bromo/TopAnalysis/TopFi
 
 cvs co -d TopAnalysis/TopUtils/scripts UserCode/Bromo/TopAnalysis/TopUtils/scripts
 
+#utilz moved to topAnalysis
+
+cvs co -d TopAnalysis/ZTopUtils UserCode/Bromo/TopAnalysis/ZTopUtils
+
 #b-jet stuff
 
 cvs co -d TopAnalysis/TopUtils/python/ UserCode/Bromo/TopAnalysis/TopUtils/python/GenLevelBJetProducer_cff.py
