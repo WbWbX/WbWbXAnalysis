@@ -1,5 +1,6 @@
 <lcgdict>
-  <class name="std::vector<std::string>"/>
+
+<class name="std::vector<std::string>"/>
   <class name="std::vector<std::vector<std::string> >"/>
   <class name="ztop::NTLepton"/>
   <class name="std::vector<ztop::NTLepton>"/>
@@ -26,16 +27,17 @@
   <class name="std::vector<ztop::NTGenParticle*>"/>
   <class name="ztop::NTGenJet"/>
   <class name="std::vector<ztop::NTGenJet>"/>
+
+
   <class name="ztop::NTBTagSF"/>
   <class name="std::vector<ztop::NTBTagSF>"/>
   <class name="ztop::NTJECUncertainties"/>
   <class name="std::vector<ztop::NTJECUncertainties>"/>
   <class name="ztop::NTJERAdjuster"/>
   <class name="std::vector<ztop::NTJERAdjuster>"/>
-  <class name="ztop::NTTrigger"/>
-  <class name="std::vector<ztop::NTTrigger>"/>
   <class name="std::map<std::string,double>"/>
   <class name="std::map<int,double>"/>
+
 
 </lcgdict>
  

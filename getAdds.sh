@@ -144,15 +144,20 @@ fi
 #some copy-paste in case you want to use my root macros and the classes on command line
 echo 'you will need this in the rootlogon.C:'
 echo '
-     gSystem->Load("libFWCoreFWLite.so"); 
+      gSystem->Load("libFWCoreFWLite.so"); 
      AutoLibraryLoader::enable();
+     //ensure backward compatability to old trees
+     namespace ztop{};
+     namespace top{using namespace ztop;}
      gSystem->Load("libDataFormatsFWLite.so");
      gSystem->Load("libDataFormatsPatCandidates.so");
      gSystem->Load("libTtZAnalysisDataFormats.so");
+     gSystem->Load("libTtZAnalysisTools.so");
+     gSystem->Load("libTopAnalysisZTopUtils.so");
      gSystem->Load("libRooFit");
-     gSystem->Load("libFWCoreUtilities.so");
      gSystem->Load("libCondFormatsJetMETObjects.so");
      cout << "libs loaded" <<endl;
+     ztop::container1DStackVector csv_find("for_listing_etc");
      '
 
 

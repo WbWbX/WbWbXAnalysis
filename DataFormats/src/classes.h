@@ -21,10 +21,14 @@
 #include "../interface/NTJECUncertainties.h"
 #include "../interface/NTJERAdjuster.h"
 
+//backward comp
+
+namespace top{using namespace ztop;}
+
 namespace
 {
   struct dictionary {
-
+    
     std::vector<std::string> dummy1;
     std::vector<std::vector<std::string> > dummy2;
     ztop::NTLepton dummy5;
@@ -45,16 +49,19 @@ namespace
     std::vector<ztop::NTTrack> dummy18;
     ztop::NTSuClu dummy19;
     std::vector<ztop::NTSuClu> dummy20;
-    ztop::NTTrigger dummy21;
-    std::vector<ztop::NTTrigger> dummy22;
-
+    ztop::NTGenParticle ewfik;
+    std::vector<ztop::NTGenParticle> swded;
+    ztop::NTGenJet ewfffffik;
+    std::vector<ztop::NTGenJet> swgggfded;
+    std::vector< ztop::NTGenParticle *> jfffd;
+    ztop::NTGenLepton ihisdh;
+    std::vector<ztop::NTGenLepton> asfkkk;
+    
 
 
     std::map<std::string, double> ksdjsda;
     std::map<int, double> ijdfj;
 
-    ztop::NTGenLepton ihisdh;
-    std::vector<ztop::NTGenLepton> asfkkk;
 
     ztop::NTBTagSF ked;
     ztop::NTJECUncertainties kkss;
@@ -63,13 +70,13 @@ namespace
     std::vector<ztop::NTJECUncertainties> kkssV;
     std::vector<ztop::NTJERAdjuster> ksdskV;
 
-    ztop::NTGenParticle ewfik;
-    std::vector<ztop::NTGenParticle> swded;
-    ztop::NTGenJet ewfffffik;
-    std::vector<ztop::NTGenJet> swgggfded;
-
-    std::vector< ztop::NTGenParticle *> jfffd;
     
   };
+
+
+
+
 }
 
+
+ 
