@@ -62,8 +62,8 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
     if(fabs(elec->eta()) > 2.5) continue;
     if(elec->mvaId()<0) continue;
     if(!elec->isNotConv()) continue;
-      if(fabs(elec->d0V()) > 0.02) continue;
-      if(fabs(elec->dzV()) > 1) continue;
+    if(fabs(elec->d0V()) > 0.02) continue;
+    if(fabs(elec->dzV()) > 1) continue;
 
     tightelecs << elec;
     tightidx=i;
@@ -107,21 +107,19 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
     std::vector<ztop::NTElectron*> allselelecs;
     allselelecs << tightelecs << looseelecs;
 
-    //possibilty 1: combine tight mu and any elec
-    //possibility 2: combine tight elec and any mu
-    bool possibility1=false;
+    bool tightmutighte = tightmuons.size() == 1 && tightelecs.size() == 1;
+    bool tightmuloosee = tightmuons.size() == 1 && looseelecs.size() == 1;
+    bool loosemutighte = loosemuons.size() == 1 && tightelecs.size() == 1;
 
-    if(possibility1){
-      if(tightmuons.size() != 1 || allselelecs.size() != 1) return 0;
-      if(tightmuons.at(0)->q() == allselelecs.at(0)->q())   return 0;
-      mass=(tightmuons.at(0)->p4() + allselelecs.at(0)->p4()).M();
-    }
-    else{
-      if(tightelecs.size() != 1 || allselmuons.size() != 1) return 0;
-      if(tightelecs.at(0)->q() == allselmuons.at(0)->q())   return 0;
-      mass=(tightelecs.at(0)->p4() + allselmuons.at(0)->p4()).M();
-    }
-    //??? what to do
+    if(!(tightmutighte || tightmuloosee || loosemutighte)) return 0;
+    //require exactly one of each
+    if(allselmuons.size() != 1 || allselelecs.size() != 1) return 0;
+
+    //oppo charge
+    if(allselmuons.at(0)->q() == allselelecs.at(0)->q()) return 0;
+
+    mass=(allselmuons.at(0)->p4() + allselelecs.at(0)->p4()).M();
+
   }
   else{ //mumu
     if(tightmuons.size() != 1 || loosemuons.size() != 1) return 0;
@@ -144,8 +142,9 @@ void trigger_tth(){
   using namespace std;
   using namespace ztop;
 
-  std::vector<float> binsmumueta, bins2dee, bins2dmu, binsptmue, binspte, bins2dmumu;
-  binsmumueta.push_back(-2.4);binsmumueta.push_back(-2.1);binsmumueta.push_back(-1.2);binsmumueta.push_back(-0.9);binsmumueta.push_back(0.9);binsmumueta.push_back(1.2);binsmumueta.push_back(2.1);binsmumueta.push_back(2.4);
+  std::vector<float> binsmumueta, bins2dee, bins2dmue,binsptmu, binspte, bins2dmumu;
+  
+  binsmumueta.push_back(-2.5);binsmumueta.push_back(-2.1);binsmumueta.push_back(-1.2);binsmumueta.push_back(-0.9);binsmumueta.push_back(0.9);binsmumueta.push_back(1.2);binsmumueta.push_back(2.1);binsmumueta.push_back(2.5);
 
   bins2dee << 0 << 1.479 << 2.5;
   bins2dmue << 0 << 0.9 << 2.5;
@@ -159,18 +158,26 @@ void trigger_tth(){
   triggerAnalyzer ta_eed;
   triggerAnalyzer ta_mumud;
   triggerAnalyzer ta_emud;
+
   ta_eed.setMode("ee");
+  ta_eed.setMassCut(12);
   ta_eed.setIncludeCorr(includecorr);
   ta_emud.setMode("emu");
+  ta_emud.setMassCut(12);
   ta_eed.setIncludeCorr(includecorr);
   ta_mumud.setMode("mumu");
+  ta_mumud.setMassCut(12);
   ta_eed.setIncludeCorr(includecorr);
 
   ta_mumud.setBinsEta(binsmumueta);
+  ta_mumud.setBinsEta2dX(bins2dmumu);
+  ta_mumud.setBinsEta2dY(bins2dmumu);
   ta_mumud.setBinsPt(binsptmu);
+
   ta_eed.setBinsPt(binspte);
   ta_eed.setBinsEta2dX(bins2dee);
   ta_eed.setBinsEta2dY(bins2dee);
+
   ta_emud.setBinsEta2dX(bins2dee);
   ta_emud.setBinsEta2dY(bins2dmue);
   ta_emud.setBinsPt(binsptmu);

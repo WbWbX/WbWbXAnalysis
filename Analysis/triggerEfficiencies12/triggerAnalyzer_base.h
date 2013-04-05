@@ -4,11 +4,11 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TH1D.h"
-#include "TtZAnalysis/DataFormats/interface/NTMuon.h"
-#include "TtZAnalysis/DataFormats/interface/NTElectron.h"
-#include "TtZAnalysis/DataFormats/interface/NTEvent.h"
-#include "TtZAnalysis/DataFormats/interface/NTJet.h"
-#include "TtZAnalysis/DataFormats/interface/NTMet.h"
+#include "TtZAnalysis/DataFormats/src/classes.h"
+// #include "TtZAnalysis/DataFormats/interface/NTElectron.h"
+// #include "TtZAnalysis/DataFormats/interface/NTEvent.h"
+// #include "TtZAnalysis/DataFormats/interface/NTJet.h"
+// #include "TtZAnalysis/DataFormats/interface/NTMet.h"
 #include <vector>
 #include <algorithm>
 #include <string>
@@ -19,12 +19,14 @@
 #include "makeplotsnice.h"
 #include "TtZAnalysis/Tools/interface/container.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
-#include "TopAnalysis/ZtopUtils/interface/PUReweighter.h"
+#include "TopAnalysis/ZTopUtils/interface/PUReweighter.h"
 #include <map>
 #include <stdlib.h>
 
 using namespace std; //nasty.. but ok here
     using namespace ztop;
+namespace top{using namespace ztop;}
+
 
 //ratiomulti affects plots AND syst error in tables
 // NOOOOO relative paths!!
@@ -53,6 +55,7 @@ public:
     isMC_=false;
     breakat5fb_=false;
     includecorr_=true;
+    masscut_=20;
   }
   ~triggerAnalyzer(){};
 
@@ -95,6 +98,8 @@ public:
   void setPUFile(TString file){pufile_=file;};
 
   void setIncludeCorr(bool inc){includecorr_=inc;}
+
+  void setMassCut(double cut){masscut_=cut;}
 
   std::vector<double> Eff(){
 
@@ -1002,6 +1007,8 @@ protected:
   std::vector<float> binseta2dx_;
   std::vector<float> binseta2dy_;
   std::vector<float> binspt_;
+
+  double masscut_;
 
   TString whichelectrons_;
   bool breakat5fb_;
