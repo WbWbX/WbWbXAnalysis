@@ -1,8 +1,8 @@
 
 ##DY MC
 
-400  /DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_dymumu60120     muCone03=false  includereco=true ttH=true genFilter=Z genFilterString=MuonMuon genFilterMassLow=60 genFilterMassHigh=120 isSignal=true
-400  /DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_dyee60120       muCone03=false  includereco=true ttH=true genFilter=Z genFilterString=ElectronElectron genFilterMassLow=60 genFilterMassHigh=120 isSignal=true
+700  /DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_dymumu60120     muCone03=false includereco=true ttH=true genFilter=Z genFilterString=MuonMuon genFilterMassLow=60 genFilterMassHigh=120 isSignal=true
+700  /DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_dyee60120       muCone03=false includereco=true ttH=true genFilter=Z genFilterString=ElectronElectron genFilterMassLow=60 genFilterMassHigh=120 isSignal=true
 
 
 
