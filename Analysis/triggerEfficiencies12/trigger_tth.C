@@ -99,6 +99,8 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
   if(mode_<0){ //ee
     if(tightelecs.size() != 1 || looseelecs.size() != 1) return 0;
     if(tightelecs.at(0)->q() == looseelecs.at(0)->q())   return 0;
+    if(!noOverlap(tightelecs.at(0), looseelecs.at(0) , 0.2)) return 0;
+
     mass=(tightelecs.at(0)->p4() + looseelecs.at(0)->p4()).M();
   }
   else if(mode_==0){ //emu
@@ -117,6 +119,7 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
 
     //oppo charge
     if(allselmuons.at(0)->q() == allselelecs.at(0)->q()) return 0;
+    if(!noOverlap(allselmuons.at(0), allselelecs.at(0) , 0.2)) return 0;
 
     mass=(allselmuons.at(0)->p4() + allselelecs.at(0)->p4()).M();
 
@@ -124,6 +127,7 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
   else{ //mumu
     if(tightmuons.size() != 1 || loosemuons.size() != 1) return 0;
     if(tightmuons.at(0)->q() == loosemuons.at(0)->q())   return 0;
+    if(!noOverlap(tightmuons.at(0), loosemuons.at(0) , 0.2)) return 0;
     mass=(tightmuons.at(0)->p4() + loosemuons.at(0)->p4()).M();
   }
 
@@ -160,13 +164,13 @@ void trigger_tth(){
   triggerAnalyzer ta_emud;
 
   ta_eed.setMode("ee");
-  ta_eed.setMassCut(12);
+  ta_eed.setMassCutLow(12);
   ta_eed.setIncludeCorr(includecorr);
   ta_emud.setMode("emu");
-  ta_emud.setMassCut(12);
+  ta_emud.setMassCutLow(12);
   ta_eed.setIncludeCorr(includecorr);
   ta_mumud.setMode("mumu");
-  ta_mumud.setMassCut(12);
+  ta_mumud.setMassCutLow(12);
   ta_eed.setIncludeCorr(includecorr);
 
   ta_mumud.setBinsEta(binsmumueta);
