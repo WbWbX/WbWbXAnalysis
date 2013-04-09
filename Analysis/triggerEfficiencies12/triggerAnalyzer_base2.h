@@ -1,0 +1,969 @@
+#ifndef TRIGGERANALYZER_BASE_H
+#define TRIGGERANALYZER_BASE_H
+
+#include "TFile.h"
+#include "TTree.h"
+#include "TH1D.h"
+#include "TtZAnalysis/DataFormats/src/classes.h"
+// #include "TtZAnalysis/DataFormats/interface/NTElectron.h"
+// #include "TtZAnalysis/DataFormats/interface/NTEvent.h"
+// #include "TtZAnalysis/DataFormats/interface/NTJet.h"
+// #include "TtZAnalysis/DataFormats/interface/NTMet.h"
+#include <vector>
+#include <algorithm>
+#include <string>
+#include <utility>
+#include "TCanvas.h"
+#include "TROOT.h"
+#include "TChain.h"
+//#include "makeplotsnice.h"
+#include "TtZAnalysis/Tools/interface/container.h"
+#include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
+#include "TopAnalysis/ZTopUtils/interface/PUReweighter.h"
+#include <map>
+#include <stdlib.h>
+#include "histoStyle.h"
+
+
+#include "TtZAnalysis/Tools/interface/effTriple.h"
+
+using namespace std; //nasty.. but ok here
+    using namespace ztop;
+namespace top{using namespace ztop;}
+
+
+//ratiomulti affects plots AND syst error in tables
+// NOOOOO relative paths!!
+
+double ratiomultiplier=0;
+
+double jetptcut=30;
+
+
+
+
+class triggerAnalyzer{
+
+public:
+  triggerAnalyzer(){
+    binseta_.push_back(-2.5);binseta_.push_back(-1.5);binseta_.push_back(-0.8);binseta_.push_back(0.8);binseta_.push_back(1.5);binseta_.push_back(2.5); // ee standard
+    binspt_ << 20 << 25 << 30 << 35 << 40 << 50 << 60 << 100 << 200;
+    binseta2dx_ << 0 << 0.9 << 1.2 << 2.1 << 2.4; //mu standard
+    binseta2dy_=binseta2dx_;
+    whichelectrons_="NTPFElectrons";
+    breakat5fb_=false;
+    checktriggerpaths_=false;
+    coutalltriggerpaths_=false;
+    TH1::AddDirectory(kFALSE);
+    mode_=0;
+    isMC_=false;
+    breakat5fb_=false;
+    includecorr_=true;
+    masscut_=20;
+  }
+  ~triggerAnalyzer(){};
+
+  //virtual 
+  double selectDileptons(std::vector<ztop::NTMuon> * , std::vector<ztop::NTElectron> * );
+  //! fills selectedElecs_ and std::vector<ztop::NTMuon* > selectedMuons_
+
+  void setElectrons(TString elecs){whichelectrons_=elecs;}
+
+  void setBinsEta(std::vector<float> binseta){binseta_.clear();binseta_=binseta;};
+  void setBinsEta2dX(std::vector<float> binseta2dx){binseta2dx_.clear();binseta2dx_=binseta2dx;};
+  void setBinsEta2dY(std::vector<float> binseta2dy){binseta2dy_.clear();binseta2dy_=binseta2dy;};
+  void setBinsPt(std::vector<float> binspt){binspt_.clear();binspt_=binspt;}
+
+  std::vector<ztop::effTriple> getTriples(){return alltriples_;}
+
+
+
+  void setChain(TChain * t1){t_=t1;}
+  void setIsMC(bool isMonteCarlo){isMC_=isMonteCarlo;}
+
+  void setMode(TString mode){if(mode=="ee") mode_=-1;if(mode=="emu") mode_=0;if(mode=="mumu") mode_=1;}
+
+  void setBreakAt5fb(bool Break){breakat5fb_=Break;}
+
+  void setPUFile(TString file){pufile_=file;};
+
+  void setIncludeCorr(bool inc){includecorr_=inc;}
+
+  void setMassCut(double cut){masscut_=cut;}
+
+  std::vector<double> Eff(){
+
+
+
+    using namespace ztop;
+    using namespace std;
+
+    std::vector<string> mettriggers=initTriggers();
+  
+    std::vector<string> mettriggersMC=mettriggers;
+
+    TString MCadd="";
+    if(isMC_) MCadd="MC";
+
+
+    //define bins
+
+    vector<float> binsdphi,binsvmulti,binsjetmulti,binsdrll;
+
+    for(float i=0;i<=10;i++){
+      binsdphi.push_back(2*3.1415 * i/10);
+    }
+    for(float i=0.5;i<=30.5;i++) binsvmulti << i;
+    for(float i=-0.5;i<=7.5;i++) binsjetmulti << i;
+    for(float i=0 ;i<15 ;i++) binsdrll << 2 * i /15;
+
+
+    vector<float> binsallpt;
+    binsallpt << 0 << 3 << 5 << 8 << 15 << 20 << 25 << 30 << 40 << 50 << 60 << 80 << 120 << 200 << 400;
+   
+    // in addition binseta_ binseta2dx_ binseta2dy_ binspt_
+
+    //pt
+    //eta
+    //et2d
+    //dphi
+    //vmulti
+    //drlep
+    //jetmulti
+    ////jetmultieta2d
+
+    std::cout << "setting plots "<< std::endl;   
+    std::cout << effTriple::effTriple_list.size() << std::endl;
+
+    effTriple::makelist=true;
+
+    effTriple t_pt      (binspt_                 , "lepton_pt"      , "p_{T,l}"            , "evts/binw"   );
+    effTriple t_allpt   (binsallpt               , "all_lepton_pt"  , "p_{T,l}"            , "evts/binw"   );
+    effTriple t_eta     (binseta_                , "lepton_eta"     , "#eta_{l}"           , "evts/binw"   );
+    effTriple t_eta2d   (binseta2dx_, binseta2dy_, "lepton_eta2d"   , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
+    effTriple t_dphi    (binsdphi                , "leptonmet_dphi" , "#Delta#phi_{l,MET}" , "evts/binw"   );
+    effTriple t_vmulti  (binsvmulti              , "vertex_multi"   , "n_{vtx}"            , "evts/binw"   );
+    effTriple t_drll    (binsdrll                , "leptons_dR"     , "#Delta R_{l,l}"     , "evts/binw"   );
+    effTriple t_jetmulti(binsjetmulti            , "jet_multi"      , "n_{jets}"           , "evts/binw"   );
+
+    effTriple::makelist=false;
+
+
+    //all this trigger stuff starts here
+
+    TH1D *datapileup=0;
+    if(isMC_){
+      TFile f2(pufile_);
+      datapileup=((TH1D*)f2.Get("pileup"));
+    }
+ 
+    vector<pair<string, double> >dileptriggers;
+
+    //make triggers switchable from the outside in next iteration. leave right now as it is
+
+    if(mode_<-0.1){
+      pair<string, double> trig2("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999.);
+      dileptriggers.push_back(trig2);
+
+    }
+    if(mode_>0.1){
+      pair<string, double> trig3("HLT_Mu17_Mu8_v",999999);
+      dileptriggers.push_back(trig3);
+      pair<string, double> trig4("HLT_Mu17_TkMu8_v",999999);
+      dileptriggers.push_back(trig4);
+    }
+
+    if(mode_==0){
+      pair<string, double> trig3("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999);
+      dileptriggers.push_back(trig3);
+      pair<string, double> trig4("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999);
+      dileptriggers.push_back(trig4);
+    }
+
+    vector<string> dileptriggersMC; // the version numbers where set as wildcards, so if statement obsolete!
+    // if(!is52v9){
+    if(mode_<-0.1){
+      dileptriggersMC.push_back("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
+    }
+    if(mode_>0.1){
+      dileptriggersMC.push_back("HLT_Mu17_Mu8_v");
+      dileptriggersMC.push_back("HLT_Mu17_TkMu8_v");
+    }
+    if(mode_==0){
+      dileptriggersMC.push_back("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
+      dileptriggersMC.push_back("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
+    }
+ 
+  
+
+    ///////////PU reweighting
+  
+    PUReweighter PUweight;
+    if(isMC_) PUweight.setDataTruePUInput(datapileup);
+    if(isMC_)PUweight.setMCDistrSum12();
+
+    TBranch * b_NTMuons=0;
+    TBranch * b_NTElectrons=0;
+
+    vector<NTMuon> * pMuons = 0;
+    t_->SetBranchAddress("NTMuons",&pMuons);//, &b_NTMuons); 
+    vector<NTElectron> * pElectrons = 0;
+    t_->SetBranchAddress(whichelectrons_.Data(),&pElectrons);//, &b_NTElectrons); 
+    vector<NTJet> * pJets = 0;
+    t_->SetBranchAddress("NTJets",&pJets); 
+    NTMet * pMet = 0;
+    t_->SetBranchAddress("NTMet",&pMet); 
+    NTEvent * pEvent = 0;
+    t_->SetBranchAddress("NTEvent",&pEvent); 
+
+
+
+    pair<string,double> dilepton("dilepton", 0);
+    pair<string,double> ZVeto   ("ZVeto   ", 0);
+    pair<string,double> oneJet  ("oneJet  ", 0);
+    pair<string,double> twoJets ("twoJets ", 0);
+    pair<string,double> met     ("met     ", 0);
+
+
+    vector<pair<string,double> >sel_woTrig;
+    vector<pair<string,double> >sel_Trig;
+    vector<pair<string,double> >sel_MetTrig;
+    vector<pair<string,double> >sel_BothTrig;
+
+    sel_woTrig.push_back(dilepton);
+    sel_woTrig.push_back(ZVeto);
+    sel_woTrig.push_back(oneJet);
+    sel_woTrig.push_back(twoJets);
+    sel_woTrig.push_back(met);
+
+    sel_Trig.push_back(dilepton);
+    sel_Trig.push_back(ZVeto);
+    sel_Trig.push_back(oneJet);
+    sel_Trig.push_back(twoJets);
+    sel_Trig.push_back(met);
+
+    sel_MetTrig.push_back(dilepton);
+    sel_MetTrig.push_back(ZVeto);
+    sel_MetTrig.push_back(oneJet);
+    sel_MetTrig.push_back(twoJets);
+    sel_MetTrig.push_back(met);
+
+    sel_BothTrig.push_back(dilepton);
+    sel_BothTrig.push_back(ZVeto);
+    sel_BothTrig.push_back(oneJet);
+    sel_BothTrig.push_back(twoJets);
+    sel_BothTrig.push_back(met);
+
+    vector<pair<TString, int > >triggersummary;
+ 
+
+    Long64_t n = t_->GetEntries();
+    cout  << "Entries in tree: " << n << endl;
+
+    //TRAPTEST//   
+    n*=0.001;
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    for(Long64_t i=0;i<n;i++){  //main loop
+
+      selectedElecs_.clear();
+      selectedMuons_.clear();
+
+      t_->GetEntry(i);
+
+      displayStatusBar(i,n);
+
+
+      double puweight=1;
+      if(isMC_) puweight=PUweight.getPUweight(pEvent->truePU());
+
+      //   b_NTMuons->GetEntry(i);
+      if(mode_>0.1 && pMuons->size()<2) continue;
+
+      //  b_NTElectrons->GetEntry(i);
+      if(mode_<-0.1 && pElectrons->size()<2) continue;
+
+      if(mode_==0 &&  (pElectrons->size() < 1 || pMuons->size()< 1)) continue;
+
+
+      /*
+      mumultiplicity.fill(pMuons->size(),puweight);
+
+      for(size_t i=0;i<pMuons->size();i++)
+	mupt.fill(pMuons->at(i).pt(),puweight);
+
+      */
+      double mass=selectDileptons(pMuons,pElectrons);
+
+      if(mass < 20) continue;
+     
+
+      vector<string> ids;
+
+
+      if(breakat5fb_ && !isMC_){
+
+	if(pEvent->runNo() > 196531){
+	  std::cout << "breaking at run " << pEvent->runNo() << std::endl;
+	  break;
+	}
+      }
+      if(i==n-1) std::cout << "last run number: " << pEvent->runNo() << std::endl;
+
+
+      //get the rest of the branches (more time consuming)
+   
+
+   
+      bool firedDilepTrigger=false;
+      bool firedMet=false;
+      bool b_dilepton=false;
+      bool b_ZVeto=false;
+      bool b_oneJet=false;
+      bool b_twoJets=false;
+      bool b_met=false;
+
+
+      vector<string> trigs;
+      trigs=pEvent->firedTriggers();
+      for(unsigned int trigit=0;trigit<trigs.size();trigit++){
+	TString trig=trigs[trigit];
+      
+
+	if(isMC_){
+	  for(unsigned int ctrig=0;ctrig<dileptriggersMC.size(); ctrig++){
+	    if(trig.Contains(dileptriggersMC[ctrig])){
+	      firedDilepTrigger=true;
+	      break;
+	    }
+	  }
+	  for(unsigned int ctrig=0;ctrig<mettriggersMC.size(); ctrig++){
+	    if(trig.Contains(mettriggersMC[ctrig])){
+	      firedMet=true;
+	      break;
+	    }
+	  }
+	  bool newtrigger=false;
+	  if(trig.Contains("MET")){
+	    newtrigger=true;
+	    for(unsigned int J=0; J<triggersummary.size();J++){
+	      if(triggersummary[J].first == trig){
+		newtrigger=false;
+		triggersummary[J].second++;
+	      }
+	    }
+	  }
+	  pair<TString, int> temppair;
+	  temppair.first = trig; temppair.second =1;
+	  if(newtrigger) triggersummary.push_back(temppair);
+	}
+
+	else{
+	  for(unsigned int ctrig=0;ctrig<dileptriggers.size(); ctrig++){
+	    if(trig.Contains(dileptriggers[ctrig].first) && pEvent->runNo() < dileptriggers[ctrig].second){
+	      firedDilepTrigger=true;
+	      break;
+	    }
+	  }
+	  for(unsigned int ctrig=0;ctrig<mettriggers.size(); ctrig++){
+	    if(trig.Contains(mettriggers[ctrig])){
+	      firedMet=true;
+	      break;
+	    }
+	  }
+	}
+
+      }
+      if(includecorr_ && !firedMet) continue;
+      
+      if(!includecorr_ && !isMC_ && !firedMet) continue;
+
+      // lepton selection and event selection (at least two leptons etc)
+
+      if(pEvent->vertexMulti() <1) continue;
+    
+      if(mass>20)
+	b_dilepton=true;
+
+      if(!b_dilepton) continue; ///////////
+
+      /////////trigger check/////////
+    
+      ////////////////dilepton selection
+      if((mode_== 1 || mode_<-0.1 ) && (mass > 106 || mass < 76)) b_ZVeto=true;
+      if(mode_==0)  b_ZVeto=true;
+
+      vector<NTJet> selected_jets;
+      for(vector<NTJet>::iterator jet=pJets->begin();jet<pJets->end();jet++){
+	if(jet->pt() < jetptcut) continue;
+	if(fabs(jet->eta()) >2.5) continue;
+	if(!noOverlap(&*jet,selectedMuons_,0.3)) continue; //cleaning  ##TRAP## changed to 0.4 /doesn't matter for final eff
+	if(!noOverlap(&*jet,selectedElecs_,0.3)) continue;
+	if((!jet->id())) continue;
+
+	selected_jets.push_back(*jet);
+      }
+      if(selected_jets.size() >0) b_oneJet=true;
+      if(selected_jets.size() >1) b_twoJets=true;
+      if((mode_== -1 || mode_>0.1) && pMet->met() > 40) b_met=true;
+      if(mode_== 0) b_met=true;
+
+
+      //  std::cout << puweight << std::endl;
+
+      //define variables
+
+      double vmulti=pEvent->vertexMulti();
+      double jetmulti=selected_jets.size();
+      double pt1,pt2;
+      double eta1,eta2;
+      double dphi;
+      double dRll;
+
+      if(mode_<-0.1){ //ee
+	eta1=selectedElecs_[0]->eta();
+	eta2=selectedElecs_[1]->eta();
+	pt1=selectedElecs_[0]->pt();
+	pt2=selectedElecs_[1]->pt();
+	dphi=selectedElecs_[0]->phi() - pMet->phi();
+	dRll=dR(selectedElecs_[0],selectedElecs_[1]);
+      }
+      else if(mode_>0.1){ //mumu
+	eta1=selectedMuons_[0]->eta();
+	eta2=selectedMuons_[1]->eta();
+	pt1=selectedMuons_[0]->pt();
+	pt2=selectedMuons_[1]->pt();
+	dphi=selectedMuons_[0]->phi() - pMet->phi();
+	dRll=dR(selectedMuons_[0],selectedMuons_[1]);
+      }
+      else{ //emu
+	eta1=selectedElecs_[0]->eta();
+	eta2=selectedMuons_[0]->eta();
+	pt1=selectedElecs_[0]->pt();
+	pt2=selectedMuons_[0]->pt();
+	dphi=selectedElecs_[0]->phi() - pMet->phi();
+	dRll=dR(selectedElecs_[0],selectedMuons_[0]);
+      }
+
+      if(b_dilepton){
+	sel_woTrig[0].second      +=puweight; //global
+
+	t_pt.fillDen(pt1,puweight);  
+	t_pt.fillDen(pt2,puweight); 
+
+	//	t_allpt.fillDen(); 
+	//	t_allpt.fillDen();  
+
+	t_eta .fillDen(eta1,puweight);   
+	t_eta .fillDen(eta2,puweight);   
+
+	t_eta2d.fillDen(eta1,eta2,puweight);  
+	t_dphi.fillDen(dphi,puweight);  
+	t_vmulti.fillDen(vmulti,puweight);  
+	t_drll.fillDen(dRll,puweight);  
+	t_jetmulti.fillDen(jetmulti,puweight);  
+	
+      }
+      if(b_dilepton && b_ZVeto)                                   sel_woTrig[1].second      +=puweight;
+      if(b_dilepton && b_ZVeto && b_oneJet)                       sel_woTrig[2].second      +=puweight;
+      if(b_dilepton && b_ZVeto && b_oneJet && b_twoJets)          sel_woTrig[3].second      +=puweight;
+      if(b_dilepton && b_ZVeto && b_oneJet && b_twoJets && b_met) sel_woTrig[4].second      +=puweight;
+
+      if(firedDilepTrigger){
+	if(b_dilepton){
+	  sel_Trig[0].second  +=puweight;
+	  
+	  t_pt.fillNum(pt1,puweight);  
+	  t_pt.fillNum(pt2,puweight); 
+
+	  //	t_allpt.fillNum(); 
+	  //	t_allpt.fillNum();  
+
+	  t_eta .fillNum(eta1,puweight);   
+	  t_eta .fillNum(eta2,puweight);   
+
+	  t_eta2d.fillNum(eta1,eta2,puweight);  
+	  t_dphi.fillNum(dphi,puweight);  
+	  t_vmulti.fillNum(vmulti,puweight);  
+	  t_drll.fillNum(dRll,puweight);  
+	  t_jetmulti.fillNum(jetmulti,puweight);  
+	}
+
+
+                                                  
+	if(b_dilepton && b_ZVeto)                                   sel_Trig[1].second  +=puweight;
+	if(b_dilepton && b_ZVeto && b_oneJet)                       sel_Trig[2].second +=puweight;
+	if(b_dilepton && b_ZVeto && b_oneJet && b_twoJets)          sel_Trig[3].second +=puweight;
+	if(b_dilepton && b_ZVeto && b_oneJet && b_twoJets && b_met) sel_Trig[4].second    +=puweight;
+      }
+
+      if(firedMet){
+	if(b_dilepton){
+	  sel_MetTrig[0].second  +=puweight;
+	}
+	if(b_dilepton && b_ZVeto)                                   sel_MetTrig[1].second  +=puweight;
+	if(b_dilepton && b_ZVeto && b_oneJet)                       sel_MetTrig[2].second +=puweight;
+	if(b_dilepton && b_ZVeto && b_oneJet && b_twoJets)          sel_MetTrig[3].second +=puweight;
+	if(b_dilepton && b_ZVeto && b_oneJet && b_twoJets && b_met) sel_MetTrig[4].second    +=puweight;
+      }
+ 
+      if(firedMet && firedDilepTrigger){
+	if(b_dilepton){
+	  sel_BothTrig[0].second  +=puweight;
+	}
+	if(b_dilepton && b_ZVeto)                                   sel_BothTrig[1].second  +=puweight;
+	if(b_dilepton && b_ZVeto && b_oneJet)                       sel_BothTrig[2].second +=puweight;
+	if(b_dilepton && b_ZVeto && b_oneJet && b_twoJets)          sel_BothTrig[3].second +=puweight;
+	if(b_dilepton && b_ZVeto && b_oneJet && b_twoJets && b_met) sel_BothTrig[4].second    +=puweight;
+      }
+
+
+
+    }//eventloop
+    cout << endl;
+
+    string MCdata="data";
+
+    if(isMC_) MCdata="MC";
+    cout << "\n\nIn channel " << mode_<< "   " << MCdata << endl;
+    cout << "triggers: " <<endl;
+    if(!isMC_){
+      for(unsigned int i=0;i<dileptriggers.size();i++){
+	cout << dileptriggers[i].first << "   until runnumber "<< dileptriggers[i].second << endl;
+      }
+    }
+
+
+    // set up output
+    vector<double> output;
+
+    for(unsigned int i=0; i< sel_woTrig.size();i++){
+      double eff=sel_Trig[i].second / sel_woTrig[i].second;
+      double erreff=sqrt(eff*(1-eff)/sel_Trig[i].second);
+
+      double ratio= (eff * sel_MetTrig[i].second/sel_woTrig[i].second ) /(sel_BothTrig[i].second/ sel_woTrig[i].second) -1;
+      //double ratiostat=sel_BothTrig[i].second ;
+
+      output.push_back(eff);
+      output.push_back(erreff);
+      output.push_back(ratio);
+
+      cout << "selected " << sel_woTrig[i].first << ":  \t" << sel_woTrig[i].second << "  vs. \t" << sel_Trig[i].second << "  \teff: " << eff  << " +- " << erreff << "\tCorrR-1: " <<  ratio << "\t stat: " << sel_BothTrig[i].second  <<endl;
+      //if(i==0) output=effdeffR;
+
+    }
+    //output=effdeffR;
+
+    ////////////////////////////////////check MC triggers
+
+    /// show contribution of each trigger in data
+
+
+    if(coutalltriggerpaths_){
+      cout << "all triggers containing MET" << endl;
+      for(unsigned int i=0;i<triggersummary.size();i++){
+	cout << "<< \"" << triggersummary[i].first ;
+      }
+      cout << ";" << endl;
+    }
+
+    if(checktriggerpaths_){
+    
+      cout << "\ncontribution of different triggers:\n" << endl;
+      for(unsigned int i=0;i<triggersummary.size();i++){
+	cout << triggersummary[i].second << "\t" << triggersummary[i].first << endl;
+      }
+    
+    
+      ///  triggersummary mettriggers
+      int trigin=0;
+      vector<unsigned int> notinc;
+      for(unsigned int i=0; i<mettriggersMC.size(); i++){
+	bool inc=false;
+	//	if(!(mettriggersMC[i].Contains("HLT"))) continue;
+	for(unsigned int j=0; j<triggersummary.size();j++){
+	  // cout << mettriggers[i] << " vs " << triggersummary[j].first << endl;
+	  if(triggersummary[j].first.Contains(mettriggersMC[i])){
+	    trigin++;
+	    inc=true;
+	    break;
+	  }
+	}
+	if(!inc) notinc.push_back(i);
+      }
+      
+      
+      cout << trigin << " total; fraction of found triggers wrt datamettriggers: " << trigin/(double)mettriggers.size() << endl;
+      cout << "\ntriggers in metMCtrigger list and not found in triggered triggers:\n" << endl;
+
+      for(unsigned int i=0; i<notinc.size();i++){
+	cout << mettriggersMC[notinc[i]] << endl;
+      }
+
+    
+    }
+
+   
+   
+    if(!isMC_) cout <<  '\n' << mode_<< " \t\t& $N_{sel}$ \t& $N_{sel}^{trig}$ \t& $\\epsilon_d$ \t& $\\delta\\epsilon$ (stat.) \\\\ \\hline" << endl;
+    if(isMC_) cout <<  '\n' << mode_<< " MC" << " \t\t& $N_{sel}$ \t& $N_{sel}^{trig}$ \t& $\\epsilon_{MC}$  \t& $\\delta\\epsilon$ (stat.) \t&R$_c$ - 1 \\\\ \\hline" << endl;
+    for(unsigned int i=0; i< sel_woTrig.size();i++){
+      double eff=sel_Trig[i].second / sel_woTrig[i].second;
+      double erreff=sqrt(eff*(1-eff)/sel_woTrig[i].second);
+      double ratio= (eff * sel_MetTrig[i].second/sel_woTrig[i].second ) /(sel_BothTrig[i].second/ sel_woTrig[i].second) -1;
+      cout.setf(ios::fixed,ios::floatfield);
+      cout.precision(0);
+      cout <<  sel_woTrig[i].first << "\t& " << sel_woTrig[i].second << "\t\t& " << sel_Trig[i].second << "\t\t\t& ";
+      //cout.unsetf(ios::floatfield);
+      cout.precision(3);
+      if(isMC_) cout << eff  << " \t& " << erreff << " \t& " << ratio << " \\\\" << endl;
+      else cout << eff << " \t& " << erreff <<" \\\\" << endl;
+    }
+    
+
+    TString add="emu";
+    if(mode_<0) add="ee";
+    if(mode_>0) add="mumu";
+
+    alltriples_.clear();
+
+    for(size_t i=0;i<effTriple::effTriple_list.size();i++){
+      //  std::cout << "adding " << effTriple::effTriple_list.at(i)->getName() << std::endl;
+      alltriples_.push_back(*(effTriple::effTriple_list.at(i)));
+    }
+
+    //all histograms saved
+
+    return output;
+  } 
+  
+
+  void writeAll(TString add=""){
+    for(size_t i=0; i< alltriples_.size();i++){
+      // std::cout << alltriples_.at(i).getName() << std::endl;
+      histWrapper a=alltriples_.at(i).getNum();
+      histWrapper b=alltriples_.at(i).getDen();
+      histWrapper c=alltriples_.at(i).getEff();
+      if(add !=""){
+	a.setName(a.getName()+add);
+	b.setName(b.getName()+add);
+	c.setName(c.getName()+add);
+      }
+      a.write();
+      b.write();
+      c.write();
+    }
+  }
+
+  std::vector<string> initTriggers(){
+    std::vector<string> mettriggers;
+
+
+    mettriggers.push_back("HLT_DiCentralPFJet50_PFMET80_v");
+    mettriggers.push_back("HLT_MET120_HBHENoiseCleaned_v");
+    mettriggers.push_back("HLT_PFHT350_PFMET100_v");
+    mettriggers.push_back("HLT_PFHT400_PFMET100_v");
+    mettriggers.push_back("HLT_MonoCentralPFJet80_PFMETnoMu95_NHEF0p95_v");
+    mettriggers.push_back("HLT_MET120_v");
+    mettriggers.push_back("HLT_DiCentralPFJet30_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v");
+    mettriggers.push_back("HLT_CentralPFJet80_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v");
+    mettriggers.push_back("HLT_DiCentralJet20_BTagIP_MET65_HBHENoiseFiltered_dPhi1_v");
+    mettriggers.push_back("HLT_DiCentralJet20_CaloMET65_BTagCSV07_PFMHT80_v");
+    mettriggers.push_back("HLT_MET80_Track50_dEdx3p6_v");
+    mettriggers.push_back("HLT_MET80_Track60_dEdx3p7_v");
+    mettriggers.push_back("HLT_MET200_v");
+    mettriggers.push_back("HLT_MET200_HBHENoiseCleaned_v");
+    mettriggers.push_back("HLT_MET300_v");
+    mettriggers.push_back("HLT_MET300_HBHENoiseCleaned_v");
+    mettriggers.push_back("HLT_PFMET150_v");
+    mettriggers.push_back("HLT_DiPFJet40_PFMETnoMu65_MJJ800VBF_AllJets_v");
+    mettriggers.push_back("HLT_DiPFJet40_PFMETnoMu65_MJJ600VBF_LeadingJets_v");
+    mettriggers.push_back("HLT_PFMET180_v");
+    mettriggers.push_back("HLT_MET80_v");
+    mettriggers.push_back("HLT_Photon70_CaloIdXL_PFMET100_v");
+    mettriggers.push_back("HLT_MonoCentralPFJet80_PFMETnoMu95_NHEF0p95_v");
+    mettriggers.push_back("HLT_DiPFJet40_PFMETnoMu65_MJJ600VBF_LeadingJets_v");
+    mettriggers.push_back("HLT_CentralPFJet80_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v");
+    mettriggers.push_back("HLT_DiCentralPFJet50_PFMET80_v");
+    mettriggers.push_back("HLT_DiCentralPFJet30_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v");
+    mettriggers.push_back("HLT_PFMET150_v");
+    mettriggers.push_back("HLT_PFMET180_v");
+    mettriggers.push_back("HLT_DiCentralJet20_CaloMET65_BTagCSV07_PFMHT80_v");
+    mettriggers.push_back("HLT_Photon70_CaloIdXL_PFMET100_v"); 
+    mettriggers.push_back("HLT_PFHT350_PFMET100_v");
+    mettriggers.push_back("HLT_PFHT400_PFMET100_v");
+    mettriggers.push_back("HLT_DiPFJet40_PFMETnoMu65_MJJ800VBF_AllJets_v");
+    mettriggers.push_back("HLT_MonoCentralPFJet80_PFMETnoMu95_NHEF0p95_v");
+    mettriggers.push_back("HLT_DiCentralPFJet50_PFMET80_v");
+    mettriggers.push_back("HLT_DiCentralPFJet30_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v");
+    mettriggers.push_back("HLT_CentralPFJet80_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v");
+    mettriggers.push_back("HLT_DiCentralJet20_CaloMET65_BTagCSV07_PFMHT80_v");
+    mettriggers.push_back("HLT_MET80_Track50_dEdx3p6_v");
+    mettriggers.push_back("HLT_MET80_Track60_dEdx3p7_v");
+    mettriggers.push_back("HLT_Photon70_CaloIdXL_PFMET100_v");
+    mettriggers.push_back("HLT_DiCentralJet20_BTagIP_MET65_HBHENoiseFiltered_dPhi1_v");
+    mettriggers.push_back("HLT_PFHT350_PFMET100_v");
+    mettriggers.push_back("HLT_MET120_HBHENoiseCleaned_v");
+    mettriggers.push_back("HLT_DiPFJet40_PFMETnoMu65_MJJ600VBF_LeadingJets_v");
+    mettriggers.push_back("HLT_PFMET150_v");
+    mettriggers.push_back("HLT_MET120_v");
+    mettriggers.push_back("HLT_MET200_v");
+    mettriggers.push_back("HLT_MET200_HBHENoiseCleaned_v");
+    mettriggers.push_back("HLT_MET300_v");
+    mettriggers.push_back("HLT_MET300_HBHENoiseCleaned_v");
+    mettriggers.push_back("HLT_MET400_v");
+    mettriggers.push_back("HLT_MET400_HBHENoiseCleaned_v");
+    mettriggers.push_back("HLT_PFHT400_PFMET100_v");
+    mettriggers.push_back("HLT_PFMET180_v");
+    mettriggers.push_back("HLT_DiPFJet40_PFMETnoMu65_MJJ800VBF_AllJets_v");
+    mettriggers.push_back("HLT_MET80_v");
+    mettriggers.push_back("HLT_MET400_v");
+    mettriggers.push_back("HLT_MET400_HBHENoiseCleaned_v");
+    mettriggers.push_back("HLT_PFHT350_PFMET100_v");
+    mettriggers.push_back("HLT_PFHT400_PFMET100_v");
+    mettriggers.push_back("HLT_DiCentralPFJet50_PFMET80_v");
+    mettriggers.push_back("HLT_MonoCentralPFJet80_PFMETnoMu95_NHEF0p95_v");
+    mettriggers.push_back("HLT_DiCentralPFJet30_PFMET80_BTagCSV07_v");
+    mettriggers.push_back("HLT_DiPFJet40_PFMETnoMu65_MJJ600VBF_LeadingJets_v");
+    mettriggers.push_back("HLT_DiCentralPFJet30_PFMET80_v");
+    mettriggers.push_back("HLT_DiPFJet40_PFMETnoMu65_MJJ800VBF_AllJets_v");
+    mettriggers.push_back("HLT_DiCentralJetSumpT100_dPhi05_DiCentralPFJet60_25_PFMET100_HBHENoiseCleaned_v");
+    mettriggers.push_back("HLT_DisplacedPhoton65_CaloIdVL_IsoL_PFMET25_v");
+    mettriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v");
+  
+
+
+    //just for testing
+    // mettriggers.clear();
+    //mettriggers.push_back("HLT_MET120_v10");
+
+    vector<string> notinMCtriggers;
+    notinMCtriggers.push_back("HLT_DiCentralPFJet30_PFMET80_BTagCSV07_v");
+    notinMCtriggers.push_back("HLT_DiCentralPFJet30_PFMET80_v");
+    notinMCtriggers.push_back("HLT_DiCentralJetSumpT100_dPhi05_DiCentralPFJet60_25_PFMET100_HBHENoiseCleaned_v");
+    notinMCtriggers.push_back("HLT_DisplacedPhoton65_CaloIdVL_IsoL_PFMET25_v");
+    notinMCtriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v");
+
+    notinMCtriggers.push_back("HLT_DiCentralPFJet30_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v");
+    notinMCtriggers.push_back("HLT_CentralPFJet80_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v");
+    notinMCtriggers.push_back("HLT_DiCentralJet20_BTagIP_MET65_HBHENoiseFiltered_dPhi1_v");
+    notinMCtriggers.push_back("HLT_DiCentralJet20_CaloMET65_BTagCSV07_PFMHT80_v");
+    notinMCtriggers.push_back("HLT_CentralPFJet80_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v");
+    notinMCtriggers.push_back("HLT_DiCentralPFJet30_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v");
+    notinMCtriggers.push_back("HLT_DiCentralJet20_CaloMET65_BTagCSV07_PFMHT80_v");
+    notinMCtriggers.push_back("HLT_DiCentralPFJet30_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v");
+    notinMCtriggers.push_back("HLT_CentralPFJet80_CaloMET50_dPhi1_PFMHT80_HBHENoiseFiltered_v");
+    notinMCtriggers.push_back("HLT_DiCentralJet20_CaloMET65_BTagCSV07_PFMHT80_v");
+    notinMCtriggers.push_back("HLT_DiCentralJet20_BTagIP_MET65_HBHENoiseFiltered_dPhi1_v");
+
+    notinMCtriggers.push_back("DiCentralJet");  //get rid of all dijet stuff
+    notinMCtriggers.push_back("DiCentralPFJet");
+
+    for(unsigned int j=0; j< mettriggers.size();j++){
+      for(unsigned int i=0;i<notinMCtriggers.size();i++){
+	if( ((TString)mettriggers[j]).Contains(notinMCtriggers[i]) ){
+	  mettriggers[j]="notrig";
+	}
+      }
+    }
+
+    if(checktriggerpaths_){
+      cout << "used MET triggers: " << endl;
+      for(unsigned int i=0;i<mettriggers.size();i++){
+	if(mettriggers.at(i) != "notrig") cout << mettriggers.at(i) << endl;
+      }
+    }
+
+    // mettriggers=notinMCtriggers;
+    return mettriggers;
+  }
+
+protected:
+  std::vector<float> binseta_;
+  std::vector<float> binseta2dx_;
+  std::vector<float> binseta2dy_;
+  std::vector<float> binspt_;
+
+  double masscut_;
+
+  TString whichelectrons_;
+  bool breakat5fb_;
+  bool isMC_;
+  bool checktriggerpaths_;
+  bool coutalltriggerpaths_;
+  bool includecorr_;
+  int mode_; // -1: ee 0: emu 1:mumu
+  TString pufile_;
+
+  std::vector< ztop::NTElectron *> selectedElecs_;
+  std::vector< ztop::NTMuon *> selectedMuons_;
+
+  TChain * t_;
+
+  std::vector<ztop::effTriple> alltriples_;
+  // bool isMC;
+
+
+};
+
+TChain * makeChain(std::vector<TString> paths){
+
+  TChain * chain = new TChain("PFTree/PFTree");
+  
+  for(std::vector<TString>::iterator path=paths.begin();path<paths.end();++path){
+    int h=chain->AddFile((*path));
+    std::cout << h << " added " << *path << " to chain."<< std::endl;
+  }
+  
+  return chain;
+}
+
+TChain * makeChain(TString path){
+  TChain * chain = new TChain(path);
+  
+  chain->Add(path+"/PFTree/PFTree");
+  std::cout << "added " << path << " to chain." << std::endl;
+  return chain;
+}
+
+
+//function analyze(std::vector<TString> datafiles, std::vector<TString> eemcfiles,std::vector<TString> mumumcfiles,std::vector<TString> emumcfiles)
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+///
+
+// so include this header define your dilepton selection virtual double selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::vector<ztop::NTElectron> * inputElectrons) and run  analyze(std::vector<TString> datafiles, std::vector<TString> eemcfiles,std::vector<TString> mumumcfiles,std::vector<TString> emumcfiles)
+
+
+
+
+/////definitions here
+
+
+
+void analyze(triggerAnalyzer ta_eed, triggerAnalyzer ta_eeMC, triggerAnalyzer ta_mumud, triggerAnalyzer ta_mumuMC, triggerAnalyzer ta_emud, triggerAnalyzer ta_emuMC){
+
+  using namespace ztop;
+  using namespace std;
+
+  vector<double> eed=ta_eed.Eff();
+  vector<double> mumud=ta_mumud.Eff();
+  vector<double> emud= ta_emud.Eff();
+
+
+  vector<double> eeMC=ta_eeMC.Eff();
+  vector<double> mumuMC=ta_mumuMC.Eff();
+  vector<double> emuMC=ta_emuMC.Eff();
+
+
+  cout.precision(3);
+  // get correction factors
+ 
+
+  cout << "\n\n TeX table:" <<endl;
+
+  cout << "\\begin{table}\n\\center\n\\begin{tabular}{c | c | c | c}" << endl;
+  cout << " & $\\epsilon_{data}$ & $\\epsilon_{MC}$ & $\\epsilon_{data}/\\epsilon_{MC}$ \\\\ \\hline" << endl;
+
+  cout << "$ee$ & " << eed[0] <<" $\\pm$ " << eed[1] << " (stat.) & " 
+       << eeMC[0] << " $\\pm$ " << eeMC[1] << " (stat.) & " << eed[0]/eeMC[0] 
+       << " $\\pm$ " << sqrt((eed[1]/eeMC[0])*(eed[1]/eeMC[0]) + (eed[0]/(eeMC[0]*eeMC[0]))*eeMC[1]*eeMC[1]*(eed[0]/(eeMC[0]*eeMC[0]))) << " (stat.)  " 
+       <<  " $\\pm$ " << sqrt(0.01*eed[0]/eeMC[0]*eed[0]/eeMC[0]*0.01  +fabs(ratiomultiplier*eed[0]/eeMC[0] * eeMC[2])*fabs(ratiomultiplier*eed[0]/eeMC[0] * eeMC[2])) << " (syst.) \\\\" << endl;
+  
+
+  cout << "$\\mu\\mu$ & " << mumud[0] <<" $\\pm$ " << mumud[1] << " (stat.) & " 
+       << mumuMC[0] << " $\\pm$ " << mumuMC[1] << " (stat.) & " << mumud[0]/mumuMC[0] 
+       << " $\\pm$ " << sqrt((mumud[1]/mumuMC[0])*(mumud[1]/mumuMC[0]) + (mumud[0]/(mumuMC[0]*mumuMC[0]))*mumuMC[1]*mumuMC[1]*(mumud[0]/(mumuMC[0]*mumuMC[0]))) << " (stat.)  " 
+       <<  " $\\pm$ " << sqrt(0.01*mumud[0]/mumuMC[0]*mumud[0]/mumuMC[0]*0.01+fabs(ratiomultiplier*mumud[0]/mumuMC[0] * mumuMC[2])*fabs(ratiomultiplier*mumud[0]/mumuMC[0] * mumuMC[2])) << " (syst.) \\\\" << endl;
+
+  cout << "$e\\mu$ & " << emud[0] <<" $\\pm$ " << emud[1] << " (stat.) & " 
+       << emuMC[0] << " $\\pm$ " << emuMC[1] << " (stat.) & " << emud[0]/emuMC[0] 
+       << " $\\pm$ " << sqrt((emud[1]/emuMC[0])*(emud[1]/emuMC[0]) + (emud[0]/(emuMC[0]*emuMC[0]))*emuMC[1]*emuMC[1]*(emud[0]/(emuMC[0]*emuMC[0]))) << " (stat.)  " 
+       <<  " $\\pm$ " << sqrt(0.01*emud[0]/emuMC[0]*emud[0]/emuMC[0]*0.01+fabs(ratiomultiplier*emud[0]/emuMC[0] * emuMC[2])*fabs(ratiomultiplier*emud[0]/emuMC[0] * emuMC[2])) << " (syst.) \\\\" << endl;
+
+  cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC and resulting scaling factors}\n\\end{table}" << endl;
+
+  cout << "\n\n\\begin{table}\n\\center\n\\begin{tabular}{c | c | c | c}" << endl;
+  cout  << " & $ee$ & $\\mu\\mu$ & $e\\mu$ \\\\ \\hline" <<endl;
+
+  cout.precision(3);
+  cout.setf(ios::fixed,ios::floatfield);
+ 
+  //make summarizing table
+  for(unsigned int i=0; i<eed.size();i++){
+    TString step;
+    if(i==0) step="dilepton";
+    if(i==3) step="Z-Veto";
+    if(i==6) step="$\\geq1$jet";
+    if(i==9) step="$\\geq2$jets";
+    if(i==12) step="MET";
+    cout << step << " & " << eed[i]/eeMC[i] << " $\\pm$ " << sqrt((eed[i+1]/eeMC[i])*(eed[1]/eeMC[i]) + (eed[i]/(eeMC[i]*eeMC[i]))*eeMC[i+1]*eeMC[i+1]*(eed[i]/(eeMC[i]*eeMC[i])) + fabs(ratiomultiplier*eed[i]/eeMC[i] * eeMC[i+2])*fabs(ratiomultiplier*eed[i]/eeMC[i] * eeMC[i+2]) + 0.01*0.01*eed[i]/eeMC[i]*eed[i]/eeMC[i]) << " & "
+	 << mumud[i]/mumuMC[i] << " $\\pm$ " << sqrt((mumud[i+1]/mumuMC[i])*(mumud[1]/mumuMC[i]) + (mumud[i]/(mumuMC[i]*mumuMC[i]))*mumuMC[i+1]*mumuMC[i+1]*(mumud[i]/(mumuMC[i]*mumuMC[i])) + fabs(ratiomultiplier*mumud[i]/mumuMC[i] * mumuMC[i+2])*fabs(ratiomultiplier*mumud[i]/mumuMC[i] * mumuMC[i+2]) + 0.01*0.01*mumud[i]/mumuMC[i]*mumud[i]/mumuMC[i] ) << "  & "
+	 << emud[i]/emuMC[i] << " $\\pm$ " << sqrt((emud[i+1]/emuMC[i])*(emud[1]/emuMC[i]) + (emud[i]/(emuMC[i]*emuMC[i]))*emuMC[i+1]*emuMC[i+1]*(emud[i]/(emuMC[i]*emuMC[i])) + fabs(ratiomultiplier*emud[i]/emuMC[i] * emuMC[i+2])*fabs(ratiomultiplier*emud[i]/emuMC[i] * emuMC[i+2]) + 0.01*0.01*emud[i]/emuMC[i]*emud[i]/emuMC[i]) << " \\\\" << endl;
+    i++;i++;
+  }
+
+  cout << "\\end{tabular}\n\\caption{Trigger scale factors for different ttbar selection steps}\n\\end{table}" << endl;
+
+
+
+  container1D scalefactor;
+  container1D data;
+  container1D MC;
+  TH2D SFdd,datadd,MCdd;
+
+  TFile* f5 = new TFile("triggerSummary_ee.root","RECREATE");
+  ta_eed.writeAll();
+  f5->Close();
+ TFile* f6 = new TFile("triggerSummary_ee_MC.root","RECREATE");
+  ta_eeMC.writeAll();
+  f6->Close();
+
+  //etc
+  
+}
+
+std::vector<histWrapper> getAllPlusSFs(triggerAnalyzer & num, triggerAnalyzer & den , double relerror=0){ //also applies style
+  using namespace ztop;
+  using namespace std;
+  if(num.getTriples().size() != den.getTriples().size()){
+    cout << "getSFs: wrong sized triples! exit" << endl;
+  }
+
+  //search for same named _eff plots and divide them.
+  std::vector<histWrapper> out;
+
+  for(size_t i=0;i<num.getTriples().size();i++){
+    histWrapper  firsteff=num.getTriples().at(i).getEff();
+    for(size_t j=0;j<den.getTriples().size();j++){
+      histWrapper seceff=den.getTriples().at(j).getEff();
+      if(firsteff.getName() == seceff.getName()){ //found two matching ones
+	firsteff.setDivideBinomial(false);
+	seceff.setDivideBinomial(false);
+
+	seceff.setName(seceff.getName() + "_mc");
+	applyEfficiencyStyleData(firsteff);
+	applyEfficiencyStyleMC(seceff);
+	
+
+	out.push_back(firsteff);
+	out.push_back(seceff);
+
+	histWrapper sf=firsteff / seceff;
+	sf.setName(num.getTriples().at(i).getName() + "_sf");
+
+	sf.addRelError(relerror);
+	applySFStyle(sf);
+	out.push_back(sf);
+      }
+    }
+  }
+  return out;
+}
+
+
+
+#endif
