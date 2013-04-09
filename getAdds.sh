@@ -7,14 +7,14 @@ cd ${CMSSW_BASE}/src
 # the things I use from the TopAnalysis code
 #
 
-if [[ "${CMSSW_VERSION}" != "CMSSW_5_3_3_patch3" && "${CMSSW_VERSION}" != "CMSSW_5_3_5" && "${CMSSW_VERSION}" != "CMSSW_5_3_7" ]];
+if [[ "${CMSSW_VERSION}" != "CMSSW_5_3_3_patch3" && "${CMSSW_VERSION}" != "CMSSW_5_3_5" && "${CMSSW_VERSION}" != "CMSSW_5_3_7"]];
 then
     echo 'warning! '"$CMSSW_VERSION"' not supported for automatic checkout of pat packages! add them manually!'
 fi
 
 if [[ $1 == "SUSY" ]];
 then
-    echo 'checking out additional SUSY packages for efficiency studies.'
+    echo 'checking out additional SUSY packagesf for efficiency studies.'
     cvs co -d WWAnalysis/SkimStep UserCode/Mangano/WWAnalysis/SkimStep 
 fi
 
@@ -48,15 +48,15 @@ cvs co -d TopAnalysis/TopUtils/plugins UserCode/Bromo/TopAnalysis/TopUtils/plugi
 
 #runallStuff
 
-cvs co -d TopAnalysis/Configuration/analysis/diLeptonic  UserCode/Bromo/TopAnalysis/Configuration/analysis/diLeptonic/runallGC.pl
-cvs co -d TopAnalysis/Configuration/analysis/diLeptonic  UserCode/Bromo/TopAnalysis/Configuration/analysis/diLeptonic/runallCrab.pl
+cvs co -d TopAnalysis/Configuration/analysis/diLeptonic/scripts  UserCode/Bromo/TopAnalysis/Configuration/analysis/diLeptonic/scripts/runallGC.pl
+cvs co -d TopAnalysis/Configuration/analysis/diLeptonic/scripts  UserCode/Bromo/TopAnalysis/Configuration/analysis/diLeptonic/scripts/runallCrab.pl
 
 
 
 
 cd ${CMSSW_BASE}/src/TtZAnalysis/Configuration/python/analysis
-ln -s ${CMSSW_BASE}/src/TopAnalysis/Configuration/analysis/diLeptonic/runallGC.pl runallGC.pl
-ln -s ${CMSSW_BASE}/src/TopAnalysis/Configuration/analysis/diLeptonic/runallCrab.pl runallCrab.pl
+ln -s ${CMSSW_BASE}/src/TopAnalysis/Configuration/analysis/diLeptonic/scripts/runallGC.pl runallGC.pl
+ln -s ${CMSSW_BASE}/src/TopAnalysis/Configuration/analysis/diLeptonic/scripts/runallCrab.pl runallCrab.pl
 
 ln -s  ${CMSSW_BASE}/src/TtZAnalysis/Configuration/python/analysis/ReRecoNov2011.json ${CMSSW_BASE}/src/TtZAnalysis/Data/ReRecoNov2011.json
 ln -s  ${CMSSW_BASE}/src/TtZAnalysis/Configuration/python/analysis/HCP.json ${CMSSW_BASE}/src/TtZAnalysis/Data/HCP.json
@@ -75,11 +75,11 @@ cd $CMSSW_BASE/src
 #./updatemcfiles12.sh
 cd $CMSSW_BASE/src
 
-# the private JEC uncertainties code (standalone)
+# the private JEC uncertainties code (standalone) should be obsolete now
 
-echo "modified JEC Uncertainty utility.."
+#echo "modified JEC Uncertainty utility.."
 
-cp -r /afs/desy.de/user/k/kiesej/public/code/CondFormats .
+#cp -r /afs/desy.de/user/k/kiesej/public/code/CondFormats .
 
 
 echo "Electron MVA stuff"
@@ -144,20 +144,15 @@ fi
 #some copy-paste in case you want to use my root macros and the classes on command line
 echo 'you will need this in the rootlogon.C:'
 echo '
-      gSystem->Load("libFWCoreFWLite.so"); 
+     gSystem->Load("libFWCoreFWLite.so"); 
      AutoLibraryLoader::enable();
-     //ensure backward compatability to old trees
-     namespace ztop{};
-     namespace top{using namespace ztop;}
      gSystem->Load("libDataFormatsFWLite.so");
      gSystem->Load("libDataFormatsPatCandidates.so");
      gSystem->Load("libTtZAnalysisDataFormats.so");
-     gSystem->Load("libTtZAnalysisTools.so");
-     gSystem->Load("libTopAnalysisZTopUtils.so");
      gSystem->Load("libRooFit");
+     gSystem->Load("libFWCoreUtilities.so");
      gSystem->Load("libCondFormatsJetMETObjects.so");
      cout << "libs loaded" <<endl;
-     ztop::container1DStackVector csv_find("for_listing_etc");
      '
 
 
