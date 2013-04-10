@@ -2,6 +2,14 @@
 #include "TH2D.h"
 #include "TtZAnalysis/Tools/interface/effTriple.h"
 #include "TStyle.h"
+#include "TCanvas.h"
+#include "TLegend.h"
+#include "TString.h"
+#include "TPad.h"
+#include "TPaveText.h"
+
+#ifndef histoStyle_h
+#define histoStyle_h
 
 void setGStyle(){
   gStyle->SetOptTitle(0);
@@ -92,3 +100,102 @@ void applySFStyle(ztop::histWrapper & h){
   else
     applySFStyle(h.getTH2D());
 }
+
+
+void plotAll(std::vector<ztop::histWrapper> & hvec, TString addlabel="", TString dir = "./", bool setStyle=false){
+
+  //num,den,eff
+  size_t i=0;
+
+  bool ignorewarnings=setStyle;
+
+  if(dir != "./")
+    system(("mkdir -p "+dir).Data());
+
+ 
+
+  TCanvas * c=new TCanvas();
+  c->SetBatch();
+  TLegend * leg=new TLegend(0.35,0.15,0.70,0.42);
+  leg->SetFillStyle(0);
+  leg->SetBorderSize(0);
+
+
+  gStyle->SetOptTitle(0);
+  gStyle->SetOptStat(0);
+
+  gPad->SetLeftMargin(0.15);
+  gPad->SetBottomMargin(0.15);
+
+  gStyle->SetPaintTextFormat("5.3f");
+
+  TPaveText *label = new TPaveText();
+
+  label -> SetX1NDC(gStyle->GetPadLeftMargin());
+  label -> SetY1NDC(1.0-gStyle->GetPadTopMargin());
+  label -> SetX2NDC(1.0-gStyle->GetPadRightMargin());
+  label -> SetY2NDC(1.0);
+  label -> SetTextFont(42);
+  label -> AddText(Form(addlabel));
+
+  label->SetFillStyle(0);
+  label->SetBorderSize(0);
+  label->SetTextAlign(22);
+  //  label->Draw("same"); 
+
+  while(i<hvec.size()){
+    c->Clear();
+    leg->Clear();
+    if(hvec.at(i).isTH1D()){ //do 1D plotting
+      TH1D * h=&(hvec.at(i).getTH1D());
+      leg->AddEntry(h,"data efficiency"  ,"pe");
+      h->GetYaxis()->SetTitle("#epsilon,SF");
+      h->Draw("e1");
+      i++;
+      h=&(hvec.at(i).getTH1D());
+      leg->AddEntry(h,"MC efficiency"  ,"pe");
+      h->Draw("e1,same");
+      i++;
+      h=&(hvec.at(i).getTH1D());
+      leg->AddEntry(h,"scale factor"  ,"pe");
+      h->Draw("e1,same");
+
+      TString canvasname=hvec.at(i).getName();
+      canvasname.ReplaceAll("_eff","");
+      c->SetName(canvasname);
+      c->SetTitle(canvasname);
+
+      leg->Draw("same");
+      label->Draw("same"); 
+
+      c->Write();
+      c->Print(dir+canvasname+".pdf");
+
+      i++; //next
+    }
+    else{                    //do 2d plotting
+      size_t j=i;
+      while(j<i+3){
+	c->Clear();
+	TH2D * h=&(hvec.at(j).getTH2D()); 
+	TString canvasname=hvec.at(j).getName();
+	c->SetName(canvasname);
+	c->SetTitle(canvasname);
+	h->Draw("colz,text,e"); 
+	label->Draw("same"); 
+	c->Write();
+	c->Print(dir+canvasname+".pdf");
+	j++;
+      }
+      i+=3; //next
+    }
+  }
+
+  delete c;
+  delete label;
+}
+
+
+
+
+#endif

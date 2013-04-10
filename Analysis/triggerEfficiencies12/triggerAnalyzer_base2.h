@@ -123,6 +123,16 @@ public:
    
     // in addition binseta_ binseta2dx_ binseta2dy_ binspt_
 
+    vector<float> massbins;
+
+    for(float i=0;i<300;i++){
+
+      float bin=i*30;
+
+      if(bin>=300) break;
+      massbins << bin;
+    }
+
     //pt
     //eta
     //et2d
@@ -137,14 +147,18 @@ public:
 
     effTriple::makelist=true;
 
-    effTriple t_pt      (binspt_                 , "lepton_pt"      , "p_{T,l}"            , "evts/binw"   );
-    effTriple t_allpt   (binsallpt               , "all_lepton_pt"  , "p_{T,l}"            , "evts/binw"   );
+    /////////PLOTS///////
+
+    effTriple t_pt      (binspt_                 , "lepton_pt"      , "p_{T,l} [GeV]"            , "evts/binw"   );
+    effTriple t_allpt   (binsallpt               , "all_lepton_pt"  , "p_{T,l} [GeV]"            , "evts/binw"   );
     effTriple t_eta     (binseta_                , "lepton_eta"     , "#eta_{l}"           , "evts/binw"   );
     effTriple t_eta2d   (binseta2dx_, binseta2dy_, "lepton_eta2d"   , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
     effTriple t_dphi    (binsdphi                , "leptonmet_dphi" , "#Delta#phi_{l,MET}" , "evts/binw"   );
     effTriple t_vmulti  (binsvmulti              , "vertex_multi"   , "n_{vtx}"            , "evts/binw"   );
     effTriple t_drll    (binsdrll                , "leptons_dR"     , "#Delta R_{l,l}"     , "evts/binw"   );
     effTriple t_jetmulti(binsjetmulti            , "jet_multi"      , "n_{jets}"           , "evts/binw"   );
+
+    effTriple t_invmass (massbins            , "dilepton_mll"      , "m_{ll} [GeV]"          , "evts/binw"   );
 
     effTriple::makelist=false;
 
@@ -261,7 +275,7 @@ public:
     cout  << "Entries in tree: " << n << endl;
 
     //TRAPTEST//   
-    n*=0.001;
+    n*=0.01;
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     for(Long64_t i=0;i<n;i++){  //main loop
@@ -462,6 +476,8 @@ public:
 	t_vmulti.fillDen(vmulti,puweight);  
 	t_drll.fillDen(dRll,puweight);  
 	t_jetmulti.fillDen(jetmulti,puweight);  
+
+	t_invmass.fillDen(mass,puweight);
 	
       }
       if(b_dilepton && b_ZVeto)                                   sel_woTrig[1].second      +=puweight;
@@ -487,6 +503,9 @@ public:
 	  t_vmulti.fillNum(vmulti,puweight);  
 	  t_drll.fillNum(dRll,puweight);  
 	  t_jetmulti.fillNum(jetmulti,puweight);  
+
+
+	  t_invmass.fillNum(mass,puweight);
 	}
 
 
@@ -648,6 +667,9 @@ public:
 	a.setName(a.getName()+add);
 	b.setName(b.getName()+add);
 	c.setName(c.getName()+add);
+	applyEfficiencyStyleData(a);
+	applyEfficiencyStyleData(b);
+	applyEfficiencyStyleData(c);
       }
       a.write();
       b.write();
@@ -839,12 +861,52 @@ TChain * makeChain(TString path){
 
 
 
+std::vector<histWrapper> getAllSFs(triggerAnalyzer & num, triggerAnalyzer & den , double relerror=0){ //also applies style
+  using namespace ztop;
+  using namespace std;
+  if(num.getTriples().size() != den.getTriples().size()){
+    cout << "getSFs: wrong sized triples! exit" << endl;
+  }
+
+  //search for same named _eff plots and divide them.
+  std::vector<histWrapper> out;
+
+  for(size_t i=0;i<num.getTriples().size();i++){
+    histWrapper  firsteff=num.getTriples().at(i).getEff();
+    for(size_t j=0;j<den.getTriples().size();j++){
+      histWrapper seceff=den.getTriples().at(j).getEff();
+      if(firsteff.getName() == seceff.getName()){ //found two matching ones
+	firsteff.setDivideBinomial(false);
+	seceff.setDivideBinomial(false);
+
+	seceff.setName(seceff.getName() + "_mc");
+	applyEfficiencyStyleData(firsteff);
+	applyEfficiencyStyleMC(seceff);
+	
+
+	out.push_back(firsteff);
+	out.push_back(seceff);
+
+	histWrapper sf=firsteff / seceff;
+	sf.setName(num.getTriples().at(i).getName() + "_sf");
+
+	sf.addRelError(relerror);
+	applySFStyle(sf);
+	out.push_back(sf);
+      }
+    }
+  }
+  return out;
+}
+
+
+
 
 /////definitions here
 
 
 
-void analyze(triggerAnalyzer ta_eed, triggerAnalyzer ta_eeMC, triggerAnalyzer ta_mumud, triggerAnalyzer ta_mumuMC, triggerAnalyzer ta_emud, triggerAnalyzer ta_emuMC){
+void analyzeAll(triggerAnalyzer ta_eed, triggerAnalyzer ta_eeMC, triggerAnalyzer ta_mumud, triggerAnalyzer ta_mumuMC, triggerAnalyzer ta_emud, triggerAnalyzer ta_emuMC){
 
   using namespace ztop;
   using namespace std;
@@ -915,55 +977,62 @@ void analyze(triggerAnalyzer ta_eed, triggerAnalyzer ta_eeMC, triggerAnalyzer ta
   container1D MC;
   TH2D SFdd,datadd,MCdd;
 
-  TFile* f5 = new TFile("triggerSummary_ee.root","RECREATE");
-  ta_eed.writeAll();
-  f5->Close();
- TFile* f6 = new TFile("triggerSummary_ee_MC.root","RECREATE");
-  ta_eeMC.writeAll();
-  f6->Close();
+  //write all "control"plots
+  std::vector<histWrapper> sfs_ee=getAllSFs(ta_eed,ta_eeMC,0.01); //last relerror
+
+  TFile *f = new TFile("triggerSummary_ee.root","RECREATE");
+  for(size_t i=0;i<sfs_ee.size();i++)
+    sfs_ee.at(i).write();
+  f->Close();
+
+  std::vector<histWrapper> sfs_mumu=getAllSFs(ta_mumud,ta_mumuMC,0.01); //last relerror
+
+  TFile *f2 = new TFile("triggerSummary_mumu.root","RECREATE");
+  for(size_t i=0;i<sfs_mumu.size();i++)
+    sfs_mumu.at(i).write();
+  f2->Close();
+
+
+  std::vector<histWrapper> sfs_emu=getAllSFs(ta_emud,ta_emuMC,0.01); //last relerror
+
+  TFile *f3 = new TFile("triggerSummary_emu.root","RECREATE");
+  for(size_t i=0;i<sfs_emu.size();i++)
+    sfs_emu.at(i).write();
+  f3->Close();
+
 
   //etc
   
 }
 
-std::vector<histWrapper> getAllPlusSFs(triggerAnalyzer & num, triggerAnalyzer & den , double relerror=0){ //also applies style
-  using namespace ztop;
-  using namespace std;
-  if(num.getTriples().size() != den.getTriples().size()){
-    cout << "getSFs: wrong sized triples! exit" << endl;
-  }
 
-  //search for same named _eff plots and divide them.
-  std::vector<histWrapper> out;
+void makeFullOutput(triggerAnalyzer & data, triggerAnalyzer & mc , TString dirname, TString label,  double relerror=0){
 
-  for(size_t i=0;i<num.getTriples().size();i++){
-    histWrapper  firsteff=num.getTriples().at(i).getEff();
-    for(size_t j=0;j<den.getTriples().size();j++){
-      histWrapper seceff=den.getTriples().at(j).getEff();
-      if(firsteff.getName() == seceff.getName()){ //found two matching ones
-	firsteff.setDivideBinomial(false);
-	seceff.setDivideBinomial(false);
+  std::vector<histWrapper> sfs=getAllSFs(data,mc,relerror);
 
-	seceff.setName(seceff.getName() + "_mc");
-	applyEfficiencyStyleData(firsteff);
-	applyEfficiencyStyleMC(seceff);
-	
+  system(("mkdir -p "+dirname).Data());
 
-	out.push_back(firsteff);
-	out.push_back(seceff);
+  TFile *f = new TFile(dirname+"/"+label+"_scalefactors.root","RECREATE");
+  for(size_t i=0;i<sfs.size();i++)
+    sfs.at(i).write();
+  f->Close();
+  
+  TFile *f2 = new TFile(dirname+"/"+label+"_raw.root","RECREATE");
+  data.writeAll();
+  mc.writeAll("MC");
+  f2->Close();
 
-	histWrapper sf=firsteff / seceff;
-	sf.setName(num.getTriples().at(i).getName() + "_sf");
+ //make plots
 
-	sf.addRelError(relerror);
-	applySFStyle(sf);
-	out.push_back(sf);
-      }
-    }
-  }
-  return out;
+  TFile *f3 = new TFile(dirname+"/"+label+"_plots.root","RECREATE");
+  plotAll(sfs,label,dirname+"/");
+  f3->Close();
+
+  delete f;
+  delete f2;
+  delete f3;
+
 }
-
 
 
 #endif

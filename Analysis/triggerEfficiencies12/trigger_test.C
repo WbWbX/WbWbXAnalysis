@@ -240,20 +240,48 @@ void trigger_test(){
   ta_mumud.setChain(datachain);
   ta_emud.setChain(datachain);
 
-  ta_eed.Eff();
-  ta_eeMC.Eff();
+  ta_mumud.Eff();
+  ta_mumuMC.Eff();
 
-  std::vector<histWrapper> sfs=getAllPlusSFs(ta_eed,ta_eeMC);
 
-  TFile *f = new TFile("trigger_ee.root","RECREATE");
-  for(size_t i=0;i<sfs.size();i++)
-    sfs.at(i).write();
+  makeFullOutput(ta_mumud, ta_mumuMC, "testdir", "testRun", 0.01);
 
-  f->Close();
+  // std::vector<histWrapper> sfs=getAllSFs(ta_mumud,ta_mumuMC,0.01); //last relerror
+
+ //  TFile *f = new TFile("trigger_mumu_sf.root","RECREATE");
+ //  for(size_t i=0;i<sfs.size();i++)
+ //    sfs.at(i).write();
+ //  f->Close();
+  
+ //  TFile *f2 = new TFile("trigger_mumu_raw.root","RECREATE");
+ //  ta_mumud.writeAll();
+ //  ta_mumuMC.writeAll("MC");
+ //  f2->Close();
+
+ // //make plots
+
+ //  TFile *f2 = new TFile("trigger_plots_mumu.root","RECREATE");
+ 
+ 
+
+ //  plotAll(sfs,"testRun","plots_test/");
+ //  f2->Close();
+
+  
+
 
   // analyze( ta_eed,  ta_eeMC,  ta_mumud,  ta_mumuMC,  ta_emud,  ta_emuMC);
   
   //miniscript();
 }
 
+
+/*
+plots now have appropriate style, analyzer can be run without doing all channels, new plots can be implemented easily
+
+still missing: actual plotting step. exploit ordering in std::vector<histWrapper> sfs=getAllSFs(ta_eed,ta_eeMC,0.01) and the fact that isTH1D() can be required for overlay plots.
+
+also possible: do plots overlaying run ranges etc just by combining the same entries etc...
+
+*/
   
