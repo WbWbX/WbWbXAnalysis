@@ -56,7 +56,6 @@ namespace ztop{
       exit(EXIT_FAILURE);
     }
     name_=name;
-    ptf_="";
     TH1::AddDirectory(kFALSE); 
     double binxarray[binsx.size()];
     for(size_t i=0;i<binsx.size();i++){
@@ -87,8 +86,6 @@ namespace ztop{
       exit(EXIT_FAILURE);
     }
     name_=name;
-    ptf_=painttextformat;
-
     TH1::AddDirectory(kFALSE); 
     double binxarray[binsx.size()];
     for(size_t i=0;i<binsx.size();i++){
@@ -115,6 +112,7 @@ namespace ztop{
       h.GetYaxis()->SetTitle(yaxisname);
       setStyle2d(h);
       histWrapper temp(h,name+add);
+      temp.setPaintTextFormat(painttextformat);
       hists_.push_back(temp);
     }
     bool justAPlaceholderIgnoreWarning=mergeufof; //to avoid warning !IMPLEMENT! later (or remove switch)

@@ -19,8 +19,8 @@ namespace ztop{
   class histWrapper{
   public:
     histWrapper(){}
-    histWrapper(const TH1D & h, TString name=""){setHisto(h);setName(name);dividebinomial_=true;}
-    histWrapper(const TH2D & h, TString name=""){setHisto(h);setName(name);dividebinomial_=true;}
+    histWrapper(const TH1D & h, TString name=""){setHisto(h);setName(name);dividebinomial_=true;ptf_="";}
+    histWrapper(const TH2D & h, TString name=""){setHisto(h);setName(name);dividebinomial_=true;ptf_="";}
     ~histWrapper(){}
 
     void setHisto(const TH2D & h2d){th2d_=h2d;is2d_=true;}
@@ -44,6 +44,9 @@ namespace ztop{
     TH2D & getTH2D()  {return th2d_;}
     TH1D & getTH1D()  {return th1d_;}
     TString getName(){return name_;}
+
+    void setPaintTextFormat(TString ptf){ptf_=ptf;}
+    TString getPaintTextFormat(){return ptf_;}
 
     void fill(double val, double val2weight=1, double weight=1){
       if(isTH1D())
@@ -110,6 +113,8 @@ namespace ztop{
     bool is2d_;
 
     bool dividebinomial_;
+
+    TString ptf_;
 
     TH1D divideTH1D(const TH1D &h1, const TH1D &h2, bool binomial=true){ //! out = h1 / h2
       TH1D out=h1; 
@@ -207,7 +212,7 @@ namespace ztop{
 
     TString getName(){return name_;}
 
-    TString getPaintTextFormat(){return ptf_;}
+    TString getPaintTextFormat(){return hists_.at(0).getPaintTextFormat();}
 
     static std::vector<effTriple *> effTriple_list;
     static bool makelist;
@@ -218,7 +223,7 @@ namespace ztop{
 
     TString name_;
     std::vector<histWrapper> hists_;
-    TString ptf_;
+   
 
   private:
     //les see what comes here
