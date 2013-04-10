@@ -123,15 +123,25 @@ public:
    
     // in addition binseta_ binseta2dx_ binseta2dy_ binspt_
 
-    vector<float> massbins;
+    vector<float> binsmass;
 
     for(float i=0;i<300;i++){
 
       float bin=i*30;
 
       if(bin>=300) break;
-      massbins << bin;
+      binsmass << bin;
     }
+
+    vector<float> binslepmulti=binsjetmulti;
+    vector<float> binsetafine;
+    binsetafine << -2.4 << -2.1 << -1.7 << -1.2 << -0.9 << -0.6 << -0.3 << -0.1 << 0.1 << 0.3 << 0.6 << 0.9 << 1.2 << 1.7 << 2.1 << 2.4;
+
+
+    vector<float> binseta2jetmultiX,binseta2jetmultiY;
+    binseta2jetmultiX << -0.5 << 0.5 << 1.5 << 2.5 << 3.5 << 4.5 << 5.5;
+    binseta2jetmultiY << 0 << 0.9 << 1.2 << 2.1 << 2.4;
+
 
     //pt
     //eta
@@ -142,6 +152,7 @@ public:
     //jetmulti
     ////jetmultieta2d
 
+    alltriples_.clear();
     std::cout << "setting plots "<< std::endl;   
     std::cout << effTriple::effTriple_list.size() << std::endl;
 
@@ -149,16 +160,20 @@ public:
 
     /////////PLOTS///////
 
-    effTriple t_pt      (binspt_                 , "lepton_pt"      , "p_{T,l} [GeV]"            , "evts/binw"   );
-    effTriple t_allpt   (binsallpt               , "all_lepton_pt"  , "p_{T,l} [GeV]"            , "evts/binw"   );
-    effTriple t_eta     (binseta_                , "lepton_eta"     , "#eta_{l}"           , "evts/binw"   );
+    effTriple t_pt      (binspt_                 , "lepton_pt"      , "p_{T,l} [GeV]"            , "evts"   );
+    effTriple t_allpt   (binsallpt               , "all_lepton_pt"  , "p_{T,l} [GeV]"            , "evts"   );
+    effTriple t_eta     (binseta_                , "lepton_eta"     , "#eta_{l}"           , "evts"   );
     effTriple t_eta2d   (binseta2dx_, binseta2dy_, "lepton_eta2d"   , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
-    effTriple t_dphi    (binsdphi                , "leptonmet_dphi" , "#Delta#phi_{l,MET}" , "evts/binw"   );
-    effTriple t_vmulti  (binsvmulti              , "vertex_multi"   , "n_{vtx}"            , "evts/binw"   );
-    effTriple t_drll    (binsdrll                , "leptons_dR"     , "#Delta R_{l,l}"     , "evts/binw"   );
-    effTriple t_jetmulti(binsjetmulti            , "jet_multi"      , "n_{jets}"           , "evts/binw"   );
+    effTriple t_dphi    (binsdphi                , "leptonmet_dphi" , "#Delta#phi_{l,MET}" , "evts"   );
+    effTriple t_vmulti  (binsvmulti              , "vertex_multi"   , "n_{vtx}"            , "evts"   );
+    effTriple t_drll    (binsdrll                , "leptons_dR"     , "#Delta R_{l,l}"     , "evts"   );
+    effTriple t_jetmulti(binsjetmulti            , "jet_multi"      , "n_{jets}"           , "evts"   );
 
-    effTriple t_invmass (massbins            , "dilepton_mll"      , "m_{ll} [GeV]"          , "evts/binw"   );
+    effTriple t_invmass (binsmass            , "dilepton_mll"      , "m_{ll} [GeV]"          , "evts"   );
+    effTriple t_lepmulti(binslepmulti            , "lepton_multi"      , "n_{l}"           , "evts"   );
+    effTriple t_alllepmulti(binslepmulti            , "alllepton_multi"      , "n_{l}"           , "evts"   );
+    effTriple t_etafine     (binsetafine                , "lepton_etafine"     , "#eta_{l}"           , "evts"   );
+    effTriple t_eta2jetmulti   (binseta2jetmultiX, binseta2jetmultiY, "leptonjet_eta2multi"   , "n_{jets}"       , "|#eta_{l}|");
 
     effTriple::makelist=false;
 
@@ -433,6 +448,10 @@ public:
       double eta1,eta2;
       double dphi;
       double dRll;
+      double lepmulti;
+      double alllepmulti;
+
+      //mass already defined
 
       if(mode_<-0.1){ //ee
 	eta1=selectedElecs_[0]->eta();
@@ -441,6 +460,8 @@ public:
 	pt2=selectedElecs_[1]->pt();
 	dphi=selectedElecs_[0]->phi() - pMet->phi();
 	dRll=dR(selectedElecs_[0],selectedElecs_[1]);
+	lepmulti=selectedElecs_.size();
+	alllepmulti=pElectrons->size();
       }
       else if(mode_>0.1){ //mumu
 	eta1=selectedMuons_[0]->eta();
@@ -449,6 +470,8 @@ public:
 	pt2=selectedMuons_[1]->pt();
 	dphi=selectedMuons_[0]->phi() - pMet->phi();
 	dRll=dR(selectedMuons_[0],selectedMuons_[1]);
+	lepmulti=selectedMuons_.size();
+	alllepmulti=pMuons->size();
       }
       else{ //emu
 	eta1=selectedElecs_[0]->eta();
@@ -457,6 +480,8 @@ public:
 	pt2=selectedMuons_[0]->pt();
 	dphi=selectedElecs_[0]->phi() - pMet->phi();
 	dRll=dR(selectedElecs_[0],selectedMuons_[0]);
+	lepmulti=selectedElecs_.size()+selectedMuons_.size();
+	alllepmulti=pMuons->size() + pElectrons->size();
       }
 
       if(b_dilepton){
@@ -478,6 +503,12 @@ public:
 	t_jetmulti.fillDen(jetmulti,puweight);  
 
 	t_invmass.fillDen(mass,puweight);
+	t_lepmulti.fillDen(lepmulti,puweight);
+	t_alllepmulti.fillDen(alllepmulti,puweight);
+	t_etafine.fillDen(eta1,puweight);   
+	t_etafine.fillDen(eta2,puweight); 
+	t_eta2jetmulti.fillDen(jetmulti,fabs(eta1),puweight); 
+	t_eta2jetmulti.fillDen(jetmulti,fabs(eta2),puweight);   
 	
       }
       if(b_dilepton && b_ZVeto)                                   sel_woTrig[1].second      +=puweight;
@@ -506,6 +537,13 @@ public:
 
 
 	  t_invmass.fillNum(mass,puweight);
+	  t_lepmulti.fillNum(lepmulti,puweight);
+	  t_alllepmulti.fillNum(alllepmulti,puweight);
+	  t_etafine.fillNum(eta1,puweight);   
+	  t_etafine.fillNum(eta2,puweight);   
+	  t_eta2jetmulti.fillNum(jetmulti,fabs(eta1),puweight); 
+	  t_eta2jetmulti.fillNum(jetmulti,fabs(eta2),puweight);  
+	
 	}
 
 
@@ -903,7 +941,33 @@ std::vector<histWrapper> getAllSFs(triggerAnalyzer & num, triggerAnalyzer & den 
 
 
 /////definitions here
+void makeFullOutput(triggerAnalyzer & data, triggerAnalyzer & mc , TString dirname, TString label,  double relerror=0){
 
+  std::vector<histWrapper> sfs=getAllSFs(data,mc,relerror);
+
+  system(("mkdir -p "+dirname).Data());
+
+  TFile *f = new TFile(dirname+"/"+label+"_scalefactors.root","RECREATE");
+  for(size_t i=0;i<sfs.size();i++)
+    sfs.at(i).write();
+  f->Close();
+  
+  TFile *f2 = new TFile(dirname+"/"+label+"_raw.root","RECREATE");
+  data.writeAll();
+  mc.writeAll("MC");
+  f2->Close();
+
+ //make plots
+
+  TFile *f3 = new TFile(dirname+"/"+label+"_plots.root","RECREATE");
+  plotAll(sfs,label,dirname+"/");
+  f3->Close();
+
+  delete f;
+  delete f2;
+  delete f3;
+
+}
 
 
 void analyzeAll(triggerAnalyzer ta_eed, triggerAnalyzer ta_eeMC, triggerAnalyzer ta_mumud, triggerAnalyzer ta_mumuMC, triggerAnalyzer ta_emud, triggerAnalyzer ta_emuMC){
@@ -972,67 +1036,16 @@ void analyzeAll(triggerAnalyzer ta_eed, triggerAnalyzer ta_eeMC, triggerAnalyzer
 
 
 
-  container1D scalefactor;
-  container1D data;
-  container1D MC;
-  TH2D SFdd,datadd,MCdd;
 
-  //write all "control"plots
-  std::vector<histWrapper> sfs_ee=getAllSFs(ta_eed,ta_eeMC,0.01); //last relerror
+  makeFullOutput(ta_eed, ta_eeMC, "ee", "", 0.01);
+  makeFullOutput(ta_mumud, ta_mumuMC, "mumu", "", 0.01);
+  makeFullOutput(ta_emud, ta_emuMC, "emu", "", 0.01);
 
-  TFile *f = new TFile("triggerSummary_ee.root","RECREATE");
-  for(size_t i=0;i<sfs_ee.size();i++)
-    sfs_ee.at(i).write();
-  f->Close();
-
-  std::vector<histWrapper> sfs_mumu=getAllSFs(ta_mumud,ta_mumuMC,0.01); //last relerror
-
-  TFile *f2 = new TFile("triggerSummary_mumu.root","RECREATE");
-  for(size_t i=0;i<sfs_mumu.size();i++)
-    sfs_mumu.at(i).write();
-  f2->Close();
-
-
-  std::vector<histWrapper> sfs_emu=getAllSFs(ta_emud,ta_emuMC,0.01); //last relerror
-
-  TFile *f3 = new TFile("triggerSummary_emu.root","RECREATE");
-  for(size_t i=0;i<sfs_emu.size();i++)
-    sfs_emu.at(i).write();
-  f3->Close();
-
-
-  //etc
   
 }
 
 
-void makeFullOutput(triggerAnalyzer & data, triggerAnalyzer & mc , TString dirname, TString label,  double relerror=0){
 
-  std::vector<histWrapper> sfs=getAllSFs(data,mc,relerror);
-
-  system(("mkdir -p "+dirname).Data());
-
-  TFile *f = new TFile(dirname+"/"+label+"_scalefactors.root","RECREATE");
-  for(size_t i=0;i<sfs.size();i++)
-    sfs.at(i).write();
-  f->Close();
-  
-  TFile *f2 = new TFile(dirname+"/"+label+"_raw.root","RECREATE");
-  data.writeAll();
-  mc.writeAll("MC");
-  f2->Close();
-
- //make plots
-
-  TFile *f3 = new TFile(dirname+"/"+label+"_plots.root","RECREATE");
-  plotAll(sfs,label,dirname+"/");
-  f3->Close();
-
-  delete f;
-  delete f2;
-  delete f3;
-
-}
 
 
 #endif

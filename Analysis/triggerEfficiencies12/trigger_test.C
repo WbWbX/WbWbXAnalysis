@@ -246,31 +246,8 @@ void trigger_test(){
 
   makeFullOutput(ta_mumud, ta_mumuMC, "testdir", "testRun", 0.01);
 
-  // std::vector<histWrapper> sfs=getAllSFs(ta_mumud,ta_mumuMC,0.01); //last relerror
 
- //  TFile *f = new TFile("trigger_mumu_sf.root","RECREATE");
- //  for(size_t i=0;i<sfs.size();i++)
- //    sfs.at(i).write();
- //  f->Close();
-  
- //  TFile *f2 = new TFile("trigger_mumu_raw.root","RECREATE");
- //  ta_mumud.writeAll();
- //  ta_mumuMC.writeAll("MC");
- //  f2->Close();
-
- // //make plots
-
- //  TFile *f2 = new TFile("trigger_plots_mumu.root","RECREATE");
- 
- 
-
- //  plotAll(sfs,"testRun","plots_test/");
- //  f2->Close();
-
-  
-
-
-  // analyze( ta_eed,  ta_eeMC,  ta_mumud,  ta_mumuMC,  ta_emud,  ta_emuMC);
+  analyzeAll( ta_eed,  ta_eeMC,  ta_mumud,  ta_mumuMC,  ta_emud,  ta_emuMC);
   
   //miniscript();
 }
