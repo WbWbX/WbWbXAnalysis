@@ -52,6 +52,13 @@ namespace ztop{
 	th2d_.Fill(val, val2weight, weight);
     }
 
+    void addRelError(double err){
+      if(isTH1D())
+	addRelError(th1d_,err);
+      else
+	addRelError(th2d_,err);
+    }
+
     void write(){
      if(isTH1D())
        th1d_.Write();
@@ -147,6 +154,24 @@ namespace ztop{
       return out;
     }
 
+    void addRelError(TH2D &h, double err){
+      for(int binx=1;binx<=h.GetNbinsX()+1;binx++){
+	for(int biny=1;biny<=h.GetNbinsY()+1;biny++){
+	  double add=h.GetBinContent(binx,biny) * err;
+	  double newerr=sqrt(pow(h.GetBinError(binx,biny),2) + pow(add,2));
+	  h.SetBinError(binx,biny,newerr);
+	}
+      }
+    }
+    void addRelError(TH1D &h, double err){
+      for(int binx=1;binx<=h.GetNbinsX()+1;binx++){
+	double add=h.GetBinContent(binx) * err;
+	double newerr=sqrt(pow(h.GetBinError(binx),2) + pow(add,2));
+	h.SetBinError(binx,newerr);  
+      }
+    }
+
+
   };
 
 
@@ -166,6 +191,7 @@ namespace ztop{
 	      TString name="",
 	      TString xaxisname="",
 	      TString yaxisname="", 
+	      TString painttextformat="",
 	      bool mergeufof=false, 
 	      size_t size=3); //! binsx, binsy, name, xaxisname, yaxisname, mergeUFOF=false
     
@@ -181,6 +207,8 @@ namespace ztop{
 
     TString getName(){return name_;}
 
+    TString getPaintTextFormat(){return ptf_;}
+
     static std::vector<effTriple *> effTriple_list;
     static bool makelist;
 
@@ -190,7 +218,7 @@ namespace ztop{
 
     TString name_;
     std::vector<histWrapper> hists_;
-
+    TString ptf_;
 
   private:
     //les see what comes here

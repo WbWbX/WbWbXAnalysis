@@ -56,6 +56,7 @@ namespace ztop{
       exit(EXIT_FAILURE);
     }
     name_=name;
+    ptf_="";
     TH1::AddDirectory(kFALSE); 
     double binxarray[binsx.size()];
     for(size_t i=0;i<binsx.size();i++){
@@ -76,16 +77,18 @@ namespace ztop{
       histWrapper temp(h,name+add);
       hists_.push_back(temp);
     }
-    bool justAPlaceholderIgnoreWarning=mergeufof; //to avoid warning !IMPLEMENT! later (or remove switch)
+    bool justAPlaceholderIgnoreWarning=mergeufof; //to avoid warning !IMPLEMENT! later (or remove switch) 
     addToList();
   }
 
-  effTriple::effTriple(std::vector<float> binsx,  std::vector<float> binsy, TString name,TString xaxisname,TString yaxisname, bool mergeufof, size_t size){
+  effTriple::effTriple(std::vector<float> binsx,  std::vector<float> binsy, TString name,TString xaxisname,TString yaxisname,  TString painttextformat, bool mergeufof, size_t size){
     if(size>3){
       std::cout << "effTriple:size>3 not supported yet!" << std::endl;
       exit(EXIT_FAILURE);
     }
     name_=name;
+    ptf_=painttextformat;
+
     TH1::AddDirectory(kFALSE); 
     double binxarray[binsx.size()];
     for(size_t i=0;i<binsx.size();i++){
