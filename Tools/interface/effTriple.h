@@ -45,8 +45,8 @@ namespace ztop{
     TH1D & getTH1D()  {return th1d_;}
     TString getName(){return name_;}
 
-    void setPaintTextFormat(TString ptf){ptf_=ptf;}
-    TString getPaintTextFormat(){return ptf_;}
+    void setFormatInfo(TString ptf){ptf_=ptf;}
+    TString getFormatInfo(){return ptf_;}
 
     void fill(double val, double val2weight=1, double weight=1){
       if(isTH1D())
@@ -89,6 +89,7 @@ namespace ztop{
 	//do binomial
 	TH1D h=divideTH1D(getTH1D(),denominator.getTH1D(), dividebinomial_);
 	histWrapper out(h);
+	out.setFormatInfo(getFormatInfo());
 	return out;
       }
       else if(isTH2D() && denominator.isTH2D()){
@@ -99,6 +100,7 @@ namespace ztop{
 	//do binomial
 	TH2D h=divideTH2D(getTH2D(),denominator.getTH2D(), dividebinomial_);
 	histWrapper out(h);
+	out.setFormatInfo(getFormatInfo());
 	return out;
       }
       return def;
@@ -188,7 +190,8 @@ namespace ztop{
     effTriple(std::vector<float> binsx,  
 	      TString name="",
 	      TString xaxisname="",
-	      TString yaxisname="", 
+	      TString yaxisname="",  
+	      TString formatinfo="",
 	      bool mergeufof=false, 
 	      size_t size=3); //! bins, name, xaxisname, yaxisname, mergeUFOF=false - for 1D histos
     effTriple(std::vector<float> binsx,  
@@ -196,7 +199,7 @@ namespace ztop{
 	      TString name="",
 	      TString xaxisname="",
 	      TString yaxisname="", 
-	      TString painttextformat="",
+	      TString formatinfo="",
 	      bool mergeufof=false, 
 	      size_t size=3); //! binsx, binsy, name, xaxisname, yaxisname, mergeUFOF=false
     
@@ -212,7 +215,7 @@ namespace ztop{
 
     TString getName(){return name_;}
 
-    TString getPaintTextFormat(){return hists_.at(0).getPaintTextFormat();}
+    TString getFormatInfo(){return hists_.at(0).getFormatInfo();}
 
     static std::vector<effTriple *> effTriple_list;
     static bool makelist;

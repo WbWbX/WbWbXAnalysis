@@ -34,6 +34,7 @@ namespace ztop{
 
     histWrapper eff=hists_.at(0) / hists_.at(1);
     eff.setName(name_+"_eff");
+    eff.setFormatInfo(hists_.at(0).getFormatInfo());
     eff.setDivideBinomial(false);
     if(hists_.size() < 3)
       hists_.push_back(eff);
@@ -50,7 +51,7 @@ namespace ztop{
     std::exit(EXIT_FAILURE);
   }
 
-  effTriple::effTriple(std::vector<float> binsx,  TString name,TString xaxisname,TString yaxisname, bool mergeufof, size_t size){
+  effTriple::effTriple(std::vector<float> binsx,  TString name,TString xaxisname,TString yaxisname, TString formatinfo, bool mergeufof, size_t size){
     if(size>3){
       std::cout << "effTriple:size>3 not supported yet!" << std::endl;
       exit(EXIT_FAILURE);
@@ -74,13 +75,14 @@ namespace ztop{
       h.GetYaxis()->SetTitle(yaxisname);
       setStyle(h);
       histWrapper temp(h,name+add);
+      temp.setFormatInfo(formatinfo);
       hists_.push_back(temp);
     }
     bool justAPlaceholderIgnoreWarning=mergeufof; //to avoid warning !IMPLEMENT! later (or remove switch) 
     addToList();
   }
 
-  effTriple::effTriple(std::vector<float> binsx,  std::vector<float> binsy, TString name,TString xaxisname,TString yaxisname,  TString painttextformat, bool mergeufof, size_t size){
+  effTriple::effTriple(std::vector<float> binsx,  std::vector<float> binsy, TString name,TString xaxisname,TString yaxisname,  TString formatinfo, bool mergeufof, size_t size){
     if(size>3){
       std::cout << "effTriple:size>3 not supported yet!" << std::endl;
       exit(EXIT_FAILURE);
@@ -112,7 +114,7 @@ namespace ztop{
       h.GetYaxis()->SetTitle(yaxisname);
       setStyle2d(h);
       histWrapper temp(h,name+add);
-      temp.setPaintTextFormat(painttextformat);
+      temp.setFormatInfo(formatinfo);
       hists_.push_back(temp);
     }
     bool justAPlaceholderIgnoreWarning=mergeufof; //to avoid warning !IMPLEMENT! later (or remove switch)
