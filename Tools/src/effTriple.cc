@@ -40,7 +40,6 @@ namespace ztop{
     else
       hists_.at(2) = eff;
     hists_.at(2).setName(name_+"_eff");
-    std::cout << "eff made for " << hists_.at(2).getName() << std::endl;
   }
 
 
