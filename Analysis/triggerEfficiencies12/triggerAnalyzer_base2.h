@@ -1023,6 +1023,10 @@ void makeFullOutput(triggerAnalyzer & data, triggerAnalyzer & mc , TString dirna
   delete f2;
   delete f3;
 
+  std::cout << "to get subset of plots: " << std::endl;
+  std::cout << "root -l -b -q 'getSubSetRoot.C++(\"" << dirname << "\")'" << std::endl;
+
+
 }
 
 
