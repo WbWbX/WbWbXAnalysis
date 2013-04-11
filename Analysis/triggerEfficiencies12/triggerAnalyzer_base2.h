@@ -1010,7 +1010,7 @@ void makeFullOutput(triggerAnalyzer & data, triggerAnalyzer & mc , TString dirna
   //data.writeAll();
   //mc.writeAll("MC");
   plotRaw(data.getTriples(),"",label,dirname+"/");
-  plotRaw(mc.getTriples(),"_mc",label,dirname+"/");
+  plotRaw(mc.getTriples(),"_mc",label+" MC",dirname+"/");
   f2->Close();
 
   //make plots

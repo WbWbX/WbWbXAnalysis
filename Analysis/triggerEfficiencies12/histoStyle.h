@@ -319,11 +319,17 @@ void plotAll(std::vector<ztop::histWrapper>  hvec, TString addlabel="", TString 
 	  h->SetMarkerSize(h->GetMarkerSize()*0.5);
 	TString canvasname=hvec.at(j).getName();
 	c->SetName(canvasname);
+	if(canvasname.Contains("_mc")){
+	  label -> Clear();
+	  label -> AddText(Form(addlabel+" MC"));
+	}
 	c->SetTitle(canvasname);
 	h->Draw("colz,text,e"); 
 	label->Draw("same"); 
 	c->Write();
 	c->Print(dir+canvasname+".pdf");
+	label -> Clear();
+	label -> AddText(Form(addlabel));
 	j++;
       }
       i+=3; //next
