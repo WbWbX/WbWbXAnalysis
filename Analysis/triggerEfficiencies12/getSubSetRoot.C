@@ -16,7 +16,7 @@ void getSubSetRoot(TString dirname){
  
 
   TFile *f =new TFile(dirname+"/raw.root");
-  TFile *fout = new TFile("plotHistos.root","RECREATE");
+  TFile *fout = new TFile(dirname+"/plotHistos.root","RECREATE");
 
   //get num and den
 
