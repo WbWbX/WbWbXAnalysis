@@ -28,7 +28,7 @@
 #include "TtZAnalysis/Tools/interface/effTriple.h"
 
 using namespace std; //nasty.. but ok here
-    using namespace ztop;
+using namespace ztop;
 namespace top{using namespace ztop;}
 
 
@@ -51,15 +51,19 @@ public:
     binseta2dx_ << 0 << 0.9 << 1.2 << 2.1 << 2.4; //mu standard
     binseta2dy_=binseta2dx_;
     whichelectrons_="NTPFElectrons";
-    breakat5fb_=false;
+ 
     checktriggerpaths_=false;
     coutalltriggerpaths_=false;
     TH1::AddDirectory(kFALSE);
     mode_=0;
     isMC_=false;
-    breakat5fb_=false;
+    
     includecorr_=true;
-    masscut_=20;
+    masscutlow_=20;
+    masscuthigh_=0;
+
+    runcutlow_=0;
+    runcuthigh_=0;
   }
   ~triggerAnalyzer(){};
 
@@ -83,17 +87,21 @@ public:
 
   void setMode(TString mode){if(mode=="ee") mode_=-1;if(mode=="emu") mode_=0;if(mode=="mumu") mode_=1;}
 
-  void setBreakAt5fb(bool Break){breakat5fb_=Break;}
 
   void setPUFile(TString file){pufile_=file;};
 
   void setIncludeCorr(bool inc){includecorr_=inc;}
 
-  void setMassCut(double cut){masscut_=cut;}
+  void setMassCutLow(double cut){masscutlow_=cut;}
+  void setMassCutHigh(double cut){masscuthigh_=cut;}
+
+  void setRunCutLow(double cut){runcutlow_=cut;}
+  void setRunCutHigh(double cut){runcuthigh_=cut;}
+
+  void setDileptonTriggers(std::vector<std::string> trigs){trigs_=trigs;}
+  void setDileptonTrigger(string trig){trigs_.clear(); trigs_.push_back(trig);}
 
   std::vector<double> Eff(){
-
-
 
     using namespace ztop;
     using namespace std;
@@ -133,14 +141,22 @@ public:
       binsmass << bin;
     }
 
-    vector<float> binslepmulti=binsjetmulti;
+    vector<float> binslepmulti;
+    binslepmulti << 1.5 << 2.5 << 3.5 << 4.5 << 5.5;
     vector<float> binsetafine;
     binsetafine << -2.4 << -2.1 << -1.7 << -1.2 << -0.9 << -0.6 << -0.3 << -0.1 << 0.1 << 0.3 << 0.6 << 0.9 << 1.2 << 1.7 << 2.1 << 2.4;
 
+    vector<float> binseta2dfineX,binseta2dfineY;
+    binseta2dfineX << 0 << 0.1 << 0.3 << 0.6 << 0.9 << 1.2 << 1.7 << 2.4;
+    binseta2dfineY=binseta2dfineX;
 
     vector<float> binseta2jetmultiX,binseta2jetmultiY;
     binseta2jetmultiX << -0.5 << 0.5 << 1.5 << 2.5 << 3.5 << 4.5 << 5.5;
     binseta2jetmultiY << 0 << 0.9 << 1.2 << 2.1 << 2.4;
+
+    vector<float> binsiso;
+    for(float i=0;i<20;i++)
+      binsiso << i/100;
 
 
     //pt
@@ -173,7 +189,9 @@ public:
     effTriple t_lepmulti(binslepmulti            , "lepton_multi"      , "n_{l}"           , "evts"   );
     effTriple t_alllepmulti(binslepmulti            , "alllepton_multi"      , "n_{l}"           , "evts"   );
     effTriple t_etafine     (binsetafine                , "lepton_etafine"     , "#eta_{l}"           , "evts"   );
-    effTriple t_eta2jetmulti   (binseta2jetmultiX, binseta2jetmultiY, "leptonjet_eta2multi"   , "n_{jets}"       , "|#eta_{l}|");
+    effTriple t_eta2jetmulti  (binseta2jetmultiX, binseta2jetmultiY, "leptonjet_eta2multi"   , "n_{jets}"       , "|#eta_{l}|");
+    effTriple t_iso     (binsiso                , "lepton_iso"     , "Iso_{l}"           , "evts"   );
+    effTriple t_eta2dfine   (binseta2dfineX, binseta2dfineY, "lepton_eta2dfine"   , "#eta_{l_{1}}"       , "#eta_{l_{2}}", "smallmarkers");
 
     effTriple::makelist=false;
 
@@ -186,27 +204,34 @@ public:
       datapileup=((TH1D*)f2.Get("pileup"));
     }
  
-    vector<pair<string, double> >dileptriggers;
+    vector<string> dileptriggers;
 
     //make triggers switchable from the outside in next iteration. leave right now as it is
 
     if(mode_<-0.1){
-      pair<string, double> trig2("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999.);
-      dileptriggers.push_back(trig2);
+      //  pair<string, double> trig2("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999.);
+      dileptriggers.push_back("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
 
     }
     if(mode_>0.1){
-      pair<string, double> trig3("HLT_Mu17_Mu8_v",999999);
-      dileptriggers.push_back(trig3);
-      pair<string, double> trig4("HLT_Mu17_TkMu8_v",999999);
-      dileptriggers.push_back(trig4);
+      //   pair<string, double> trig3("HLT_Mu17_Mu8_v",999999);
+      dileptriggers.push_back("HLT_Mu17_Mu8_v");
+      // pair<string, double> trig4("HLT_Mu17_TkMu8_v",999999);
+      dileptriggers.push_back("HLT_Mu17_TkMu8_v");
     }
 
     if(mode_==0){
-      pair<string, double> trig3("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999);
-      dileptriggers.push_back(trig3);
-      pair<string, double> trig4("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999);
-      dileptriggers.push_back(trig4);
+      //  pair<string, double> trig3("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999);
+      dileptriggers.push_back("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
+      //  pair<string, double> trig4("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999);
+      dileptriggers.push_back("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
+    }
+
+    if(trigs_.size()>0){   //manually set
+      dileptriggers.clear();
+      for(size_t i=0;i<trigs_.size();i++){
+	dileptriggers.push_back(trigs_.at(i));
+      }
     }
 
     vector<string> dileptriggersMC; // the version numbers where set as wildcards, so if statement obsolete!
@@ -222,7 +247,9 @@ public:
       dileptriggersMC.push_back("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
       dileptriggersMC.push_back("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
     }
- 
+
+    if(trigs_.size()>0)
+      dileptriggersMC=dileptriggers;
   
 
     ///////////PU reweighting
@@ -290,7 +317,7 @@ public:
     cout  << "Entries in tree: " << n << endl;
 
     //TRAPTEST//   
-    n*=0.01;
+    //n*=0.01;
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     for(Long64_t i=0;i<n;i++){  //main loop
@@ -316,9 +343,9 @@ public:
 
 
       /*
-      mumultiplicity.fill(pMuons->size(),puweight);
+	mumultiplicity.fill(pMuons->size(),puweight);
 
-      for(size_t i=0;i<pMuons->size();i++)
+	for(size_t i=0;i<pMuons->size();i++)
 	mupt.fill(pMuons->at(i).pt(),puweight);
 
       */
@@ -327,17 +354,14 @@ public:
       if(mass < 20) continue;
      
 
+      if(runcutlow_!=0  && pEvent->runNo() < runcutlow_ ) continue;
+      if(runcuthigh_!=0 && pEvent->runNo() > runcuthigh_) continue;
+
+      if(masscutlow_!=0  && mass < masscutlow_ ) continue;
+      if(masscuthigh_!=0 && mass > masscuthigh_) continue;
+
       vector<string> ids;
 
-
-      if(breakat5fb_ && !isMC_){
-
-	if(pEvent->runNo() > 196531){
-	  std::cout << "breaking at run " << pEvent->runNo() << std::endl;
-	  break;
-	}
-      }
-      if(i==n-1) std::cout << "last run number: " << pEvent->runNo() << std::endl;
 
 
       //get the rest of the branches (more time consuming)
@@ -389,7 +413,7 @@ public:
 
 	else{
 	  for(unsigned int ctrig=0;ctrig<dileptriggers.size(); ctrig++){
-	    if(trig.Contains(dileptriggers[ctrig].first) && pEvent->runNo() < dileptriggers[ctrig].second){
+	    if(trig.Contains(dileptriggers[ctrig])){
 	      firedDilepTrigger=true;
 	      break;
 	    }
@@ -450,6 +474,8 @@ public:
       double dRll;
       double lepmulti;
       double alllepmulti;
+      double iso1;
+      double iso2;
 
       //mass already defined
 
@@ -462,6 +488,8 @@ public:
 	dRll=dR(selectedElecs_[0],selectedElecs_[1]);
 	lepmulti=selectedElecs_.size();
 	alllepmulti=pElectrons->size();
+	iso1=selectedElecs_[0]->isoVal();
+	iso2=selectedElecs_[1]->isoVal();
       }
       else if(mode_>0.1){ //mumu
 	eta1=selectedMuons_[0]->eta();
@@ -472,6 +500,8 @@ public:
 	dRll=dR(selectedMuons_[0],selectedMuons_[1]);
 	lepmulti=selectedMuons_.size();
 	alllepmulti=pMuons->size();
+	iso1=selectedMuons_[0]->isoVal();
+	iso2=selectedMuons_[1]->isoVal();
       }
       else{ //emu
 	eta1=selectedElecs_[0]->eta();
@@ -482,6 +512,8 @@ public:
 	dRll=dR(selectedElecs_[0],selectedMuons_[0]);
 	lepmulti=selectedElecs_.size()+selectedMuons_.size();
 	alllepmulti=pMuons->size() + pElectrons->size();
+	iso1=selectedElecs_[0]->isoVal();
+	iso2=selectedMuons_[0]->isoVal();
       }
 
       if(b_dilepton){
@@ -496,7 +528,7 @@ public:
 	t_eta .fillDen(eta1,puweight);   
 	t_eta .fillDen(eta2,puweight);   
 
-	t_eta2d.fillDen(eta1,eta2,puweight);  
+	t_eta2d.fillDen(fabs(eta1),fabs(eta2),puweight);  
 	t_dphi.fillDen(dphi,puweight);  
 	t_vmulti.fillDen(vmulti,puweight);  
 	t_drll.fillDen(dRll,puweight);  
@@ -508,8 +540,16 @@ public:
 	t_etafine.fillDen(eta1,puweight);   
 	t_etafine.fillDen(eta2,puweight); 
 	t_eta2jetmulti.fillDen(jetmulti,fabs(eta1),puweight); 
-	t_eta2jetmulti.fillDen(jetmulti,fabs(eta2),puweight);   
-	
+	t_eta2jetmulti.fillDen(jetmulti,fabs(eta2),puweight); 
+	t_iso.fillDen(iso1,puweight); 
+	t_iso.fillDen(iso2,puweight); 
+	t_eta2dfine.fillDen(fabs(eta1),fabs(eta2),puweight);
+ 
+	if(mode_ > 0.1){
+	  for(size_t j=0;j<pMuons->size();j++)
+	    t_allpt.fillDen(pMuons->at(j).pt(),puweight);
+	}
+
       }
       if(b_dilepton && b_ZVeto)                                   sel_woTrig[1].second      +=puweight;
       if(b_dilepton && b_ZVeto && b_oneJet)                       sel_woTrig[2].second      +=puweight;
@@ -529,7 +569,7 @@ public:
 	  t_eta .fillNum(eta1,puweight);   
 	  t_eta .fillNum(eta2,puweight);   
 
-	  t_eta2d.fillNum(eta1,eta2,puweight);  
+	  t_eta2d.fillNum(fabs(eta1),fabs(eta2),puweight);  
 	  t_dphi.fillNum(dphi,puweight);  
 	  t_vmulti.fillNum(vmulti,puweight);  
 	  t_drll.fillNum(dRll,puweight);  
@@ -543,7 +583,15 @@ public:
 	  t_etafine.fillNum(eta2,puweight);   
 	  t_eta2jetmulti.fillNum(jetmulti,fabs(eta1),puweight); 
 	  t_eta2jetmulti.fillNum(jetmulti,fabs(eta2),puweight);  
-	
+	  t_iso.fillNum(iso1,puweight); 
+	  t_iso.fillNum(iso2,puweight); 
+	  t_eta2dfine.fillNum(fabs(eta1),fabs(eta2),puweight);
+
+	  if(mode_ > 0.1){
+	    for(size_t j=0;j<pMuons->size();j++)
+	      t_allpt.fillNum(pMuons->at(j).pt(),puweight);
+	  }	
+
 	}
 
 
@@ -586,7 +634,7 @@ public:
     cout << "triggers: " <<endl;
     if(!isMC_){
       for(unsigned int i=0;i<dileptriggers.size();i++){
-	cout << dileptriggers[i].first << "   until runnumber "<< dileptriggers[i].second << endl;
+	cout << dileptriggers[i] << endl;
       }
     }
 
@@ -705,8 +753,8 @@ public:
 	a.setName(a.getName()+add);
 	b.setName(b.getName()+add);
 	c.setName(c.getName()+add);
-	applyEfficiencyStyleData(a);
-	applyEfficiencyStyleData(b);
+	applyNumStyle(a);
+	applyDenStyle(b);
 	applyEfficiencyStyleData(c);
       }
       a.write();
@@ -714,6 +762,8 @@ public:
       c.write();
     }
   }
+
+ 
 
   std::vector<string> initTriggers(){
     std::vector<string> mettriggers;
@@ -844,10 +894,13 @@ protected:
   std::vector<float> binseta2dy_;
   std::vector<float> binspt_;
 
-  double masscut_;
+  double masscutlow_,masscuthigh_;
+  double runcutlow_,runcuthigh_;
+
+
+  std::vector<string> trigs_;
 
   TString whichelectrons_;
-  bool breakat5fb_;
   bool isMC_;
   bool checktriggerpaths_;
   bool coutalltriggerpaths_;
@@ -943,23 +996,26 @@ std::vector<histWrapper> getAllSFs(triggerAnalyzer & num, triggerAnalyzer & den 
 /////definitions here
 void makeFullOutput(triggerAnalyzer & data, triggerAnalyzer & mc , TString dirname, TString label,  double relerror=0){
 
+
   std::vector<histWrapper> sfs=getAllSFs(data,mc,relerror);
 
   system(("mkdir -p "+dirname).Data());
 
-  TFile *f = new TFile(dirname+"/"+label+"_scalefactors.root","RECREATE");
+  TFile *f = new TFile(dirname+"/scalefactors.root","RECREATE");
   for(size_t i=0;i<sfs.size();i++)
     sfs.at(i).write();
   f->Close();
   
-  TFile *f2 = new TFile(dirname+"/"+label+"_raw.root","RECREATE");
-  data.writeAll();
-  mc.writeAll("MC");
+  TFile *f2 = new TFile(dirname+"/raw.root","RECREATE");
+  //data.writeAll();
+  //mc.writeAll("MC");
+  plotRaw(data.getTriples(),"",label,dirname+"/");
+  plotRaw(mc.getTriples(),"_mc",label,dirname+"/");
   f2->Close();
 
- //make plots
+  //make plots
 
-  TFile *f3 = new TFile(dirname+"/"+label+"_plots.root","RECREATE");
+  TFile *f3 = new TFile(dirname+"/sf_plots.root","RECREATE");
   plotAll(sfs,label,dirname+"/");
   f3->Close();
 
