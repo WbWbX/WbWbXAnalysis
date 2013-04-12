@@ -1,10 +1,10 @@
 ##for muCone03!!!
 ##/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12-START53_V7C_FSIM-v1/AODSIM
 
-150   /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12-START53_V7C_FSIM-v1/AODSIM     tree_8TeV_eettbar           includetrigger=true ttH=true genFilter=Top genFilterString=ElectronElectron isSignal=true
-150   /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12-START53_V7C_FSIM-v1/AODSIM     tree_8TeV_mumuttbar         includetrigger=true ttH=true genFilter=Top genFilterString=MuonMuon isSignal=true
-150   /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12-START53_V7C_FSIM-v1/AODSIM     tree_8TeV_emuttbar          includetrigger=true ttH=true genFilter=Top genFilterString=ElectronMuon isSignal=true
-100  /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12-START53_V7C_FSIM-v1/AODSIM     tree_8TeV_eettbarviatau      includetrigger=true ttH=true genFilter=Top genFilterString=ElectronElectronViaTau
-100  /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12-START53_V7C_FSIM-v1/AODSIM     tree_8TeV_mumuttbarviatau    includetrigger=true ttH=true genFilter=Top genFilterString=MuonMuonViaTau
-100  /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12-START53_V7C_FSIM-v1/AODSIM     tree_8TeV_emuttbarviatau     includetrigger=true ttH=true genFilter=Top genFilterString=ElectronMuonViaTau
+150   /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12-START53_V7C_FSIM-v1/AODSIM     tree_8TeV_eettbar           isFastSim=true includetrigger=true ttH=true genFilter=Top genFilterString=ElectronElectron isSignal=true
+150   /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12-START53_V7C_FSIM-v1/AODSIM     tree_8TeV_mumuttbar         isFastSim=true includetrigger=true ttH=true genFilter=Top genFilterString=MuonMuon isSignal=true
+150   /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12-START53_V7C_FSIM-v1/AODSIM     tree_8TeV_emuttbar          isFastSim=true includetrigger=true ttH=true genFilter=Top genFilterString=ElectronMuon isSignal=true
+100  /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12-START53_V7C_FSIM-v1/AODSIM     tree_8TeV_eettbarviatau      isFastSim=true includetrigger=true ttH=true genFilter=Top genFilterString=ElectronElectronViaTau
+100  /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12-START53_V7C_FSIM-v1/AODSIM     tree_8TeV_mumuttbarviatau    isFastSim=true includetrigger=true ttH=true genFilter=Top genFilterString=MuonMuonViaTau
+100  /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12-START53_V7C_FSIM-v1/AODSIM     tree_8TeV_emuttbarviatau     isFastSim=true includetrigger=true ttH=true genFilter=Top genFilterString=ElectronMuonViaTau
 
