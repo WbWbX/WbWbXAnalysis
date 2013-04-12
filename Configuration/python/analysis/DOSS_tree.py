@@ -41,6 +41,7 @@ options.register ('susy',False,VarParsing.VarParsing.multiplicity.singleton,VarP
 
 
 options.register ('debug',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"enters debug mode")
+options.register ('isFastSim',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"FastSim")
 
 
 import sys
@@ -72,6 +73,8 @@ isSignal=options.isSignal
 newMuons=options.muCone03
 wantSummary=options.wantSummary
 ttH=options.ttH
+
+isFastSim=options.isFastSim
 
 debug=options.debug
 
@@ -792,8 +795,8 @@ process.treeSequence = cms.Sequence(process.triggerMatches *
 
 ##### does this prevent segfaults?
 
-
-
+if isFastSim:
+    massSearchReplaceAnyInputTag(process.path,cms.InputTag("kt6PFJets","rho", "RECO"), cms.InputTag("kt6PFJets","rho", "HLT"),True)
 
 ###### Path
 
@@ -807,6 +810,7 @@ process.path = cms.Path( process.goodOfflinePrimaryVertices *
                         process.isoJetSequence  *
                         process.treeSequence
                          )
+
 
 #massSearchReplaceAnyInputTag(process.path,cms.InputTag('goodOfflinePrimaryVertices'), cms.InputTag('goodVertices'),True)
 
