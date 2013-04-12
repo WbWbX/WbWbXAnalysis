@@ -136,5 +136,8 @@ close $OUTA;
 chmod 0755, "$path/check.sh";
 print "run $path/check.sh to check jobs\n";
 
+my $fullSource=File::Spec->rel2abs($source);
+
 system("cp ${fullCMSSWcfpath} $path");
+system("cp $fullSource $path");
 system("ln -s $ENV{CMSSW_BASE} $path/CMSSW_BASE");
