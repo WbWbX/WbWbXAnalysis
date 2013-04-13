@@ -795,9 +795,6 @@ process.treeSequence = cms.Sequence(process.triggerMatches *
 
 ##### does this prevent segfaults?
 
-if isFastSim:
-    massSearchReplaceAnyInputTag(process.path,cms.InputTag("kt6PFJets","rho", "RECO"), cms.InputTag("kt6PFJets","rho", "HLT"),True)
-
 ###### Path
 
 process.path = cms.Path( process.goodOfflinePrimaryVertices *
@@ -810,6 +807,10 @@ process.path = cms.Path( process.goodOfflinePrimaryVertices *
                         process.isoJetSequence  *
                         process.treeSequence
                          )
+
+
+if isFastSim:
+    massSearchReplaceAnyInputTag(process.path,cms.InputTag("kt6PFJets","rho", "RECO"), cms.InputTag("kt6PFJets","rho", "HLT"),True)
 
 
 #massSearchReplaceAnyInputTag(process.path,cms.InputTag('goodOfflinePrimaryVertices'), cms.InputTag('goodVertices'),True)
