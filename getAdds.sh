@@ -49,6 +49,7 @@ cvs co -d TopAnalysis/TopUtils/plugins UserCode/Bromo/TopAnalysis/TopUtils/plugi
 
 cvs co -d TopAnalysis/TopUtils/python/sequences UserCode/Bromo/TopAnalysis/TopUtils/python/sequences
 
+cvs co -d TopAnalysis/TopUtils UserCode/Bromo/TopAnalysis/TopUtils/BuildFile.xml
 
 #runallStuff
 
