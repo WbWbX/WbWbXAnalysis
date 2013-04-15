@@ -46,6 +46,10 @@ cvs co -d TopAnalysis/TopUtils/plugins UserCode/Bromo/TopAnalysis/TopUtils/plugi
 cvs co -d TopAnalysis/TopUtils/plugins UserCode/Bromo/TopAnalysis/TopUtils/plugins/myInputGenJetsParticleSelector.cc
 cvs co -d TopAnalysis/TopUtils/plugins UserCode/Bromo/TopAnalysis/TopUtils/plugins/myInputGenJetsParticleSelector.h
 
+
+cvs co -d TopAnalysis/TopUtils/python/sequences UserCode/Bromo/TopAnalysis/TopUtils/python/sequences
+
+
 #runallStuff
 
 cvs co -d TopAnalysis/Configuration/analysis/diLeptonic/scripts  UserCode/Bromo/TopAnalysis/Configuration/analysis/diLeptonic/scripts/runallGC.pl
