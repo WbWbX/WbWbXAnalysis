@@ -37,19 +37,9 @@ cvs co -d TopAnalysis/ZTopUtils UserCode/Bromo/TopAnalysis/ZTopUtils
 
 #b-jet stuff
 
-cvs co -d TopAnalysis/TopUtils/python/ UserCode/Bromo/TopAnalysis/TopUtils/python/GenLevelBJetProducer_cff.py
-cvs co -d TopAnalysis/TopUtils/python/ UserCode/Bromo/TopAnalysis/TopUtils/python/GenLevelBJetProducer_cfi.py
-cvs co -d TopAnalysis/TopUtils/python/ UserCode/Bromo/TopAnalysis/TopUtils/python/GenJetParticles_cff.py
-cvs co -d TopAnalysis/TopUtils/python/ UserCode/Bromo/TopAnalysis/TopUtils/python/GenJetParticles_cfi.py
+cvs co -d TopAnalysis/TopUtils UserCode/Bromo/TopAnalysis/TopUtils
 
-cvs co -d TopAnalysis/TopUtils/plugins UserCode/Bromo/TopAnalysis/TopUtils/plugins/GenLevelBJetProducer.cc
-cvs co -d TopAnalysis/TopUtils/plugins UserCode/Bromo/TopAnalysis/TopUtils/plugins/myInputGenJetsParticleSelector.cc
-cvs co -d TopAnalysis/TopUtils/plugins UserCode/Bromo/TopAnalysis/TopUtils/plugins/myInputGenJetsParticleSelector.h
-
-
-cvs co -d TopAnalysis/TopUtils/python/sequences UserCode/Bromo/TopAnalysis/TopUtils/python/sequences
-
-cvs co -d TopAnalysis/TopUtils UserCode/Bromo/TopAnalysis/TopUtils/BuildFile.xml
+rm -r -f $CMSSW_BASE/src/TopAnalysis/TopUtils/data
 
 #runallStuff
 
