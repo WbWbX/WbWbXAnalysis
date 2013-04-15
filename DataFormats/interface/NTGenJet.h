@@ -15,10 +15,12 @@ namespace ztop{
     void setP4(PolarLorentzVector p4In){p4_=p4In;}
     void setP4(LorentzVector p4In){p4_=p4In;}
  
-    void setMother(size_t it_pos)   {motherits_.push_back(it_pos);} 
+    void addMother(size_t it_pos)   {motherits_.push_back(it_pos);} 
+    void setMother(size_t it_pos)   {motherits_.clear();motherits_.push_back(it_pos);} 
     void setGenId(int genid){genid_=genid;}
 
     int genId(){return genid_;}
+    size_t mothersSize(){return motherits_.size();}
     size_t mother(size_t i=0){return motherits_.at(i);}
 
     const PolarLorentzVector & p4(){return p4_;}
