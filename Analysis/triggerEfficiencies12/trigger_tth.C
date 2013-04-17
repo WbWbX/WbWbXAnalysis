@@ -1,4 +1,4 @@
-#include "triggerAnalyzer_base.h"
+#include "triggerAnalyzer_base2.h"
 
 
 
@@ -100,7 +100,6 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
     if(tightelecs.size() != 1 || looseelecs.size() != 1) return 0;
     if(tightelecs.at(0)->q() == looseelecs.at(0)->q())   return 0;
     if(!noOverlap(tightelecs.at(0), looseelecs.at(0) , 0.2)) return 0;
-
     mass=(tightelecs.at(0)->p4() + looseelecs.at(0)->p4()).M();
   }
   else if(mode_==0){ //emu
@@ -139,7 +138,7 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
 
 
 
-void trigger_tth(){
+void trigger_test(){
 
   
 
@@ -164,13 +163,13 @@ void trigger_tth(){
   triggerAnalyzer ta_emud;
 
   ta_eed.setMode("ee");
-  ta_eed.setMassCutLow(12);
+  ta_eed.setMassCut(12);
   ta_eed.setIncludeCorr(includecorr);
   ta_emud.setMode("emu");
-  ta_emud.setMassCutLow(12);
+  ta_emud.setMassCut(12);
   ta_eed.setIncludeCorr(includecorr);
   ta_mumud.setMode("mumu");
-  ta_mumud.setMassCutLow(12);
+  ta_mumud.setMassCut(12);
   ta_eed.setIncludeCorr(includecorr);
 
   ta_mumud.setBinsEta(binsmumueta);
@@ -200,7 +199,7 @@ void trigger_tth(){
   TString dir="/scratch/hh/dust/naf/cms/user/kieseler/trees_ES_tth/";
 
   TString cmssw_base=getenv("CMSSW_BASE");
-  TString pileuproot = cmssw_base+"/src/TtZAnalysis/Data/ttH.json_PU.root";//HCP_PU.root";//HCP_5.3fb_PU.root";
+  TString pileuproot = cmssw_base+"/src/TtZAnalysis/Data/Full19.json.txt_PU.root";//HCP_PU.root";//HCP_5.3fb_PU.root";
 
 
   std::vector<TString> eemcfiles,mumumcfiles,emumcfiles, datafiles;
@@ -240,11 +239,26 @@ void trigger_tth(){
   ta_eed.setChain(datachain);
   ta_mumud.setChain(datachain);
   ta_emud.setChain(datachain);
+  /*
+  ta_mumud.Eff();
+  ta_mumuMC.Eff();
+  */
+
+  //  makeFullOutput(ta_mumud, ta_mumuMC, "testdir", "testRun", 0.01);
 
 
-  analyze( ta_eed,  ta_eeMC,  ta_mumud,  ta_mumuMC,  ta_emud,  ta_emuMC);
+  analyzeAll( ta_eed,  ta_eeMC,  ta_mumud,  ta_mumuMC,  ta_emud,  ta_emuMC);
   
-  miniscript();
+  //miniscript();
 }
 
+
+/*
+plots now have appropriate style, analyzer can be run without doing all channels, new plots can be implemented easily
+
+still missing: actual plotting step. exploit ordering in std::vector<histWrapper> sfs=getAllSFs(ta_eed,ta_eeMC,0.01) and the fact that isTH1D() can be required for overlay plots.
+
+also possible: do plots overlaying run ranges etc just by combining the same entries etc...
+
+*/
   

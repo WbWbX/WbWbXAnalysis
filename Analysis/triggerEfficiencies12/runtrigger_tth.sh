@@ -8,9 +8,9 @@ echo '\n\nrunning in directory' "${dirstring}."
 
 mkdir $dirstring
 cd $dirstring
-cp ../triggerAnalyzer_base.h .
+cp ../triggerAnalyzer_base2.h .
 cp ../trigger_tth.C .
-cp ../makeplotsnice.h .
-cp ../make2dplots.h .
+cp ../histoStyle.h .
+cp ../getSubSetRoot.C .
 nohup root -l -b -q trigger_tth.C++ > output.txt 
 echo "done with ${dirstring}"
