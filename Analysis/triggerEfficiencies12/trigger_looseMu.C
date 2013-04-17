@@ -8,7 +8,6 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
   using namespace std;
   using namespace ztop;
 
-
   for(size_t i=0;i<inputMuons->size();i++){
     ztop::NTMuon * muon = &inputMuons->at(i);
     //select
@@ -89,19 +88,20 @@ void trigger_looseMu(){
   TString dir="/scratch/hh/dust/naf/cms/user/kieseler/trees_ES_tth/";
 
   TString cmssw_base=getenv("CMSSW_BASE");
-  TString pileuproot = cmssw_base+"/src/TtZAnalysis/Data/ttH.json_PU.root";
+  TString pileuproot = cmssw_base+"/src/TtZAnalysis/Data/Full19.json.txt_PU.root";
 
 
-  std::vector<TString> mumumcfiles, datafilesFull,datafilesRunb,datafilesRunc, datafilesRuna;
+  std::vector<TString> mumumcfiles, datafilesFull,datafilesRunb,datafilesRunc, datafilesRuna,datafilesRund;
  
   mumumcfiles << dir+"tree_8TeV_mumuttbar.root" 
 	      << dir+"tree_8TeV_mumuttbarviatau.root" ;
 
   datafilesFull  << dir + "tree_8TeV_MET_runA_06Aug.root"  
+	     << dir + "tree_8TeV_MET_runA_13Jul.root"  
 	     << dir + "tree_8TeV_MET_runB_13Jul.root"  
 	     << dir + "tree_8TeV_MET_runC_prompt.root"
-	     << dir + "tree_8TeV_MET_runA_13Jul.root"  
 	     << dir + "tree_8TeV_MET_runC_24Aug.root"  
+	     << dir + "tree_8TeV_MET_runC_11Dec.root"  
 	     << dir + "tree_8TeV_MET_runD_prompt.root";
   
 
@@ -109,8 +109,11 @@ void trigger_looseMu(){
 		<< dir + "tree_8TeV_MET_runA_13Jul.root" ;
 
   datafilesRunb << dir + "tree_8TeV_MET_runB_13Jul.root"  ;
-  datafilesRunc << dir + "tree_8TeV_MET_runC_24Aug.root" 
-		<< dir + "tree_8TeV_MET_runC_prompt.root" ; //TRAP dec11 is missing!!
+  datafilesRunc << dir + "tree_8TeV_MET_runC_24Aug.root"  
+		<< dir + "tree_8TeV_MET_runC_11Dec.root" 
+		<< dir + "tree_8TeV_MET_runC_prompt.root" ; 
+
+  datafilesRund << dir + "tree_8TeV_MET_runD_prompt.root" ; 
 
 
 
@@ -121,17 +124,18 @@ void trigger_looseMu(){
   TChain * datachainRunA=makeChain(datafilesRuna);
   TChain * datachainRunB=makeChain(datafilesRunb);
   TChain * datachainRunC=makeChain(datafilesRunc);
+  TChain * datachainRunD=makeChain(datafilesRund);
   TChain * mumuchain=makeChain(mumumcfiles);
 
   ta_mumud.setChain(datachainFull);
   ta_mumuMC.setChain(mumuchain);
   ta_mumuMC.setPUFile(pileuproot);
  
-  /*
+  
   ta_mumud.Eff();
   ta_mumuMC.Eff();
-  makeFullOutput(ta_mumud, ta_mumuMC, "full", "full dataset", 0.01);
-  */
+  makeFullOutput(ta_mumud, ta_mumuMC, "full", "full 8 TeV dataset", 0.01);
+  
  
   //Run A
 
@@ -169,6 +173,19 @@ void trigger_looseMu(){
   ta_mumuRunC.Eff();
   ta_mumuMC.Eff();
   makeFullOutput(ta_mumuRunC, ta_mumuMC, "RunCMu17Mu8", "Run C, Mu17Mu8", 0.01);
+
+
+  //Run D
+
+  triggerAnalyzer ta_mumuRunD=ta_mumud;
+  ta_mumuRunD.setChain(datachainRunD);
+  ta_mumuRunD.setRunCutLow(203768);
+  ta_mumuRunD.setRunCutHigh(208686);
+
+  ta_mumuMC.setPUFile(cmssw_base+"/src/TtZAnalysis/Data/RunDprompt.json.txt_PU.root");
+  ta_mumuRunD.Eff();
+  ta_mumuMC.Eff();
+  makeFullOutput(ta_mumuRunD, ta_mumuMC, "RunDMu17Mu8", "Run D, Mu17Mu8", 0.01);
 
   ///////other trigger: Mu17_TkMu8
 
@@ -211,6 +228,18 @@ void trigger_looseMu(){
   ta_mumuRunC.Eff();
   ta_mumuMC.Eff();
   makeFullOutput(ta_mumuRunC, ta_mumuMC, "RunCMu17TkMu8", "Run C, Mu17TkMu8", 0.01);
+
+ //Run D
+
+  ta_mumuRunD=ta_mumud;
+  ta_mumuRunD.setChain(datachainRunD);
+  ta_mumuRunD.setRunCutLow(203768);
+  ta_mumuRunD.setRunCutHigh(208686);
+
+  ta_mumuMC.setPUFile(cmssw_base+"/src/TtZAnalysis/Data/RunDprompt.json.txt_PU.root");
+  ta_mumuRunD.Eff();
+  ta_mumuMC.Eff();
+  makeFullOutput(ta_mumuRunC, ta_mumuMC, "RunDMu17TkMu8", "Run D, Mu17TkMu8", 0.01);
 
 
 
@@ -258,6 +287,18 @@ void trigger_looseMu(){
   ta_mumuMC.Eff();
   makeFullOutput(ta_mumuRunC, ta_mumuMC, "RunCOR", "Run C,  Mu17TkMu8 OR Mu17Mu8", 0.01);
 
+
+  //Run D
+
+  ta_mumuRunD=ta_mumud;
+  ta_mumuRunD.setChain(datachainRunD);
+  ta_mumuRunD.setRunCutLow(203768);
+  ta_mumuRunD.setRunCutHigh(208686);
+
+  ta_mumuMC.setPUFile(cmssw_base+"/src/TtZAnalysis/Data/RunDprompt.json.txt_PU.root");
+  ta_mumuRunD.Eff();
+  ta_mumuMC.Eff();
+  makeFullOutput(ta_mumuRunC, ta_mumuMC, "RunDOR", "Run D, Mu17TkMu8 OR Mu17Mu8", 0.01);
 
 
 
