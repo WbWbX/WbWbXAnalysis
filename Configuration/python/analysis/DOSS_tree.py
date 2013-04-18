@@ -90,10 +90,9 @@ print "\n\n"
 
 electronIsoCone="03"
 useGsf = True
-minleptons=1
+minleptons=2
 
-if not includereco:
-    minleptons=2
+print 'minimum 2 leptons required. Check tree filling cuts for kinLeptons!! Even for includereco=true'
 
 if syncfile:
     globalTag='START52_V9'
@@ -277,11 +276,31 @@ if isMC:
             print 'genFilter set to Top: ' 
             print genFilterString
 
+########b-hadron stuff 1st part
+
+        process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi") # supplies PDG ID to real name resolution of MC particles, necessary for GenLevelBJetProducer
+        process.load("TopAnalysis.TopUtils.GenLevelBJetProducer_cff")
+        process.produceGenLevelBJetsPlusHadron.deltaR = 5.0
+        process.produceGenLevelBJetsPlusHadron.noBBbarResonances = True
+        process.produceGenLevelBJetsPlusHadron.doImprovedHadronMatching = True
+        process.produceGenLevelBJetsPlusHadron.doValidationPlotsForImprovedHadronMatching = False
+        process.load("TopAnalysis.TopUtils.sequences.improvedJetHadronQuarkMatching_cff")
+
+##top projections turned off -> re-switch this?
+
+       # process.genParticlesForJetsNoNuPlusHadron.ignoreParticleIDs += cms.vuint32( 12,14,16)
+       # process.genParticlesForJetsNoMuNoNuPlusHadron.ignoreParticleIDs += cms.vuint32( 12,13,14,16)
+
         process.preFilterSequence = cms.Sequence(process.preCutPUInfo * 
                                                  process.topsequence *
-                                                 process.postCutPUInfo #*
+                                                 process.postCutPUInfo *
+                                                 process.improvedJetHadronQuarkMatchingSequence *
+                                                 process.produceGenLevelBJetsPlusHadron #*
                                                  #process.requireRecoLeps
                                                  )
+
+
+
 
     elif genFilter=='Z':
         process.load('TopAnalysis.TopFilter.filters.GeneratorZFilter_cfi')
@@ -777,6 +796,11 @@ process.PFTree.includeRho2011    = is2011
 process.PFTree.includePDFWeights = includePDFWeights
 process.PFTree.pdfWeights        = "pdfWeights:"+PDF
 process.PFTree.includeGen        = isSignal
+
+if isSignal and genFilter=="Top":
+    process.PFTree.genJets           = 'ak5GenJetsPlusHadron'
+
+
 if not includereco:
     process.PFTree.muonSrc = 'kinMuons'
     process.PFTree.elecGSFSrc =  'kinElectrons'
