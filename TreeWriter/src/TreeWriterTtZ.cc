@@ -36,12 +36,11 @@ public:
 
 ztop::NTMuon TreeWriterTtZ::makeNTMuon(const pat::Muon & muon){
 
+ 
   ztop::LorentzVector p4zero(0,0,0,0);
   ztop::NTMuon tempmuon;
 
-
   tempmuon.setIsPf(muon.isPFMuon());
-  
 
   ztop::NTIsolation Iso;
   Iso.setChargedHadronIso(muon.chargedHadronIso());
@@ -82,11 +81,9 @@ ztop::NTMuon TreeWriterTtZ::makeNTMuon(const pat::Muon & muon){
     vzbs=muon.outerTrack()->dz(beamSpotPosition);
   }
 
-
   tempmuon.setPixHits(-9999);
   if(!(muon.innerTrack()).isNull())
     tempmuon.setPixHits(muon.innerTrack()->hitPattern().numberOfValidPixelHits());
-
 
   tempmuon.setDzV   (vz);
   tempmuon.setDzVErr   (vzerr);
@@ -112,23 +109,31 @@ ztop::NTMuon TreeWriterTtZ::makeNTMuon(const pat::Muon & muon){
     tempmuon.setMuonHits    (0);
     tempmuon.setD0V  (-9999);
     tempmuon.setD0Bs  (-9999);
-  
+    
   }
   if(includereco_){
-   
+
     std::vector<std::string> matched;
     for(size_t i=0;i<writeMatchedHLTObjects_.size();i++){
-      if(muon.triggerObjectMatchesByPath(writeMatchedHLTObjects_.at(i)).size() > 0)
-	//	std::cout << "found matched object to path " << writeMatchedHLTObjects_.at(i) << std::endl;
+      if(muon.triggerObjectMatchesByPath(writeMatchedHLTObjects_.at(i)).size() > 0){
 	matched.push_back(writeMatchedHLTObjects_[i]);
-      if(muon.triggerObjectMatchesByCollection(writeMatchedHLTObjects_.at(i)).size() >0)
+      }
+      if(muon.triggerObjectMatchesByCollection(writeMatchedHLTObjects_.at(i)).size() >0){
 	matched.push_back(writeMatchedHLTObjects_[i]);
-      if(muon.triggerObjectMatchesByFilter(writeMatchedHLTObjects_.at(i)).size() >0)
+      }
+      if(muon.triggerObjectMatchesByFilter(writeMatchedHLTObjects_.at(i)).size() >0){
 	matched.push_back(writeMatchedHLTObjects_[i]);
+      }
     }
+    if(debugmode) std:: cout << "muon:matched HLTObjects size: " << matched.size() << std::endl;
     tempmuon.setMatchedTrig(matched);
+    
   }
   ////////space for extra cuts
+
+
+
+
 
 
 
@@ -138,7 +143,7 @@ ztop::NTElectron TreeWriterTtZ::makeNTElectron(const pat::Electron & electron){
   
   ztop::LorentzVector p4zero(0,0,0,0);
 
-  ztop::NTElectron tempelec;
+   ztop::NTElectron tempelec;
 
   ztop::NTIsolation Iso;
        
@@ -163,6 +168,8 @@ ztop::NTElectron TreeWriterTtZ::makeNTElectron(const pat::Electron & electron){
 
   int mhits=99;
 
+
+
   if(!(electron.gsfTrack().isNull())){
     vz=electron.gsfTrack()->dz(vtxs[0].position());                   //
     vzbs=electron.gsfTrack()->dz(beamSpotPosition);                   //
@@ -184,7 +191,7 @@ ztop::NTElectron TreeWriterTtZ::makeNTElectron(const pat::Electron & electron){
   tempelec.setDzBs(vzbs);     
   tempelec.setD0V(d0V); 
   tempelec.setD0Bs(d0Bs); 
-                  //
+
   tempelec.setNotConv(electron.passConversionVeto());    
   tempelec.setId(electron.electronIDs());
   tempelec.setIso(Iso);                        //
@@ -193,7 +200,7 @@ ztop::NTElectron TreeWriterTtZ::makeNTElectron(const pat::Electron & electron){
 
 		       
   if(includereco_){
-   
+    
     std::vector<std::string> matched;
     for(size_t i=0;i<writeMatchedHLTObjects_.size();i++){
       if(electron.triggerObjectMatchesByPath(writeMatchedHLTObjects_.at(i)).size() > 0)
@@ -203,6 +210,8 @@ ztop::NTElectron TreeWriterTtZ::makeNTElectron(const pat::Electron & electron){
       if(electron.triggerObjectMatchesByFilter(writeMatchedHLTObjects_.at(i)).size() >0)
 	matched.push_back(writeMatchedHLTObjects_[i]);
     }
+    if(debugmode) std:: cout << "electron:matched HLTObjects size: " << matched.size() << std::endl;
+   
     tempelec.setMatchedTrig(matched);
   }
   double suclue=0;
@@ -215,6 +224,7 @@ ztop::NTElectron TreeWriterTtZ::makeNTElectron(const pat::Electron & electron){
     suclu.setP4(suclup4);
     tempelec.setSuClu(suclu);
   }
+  ////extra stuff set member by id //empty here
   
 
   return tempelec;
