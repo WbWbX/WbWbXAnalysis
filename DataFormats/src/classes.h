@@ -60,6 +60,7 @@ namespace
 
 
     std::map<std::string, double> ksdjsda;
+    std::map<std::string, unsigned int> ksdjsda;
     std::map<int, double> ijdfj;
 
 

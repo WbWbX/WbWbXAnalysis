@@ -36,6 +36,7 @@
   <class name="ztop::NTJERAdjuster"/>
   <class name="std::vector<ztop::NTJERAdjuster>"/>
   <class name="std::map<std::string,double>"/>
+  <class name="std::map<std::string,unsigned int>"/>
   <class name="std::map<int,double>"/>
 
 
