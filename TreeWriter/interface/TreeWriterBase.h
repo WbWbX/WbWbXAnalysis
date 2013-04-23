@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id: TreeWriterBase.h,v 1.1 2013/03/22 11:33:55 jkiesele Exp $
+// $Id: TreeWriterBase.h,v 1.2 2013/04/04 17:37:24 jkiesele Exp $
 //
 //
 
@@ -137,8 +137,11 @@ public:
   std::vector<bool> checkTriggers(const edm::Event&);
   std::vector<std::string> triggers_;
   std::vector<bool> triggerBools_;
+  std::vector<unsigned int> triggerPrescales_;
   void setTriggers();
   ztop::NTGenParticle makeNTGen(const reco::GenParticle *, const std::map<const reco::GenParticle*, int>&);
+  ztop::NTGenParticle  makeNTGen(const reco::GenParticle * p);
+  ztop::NTGenJet  makeNTGenJet(const reco::GenJet * p);
   bool isInGenCollection(const reco::GenParticle * , const std::vector<const reco::GenParticle * > &);
   bool isInGenCollection(const reco::GenJet * , const std::vector<const reco::GenJet * > &);
   template<typename t,typename u>
@@ -169,7 +172,7 @@ public:
   ztop::NTEvent ntevent;
   ztop::NTTrigger nttrigger;
 
-  std::vector<ztop::NTGenParticle> ntgenmuons3, ntgenelecs3,ntgentaus3,ntgenmuons1, ntgenelecs1,ntgentaus1, allntgen;
+  std::vector<ztop::NTGenParticle> nttops,ntws,ntzs,ntbs,ntbhadrons,ntnus,ntleps3,ntleps1,ntallnus;
   std::vector<ztop::NTGenJet> ntgenjets;
   int channel_; // 11 for ee 13 for mumu 1113 for emu 151113 etc for via tau
 
@@ -184,6 +187,17 @@ public:
 
 
   bool debugmode;
+
+  ///b-hardon stuff
+
+  edm::InputTag bHadJetIdx_, antibHadJetIdx_;
+  edm::InputTag BHadrons_, AntiBHadrons_;
+  edm::InputTag BHadronFromTopB_, AntiBHadronFromTopB_;
+  edm::InputTag BHadronVsJet_, AntiBHadronVsJet_;
+  
+  edm::InputTag genBHadPlusMothers_, genBHadPlusMothersIndices_;
+  edm::InputTag genBHadIndex_, genBHadFlavour_, genBHadJetIndex_;
+
 
 
 };
