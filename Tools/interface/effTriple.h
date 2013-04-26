@@ -23,8 +23,8 @@ namespace ztop{
     histWrapper(const TH2D & h, TString name=""){setHisto(h);setName(name);dividebinomial_=true;ptf_="";}
     ~histWrapper(){}
 
-    void setHisto(const TH2D & h2d){th2d_=h2d;is2d_=true;}
-    void setHisto(const TH1D & h){th1d_=h;is2d_=false;}
+    void setHisto(const TH2D & h2d){th2d_=h2d;th2d_.Sumw2();is2d_=true;}
+    void setHisto(const TH1D & h){th1d_=h;th1d_.Sumw2();is2d_=false;}
     void setName(TString name){
       name_=name;
       if(isTH1D()){
@@ -88,6 +88,7 @@ namespace ztop{
 	}
 	//do binomial
 	TH1D h=divideTH1D(getTH1D(),denominator.getTH1D(), dividebinomial_);
+	h.Sumw2();
 	histWrapper out(h);
 	out.setFormatInfo(getFormatInfo());
 	return out;
@@ -99,6 +100,7 @@ namespace ztop{
 	}
 	//do binomial
 	TH2D h=divideTH2D(getTH2D(),denominator.getTH2D(), dividebinomial_);
+	h.Sumw2();
 	histWrapper out(h);
 	out.setFormatInfo(getFormatInfo());
 	return out;

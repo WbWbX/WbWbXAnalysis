@@ -74,6 +74,7 @@ namespace ztop{
       h.GetXaxis()->SetTitle(xaxisname);
       h.GetYaxis()->SetTitle(yaxisname);
       setStyle(h);
+      h.Sumw2();
       histWrapper temp(h,name+add);
       temp.setFormatInfo(formatinfo);
       hists_.push_back(temp);
@@ -113,6 +114,7 @@ namespace ztop{
       h.GetXaxis()->SetTitle(xaxisname);
       h.GetYaxis()->SetTitle(yaxisname);
       setStyle2d(h);
+      h.Sumw2();
       histWrapper temp(h,name+add);
       temp.setFormatInfo(formatinfo);
       hists_.push_back(temp);
