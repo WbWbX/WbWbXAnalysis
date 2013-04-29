@@ -651,7 +651,7 @@ if is2011:
 from PhysicsTools.PatAlgos.tools.trigTools import *
 switchOnTrigger( process )
 
-process.patTrigger.onlyStandAlone = True
+process.patTrigger.onlyStandAlone = False
 
 #process.reducedPatTrigger = cms.EDProducer("TriggerObjectFilterByCollection",
 #    src = cms.InputTag("patTrigger"),
@@ -679,6 +679,18 @@ process.patMuonsTriggerMatches.src = 'patMuons'+ pfpostfix
 process.patMuonsTriggerMatches.matchedCuts = cms.string("path(\"HLT_IsoMu24_v*\") || path(\"HLT_IsoMu24_eta2p1_v*\")")
 process.patMuonsTriggerMatches.maxDeltaR = cms.double(0.1)
 
+
+
+if not includereco and includetrigger:
+
+    process.patMuonsTriggerMatches.matchedCuts = cms.string("path(\"HLT_Mu17_Mu8_v*\") || path(\"HLT_Mu17_TkMu8_v*\") || path(\"HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v*\") || path(\"HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v*\")")
+
+    process.patGSFElectronsTriggerMatches.matchedCuts = cms.string("path(\"HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v*\") || path(\"HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v*\") || path(\"HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v*\")")
+
+    process.patPFElectronsTriggerMatches.matchedCuts = process.patGSFElectronsTriggerMatches.matchedCuts
+
+
+
 process.patGSFElectronsWithTrigger = cms.EDProducer("PATTriggerMatchElectronEmbedder",
                                                     src = cms.InputTag("patElectrons"+ pfpostfix),
                                                     matches = cms.VInputTag("patGSFElectronsTriggerMatches")
@@ -694,7 +706,7 @@ process.patMuonsWithTrigger = cms.EDProducer("PATTriggerMatchMuonEmbedder",
                                              )
 
 
-if includereco:
+if includereco or includetrigger:
     process.triggerMatches =  cms.Sequence(#process.reducedPatTrigger *
                                            process.patGSFElectronsTriggerMatches *
                                            process.patPFElectronsTriggerMatches *
@@ -702,11 +714,19 @@ if includereco:
                                            process.patGSFElectronsWithTrigger *
                                            process.patPFElectronsWithTrigger *
                                            process.patMuonsWithTrigger)
-    process.patTriggerSequence = cms.Sequence(process.patTrigger)
+    
 
 else:
     process.triggerMatches =  cms.Sequence()
-    process.patTriggerSequence = cms.Sequence()
+    
+
+process.patTriggerSequence = cms.Sequence(process.patTrigger *
+                                          process.triggerMatches *
+                                          process.patTriggerEvent)
+
+from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run52xOn51xTrigger
+
+run52xOn51xTrigger(process,'patTriggerSequence')
 
 ###### Merge SuperClusters
 
@@ -801,16 +821,18 @@ if isSignal and genFilter=="Top":
     process.PFTree.genJets           = 'ak5GenJetsPlusHadron'
 
 
-if not includereco:
+if not (includereco or includetrigger):
     process.PFTree.muonSrc = 'kinMuons'
     process.PFTree.elecGSFSrc =  'kinElectrons'
     process.PFTree.elecPFSrc =  'kinPFElectrons'
+
+
 
 process.PFTree.debugmode= debug
 
 ## make tree sequence
 
-process.treeSequence = cms.Sequence(process.triggerMatches *
+process.treeSequence = cms.Sequence(process.patTriggerSequence *
                                     process.superClusters *
                                     process.treeJets *
                                     process.PFTree)
@@ -826,7 +848,7 @@ process.path = cms.Path( process.goodOfflinePrimaryVertices *
                         #  process.inclusiveVertexing *   ## segfaults?!?! in the newest release or MC
                         process.preFilterSequence *
                       #  process.btagging *             #not yet implemented fully in pf2pat sequence../ needed for new btagging tag
-                        process.patTriggerSequence *
+                        
                         getattr(process,'patPF2PATSequence'+pfpostfix) *
                         process.isoJetSequence  *
                         process.treeSequence
