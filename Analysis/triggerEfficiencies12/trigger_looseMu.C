@@ -72,6 +72,8 @@ void trigger_looseMu(){
   ta_mumud.setMode("mumu");
   ta_mumud.setMassCutLow(12);
   ta_mumud.setIncludeCorr(true);
+  ta_mumud.checkTriggerPaths(true);
+
 
   ta_mumud.setBinsEta(binsmumueta);
   ta_mumud.setBinsEta2dX(bins2dmumu);
@@ -84,7 +86,6 @@ void trigger_looseMu(){
 
 
   
-
   TString dir="/scratch/hh/dust/naf/cms/user/kieseler/trees_ES_tth/";
 
   TString cmssw_base=getenv("CMSSW_BASE");
@@ -134,9 +135,9 @@ void trigger_looseMu(){
   
   ta_mumud.Eff();
   ta_mumuMC.Eff();
-  makeFullOutput(ta_mumud, ta_mumuMC, "full", "full 8 TeV dataset", 0.01);
+  makeFullOutput(ta_mumud, ta_mumuMC, "fullMu17Mu8", "19 fb^{-1}, Mu17Mu8", 0.01);
   
- 
+  
   //Run A
 
   triggerAnalyzer ta_mumuRunA=ta_mumud;
@@ -189,10 +190,21 @@ void trigger_looseMu(){
 
   ///////other trigger: Mu17_TkMu8
 
-
+  
   ta_mumud.setDileptonTrigger("HLT_Mu17_TkMu8_v");
   ta_mumuMC.setDileptonTrigger("HLT_Mu17_TkMu8_v");
 
+
+  ta_mumud.setChain(datachainFull);
+  ta_mumuMC.setChain(mumuchain);
+  ta_mumuMC.setPUFile(pileuproot);
+ 
+  
+  ta_mumud.Eff();
+  ta_mumuMC.Eff();
+  makeFullOutput(ta_mumud, ta_mumuMC, "fullMu17TkMu8", "19 fb^{-1}, Mu17TkMu8", 0.01);
+
+  
   //Run A 
   
   ta_mumuRunA=ta_mumud;
@@ -241,7 +253,7 @@ void trigger_looseMu(){
   ta_mumuMC.Eff();
   makeFullOutput(ta_mumuRunC, ta_mumuMC, "RunDMu17TkMu8", "Run D, Mu17TkMu8", 0.01);
 
-
+  
 
   std::vector<string> bothtrig;
   bothtrig << "HLT_Mu17_TkMu8_v" << "HLT_Mu17_Mu8_v";
@@ -251,7 +263,18 @@ void trigger_looseMu(){
   ta_mumud.setDileptonTriggers(bothtrig);
   ta_mumuMC.setDileptonTriggers(bothtrig);
 
+  ta_mumud.setChain(datachainFull);
+  ta_mumuMC.setChain(mumuchain);
+  ta_mumuMC.setPUFile(pileuproot);
+ 
+  
+  ta_mumud.Eff();
+  ta_mumuMC.Eff();
+  makeFullOutput(ta_mumud, ta_mumuMC, "fullOR", "19 fb^{-1}, Mu17TkMu8 OR Mu17Mu8", 0.01);
+
+  
   //Run A 
+
   
   ta_mumuRunA=ta_mumud;
   ta_mumuRunA.setChain(datachainRunA);
@@ -301,7 +324,7 @@ void trigger_looseMu(){
   makeFullOutput(ta_mumuRunC, ta_mumuMC, "RunDOR", "Run D, Mu17TkMu8 OR Mu17Mu8", 0.01);
 
 
-
+  
 }
 
 

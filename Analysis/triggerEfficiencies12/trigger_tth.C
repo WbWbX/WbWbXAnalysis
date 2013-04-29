@@ -138,7 +138,7 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
 
 
 
-void trigger_test(){
+void trigger_tth(){
 
   
 
@@ -163,13 +163,13 @@ void trigger_test(){
   triggerAnalyzer ta_emud;
 
   ta_eed.setMode("ee");
-  ta_eed.setMassCut(12);
+  ta_eed.setMassCutLow(12);
   ta_eed.setIncludeCorr(includecorr);
   ta_emud.setMode("emu");
-  ta_emud.setMassCut(12);
+  ta_emud.setMassCutLow(12);
   ta_eed.setIncludeCorr(includecorr);
   ta_mumud.setMode("mumu");
-  ta_mumud.setMassCut(12);
+  ta_mumud.setMassCutLow(12);
   ta_eed.setIncludeCorr(includecorr);
 
   ta_mumud.setBinsEta(binsmumueta);

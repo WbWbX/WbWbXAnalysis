@@ -317,6 +317,16 @@ public:
     container1D c_corrdphi2 = container1D(dphi);
 
 
+    ////test containers!!! temporary!
+
+    vector<float> allpt;
+    allpt << 0 << 3 << 5 << 8 << 15 << 20 << 25 << 30 << 40 << 50 << 60 << 80 << 120 << 200 << 400;
+
+    container1D mumultiplicity = container1D(vmulti, "muon multiplicity");
+    container1D mupt = container1D(allpt, "all muon pt");
+
+
+
     container1D::c_makelist=false;
 
     for(size_t i=0;i<container1D::c_list.size();i++){
@@ -459,6 +469,8 @@ public:
       displayStatusBar(i,n);
 
 
+      double puweight=1;
+      if(isMC_) puweight=PUweight.getPUweight(pEvent->truePU());
 
       //   b_NTMuons->GetEntry(i);
       if(mode_>0.1 && pMuons->size()<2) continue;
@@ -468,8 +480,14 @@ public:
 
       if(mode_==0 &&  (pElectrons->size() < 1 || pMuons->size()< 1)) continue;
 
-     
 
+      /*
+      mumultiplicity.fill(pMuons->size(),puweight);
+
+      for(size_t i=0;i<pMuons->size();i++)
+	mupt.fill(pMuons->at(i).pt(),puweight);
+
+      */
       double mass=selectDileptons(pMuons,pElectrons);
 
       if(mass < 20) continue;
@@ -500,8 +518,6 @@ public:
       bool b_twoJets=false;
       bool b_met=false;
 
-      double puweight=1;
-      if(isMC_) puweight=PUweight.getPUweight(pEvent->truePU());
 
       vector<string> trigs;
       trigs=pEvent->firedTriggers();

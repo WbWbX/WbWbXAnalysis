@@ -64,6 +64,9 @@ public:
 
     runcutlow_=0;
     runcuthigh_=0;
+
+    std::cout << "Don't forget to check if all trigger Prescales are 1. If they are its either MC or an error in prescaletable. then use the one from event before or skip event - maybe checking one known prescale is sufficient" << std::endl;
+
   }
   ~triggerAnalyzer(){};
 
@@ -80,6 +83,7 @@ public:
 
   std::vector<ztop::effTriple> getTriples(){return alltriples_;}
 
+  void checkTriggerPaths(bool check){checktriggerpaths_=check;}
 
 
   void setChain(TChain * t1){t_=t1;}
@@ -158,6 +162,8 @@ public:
     for(float i=0;i<20;i++)
       binsiso << i/100;
 
+    vector<float> onebin; onebin << 0 << 2;
+
 
     //pt
     //eta
@@ -176,6 +182,7 @@ public:
 
     /////////PLOTS///////
 
+    effTriple t_global  (onebin                  , "global"         , "entry"                    , "evts"   );
     effTriple t_pt      (binspt_                 , "lepton_pt"      , "p_{T,l} [GeV]"            , "evts"   );
     effTriple t_allpt   (binsallpt               , "all_lepton_pt"  , "p_{T,l} [GeV]"            , "evts"   );
     effTriple t_eta     (binseta_                , "lepton_eta"     , "#eta_{l}"           , "evts"   );
@@ -311,6 +318,10 @@ public:
     sel_BothTrig.push_back(met);
 
     vector<pair<TString, int > >triggersummary;
+
+
+    vector<vector<unsigned int> > mettrigcontr;
+    vector<vector<unsigned int> > mettrigprescales;
  
 
     Long64_t n = t_->GetEntries();
@@ -379,10 +390,11 @@ public:
 
       vector<string> trigs;
       trigs=pEvent->firedTriggers();
+      unsigned int prescale=1;
+      size_t usedtriggeridx=99999;
       for(unsigned int trigit=0;trigit<trigs.size();trigit++){
 	TString trig=trigs[trigit];
-      
-
+     
 	if(isMC_){
 	  for(unsigned int ctrig=0;ctrig<dileptriggersMC.size(); ctrig++){
 	    if(trig.Contains(dileptriggersMC[ctrig])){
@@ -396,19 +408,7 @@ public:
 	      break;
 	    }
 	  }
-	  bool newtrigger=false;
-	  if(trig.Contains("MET")){
-	    newtrigger=true;
-	    for(unsigned int J=0; J<triggersummary.size();J++){
-	      if(triggersummary[J].first == trig){
-		newtrigger=false;
-		triggersummary[J].second++;
-	      }
-	    }
-	  }
-	  pair<TString, int> temppair;
-	  temppair.first = trig; temppair.second =1;
-	  if(newtrigger) triggersummary.push_back(temppair);
+	  
 	}
 
 	else{
@@ -421,11 +421,41 @@ public:
 	  for(unsigned int ctrig=0;ctrig<mettriggers.size(); ctrig++){
 	    if(trig.Contains(mettriggers[ctrig])){
 	      firedMet=true;
+	      if(checktriggerpaths_){
+
+		bool newtrigger=true;
+		for(unsigned int J=0; J<triggersummary.size();J++){
+		  if(triggersummary[J].first == trig){
+		    newtrigger=false;
+		    triggersummary[J].second++; ////// here there should be the prescale
+		  }
+		}
+	
+		if(newtrigger){
+		  pair<TString, int> temppair;
+		  temppair.first = trig; temppair.second =1;
+		  triggersummary.push_back(temppair);
+		  ////// here there should be the prescale
+		}
+	      }
 	      break;
+	      
 	    }
 	  }
+
+	  //if(prescale > triggerprescale){
+	  //  prescale=triggerprescale;
+	  //  usedtriggeridx=trigit;
+
+	  //}
+
 	}
 
+	///make triggersummary of used!!! triggers
+
+
+
+	
       }
       if(includecorr_ && !firedMet) continue;
       
@@ -518,6 +548,7 @@ public:
 
       if(b_dilepton){
 	sel_woTrig[0].second      +=puweight; //global
+	t_global.fillDen(1,puweight);
 
 	t_pt.fillDen(pt1,puweight);  
 	t_pt.fillDen(pt2,puweight); 
@@ -559,6 +590,7 @@ public:
       if(firedDilepTrigger){
 	if(b_dilepton){
 	  sel_Trig[0].second  +=puweight;
+	  t_global.fillNum(1,puweight);
 	  
 	  t_pt.fillNum(pt1,puweight);  
 	  t_pt.fillNum(pt2,puweight); 
@@ -632,11 +664,17 @@ public:
     if(isMC_) MCdata="MC";
     cout << "\n\nIn channel " << mode_<< "   " << MCdata << endl;
     cout << "triggers: " <<endl;
-    if(!isMC_){
-      for(unsigned int i=0;i<dileptriggers.size();i++){
-	cout << dileptriggers[i] << endl;
-      }
+    //if(!isMC_){
+    for(unsigned int i=0;i<dileptriggers.size();i++){
+      cout << dileptriggers[i] << endl;
     }
+    //}
+    cout << "triggers MC: " <<endl;
+    // if(!isMC_){
+    for(unsigned int i=0;i<dileptriggersMC.size();i++){
+      cout << dileptriggersMC[i] << endl;
+    }
+    // }
 
 
     // set up output
@@ -674,9 +712,9 @@ public:
 
     if(checktriggerpaths_){
     
-      cout << "\ncontribution of different triggers:\n" << endl;
+      cout << "\ncontribution of different triggers (unweighted!!):\n Contribution || Prescale || Name" << endl;
       for(unsigned int i=0;i<triggersummary.size();i++){
-	cout << triggersummary[i].second << "\t" << triggersummary[i].first << endl;
+	cout << triggersummary[i].second << "|| \t " << "|| \t "<< triggersummary[i].first << endl;
       }
     
     
@@ -842,6 +880,8 @@ public:
     mettriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v");
   
 
+    mettriggers.push_back("HLT_L1ETM100_v");
+
 
     //just for testing
     // mettriggers.clear();
@@ -869,23 +909,28 @@ public:
     notinMCtriggers.push_back("DiCentralJet");  //get rid of all dijet stuff
     notinMCtriggers.push_back("DiCentralPFJet");
 
+    std::vector<std::string> out;
+
     for(unsigned int j=0; j< mettriggers.size();j++){
+      bool isOk=true;
       for(unsigned int i=0;i<notinMCtriggers.size();i++){
 	if( ((TString)mettriggers[j]).Contains(notinMCtriggers[i]) ){
 	  mettriggers[j]="notrig";
+	  isOk=false;
 	}
       }
+      if(isOk) out.push_back(mettriggers[j]);
     }
 
     if(checktriggerpaths_){
       cout << "used MET triggers: " << endl;
       for(unsigned int i=0;i<mettriggers.size();i++){
-	if(mettriggers.at(i) != "notrig") cout << mettriggers.at(i) << endl;
+	std::cout << out.at(i) << std::endl;
       }
     }
 
     // mettriggers=notinMCtriggers;
-    return mettriggers;
+    return out;
   }
 
 protected:
@@ -1030,7 +1075,7 @@ void makeFullOutput(triggerAnalyzer & data, triggerAnalyzer & mc , TString dirna
 }
 
 
-void analyzeAll(triggerAnalyzer ta_eed, triggerAnalyzer ta_eeMC, triggerAnalyzer ta_mumud, triggerAnalyzer ta_mumuMC, triggerAnalyzer ta_emud, triggerAnalyzer ta_emuMC){
+void analyzeAll(triggerAnalyzer ta_eed, triggerAnalyzer ta_eeMC, triggerAnalyzer ta_mumud, triggerAnalyzer ta_mumuMC, triggerAnalyzer ta_emud, triggerAnalyzer ta_emuMC, TString label=""){
 
   using namespace ztop;
   using namespace std;
@@ -1097,9 +1142,9 @@ void analyzeAll(triggerAnalyzer ta_eed, triggerAnalyzer ta_eeMC, triggerAnalyzer
 
 
 
-  makeFullOutput(ta_eed, ta_eeMC, "ee", "", 0.01);
-  makeFullOutput(ta_mumud, ta_mumuMC, "mumu", "", 0.01);
-  makeFullOutput(ta_emud, ta_emuMC, "emu", "", 0.01);
+  makeFullOutput(ta_eed, ta_eeMC, "ee", "ee"+label, 0.01);
+  makeFullOutput(ta_mumud, ta_mumuMC, "mumu", "#mu#mu"+label, 0.01);
+  makeFullOutput(ta_emud, ta_emuMC, "emu", "e#mu"+label, 0.01);
 
   
 }

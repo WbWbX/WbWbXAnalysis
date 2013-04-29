@@ -48,7 +48,32 @@ void getSubSetRoot(TString dirname){
       obj->Write();
     }
   }
-  
+
+  TString channel="";
+  if(dirname.Contains("ee")) channel="ee";
+  else if(dirname.Contains("emu")) channel="emu";
+  else if(dirname.Contains("mumu")) channel="mumu";
+  else std::cout << "naming of triggerSummary  nor done automatically - if not intended, check dirnames (should contain channel name" << std::endl;
+
+  TFile *fout2 = new TFile(dirname+"/triggerSummary_"+channel+".root","RECREATE"); 
+  fout2->cd();
+  std::vector<TString> addsdssf;
+  addsdssf << "lepton_eta2d_sf";
+
+
+  for(size_t i=0;i<addsdssf.size();i++){
+    TString plotname=addsdssf.at(i);
+    TObject * obj = f3->Get(plotname);
+    fout2->cd();
+    
+    if((TString)obj->ClassName() == "TH2D"){
+      TH2D * h=(TH2D*)f3->Get(plotname);
+      h->SetName("scalefactor eta2d with syst");
+      std::cout << "Writing: "<< h->GetName() << std::endl;
+      h->Write();
+    }
+  }
+
 }
 
 

@@ -11,6 +11,6 @@ cd $dirstring
 cp ../triggerAnalyzer_base2.h .
 cp ../trigger_test.C .
 cp ../histoStyle.h .
-cp ../make2dplots.h .
+cp ../getSubSetRoot.C .
 nohup root -l -b -q trigger_test.C++ > output.txt 
 echo "done with ${dirstring}"
