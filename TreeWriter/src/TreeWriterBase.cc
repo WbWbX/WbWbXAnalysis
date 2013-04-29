@@ -29,6 +29,7 @@ TreeWriterBase::TreeWriterBase(const edm::ParameterSet& iConfig)
 
   includetrigger_  =iConfig.getParameter<bool>               ( "includeTrigger" );
   trigresults_     =iConfig.getParameter<edm::InputTag>    ( "triggerResults" );
+  pattriggerevent_     =iConfig.getParameter<edm::InputTag>    ( "triggerEvent" );
 
   puinfo_          =iConfig.getParameter<edm::InputTag>         ( "PUInfo" );
 
@@ -84,6 +85,11 @@ TreeWriterBase::TreeWriterBase(const edm::ParameterSet& iConfig)
 
 
    std::cout << "\n\n JETS ARE REQUIRED TO HAVE AT LEAST 10GeV UNCORR PT\n\n" << std::endl;
+
+   std::cout << "writing Muons: " << muons_ << std::endl;
+   std::cout << "writing GSF: " << gsfelecs_ << std::endl;
+   std::cout << "writing PFElecs: " << pfelecs_ << std::endl;
+
 
    setTriggers();
 
@@ -141,7 +147,8 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    ntgenjets.clear();
 
    triggerBools_.clear();
-
+   alltriggerswithprescales_.clear();
+   triggerPrescales_.clear();
 
 
    ztop::NTTrigger clear;
@@ -398,7 +405,7 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 
      for(size_t i=0;i<genBHadPlusMothers->size();i++){
-       std::vector<reco::GenParticle> * bhpm =&genBHadPlusMothers->at(i);
+       //  std::vector<reco::GenParticle> * bhpm =&genBHadPlusMothers->at(i);
 
 
 
@@ -903,15 +910,14 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    /////////triggers as boolians and if switched on as strings
 
-   triggerBools_=checkTriggers(iEvent);
-
+   
 
    std::vector<std::string> firedtriggers;
-
+   //leave for comparison!
    if(includetrigger_){ 
 
 
-   if(debugmode) std::cout << "include trigger loop" << std::endl;
+     if(debugmode) std::cout << "include trigger loop" << std::endl;
 
      Handle<TriggerResults> trigresults;
      iEvent.getByLabel(trigresults_, trigresults);
@@ -933,6 +939,53 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      }
 
    }
+ 
+   /////all trigger stuffff/////new
+
+   // triggerBools_=checkTriggers(iEvent);
+
+
+   triggerBools_.clear();
+   alltriggerswithprescales_.clear();
+   triggerPrescales_.clear();
+
+   if(debugmode) std::cout << "new trigger filling loop" << std::endl;
+
+   edm::Handle< pat::TriggerEvent > triggerEvent;
+   iEvent.getByLabel(pattriggerevent_ , triggerEvent );
+
+   const std::vector< pat::TriggerPath > * paths=triggerEvent->paths();
+
+   if(!paths){
+     std::cout << "paths pointer=0; exit" << std::endl;
+     std::exit(EXIT_FAILURE);
+   }
+
+   std::vector<unsigned int> prescales;
+   std::vector<std::string> pathnames;
+   std::vector<bool> fireds;
+
+   triggerBools_.resize(triggers_.size(),false);
+
+   for(size_t i=0;i<paths->size();i++){
+     unsigned int prescale=paths->at(i).prescale();
+     std::string pathname= paths->at(i).name();
+     bool fired=           paths->at(i).wasAccept();
+     if(fired && includetrigger_){
+       alltriggerswithprescales_[pathname]=prescale;
+       if(debugmode) std::cout << "prescale "<< prescale << " trigger: " << pathname << std::endl;
+     }
+     for(size_t j=0;j<triggers_.size();j++){
+       if(pathname.find(triggers_[j]) != std::string::npos){
+	 triggerBools_.at(j)=fired;
+	 if(debugmode) std::cout << "fired trigger: " << pathname << std::endl;
+       }
+     }
+   }
+
+
+   ////////end trigger stuff new
+
 
 
    if(debugmode) std::cout << "event info" << std::endl;
@@ -1043,6 +1096,10 @@ TreeWriterBase::beginJob()
     Ntuple->Branch("NTTracks", "std::vector<ztop::NTTrack>", &nttracks);
     Ntuple->Branch("NTSuClu", "std::vector<ztop::NTSuClu>", &ntsuclus);
   }
+
+  //if(includetrigger_)
+    Ntuple->Branch("AllTriggersWithPrescales",   "std::map<std::string,unsigned int>", &alltriggerswithprescales_);
+  
   Ntuple->Branch("NTPFElectrons", "std::vector<ztop::NTElectron>", &ntpfelectrons);
   Ntuple->Branch("NTElectrons", "std::vector<ztop::NTElectron>", &ntgsfelectrons);
   Ntuple->Branch("NTJets", "std::vector<ztop::NTJet>", &ntjets);
@@ -1053,6 +1110,9 @@ TreeWriterBase::beginJob()
   Ntuple->Branch("NTEvent", "ztop::NTEvent", &ntevent);
 
   Ntuple->Branch("TriggerBools",   "std::vector<bool>", &triggerBools_);
+  Ntuple->Branch("TriggerPrescales",   "std::vector<unsigned int>", &triggerPrescales_);
+
+
 
   //  Ntuple->Branch("NTTrigger", "ztop::NTTrigger", &nttrigger);
 
@@ -1176,6 +1236,9 @@ std::vector<bool> TreeWriterBase::checkTriggers(const edm::Event& iEvent){
   }
   return output;
 }
+
+
+
 
 void TreeWriterBase::setTriggers(){
   

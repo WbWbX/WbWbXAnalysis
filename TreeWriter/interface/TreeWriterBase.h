@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id: TreeWriterBase.h,v 1.2 2013/04/04 17:37:24 jkiesele Exp $
+// $Id: TreeWriterBase.h,v 1.3 2013/04/23 15:50:22 jkiesele Exp $
 //
 //
 
@@ -71,6 +71,10 @@
 #include "DataFormats/Candidate/interface/CandidateFwd.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "FWCore/Common/interface/TriggerNames.h"
+#include "DataFormats/PatCandidates/interface/TriggerEvent.h"
+#include "DataFormats/Common/interface/RefVector.h"
+#include <string>
+#include <map>
 
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenRunInfoProduct.h"
@@ -138,6 +142,7 @@ public:
   std::vector<std::string> triggers_;
   std::vector<bool> triggerBools_;
   std::vector<unsigned int> triggerPrescales_;
+  std::map<std::string,unsigned int> alltriggerswithprescales_;
   void setTriggers();
   ztop::NTGenParticle makeNTGen(const reco::GenParticle *, const std::map<const reco::GenParticle*, int>&);
   ztop::NTGenParticle  makeNTGen(const reco::GenParticle * p);
@@ -155,7 +160,7 @@ public:
   bool rho2011_;
   bool usegsf_;
 
-  edm::InputTag muons_, recomuons_, pfelecs_, gsfelecs_,recoelecs_, jets_, met_, vertices_, trigresults_, puinfo_, recotracks_, recosuclus_,rhojetsiso_,rhojetsisonopu_,rhoiso_,pdfweights_, genparticles_, genjets_,mvamet_;
+  edm::InputTag muons_, recomuons_, pfelecs_, gsfelecs_,recoelecs_, jets_, met_, vertices_, trigresults_, puinfo_, recotracks_, recosuclus_,rhojetsiso_,rhojetsisonopu_,rhoiso_,pdfweights_, genparticles_, genjets_,mvamet_,pattriggerevent_;
   //rhojets_,rhojetsiso_,rhojetsnopu_,rhojetsisonopu_,rhoiso_;
 
   bool includereco_, includetrigger_, pfinput_,includepdfweights_,includegen_;

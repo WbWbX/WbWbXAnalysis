@@ -19,16 +19,11 @@ PFTree   = cms.EDAnalyzer('TreeWriterTtZ',
                           recoTrackSrc = cms.InputTag('generalTracks'),
                           recoSuCluSrc = cms.InputTag('superClusters'),
                           
-                          writeMatchedHLTObjects = cms.vstring("HLT_IsoMu24_v*",
-                                                               "HLT_IsoMu24_eta2p1_v*",
-                                                               "HLT_Ele27_WP80_v*",
-                                                               "hltL3MuonCandidates",
-                                                               "hltL3ElectronCandidates"),
-                          
-                                                                    
+                                                    
 
                           includeTrigger = cms.bool(True),
                           triggerResults = cms.InputTag('TriggerResults','','HLT'),
+                          triggerEvent = cms.InputTag('patTriggerEvent'),
                           
                           PUInfo = cms.InputTag('addPileupInfo'),
                           rhoIso = cms.InputTag("kt6PFJets","rho", "RECO"),
@@ -44,5 +39,24 @@ PFTree   = cms.EDAnalyzer('TreeWriterTtZ',
                           genJets = cms.InputTag('ak5GenJetsNoNu'),
 
 
-                          debugmode = cms.bool(False)
+                          debugmode = cms.bool(False),
+
+#produceGenLevelBJetsPlusHadron
+                          BJetIndex     = cms.InputTag("produceGenLevelBJetsPlusHadron", "BJetIndex"),
+                          AntiBJetIndex = cms.InputTag("produceGenLevelBJetsPlusHadron", "AntiBJetIndex"),
+                          BHadJetIndex = cms.InputTag("produceGenLevelBJetsPlusHadron", "BHadJetIndex"),
+                          AntiBHadJetIndex = cms.InputTag("produceGenLevelBJetsPlusHadron", "AntiBHadJetIndex"),
+                          BHadrons = cms.InputTag("produceGenLevelBJetsPlusHadron", "BHadrons"),
+                          AntiBHadrons = cms.InputTag("produceGenLevelBJetsPlusHadron", "AntiBHadrons"),
+                          BHadronFromTopB = cms.InputTag("produceGenLevelBJetsPlusHadron", "BHadronFromTopB"),
+                          AntiBHadronFromTopB = cms.InputTag("produceGenLevelBJetsPlusHadron", "AntiBHadronFromTopB"),
+                          BHadronVsJet = cms.InputTag("produceGenLevelBJetsPlusHadron", "BHadronVsJet"),
+                          AntiBHadronVsJet = cms.InputTag("produceGenLevelBJetsPlusHadron", "AntiBHadronVsJet"),
+                          genBHadPlusMothers = cms.InputTag("produceGenLevelBJetsPlusHadron","genBHadPlusMothers"),
+                          genBHadPlusMothersIndices = cms.InputTag("produceGenLevelBJetsPlusHadron","genBHadPlusMothersIndices"),
+                          genBHadIndex = cms.InputTag("produceGenLevelBJetsPlusHadron","genBHadIndex"),
+                          genBHadFlavour = cms.InputTag("produceGenLevelBJetsPlusHadron","genBHadFlavour"),
+                          genBHadJetIndex = cms.InputTag("produceGenLevelBJetsPlusHadron","genBHadJetIndex")
+
+
                           )

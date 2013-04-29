@@ -19,19 +19,11 @@ PFTree   = cms.EDAnalyzer('TreeWriterTtH',
                           recoTrackSrc = cms.InputTag('generalTracks'),
                           recoSuCluSrc = cms.InputTag('superClusters'),
 
-                          writeMatchedHLTObjects = cms.vstring("HLT_IsoMu24_v*",
-                                                               "HLT_IsoMu24_eta2p1_v*",
-                                                               "HLT_Ele27_WP80_v*",
-                                                               "hltL3MuonCandidates",
-                                                               "hltL3ElectronCandidates",
-                                                               "hltSingleMuL2QualIsoL3IsoFiltered24", ##unambigious
-                                                               "hltL3crIsoL1sMu16Eta2p1L1f0L2f16QL3f24QL3crIsoFiltered10"  ##unambigious
-                                                               ## For electrons the sequence HLTEle27WP80Sequence is in different paths - what to do here?
-                                                               ),
-                          
+                         
                                   
                           includeTrigger = cms.bool(True),
                           triggerResults = cms.InputTag('TriggerResults','','HLT'),
+                          triggerEvent = cms.InputTag('patTriggerEvent'),
                           
                           PUInfo = cms.InputTag('addPileupInfo'),
                           rhoIso = cms.InputTag("kt6PFJets","rho", "RECO"),

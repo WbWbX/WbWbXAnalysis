@@ -7,13 +7,6 @@ public:
   explicit TreeWriterTtH(const edm::ParameterSet & ParSet) : TreeWriterBase(ParSet) {
 
 
-    writeMatchedHLTObjects_    =ParSet.getParameter<std::vector<std::string> >        ("writeMatchedHLTObjects");
-
-    //   writeMatchedHLTObjects_ << "HLT_IsoMu24_v" << "HLT_IsoMu24_eta2p1_v";
-    std::cout << "Writing matched triggersObjects:" << std::endl;
-    for(size_t i=0;i<writeMatchedHLTObjects_.size() ;i++)
-      std::cout << writeMatchedHLTObjects_.at(i) << " " ;
-    std::cout << std::endl;
     
 
   }
@@ -28,8 +21,6 @@ public:
   ztop::NTElectron makeNTElectron(const pat::Electron &);
   ztop::NTJet makeNTJet(const pat::Jet &);
 
-
-  std::vector<std::string> writeMatchedHLTObjects_;
 
 
 };
@@ -110,21 +101,19 @@ ztop::NTMuon TreeWriterTtH::makeNTMuon(const pat::Muon & muon){
     tempmuon.setD0Bs  (-9999);
     
   }
-  if(includereco_){
+ 
+  if(includereco_ || includetrigger_){
 
     std::vector<std::string> matched;
-    for(size_t i=0;i<writeMatchedHLTObjects_.size();i++){
-      if(muon.triggerObjectMatchesByPath(writeMatchedHLTObjects_.at(i)).size() > 0){
-	matched.push_back(writeMatchedHLTObjects_[i]);
-      }
-      if(muon.triggerObjectMatchesByCollection(writeMatchedHLTObjects_.at(i)).size() >0){
-	matched.push_back(writeMatchedHLTObjects_[i]);
-      }
-      if(muon.triggerObjectMatchesByFilter(writeMatchedHLTObjects_.at(i)).size() >0){
-	matched.push_back(writeMatchedHLTObjects_[i]);
-      }
-    }
+    if(muon.triggerObjectMatches().size()>0)
+      matched=muon.triggerObjectMatches().begin()->pathNames();
     if(debugmode) std:: cout << "muon:matched HLTObjects size: " << matched.size() << std::endl;
+    if(debugmode){
+      for(size_t k=0;k<matched.size();k++)
+	std::cout << "matched: " << matched.at(k) << std::endl;
+    }
+
+
     tempmuon.setMatchedTrig(matched);
     
   }
@@ -197,21 +186,23 @@ ztop::NTElectron TreeWriterTtH::makeNTElectron(const pat::Electron & electron){
 
 
 		       
-  if(includereco_){
+  if(includereco_ || includetrigger_){
     
     std::vector<std::string> matched;
-    for(size_t i=0;i<writeMatchedHLTObjects_.size();i++){
-      if(electron.triggerObjectMatchesByPath(writeMatchedHLTObjects_.at(i)).size() > 0)
-	matched.push_back(writeMatchedHLTObjects_[i]);
-      if(electron.triggerObjectMatchesByCollection(writeMatchedHLTObjects_.at(i)).size() >0)
-	matched.push_back(writeMatchedHLTObjects_[i]);
-      if(electron.triggerObjectMatchesByFilter(writeMatchedHLTObjects_.at(i)).size() >0)
-	matched.push_back(writeMatchedHLTObjects_[i]);
-    }
+    if(electron.triggerObjectMatches().size()>0)
+      matched=electron.triggerObjectMatches().begin()->pathNames();
     if(debugmode) std:: cout << "electron:matched HLTObjects size: " << matched.size() << std::endl;
+    if(debugmode){
+      for(size_t k=0;k<matched.size();k++)
+	std::cout << "matched: " << matched.at(k) << std::endl;
+    }
+   
+
+
    
     tempelec.setMatchedTrig(matched);
   }
+
   double suclue=0;
   if(includereco_ && !(electron.superCluster().isNull())){
     suclue=electron.superCluster()->rawEnergy();
