@@ -994,7 +994,7 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    ntevent.setLumiBlock(iEvent.id().luminosityBlock());
    ntevent.setEventNo(iEvent.id().event());
    ntevent.setVertexMulti(vertices->size());
-   ntevent.setFiredTriggers(firedtriggers);
+   //  ntevent.setFiredTriggers(firedtriggers);
 
    float BXminus=0;
    float BXzero=0;
