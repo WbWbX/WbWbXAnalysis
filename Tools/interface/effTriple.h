@@ -88,7 +88,7 @@ namespace ztop{
 	}
 	//do binomial
 	TH1D h=divideTH1D(getTH1D(),denominator.getTH1D(), dividebinomial_);
-	h.Sumw2();
+	//	h.Sumw2();
 	histWrapper out(h);
 	out.setFormatInfo(getFormatInfo());
 	return out;
@@ -100,7 +100,7 @@ namespace ztop{
 	}
 	//do binomial
 	TH2D h=divideTH2D(getTH2D(),denominator.getTH2D(), dividebinomial_);
-	h.Sumw2();
+	//	h.Sumw2();
 	histWrapper out(h);
 	out.setFormatInfo(getFormatInfo());
 	return out;
