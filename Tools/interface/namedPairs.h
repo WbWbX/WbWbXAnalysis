@@ -88,6 +88,22 @@ public:
 
 
 
+  std::vector<double> * secondsByName(std::string name){
+    for(size_t i=0;i<names_.size();i++){
+      if(names_.at(i) == name)
+	return &seconds_.at(i);
+    }
+    return 0;
+  }
+  std::vector<double> * thirdsByName(std::string name){
+    for(size_t i=0;i<names_.size();i++){
+      if(names_.at(i)==name)
+	return &thirds_.at(i);
+    }
+    return 0;
+  }
+
+
   void sortByThird(){} //does nothing yet
 
   void sortBySecond(){}
@@ -109,26 +125,14 @@ public:
     return out;
   }
 
+
 private:
 
   std::vector<std::string> names_;
   std::vector<std::vector<double> > seconds_; 
   std::vector<std::vector<double> > thirds_; 
  
-  std::vector<double> * secondsByName(std::string name){
-    for(size_t i=0;i<names_.size();i++){
-      if(names_.at(i) == name)
-	return &seconds_.at(i);
-    }
-    return 0;
-  }
-  std::vector<double> * thirdsByName(std::string name){
-    for(size_t i=0;i<names_.size();i++){
-      if(names_.at(i)==name)
-	return &thirds_.at(i);
-    }
-    return 0;
-  }
+ 
 
 };
 
