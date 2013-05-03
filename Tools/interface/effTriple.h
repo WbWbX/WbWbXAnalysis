@@ -23,8 +23,8 @@ namespace ztop{
     histWrapper(const TH2D & h, TString name=""){setHisto(h);setName(name);dividebinomial_=true;ptf_="";}
     ~histWrapper(){}
 
-    void setHisto(const TH2D & h2d){th2d_=h2d;th2d_.Sumw2();is2d_=true;}
-    void setHisto(const TH1D & h){th1d_=h;th1d_.Sumw2();is2d_=false;}
+    void setHisto(const TH2D & h2d){th2d_=h2d;is2d_=true;}
+    void setHisto(const TH1D & h){th1d_=h;is2d_=false;}
     void setName(TString name){
       name_=name;
       if(isTH1D()){
@@ -37,6 +37,8 @@ namespace ztop{
       }
     }
     void setDivideBinomial(bool div){dividebinomial_=div;}
+
+    void sumw2(){if(is2d_) th2d_.Sumw2(); else th1d_.Sumw2();}
 
     bool isTH1D(){return !is2d_;}
     bool isTH2D(){return is2d_;}
@@ -73,6 +75,26 @@ namespace ztop{
        th1d_.Draw(opt);
      else
        th2d_.Draw(opt);
+    }
+
+    void scale(double SF, TString opt=""){
+      if(is2d_)
+	th2d_.Scale(SF,opt);
+      else
+	th1d_.Scale(SF,opt);
+    }
+
+    histWrapper operator + (const histWrapper & second){
+      histWrapper out=second;
+      if(is2d_ != second.is2d_){
+	std::cout << "must add same dimensional wrappers!" << std::endl;
+	return out;
+      }
+      if(is2d_)
+	out.th2d_.Add(&th2d_);
+      else
+	out.th1d_.Add(&th1d_);
+      return out;
     }
 
     histWrapper operator / (histWrapper & denominator){ // only binomial division
@@ -210,7 +232,15 @@ namespace ztop{
     void fillNum(double value, double val2weight=1, double weight=1);
     void fillDen(double value, double val2weight=1, double weight=1);
 
-    
+    void scale(double SF){hists_.at(0).scale(SF);hists_.at(1).scale(SF);}    
+
+    effTriple operator + (const effTriple & second){
+      effTriple out=second;
+      out.hists_.at(0) = out.hists_.at(0) + hists_.at(0);
+      out.hists_.at(1) = out.hists_.at(1) + hists_.at(1);
+      return out;
+    }
+
     histWrapper getEff(){makeEff(); return hists_.at(2);}
     histWrapper getNum(){return hists_.at(0);}
     histWrapper getDen(){return hists_.at(1);}

@@ -112,7 +112,7 @@ public:
   void sortByName(){}
 
   //compare
-  namedPairs compare(namedPairs first, namedPairs second){return first;} //output?!?
+  namedPairs compare(namedPairs first, namedPairs secondIgnoreWarningHere){return first;} //output?!?
 
   //operator +
   namedPairs operator + (const namedPairs & L){
