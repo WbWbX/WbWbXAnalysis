@@ -16,6 +16,7 @@ namespace ztop{
     void setPdgId(int id){pdgid_=id;}
 
     void setGenId(int genid){genid_=genid;};
+    void setQ(int charge){q_=charge;}
 
     const int & genId(){return genid_;}
 
@@ -40,7 +41,7 @@ namespace ztop{
     double  phi(){return p4_.Phi();}
     double  eta(){return p4_.Eta();}
     double  m(){return p4_.M();}
-    int q(){if(pdgid_<0) return -1; else if(pdgid_>0) return 1; else return 0;}
+    int q(){return q_;}
 
     
     std::vector<int> & daughterIts(){return daughterits_;}
@@ -76,7 +77,7 @@ namespace ztop{
   protected:
 
 
-    int pdgid_, status_, genid_;
+    int pdgid_, status_, genid_,q_;
     PolarLorentzVector p4_;
     std::vector<int> motherits_,daughterits_;
     std::vector<ztop::NTGenParticle *> daughterPs_,motherPs_;
