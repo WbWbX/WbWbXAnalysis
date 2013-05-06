@@ -1,4 +1,4 @@
-#include "triggerAnalyzer_base2.h"
+#include "triggerAnalyzer_base3.h"
 
 
 
@@ -20,15 +20,15 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
 
  
   /*
-  for(size_t i=0;i<inputElectrons->size();i++){
+    for(size_t i=0;i<inputElectrons->size();i++){
     ztop::NTElectron * elec = &inputElectrons->at(i);
 
-  }
+    }
 
-  for(size_t i=0;i<inputElectrons->size();i++){
+    for(size_t i=0;i<inputElectrons->size();i++){
     ztop::NTElectron * elec = &inputElectrons->at(i);
 
-  }
+    }
   */
   double mass=0;
 
@@ -86,7 +86,7 @@ void trigger_looseMu(){
 
 
   
-  TString dir="/scratch/hh/dust/naf/cms/user/kieseler/trees_ES_tth/";
+  TString dir="/scratch/hh/dust/naf/cms/user/kieseler/trees_PS_trig_03/";
 
   TString cmssw_base=getenv("CMSSW_BASE");
   TString pileuproot = cmssw_base+"/src/TtZAnalysis/Data/Full19.json.txt_PU.root";
@@ -98,12 +98,12 @@ void trigger_looseMu(){
 	      << dir+"tree_8TeV_mumuttbarviatau.root" ;
 
   datafilesFull  << dir + "tree_8TeV_MET_runA_06Aug.root"  
-	     << dir + "tree_8TeV_MET_runA_13Jul.root"  
-	     << dir + "tree_8TeV_MET_runB_13Jul.root"  
-	     << dir + "tree_8TeV_MET_runC_prompt.root"
-	     << dir + "tree_8TeV_MET_runC_24Aug.root"  
-	     << dir + "tree_8TeV_MET_runC_11Dec.root"  
-	     << dir + "tree_8TeV_MET_runD_prompt.root";
+		 << dir + "tree_8TeV_MET_runA_13Jul.root"  
+		 << dir + "tree_8TeV_MET_runB_13Jul.root"  
+		 << dir + "tree_8TeV_MET_runC_prompt.root"
+		 << dir + "tree_8TeV_MET_runC_24Aug.root"  
+		 << dir + "tree_8TeV_MET_runC_11Dec.root"  
+		 << dir + "tree_8TeV_MET_runD_prompt.root";
   
 
   datafilesRuna << dir + "tree_8TeV_MET_runA_06Aug.root"
@@ -150,6 +150,8 @@ void trigger_looseMu(){
   ta_mumuMC.Eff();
   makeFullOutput(ta_mumuRunA, ta_mumuMC, "RunAMu17Mu8", "Run A, Mu17Mu8", 0.01);
 
+  
+
   //Run B
 
   triggerAnalyzer ta_mumuRunB=ta_mumud;
@@ -161,7 +163,7 @@ void trigger_looseMu(){
   ta_mumuRunB.Eff();
   ta_mumuMC.Eff();
   makeFullOutput(ta_mumuRunB, ta_mumuMC, "RunBMu17Mu8", "Run B, Mu17Mu8", 0.01);
-
+  
 
   //Run C
 
@@ -177,7 +179,7 @@ void trigger_looseMu(){
 
 
   //Run D
-
+  
   triggerAnalyzer ta_mumuRunD=ta_mumud;
   ta_mumuRunD.setChain(datachainRunD);
   ta_mumuRunD.setRunCutLow(203768);
@@ -189,7 +191,7 @@ void trigger_looseMu(){
   makeFullOutput(ta_mumuRunD, ta_mumuMC, "RunDMu17Mu8", "Run D, Mu17Mu8", 0.01);
 
   ///////other trigger: Mu17_TkMu8
-
+  
   
   ta_mumud.setDileptonTrigger("HLT_Mu17_TkMu8_v");
   ta_mumuMC.setDileptonTrigger("HLT_Mu17_TkMu8_v");
@@ -241,7 +243,7 @@ void trigger_looseMu(){
   ta_mumuMC.Eff();
   makeFullOutput(ta_mumuRunC, ta_mumuMC, "RunCMu17TkMu8", "Run C, Mu17TkMu8", 0.01);
 
- //Run D
+  //Run D
 
   ta_mumuRunD=ta_mumud;
   ta_mumuRunD.setChain(datachainRunD);
@@ -323,16 +325,16 @@ void trigger_looseMu(){
   ta_mumuMC.Eff();
   makeFullOutput(ta_mumuRunC, ta_mumuMC, "RunDOR", "Run D, Mu17TkMu8 OR Mu17Mu8", 0.01);
 
-
+  
   
 }
 
 
 /*
-change breakat5fb in triggerAna..bas2 to the one in without 2 (probably not checked in....
+  change breakat5fb in triggerAna..bas2 to the one in without 2 (probably not checked in....
 
-runB first: 193834
-runB last: 196531
+  runB first: 193834
+  runB last: 196531
 
 */
   

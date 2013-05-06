@@ -105,13 +105,18 @@ public:
   void setDileptonTriggers(std::vector<std::string> trigs){trigs_=trigs;}
   void setDileptonTrigger(string trig){trigs_.clear(); trigs_.push_back(trig);}
 
+
+
+  //////////////////////
+
+
   std::vector<double> Eff(){
 
     using namespace ztop;
     using namespace std;
 
     std::vector<string> mettriggers=initTriggers();
-  
+ 
     std::vector<string> mettriggersMC=mettriggers;
 
     TString MCadd="";
@@ -173,6 +178,8 @@ public:
     //drlep
     //jetmulti
     ////jetmultieta2d
+
+    
 
     alltriples_.clear();
     std::cout << "setting plots "<< std::endl;   
@@ -924,7 +931,7 @@ public:
 
     if(checktriggerpaths_){
       cout << "used MET triggers: " << endl;
-      for(unsigned int i=0;i<mettriggers.size();i++){
+      for(unsigned int i=0;i<out.size();i++){
 	std::cout << out.at(i) << std::endl;
       }
     }

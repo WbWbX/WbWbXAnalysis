@@ -7,6 +7,7 @@
 #include "TString.h"
 #include "TPad.h"
 #include "TPaveText.h"
+#include <vector>
 
 #ifndef histoStyle_h
 #define histoStyle_h
@@ -136,7 +137,7 @@ void applyDenStyle(ztop::histWrapper & h){
     applyDenStyle(h.getTH2D());
 }
 
-void plotRaw(vector<ztop::effTriple> trips, TString add="", TString addlabel="", TString dir = "./"){
+void plotRaw(std::vector<ztop::effTriple> trips, TString add="", TString addlabel="", TString dir = "./"){
 
   using namespace ztop;
   using namespace std;

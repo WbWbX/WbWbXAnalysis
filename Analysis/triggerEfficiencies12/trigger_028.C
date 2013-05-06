@@ -265,7 +265,7 @@ void trigger_028(){
   ta_mumuMCD.setPUFile(PURunD);
   ta_emuMCD.setPUFile(PURunD);
 
-  analyzeAll( ta_eedD,  ta_eeMCD,  ta_mumudD,  ta_mumuMCD,  ta_emudD,  ta_emuMCD,"RunD","Run D");
+  //  analyzeAll( ta_eedD,  ta_eeMCD,  ta_mumudD,  ta_mumuMCD,  ta_emudD,  ta_emuMCD,"RunD","Run D");
 
 
   double lumiA=0.890;
