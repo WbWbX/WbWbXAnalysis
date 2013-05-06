@@ -17,13 +17,13 @@ namespace ztop{
 
     void setGenId(int genid){genid_=genid;};
 
-    int genId(){return genid_;}
+    const int & genId(){return genid_;}
 
-    void setMother(size_t it_pos)   {motherits_.push_back(it_pos);} 
-    void setDaughter(size_t it_pos) {daughterits_.push_back(it_pos); }
+    void setMothers(const std::vector<ztop::NTGenParticle *> & p){motherPs_=p;}
+    void setDaughters(const std::vector<ztop::NTGenParticle *> & p){daughterPs_=p;}
 
-    void setDaughters(const std::vector<size_t> & Daughters){daughterits_=Daughters;}
-    void setMothers  (const std::vector<size_t> & Mothers)  {motherits_=Mothers;}
+    void setDaughterIts(const std::vector<int> & Daughters){daughterits_=Daughters;}
+    void setMotherIts  (const std::vector<int> & Mothers)  {motherits_=Mothers;}
 
     void setStatus(int Status){status_=Status;}
 
@@ -32,21 +32,19 @@ namespace ztop{
 
     const PolarLorentzVector & p4(){return p4_;}
     double pt(){return p4_.Pt();}
-    double E() {return p4_.E();}
-    double e() {return p4_.E();}
-    double phi(){return p4_.Phi();}
-    double eta(){return p4_.Eta();}
-    double m(){return p4_.M();}
+    double  E() {return p4_.E();}
+    double  e() {return p4_.E();}
+    double  phi(){return p4_.Phi();}
+    double  eta(){return p4_.Eta();}
+    double  m(){return p4_.M();}
     int q(){if(pdgid_<0) return -1; else if(pdgid_>0) return 1; else return 0;}
 
-    size_t daughter(size_t i=0){return daughterits_.at(i);}
-    size_t mother(size_t i=0){return motherits_.at(i);}
+    
+    std::vector<int> & daughterIts(){return daughterits_;}
+    std::vector<int> & motherIts(){return motherits_;}
 
-    std::vector<size_t> & daughters(){return daughterits_;}
-    std::vector<size_t> & mothers(){return motherits_;}
-
-    void clearDaughters(){daughterits_.clear();}
-    void clearMothers(){motherits_.clear();}
+    const std::vector<NTGenParticle *> & daughters(){return daughterPs_;}
+    const std::vector<NTGenParticle *> & mothers(){return motherPs_;}
 
     //extra
 
@@ -77,7 +75,8 @@ namespace ztop{
 
     int pdgid_, status_, genid_;
     PolarLorentzVector p4_;
-    std::vector<size_t> motherits_,daughterits_;
+    std::vector<int> motherits_,daughterits_;
+    std::vector<ztop::NTGenParticle *> daughterPs_,motherPs_;
     //std::vector<int> mothers_, daughters_;
 
     std::map<std::string, double> memberss_;
