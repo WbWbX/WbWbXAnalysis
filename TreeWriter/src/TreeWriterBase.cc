@@ -188,6 +188,9 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
      bool gotTop=false;
 
+     int genidit=0;
+
+
      for(size_t i=0;i<genParticles->size();i++){
        allgen << &genParticles->at(i);
      }
@@ -196,18 +199,19 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
      for(size_t i=0;i<allgen.size();i++){
        if(fabs(allgen.at(i)->pdgId() -6) < 0.1){ // 6
-	 nttops << makeNTGen(allgen.at(i));
+	 ztop::NTGenParticle temp=makeNTGen(allgen.at(i));
+	 temp.setGenId(genidit++);
+	 nttops << temp;
 	 tops << allgen.at(i);
 	 gotTop=true;
-	 break;
        }
-     }
-     for(size_t i=0;i<allgen.size();i++){
-       if(fabs(allgen.at(i)->pdgId() +6) < 0.1){ // -6
-	 nttops << makeNTGen(allgen.at(i));
+       else if(fabs(allgen.at(i)->pdgId() +6) < 0.1){ // -6
+	 ztop::NTGenParticle temp=makeNTGen(allgen.at(i));
+	 temp.setGenId(genidit++);
+	 nttops << temp;
 	 tops << allgen.at(i);
-	 break;
        }
+       if(tops.size() > 1) break;
      }
 
      //makes shure the right ordering is done
@@ -225,14 +229,18 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	   daughter = dynamic_cast<const reco::GenParticle*>(mother->daughter(j));
 	   if(fabs(daughter->pdgId() - 24) < 0.1){
 	     ztop::NTGenParticle temp=makeNTGen(daughter);
-	     temp.setMother(i);
+	     temp.setGenId(genidit++); 
+	     temp.addMotherIt(nttops.at(i).genId());
+	     nttops.at(i).addDaughterIt(temp.genId());
 	     ntws << temp;
 	     Ws   << daughter;
 	     gotWFromTop=true;
 	   }
 	   if(fabs(daughter->pdgId() + 24) < 0.1){
 	     ztop::NTGenParticle temp=makeNTGen(daughter);
-	     temp.setMother(i);
+	     temp.setGenId(genidit++);
+	     temp.addMotherIt(nttops.at(i).genId());
+	     nttops.at(i).addDaughterIt(temp.genId());
 	     ntws << temp;
 	     Ws   << daughter;
 	   }
@@ -242,7 +250,7 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
      //////direct W decay leps3 and nus
 
-     if(debugmode) std::cout << "filling neutrinoes and stat3 leps" << std::endl;
+     if(debugmode) std::cout << "filling neutrinoes and stat3 leps from W" << std::endl;
     
      for(size_t i=0;i<Ws.size();i++){
        mother=Ws.at(i);
@@ -251,16 +259,19 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	 daughter = dynamic_cast<const reco::GenParticle*>(mother->daughter(j));
 	 if(isAbsApprox(daughter->pdgId(), 11) || isAbsApprox(daughter->pdgId(), 13) || isAbsApprox(daughter->pdgId(), 15)){
 	   ztop::NTGenParticle temp=makeNTGen(daughter);
-	   temp.setMother(i);
+	   temp.setGenId(genidit++);
+	   temp.addMotherIt(ntws.at(i).genId());
+	   ntws.at(i).addDaughterIt(temp.genId());
 	   ntleps3 << temp;
 	   leps3 << daughter;
 	 }
 	 if(isAbsApprox(daughter->pdgId(), 12) || isAbsApprox(daughter->pdgId(), 14) || isAbsApprox(daughter->pdgId(), 16)){
 	   ztop::NTGenParticle temp=makeNTGen(daughter);
-	   temp.setMother(i);
+	   temp.setGenId(genidit++);
+	   temp.addMotherIt(ntws.at(i).genId());
+	   ntws.at(i).addDaughterIt(temp.genId());
 	   ntnus << temp;
 	   nus << daughter;
-	   
 	 }
        }
      }
@@ -271,7 +282,9 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
        for(size_t i=0;i<allgen.size();i++){
 	 if(fabs(allgen.at(i)->pdgId() -23) < 0.1){ // 23
-	   ntzs << makeNTGen(allgen.at(i));
+	   ztop::NTGenParticle temp=makeNTGen(allgen.at(i));
+	   temp.setGenId(genidit++);
+	   ntzs << temp;
 	   Zs << allgen.at(i);
 	   break;
 	 }
@@ -285,14 +298,24 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	   daughter = dynamic_cast<const reco::GenParticle*>(mother->daughter(j));
 	   if(isAbsApprox(daughter->pdgId(), 11) || isAbsApprox(daughter->pdgId(), 13) || isAbsApprox(daughter->pdgId(), 15)){
 	     ztop::NTGenParticle temp=makeNTGen(daughter);
-	     temp.setMother(i);
+	     temp.setGenId(genidit++);
+	     temp.addMotherIt(ntzs.at(i).genId());
+	     ntzs.at(i).addDaughterIt(temp.genId());
 	     ntleps3 << temp;
 	     leps3 << daughter;
 	   }
+	   if(isAbsApprox(daughter->pdgId(), 12) || isAbsApprox(daughter->pdgId(), 14) || isAbsApprox(daughter->pdgId(), 16)){
+	     ztop::NTGenParticle temp=makeNTGen(daughter);
+	     temp.setGenId(genidit++);
+	     temp.addMotherIt(ntws.at(i).genId());
+	     ntzs.at(i).addDaughterIt(temp.genId());
+	     ntnus << temp;
+	     nus << daughter;
+	   }
 	 }
        }
-
      }
+     
      /////further lep decay to stat 1 leps; the above can be stat 1, too
      if(debugmode) std::cout << "Filling stat 1 leptons" << std::endl;
 
@@ -307,8 +330,9 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	 if(isAbsApprox(daughter->pdgId(),11) || isAbsApprox(daughter->pdgId(),13) || isAbsApprox(daughter->pdgId(),15)){
 	   if(isAbsApprox(daughter->status(),1)){
 	     ztop::NTGenParticle temp=makeNTGen(daughter);
-	     temp.setMother(j);
-	     temp.setGenId(newid);
+	     temp.setGenId(genidit++);
+	     temp.addMotherIt(ntleps3.at(j).genId());
+	     ntleps3.at(j).addDaughterIt(temp.genId());
 	     leps1 << daughter;
 	     smallIdMap[daughter]=newid;
 	     ntleps1 << temp;
@@ -325,13 +349,14 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      }
      //all nus (for met or other stuff)
 
-     if(debugmode) std::cout << "jet loopfilling all neutrinos" << std::endl;
+     if(debugmode) std::cout << "filling all neutrinos" << std::endl;
 
      for(size_t i=0;i<allgen.size();i++){ 
        if(isAbsApprox(allgen.at(i)->pdgId(), 12) 
 	  || isAbsApprox(allgen.at(i)->pdgId(), 14) 
 	  || isAbsApprox(allgen.at(i)->pdgId(), 16)){
 	 ztop::NTGenParticle temp=makeNTGen(allgen.at(i));
+	 // temp.setGenId(genidit++);
 	 ntallnus << temp;
 	 allnus << allgen.at(i);
        }
@@ -392,7 +417,9 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	 daughter = dynamic_cast<const reco::GenParticle*>(mother->daughter(j));
 	 if(isAbsApprox(daughter->pdgId(),5)){
 	   ztop::NTGenParticle temp=makeNTGen(daughter);
-	   temp.setMother(i);
+	   temp.setGenId(genidit++);
+	   temp.addMotherIt(nttops.at(i).genId());
+	   nttops.at(i).addDaughterIt(temp.genId());
 	   ntbs << temp;
 	   bs << daughter;
 	 } 
@@ -403,170 +430,77 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
      if(debugmode) std::cout << "Filling b-hadrons" << std::endl;
 
-
-     for(size_t i=0;i<genBHadPlusMothers->size();i++){
-       //  std::vector<reco::GenParticle> * bhpm =&genBHadPlusMothers->at(i);
-
-
-
-     }
-     /* just copied
-
-     edm::Handle<std::vector<std::vector<int> > > genBHadPlusMothersIndices;
-
-     edm::Handle<std::vector<int> > genBHadFlavour;
-
-     edm::Handle<std::vector<int> > genBHadJetIndex;
-
-     edm::Handle<std::vector<reco::GenParticle> > genBHadPlusMothers;
-
-     edm::Handle<std::vector<int> > genBHadIndex;
-
-    for(size_t iBHadron=0; iBHadron<genBHadFlavour_->size(); ++iBHadron){
-        const int flavour = genBHadFlavour_->at(iBHadron);
-        if(abs(flavour) != abs(pdgId)) continue;     // Skipping hadrons with the wrong flavour
-        // Assigning jet index of corresponding hadron. Set to -2 if >1 hadrons found for the same flavour
-        if(flavour>0) genBJetIndex = (genBJetIndex==-1) ? genBHadJetIndex_->at(iBHadron) : -2;
-        else if(flavour<0) genAntiBJetIndex = (genAntiBJetIndex==-1) ? genBHadJetIndex_->at(iBHadron) : -2;
-    }
-
-
-
-
-      */
-     /*
-     for(size_t i=0;i<BHadrons->size();i++){
-       ztop::NTGenParticle temp=makeNTGen(&(BHadrons->at(i)));
-       if(BHadronFromTopB->at(i)){
-	 size_t idx=0;
-	 for(size_t j=0;j<bs.size();j++){
-	   if(bs.at(j)->pdgId()>0){
-	     idx=j;
+     vector<int> tempBDaugh;
+     for(size_t i=0;i<genBHadFlavour->size();i++){
+       const reco::GenParticle * B = &genBHadPlusMothers->at(i);
+       int motherFlavour     =  genBHadFlavour->at(i);
+       int assoJetIdx        = genBHadJetIndex->at(i);
+       
+       ztop::NTGenParticle tmpB=makeNTGen(B);
+       tmpB.setGenId(genidit++);
+       tempBDaugh.push_back(assoJetIdx);
+       //  tmpB.addDaughterIt(assoJetIdx);
+       //  size_t mother=999;
+       if(isAbsApprox(motherFlavour,6)){ //from top 
+	 //   loop only for security reasons. 
+	 for(size_t h=0;h<ntbs.size();h++){
+	   ztop::NTGenParticle * b=& ntbs.at(h);
+	   if(b->pdgId() * motherFlavour > 0){ // top-b match or antitop-antib
+	     tmpB.addMotherIt(b->genId());
+	     b->addDaughterIt(tmpB.genId());
 	     break;
 	   }
 	 }
-	 temp.setMother(idx);
-	 temp.setMember(0,1);// is from top may be the only interesting thing
        }
-
-       ntbhadrons << temp;
-       Bhadrons << &(BHadrons->at(i));
+       ntbhadrons << tmpB;
      }
 
-     for(size_t i=0;i< AntiBHadrons->size();i++){
-       ztop::NTGenParticle temp=makeNTGen(&( AntiBHadrons->at(i)));
-       if( AntiBHadronFromTopB->at(i)){
-	 size_t idx=0;
-	 for(size_t j=0;j<bs.size();j++){
-	   if(bs.at(j)->pdgId()<0){
-	     idx=j;
-	     break;
-	   }
-	 }
-	 temp.setMother(idx);
-	 temp.setMember(0,1); // is from top may be the only interesting thing
-       }
-       ntbhadrons << temp;
-       Bhadrons << &( AntiBHadrons->at(i));
-     }
+     if(debugmode) std::cout << "Filling genjets" << std::endl;
 
-     */
-
-     //if(BHadronVsJet->at(iJet * bHadronObject.size() + iBhadron) ==1) hadron was in jet
-
-
-     //////////genjet Id set by index!!!
-
-     if(debugmode) std::cout << "jet loopFilling gen jets plus b asso" << std::endl;
-     /*
      for(size_t i=0;i<genJets->size();i++){
-       ztop::NTGenJet temp=makeNTGenJet(&genJets->at(i));
-       temp.setGenId(i);
+       const reco::GenJet * jet=&genJets->at(i);
+       ztop::NTGenJet tempjet=makeNTGenJet(jet);
+       tempjet.setGenId(genidit++);
 
-       for(size_t j=0;j< BHadrons->size();j++){
-	 if(BHadronVsJet->at(i*BHadrons->size() + j) >0 ){
-	   temp.setMother(j);
-	   if(BHadronFromTopB->at(j))
-	     temp.setMember(0,1);
+       for(size_t h=0;h<tempBDaugh.size();h++){
+	 ztop::NTGenParticle * B= & ntbhadrons.at(h);
+	 if((size_t)tempBDaugh.at(h) == i){
+	   tempjet.addMotherIt(B->genId());
+	   B->addDaughterIt(tempjet.genId());
+
+	   if(debugmode) std::cout << "associated Hadron (id): " << B->genId() << " to jet (id): " << tempjet.genId() <<  std::endl;
+	   //no break there might be some hadrons merged in one jet
 	 }
        }
-
-
-       for(size_t j=0;j< AntiBHadrons->size();j++){
-	 if(AntiBHadronVsJet->at(i*AntiBHadrons->size() + j) >0 ){
-	   temp.setMother(j+BHadrons->size());
-	   if(AntiBHadronFromTopB->at(j))
-	     temp.setMember(0,1);
-	 }
-       }
-       ntgenjets << temp;
+       ntgenjets << tempjet;
      }
-     */
-     //////////remaining problem: matching of gen and reco jets. pat stuff may not work here.... but can be done on analysis level
-
-
 
    }//isMC and includegen end
 
-
+   if(debugmode){
+     std::cout <<"One full decay path for bs: " << std::endl;
+     for(size_t f=0;f<nttops.size();f++){
+       std::cout << "top: "  << nttops.at(f).pdgId() << "(" << nttops.at(f).genId() << ")";
+       for(size_t i=0;i<nttops.at(f).daughterIts().size();i++){
+	 for(size_t j=0;j<ntbs.size();j++){
+	   if(ntbs.at(j).genId() == nttops.at(f).daughterIts().at(i)){
+	     std::cout << " -> b-quark: " << ntbs.at(j).pdgId() << "(" << ntbs.at(j).genId() << ")";
+	     for(size_t k=0;k<ntbs.at(j).daughterIts().size();k++){
+	       for(size_t l=0;l<ntbhadrons.size();l++){
+		 if(ntbs.at(j).daughterIts().at(k) == ntbhadrons.at(l).genId()){
+		   std::cout << " -> B-hadron: " << ntbhadrons.at(l).pdgId() << "(" << ntbhadrons.at(l).genId() << ")" << std::endl;
+		 }
+	       }
+	     }
+	   }
+	 }
+       }  
+     }
+   }
    if(debugmode) std::cout <<"includegen left" << std::endl;
 
- // a lot has to be done here!!!
-	 // genJet b matching (get best! dr match cone 0.5
-	 // associate b as mother of jet
-	 // association via id int. e.g. e.g. some class variable that just counts futher in each fill
-	 // first fill all the parton stuff, then the matched jets. 
-	 // direct asso done on analysis level by checking. If has to be checked several times, make temp asso map
-	 // also store neutrinos. just for fun. 12 14 16
-	 // ids...: 
-	 /*
-	   one vector soulution: once filled properly, easy asso, fast, additional analysis level tools to get collections.. 
-	   seperate vectors: complicated or lot of hardcoded asso, easy to handle on analysis level, but slower
+   //////////starting RECO part
 
-	   how to make a nice asso? static member asso map?
-
-	   first give "random" ids. at end of each event loop, make asso via vector links and fill one vector..
-	   remaining prob: jet-b asso. reco-gen asso.. ok .. just associate in a "hard" way: 
-	   b->always jet, genlep->stat3->recolep
-	   genneutr->nothing
-
-	   do selection as you like. step by step or in an enormous entangled loop
-
-	   protoype loop:
-	   int id
-	   for each gen(i) in recogenpart:
-	   do some selection
-	   ntgen <- gen(i)
-	   ntgen.setGenId(id)
-	   id++ (at each filling step, also for daughters) !!! the important part.
-
-
-	   at the end:
-	   vector<ntgen> new=ntgenvec
-	   for each ntgen(i) in ntgenvec
-	   for each j in ntgenvec
-	   moth=ntgenvec(i).mother
-	   daught=ntgenvec.daught
-	   search for corresponding entries j in ntgenvec
-	   new.setMother/Duaghter(j)
-
-	   use new 
-	   do the same for ntgenjets<-recojets
-	   do the same for genleptsstat3<-recoleps
-
-	   the genStuff has to be filled BEFORE the reco stuff is done. To be able to do the asso (ids already created)
-	   create temp map in tree writer of map<int id, reco:genParticle * asso genpart> for all gen<->reco asso
-
-
-	   functions: reco: 
-	   get:	   genMatch
-	   set:    setGenMatch
-
-	   gen:
-	   get:    genId
-	   set:    setGenId
-
-	  */
 
 
 
@@ -1271,6 +1205,7 @@ ztop::NTGenParticle TreeWriterBase::makeNTGen(const reco::GenParticle * p, const
   out.setP4(p->p4());
   out.setPdgId(p->pdgId());
   out.setStatus(p->status());
+  out.setQ(p->charge());
   out.setGenId(idmap.at(p));
   return out;
 }
