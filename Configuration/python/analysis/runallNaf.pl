@@ -75,7 +75,7 @@ my $fullCMSSWcfpath=File::Spec->rel2abs($arg{c});
 my $cfgfilename = ( split m{/}, $arg{c} )[-1];
 my $nafJobSplitter="$ENV{CMSSW_BASE}/src/TopAnalysis/TopUtils/scripts/nafJobSplitter2.pl";
 
-my $startstring="#!/bin/sh\nif [[ \"\${CMSSW_BASE}\" != $ENV{CMSSW_BASE} ]] ;\nthen\necho Wrong CMSSW env set. should be $ENV{CMSSW_BASE}\nexit\nfi\nexport PYTHONPATH=/scratch/hh/dust/naf/cms/user/\$USER/.nafJobSplitter/python:\$PYTHONPATH\n";
+my $startstring="#!/bin/sh\nif [[ \"\${CMSSW_BASE}\" != $ENV{CMSSW_BASE} ]] ;\nthen\ncd $ENV{CMSSW_BASE}\neval \`scramv1 runtime -sh\`\necho \"using CMSSW located here: \${CMSSW_BASE}\"\ncd-\nfi\nexport PYTHONPATH=/scratch/hh/dust/naf/cms/user/\$USER/.nafJobSplitter/python:\$PYTHONPATH\n";
 
 push @run, $startstring;
 push @check, $startstring;
