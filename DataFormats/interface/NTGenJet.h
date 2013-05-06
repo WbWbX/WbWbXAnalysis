@@ -17,6 +17,7 @@ namespace ztop{
  
     void setMotherIts(const std::vector<int> & its){motherits_=its;}
     void setMothers(const std::vector<ztop::NTGenParticle *> & p){motherPs_=p;}
+    void addMotherIt(int it){motherits_.push_back(it);}
 
     void setGenId(int genid){genid_=genid;}
 

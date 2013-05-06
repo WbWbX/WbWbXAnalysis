@@ -25,6 +25,9 @@ namespace ztop{
     void setDaughterIts(const std::vector<int> & Daughters){daughterits_=Daughters;}
     void setMotherIts  (const std::vector<int> & Mothers)  {motherits_=Mothers;}
 
+    void addMotherIt(int it){motherits_.push_back(it);}
+    void addDaughterIt(int it){daughterits_.push_back(it);}
+
     void setStatus(int Status){status_=Status;}
 
     int pdgId(){return pdgid_;}
