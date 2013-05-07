@@ -73,6 +73,9 @@ namespace ztop{
       }
     }
   }
+  void container1DStackVector::addMCErrorStackVector(ztop::container1DStackVector stackvec, bool ignoreMCStat){
+    addMCErrorStackVector(stackvec.getSyst(), stackvec,ignoreMCStat);
+  }
   void container1DStackVector::addGlobalRelMCError(TString sysname,double error){
     for(std::vector<container1DStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
       stack->addGlobalRelMCError(sysname,error);

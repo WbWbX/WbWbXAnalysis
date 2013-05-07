@@ -22,6 +22,9 @@ namespace ztop{
     ~container1DStackVector();
     void setName(TString Name){name_=Name;}
     TString getName(){return name_;}
+    void setSyst(TString sys){isSyst_=sys;}
+    TString getSyst(){return isSyst_;}
+
     void listStacks();
 
     void add(ztop::container1D &, TString, int, double);
@@ -32,6 +35,7 @@ namespace ztop{
     void removeContribution(TString);
 
     void addMCErrorStackVector(TString,ztop::container1DStackVector, bool ignoreMCStat=true);
+    void addMCErrorStackVector(ztop::container1DStackVector, bool ignoreMCStat=true);
     void addGlobalRelMCError(TString,double);
     void addRelSystematicsFrom(ztop::container1DStackVector);
     void removeError(TString);
@@ -53,6 +57,7 @@ namespace ztop{
 
   private:
     TString name_;
+    TString isSyst_;
     std::vector<ztop::container1DStack> stacks_;
 
 
