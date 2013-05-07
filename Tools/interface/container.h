@@ -26,10 +26,8 @@ namespace ztop{
     void setNames(TString name, TString xaxis, TString yaxis){name_=name;xname_=xaxis;yname_=yaxis;}
     void setShowWarnings(bool show){showwarnings_=show;}
  
-    void fill(double);            //! fills
-    void fillDyn(double);         //! not implemented yet
-    void fill(double, double);    //! fills with weight
-    void fillDyn(double, double); //! not implemented yet
+    void fill(double val, double weight=1);    //! fills with weight
+    void fillDyn(double what, double weight=1); //! not implemented yet
 
     void setBins(std::vector<float>);
     void setBinWidth(float);            //! sets bin width; enables dynamic filling (not implemented yet)
@@ -126,6 +124,8 @@ namespace ztop{
     double getDominantVariationUp(TString,int);
     double getDominantVariationDown(TString,int);
 
+    double sq(double); //helper
+
   };
   
 } //namespace
@@ -136,6 +136,51 @@ ztop::container1D operator * (double multiplier, const ztop::container1D & cont)
 ztop::container1D operator * (float multiplier, const ztop::container1D & cont);  //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
 ztop::container1D operator * (int multiplier, const ztop::container1D & cont);    //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
 
+inline double ztop::container1D::sq(double a){
+  return a*a;
+}
+
+inline int ztop::container1D::getBinNo(double var){
+  for(unsigned int i=1; i<bins_.size(); i++){
+    if(var > bins_[i]){
+      continue;
+    }
+    else{
+      return i-1;
+    }
+  }
+  //create underflow bin if empty vect.
+  bins_.push_back(0);
+  return 0;  
+}
+
+
+inline void ztop::container1D::fill(double what, double weight){
+  int bin=getBinNo(what);
+  if(mergeufof_){
+    if(bin==0 && bins_.size() > 1){
+      bin=1;
+      wasunderflow_=true;
+    }
+    else if(bin==(int)bins_.size()-1){
+      bin--;
+      wasoverflow_=true;
+    }
+  }
+  content_[bin] += weight;
+  entries_[bin]++;
+  staterrup_[bin]= sqrt(sq(staterrup_[bin]) + sq(weight));
+  staterrdown_[bin]=sqrt(sq(staterrdown_[bin]) + sq(weight));
+}
+inline void ztop::container1D::fillDyn(double what, double weight){
+  if(canfilldyn_){
+    what++;
+    weight++; //just avoid warnings function not implemented yet. creates new bins based on binwidth_ if needed
+  }
+  else if(showwarnings_){
+    std::cout << "dynamic filling not available with fixed bins!" << std::endl;
+  }
+}
 
 
 #endif

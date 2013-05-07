@@ -87,38 +87,8 @@ namespace ztop{
   }
 
 
-  void container1D::fill(double what){
-    fill(what,1);
-  }
-  void container1D::fillDyn(double what){
-    fillDyn(what,1);
-  }
-  void container1D::fill(double what, double weight){
-    int bin=getBinNo(what);
-    if(mergeufof_){
-      if(bin==0 && bins_.size() > 1){
-	bin=1;
-	wasunderflow_=true;
-      }
-      else if(bin==(int)bins_.size()-1){
-	bin--;
-	wasoverflow_=true;
-      }
-    }
-    content_[bin] += weight;
-    entries_[bin]++;
-    staterrup_[bin]= sqrt(pow(staterrup_[bin],2) + pow(weight,2));
-    staterrdown_[bin]=sqrt(pow(staterrdown_[bin],2) + pow(weight,2));
-  }
-  void container1D::fillDyn(double what, double weight){
-    if(canfilldyn_){
-      what++;
-      weight++; //just avoid warnings function not implemented yet. creates new bins based on binwidth_ if needed
-    }
-    else if(showwarnings_){
-      std::cout << "dynamic filling not available with fixed bins!" << std::endl;
-    }
-  }
+  
+  
   void container1D::setBinErrorUp(int bin, double err){
     if((unsigned int)bin<bins_.size()){
       staterrup_[bin] = err;
@@ -155,26 +125,7 @@ namespace ztop{
     }
   }
 
-  int container1D::getBinNo(double var){
-    int binnumber=bins_.size()-1;
-    if(bins_.size()==0){ //create underflow bin if empty vect.
-      bins_.push_back(0);
-      binnumber=0;
-    }
-    else{
-      for(unsigned int i=1; i<bins_.size(); i++){
-	if(var > bins_[i]){
-	  continue;
-	}
-	else{
-	  binnumber=i-1;
-	  break;
-	}
-      }
-    }
-    return binnumber;
-  }
-
+  
   int container1D::getNBins(){
     return (int)bins_.size()-2;
   }
@@ -216,7 +167,7 @@ namespace ztop{
   double container1D::getBinErrorUp(int bin, TString limittosys){
     double fullerr2=0;
     if((unsigned int)bin<bins_.size()){
-      fullerr2=pow(staterrup_[bin],2); //stat
+      fullerr2=sq(staterrup_[bin]); //stat
       if(limittosys==""){
 	// make vector of all sys stripped
 	std::vector<TString> sources;
@@ -224,12 +175,12 @@ namespace ztop{
 	  TString source=stripVariation(syserrors_[i].first);
 	  if(-1==isIn(source,sources)){
 	    sources.push_back(source);
-	    fullerr2 += pow(getDominantVariationUp(source,bin), 2);
+	    fullerr2 += sq(getDominantVariationUp(source,bin));
 	  }
 	}
       }
       else{
-	fullerr2 += pow(getDominantVariationUp(limittosys,bin), 2);
+	fullerr2 += sq(getDominantVariationUp(limittosys,bin));
       }
       return sqrt(fullerr2);
     }
@@ -241,7 +192,7 @@ namespace ztop{
   double container1D::getBinErrorDown(int bin,TString limittosys){
     double fullerr2=0;
     if((unsigned int)bin<bins_.size()){
-      fullerr2=pow(staterrdown_[bin],2); //stat
+      fullerr2=sq(staterrdown_[bin]); //stat
       if(limittosys==""){
 	// make vector of all sys stripped
 	std::vector<TString> sources;
@@ -249,12 +200,12 @@ namespace ztop{
 	  TString source=stripVariation(syserrors_[i].first);
 	  if(-1==isIn(source,sources)){
 	    sources.push_back(source);
-	    fullerr2 += pow(getDominantVariationDown(source,bin), 2);
+	    fullerr2 += sq(getDominantVariationDown(source,bin));
 	  }
 	}
       }
       else{
-	fullerr2 += pow(getDominantVariationUp(limittosys,bin), 2);
+	fullerr2 += sq(getDominantVariationUp(limittosys,bin));
       }
       return sqrt(fullerr2);
     }
@@ -451,8 +402,8 @@ namespace ztop{
       for(unsigned int i=0; i<content_.size(); i++){
 	out.content_[i] += content_[i];
 	out.entries_[i] += entries_[i];
-	out.staterrup_[i] = sqrt(pow(second.staterrup_[i],2) + pow(staterrup_[i],2));
-	out.staterrdown_[i] = sqrt(pow(second.staterrdown_[i],2) + pow(staterrdown_[i],2));
+	out.staterrup_[i] = sqrt(sq(second.staterrup_[i]) + sq(staterrup_[i]));
+	out.staterrdown_[i] = sqrt(sq(second.staterrdown_[i]) + sq(staterrdown_[i]));
       }
       //systematics
       for(unsigned int firstsys=0;firstsys<syserrors_.size();firstsys++){
@@ -550,8 +501,8 @@ namespace ztop{
 	    errdown=errup;
 	  }
 	  else{ 
-	    errup=sqrt(pow(content_[i] / (denominator.content_[i] - denominator.staterrdown_[i]) - content,2) + pow((content_[i]+staterrup_[i]) / denominator.content_[i] -content,2) );
-	    errdown=sqrt(pow(content_[i] / (denominator.content_[i] + denominator.staterrup_[i]) - content,2) + pow((content_[i]+staterrdown_[i]) / denominator.content_[i] -content,2) );
+	    errup=sqrt(sq(content_[i] / (denominator.content_[i] - denominator.staterrdown_[i]) - content) + sq((content_[i]+staterrup_[i]) / denominator.content_[i] -content) );
+	    errdown=sqrt(sq(content_[i] / (denominator.content_[i] + denominator.staterrup_[i]) - content) + sq((content_[i]+staterrdown_[i]) / denominator.content_[i] -content) );
 	  }
 	  out.content_[i]=content;
 	  out.staterrup_[i]=errup;
@@ -611,8 +562,8 @@ namespace ztop{
       //statistics and content
       for(unsigned int i=0; i<content_.size(); i++){
 	out.content_[i] *= content_[i];
-	out.staterrup_[i] = sqrt(pow(staterrup_[i]*multiplier.content_[i],2) + pow(content_[i]*multiplier.staterrup_[i],2));
-	out.staterrdown_[i] = sqrt(pow(staterrdown_[i]*multiplier.content_[i],2) + pow(content_[i]*multiplier.staterrdown_[i],2));
+	out.staterrup_[i] = sqrt(sq(staterrup_[i]*multiplier.content_[i]) + sq(content_[i]*multiplier.staterrup_[i]));
+	out.staterrdown_[i] = sqrt(sq(staterrdown_[i]*multiplier.content_[i]) + sq(content_[i]*multiplier.staterrdown_[i]));
 	out.entries_[i]+=entries_[i];
       }
     }
@@ -670,8 +621,8 @@ namespace ztop{
 			<< name_ <<"\" exceeds deviation(*weight) in bin " 
 			<< xname_ << ": "<< bins_[i] << " - " << bins_[i+1] << std::endl;
 	    }
-	    if(deviation < 0) deviation = - sqrt(pow(deviation,2) + pow(weight * deviatingContainer.getBinErrorDown(i),2));
-	    else deviation = sqrt(pow(deviation,2) + pow(weight * deviatingContainer.getBinErrorUp(i),2));
+	    if(deviation < 0) deviation = - sqrt(sq(deviation) + sq(weight * deviatingContainer.getBinErrorDown(i)));
+	    else deviation = sqrt(sq(deviation) + sq(weight * deviatingContainer.getBinErrorUp(i)));
 	  }
 	  devvec.push_back(deviation);
 	}
