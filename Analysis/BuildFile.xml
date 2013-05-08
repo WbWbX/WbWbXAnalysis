@@ -4,6 +4,7 @@
 <use   name="TopAnalysis/ZTopUtils"/>
 <use   name="root"/>
 <use   name="rootrflx"/>
+<use   name="FWCore/FWLite"/>
 <export>
   <lib   name="1"/>
 </export>
