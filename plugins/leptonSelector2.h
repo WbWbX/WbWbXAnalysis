@@ -18,7 +18,7 @@
 namespace ztop{
   
 
-  std::pair<std::vector<ztop::NTElectron* > , std::vector<ztop::NTMuon* > > geztoppoQHighestPtPair(const std::vector<ztop::NTElectron*> &elecs, const std::vector<ztop::NTMuon*> & muons){
+  std::pair<std::vector<ztop::NTElectron* > , std::vector<ztop::NTMuon* > > getoppoQHighestPtPair(const std::vector<ztop::NTElectron*> &elecs, const std::vector<ztop::NTMuon*> & muons){
     double sumpt=0;
     //double emupt=0;
     std::vector<ztop::NTElectron*> outelecs;
