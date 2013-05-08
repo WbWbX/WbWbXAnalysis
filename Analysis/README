@@ -1,0 +1,20 @@
+
+in src/MainAnalyzer... etc define all stuff
+
+compile with scram
+
+in script:
+
+compile analyse.C for submission
+
+
+prepare b-tag stuff only manually
+
+if returns success:
+
+parse systematic string options to analyse.C.exe and submit to batch
+
+
+check every 30sec if all files exist
+
+merge if all exist and run function to addErrorContainer...
