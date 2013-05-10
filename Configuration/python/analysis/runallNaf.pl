@@ -103,15 +103,18 @@ while(my $line = <$IN>) {
     next unless $outputFile;
     my $allOptions;
     my $json = "";
+
     if($jsonFile){
 	$jsonFile =~ s/\s+$//;
 	$json = File::Spec->rel2abs($jsonFile);
 	$allOptions="\"outputFile=$outputFile json=$json $options\"";
     }
-    else{
+    elsif($options){
 	$allOptions="\"outputFile=$outputFile $options\"";
     }
-    
+    else{
+	$allOptions="\"outputFile=$outputFile\"";
+    }
 
 #run script, killall script should be sufficient
     
