@@ -1,44 +1,39 @@
+#include "../interface/MainAnalyzer.h"
+#include "FWCore/FWLite/interface/AutoLibraryLoader.h"
 
-bool MainAnalyzer::triggersContain(TString triggername, ztop::NTEvent * pevent){
-  bool out = false;
-  for(unsigned int i=0;i<pevent->firedTriggers().size();i++){
-    if(((TString)pevent->firedTriggers()[i]).Contains(triggername)){
-      out=true;
-      break;
-    }
-  }
-  return out;
-}
 
-void MainAnalyzer::start(TString ident){
-
-  dycontributions.clear();
-  dycontributions << "Z#rightarrowll" << "DY#rightarrowll";
+void MainAnalyzer::start(){
 
   using namespace std;
-  // if(analysisplots_) 
-    clear();
-    //else cout << "warning analysisplots_ is null" << endl;
-  analysisplots_.setName(name_+"_"+additionalinfo_);
-  std::cout << "Starting analysis for " << name_ << std::endl;
+
+  AutoLibraryLoader::enable();
+  
+ 
+  clear();
+
+  TString name=channel_+"_"+energy_+"_"+syst_;
+
+  if(channel_=="" || energy_=="" || syst_ == ""){
+    std::cout << "MainAnalyzer::start Analyzer not properly named - check!" << std::endl;
+    return;
+  }
+
+  analysisplots_.setName(name);
+  analysisplots_.setSyst(getSyst());
+
+  std::cout << "Starting analysis for " << name << std::endl;
   ifstream inputfiles (filelist_.Data());
-  string filename, identifier;
+  string filename;
   string legentry;
   int color;
   double norm;
-  string oldfilename="";
+  string oldline="";
   if(inputfiles.is_open()){
     while(inputfiles.good()){
-      inputfiles >> identifier;
-      TString temp=identifier;
-      if(temp != ident){
-	getline(inputfiles,filename); //just ignore complete line
-	continue;
-      }
       inputfiles >> filename; 
       inputfiles >> legentry >> color >> norm;
-      if(oldfilename != filename) analyze(datasetdirectory_+(TString) filename, (TString)legentry, color, norm);
-      oldfilename=filename;
+      if(oldline != filename) analyze((TString) filename, (TString)legentry, color, norm);
+      oldline=filename;
     }
   }
   else{
@@ -51,10 +46,13 @@ void MainAnalyzer::start(TString ident){
 
 
 void MainAnalyzer::copyAll(const MainAnalyzer & analyzer){
-  name_=analyzer.name_;
-  lumi_=analyzer.lumi_;
-  additionalinfo_=analyzer.additionalinfo_;
+  
+  channel_=analyzer.channel_;
+  syst_=analyzer.syst_;
+  energy_=analyzer.energy_;
   dataname_=analyzer.dataname_;
+
+  lumi_=analyzer.lumi_;
   datasetdirectory_=analyzer.datasetdirectory_;
   puweighter_= analyzer.puweighter_;
   filelist_=analyzer.filelist_;
@@ -288,25 +286,25 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
   /////some boolians //channels
   bool b_mumu=false;bool b_ee=false;bool b_emu=false;;
-  if(isInInfo("mumu")){
+  if(channel_.Contains("mumu")){
     b_mumu=true;
     cout << "\nrunning in mumu mode" <<endl;
   }
-  else if (isInInfo("ee")){
+  else if (channel_.Contains("ee")){
     b_ee=true;
     cout << "\nrunning in ee mode" <<endl;
   }
-  else if (isInInfo("emu")){
+  else if (channel_.Contains("emu")){
     b_emu=true;
     cout << "\nrunning in emu mode" <<endl;
   }
   bool is7TeV=false;
-  if(name_.Contains("7TeV") ||  isInInfo("7TeV")){
+  if(energy_.Contains("7TeV")){
     is7TeV=true;
     cout << "running with 2011 data/MC!" <<endl;
   }
 
-  TFile *f=TFile::Open(inputfile);
+  TFile *f=TFile::Open(datasetdirectory_+inputfile);
   double genentries=0;
   if(isMC){
 
@@ -342,12 +340,14 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   // getBTagSF()->prepareEff(inputfile , norm );
   getBTagSF()->setSampleName(toString(inputfile));
 
-  cout << "running on: " << inputfile << "    legend: " << legendname << "\nxsec: " << oldnorm << ", genEvents: " << genentries <<endl;
+  cout << "running on: " << datasetdirectory_ << inputfile << "    legend: " << legendname << "\nxsec: " << oldnorm << ", genEvents: " << genentries <<endl;
   // get main analysis tree
 
   /////////prepare collections
 
-  TTree * t = (TTree*) f->Get("PFTree/pfTree");
+  TTree * t = (TTree*) f->Get("PFTree/PFTree");
+
+  cout << "opened tree" << endl;
 
   vector<NTMuon> * pMuons = 0;
   t->SetBranchAddress("NTMuons",&pMuons); 
@@ -369,7 +369,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   Long64_t nEntries=t->GetEntries();
   if(norm==0) nEntries=0; //skip for norm0
 
-  if(testmode) nEntries=10;
+  //if(testmode) nEntries=10;
 
   for(Long64_t entry=0;entry<nEntries;entry++){
     if(showstatusbar_) displayStatusBar(entry,nEntries);
@@ -392,7 +392,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       if(!(pMuons->at(i).isGlobal() || pMuons->at(i).isTracker()) ) continue;
       idmuons <<  &(pMuons->at(i));
 
-      if(pMuons->at(i).isoVal04() > 0.2) continue;
+      if(pMuons->at(i).isoVal() > 0.2) continue;
       isomuons <<  &(pMuons->at(i));
 
     }
@@ -405,7 +405,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       kinelectrons  << &(pElectrons->at(i));
 
       ///select id electrons
-      if(fabs(pElectrons->at(i).dbs()) >0.04 ) continue;
+      if(fabs(pElectrons->at(i).d0V()) >0.04 ) continue;
       if(!(pElectrons->at(i).isNotConv()) ) continue;
       if(pElectrons->at(i).mvaId() < 0.5) continue;
       if(pElectrons->at(i).mHits() > 0) continue;
@@ -413,7 +413,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       idelectrons <<  &(pElectrons->at(i));
 
       //select iso electrons
-      if(pElectrons->at(i).isoVal03()>0.15) continue;
+      if(pElectrons->at(i).isoVal()>0.15) continue;
       isoelectrons <<  &(pElectrons->at(i));
     }
 
@@ -425,60 +425,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     if(!isMC) puweight=1;
     else puweight = getPUReweighter()->getPUweight(pEvent->truePU());
 
-    bool trigger=true;
-    if(trigger){
-      /////////TRIGGER CUT and kin leptons STEP 0/////////////////////////////
-      if(b_ee){
-	if(kinelectrons.size()< 2) continue; //has to be 17??!!
-	if(is7TeV){
-	  if(!(triggersContain("Ele17_SW_TightCaloEleId_Ele8_HE_L1R_v", pEvent) || triggersContain("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v", pEvent) || triggersContain("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v", pEvent))) continue;
-	  if(isMC) puweight= puweight * 0.992; //ONLY trigger #TRAP#
-	}
-	else{                           
-	  if(isMC  && !triggersContain("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v" , pEvent) ) continue;
-	  if(!isMC && !triggersContain("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v" , pEvent) ) continue;
-
-	  if(isMC) puweight= puweight * 0.938; //full lep+id+trig SF from AN 12 389 ###TRAP##
-
-	}
-
-      }
-      if(b_mumu){
-	if(kinmuons.size() < 2) continue;
-	//trg wildcards
-	if(is7TeV){
-	  if(isMC && !triggersContain("HLT_DoubleMu7", pEvent)) continue;
-
-	  if(!isMC){
-	    if(pEvent->runNo() < 163869){
-	      if(!triggersContain("HLT_DoubleMu7", pEvent)) continue;
-	    }
-	    else{
-	      if(!triggersContain("HLT_Mu13_Mu8_v", pEvent)) continue;
-	    }
-	  }
-	  else{
-	    puweight= puweight * 0.946; //ONLY trigger!
-	  }
-
-	}
-	else{
-	  if(isMC &&  !(triggersContain("HLT_Mu17_Mu8_v",pEvent)  || triggersContain("HLT_Mu17_TkMu8_v",pEvent))) continue;
-	  if(!isMC && !(triggersContain("HLT_Mu17_Mu8_v",pEvent)  || triggersContain("HLT_Mu17_TkMu8_v",pEvent))) continue;
-
-	  if(isMC) puweight= puweight * 0.962; //full lep+id+trig SF from AN 12 389 ###TRAP###
-
-	}
-
-      }
-      if(b_emu){
-	if(kinelectrons.size() + kinmuons.size() < 2) continue;
-	//trg
-
-	if(!isMC) puweight=1;
-
-      }
-    }
+    ///triggers here - reimplement
+    
     /////// make collections
 
     for(size_t i=0;i<kinelectrons.size();i++){
@@ -486,7 +434,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       //fill plots for kinelecs
       eleceta0.fill(kinelectrons.at(i)->eta(), puweight);
       elecpt0.fill(kinelectrons.at(i)->pt(),puweight);
-      eleciso0.fill(kinelectrons.at(i)->isoVal03(),puweight);
+      eleciso0.fill(kinelectrons.at(i)->isoVal(),puweight);
       elecid0.fill(kinelectrons.at(i)->mvaId(),puweight);
 
 
@@ -498,7 +446,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     for(size_t i=0;i<kinmuons.size();i++){
       muoneta0.fill(kinmuons.at(i)->eta(), puweight);
       muonpt0.fill(kinmuons.at(i)->pt(),puweight);
-      muoniso0.fill(kinmuons.at(i)->isoVal04(),puweight);
+      muoniso0.fill(kinmuons.at(i)->isoVal(),puweight);
 
       
 
@@ -519,7 +467,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     for(size_t i=0;i<idelectrons.size();i++){
       eleceta1.fill(idelectrons.at(i)->eta(), puweight);
       elecpt1.fill(idelectrons.at(i)->pt(),puweight);
-      eleciso1.fill(idelectrons.at(i)->isoVal03(),puweight);
+      eleciso1.fill(idelectrons.at(i)->isoVal(),puweight);
       elecid1.fill(idelectrons.at(i)->mvaId(),puweight);
       //some other fills
     }
@@ -527,7 +475,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     for(size_t i=0;i<idmuons.size();i++){
       muoneta1.fill(idmuons.at(i)->eta(), puweight);
       muonpt1.fill(idmuons.at(i)->pt(),puweight);
-      muoniso1.fill(idmuons.at(i)->isoVal04(),puweight);
+      muoniso1.fill(idmuons.at(i)->isoVal(),puweight);
     }
 
 
@@ -544,7 +492,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     
     //make pair
     pair<vector<NTElectron*>, vector<NTMuon*> > leppair;
-    leppair = getOppoQHighestPtPair(isoelectrons, isomuons);
+    leppair = ztop::getOppoQHighestPtPair(isoelectrons, isomuons);
 
     double invLepMass=0;
     LorentzVector dilp4;
@@ -569,7 +517,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     for(size_t i=0;i<isoelectrons.size();i++){
       eleceta2.fill(isoelectrons.at(i)->eta(), puweight);
       elecpt2.fill(isoelectrons.at(i)->pt(),puweight);
-      eleciso2.fill(isoelectrons.at(i)->isoVal03(),puweight);
+      eleciso2.fill(isoelectrons.at(i)->isoVal(),puweight);
       elecid2.fill(isoelectrons.at(i)->mvaId(),puweight);
       //some other fills
     }
@@ -577,7 +525,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     for(size_t i=0;i<isomuons.size();i++){
       muoneta2.fill(isomuons.at(i)->eta(), puweight);
       muonpt2.fill(isomuons.at(i)->pt(),puweight);
-      muoniso2.fill(isomuons.at(i)->isoVal04(),puweight);
+      muoniso2.fill(isomuons.at(i)->isoVal(),puweight);
     }
 
     invmass2.fill(invLepMass,puweight);
@@ -601,7 +549,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     double dpx=0;
     double dpy=0;
     for(size_t i=0;i<treejets.size();i++){ //ALSO THE RESOLUTION AFFECTS MET. HERE INTENDED!!! GOOD?
-      LorentzVector oldp4=treejets.at(i)->p4();
+      PolarLorentzVector oldp4=treejets.at(i)->p4();
       if(isMC){// && !is7TeV){     
 	bool useJetForMet=false;
 	if(treejets.at(i)->emEnergyFraction() < 0.9 && treejets.at(i)->pt() > 10)
@@ -638,14 +586,14 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     for(size_t i=0;i<isoelectrons.size();i++){
       eleceta3.fill(isoelectrons.at(i)->eta(), puweight);
       elecpt3.fill(isoelectrons.at(i)->pt(),puweight);
-      eleciso3.fill(isoelectrons.at(i)->isoVal03(),puweight);
+      eleciso3.fill(isoelectrons.at(i)->isoVal(),puweight);
       //some other fills
     }
 
     for(size_t i=0;i<isomuons.size();i++){
       muoneta3.fill(isomuons.at(i)->eta(), puweight);
       muonpt3.fill(isomuons.at(i)->pt(),puweight);
-      muoniso3.fill(isomuons.at(i)->isoVal04(),puweight);
+      muoniso3.fill(isomuons.at(i)->isoVal(),puweight);
     }
 
     invmass3.fill(invLepMass,puweight);
@@ -703,14 +651,14 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       for(size_t i=0;i<isoelectrons.size();i++){
 	eleceta4.fill(isoelectrons.at(i)->eta(), puweight);
 	elecpt4.fill(isoelectrons.at(i)->pt(),puweight);
-	eleciso4.fill(isoelectrons.at(i)->isoVal03(),puweight);
+	eleciso4.fill(isoelectrons.at(i)->isoVal(),puweight);
 	//some other fills
       }
       
       for(size_t i=0;i<isomuons.size();i++){
 	muoneta4.fill(isomuons.at(i)->eta(), puweight);
 	muonpt4.fill(isomuons.at(i)->pt(),puweight);
-	muoniso4.fill(isomuons.at(i)->isoVal04(),puweight);
+	muoniso4.fill(isomuons.at(i)->isoVal(),puweight);
       }
 
       invmass4.fill(invLepMass,puweight);
@@ -740,14 +688,14 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       for(size_t i=0;i<isoelectrons.size();i++){
 	eleceta5.fill(isoelectrons.at(i)->eta(), puweight);
 	elecpt5.fill(isoelectrons.at(i)->pt(),puweight);
-	//	eleciso5.fill(elec->isoVal03(),puweight);
+	//	eleciso5.fill(elec->isoVal(),puweight);
 	//some other fills
       }
       
       for(size_t i=0;i<isomuons.size();i++){
 	muoneta5.fill(isomuons.at(i)->eta(), puweight);
 	muonpt5.fill(isomuons.at(i)->pt(),puweight);
-	//	muoniso5.fill(isomuons.at(i)->isoVal04(),puweight);
+	//	muoniso5.fill(isomuons.at(i)->isoVal(),puweight);
       }
       
       invmass5.fill(invLepMass,puweight);
@@ -787,14 +735,14 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       for(size_t i=0;i<isoelectrons.size();i++){
 	eleceta6.fill(isoelectrons.at(i)->eta(), puweight);
 	elecpt6.fill(isoelectrons.at(i)->pt(),puweight);
-	//	eleciso6.fill(isoelectrons.at(i)->isoVal03(),puweight);
+	//	eleciso6.fill(isoelectrons.at(i)->isoVal(),puweight);
 	//some other fills
       }
       
       for(size_t i=0;i<isomuons.size();i++){
 	muoneta6.fill(isomuons.at(i)->eta(), puweight);
 	muonpt6.fill(isomuons.at(i)->pt(),puweight);
-	//	muoniso6.fill(isomuons.at(i)->isoVal04(),puweight);
+	//	muoniso6.fill(isomuons.at(i)->isoVal(),puweight);
       }
       
       invmass6.fill(invLepMass,puweight);
@@ -839,14 +787,14 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       for(size_t i=0;i<isoelectrons.size();i++){
 	eleceta7.fill(isoelectrons.at(i)->eta(), puweight);
 	elecpt7.fill(isoelectrons.at(i)->pt(),puweight);
-	//	eleciso7.fill(isoelectrons.at(i)->isoVal03(),puweight);
+	//	eleciso7.fill(isoelectrons.at(i)->isoVal(),puweight);
 	//some other fills
       }
       
       for(size_t i=0;i<isomuons.size();i++){
 	muoneta7.fill(isomuons.at(i)->eta(), puweight);
 	muonpt7.fill(isomuons.at(i)->pt(),puweight);
-	//	muoniso7.fill(isomuons.at(i)->isoVal04(),puweight);
+	//	muoniso7.fill(isomuons.at(i)->isoVal(),puweight);
       }
       
       invmass7.fill(invLepMass,puweight);
@@ -883,14 +831,14 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       for(size_t i=0;i<isoelectrons.size();i++){
 	eleceta8.fill(isoelectrons.at(i)->eta(), puweight);
 	elecpt8.fill(isoelectrons.at(i)->pt(),puweight);
-	//	eleciso8.fill(isoelectrons.at(i)->isoVal03(),puweight);
+	//	eleciso8.fill(isoelectrons.at(i)->isoVal(),puweight);
 	//some other fills
       }
       
       for(size_t i=0;i<isomuons.size();i++){
 	muoneta8.fill(isomuons.at(i)->eta(), puweight);
 	muonpt8.fill(isomuons.at(i)->pt(),puweight);
-	//	muoniso8.fill(isomuons.at(i)->isoVal04(),puweight);
+	//	muoniso8.fill(isomuons.at(i)->isoVal(),puweight);
       }
       
       invmass8.fill(invLepMass,puweight);

@@ -13,9 +13,9 @@
 
 ////options parser
 
-std::vector<TString> getSyst(int argc, char* argv[]){
+TString getSyst(int argc, char* argv[]){
   using namespace ztop;
-  std::vector<TString> out;
+  TString out;
   bool foundoption=false;
   for(int i=1;i<argc;i++){ 
     if (i + 1 != argc){
@@ -28,7 +28,7 @@ std::vector<TString> getSyst(int argc, char* argv[]){
       }
       if(foundoption){
 	TString temp=argv[i];
-	out << temp;
+	out = temp;
       }
     }
   }
@@ -67,6 +67,18 @@ TString getEnergy(int argc, char* argv[]){
     //  std::cout << argv[i] << std::endl;; 
     if (i + 1 != argc){
       if((TString)argv[i] == "-e")
+	out=(TString)argv[i+1];
+      // std::cout << "outfile " << out << std::endl;
+    }
+  }
+  return out;
+}
+TString getOutfile(int argc, char* argv[]){
+  TString out="def_out.root";
+  for(int i=1;i<argc;i++){
+    //  std::cout << argv[i] << std::endl;; 
+    if (i + 1 != argc){
+      if((TString)argv[i] == "-o")
 	out=(TString)argv[i+1];
       // std::cout << "outfile " << out << std::endl;
     }

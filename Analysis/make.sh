@@ -1,19 +1,36 @@
 #!/bin/sh
 
-infile=$1
+infile=analyse.C
 
-CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:$CMSSW_BASE/src/
+export CPLUS_INCLUDE_PATH=$CMSSW_BASE/src
 ROOTFLAGS=`root-config --cflags`
 ROOTLIBS=`root-config --libs`
 
-CMSLIBS=$CMSSW_BASE/lib/$SCRAM_ARCH
+CMSLIBS=$CMSSW_BASE/lib/$SCRAM_ARCH/
+#declare -a libs
+libs=("TopAnalysisZTopUtils" 
+"TtZAnalysisDataFormats" 
+"TtZAnalysisTools"
+"TtZAnalysisAnalysis"
+#"DataFormatsStdDictionaries"
+#"CondFormatsJetMETObjects"
+);
 
-TOPZTLIB=$CMSLIBS/libTopAnalysisZTopUtils.so
-TTZDLIB=$CMSLIBS/libTtZAnalysisDataFormats.so
-TTZTLIB=$CMSLIBS/libTtZAnalysisTools.so
+#echo $libs
 
+#exit
 
+libdir=$CMSSW_BASE/src/TtZAnalysis/Analysis/lib
 
-g++ -c $ROOTFLAGS -L$CPLUS_INCLUDE_PATH -o $infile.o $infile
+mkdir -p $libdir
+linklibs=""
 
-g++ -o $infile.exe $ROOTLIBS -L$LD_LIBRARY_PATH -l$TOPZTLIB -l$TTZDLIB -l$TTZTLIB $infile.o
+for (( i=0;i<${#libs[@]};i++)); do
+linklibs="$linklibs -l${libs[${i}]}"
+cp $CMSLIBS/lib${libs[${i}]}.so $libdir
+done
+
+g++ $ROOTFLAGS -I$CPLUS_INCLUDE_PATH -c -o $infile.o $infile
+#exit
+g++ -o analyse.exe $ROOTLIBS -Llib$linklibs $infile.o
+
