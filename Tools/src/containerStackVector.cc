@@ -170,7 +170,7 @@ namespace ztop{
     t->Fill();
     t->Write("",TObject::kOverwrite);
     delete t;
-
+    /*
     TDirectory * d = f->mkdir(name + "_ratio",name + "_ratio");
     d->cd();
     for(std::vector<container1DStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
@@ -188,7 +188,7 @@ namespace ztop{
       delete c2;
     }
 
-
+    */
     f->Close();
     delete f;
     // delete d;

@@ -76,6 +76,8 @@ namespace ztop{
     static bool cs_makelist;
     static void cs_clearlist(){cs_list.clear();}
 
+    static bool batchmode;
+
   private:
     TString name_;
     std::vector<ztop::container1D> containers_;
@@ -86,8 +88,6 @@ namespace ztop{
 
     
 };
-
- 
   
 
 }

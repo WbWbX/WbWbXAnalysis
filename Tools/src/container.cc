@@ -70,9 +70,20 @@ namespace ztop{
 
   void container1D::setBins(std::vector<float> bins){
     reset();
+    float lastbin;
+    for(size_t i=0;i<bins.size();i++){
+      if(i<1){
+	lastbin=bins.at(i);}
+      else if(lastbin >= bins.at(i)){
+	std::cout << "container1D::setBins: bins must be in increasing order!" << std::endl;
+	std::exit(EXIT_FAILURE);
+      }
+    }
+
     bins_=bins;
     bins_.insert(bins_.begin(),0); //underflow
                                    //overflow is the last one
+    
     canfilldyn_=false;
     for(unsigned int i=0; i<bins_.size(); i++){
       content_.push_back(0);

@@ -4,6 +4,7 @@ namespace ztop{
 
   std::vector<ztop::container1DStack*> container1DStack::cs_list;
   bool container1DStack::cs_makelist=false;
+  bool container1DStack::batchmode=true;
 
   container1DStack::container1DStack(){
     if(cs_makelist)cs_list.push_back(this);
@@ -384,6 +385,8 @@ namespace ztop{
 
   TCanvas * container1DStack::makeTCanvas(bool drawratioplot){
     TCanvas * c = new TCanvas(name_+"_c",name_+"_c");
+    if(container1DStack::batchmode)
+      c->SetBatch();
     TH1D * htemp=new TH1D("sometemphisto"+name_,"sometemphisto"+name_,2,0,1); //creates all gPad stuff etc and prevents seg vio, which happens in some cases; weird
     htemp->Draw();
     if(!drawratioplot){
