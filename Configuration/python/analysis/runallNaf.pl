@@ -95,7 +95,9 @@ while(my $line = <$IN>) {
         map { s!\${(\w+)}!$ENV{$1}!g; $_ }
         split / {2,}/, $line;
 
-    $options =~ s/\s+$//;
+    if($options){
+	$options =~ s/\s+$//;
+    }
     $dataset =~ s/\s+$//;
 
     next unless $outputFile;
