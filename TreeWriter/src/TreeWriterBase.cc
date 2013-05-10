@@ -1180,18 +1180,22 @@ void TreeWriterBase::setTriggers(){
   triggers_.push_back("HLT_Mu17_Mu8_v");
   triggers_.push_back("HLT_Mu17_TkMu8_v");
   //
-  triggers_.push_back("HLT_Ele17_SW_TightCaloEleId_Ele8_HE_L1R_v");
-  triggers_.push_back("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v");
-  triggers_.push_back("HLT_DoubleMu7");
+  triggers_.push_back("HLT_Ele17_SW_TightCaloEleId_Ele8_HE_L1R_v");              //3
+  triggers_.push_back("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v");   //4
+  triggers_.push_back("HLT_DoubleMu7");   
   triggers_.push_back("HLT_Mu13_Mu8_v");
 
   //single lep for efficiencies
-  triggers_.push_back("HLT_IsoMu24_v");
+  triggers_.push_back("HLT_IsoMu24_v");      //7
   triggers_.push_back("HLT_IsoMu24_eta2p1_v");
   triggers_.push_back("HLT_Ele27_WP80_v");
+  
+  //emu triggers
+
+  triggers_.push_back("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v"); //10
+  triggers_.push_back("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v"); //11
   /*
-  triggers_.push_back();
-  triggers_.push_back();
+
   triggers_.push_back();
   triggers_.push_back();
   triggers_.push_back();
