@@ -30,7 +30,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfile, dou
   jecfile="/src/TtZAnalysis/Data/Summer12_V2_DATA_AK5PF_UncertaintySources.txt";
   btagfile="/src/TtZAnalysis/Data";
   pufile="/src/TtZAnalysis/Data/Full19.json.txt_PU.root";
-  inputfilewochannel="inputfiles.txt"; //here dont specify channel or energy
+  inputfilewochannel="testfiles.txt"; //here dont specify channel or energy
 
   if(Syst=="nominal"){
     //all already defined
