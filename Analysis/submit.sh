@@ -27,6 +27,7 @@ cd $dir
 cp ../analyse.exe .
 cp -r ../lib .
 cp ../*inputfiles.txt .
+cp ../*testfiles.txt .
 cp ../analyse.C .
 #cp ../job.sh .
 mkdir jobscripts
