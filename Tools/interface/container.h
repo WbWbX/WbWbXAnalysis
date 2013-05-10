@@ -10,6 +10,7 @@
 #include "TPad.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 #include <algorithm>
+#include <complex>
 
 ////////bins include their border on the right side!!
 
@@ -176,8 +177,10 @@ inline void ztop::container1D::fill(const double & what, const double & weight){
   }
   content_[bin] += weight;
   entries_[bin]++;
-  staterrup_[bin]=1;// sqrt(sq(staterrup_[bin]) + sq(weight));
-  staterrdown_[bin]=1;//sqrt(sq(staterrdown_[bin]) + sq(weight)); 
+  
+  staterrup_[bin]=std::sqrt(sq(staterrup_[bin]) + sq(weight));
+  staterrdown_[bin]=std::sqrt(sq(staterrdown_[bin]) + sq(weight)); 
+  
 }
 inline void ztop::container1D::fillDyn(double what, double weight){
   if(canfilldyn_){
