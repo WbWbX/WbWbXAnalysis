@@ -9,6 +9,7 @@
 #include <utility>
 #include "TPad.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
+#include <algorithm>
 
 ////////bins include their border on the right side!!
 
@@ -26,7 +27,7 @@ namespace ztop{
     void setNames(TString name, TString xaxis, TString yaxis){name_=name;xname_=xaxis;yname_=yaxis;}
     void setShowWarnings(bool show){showwarnings_=show;}
  
-    void fill(double val, double weight=1);    //! fills with weight
+    void fill(const double & val, const double & weight=1);    //! fills with weight
     void fillDyn(double what, double weight=1); //! not implemented yet
 
     void setBins(std::vector<float>);
@@ -37,7 +38,7 @@ namespace ztop{
     void setBinContent(int, double);    //! sets bin content, does not change error values!
 
 
-    int getBinNo(double); //! returns bin index number for (double variable)
+    int getBinNo(const double&); //! returns bin index number for (double variable)
     int getNBins();       //! returns nuberof bins 
     double getBinCenter(int);
     double getBinWidth(int); //! returns total bin width NOT 0.5* width
@@ -97,6 +98,7 @@ namespace ztop{
     static bool c_makelist;
     static std::vector<container1D*> c_list;
     static void c_clearlist(){c_list.clear();}
+    static bool debug;
 
   protected:
     bool showwarnings_;
@@ -140,23 +142,28 @@ inline double ztop::container1D::sq(double a){
   return a*a;
 }
 
-inline int ztop::container1D::getBinNo(double var){
-  for(unsigned int i=1; i<bins_.size(); i++){
-    if(var > bins_[i]){
-      continue;
-    }
-    else{
-      return i-1;
-    }
+inline int ztop::container1D::getBinNo(const double & var){
+
+  if(bins_.size()<1){
+    bins_.push_back(0);
+    return 0;
   }
-  //create underflow bin if empty vect.
-  bins_.push_back(0);
-  return 0;  
+  if(bins_.size() <2){
+    return 0;
+  }
+  std::vector<float>::iterator it=std::lower_bound(bins_.begin()+1, bins_.end(), var);
+  if(var==*it)
+    return it-bins_.begin();
+  else 
+    return it-bins_.begin()-1;
+  
 }
 
 
-inline void ztop::container1D::fill(double what, double weight){
+inline void ztop::container1D::fill(const double & what, const double & weight){
   int bin=getBinNo(what);
+  //int bin=0;
+  
   if(mergeufof_){
     if(bin==0 && bins_.size() > 1){
       bin=1;
@@ -169,8 +176,8 @@ inline void ztop::container1D::fill(double what, double weight){
   }
   content_[bin] += weight;
   entries_[bin]++;
-  staterrup_[bin]= sqrt(sq(staterrup_[bin]) + sq(weight));
-  staterrdown_[bin]=sqrt(sq(staterrdown_[bin]) + sq(weight));
+  staterrup_[bin]=1;// sqrt(sq(staterrup_[bin]) + sq(weight));
+  staterrdown_[bin]=1;//sqrt(sq(staterrdown_[bin]) + sq(weight)); 
 }
 inline void ztop::container1D::fillDyn(double what, double weight){
   if(canfilldyn_){
@@ -181,6 +188,8 @@ inline void ztop::container1D::fillDyn(double what, double weight){
     std::cout << "dynamic filling not available with fixed bins!" << std::endl;
   }
 }
+
+
 
 
 #endif

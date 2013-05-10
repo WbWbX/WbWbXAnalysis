@@ -1,2 +1,2 @@
 tree_8TeV_eettbar_data.root data 1 1
-tree_8TeV_eettbar.root t#bar{t} 633 1
+tree_8TeV_eettbar.root t#bar{t} 633 245

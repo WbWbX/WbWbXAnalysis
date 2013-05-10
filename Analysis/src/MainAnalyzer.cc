@@ -231,7 +231,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   container1D invmass6(massbins, "dilepton invariant mass step 6", "m_{ll} [GeV]", "N_{evt}");
   container1D invmass7(massbins, "dilepton invariant mass step 7", "m_{ll} [GeV]", "N_{evt}");
   container1D invmass8(massbins, "dilepton invariant mass step 8", "m_{ll} [GeV]", "N_{evt}");
-  container1D invmass9(massbins, "dilepton invariant mass step 8", "m_{ll} [GeV]", "N_{evt}");
+  container1D invmass9(massbins, "dilepton invariant mass step 9", "m_{ll} [GeV]", "N_{evt}");
 
   container1D invmassZ5(massbins, "dilepton invariant massZ step 5", "m_{ll} [GeV]", "N_{evt}");
   container1D invmassZ6(massbins, "dilepton invariant massZ step 6", "m_{ll} [GeV]", "N_{evt}");
@@ -349,18 +349,38 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
   cout << "opened tree" << endl;
 
-  vector<NTMuon> * pMuons = 0;
-  t->SetBranchAddress("NTMuons",&pMuons); 
+  TBranch * b_TriggerBools=0;
+  std::vector<bool> * p_TriggerBools=0;
+  t->SetBranchAddress("TriggerBools",&p_TriggerBools, &b_TriggerBools);
+
+  //0 Ele
+  //1,2 Mu
+
+  TBranch * b_Electrons=0;
   vector<NTElectron> * pElectrons = 0;
-  t->SetBranchAddress("NTPFElectrons",&pElectrons);           // ##TRAP##
+  t->SetBranchAddress("NTPFElectrons",&pElectrons,&b_Electrons);
+
+  TBranch * b_Muons=0;
+  vector<NTMuon> * pMuons = 0;
+  t->SetBranchAddress("NTMuons",&pMuons, &b_Muons); 
+
+  TBranch * b_Jets=0;         // ##TRAP##
   vector<NTJet> * pJets=0;
-  t->SetBranchAddress("NTJets",&pJets);
+  t->SetBranchAddress("NTJets",&pJets, &b_Jets);
+
+  TBranch * b_Met=0;
   NTMet * pMet = 0;
-  t->SetBranchAddress("NTMet",&pMet); 
+  t->SetBranchAddress("NTMet",&pMet,&b_Met); 
+
+  TBranch * b_Event=0;
   NTEvent * pEvent = 0;
-  t->SetBranchAddress("NTEvent",&pEvent); 
+  t->SetBranchAddress("NTEvent",&pEvent,&b_Event); 
 
 
+  /*
+  norm=1;
+  isMC=false;
+  */
   // just for sync reasons
 
   double sel_step[]={0,0,0,0,0,0,0,0,0};
@@ -373,15 +393,28 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
   for(Long64_t entry=0;entry<nEntries;entry++){
     if(showstatusbar_) displayStatusBar(entry,nEntries);
-    t->GetEntry(entry);
+
+    b_TriggerBools->GetEntry(entry);
+
+    //do trigger stuff - onlye 8TeV for now
+
+    if(p_TriggerBools->size() < 3)
+      continue;
+
+    if(b_mumu){
+      if(!(p_TriggerBools->at(1) || p_TriggerBools->at(2)))
+	continue;
+    }
+    else if(b_ee){
+      if(!p_TriggerBools->at(0))
+	continue;
+    }
+
+    // t->GetEntry(entry);
 
     //make collections
 
-    vector<NTJet *> treejets,nolidjets,hardjets;
-    for(size_t i=0;i<pJets->size();i++){
-      treejets << &(pJets->at(i));
-    }
-
+    b_Muons->GetEntry(entry);
 
     vector<NTMuon*> kinmuons,idmuons,isomuons;
     for(size_t i=0;i<pMuons->size();i++){
@@ -396,6 +429,11 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       isomuons <<  &(pMuons->at(i));
 
     }
+
+    if(b_mumu && kinmuons.size()<2)
+      continue;
+
+    b_Electrons->GetEntry(entry);
 
     vector<NTElectron *> kinelectrons,idelectrons,isoelectrons;
     for(size_t i=0;i<pElectrons->size();i++){
@@ -417,27 +455,35 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       isoelectrons <<  &(pElectrons->at(i));
     }
 
-    //  if(!isMC && pEvent->runNo() > 196531) continue; // ##TRAP##
     
+    // ask for the elecs/muons etc
 
+    
+    if(b_ee && kinelectrons.size() <2)
+      continue;
 
-    double puweight;
-    if(!isMC) puweight=1;
-    else puweight = getPUReweighter()->getPUweight(pEvent->truePU());
+    b_Jets->GetEntry(entry);
 
+    vector<NTJet *> treejets,nolidjets,hardjets;
+    for(size_t i=0;i<pJets->size();i++){
+      treejets << &(pJets->at(i));
+    }
+
+    b_Event->GetEntry(entry);
+
+    double puweight=1;
+    if (isMC) puweight = getPUReweighter()->getPUweight(pEvent->truePU());
+  
     ///triggers here - reimplement
     
     /////// make collections
 
     for(size_t i=0;i<kinelectrons.size();i++){
-
       //fill plots for kinelecs
       eleceta0.fill(kinelectrons.at(i)->eta(), puweight);
       elecpt0.fill(kinelectrons.at(i)->pt(),puweight);
       eleciso0.fill(kinelectrons.at(i)->isoVal(),puweight);
       elecid0.fill(kinelectrons.at(i)->mvaId(),puweight);
-
-
     }
 
     //some other fills
@@ -447,9 +493,6 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       muoneta0.fill(kinmuons.at(i)->eta(), puweight);
       muonpt0.fill(kinmuons.at(i)->pt(),puweight);
       muoniso0.fill(kinmuons.at(i)->isoVal(),puweight);
-
-      
-
     }
 
     vertexmulti0.fill(pEvent->vertexMulti(),puweight);
@@ -570,7 +613,6 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
       if(treejets.at(i)->pt() < 30 || fabs(treejets.at(i)->eta())>2.5) continue;
       hardjets << treejets.at(i);
-
     }
 
 
@@ -578,7 +620,6 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     //fill container
 
     for(size_t i=0;i<nolidjets.size();i++){ 
-
       jetpt3.fill( nolidjets.at(i)->pt(),puweight);
       jeteta3.fill(nolidjets.at(i)->eta(),puweight);
     }
@@ -622,7 +663,6 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       
       invmass20.fill(invLepMass,puweight);
       
-
       Zfinal_selection20.fill(1,puweight);
 
       isZrange=true;
@@ -715,6 +755,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     /////////////////////// at least two jets STEP 6 /////////////
 
     ///adjust MET ///
+    b_Met->GetEntry(entry);
 
     NTMet adjustedmet = *pMet;
     double nmpx=pMet->p4().Px() + dpx;
@@ -819,7 +860,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     bsf=getBTagSF()->getNTEventWeight(hardjets);
     //  if(bsf < 0.3) cout << bsf << endl;
     btagScFs.fill(bsf, puweight);
-    puweight= puweight * bsf;
+    //  puweight= puweight * bsf;
 
     if(!Znotemu){
 

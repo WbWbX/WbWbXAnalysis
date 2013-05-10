@@ -8,6 +8,8 @@ void analyse(TString channel, TString Syst, TString energy, TString outfile, dou
 
   bool didnothing=false;
 
+  // ztop::container1D::debug =true;
+
   //define all options HERE!!!
   //read PU file from filelist.txt? makes sense somehow... do it!!!
   //all files relative to CMSSW_BASE
@@ -15,7 +17,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfile, dou
   //let samplename for btag be without the whole path (check in btagbase)
   //make btagbase writeable
 
-  TString treedir="/scratch/hh/dust/naf/cms/user/kieseler/trees_testGen/";
+  TString treedir="/data/user/kiesej/Analysis2012/trees/trees_testGen/";
   TString jecfile,btagfile,pufile,inputfilewochannel; //...
 
 

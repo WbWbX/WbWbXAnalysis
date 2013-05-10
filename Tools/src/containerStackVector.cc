@@ -1,5 +1,7 @@
 #include "../interface/containerStackVector.h"
 
+bool ztop::container1D::debug =false;
+
 namespace ztop{
 
 
@@ -29,12 +31,16 @@ namespace ztop{
     bool found=false;
     for(std::vector<ztop::container1DStack>::iterator s=stacks_.begin();s<stacks_.end();++s){
       if(s->getName() == container.getName()){
+	if(container1D::debug)
+	  std::cout << "container1DStackVector::add: adding " << s->getName() << " to existing stack"  <<std::endl;
 	s->push_back(container, leg, color, norm);
 	found=true;
 	break;
       }
     }
-    if(!found){
+    if(!found){	
+      if(container1D::debug)
+	  std::cout << "container1DStackVector::add: creating new stack " << container.getName()  <<std::endl;
       ztop::container1DStack newstack(container.getName());
       newstack.push_back(container, leg, color, norm);
       stacks_.push_back(newstack);
@@ -170,7 +176,10 @@ namespace ztop{
     t->Fill();
     t->Write("",TObject::kOverwrite);
     delete t;
-    /*
+    
+    bool batch=container1DStack::batchmode;
+    container1DStack::batchmode=true;
+
     TDirectory * d = f->mkdir(name + "_ratio",name + "_ratio");
     d->cd();
     for(std::vector<container1DStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
@@ -188,11 +197,13 @@ namespace ztop{
       delete c2;
     }
 
-    */
+    
     f->Close();
     delete f;
     // delete d;
     // delete d2;
+    container1DStack::batchmode=batch;
+
   }
 
   void container1DStackVector::writeAllToTFile(TFile * f, TString treename){
@@ -223,6 +234,10 @@ namespace ztop{
     t->Write("",TObject::kOverwrite);
     delete t;
     
+    bool batch=container1DStack::batchmode;
+    container1DStack::batchmode=true;
+
+
     TDirectory * d = f->mkdir(name + "_ratio",name + "_ratio");
     d->cd();
     for(std::vector<container1DStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
@@ -239,6 +254,9 @@ namespace ztop{
       c2->Write();
     delete c2;
     }
+
+    container1DStack::batchmode=batch;
+
   }
   
   

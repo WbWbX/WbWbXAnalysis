@@ -406,7 +406,7 @@ namespace ztop{
 
       ztop::container1D out=second;
     if(bins_ != second.bins_){
-      if(showwarnings_) std::cout << "operator +: not same binning!" << std::endl;
+      if(showwarnings_) std::cout << "operator +: not same binning for " << name_ << std::endl;
     }
 
     else{

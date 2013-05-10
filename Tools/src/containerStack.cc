@@ -22,6 +22,8 @@ namespace ztop{
    bool wasthere=false;
    for(unsigned int i=0;i<legends_.size();i++){
      if(legend == legends_[i]){
+       if(container1D::debug)
+	 std::cout << "container1DStack::push_back: found same legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
        containers_[i] = containers_[i] * norms_[i] + cont * norm;
        containers_[i].setName("c_" +legend);
        norms_[i]=1;
