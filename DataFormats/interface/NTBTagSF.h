@@ -22,7 +22,7 @@ namespace ztop{
 
 namespace ztop{
 
-  double NTBTagSF::getNTEventWeight(const std::vector<ztop::NTJet *> & jets){
+  inline double NTBTagSF::getNTEventWeight(const std::vector<ztop::NTJet *> & jets){
     // std::vector<const ztop::LorentzVector *> p4s;p4s.clear();
     std::vector< ztop::PolarLorentzVector> p4sv; p4sv.clear();//!change asap when new dataformats ready 
     std::vector<int> genPartonFlavours;
