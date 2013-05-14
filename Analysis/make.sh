@@ -30,7 +30,7 @@ linklibs="$linklibs -l${libs[${i}]}"
 cp $CMSLIBS/lib${libs[${i}]}.so $libdir
 done
 
-g++ $ROOTFLAGS -I$CPLUS_INCLUDE_PATH -c -o $infile.o $infile
+g++ $ROOTFLAGS -fopenmp -I$CPLUS_INCLUDE_PATH -c -o $infile.o $infile
 #exit
-g++ -o analyse.exe -Wall -O3 $ROOTLIBS -Llib$linklibs $infile.o
+g++ -o analyse.exe -fopenmp -Wall -O3 $ROOTLIBS -Llib$linklibs $infile.o
 
