@@ -18,6 +18,11 @@ void analyse(TString channel, TString Syst, TString energy, TString outfile, dou
   //make btagbase writeable
 
   TString treedir="/data/user/kiesej/Analysis2012/trees/trees_testGen/";
+  if((TString)getenv("SGE_CELL") != ""){ //on the naf
+    treedir="/scratch/hh/dust/naf/cms/user/kieseler/trees_Mai13_A03/";
+  }
+  
+
   TString jecfile,btagfile,pufile,inputfilewochannel; //...
 
 
@@ -33,6 +38,8 @@ void analyse(TString channel, TString Syst, TString energy, TString outfile, dou
   btagfile="/src/TtZAnalysis/Data";
   pufile="/src/TtZAnalysis/Data/Full19.json.txt_PU.root";
   inputfilewochannel="testfiles.txt"; //here dont specify channel or energy
+
+  btagfile="btags.root";
 
   if(Syst=="nominal"){
     //all already defined
@@ -73,6 +80,10 @@ void analyse(TString channel, TString Syst, TString energy, TString outfile, dou
   }
   
   TString inputfile=channel+"_"+energy+"_"+inputfilewochannel;
+  // TString 
+
+
+  std::cout << "doing btag: " << dobtag <<std::endl;
 
   //some env variables
   TString cmssw_base=getenv("CMSSW_BASE");
@@ -94,10 +105,12 @@ void analyse(TString channel, TString Syst, TString energy, TString outfile, dou
   ana.setChannel(channel);
   ana.setSyst(Syst);
   ana.setEnergy(energy);
-  // if(energy=="8TeV")
   ana.getPUReweighter()->setMCDistrSum12();
-  // ana.getBTagSF()->setMakeEff(false);
-  
+ 
+  //ana.getBTagSF()->setMakeEff(dobtag);
+  if(!dobtag)
+    ana.getBTagSF()->readFromTFile(btagfile);
+
   //btag?? no idea...
 
   if(didnothing){
@@ -107,7 +120,11 @@ void analyse(TString channel, TString Syst, TString energy, TString outfile, dou
   else{
     //if PDF var not found make the same file as above
     ana.start();
-        ana.getPlots()->writeAllToTFile("output/"+outfile+".root",true);
+      ana.getPlots()->writeAllToTFile("output/"+outfile+".root",true);
+
+    if(dobtag)
+      ana.getBTagSF()->writeToTFile(btagfile);
+    
   }
 
   
@@ -140,6 +157,6 @@ int main(int argc, char* argv[]){
     //do the merging with filestomerge
   }
   else{
-    analyse(channel, syst, energy, outfile, lumi, dobtag, statbar);
+    analyse(channel, syst, energy, outfile, lumi,dobtag , statbar);
   }
 }

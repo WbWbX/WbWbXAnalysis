@@ -7,8 +7,23 @@
 //#include "MainAnalyzer.h"
 #include <cstdlib>
 
+/*
+template<class a>
+void recreateRelations(typename std::vector<a *> & mothers, typename std::vector<b *> & daughters){
+
+  for(size_t j=0;i<mothers.size();i++){
+    a * mother=mothers.at(i);
+    for(size_t j=0;j<daughters.size();j++){
+      b * daughter=daughters.at(j);
+      typename std::vector<a *> mothers;
 
 
+    }
+  }
+
+}
+
+*/
 ///DON'T !!! do options stuff here!!!
 
 ////options parser
@@ -100,11 +115,11 @@ float getLumi(int argc, char* argv[]){
 bool prepareBTag(int argc, char* argv[]){
 for(int i=1;i<argc;i++){
     //  std::cout << argv[i] << std::endl;; 
-    if (i + 1 != argc){
+    //if (i + 1 != argc){
       if((TString)argv[i] == "-b")
 	return true;
       // std::cout << "outfile " << out << std::endl;
-    }
+      // }
   }
  return false;
 }
@@ -139,6 +154,8 @@ void rescaleDY(ztop::container1DStackVector * vec, std::vector<TString> contribu
   }
 
 }
+
+
 
 
 

@@ -45,12 +45,10 @@ namespace ztop{
 class MainAnalyzer{
 
 public:
-  MainAnalyzer(){
-    dataname_="data";
-  }
+  MainAnalyzer();
   MainAnalyzer(const MainAnalyzer &);
  
-  ~MainAnalyzer(){}
+  ~MainAnalyzer(){std::cout << "~MainAnalyzer" << std::endl;}
 
   void setChannel(TString chan){channel_=chan;}
   void setSyst(TString syst){syst_=syst;}

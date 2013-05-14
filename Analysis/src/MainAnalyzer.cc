@@ -1,12 +1,20 @@
 #include "../interface/MainAnalyzer.h"
 #include "FWCore/FWLite/interface/AutoLibraryLoader.h"
 
+MainAnalyzer::MainAnalyzer(){
+
+  AutoLibraryLoader::enable();
+
+  dataname_="data";
+  
+
+}
 
 void MainAnalyzer::start(){
 
   using namespace std;
 
-  AutoLibraryLoader::enable();
+  
   
  
   clear();
@@ -117,6 +125,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
   vector<float> bsfs;
   for(float i=0;i<120;i++) bsfs <<  (i/100);
+
+  vector<float> mlb_bins;
+  for(float i=0;i<20;i++) mlb_bins << i*10;
 
 
   //and so on
@@ -273,6 +284,14 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   container1D btagScFs(bsfs, "b-tag event SFs", "SF_{evt}", "N_{evt}",true);
 
 
+  ///////gen distributions
+
+
+  container1D gen_dileptonEta(etabinsmuon, "eta_ll genstep", "#eta_{ll}","N_{#l}");
+  container1D gen_bhadronpt(ptbins, "genHadron p_{T} genstep", "p_{T} [GeV]","N_{#l}");
+  container1D gen_mlb(mlb_bins, "m_lb genstep","M_{lb} [GeV]", "N_{evt}");
+
+
   container1D::c_makelist=false; //switch off automatic listing
 
 
@@ -376,6 +395,24 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   NTEvent * pEvent = 0;
   t->SetBranchAddress("NTEvent",&pEvent,&b_Event); 
 
+  /// generator branches should exist everywhere but empty for non signal processes
+
+  TBranch * b_GenTops=0;
+  vector<NTGenParticle> * pGenTops=0;
+  t->SetBranchAddress("NTGenTops",&pGenTops,&b_GenTops); 
+  // TBranch * b_GenWs=0;
+  // TBranch * b_GenZs=0;
+  // TBranch * b_GenBs=0;
+  TBranch * b_GenBHadrons=0;
+  vector<NTGenParticle> * pGenBHadrons=0;
+  t->SetBranchAddress("NTGenBHadrons",&pGenBHadrons,&b_GenBHadrons); 
+  //  TBranch * b_GenLeptons3=0;
+  //  TBranch * b_GenLeptons1=0;
+  TBranch * b_GenJets=0;
+  vector<NTGenJet> * pGenJets=0;
+  t->SetBranchAddress("NTGenJets",&pGenJets,&b_GenJets); 
+
+
 
   /*
   norm=1;
@@ -394,6 +431,30 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   for(Long64_t entry=0;entry<nEntries;entry++){
     if(showstatusbar_) displayStatusBar(entry,nEntries);
 
+
+    ///gen stuff wo cuts!
+    if(isMC){
+      b_GenJets->GetEntry(entry);
+      if(pGenJets->size()>1){ //gen info there
+	
+      //recreate mother daughter relations
+      b_GenBHadrons->GetEntry(entry);
+      
+      ///make vector of pointers (NOT constant!!)
+
+      //   gen_dileptonEta.fill();
+      //   gen_mlb.fill();
+      for(size_t i=0;i<pGenBHadrons->size();i++){
+	gen_bhadronpt.fill(pGenBHadrons->at(i).pt());
+
+
+      }
+      //recreateRelations(mothers, daughters) --serach for genid and motherit, daugherits
+
+
+
+      }
+    }
     b_TriggerBools->GetEntry(entry);
 
     //do trigger stuff - onlye 8TeV for now
@@ -934,8 +995,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     std::cout  << std::endl;
   }
 
-  delete t;
-  f->Close();
+  // delete t;
+  f->Close(); //deletes t
   delete f;
 
   getBTagSF()->makeEffs();

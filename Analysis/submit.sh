@@ -46,7 +46,12 @@ for (( i=0;i<${#channels[@]};i++)); do
 	    outname=${channel}_${energy}_${syst};
 	    sed -e "s/##OUTNAME##/${outname}/" -e "s/##PARAMETERS##/-c ${channel} -s ${syst} -o ${outname}/" -e "s/##WORKDIR##/${dir}/" < ../job.sh > jobscripts/${outname}_job.sh
 	    chmod +x jobscripts/${outname}_job.sh
-	    ./jobscripts/${outname}_job.sh &
+	    if [[ $SGE_CELL ]] ;
+	    then
+		qsub jobscripts/${outname}_job.sh
+	    else
+		./jobscripts/${outname}_job.sh &
+	    fi
 	done
     done
 done

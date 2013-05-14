@@ -32,5 +32,5 @@ done
 
 g++ $ROOTFLAGS -I$CPLUS_INCLUDE_PATH -c -o $infile.o $infile
 #exit
-g++ -o analyse.exe -O3 $ROOTLIBS -Llib$linklibs $infile.o
+g++ -o analyse.exe -Wall -O3 $ROOTLIBS -Llib$linklibs $infile.o
 
