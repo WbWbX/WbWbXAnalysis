@@ -15,7 +15,7 @@
 #include "TTree.h"
 #include "TFile.h"
 #include <fstream>
-
+#include <omp.h>
 
 
 #include <stdlib.h>

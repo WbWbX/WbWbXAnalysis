@@ -17,7 +17,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfile, dou
   //let samplename for btag be without the whole path (check in btagbase)
   //make btagbase writeable
 
-  TString treedir="/data/user/kiesej/Analysis2012/trees/trees_testGen/";
+  TString treedir="/data/user/kiesej/Analysis2012/trees/trees_Mai13_A03/";
   if((TString)getenv("SGE_CELL") != ""){ //on the naf
     treedir="/scratch/hh/dust/naf/cms/user/kieseler/trees_Mai13_A03/";
   }
@@ -37,7 +37,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfile, dou
   jecfile="/src/TtZAnalysis/Data/Summer12_V2_DATA_AK5PF_UncertaintySources.txt";
   btagfile="/src/TtZAnalysis/Data";
   pufile="/src/TtZAnalysis/Data/Full19.json.txt_PU.root";
-  inputfilewochannel="testfiles.txt"; //here dont specify channel or energy
+  inputfilewochannel="inputfiles.txt"; //here dont specify channel or energy
 
   btagfile="btags.root";
 

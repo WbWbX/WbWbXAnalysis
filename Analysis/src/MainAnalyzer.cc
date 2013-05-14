@@ -13,9 +13,10 @@ MainAnalyzer::MainAnalyzer(){
 void MainAnalyzer::start(){
 
   using namespace std;
+  using namespace ztop;
 
   
-  
+  /// put MC code here, make containerlist private!!
  
   clear();
 
@@ -29,6 +30,11 @@ void MainAnalyzer::start(){
   analysisplots_.setName(name);
   analysisplots_.setSyst(getSyst());
 
+  //fill info vectors
+  std::vector<TString> infiles,legentries;
+  std::vector<int> colz;
+  std::vector<double> norms;
+
   std::cout << "Starting analysis for " << name << std::endl;
   ifstream inputfiles (filelist_.Data());
   string filename;
@@ -38,15 +44,32 @@ void MainAnalyzer::start(){
   string oldline="";
   if(inputfiles.is_open()){
     while(inputfiles.good()){
+
+
       inputfiles >> filename; 
       inputfiles >> legentry >> color >> norm;
-      if(oldline != filename) analyze((TString) filename, (TString)legentry, color, norm);
+      if(oldline != filename){
+	infiles << filename;
+	legentries << legentry;
+	colz << color;
+	norms << norm;
+      }
       oldline=filename;
     }
   }
   else{
     cout << "MainAnalyzer::start(): input file list not found" << endl;
   }
+  //  #pragma omp parallel for
+  //STL not MC safe.. damn
+  for(size_t i=0;i<infiles.size();i++){
+
+    analyze(infiles.at(i), legentries.at(i), colz.at(i), norms.at(i));
+
+  }
+  //parallel stuff
+
+  // analyze((TString) filename, (TString)legentry, color, norm);
 
   //rescaleDY(&analysisplots_, dycontributions);
   
@@ -93,6 +116,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   //define containers here
 
   //   define binnings
+
+
+
   vector<float> drbins;
   for(float i=0;i<40;i++) drbins << i/40;
 
@@ -139,6 +165,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
   /// comment: rearrange to object clusters!!   PER BINWIDTH!!!!! HAS TO BE ADDED!!
   
+
+
   container1D::c_clearlist(); // should be empty just in case
   container1D::c_makelist=true; //switch on automatic listing
 
@@ -294,7 +322,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
   container1D::c_makelist=false; //switch off automatic listing
 
-
+  
 
 
   //get the lepton selector (maybe directly in the code.. lets see)
@@ -304,7 +332,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   double oldnorm=norm;
 
   /////some boolians //channels
-  bool b_mumu=false;bool b_ee=false;bool b_emu=false;;
+  bool b_mumu=false;bool b_ee=false;bool b_emu=false;
   if(channel_.Contains("mumu")){
     b_mumu=true;
     cout << "\nrunning in mumu mode" <<endl;
@@ -978,8 +1006,10 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   // Fill all containers in the stackVector
 
   // std::cout << "Filling containers to the Stack\n" << std::endl;
-  getPlots()->addList(legendname,color,norm);
-
+#pragma omp critical(fillPlots)
+  {
+    getPlots()->addList(legendname,color,norm);
+  }
   for(unsigned int i=0;i<9;i++){
     std::cout << "selection step "<< toTString(i)<< " "  << sel_step[i];
     if(i==3)
