@@ -155,7 +155,23 @@ void rescaleDY(ztop::container1DStackVector * vec, std::vector<TString> contribu
 
 }
 
+template<class T>
+class IPCPipe{
+public:
+  IPCPipe(){pipe(pfds);}
+  ~IPCPipe(){}
 
+ 
+
+  T pwrite(const T & c){return write(pfds[1], &c , 256);}
+  T pread(){read(pfds[0], buf, 256);return buf[0];}
+
+private:
+
+  int pfds[2];
+  T buf[256];
+
+};
 
 
 
