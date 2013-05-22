@@ -3,6 +3,8 @@ tree_8TeV_ee_runA_06Aug.root data 1 1
 tree_8TeV_ee_runB_13Jul.root data 1 1
 tree_8TeV_ee_runC_24Aug.root data 1 1
 tree_8TeV_ee_runC_prompt.root data 1 1
+tree_8TeV_ee_runC_11Dec.root data 1 1
+tree_8TeV_ee_runD_prompt.root data 1 1
 #
 #mc
 #
