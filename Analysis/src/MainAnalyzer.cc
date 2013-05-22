@@ -6,11 +6,24 @@ MainAnalyzer::MainAnalyzer(){
   AutoLibraryLoader::enable();
 
   dataname_="data";
-  
+  writeAllowed_=true;
 
 }
 
-void MainAnalyzer::start(){
+
+int MainAnalyzer::checkForWriteRequest(){
+  for(size_t i=0;i<p_askwrite.size();i++){
+    if(p_askwrite.get(i)->preadready()){
+      return i; //return first ready to write!
+    }
+  }
+  return -1;
+}
+
+
+
+
+int MainAnalyzer::start(){
 
   using namespace std;
   using namespace ztop;
@@ -24,18 +37,85 @@ void MainAnalyzer::start(){
 
   if(channel_=="" || energy_=="" || syst_ == ""){
     std::cout << "MainAnalyzer::start Analyzer not properly named - check!" << std::endl;
-    return;
+    return -1;
   }
 
   analysisplots_.setName(name);
   analysisplots_.setSyst(getSyst());
 
-  //fill info vectors
-  std::vector<TString> infiles,legentries;
-  std::vector<int> colz;
-  std::vector<double> norms;
 
-  std::cout << "Starting analysis for " << name << std::endl;
+  ///communication stuff...
+
+  size_t filenumber=infiles_.size();
+
+  //create pipes
+  p_idx.open(filenumber);
+  p_finished.open(filenumber);
+  p_allowwrite.open(filenumber);
+  p_askwrite.open(filenumber);
+
+  daughPIDs_.resize(filenumber,0);
+
+  //spawn child processes
+  for(size_t i=0;i<filenumber;i++){
+     daughPIDs_.at(i)=fork();
+    if(daughPIDs_.at(i)==0){ //child
+      analyze(p_idx.get(i)->pread());
+      //   std::cout << p_idx.get(i)->pread() << std::endl;
+       std::exit(EXIT_SUCCESS);
+    }
+    else{ //send start signal for ith daughter process
+         p_idx.get(i)->pwrite(i);
+    }
+  }
+
+  //daughters never reach here
+
+  // if(NoneEqual(daughPIDs_,0)) //recheck
+
+  std::cout << "running on " << filenumber << " files" << std::endl;
+  std::vector<int> succ;
+  succ.resize(filenumber,0);
+
+  while(!NoneEqual(succ,0)){ //wait for daughters until all are done or failed
+
+    //get done or failed
+    for(size_t i=0;i<filenumber;i++){ 
+      if(p_finished.get(i)->preadready())
+	succ.at(i)=p_finished.get(i)->pread(); //testing
+    }
+    
+    int it_readytowrite=checkForWriteRequest();
+    if(it_readytowrite >= 0){ // daugh ready to write
+      p_allowwrite.get(it_readytowrite)->pwrite(1);
+      succ.at(it_readytowrite)=p_finished.get(it_readytowrite)->pread();   //wait for successful/ns write
+    } //else do nothing - none ready to write
+    
+    // put statusbars here maybe ask for status via pipes
+
+
+    usleep(100000); //only check every 100ms
+  }
+  sleep(1);
+  for(size_t i=0;i<succ.size();i++){
+    std::cout << succ.at(i) << "\t" << infiles_.at(i) << std::endl;
+  }
+
+  return 1; //only parent
+  
+}
+
+void MainAnalyzer::setFileList(TString filelist){
+  using namespace ztop;
+  using namespace std;
+
+  filelist_=filelist;
+
+  infiles_.clear();
+  legentries_.clear();
+  colz_.clear();
+  norms_.clear();
+
   ifstream inputfiles (filelist_.Data());
   string filename;
   string legentry;
@@ -44,37 +124,29 @@ void MainAnalyzer::start(){
   string oldline="";
   if(inputfiles.is_open()){
     while(inputfiles.good()){
-
-
       inputfiles >> filename; 
+      
+      if(((TString)filename).Contains("#")){
+	getline(inputfiles,filename); //just ignore complete line
+	std::cout << "ignoring: " << filename << std::endl;
+	continue;
+      }
       inputfiles >> legentry >> color >> norm;
       if(oldline != filename){
-	infiles << filename;
-	legentries << legentry;
-	colz << color;
-	norms << norm;
+	infiles_    << filename;
+	legentries_ << legentry;
+	colz_       << color;
+	norms_      << norm;
+	oldline=filename;
       }
-      oldline=filename;
+      
     }
   }
   else{
-    cout << "MainAnalyzer::start(): input file list not found" << endl;
+    cout << "MainAnalyzer::setFileList(): input file list not found" << endl;
   }
-  //  #pragma omp parallel for
-  //STL not MC safe.. damn
-  for(size_t i=0;i<infiles.size();i++){
 
-    analyze(infiles.at(i), legentries.at(i), colz.at(i), norms.at(i));
-
-  }
-  //parallel stuff
-
-  // analyze((TString) filename, (TString)legentry, color, norm);
-
-  //rescaleDY(&analysisplots_, dycontributions);
-  
 }
-
 
 void MainAnalyzer::copyAll(const MainAnalyzer & analyzer){
   
@@ -92,6 +164,16 @@ void MainAnalyzer::copyAll(const MainAnalyzer & analyzer){
   btagsf_ = analyzer.btagsf_;
   analysisplots_ = analyzer.analysisplots_;
   showstatusbar_=analyzer.showstatusbar_;
+
+  infiles_=analyzer.infiles_;
+  legentries_=analyzer.legentries_;
+  colz_=analyzer.colz_;
+  norms_=analyzer.norms_;
+  outfile_=analyzer.outfile_;
+
+  //pipes are NOT in here. they need to be created during running?
+
+  writeAllowed_=analyzer.writeAllowed_;
 }
 
 MainAnalyzer::MainAnalyzer(const MainAnalyzer & analyzer){
@@ -103,7 +185,16 @@ MainAnalyzer & MainAnalyzer::operator = (const MainAnalyzer & analyzer){
   return *this;
 }
 
-void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, double norm){
+void MainAnalyzer::analyze(size_t i){
+
+  std::cout << " analyze " << i<< std::endl;
+  analyze(infiles_.at(i),legentries_.at(i),colz_.at(i),norms_.at(i),i);
+
+}
+
+void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, double norm,size_t anaid){
+
+  // return;
 
   using namespace std;
   using namespace ztop;
@@ -116,8 +207,15 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   //define containers here
 
   //   define binnings
+  
 
+  std::ifstream FileTest((datasetdirectory_+inputfile).Data()); 
+  if(!FileTest) {
+    p_finished.get(anaid)->pwrite(-1);
+    return;
+  }
 
+  // return; //test
 
   vector<float> drbins;
   for(float i=0;i<40;i++) drbins << i/40;
@@ -352,6 +450,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   }
 
   TFile *f=TFile::Open(datasetdirectory_+inputfile);
+  
   double genentries=0;
   if(isMC){
 
@@ -385,7 +484,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
   
   // getBTagSF()->prepareEff(inputfile , norm );
-  getBTagSF()->setSampleName(toString(inputfile));
+    getBTagSF()->setSampleName(toString(inputfile));
 
   cout << "running on: " << datasetdirectory_ << inputfile << "    legend: " << legendname << "\nxsec: " << oldnorm << ", genEvents: " << genentries <<endl;
   // get main analysis tree
@@ -1006,32 +1105,90 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   // Fill all containers in the stackVector
 
   // std::cout << "Filling containers to the Stack\n" << std::endl;
-#pragma omp critical(fillPlots)
-  {
-    getPlots()->addList(legendname,color,norm);
-  }
-  for(unsigned int i=0;i<9;i++){
-    std::cout << "selection step "<< toTString(i)<< " "  << sel_step[i];
-    if(i==3)
-      cout << "  => sync step 1";
-    if(i==4)
-      cout << "  => sync step 2";
-    if(i==6)
-      cout << "  => sync step 3";
-    if(i==7)
-      cout << "  => sync step 4";
-    if(i==8)
-      cout << "  => sync step 5";
-    std::cout  << std::endl;
-  }
+  
 
   // delete t;
   f->Close(); //deletes t
   delete f;
 
-  getBTagSF()->makeEffs();
 
   
+  ///
+  // if File outfile_ exists (it was created in analyze.C check
+  // open file
+  // try to get csv with proper name (there should be only one)
+  // get it, name it csv
+  // ask if write not blocked
+  // csv->addList(legendname,color,norm);
+  // stored_objects tree->fill
+  // tree->overwrite
+  // clse file and unblock
+  p_askwrite.get(anaid)->pwrite(anaid);
+  int canwrite=p_allowwrite.get(anaid)->pread();
+  if(canwrite>0){ //wait for permission
+
+    std::cout << "allowed " << anaid << " to write" << endl;
+
+    std::ofstream text_outfile;
+
+    text_outfile.open((outfile_+".txt").Data(), std::ios_base::app);
+    text_outfile << anaid; 
+    text_outfile << "\n";
+
+    TFile * outfile=new TFile(outfile_,"read");
+    TTree * outtree;
+    ztop::container1DStackVector * csv=&analysisplots_;
+
+    std::cout << "trying to get tree" <<std::endl;   
+
+    if(outfile->Get("stored_objects")){
+      outtree=(TTree*)outfile->Get("stored_objects");
+      if(outtree->GetBranch("allContainerStackVectors")){ //exists already others are filled
+	// csv->loadFromTree(outtree,csv->getName()); //makes copy
+	csv=csv->getFromTree(outtree,csv->getName()); 
+      }
+    }     
+
+    csv->addList(legendname,color,norm);
+    outfile->Close();
+    delete outfile;
+  
+    outfile=new TFile(outfile_,"RECREATE");
+    outfile->cd();
+
+    outtree= new TTree("stored_objects","stored_objects");
+    outtree->Branch("allContainerStackVectors",&csv);
+    outtree->Fill();
+    outtree->Write("",TObject::kOverwrite);//"",TObject::kOverwrite);
+    outfile->Close();
+    delete outfile;
+    
+    std::cout << inputfile << ": " << std::endl;
+    for(unsigned int i=0;i<9;i++){
+      std::cout << "selection step "<< toTString(i)<< " "  << sel_step[i];
+      if(i==3)
+	cout << "  => sync step 1";
+      if(i==4)
+	cout << "  => sync step 2";
+      if(i==6)
+	cout << "  => sync step 3";
+      if(i==7)
+	cout << "  => sync step 4";
+      if(i==8)
+	cout << "  => sync step 5";
+      std::cout  << std::endl;
+    }
+
+    text_outfile.close();
+    //all operations done
+    p_finished.get(anaid)->pwrite(1); //turns of write blocking, too
+  }
+  else{
+    p_finished.get(anaid)->pwrite(-2); //write failed
+  }
+
+
+
 
 }
 

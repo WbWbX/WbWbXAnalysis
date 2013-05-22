@@ -20,6 +20,8 @@ libs=("TopAnalysisZTopUtils"
 
 #exit
 
+scram b -j12
+
 libdir=$CMSSW_BASE/src/TtZAnalysis/Analysis/lib
 
 mkdir -p $libdir
@@ -32,5 +34,5 @@ done
 
 g++ $ROOTFLAGS -fopenmp -I$CPLUS_INCLUDE_PATH -c -o $infile.o $infile
 #exit
-g++ -o analyse.exe -fopenmp -Wall -O3 $ROOTLIBS -Llib$linklibs $infile.o
+g++ -o analyse.exe -fopenmp -Wall $ROOTLIBS -Llib$linklibs $infile.o
 

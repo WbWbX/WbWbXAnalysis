@@ -16,7 +16,7 @@
 #include "TFile.h"
 #include <fstream>
 #include <omp.h>
-
+#include "TtZAnalysis/Analysis/interface/AnalysisUtils.h"
 
 #include <stdlib.h>
 
@@ -53,6 +53,7 @@ public:
   void setChannel(TString chan){channel_=chan;}
   void setSyst(TString syst){syst_=syst;}
   void setEnergy(TString e){energy_=e;}
+  void setOutFile(TString o){outfile_=o;}
   
  
   void setLumi(double Lumi){lumi_=Lumi;}
@@ -64,15 +65,16 @@ public:
 
 
  
-  void analyze(TString, TString, int, double);
+void analyze(TString, TString, int, double,size_t i=0);
+   void analyze(size_t i);
 
-  void setFileList(TString filelist){filelist_=filelist;}
+  void setFileList(TString );
   void setDataSetDirectory(TString dir){datasetdirectory_=dir;}
   void setShowStatusBar(bool show){showstatusbar_=show;}
 
   ztop::container1DStackVector * getPlots(){return & analysisplots_;}
 
-  void start();
+  int start();
   //  void start(TString);
 
   void clear(){analysisplots_.clear();}
@@ -84,8 +86,11 @@ public:
 
   MainAnalyzer & operator= (const MainAnalyzer &);
 
+  
 
 private:
+
+  
 
   void copyAll(const MainAnalyzer &);
 
@@ -104,6 +109,34 @@ private:
   ztop::NTBTagSF  btagsf_;
 
   ztop::container1DStackVector  analysisplots_;
+
+  size_t filecount_;
+  TString outfile_;
+
+  //for parallel stuff
+
+  std::vector<TString> infiles_,legentries_;
+  std::vector<int> colz_;
+  std::vector<double> norms_;
+
+///communication pipes
+
+  IPCPipes<int> p_idx;
+  IPCPipes<int> p_finished;
+
+  IPCPipes<int> p_allowwrite;
+  IPCPipes<int> p_askwrite;
+
+  bool writeAllowed_;
+
+  // bool askForWrite();
+  int  checkForWriteRequest();
+  // void blockWrite();
+  // void freeWrite();
+
+
+pid_t PID_;
+std::vector<pid_t> daughPIDs_;
 
 
 };
