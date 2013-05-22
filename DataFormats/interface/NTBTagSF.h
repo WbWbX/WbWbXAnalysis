@@ -16,6 +16,8 @@ namespace ztop{
 
     double getNTEventWeight(const std::vector<ztop::NTJet *> &);
 
+    NTBTagSF  operator + (NTBTagSF  second);
+
   };
 }
 
