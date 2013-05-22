@@ -219,7 +219,7 @@ namespace ztop{
     else{
     t = new TTree(treename,treename);
     }
-    if(t->GetBranch("allContainerStackVectors")){ //branch does not exist yet
+    if(t->GetBranch("allContainerStackVectors")){ //branch does exist
       bool temp=csv_makelist;
       csv_makelist=false;
       container1DStackVector * csv = this;
@@ -261,7 +261,7 @@ namespace ztop{
   
   
   void container1DStackVector::loadFromTree(TTree * t, TString name){
-    
+    /*
     container1DStackVector * csv=0;
     t->SetBranchAddress("allContainerStackVectors", &csv);
     bool found=false;
@@ -274,7 +274,27 @@ namespace ztop{
       }
     }
     if(!found) std::cout << "container1DStackVector::loadFromTree: " << name << " not found in tree " << t->GetName() << std::endl;
+    */
+    container1DStackVector csv;
+    *this=*(csv.getFromTree(t,name));
   }
+
+  container1DStackVector * container1DStackVector::getFromTree(TTree * t, TString name){
+    container1DStackVector * csv=0;
+    t->SetBranchAddress("allContainerStackVectors", &csv);
+    for(float n=0;n<t->GetEntries();n++){
+      t->GetEntry(n);
+      if(csv->getName() == name){
+	//this=csv;
+	return csv;
+	break;
+      }
+    }
+    std::cout << "container1DStackVector::getFromTree: " << name << " not found in tree " << t->GetName() << std::endl;
+    return csv;
+  }
+
+
   void container1DStackVector::listAllInTree(TTree * t){
     container1DStackVector * csv=0;
     t->SetBranchAddress("allContainerStackVectors", &csv);

@@ -48,6 +48,7 @@ namespace ztop{
     void writeAllToTFile(TString, bool recreate=false, TString treename="stored_objects");
     void writeAllToTFile(TFile * , TString treename="stored_objects");
     void loadFromTree(TTree *, TString);
+    container1DStackVector* getFromTree(TTree *, TString);
     void listAllInTree(TTree *);
 
     void clear(){stacks_.clear();name_="";}
