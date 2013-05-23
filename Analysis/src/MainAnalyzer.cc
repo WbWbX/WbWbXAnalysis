@@ -14,6 +14,7 @@ MainAnalyzer::MainAnalyzer(){
 int MainAnalyzer::checkForWriteRequest(){
   for(size_t i=0;i<p_askwrite.size();i++){
     if(p_askwrite.get(i)->preadready()){
+      p_askwrite.get(i)->pread(); //to free pipe again
       return i; //return first ready to write!
     }
   }
@@ -33,16 +34,21 @@ int MainAnalyzer::start(){
  
   clear();
 
-  TString name=channel_+"_"+energy_+"_"+syst_;
+  //TString name=channel_+"_"+energy_+"_"+syst_;
 
   if(channel_=="" || energy_=="" || syst_ == ""){
     std::cout << "MainAnalyzer::start Analyzer not properly named - check!" << std::endl;
     return -1;
   }
 
-  analysisplots_.setName(name);
+  analysisplots_.setName(getOutFileName());
   analysisplots_.setSyst(getSyst());
 
+  //load btag:
+  if(!(getBTagSF()->makesEff())){
+    std::cout << "loading b-tag File: " << btagsffile_ << std::endl;
+    getBTagSF()->readFromTFile(btagsffile_);
+  }
 
   ///communication stuff...
 
@@ -66,6 +72,7 @@ int MainAnalyzer::start(){
     }
     else{ //send start signal for ith daughter process
          p_idx.get(i)->pwrite(i);
+	 usleep(500);
     }
   }
 
@@ -169,7 +176,7 @@ void MainAnalyzer::copyAll(const MainAnalyzer & analyzer){
   legentries_=analyzer.legentries_;
   colz_=analyzer.colz_;
   norms_=analyzer.norms_;
-  outfile_=analyzer.outfile_;
+  outfileadd_=analyzer.outfileadd_;
 
   //pipes are NOT in here. they need to be created during running?
 
@@ -187,7 +194,7 @@ MainAnalyzer & MainAnalyzer::operator = (const MainAnalyzer & analyzer){
 
 void MainAnalyzer::analyze(size_t i){
 
-  std::cout << " analyze " << i<< std::endl;
+  //  std::cout << " analyze " << i<< std::endl;
   analyze(infiles_.at(i),legentries_.at(i),colz_.at(i),norms_.at(i),i);
 
 }
@@ -246,6 +253,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   for(float i=-0.5;i<11.5;i++) selectionbins << i;
   vector<float> onebin;
   onebin << 0.5 << 1.5;
+
+  vector<float> metbins; //MET = [0, 400] in 25GeV bin
+  for(float i=0;i<21;i++) metbins << i*20;
 
   vector<float> bsfs;
   for(float i=0;i<120;i++) bsfs <<  (i/100);
@@ -397,11 +407,19 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   container1D jeteta7(etabinsjets, "jet eta step 7", "#eta_{jet}","N_{jets}");
   container1D jeteta8(etabinsjets, "jet eta step 8", "#eta_{jet}","N_{jets}");
 
-  container1D met6u(ptbins, "missing transverse energy uncorr step 6","E_{T,miss} [GeV]", "N_{evt}");
-  container1D met6(ptbins, "missing transverse energy step 6","E_{T,miss} [GeV]", "N_{evt}");
-  container1D met7(ptbins, "missing transverse energy step 7","E_{T,miss} [GeV]", "N_{evt}");
-  container1D met8(ptbins, "missing transverse energy step 8","E_{T,miss} [GeV]", "N_{evt}");
-  container1D met9(ptbins, "missing transverse energy step 9","E_{T,miss} [GeV]", "N_{evt}");
+
+  
+  container1D met3u(metbins, "missing transverse energy uncorr step 3","E_{T,miss} [GeV]", "N_{evt}");
+  container1D met4u(metbins, "missing transverse energy uncorr step 4","E_{T,miss} [GeV]", "N_{evt}");
+  container1D met5u(metbins, "missing transverse energy uncorr step 5","E_{T,miss} [GeV]", "N_{evt}");
+  container1D met6u(metbins, "missing transverse energy uncorr step 6","E_{T,miss} [GeV]", "N_{evt}");
+  container1D met3(metbins, "missing transverse energy step 3","E_{T,miss} [GeV]", "N_{evt}");
+  container1D met4(metbins, "missing transverse energy step 4","E_{T,miss} [GeV]", "N_{evt}");
+  container1D met5(metbins, "missing transverse energy step 5","E_{T,miss} [GeV]", "N_{evt}");
+  container1D met6(metbins, "missing transverse energy step 6","E_{T,miss} [GeV]", "N_{evt}");
+  container1D met7(metbins, "missing transverse energy step 7","E_{T,miss} [GeV]", "N_{evt}");
+  container1D met8(metbins, "missing transverse energy step 8","E_{T,miss} [GeV]", "N_{evt}");
+  container1D met9(metbins, "missing transverse energy step 9","E_{T,miss} [GeV]", "N_{evt}");
 
   container1D btagmulti7(multibinsbtag, "b-jet multiplicity step 7", "n_{b-tags}", "N_{jets}",true);
   container1D btagmulti8(multibinsbtag, "b-jet multiplicity step 8", "n_{b-tags}", "N_{jets}",true);
@@ -421,7 +439,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   container1D::c_makelist=false; //switch off automatic listing
 
   
-
+  int hghg=0;
 
   //get the lepton selector (maybe directly in the code.. lets see)
 
@@ -769,6 +787,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
     if(invLepMass < 20) 
       continue;
+
+   
     
 
     // create jec jets for met and ID jets
@@ -803,6 +823,13 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       hardjets << treejets.at(i);
     }
 
+    b_Met->GetEntry(entry);
+
+    NTMet adjustedmet = *pMet;
+    double nmpx=pMet->p4().Px() + dpx;
+    double nmpy=pMet->p4().Py() + dpy;
+    adjustedmet.setP4(LorentzVector(nmpx,nmpy,0,sqrt(nmpx*nmpx+nmpy*nmpy)));
+    
 
 
     //fill container
@@ -825,6 +852,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       muoniso3.fill(isomuons.at(i)->isoVal(),puweight);
     }
 
+    met3u.fill(pMet->met(),puweight);
+    met3.fill(adjustedmet.met(), puweight);
     invmass3.fill(invLepMass,puweight);
     vertexmulti3.fill(pEvent->vertexMulti(),puweight);
     selection.fill(3,puweight);
@@ -893,6 +922,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       vertexmulti4.fill(pEvent->vertexMulti(),puweight);
       jetmulti4.fill(hardjets.size(),puweight);
       selection.fill(4,puweight);
+      met4u.fill(pMet->met(),puweight);
+      met4.fill(adjustedmet.met(), puweight);
 
       sel_step[4]+=puweight;
       
@@ -930,6 +961,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       vertexmulti5.fill(pEvent->vertexMulti(),puweight);
       jetmulti5.fill(hardjets.size(),puweight);
       selection.fill(5,puweight);
+      met5u.fill(pMet->met(),puweight);
+      met5.fill(adjustedmet.met(), puweight);
 
       sel_step[5]+=puweight;
 
@@ -943,6 +976,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     /////////////////////// at least two jets STEP 6 /////////////
 
     ///adjust MET ///
+    /* moveed to top for testing
     b_Met->GetEntry(entry);
 
     NTMet adjustedmet = *pMet;
@@ -950,7 +984,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     double nmpy=pMet->p4().Py() + dpy;
     adjustedmet.setP4(LorentzVector(nmpx,nmpy,0,sqrt(nmpx*nmpx+nmpy*nmpy)));
     
-
+    */
 
     if(hardjets.size() < 2) continue;
 
@@ -1048,7 +1082,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     bsf=getBTagSF()->getNTEventWeight(hardjets);
     //  if(bsf < 0.3) cout << bsf << endl;
     btagScFs.fill(bsf, puweight);
-    //  puweight= puweight * bsf;
+    puweight= puweight * bsf;
 
     if(!Znotemu){
 
@@ -1100,12 +1134,12 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
 
   }//main event loop ends
-  std::cout << std::endl; //for status bar
+  if(showstatusbar_)std::cout << std::endl; //for status bar
 
   // Fill all containers in the stackVector
 
   // std::cout << "Filling containers to the Stack\n" << std::endl;
-  
+  btagsf_.makeEffs(); //only does that if switched on, so safe
 
   // delete t;
   f->Close(); //deletes t
@@ -1114,7 +1148,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
   
   ///
-  // if File outfile_ exists (it was created in analyze.C check
+  // if File outfileadd_ exists (it was created in analyze.C check
   // open file
   // try to get csv with proper name (there should be only one)
   // get it, name it csv
@@ -1124,22 +1158,33 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   // tree->overwrite
   // clse file and unblock
   p_askwrite.get(anaid)->pwrite(anaid);
+  std::cout << anaid << " (" << inputfile << ")" << " asking for write permissions to " <<getOutPath() << endl;
   int canwrite=p_allowwrite.get(anaid)->pread();
   if(canwrite>0){ //wait for permission
+
 
     std::cout << "allowed " << anaid << " to write" << endl;
 
     std::ofstream text_outfile;
 
-    text_outfile.open((outfile_+".txt").Data(), std::ios_base::app);
+    text_outfile.open((getOutPath()+".txt").Data(), std::ios_base::app);
     text_outfile << anaid; 
     text_outfile << "\n";
 
-    TFile * outfile=new TFile(outfile_,"read");
+    TFile * outfile;
+
+    std::ifstream OutFileTest((getOutPath()+".root").Data()); 
+    if(!OutFileTest) {
+      outfile=new TFile(getOutPath()+".root","RECREATE");
+    }
+    else{
+      outfile=new TFile(getOutPath()+".root","READ");
+    }
+
     TTree * outtree;
     ztop::container1DStackVector * csv=&analysisplots_;
-
-    std::cout << "trying to get tree" <<std::endl;   
+   
+    // std::cout << "trying to get tree" <<std::endl;   
 
     if(outfile->Get("stored_objects")){
       outtree=(TTree*)outfile->Get("stored_objects");
@@ -1149,11 +1194,13 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       }
     }     
 
+    //btagsf_
+
     csv->addList(legendname,color,norm);
     outfile->Close();
     delete outfile;
   
-    outfile=new TFile(outfile_,"RECREATE");
+    outfile=new TFile((getOutPath()+".root"),"RECREATE");
     outfile->cd();
 
     outtree= new TTree("stored_objects","stored_objects");
@@ -1162,7 +1209,32 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     outtree->Write("",TObject::kOverwrite);//"",TObject::kOverwrite);
     outfile->Close();
     delete outfile;
-    
+
+    ///btagsf
+    if(btagsf_.makesEff()){
+      ztop::NTBTagSF  btsf;
+      TFile * bsffile;
+      std::ifstream BOutFileTest(btagsffile_.Data()); 
+      if(!BOutFileTest) {
+	bsffile=new TFile(btagsffile_,"RECREATE");
+      }
+      else{
+	bsffile=new TFile(btagsffile_,"READ");
+	if(bsffile->Get("stored_objects")){
+	  TTree * btt = (TTree*) bsffile->Get("stored_objects");
+	  if(btt->GetBranch("allbTagBase")){
+	    btsf.readFromTFile(btagsffile_);
+	    //ztop::NTBTagSF  btsf2=btagsf_ + btsf;
+	     btagsf_ = (btagsf_ + btsf); //combine both
+	  }
+	}
+      }
+      bsffile->Close();
+      delete bsffile;
+      btagsf_.writeToTFile(btagsffile_); //recreates the file
+
+    }///makes eff
+
     std::cout << inputfile << ": " << std::endl;
     for(unsigned int i=0;i<9;i++){
       std::cout << "selection step "<< toTString(i)<< " "  << sel_step[i];

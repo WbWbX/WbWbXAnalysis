@@ -53,9 +53,24 @@ public:
   void setChannel(TString chan){channel_=chan;}
   void setSyst(TString syst){syst_=syst;}
   void setEnergy(TString e){energy_=e;}
-  void setOutFile(TString o){outfile_=o;}
+  void setOutFileAdd(TString o){outfileadd_=o;}
   
- 
+  TString getOutFileName(){
+    if(outfileadd_=="") return channel_+"_"+energy_+"_"+syst_;
+    else return channel_+"_"+energy_+"_"+syst_+"_"+outfileadd_;
+  } 
+
+  void setOutDir(TString dir){
+    if(dir.EndsWith("/"))
+      outdir_=dir;
+    else
+      outdir_=dir+"/";
+  }
+
+  TString getOutPath(){return outdir_+getOutFileName();}
+
+  void setBTagSFFile(TString file){btagsffile_=file;}
+
   void setLumi(double Lumi){lumi_=Lumi;}
 
   // void replaceInAllOptions(TString replace, TString with){name_.ReplaceAll(replace,with);analysisplots_.setName(name_);}
@@ -65,8 +80,8 @@ public:
 
 
  
-void analyze(TString, TString, int, double,size_t i=0);
-   void analyze(size_t i);
+  void analyze(TString, TString, int, double,size_t i=0);
+  void analyze(size_t i);
 
   void setFileList(TString );
   void setDataSetDirectory(TString dir){datasetdirectory_=dir;}
@@ -111,7 +126,10 @@ private:
   ztop::container1DStackVector  analysisplots_;
 
   size_t filecount_;
-  TString outfile_;
+  TString outfileadd_;
+  TString outdir_;
+
+  TString btagsffile_;
 
   //for parallel stuff
 
