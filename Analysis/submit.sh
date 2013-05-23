@@ -24,12 +24,13 @@ dir=analysis_$(date +%F_%H:%M)
 
 mkdir $dir
 cd $dir
+cp ../submit.sh .
 cp ../analyse.exe .
 cp -r ../lib .
 cp ../*inputfiles.txt .
 cp ../*testfiles.txt .
 cp ../analyse.C .
-#cp ../job.sh .
+cp ../*btags.root .
 mkdir jobscripts
 workdir=`pwd`
 
@@ -44,13 +45,13 @@ for (( i=0;i<${#channels[@]};i++)); do
 
 ##here do qsub or dirty &
 	    outname=${channel}_${energy}_${syst};
-	    sed -e "s/##OUTNAME##/${outname}/" -e "s/##PARAMETERS##/-c ${channel} -s ${syst} -o ${outname}/" -e "s/##WORKDIR##/${dir}/" < ../job.sh > jobscripts/${outname}_job.sh
+	    sed -e "s/##OUTNAME##/${outname}/" -e "s/##PARAMETERS##/-c ${channel} -s ${syst}/" -e "s/##WORKDIR##/${dir}/" < ../job.sh > jobscripts/${outname}_job.sh
 	    chmod +x jobscripts/${outname}_job.sh
 	    if [[ $SGE_CELL ]] ;
 	    then
 		qsub jobscripts/${outname}_job.sh
 	    else
-		./jobscripts/${outname}_job.sh &
+	echo	./jobscripts/${outname}_job.sh &
 	    fi
 	done
     done
