@@ -20,6 +20,7 @@ namespace
     std::vector<ztop::container1DStack> bb;
     ztop::container1DStackVector aaa;
     std::vector<ztop::container1DStackVector> bbb;
+    std::map<TString,size_t > kokssd;
 
 
     std::vector<TH2D> ijij;

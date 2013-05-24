@@ -201,7 +201,10 @@ namespace ztop{
   THStack * container1DStack::makeTHStack(TString stackname){
     if(stackname == "") stackname = name_+"_s";
     THStack *tstack = new THStack(stackname,stackname);
-    for(unsigned int i=0;i<size();i++){
+    for(unsigned int it=0;it<size();it++){
+      size_t i=it;
+      if(checkLegOrder()>-1 &&legorder_.find(legends_[it])!=legorder_.end())
+	i=legorder_.find(legends_[it])->second;
       if(getLegend(i) != dataleg_){
 	container1D tempcont = getContainer(i);
 	tempcont = tempcont * getNorm(i);
@@ -215,18 +218,38 @@ namespace ztop{
     }
     return  tstack;
   }
-  TLegend * container1DStack::makeTLegend(){
+  TLegend * container1DStack::makeTLegend(bool inverse){
     TLegend *leg = new TLegend((Double_t)0.65,(Double_t)0.50,(Double_t)0.95,(Double_t)0.90);
     leg->Clear();
     leg->SetFillStyle(0);
     leg->SetBorderSize(0);
-    for(unsigned int i=0;i<size();i++){
-      container1D tempcont = getContainer(i);
-      tempcont = tempcont * getNorm(i);
-      TH1D * h = (TH1D*)tempcont.getTH1D(getLegend(i)+" "+getName()+"_leg")->Clone();
-      h->SetFillColor(getColor(i));
-      if(getLegend(i) != dataleg_) leg->AddEntry(h,getLegend(i),"f");
-      else leg->AddEntry(h,getLegend(i),"ep");
+
+    //inverse not in yet
+    if(inverse){
+      for(unsigned int it=size()-1;(int)it>=0;it--){
+	size_t i=it;
+	if(checkLegOrder()>-1 && legorder_.find(legends_[it])!=legorder_.end())
+	  i=legorder_.find(legends_[it])->second;
+	container1D tempcont = getContainer(i);
+	tempcont = tempcont * getNorm(i);
+	TH1D * h = (TH1D*)tempcont.getTH1D(getLegend(i)+" "+getName()+"_leg")->Clone();
+	h->SetFillColor(getColor(i));
+	if(getLegend(i) != dataleg_) leg->AddEntry(h,getLegend(i),"f");
+	else leg->AddEntry(h,getLegend(i),"ep");
+      }
+    }
+    else{
+      for(unsigned int it=0;it<size();it++){
+	size_t i=it;
+	if(checkLegOrder()>-1 &&legorder_.find(legends_[it])!=legorder_.end())
+	  i=legorder_.find(legends_[it])->second;
+	container1D tempcont = getContainer(i);
+	tempcont = tempcont * getNorm(i);
+	TH1D * h = (TH1D*)tempcont.getTH1D(getLegend(i)+" "+getName()+"_leg")->Clone();
+	h->SetFillColor(getColor(i));
+	if(getLegend(i) != dataleg_) leg->AddEntry(h,getLegend(i),"f");
+	else leg->AddEntry(h,getLegend(i),"ep");
+      }
     }
     return leg;
   }
@@ -472,6 +495,16 @@ namespace ztop{
   ztop::container1DStack container1DStack::operator * (int scalar){
     return *this * (double)scalar;
   }
-    
 
-}
+  //rovate memberfunc
+  int container1DStack::checkLegOrder(){
+    for(std::map<TString,size_t>::iterator it=legorder_.begin();it!=legorder_.end();++it){
+      if(it->second > size()){
+	std::cout << "container1DStack::checkLegOrder: "<< name_ << ": legend ordering numbers (" <<it->second << ") need to be <= size of stack! ("<< size()<<")" <<std::endl;
+	return -1;
+      }
+    }
+    return 0;
+  }
+
+}//namespace

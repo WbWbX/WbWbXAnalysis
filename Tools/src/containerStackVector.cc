@@ -27,13 +27,21 @@ namespace ztop{
     }
   }
 
-  void container1DStackVector::add(ztop::container1D & container, TString leg , int color , double norm){
+  void container1DStackVector::setLegendOrder(TString leg, size_t no){
+    for(std::vector<ztop::container1DStack>::iterator s=stacks_.begin();s<stacks_.end();++s){
+      s->setLegendOrder(leg,no);
+    }
+  }
+
+  void container1DStackVector::add(ztop::container1D & container, TString leg , int color , double norm,int legor){
     bool found=false;
     for(std::vector<ztop::container1DStack>::iterator s=stacks_.begin();s<stacks_.end();++s){
       if(s->getName() == container.getName()){
 	if(container1D::debug)
 	  std::cout << "container1DStackVector::add: adding " << s->getName() << " to existing stack"  <<std::endl;
 	s->push_back(container, leg, color, norm);
+	if(legor>-1)
+	  s->setLegendOrder(leg,(size_t)legor);
 	found=true;
 	break;
       }
@@ -43,9 +51,12 @@ namespace ztop{
 	  std::cout << "container1DStackVector::add: creating new stack " << container.getName()  <<std::endl;
       ztop::container1DStack newstack(container.getName());
       newstack.push_back(container, leg, color, norm);
+      if(legor>-1)
+	newstack.setLegendOrder(leg,(size_t)legor);
       stacks_.push_back(newstack);
     }
   }
+
 
   void container1DStackVector::addList(TString leg, int color, double norm){
     for(unsigned int i=0;i<container1D::c_list.size();i++){
@@ -53,6 +64,11 @@ namespace ztop{
     }
   }
 
+  void container1DStackVector::addList(TString leg, int color, double norm,size_t legor){
+    for(unsigned int i=0;i<container1D::c_list.size();i++){
+      add(*container1D::c_list[i],leg,color,norm,legor);
+    }
+  }
   ztop::container1DStack container1DStackVector::getStack(TString name){
     ztop::container1DStack defout("DUMMY");
     for(std::vector<ztop::container1DStack>::iterator s=stacks_.begin();s<stacks_.end();++s){

@@ -26,9 +26,13 @@ namespace ztop{
     TString getSyst(){return isSyst_;}
 
     void listStacks();
+    void setLegendOrder(TString , size_t); //do it afterwards
 
-    void add(ztop::container1D &, TString, int, double);
+    // void add(ztop::container1D &, TString, int, double);
     void addList( TString, int, double);
+    void add(ztop::container1D &, TString, int, double,int legor=-1); //+legorder
+    void addList( TString, int, double,size_t); //+legorder
+
     std::vector<ztop::container1DStack> getVector(){return stacks_;}
     ztop::container1DStack getStack(TString);
     ztop::container1DStack getStack(unsigned int n){return stacks_[n];}

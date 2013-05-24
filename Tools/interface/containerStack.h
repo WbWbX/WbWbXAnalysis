@@ -14,6 +14,7 @@
 #include "TStyle.h"
 #include "TLatex.h"
 #include "TGaxis.h"
+#include <map>
 
 namespace ztop{
 
@@ -28,6 +29,9 @@ namespace ztop{
     void removeContribution(TString); //! removes contribution
     
     void setDataLegend(TString leg="data"){dataleg_=leg;}
+
+    void setLegendOrder(TString leg, size_t no){legorder_[leg]=no;}
+
     void mergeSameLegends();       //! shouldn't be necessary
     ztop::container1D getContribution(TString);   //! does not ignore data; makes copy, doesn't change member containers!
     ztop::container1D getContributionsBut(TString);  //!does not ignore data; makes copy, doesn't change member containers!
@@ -54,7 +58,7 @@ namespace ztop{
     void setName(TString name){name_=name;}
     
     THStack * makeTHStack(TString stackname = "");
-    TLegend * makeTLegend();
+    TLegend * makeTLegend(bool inverse=true);
     void drawControlPlot(TString name="", bool drawxaxislabels=true, double resizelabels=1); // the extra axis is in both... sorry for that!
     TGraphAsymmErrors * makeMCErrors();
     void drawRatioPlot(TString name="",double resizelabels=1);
@@ -86,7 +90,10 @@ namespace ztop{
     std::vector<double> norms_;
     TString dataleg_;
 
+    std::map<TString,size_t> legorder_;
     
+    int checkLegOrder();
+
 };
   
 
