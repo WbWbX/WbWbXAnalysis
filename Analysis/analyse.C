@@ -39,48 +39,13 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
 
   jecfile="/src/TtZAnalysis/Data/Summer12_V2_DATA_AK5PF_UncertaintySources.txt";
   //btagfile="/src/TtZAnalysis/Data";
-  pufile="/src/TtZAnalysis/Data/Full19.json.txt_PU.root";
+  // pufile="/src/TtZAnalysis/Data/Full19.json.txt_PU.root";
+  pufile="Full19.json.txt_PU";
   inputfilewochannel="inputfiles.txt"; //here dont specify channel or energy
 
   btagfile=channel+"_btags.root";
 
-  if(Syst=="nominal"){
-    //all already defined
-  }
-  else if(Syst=="JES_up"){
-
-  }
-  else if(Syst=="JES_down"){
-
-  }
-  else if(Syst=="JER_up"){
-
-  }
-  else if(Syst=="JER_down"){
-
-  }
-  else if(Syst=="PU_up"){
-
-  }
-  else if(Syst=="PU_down"){
-
-  }
-  else if(Syst=="MATCH_up"){
-    inputfilewochannel="inputfiles_matchup.txt";
-  }
-  else if(Syst=="MATCH_down"){
-
-  }
-  else if(Syst=="SCALE_up"){
-
-  }
-  else if(Syst=="SCALE_down"){
-
-  }
-  //......
-  else{
-    didnothing=true;
-  }
+  
   
   TString inputfile=channel+"_"+energy+"_"+inputfilewochannel;
   // TString 
@@ -105,7 +70,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
   ana.setLumi(lumi);
   ana.setFileList(inputfile);
   ana.setDataSetDirectory(treedir);
-  ana.getPUReweighter()->setDataTruePUInput((TString)cmssw_base+pufile);
+  ana.getPUReweighter()->setDataTruePUInput((TString)cmssw_base+"/src/TtZAnalysis/Data/"+pufile+".root");
   ana.setChannel(channel);
   ana.setSyst(Syst);
   ana.setEnergy(energy);
@@ -114,6 +79,45 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
   ana.setOutDir(outdir);
   ana.getBTagSF()->setMakeEff(dobtag);
   ana.setBTagSFFile(btagfile);
+
+
+  if(Syst=="nominal"){
+    //all already defined
+  }
+  else if(Syst=="JES_up"){
+    ana.getJECUncertainties()->setSystematics("up");
+  }
+  else if(Syst=="JES_down"){
+    ana.getJECUncertainties()->setSystematics("down");
+  }
+  else if(Syst=="JER_up"){
+    ana.getJERAdjuster()->setSystematics("up");
+  }
+  else if(Syst=="JER_down"){
+    ana.getJERAdjuster()->setSystematics("down");
+  }
+  else if(Syst=="PU_up"){
+    ana.getPUReweighter()->setDataTruePUInput((TString)cmssw_base+"/src/TtZAnalysis/Data/"+pufile+"_up.root");
+  }
+  else if(Syst=="PU_down"){
+    ana.getPUReweighter()->setDataTruePUInput((TString)cmssw_base+"/src/TtZAnalysis/Data/"+pufile+"_down.root");
+  }
+  else if(Syst=="MATCH_up"){
+    inputfilewochannel="inputfiles_matchup.txt";
+  }
+  else if(Syst=="MATCH_down"){
+
+  }
+  else if(Syst=="SCALE_up"){
+
+  }
+  else if(Syst=="SCALE_down"){
+
+  }
+  //......
+  else{
+    didnothing=true;
+  }
 
 
   if(didnothing){
@@ -157,7 +161,7 @@ int main(int argc, char* argv[]){
   TString outfile=getOutFile(argc, argv);  //-o <outfile> should be something like channel_energy_syst.root // only for plots
   bool statbar=false;
 
-  bool mergefiles=false; //get these things from the options to
+  bool mergefiles=false; //get these things from the options to..
   std::vector<TString> filestomerge;
 
   if(mergefiles){

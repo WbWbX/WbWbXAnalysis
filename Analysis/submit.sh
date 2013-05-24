@@ -31,6 +31,8 @@ cp ../*inputfiles.txt .
 cp ../*testfiles.txt .
 cp ../analyse.C .
 cp ../*btags.root .
+cp ../mergeSyst.C .
+cp ../mergeSyst.exe .
 mkdir jobscripts
 workdir=`pwd`
 
@@ -53,6 +55,14 @@ for (( i=0;i<${#channels[@]};i++)); do
 	    else
 		./jobscripts/${outname}_job.sh &
 	    fi
+
+###make the merge line
+
+
+###what about check script?
+
 	done
     done
 done
+
+

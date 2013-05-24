@@ -1,6 +1,6 @@
 #!/bin/sh
 
-infile=analyse.C
+
 
 export CPLUS_INCLUDE_PATH=$CMSSW_BASE/src
 ROOTFLAGS=`root-config --cflags`
@@ -12,6 +12,7 @@ libs=("TopAnalysisZTopUtils"
 "TtZAnalysisDataFormats" 
 "TtZAnalysisTools"
 "TtZAnalysisAnalysis"
+"FWCoreFWLite"
 #"DataFormatsStdDictionaries"
 #"CondFormatsJetMETObjects"
 );
@@ -32,7 +33,15 @@ linklibs="$linklibs -l${libs[${i}]}"
 cp ${CMSLIBS}lib${libs[${i}]}.so $libdir
 done
 
+echo compiling analyse.C
+infile=analyse.C
+
 g++ $ROOTFLAGS -fopenmp -I$CPLUS_INCLUDE_PATH -c -o $infile.o $infile
-#exit
 g++ -o analyse.exe -fopenmp -Wall $ROOTLIBS -Llib$linklibs $infile.o
 
+infile=mergeSyst.cc
+
+echo compiling mergeSyst.cc
+
+g++ $ROOTFLAGS -fopenmp -I$CPLUS_INCLUDE_PATH -c -o $infile.o $infile
+g++ -o mergeSyst.exe -fopenmp -Wall $ROOTLIBS -Llib$linklibs $infile.o
