@@ -4,7 +4,7 @@
 #$ -S /bin/sh
 #
 #(the cpu time for this job)
-#$ -l h_cpu=00:30:00
+#$ -l h_cpu=01:30:00
 #
 #(the maximum memory usage of this job)
 #$ -l h_vmem=1024M

@@ -104,11 +104,16 @@ int MainAnalyzer::start(){
     usleep(100000); //only check every 100ms
   }
   sleep(1);
+  bool nonefailed;
   for(size_t i=0;i<succ.size();i++){
     std::cout << succ.at(i) << "\t" << infiles_.at(i) << std::endl;
+    if(succ.at(i) < 0)
+      nonefailed=false;
   }
-
-  return 1; //only parent
+  if(nonefailed)
+    return 1; //only parent
+  else
+    return -1;
   
 }
 
@@ -503,7 +508,10 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
   
   // getBTagSF()->prepareEff(inputfile , norm );
-    getBTagSF()->setSampleName(toString(inputfile));
+  if(getBTagSF()->setSampleName(toString(inputfile)) < 0){
+    p_finished.get(anaid)->pwrite(-2);
+    return;
+  }
 
   cout << "running on: " << datasetdirectory_ << inputfile << "    legend: " << legendname << "\nxsec: " << oldnorm << ", genEvents: " << genentries <<endl;
   // get main analysis tree
@@ -573,7 +581,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   if(norm==0) nEntries=0; //skip for norm0
 
   //if(testmode) 
-  // nEntries=nEntries/1000;
+   nEntries=nEntries/1000;
 
   for(Long64_t entry=0;entry<nEntries;entry++){
     if(showstatusbar_) displayStatusBar(entry,nEntries);

@@ -123,24 +123,30 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
   if(didnothing){
     //create a file outputname_norun that gives a hint that nothing has been done
     //and check in the sleep loop whether outputname_norun exists
+    std::cout << "analyse.exe: "<< channel <<"_" << energy <<"_" << Syst << " nothing done - maybe some input strings wrong" << std::endl;
   }
   else{
     //if PDF var not found make the same file as above
-    std::cout << ana.start() << std::endl;
+    int fullsucc=ana.start();
     
     ztop::container1DStackVector csv;
-    TFile * f = new TFile(ana.getOutPath()+".root","read");
-    if(f->Get("stored_objects")){
-      csv.loadFromTree((TTree*)f->Get("stored_objects"),ana.getPlots()->getName());
+   
+    if(fullsucc>=0){
+      TFile * f = new TFile(ana.getOutPath()+".root","read");
+      if(f->Get("stored_objects")){
+	csv.loadFromTree((TTree*)f->Get("stored_objects"),ana.getPlots()->getName());
+      }
+      csv.writeAllToTFile(ana.getOutPath()+"_plots.root",true);
+      sleep(1);
+      std::cout <<"\nFINISHED with "<< channel <<"_" << energy <<"_" << Syst <<std::endl;
+
     }
-    csv.writeAllToTFile(ana.getOutPath()+"_plots.root",true);
-    
-    
+    else{
+      std::cout << "" << std::endl;
+    }
   }
 
-  sleep(1);
-  std::cout <<"\nFINISHED with "<< channel <<"_" << energy <<"_" << Syst <<std::endl;
-  if(didnothing) std::cout << "...but nothing done - maybe some input strings wrong" << std::endl;
+  
   
 }
 
