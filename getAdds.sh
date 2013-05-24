@@ -134,7 +134,13 @@ addpkg PhysicsTools/PatAlgos     V08-09-48
 addpkg DataFormats/StdDictionaries V00-02-14
 addpkg FWCore/GuiBrowsers V00-00-70
 
+
 fi
+
+
+#for analysis stuff:
+
+addpkg FWCore/FWLite/src/FWCoreFWLite
 
 #some copy-paste in case you want to use my root macros and the classes on command line
 echo 'you will need this in the rootlogon.C:'

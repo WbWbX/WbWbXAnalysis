@@ -25,7 +25,7 @@ cd $CMSSW_BASE/src
 
 cd $CMSSW_BASE/src
 
-
+addpkg FWCore/FWLite/src/FWCoreFWLite
 
 #some copy-paste in case you want to use my root macros and the classes on command line
 echo 'you will need this in the rootlogon.C:'
