@@ -11,8 +11,8 @@ tree_8TeV_ee_runD_prompt.root data 1 1
 tree_8TeV_eettbar.root t#bar{t} 633 234
 tree_8TeV_eettbarviatau.root t#bar{t}(#tau) 632 234
 tree_8TeV_eettbarbg.root t#bar{t}bg 634 234
-tree_8TeV_tW.root singleTop 616 11.2
-tree_8TeV_tbarW.root singleTop 616 11.2
+tree_8TeV_tW.root singleTop 616 11.1
+tree_8TeV_tbarW.root singleTop 616 11.1
 tree_8TeV_wwp.root VV 390 54.8
 tree_8TeV_zz.root VV 390 17.7
 tree_8TeV_wz.root VV 390 33.2

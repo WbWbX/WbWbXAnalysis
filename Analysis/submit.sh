@@ -1,7 +1,7 @@
 #!/bin/sh
 
 channels=("ee"
-"mumu"
+#"mumu"
 );
 systs=("nominal"
 );
@@ -51,7 +51,7 @@ for (( i=0;i<${#channels[@]};i++)); do
 	    then
 		qsub jobscripts/${outname}_job.sh
 	    else
-	echo	./jobscripts/${outname}_job.sh &
+		./jobscripts/${outname}_job.sh &
 	    fi
 	done
     done

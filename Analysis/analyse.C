@@ -4,7 +4,7 @@
 //should be taken care of by the linker!
 
 
-void analyse(TString channel, TString Syst, TString energy, TString outfile, double lumi, bool dobtag, bool statbar){ //options like syst..
+void analyse(TString channel, TString Syst, TString energy, TString outfileadd, double lumi, bool dobtag, bool statbar){ //options like syst..
 
   bool didnothing=false;
 
@@ -35,11 +35,11 @@ void analyse(TString channel, TString Syst, TString energy, TString outfile, dou
   // all relative to cmssw_base except for inputfiles (will be copied)
 
   jecfile="/src/TtZAnalysis/Data/Summer12_V2_DATA_AK5PF_UncertaintySources.txt";
-  btagfile="/src/TtZAnalysis/Data";
+  //btagfile="/src/TtZAnalysis/Data";
   pufile="/src/TtZAnalysis/Data/Full19.json.txt_PU.root";
-  inputfilewochannel="testfiles.txt"; //here dont specify channel or energy
+  inputfilewochannel="inputfiles.txt"; //here dont specify channel or energy
 
-  btagfile="btags.root";
+  btagfile=channel+"_btags.root";
 
   if(Syst=="nominal"){
     //all already defined
@@ -95,12 +95,8 @@ void analyse(TString channel, TString Syst, TString energy, TString outfile, dou
   ///set input files list etc (common)
 
   system("mkdir -p output");
-  TString outfilename="output/"+outfile+".root";
-  //create file
-  TFile *f = new TFile(outfilename,"RECREATE");
-  delete f;
-  system(((TString)"touch "+outfilename+".txt").Data());
- 
+  TString outdir="output";  
+
   MainAnalyzer ana;
   ana.setShowStatusBar(statbar);
   ana.setLumi(lumi);
@@ -111,13 +107,11 @@ void analyse(TString channel, TString Syst, TString energy, TString outfile, dou
   ana.setSyst(Syst);
   ana.setEnergy(energy);
   ana.getPUReweighter()->setMCDistrSum12();
-  ana.setOutFile(outfilename);
- 
-  //ana.getBTagSF()->setMakeEff(dobtag);
-  if(!dobtag)
-    ana.getBTagSF()->readFromTFile(btagfile);
+  ana.setOutFileAdd(outfileadd);
+  ana.setOutDir(outdir);
+  ana.getBTagSF()->setMakeEff(dobtag);
+  ana.setBTagSFFile(btagfile);
 
-  //btag?? no idea...
 
   if(didnothing){
     //create a file outputname_norun that gives a hint that nothing has been done
@@ -125,11 +119,15 @@ void analyse(TString channel, TString Syst, TString energy, TString outfile, dou
   }
   else{
     //if PDF var not found make the same file as above
-    std::cout << ana.start() << std::endl;;
-    // NOT DONE HERE ANYMORE!  ana.getPlots()->writeAllToTFile("output/"+outfile+".root",true);
-
-    if(dobtag)
-      ana.getBTagSF()->writeToTFile(btagfile);
+    std::cout << ana.start() << std::endl;
+    
+    ztop::container1DStackVector csv;
+    TFile * f = new TFile(ana.getOutPath()+".root","read");
+    if(f->Get("stored_objects")){
+      csv.loadFromTree((TTree*)f->Get("stored_objects"),ana.getPlots()->getName());
+    }
+    csv.writeAllToTFile(ana.getOutPath()+"_plots.root",true);
+    
     
   }
 
@@ -154,7 +152,7 @@ int main(int argc, char* argv[]){
   double lumi=getLumi(argc, argv);        //-l default 19100
   bool dobtag=prepareBTag(argc, argv);    //-b switches on default false
   TString outfile=getOutFile(argc, argv);  //-o <outfile> should be something like channel_energy_syst.root // only for plots
-  bool statbar=true;
+  bool statbar=false;
 
   bool mergefiles=false; //get these things from the options to
   std::vector<TString> filestomerge;
