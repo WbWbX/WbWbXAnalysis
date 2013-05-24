@@ -29,7 +29,7 @@ linklibs=""
 
 for (( i=0;i<${#libs[@]};i++)); do
 linklibs="$linklibs -l${libs[${i}]}"
-cp $CMSLIBS/lib${libs[${i}]}.so $libdir
+cp ${CMSLIBS}lib${libs[${i}]}.so $libdir
 done
 
 g++ $ROOTFLAGS -fopenmp -I$CPLUS_INCLUDE_PATH -c -o $infile.o $infile

@@ -129,6 +129,7 @@ void MainAnalyzer::setFileList(TString filelist){
   int color;
   double norm;
   string oldline="";
+  size_t legord;
   if(inputfiles.is_open()){
     while(inputfiles.good()){
       inputfiles >> filename; 
@@ -138,12 +139,13 @@ void MainAnalyzer::setFileList(TString filelist){
 	std::cout << "ignoring: " << filename << std::endl;
 	continue;
       }
-      inputfiles >> legentry >> color >> norm;
+      inputfiles >> legentry >> color >> norm >> legord;
       if(oldline != filename){
 	infiles_    << filename;
 	legentries_ << legentry;
 	colz_       << color;
 	norms_      << norm;
+	legord_ << legord;
 	oldline=filename;
       }
       
@@ -195,11 +197,11 @@ MainAnalyzer & MainAnalyzer::operator = (const MainAnalyzer & analyzer){
 void MainAnalyzer::analyze(size_t i){
 
   //  std::cout << " analyze " << i<< std::endl;
-  analyze(infiles_.at(i),legentries_.at(i),colz_.at(i),norms_.at(i),i);
+  analyze(infiles_.at(i),legentries_.at(i),colz_.at(i),norms_.at(i),legord_.at(i),i);
 
 }
 
-void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, double norm,size_t anaid){
+void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, double norm,size_t legord,size_t anaid){
 
   // return;
 
@@ -439,7 +441,6 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   container1D::c_makelist=false; //switch off automatic listing
 
   
-  int hghg=0;
 
   //get the lepton selector (maybe directly in the code.. lets see)
 
@@ -571,7 +572,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   Long64_t nEntries=t->GetEntries();
   if(norm==0) nEntries=0; //skip for norm0
 
-  //if(testmode) nEntries=10;
+  //if(testmode) 
+  //  nEntries=nEntries/1000;
 
   for(Long64_t entry=0;entry<nEntries;entry++){
     if(showstatusbar_) displayStatusBar(entry,nEntries);
@@ -1196,7 +1198,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
     //btagsf_
 
-    csv->addList(legendname,color,norm);
+    csv->addList(legendname,color,norm,legord);
     outfile->Close();
     delete outfile;
   

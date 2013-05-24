@@ -80,7 +80,7 @@ public:
 
 
  
-  void analyze(TString, TString, int, double,size_t i=0);
+  void analyze(TString, TString, int, double,size_t,size_t i=0);
   void analyze(size_t i);
 
   void setFileList(TString );
@@ -136,6 +136,7 @@ private:
   std::vector<TString> infiles_,legentries_;
   std::vector<int> colz_;
   std::vector<double> norms_;
+  std::vector<size_t> legord_;
 
 ///communication pipes
 

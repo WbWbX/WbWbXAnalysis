@@ -21,6 +21,9 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
   if((TString)getenv("SGE_CELL") != ""){ //on the naf
     treedir="/scratch/hh/dust/naf/cms/user/kieseler/trees_Mai13_A03/";
   }
+  else if((TString)getenv("HOST") == "cmsng401"){
+    treedir="/data/kiesej/Analysis/trees/trees_Mai13_A03/";
+  }
   
 
   TString jecfile,btagfile,pufile,inputfilewochannel; //...
