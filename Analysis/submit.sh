@@ -56,7 +56,7 @@ for (( i=0;i<${#channels[@]};i++)); do
 
 ##here do qsub or dirty &
 	    outname=${channel}_${energy}_${syst};
-	    array=( "${array[@]}" "jack" )
+	   # array=( "${array[@]}" "jack" )
 	    outnames=( "${outnames[@]}" "${outname}" );
 	    sed -e "s/##OUTNAME##/${outname}/" -e "s/##PARAMETERS##/-c ${channel} -s ${syst}/" -e "s/##WORKDIR##/${dir}/" < ../job.sh > jobscripts/${outname}
 	    chmod +x jobscripts/${outname}

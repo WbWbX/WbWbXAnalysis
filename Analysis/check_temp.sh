@@ -1,26 +1,29 @@
-#!/bin/sh
+#!/bin/zsh
 
-alljobs=`ls jobscripts`
-nominal=""
 
 doloop=$1
+cd jobscripts
 
-for (( i=0;i<${#alljobs[@]};i++)); do
+#for (( i=0;i<${#alljobs[@]};i++)); do
+for file in *; do
 
-    jobname=${alljobs[${i}]};
-
+    jobname=$file
     if [[ -f output/$jobname.root ]];
     then
 	if [[ -f output/${jobname}_plots.root ]];
 	then
-	    echo "${jobname} successfully done"
+	    echo "${jobname} \e[1;42m successfully done \e[0m "
+	   # if [[ "${jobname}" == *"nominal"*]]
+	   ## then
+		#nominal
+	    done=( "${done[@]}" "${jobname}" );
 	else
-	    echo "${jobname} failed"
+	    echo "${jobname} \e[1;31m failed \e[0m"
 	fi
     else
-	echo "${jobname} running"
+	echo "${jobname} \e[1;42m running \e[0m"
     fi
-
 done
 
-##some structure stuff still missing
+echo "for merging of systematics of successful jobs do:"
+echo "../mergeSyst.exe ${done[@]}"
