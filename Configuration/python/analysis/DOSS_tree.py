@@ -403,18 +403,21 @@ process.noscraping = cms.EDFilter(
 process.load('CommonTools.RecoAlgos.HBHENoiseFilter_cfi')
 
 ## The CSC beam halo tight filter ____________________________________________||
-process.load('RecoMET.METAnalyzers.CSCHaloFilter_cfi')
+## The tracking failure filter _______________________________________________||
+if not is2011:
+    process.load('RecoMET.METFilters.trackingFailureFilter_cfi')
+    process.load('RecoMET.METAnalyzers.CSCHaloFilter_cfi')
 
 ## The HCAL laser filter _____________________________________________________||
-process.load("RecoMET.METFilters.hcalLaserEventFilter_cfi")
+    process.load("RecoMET.METFilters.hcalLaserEventFilter_cfi")
 
 ## The ECAL dead cell trigger primitive filter _______________________________||
-process.load('RecoMET.METFilters.EcalDeadCellTriggerPrimitiveFilter_cfi')
-process.EcalDeadCellTriggerPrimitiveFilter.tpDigiCollection = cms.InputTag("ecalTPSkimNA")
+    process.load('RecoMET.METFilters.EcalDeadCellTriggerPrimitiveFilter_cfi')
+    process.EcalDeadCellTriggerPrimitiveFilter.tpDigiCollection = cms.InputTag("ecalTPSkimNA")
 
 
 ## The EE bad SuperCrystal filter ____________________________________________||
-process.load('RecoMET.METFilters.eeBadScFilter_cfi')
+    process.load('RecoMET.METFilters.eeBadScFilter_cfi')
 
 ## The ECAL laser correction filter
 ###process.load('RecoMET.METFilters.ecalLaserCorrFilter_cfi')
@@ -428,40 +431,33 @@ process.goodVertices = cms.EDFilter(
   cut = cms.string("!isFake && ndof > 4 && abs(z) <= 24 && position.rho < 2")
 )
 
-## The tracking failure filter _______________________________________________||
-process.load('RecoMET.METFilters.trackingFailureFilter_cfi')
+
 
 ## The tracking POG filters __________________________________________________||
 #process.load('RecoMET.METFilters.trackingPOGFilters_cff')
-
-process.filtersSeq = cms.Sequence(
-   process.primaryVertexFilter *
-   process.noscraping *
-   process.HBHENoiseFilter *
-   process.CSCTightHaloFilter *
-   process.hcalLaserEventFilter *
-   process.EcalDeadCellTriggerPrimitiveFilter *
-   process.goodVertices * 
-   process.trackingFailureFilter *
-   process.eeBadScFilter #*
-   #process.ecalLaserCorrFilter * ##is already in prefilterseq... nasty but ok
-   #process.trkPOGFilters
-)
 
 if is2011:
     process.filtersSeq = cms.Sequence(
         process.primaryVertexFilter *
         process.noscraping *
+        process.HBHENoiseFilter 
+        )
+else:
+    process.filtersSeq = cms.Sequence(
+        process.primaryVertexFilter *
+        process.noscraping *
         process.HBHENoiseFilter *
         process.CSCTightHaloFilter *
-        #process.hcalLaserEventFilter *
-       # process.EcalDeadCellTriggerPrimitiveFilter *
+        process.hcalLaserEventFilter *
+        process.EcalDeadCellTriggerPrimitiveFilter *
         process.goodVertices * 
         process.trackingFailureFilter *
         process.eeBadScFilter #*
         #process.ecalLaserCorrFilter * ##is already in prefilterseq... nasty but ok
         #process.trkPOGFilters
-)
+        )
+
+
 
 if isMC:
     process.filtersSeq = cms.Sequence(process.goodVertices 
@@ -724,9 +720,9 @@ process.patTriggerSequence = cms.Sequence(process.patTrigger *
                                           process.triggerMatches *
                                           process.patTriggerEvent)
 
-from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run52xOn51xTrigger
+#from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run52xOn51xTrigger
 
-run52xOn51xTrigger(process,'patTriggerSequence')
+#run52xOn51xTrigger(process,'patTriggerSequence')
 
 ###### Merge SuperClusters
 
@@ -745,6 +741,8 @@ process.kinMuons = process.selectedPatMuons.clone()
 process.kinMuons.src = 'patMuons' + pfpostfix
 #process.kinMuons.cut = cms.string('pt > 30  && abs(eta) < 2.1')
 process.kinMuons.cut = cms.string('pt > 8  && abs(eta) < 2.7')
+if includetrigger:
+    process.kinMuons.cut = cms.string('pt > 3  && abs(eta) < 2.7')
 
 process.kinElectrons = process.selectedPatElectrons.clone()
 process.kinElectrons.src = 'patElectrons' + pfpostfix
