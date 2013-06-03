@@ -819,10 +819,13 @@ if isSignal and genFilter=="Top":
     process.PFTree.genJets           = 'ak5GenJetsPlusHadron'
 
 
-if not (includereco or includetrigger):
+if not (includereco or includetrigger): #for reco and trigger filter on two kinMuons but use all of them to fill tree, for trigger kinmuons cut is 3GeV
     process.PFTree.muonSrc = 'kinMuons'
     process.PFTree.elecGSFSrc =  'kinElectrons'
     process.PFTree.elecPFSrc =  'kinPFElectrons'
+
+if includetrigger: #lower pfMuon threshold
+    process.pfSelectedMuonsPFlow.cut = cms.string('pt>3')
 
 
 
