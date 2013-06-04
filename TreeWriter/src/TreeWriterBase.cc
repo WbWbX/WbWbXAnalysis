@@ -371,41 +371,48 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      edm::Handle<reco::GenJetCollection> genJets;
      iEvent.getByLabel(genjets_, genJets);
 
-     edm::Handle<std::vector<int> > BHadJetIndex;
-     iEvent.getByLabel(bHadJetIdx_, BHadJetIndex);
+     /*  edm::Handle<std::vector<int> > BHadJetIndex;
      edm::Handle<std::vector<int> > AntiBHadJetIndex;
-     iEvent.getByLabel(antibHadJetIdx_, AntiBHadJetIndex);
      edm::Handle<std::vector<reco::GenParticle> > BHadrons;
-     iEvent.getByLabel(BHadrons_, BHadrons);
      edm::Handle<std::vector<reco::GenParticle> > AntiBHadrons;
-     iEvent.getByLabel(AntiBHadrons_, AntiBHadrons);
-
      edm::Handle<std::vector<bool> > BHadronFromTopB;
-     iEvent.getByLabel(BHadronFromTopB_, BHadronFromTopB);
      edm::Handle<std::vector<bool> > AntiBHadronFromTopB;
-     iEvent.getByLabel(AntiBHadronFromTopB_, AntiBHadronFromTopB);
-
      edm::Handle<std::vector<int> > BHadronVsJet;
-     iEvent.getByLabel(BHadronVsJet_, BHadronVsJet);
-     edm::Handle<std::vector<int> > AntiBHadronVsJet;
-     iEvent.getByLabel(AntiBHadronVsJet_, AntiBHadronVsJet);
+     edm::Handle<std::vector<int> > AntiBHadronVsJet; */
+       edm::Handle<std::vector<std::vector<int> > > genBHadPlusMothersIndices;
+       edm::Handle<std::vector<int> > genBHadFlavour;
+       edm::Handle<std::vector<int> > genBHadJetIndex;
+       edm::Handle<std::vector<reco::GenParticle> > genBHadPlusMothers;
+       edm::Handle<std::vector<int> > genBHadIndex;
+
+     bool fillbhadrons=true;
+     try{
+       /*   iEvent.getByLabel(bHadJetIdx_, BHadJetIndex);
+       iEvent.getByLabel(antibHadJetIdx_, AntiBHadJetIndex);
+       iEvent.getByLabel(BHadrons_, BHadrons);
+       iEvent.getByLabel(AntiBHadrons_, AntiBHadrons);
+
+       iEvent.getByLabel(BHadronFromTopB_, BHadronFromTopB);
+       iEvent.getByLabel(AntiBHadronFromTopB_, AntiBHadronFromTopB);
+
+       iEvent.getByLabel(BHadronVsJet_, BHadronVsJet);
+       iEvent.getByLabel(AntiBHadronVsJet_, AntiBHadronVsJet);*/
+
+       iEvent.getByLabel(genBHadPlusMothersIndices_, genBHadPlusMothersIndices);
+       iEvent.getByLabel(genBHadFlavour_, genBHadFlavour);
+       iEvent.getByLabel(genBHadJetIndex_, genBHadJetIndex);
+       iEvent.getByLabel(genBHadPlusMothers_, genBHadPlusMothers);
+       iEvent.getByLabel(genBHadIndex_, genBHadIndex);
+     } 
+     catch(...) { fillbhadrons=false; }
+
+
+    
+
+       
 
      /////////
 
-     edm::Handle<std::vector<std::vector<int> > > genBHadPlusMothersIndices;
-     iEvent.getByLabel(genBHadPlusMothersIndices_, genBHadPlusMothersIndices);
-
-     edm::Handle<std::vector<int> > genBHadFlavour;
-     iEvent.getByLabel(genBHadFlavour_, genBHadFlavour);
-
-     edm::Handle<std::vector<int> > genBHadJetIndex;
-     iEvent.getByLabel(genBHadJetIndex_, genBHadJetIndex);
-
-     edm::Handle<std::vector<reco::GenParticle> > genBHadPlusMothers;
-     iEvent.getByLabel(genBHadPlusMothers_, genBHadPlusMothers);
-
-     edm::Handle<std::vector<int> > genBHadIndex;
-     iEvent.getByLabel(genBHadIndex_, genBHadIndex);
 
 
 
@@ -430,6 +437,7 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
      if(debugmode) std::cout << "Filling b-hadrons" << std::endl;
 
+     
      vector<int> tempBDaugh;
      for(size_t i=0;i<genBHadFlavour->size();i++){
        const reco::GenParticle * B = &genBHadPlusMothers->at(i);
@@ -454,6 +462,7 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        }
        ntbhadrons << tmpB;
      }
+     
 
      if(debugmode) std::cout << "Filling genjets" << std::endl;
 
