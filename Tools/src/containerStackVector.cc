@@ -292,22 +292,32 @@ namespace ztop{
     if(!found) std::cout << "container1DStackVector::loadFromTree: " << name << " not found in tree " << t->GetName() << std::endl;
     */
     container1DStackVector csv;
-    *this=*(csv.getFromTree(t,name));
+    if(csv.getFromTree(t,name))
+      *this=*(csv.getFromTree(t,name));
   }
 
   container1DStackVector * container1DStackVector::getFromTree(TTree * t, TString name){
     container1DStackVector * csv=0;
+    bool found=false;
     t->SetBranchAddress("allContainerStackVectors", &csv);
     for(float n=0;n<t->GetEntries();n++){
       t->GetEntry(n);
-      if(csv->getName() == name){
+      TString vname=toTString(csv->getName());
+      std::cout << "check name: (" << vname << ") searching for: ("<< name<< ")"<<std::endl;
+      //  vname=name;
+      std::cout << name.CompareTo(toTString(vname)) << std::endl;
+      if(vname == name){
 	//this=csv;
+	std::cout << "found " << name << std::endl;
 	return csv;
+	found=true;
 	break;
       }
     }
-    std::cout << "container1DStackVector::getFromTree: " << name << " not found in tree " << t->GetName() << std::endl;
-    return csv;
+    if(!found){
+      std::cout << "container1DStackVector::getFromTree: " << name << " not found in tree " << t->GetName() << "\nreturning 0 pointer!" <<std::endl;
+    }
+    return 0;
   }
 
 

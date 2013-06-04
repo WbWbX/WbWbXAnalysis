@@ -44,6 +44,7 @@ namespace ztop{
     std::vector<TString>::iterator leg=legends_.begin();
     std::vector<int>::iterator col=colors_.begin();
     std::vector<double>::iterator norm=norms_.begin();
+    
     for(std::vector<ztop::container1D>::iterator cont=containers_.begin();cont<containers_.end();++cont){
       if(*leg == legendname){
 	legends_.erase(leg);
@@ -54,6 +55,10 @@ namespace ztop{
 	break;
       }
       ++leg;++col;++norm;
+      for(std::map<TString,size_t>::iterator lego=legorder_.begin(); lego!=legorder_.end();++lego){
+	if(lego->first == legendname)
+	  legorder_.erase(lego);
+      }
     }
     if(!found) std::cout << "container1DStack::removeContribution: " << legendname << " not found." <<std::endl;
 
@@ -201,10 +206,11 @@ namespace ztop{
   THStack * container1DStack::makeTHStack(TString stackname){
     if(stackname == "") stackname = name_+"_s";
     THStack *tstack = new THStack(stackname,stackname);
+
+    std::vector<size_t> sorted=sortEntries(false);
+
     for(unsigned int it=0;it<size();it++){
-      size_t i=it;
-      if(checkLegOrder()>-1 &&legorder_.find(legends_[it])!=legorder_.end())
-	i=legorder_.find(legends_[it])->second;
+      size_t i=sorted.at(it);
       if(getLegend(i) != dataleg_){
 	container1D tempcont = getContainer(i);
 	tempcont = tempcont * getNorm(i);
@@ -224,33 +230,19 @@ namespace ztop{
     leg->SetFillStyle(0);
     leg->SetBorderSize(0);
 
-    //inverse not in yet
-    if(inverse){
-      for(unsigned int it=size()-1;(int)it>=0;it--){
-	size_t i=it;
-	if(checkLegOrder()>-1 && legorder_.find(legends_[it])!=legorder_.end())
-	  i=legorder_.find(legends_[it])->second;
-	container1D tempcont = getContainer(i);
-	tempcont = tempcont * getNorm(i);
-	TH1D * h = (TH1D*)tempcont.getTH1D(getLegend(i)+" "+getName()+"_leg")->Clone();
-	h->SetFillColor(getColor(i));
-	if(getLegend(i) != dataleg_) leg->AddEntry(h,getLegend(i),"f");
-	else leg->AddEntry(h,getLegend(i),"ep");
-      }
+    std::vector<size_t> sorted=sortEntries(inverse);
+
+    for(unsigned int it=0;it<size();it++){
+      size_t i=sorted.at(it);
+      container1D tempcont = getContainer(i);
+      tempcont = tempcont * getNorm(i);
+      TH1D * h = (TH1D*)tempcont.getTH1D(getLegend(i)+" "+getName()+"_leg")->Clone();
+      h->SetFillColor(getColor(i));
+      if(getLegend(i) != dataleg_) leg->AddEntry(h,getLegend(i),"f");
+      else leg->AddEntry(h,getLegend(i),"ep");
+      //  delete h;
     }
-    else{
-      for(unsigned int it=0;it<size();it++){
-	size_t i=it;
-	if(checkLegOrder()>-1 &&legorder_.find(legends_[it])!=legorder_.end())
-	  i=legorder_.find(legends_[it])->second;
-	container1D tempcont = getContainer(i);
-	tempcont = tempcont * getNorm(i);
-	TH1D * h = (TH1D*)tempcont.getTH1D(getLegend(i)+" "+getName()+"_leg")->Clone();
-	h->SetFillColor(getColor(i));
-	if(getLegend(i) != dataleg_) leg->AddEntry(h,getLegend(i),"f");
-	else leg->AddEntry(h,getLegend(i),"ep");
-      }
-    }
+    
     return leg;
   }
   void container1DStack::drawControlPlot(TString name, bool drawxaxislabels, double resizelabels){
@@ -505,6 +497,53 @@ namespace ztop{
       }
     }
     return 0;
+  }
+
+  std::vector<size_t> container1DStack::sortEntries(bool inverse){
+
+    std::vector<int> ordering;
+    std::vector<size_t> dontuse;
+
+    ordering.resize(size(),-1);
+    for(unsigned int it=0;it<size();it++){ 
+      if(checkLegOrder()>-1 && legorder_.find(legends_[it])!=legorder_.end()){
+	ordering.at(legorder_.find(legends_[it])->second)=it;
+	dontuse.push_back(it);
+      }
+    }
+    
+
+    for(size_t it=0;it<ordering.size();it++){ //fill rest
+      int ord=ordering.at(it);
+      if(ord<0){ //not yet filled
+	for(size_t newit=0;newit<size();newit++){
+	  bool use=true;
+	  for(size_t j=0;j<dontuse.size();j++){
+	    if(newit == dontuse.at(j))
+	      use=false;
+	  }
+	  if(use){
+	    ordering.at(it)=(int)newit;
+	  }
+	}
+      }
+    }
+
+    std::vector<size_t> out;
+
+    if(inverse){
+      out.resize(ordering.size(),0);
+      size_t outidx=ordering.size()-1;
+      for(size_t i=0;i<ordering.size();i++){
+	out.at(outidx)=ordering.at(i);
+	outidx--;
+      }
+    }
+    else{
+      for(size_t i=0;i<ordering.size();i++)
+	out.push_back((size_t) ordering.at(i));
+    }
+    return out;
   }
 
 }//namespace

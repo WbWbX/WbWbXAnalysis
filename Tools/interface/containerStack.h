@@ -39,7 +39,7 @@ namespace ztop{
 
     TString getName(){return name_;}
     unsigned int size(){return colors_.size();}
-    TString getLegend(unsigned int i){return legends_[i];}
+    TString & getLegend(unsigned int i){return legends_[i];}
     int & getColor (unsigned int i){return colors_[i];};
     double & getNorm  (unsigned int i){return norms_[i];}
     container1D & getContainer(unsigned int i){return containers_[i];}
@@ -93,6 +93,8 @@ namespace ztop{
     std::map<TString,size_t> legorder_;
     
     int checkLegOrder();
+
+    std::vector<size_t> sortEntries(bool inverse);
 
 };
   
