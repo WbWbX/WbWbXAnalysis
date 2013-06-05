@@ -4,7 +4,7 @@
 #$ -S /bin/sh
 #
 #(the cpu time for this job)
-#$ -l h_cpu=01:30:00
+#$ -l h_cpu=01:00:00
 #
 #(the maximum memory usage of this job)
 #$ -l h_vmem=1024M
@@ -13,6 +13,8 @@
 #$ -j y
 #
 #$ -cwd -V
+#$ -l h_stack=1024M
+#$ -pe multicore 8 -R y
 
 workdir=$CMSSW_BASE/src/TtZAnalysis/Analysis/##WORKDIR##
 
