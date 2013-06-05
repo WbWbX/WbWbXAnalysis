@@ -387,26 +387,18 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
      bool fillbhadrons=true;
      try{
-       /*   iEvent.getByLabel(bHadJetIdx_, BHadJetIndex);
-       iEvent.getByLabel(antibHadJetIdx_, AntiBHadJetIndex);
-       iEvent.getByLabel(BHadrons_, BHadrons);
-       iEvent.getByLabel(AntiBHadrons_, AntiBHadrons);
-
-       iEvent.getByLabel(BHadronFromTopB_, BHadronFromTopB);
-       iEvent.getByLabel(AntiBHadronFromTopB_, AntiBHadronFromTopB);
-
-       iEvent.getByLabel(BHadronVsJet_, BHadronVsJet);
-       iEvent.getByLabel(AntiBHadronVsJet_, AntiBHadronVsJet);*/
-
+       
        iEvent.getByLabel(genBHadPlusMothersIndices_, genBHadPlusMothersIndices);
+       
+     } 
+     catch(...) { fillbhadrons=false; }
+
+     if(fillbhadrons){
        iEvent.getByLabel(genBHadFlavour_, genBHadFlavour);
        iEvent.getByLabel(genBHadJetIndex_, genBHadJetIndex);
        iEvent.getByLabel(genBHadPlusMothers_, genBHadPlusMothers);
        iEvent.getByLabel(genBHadIndex_, genBHadIndex);
-     } 
-     catch(...) { fillbhadrons=false; }
-
-
+     }
     
 
        
