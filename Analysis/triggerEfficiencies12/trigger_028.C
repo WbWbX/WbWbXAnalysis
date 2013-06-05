@@ -39,7 +39,7 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
 
   double mass=0;
 
-  std::pair<std::vector<ztop::NTElectron* > , std::vector<ztop::NTMuon* > > leppair=geztoppoQHighestPtPair(tempelecs,tempmuons);
+  std::pair<std::vector<ztop::NTElectron* > , std::vector<ztop::NTMuon* > > leppair=getOppoQHighestPtPair(tempelecs,tempmuons);
 
   selectedElecs_=leppair.first;
   selectedMuons_=leppair.second;
@@ -69,7 +69,7 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
 
 void trigger_028(){
 
-  triggerAnalyzer::testmode=false;
+  triggerAnalyzer::testmode=true;
 
   using namespace std;
   using namespace ztop;
