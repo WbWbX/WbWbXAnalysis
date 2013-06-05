@@ -70,7 +70,7 @@ TreeWriterBase::TreeWriterBase(const edm::ParameterSet& iConfig)
   genBHadJetIndex_= iConfig.getParameter<edm::InputTag> ("genBHadJetIndex");
 
 
-
+  useBHadrons_ = iConfig.getParameter<bool> ("useBHadrons");
 
 
    std::cout << "n\n################## Tree writer ########################" 
@@ -379,28 +379,22 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      edm::Handle<std::vector<bool> > AntiBHadronFromTopB;
      edm::Handle<std::vector<int> > BHadronVsJet;
      edm::Handle<std::vector<int> > AntiBHadronVsJet; */
-       edm::Handle<std::vector<std::vector<int> > > genBHadPlusMothersIndices;
-       edm::Handle<std::vector<int> > genBHadFlavour;
-       edm::Handle<std::vector<int> > genBHadJetIndex;
-       edm::Handle<std::vector<reco::GenParticle> > genBHadPlusMothers;
-       edm::Handle<std::vector<int> > genBHadIndex;
+     edm::Handle<std::vector<std::vector<int> > > genBHadPlusMothersIndices;
+     edm::Handle<std::vector<int> > genBHadFlavour;
+     edm::Handle<std::vector<int> > genBHadJetIndex;
+     edm::Handle<std::vector<reco::GenParticle> > genBHadPlusMothers;
+     edm::Handle<std::vector<int> > genBHadIndex;
 
-     bool fillbhadrons=true;
-     try{
-       
+     if(useBHadrons_){
+
        iEvent.getByLabel(genBHadPlusMothersIndices_, genBHadPlusMothersIndices);
-       
-     } 
-     catch(...) { fillbhadrons=false; }
-
-     if(fillbhadrons){
        iEvent.getByLabel(genBHadFlavour_, genBHadFlavour);
        iEvent.getByLabel(genBHadJetIndex_, genBHadJetIndex);
        iEvent.getByLabel(genBHadPlusMothers_, genBHadPlusMothers);
        iEvent.getByLabel(genBHadIndex_, genBHadIndex);
-     }
+     
     
-
+     }
        
 
      /////////

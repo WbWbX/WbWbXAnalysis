@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id: TreeWriterBase.h,v 1.3 2013/04/23 15:50:22 jkiesele Exp $
+// $Id: TreeWriterBase.h,v 1.4 2013/04/29 15:34:49 jkiesele Exp $
 //
 //
 
@@ -203,7 +203,7 @@ public:
   edm::InputTag genBHadPlusMothers_, genBHadPlusMothersIndices_;
   edm::InputTag genBHadIndex_, genBHadFlavour_, genBHadJetIndex_;
 
-
+  bool useBHadrons_;
 
 };
 
