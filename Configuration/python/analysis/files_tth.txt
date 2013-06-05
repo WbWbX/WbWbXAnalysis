@@ -1,8 +1,8 @@
 
 ##DY MC
 
-700  /DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_dymumu60120     muCone03=false includereco=true ttH=true genFilter=Z genFilterString=MuonMuon genFilterMassLow=60 genFilterMassHigh=120 isSignal=true
-700  /DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_dyee60120       muCone03=false includereco=true ttH=true genFilter=Z genFilterString=ElectronElectron genFilterMassLow=60 genFilterMassHigh=120 isSignal=true
+#700  /DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_dymumu60120     muCone03=false includereco=true ttH=true genFilter=Z genFilterString=MuonMuon genFilterMassLow=60 genFilterMassHigh=120 isSignal=true
+#700  /DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_dyee60120       muCone03=false includereco=true ttH=true genFilter=Z genFilterString=ElectronElectron genFilterMassLow=60 genFilterMassHigh=120 isSignal=true
 
 
 
@@ -28,20 +28,25 @@
 100  /MET/Run2012B-13Jul2012-v1/AOD           tree_8TeV_MET_runB_13Jul    includetrigger=true muCone03=false ttH=true isMC=false globalTag=FT_53_V6C_AN4     json/RunB13Jul.json.txt
 10   /MET/Run2012C-24Aug2012-v1/AOD           tree_8TeV_MET_runC_24Aug    includetrigger=true muCone03=false ttH=true isMC=false globalTag=FT53_V10A_AN4    json/RunC24Aug.json.txt
 150  /MET/Run2012C-PromptReco-v2/AOD          tree_8TeV_MET_runC_prompt   includetrigger=true muCone03=false ttH=true isMC=false globalTag=GR_P_V42_AN4    json/RunCprompt.json.txt
+
+##not needed but for completeness
+20  /MET/Run2012C-EcalRecover_11Dec2012-v1/AOD          tree_8TeV_MET_runC_11Dec   includetrigger=true muCone03=false ttH=true isMC=false globalTag=FT_P_V42C_AN4    json/RunC11Dec.json.txt
+##
+
 150  /MET/Run2012D-PromptReco-v1/AOD         tree_8TeV_MET_runD_prompt   includetrigger=true muCone03=false ttH=true isMC=false globalTag=GR_P_V42_AN4    json/RunDprompt.json.txt
 
-200  /SingleMu/Run2012A-13Jul2012-v1/AOD                tree_8TeV_singlemu_runA_13Jul    muCone03=false ttH=true isMC=false globalTag=FT_53_V6C_AN4 includereco=true includetrigger=false    json/RunA13Jul.json.txt
-70   /SingleMu/Run2012A-recover-06Aug2012-v1/AOD        tree_8TeV_singlemu_runA_06Aug    muCone03=false ttH=true isMC=false globalTag=FT_53_V6C_AN4 includereco=true includetrigger=false   json/RunA06Aug.json.txt
-500  /SingleMu/Run2012B-13Jul2012-v1/AOD                tree_8TeV_singlemu_runB_13Jul    muCone03=false ttH=true isMC=false globalTag=FT_53_V6C_AN4 includereco=true includetrigger=false    json/RunB13Jul.json.txt
-70   /SingleMu/Run2012C-24Aug2012-v1/AOD                tree_8TeV_singlemu_runC_24Aug    muCone03=false ttH=true isMC=false globalTag=FT53_V10A_AN4 includereco=true includetrigger=false   json/RunC24Aug.json.txt
-550  /SingleMu/Run2012C-PromptReco-v2/AOD               tree_8TeV_singlemu_runC_prompt   muCone03=false ttH=true isMC=false globalTag=GR_P_V42_AN4 includereco=true includetrigger=false   json/RunCprompt.json.txt
+#200  /SingleMu/Run2012A-13Jul2012-v1/AOD                tree_8TeV_singlemu_runA_13Jul    muCone03=false ttH=true isMC=false globalTag=FT_53_V6C_AN4 includereco=true includetrigger=false    json/RunA13Jul.json.txt
+#70   /SingleMu/Run2012A-recover-06Aug2012-v1/AOD        tree_8TeV_singlemu_runA_06Aug    muCone03=false ttH=true isMC=false globalTag=FT_53_V6C_AN4 includereco=true includetrigger=false   json/RunA06Aug.json.txt
+#500  /SingleMu/Run2012B-13Jul2012-v1/AOD                tree_8TeV_singlemu_runB_13Jul    muCone03=false ttH=true isMC=false globalTag=FT_53_V6C_AN4 includereco=true includetrigger=false    json/RunB13Jul.json.txt
+#70   /SingleMu/Run2012C-24Aug2012-v1/AOD                tree_8TeV_singlemu_runC_24Aug    muCone03=false ttH=true isMC=false globalTag=FT53_V10A_AN4 includereco=true includetrigger=false   json/RunC24Aug.json.txt
+#550  /SingleMu/Run2012C-PromptReco-v2/AOD               tree_8TeV_singlemu_runC_prompt   muCone03=false ttH=true isMC=false globalTag=GR_P_V42_AN4 includereco=true includetrigger=false   json/RunCprompt.json.txt
 #650  /SingleMu/Run2012D-PromptReco-v1/AOD               tree_8TeV_singlemu_runD_prompt   muCone03=false ttH=true isMC=false globalTag=GR_P_V42_AN4 includereco=true includetrigger=false   json/RunDprompt.json.txt
 #not at desy yet
 
-200  /SingleElectron/Run2012A-13Jul2012-v1/AOD           tree_8TeV_singlee_runA_13Jul    muCone03=false ttH=true isMC=false globalTag=FT_53_V6C_AN4 includereco=true includetrigger=false    json/RunA13Jul.json.txt
-70   /SingleElectron/Run2012A-recover-06Aug2012-v1/AOD   tree_8TeV_singlee_runA_06Aug    muCone03=false ttH=true isMC=false globalTag=FT_53_V6C_AN4 includereco=true includetrigger=false   json/RunA06Aug.json.txt
-500  /SingleElectron/Run2012B-13Jul2012-v1/AOD           tree_8TeV_singlee_runB_13Jul    muCone03=false ttH=true isMC=false globalTag=FT_53_V6C_AN4 includereco=true includetrigger=false    json/RunB13Jul.json.txt
-70   /SingleElectron/Run2012C-24Aug2012-v1/AOD           tree_8TeV_singlee_runC_24Aug    muCone03=false ttH=true isMC=false globalTag=FT53_V10A_AN4 includereco=true includetrigger=false   json/RunC24Aug.json.txt
-550  /SingleElectron/Run2012C-PromptReco-v2/AOD          tree_8TeV_singlee_runC_prompt   muCone03=false ttH=true isMC=false globalTag=GR_P_V42_AN4 includereco=true includetrigger=false   json/RunCprompt.json.txt
+#200  /SingleElectron/Run2012A-13Jul2012-v1/AOD           tree_8TeV_singlee_runA_13Jul    muCone03=false ttH=true isMC=false globalTag=FT_53_V6C_AN4 includereco=true includetrigger=false    json/RunA13Jul.json.txt
+#70   /SingleElectron/Run2012A-recover-06Aug2012-v1/AOD   tree_8TeV_singlee_runA_06Aug    muCone03=false ttH=true isMC=false globalTag=FT_53_V6C_AN4 includereco=true includetrigger=false   json/RunA06Aug.json.txt
+#500  /SingleElectron/Run2012B-13Jul2012-v1/AOD           tree_8TeV_singlee_runB_13Jul    muCone03=false ttH=true isMC=false globalTag=FT_53_V6C_AN4 includereco=true includetrigger=false    json/RunB13Jul.json.txt
+#70   /SingleElectron/Run2012C-24Aug2012-v1/AOD           tree_8TeV_singlee_runC_24Aug    muCone03=false ttH=true isMC=false globalTag=FT53_V10A_AN4 includereco=true includetrigger=false   json/RunC24Aug.json.txt
+#550  /SingleElectron/Run2012C-PromptReco-v2/AOD          tree_8TeV_singlee_runC_prompt   muCone03=false ttH=true isMC=false globalTag=GR_P_V42_AN4 includereco=true includetrigger=false   json/RunCprompt.json.txt
 #650  /SingleElectron/Run2012D-PromptReco-v1/AOD          tree_8TeV_singlee_runD_prompt   muCone03=false ttH=true isMC=false globalTag=GR_P_V42_AN4 includereco=true includetrigger=false   json/RunDprompt.json.txt
 #not at desy yet
