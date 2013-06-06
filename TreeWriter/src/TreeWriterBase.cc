@@ -420,36 +420,35 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      }
 
      /////B hadrons
-
-     if(debugmode) std::cout << "Filling b-hadrons" << std::endl;
-
-     
      vector<int> tempBDaugh;
-     for(size_t i=0;i<genBHadFlavour->size();i++){
-       const reco::GenParticle * B = &genBHadPlusMothers->at(i);
-       int motherFlavour     =  genBHadFlavour->at(i);
-       int assoJetIdx        = genBHadJetIndex->at(i);
+     if(useBHadrons_){
+       if(debugmode) std::cout << "Filling b-hadrons" << std::endl;
+
+       for(size_t i=0;i<genBHadFlavour->size();i++){
+	 const reco::GenParticle * B = &genBHadPlusMothers->at(i);
+	 int motherFlavour     =  genBHadFlavour->at(i);
+	 int assoJetIdx        = genBHadJetIndex->at(i);
        
-       ztop::NTGenParticle tmpB=makeNTGen(B);
-       tmpB.setGenId(genidit++);
-       tempBDaugh.push_back(assoJetIdx);
-       //  tmpB.addDaughterIt(assoJetIdx);
-       //  size_t mother=999;
-       if(isAbsApprox(motherFlavour,6)){ //from top 
-	 //   loop only for security reasons. 
-	 for(size_t h=0;h<ntbs.size();h++){
-	   ztop::NTGenParticle * b=& ntbs.at(h);
-	   if(b->pdgId() * motherFlavour > 0){ // top-b match or antitop-antib
-	     tmpB.addMotherIt(b->genId());
-	     b->addDaughterIt(tmpB.genId());
-	     break;
+	 ztop::NTGenParticle tmpB=makeNTGen(B);
+	 tmpB.setGenId(genidit++);
+	 tempBDaugh.push_back(assoJetIdx);
+	 //  tmpB.addDaughterIt(assoJetIdx);
+	 //  size_t mother=999;
+	 if(isAbsApprox(motherFlavour,6)){ //from top 
+	   //   loop only for security reasons. 
+	   for(size_t h=0;h<ntbs.size();h++){
+	     ztop::NTGenParticle * b=& ntbs.at(h);
+	     if(b->pdgId() * motherFlavour > 0){ // top-b match or antitop-antib
+	       tmpB.addMotherIt(b->genId());
+	       b->addDaughterIt(tmpB.genId());
+	       break;
+	     }
 	   }
 	 }
+	 ntbhadrons << tmpB;
        }
-       ntbhadrons << tmpB;
-     }
      
-
+     }
      if(debugmode) std::cout << "Filling genjets" << std::endl;
 
      for(size_t i=0;i<genJets->size();i++){
@@ -457,7 +456,7 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        ztop::NTGenJet tempjet=makeNTGenJet(jet);
        tempjet.setGenId(genidit++);
 
-       for(size_t h=0;h<tempBDaugh.size();h++){
+       for(size_t h=0;h<tempBDaugh.size();h++){ //only > 0 if bhadrons were filled so safe
 	 ztop::NTGenParticle * B= & ntbhadrons.at(h);
 	 if((size_t)tempBDaugh.at(h) == i){
 	   tempjet.addMotherIt(B->genId());
