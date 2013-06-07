@@ -78,6 +78,8 @@ isFastSim=options.isFastSim
 
 debug=options.debug
 
+useBHadrons=False #will be changes for top filter sequence!
+
 if not isMC:
     isSignal=False
 
@@ -291,6 +293,8 @@ if isMC:
        # process.genParticlesForJetsNoNuPlusHadron.ignoreParticleIDs += cms.vuint32( 12,14,16)
        # process.genParticlesForJetsNoMuNoNuPlusHadron.ignoreParticleIDs += cms.vuint32( 12,13,14,16)
 
+        useBHadrons=True
+
         process.preFilterSequence = cms.Sequence(process.preCutPUInfo * 
                                                  process.topsequence *
                                                  process.postCutPUInfo *
@@ -439,6 +443,7 @@ process.goodVertices = cms.EDFilter(
 if is2011:
     process.filtersSeq = cms.Sequence(
         process.primaryVertexFilter *
+        process.goodVertices *
         process.noscraping *
         process.HBHENoiseFilter 
         )
@@ -814,15 +819,17 @@ process.PFTree.includeRho2011    = is2011
 process.PFTree.includePDFWeights = includePDFWeights
 process.PFTree.pdfWeights        = "pdfWeights:"+PDF
 process.PFTree.includeGen        = isSignal
+process.PFTree.useBHadrons       = useBHadrons
 
 if isSignal and genFilter=="Top":
     process.PFTree.genJets           = 'ak5GenJetsPlusHadron'
 
 
-if not (includereco or includetrigger): #for reco and trigger filter on two kinMuons but use all of them to fill tree, for trigger kinmuons cut is 3GeV
+if not (includereco or includetrigger):
     process.PFTree.muonSrc = 'kinMuons'
     process.PFTree.elecGSFSrc =  'kinElectrons'
     process.PFTree.elecPFSrc =  'kinPFElectrons'
+
 
 if includetrigger: #lower pfMuon threshold
     process.pfSelectedMuonsPFlow.cut = cms.string('pt>3')
