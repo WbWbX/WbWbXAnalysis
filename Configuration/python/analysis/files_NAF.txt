@@ -124,12 +124,12 @@
 #####Matching Z
 
 
-400  /DYJetsToLL_M-50_matchingdown_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_dymumu60120_Zmup     genFilter=Z genFilterString=MuonMuon genFilterMassLow=60 genFilterMassHigh=120
-400  /DYJetsToLL_M-50_matchingdown_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_dyee60120_Zmup       genFilter=Z genFilterString=ElectronElectron genFilterMassLow=60 genFilterMassHigh=120
+400  /DYJetsToLL_M-50_matchingdown_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_dymumu60120_Zmdown     genFilter=Z genFilterString=MuonMuon genFilterMassLow=60 genFilterMassHigh=120
+400  /DYJetsToLL_M-50_matchingdown_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_dyee60120_Zmdown       genFilter=Z genFilterString=ElectronElectron genFilterMassLow=60 genFilterMassHigh=120
 
 
-400  /DYJetsToLL_M-50_matchingup_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_dymumu60120_Zmdown     genFilter=Z genFilterString=MuonMuon genFilterMassLow=60 genFilterMassHigh=120
-400  /DYJetsToLL_M-50_matchingup_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_dyee60120_Zmdown       genFilter=Z genFilterString=ElectronElectron genFilterMassLow=60 genFilterMassHigh=120
+400  /DYJetsToLL_M-50_matchingup_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_dymumu60120_Zmup     genFilter=Z genFilterString=MuonMuon genFilterMassLow=60 genFilterMassHigh=120
+400  /DYJetsToLL_M-50_matchingup_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_dyee60120_Zmup       genFilter=Z genFilterString=ElectronElectron genFilterMassLow=60 genFilterMassHigh=120
 
 
 
