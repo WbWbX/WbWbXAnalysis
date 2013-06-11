@@ -5,31 +5,49 @@
 
 #### 8TeV GR_P_V41_AN3
 
-### data
+### data PROMPT
 
-150  /DoubleElectron/Run2012A-13Jul2012-v1/AOD                 tree_8TeV_ee_runA_13Jul   isMC=false globalTag=FT_53_V6C_AN3     json/Full19.json.txt
-20   /DoubleElectron/Run2012A-recover-06Aug2012-v1/AOD         tree_8TeV_ee_runA_06Aug   isMC=false globalTag=FT_53_V6C_AN3    json/Full19.json.txt
-250  /DoubleElectron/Run2012B-13Jul2012-v1/AOD                 tree_8TeV_ee_runB_13Jul   isMC=false globalTag=FT_53_V6C_AN3     json/Full19.json.txt
-20   /DoubleElectron/Run2012C-24Aug2012-v1/AOD                 tree_8TeV_ee_runC_24Aug   isMC=false globalTag=FT53_V10A_AN3    json/Full19.json.txt
-300  /DoubleElectron/Run2012C-PromptReco-v2/AOD                tree_8TeV_ee_runC_prompt  isMC=false globalTag=GR_P_V42_AN3    json/Full19.json.txt
-20   /DoubleElectron/Run2012C-EcalRecover_11Dec2012-v1/AOD     tree_8TeV_ee_runC_11Dec   isMC=false globalTag=FT_P_V42C_AN3    json/Full19.json.txt
-350  /DoubleElectron/Run2012D-PromptReco-v1/AOD                tree_8TeV_ee_runD_prompt  isMC=false globalTag=GR_P_V42_AN3    json/Full19.json.txt
+#150  /DoubleElectron/Run2012A-13Jul2012-v1/AOD                 tree_8TeV_ee_runA_13Jul   isMC=false globalTag=FT_53_V6C_AN3     json/Full19.json.txt
+#20   /DoubleElectron/Run2012A-recover-06Aug2012-v1/AOD         tree_8TeV_ee_runA_06Aug   isMC=false globalTag=FT_53_V6C_AN3    json/Full19.json.txt
+#250  /DoubleElectron/Run2012B-13Jul2012-v1/AOD                 tree_8TeV_ee_runB_13Jul   isMC=false globalTag=FT_53_V6C_AN3     json/Full19.json.txt
+#20   /DoubleElectron/Run2012C-24Aug2012-v1/AOD                 tree_8TeV_ee_runC_24Aug   isMC=false globalTag=FT53_V10A_AN3    json/Full19.json.txt
+#300  /DoubleElectron/Run2012C-PromptReco-v2/AOD                tree_8TeV_ee_runC_prompt  isMC=false globalTag=GR_P_V42_AN3    json/Full19.json.txt
+#20   /DoubleElectron/Run2012C-EcalRecover_11Dec2012-v1/AOD     tree_8TeV_ee_runC_11Dec   isMC=false globalTag=FT_P_V42C_AN3    json/Full19.json.txt
+#350  /DoubleElectron/Run2012D-PromptReco-v1/AOD                tree_8TeV_ee_runD_prompt  isMC=false globalTag=GR_P_V42_AN3    json/Full19.json.txt
 
-150  /DoubleMu/Run2012A-13Jul2012-v1/AOD                    tree_8TeV_mumu_runA_13Jul   isMC=false globalTag=FT_53_V6C_AN3     json/Full19.json.txt
-20   /DoubleMu/Run2012A-recover-06Aug2012-v1/AOD            tree_8TeV_mumu_runA_06Aug   isMC=false globalTag=FT_53_V6C_AN3    json/Full19.json.txt
-250  /DoubleMu/Run2012B-13Jul2012-v4/AOD                    tree_8TeV_mumu_runB_13Jul   isMC=false globalTag=FT_53_V6C_AN3     json/Full19.json.txt
-20   /DoubleMu/Run2012C-24Aug2012-v1/AOD                    tree_8TeV_mumu_runC_24Aug   isMC=false globalTag=FT53_V10A_AN3    json/Full19.json.txt
-300  /DoubleMu/Run2012C-PromptReco-v2/AOD                   tree_8TeV_mumu_runC_prompt  isMC=false globalTag=GR_P_V42_AN3    json/Full19.json.txt
-20   /DoubleMu/Run2012C-EcalRecover_11Dec2012-v1/AOD        tree_8TeV_mumu_runC_11Dec   isMC=false globalTag=FT_P_V42C_AN3    json/Full19.json.txt
-350  /DoubleMu/Run2012D-PromptReco-v1/AOD                   tree_8TeV_mumu_runD_prompt  isMC=false globalTag=GR_P_V42_AN3    json/Full19.json.txt
+#150  /DoubleMu/Run2012A-13Jul2012-v1/AOD                    tree_8TeV_mumu_runA_13Jul   isMC=false globalTag=FT_53_V6C_AN3     json/Full19.json.txt
+#20   /DoubleMu/Run2012A-recover-06Aug2012-v1/AOD            tree_8TeV_mumu_runA_06Aug   isMC=false globalTag=FT_53_V6C_AN3    json/Full19.json.txt
+#250  /DoubleMu/Run2012B-13Jul2012-v4/AOD                    tree_8TeV_mumu_runB_13Jul   isMC=false globalTag=FT_53_V6C_AN3     json/Full19.json.txt
+#20   /DoubleMu/Run2012C-24Aug2012-v1/AOD                    tree_8TeV_mumu_runC_24Aug   isMC=false globalTag=FT53_V10A_AN3    json/Full19.json.txt
+#300  /DoubleMu/Run2012C-PromptReco-v2/AOD                   tree_8TeV_mumu_runC_prompt  isMC=false globalTag=GR_P_V42_AN3    json/Full19.json.txt
+#20   /DoubleMu/Run2012C-EcalRecover_11Dec2012-v1/AOD        tree_8TeV_mumu_runC_11Dec   isMC=false globalTag=FT_P_V42C_AN3    json/Full19.json.txt
+#350  /DoubleMu/Run2012D-PromptReco-v1/AOD                   tree_8TeV_mumu_runD_prompt  isMC=false globalTag=GR_P_V42_AN3    json/Full19.json.txt
 
-150  /MuEG/Run2012A-13Jul2012-v1/AOD             tree_8TeV_emu_runA_13Jul   isMC=false globalTag=FT_53_V6C_AN3     json/Full19.json.txt
-20   /MuEG/Run2012A-recover-06Aug2012-v1/AOD     tree_8TeV_emu_runA_06Aug   isMC=false globalTag=FT_53_V6C_AN3    json/Full19.json.txt
-250  /MuEG/Run2012B-13Jul2012-v1/AOD             tree_8TeV_emu_runB_13Jul   isMC=false globalTag=FT_53_V6C_AN3     json/Full19.json.txt
-20   /MuEG/Run2012C-24Aug2012-v1/AOD             tree_8TeV_emu_runC_24Aug   isMC=false globalTag=FT53_V10A_AN3    json/Full19.json.txt
-300  /MuEG/Run2012C-PromptReco-v2/AOD            tree_8TeV_emu_runC_prompt  isMC=false globalTag=GR_P_V42_AN3    json/Full19.json.txt
-20   /MuEG/Run2012C-EcalRecover_11Dec2012-v1/AOD  tree_8TeV_emu_runC_11Dec  isMC=false globalTag=FT_P_V42C_AN3    json/Full19.json.txt
-350  /MuEG/Run2012D-PromptReco-v1/AOD            tree_8TeV_emu_runD_prompt  isMC=false globalTag=GR_P_V42_AN3    json/Full19.json.txt
+#150  /MuEG/Run2012A-13Jul2012-v1/AOD             tree_8TeV_emu_runA_13Jul   isMC=false globalTag=FT_53_V6C_AN3     json/Full19.json.txt
+#20   /MuEG/Run2012A-recover-06Aug2012-v1/AOD     tree_8TeV_emu_runA_06Aug   isMC=false globalTag=FT_53_V6C_AN3    json/Full19.json.txt
+#250  /MuEG/Run2012B-13Jul2012-v1/AOD             tree_8TeV_emu_runB_13Jul   isMC=false globalTag=FT_53_V6C_AN3     json/Full19.json.txt
+#20   /MuEG/Run2012C-24Aug2012-v1/AOD             tree_8TeV_emu_runC_24Aug   isMC=false globalTag=FT53_V10A_AN3    json/Full19.json.txt
+#300  /MuEG/Run2012C-PromptReco-v2/AOD            tree_8TeV_emu_runC_prompt  isMC=false globalTag=GR_P_V42_AN3    json/Full19.json.txt
+#20   /MuEG/Run2012C-EcalRecover_11Dec2012-v1/AOD  tree_8TeV_emu_runC_11Dec  isMC=false globalTag=FT_P_V42C_AN3    json/Full19.json.txt
+#350  /MuEG/Run2012D-PromptReco-v1/AOD            tree_8TeV_emu_runD_prompt  isMC=false globalTag=GR_P_V42_AN3    json/Full19.json.txt
+
+
+##RERECO !?!!!
+
+170  /DoubleElectron/Run2012A-22Jan2013-v1/AOD   tree_8TeV_ee_runA_22Jan      isMC=false globalTag=FT_53_V21_AN4   json/ReRecoJan13.json.txt
+250  /DoubleElectron/Run2012B-22Jan2013-v1/AOD   tree_8TeV_ee_runB_22Jan      isMC=false globalTag=FT_53_V21_AN4   json/ReRecoJan13.json.txt
+300  /DoubleElectron/Run2012C-22Jan2013-v1/AOD   tree_8TeV_ee_runC_22Jan      isMC=false globalTag=FT_53_V21_AN4   json/ReRecoJan13.json.txt
+350  /DoubleElectron/Run2012D-22Jan2013-v1/AOD   tree_8TeV_ee_runD_22Jan      isMC=false globalTag=FT_53_V21_AN4   json/ReRecoJan13.json.txt
+
+170  /DoubleMu/Run2012A-22Jan2013-v1/AOD         tree_8TeV_mumu_runA_22Jan    isMC=false globalTag=FT_53_V21_AN4   json/ReRecoJan13.json.txt
+250  /DoubleMuParked/Run2012B-22Jan2013-v1/AOD   tree_8TeV_mumu_runB_22Jan    isMC=false globalTag=FT_53_V21_AN4   json/ReRecoJan13.json.txt
+300  /DoubleMuParked/Run2012C-22Jan2013-v1/AOD   tree_8TeV_mumu_runC_22Jan    isMC=false globalTag=FT_53_V21_AN4   json/ReRecoJan13.json.txt
+350  /DoubleMuParked/Run2012D-22Jan2013-v1/AOD   tree_8TeV_mumu_runD_22Jan    isMC=false globalTag=FT_53_V21_AN4   json/ReRecoJan13.json.txt
+
+170  /MuEG/Run2012A-22Jan2013-v1/AOD             tree_8TeV_emu_runA_22Jan     isMC=false globalTag=FT_53_V21_AN4   json/ReRecoJan13.json.txt
+250  /MuEG/Run2012B-22Jan2013-v1/AOD             tree_8TeV_emu_runB_22Jan     isMC=false globalTag=FT_53_V21_AN4   json/ReRecoJan13.json.txt
+300  /MuEG/Run2012C-22Jan2013-v1/AOD             tree_8TeV_emu_runC_22Jan     isMC=false globalTag=FT_53_V21_AN4   json/ReRecoJan13.json.txt
+350  /MuEG/Run2012D-22Jan2013-v1/AOD             tree_8TeV_emu_runD_22Jan     isMC=false globalTag=FT_53_V21_AN4   json/ReRecoJan13.json.txt
 
 
 
@@ -177,8 +195,8 @@
 
 
 
-100  /DoubleElectron/Run2011A-08Nov2011-v1/AOD        tree_7TeV_ee_runA_08Nov    is2011=true isMC=false globalTag=FT44_V9_AN1     json/ReRecoNov2011.json.txt
-300  /DoubleElectron/Run2011B-19Nov2011-v1/AOD        tree_7TeV_ee_runB_19Nov    is2011=true isMC=false globalTag=FT44_V11_AN1    json/ReRecoNov2011.json.txt
-100  /DoubleMu/Run2011A-08Nov2011-v1/AOD              tree_7TeV_mumu_runA_08Nov  is2011=true isMC=false globalTag=FT44_V9_AN1     json/ReRecoNov2011.json.txt
-300  /DoubleMu/Run2011B-19Nov2011-v1/AOD              tree_7TeV_mumu_runB_19Nov  is2011=true isMC=false globalTag=FT44_V11_AN1    json/ReRecoNov2011.json.txt
+#100  /DoubleElectron/Run2011A-08Nov2011-v1/AOD        tree_7TeV_ee_runA_08Nov    is2011=true isMC=false globalTag=FT44_V9_AN1     json/ReRecoNov2011.json.txt
+#300  /DoubleElectron/Run2011B-19Nov2011-v1/AOD        tree_7TeV_ee_runB_19Nov    is2011=true isMC=false globalTag=FT44_V11_AN1    json/ReRecoNov2011.json.txt
+#100  /DoubleMu/Run2011A-08Nov2011-v1/AOD              tree_7TeV_mumu_runA_08Nov  is2011=true isMC=false globalTag=FT44_V9_AN1     json/ReRecoNov2011.json.txt
+#300  /DoubleMu/Run2011B-19Nov2011-v1/AOD              tree_7TeV_mumu_runB_19Nov  is2011=true isMC=false globalTag=FT44_V11_AN1    json/ReRecoNov2011.json.txt
 
