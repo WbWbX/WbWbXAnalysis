@@ -7,7 +7,7 @@ options = VarParsing.VarParsing()
 
 options.register ('is2011',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"is 2011 data/MC")
 options.register ('crab',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"uses crab")
-options.register ('globalTag','START53_V7G',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"global tag")
+options.register ('globalTag','START53_V22',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"global tag")
 options.register ('reportEvery',1000,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.int,"report every")
 options.register ('maxEvents',-1,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.int,"maximum events")
 options.register ('skipEvents', 0, VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, "skip N events")
@@ -67,7 +67,7 @@ PDF=options.PDF                          # cteq65
 inputScript=options.inputScript          # TtZAnalysis.Configuration.samples.mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12-PU_S7_START52_V9-v2_cff
 json=options.json                        # give full path!!json files in TtZAnalysis/Data/data ONLY needed with nafjobsplitter
 laseroff=options.laseroff
-
+susy=options.susy
 
 isSignal=options.isSignal
 newMuons=options.muCone03
@@ -123,15 +123,17 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.load('Configuration.EventContent.EventContent_cff')
 
-if not isMC and not is2011: # https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagJetProbabilityCalibration?redirectedfrom=CMS.SWGuideBTagJetProbabilityCalibration#Calibration_in_52x_and_53x_Data
-    process.GlobalTag.toGet = cms.VPSet(
-        cms.PSet(record = cms.string("BTagTrackProbability2DRcd"),
-                 tag = cms.string("TrackProbabilityCalibration_2D_Data53X_v2"),
-                 connect = cms.untracked.string("frontier://FrontierPrep/CMS_COND_BTAU")),
-        cms.PSet(record = cms.string("BTagTrackProbability3DRcd"),
-                 tag = cms.string("TrackProbabilityCalibration_3D_Data53X_v2"),
-                 connect = cms.untracked.string("frontier://FrontierPrep/CMS_COND_BTAU"))
-        )
+#if not isMC and not is2011: # https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagJetProbabilityCalibration?redirectedfrom=CMS.SWGuideBTagJetProbabilityCalibration#Calibration_in_52x_and_53x_Data
+#    process.GlobalTag.toGet = cms.VPSet(
+#        cms.PSet(record = cms.string("BTagTrackProbability2DRcd"),
+#                 tag = cms.string("TrackProbabilityCalibration_2D_Data53X_v2"),
+#                 connect = cms.untracked.string("frontier://FrontierPrep/CMS_COND_BTAU")),
+#        cms.PSet(record = cms.string("BTagTrackProbability3DRcd"),
+#                 tag = cms.string("TrackProbabilityCalibration_3D_Data53X_v2"),
+#                 connect = cms.untracked.string("frontier://FrontierPrep/CMS_COND_BTAU"))
+#        )
+
+##  not needed anymore in rereco
 
 if isMC and not is2011:
 
@@ -802,10 +804,20 @@ else: ## is Signal
 ########## Prepare Tree ##
 if ttH:
     process.load('TtZAnalysis.TreeWriter.treewriter_tth_cff')
-#else if susy:
+
+elif susy:
+    process.load('TtZAnalysis.TreeWriter.treewriter_ttz_cff')
+    from TtZAnalysis.Workarounds.usePFIsoCone import *
+    usePFIsoCone(process)
+    #load the standard pat objects
+    process.kinMuons.src = 'patMuons'
+    process.kinElectrons.src = 'patElectrons'
 
 else:
     process.load('TtZAnalysis.TreeWriter.treewriter_ttz_cff')
+
+
+
 
 
 process.PFTree.vertexSrc         = 'goodVertices'
@@ -865,6 +877,9 @@ process.path = cms.Path( process.goodOfflinePrimaryVertices *
 
 if isFastSim:
     massSearchReplaceAnyInputTag(process.path,cms.InputTag("kt6PFJets","rho", "RECO"), cms.InputTag("kt6PFJets","rho", "HLT"),True)
+if susy:
+    process.path.replace(getattr(process,'patPF2PATSequence'+pfpostfix),
+                 process.patDefaultSequence)
 
 
 #massSearchReplaceAnyInputTag(process.path,cms.InputTag('goodOfflinePrimaryVertices'), cms.InputTag('goodVertices'),True)
@@ -875,5 +890,5 @@ if isFastSim:
 process.outpath    = cms.EndPath()
 
 
-
+print globalTag
 
