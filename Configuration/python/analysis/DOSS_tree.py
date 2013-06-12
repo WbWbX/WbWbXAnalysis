@@ -811,7 +811,7 @@ if ttH:
     process.load('TtZAnalysis.TreeWriter.treewriter_tth_cff')
 
 elif susy:
-    process.load('TtZAnalysis.TreeWriter.treewriter_ttz_cff')
+    process.load('TtZAnalysis.TreeWriter.treewriter_susy_cff')
     from TtZAnalysis.Workarounds.usePFIsoCone import *
     usePFIsoCone(process)
     #load the standard pat objects
@@ -881,12 +881,12 @@ process.path = cms.Path( process.goodOfflinePrimaryVertices *
                         process.treeSequence
                          )
 
-
-if isFastSim:
-    massSearchReplaceAnyInputTag(process.path,cms.InputTag("kt6PFJets","rho", "RECO"), cms.InputTag("kt6PFJets","rho", "HLT"),True)
 if susy:
     process.path.replace(getattr(process,'patPF2PATSequence'+pfpostfix),
                  process.patDefaultSequence)
+
+if isFastSim:
+    massSearchReplaceAnyInputTag(process.path,cms.InputTag("kt6PFJets","rho", "RECO"), cms.InputTag("kt6PFJets","rho", "HLT"),True)
 
 
 #massSearchReplaceAnyInputTag(process.path,cms.InputTag('goodOfflinePrimaryVertices'), cms.InputTag('goodVertices'),True)
