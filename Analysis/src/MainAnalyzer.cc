@@ -4,7 +4,7 @@
 MainAnalyzer::MainAnalyzer(){
 
   AutoLibraryLoader::enable();
-
+  freplaced_=0;
   dataname_="data";
   writeAllowed_=true;
 
@@ -34,6 +34,8 @@ int MainAnalyzer::start(){
  
   clear();
 
+  readFileList();
+
   //TString name=channel_+"_"+energy_+"_"+syst_;
 
   if(channel_=="" || energy_=="" || syst_ == ""){
@@ -43,11 +45,12 @@ int MainAnalyzer::start(){
 
   analysisplots_.setName(getOutFileName());
   analysisplots_.setSyst(getSyst());
-
+  int btagsyst=getBTagSF()->getSystematic();
   //load btag:
   if(!(getBTagSF()->makesEff())){
     std::cout << "loading b-tag File: " << btagsffile_ << std::endl;
     getBTagSF()->readFromTFile(btagsffile_);
+    getBTagSF()->setSystematic(btagsyst);
   }
 
   ///communication stuff...
@@ -72,7 +75,7 @@ int MainAnalyzer::start(){
     }
     else{ //send start signal for ith daughter process
          p_idx.get(i)->pwrite(i);
-	 usleep(500);
+	 usleep(50000);
     }
   }
 
@@ -96,15 +99,41 @@ int MainAnalyzer::start(){
     if(it_readytowrite >= 0){ // daugh ready to write
       p_allowwrite.get(it_readytowrite)->pwrite(1);
       succ.at(it_readytowrite)=p_finished.get(it_readytowrite)->pread();   //wait for successful/ns write
-    } //else do nothing - none ready to write
+
+      int done=0,sdone=0;
+      std::cout << "\n\n" << std::endl;
+      for(size_t i=0;i<filenumber;i++){
+	if(succ.at(i) == 0){
+	  std::cout <<  "running:\t" <<infiles_.at(i) <<std::endl;
+	}
+	if(succ.at(i) !=0){
+	  done++;
+	}
+	if(succ.at(i) >0){
+	  sdone++;
+	}
+      }
+      for(size_t i=0;i<filenumber;i++){
+	if(succ.at(i) <0){
+	  std::cout  << "failed:  \t" << infiles_.at(i) << std::endl;
+	}
+      }
+      for(size_t i=0;i<filenumber;i++){
+	if(succ.at(i) >0){
+	  std::cout  << "done:   \t" << infiles_.at(i) << std::endl;
+	}
+      }
+
+	  std::cout << "\n\n" << sdone << "(" << done-sdone << " failed) / " << filenumber << "done\n\n"<< std::endl;
+	} //else do nothing - none ready to write
     
     // put statusbars here maybe ask for status via pipes
+    
 
-
-    usleep(100000); //only check every 100ms
+    usleep(100000); //only check every 1000ms
   }
   sleep(1);
-  bool nonefailed;
+  bool nonefailed=true;
   for(size_t i=0;i<succ.size();i++){
     std::cout << succ.at(i) << "\t" << infiles_.at(i) << std::endl;
     if(succ.at(i) < 0)
@@ -117,16 +146,28 @@ int MainAnalyzer::start(){
   
 }
 
-void MainAnalyzer::setFileList(TString filelist){
+TString MainAnalyzer::replaceExtension(TString filename){
+ 
+  for(size_t i=0;i<ftorepl_.size();i++){
+    if(filename.Contains(ftorepl_.at(i))){
+      freplaced_++;
+      return filename.ReplaceAll(ftorepl_.at(i),fwithfix_.at(i));
+    }
+  }
+  return filename;
+}
+
+void MainAnalyzer::readFileList(){
   using namespace ztop;
   using namespace std;
 
-  filelist_=filelist;
+ 
 
   infiles_.clear();
   legentries_.clear();
   colz_.clear();
   norms_.clear();
+  legord_.clear();
 
   ifstream inputfiles (filelist_.Data());
   string filename;
@@ -141,12 +182,15 @@ void MainAnalyzer::setFileList(TString filelist){
       
       if(((TString)filename).Contains("#")){
 	getline(inputfiles,filename); //just ignore complete line
-	std::cout << "ignoring: " << filename << std::endl;
+	//	std::cout << "ignoring: " << filename << std::endl;
 	continue;
       }
       inputfiles >> legentry >> color >> norm >> legord;
       if(oldline != filename){
-	infiles_    << filename;
+
+	std::cout << "adding: " << replaceExtension(filename) << "\t" << legentry << "\t" << color << "\t" << norm << "\t" << legord << std::endl;
+
+	infiles_    << replaceExtension(filename);
 	legentries_ << legentry;
 	colz_       << color;
 	norms_      << norm;
@@ -154,6 +198,10 @@ void MainAnalyzer::setFileList(TString filelist){
 	oldline=filename;
       }
       
+    }
+    if((uint)freplaced_ != fwithfix_.size()){
+      cout << "replacing at least some postfixes was not sucessful! expected to replace "<< fwithfix_.size() << " replaced "<< freplaced_ << " exit" << endl;
+
     }
   }
   else{
@@ -225,9 +273,11 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
   std::ifstream FileTest((datasetdirectory_+inputfile).Data()); 
   if(!FileTest) {
+    std::cout << datasetdirectory_+inputfile << " not found!!" << std::endl;
     p_finished.get(anaid)->pwrite(-1);
     return;
   }
+  FileTest.close();
 
   // return; //test
 
@@ -270,6 +320,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   vector<float> mlb_bins;
   for(float i=0;i<20;i++) mlb_bins << i*10;
 
+  vector<float> phi_bins;
+  for(float i=-3.1415;i<=3.1415;i+=3.1415/20) phi_bins << i;
 
   //and so on
 
@@ -428,6 +480,18 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   container1D met8(metbins, "missing transverse energy step 8","E_{T,miss} [GeV]", "N_{evt}");
   container1D met9(metbins, "missing transverse energy step 9","E_{T,miss} [GeV]", "N_{evt}");
 
+  container1D metphi3u(phi_bins, "missing transverse energy phi uncorr step 3","#phi", "N_{evt}");
+  container1D metphi4u(phi_bins, "missing transverse energy phi uncorr step 4","#phi", "N_{evt}");
+  container1D metphi5u(phi_bins, "missing transverse energy phi uncorr step 5","#phi", "N_{evt}");
+  container1D metphi6u(phi_bins, "missing transverse energy phi uncorr step 6","#phi", "N_{evt}");
+  container1D metphi3(phi_bins, "missing transverse energy phi step 3","#phi", "N_{evt}");
+  container1D metphi4(phi_bins, "missing transverse energy phi step 4","#phi", "N_{evt}");
+  container1D metphi5(phi_bins, "missing transverse energy phi step 5","#phi", "N_{evt}");
+  container1D metphi6(phi_bins, "missing transverse energy phi step 6","#phi", "N_{evt}");
+  container1D metphi7(phi_bins, "missing transverse energy phi step 7","#phi", "N_{evt}");
+  container1D metphi8(phi_bins, "missing transverse energy phi step 8","#phi", "N_{evt}");
+  container1D metphi9(phi_bins, "missing transverse energy phi step 9","#phi", "N_{evt}");
+
   container1D btagmulti7(multibinsbtag, "b-jet multiplicity step 7", "n_{b-tags}", "N_{jets}",true);
   container1D btagmulti8(multibinsbtag, "b-jet multiplicity step 8", "n_{b-tags}", "N_{jets}",true);
   container1D btagmulti9(multibinsbtag, "b-jet multiplicity step 9", "n_{b-tags}", "N_{jets}",true);
@@ -581,7 +645,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   if(norm==0) nEntries=0; //skip for norm0
 
   //if(testmode) 
-   nEntries=nEntries/1000;
+  //  nEntries=nEntries/1000;
 
   for(Long64_t entry=0;entry<nEntries;entry++){
     if(showstatusbar_) displayStatusBar(entry,nEntries);
@@ -613,19 +677,56 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     b_TriggerBools->GetEntry(entry);
 
     //do trigger stuff - onlye 8TeV for now
-
-    if(p_TriggerBools->size() < 3)
-      continue;
-
-    if(b_mumu){
-      if(!(p_TriggerBools->at(1) || p_TriggerBools->at(2)))
+    if(!is7TeV){
+      if(p_TriggerBools->size() < 3)
 	continue;
-    }
-    else if(b_ee){
-      if(!p_TriggerBools->at(0))
-	continue;
-    }
 
+      if(b_mumu){
+	if(!(p_TriggerBools->at(1) || p_TriggerBools->at(2)))
+	  continue;
+      }
+      else if(b_ee){
+	if(!p_TriggerBools->at(0))
+	  continue;
+      }
+      else if(b_emu){
+	if(p_TriggerBools->size()<10){
+	  p_finished.get(anaid)->pwrite(-3);
+	  return;
+	}
+	if(!(p_TriggerBools->at(10) || p_TriggerBools->at(11)))
+	  continue;
+      }
+    }
+    else{ //is7TeV
+      if(p_TriggerBools->size() < 3)
+	continue;
+
+      if(b_mumu){
+	if(isMC && !p_TriggerBools->at(5))
+	  continue;
+	if(!isMC && pEvent->runNo() < 163869 && !p_TriggerBools->at(5))
+	  continue;
+	if(!isMC && pEvent->runNo() >= 163869 && !p_TriggerBools->at(6))
+	  continue;
+      }
+      else if(b_ee){
+	if(!(p_TriggerBools->at(3) || p_TriggerBools->at(4) || p_TriggerBools->at(1)))
+	  continue;
+      }
+      else if(b_emu){
+	std::cout << "emu channel at 7TeV not supported yet (triggers missing)" << std::endl;
+	p_finished.get(anaid)->pwrite(-4);
+	return;
+
+	if(p_TriggerBools->size()<10){
+	  p_finished.get(anaid)->pwrite(-3);
+	  return;
+	}
+	if(!(p_TriggerBools->at(10) || p_TriggerBools->at(11)))
+	  continue;
+      }
+    }
     // t->GetEntry(entry);
 
     //make collections
@@ -864,6 +965,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
     met3u.fill(pMet->met(),puweight);
     met3.fill(adjustedmet.met(), puweight);
+    metphi3u.fill(pMet->phi(),puweight);
+    metphi3.fill(adjustedmet.phi(), puweight);
     invmass3.fill(invLepMass,puweight);
     vertexmulti3.fill(pEvent->vertexMulti(),puweight);
     selection.fill(3,puweight);
@@ -934,6 +1037,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       selection.fill(4,puweight);
       met4u.fill(pMet->met(),puweight);
       met4.fill(adjustedmet.met(), puweight);
+      metphi4u.fill(pMet->phi(),puweight);
+      metphi4.fill(adjustedmet.phi(), puweight);
 
       sel_step[4]+=puweight;
       
@@ -973,6 +1078,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       selection.fill(5,puweight);
       met5u.fill(pMet->met(),puweight);
       met5.fill(adjustedmet.met(), puweight);
+      metphi5u.fill(pMet->phi(),puweight);
+      metphi5.fill(adjustedmet.phi(), puweight);
 
       sel_step[5]+=puweight;
 
@@ -1024,6 +1131,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       selection.fill(6,puweight);
       met6u.fill(pMet->met(),puweight);
       met6.fill(adjustedmet.met(), puweight);
+      metphi6u.fill(pMet->phi(),puweight);
+      metphi6.fill(adjustedmet.phi(), puweight);
 
       sel_step[6]+=puweight;
     }
@@ -1039,7 +1148,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
    
     //////////////////// MET cut STEP 7//////////////////////////////////
-    if(adjustedmet.met() < 40) continue;
+    if(!b_emu && adjustedmet.met() < 40) continue;
 
 
     vector<NTJet*> btaggedjets;
@@ -1075,6 +1184,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       jetmulti7.fill(hardjets.size(),puweight);
       selection.fill(7, puweight);
       met7.fill(adjustedmet.met(), puweight);
+      metphi7.fill(adjustedmet.phi(), puweight);
       btagmulti7.fill(btaggedjets.size(),puweight);
 
       sel_step[7]+=puweight;
@@ -1120,6 +1230,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       selection.fill(8,puweight);
       met8.fill(adjustedmet.met(), puweight);
       btagmulti8.fill(btaggedjets.size(),puweight);
+      metphi8.fill(adjustedmet.phi(), puweight);
 
       ttfinal_selection8.fill(1,puweight);
       sel_step[8]+=puweight;
@@ -1134,6 +1245,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       selection.fill(9,puweight);
       btagmulti9.fill(btaggedjets.size(),puweight);
       met9.fill(adjustedmet.met(), puweight);
+      metphi9.fill(adjustedmet.phi(), puweight);
 
       ttfinal_selection9.fill(1,puweight);
 
@@ -1156,17 +1268,17 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   delete f;
 
 
-  
-  ///
-  // if File outfileadd_ exists (it was created in analyze.C check
-  // open file
-  // try to get csv with proper name (there should be only one)
-  // get it, name it csv
-  // ask if write not blocked
-  // csv->addList(legendname,color,norm);
-  // stored_objects tree->fill
-  // tree->overwrite
-  // clse file and unblock
+  ///////////////////////////////
+  ///////////////////////////////
+  ///////////////////////////////
+  ///////////////////////////////
+  //     WRITE OUTPUT PART     //
+  ///////////////////////////////
+  ///////////////////////////////
+  ///////////////////////////////
+  ///////////////////////////////
+
+
   p_askwrite.get(anaid)->pwrite(anaid);
   std::cout << anaid << " (" << inputfile << ")" << " asking for write permissions to " <<getOutPath() << endl;
   int canwrite=p_allowwrite.get(anaid)->pread();
@@ -1235,7 +1347,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 	  if(btt->GetBranch("allbTagBase")){
 	    btsf.readFromTFile(btagsffile_);
 	    //ztop::NTBTagSF  btsf2=btagsf_ + btsf;
-	     btagsf_ = (btagsf_ + btsf); //combine both
+	     btagsf_ = (btagsf_ + btsf); //combine both if sample already exists, couts warning but doesn't change anything
 	  }
 	}
       }

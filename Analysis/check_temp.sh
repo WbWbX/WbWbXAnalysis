@@ -1,16 +1,19 @@
 #!/bin/zsh
 
 
+
 doloop=$1
 cd jobscripts
 
 #for (( i=0;i<${#alljobs[@]};i++)); do
 for file in *; do
 
+    fullpath=../output/$file
     jobname=$file
-    if [[ -f output/$jobname.root ]];
+    echo "checking $fullpath"
+    if [[ -e "${fullpath}.root" ]];
     then
-	if [[ -f output/${jobname}_plots.root ]];
+	if [ -e "${fullpath}_plots.root" ];
 	then
 	    echo "${jobname} \e[1;42m successfully done \e[0m "
 	   # if [[ "${jobname}" == *"nominal"*]]
@@ -18,10 +21,13 @@ for file in *; do
 		#nominal
 	    done=( "${done[@]}" "${jobname}" );
 	else
-	    echo "${jobname} \e[1;31m failed \e[0m"
+	    echo "${jobname} \e[1;32m partially done \e[0m"
 	fi
+    elif [ -e "${fullpath}_failed" ];
+    then
+	echo "${jobname} \e[1;31m completely failed \e[0m"
     else
-	echo "${jobname} \e[1;42m running \e[0m"
+	echo "${jobname} \e[1;42m qw/running (?)\e[0m"
     fi
 done
 

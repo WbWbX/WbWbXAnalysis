@@ -1,13 +1,29 @@
 #!/bin/sh
 
+dobtag=$1
+
+if [[ $dobtag ]]
+then
+echo "preparing b-efficiencies -> will be safed in channel_energy_btags.root"
+fi
+
 channels=("ee"
 "mumu"
+"emu"
 );
 systs=("nominal"
 "JER_up"
 "JER_down"
 "JES_up"
 "JES_down"
+"BTAGH_up"
+"BTAGH_down"
+"BTAGL_up"
+"BTAGL_down"
+#"TT_MATCH_down"
+#"TT_MATCH_up"
+#"TT_SCALE_down"
+#"TT_SCALE_up"
 );
 energies=("8TeV"
 );
@@ -27,6 +43,8 @@ energies=("8TeV"
 
 
 dir=analysis_$(date +%F_%H:%M)
+
+echo "running in dir $dir"
 
 mkdir $dir
 cd $dir
@@ -58,13 +76,18 @@ for (( i=0;i<${#channels[@]};i++)); do
 	    outname=${channel}_${energy}_${syst};
 	   # array=( "${array[@]}" "jack" )
 	    outnames=( "${outnames[@]}" "${outname}" );
-	    sed -e "s/##OUTNAME##/${outname}/" -e "s/##PARAMETERS##/-c ${channel} -s ${syst}/" -e "s/##WORKDIR##/${dir}/" < ../job.sh > jobscripts/${outname}
+	    if [[ $dobtag ]] ;
+	    then
+		sed -e "s/##OUTNAME##/${outname}/" -e "s/##PARAMETERS##/-b -c ${channel} -s ${syst}/" -e "s/##WORKDIR##/${dir}/" < ../job.sh > jobscripts/${outname}
+	    else
+		sed -e "s/##OUTNAME##/${outname}/" -e "s/##PARAMETERS##/-c ${channel} -s ${syst}/" -e "s/##WORKDIR##/${dir}/" < ../job.sh > jobscripts/${outname}
+	    fi
 	    chmod +x jobscripts/${outname}
 	    if [[ $SGE_CELL ]] ;
 	    then
-	echo	qsub jobscripts/${outname}
+		qsub jobscripts/${outname}
 	    else
-	echo	./jobscripts/${outname} &
+		./jobscripts/${outname} &
 	    fi
 
 ###make the merge line

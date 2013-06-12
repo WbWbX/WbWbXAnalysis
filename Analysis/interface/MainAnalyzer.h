@@ -83,7 +83,17 @@ public:
   void analyze(TString, TString, int, double,size_t,size_t i=0);
   void analyze(size_t i);
 
-  void setFileList(TString );
+  void setFileList(TString fl){filelist_=fl;}
+  void setFilePostfixReplace(TString file,TString pf,bool clear=false){
+    if(clear){ fwithfix_.clear();ftorepl_.clear();} 
+    ftorepl_.push_back(file); fwithfix_.push_back(pf);
+  }
+
+  void setFilePostfixReplace(std::vector<TString> files,std::vector<TString> pf){
+    if(files.size() != pf.size()){std::cout << "setFilePostfixReplace: vectors have to be same size, exit!" << std::endl; std::exit(EXIT_FAILURE);} 
+    ftorepl_=files;fwithfix_=pf;
+  }
+
   void setDataSetDirectory(TString dir){datasetdirectory_=dir;}
   void setShowStatusBar(bool show){showstatusbar_=show;}
 
@@ -108,7 +118,9 @@ private:
   
 
   void copyAll(const MainAnalyzer &);
+  void readFileList(); //run automatically when start() is called
 
+  TString replaceExtension(TString );
 
   bool showstatusbar_;
 
@@ -117,6 +129,8 @@ private:
   double lumi_;
 
   TString filelist_;
+  std::vector<TString> fwithfix_,ftorepl_;
+  int freplaced_;
   
   ztop::PUReweighter  puweighter_;
   ztop::NTJERAdjuster  jeradjuster_;
@@ -145,6 +159,8 @@ private:
 
   IPCPipes<int> p_allowwrite;
   IPCPipes<int> p_askwrite;
+
+  IPCPipes<int> p_status; //not  implemented, yet
 
   bool writeAllowed_;
 
