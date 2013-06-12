@@ -36,6 +36,7 @@ options.register ('muCone03',True,VarParsing.VarParsing.multiplicity.singleton,V
 options.register ('wantSummary',True,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"prints trigger summary")
 options.register ('ttH',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"writes the ttH tree")
 options.register ('susy',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"writes the Susy tree")
+options.register ('isPrompt',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"loads extra filters etc for prompt")
 
 
 
@@ -77,6 +78,10 @@ ttH=options.ttH
 isFastSim=options.isFastSim
 
 debug=options.debug
+isPrompt=options.isPrompt
+
+if susy:
+    isPrompt=True
 
 useBHadrons=False #will be changes for top filter sequence!
 
@@ -123,15 +128,15 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.load('Configuration.EventContent.EventContent_cff')
 
-#if not isMC and not is2011: # https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagJetProbabilityCalibration?redirectedfrom=CMS.SWGuideBTagJetProbabilityCalibration#Calibration_in_52x_and_53x_Data
-#    process.GlobalTag.toGet = cms.VPSet(
-#        cms.PSet(record = cms.string("BTagTrackProbability2DRcd"),
-#                 tag = cms.string("TrackProbabilityCalibration_2D_Data53X_v2"),
-#                 connect = cms.untracked.string("frontier://FrontierPrep/CMS_COND_BTAU")),
-#        cms.PSet(record = cms.string("BTagTrackProbability3DRcd"),
-#                 tag = cms.string("TrackProbabilityCalibration_3D_Data53X_v2"),
-#                 connect = cms.untracked.string("frontier://FrontierPrep/CMS_COND_BTAU"))
-#        )
+if not isMC and not is2011 and isPrompt: # https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagJetProbabilityCalibration?redirectedfrom=CMS.SWGuideBTagJetProbabilityCalibration#Calibration_in_52x_and_53x_Data
+    process.GlobalTag.toGet = cms.VPSet(
+        cms.PSet(record = cms.string("BTagTrackProbability2DRcd"),
+                 tag = cms.string("TrackProbabilityCalibration_2D_Data53X_v2"),
+                 connect = cms.untracked.string("frontier://FrontierPrep/CMS_COND_BTAU")),
+        cms.PSet(record = cms.string("BTagTrackProbability3DRcd"),
+                 tag = cms.string("TrackProbabilityCalibration_3D_Data53X_v2"),
+                 connect = cms.untracked.string("frontier://FrontierPrep/CMS_COND_BTAU"))
+        )
 
 ##  not needed anymore in rereco
 
@@ -442,7 +447,7 @@ process.goodVertices = cms.EDFilter(
 ## The tracking POG filters __________________________________________________||
 #process.load('RecoMET.METFilters.trackingPOGFilters_cff')
 
-if is2011:
+if is2011 or not isPrompt:
     process.filtersSeq = cms.Sequence(
         process.primaryVertexFilter *
         process.goodVertices *
@@ -841,6 +846,8 @@ if not (includereco or includetrigger):
     process.PFTree.muonSrc = 'kinMuons'
     process.PFTree.elecGSFSrc =  'kinElectrons'
     process.PFTree.elecPFSrc =  'kinPFElectrons'
+
+
 
 
 if includetrigger: #lower pfMuon threshold
