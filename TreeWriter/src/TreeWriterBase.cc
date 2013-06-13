@@ -72,6 +72,8 @@ TreeWriterBase::TreeWriterBase(const edm::ParameterSet& iConfig)
 
   useBHadrons_ = iConfig.getParameter<bool> ("useBHadrons");
 
+  susy_= iConfig.getParameter<bool> ("isSusy");
+
 
    std::cout << "n\n################## Tree writer ########################" 
              <<  "\n#" << treename_
@@ -145,6 +147,9 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    ntallnus.clear();
 
    ntgenjets.clear();
+
+   vstopmass.clear();
+   vchimass.clear();
 
    triggerBools_.clear();
    alltriggerswithprescales_.clear();
@@ -468,6 +473,52 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        }
        ntgenjets << tempjet;
      }
+
+     //////susy
+
+     if(susy_){
+       for(size_t i=0;i<allgen.size();i++){
+	 if(fabs(fabs(allgen.at(i)->pdgId()) -1000006) < 0.1){ // +-1000006
+	   // ztop::NTGenParticle temp=makeNTGen(allgen.at(i));
+
+	   vstopmass.push_back(allgen.at(i)->mass());
+
+	   size_t ndau = allgen.at(i)->numberOfDaughters();
+	   bool foundTop = false;
+
+	   for( size_t j = 0; j < ndau; ++ j ) {
+	
+	     if( fabs( fabs(allgen.at(i)->daughter(j)->pdgId())-6 ) <0.1 ) { // if the i-th daughter is a top or an anti-top
+	       foundTop = true;
+	  
+	       LorentzVector LVstop( allgen.at(i)->px(), allgen.at(i)->py(), allgen.at(i)->pz(), allgen.at(i)->energy() );
+	       LorentzVector LVtop( allgen.at(i)->daughter(j)->px(), allgen.at(i)->daughter(j)->py(), allgen.at(i)->daughter(j)->pz(), allgen.at(i)->daughter(j)->energy() );
+	  
+	       vchimass.push_back( (LVstop-LVtop).M() );
+	       //std::cout << "chi0 mass = " << (LVstop-LVtop).M() << endl; 
+	       break;
+	     }
+	   }
+	   if( !foundTop )// stop/anti-stop has no top/anti-top daughter! m_chi0 set to an unphysical value
+	     vchimass.push_back(-99999.);
+	 } //if
+       }
+
+       //do gen selection on tree writer level
+       if(vstopmass.size() < 1)
+	 return;
+       if(vstopmass.at(0) > 350)
+	 return;
+       if(vstopmass.at(0) < 250)
+	 return;
+       float diff=vstopmass.at(0) - vchimass.at(0);
+       if(diff > 250)
+	 return;
+       if(diff < 200)
+	 return;
+     }
+
+
 
    }//isMC and includegen end
 
@@ -1054,6 +1105,13 @@ TreeWriterBase::beginJob()
   Ntuple->Branch("NTGenLeptons1",  "std::vector<ztop::NTGenParticle>", &ntleps1);
 
   Ntuple->Branch("NTGenJets",      "std::vector<ztop::NTGenJet>",      &ntgenjets);
+
+
+  Ntuple->Branch("NTGenParticles",      "std::vector<ztop::NTGenParticle>", &ntpart);
+  if(susy_){
+    Ntuple->Branch("StopMass", "std::vector<float>", &vstopmass);
+    Ntuple->Branch("ChiMass", "std::vector<float>", &vchimass);
+  }
 
   // Ntuple->Branch("NTGenMEMuons",     "std::vector<ztop::NTGenParticle>", &ntgenmuons3);
   // Ntuple->Branch("NTGenElectrons", "std::vector<ztop::NTGenParticle>", &ntgenelecs1);

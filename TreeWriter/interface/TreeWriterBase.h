@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id: TreeWriterBase.h,v 1.4 2013/04/29 15:34:49 jkiesele Exp $
+// $Id: TreeWriterBase.h,v 1.5 2013/06/05 13:20:24 jkiesele Exp $
 //
 //
 
@@ -163,7 +163,7 @@ public:
   edm::InputTag muons_, recomuons_, pfelecs_, gsfelecs_,recoelecs_, jets_, met_, vertices_, trigresults_, puinfo_, recotracks_, recosuclus_,rhojetsiso_,rhojetsisonopu_,rhoiso_,pdfweights_, genparticles_, genjets_,mvamet_,pattriggerevent_;
   //rhojets_,rhojetsiso_,rhojetsnopu_,rhojetsisonopu_,rhoiso_;
 
-  bool includereco_, includetrigger_, pfinput_,includepdfweights_,includegen_;
+  bool includereco_, includetrigger_, pfinput_,includepdfweights_,includegen_,susy_;
   TTree * Ntuple;
   std::vector<ztop::NTMuon> ntmuons;
   std::vector<ztop::NTLepton> ntleptons;
@@ -177,9 +177,12 @@ public:
   ztop::NTEvent ntevent;
   ztop::NTTrigger nttrigger;
 
-  std::vector<ztop::NTGenParticle> nttops,ntws,ntzs,ntbs,ntbhadrons,ntnus,ntleps3,ntleps1,ntallnus;
+  std::vector<ztop::NTGenParticle> nttops,ntws,ntzs,ntbs,ntbhadrons,ntnus,ntleps3,ntleps1,ntallnus,ntpart;
   std::vector<ztop::NTGenJet> ntgenjets;
   int channel_; // 11 for ee 13 for mumu 1113 for emu 151113 etc for via tau
+
+
+  std::vector<float> vstopmass,vchimass;
 
   bool viaTau_;
 

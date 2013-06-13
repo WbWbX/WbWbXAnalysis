@@ -121,6 +121,7 @@ ztop::NTMuon TreeWriterTtH::makeNTMuon(const pat::Muon & muon){
 
 
 
+  tempmuon.setMember(0,muon.numberOfMatchedStations());
 
 
 
@@ -204,7 +205,7 @@ ztop::NTElectron TreeWriterTtH::makeNTElectron(const pat::Electron & electron){
   }
 
   double suclue=0;
-  if(includereco_ && !(electron.superCluster().isNull())){
+  if(!(electron.superCluster().isNull())){
     suclue=electron.superCluster()->rawEnergy();
     math::XYZPoint suclupoint=electron.superCluster()->position();
     double magnitude=sqrt(suclupoint.mag2());
