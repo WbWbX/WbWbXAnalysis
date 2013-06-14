@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
-// $Id: genInfoTreeWriter.cc,v 1.3 2013/04/04 17:37:24 jkiesele Exp $
+// $Id: genInfoTreeWriter.cc,v 1.1 2013/06/14 15:45:36 jkiesele Exp $
 //
 //
 
@@ -22,8 +22,6 @@
 #include <memory>
 
 // user include files
-#include "PhysicsTools/SelectorUtils/interface/JetIDSelectionFunctor.h"
-#include "PhysicsTools/SelectorUtils/interface/PFJetIDSelectionFunctor.h"
 
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
@@ -32,47 +30,16 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "DataFormats/PatCandidates/interface/Electron.h"
-#include "DataFormats/PatCandidates/interface/Muon.h"
-#include "DataFormats/PatCandidates/interface/Jet.h"
-#include "DataFormats/PatCandidates/interface/MET.h"
-#include <vector>
-#include <string>
-#include "DataFormats/Common/interface/TriggerResults.h"
-#include "FWCore/Common/interface/TriggerNames.h"
-#include "DataFormats/PatCandidates/interface/TriggerObject.h"
-#include "TTree.h"
-#include "TLorentzVector.h"
 
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
-#include "../../DataFormats/interface/NTMuon.h"
-#include "../../DataFormats/interface/NTElectron.h"
-#include "../../DataFormats/interface/NTJet.h"
-#include "../../DataFormats/interface/NTMet.h"
-#include "../../DataFormats/interface/NTEvent.h"
-
-#include "DataFormats/Candidate/interface/CompositeCandidate.h"
-
-#include "DataFormats/Candidate/interface/CandidateFwd.h"
-#include "DataFormats/Common/interface/TriggerResults.h"
-#include "FWCore/Common/interface/TriggerNames.h"
 
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenRunInfoProduct.h"
 
-
-#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
-//#include "PhysicsTools/Utilities/interface/LumiReWeighting.h"
-//#include "PhysicsTools/Utilities/interface/Lumi3DReWeighting.h"
-#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "TTree.h"
 
 
-#include <algorithm>
-
-#include <cstring>
-
-//
 // class declaration
 //
 
@@ -150,18 +117,15 @@ genInfoTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   using namespace edm;
 
   bool IsRealData = false;
-  edm::Handle <reco::GenParticleCollection> genParticles;
+  
+
+  edm::Handle<GenEventInfoProduct> genInfo;
   try {
-    iEvent.getByLabel("genParticles", genParticles);
-    int aux = genParticles->size();
-    aux = 0+aux;
+    iEvent.getByLabel("generator", genInfo);
   }
   catch(...) {IsRealData = true;} 
 
   if(!IsRealData){ //do MC stuff
-
-    edm::Handle<GenEventInfoProduct> genInfo;
-    iEvent.getByLabel("generator", genInfo);
 
     pdfscale = genInfo->pdf()->scalePDF;
  
@@ -179,6 +143,7 @@ genInfoTreeWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     aqed=genInfo->alphaQED();
 
   }
+
   Ntuple ->Fill();
 
 }
@@ -197,16 +162,16 @@ genInfoTreeWriter::beginJob()
  
   Ntuple=fs->make<TTree>("GenTree" ,"GenTree" );
   
-  Ntuple->Branch("QScale", "double", &qscale);
-  Ntuple->Branch("PDFScale", "double", &pdfscale);
-  Ntuple->Branch("ID1", "double", &id1);
-  Ntuple->Branch("ID2", "double", &id2);
-  Ntuple->Branch("X1", "double", &x1);
-  Ntuple->Branch("X2", "double", &x2);
-  Ntuple->Branch("PDFX1", "double", &pdfx1);
-  Ntuple->Branch("PDFX2", "double", &pdfx2);
-  Ntuple->Branch("AlphaQCD", "double", &aqcd);
-  Ntuple->Branch("AlphaQED", "double", &aqed);
+  Ntuple->Branch("QScale", &qscale);
+  Ntuple->Branch("PDFScale", &pdfscale);
+  Ntuple->Branch("ID1", &id1);
+  Ntuple->Branch("ID2", &id2);
+  Ntuple->Branch("X1", &x1);
+  Ntuple->Branch("X2", &x2);
+  Ntuple->Branch("PDFX1", &pdfx1);
+  Ntuple->Branch("PDFX2", &pdfx2);
+  Ntuple->Branch("AlphaQCD", &aqcd);
+  Ntuple->Branch("AlphaQED", &aqed);
 
 }
 
