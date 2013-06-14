@@ -292,7 +292,7 @@ if isMC:
         process.produceGenLevelBJetsPlusHadron.deltaR = 5.0
         process.produceGenLevelBJetsPlusHadron.noBBbarResonances = True
         process.produceGenLevelBJetsPlusHadron.doImprovedHadronMatching = True
-        process.produceGenLevelBJetsPlusHadron.doValidationPlotsForImprovedHadronMatching = False
+       # process.produceGenLevelBJetsPlusHadron.doValidationPlotsForImprovedHadronMatching = False
         process.load("TopAnalysis.TopUtils.sequences.improvedJetHadronQuarkMatching_cff")
 
 ##top projections turned off -> re-switch this?
@@ -897,5 +897,5 @@ if isFastSim:
 process.outpath    = cms.EndPath()
 
 
-print globalTag
+print "\nglobal Tag: " + globalTag
 
