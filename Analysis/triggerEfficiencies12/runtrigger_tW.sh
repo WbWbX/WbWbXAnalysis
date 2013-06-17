@@ -6,10 +6,13 @@ dirstring=$1"_tW_trigger_$(date +%F_%H:%M)"
 
 echo '\n\nrunning in directory' "${dirstring}."
 
+
 mkdir $dirstring
 cd $dirstring
-cp ../do_triggerAnalyzer_tW.C .
-cp ../makeplotsnice.h .
-cp ../make2dplots.h .
-nohup root -l -b -q do_triggerAnalyzer_tW.C++ > output.txt 
+cp ../triggerAnalyzer_base*.h .
+#cp ../prescaleList.h .
+cp ../trigger_tW.C .
+cp ../histoStyle.h .
+cp ../getSubSetRoot.C .
+nohup root -l -b -q trigger_tW.C++ > output.txt 
 echo "done with ${dirstring}"
