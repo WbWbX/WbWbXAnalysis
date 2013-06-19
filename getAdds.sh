@@ -136,7 +136,20 @@ addpkg FWCore/GuiBrowsers V00-00-70
 
 
 fi
+if [[ "$CMSSW_VERSION" == "CMSSW_5_3_11" ]]
+then
 
+addpkg DataFormats/PatCandidates V06-05-06-12
+addpkg PhysicsTools/PatAlgos     V08-09-61
+addpkg PhysicsTools/PatUtils
+addpkg RecoBTag/ImpactParameter V01-04-09-01
+addpkg RecoBTag/SecondaryVertex V01-10-06
+addpkg RecoBTag/SoftLepton      V05-09-11
+addpkg RecoBTau/JetTagComputer  V02-03-02
+addpkg RecoBTag/Configuration   V00-07-05
+addpkg RecoParticleFlow/PFProducer V15-02-06
+
+fi
 
 #for analysis stuff:
 
