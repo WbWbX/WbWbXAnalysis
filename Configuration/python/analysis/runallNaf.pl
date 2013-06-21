@@ -75,7 +75,7 @@ my $fullCMSSWcfpath=File::Spec->rel2abs($arg{c});
 my $cfgfilename = ( split m{/}, $arg{c} )[-1];
 my $nafJobSplitter="$ENV{CMSSW_BASE}/src/TopAnalysis/TopUtils/scripts/nafJobSplitter2.pl";
 
-my $startstring="#!/bin/sh\nexport SCRAM_ARCH=$ENV{SCRAM_ARCH}\nexport VO_CMS_SW_DIR=$ENV{CMS_PATH}\n.$ENV{CMS_PATH}/cmsset_default.sh\n\necho \"using CMSSW located here: $ENV{CMSSW_BASE}\"\ncd $ENV{CMSSW_BASE}\neval `scramv1 runtime -sh`\ncd -\nfi\nexport PYTHONPATH=/scratch/hh/dust/naf/cms/user/\$USER/.nafJobSplitter/python:\$PYTHONPATH\n";
+my $startstring="#!/bin/sh\nexport SCRAM_ARCH=$ENV{SCRAM_ARCH}\nexport VO_CMS_SW_DIR=$ENV{CMS_PATH}\nsource $ENV{CMS_PATH}/cmsset_default.sh\n\necho \"using CMSSW located here: $ENV{CMSSW_BASE}\"\ncd $ENV{CMSSW_BASE}\neval `scramv1 runtime -sh`\ncd -\nfi\nexport PYTHONPATH=/scratch/hh/dust/naf/cms/user/\$USER/.nafJobSplitter/python:\$PYTHONPATH\n";
 
 push @run, $startstring;
 push @check, $startstring;
