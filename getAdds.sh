@@ -7,7 +7,7 @@ cd ${CMSSW_BASE}/src
 # the things I use from the TopAnalysis code
 #
 
-if [[ "${CMSSW_VERSION}" != "CMSSW_5_3_3_patch3" && "${CMSSW_VERSION}" != "CMSSW_5_3_5" && "${CMSSW_VERSION}" != "CMSSW_5_3_7" ]];
+if [[ "${CMSSW_VERSION}" != "CMSSW_5_3_3_patch3" && "${CMSSW_VERSION}" != "CMSSW_5_3_5" && "${CMSSW_VERSION}" != "CMSSW_5_3_7" && "${CMSSW_VERSION}" != "CMSSW_5_3_11" ]];
 then
     echo 'warning! '"$CMSSW_VERSION"' not supported for automatic checkout of pat packages! add them manually!'
 fi
@@ -149,6 +149,10 @@ addpkg RecoBTau/JetTagComputer  V02-03-02
 addpkg RecoBTag/Configuration   V00-07-05
 addpkg RecoParticleFlow/PFProducer V15-02-06
 
+addpkg TopQuarkAnalysis/Configuration
+addpkg TopQuarkAnalysis/TopSkimming V07-01-04
+addpkg TopQuarkAnalysis/TopTools    V06-07-13
+
 fi
 
 #for analysis stuff:
@@ -160,6 +164,10 @@ echo "setting LHAPDF path to /afs/naf.desy.de/user/k/kieseler/public/lhapdf"
 
 mv $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected/lhapdf.xml $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected/lhapdf.xml.old
 sed  -e 's;environment name=\"LHAPDF_BASE\" default=\"/afs/naf.desy.de/group/cms/sw/slc5_amd64_gcc462/external/lhapdf/5.8.5-cms2\";environment name=\"LHAPDF_BASE\" default=\"/afs/naf.desy.de/user/k/kieseler/public/lhapdf\"";g' < $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected/lhapdf.xml.old  > $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected/lhapdf.xml
+
+
+echo "Building eclipse project..."
+/afs/naf.desy.de/user/k/kieseler/public/eclipsetemp/prepareEclipseProject.sh
 
 #some copy-paste in case you want to use my root macros and the classes on command line
 echo 'you will need this in the rootlogon.C:'
