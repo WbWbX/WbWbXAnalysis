@@ -1,10 +1,11 @@
 #!/bin/sh
 
-dobtag=$1
+dirname=$1
+dobtag=$2
 
 if [[ $dobtag ]]
 then
-echo "preparing b-efficiencies -> will be safed in channel_energy_btags.root"
+echo "preparing b-efficiencies -> will be safed in channel_energy_syst_btags.root. need to be merged afterwards"
 fi
 
 channels=("ee"
@@ -12,18 +13,24 @@ channels=("ee"
 "emu"
 );
 systs=("nominal"
+"PU_up"
+"PU_down"
 "JER_up"
 "JER_down"
-"JES_up"
-"JES_down"
-"BTAGH_up"
-"BTAGH_down"
-"BTAGL_up"
-"BTAGL_down"
+#"JES_up"
+#"JES_down"
+#"BTAGH_up"
+#"BTAGH_down"
+#"BTAGL_up"
+#"BTAGL_down"
 #"TT_MATCH_down"
 #"TT_MATCH_up"
 #"TT_SCALE_down"
 #"TT_SCALE_up"
+#"Z_MATCH_down"
+#"Z_MATCH_up"
+#"Z_SCALE_down"
+#"Z_SCALE_up"
 );
 energies=("8TeV"
 );
@@ -42,7 +49,7 @@ energies=("8TeV"
 
 
 
-dir=analysis_$(date +%F_%H:%M)
+dir=${dirname}_$(date +%F_%H:%M)
 
 echo "running in dir $dir"
 
@@ -60,7 +67,8 @@ cp ../mergeSyst.exe .
 mkdir jobscripts
 workdir=`pwd`
 
-cp ../check_temp.sh check.sh
+
+sed -e 's;##WORKDIR##;'${workdir}';g' < ../check_temp.sh > check.sh
 chmod +x check.sh
 
 #check wheter running on naf or wgs and do qsub or dirty "&"
@@ -87,7 +95,12 @@ for (( i=0;i<${#channels[@]};i++)); do
 	    then
 		qsub jobscripts/${outname}
 	    else
+		while [ `ps ax | grep -E 'analyse.exe' | wc -l` -gt 10 ]; do
+		    sleep 1;
+		done
+		echo "starting ${outname}"
 		./jobscripts/${outname} &
+		sleep 2;
 	    fi
 
 ###make the merge line

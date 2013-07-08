@@ -17,12 +17,12 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
   //let samplename for btag be without the whole path (check in btagbase)
   //make btagbase writeable
 
-  TString treedir="/data/user/kiesej/Analysis2012/trees/trees_Mai13_A03/";
+  TString treedir="/data/user/kiesej/Analysis2012/trees/trees_Jun13_03/";
   if((TString)getenv("SGE_CELL") != ""){ //on the naf
-    treedir="/scratch/hh/dust/naf/cms/user/kieseler/trees_Mai13_A03/";
+    treedir="/scratch/hh/dust/naf/cms/user/kieseler/trees_Jun13_03/";
   }
   else if((TString)getenv("HOST") == "cmsng401"){
-    treedir="/data/kiesej/Analysis/trees/trees_Mai13_A03/";
+    treedir="/data/kiesej/Analysis/trees/trees_Jun13_03/";
   }
   
 
@@ -40,7 +40,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
     jecfile="/src/TtZAnalysis/Data/Summer12_V2_DATA_AK5PF_UncertaintySources.txt";
     //btagfile="/src/TtZAnalysis/Data";
     // pufile="/src/TtZAnalysis/Data/Full19.json.txt_PU.root";
-    pufile="Full19.json.txt_PU";
+    pufile="ReRecoJan13.json.txt_PU";
     //here dont specify channel or energy
   }
  
@@ -50,7 +50,10 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
     pufile="ReRecoNov2011.json_PU";
 
   }
-   btagfile=channel+"_"+energy+"_btags.root";
+   btagfile="all_btags.root";
+
+   if(dobtag)
+     btagfile=channel+"_"+energy+"_"+Syst+"_btags.root";
  
   //some env variables
   TString cmssw_base=getenv("CMSSW_BASE");
@@ -80,7 +83,9 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
   ana.getBTagSF()->setMakeEff(dobtag);
   ana.setBTagSFFile(btagfile);
 
-  //add indication for non-correlated syst by adding the energy to syst name for the INPUT!!
+  //add indication for non-correlated syst by adding the energy to syst name!! then the getCrossSections stuff should recognise it
+
+  //although it produces overhead, add background rescaling here?
 
   if(Syst=="nominal"){
     //all already defined
@@ -144,7 +149,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
     ana.setFilePostfixReplace("60120.root","60120_Zmup.root");
   }
   else if(Syst=="Z_MATCH_down"){
-    ana.setFilePostfixReplace("60120.root","60120_Zmudown.root");
+    ana.setFilePostfixReplace("60120.root","60120_Zmdown.root");
   }
   else if(Syst=="Z_SCALE_up"){
     ana.setFilePostfixReplace("60120.root","60120_Zscaleup.root");

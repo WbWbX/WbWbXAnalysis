@@ -83,7 +83,7 @@ public:
     masscutlow_=20;
     masscuthigh_=0;
 
-    
+    match_=false;
 
     runcutlow_=0;
     runcuthigh_=0;
@@ -91,7 +91,7 @@ public:
     selectionstep_=0;
 
     globalDen_=0;
-    std::cout << "Don't forget to check if all trigger Prescales are 1. If they are its either MC or an error in prescaletable. then use the one from event before or skip event - maybe checking one known prescale is sufficient" << std::endl;
+    //  std::cout << "Don't forget to check if all trigger Prescales are 1. If they are its either MC or an error in prescaletable. then use the one from event before or skip event - maybe checking one known prescale is sufficient" << std::endl;
 
   }
   ~triggerAnalyzer(){};
@@ -119,6 +119,7 @@ public:
 
   void setMode(TString mode){if(mode=="ee") mode_=-1;if(mode=="emu") mode_=0;if(mode=="mumu") mode_=1;}
 
+  TString getModeS(){if(mode_==-1) return "ee";if(mode_==0) return "emu";else return "mumu";}
 
   void setPUFile(TString file){pufile_=file;};
 
@@ -135,6 +136,8 @@ public:
 
   void setSelectionStep(int step){/*selectionstep_=step; for future use. needs to affect the plots, too*/ }
   int selectionStep(){return selectionstep_;}
+
+  void setUseMatching(bool match){match_=match;}
 
   double getGlobalDen(){return globalDen_;}
 
@@ -221,6 +224,12 @@ public:
 
     vector<float> selectionbins; selectionbins << -0.5 << 0.5 << 1.5 << 2.5 << 3.5 << 4.5;
 
+    vector<float> dzbins;
+    for(float i=0;i<40;i++)
+      dzbins << i;
+    vector<float> dzbins2;
+    //for(float i=0;i<10;i++)
+    dzbins2 << 0 << 0.025 << 0.05 << 0.3  << 1 << 2 << 3 << 4;
 
     //pt
     //eta
@@ -260,9 +269,12 @@ public:
     effTriple t_eta2jetmulti  (binseta2jetmultiX, binseta2jetmultiY, "leptonjet_eta2multi"   , "n_{jets}"       , "|#eta_{l}|");
     effTriple t_iso     (binsiso                , "lepton_iso"     , "Iso_{l}"           , "evts"   );
     effTriple t_eta2dfine   (binseta2dfineX, binseta2dfineY, "lepton_eta2dfine"   , "#eta_{l_{1}}"       , "#eta_{l_{2}}", "smallmarkers");
+    effTriple t_dzlepton (dzbins2                 , "lepton_dzV"      , "dz(V)_{l} [cm]"            , "evts"   );
+    effTriple t_dzbslepton (dzbins                 , "lepton_dzBs"      , "dz(Bs)_{l} [cm]"            , "evts"   );
+    effTriple t_dzbsalllepton (dzbins2                 , "alllepton_dzBs"      , "dz(Bs)_{l} [cm]"            , "evts"   );
+    effTriple t_dzleptonlepton (dzbins2                 , "leptonlepton_dz"      , "dz(ll) [cm]"            , "evts"   );
 
     effTriple::makelist=false;
-
 
     //all this trigger stuff starts here
 
@@ -419,9 +431,11 @@ public:
 
       if(mode_==0 &&  (pElectrons->size() < 1 || pMuons->size()< 1)) continue;
 
+    
       //select dileptons
       double mass=selectDileptons(pMuons,pElectrons);
 
+     
       //cut on run ranges
       if(runcutlow_ >0  && pEvent->runNo() < runcutlow_ ) continue;
       if(runcuthigh_>0 && pEvent->runNo() > runcuthigh_) continue;
@@ -429,6 +443,9 @@ public:
       //cut on mass ranges
       if(masscutlow_ >0  && mass < masscutlow_ ) continue;
       if(masscuthigh_>0 && mass > masscuthigh_) continue;
+
+
+
 
       b_dilepton=true;
    
@@ -500,6 +517,40 @@ public:
       
       //////////trigger check ends
      
+      //do matching on selectedMuons_ selectedElecs
+
+      if(match_){
+	firedDilepTrigger=false;
+	int matchedno=0;
+
+	if(mode_>0.1){ //mumu
+	  for(size_t g=0;g<selectedMuons_.size();g++){
+	    ztop::NTMuon * muon = selectedMuons_.at(g);
+	    bool foundmatched=false;
+	    for(size_t j=0;j<muon->matchedTrig().size();j++){
+	      //std::cout << muon->matchedTrig().at(j) << std::endl;
+	      for(size_t k=0;k<trigs_.size();k++){
+		if(((TString)muon->matchedTrig().at(j)).Contains(trigs_.at(k))){
+		  matchedno++;
+		  foundmatched=true;
+		  break;
+		}
+	      }
+	      if(foundmatched)
+		break;
+	    }
+	  }
+	}
+	if(mode_<-0.1){ //ee
+
+	}
+	if(mode_==0){ //emu
+
+	}
+	if(matchedno > 1)  //The selected muons have fired the trigger! machedno >0 also means, trigger has fired but not ness. due to selected muons
+	  firedDilepTrigger=true;
+      }
+
     
       if(includecorr_ && !firedMet) continue;
       
@@ -546,6 +597,7 @@ public:
       double alllepmulti;
       double iso1;
       double iso2;
+      double dz1,dz2,dzbs1,dzbs2;
 
       //mass already defined
 
@@ -563,6 +615,10 @@ public:
 	alllepmulti=pElectrons->size();
 	iso1=selectedElecs_[0]->isoVal();
 	iso2=selectedElecs_[1]->isoVal();
+	dz1=selectedElecs_[0]->dzV();
+	dz2=selectedElecs_[1]->dzV();
+	dzbs1=selectedElecs_[0]->dZBs();
+	dzbs2=selectedElecs_[1]->dZBs();
       }
       else if(mode_>0.1){ //mumu
 	eta1=selectedMuons_[0]->eta();
@@ -575,6 +631,10 @@ public:
 	alllepmulti=pMuons->size();
 	iso1=selectedMuons_[0]->isoVal();
 	iso2=selectedMuons_[1]->isoVal();
+	dz1=selectedMuons_[0]->dzV();
+	dz2=selectedMuons_[1]->dzV();
+	dzbs1=selectedMuons_[0]->dZBs();
+	dzbs2=selectedMuons_[1]->dZBs();
       }
       else{ //emu
 	eta1=selectedElecs_[0]->eta();
@@ -587,6 +647,10 @@ public:
 	alllepmulti=pMuons->size() + pElectrons->size();
 	iso1=selectedElecs_[0]->isoVal();
 	iso2=selectedMuons_[0]->isoVal();
+	dz1=selectedMuons_[0]->dzV();
+	dz2=selectedElecs_[0]->dzV();
+	dzbs1=selectedElecs_[0]->dZBs();
+	dzbs2=selectedMuons_[0]->dZBs();
       }
 
       if(b_dilepton){
@@ -618,10 +682,20 @@ public:
 	t_iso.fillDen(iso1,puweight); 
 	t_iso.fillDen(iso2,puweight); 
 	t_eta2dfine.fillDen(fabs(eta1),fabs(eta2),puweight);
+
+	t_dzlepton.fillDen(fabs(dz1),puweight);
+	t_dzlepton.fillDen(fabs(dz2),puweight);
+
+	t_dzbslepton.fillDen(fabs(dzbs1),puweight);
+	t_dzbslepton.fillDen(fabs(dzbs2),puweight);
+
+	t_dzleptonlepton.fillDen(fabs(dz1-dz2),puweight);
  
 	if(mode_ > 0.1){
-	  for(size_t j=0;j<pMuons->size();j++)
+	  for(size_t j=0;j<pMuons->size();j++){
 	    t_allpt.fillDen(pMuons->at(j).pt(),puweight);
+	    t_dzbsalllepton.fillDen(fabs(pMuons->at(j).dZBs()),puweight);
+	  }
 	}
 
       }
@@ -662,10 +736,20 @@ public:
 	  t_iso.fillNum(iso2,puweight); 
 	  t_eta2dfine.fillNum(fabs(eta1),fabs(eta2),puweight);
 
-	  if(mode_ > 0.1){
-	    for(size_t j=0;j<pMuons->size();j++)
-	      t_allpt.fillNum(pMuons->at(j).pt(),puweight);
-	  }	
+	  t_dzlepton.fillNum(fabs(dz1),puweight);
+	  t_dzlepton.fillNum(fabs(dz2),puweight);
+
+	t_dzbslepton.fillNum(fabs(dzbs1),puweight);
+	t_dzbslepton.fillNum(fabs(dzbs2),puweight);
+
+	t_dzleptonlepton.fillNum(fabs(dz1-dz2),puweight);
+
+	if(mode_ > 0.1){
+	  for(size_t j=0;j<pMuons->size();j++){
+	    t_allpt.fillNum(pMuons->at(j).pt(),puweight);
+	    t_dzbsalllepton.fillNum(fabs(pMuons->at(j).dZBs()),puweight);
+	  }
+	}	
 
 	}
 
@@ -882,7 +966,7 @@ public:
     mettriggers.push_back("HLT_DiPFJet40_PFMETnoMu65_MJJ800VBF_AllJets_v");
     mettriggers.push_back("HLT_DiPFJet40_PFMETnoMu65_MJJ600VBF_LeadingJets_v");
     mettriggers.push_back("HLT_PFMET180_v");
-    mettriggers.push_back("HLT_MET80_v");
+    //  mettriggers.push_back("HLT_MET80_v");
     mettriggers.push_back("HLT_Photon70_CaloIdXL_PFMET100_v");
     mettriggers.push_back("HLT_MonoCentralPFJet80_PFMETnoMu95_NHEF0p95_v");
     mettriggers.push_back("HLT_DiPFJet40_PFMETnoMu65_MJJ600VBF_LeadingJets_v");
@@ -935,7 +1019,7 @@ public:
     mettriggers.push_back("HLT_DisplacedPhoton65EBOnly_CaloIdVL_IsoL_PFMET30_v");
   
 
-    mettriggers.push_back("HLT_L1ETM100_v");
+    //   mettriggers.push_back("HLT_L1ETM100_v");
 
 
     //just for testing
@@ -996,6 +1080,8 @@ protected:
   std::vector<float> binseta2dx_;
   std::vector<float> binseta2dy_;
   std::vector<float> binspt_;
+
+  bool match_;
 
   double masscutlow_,masscuthigh_;
   double runcutlow_,runcuthigh_;
@@ -1085,17 +1171,17 @@ std::vector<histWrapper> getAllSFs(triggerAnalyzer & num, triggerAnalyzer & den 
 
 
 /////definitions here
-void makeFullOutput(triggerAnalyzer & data, triggerAnalyzer & mc , TString dirname, TString label,  double relerror=0){
+TString makeFullOutput(triggerAnalyzer & data, triggerAnalyzer & mc , TString dirname, TString label,  double relerror=0){
 
   using namespace std;
   int selectionstep=data.selectionStep();
   if(data.selectionStep() != mc.selectionStep()){
     cout << "makeFullOutput: selection Step must be the same!" << endl;
-    return;
+    return "";
   }
   if(data.getTriples().size() < 1 || mc.getTriples().size() < 1){
     cout << "makeFullOutput: run Eff() first!" << endl;
-    return;
+    return "";
   }
 
   std::vector<histWrapper> sfs=getAllSFs(data,mc,relerror);
@@ -1132,22 +1218,24 @@ void makeFullOutput(triggerAnalyzer & data, triggerAnalyzer & mc , TString dirna
 
   if(!globaldata.getNum().isTH1D()){
     cout << "makeFullOutput: global SF histo needs to be TH1D!!" <<endl;
-    return;
+    return "";
   }
   int bin=globaldata.getNum().getTH1D().FindBin(selectionstep);
-
+  /*
   double datanum=globaldata.getNum().getTH1D().GetBinContent(bin);
   double dataden=globaldata.getDen().getTH1D().GetBinContent(bin);
   double datanumerr=globaldata.getNum().getTH1D().GetBinError(bin);
   double datadenerr=globaldata.getDen().getTH1D().GetBinError(bin);
+  */
   double dataeff=globaldata.getEff().getTH1D().GetBinContent(bin);
   double dataefferr=globaldata.getEff().getTH1D().GetBinError(bin);
 
-
+  /*
   double mcnum=globalmc.getNum().getTH1D().GetBinContent(bin);
   double mcden=globalmc.getDen().getTH1D().GetBinContent(bin);
   double mcnumerr=globalmc.getNum().getTH1D().GetBinError(bin);
   double mcdenerr=globalmc.getDen().getTH1D().GetBinError(bin);
+  */
   double mceff=globalmc.getEff().getTH1D().GetBinContent(bin);
   double mcefferr=globalmc.getEff().getTH1D().GetBinError(bin);
 
@@ -1158,17 +1246,33 @@ void makeFullOutput(triggerAnalyzer & data, triggerAnalyzer & mc , TString dirna
 
   histWrapper hwscaleF=hwdataeff/hwmceff;
   hwscaleF.addRelError(relerror);
+  double sfstaterr=hwscaleF.getTH1D().GetBinError(bin);
   double sf=hwscaleF.getTH1D().GetBinContent(bin);
   double sferr=hwscaleF.getTH1D().GetBinError(bin);
 
-  std::cout << "TeX table Efficiencies: \n" << std::endl;
+  std::cout << "***********\nTeX table Efficiencies for  \n" << label << std::endl;
   cout.setf(ios::fixed,ios::floatfield);
   cout.precision(3);
-  std::cout << "\\epsilon_{data} & \\epsilon_{MC} & SF \\\\ \n"
+  std::cout << "  & \\epsilon_{data} & \\epsilon_{MC} & SF \\\\ \n"
 	    <<  dataeff << " $\\pm$ " << dataefferr << " & " 
 	    <<   mceff << " $\\pm$ " << mcefferr << " & " 
 	    <<  sf << " $\\pm$ " << sferr << "\\\\" << endl;
 
+
+  std::cout << "\n***********\nnumbers for copy-paste in tables(data,mc,sf)(stat,stat,stat;syst)\n" 
+	    << dataeff << " " << dataefferr << "\n"
+	    << mceff << " " << mcefferr << "\n"
+	    << sf << " " << sfstaterr << " " << sf*0.01
+	    << "\n************\n" << std::endl;
+
+
+  std::ostringstream s;
+  s    << data.getModeS() << dataeff << " $\\pm$ " << dataefferr << " & " 
+       <<   mceff << " $\\pm$ " << mcefferr << " & " 
+       <<  sf << " $\\pm$ " << sferr << "\\\\";
+
+  TString out= s.str();
+  return out;
 
 }
 

@@ -2,7 +2,7 @@
 #define MainAnalyzer_h
 
 #include "TtZAnalysis/DataFormats/src/classes.h" //gets all the dataformats
-//#include "TtZAnalysis/DataFormats/interface/elecRhoIsoAdder.h"
+#include "TtZAnalysis/DataFormats/interface/elecRhoIsoAdder.h"
 #include "TopAnalysis/ZTopUtils/interface/PUReweighter.h"
 #include "TtZAnalysis/plugins/leptonSelector2.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"

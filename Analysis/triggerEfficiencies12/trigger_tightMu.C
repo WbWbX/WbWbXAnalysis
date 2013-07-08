@@ -8,8 +8,6 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
 
   bool domatching=false;
 
-    if( inputMuons->size() >2) return 0;
-
   ////////ONLY FOR TESTING!!! IF SWITCHED ON EFF=1 BY CONSTRUCTION DONT USE THIS THING FOR ANY EFF!!
 
   using namespace std;
@@ -20,26 +18,37 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
     //select
     if(muon->pt() < 20) continue;
     if(fabs(muon->eta()) > 2.4) continue;
-    if(!(muon->isGlobal() || muon->isTracker())) continue;
+    if(!(muon->isGlobal())) continue;
+    if(!(muon->isTracker())) continue;
+    if(fabs(muon->normChi2()) > 10) continue;
+    if(muon->muonHits() < 1) continue;
+    if(fabs(muon->d0V()) > 0.2) continue;
+    if(muon->trkHits() <= 5) continue;
+    if(muon->pixHits() <= 0) continue;
+    if(fabs(muon->dzV()) >= 0.5) continue;
+
+
+    //number of matched stations missing!!!
+
     if(fabs(muon->isoVal()) > 0.2) continue;
-    match=false;
+       match=false;
 
     if(domatching){
 
-    	for(size_t j=0;j<muon->matchedTrig().size();j++){
-    		//std::cout << muon->matchedTrig().at(j) << std::endl;
-    		for(size_t k=0;k<trigs_.size();k++){
-    			if(((TString)muon->matchedTrig().at(j)).Contains(trigs_.at(k))){
-    				match=true;
-    				break;
-    			}
-
-    		}
-    		if(match)
-    			break;
-    	}
-    	if(!match)
-    		continue;
+      for(size_t j=0;j<muon->matchedTrig().size();j++){
+	//std::cout << muon->matchedTrig().at(j) << std::endl;
+	for(size_t k=0;k<trigs_.size();k++){
+	  if(((TString)muon->matchedTrig().at(j)).Contains(trigs_.at(k))){
+	    match=true;
+	    break;
+	  }
+	 
+	}
+	if(match)
+	  break;
+      }
+      if(!match)
+	continue;
     }
     selectedMuons_ << muon;
   }
@@ -83,7 +92,7 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
 
 
 
-void trigger_looseMu(){
+void trigger_tightMu(){
 
   
 
@@ -108,15 +117,13 @@ void trigger_looseMu(){
 
   ta_mumud.setMode("mumu");
   ta_mumud.setMassCutLow(12);
-  ta_mumud.setIncludeCorr(false);
-  // ta_mumud.checkTriggerPaths(true);
-  // ta_mumud.setUseMatching(false);
+  ta_mumud.setIncludeCorr(true);
+  ta_mumud.checkTriggerPaths(false);
+  ta_mumud.setUseMatching(false);
 
   ta_mumud.setBinsEta(binsmumueta);
   ta_mumud.setBinsEta2dX(bins2dmumu);
   ta_mumud.setBinsEta2dY(bins2dmumu);
-  ta_mumud.setMassCutLow(60);
-  ta_mumud.setMassCutHigh(120);
 
   ta_mumud.setDileptonTrigger("HLT_Mu17_Mu8_v");
 
@@ -129,9 +136,7 @@ void trigger_looseMu(){
 
 
   
-  //TString dir="/scratch/hh/dust/naf/cms/user/kieseler/trees_Apr13_04/";
-  
-  TString dir="/scratch/hh/dust/naf/cms/user/kieseler/trees_ES_mu04_lowkin/";
+  TString dir="/scratch/hh/dust/naf/cms/user/kieseler/trees_Apr13_04/";
 
   TString cmssw_base=getenv("CMSSW_BASE");
   TString pileuproot = cmssw_base+"/src/TtZAnalysis/Data/Full19.json.txt_PU.root";
@@ -139,9 +144,8 @@ void trigger_looseMu(){
 
   std::vector<TString> mumumcfiles, datafilesFull,datafilesRunb,datafilesRunc, datafilesRuna,datafilesRund;
  
-  mumumcfiles  // << dir+"tree_8TeV_mumuttbar.root" 
-    //  << dir+"tree_8TeV_mumuttbarviatau.root" ;
-   << dir+"tree_8TeV_dymumu60120.root";
+  mumumcfiles << dir+"tree_8TeV_mumuttbar.root" 
+	      << dir+"tree_8TeV_mumuttbarviatau.root" ;
 
   datafilesFull  << dir + "tree_8TeV_MET_runA_06Aug.root"  
 		 << dir + "tree_8TeV_MET_runA_13Jul.root"  

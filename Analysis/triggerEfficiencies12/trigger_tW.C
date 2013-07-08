@@ -113,7 +113,7 @@ void trigger_tW(){
 
   std::vector<float> binsmumueta, bins2dee, bins2dmue,binsptmu, binspte, bins2dmumu;
   
-  binsmumueta << -2.5 << -2.1 << -1.2 << -0.9 << 0.9 << 1.2 << 2.1 << 2.5;
+  binsmumueta << -2.4 << -2.1 << -1.2 << -0.9 << 0.9 << 1.2 << 2.1 << 2.4;
   bins2dmumu << 0 << 0.9 << 1.2 << 2.1 << 2.5;
   bins2dee <<0 << 1.47 << 2.5;
   bins2dmue << 0 << 1.2 << 2.5;

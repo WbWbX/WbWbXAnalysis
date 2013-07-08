@@ -182,7 +182,7 @@ void trigger_028(){
 
 
 
-  analyzeAll( ta_eed,  ta_eeMC,  ta_mumud,  ta_mumuMC,  ta_emud,  ta_emuMC,"full","19 fb^{-1}");
+  // analyzeAll( ta_eed,  ta_eeMC,  ta_mumud,  ta_mumuMC,  ta_emud,  ta_emuMC,"full","19 fb^{-1}");
 
 
 

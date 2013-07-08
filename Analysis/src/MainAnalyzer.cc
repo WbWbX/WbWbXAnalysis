@@ -49,6 +49,11 @@ int MainAnalyzer::start(){
   //load btag:
   if(!(getBTagSF()->makesEff())){
     std::cout << "loading b-tag File: " << btagsffile_ << std::endl;
+    std::ifstream testfile(btagsffile_.Data());
+    if(!testfile){
+      std::cout << "b-tag File " << btagsffile_ << " not found, exit (-3)" << std::endl;
+      return -3;
+    }
     getBTagSF()->readFromTFile(btagsffile_);
     getBTagSF()->setSystematic(btagsyst);
   }
@@ -341,7 +346,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   container1D generated2(onebin, "generated filtered events", "gen", "N_{gen}");
 
 
-  container1D diletaZgen(etabinsdil, "dilepton eta gen", "#eta_{ll}", "N_{evt}");
+  container1D diletagen(etabinsdil, "dilepton eta gen", "#eta_{ll}", "N_{evt}");
 
   container1D selection(selectionbins, "some selection steps", "step", "N_{sel}");
 
@@ -561,11 +566,22 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       }
     }
     else{
-      generated2=generated;
+      for(int i=1;i<=generated.getNBins();i++){
+	generated2.setBinContent(i, genentries);
+	generated2.setBinError(i, sqrt(genentries));
+      }
     }
 
   }
-  else{
+  else{//not mc
+    for(int i=1;i<=generated.getNBins();i++){
+      generated.setBinContent(i, 0);
+      generated.setBinError(i, 0);
+    }
+    for(int i=1;i<=generated2.getNBins();i++){
+      generated2.setBinContent(i, 0);
+      generated2.setBinError(i, 0);
+    }
     norm=1;
   }
 
@@ -595,7 +611,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
   TBranch * b_Electrons=0;
   vector<NTElectron> * pElectrons = 0;
-  t->SetBranchAddress("NTPFElectrons",&pElectrons,&b_Electrons);
+  // t->SetBranchAddress("NTPFElectrons",&pElectrons,&b_Electrons);
+  t->SetBranchAddress("NTElectrons",&pElectrons,&b_Electrons);
 
   TBranch * b_Muons=0;
   vector<NTMuon> * pMuons = 0;
@@ -625,12 +642,22 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   vector<NTGenParticle> * pGenBHadrons=0;
   t->SetBranchAddress("NTGenBHadrons",&pGenBHadrons,&b_GenBHadrons); 
   //  TBranch * b_GenLeptons3=0;
-  //  TBranch * b_GenLeptons1=0;
+  TBranch * b_GenLeptons1=0;
+  vector<NTGenParticle> *pGenLeptons1 =0;
+  t->SetBranchAddress("NTGenLeptons1",&pGenLeptons1,&b_GenLeptons1); 
+
   TBranch * b_GenJets=0;
   vector<NTGenJet> * pGenJets=0;
   t->SetBranchAddress("NTGenJets",&pGenJets,&b_GenJets); 
 
+  TBranch * b_GenNeutrinos=0;
+  vector<NTGenParticle> * pGenNeutrinos=0;
+  t->SetBranchAddress("NTGenNeutrinos",&pGenNeutrinos,&b_GenNeutrinos); 
 
+
+
+  elecRhoIsoAdder elecrhoisoadd(isMC);
+  elecrhoisoadd.setUse2012EA(!is7TeV);
 
   /*
   norm=1;
@@ -647,9 +674,18 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   //if(testmode) 
   //  nEntries=nEntries/1000;
 
+
+  
+
   for(Long64_t entry=0;entry<nEntries;entry++){
     if(showstatusbar_) displayStatusBar(entry,nEntries);
 
+
+
+    b_Event->GetEntry(entry);
+    double puweight=1;
+    if (isMC) puweight = getPUReweighter()->getPUweight(pEvent->truePU());
+  
 
     ///gen stuff wo cuts!
     if(isMC){
@@ -667,7 +703,18 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 	gen_bhadronpt.fill(pGenBHadrons->at(i).pt());
 
 
+
+
       }
+
+      b_GenLeptons1->GetEntry(entry);
+      if(pGenLeptons1->size() > 1){
+
+	PolarLorentzVector p4dil=pGenLeptons1->at(0).p4() + pGenLeptons1->at(1).p4();
+	diletagen.fill(p4dil.Eta(),puweight);
+
+      }
+
       //recreateRelations(mothers, daughters) --serach for genid and motherit, daugherits
 
 
@@ -765,10 +812,18 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       if(pElectrons->at(i).mvaId() < 0.5) continue;
       if(pElectrons->at(i).mHits() > 0) continue;
 
+      /////////only temporarily////
+      NTSuClu suclu;
+      LorentzVector ecalp4;
+      ecalp4=pElectrons->at(i).ECalP4();
+      suclu.setP4(ecalp4);
+      pElectrons->at(i).setSuClu(suclu);
+      elecrhoisoadd.addRhoIso(pElectrons->at(i));
+
       idelectrons <<  &(pElectrons->at(i));
 
       //select iso electrons
-      if(pElectrons->at(i).isoVal()>0.15) continue;
+      if(pElectrons->at(i).rhoIso()>0.15) continue;
       isoelectrons <<  &(pElectrons->at(i));
     }
 
@@ -786,11 +841,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       treejets << &(pJets->at(i));
     }
 
-    b_Event->GetEntry(entry);
 
-    double puweight=1;
-    if (isMC) puweight = getPUReweighter()->getPUweight(pEvent->truePU());
-  
     ///triggers here - reimplement
     
     /////// make collections
