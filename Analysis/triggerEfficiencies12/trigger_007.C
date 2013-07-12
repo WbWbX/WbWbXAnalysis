@@ -15,15 +15,16 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
   std::vector<ztop::NTMuon* > globalmuons;
 
   for(size_t i=0;i<inputMuons->size();i++){
-    ztop::NTMuon * muon = &inputMuons->at(i);
-    //select
-    if(muon->pt() < 20) continue;
-    if(fabs(muon->eta()) > 2.4) continue;
-    if(!muon->isGlobal()) continue;
-    globalmuons << muon;
-    if(!(muon->isGlobal() || muon->isTracker())) continue;
-    if(fabs(muon->isoVal()) > 0.15) continue;
-    tempmuons << muon;
+	  ztop::NTMuon * muon = &inputMuons->at(i);
+	  //select
+	  if(muon->isGlobal()){
+		  globalmuons << muon;
+	  }
+	  if(muon->pt() < 20) continue;
+	  if(fabs(muon->eta()) > 2.4) continue;
+	  if(!(muon->isGlobal() || muon->isTracker())) continue;
+	  if(fabs(muon->isoVal()) > 0.15) continue;
+	  tempmuons << muon;
   }
 
  
@@ -76,7 +77,7 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
 
 void trigger_007(){
 
-  triggerAnalyzer::testmode=true;
+  triggerAnalyzer::testmode=false;
 
   using namespace std;
   using namespace ztop;

@@ -68,7 +68,7 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
 
 void trigger_028(){
 
-  triggerAnalyzer::testmode=true;
+  triggerAnalyzer::testmode=false;
 
   using namespace std;
   using namespace ztop;
@@ -245,7 +245,7 @@ void trigger_028(){
 
   analyzeAll( ta_eedC,  ta_eeMCC,  ta_mumudC,  ta_mumuMCC,  ta_emudC,  ta_emuMCC,"RunC","Run C");
 
-
+/*
   triggerAnalyzer ta_eedD=ta_eed;
   triggerAnalyzer ta_mumudD=ta_mumud;
   triggerAnalyzer ta_emudD=ta_emud;
@@ -263,19 +263,19 @@ void trigger_028(){
   ta_eeMCD.setPUFile(PURunD);
   ta_mumuMCD.setPUFile(PURunD);
   ta_emuMCD.setPUFile(PURunD);
-
+*/
   //  analyzeAll( ta_eedD,  ta_eeMCD,  ta_mumudD,  ta_mumuMCD,  ta_emudD,  ta_emuMCD,"RunD","Run D");
 
 
   double lumiA=0.890;
   double lumiB=4.430;
   double lumiC=7.026;
-  double lumiD=7.272;
+//  double lumiD=7.272;
 
-  double lumitotal=lumiA+lumiB+lumiC+lumiD;
+  double lumitotal=lumiA+lumiB+lumiC;//+lumiD;
 
   //for ee
-  double eetotal=ta_eedA.getGlobalDen() + ta_eedB.getGlobalDen() + ta_eedC.getGlobalDen() + ta_eedD.getGlobalDen();
+  double eetotal=ta_eedA.getGlobalDen() + ta_eedB.getGlobalDen() + ta_eedC.getGlobalDen() ;//+ ta_eedD.getGlobalDen();
   double eeAscale=eetotal/ta_eedA.getGlobalDen() * lumiA/lumitotal;
   ta_eedA.scale(eeAscale);
   ta_eeMCA.scale(eeAscale);
@@ -285,16 +285,16 @@ void trigger_028(){
   double eeCscale=eetotal/ta_eedC.getGlobalDen() * lumiC/lumitotal;
   ta_eedC.scale(eeCscale);
   ta_eeMCC.scale(eeCscale);
-  double eeDscale=eetotal/ta_eedD.getGlobalDen() * lumiD/lumitotal;
-  ta_eedD.scale(eeDscale);
-  ta_eeMCD.scale(eeDscale);
+//  double eeDscale=eetotal/ta_eedD.getGlobalDen() * lumiD/lumitotal;
+//  ta_eedD.scale(eeDscale);
+//  ta_eeMCD.scale(eeDscale);
 
-  triggerAnalyzer eedFull = ta_eedA + ta_eedB + ta_eedC + ta_eedD;
-  triggerAnalyzer eemcFull = ta_eeMCA + ta_eeMCB + ta_eeMCC + ta_eeMCD;
-  TString eestring=makeFullOutput(eedFull, eemcFull, "ee_Full", "ee Full 19 fb^{-1}", 0.01);
+  triggerAnalyzer eedFull = ta_eedA + ta_eedB + ta_eedC ;//+ ta_eedD;
+  triggerAnalyzer eemcFull = ta_eeMCA + ta_eeMCB + ta_eeMCC;// + ta_eeMCD;
+  TString eestring=makeFullOutput(eedFull, eemcFull, "ee_12", "ee 12 fb^{-1}", 0.01);
 
   ////
-  double mumutotal=ta_mumudA.getGlobalDen() + ta_mumudB.getGlobalDen() + ta_mumudC.getGlobalDen() + ta_mumudD.getGlobalDen();
+  double mumutotal=ta_mumudA.getGlobalDen() + ta_mumudB.getGlobalDen() + ta_mumudC.getGlobalDen();// + ta_mumudD.getGlobalDen();
   double mumuAscale=mumutotal/ta_mumudA.getGlobalDen() * lumiA/lumitotal;
   ta_mumudA.scale(mumuAscale);
   ta_mumuMCA.scale(mumuAscale);
@@ -304,18 +304,18 @@ void trigger_028(){
   double mumuCscale=mumutotal/ta_mumudC.getGlobalDen() * lumiC/lumitotal;
   ta_mumudC.scale(mumuCscale);
   ta_mumuMCC.scale(mumuCscale);
-  double mumuDscale=mumutotal/ta_mumudD.getGlobalDen() * lumiD/lumitotal;
-  ta_mumudD.scale(mumuDscale);
-  ta_mumuMCD.scale(mumuDscale);
+//  double mumuDscale=mumutotal/ta_mumudD.getGlobalDen() * lumiD/lumitotal;
+//  ta_mumudD.scale(mumuDscale);
+//  ta_mumuMCD.scale(mumuDscale);
 
 
-  triggerAnalyzer mumudFull = ta_mumudA + ta_mumudB + ta_mumudC + ta_mumudD;
-  triggerAnalyzer mumumcFull = ta_mumuMCA + ta_mumuMCB + ta_mumuMCC + ta_mumuMCD;
-  TString mumustring=makeFullOutput(mumudFull, mumumcFull, "mumu_Full", "mumu Full 19 fb^{-1}", 0.01);
+  triggerAnalyzer mumudFull = ta_mumudA + ta_mumudB + ta_mumudC ;//+ ta_mumudD;
+  triggerAnalyzer mumumcFull = ta_mumuMCA + ta_mumuMCB + ta_mumuMCC ;//+ ta_mumuMCD;
+  TString mumustring=makeFullOutput(mumudFull, mumumcFull, "mumu_12", "mumu 12 fb^{-1}", 0.01);
 
 
   ///
-  double emutotal=ta_emudA.getGlobalDen() + ta_emudB.getGlobalDen() + ta_emudC.getGlobalDen() + ta_emudD.getGlobalDen();
+  double emutotal=ta_emudA.getGlobalDen() + ta_emudB.getGlobalDen() + ta_emudC.getGlobalDen() ;//+ ta_emudD.getGlobalDen();
   double emuAscale=emutotal/ta_emudA.getGlobalDen() * lumiA/lumitotal;
   ta_emudA.scale(emuAscale);
   ta_emuMCA.scale(emuAscale);
@@ -325,14 +325,14 @@ void trigger_028(){
   double emuCscale=emutotal/ta_emudC.getGlobalDen() * lumiC/lumitotal;
   ta_emudC.scale(emuCscale);
   ta_emuMCC.scale(emuCscale);
-  double emuDscale=emutotal/ta_emudD.getGlobalDen() * lumiD/lumitotal;
-  ta_emudD.scale(emuDscale);
-  ta_emuMCD.scale(emuDscale);
+//  double emuDscale=emutotal/ta_emudD.getGlobalDen() * lumiD/lumitotal;
+//  ta_emudD.scale(emuDscale);
+//  ta_emuMCD.scale(emuDscale);
+//
 
-
-  triggerAnalyzer emudFull = ta_emudA + ta_emudB + ta_emudC + ta_emudD;
-  triggerAnalyzer emumcFull = ta_emuMCA + ta_emuMCB + ta_emuMCC + ta_emuMCD;
- TString emustring= makeFullOutput(emudFull, emumcFull, "emu_Full", "emu Full 19 fb^{-1}", 0.01);
+  triggerAnalyzer emudFull = ta_emudA + ta_emudB + ta_emudC;// + ta_emudD;
+  triggerAnalyzer emumcFull = ta_emuMCA + ta_emuMCB + ta_emuMCC ;//+ ta_emuMCD;
+ TString emustring= makeFullOutput(emudFull, emumcFull, "emu_12", "emu 12 fb^{-1}", 0.01);
 
   std::cout << "channel  & $\\epsilon_{data}$ & $\\epsilon_{MC}$ & SF & $\\alpha$ \\\\ " << std::endl;
     std::cout << eestring<< std::endl;
