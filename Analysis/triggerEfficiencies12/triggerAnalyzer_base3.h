@@ -1,5 +1,5 @@
-#ifndef TRIGGERANALYZER_BASE_H
-#define TRIGGERANALYZER_BASE_H
+#ifndef TRIGGERANALYZER_BASE3_H
+#define TRIGGERANALYZER_BASE3_H
 
 #include "TFile.h"
 #include "TTree.h"
@@ -87,7 +87,7 @@ public:
 
     runcutlow_=0;
     runcuthigh_=0;
-
+    prescaleweight_=true;
     selectionstep_=0;
 
     globalDen_=0;
@@ -138,6 +138,8 @@ public:
   int selectionStep(){return selectionstep_;}
 
   void setUseMatching(bool match){match_=match;}
+
+  void setUsePrescaleWeight(bool doit){prescaleweight_=doit;}
 
   double getGlobalDen(){return globalDen_;}
 
@@ -251,7 +253,9 @@ public:
     /////////PLOTS///////
 
     effTriple t_global  (selectionbins           , "global"         , "sel step"                    , "evts"   );
-    ///don't change!! global needs to be the first entry!!
+    effTriple t_global_woCorr  (selectionbins           , "global_woCorr"         , "sel step"                    , "evts"   );
+
+    ///don't change!! global needs to be the first/second entry!!
 
     effTriple t_pt      (binspt_                 , "lepton_pt"      , "p_{T,l} [GeV]"            , "evts"   );
     effTriple t_allpt   (binsallpt               , "all_lepton_pt"  , "p_{T,l} [GeV]"            , "evts"   );
@@ -500,9 +504,12 @@ public:
       if(largestprescale < 2 && !isMC_)
 	wrongtables++;
 
-      if(prescale > prescaleCutHigh) continue; //get rid of high prescales
+      if(prescaleweight_){
 
-      puweight*=(double) prescale;
+    	  if(prescale > prescaleCutHigh) continue; //get rid of high prescales
+
+    	  puweight*=(double) prescale;
+      }
 
       std::map<std::string, unsigned int>::iterator tit=pTriggersWithPrescales->begin();
      
@@ -552,10 +559,17 @@ public:
       }
 
     
-      if(includecorr_ && !firedMet) continue;
+
       
       if(!isMC_ && !firedMet) continue;
 
+
+      t_global_woCorr.fillDen(0,puweight);
+      if(firedDilepTrigger)
+    	  t_global_woCorr.fillNum(0,puweight);
+
+
+      if(includecorr_ && !firedMet) continue;
       // lepton selection and event selection (at least two leptons etc)
 
       if(pEvent->vertexMulti() <1) continue;
@@ -607,8 +621,8 @@ public:
       if(mode_<-0.1){ //ee
 	eta1=selectedElecs_[0]->eta();
 	eta2=selectedElecs_[1]->eta();
-	pt1=selectedElecs_[0]->pt();
-	pt2=selectedElecs_[1]->pt();
+	pt1=selectedElecs_[0]->ECalP4().Pt();
+	pt2=selectedElecs_[1]->ECalP4().Pt();
 	dphi=selectedElecs_[0]->phi() - pMet->phi();
 	dRll=dR(selectedElecs_[0],selectedElecs_[1]);
 	lepmulti=selectedElecs_.size();
@@ -639,7 +653,7 @@ public:
       else{ //emu
 	eta1=selectedElecs_[0]->eta();
 	eta2=selectedMuons_[0]->eta();
-	pt1=selectedElecs_[0]->pt();
+	pt1=selectedElecs_[0]->ECalP4().Pt();
 	pt2=selectedMuons_[0]->pt();
 	dphi=selectedElecs_[0]->phi() - pMet->phi();
 	dRll=dR(selectedElecs_[0],selectedMuons_[0]);
@@ -1097,7 +1111,7 @@ protected:
   bool includecorr_;
   int mode_; // -1: ee 0: emu 1:mumu
   TString pufile_;
-
+  bool prescaleweight_;
   int selectionstep_;
 
   std::vector< ztop::NTElectron *> selectedElecs_;
@@ -1215,6 +1229,8 @@ TString makeFullOutput(triggerAnalyzer & data, triggerAnalyzer & mc , TString di
 
   effTriple globaldata=data.getTriples().at(0);
   effTriple globalmc=mc.getTriples().at(0);
+  effTriple globaldatanoC=data.getTriples().at(1);
+  effTriple globalmcnoC=mc.getTriples().at(1);
 
   if(!globaldata.getNum().isTH1D()){
     cout << "makeFullOutput: global SF histo needs to be TH1D!!" <<endl;
@@ -1230,6 +1246,8 @@ TString makeFullOutput(triggerAnalyzer & data, triggerAnalyzer & mc , TString di
   double dataeff=globaldata.getEff().getTH1D().GetBinContent(bin);
   double dataefferr=globaldata.getEff().getTH1D().GetBinError(bin);
 
+
+
   /*
   double mcnum=globalmc.getNum().getTH1D().GetBinContent(bin);
   double mcden=globalmc.getDen().getTH1D().GetBinContent(bin);
@@ -1238,6 +1256,10 @@ TString makeFullOutput(triggerAnalyzer & data, triggerAnalyzer & mc , TString di
   */
   double mceff=globalmc.getEff().getTH1D().GetBinContent(bin);
   double mcefferr=globalmc.getEff().getTH1D().GetBinError(bin);
+
+  double mceffnoC=globalmcnoC.getEff().getTH1D().GetBinContent(bin);
+
+    double alpha=mceffnoC/mceff;
 
   histWrapper hwdataeff=globaldata.getEff();
   hwdataeff.setDivideBinomial(false);
@@ -1253,23 +1275,25 @@ TString makeFullOutput(triggerAnalyzer & data, triggerAnalyzer & mc , TString di
   std::cout << "***********\nTeX table Efficiencies for  \n" << label << std::endl;
   cout.setf(ios::fixed,ios::floatfield);
   cout.precision(3);
-  std::cout << "  & \\epsilon_{data} & \\epsilon_{MC} & SF \\\\ \n"
+  std::cout << "  & $\\epsilon_{data}$ & $\\epsilon_{MC}$ & SF & $\\alpha$ \\\\ \n"
 	    <<  dataeff << " $\\pm$ " << dataefferr << " & " 
 	    <<   mceff << " $\\pm$ " << mcefferr << " & " 
-	    <<  sf << " $\\pm$ " << sferr << "\\\\" << endl;
+	    <<  sf << " $\\pm$ " << sferr << " " << alpha << "\\\\" << endl;
 
 
-  std::cout << "\n***********\nnumbers for copy-paste in tables(data,mc,sf)(stat,stat,stat;syst)\n" 
+  std::cout << "\n***********\nnumbers for copy-paste in tables(data,mc,sf,alpha)(stat,stat,stat;syst)\n"
 	    << dataeff << " " << dataefferr << "\n"
 	    << mceff << " " << mcefferr << "\n"
-	    << sf << " " << sfstaterr << " " << sf*0.01
+	    << sf << " " << sfstaterr << " " << sf*0.01 << " " << alpha
 	    << "\n************\n" << std::endl;
 
 
   std::ostringstream s;
-  s    << data.getModeS() << dataeff << " $\\pm$ " << dataefferr << " & " 
+  s.setf(ios::fixed,ios::floatfield);
+  s.precision(3);
+  s    << data.getModeS() << " & " << dataeff << " $\\pm$ " << dataefferr << " & "
        <<   mceff << " $\\pm$ " << mcefferr << " & " 
-       <<  sf << " $\\pm$ " << sferr << "\\\\";
+       <<  sf << " $\\pm$ " << sferr << " & " << alpha << "\\\\";
 
   TString out= s.str();
   return out;

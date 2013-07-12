@@ -382,4 +382,9 @@ void trigger_tW(){
   makeFullOutput(emudFull, emumcFull, "emu_Full", "emu 12 fb^{-1}", 0.01);
 
 
+  std::cout << "channel  & $\\epsilon_{data}$ & $\\epsilon_{MC}$ & SF & $\\alpha$ \\\\ " << std::endl;
+    std::cout << eestring<< std::endl;
+    std::cout << mumustring<< std::endl;
+    std::cout << emustring<< std::endl;
+
 }

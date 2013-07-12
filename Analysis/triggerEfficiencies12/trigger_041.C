@@ -27,7 +27,7 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
   
   for(size_t i=0;i<inputElectrons->size();i++){
     ztop::NTElectron * elec = &inputElectrons->at(i);
-    if(elec->pt() < 20) continue;
+    if(elec->ECalP4().Pt() < 20) continue;
     if(elec->isoVal()>0.15) continue;
     if(fabs(elec->eta()) > 2.4) continue;
     if(elec->mvaId() < 0.5) continue;
@@ -94,10 +94,10 @@ void trigger_041(){
   ta_emud.setMode("emu");
   ta_emud.setMassCutLow(20);
   ta_emud.setIncludeCorr(includecorr);
-    ta_emud.setDileptonTrigger("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
+//   ta_emud.setDileptonTrigger("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
 
   ta_mumud.setMode("mumu");
-  // ta_mumud.setDileptonTrigger("HLT_Mu17_Mu8_v");
+ //  ta_mumud.setDileptonTrigger("HLT_Mu17_Mu8_v");
   ta_mumud.setMassCutLow(20);
   ta_mumud.setIncludeCorr(includecorr);
 
@@ -296,7 +296,7 @@ void trigger_041(){
 
   triggerAnalyzer eedFull = ta_eedA + ta_eedB + ta_eedC + ta_eedD;
   triggerAnalyzer eemcFull = ta_eeMCA + ta_eeMCB + ta_eeMCC + ta_eeMCD;
-  makeFullOutput(eedFull, eemcFull, "ee_Full", "ee Full 19 fb^{-1}", 0.01);
+ TString eestring= makeFullOutput(eedFull, eemcFull, "ee_Full", "ee Full 19 fb^{-1}", 0.01);
 
   ////
   double mumutotal=ta_mumudA.getGlobalDen() + ta_mumudB.getGlobalDen() + ta_mumudC.getGlobalDen() + ta_mumudD.getGlobalDen();
@@ -316,7 +316,7 @@ void trigger_041(){
 
   triggerAnalyzer mumudFull = ta_mumudA + ta_mumudB + ta_mumudC + ta_mumudD;
   triggerAnalyzer mumumcFull = ta_mumuMCA + ta_mumuMCB + ta_mumuMCC + ta_mumuMCD;
-  makeFullOutput(mumudFull, mumumcFull, "mumu_Full", "mumu Full 19 fb^{-1}", 0.01);
+ TString mumustring= makeFullOutput(mumudFull, mumumcFull, "mumu_Full", "mumu Full 19 fb^{-1}", 0.01);
 
 
   ///
@@ -337,7 +337,12 @@ void trigger_041(){
 
   triggerAnalyzer emudFull = ta_emudA + ta_emudB + ta_emudC + ta_emudD;
   triggerAnalyzer emumcFull = ta_emuMCA + ta_emuMCB + ta_emuMCC + ta_emuMCD;
-  makeFullOutput(emudFull, emumcFull, "emu_Full", "emu Full 19 fb^{-1}", 0.01);
+  TStrin emustring=makeFullOutput(emudFull, emumcFull, "emu_Full", "emu Full 19 fb^{-1}", 0.01);
 
+
+  std::cout << "channel  & $\\epsilon_{data}$ & $\\epsilon_{MC}$ & SF & $\\alpha$ \\\\ " << std::endl;
+  std::cout << eestring<< std::endl;
+  std::cout << mumustring<< std::endl;
+  std::cout << emustring<< std::endl;
 
 }

@@ -385,7 +385,7 @@ TString cmssw_base=getenv("CMSSW_BASE");
   triggerAnalyzer eedFull = ta_eedA + ta_eedB + ta_eedC + ta_eedD;
   triggerAnalyzer eemcFull = ta_eeMCA + ta_eeMCB + ta_eeMCC + ta_eeMCD;
 
-  makeFullOutput(eedFull, eemcFull, "ee_Full", "ee Full 19 fb^{-1}", 0.01);
+  TString eestring=makeFullOutput(eedFull, eemcFull, "ee_Full", "ee Full 19 fb^{-1}", 0.01);
 
   ////
   double mumutotal=ta_mumudA.getGlobalDen() + ta_mumudB.getGlobalDen() + ta_mumudC.getGlobalDen() + ta_mumudD.getGlobalDen();
@@ -405,7 +405,7 @@ TString cmssw_base=getenv("CMSSW_BASE");
 
   triggerAnalyzer mumudFull = ta_mumudA + ta_mumudB + ta_mumudC + ta_mumudD;
   triggerAnalyzer mumumcFull = ta_mumuMCA + ta_mumuMCB + ta_mumuMCC + ta_mumuMCD;
-  makeFullOutput(mumudFull, mumumcFull, "mumu_Full", "mumu Full 19 fb^{-1}", 0.01);
+  TString mumustring=makeFullOutput(mumudFull, mumumcFull, "mumu_Full", "mumu Full 19 fb^{-1}", 0.01);
 
 
   ///
@@ -426,8 +426,12 @@ TString cmssw_base=getenv("CMSSW_BASE");
 
   triggerAnalyzer emudFull = ta_emudA + ta_emudB + ta_emudC + ta_emudD;
   triggerAnalyzer emumcFull = ta_emuMCA + ta_emuMCB + ta_emuMCC + ta_emuMCD;
-  makeFullOutput(emudFull, emumcFull, "emu_Full", "emu Full 19 fb^{-1}", 0.01);
+ TString emustring= makeFullOutput(emudFull, emumcFull, "emu_Full", "emu Full 19 fb^{-1}", 0.01);
 
+  std::cout << "channel  & $\\epsilon_{data}$ & $\\epsilon_{MC}$ & SF & $\\alpha$ \\\\ " << std::endl;
+   std::cout << eestring<< std::endl;
+   std::cout << mumustring<< std::endl;
+   std::cout << emustring<< std::endl;
 
 }
 
