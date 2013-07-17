@@ -28,7 +28,7 @@ options.register ('isSync',False,VarParsing.VarParsing.multiplicity.singleton,Va
 options.register('samplename', 'standard', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "which sample to run over - obsolete")
 options.register ('laseroff',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"use ECal Laser filter")
 
-
+options.register ('jpsi',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"make trees for J/Psi")
 
 options.register ('isSignal',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"is SignalMC")
 options.register ('muCone03',True,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"use iso cone of 0.3")
@@ -69,6 +69,7 @@ inputScript=options.inputScript          # TtZAnalysis.Configuration.samples.mc.
 json=options.json                        # give full path!!json files in TtZAnalysis/Data/data ONLY needed with nafjobsplitter
 laseroff=options.laseroff
 susy=options.susy
+jpsi=options.jpsi
 
 isSignal=options.isSignal
 newMuons=options.muCone03
@@ -753,16 +754,23 @@ process.kinMuons = process.selectedPatMuons.clone()
 process.kinMuons.src = 'patMuons' + pfpostfix
 #process.kinMuons.cut = cms.string('pt > 30  && abs(eta) < 2.1')
 process.kinMuons.cut = cms.string('pt > 8  && abs(eta) < 2.7')
-if includetrigger:
+if includetrigger or jpsi:
     process.kinMuons.cut = cms.string('pt > 3  && abs(eta) < 2.7')
+
 
 process.kinElectrons = process.selectedPatElectrons.clone()
 process.kinElectrons.src = 'patElectrons' + pfpostfix
 process.kinElectrons.cut = cms.string( 'pt > 8  && abs(eta) < 2.7') # because of ECalP4 to be on the safe side
 
+if includetrigger or jpsi:
+    process.kinElectrons.cut = cms.string( 'pt > 3  && abs(eta) < 2.7')
+
 process.kinPFElectrons = process.selectedPatElectrons.clone()
 process.kinPFElectrons.src = 'patPFElectrons' + pfpostfix
 process.kinPFElectrons.cut = cms.string( 'pt > 8  && abs(eta) < 2.7')
+
+if includetrigger or jpsi:
+    process.kinPFElectrons.cut = cms.string( 'pt > 3  && abs(eta) < 2.7')
 
 
 process.MuonGSFMerge = cms.EDProducer("CandViewMerger",

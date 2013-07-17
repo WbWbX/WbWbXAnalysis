@@ -12,5 +12,6 @@ cp ../triggerAnalyzer_base*.h .
 cp ../trigger_tth.C .
 cp ../histoStyle.h .
 cp ../getSubSetRoot.C .
+touch $HOSTNAME
 nohup root -l -b -q trigger_tth.C++ > output.txt 
 echo "done with ${dirstring}"

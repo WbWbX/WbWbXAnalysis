@@ -1370,11 +1370,16 @@ void analyzeAll(triggerAnalyzer &ta_eed, triggerAnalyzer &ta_eeMC, triggerAnalyz
 	cout << "\\end{tabular}\n\\caption{Trigger scale factors for different ttbar selection steps}\n\\end{table}" << endl;
 
 
+	cout << "\n\nsummary tablenew style" << endl;
 
+	TString eestring= makeFullOutput(ta_eed, ta_eeMC, "ee_"+dir, "ee"+label, 0.01);
+	TString mumustring= makeFullOutput(ta_mumud, ta_mumuMC, "mumu_"+dir, "#mu#mu"+label, 0.01);
+	TString emustring= makeFullOutput(ta_emud, ta_emuMC, "emu_"+dir, "e#mu"+label, 0.01);
 
-	makeFullOutput(ta_eed, ta_eeMC, "ee_"+dir, "ee"+label, 0.01);
-	makeFullOutput(ta_mumud, ta_mumuMC, "mumu_"+dir, "#mu#mu"+label, 0.01);
-	makeFullOutput(ta_emud, ta_emuMC, "emu_"+dir, "e#mu"+label, 0.01);
+	  std::cout << "channel  & $\\epsilon_{data}$ & $\\epsilon_{MC}$ & SF & $\\alpha$ \\\\ " << std::endl;
+	  std::cout << eestring<< std::endl;
+	  std::cout << mumustring<< std::endl;
+	  std::cout << emustring<< std::endl;
 
 
 }
