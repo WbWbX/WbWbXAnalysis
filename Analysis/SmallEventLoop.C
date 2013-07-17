@@ -19,7 +19,7 @@ void smallEventLoop(void){
   using namespace top;
   using namespace std;
 
-  TString infile="path to file";
+  TString infile="/data/user/kiesej/summerStudent/tree_8TeV_mumuttbar.root";
 
 
 
