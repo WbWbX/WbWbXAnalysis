@@ -8,9 +8,9 @@ then
 echo "preparing b-efficiencies -> will be safed in channel_energy_syst_btags.root. need to be merged afterwards"
 fi
 
-channels=("ee"
+channels=(#"ee"
 "mumu"
-"emu"
+#"emu"
 );
 systs=("nominal"
 "PU_up"
@@ -95,8 +95,11 @@ for (( i=0;i<${#channels[@]};i++)); do
 	    then
 		qsub jobscripts/${outname}
 	    else
-		while [ `ps ax | grep -E 'analyse.exe' | wc -l` -gt 10 ]; do
-		    sleep 1;
+		all=`ps ax | grep -E 'analyse.exe' | wc -l`
+		defunct=`ps ax | grep -E 'analyse.exe' | grep -E 'defunct' | wc -l`
+		running=`expr $all - $defunct`
+		while [$running  -gt 10 ]; do
+		    sleep 2;
 		done
 		echo "starting ${outname}"
 		./jobscripts/${outname} &
