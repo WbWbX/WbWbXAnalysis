@@ -227,6 +227,8 @@ namespace ztop{
     if(name_=="") name="no_name";
     else name = name_;
 
+    TH1::AddDirectory(kFALSE);
+
     f->cd();
     TTree * t=0;
     if(f->Get(treename)){
@@ -303,12 +305,12 @@ namespace ztop{
     for(float n=0;n<t->GetEntries();n++){
       t->GetEntry(n);
       TString vname=toTString(csv->getName());
-      std::cout << "check name: (" << vname << ") searching for: ("<< name<< ")"<<std::endl;
+      // std::cout << "check name: (" << vname << ") searching for: ("<< name<< ")"<<std::endl;
       //  vname=name;
-      std::cout << name.CompareTo(toTString(vname)) << std::endl;
+      //std::cout << name.CompareTo(toTString(vname)) << std::endl;
       if(vname == name){
 	//this=csv;
-	std::cout << "found " << name << std::endl;
+	//	std::cout << "found " << name << std::endl;
 	return csv;
 	found=true;
 	break;
