@@ -163,11 +163,11 @@ addpkg ElectroWeakAnalysis/Utilities
 echo "setting LHAPDF path to /afs/naf.desy.de/user/k/kieseler/public/lhapdf"
 
 mv $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected/lhapdf.xml $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected/lhapdf.xml.old
-sed  -e 's;environment name=\"LHAPDF_BASE\" default=\"/afs/naf.desy.de/group/cms/sw/slc5_amd64_gcc462/external/lhapdf/5.8.5-cms2\";environment name=\"LHAPDF_BASE\" default=\"/afs/naf.desy.de/user/k/kieseler/public/lhapdf\"";g' < $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected/lhapdf.xml.old  > $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected/lhapdf.xml
+
+sed  -e 's;environment name=\"LHAPDF_BASE\" default=\"/afs/naf.desy.de/group/cms/sw/slc5_amd64_gcc462/external/lhapdf/5.8.5-cms2\";environment name=\"LHAPDF_BASE\" default=\"/afs/naf.desy.de/user/k/kieseler/public/lhapdf\";g' < $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected/lhapdf.xml.old  > $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected/lhapdf.xml
 
 
-echo "Building eclipse project..."
-/afs/naf.desy.de/user/k/kieseler/public/eclipsetemp/prepareEclipseProject.sh
+
 
 #some copy-paste in case you want to use my root macros and the classes on command line
 echo 'you will need this in the rootlogon.C:'
@@ -177,12 +177,14 @@ echo '
      gSystem->Load("libDataFormatsFWLite.so");
      gSystem->Load("libDataFormatsPatCandidates.so");
      gSystem->Load("libTtZAnalysisDataFormats.so");
+     gSystem->Load("libTtZAnalysisTools.so");
+     gSystem->Load("libTopAnalysisZTopUtils.so");
      gSystem->Load("libRooFit");
      gSystem->Load("libFWCoreUtilities.so");
-     gSystem->Load("libCondFormatsJetMETObjects.so");
      cout << "libs loaded" <<endl;
      '
 
 
+echo "To prepare eclipse project run: /afs/naf.desy.de/user/k/kieseler/public/eclipsetemp/prepareEclipseProject.sh"
 
 echo "\n\ncompile if you like"
