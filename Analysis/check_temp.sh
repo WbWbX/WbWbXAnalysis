@@ -20,6 +20,9 @@ for file in *; do
 	   ## then
 		#nominal
 	    done=( "${done[@]}" "${jobname}" );
+	elif [ -e "${fullpath}_failed" ];
+	then
+	    echo "${jobname} \e[1;31m partially failed \e[0m"
 	else
 	    echo "${jobname} \e[1;32m partially done \e[0m"
 	fi
