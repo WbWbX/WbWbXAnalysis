@@ -157,7 +157,7 @@ fi
 
 #for analysis stuff:
 
-addpkg FWCore/FWLite/src/FWCoreFWLite
+addpkg FWCore/FWLite
 addpkg ElectroWeakAnalysis/Utilities
 
 echo "setting LHAPDF path to /afs/naf.desy.de/user/k/kieseler/public/lhapdf"
