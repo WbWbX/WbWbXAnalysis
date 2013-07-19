@@ -17,6 +17,7 @@
 #include <fstream>
 #include <omp.h>
 #include "TtZAnalysis/Analysis/interface/AnalysisUtils.h"
+#include "Pipes.h"
 
 #include <stdlib.h>
 
