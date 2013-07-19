@@ -878,10 +878,11 @@ process.treeSequence = cms.Sequence(process.patTriggerSequence *
 
 ###### Path
 
-process.path = cms.Path( process.goodOfflinePrimaryVertices *
+process.path = cms.Path( process.preFilterSequence *
+                         process.goodOfflinePrimaryVertices *
                          process.filtersSeq *
                         #  process.inclusiveVertexing *   ## segfaults?!?! in the newest release or MC
-                        process.preFilterSequence *
+                        
                       #  process.btagging *             #not yet implemented fully in pf2pat sequence../ needed for new btagging tag
                         
                         getattr(process,'patPF2PATSequence'+pfpostfix) *
