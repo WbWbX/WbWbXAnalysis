@@ -18,7 +18,6 @@
 void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, double norm,size_t legord,size_t anaid){
 
 
-
   using namespace std;
   using namespace ztop;
 
