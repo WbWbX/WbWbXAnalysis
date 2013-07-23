@@ -8,6 +8,10 @@ MainAnalyzer::MainAnalyzer(){
   freplaced_=0;
   dataname_="data";
   writeAllowed_=true;
+  b_ee_=false;
+  b_mumu_=false;
+  b_emu_=false;
+  is7TeV_=false;
 
 }
 
@@ -196,14 +200,16 @@ void MainAnalyzer::readFileList(){
 
     	  std::cout << "adding: " << replaceExtension(filename) << "\t" << legentry << "\t" << color << "\t" << norm << "\t" << legord << std::endl;
 
-	infiles_    << replaceExtension(filename);
-	legentries_ << legentry;
-	colz_       << color;
-	norms_      << norm;
-	legord_ << legord;
-	oldline=filename;
+    	  TString infile=replaceExtension(filename);
+
+    	  infiles_    << infile;
+    	  legentries_ << legentry;
+    	  colz_       << color;
+    	  norms_      << norm;
+    	  legord_ << legord;
+    	  oldline=filename;
       }
-      
+
     }
     if((uint)freplaced_ != fwithfix_.size()){
       cout << "replacing at least some postfixes was not sucessful! expected to replace "<< fwithfix_.size() << " replaced "<< freplaced_ << " exit" << endl;
@@ -219,6 +225,9 @@ void MainAnalyzer::readFileList(){
 void MainAnalyzer::copyAll(const MainAnalyzer & analyzer){
   
   channel_=analyzer.channel_;
+  b_ee_=analyzer.b_ee_;
+  b_emu_=analyzer.b_emu_;
+  b_mumu_=analyzer.b_mumu_;
   syst_=analyzer.syst_;
   energy_=analyzer.energy_;
   dataname_=analyzer.dataname_;

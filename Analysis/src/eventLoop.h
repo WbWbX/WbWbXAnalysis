@@ -11,7 +11,7 @@
 
 void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, double norm,size_t legord,size_t anaid){
 
-  // return;
+
 
   using namespace std;
   using namespace ztop;
@@ -20,21 +20,22 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   bool isMC=true;
   if(legendname==dataname_) isMC=false;
 
+  //check if file exists
+  TFile *f;
+  if(!fileExists((datasetdirectory_+inputfile).Data())){
+	  std::cout << datasetdirectory_+inputfile << " not found!!" << std::endl;
+	  p_finished.get(anaid)->pwrite(-1);
+	  return;
+  }
+  else{
+	  f=TFile::Open(datasetdirectory_+inputfile);
+  }
+
 
   //define containers here
 
   //   define binnings
 
-
-  std::ifstream FileTest((datasetdirectory_+inputfile).Data());
-  if(!FileTest) {
-    std::cout << datasetdirectory_+inputfile << " not found!!" << std::endl;
-    p_finished.get(anaid)->pwrite(-1);
-    return;
-  }
-  FileTest.close();
-
-  // return; //test
 
   vector<float> drbins;
   for(float i=0;i<40;i++) drbins << i/40;
@@ -270,79 +271,53 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   container1D::c_makelist=false; //switch off automatic listing
 
 
-
-  //get the lepton selector (maybe directly in the code.. lets see)
-
-  //leptonSelector2 lepSel;
-  //lepSel.setUseRhoIsoForElectrons(false);
+//setting the right normalisation for MC and the histos for inclusive cross section determination
   double oldnorm=norm;
-
-  /////some boolians //channels
-  bool b_mumu=false;bool b_ee=false;bool b_emu=false;
-  if(channel_.Contains("mumu")){
-    b_mumu=true;
-    cout << "\nrunning in mumu mode" <<endl;
-  }
-  else if (channel_.Contains("ee")){
-    b_ee=true;
-    cout << "\nrunning in ee mode" <<endl;
-  }
-  else if (channel_.Contains("emu")){
-    b_emu=true;
-    cout << "\nrunning in emu mode" <<endl;
-  }
-  bool is7TeV=false;
-  if(energy_.Contains("7TeV")){
-    is7TeV=true;
-    cout << "running with 2011 data/MC!" <<endl;
-  }
-
-  TFile *f=TFile::Open(datasetdirectory_+inputfile);
 
   double genentries=0;
   if(isMC){
 
-    TTree * tnorm = (TTree*) f->Get("preCutPUInfo/preCutPUInfo");
-    genentries=tnorm->GetEntries();
+	  TTree * tnorm = (TTree*) f->Get("preCutPUInfo/preCutPUInfo");
+	  genentries=tnorm->GetEntries();
 
-    delete tnorm;
-    norm = lumi_ * norm / genentries;
-    for(int i=1;i<=generated.getNBins();i++){
-      generated.setBinContent(i, genentries);
-      generated.setBinError(i, sqrt(genentries));
-    }
-    double fgen=0;
-    TTree * tfgen = (TTree*) f->Get("postCutPUInfo/PUTreePostCut");
-    if(tfgen){
-      fgen=tfgen->GetEntries();
-      for(int i=1;i<=generated2.getNBins();i++){
-	generated2.setBinContent(i, fgen);
-	generated2.setBinError(i, sqrt(fgen));
-      }
-    }
-    else{
-      for(int i=1;i<=generated.getNBins();i++){
-	generated2.setBinContent(i, genentries);
-	generated2.setBinError(i, sqrt(genentries));
-      }
-    }
+	  delete tnorm;
+	  norm = lumi_ * norm / genentries;
+	  for(int i=1;i<=generated.getNBins();i++){
+		  generated.setBinContent(i, genentries);
+		  generated.setBinError(i, sqrt(genentries));
+	  }
+	  double fgen=0;
+	  TTree * tfgen = (TTree*) f->Get("postCutPUInfo/PUTreePostCut");
+	  if(tfgen){
+		  fgen=tfgen->GetEntries();
+		  for(int i=1;i<=generated2.getNBins();i++){
+			  generated2.setBinContent(i, fgen);
+			  generated2.setBinError(i, sqrt(fgen));
+		  }
+	  }
+	  else{
+		  for(int i=1;i<=generated.getNBins();i++){
+			  generated2.setBinContent(i, genentries);
+			  generated2.setBinError(i, sqrt(genentries));
+		  }
+	  }
 
   }
   else{//not mc
-    for(int i=1;i<=generated.getNBins();i++){
-      generated.setBinContent(i, 0);
-      generated.setBinError(i, 0);
-    }
-    for(int i=1;i<=generated2.getNBins();i++){
-      generated2.setBinContent(i, 0);
-      generated2.setBinError(i, 0);
-    }
-    norm=1;
+	  for(int i=1;i<=generated.getNBins();i++){
+		  generated.setBinContent(i, 0);
+		  generated.setBinError(i, 0);
+	  }
+	  for(int i=1;i<=generated2.getNBins();i++){
+		  generated2.setBinContent(i, 0);
+		  generated2.setBinError(i, 0);
+	  }
+	  norm=1;
   }
 
 
+  //init b-tag scale factor utility
 
-  // getBTagSF()->prepareEff(inputfile , norm );
   if(getBTagSF()->setSampleName(toString(inputfile)) < 0){
     p_finished.get(anaid)->pwrite(-2);
     return;
@@ -351,11 +326,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   cout << "running on: " << datasetdirectory_ << inputfile << "    legend: " << legendname << "\nxsec: " << oldnorm << ", genEvents: " << genentries <<endl;
   // get main analysis tree
 
-  /////////prepare collections
+  /////////open main tree and prepare collections
 
   TTree * t = (TTree*) f->Get("PFTree/PFTree");
-
-  cout << "opened tree" << endl;
 
   TBranch * b_TriggerBools=0;
   std::vector<bool> * p_TriggerBools=0;
@@ -410,27 +383,27 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
   t->SetBranchAddress("NTGenNeutrinos",&pGenNeutrinos,&b_GenNeutrinos);
 
 
-
+/*
+ * ONLY because of a bug in current trees
+ */
   elecRhoIsoAdder elecrhoisoadd(isMC);
-  elecrhoisoadd.setUse2012EA(!is7TeV);
+  elecrhoisoadd.setUse2012EA(!is7TeV_);
 
-  /*
-  norm=1;
-  isMC=false;
-  */
-  // just for sync reasons
 
   double sel_step[]={0,0,0,0,0,0,0,0,0};
 
-  // start main loop /////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
+  ///////////////////////////////////////// start main loop /////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
+
   Long64_t nEntries=t->GetEntries();
   if(norm==0) nEntries=0; //skip for norm0
-
-  //if(testmode)
-  //  nEntries=nEntries/1000;
-
-
-
 
   for(Long64_t entry=0;entry<nEntries;entry++){
     if(showstatusbar_) displayStatusBar(entry,nEntries);
@@ -479,52 +452,52 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     b_TriggerBools->GetEntry(entry);
 
     //do trigger stuff - onlye 8TeV for now
-    if(!is7TeV){
-      if(p_TriggerBools->size() < 3)
-	continue;
+    if(!is7TeV_){
+    	if(p_TriggerBools->size() < 3)
+    		continue;
 
-      if(b_mumu){
-	if(!(p_TriggerBools->at(1) || p_TriggerBools->at(2)))
-	  continue;
-      }
-      else if(b_ee){
-	if(!p_TriggerBools->at(0))
-	  continue;
-      }
-      else if(b_emu){
-	if(p_TriggerBools->size()<10){
-	  p_finished.get(anaid)->pwrite(-3);
-	  return;
-	}
-	if(!(p_TriggerBools->at(10) || p_TriggerBools->at(11)))
-	  continue;
-      }
+    	if(b_mumu_){
+    		if(!(p_TriggerBools->at(1) || p_TriggerBools->at(2)))
+    			continue;
+    	}
+    	else if(b_ee_){
+    		if(!p_TriggerBools->at(0))
+    			continue;
+    	}
+    	else if(b_emu_){
+    		if(p_TriggerBools->size()<10){
+    			p_finished.get(anaid)->pwrite(-3);
+    			return;
+    		}
+    		if(!(p_TriggerBools->at(10) || p_TriggerBools->at(11)))
+    			continue;
+    	}
     }
-    else{ //is7TeV
-      if(p_TriggerBools->size() < 3)
-	continue;
+    else{ //is7TeV_
+    	if(p_TriggerBools->size() < 3)
+    		continue;
 
-      if(b_mumu){
-	if(isMC && !p_TriggerBools->at(5))
-	  continue;
-	if(!isMC && pEvent->runNo() < 163869 && !p_TriggerBools->at(5))
-	  continue;
-	if(!isMC && pEvent->runNo() >= 163869 && !p_TriggerBools->at(6))
-	  continue;
-      }
-      else if(b_ee){
-	if(!(p_TriggerBools->at(3) || p_TriggerBools->at(4) || p_TriggerBools->at(1)))
-	  continue;
-      }
-      else if(b_emu){
-	std::cout << "emu channel at 7TeV not supported yet (triggers missing)" << std::endl;
-	p_finished.get(anaid)->pwrite(-4);
-	return;
+    	if(b_mumu_){
+    		if(isMC && !p_TriggerBools->at(5))
+    			continue;
+    		if(!isMC && pEvent->runNo() < 163869 && !p_TriggerBools->at(5))
+    			continue;
+    		if(!isMC && pEvent->runNo() >= 163869 && !p_TriggerBools->at(6))
+    			continue;
+    	}
+    	else if(b_ee_){
+    		if(!(p_TriggerBools->at(3) || p_TriggerBools->at(4) || p_TriggerBools->at(1)))
+    			continue;
+    	}
+    	else if(b_emu_){
+    		std::cout << "emu channel at 7TeV not supported yet (triggers missing)" << std::endl;
+    		p_finished.get(anaid)->pwrite(-4);
+    		return;
 
-	if(p_TriggerBools->size()<10){
-	  p_finished.get(anaid)->pwrite(-3);
-	  return;
-	}
+    		if(p_TriggerBools->size()<10){
+    			p_finished.get(anaid)->pwrite(-3);
+    			return;
+    		}
 	if(!(p_TriggerBools->at(10) || p_TriggerBools->at(11)))
 	  continue;
       }
@@ -535,7 +508,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
     b_Muons->GetEntry(entry);
 
-    size_t mintightmuons=1;
+    size_t mintightmuons=0;
 
     vector<NTMuon*> kinmuons,idmuons,isomuons,tightmuons,loosemuons;
     for(size_t i=0;i<pMuons->size();i++){
@@ -568,12 +541,12 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
     for(size_t i=0;i<idmuons.size();i++){
     	NTMuon * muon =  idmuons.at(i);
-    	if(muon->isoVal() > 0.2) continue;
+    	if(muon->isoVal() > 0.15) continue;
     	isomuons <<  muon;
 
     }
 
-    if(b_mumu && kinmuons.size()<2)
+    if(b_mumu_ && kinmuons.size()<2)
       continue;
 
     b_Electrons->GetEntry(entry);
@@ -591,7 +564,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
       if(pElectrons->at(i).mvaId() < 0.5) continue;
       if(pElectrons->at(i).mHits() > 0) continue;
 
-      /////////only temporarily////
+      /////////only temporarily////!! rho iso stuff
       NTSuClu suclu;
       LorentzVector ecalp4;
       ecalp4=pElectrons->at(i).ECalP4();
@@ -610,7 +583,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     // ask for the elecs/muons etc
 
 
-    if(b_ee && kinelectrons.size() <2)
+    if(b_ee_ && kinelectrons.size() <2)
       continue;
 
     b_Jets->GetEntry(entry);
@@ -650,9 +623,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
     //////////two ID leptons STEP 1///////////////////////////////
 
-    if(b_ee && idelectrons.size() < 2) continue;
-    if(b_mumu && (idmuons.size() < 2 || tightmuons.size() < mintightmuons)) continue;
-    if(b_emu && idmuons.size() + idelectrons.size() < 2) continue;
+    if(b_ee_ && idelectrons.size() < 2) continue;
+    if(b_mumu_ && (idmuons.size() < 2 || tightmuons.size() < mintightmuons)) continue;
+    if(b_emu_ && idmuons.size() + idelectrons.size() < 2) continue;
 
 
     for(size_t i=0;i<idelectrons.size();i++){
@@ -678,9 +651,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
     //////// require two iso leptons  STEP 2  //////
 
-    if(b_ee && isoelectrons.size() < 2) continue;
-    if(b_mumu && isomuons.size() < 2 ) continue;
-    if(b_emu && isomuons.size() + isoelectrons.size() < 2) continue;
+    if(b_ee_ && isoelectrons.size() < 2) continue;
+    if(b_mumu_ && isomuons.size() < 2 ) continue;
+    if(b_emu_ && isomuons.size() + isoelectrons.size() < 2) continue;
 
     //make pair
     pair<vector<NTElectron*>, vector<NTMuon*> > leppair;
@@ -689,17 +662,17 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     double invLepMass=0;
     LorentzVector dilp4;
 
-    if(b_ee){
+    if(b_ee_){
     if(leppair.first.size() <2) continue;
     dilp4=leppair.first[0]->p4() + leppair.first[1]->p4();
     invLepMass=dilp4.M();
     }
-    else if(b_mumu){
+    else if(b_mumu_){
     if(leppair.second.size() < 2) continue;
     dilp4=leppair.second[0]->p4() + leppair.second[1]->p4();
     invLepMass=dilp4.M();
     }
-    else if(b_emu){
+    else if(b_emu_){
     if(leppair.first.size() < 1 || leppair.second.size() < 1) continue;
     dilp4=leppair.first[0]->p4() + leppair.second[0]->p4();
     invLepMass=dilp4.M();
@@ -745,7 +718,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     double dpy=0;
     for(size_t i=0;i<treejets.size();i++){ //ALSO THE RESOLUTION AFFECTS MET. HERE INTENDED!!! GOOD?
       PolarLorentzVector oldp4=treejets.at(i)->p4();
-      if(isMC){// && !is7TeV){
+      if(isMC){// && !is7TeV_){
 	bool useJetForMet=false;
 	if(treejets.at(i)->emEnergyFraction() < 0.9 && treejets.at(i)->pt() > 10)
 	  useJetForMet=true; //dont even do something
@@ -835,7 +808,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     }
 
     bool Znotemu=isZrange;
-    if(b_emu) Znotemu=false;
+    if(b_emu_) Znotemu=false;
 
     ////////////////////Z Veto Cut STEP 4 (incl. hard jets)////////////////////////////////////
 
@@ -981,7 +954,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
 
     //////////////////// MET cut STEP 7//////////////////////////////////
-    if(!b_emu && adjustedmet.met() < 40) continue;
+    if(!b_emu_ && adjustedmet.met() < 40) continue;
 
 
     vector<NTJet*> btaggedjets;
