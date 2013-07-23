@@ -15,7 +15,7 @@
 #include "TTree.h"
 #include "TFile.h"
 #include <fstream>
-#include <omp.h>
+//#include <omp.h>
 #include "TtZAnalysis/Analysis/interface/AnalysisUtils.h"
 #include "Pipes.h"
 
@@ -51,9 +51,17 @@ public:
  
   ~MainAnalyzer(){std::cout << "~MainAnalyzer" << std::endl;}
 
-  void setChannel(TString chan){channel_=chan;}
+  void setChannel(TString chan){
+	  if(chan.Contains("mumu")) b_mumu_=true;
+	  else if(chan.Contains("emu")) b_emu_=true;
+	  else if(chan.Contains("ee")) b_ee_=true;
+	  else{
+		  std::cout << "channel wrongly set! exit" << std::endl;
+		  std::exit(EXIT_FAILURE);
+	  }
+	  channel_=chan;}
   void setSyst(TString syst){syst_=syst;}
-  void setEnergy(TString e){energy_=e;}
+  void setEnergy(TString e){if(e.Contains("7TeV")) is7TeV_=true; energy_=e;}
   void setOutFileAdd(TString o){outfileadd_=o;}
   
   TString getOutFileName(){
@@ -126,6 +134,7 @@ private:
   bool showstatusbar_;
 
   TString name_,dataname_,channel_,syst_,energy_;
+  bool b_ee_,b_emu_,b_mumu_,is7TeV_;
   TString datasetdirectory_;
   double lumi_;
 
