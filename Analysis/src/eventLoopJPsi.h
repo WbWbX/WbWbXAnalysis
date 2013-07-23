@@ -60,9 +60,10 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 	  genentries=tnorm->GetEntries();
 	  delete tnorm;
 	  norm = lumi_ * norm / genentries;
-	  else{//not mc
-		  norm=1;
-	  }
+  }
+  else{//not mc
+	  norm=1;
+  }
 
 /*
  * some couts to check whether something went wrong
@@ -123,6 +124,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
  *  In order to do that, information from the NTEvent branch is needed,
  *  so b_Event->GetEntry(entry) reads the necessary piece of information from the input tree
  *  now, the pEvent pointer is valid and points to the information
+ *  Please add a histo->Fill(value, puweight); to all your histos
  */
     b_Event->GetEntry(entry);
     double puweight=1;
