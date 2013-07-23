@@ -101,7 +101,7 @@ TString getOutfile(int argc, char* argv[]){
   return out;
 }
 float getLumi(int argc, char* argv[]){
-  double out=19100;
+  double out=19789;
   for(int i=1;i<argc;i++){
     //  std::cout << argv[i] << std::endl;; 
     if (i + 1 != argc){
@@ -171,6 +171,14 @@ bool NoneEqual(std::vector<T> vec, T val){
       return false;
   }
   return true;
+}
+
+
+bool fileExists(const char * filename){
+std::ifstream FileTest(filename);
+  bool exists=FileTest;
+  FileTest.close();
+  return exists;
 }
 
 
