@@ -8,15 +8,15 @@ then
 echo "preparing b-efficiencies -> will be safed in channel_energy_syst_btags.root. need to be merged afterwards"
 fi
 
-channels=(#"ee"
-"mumu"
-#"emu"
+channels=( #"ee"
+#"mumu"
+"emu"
 );
 systs=("nominal"
 "PU_up"
 "PU_down"
-"JER_up"
-"JER_down"
+#"JER_up"
+#"JER_down"
 #"JES_up"
 #"JES_down"
 #"BTAGH_up"
@@ -60,10 +60,17 @@ cp ../analyse.exe .
 cp -r ../lib .
 cp ../*inputfiles.txt .
 cp ../*testfiles.txt .
-cp ../analyse.C .
 cp ../*btags.root .
-cp ../mergeSyst.cc .
 cp ../mergeSyst.exe .
+
+mkdir source
+cd source 
+cp ../../src/eventLoop.h .
+cp ../../src/MainAnalyzer.cc .
+cp ../../interface/MainAnalyzer.h .
+cp ../../analyse.C .
+cp ../../mergeSyst.cc .
+cd ..
 mkdir jobscripts
 workdir=`pwd`
 
@@ -98,7 +105,7 @@ for (( i=0;i<${#channels[@]};i++)); do
 		all=`ps ax | grep -E 'analyse.exe' | wc -l`
 		defunct=`ps ax | grep -E 'analyse.exe' | grep -E 'defunct' | wc -l`
 		running=`expr $all - $defunct`
-		while [$running  -gt 10 ]; do
+		while [ $running  -gt 10 ]; do
 		    sleep 2;
 		done
 		echo "starting ${outname}"
