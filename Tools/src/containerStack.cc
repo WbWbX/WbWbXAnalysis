@@ -210,17 +210,17 @@ namespace ztop{
     std::vector<size_t> sorted=sortEntries(false);
 
     for(unsigned int it=0;it<size();it++){
-      size_t i=sorted.at(it);
-      if(getLegend(i) != dataleg_){
-	container1D tempcont = getContainer(i);
-	tempcont = tempcont * getNorm(i);
-	TH1D * h = (TH1D*)tempcont.getTH1D(getLegend(i)+" "+getName()+"_stack_h")->Clone();
-	h->SetFillColor(getColor(i));
-	for(int bin = 1 ; bin < h->GetNbinsX()+1;bin++){
-	  h->SetBinError(bin,0);
-	}
-	tstack->Add(h);
-      }
+    	size_t i=sorted.at(it);
+    	if(getLegend(i) != dataleg_){
+    		container1D tempcont = getContainer(i);
+    		tempcont = tempcont * getNorm(i);
+    		TH1D * h = (TH1D*)tempcont.getTH1D(getLegend(i)+" "+getName()+"_stack_h")->Clone();
+    		h->SetFillColor(getColor(i));
+    		for(int bin = 1 ; bin < h->GetNbinsX()+1;bin++){
+    			h->SetBinError(bin,0);
+    		}
+    		tstack->Add(h);
+    	}
     }
     return  tstack;
   }
@@ -368,7 +368,7 @@ namespace ztop{
     //   multiplier = multiplier * resizelabels;
     ratio.setLabelSize(multiplier * resizelabels);
 
-    TGraphAsymmErrors * gratio = ratio.getTGraph(name,false,true); //don't divide by binwidth, no x errors
+    TGraphAsymmErrors * gratio = ratio.getTGraph(name,false,false,true); //don't divide by binwidth, no x errors
     // rescale axis titles etc.
     TH1D * h = ratio.getTH1D(name+"_h_r",false); //no bw div
     h->GetYaxis()->SetTitle("data/MC");
@@ -377,7 +377,7 @@ namespace ztop{
     h->GetXaxis()->SetTickLength(0.03 * multiplier);
     h->Draw("AXIS");
     gratio->Draw("P");
-    TGraphAsymmErrors * gmcerr = relmcerr.getTGraph(name+"_relerr",false,false);
+    TGraphAsymmErrors * gmcerr = relmcerr.getTGraph(name+"_relerr",false,false,false);
     gmcerr->SetFillStyle(3005);
     gmcerr->Draw("2,same");
     TLine * l = new TLine(mc.getXMin(),1,mc.getXMax(),1);

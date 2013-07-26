@@ -175,60 +175,79 @@ namespace ztop{
       return 0;
     }
   }
-  double container1D::getBinErrorUp(int bin, TString limittosys){
-    double fullerr2=0;
-    if((unsigned int)bin<bins_.size()){
-      fullerr2=sq(staterrup_[bin]); //stat
-      if(limittosys==""){
-	// make vector of all sys stripped
-	std::vector<TString> sources;
-	for(unsigned int i=0;i<syserrors_.size();i++){
-	  TString source=stripVariation(syserrors_[i].first);
-	  if(-1==isIn(source,sources)){
-	    sources.push_back(source);
-	    fullerr2 += sq(getDominantVariationUp(source,bin));
+  /**
+   * returns the bin error variation up. If onlystat=false, each systematic uncertainty will be added in squares to
+   * the stat. error. limittosys identifies a systematic source the output should be limited to.
+   * no effect if onlystat=true
+   */
+  double container1D::getBinErrorUp(int bin, bool onlystat,TString limittosys){
+	  double fullerr2=0;
+	  if((unsigned int)bin<bins_.size()){
+		  fullerr2=sq(staterrup_[bin]); //stat
+		  if(onlystat)
+			  return sqrt(fullerr2);
+		  if(limittosys==""){
+			  // make vector of all sys stripped
+			  std::vector<TString> sources;
+			  for(unsigned int i=0;i<syserrors_.size();i++){
+				  TString source=stripVariation(syserrors_[i].first);
+				  if(-1==isIn(source,sources)){
+					  sources.push_back(source);
+					  fullerr2 += sq(getDominantVariationUp(source,bin));
+				  }
+			  }
+		  }
+		  else{
+			  fullerr2 += sq(getDominantVariationUp(limittosys,bin));
+		  }
+		  return sqrt(fullerr2);
 	  }
-	}
-      }
-      else{
-	fullerr2 += sq(getDominantVariationUp(limittosys,bin));
-      }
-      return sqrt(fullerr2);
-    }
-    else{
-      if(showwarnings_)std::cout << "container1D::getBinErrorUp: bin not existent!" << std::endl;
-      return 0;
-    }
-  }
-  double container1D::getBinErrorDown(int bin,TString limittosys){
-    double fullerr2=0;
-    if((unsigned int)bin<bins_.size()){
-      fullerr2=sq(staterrdown_[bin]); //stat
-      if(limittosys==""){
-	// make vector of all sys stripped
-	std::vector<TString> sources;
-	for(unsigned int i=0;i<syserrors_.size();i++){
-	  TString source=stripVariation(syserrors_[i].first);
-	  if(-1==isIn(source,sources)){
-	    sources.push_back(source);
-	    fullerr2 += sq(getDominantVariationDown(source,bin));
+	  else{
+		  if(showwarnings_)std::cout << "container1D::getBinErrorUp: bin not existent!" << std::endl;
+		  return 0;
 	  }
-	}
-      }
-      else{
-	fullerr2 += sq(getDominantVariationUp(limittosys,bin));
-      }
-      return sqrt(fullerr2);
-    }
-    else{
-      if(showwarnings_)std::cout << "container1D::getBinErrorUp: bin not existent!" << std::endl;
-      return 0;
-    }
   }
-  double container1D::getBinError(int bin,TString limittosys){
+  /**
+     * returns the bin error variation down. If onlystat=false, each systematic uncertainty will be added in squares to
+     * the stat. error. limittosys identifies a systematic source the output should be limited to.
+     * no effect if onlystat=true
+     */
+  double container1D::getBinErrorDown(int bin,bool onlystat,TString limittosys){
+	  double fullerr2=0;
+	  if((unsigned int)bin<bins_.size()){
+		  fullerr2=sq(staterrdown_[bin]); //stat
+		  if(onlystat)
+			  return sqrt(fullerr2);
+		  if(limittosys==""){
+			  // make vector of all sys stripped
+			  std::vector<TString> sources;
+			  for(unsigned int i=0;i<syserrors_.size();i++){
+				  TString source=stripVariation(syserrors_[i].first);
+				  if(0>isIn(source,sources)){
+					  sources.push_back(source);
+					  fullerr2 += sq(getDominantVariationDown(source,bin));
+				  }
+			  }
+		  }
+		  else{
+			  fullerr2 += sq(getDominantVariationDown(limittosys,bin));
+		  }
+		  return sqrt(fullerr2);
+	  }
+	  else{
+		  if(showwarnings_)std::cout << "container1D::getBinErrorUp: bin not existent!" << std::endl;
+		  return 0;
+	  }
+  }
+  /**
+     * returns the symmetrized (max(down,up)) bin error variation. If onlystat=false, each systematic uncertainty will be added in squares to
+     * the stat. error. limittosys identifies a systematic source the output should be limited to.
+     * no effect if onlystat=true
+     */
+  double container1D::getBinError(int bin,bool onlystat,TString limittosys){
     double symmerror=0;
-    if(getBinErrorUp(bin,limittosys) > fabs(getBinErrorDown(bin,limittosys))) symmerror=getBinErrorUp(bin,limittosys);
-    else symmerror=fabs(getBinErrorDown(bin,limittosys));
+    if(getBinErrorUp(bin,onlystat,limittosys) > fabs(getBinErrorDown(bin,onlystat,limittosys))) symmerror=getBinErrorUp(bin,onlystat,limittosys);
+    else symmerror=fabs(getBinErrorDown(bin,onlystat,limittosys));
     return symmerror;
   }
   double container1D::getOverflow(){
@@ -303,8 +322,10 @@ namespace ztop{
     }
     syserrors_.clear();
   }
-
-  TH1D * container1D::getTH1D(TString name, bool dividebybinwidth){ 
+/**
+ * creates new TH1D and returns pointer to it
+ */
+  TH1D * container1D::getTH1D(TString name, bool dividebybinwidth, bool onlystat){
     if(name=="") name=name_;
     double binarray[getNBins()+1];
     for(int i=0; i<=getNBins() ;i++){
@@ -337,14 +358,14 @@ namespace ztop{
     return h;
   }
 
-  void container1D::writeTH1D(TString name, bool dividebybinwidth){
-    TH1D * h = getTH1D(name,dividebybinwidth);
+  void container1D::writeTH1D(TString name, bool dividebybinwidth,bool onlystat){
+    TH1D * h = getTH1D(name,dividebybinwidth,onlystat);
     h->Draw();
     h->Write();
     delete h;
   }
 
-  TGraphAsymmErrors * container1D::getTGraph(TString name, bool dividebybinwidth, bool noXErrors){
+  TGraphAsymmErrors * container1D::getTGraph(TString name, bool dividebybinwidth, bool onlystat, bool noXErrors){
 
     if(name=="") name=name_;
     double x[getNBins()];
@@ -390,8 +411,8 @@ namespace ztop{
 
     return g;
   }
-  void container1D::writeTGraph(TString name, bool dividebybinwidth, bool noXErrors){
-    TGraphAsymmErrors * g=getTGraph(name,dividebybinwidth);
+  void container1D::writeTGraph(TString name, bool dividebybinwidth, bool onlystat,bool noXErrors){
+    TGraphAsymmErrors * g=getTGraph(name,dividebybinwidth,onlystat,noXErrors);
     g->SetName(name);
     g->Draw("AP");
     g->Write();

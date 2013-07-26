@@ -41,6 +41,7 @@ namespace ztop{
 
     int getBinNo(const double&); //! returns bin index number for (double variable)
     int getNBins();       //! returns nuberof bins 
+    const std::vector<float> & getBins(){return bins_;}
     double getBinCenter(int);
     double getBinWidth(int); //! returns total bin width NOT 0.5* width
     float getXMax(){return bins_[getNBins()+1];}
@@ -48,9 +49,9 @@ namespace ztop{
 
 
     double getBinContent(int);
-    double getBinErrorUp(int,TString limittosys="");
-    double getBinErrorDown(int,TString limittosys="");
-    double getBinError(int,TString limittosys="");
+    double getBinErrorUp(int, bool onlystat=false,TString limittosys="");
+    double getBinErrorDown(int,bool onlystat=false,TString limittosys="");
+    double getBinError(int,bool onlystat=false,TString limittosys="");
     double getOverflow();                              //!returns -1 if overflow was merged with last bin
     double getUnderflow();                             //!returns -1 if underflow was merged with last bin
 
@@ -62,14 +63,14 @@ namespace ztop{
     void clear();    //! sets all bin contents to zero; clears all systematic uncertainties
 
     void setLabelSize(double size){labelmultiplier_=size;}       //! 1 for default
-    TH1D * getTH1D(TString name="", bool dividebybinwidth=true); //! returns a TH1D pointer with symmetrized errors (TString name); small bug with content(bin)=0 and error(bin)=0
+    TH1D * getTH1D(TString name="", bool dividebybinwidth=true, bool onlystat=false); //! returns a TH1D pointer with symmetrized errors (TString name); small bug with content(bin)=0 and error(bin)=0
     operator TH1D(){return *getTH1D();}
     operator TH1D*(){return getTH1D();}
-    void writeTH1D(TString name="",bool dividebybinwidth=true); //! writes TH1D->Write() with symmetrized errors (TString name)
-    TGraphAsymmErrors * getTGraph(TString name="", bool dividebybinwidth=true,bool noXErrors=false);  
+    void writeTH1D(TString name="",bool dividebybinwidth=true, bool onlystat=false); //! writes TH1D->Write() with symmetrized errors (TString name)
+    TGraphAsymmErrors * getTGraph(TString name="", bool dividebybinwidth=true,bool onlystat=false,bool noXErrors=false);
     operator TGraphAsymmErrors(){return *getTGraph();}
     operator TGraphAsymmErrors*(){return getTGraph();}
-    void writeTGraph(TString name="",bool dividebybinwidth=true,bool noXErrors=false); //! writes TGraph to TFile (must be opened)
+    void writeTGraph(TString name="",bool dividebybinwidth=true,bool onlystat=false, bool noXErrors=false); //! writes TGraph to TFile (must be opened)
     
     void setDivideBinomial(bool);                                   //! default true
     void setMergeUnderFlowOverFlow(bool merge){mergeufof_=merge;}   //! merges underflow/overflow in first or last bin, respectively
