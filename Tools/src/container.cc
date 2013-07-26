@@ -166,6 +166,13 @@ namespace ztop{
     }
     return width;
   }
+  double container1D::getBinEntries(int bin){
+	 if(bin<0 || (unsigned int)bin>bins_.size()){
+		 std::cout << "container1D::getBinEntries: bin out of range, return -1" << std::endl;
+		 return -1.;
+	 }
+	 return entries_.at(bin);
+  }
   double container1D::getBinContent(int bin){
     if((unsigned int)bin<bins_.size()){
       return content_[bin];
@@ -327,11 +334,9 @@ namespace ztop{
  */
   TH1D * container1D::getTH1D(TString name, bool dividebybinwidth, bool onlystat){
     if(name=="") name=name_;
-    double binarray[getNBins()+1];
-    for(int i=0; i<=getNBins() ;i++){
-      binarray[i]=bins_[i+1];
-    }
-    TH1D *  h = new TH1D(name,name,getNBins(),binarray);
+    if(bins_.size() < 2)
+    	return 0;
+    TH1D *  h = new TH1D(name,name,getNBins(),&(bins_.at(1)));
     double entriessum=0;
     for(int i=0;i<=getNBins()+1;i++){ // 0 underflow, genBins+1 overflow
       double cont=getBinContent(i);
@@ -375,25 +380,25 @@ namespace ztop{
     double yel[getNBins()];
     double yeh[getNBins()];
     for(int i=1;i<=getNBins();i++){
-      x[i-1]=getBinCenter(i);
-      if(noXErrors){
-	xeh[i-1]=0;
-	xel[i-1]=0;
-      }
-      else{
-	xeh[i-1]=getBinWidth(i)/2;
-	xel[i-1]=getBinWidth(i)/2;
-      }
-      if(dividebybinwidth){
-	y[i-1]=getBinContent(i)/getBinWidth(i); 
-	yeh[i-1]=getBinErrorUp(i)/getBinWidth(i); 
-	yel[i-1]=getBinErrorDown(i)/getBinWidth(i);
-      }
-      else{
-	y[i-1]=getBinContent(i); 
-	yeh[i-1]=getBinErrorUp(i); 
-	yel[i-1]=getBinErrorDown(i);
-      }
+    	x[i-1]=getBinCenter(i);
+    	if(noXErrors){
+    		xeh[i-1]=0;
+    		xel[i-1]=0;
+    	}
+    	else{
+    		xeh[i-1]=getBinWidth(i)/2;
+    		xel[i-1]=getBinWidth(i)/2;
+    	}
+    	if(dividebybinwidth){
+    		y[i-1]=getBinContent(i)/getBinWidth(i);
+    		yeh[i-1]=getBinErrorUp(i)/getBinWidth(i);
+    		yel[i-1]=getBinErrorDown(i)/getBinWidth(i);
+    	}
+    	else{
+    		y[i-1]=getBinContent(i);
+    		yeh[i-1]=getBinErrorUp(i);
+    		yel[i-1]=getBinErrorDown(i);
+    	}
     }
     TGraphAsymmErrors * g = new TGraphAsymmErrors(getNBins(),x,y,xel,xeh,yel,yeh);
     g->SetName(name);

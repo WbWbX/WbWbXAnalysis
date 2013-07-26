@@ -44,6 +44,7 @@ namespace ztop{
     const std::vector<float> & getBins(){return bins_;}
     double getBinCenter(int);
     double getBinWidth(int); //! returns total bin width NOT 0.5* width
+    double getBinEntries(int);
     float getXMax(){return bins_[getNBins()+1];}
     float getXMin(){return bins_[1];}
 
@@ -95,7 +96,7 @@ namespace ztop{
     void renameSyst(TString , TString); //! old, new
 
     void transformStatToSyst(TString);
-    void setAllErrorsZero(){for(unsigned int i=0;i<staterrup_.size();i++){staterrup_[i]=0;staterrdown_[i]=0;} syserrors_.clear();} //! sets all errors zero (onlystat!!!)
+    void setAllErrorsZero(){for(unsigned int i=0;i<staterrup_.size();i++){staterrup_[i]=0;staterrdown_[i]=0;} syserrors_.clear();} //! sets all errors zero
 
     static bool c_makelist;
     static std::vector<container1D*> c_list;
