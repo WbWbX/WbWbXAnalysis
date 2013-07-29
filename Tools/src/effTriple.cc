@@ -50,7 +50,10 @@ namespace ztop{
     std::cout << "effTriple::effTriple(): default constructor not supported (yet), exit" << std::endl;
     std::exit(EXIT_FAILURE);
   }
-
+/**
+ * mind that TEfficiency might be a good alternative providing nearly the same functionality (better/more ways for uncertainty calc, but no automatic
+ * listing as done here
+ */
   effTriple::effTriple(std::vector<float> binsx,  TString name,TString xaxisname,TString yaxisname, TString formatinfo, bool mergeufof, size_t size){
     if(size>3){
       std::cout << "effTriple:size>3 not supported yet!" << std::endl;

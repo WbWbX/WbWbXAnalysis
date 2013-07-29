@@ -6,6 +6,8 @@
   <class name="std::vector<long int>"/>
   <class name="ztop::container1D"/>
   <class name="std::vector<ztop::container1D>"/>
+  <class name="ztop::container2D"/>
+  <class name="std::vector<ztop::container2D>"/>
   <class name="ztop::container1DStack"/>
   <class name="std::vector<ztop::container1DStack>"/>
   <class name="ztop::container1DStackVector"/>
