@@ -63,7 +63,27 @@ double container2D::getBinEntries(int xbin, int ybin){
 	}
 	return conts_.at(ybin).getBinEntries(xbin);
 }
-
+double container2D::getBinErrorUp(int xbin, int ybin, bool onlystat,TString limittosys){
+	if(ybin<0 || (unsigned int)ybin>ybins_.size()){
+		std::cout << "container2D::getBinErrorUp: ybin out of range! return -1" << std::endl;
+		return -1.;
+	}
+	return conts_.at(ybin).getBinErrorUp(xbin);
+}
+double container2D::getBinErrorDown(int xbin, int ybin, bool onlystat,TString limittosys){
+	if(ybin<0 || (unsigned int)ybin>ybins_.size()){
+		std::cout << "container2D::getBinErrorDown: ybin out of range! return -1" << std::endl;
+		return -1.;
+	}
+	return conts_.at(ybin).getBinErrorDown(xbin);
+}
+double container2D::getBinError(int xbin, int ybin, bool onlystat,TString limittosys){
+	if(ybin<0 || (unsigned int)ybin>ybins_.size()){
+		std::cout << "container2D::getBinError: ybin out of range! return -1" << std::endl;
+		return -1.;
+	}
+	return conts_.at(ybin).getBinError(xbin);
+}
 /**
  * on long term, put this in own class responsible for all drawing stuff (same for 1D containers)
  * maybe something like a histodrawer class (handles 2D, 1D, UF, ...) and each object has own style
@@ -83,13 +103,14 @@ TH2D * container2D::getTH2D(TString name, bool dividebybinwidth){
 	for(int xbin=1;xbin<=getNBinsX();xbin++){ // 0 underflow, genBins+1 overflow NOT INCLUDED YET!!
 		for(int ybin=1;ybin<=getNBinsY();ybin++){
 			entries+=getBinEntries(xbin,ybin);
+
 			double cont=getBinContent(xbin,ybin);
-			// if(dividebybinwidth && i>0 && i<getNBins()+1) cont=cont/getBinWidth(i);
+			//if(dividebybinwidth && >0 && i<getNBins()+1) cont=cont/getBinWidth(i);
 			h->SetBinContent(xbin,ybin,cont);
-			// double err=getBinError(i);
-			//  if(dividebybinwidth && i>0 && i<getNBins()+1) err=err/getBinWidth(i);
-			//  h->SetBinError(i,err);
-			//  entriessum +=entries_[i];
+			double err=getBinError(xbin,ybin);
+			//if(dividebybinwidth && i>0 && i<getNBins()+1) err=err/getBinWidth(i);
+			h->SetBinError(xbin,ybin,err);
+
 		}
 	}
 	h->SetEntries(entries);

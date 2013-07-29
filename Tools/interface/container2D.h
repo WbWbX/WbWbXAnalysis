@@ -32,6 +32,9 @@ public:
     void fill(const double & xval, const double & yval, const double & weight=1);    //! fills with weight
 
     double getBinContent(int xbin,int ybin);
+    double getBinErrorUp(int xbin, int ybin, bool onlystat=false,TString limittosys="");
+    double getBinErrorDown(int,int,bool onlystat=false,TString limittosys="");
+    double getBinError(int,int,bool onlystat=false,TString limittosys="");
 
     TH2D * getTH2D(TString name="", bool dividebybinwidth=false);
 
