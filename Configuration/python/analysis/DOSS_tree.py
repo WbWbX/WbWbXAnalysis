@@ -7,7 +7,7 @@ options = VarParsing.VarParsing()
 
 options.register ('is2011',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"is 2011 data/MC")
 options.register ('crab',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"uses crab")
-options.register ('globalTag','START53_V22',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"global tag")
+options.register ('globalTag','START53_V26',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"global tag")
 options.register ('reportEvery',1000,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.int,"report every")
 options.register ('maxEvents',-1,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.int,"maximum events")
 options.register ('skipEvents', 0, VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, "skip N events")
@@ -115,6 +115,7 @@ if includePDFWeights:
     import os
     newlha = os.environ['CMSSW_BASE']+'/src/TtZAnalysis/Data/data/PDFSets'
     os.environ['LHAPATH']=newlha
+
 
 
 pfpostfix='PFlow' #unfortunately some things don't seem to work otherwise.. pfjets get lost somehow produces LOADS of overhead...
@@ -689,10 +690,12 @@ process.patMuonsTriggerMatches.matchedCuts = cms.string("path(\"HLT_IsoMu24_v*\"
 process.patMuonsTriggerMatches.maxDeltaR = cms.double(0.1)
 
 
+muontriggermodules = cms.string("filter(\"hltDiMuonGlb17Trk8DzFiltered0p2\") || filter(\"hltDiMuonGlb17Glb8DzFiltered0p2\")")
+
 
 if not includereco and includetrigger:
 
-    process.patMuonsTriggerMatches.matchedCuts = cms.string("path(\"HLT_Mu17_Mu8_v*\") || path(\"HLT_Mu17_TkMu8_v*\") || path(\"HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v*\") || path(\"HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v*\")")
+    process.patMuonsTriggerMatches.matchedCuts = muontriggermodules
 
     process.patGSFElectronsTriggerMatches.matchedCuts = cms.string("path(\"HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v*\") || path(\"HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v*\") || path(\"HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v*\")")
 
@@ -878,8 +881,8 @@ process.treeSequence = cms.Sequence(process.patTriggerSequence *
 
 ###### Path
 
-process.path = cms.Path( process.preFilterSequence *
-                         process.goodOfflinePrimaryVertices *
+process.path = cms.Path( process.goodOfflinePrimaryVertices *
+                         process.preFilterSequence *
                          process.filtersSeq *
                         #  process.inclusiveVertexing *   ## segfaults?!?! in the newest release or MC
                         

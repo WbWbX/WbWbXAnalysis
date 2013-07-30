@@ -34,20 +34,20 @@
 
 ##RERECO !?!!!
 
-170  /DoubleElectron/Run2012A-22Jan2013-v1/AOD   tree_8TeV_ee_runA_22Jan      isMC=false globalTag=FT_53_V21_AN4   json/ReRecoJan13.json.txt
-250  /DoubleElectron/Run2012B-22Jan2013-v1/AOD   tree_8TeV_ee_runB_22Jan      isMC=false globalTag=FT_53_V21_AN4   json/ReRecoJan13.json.txt
-300  /DoubleElectron/Run2012C-22Jan2013-v1/AOD   tree_8TeV_ee_runC_22Jan      isMC=false globalTag=FT_53_V21_AN4   json/ReRecoJan13.json.txt
-350  /DoubleElectron/Run2012D-22Jan2013-v1/AOD   tree_8TeV_ee_runD_22Jan      isMC=false globalTag=FT_53_V21_AN4   json/ReRecoJan13.json.txt
+170  /DoubleElectron/Run2012A-22Jan2013-v1/AOD   tree_8TeV_ee_runA_22Jan      isMC=false globalTag=FT_53_V21_AN5   json/ReRecoJan13.json.txt
+250  /DoubleElectron/Run2012B-22Jan2013-v1/AOD   tree_8TeV_ee_runB_22Jan      isMC=false globalTag=FT_53_V21_AN5   json/ReRecoJan13.json.txt
+300  /DoubleElectron/Run2012C-22Jan2013-v1/AOD   tree_8TeV_ee_runC_22Jan      isMC=false globalTag=FT_53_V21_AN5   json/ReRecoJan13.json.txt
+350  /DoubleElectron/Run2012D-22Jan2013-v1/AOD   tree_8TeV_ee_runD_22Jan      isMC=false globalTag=FT_53_V21_AN5   json/ReRecoJan13.json.txt
 
-170  /DoubleMu/Run2012A-22Jan2013-v1/AOD         tree_8TeV_mumu_runA_22Jan    isMC=false globalTag=FT_53_V21_AN4   json/ReRecoJan13.json.txt
-250  /DoubleMuParked/Run2012B-22Jan2013-v1/AOD   tree_8TeV_mumu_runB_22Jan    isMC=false globalTag=FT_53_V21_AN4   json/ReRecoJan13.json.txt
-300  /DoubleMuParked/Run2012C-22Jan2013-v1/AOD   tree_8TeV_mumu_runC_22Jan    isMC=false globalTag=FT_53_V21_AN4   json/ReRecoJan13.json.txt
-350  /DoubleMuParked/Run2012D-22Jan2013-v1/AOD   tree_8TeV_mumu_runD_22Jan    isMC=false globalTag=FT_53_V21_AN4   json/ReRecoJan13.json.txt
+170  /DoubleMu/Run2012A-22Jan2013-v1/AOD         tree_8TeV_mumu_runA_22Jan    isMC=false globalTag=FT_53_V21_AN5   json/ReRecoJan13.json.txt
+250  /DoubleMuParked/Run2012B-22Jan2013-v1/AOD   tree_8TeV_mumu_runB_22Jan    isMC=false globalTag=FT_53_V21_AN5   json/ReRecoJan13.json.txt
+300  /DoubleMuParked/Run2012C-22Jan2013-v1/AOD   tree_8TeV_mumu_runC_22Jan    isMC=false globalTag=FT_53_V21_AN5   json/ReRecoJan13.json.txt
+350  /DoubleMuParked/Run2012D-22Jan2013-v1/AOD   tree_8TeV_mumu_runD_22Jan    isMC=false globalTag=FT_53_V21_AN5   json/ReRecoJan13.json.txt
 
-170  /MuEG/Run2012A-22Jan2013-v1/AOD             tree_8TeV_emu_runA_22Jan     isMC=false globalTag=FT_53_V21_AN4   json/ReRecoJan13.json.txt
-250  /MuEG/Run2012B-22Jan2013-v1/AOD             tree_8TeV_emu_runB_22Jan     isMC=false globalTag=FT_53_V21_AN4   json/ReRecoJan13.json.txt
-300  /MuEG/Run2012C-22Jan2013-v1/AOD             tree_8TeV_emu_runC_22Jan     isMC=false globalTag=FT_53_V21_AN4   json/ReRecoJan13.json.txt
-350  /MuEG/Run2012D-22Jan2013-v1/AOD             tree_8TeV_emu_runD_22Jan     isMC=false globalTag=FT_53_V21_AN4   json/ReRecoJan13.json.txt
+170  /MuEG/Run2012A-22Jan2013-v1/AOD             tree_8TeV_emu_runA_22Jan     isMC=false globalTag=FT_53_V21_AN5   json/ReRecoJan13.json.txt
+250  /MuEG/Run2012B-22Jan2013-v1/AOD             tree_8TeV_emu_runB_22Jan     isMC=false globalTag=FT_53_V21_AN5   json/ReRecoJan13.json.txt
+300  /MuEG/Run2012C-22Jan2013-v1/AOD             tree_8TeV_emu_runC_22Jan     isMC=false globalTag=FT_53_V21_AN5   json/ReRecoJan13.json.txt
+350  /MuEG/Run2012D-22Jan2013-v1/AOD             tree_8TeV_emu_runD_22Jan     isMC=false globalTag=FT_53_V21_AN5   json/ReRecoJan13.json.txt
 
 
 
