@@ -59,5 +59,6 @@ PFTree   = cms.EDAnalyzer('TreeWriterSusy',
 
                           isSusy =  cms.bool(True),
 
-                          debugmode = cms.bool(False)
+                          debugmode = cms.bool(False),
+                          triggerObjects = cms.vstring("")
                           )

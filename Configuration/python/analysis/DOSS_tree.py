@@ -863,6 +863,7 @@ if not (includereco or includetrigger):
 
 if includetrigger: #lower pfMuon threshold
     process.pfSelectedMuonsPFlow.cut = cms.string('pt>3')
+    process.PFTree.triggerObjects = cms.vstring("hltDiMuonGlb17Trk8DzFiltered0p2","hltDiMuonGlb17Glb8DzFiltered0p2") #..all objects to be written to tree
 
 
 

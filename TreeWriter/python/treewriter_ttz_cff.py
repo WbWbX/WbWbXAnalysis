@@ -60,6 +60,8 @@ PFTree   = cms.EDAnalyzer('TreeWriterTtZ',
 
                           isSusy =  cms.bool(False),
 
-                          useBHadrons = cms.bool(False)
+                          useBHadrons = cms.bool(False),
+                          
+                          triggerObjects = cms.vstring("")
 
                           )
