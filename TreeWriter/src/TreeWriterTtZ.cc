@@ -7,11 +7,7 @@ public:
   explicit TreeWriterTtZ(const edm::ParameterSet & ParSet) : TreeWriterBase(ParSet) {
 
 
-    //    writeMatchedHLTObjects_    =ParSet.getParameter<std::vector<std::string> >        ("writeMatchedHLTObjects");
-
-    
-    std::cout << "Writing all matched triggers" << std::endl;
-   
+   std::cout << "old matching to triggers still in here for compatability reasons" << std::endl;
     
   }
   ~TreeWriterTtZ(){}
@@ -109,21 +105,23 @@ ztop::NTMuon TreeWriterTtZ::makeNTMuon(const pat::Muon & muon){
     tempmuon.setD0Bs  (-9999);
     
   }
+//NO trigger matching anynore here!
   if(includereco_ || includetrigger_){
 
-    std::vector<std::string> matched;
-    if(muon.triggerObjectMatches().size()>0)
-      matched=muon.triggerObjectMatches().begin()->pathNames();
-    if(debugmode) std:: cout << "muon:matched HLTObjects size: " << matched.size() << std::endl;
-    if(debugmode){
-      for(size_t k=0;k<matched.size();k++)
-	std::cout << "matched: " << matched.at(k) << std::endl;
-    }
-   
+      std::vector<std::string> matched;
+      if(muon.triggerObjectMatches().size()>0)
+        matched=muon.triggerObjectMatches().begin()->pathNames();
+      if(debugmode) std:: cout << "muon:matched HLTObjects size: " << matched.size() << std::endl;
+      if(debugmode){
+        for(size_t k=0;k<matched.size();k++)
+  	std::cout << "matched: " << matched.at(k) << std::endl;
+      }
 
-    tempmuon.setMatchedTrig(matched);
-    
-  }
+
+      tempmuon.setMatchedTrig(matched);
+
+    }
+
   ////////space for extra cuts
 
 
@@ -194,7 +192,7 @@ ztop::NTElectron TreeWriterTtZ::makeNTElectron(const pat::Electron & electron){
   tempelec.setMHits(mhits);
 
 
-		       
+
   if(includereco_ || includetrigger_){
     
     std::vector<std::string> matched;
@@ -208,6 +206,7 @@ ztop::NTElectron TreeWriterTtZ::makeNTElectron(const pat::Electron & electron){
    
     tempelec.setMatchedTrig(matched);
   }
+
   double suclue=0;
   if(!(electron.superCluster().isNull())){
     suclue=electron.superCluster()->rawEnergy();

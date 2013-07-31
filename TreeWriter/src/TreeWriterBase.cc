@@ -74,6 +74,8 @@ TreeWriterBase::TreeWriterBase(const edm::ParameterSet& iConfig)
 
   susy_= iConfig.getParameter<bool> ("isSusy");
 
+  triggerObjects_ = iConfig.getParameter<std::vector<std::string> > ("triggerObjects");
+
 
    std::cout << "n\n################## Tree writer ########################" 
              <<  "\n#" << treename_
@@ -92,7 +94,14 @@ TreeWriterBase::TreeWriterBase(const edm::ParameterSet& iConfig)
    std::cout << "writing GSF: " << gsfelecs_ << std::endl;
    std::cout << "writing PFElecs: " << pfelecs_ << std::endl;
 
+   if(triggerObjects_.size() > 0 && includetrigger_){
+	   std::cout << "writing trigger objects: " << std::endl;
+	   for(size_t i=0;i<triggerObjects_.size();i++)
+		   std::cout << triggerObjects_.at(i) << " ";
+	   std::cout << std::endl;
+   }
 
+   //set trigger bools
    setTriggers();
 
 }
@@ -155,6 +164,8 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    alltriggerswithprescales_.clear();
    triggerPrescales_.clear();
 
+   for(size_t i=0;i<trigObjVec.size();i++)
+	   trigObjVec.at(i).clear();
 
    ztop::NTTrigger clear;
    nttrigger=clear;
@@ -676,9 +687,10 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    if(debugmode) std::cout << "muon loops" << std::endl;
 
      for(size_t i=0;i<muons->size();i++){
-   
+
        ztop::NTMuon tempmuon;
        tempmuon=makeNTMuon(muons->at(i));
+
 
        int genidx=-1;
 
@@ -1030,9 +1042,48 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
      ntevent.setPDFWeights(*weightHandle);
    }
+   if(includetrigger_){
 
-   /////// Fill generator info
+	   std::string triggerProcess_="HLT";
 
+	   if(debugmode) std::cout << "starting trigger object loops (HLT)" << std::endl;
+	   edm::Handle<trigger::TriggerEvent> triggerEvent;
+	   iEvent.getByLabel(edm::InputTag("hltTriggerSummaryAOD", "", triggerProcess_), triggerEvent);
+
+	   if(!triggerEvent.isValid()) {
+		   std::cout << "TriggerEvent not valid" << std::endl;
+		   return;
+	   }
+	   const trigger::TriggerObjectCollection & toc = triggerEvent->getObjects();
+	   unsigned int filterIndex = triggerEvent->sizeFilters();
+
+	   //start loop over collections
+	   for(size_t i=0;i<triggerObjects_.size();i++){
+		   //might throw exception if not in right path
+		   filterIndex = triggerEvent->filterIndex(edm::InputTag(triggerObjects_.at(i), "", triggerProcess_));
+		   if(debugmode) std::cout << "filter index for " << triggerObjects_.at(i) << ": " << filterIndex <<std::endl;
+		   if( filterIndex<triggerEvent->sizeFilters() ) { //just a safety net
+			 //  const trigger::Vids & vids( triggerEvent->filterIds(filterIndex) );
+			   const trigger::Keys & keys( triggerEvent->filterKeys(filterIndex) );
+
+			   /*
+			    * module type not needed for L3 matching
+			    */
+
+			   for(unsigned int k=0; k<keys.size(); ++k) {
+				   const trigger::TriggerObject & to = toc[keys[k]];
+				   NTTriggerObject tempobj;
+				   PolarLorentzVector vec(to.pt(),to.eta(),to.phi(),to.mass());
+
+				   tempobj.setP4(vec);
+				   trigObjVec.at(i).push_back(tempobj);
+
+				   if(debugmode) std::cout << "\n\nwritten triggerobject for id: " << triggerObjects_.at(i) << "\n\n" << std::endl;
+
+			   }
+		   }
+	   }
+   }
 
    if(debugmode) std::cout << "fill ntuple" << std::endl;
 
@@ -1092,8 +1143,16 @@ TreeWriterBase::beginJob()
   Ntuple->Branch("TriggerPrescales",   "std::vector<unsigned int>", &triggerPrescales_);
 
 
+  for(size_t i=0;i<triggerObjects_.size();i++){ //set vector beforehand (pointers change when increasing vector size)
+  	  std::vector<ztop::NTTriggerObject> temp;
+  	  trigObjVec.push_back(temp);
+  }
+  for(size_t i=0;i<triggerObjects_.size();i++){ //make own branch for each trigger object, indices coincide
+	  Ntuple->Branch("NTTriggerObjects_"+(TString)(triggerObjects_.at(i)),      "std::vector<ztop::NTTriggerObject>",&(trigObjVec[i]));
+	  if(debugmode) std::cout << "added branch for TriggerObjects: " << "NTTriggerObjects_"+(TString)triggerObjects_.at(i) << std::endl;
+  }
 
-  //  Ntuple->Branch("NTTrigger", "ztop::NTTrigger", &nttrigger);
+  //gen branches
 
   Ntuple->Branch("NTGenTops",      "std::vector<ztop::NTGenParticle>", &nttops);
   Ntuple->Branch("NTGenWs",        "std::vector<ztop::NTGenParticle>", &ntws);

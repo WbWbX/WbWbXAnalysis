@@ -7,7 +7,8 @@ public:
   explicit TreeWriterTtH(const edm::ParameterSet & ParSet) : TreeWriterBase(ParSet) {
 
 
-    
+
+	   std::cout << "old matching to triggers still in here for compatability reasons" << std::endl;
 
   }
   ~TreeWriterTtH(){}
