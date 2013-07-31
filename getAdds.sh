@@ -18,34 +18,9 @@ then
     cvs co -d WWAnalysis/SkimStep UserCode/Mangano/WWAnalysis/SkimStep 
 fi
 
-#generator filter
-
-cvs co -d TopAnalysis/TopFilter/plugins/ UserCode/Bromo/TopAnalysis/TopFilter/plugins/GeneratorZFilter.cc
-cvs co -d TopAnalysis/TopFilter/plugins/ UserCode/Bromo/TopAnalysis/TopFilter/plugins/GeneratorTopFilter.cc
-cvs co -d TopAnalysis/TopFilter/plugins/ UserCode/Bromo/TopAnalysis/TopFilter/plugins/BuildFile.xml
-cvs co -d TopAnalysis/TopFilter/ UserCode/Bromo/TopAnalysis/TopFilter/BuildFile.xml
-cvs co -d TopAnalysis/TopFilter/python/filters/ UserCode/Bromo/TopAnalysis/TopFilter/python/filters/GeneratorTopFilter_cfi.py
-cvs co -d TopAnalysis/TopFilter/python/filters/ UserCode/Bromo/TopAnalysis/TopFilter/python/filters/GeneratorZFilter_cfi.py
-
-#scripts
-
-cvs co -d TopAnalysis/TopUtils/scripts UserCode/Bromo/TopAnalysis/TopUtils/scripts
-
-#utilz moved to topAnalysis
-
-cvs co -d TopAnalysis/ZTopUtils UserCode/Bromo/TopAnalysis/ZTopUtils
-
-#b-jet stuff
-
-cvs co -d TopAnalysis/TopUtils UserCode/Bromo/TopAnalysis/TopUtils
-
-rm -r -f $CMSSW_BASE/src/TopAnalysis/TopUtils/data
-
-#runallStuff
-
-cvs co -d TopAnalysis/Configuration/analysis/diLeptonic/scripts  UserCode/Bromo/TopAnalysis/Configuration/analysis/diLeptonic/scripts/runallGC.pl
-cvs co -d TopAnalysis/Configuration/analysis/diLeptonic/scripts  UserCode/Bromo/TopAnalysis/Configuration/analysis/diLeptonic/scripts/runallCrab.pl
-
+##TopAnalysis package
+cd ${CMSSW_BASE}/src
+git clone https://git.cern.ch/reps/TopAnalysis
 
 
 
