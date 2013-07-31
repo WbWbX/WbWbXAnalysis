@@ -156,30 +156,5 @@ void rescaleDY(ztop::container1DStackVector * vec, std::vector<TString> contribu
 }
 
 
-template<class T>
-bool allEqual(std::vector<T> vec, T val){
-  for(size_t i=0;i<vec.size();i++){
-    if(vec.at(i) != val)
-      return false;
-  }
-  return true;
-}
-template<class T>
-bool NoneEqual(std::vector<T> vec, T val){
-  for(size_t i=0;i<vec.size();i++){
-    if(vec.at(i) == val)
-      return false;
-  }
-  return true;
-}
-
-
-bool fileExists(const char * filename){
-std::ifstream FileTest(filename);
-  bool exists=FileTest;
-  FileTest.close();
-  return exists;
-}
-
 
 #endif
