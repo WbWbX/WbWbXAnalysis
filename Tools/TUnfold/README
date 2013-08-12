@@ -1,0 +1,84 @@
+TUnfold version 17.1, readme file as of Nov 15, 2012
+
+  This file is part of TUnfold.
+
+  TUnfold is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  TUnfold is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with TUnfold.  If not, see <http://www.gnu.org/licenses/>.
+
+
+File list:
+==========
+ TUnfold.h
+ TUnfoldBinning.h
+ TUnfoldDensity.h
+ TUnfoldSys.h
+ TUnfoldBinningV17.cxx
+ TUnfoldDensityV17.cxx
+ TUnfoldSysV17.cxx
+ TUnfoldV17.cxx
+ testUnfold1.C
+ testUnfold2.C
+ testUnfold3.C
+ testUnfold4.C
+ testUnfold5a.C
+ testUnfold5b.C
+ testUnfold5c.C
+ testUnfold5d.C
+ docu.C
+ altercodeversion.sh
+ Makefile
+ README
+ COPYING
+ tunfold_manual.tex
+ tunfold_manual_fig1.eps
+ tunfold_manual_fig2.eps
+
+
+documentation on the TUnfold package:
+=====================================
+  arXiv:1205.6201
+  http://www.desy.de/~sschmitt
+
+Compiling remarks
+=================
+ * you need a running version of root installed on your computer
+ * very old root version (say, less then 5.20) may be problematic
+ * compiling has been tested on a linux system (scientific linux 5)
+   it may or may not work on other systems
+
+Compiling:
+==========
+ * for compiling the examples, type
+     make bin
+ * for compiling the library, type
+     make lib
+
+how to use this TUnfold version in parallel to the existing (possibly
+outdated) version of TUnfold which is shipped with your root version
+
+ * make sure the header files
+    TUnfold.h TUnfoldBinning.h TUnfoldDensity.h TUnfoldSys.h
+   are taken from the local directory when included in your source code
+
+ * make sure the library "libunfold.so" is linked to your code 
+
+how it works:
+  the "original" classes of the TUnfold package are named
+    TUnfold TUnfoldBinning TUnfoldDensity TUnfoldSys 
+
+  the classes shipped with this package are named
+    TUnfoldV17 TUnfoldBinningV17 TUnfoldDensityV17 TUnfoldSysV17
+
+  in the header file there are statements
+
+   #define TUnfold TUnfoldV17
