@@ -27,6 +27,8 @@
   <class name="std::vector<ztop::NTGenParticle*>"/>
   <class name="ztop::NTGenJet"/>
   <class name="std::vector<ztop::NTGenJet>"/>
+  <class name="ztop::NTTriggerObject"/>
+  <class name="std::vector<ztop::NTTriggerObject>"/>
 
 
   <class name="ztop::NTBTagSF"/>

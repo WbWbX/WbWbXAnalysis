@@ -1042,6 +1042,9 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
      ntevent.setPDFWeights(*weightHandle);
    }
+
+   //////////////// TRIGGER OBJECTS!!!! ////////
+
    if(includetrigger_){
 
 	   std::string triggerProcess_="HLT";
@@ -1078,7 +1081,7 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 				   tempobj.setP4(vec);
 				   trigObjVec.at(i).push_back(tempobj);
 
-				   if(debugmode) std::cout << "\n\nwritten triggerobject for id: " << triggerObjects_.at(i) << "\n\n" << std::endl;
+				   if(debugmode) std::cout << "written triggerobject for id: " << triggerObjects_.at(i)  << std::endl;
 
 			   }
 		   }

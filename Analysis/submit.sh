@@ -13,8 +13,8 @@ channels=( #"ee"
 "emu"
 );
 systs=("nominal"
-"PU_up"
-"PU_down"
+#"PU_up"
+#"PU_down"
 #"JER_up"
 #"JER_down"
 #"JES_up"
@@ -107,6 +107,9 @@ for (( i=0;i<${#channels[@]};i++)); do
 		running=`expr $all - $defunct`
 		while [ $running  -gt 10 ]; do
 		    sleep 2;
+		    all=`ps ax | grep -E 'analyse.exe' | wc -l`
+		    defunct=`ps ax | grep -E 'analyse.exe' | grep -E 'defunct' | wc -l`
+		    running=`expr $all - $defunct`
 		done
 		echo "starting ${outname}"
 		./jobscripts/${outname} &

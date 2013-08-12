@@ -4,7 +4,7 @@
 #include "container.h"
 #include "container2D.h"
 #include "TString.h"
-
+#include "../TUnfold/TUnfold.h"
 
 
 
@@ -18,24 +18,24 @@
 
 namespace ztop{
 
-  class container1DUF : public container1D{
+  class container1DUF2 : public container1D{
 
   public:
 
-    container1DUF(){debug_=false;};
-    container1DUF(const ztop::container1D &);
-    ~container1DUF(){};
+    container1DUF2(){debug_=false;TUnfold bla(new TH2D(),TUnfold::kHistMapOutputHoriz,TUnfold::kRegModeNone,TUnfold::kEConstraintNone); }
+    container1DUF2(const ztop::container1D &){}
+    ~container1DUF2(){};
 
 
-    container1DUF binByBinUnfold();
-    container1DUF SVDUnfold();
+    container1DUF2 binByBinUnfold(){return *this;}
+    container1DUF2 SVDUnfold(){return *this;}
 
    // void setBinName(int, TString );
 
   //  void coutBinContents();
 
 
-    ztop::container1DUF breakDownRelSystematicsInBin(int);
+    ztop::container1DUF2 breakDownRelSystematicsInBin(int){return *this;}
 
 
     //some plotting stuff - put in external class, just leave some debug stuff here for the time-being (inherited from container1D
@@ -74,5 +74,11 @@ namespace ztop{
 
 
 }
+/*
+void test(){
+
+}
+*/
+
 
 #endif

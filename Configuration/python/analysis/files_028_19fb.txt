@@ -27,7 +27,6 @@
 180  /MET/Run2012C-22Jan2013-v1/AOD         tree_8TeV_MET_runC_22Jan       ttH=true isMC=false globalTag=FT_53_V21_AN5   json/ReRecoJan13.json.txt
 180  /METParked/Run2012D-22Jan2013-v1/AOD   tree_8TeV_MET_runD_22Jan       ttH=true isMC=false globalTag=FT_53_V21_AN5   json/ReRecoJan13.json.txt
 
-
 ##single lep
 
 200  /SingleElectron/Run2012A-22Jan2013-v1/AOD      tree_8TeV_singlee_runA_22Jan       ttH=true isMC=false globalTag=FT_53_V21_AN5 includereco=true   json/ReRecoJan13.json.txt

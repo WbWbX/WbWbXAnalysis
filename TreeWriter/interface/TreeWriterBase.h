@@ -63,6 +63,7 @@
 #include "../../DataFormats/interface/NTGenLepton.h"
 #include "../../DataFormats/interface/NTGenParticle.h"
 #include "../../DataFormats/interface/NTGenJet.h"
+#include "../../DataFormats/interface/NTTriggerObject.h"
 #include "../../DataFormats/interface/mathdefs.h"
 
 
@@ -94,6 +95,16 @@
 #include <cstring>
 #include "../interface/genTools.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
+
+
+#include "FWCore/Common/interface/TriggerNames.h"
+#include "FWCore/Common/interface/TriggerResultsByName.h"
+#include "DataFormats/Common/interface/TriggerResults.h"
+#include "DataFormats/HLTReco/interface/TriggerEvent.h"
+#include "DataFormats/HLTReco/interface/TriggerObject.h"
+
+#include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
+#include "HLTrigger/HLTcore/interface/HLTEventAnalyzerAOD.h"
 
 //
 // class declaration
@@ -152,7 +163,9 @@ public:
   template<typename t,typename u>
   int findGenMatchIdx(t * , std::vector<u> & , double dR=0.4);
  
-
+  std::vector<std::string> triggerObjects_;
+  std::vector<std::vector<ztop::NTTriggerObject> > trigObjVec;
+  //HLTConfigProvider hltConfig_;
   
 
   bool pfElecCands_;

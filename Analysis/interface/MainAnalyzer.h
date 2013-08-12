@@ -19,11 +19,12 @@
 #include "TtZAnalysis/Analysis/interface/AnalysisUtils.h"
 #include "Pipes.h"
 
-#include <stdlib.h>
+#include <cstdlib>
+#include "scalefactors.h"
 
 bool testmode=true;
 
-
+#define IPC_BUFFERSIZE 101
 
 namespace ztop{
   typedef std::vector<ztop::NTElectron>::iterator NTElectronIt;
@@ -49,7 +50,7 @@ public:
   MainAnalyzer();
   MainAnalyzer(const MainAnalyzer &);
  
-  ~MainAnalyzer(){std::cout << "~MainAnalyzer" << std::endl;}
+  ~MainAnalyzer(){}
 
   void setChannel(TString chan){
 	  if(chan.Contains("mumu")) b_mumu_=true;
@@ -105,6 +106,8 @@ public:
 
   void setDataSetDirectory(TString dir){datasetdirectory_=dir;}
   void setShowStatusBar(bool show){showstatusbar_=show;}
+  void setOnlySummary(bool show){onlySummary_=show;}
+  void setTestMode(bool test){testmode_=test;}
 
   ztop::container1DStackVector * getPlots(){return & analysisplots_;}
 
@@ -117,6 +120,9 @@ public:
   ztop::NTJERAdjuster * getJERAdjuster(){return & jeradjuster_;}
   ztop::NTJECUncertainties * getJECUncertainties(){return & jecuncertainties_;}
   ztop::NTBTagSF * getBTagSF(){return &btagsf_;}
+  ztop::scalefactors * getMuonSF(){return &muonsf_;}
+  ztop::scalefactors * getElecSF(){return &elecsf_;}
+  ztop::scalefactors * getTriggerSF(){return &triggersf_;}
 
   MainAnalyzer & operator= (const MainAnalyzer &);
 
@@ -131,7 +137,7 @@ private:
 
   TString replaceExtension(TString );
 
-  bool showstatusbar_;
+  bool showstatusbar_,onlySummary_,testmode_;
 
   TString name_,dataname_,channel_,syst_,energy_;
   bool b_ee_,b_emu_,b_mumu_,is7TeV_;
@@ -154,6 +160,10 @@ private:
   TString outdir_;
 
   TString btagsffile_;
+
+  //for scalefactors provided in THXX format:
+  ztop::scalefactors elecsf_,muonsf_,triggersf_;
+
 
   //for parallel stuff
 

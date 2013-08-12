@@ -863,7 +863,15 @@ if not (includereco or includetrigger):
 
 if includetrigger: #lower pfMuon threshold
     process.pfSelectedMuonsPFlow.cut = cms.string('pt>3')
-    process.PFTree.triggerObjects = cms.vstring("hltDiMuonGlb17Trk8DzFiltered0p2","hltDiMuonGlb17Glb8DzFiltered0p2") #..all objects to be written to tree
+    process.PFTree.triggerObjects = cms.vstring("hltDiMuonGlb17Trk8DzFiltered0p2", ##tkMu8
+                                                "hltL3fL1sMu10MuOpenL1f0L2f10L3Filtered17",     #mu17 leg of TkMu8
+                                                "hltL3fL1sMu10MuOpenOR3p5L1f0L2f10L3Filtered17", #mu17 leg of TkMu8 late RunC
+                                                "hltDiMuonGlbFiltered17TrkFiltered8",             #TkMu8 leg of TkMu8
+                                                "hltDiMuonGlb17Glb8DzFiltered0p2", ##Mu8 only if Z Filter is switched on!! (RunA, C, D)
+                                                "hltL3fL1DoubleMu10MuOpenL1f0L2f10L3Filtered17",   ## Mu17 leg of Mu17Mu8
+                                                "hltL3fL1DoubleMu10MuOpenOR3p5L1f0L2f10L3Filtered17", ## Mu17 leg for late RunC
+                                                "hltL3pfL1DoubleMu10MuOpenL1f0L2pf0L3PreFiltered8",   # Mu8 leg of Mu17Mu8
+                                                "hltL3pfL1DoubleMu10MuOpenOR3p5L1f0L2pf0L3PreFiltered8") # Mu8 leg of Mu17Mu8 late RunC
 
 
 

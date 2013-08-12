@@ -135,11 +135,12 @@ fi
 addpkg FWCore/FWLite
 addpkg ElectroWeakAnalysis/Utilities
 
-echo "setting LHAPDF path to /afs/naf.desy.de/user/k/kieseler/public/lhapdf"
-
-mv $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected/lhapdf.xml $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected/lhapdf.xml.old
-
-sed  -e 's;environment name=\"LHAPDF_BASE\" default=\"/afs/naf.desy.de/group/cms/sw/slc5_amd64_gcc462/external/lhapdf/5.8.5-cms2\";environment name=\"LHAPDF_BASE\" default=\"/afs/naf.desy.de/user/k/kieseler/public/lhapdf\";g' < $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected/lhapdf.xml.old  > $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected/lhapdf.xml
+#
+#echo "setting LHAPDF path to /afs/naf.desy.de/user/k/kieseler/public/lhapdf"
+#
+#mv $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected/lhapdf.xml $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected/lhapdf.xml.old
+#
+#sed  -e 's;environment name=\"LHAPDF_BASE\" default=\"/afs/naf.desy.de/group/cms/sw/slc5_amd64_gcc462/external/lhapdf/5.8.5-cms2\";environment name=\"LHAPDF_BASE\" default=\"/afs/naf.desy.de/user/k/kieseler/public/lhapdf\";g' < $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected/lhapdf.xml.old  > $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected/lhapdf.xml
 
 
 
@@ -161,5 +162,6 @@ echo '
 
 
 echo "To prepare eclipse project run: /afs/naf.desy.de/user/k/kieseler/public/eclipsetemp/prepareEclipseProject.sh"
+echo "don't forget to do <scram setup lhapdffull> when intending to use pdf weights"
 
 echo "\n\ncompile if you like"

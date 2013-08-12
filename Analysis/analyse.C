@@ -4,10 +4,15 @@
 //should be taken care of by the linker!
 
 
-void analyse(TString channel, TString Syst, TString energy, TString outfileadd, double lumi, bool dobtag, bool statbar){ //options like syst..
+void analyse(TString channel, TString Syst, TString energy, TString outfileadd, double lumi, bool dobtag, bool status,bool testmode=false){ //options like syst..
 
   bool didnothing=false;
+  //some env variables
+    TString cmssw_base=getenv("CMSSW_BASE");
+    TString scram_arch=getenv("SCRAM_ARCH");
 
+    using namespace std;
+    using namespace ztop;
   // ztop::container1D::debug =true;
 
   //define all options HERE!!!
@@ -26,7 +31,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
   }
   
 
-  TString jecfile,btagfile,pufile,inputfilewochannel; //...
+  TString jecfile,btagfile,pufile,inputfilewochannel,muonsffile,muonsfhisto,elecsffile,elecsfhisto,trigsffile,trigsfhisto; //...
 
   inputfilewochannel="inputfiles.txt";
   // 7 TeV stuff needs to be implemented
@@ -41,7 +46,12 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
     //btagfile="/src/TtZAnalysis/Data";
     // pufile="/src/TtZAnalysis/Data/Full19.json.txt_PU.root";
     pufile="ReRecoJan13.json.txt_PU";
-    //here dont specify channel or energy
+    muonsffile="/src/TopAnalysis/Configuration/analysis/diLeptonic/data/MuonSFtop12028_19fb.root";
+    muonsfhisto="MuonSFtop12028";
+    elecsffile="/src/TopAnalysis/Configuration/analysis/diLeptonic/data/ElectronSFtop12028_19fb.root";
+    elecsfhisto="ElectronSFtop12028";
+    trigsffile="/src/TopAnalysis/Configuration/analysis/diLeptonic/data/triggerSummary_"+channel+"_19fb.root";
+    trigsfhisto="scalefactor eta2d with syst";
   }
  
 
@@ -55,12 +65,8 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
    if(dobtag)
      btagfile=channel+"_"+energy+"_"+Syst+"_btags.root";
  
-  //some env variables
-  TString cmssw_base=getenv("CMSSW_BASE");
-  TString scram_arch=getenv("SCRAM_ARCH");
 
-  using namespace std;
-  using namespace ztop;
+
 
   ///set input files list etc (common)
 
@@ -68,21 +74,26 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
   TString outdir="output";  
 
   MainAnalyzer ana;
-  ana.setShowStatusBar(statbar);
+  ana.setOnlySummary(!status);
+  ana.setTestMode(testmode);
   ana.setLumi(lumi);
   ana.setDataSetDirectory(treedir);
   ana.getPUReweighter()->setDataTruePUInput((TString)cmssw_base+"/src/TtZAnalysis/Data/"+pufile+".root");
   ana.setChannel(channel);
   ana.setEnergy(energy);
-  if(energy == "8TeV")
+  if(energy == "8TeV"){
     ana.getPUReweighter()->setMCDistrSum12();
-  else if(energy == "7TeV")
+  }
+  else if(energy == "7TeV"){
     ana.getPUReweighter()->setMCDistrFall11();
+  }
+  ana.getElecSF()->setInput(cmssw_base+elecsffile,elecsfhisto);
+  ana.getMuonSF()->setInput(cmssw_base+muonsffile,muonsfhisto);
+  ana.getTriggerSF()->setInput(cmssw_base+trigsffile,trigsfhisto);
   ana.setOutFileAdd(outfileadd);
   ana.setOutDir(outdir);
   ana.getBTagSF()->setMakeEff(dobtag);
   ana.setBTagSFFile(btagfile);
-
   //add indication for non-correlated syst by adding the energy to syst name!! then the getCrossSections stuff should recognise it
 
   //although it produces overhead, add background rescaling here?
@@ -221,10 +232,11 @@ int main(int argc, char* argv[]){
   TString channel = getChannel(argc, argv);//-c <chan>
   TString syst = getSyst(argc, argv);      //-s <syst>
   TString energy = getEnergy(argc, argv); //-e default 8TeV
-  double lumi=getLumi(argc, argv);        //-l default 19100
+  double lumi=getLumi(argc, argv);        //-l default 19789
   bool dobtag=prepareBTag(argc, argv);    //-b switches on default false
   TString outfile=getOutFile(argc, argv);  //-o <outfile> should be something like channel_energy_syst.root // only for plots
-  bool statbar=false;
+  bool status=getShowStatus(argc, argv);    //-S default false
+  bool testmode=getTestMode(argc, argv); 	//-T default false
 
   bool mergefiles=false; //get these things from the options to..
   std::vector<TString> filestomerge;
@@ -233,6 +245,6 @@ int main(int argc, char* argv[]){
     //do the merging with filestomerge
   }
   else{
-    analyse(channel, syst, energy, outfile, lumi,dobtag , statbar);
+    analyse(channel, syst, energy, outfile, lumi,dobtag , status, testmode);
   }
 }

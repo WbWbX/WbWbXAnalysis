@@ -123,6 +123,20 @@ for(int i=1;i<argc;i++){
   }
  return false;
 }
+bool getShowStatus(int argc, char* argv[]){
+	for(int i=1;i<argc;i++){
+		if((TString)argv[i] == "-S")
+			return true;
+	}
+	return false;
+}
+bool getTestMode(int argc, char* argv[]){
+	for(int i=1;i<argc;i++){
+		if((TString)argv[i] == "-T")
+			return true;
+	}
+	return false;
+}
 
 void rescaleDY(ztop::container1DStackVector * vec, std::vector<TString> contributions, double scalescale=1, bool textout=true, TString identifier="dilepton invariant massZ "){
 

@@ -33,11 +33,13 @@ int scalefactors::setInput(TString filename, TString histname){
 	if(classname.Contains("TH2D")){
 		th2d_ = *(TH2D*)ph;
 		h = & th2d_;
+		isth2d_=true;
 		return 0;
 	}
 	else if(classname.Contains("TH1D")){
 		th1d_ = *(TH1D*)ph;
 		h = & th1d_;
+		isth2d_=false;
 		return 0;
 	}
 	else{
@@ -58,7 +60,7 @@ int scalefactors::setInput(TString filename, TString histname){
  */
 int scalefactors::setSystematics(TString updownnom){
 	if(updownnom.Contains("nom")){
-		syst_=0;
+		syst_=100;
 		return 0;
 	}
 	else if(updownnom.Contains("down")){
@@ -75,7 +77,17 @@ int scalefactors::setSystematics(TString updownnom){
 		return -1;
 	}
 }
-
+scalefactors::scalefactors(const ztop::scalefactors & rhs){
+	th1d_  = rhs.th1d_;
+	th2d_  = rhs.th2d_;
+	isth2d_= rhs.isth2d_;
+	syst_  = rhs.syst_;
+	isMC_  = rhs.isMC_;
+	if(isth2d_)
+		h=&th2d_;
+	else
+		h=&th1d_;
+}
 
 }
 

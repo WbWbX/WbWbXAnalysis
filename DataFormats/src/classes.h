@@ -10,6 +10,7 @@
 #include "../interface/NTTrack.h"
 #include "../interface/NTSuClu.h"
 #include "../interface/NTTrigger.h"
+#include "../interface/NTTriggerObject.h"
 
 
 
@@ -56,6 +57,8 @@ namespace
     std::vector< ztop::NTGenParticle *> jfffd;
     ztop::NTGenLepton ihisdh;
     std::vector<ztop::NTGenLepton> asfkkk;
+    ztop::NTTriggerObject isdhisdh;
+    std::vector<ztop::NTTriggerObject> asfsdkkk;
     
 
 
@@ -70,8 +73,8 @@ namespace
     std::vector<ztop::NTBTagSF> kedV;
     std::vector<ztop::NTJECUncertainties> kkssV;
     std::vector<ztop::NTJERAdjuster> ksdskV;
-
     
+
   };
 
 

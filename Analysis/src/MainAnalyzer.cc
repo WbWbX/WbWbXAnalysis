@@ -12,6 +12,7 @@ MainAnalyzer::MainAnalyzer(){
   b_mumu_=false;
   b_emu_=false;
   is7TeV_=false;
+  showstatusbar_=false;
 
 }
 
@@ -72,6 +73,7 @@ int MainAnalyzer::start(){
   p_finished.open(filenumber);
   p_allowwrite.open(filenumber);
   p_askwrite.open(filenumber);
+  p_status.open(filenumber);
 
   daughPIDs_.resize(filenumber,0);
 
@@ -96,51 +98,62 @@ int MainAnalyzer::start(){
   std::cout << "running on " << filenumber << " files" << std::endl;
   std::vector<int> succ;
   succ.resize(filenumber,0);
+  std::vector<int> status;
+  status.resize(filenumber,0);
 
   while(!NoneEqual(succ,0)){ //wait for daughters until all are done or failed
 
-    //get done or failed
-    for(size_t i=0;i<filenumber;i++){ 
-      if(p_finished.get(i)->preadready())
-	succ.at(i)=p_finished.get(i)->pread(); //testing
-    }
-    
-    int it_readytowrite=checkForWriteRequest();
-    if(it_readytowrite >= 0){ // daugh ready to write
-      p_allowwrite.get(it_readytowrite)->pwrite(1);
-      succ.at(it_readytowrite)=p_finished.get(it_readytowrite)->pread();   //wait for successful/ns write
+	  //get done or failed or status
+	  for(size_t i=0;i<filenumber;i++){
+		  if(p_finished.get(i)->preadready())
+			  succ.at(i)=p_finished.get(i)->pread(); //testing
+		  while(p_status.get(i)->preadready())
+			  status.at(i)=p_status.get(i)->pread();// asks for status, read full buffer and store last value
+	  }
 
-      int done=0,sdone=0;
-      std::cout << "\n\n" << std::endl;
-      for(size_t i=0;i<filenumber;i++){
-	if(succ.at(i) == 0){
-	  std::cout <<  "running:\t" <<infiles_.at(i) <<std::endl;
-	}
-	if(succ.at(i) !=0){
-	  done++;
-	}
-	if(succ.at(i) >0){
-	  sdone++;
-	}
-      }
-      for(size_t i=0;i<filenumber;i++){
-	if(succ.at(i) <0){
-	  std::cout  << "failed:  \t" << infiles_.at(i) << std::endl;
-	}
-      }
-      for(size_t i=0;i<filenumber;i++){
-	if(succ.at(i) >0){
-	  std::cout  << "done:   \t" << infiles_.at(i) << std::endl;
-	}
-      }
+	  int it_readytowrite=checkForWriteRequest();
+	  if(it_readytowrite >= 0){ // daugh ready to write
+		  p_allowwrite.get(it_readytowrite)->pwrite(1);
+		  succ.at(it_readytowrite)=p_finished.get(it_readytowrite)->pread();   //wait for successful/ns write
 
-	  std::cout << "\n\n" << sdone << "(" << done-sdone << " failed) / " << filenumber << "done\n\n"<< std::endl;
-	} //else do nothing - none ready to write
-    
-    // put statusbars here maybe ask for status via pipes
-    
 
-    usleep(100000); //only check every 1000ms
+	  } //else do nothing - none ready to write
+
+	  // put statusbars here maybe ask for status via pipes
+
+	  else{
+		  sleep(2); //if nothing happened only check every 2 sec
+	  }
+	  if(!onlySummary_){
+		  int done=0,sdone=0;
+		  std::cout << "\n\n" << std::endl;
+		  for(size_t i=0;i<filenumber;i++){
+			  if(succ.at(i) == 0){
+				  std::cout <<  "running "<< status.at(i) << "%:"<< "\t" <<infiles_.at(i)  << std::endl;
+			  }
+			  if(succ.at(i) !=0){
+				  done++;
+			  }
+			  if(succ.at(i) >0){
+				  sdone++;
+			  }
+		  }
+		  std::cout << "-----------------" << std::endl;
+		  for(size_t i=0;i<filenumber;i++){
+			  if(succ.at(i) <0){
+				  std::cout  << "failed:     \t" << infiles_.at(i) << std::endl;
+			  }
+		  }
+
+		  for(size_t i=0;i<filenumber;i++){
+			  if(succ.at(i) >0){
+				  std::cout  << " done:      \t" << infiles_.at(i) << std::endl;
+			  }
+		  }
+
+		  std::cout << "\n\n" << sdone << "(" << done-sdone << " failed) / " << filenumber << " done\n\n"<< std::endl;
+	  }
+
   }
   sleep(1);
   bool nonefailed=true;

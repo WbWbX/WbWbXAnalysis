@@ -134,6 +134,10 @@ public:
 	void setDileptonTriggers(std::vector<std::string> trigs){trigs_=trigs;}
 	void setDileptonTrigger(string trig){trigs_.clear(); trigs_.push_back(trig);}
 
+	void setTriggerObjects(std::vector<std::string> trigobjs){trigsObj_=trigobjs;}
+	void setTriggerObjects(std::string trigobj){trigsObj_.clear();trigsObj_.push_back(trigobj);}
+	void addTriggerObjects(std::string trigobj){trigsObj_.push_back(trigobj);}
+
 	void setSelectionStep(int step){/*selectionstep_=step; for future use. needs to affect the plots, too*/ }
 	int selectionStep(){return selectionstep_;}
 
@@ -231,644 +235,674 @@ public:
 			dzbins << i;
 		vector<float> dzbins2;
 		//for(float i=0;i<10;i++)
-			dzbins2 << 0 << 0.025 << 0.05 << 0.3  << 1 << 2 << 3 << 4;
+		dzbins2 << 0 << 0.025 << 0.05 << 0.3  << 1 << 2 << 3 << 4;
 
-			//pt
-			//eta
-			//et2d
-			//dphi
-			//vmulti
-			//drlep
-			//jetmulti
-			////jetmultieta2d
+		//pt
+		//eta
+		//et2d
+		//dphi
+		//vmulti
+		//drlep
+		//jetmulti
+		////jetmultieta2d
 
 
+		alltriples_.clear();
+		std::cout << "setting plots "<< std::endl;
+		std::cout << effTriple::effTriple_list.size() << std::endl;
 
-			alltriples_.clear();
-			std::cout << "setting plots "<< std::endl;
-			std::cout << effTriple::effTriple_list.size() << std::endl;
+		effTriple::makelist=true;
 
-			effTriple::makelist=true;
+		/////////PLOTS///////
 
-			/////////PLOTS///////
+		effTriple t_global  (selectionbins           , "global"         , "sel step"                    , "evts"   );
+		effTriple t_global_woCorr  (selectionbins           , "global_woCorr"         , "sel step"                    , "evts"   );
 
-			effTriple t_global  (selectionbins           , "global"         , "sel step"                    , "evts"   );
-			effTriple t_global_woCorr  (selectionbins           , "global_woCorr"         , "sel step"                    , "evts"   );
+		///don't change!! global needs to be the first/second entry!!
 
-			///don't change!! global needs to be the first/second entry!!
+		effTriple t_pt      (binspt_                 , "lepton_pt"      , "p_{T,l} [GeV]"            , "evts"   );
+		effTriple t_allpt   (binsallpt               , "all_lepton_pt"  , "p_{T,l} [GeV]"            , "evts"   );
+		effTriple t_eta     (binseta_                , "lepton_eta"     , "#eta_{l}"           , "evts"   );
+		effTriple t_eta2d   (binseta2dx_, binseta2dy_, "lepton_eta2d"   , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
+		effTriple t_dphi    (binsdphi                , "leptonmet_dphi" , "#Delta#phi_{l,MET}" , "evts"   );
+		effTriple t_vmulti  (binsvmulti              , "vertex_multi"   , "n_{vtx}"            , "evts"   );
+		effTriple t_drll    (binsdrll                , "leptons_dR"     , "#Delta R_{l,l}"     , "evts"   );
+		effTriple t_jetmulti(binsjetmulti            , "jet_multi"      , "n_{jets}"           , "evts"   );
 
-			effTriple t_pt      (binspt_                 , "lepton_pt"      , "p_{T,l} [GeV]"            , "evts"   );
-			effTriple t_allpt   (binsallpt               , "all_lepton_pt"  , "p_{T,l} [GeV]"            , "evts"   );
-			effTriple t_eta     (binseta_                , "lepton_eta"     , "#eta_{l}"           , "evts"   );
-			effTriple t_eta2d   (binseta2dx_, binseta2dy_, "lepton_eta2d"   , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
-			effTriple t_dphi    (binsdphi                , "leptonmet_dphi" , "#Delta#phi_{l,MET}" , "evts"   );
-			effTriple t_vmulti  (binsvmulti              , "vertex_multi"   , "n_{vtx}"            , "evts"   );
-			effTriple t_drll    (binsdrll                , "leptons_dR"     , "#Delta R_{l,l}"     , "evts"   );
-			effTriple t_jetmulti(binsjetmulti            , "jet_multi"      , "n_{jets}"           , "evts"   );
+		effTriple t_invmass (binsmass            , "dilepton_mll"      , "m_{ll} [GeV]"          , "evts"   );
+		effTriple t_lepmulti(binslepmulti            , "lepton_multi"      , "n_{l}"           , "evts"   );
+		effTriple t_alllepmulti(binslepmulti            , "alllepton_multi"      , "n_{l}"           , "evts"   );
+		effTriple t_etafine     (binsetafine                , "lepton_etafine"     , "#eta_{l}"           , "evts"   );
+		effTriple t_eta2jetmulti  (binseta2jetmultiX, binseta2jetmultiY, "leptonjet_eta2multi"   , "n_{jets}"       , "|#eta_{l}|");
+		effTriple t_iso     (binsiso                , "lepton_iso"     , "Iso_{l}"           , "evts"   );
+		effTriple t_eta2dfine   (binseta2dfineX, binseta2dfineY, "lepton_eta2dfine"   , "#eta_{l_{1}}"       , "#eta_{l_{2}}", "smallmarkers");
+		effTriple t_dzlepton (dzbins2                 , "lepton_dzV"      , "dz(V)_{l} [cm]"            , "evts"   );
+		effTriple t_dzbslepton (dzbins                 , "lepton_dzBs"      , "dz(Bs)_{l} [cm]"            , "evts"   );
+		effTriple t_dzbsalllepton (dzbins2                 , "alllepton_dzBs"      , "dz(Bs)_{l} [cm]"            , "evts"   );
+		effTriple t_dzleptonlepton (dzbins2                 , "leptonlepton_dz"      , "dz(ll) [cm]"            , "evts"   );
+		effTriple t_drleptrig (binsdrll                 , "leptontrigger_dr"      , "dr(lt) [cm]"            , "evts"   );
 
-			effTriple t_invmass (binsmass            , "dilepton_mll"      , "m_{ll} [GeV]"          , "evts"   );
-			effTriple t_lepmulti(binslepmulti            , "lepton_multi"      , "n_{l}"           , "evts"   );
-			effTriple t_alllepmulti(binslepmulti            , "alllepton_multi"      , "n_{l}"           , "evts"   );
-			effTriple t_etafine     (binsetafine                , "lepton_etafine"     , "#eta_{l}"           , "evts"   );
-			effTriple t_eta2jetmulti  (binseta2jetmultiX, binseta2jetmultiY, "leptonjet_eta2multi"   , "n_{jets}"       , "|#eta_{l}|");
-			effTriple t_iso     (binsiso                , "lepton_iso"     , "Iso_{l}"           , "evts"   );
-			effTriple t_eta2dfine   (binseta2dfineX, binseta2dfineY, "lepton_eta2dfine"   , "#eta_{l_{1}}"       , "#eta_{l_{2}}", "smallmarkers");
-			effTriple t_dzlepton (dzbins2                 , "lepton_dzV"      , "dz(V)_{l} [cm]"            , "evts"   );
-			effTriple t_dzbslepton (dzbins                 , "lepton_dzBs"      , "dz(Bs)_{l} [cm]"            , "evts"   );
-			effTriple t_dzbsalllepton (dzbins2                 , "alllepton_dzBs"      , "dz(Bs)_{l} [cm]"            , "evts"   );
-			effTriple t_dzleptonlepton (dzbins2                 , "leptonlepton_dz"      , "dz(ll) [cm]"            , "evts"   );
+		effTriple::makelist=false;
 
-			effTriple::makelist=false;
+		//all this trigger stuff starts here
 
-			//all this trigger stuff starts here
+		TH1D *datapileup=0;
+		if(isMC_){
+			TFile f2(pufile_);
+			datapileup=((TH1D*)f2.Get("pileup"));
+		}
 
-			TH1D *datapileup=0;
-			if(isMC_){
-				TFile f2(pufile_);
-				datapileup=((TH1D*)f2.Get("pileup"));
+		vector<string> dileptriggers;
+
+		//make triggers switchable from the outside in next iteration. leave right now as it is
+
+		if(mode_<-0.1){
+			//  pair<string, double> trig2("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999.);
+			dileptriggers.push_back("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
+
+		}
+		if(mode_>0.1){
+			//   pair<string, double> trig3("HLT_Mu17_Mu8_v",999999);
+			dileptriggers.push_back("HLT_Mu17_Mu8_v");
+			// pair<string, double> trig4("HLT_Mu17_TkMu8_v",999999);
+			dileptriggers.push_back("HLT_Mu17_TkMu8_v");
+		}
+
+		if(mode_==0){
+			//  pair<string, double> trig3("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999);
+			dileptriggers.push_back("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
+			//  pair<string, double> trig4("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999);
+			dileptriggers.push_back("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
+		}
+
+		if(trigs_.size()>0){   //manually set
+			dileptriggers.clear();
+			for(size_t i=0;i<trigs_.size();i++){
+				dileptriggers.push_back(trigs_.at(i));
 			}
+		}
 
-			vector<string> dileptriggers;
+		vector<string> dileptriggersMC; // the version numbers where set as wildcards, so if statement obsolete!
+		// if(!is52v9){
+		if(mode_<-0.1){
+			dileptriggersMC.push_back("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
+		}
+		if(mode_>0.1){
+			dileptriggersMC.push_back("HLT_Mu17_Mu8_v");
+			dileptriggersMC.push_back("HLT_Mu17_TkMu8_v");
+		}
+		if(mode_==0){
+			dileptriggersMC.push_back("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
+			dileptriggersMC.push_back("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
+		}
 
-			//make triggers switchable from the outside in next iteration. leave right now as it is
+		if(trigs_.size()>0)
+			dileptriggersMC=dileptriggers;
 
-			if(mode_<-0.1){
-				//  pair<string, double> trig2("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999.);
-				dileptriggers.push_back("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
 
+		///////////PU reweighting
+
+		PUReweighter PUweight;
+		if(isMC_) PUweight.setDataTruePUInput(datapileup);
+		if(isMC_)PUweight.setMCDistrSum12();
+
+		vector<NTMuon> * pMuons = 0;
+		t_->SetBranchAddress("NTMuons",&pMuons);//, &b_NTMuons);
+		vector<NTElectron> * pElectrons = 0;
+		t_->SetBranchAddress(whichelectrons_.Data(),&pElectrons);//, &b_NTElectrons);
+		vector<NTJet> * pJets = 0;
+		t_->SetBranchAddress("NTJets",&pJets);
+		NTMet * pMet = 0;
+		t_->SetBranchAddress("NTMet",&pMet);
+		NTEvent * pEvent = 0;
+		t_->SetBranchAddress("NTEvent",&pEvent);
+		map<string,unsigned int> * pTriggersWithPrescales=0;
+		t_->SetBranchAddress("AllTriggersWithPrescales",&pTriggersWithPrescales);
+
+		vector<vector<NTTriggerObject> *> pTriggerobjects;
+		for(size_t i=0;i<trigsObj_.size();i++){
+			vector<NTTriggerObject> * temp = 0;
+			pTriggerobjects.push_back(temp);
+		}
+
+		for(size_t i=0;i<trigsObj_.size();i++){
+			if(t_->GetBranch(("NTTriggerObjects_"+(TString)trigsObj_.at(i)).Data())){
+				t_->SetBranchAddress("NTTriggerObjects_"+(TString)trigsObj_.at(i),&pTriggerobjects.at(i));
 			}
-			if(mode_>0.1){
-				//   pair<string, double> trig3("HLT_Mu17_Mu8_v",999999);
-				dileptriggers.push_back("HLT_Mu17_Mu8_v");
-				// pair<string, double> trig4("HLT_Mu17_TkMu8_v",999999);
-				dileptriggers.push_back("HLT_Mu17_TkMu8_v");
+			else{
+				cout << "Branch " << "NTTriggerObjects_"+(TString)trigsObj_.at(i) << " not found" << endl;
+				exit(EXIT_FAILURE);
 			}
+		}
 
-			if(mode_==0){
-				//  pair<string, double> trig3("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999);
-				dileptriggers.push_back("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
-				//  pair<string, double> trig4("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999);
-				dileptriggers.push_back("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
-			}
-
-			if(trigs_.size()>0){   //manually set
-				dileptriggers.clear();
-				for(size_t i=0;i<trigs_.size();i++){
-					dileptriggers.push_back(trigs_.at(i));
-				}
-			}
-
-			vector<string> dileptriggersMC; // the version numbers where set as wildcards, so if statement obsolete!
-			// if(!is52v9){
-			if(mode_<-0.1){
-				dileptriggersMC.push_back("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
-			}
-			if(mode_>0.1){
-				dileptriggersMC.push_back("HLT_Mu17_Mu8_v");
-				dileptriggersMC.push_back("HLT_Mu17_TkMu8_v");
-			}
-			if(mode_==0){
-				dileptriggersMC.push_back("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
-				dileptriggersMC.push_back("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
-			}
-
-			if(trigs_.size()>0)
-				dileptriggersMC=dileptriggers;
-
 
-			///////////PU reweighting
 
-			PUReweighter PUweight;
-			if(isMC_) PUweight.setDataTruePUInput(datapileup);
-			if(isMC_)PUweight.setMCDistrSum12();
+		pair<string,double> dilepton("dilepton", 0);
+		pair<string,double> ZVeto   ("ZVeto   ", 0);
+		pair<string,double> oneJet  ("oneJet  ", 0);
+		pair<string,double> twoJets ("twoJets ", 0);
+		pair<string,double> met     ("met     ", 0);
 
-			vector<NTMuon> * pMuons = 0;
-			t_->SetBranchAddress("NTMuons",&pMuons);//, &b_NTMuons);
-			vector<NTElectron> * pElectrons = 0;
-			t_->SetBranchAddress(whichelectrons_.Data(),&pElectrons);//, &b_NTElectrons);
-			vector<NTJet> * pJets = 0;
-			t_->SetBranchAddress("NTJets",&pJets);
-			NTMet * pMet = 0;
-			t_->SetBranchAddress("NTMet",&pMet);
-			NTEvent * pEvent = 0;
-			t_->SetBranchAddress("NTEvent",&pEvent);
-			map<string,unsigned int> * pTriggersWithPrescales=0;
-			t_->SetBranchAddress("AllTriggersWithPrescales",&pTriggersWithPrescales);
 
+		vector<pair<string,double> >sel_woTrig;
+		vector<pair<string,double> >sel_Trig;
+		vector<pair<string,double> >sel_MetTrig;
+		vector<pair<string,double> >sel_BothTrig;
 
+		sel_woTrig.push_back(dilepton);
+		sel_woTrig.push_back(ZVeto);
+		sel_woTrig.push_back(oneJet);
+		sel_woTrig.push_back(twoJets);
+		sel_woTrig.push_back(met);
 
-			pair<string,double> dilepton("dilepton", 0);
-			pair<string,double> ZVeto   ("ZVeto   ", 0);
-			pair<string,double> oneJet  ("oneJet  ", 0);
-			pair<string,double> twoJets ("twoJets ", 0);
-			pair<string,double> met     ("met     ", 0);
+		sel_Trig.push_back(dilepton);
+		sel_Trig.push_back(ZVeto);
+		sel_Trig.push_back(oneJet);
+		sel_Trig.push_back(twoJets);
+		sel_Trig.push_back(met);
 
+		sel_MetTrig.push_back(dilepton);
+		sel_MetTrig.push_back(ZVeto);
+		sel_MetTrig.push_back(oneJet);
+		sel_MetTrig.push_back(twoJets);
+		sel_MetTrig.push_back(met);
 
-			vector<pair<string,double> >sel_woTrig;
-			vector<pair<string,double> >sel_Trig;
-			vector<pair<string,double> >sel_MetTrig;
-			vector<pair<string,double> >sel_BothTrig;
+		sel_BothTrig.push_back(dilepton);
+		sel_BothTrig.push_back(ZVeto);
+		sel_BothTrig.push_back(oneJet);
+		sel_BothTrig.push_back(twoJets);
+		sel_BothTrig.push_back(met);
 
-			sel_woTrig.push_back(dilepton);
-			sel_woTrig.push_back(ZVeto);
-			sel_woTrig.push_back(oneJet);
-			sel_woTrig.push_back(twoJets);
-			sel_woTrig.push_back(met);
 
-			sel_Trig.push_back(dilepton);
-			sel_Trig.push_back(ZVeto);
-			sel_Trig.push_back(oneJet);
-			sel_Trig.push_back(twoJets);
-			sel_Trig.push_back(met);
+		unsigned int wrongtables=0;
+		namedPairs summarylist,summarylistweighted;
 
-			sel_MetTrig.push_back(dilepton);
-			sel_MetTrig.push_back(ZVeto);
-			sel_MetTrig.push_back(oneJet);
-			sel_MetTrig.push_back(twoJets);
-			sel_MetTrig.push_back(met);
 
-			sel_BothTrig.push_back(dilepton);
-			sel_BothTrig.push_back(ZVeto);
-			sel_BothTrig.push_back(oneJet);
-			sel_BothTrig.push_back(twoJets);
-			sel_BothTrig.push_back(met);
+		Long64_t n = t_->GetEntries();
+		cout  << "Entries in tree: " << n << endl;
 
+		//TRAPTEST//
+		//n*=0.01;
+		if(testmode)
+			n*=0.01;
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-			unsigned int wrongtables=0;
-			namedPairs summarylist,summarylistweighted;
+		for(Long64_t i=0;i<n;i++){  //main loop
 
+			selectedElecs_.clear();
+			selectedMuons_.clear();
 
-			Long64_t n = t_->GetEntries();
-			cout  << "Entries in tree: " << n << endl;
+			bool firedDilepTrigger=false;
+			bool firedMet=false;
+			bool b_dilepton=false;
+			bool b_ZVeto=false;
+			bool b_oneJet=false;
+			bool b_twoJets=false;
+			bool b_met=false;
 
-			//TRAPTEST//
-			//n*=0.01;
-			if(testmode)
-				n*=0.01;
-			////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			t_->GetEntry(i);
 
-			for(Long64_t i=0;i<n;i++){  //main loop
+			if(statusbar_)
+				displayStatusBar(i,n);
 
-				selectedElecs_.clear();
-				selectedMuons_.clear();
 
-				bool firedDilepTrigger=false;
-				bool firedMet=false;
-				bool b_dilepton=false;
-				bool b_ZVeto=false;
-				bool b_oneJet=false;
-				bool b_twoJets=false;
-				bool b_met=false;
+			double puweight=1;
+			if(isMC_) puweight=PUweight.getPUweight(pEvent->truePU());
 
-				t_->GetEntry(i);
+			if(mode_>0.1 && pMuons->size()<2) continue;
 
-				if(statusbar_)
-					displayStatusBar(i,n);
+			if(mode_<-0.1 && pElectrons->size()<2) continue;
 
+			if(mode_==0 &&  (pElectrons->size() < 1 || pMuons->size()< 1)) continue;
 
-				double puweight=1;
-				if(isMC_) puweight=PUweight.getPUweight(pEvent->truePU());
 
-				if(mode_>0.1 && pMuons->size()<2) continue;
+			//select dileptons
+			double mass=selectDileptons(pMuons,pElectrons);
 
-				if(mode_<-0.1 && pElectrons->size()<2) continue;
 
-				if(mode_==0 &&  (pElectrons->size() < 1 || pMuons->size()< 1)) continue;
+			//cut on run ranges
+			if(runcutlow_ >0  && pEvent->runNo() < runcutlow_ ) continue;
+			if(runcuthigh_>0 && pEvent->runNo() > runcuthigh_) continue;
 
+			//cut on mass ranges
+			if(masscutlow_ >0  && mass < masscutlow_ ) continue;
+			if(masscuthigh_>0 && mass > masscuthigh_) continue;
 
-				//select dileptons
-				double mass=selectDileptons(pMuons,pElectrons);
 
 
-				//cut on run ranges
-				if(runcutlow_ >0  && pEvent->runNo() < runcutlow_ ) continue;
-				if(runcuthigh_>0 && pEvent->runNo() > runcuthigh_) continue;
 
-				//cut on mass ranges
-				if(masscutlow_ >0  && mass < masscutlow_ ) continue;
-				if(masscuthigh_>0 && mass > masscuthigh_) continue;
+			b_dilepton=true;
 
 
+			//check whether dilepton trigger has fired
 
+			for(std::map<std::string, unsigned int>::iterator trigP=pTriggersWithPrescales->begin();trigP!=pTriggersWithPrescales->end();++trigP){
+				const string * name= &(trigP->first);
 
-				b_dilepton=true;
-
-
-				//check whether dilepton trigger has fired
-
-				for(std::map<std::string, unsigned int>::iterator trigP=pTriggersWithPrescales->begin();trigP!=pTriggersWithPrescales->end();++trigP){
-					const string * name= &(trigP->first);
-
-					//check dilepton trigger
-					for(unsigned int ctrig=0;ctrig<dileptriggers.size(); ctrig++){
-						if(name->find(dileptriggers.at(ctrig))!=string::npos){
-							firedDilepTrigger=true;
-							break;
-						}
-					}
-
-				}
-
-				//check met trigger and use the one with lowest prescale
-				unsigned int prescaleCutHigh=20;
-
-				unsigned int prescale=99999;
-				unsigned int largestprescale=0;
-
-				vector<size_t> firedidx;
-
-				for(size_t fg=0;fg<mettriggers.size();fg++){
-					string * name= &(mettriggers.at(fg));
-
-					size_t tmpidx=0;
-					for(std::map<std::string, unsigned int>::iterator trigP=pTriggersWithPrescales->begin();trigP!=pTriggersWithPrescales->end();++trigP){
-						if(trigP->first.find(*name) != std::string::npos){
-
-							firedMet=true; //any trigger fired
-
-							firedidx.push_back(tmpidx);
-
-							if(trigP->second < prescale)
-								prescale=trigP->second;
-							if(trigP->second > largestprescale)
-								largestprescale=trigP->second;
-
-						}
-						tmpidx++;
-					}
-				}
-
-				if(!firedMet)
-					prescale = 1;
-
-				if(largestprescale < 2 && !isMC_)
-					wrongtables++;
-
-				if(prescaleweight_){
-
-					if(prescale > prescaleCutHigh) continue; //get rid of high prescales
-
-					puweight*=(double) prescale;
-				}
-
-				std::map<std::string, unsigned int>::iterator tit=pTriggersWithPrescales->begin();
-
-				for(size_t k=0;k<firedidx.size();k++){
-					tit=pTriggersWithPrescales->begin();
-					std::advance(tit, firedidx.at(k));
-					if(tit->second != prescale)
-						continue;
-					summarylist.fill(tit->first, tit->second);
-					summarylistweighted.fill(tit->first, tit->second, puweight);
-				}
-
-				//////////trigger check ends
-
-				//do matching on selectedMuons_ selectedElecs
-
-				if(match_){
-					firedDilepTrigger=false;
-					int matchedno=0;
-
-					if(mode_>0.1){ //mumu
-						for(size_t g=0;g<selectedMuons_.size();g++){
-							ztop::NTMuon * muon = selectedMuons_.at(g);
-							bool foundmatched=false;
-							for(size_t j=0;j<muon->matchedTrig().size();j++){
-								//std::cout << muon->matchedTrig().at(j) << std::endl;
-								for(size_t k=0;k<trigs_.size();k++){
-									if(((TString)muon->matchedTrig().at(j)).Contains(trigs_.at(k))){
-										matchedno++;
-										foundmatched=true;
-										break;
-									}
-								}
-								if(foundmatched)
-									break;
-							}
-						}
-					}
-					if(mode_<-0.1){ //ee
-
-					}
-					if(mode_==0){ //emu
-
-					}
-					if(matchedno > 1)  //The selected muons have fired the trigger! machedno >0 also means, trigger has fired but not ness. due to selected muons
+				//check dilepton trigger
+				for(unsigned int ctrig=0;ctrig<dileptriggers.size(); ctrig++){
+					if(name->find(dileptriggers.at(ctrig))!=string::npos){
 						firedDilepTrigger=true;
+						break;
+					}
 				}
 
+			}
 
+			//check met trigger and use the one with lowest prescale
+			unsigned int prescaleCutHigh=20;
 
+			unsigned int prescale=99999;
+			unsigned int largestprescale=0;
 
-				if(!isMC_ && !firedMet) continue;
+			vector<size_t> firedidx;
 
+			for(size_t fg=0;fg<mettriggers.size();fg++){
+				string * name= &(mettriggers.at(fg));
 
-				t_global_woCorr.fillDen(0,puweight);
-				if(firedDilepTrigger)
-					t_global_woCorr.fillNum(0,puweight);
+				size_t tmpidx=0;
+				for(std::map<std::string, unsigned int>::iterator trigP=pTriggersWithPrescales->begin();trigP!=pTriggersWithPrescales->end();++trigP){
+					if(trigP->first.find(*name) != std::string::npos){
 
+						firedMet=true; //any trigger fired
 
-				if(includecorr_ && !firedMet) continue;
-				// lepton selection and event selection (at least two leptons etc)
+						firedidx.push_back(tmpidx);
 
-				if(pEvent->vertexMulti() <1) continue;
+						if(trigP->second < prescale)
+							prescale=trigP->second;
+						if(trigP->second > largestprescale)
+							largestprescale=trigP->second;
 
-
-				/////////trigger check/////////
-
-				////////////////dilepton selection
-				if((mode_== 1 || mode_<-0.1 ) && (mass > 106 || mass < 76)) b_ZVeto=true;
-				if(mode_==0)  b_ZVeto=true;
-
-				vector<NTJet> selected_jets;
-				for(vector<NTJet>::iterator jet=pJets->begin();jet<pJets->end();jet++){
-					if(jet->pt() < jetptcut) continue;
-					if(fabs(jet->eta()) >2.5) continue;
-					if(!noOverlap(&*jet,selectedMuons_,0.3)) continue; //cleaning  ##TRAP## changed to 0.4 /doesn't matter for final eff
-					if(!noOverlap(&*jet,selectedElecs_,0.3)) continue;
-					if((!jet->id())) continue;
-
-					selected_jets.push_back(*jet);
+					}
+					tmpidx++;
 				}
-				if(selected_jets.size() >0) b_oneJet=true;
-				if(selected_jets.size() >1) b_twoJets=true;
-				if((mode_== -1 || mode_>0.1) && pMet->met() > 40) b_met=true;
-				if(mode_== 0) b_met=true;
+			}
 
+			if(!firedMet)
+				prescale = 1;
 
-				//  std::cout << puweight << std::endl;
+			if(largestprescale < 2 && !isMC_)
+				wrongtables++;
 
-				//define variables
+			if(prescaleweight_){
 
-				double vmulti=pEvent->vertexMulti();
-				double jetmulti=selected_jets.size();
-				double pt1,pt2;
-				double eta1,eta2;
-				double dphi;
-				double dRll;
-				double lepmulti;
-				double alllepmulti;
-				double iso1;
-				double iso2;
-				double dz1,dz2,dzbs1,dzbs2;
+				if(prescale > prescaleCutHigh) continue; //get rid of high prescales
 
-				//mass already defined
+				puweight*=(double) prescale;
+			}
 
+			std::map<std::string, unsigned int>::iterator tit=pTriggersWithPrescales->begin();
 
-				/////////filling stuff
+			for(size_t k=0;k<firedidx.size();k++){
+				tit=pTriggersWithPrescales->begin();
+				std::advance(tit, firedidx.at(k));
+				if(tit->second != prescale)
+					continue;
+				summarylist.fill(tit->first, tit->second);
+				summarylistweighted.fill(tit->first, tit->second, puweight);
+			}
 
+			//////////trigger check ends
+
+			//do matching on selectedMuons_ selectedElecs
+
+			if(match_){
+				firedDilepTrigger=false;
+				int matchedno=0;
+
+				if(mode_>0.1){ //mumu
+					for(size_t g=0;g<selectedMuons_.size();g++){
+						ztop::NTMuon * muon = selectedMuons_.at(g);
+						bool foundmatched=false;
+						for(size_t j=0;j<muon->matchedTrig().size();j++){
+							//std::cout << muon->matchedTrig().at(j) << std::endl;
+							for(size_t k=0;k<trigs_.size();k++){
+								if(((TString)muon->matchedTrig().at(j)).Contains(trigs_.at(k))){
+									matchedno++;
+									foundmatched=true;
+									break;
+								}
+							}
+							if(foundmatched)
+								break;
+						}
+					}
+				}
 				if(mode_<-0.1){ //ee
-					eta1=selectedElecs_[0]->eta();
-					eta2=selectedElecs_[1]->eta();
-					pt1=selectedElecs_[0]->ECalP4().Pt();
-					pt2=selectedElecs_[1]->ECalP4().Pt();
-					dphi=selectedElecs_[0]->phi() - pMet->phi();
-					dRll=dR(selectedElecs_[0],selectedElecs_[1]);
-					lepmulti=selectedElecs_.size();
-					alllepmulti=pElectrons->size();
-					iso1=selectedElecs_[0]->isoVal();
-					iso2=selectedElecs_[1]->isoVal();
-					dz1=selectedElecs_[0]->dzV();
-					dz2=selectedElecs_[1]->dzV();
-					dzbs1=selectedElecs_[0]->dZBs();
-					dzbs2=selectedElecs_[1]->dZBs();
-				}
-				else if(mode_>0.1){ //mumu
-					eta1=selectedMuons_[0]->eta();
-					eta2=selectedMuons_[1]->eta();
-					pt1=selectedMuons_[0]->pt();
-					pt2=selectedMuons_[1]->pt();
-					dphi=selectedMuons_[0]->phi() - pMet->phi();
-					dRll=dR(selectedMuons_[0],selectedMuons_[1]);
-					lepmulti=selectedMuons_.size();
-					alllepmulti=pMuons->size();
-					iso1=selectedMuons_[0]->isoVal();
-					iso2=selectedMuons_[1]->isoVal();
-					dz1=selectedMuons_[0]->dzV();
-					dz2=selectedMuons_[1]->dzV();
-					dzbs1=selectedMuons_[0]->dZBs();
-					dzbs2=selectedMuons_[1]->dZBs();
-				}
-				else{ //emu
-					eta1=selectedElecs_[0]->eta();
-					eta2=selectedMuons_[0]->eta();
-					pt1=selectedElecs_[0]->ECalP4().Pt();
-					pt2=selectedMuons_[0]->pt();
-					dphi=selectedElecs_[0]->phi() - pMet->phi();
-					dRll=dR(selectedElecs_[0],selectedMuons_[0]);
-					lepmulti=selectedElecs_.size()+selectedMuons_.size();
-					alllepmulti=pMuons->size() + pElectrons->size();
-					iso1=selectedElecs_[0]->isoVal();
-					iso2=selectedMuons_[0]->isoVal();
-					dz1=selectedMuons_[0]->dzV();
-					dz2=selectedElecs_[0]->dzV();
-					dzbs1=selectedElecs_[0]->dZBs();
-					dzbs2=selectedMuons_[0]->dZBs();
-				}
 
+				}
+				if(mode_==0){ //emu
+
+				}
+				if(matchedno > 1)  //The selected muons have fired the trigger! machedno >0 also means, trigger has fired but not ness. due to selected muons
+					firedDilepTrigger=true;
+			}
+
+
+
+
+			if(!isMC_ && !firedMet) continue;
+
+
+			t_global_woCorr.fillDen(0,puweight);
+			if(firedDilepTrigger)
+				t_global_woCorr.fillNum(0,puweight);
+
+
+			if(includecorr_ && !firedMet) continue;
+			// lepton selection and event selection (at least two leptons etc)
+
+			if(pEvent->vertexMulti() <1) continue;
+
+
+			/////////trigger check/////////
+
+			////////////////dilepton selection
+			if((mode_== 1 || mode_<-0.1 ) && (mass > 106 || mass < 76)) b_ZVeto=true;
+			if(mode_==0)  b_ZVeto=true;
+
+			vector<NTJet> selected_jets;
+			for(vector<NTJet>::iterator jet=pJets->begin();jet<pJets->end();jet++){
+				if(jet->pt() < jetptcut) continue;
+				if(fabs(jet->eta()) >2.5) continue;
+				if(!noOverlap(&*jet,selectedMuons_,0.3)) continue; //cleaning  ##TRAP## changed to 0.4 /doesn't matter for final eff
+				if(!noOverlap(&*jet,selectedElecs_,0.3)) continue;
+				if((!jet->id())) continue;
+
+				selected_jets.push_back(*jet);
+			}
+			if(selected_jets.size() >0) b_oneJet=true;
+			if(selected_jets.size() >1) b_twoJets=true;
+			if((mode_== -1 || mode_>0.1) && pMet->met() > 40) b_met=true;
+			if(mode_== 0) b_met=true;
+
+
+			vector<NTTriggerObject> alltrigobj;
+			/////// make trigger object collections ////
+			for(size_t to=0;to<pTriggerobjects.size();to++) //merge collections
+				alltrigobj << *pTriggerobjects.at(i);
+
+			//  std::cout << puweight << std::endl;
+
+			//define variables
+
+			double vmulti=pEvent->vertexMulti();
+			double jetmulti=selected_jets.size();
+			double pt1,pt2;
+			double eta1,eta2;
+			double dphi;
+			double dRll;
+			double lepmulti;
+			double alllepmulti;
+			double iso1;
+			double iso2;
+			double dz1,dz2,dzbs1,dzbs2;
+			double dRlt1,dRlt2;
+
+			//mass already defined
+
+
+			/////////filling stuff
+
+			if(mode_<-0.1){ //ee
+				eta1=selectedElecs_[0]->eta();
+				eta2=selectedElecs_[1]->eta();
+				pt1=selectedElecs_[0]->ECalP4().Pt();
+				pt2=selectedElecs_[1]->ECalP4().Pt();
+				dphi=selectedElecs_[0]->phi() - pMet->phi();
+				dRll=dR(selectedElecs_[0],selectedElecs_[1]);
+				lepmulti=selectedElecs_.size();
+				alllepmulti=pElectrons->size();
+				iso1=selectedElecs_[0]->isoVal();
+				iso2=selectedElecs_[1]->isoVal();
+				dz1=selectedElecs_[0]->dzV();
+				dz2=selectedElecs_[1]->dzV();
+				dzbs1=selectedElecs_[0]->dZBs();
+				dzbs2=selectedElecs_[1]->dZBs();
+			}
+			else if(mode_>0.1){ //mumu
+				eta1=selectedMuons_[0]->eta();
+				eta2=selectedMuons_[1]->eta();
+				pt1=selectedMuons_[0]->pt();
+				pt2=selectedMuons_[1]->pt();
+				dphi=selectedMuons_[0]->phi() - pMet->phi();
+				dRll=dR(selectedMuons_[0],selectedMuons_[1]);
+				lepmulti=selectedMuons_.size();
+				alllepmulti=pMuons->size();
+				iso1=selectedMuons_[0]->isoVal();
+				iso2=selectedMuons_[1]->isoVal();
+				dz1=selectedMuons_[0]->dzV();
+				dz2=selectedMuons_[1]->dzV();
+				dzbs1=selectedMuons_[0]->dZBs();
+				dzbs2=selectedMuons_[1]->dZBs();
+				getClosestInDR(*selectedMuons_[0],alltrigobj,dRlt1);
+				getClosestInDR(*selectedMuons_[1],alltrigobj,dRlt2);
+			}
+			else{ //emu
+				eta1=selectedElecs_[0]->eta();
+				eta2=selectedMuons_[0]->eta();
+				pt1=selectedElecs_[0]->ECalP4().Pt();
+				pt2=selectedMuons_[0]->pt();
+				dphi=selectedElecs_[0]->phi() - pMet->phi();
+				dRll=dR(selectedElecs_[0],selectedMuons_[0]);
+				lepmulti=selectedElecs_.size()+selectedMuons_.size();
+				alllepmulti=pMuons->size() + pElectrons->size();
+				iso1=selectedElecs_[0]->isoVal();
+				iso2=selectedMuons_[0]->isoVal();
+				dz1=selectedMuons_[0]->dzV();
+				dz2=selectedElecs_[0]->dzV();
+				dzbs1=selectedElecs_[0]->dZBs();
+				dzbs2=selectedMuons_[0]->dZBs();
+			}
+
+			if(b_dilepton){
+				sel_woTrig[0].second      +=puweight; //global
+				t_global.fillDen(0,puweight);
+
+				t_pt.fillDen(pt1,puweight);
+				t_pt.fillDen(pt2,puweight);
+
+				//	t_allpt.fillDen();
+				//	t_allpt.fillDen();
+
+				t_eta .fillDen(eta1,puweight);
+				t_eta .fillDen(eta2,puweight);
+
+				t_eta2d.fillDen(fabs(eta1),fabs(eta2),puweight);
+				t_dphi.fillDen(dphi,puweight);
+				t_vmulti.fillDen(vmulti,puweight);
+				t_drll.fillDen(dRll,puweight);
+				t_jetmulti.fillDen(jetmulti,puweight);
+
+				t_invmass.fillDen(mass,puweight);
+				t_lepmulti.fillDen(lepmulti,puweight);
+				t_alllepmulti.fillDen(alllepmulti,puweight);
+				t_etafine.fillDen(eta1,puweight);
+				t_etafine.fillDen(eta2,puweight);
+				t_eta2jetmulti.fillDen(jetmulti,fabs(eta1),puweight);
+				t_eta2jetmulti.fillDen(jetmulti,fabs(eta2),puweight);
+				t_iso.fillDen(iso1,puweight);
+				t_iso.fillDen(iso2,puweight);
+				t_eta2dfine.fillDen(fabs(eta1),fabs(eta2),puweight);
+
+				t_dzlepton.fillDen(fabs(dz1),puweight);
+				t_dzlepton.fillDen(fabs(dz2),puweight);
+
+				t_dzbslepton.fillDen(fabs(dzbs1),puweight);
+				t_dzbslepton.fillDen(fabs(dzbs2),puweight);
+
+				t_dzleptonlepton.fillDen(fabs(dz1-dz2),puweight);
+
+				if(mode_ > 0.1){
+					for(size_t j=0;j<pMuons->size();j++){
+						t_allpt.fillDen(pMuons->at(j).pt(),puweight);
+						t_dzbsalllepton.fillDen(fabs(pMuons->at(j).dZBs()),puweight);
+					}
+				}
+				t_drleptrig.fillDen(dRlt1,puweight);
+				t_drleptrig.fillDen(dRlt2,puweight);
+
+
+			}
+			if(b_dilepton && b_ZVeto)                                   {sel_woTrig[1].second      +=puweight; t_global.fillDen(1,puweight);}
+			if(b_dilepton && b_ZVeto && b_oneJet)                       {sel_woTrig[2].second      +=puweight; t_global.fillDen(2,puweight);}
+			if(b_dilepton && b_ZVeto && b_oneJet && b_twoJets)          {sel_woTrig[3].second      +=puweight; t_global.fillDen(3,puweight);}
+			if(b_dilepton && b_ZVeto && b_oneJet && b_twoJets && b_met) {sel_woTrig[4].second      +=puweight; t_global.fillDen(4,puweight);}
+
+			if(firedDilepTrigger){
 				if(b_dilepton){
-					sel_woTrig[0].second      +=puweight; //global
-					t_global.fillDen(0,puweight);
+					sel_Trig[0].second  +=puweight;
+					t_global.fillNum(0,puweight);
 
-					t_pt.fillDen(pt1,puweight);
-					t_pt.fillDen(pt2,puweight);
+					t_pt.fillNum(pt1,puweight);
+					t_pt.fillNum(pt2,puweight);
 
-					//	t_allpt.fillDen();
-					//	t_allpt.fillDen();
+					//	t_allpt.fillNum();
+					//	t_allpt.fillNum();
 
-					t_eta .fillDen(eta1,puweight);
-					t_eta .fillDen(eta2,puweight);
+					t_eta .fillNum(eta1,puweight);
+					t_eta .fillNum(eta2,puweight);
 
-					t_eta2d.fillDen(fabs(eta1),fabs(eta2),puweight);
-					t_dphi.fillDen(dphi,puweight);
-					t_vmulti.fillDen(vmulti,puweight);
-					t_drll.fillDen(dRll,puweight);
-					t_jetmulti.fillDen(jetmulti,puweight);
+					t_eta2d.fillNum(fabs(eta1),fabs(eta2),puweight);
+					t_dphi.fillNum(dphi,puweight);
+					t_vmulti.fillNum(vmulti,puweight);
+					t_drll.fillNum(dRll,puweight);
+					t_jetmulti.fillNum(jetmulti,puweight);
 
-					t_invmass.fillDen(mass,puweight);
-					t_lepmulti.fillDen(lepmulti,puweight);
-					t_alllepmulti.fillDen(alllepmulti,puweight);
-					t_etafine.fillDen(eta1,puweight);
-					t_etafine.fillDen(eta2,puweight);
-					t_eta2jetmulti.fillDen(jetmulti,fabs(eta1),puweight);
-					t_eta2jetmulti.fillDen(jetmulti,fabs(eta2),puweight);
-					t_iso.fillDen(iso1,puweight);
-					t_iso.fillDen(iso2,puweight);
-					t_eta2dfine.fillDen(fabs(eta1),fabs(eta2),puweight);
 
-					t_dzlepton.fillDen(fabs(dz1),puweight);
-					t_dzlepton.fillDen(fabs(dz2),puweight);
+					t_invmass.fillNum(mass,puweight);
+					t_lepmulti.fillNum(lepmulti,puweight);
+					t_alllepmulti.fillNum(alllepmulti,puweight);
+					t_etafine.fillNum(eta1,puweight);
+					t_etafine.fillNum(eta2,puweight);
+					t_eta2jetmulti.fillNum(jetmulti,fabs(eta1),puweight);
+					t_eta2jetmulti.fillNum(jetmulti,fabs(eta2),puweight);
+					t_iso.fillNum(iso1,puweight);
+					t_iso.fillNum(iso2,puweight);
+					t_eta2dfine.fillNum(fabs(eta1),fabs(eta2),puweight);
 
-					t_dzbslepton.fillDen(fabs(dzbs1),puweight);
-					t_dzbslepton.fillDen(fabs(dzbs2),puweight);
+					t_dzlepton.fillNum(fabs(dz1),puweight);
+					t_dzlepton.fillNum(fabs(dz2),puweight);
 
-					t_dzleptonlepton.fillDen(fabs(dz1-dz2),puweight);
+					t_dzbslepton.fillNum(fabs(dzbs1),puweight);
+					t_dzbslepton.fillNum(fabs(dzbs2),puweight);
+
+					t_dzleptonlepton.fillNum(fabs(dz1-dz2),puweight);
 
 					if(mode_ > 0.1){
 						for(size_t j=0;j<pMuons->size();j++){
-							t_allpt.fillDen(pMuons->at(j).pt(),puweight);
-							t_dzbsalllepton.fillDen(fabs(pMuons->at(j).dZBs()),puweight);
+							t_allpt.fillNum(pMuons->at(j).pt(),puweight);
+							t_dzbsalllepton.fillNum(fabs(pMuons->at(j).dZBs()),puweight);
 						}
 					}
 
-				}
-				if(b_dilepton && b_ZVeto)                                   {sel_woTrig[1].second      +=puweight; t_global.fillDen(1,puweight);}
-				if(b_dilepton && b_ZVeto && b_oneJet)                       {sel_woTrig[2].second      +=puweight; t_global.fillDen(2,puweight);}
-				if(b_dilepton && b_ZVeto && b_oneJet && b_twoJets)          {sel_woTrig[3].second      +=puweight; t_global.fillDen(3,puweight);}
-				if(b_dilepton && b_ZVeto && b_oneJet && b_twoJets && b_met) {sel_woTrig[4].second      +=puweight; t_global.fillDen(4,puweight);}
+					t_drleptrig.fillNum(dRlt1,puweight);
+					t_drleptrig.fillNum(dRlt2,puweight);
 
-				if(firedDilepTrigger){
-					if(b_dilepton){
-						sel_Trig[0].second  +=puweight;
-						t_global.fillNum(0,puweight);
-
-						t_pt.fillNum(pt1,puweight);
-						t_pt.fillNum(pt2,puweight);
-
-						//	t_allpt.fillNum();
-						//	t_allpt.fillNum();
-
-						t_eta .fillNum(eta1,puweight);
-						t_eta .fillNum(eta2,puweight);
-
-						t_eta2d.fillNum(fabs(eta1),fabs(eta2),puweight);
-						t_dphi.fillNum(dphi,puweight);
-						t_vmulti.fillNum(vmulti,puweight);
-						t_drll.fillNum(dRll,puweight);
-						t_jetmulti.fillNum(jetmulti,puweight);
-
-
-						t_invmass.fillNum(mass,puweight);
-						t_lepmulti.fillNum(lepmulti,puweight);
-						t_alllepmulti.fillNum(alllepmulti,puweight);
-						t_etafine.fillNum(eta1,puweight);
-						t_etafine.fillNum(eta2,puweight);
-						t_eta2jetmulti.fillNum(jetmulti,fabs(eta1),puweight);
-						t_eta2jetmulti.fillNum(jetmulti,fabs(eta2),puweight);
-						t_iso.fillNum(iso1,puweight);
-						t_iso.fillNum(iso2,puweight);
-						t_eta2dfine.fillNum(fabs(eta1),fabs(eta2),puweight);
-
-						t_dzlepton.fillNum(fabs(dz1),puweight);
-						t_dzlepton.fillNum(fabs(dz2),puweight);
-
-						t_dzbslepton.fillNum(fabs(dzbs1),puweight);
-						t_dzbslepton.fillNum(fabs(dzbs2),puweight);
-
-						t_dzleptonlepton.fillNum(fabs(dz1-dz2),puweight);
-
-						if(mode_ > 0.1){
-							for(size_t j=0;j<pMuons->size();j++){
-								t_allpt.fillNum(pMuons->at(j).pt(),puweight);
-								t_dzbsalllepton.fillNum(fabs(pMuons->at(j).dZBs()),puweight);
-							}
-						}
-
-					}
-
-
-
-					if(b_dilepton && b_ZVeto)                                   {sel_Trig[1].second    +=puweight; t_global.fillNum(1,puweight);}
-					if(b_dilepton && b_ZVeto && b_oneJet)                       {sel_Trig[2].second    +=puweight; t_global.fillNum(2,puweight);}
-					if(b_dilepton && b_ZVeto && b_oneJet && b_twoJets)          {sel_Trig[3].second    +=puweight; t_global.fillNum(3,puweight);}
-					if(b_dilepton && b_ZVeto && b_oneJet && b_twoJets && b_met) {sel_Trig[4].second    +=puweight; t_global.fillNum(4,puweight);}
-				}
-
-				if(firedMet){
-					if(b_dilepton){
-						sel_MetTrig[0].second  +=puweight;
-					}
-					if(b_dilepton && b_ZVeto)                                   sel_MetTrig[1].second  +=puweight;
-					if(b_dilepton && b_ZVeto && b_oneJet)                       sel_MetTrig[2].second +=puweight;
-					if(b_dilepton && b_ZVeto && b_oneJet && b_twoJets)          sel_MetTrig[3].second +=puweight;
-					if(b_dilepton && b_ZVeto && b_oneJet && b_twoJets && b_met) sel_MetTrig[4].second    +=puweight;
-				}
-
-				if(firedMet && firedDilepTrigger){
-					if(b_dilepton){
-						sel_BothTrig[0].second  +=puweight;
-					}
-					if(b_dilepton && b_ZVeto)                                   sel_BothTrig[1].second  +=puweight;
-					if(b_dilepton && b_ZVeto && b_oneJet)                       sel_BothTrig[2].second +=puweight;
-					if(b_dilepton && b_ZVeto && b_oneJet && b_twoJets)          sel_BothTrig[3].second +=puweight;
-					if(b_dilepton && b_ZVeto && b_oneJet && b_twoJets && b_met) sel_BothTrig[4].second    +=puweight;
 				}
 
 
 
-			}//eventloop
-
-			cout << endl;
-
-			string MCdata="data";
-
-			if(isMC_) MCdata="MC";
-			cout << "\n\nIn channel " << mode_<< "   " << MCdata << endl;
-			cout << "triggers: " <<endl;
-			//if(!isMC_){
-			for(unsigned int i=0;i<dileptriggers.size();i++){
-				cout << dileptriggers[i] << endl;
+				if(b_dilepton && b_ZVeto)                                   {sel_Trig[1].second    +=puweight; t_global.fillNum(1,puweight);}
+				if(b_dilepton && b_ZVeto && b_oneJet)                       {sel_Trig[2].second    +=puweight; t_global.fillNum(2,puweight);}
+				if(b_dilepton && b_ZVeto && b_oneJet && b_twoJets)          {sel_Trig[3].second    +=puweight; t_global.fillNum(3,puweight);}
+				if(b_dilepton && b_ZVeto && b_oneJet && b_twoJets && b_met) {sel_Trig[4].second    +=puweight; t_global.fillNum(4,puweight);}
 			}
-			//}
-			/*
+
+			if(firedMet){
+				if(b_dilepton){
+					sel_MetTrig[0].second  +=puweight;
+				}
+				if(b_dilepton && b_ZVeto)                                   sel_MetTrig[1].second  +=puweight;
+				if(b_dilepton && b_ZVeto && b_oneJet)                       sel_MetTrig[2].second +=puweight;
+				if(b_dilepton && b_ZVeto && b_oneJet && b_twoJets)          sel_MetTrig[3].second +=puweight;
+				if(b_dilepton && b_ZVeto && b_oneJet && b_twoJets && b_met) sel_MetTrig[4].second    +=puweight;
+			}
+
+			if(firedMet && firedDilepTrigger){
+				if(b_dilepton){
+					sel_BothTrig[0].second  +=puweight;
+				}
+				if(b_dilepton && b_ZVeto)                                   sel_BothTrig[1].second  +=puweight;
+				if(b_dilepton && b_ZVeto && b_oneJet)                       sel_BothTrig[2].second +=puweight;
+				if(b_dilepton && b_ZVeto && b_oneJet && b_twoJets)          sel_BothTrig[3].second +=puweight;
+				if(b_dilepton && b_ZVeto && b_oneJet && b_twoJets && b_met) sel_BothTrig[4].second    +=puweight;
+			}
+
+
+
+		}//eventloop
+
+		cout << endl;
+
+		string MCdata="data";
+
+		if(isMC_) MCdata="MC";
+		cout << "\n\nIn channel " << mode_<< "   " << MCdata << endl;
+		cout << "triggers: " <<endl;
+		//if(!isMC_){
+		for(unsigned int i=0;i<dileptriggers.size();i++){
+			cout << dileptriggers[i] << endl;
+		}
+		//}
+		/*
     cout << "triggers MC: " <<endl;
     // if(!isMC_){
     for(unsigned int i=0;i<dileptriggersMC.size();i++){
       cout << dileptriggersMC[i] << endl;
     }
-			 */
-			// }
+		 */
+		// }
 
-			cout << "probably wrong prescale tables: " << wrongtables << endl;
-
-
-			// set up output
-			vector<double> output;
-
-			storedOut_.clear();
-			for(unsigned int i=0; i< sel_woTrig.size();i++){
-
-				storedOut_.push_back(sel_Trig[i].second);
-				storedOut_.push_back(sel_woTrig[i].second);
-				storedOut_.push_back(sel_MetTrig[i].second);
-				storedOut_.push_back(sel_BothTrig[i].second);
-
-				double eff=sel_Trig[i].second / sel_woTrig[i].second;
-				double erreff=sqrt(eff*(1-eff)/sel_Trig[i].second);
-
-				double ratio= (eff * sel_MetTrig[i].second/sel_woTrig[i].second ) /(sel_BothTrig[i].second/ sel_woTrig[i].second) -1;
-				//double ratiostat=sel_BothTrig[i].second ;
-
-				output.push_back(eff);
-				output.push_back(erreff);
-				output.push_back(ratio);
-
-				cout << "selected " << sel_woTrig[i].first << ":  \t" << sel_woTrig[i].second << "  vs. \t" << sel_Trig[i].second << "  \teff: " << eff  << " +- " << erreff << "\tCorrR-1: " <<  ratio << "\t stat: " << sel_BothTrig[i].second  <<endl;
-				//if(i==0) output=effdeffR;
-
-			}
-			//output=effdeffR;
-
-			////////////////////////////////////check MC triggers
-
-			/// show contribution of each trigger in data
+		cout << "probably wrong prescale tables: " << wrongtables << endl;
 
 
-			// cout << "\ncontribution of different triggers (unweighted!!):" << endl;
-			//  summarylist.coutList();
-			cout << "\ncontribution of different triggers (weighted!!). If several triggers fired, each gets an entry:" << endl;
-			summarylistweighted.coutList();
+		// set up output
+		vector<double> output;
 
-			cout << "Total number of probably wrong prescale tables (may not be a problem, check cmssw output!): " << wrongtables << endl;
+		storedOut_.clear();
+		for(unsigned int i=0; i< sel_woTrig.size();i++){
+
+			storedOut_.push_back(sel_Trig[i].second);
+			storedOut_.push_back(sel_woTrig[i].second);
+			storedOut_.push_back(sel_MetTrig[i].second);
+			storedOut_.push_back(sel_BothTrig[i].second);
+
+			double eff=sel_Trig[i].second / sel_woTrig[i].second;
+			double erreff=sqrt(eff*(1-eff)/sel_Trig[i].second);
+
+			double ratio= (eff * sel_MetTrig[i].second/sel_woTrig[i].second ) /(sel_BothTrig[i].second/ sel_woTrig[i].second) -1;
+			//double ratiostat=sel_BothTrig[i].second ;
+
+			output.push_back(eff);
+			output.push_back(erreff);
+			output.push_back(ratio);
+
+			cout << "selected " << sel_woTrig[i].first << ":  \t" << sel_woTrig[i].second << "  vs. \t" << sel_Trig[i].second << "  \teff: " << eff  << " +- " << erreff << "\tCorrR-1: " <<  ratio << "\t stat: " << sel_BothTrig[i].second  <<endl;
+			//if(i==0) output=effdeffR;
+
+		}
+		//output=effdeffR;
+
+		////////////////////////////////////check MC triggers
+
+		/// show contribution of each trigger in data
 
 
-			if(checktriggerpaths_){
+		// cout << "\ncontribution of different triggers (unweighted!!):" << endl;
+		//  summarylist.coutList();
+		cout << "\ncontribution of different triggers (weighted!!). If several triggers fired, each gets an entry:" << endl;
+		summarylistweighted.coutList();
+
+		cout << "Total number of probably wrong prescale tables (may not be a problem, check cmssw output!): " << wrongtables << endl;
+
+
+		if(checktriggerpaths_){
 
 
 
-				///  triggersummary mettriggers
-				/*
+			///  triggersummary mettriggers
+			/*
       int trigin=0;
       vector<unsigned int> notinc;
       for(unsigned int i=0; i<mettriggersMC.size(); i++){
@@ -892,43 +926,43 @@ public:
       for(unsigned int i=0; i<notinc.size();i++){
 	cout << mettriggersMC[notinc[i]] << endl;
       }
-				 */
+			 */
 
-			}
-
-
-
-			if(!isMC_) cout <<  '\n' << mode_<< " \t\t& $N_{sel}$ \t& $N_{sel}^{trig}$ \t& $\\epsilon_d$ \t& $\\delta\\epsilon$ (stat.) \\\\ \\hline" << endl;
-			if(isMC_) cout <<  '\n' << mode_<< " MC" << " \t\t& $N_{sel}$ \t& $N_{sel}^{trig}$ \t& $\\epsilon_{MC}$  \t& $\\delta\\epsilon$ (stat.) \t&R$_c$ - 1 \\\\ \\hline" << endl;
-			for(unsigned int i=0; i< sel_woTrig.size();i++){
-				double eff=sel_Trig[i].second / sel_woTrig[i].second;
-				double erreff=sqrt(eff*(1-eff)/sel_woTrig[i].second);
-				double ratio= (eff * sel_MetTrig[i].second/sel_woTrig[i].second ) /(sel_BothTrig[i].second/ sel_woTrig[i].second) -1;
-				cout.setf(ios::fixed,ios::floatfield);
-				cout.precision(0);
-				cout <<  sel_woTrig[i].first << "\t& " << sel_woTrig[i].second << "\t\t& " << sel_Trig[i].second << "\t\t\t& ";
-				//cout.unsetf(ios::floatfield);
-				cout.precision(3);
-				if(isMC_) cout << eff  << " \t& " << erreff << " \t& " << ratio << " \\\\" << endl;
-				else cout << eff << " \t& " << erreff <<" \\\\" << endl;
-			}
+		}
 
 
-			TString add="emu";
-			if(mode_<0) add="ee";
-			if(mode_>0) add="mumu";
 
-			alltriples_.clear();
+		if(!isMC_) cout <<  '\n' << mode_<< " \t\t& $N_{sel}$ \t& $N_{sel}^{trig}$ \t& $\\epsilon_d$ \t& $\\delta\\epsilon$ (stat.) \\\\ \\hline" << endl;
+		if(isMC_) cout <<  '\n' << mode_<< " MC" << " \t\t& $N_{sel}$ \t& $N_{sel}^{trig}$ \t& $\\epsilon_{MC}$  \t& $\\delta\\epsilon$ (stat.) \t&R$_c$ - 1 \\\\ \\hline" << endl;
+		for(unsigned int i=0; i< sel_woTrig.size();i++){
+			double eff=sel_Trig[i].second / sel_woTrig[i].second;
+			double erreff=sqrt(eff*(1-eff)/sel_woTrig[i].second);
+			double ratio= (eff * sel_MetTrig[i].second/sel_woTrig[i].second ) /(sel_BothTrig[i].second/ sel_woTrig[i].second) -1;
+			cout.setf(ios::fixed,ios::floatfield);
+			cout.precision(0);
+			cout <<  sel_woTrig[i].first << "\t& " << sel_woTrig[i].second << "\t\t& " << sel_Trig[i].second << "\t\t\t& ";
+			//cout.unsetf(ios::floatfield);
+			cout.precision(3);
+			if(isMC_) cout << eff  << " \t& " << erreff << " \t& " << ratio << " \\\\" << endl;
+			else cout << eff << " \t& " << erreff <<" \\\\" << endl;
+		}
 
-			for(size_t i=0;i<effTriple::effTriple_list.size();i++){
-				//  std::cout << "adding " << effTriple::effTriple_list.at(i)->getName() << std::endl;
-				alltriples_.push_back(*(effTriple::effTriple_list.at(i)));
-			}
 
-			//all histograms saved
-			globalDen_=sel_woTrig[0].second;
+		TString add="emu";
+		if(mode_<0) add="ee";
+		if(mode_>0) add="mumu";
 
-			return output;
+		alltriples_.clear();
+
+		for(size_t i=0;i<effTriple::effTriple_list.size();i++){
+			//  std::cout << "adding " << effTriple::effTriple_list.at(i)->getName() << std::endl;
+			alltriples_.push_back(*(effTriple::effTriple_list.at(i)));
+		}
+
+		//all histograms saved
+		globalDen_=sel_woTrig[0].second;
+
+		return output;
 
 
 	}
@@ -1102,7 +1136,7 @@ protected:
 
 	bool statusbar_;
 
-	std::vector<string> trigs_;
+	std::vector<string> trigs_,trigsObj_;
 
 	TString whichelectrons_;
 	bool isMC_;
@@ -1376,10 +1410,10 @@ void analyzeAll(triggerAnalyzer &ta_eed, triggerAnalyzer &ta_eeMC, triggerAnalyz
 	TString mumustring= makeFullOutput(ta_mumud, ta_mumuMC, "mumu_"+dir, "#mu#mu"+label, 0.01);
 	TString emustring= makeFullOutput(ta_emud, ta_emuMC, "emu_"+dir, "e#mu"+label, 0.01);
 
-	  std::cout << "channel  & $\\epsilon_{data}$ & $\\epsilon_{MC}$ & SF & $\\alpha$ \\\\ " << std::endl;
-	  std::cout << eestring<< std::endl;
-	  std::cout << mumustring<< std::endl;
-	  std::cout << emustring<< std::endl;
+	std::cout << "channel  & $\\epsilon_{data}$ & $\\epsilon_{MC}$ & SF & $\\alpha$ \\\\ " << std::endl;
+	std::cout << eestring<< std::endl;
+	std::cout << mumustring<< std::endl;
+	std::cout << emustring<< std::endl;
 
 
 }

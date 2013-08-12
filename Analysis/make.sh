@@ -37,7 +37,7 @@ echo compiling analyse.C
 infile=analyse.C
 
 g++ $ROOTFLAGS -fopenmp -I$CPLUS_INCLUDE_PATH -c -o $infile.o $infile
-g++ -o analyse.exe -fopenmp -Wall $ROOTLIBS -Llib$linklibs $infile.o
+g++ -o analyse.exe -fopenmp -Wall $ROOTLIBS -Llib$linklibs -l${CMSSW_BASE}/src/TtZAnalysis/Tools/TUnfold/libunfold.so $infile.o
 
 infile=mergeSyst.cc
 

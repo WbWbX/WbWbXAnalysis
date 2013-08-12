@@ -17,12 +17,16 @@
 #include <poll.h>
 #include <vector>
 
+#define IPC_BUFFERSIZE 256
+
 template<class T>
 class IPCPipe{
 public:
 	/**
 	 * opens a pipe with (p)read and (p)write end.
 	 * additional function preadready checks if anything has been written to the buffer from write side
+	 * buffersize is a define and set to a default of 256. In case it is to change, change IPC_BUFFERSIZE
+	 * the preadready function polls for 2 ms until it returns
 	 */
 	IPCPipe(){
 		fds[0].events = POLLRDNORM | POLLIN;
@@ -31,13 +35,13 @@ public:
 	}
 	~IPCPipe(){close(pfds[0]);close(pfds[1]);}
 
-	T pwrite(T c){return write(pfds[1], &c , 256);}
-	T pread(){read(pfds[0], buf, 256);return buf[0];}
+	T pwrite(T c){return write(pfds[1], &c , IPC_BUFFERSIZE);}
+	T pread(){read(pfds[0], buf, IPC_BUFFERSIZE);return buf[0];}
 
 	int preadready(){
 		fds[0].fd=pfds[0];
 		fds[1].fd=pfds[1];
-		poll(fds, 2, 100);
+		poll(fds, 2, 2);
 		if (fds[0].revents & (POLLRDNORM | POLLIN))
 			return 1;
 		else
@@ -48,7 +52,7 @@ public:
 private:
 	int pfds[2];
 	struct pollfd fds[2];
-	T buf[256];
+	T buf[IPC_BUFFERSIZE];
 
 };
 
@@ -62,7 +66,7 @@ public:
 	/**
 	 * constructor that opens <Size> pipes
 	 */
-	IPCPipes(size_t Size){size_=Size;openPipes();}
+	IPCPipes(size_t Size){size_=Size;open(size_);}
 	~IPCPipes(){if(size_!=0)closePipes();}
 
 	/**

@@ -5,6 +5,7 @@
   <class name="std::vector<std::pair<TString,std::vector<double> > >"/>
   <class name="std::vector<long int>"/>
   <class name="ztop::container1D"/>
+  <class name="ztop::container1DUF2"/>
   <class name="std::vector<ztop::container1D>"/>
   <class name="ztop::container2D"/>
   <class name="std::vector<ztop::container2D>"/>
