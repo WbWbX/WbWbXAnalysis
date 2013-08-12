@@ -30,6 +30,8 @@
   <class name="ztop::NTTriggerObject"/>
   <class name="std::vector<ztop::NTTriggerObject>"/>
 
+  <class name="ztop::NTVertex"/>
+  <class name="std::vector<ztop::NTVertex>"/>
 
   <class name="ztop::NTBTagSF"/>
   <class name="std::vector<ztop::NTBTagSF>"/>

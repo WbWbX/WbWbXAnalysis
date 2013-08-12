@@ -13,6 +13,7 @@
 #include "../interface/NTTriggerObject.h"
 
 
+#include "../interface/NTVertex.h"
 
 #include "../interface/NTGenLepton.h"
 #include "../interface/NTGenParticle.h"
@@ -60,6 +61,8 @@ namespace
     ztop::NTTriggerObject isdhisdh;
     std::vector<ztop::NTTriggerObject> asfsdkkk;
     
+    ztop::NTVertex sdfsasa;
+    std::vector<ztop::NTVertex> dqwqdasdd;
 
 
     std::map<std::string, double> ksdjsda;
