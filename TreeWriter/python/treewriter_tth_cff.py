@@ -58,6 +58,7 @@ PFTree   = cms.EDAnalyzer('TreeWriterTtH',
                           useBHadrons = cms.bool(False),
 
                           isSusy =  cms.bool(False),
+                          isJPsi = cms.bool(False),
 
                           debugmode = cms.bool(False),
                           triggerObjects = cms.vstring("")

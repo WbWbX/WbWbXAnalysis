@@ -65,6 +65,7 @@
 #include "../../DataFormats/interface/NTGenJet.h"
 #include "../../DataFormats/interface/NTTriggerObject.h"
 #include "../../DataFormats/interface/mathdefs.h"
+#include "../../DataFormats/interface/NTVertex.h"
 
 
 #include "DataFormats/Candidate/interface/CompositeCandidate.h"
@@ -176,7 +177,7 @@ public:
   edm::InputTag muons_, recomuons_, pfelecs_, gsfelecs_,recoelecs_, jets_, met_, vertices_, trigresults_, puinfo_, recotracks_, recosuclus_,rhojetsiso_,rhojetsisonopu_,rhoiso_,pdfweights_, genparticles_, genjets_,mvamet_,pattriggerevent_;
   //rhojets_,rhojetsiso_,rhojetsnopu_,rhojetsisonopu_,rhoiso_;
 
-  bool includereco_, includetrigger_, pfinput_,includepdfweights_,includegen_,susy_;
+  bool includereco_, includetrigger_, pfinput_,includepdfweights_,includegen_,susy_,jpsi_;
   TTree * Ntuple;
   std::vector<ztop::NTMuon> ntmuons;
   std::vector<ztop::NTLepton> ntleptons;
@@ -189,6 +190,8 @@ public:
   ztop::NTMet ntmvamet;
   ztop::NTEvent ntevent;
   ztop::NTTrigger nttrigger;
+
+  std::vector<ztop::NTVertex> goodvtx,jetvtx,dimuonvtx;
 
   std::vector<ztop::NTGenParticle> nttops,ntws,ntzs,ntbs,ntbhadrons,ntnus,ntleps3,ntleps1,ntallnus,ntpart;
   std::vector<ztop::NTGenJet> ntgenjets;

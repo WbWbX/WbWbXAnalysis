@@ -59,6 +59,7 @@ PFTree   = cms.EDAnalyzer('TreeWriterTtZ',
                           genBHadJetIndex = cms.InputTag("produceGenLevelBJetsPlusHadron","genBHadJetIndex"),
 
                           isSusy =  cms.bool(False),
+                          isJPsi = cms.bool(False),
 
                           useBHadrons = cms.bool(False),
                           

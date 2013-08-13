@@ -5,6 +5,14 @@ __init__.py
 __init__.pyc
 *__GI
 
+# ROOT #
+########
+*.d
+
+# EMACS VM STUFF #
+##################
+*.*~*.*~
+
 
 # Compiled source #
 ###################

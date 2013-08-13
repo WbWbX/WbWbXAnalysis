@@ -9,6 +9,10 @@
 <use name="FWCore/ServiceRegistry"/>
 <use name="TtZAnalysis/DataFormats"/>
 <use name="DataFormats/TrackReco"/>
+<use name="RecoVertex/KalmanVertexFit"/>
+<use name="TrackingTools/TransientTrack"/>
+<use name="TrackingTools/Records"/>
+<use name="MagneticField/Engine"/>
 <flags EDM_PLUGIN="1"/>
 <export>
    <lib name="1"/>

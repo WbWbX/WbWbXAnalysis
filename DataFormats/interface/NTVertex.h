@@ -21,11 +21,14 @@ public:
 	void setPos(TVector3 v){pos_=v;}
 	void setPosErr(TVector3 v){poserr_=v;}
 	void setIdx(int idx){idx_=idx;}
+	void setNDof(float ndf){ndof_=ndf;}
+	void setChi2(double chi2){chi2_=chi2;}
 
 	const TVector3 & position(){return pos_;}
 	const TVector3 & positionErr(){return poserr_;}
 	const float & ndof(){return ndof_;}
 	const double & chi2(){return chi2_;}
+	double normChi2(){return chi2_/(double)ndof_;}
 	int id(){return idx_;}
 
 private:
