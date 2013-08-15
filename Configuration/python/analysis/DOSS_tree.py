@@ -600,6 +600,8 @@ getattr(process,'pfNoElectron'+pfpostfix).enable = False
 getattr(process,'pfNoJet'+pfpostfix).enable = False
 getattr(process,'pfNoTau'+pfpostfix).enable = False
 
+if jpsi:
+    getattr(process,'patJets'+pfpostfix).addTagInfos = True
 
 #process.pfJetsForTaus = getattr(process,'pfJets'+pfpostfix).clone()
 #getattr(process,'patPF2PATSequence'+pfpostfix).replace(getattr(process,'pfJets'+pfpostfix),
@@ -848,6 +850,7 @@ process.PFTree.includePDFWeights = includePDFWeights
 process.PFTree.pdfWeights        = "pdfWeights:"+PDF
 process.PFTree.includeGen        = isSignal
 process.PFTree.useBHadrons       = useBHadrons
+process.PFTree.isJPsi            = jpsi
 
 if isSignal and genFilter=="Top":
     process.PFTree.genJets           = 'ak5GenJetsPlusHadron'
