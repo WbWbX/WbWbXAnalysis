@@ -731,33 +731,42 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 						if(muons->size()>2)
 							break;
 						reco::PFCandidateRef pfmuptr2=muons->at(j).pfCandidateRef();
-						//split to function here
-						vector<reco::TransientTrack> t_tks;
-						t_tks.push_back(theTTBuilder->build(*(pfmuptr->trackRef())));
-						t_tks.push_back(theTTBuilder->build(*(pfmuptr2->trackRef())));
-						TransientVertex myVertex = vtxFitter.vertex(t_tks);
 						NTVertex tempvtx;
 						tempvtx.setChi2(999999); //default
 						tempvtx.setIdx(i); //associate with first muon
-						if (myVertex.isValid()) {
-							tempvtx.setPos(TVector3(myVertex.position().x(),
-									myVertex.position().y(),
-									myVertex.position().z()));
-							tempvtx.setPosErr(TVector3(myVertex.positionError().cxx(),
-									myVertex.positionError().cyy(),
-									myVertex.positionError().czz()));
-							tempvtx.setChi2(myVertex.totalChiSquared());
-							tempvtx.setNDof(myVertex.degreesOfFreedom());
+						//check for safety reasons
+						if(pfmuptr.isNonnull() && pfmuptr2.isNonnull() && pfmuptr->trackRef().isNonnull() && pfmuptr2->trackRef().isNonnull()){
+
+							vector<reco::TransientTrack> t_tks;
+							t_tks.push_back(theTTBuilder->build(*(pfmuptr->trackRef())));
+							t_tks.push_back(theTTBuilder->build(*(pfmuptr2->trackRef())));
+							TransientVertex myVertex = vtxFitter.vertex(t_tks);
+
+							if (myVertex.isValid()) {
+								tempvtx.setPos(TVector3(myVertex.position().x(),
+										myVertex.position().y(),
+										myVertex.position().z()));
+								tempvtx.setPosErr(TVector3(myVertex.positionError().cxx(),
+										myVertex.positionError().cyy(),
+										myVertex.positionError().czz()));
+								tempvtx.setChi2(myVertex.totalChiSquared());
+								tempvtx.setNDof(myVertex.degreesOfFreedom());
+							}
 						}
 						dimuonvtx << tempvtx;
 					}
 				}
+				if(pfmuptr.isNonnull() && pfmuptr->trackRef().isNonnull()){
 				LorentzVector ptrack(pfmuptr->trackRef()->px(),
 						pfmuptr->trackRef()->py(),
 						pfmuptr->trackRef()->pz(),
 						pfmuptr->trackRef()->p());
 
 				tempmuon.setTrackP4(ptrack);
+				}
+				else{
+					tempmuon.setTrackP4(LorentzVector());
+				}
 			}
 
 			int genidx=-1;
