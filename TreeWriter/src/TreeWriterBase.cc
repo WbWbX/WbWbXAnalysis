@@ -903,7 +903,7 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 					patjetvtx=&svTagInfo->secondaryVertex(0);
 					vpoint=patjetvtx->position();
 					vchi2=patjetvtx->chi2();
-					ndof=patjetvtx->ndof();
+					vndof=patjetvtx->ndof();
 				}
 				if(debugmode)
 					std::cout << vpoint << std::endl;
