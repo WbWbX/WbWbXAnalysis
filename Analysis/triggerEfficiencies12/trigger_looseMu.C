@@ -85,7 +85,7 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
 
 void trigger_looseMu(){
 
-  
+  triggerAnalyzer::testmode=true;
 
   using namespace std;
   using namespace ztop;
@@ -109,8 +109,7 @@ void trigger_looseMu(){
   ta_mumud.setMode("mumu");
   ta_mumud.setMassCutLow(12);
   ta_mumud.setIncludeCorr(false);
-  // ta_mumud.checkTriggerPaths(true);
-  // ta_mumud.setUseMatching(false);
+  // ta_mumud.checkTriggerPaths(true); ta_mumud.setUseMatching(false);
 
   ta_mumud.setBinsEta(binsmumueta);
   ta_mumud.setBinsEta2dX(bins2dmumu);
@@ -128,7 +127,7 @@ void trigger_looseMu(){
   
   TString dir="/scratch/hh/dust/naf/cms/user/kieseler/trees_ES_Jul13/";
 
-  cout << "\n\n\n\n\Warning!! Wrong muon cone size!!!! JUST FOR TESTING\n\n\n\n" <<endl;
+  cout << "\n\n\n\n\nWarning!! Wrong muon cone size!!!! JUST FOR TESTING\n\n\n\n" <<endl;
 
   TString cmssw_base=getenv("CMSSW_BASE");
   TString pileuproot = cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13.json.txt_PU.root";
@@ -136,10 +135,10 @@ void trigger_looseMu(){
 
   std::vector<TString> mumumcfiles, datafilesFull,datafilesRunb,datafilesRunc, datafilesRuna,datafilesRund;
  
-  mumumcfiles  // << dir+"tree_8TeV_mumuttbar.root" 
-    //  << dir+"tree_8TeV_mumuttbarviatau.root" ;
-   << dir+"tree_8TeV_dymumu60120.root";
-
+  mumumcfiles //  << dir+"tree_8TeV_mumuttbar.root" 
+    // << dir+"tree_8TeV_mumuttbarviatau.root" ;
+    //<< dir+"tree_8TeV_dymumu60120.root";
+    << dir+"../NAF_workingDir/04METDYtt_2013-08-12T18-54-26/naf_tree_8TeV_dymumu60120/tree_8TeV_dymumu60120.root";
   // datafilesFull  << dir + "tree_8TeV_MET_runA_06Aug.root"  
   // 		 << dir + "tree_8TeV_MET_runA_13Jul.root"  
   // 		 << dir + "tree_8TeV_MET_runB_13Jul.root"  
@@ -173,16 +172,16 @@ datafilesFull //  << dir + "tree_8TeV_MET_runA_06Aug.root"
     << dir + "tree_8TeV_MET_runC_22Jan.root"
     << dir + "tree_8TeV_MET_runD_22Jan.root";
 
-  datafilesRunA  << dir + "tree_8TeV_MET_runA_22Jan.root";
+  datafilesRuna  << dir + "tree_8TeV_MET_runA_22Jan.root";
 
-  datafilesRunB  <<  dir + "tree_8TeV_MET_runB_22Jan.root";
+  datafilesRunb  <<  dir + "tree_8TeV_MET_runB_22Jan.root";
 
 
-  datafilesRunAB  << datafilesRunA << datafilesRunB;
+ 
 
-  datafilesRunC  <<  dir + "tree_8TeV_MET_runC_22Jan.root";
+  datafilesRunc  <<  dir + "tree_8TeV_MET_runC_22Jan.root";
 
-  datafilesRunD  <<  dir + "tree_8TeV_MET_runD_22Jan.root";
+  datafilesRund  <<  dir + "tree_8TeV_MET_runD_22Jan.root";
   
 
   vector<string> trigObj_Mu17Mu8;
