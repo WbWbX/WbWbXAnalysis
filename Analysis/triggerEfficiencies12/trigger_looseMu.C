@@ -118,12 +118,7 @@ void trigger_looseMu(){
   ta_mumud.setMassCutLow(60);
   ta_mumud.setMassCutHigh(120);
 
-  ta_mumud.setDileptonTrigger("HLT_Mu17_Mu8_v");
-
-  // 
-
-  triggerAnalyzer ta_mumuMC=ta_mumud;
-  ta_mumuMC.setIsMC(true);
+ 
 
  
 
@@ -131,10 +126,12 @@ void trigger_looseMu(){
   
   //TString dir="/scratch/hh/dust/naf/cms/user/kieseler/trees_Apr13_04/";
   
-  TString dir="/scratch/hh/dust/naf/cms/user/kieseler/trees_ES_mu04_lowkin/";
+  TString dir="/scratch/hh/dust/naf/cms/user/kieseler/trees_ES_Jul13/";
+
+  cout << "\n\n\n\n\Warning!! Wrong muon cone size!!!! JUST FOR TESTING\n\n\n\n" <<endl;
 
   TString cmssw_base=getenv("CMSSW_BASE");
-  TString pileuproot = cmssw_base+"/src/TtZAnalysis/Data/Full19.json.txt_PU.root";
+  TString pileuproot = cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13.json.txt_PU.root";
 
 
   std::vector<TString> mumumcfiles, datafilesFull,datafilesRunb,datafilesRunc, datafilesRuna,datafilesRund;
@@ -143,26 +140,61 @@ void trigger_looseMu(){
     //  << dir+"tree_8TeV_mumuttbarviatau.root" ;
    << dir+"tree_8TeV_dymumu60120.root";
 
-  datafilesFull  << dir + "tree_8TeV_MET_runA_06Aug.root"  
-		 << dir + "tree_8TeV_MET_runA_13Jul.root"  
-		 << dir + "tree_8TeV_MET_runB_13Jul.root"  
-		 << dir + "tree_8TeV_MET_runC_prompt.root"
-		 << dir + "tree_8TeV_MET_runC_24Aug.root"  
-		 << dir + "tree_8TeV_MET_runC_11Dec.root"  
-  		 << dir + "tree_8TeV_MET_runD_prompt.root";
+  // datafilesFull  << dir + "tree_8TeV_MET_runA_06Aug.root"  
+  // 		 << dir + "tree_8TeV_MET_runA_13Jul.root"  
+  // 		 << dir + "tree_8TeV_MET_runB_13Jul.root"  
+  // 		 << dir + "tree_8TeV_MET_runC_prompt.root"
+  // 		 << dir + "tree_8TeV_MET_runC_24Aug.root"  
+  // 		 << dir + "tree_8TeV_MET_runC_11Dec.root"  
+  // 		 << dir + "tree_8TeV_MET_runD_prompt.root";
   
 
-  datafilesRuna << dir + "tree_8TeV_MET_runA_06Aug.root"
-  		<< dir + "tree_8TeV_MET_runA_13Jul.root" ;
+  // datafilesRuna << dir + "tree_8TeV_MET_runA_06Aug.root"
+  // 		<< dir + "tree_8TeV_MET_runA_13Jul.root" ;
 
-  datafilesRunb << dir + "tree_8TeV_MET_runB_13Jul.root"  ;
-  datafilesRunc << dir + "tree_8TeV_MET_runC_24Aug.root"  
-  		<< dir + "tree_8TeV_MET_runC_11Dec.root" 
-  		<< dir + "tree_8TeV_MET_runC_prompt.root" ; 
+  // datafilesRunb << dir + "tree_8TeV_MET_runB_13Jul.root"  ;
+  // datafilesRunc << dir + "tree_8TeV_MET_runC_24Aug.root"  
+  // 		<< dir + "tree_8TeV_MET_runC_11Dec.root" 
+  // 		<< dir + "tree_8TeV_MET_runC_prompt.root" ; 
 
-  datafilesRund << dir + "tree_8TeV_MET_runD_prompt.root" ; 
+  // datafilesRund << dir + "tree_8TeV_MET_runD_prompt.root" ; 
 
 
+datafilesFull //  << dir + "tree_8TeV_MET_runA_06Aug.root"  
+// 		 << dir + "tree_8TeV_MET_runA_13Jul.root"  
+// 		 << dir + "tree_8TeV_MET_runB_13Jul.root"  
+// 		 << dir + "tree_8TeV_MET_runC_prompt.root"
+// 		 << dir + "tree_8TeV_MET_runC_24Aug.root"  
+// 		 << dir + "tree_8TeV_MET_runC_11Dec.root"  
+// 		 << dir + "tree_8TeV_MET_runD_prompt.root";
+
+    << dir + "tree_8TeV_MET_runA_22Jan.root"
+    << dir + "tree_8TeV_MET_runB_22Jan.root"
+    << dir + "tree_8TeV_MET_runC_22Jan.root"
+    << dir + "tree_8TeV_MET_runD_22Jan.root";
+
+  datafilesRunA  << dir + "tree_8TeV_MET_runA_22Jan.root";
+
+  datafilesRunB  <<  dir + "tree_8TeV_MET_runB_22Jan.root";
+
+
+  datafilesRunAB  << datafilesRunA << datafilesRunB;
+
+  datafilesRunC  <<  dir + "tree_8TeV_MET_runC_22Jan.root";
+
+  datafilesRunD  <<  dir + "tree_8TeV_MET_runD_22Jan.root";
+  
+
+  vector<string> trigObj_Mu17Mu8;
+  trigObj_Mu17Mu8 << "hltL3fL1DoubleMu10MuOpenL1f0L2f10L3Filtered17"    << "hltL3fL1DoubleMu10MuOpenOR3p5L1f0L2f10L3Filtered17"
+		  << "hltL3pfL1DoubleMu10MuOpenL1f0L2pf0L3PreFiltered8" << "hltL3pfL1DoubleMu10MuOpenOR3p5L1f0L2pf0L3PreFiltered8";
+
+  vector<string> trigObj_Mu17TkMu8;
+  trigObj_Mu17TkMu8 << "hltL3fL1sMu10MuOpenL1f0L2f10L3Filtered17"       << "hltL3fL1sMu10MuOpenOR3p5L1f0L2f10L3Filtered17"
+		    << "hltDiMuonGlbFiltered17TrkFiltered8"             ;
+
+  vector<string> trigObj_OR;
+  trigObj_OR << trigObj_Mu17Mu8 << trigObj_Mu17TkMu8;
 
   //for others just copy data and mc, change input and pu file
  
@@ -174,6 +206,13 @@ void trigger_looseMu(){
   TChain * datachainRunD=makeChain(datafilesRund);
   TChain * mumuchain=makeChain(mumumcfiles);
 
+
+
+
+  ta_mumud.setDileptonTrigger("HLT_Mu17_Mu8_v");
+  ta_mumud.setTriggerObjects(trigObj_Mu17Mu8);
+  triggerAnalyzer ta_mumuMC=ta_mumud;
+  ta_mumuMC.setIsMC(true);
   ta_mumud.setChain(datachainFull);
   ta_mumuMC.setChain(mumuchain);
   ta_mumuMC.setPUFile(pileuproot);
@@ -192,7 +231,7 @@ void trigger_looseMu(){
   ta_mumudA.setRunCutHigh(193621);
 
   triggerAnalyzer ta_mumuMCA=ta_mumuMC;
-  ta_mumuMCA.setPUFile(cmssw_base+"/src/TtZAnalysis/Data/RunAComp.json.txt_PU.root");
+  ta_mumuMCA.setPUFile(cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13RunA.json.txt_PU.root");
   ta_mumudA.Eff();
   ta_mumuMCA.Eff();
   makeFullOutput(ta_mumudA, ta_mumuMCA, "RunAMu17Mu8", "Run A, Mu17Mu8", 0.01);
@@ -207,7 +246,7 @@ void trigger_looseMu(){
   ta_mumudB.setRunCutHigh(196531);
 
   triggerAnalyzer ta_mumuMCB=ta_mumuMC;
-  ta_mumuMCB.setPUFile(cmssw_base+"/src/TtZAnalysis/Data/RunB13Jul.json.txt_PU.root");
+  ta_mumuMCB.setPUFile(cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13RunB.json.txt_PU.root");
   ta_mumudB.Eff();
   ta_mumuMCB.Eff();
   makeFullOutput(ta_mumudB, ta_mumuMCB, "RunBMu17Mu8", "Run B, Mu17Mu8", 0.01);
@@ -221,7 +260,7 @@ void trigger_looseMu(){
   ta_mumudC.setRunCutHigh(203746);
 
   triggerAnalyzer ta_mumuMCC=ta_mumuMC;
-  ta_mumuMCC.setPUFile(cmssw_base+"/src/TtZAnalysis/Data/RunCComp.json.txt_PU.root");
+  ta_mumuMCC.setPUFile(cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13RunC.json.txt_PU.root");
   ta_mumudC.Eff();
   ta_mumuMCC.Eff();
   makeFullOutput(ta_mumudC, ta_mumuMCC, "RunCMu17Mu8", "Run C, Mu17Mu8", 0.01);
@@ -268,6 +307,8 @@ void trigger_looseMu(){
   
   ta_mumud.setDileptonTrigger("HLT_Mu17_TkMu8_v");
   ta_mumuMC.setDileptonTrigger("HLT_Mu17_TkMu8_v");
+  ta_mumud.setTriggerObjects(trigObj_Mu17TkMu8);
+  ta_mumuMC.setTriggerObjects(trigObj_Mu17TkMu8);
 
 
   ta_mumud.setChain(datachainFull);
@@ -288,7 +329,7 @@ void trigger_looseMu(){
   ta_mumudA.setRunCutHigh(193621);
 
   ta_mumuMCA=ta_mumuMC;
-  ta_mumuMCA.setPUFile(cmssw_base+"/src/TtZAnalysis/Data/RunAComp.json.txt_PU.root");
+  ta_mumuMCA.setPUFile(cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13RunA.json.txt_PU.root");
   ta_mumudA.Eff();
   ta_mumuMCA.Eff();
   makeFullOutput(ta_mumudA, ta_mumuMCA, "RunAMu17TkMu8", "Run A, Mu17TkMu8", 0.01);
@@ -301,7 +342,7 @@ void trigger_looseMu(){
   ta_mumudB.setRunCutHigh(196531);
 
   ta_mumuMCB=ta_mumuMC;
-  ta_mumuMCB.setPUFile(cmssw_base+"/src/TtZAnalysis/Data/RunB13Jul.json.txt_PU.root");
+  ta_mumuMCB.setPUFile(cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13RunB.json.txt_PU.root");
   ta_mumudB.Eff();
   ta_mumuMCB.Eff();
   makeFullOutput(ta_mumudB, ta_mumuMCB, "RunBMu17TkMu8", "Run B, Mu17TkMu8", 0.01);
@@ -314,7 +355,7 @@ void trigger_looseMu(){
   ta_mumudC.setRunCutHigh(203746);
 
   ta_mumuMCC=ta_mumuMC;
-  ta_mumuMCC.setPUFile(cmssw_base+"/src/TtZAnalysis/Data/RunCComp.json.txt_PU.root");
+  ta_mumuMCC.setPUFile(cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13RunC.json.txt_PU.root");
   ta_mumudC.Eff();
   ta_mumuMCC.Eff();
   makeFullOutput(ta_mumudC, ta_mumuMCC, "RunCMu17TkMu8", "Run C, Mu17TkMu8", 0.01);
@@ -327,7 +368,7 @@ void trigger_looseMu(){
   ta_mumudD.setRunCutHigh(208686);
 
   ta_mumuMCD=ta_mumuMC;
-  ta_mumuMCD.setPUFile(cmssw_base+"/src/TtZAnalysis/Data/RunDprompt.json.txt_PU.root");
+  ta_mumuMCD.setPUFile(cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13RunD.json.txt_PU.root");
   ta_mumudD.Eff();
   ta_mumuMCD.Eff();
   makeFullOutput(ta_mumudC, ta_mumuMCD, "RunDMu17TkMu8", "Run D, Mu17TkMu8", 0.01);
@@ -364,6 +405,8 @@ void trigger_looseMu(){
 
   ta_mumud.setDileptonTriggers(bothtrig);
   ta_mumuMC.setDileptonTriggers(bothtrig);
+  ta_mumud.setTriggerObjects(trigObj_OR);
+  ta_mumuMC.setTriggerObjects(trigObj_OR);
 
   ta_mumud.setChain(datachainFull);
   ta_mumuMC.setChain(mumuchain);
@@ -384,7 +427,7 @@ void trigger_looseMu(){
   ta_mumudA.setRunCutHigh(193621);
 
   ta_mumuMCA=ta_mumuMC;
-  ta_mumuMCA.setPUFile(cmssw_base+"/src/TtZAnalysis/Data/RunAComp.json.txt_PU.root");
+  ta_mumuMCA.setPUFile(cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13RunA.json.txt_PU.root");
   ta_mumudA.Eff();
   ta_mumuMCA.Eff();
   makeFullOutput(ta_mumudA, ta_mumuMCA, "RunAOR", "Run A,  Mu17TkMu8 OR Mu17Mu8", 0.01);
@@ -397,7 +440,7 @@ void trigger_looseMu(){
   ta_mumudB.setRunCutHigh(196531);
 
   ta_mumuMCB=ta_mumuMC;
-  ta_mumuMCB.setPUFile(cmssw_base+"/src/TtZAnalysis/Data/RunB13Jul.json.txt_PU.root");
+  ta_mumuMCB.setPUFile(cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13RunB.json.txt_PU.root");
   ta_mumudB.Eff();
   ta_mumuMCB.Eff();
   makeFullOutput(ta_mumudB, ta_mumuMCB, "RunBOR", "Run B,  Mu17TkMu8 OR Mu17Mu8", 0.01);
@@ -410,7 +453,7 @@ void trigger_looseMu(){
   ta_mumudC.setRunCutHigh(203746);
 
   ta_mumuMCC=ta_mumuMC;
-  ta_mumuMC.setPUFile(cmssw_base+"/src/TtZAnalysis/Data/RunCComp.json.txt_PU.root");
+  ta_mumuMC.setPUFile(cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13RunC.json.txt_PU.root");
   ta_mumudC.Eff();
   ta_mumuMCC.Eff();
   makeFullOutput(ta_mumudC, ta_mumuMCC, "RunCOR", "Run C,  Mu17TkMu8 OR Mu17Mu8", 0.01);
@@ -424,7 +467,7 @@ void trigger_looseMu(){
   ta_mumudD.setRunCutHigh(208686);
 
   ta_mumuMCD=ta_mumuMC;
-  ta_mumuMCD.setPUFile(cmssw_base+"/src/TtZAnalysis/Data/RunDprompt.json.txt_PU.root");
+  ta_mumuMCD.setPUFile(cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13RunD.json.txt_PU.root");
   ta_mumudD.Eff();
   ta_mumuMCD.Eff();
   makeFullOutput(ta_mumudC, ta_mumuMCD, "RunDOR", "Run D, Mu17TkMu8 OR Mu17Mu8", 0.01);
