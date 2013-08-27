@@ -728,12 +728,13 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 				reco::PFCandidateRef pfmuptr=patmuon->pfCandidateRef();
 				{
 					for(size_t j=i+1;j<muons->size();j++){
-						if(muons->size()>2)
+						if(muons->size()<2)
 							break;
 						reco::PFCandidateRef pfmuptr2=muons->at(j).pfCandidateRef();
 						NTVertex tempvtx;
 						tempvtx.setChi2(999999); //default
-						tempvtx.setIdx(i); //associate with first muon
+						int vtxid=1000*i + j;
+						tempvtx.setIdx(vtxid); //associate with first muon
 						//check for safety reasons
 						if(pfmuptr.isNonnull() && pfmuptr2.isNonnull() && pfmuptr->trackRef().isNonnull() && pfmuptr2->trackRef().isNonnull()){
 
