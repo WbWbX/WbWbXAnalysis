@@ -121,16 +121,18 @@ void trigger_041(){
 
   
 
-  TString dir="/scratch/hh/dust/naf/cms/user/kieseler/trees_PS_trig_03/";
+  TString dir="/scratch/hh/dust/naf/cms/user/kieseler/trees_ES_Jul13/";
 
   TString cmssw_base=getenv("CMSSW_BASE");
-  TString PURunA = cmssw_base+"/src/TtZAnalysis/Data/RunAComp.json.txt_PU.root";
-  TString PURunB = cmssw_base+"/src/TtZAnalysis/Data/RunB13Jul.json.txt_PU.root";
-  //  TString PURunAB = cmssw_base+"/src/TtZAnalysis/Data/RunABComp_PU.root";
-  TString PURunC = cmssw_base+"/src/TtZAnalysis/Data/RunCComp.json.txt_PU.root";
-  TString PURunD = cmssw_base+"/src/TtZAnalysis/Data/RunDprompt.json.txt_PU.root";
 
-  TString pileuproot = cmssw_base+"/src/TtZAnalysis/Data/Full19.json.txt_PU.root";
+  
+  TString PURunA = cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13RunA.json.txt_PU.root";
+  TString PURunB = cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13RunB.json.txt_PU.root";
+  //  TString PURunAB = cmssw_base+"/src/TtZAnalysis/Data/RunABComp_PU.root";
+  TString PURunC = cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13RunC.json.txt_PU.root";
+  TString PURunD = cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13RunD.json.txt_PU.root";
+
+  TString pileuproot = cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13.json.txt_PU.root";
 
 
   std::vector<TString> mumumcfiles, eemcfiles, emumcfiles, datafilesFull,datafilesRunB,datafilesRunAB,datafilesRunC, datafilesRunA, datafilesRunD;
@@ -144,27 +146,29 @@ void trigger_041(){
   emumcfiles << dir+"tree_8TeV_emuttbar.root" 
 	     << dir+"tree_8TeV_emuttbarviatau.root" ;
 
-  datafilesFull  << dir + "tree_8TeV_MET_runA_06Aug.root"  
-		 << dir + "tree_8TeV_MET_runA_13Jul.root"  
-		 << dir + "tree_8TeV_MET_runB_13Jul.root"  
-		 << dir + "tree_8TeV_MET_runC_prompt.root"
-		 << dir + "tree_8TeV_MET_runC_24Aug.root"  
-		 << dir + "tree_8TeV_MET_runC_11Dec.root"  
-		 << dir + "tree_8TeV_MET_runD_prompt.root";
+  datafilesFull //  << dir + "tree_8TeV_MET_runA_06Aug.root"  
+// 		 << dir + "tree_8TeV_MET_runA_13Jul.root"  
+// 		 << dir + "tree_8TeV_MET_runB_13Jul.root"  
+// 		 << dir + "tree_8TeV_MET_runC_prompt.root"
+// 		 << dir + "tree_8TeV_MET_runC_24Aug.root"  
+// 		 << dir + "tree_8TeV_MET_runC_11Dec.root"  
+// 		 << dir + "tree_8TeV_MET_runD_prompt.root";
 
-  datafilesRunA  << dir + "tree_8TeV_MET_runA_06Aug.root"  
-	 	 << dir + "tree_8TeV_MET_runA_13Jul.root";
+    << dir + "tree_8TeV_MET_runA_22Jan.root"
+    << dir + "tree_8TeV_MET_runB_22Jan.root"
+    << dir + "tree_8TeV_MET_runC_22Jan.root"
+    << dir + "tree_8TeV_MET_runD_22Jan.root";
 
-  datafilesRunB  << dir + "tree_8TeV_MET_runB_13Jul.root";
+  datafilesRunA  << dir + "tree_8TeV_MET_runA_22Jan.root";
+
+  datafilesRunB  <<  dir + "tree_8TeV_MET_runB_22Jan.root";
 
 
   datafilesRunAB  << datafilesRunA << datafilesRunB;
 
-  datafilesRunC  << dir + "tree_8TeV_MET_runC_prompt.root"
-		 << dir + "tree_8TeV_MET_runC_24Aug.root"  
-		 << dir + "tree_8TeV_MET_runC_11Dec.root";
+  datafilesRunC  <<  dir + "tree_8TeV_MET_runC_22Jan.root";
 
-  datafilesRunD  << dir + "tree_8TeV_MET_runD_prompt.root";
+  datafilesRunD  <<  dir + "tree_8TeV_MET_runD_22Jan.root";
   
 
 
