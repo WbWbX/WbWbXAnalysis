@@ -10,13 +10,22 @@
 
 #include "container.h"
 
+
+    /*
+     * to be implemented:
+     * hasunderflow/overflow (can be function that checks entries in corr containers
+     *
+     */
+
 namespace ztop{
 
 class container2D {
 public:
-	container2D(){divideBinomial_=true;}
+	 container2D();
     container2D( std::vector<float> ,std::vector<float> , TString name="",TString xaxisname="",TString yaxisname="", bool mergeufof=false); //! construct with binning
-	~container2D(){}
+	~container2D();
+
+	//setaxis etc still missing. should be ok as long as default constr. is protected
 
 	void setName(TString name){name_=name;}
 	TString getName(){return name_;}
@@ -31,12 +40,25 @@ public:
 
     void fill(const double & xval, const double & yval, const double & weight=1);    //! fills with weight
 
+    unsigned int getSystSize(){if(conts_.size()<1) return 0; else return conts_.at(0).getSystSize();}
     double getBinContent(int xbin,int ybin);
     double getBinErrorUp(int xbin, int ybin, bool onlystat=false,TString limittosys="");
     double getBinErrorDown(int,int,bool onlystat=false,TString limittosys="");
     double getBinError(int,int,bool onlystat=false,TString limittosys="");
+    double getSystError(unsigned int number, int xbin, int ybin);
+    TString getSystErrorName(unsigned int number);
 
-    TH2D * getTH2D(TString name="", bool dividebybinwidth=false);
+    double projectBinContentToY(int ybin,bool includeUFOF=false);
+    double projectBinContentToX(int xbin,bool includeUFOF=false);
+
+    container1D projectToX(bool includeUFOF=false);
+    container1D projectToY(bool includeUFOF=false);
+
+    void removeError(TString);
+    void renameSyst(TString, TString);
+
+    TH2D * getTH2D(TString name="", bool dividebybinwidth=false, bool onlystat=false);
+    TH2D * getTH2DSyst(TString name, unsigned int systNo, bool dividebybinwidth=false, bool statErrors=false);
 
     void setDivideBinomial(bool);
 
@@ -53,21 +75,27 @@ public:
     void addErrorContainer(const TString & ,const container2D &,double,bool ignoreMCStat=true);  //! adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down"
     void addErrorContainer(const TString &,const container2D & ,bool ignoreMCStat=true);        //! adds deviation to (this) as systematic uncertianty with name. name must be ".._up" or ".._down"
     void addRelSystematicsFrom(const container2D &);
-
+    void addGlobalRelError(TString,double);
 
     void reset();    //! resets all uncertainties and binning, keeps names and axis
     void clear();    //! sets all bin contents to zero; clears all systematic uncertainties
 
 
     static bool debug;
+    static std::vector<container2D*> c_list;
+    static bool c_makelist;
 
-private:
+protected:
+
+
+
 	std::vector<ztop::container1D> conts_; //! for each y axis bin one container
 	std::vector<float> xbins_,ybins_;
     bool divideBinomial_;
+    bool mergeufof_;
 
-    TString yaxisname_;
     TString xaxisname_;
+    TString yaxisname_;
     TString name_;
 
 };
@@ -82,8 +110,11 @@ inline int ztop::container2D::getBinNoY(const double & var){
 
   if(ybins_.size()<1){
     ybins_.push_back(0);
+    bool temp=container1D::c_makelist;
+    container1D::c_makelist=false;
     container1D UFOF;
     conts_.push_back(UFOF);
+    container1D::c_makelist=temp;
     return 0;
   }
   if(ybins_.size() <2){
