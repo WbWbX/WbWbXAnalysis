@@ -237,6 +237,9 @@ public:
 		//for(float i=0;i<10;i++)
 		dzbins2 << 0 << 0.025 << 0.05 << 0.3  << 1 << 2 << 3 << 4;
 
+		vector<float> binsdrtrig;
+		binsdrtrig << 0 << 0.05 << 0.1 << 0.15 << 0.2 << 0.3 << 0.4 << 0.6 << 1 << 2 << 5;
+
 		//pt
 		//eta
 		//et2d
@@ -280,7 +283,7 @@ public:
 		effTriple t_dzbslepton (dzbins                 , "lepton_dzBs"      , "dz(Bs)_{l} [cm]"            , "evts"   );
 		effTriple t_dzbsalllepton (dzbins2                 , "alllepton_dzBs"      , "dz(Bs)_{l} [cm]"            , "evts"   );
 		effTriple t_dzleptonlepton (dzbins2                 , "leptonlepton_dz"      , "dz(ll) [cm]"            , "evts"   );
-		effTriple t_drleptrig (binsdrll                 , "leptontrigger_dr"      , "dr(lt) [cm]"            , "evts"   );
+		effTriple t_drleptrig (binsdrtrig                 , "leptontrigger_dr"      , "dr(lt) [cm]"            , "evts"   );
 
 		effTriple::makelist=false;
 
@@ -364,19 +367,18 @@ public:
 			vector<NTTriggerObject> * temp = 0;
 			pTriggerobjects.push_back(temp);
 		}
-
+		vector<size_t> invalidbranches;
 		for(size_t i=0;i<trigsObj_.size();i++){
-			if(t_->GetBranch(("NTTriggerObjects_"+(TString)trigsObj_.at(i)).Data())){
+			if(t_->GetBranch(("NTTriggerObjects_"+(TString)trigsObj_.at(i)))){
 				t_->SetBranchAddress("NTTriggerObjects_"+(TString)trigsObj_.at(i),&pTriggerobjects.at(i));
 			}
 			else{
-				cout << "Branch " << "NTTriggerObjects_"+(TString)trigsObj_.at(i) << " not found" << endl;
-				exit(EXIT_FAILURE);
+				cout << "Branch " << "NTTriggerObjects_"+(TString)trigsObj_.at(i) 
+				     << " not found\n    will be ignored" << endl;
+				invalidbranches << i;
 			}
 		}
-
-
-
+		
 		pair<string,double> dilepton("dilepton", 0);
 		pair<string,double> ZVeto   ("ZVeto   ", 0);
 		pair<string,double> oneJet  ("oneJet  ", 0);
@@ -617,11 +619,17 @@ public:
 			if(mode_== 0) b_met=true;
 
 
-			vector<NTTriggerObject> alltrigobj;
+			vector<NTTriggerObject *> alltrigobj;
 			/////// make trigger object collections ////
-			for(size_t to=0;to<pTriggerobjects.size();to++) //merge collections
-				alltrigobj << *pTriggerobjects.at(i);
-
+			for(size_t to=0;to<pTriggerobjects.size();to++){ //merge collections
+			  if(!pTriggerobjects.at(to)){
+			    cout << "pTriggerobjects.at(" << to << ") is NULL.... exit" <<endl;
+			    exit(EXIT_FAILURE);
+			  }
+			  for(size_t j=0;j<pTriggerobjects.at(to)->size();j++){
+			    alltrigobj.push_back(&pTriggerobjects.at(to)->at(j));
+			  }
+			}
 			//  std::cout << puweight << std::endl;
 
 			//define variables
@@ -675,8 +683,9 @@ public:
 				dz2=selectedMuons_[1]->dzV();
 				dzbs1=selectedMuons_[0]->dZBs();
 				dzbs2=selectedMuons_[1]->dZBs();
-				getClosestInDR(*selectedMuons_[0],alltrigobj,dRlt1);
-				getClosestInDR(*selectedMuons_[1],alltrigobj,dRlt2);
+				dRlt1=0;dRlt2=0;
+				getClosestInDR(selectedMuons_[0],alltrigobj,dRlt1);
+				getClosestInDR(selectedMuons_[1],alltrigobj,dRlt2);
 			}
 			else{ //emu
 				eta1=selectedElecs_[0]->eta();

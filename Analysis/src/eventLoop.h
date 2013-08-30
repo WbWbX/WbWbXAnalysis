@@ -770,7 +770,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
 		///////// 20 GeV cut /// STEP 3 ///////////////////
 
-		if(invLepMass < 20)
+		if(invLepMass < 0)//20)
 			continue;
 
 
