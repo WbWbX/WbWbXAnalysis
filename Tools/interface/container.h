@@ -11,6 +11,7 @@
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 #include <algorithm>
 #include <complex>
+#include "histoContent.h"
 
 ////////bins include their border on the right side!!
 
@@ -37,93 +38,127 @@ public:
 
 	void setBins(std::vector<float>);
 	void setBinWidth(float);            //! sets bin width; enables dynamic filling (not implemented yet)
-	void setBinErrorUp(int, double);    //! sets systematics in bin to zero and stat error to given value
-	void setBinErrorDown(int, double);  //! sets systematics in bin to zero and stat error to given value
-	void setBinError(int, double);      //! sets systematics in bin to zero and stat error to given value
-	void setBinContent(int, double);    //! sets bin content, does not change error values!
+
+	void setBinErrorUp(const size_t&, const double&);    //! clears ALL systematics and adds a new one
+	void setBinErrorDown(const size_t&, const double&);  //! clears ALL systematics and adds a new one
+	void setBinError(const size_t&, const double&);      //! clears ALL systematics and adds a new one
+
+	void setBinContent(const size_t&, const double&,const int &sysLayer=-1);    //! sets bin content, does not change error values!
+	void setBinStat(const size_t &bin, const double & err, const int &sysLayer=-1); //! sets bin stat, does not change error values!
+	void setBinEntries(const size_t &bin, const size_t & entries, const int &sysLayer=-1); //! sets bin stat, does not change error values!
 
 
-	int getBinNo(const double&); //! returns bin index number for (double variable)
-	int getNBins();       //! returns nuberof bins
-	const std::vector<float> & getBins(){return bins_;}
-	double getBinCenter(int);
-	double getBinWidth(int); //! returns total bin width NOT 0.5* width
-	double getBinEntries(int);
-	float getXMax(){return bins_[getNBins()+1];}
-	float getXMin(){return bins_[1];}
+	size_t getBinNo(const double&) const; //! returns bin index number for (double variable)
+	size_t getNBins() const;       //! returns nuberof bins
+	const std::vector<float> & getBins() const {return bins_;}
 
-	unsigned int getSystSize(){return (int)syserrors_.size();}
-	double getBinContent(int);
-	double getBinErrorUp(int, bool onlystat=false,TString limittosys=""); //returns DEVIATION!
-	double getBinErrorDown(int,bool onlystat=false,TString limittosys=""); //returns DEVIATION!
-	double getBinError(int,bool onlystat=false,TString limittosys=""); //returns DEVIATION!
-	double getSystError(unsigned int number, int bin); //returns DEVIATION!
-	TString getSystErrorName(unsigned int number);
-	double getOverflow();                              //!returns -1 if overflow was merged with last bin
-	double getUnderflow();                             //!returns -1 if underflow was merged with last bin
+	double getBinCenter(const size_t &) const;
+	double getBinWidth(const size_t &) const; //! returns total bin width NOT 0.5* width
 
-	double integral(bool includeUFOF=false);
-	double cIntegral(float from=0, float to=0);       //! includes the full bin "from" or "to" is in
+	const float &getXMax() const{return bins_[getNBins()+1];}
+	const float &getXMin() const{return bins_[1];}
+
+	 size_t getSystSize() const{return contents_.layerSize();}
+
+	const double & getBinContent(const size_t&,const int &sysLayer=-1) const;
+	const size_t & getBinEntries(const size_t &,const int &sysLayer=-1) const;
+	 double  getBinStat(const size_t &,const int &sysLayer=-1) const;
+
+	double  getBinErrorUp(const size_t&, bool onlystat=false,const TString& limittosys="") const; //returns DEVIATION!
+	double  getBinErrorDown(const size_t&,bool onlystat=false,const TString&  limittosys="") const; //returns DEVIATION!
+	double getBinError(const size_t&,bool onlystat=false,const TString&  limittosys="") const; //returns DEVIATION!
+
+	double  getSystError(const size_t & number, const size_t & bin) const; //returns DEVIATION!
+	double getSystErrorStat(const size_t & number, const size_t & bin) const; //returns DEVIATION!
+
+	const TString & getSystErrorName(const size_t & number) const;
+
+	double getOverflow(const int& systLayer=-1);                              //!returns -1 if overflow was merged with last bin
+	double getUnderflow(const int& systLayer=-1);                             //!returns -1 if underflow was merged with last bin
+
+	double integral(bool includeUFOF=false,const int& systLayer=-1) const;
+	double cIntegral(float from=0, float to=0,const int& systLayer=-1) const;       //! includes the full bin "from" or "to" is in
+
+	double integralStat(bool includeUFOF=false,const int& systLayer=-1) const;
+	double cIntegralStat(float from=0, float to=0,const int& systLayer=-1) const;       //! includes the full bin "from" or "to" is in
+
+	size_t integralEntries(bool includeUFOF=false,const int& systLayer=-1) const;
+	size_t cIntegralEntries(float from=0, float to=0,const int& systLayer=-1) const;       //! includes the full bin "from" or "to" is in
 
 
 	void reset();    //! resets all uncertainties and binning, keeps names and axis
 	void clear();    //! sets all bin contents to zero; clears all systematic uncertainties
 
 	void setLabelSize(double size){labelmultiplier_=size;}       //! 1 for default
-	TH1D * getTH1D(TString name="", bool dividebybinwidth=true, bool onlystat=false); //! returns a TH1D pointer with symmetrized errors (TString name); small bug with content(bin)=0 and error(bin)=0
-	TH1D * getTH1DSyst(TString name, unsigned int systNo, bool dividebybinwidth=true, bool statErrors=false);
-	operator TH1D(){TH1D* h=getTH1D();TH1D hr=*h;delete h;return hr;}
+	TH1D * getTH1D(TString name="", bool dividebybinwidth=true, bool onlystat=false) const; //! returns a TH1D pointer with symmetrized errors (TString name); small bug with content(bin)=0 and error(bin)=0
+	TH1D * getTH1DSyst(TString name, size_t systNo, bool dividebybinwidth=true, bool statErrors=false) const;
+	operator TH1D() const {TH1D* h=getTH1D();TH1D hr=*h;delete h;return hr;}
 	// bad practise operator TH1D*(){return getTH1D();}
 	container1D & operator = (const TH1D &);
 	container1D & import(TH1 *);
-	void writeTH1D(TString name="",bool dividebybinwidth=true, bool onlystat=false); //! writes TH1D->Write() with symmetrized errors (TString name)
-	TGraphAsymmErrors * getTGraph(TString name="", bool dividebybinwidth=true,bool onlystat=false,bool noXErrors=false);
-	operator TGraphAsymmErrors(){return *getTGraph();}
-	operator TGraphAsymmErrors*(){return getTGraph();}
-	void writeTGraph(TString name="",bool dividebybinwidth=true,bool onlystat=false, bool noXErrors=false); //! writes TGraph to TFile (must be opened)
+	void writeTH1D(TString name="",bool dividebybinwidth=true, bool onlystat=false) const; //! writes TH1D->Write() with symmetrized errors (TString name)
+
+	TGraphAsymmErrors * getTGraph(TString name="", bool dividebybinwidth=true,bool onlystat=false,bool noXErrors=false) const;
+	operator TGraphAsymmErrors() const {return *getTGraph();}
+	operator TGraphAsymmErrors*() const {return getTGraph();}
+	void writeTGraph(TString name="",bool dividebybinwidth=true,bool onlystat=false, bool noXErrors=false) const; //! writes TGraph to TFile (must be opened)
 
 	void setDivideBinomial(bool);                                   //! default true
 	void setMergeUnderFlowOverFlow(bool merge){mergeufof_=merge;}   //! merges underflow/overflow in first or last bin, respectively
 
+	container1D & operator += (const container1D &);       //! adds stat errors in squares; treats same named systematics as correlated!!
 	container1D operator + (const container1D &);       //! adds stat errors in squares; treats same named systematics as correlated!!
+	container1D & operator -= (const container1D &);       //! adds stat errors in squares; treats same named systematics as correlated!!
 	container1D operator - (const container1D &);       //! adds errors in squares; treats same named systematics as correlated!!
+	container1D & operator /= (const container1D &);       //! adds stat errors in squares; treats same named systematics as correlated!!
 	container1D operator / (const container1D &);       //! binomial stat error or uncorr error (depends on setDivideBinomial()); treats same named systematics as correlated
+	container1D & operator *= (const container1D &);       //! adds stat errors in squares; treats same named systematics as correlated!!
 	container1D operator * (const container1D &);       //! adds stat errors in squares; treats same named systematics as correlated!!
+	container1D & operator *= (double);            //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
 	container1D operator * (double);            //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
-	container1D operator * (float);             //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
-	container1D operator * (int);               //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
 
 
-	void addErrorContainer(TString,container1D,double,bool ignoreMCStat=true);  //! adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down"
-	void addErrorContainer(TString,container1D ,bool ignoreMCStat=true);        //! adds deviation to (this) as systematic uncertianty with name. name must be ".._up" or ".._down"
+	void addErrorContainer(const TString &,const container1D&, double);  //! adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down"
+	void addErrorContainer(const TString &,const container1D&);        //! adds deviation to (this) as systematic uncertianty with name. name must be ".._up" or ".._down"
 	void addRelSystematicsFrom(const container1D &);
-	void addGlobalRelErrorUp(TString,double);    //! adds a global relative uncertainty with name; "..up" automatically added
-	void addGlobalRelErrorDown(TString,double);  //! adds a global relative uncertainty with name; "..down" automatically added
-	void addGlobalRelError(TString,double);      //! adds a global relative symmetric uncertainty with name; creates ".._up" and ".._down" variation names
+	void addGlobalRelErrorUp(const TString &,const double &);    //! adds a global relative uncertainty with name; "..up" automatically added
+	void addGlobalRelErrorDown(const TString &,const double &);  //! adds a global relative uncertainty with name; "..down" automatically added
+	void addGlobalRelError(const TString &,const double &);      //! adds a global relative symmetric uncertainty with name; creates ".._up" and ".._down" variation names
 
-	void removeError(TString); //! removes a systematic uncertainty with name ..
-	void renameSyst(TString , TString); //! old, new
+	void removeError(const TString &); //! removes a systematic uncertainty with name ..
+	void removeError(const size_t &); //! removes a systematic uncertainty with idx ..
+	void renameSyst(const TString &,const  TString&); //! old, new
 
-	void transformStatToSyst(TString);
-	void setAllErrorsZero(){for(unsigned int i=0;i<staterrup_.size();i++){staterrup_[i]=0;staterrdown_[i]=0;} syserrors_.clear();} //! sets all errors zero
+	void transformStatToSyst(const TString&);
+	void setAllErrorsZero(){contents_.removeAdditionalLayers();contents_.clearLayerStat(-1);} //! sets all errors zero
 
 	static bool c_makelist;
 	static std::vector<container1D*> c_list;
 	static void c_clearlist(){c_list.clear();}
 	static bool debug;
 
+	static void setOperatorDefaults();
+
+	void coutFullContent() const;
 
 protected:
 	bool showwarnings_;
 	float binwidth_;
-	std::vector<float> bins_;
 	bool canfilldyn_;
+
+	bool manualerror_;
+
+	std::vector<float> bins_;
+	histoContent contents_;
+	/*
 	std::vector<double> content_;
 	std::vector<long int> entries_;
 	std::vector<double> staterrup_;
 	std::vector<double> staterrdown_;  //has POSITIVE entries
 
 	std::vector<std::pair<TString, std::vector<double> > > syserrors_; //syst (name, each bin) stores absolute DEVIATIONS from nominal!!!!
+	 */
+
 
 	bool mergeufof_;
 	bool wasunderflow_;
@@ -135,11 +170,13 @@ protected:
 
 	double labelmultiplier_;
 
-	TString stripVariation(TString);
-	double getDominantVariationUp(TString,int);
-	double getDominantVariationDown(TString,int);
+	TString stripVariation(const TString&) const;
+	double getDominantVariationUp(const TString &,const size_t &) const;
+	double getDominantVariationDown(const TString &,const size_t &) const;
 
-	double sq(double); //helper
+	double sq(const double&) const; //helper
+
+	void createManualError();
 
 };
 
@@ -151,20 +188,19 @@ ztop::container1D operator * (double multiplier, const ztop::container1D & cont)
 ztop::container1D operator * (float multiplier, const ztop::container1D & cont);  //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
 ztop::container1D operator * (int multiplier, const ztop::container1D & cont);    //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
 
-inline double ztop::container1D::sq(double a){
+inline double ztop::container1D::sq(const double& a) const{
 	return a*a;
 }
 
-inline int ztop::container1D::getBinNo(const double & var){
+inline size_t ztop::container1D::getBinNo(const double & var) const{
 
 	if(bins_.size()<1){
-		bins_.push_back(0);
 		return 0;
 	}
 	if(bins_.size() <2){
 		return 0;
 	}
-	std::vector<float>::iterator it=std::lower_bound(bins_.begin()+1, bins_.end(), var);
+	std::vector<float>::const_iterator it=std::lower_bound(bins_.begin()+1, bins_.end(), var);
 	if(var==*it)
 		return it-bins_.begin();
 	else
@@ -174,7 +210,7 @@ inline int ztop::container1D::getBinNo(const double & var){
 
 
 inline void ztop::container1D::fill(const double & what, const double & weight){
-	int bin=getBinNo(what);
+	size_t bin=getBinNo(what);
 	//int bin=0;
 
 	if(mergeufof_){
@@ -182,17 +218,15 @@ inline void ztop::container1D::fill(const double & what, const double & weight){
 			bin=1;
 			wasunderflow_=true;
 		}
-		else if(bin==(int)bins_.size()-1){
+		else if(bin==bins_.size()-1){
 			bin--;
 			wasoverflow_=true;
 		}
 	}
-	content_[bin] += weight;
-	entries_[bin]++;
-
-	staterrup_[bin]=std::sqrt(sq(staterrup_[bin]) + sq(weight));
-	staterrdown_[bin]=std::sqrt(sq(staterrdown_[bin]) + sq(weight));
-
+	histoBin * b=&contents_.getBin(bin);
+	b->addToContent(weight);
+	b->addEntry();
+	b->addToStat(weight);
 }
 inline void ztop::container1D::fillDyn(double what, double weight){
 	if(canfilldyn_){

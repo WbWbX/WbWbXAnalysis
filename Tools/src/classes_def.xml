@@ -4,8 +4,27 @@
   <class name="std::pair<TString,std::vector<double> >"/>
   <class name="std::vector<std::pair<TString,std::vector<double> > >"/>
   <class name="std::vector<long int>"/>
+       <class name="ztop::histoBin"/>
+      <class name="std::vector<ztop::histoBin>"/>
+      <class name="ztop::histoBins"/>
+      <class name="std::vector<ztop::histoBins>"/>
+  <class name="std::map<TString,size_t>"/>
+  <class name="std::map<size_t,TString>"/>
+      <class name="ztop::indexMap<TString>"/>
+      <class name="std::vector<ztop::indexMap<TString> >"/>
+      <class name="ztop::histoContent"/>
+      <class name="std::vector<ztop::histoContent>"/>
   <class name="ztop::container1D"/>
   <class name="ztop::container1DUF2"/>
+  <class name="ztop::container1DUnfold"/>
+  <class name="TUnfoldV17"/>
+	<class name="TUnfoldBinningV17"/>
+	<class name="TUnfoldDensityV17"/>
+	<class name="TUnfoldSysV17"/>
+     <class name="std::vector<ztop::unfolder*>"/>
+  <class name="std::vector<ztop::container1DUnfold>"/>
+  <class name="ztop::unfolder"/>
+  <class name="std::vector<ztop::unfolder>"/>
   <class name="std::vector<ztop::container1D>"/>
   <class name="ztop::container2D"/>
   <class name="std::vector<ztop::container2D>"/>
@@ -13,7 +32,6 @@
   <class name="std::vector<ztop::container1DStack>"/>
   <class name="ztop::container1DStackVector"/>
   <class name="std::vector<ztop::container1DStackVector>"/>
-  <class name="std::map<TString,size_t>"/>
   <class name="std::vector<TH2D>"/>
   <class name="std::map<TString,std::vector<TH2D> >"/>
 </lcgdict>

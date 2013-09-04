@@ -11,4 +11,4 @@
 <export>
   <lib   name="1"/>
 </export>
-<Flags CXXFLAGS="-l${CMSSW_BASE}/src/TtZAnalysis/Tools/TUnfold/libunfold.so"/>
+<Flags CXXFLAGS="-l${CMSSW_BASE}/src/TtZAnalysis/Tools/TUnfold/libunfold.so -fopenmp -D_GLIBCXX_PARALLEL"/>

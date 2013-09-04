@@ -2,548 +2,904 @@
 
 namespace ztop{
 
-  std::vector<ztop::container1DStack*> container1DStack::cs_list;
-  bool container1DStack::cs_makelist=false;
-  bool container1DStack::batchmode=true;
+std::vector<ztop::containerStack*> containerStack::cs_list;
+bool containerStack::cs_makelist=false;
+bool containerStack::batchmode=true;
+bool containerStack::debug=false;
 
-  container1DStack::container1DStack(){
-    if(cs_makelist)cs_list.push_back(this);
-  }
-  container1DStack::container1DStack(TString name) : name_(name), dataleg_("data") {
-    if(cs_makelist) cs_list.push_back(this);
-  }
-  container1DStack::~container1DStack(){ 
-    for(unsigned int i=0;i<cs_list.size();i++){
-      if(cs_list[i] == this) cs_list.erase(cs_list.begin()+i);
-      break;
-    }
-  }
-  void container1DStack::push_back(ztop::container1D cont, TString legend, int color, double norm){
-   bool wasthere=false;
-   for(unsigned int i=0;i<legends_.size();i++){
-     if(legend == legends_[i]){
-       if(container1D::debug)
-	 std::cout << "container1DStack::push_back: found same legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
-       containers_[i] = containers_[i] * norms_[i] + cont * norm;
-       containers_[i].setName("c_" +legend);
-       norms_[i]=1;
-       wasthere=true;
-       break;
-     }
-   }
-   if(!wasthere){
-     cont.setName("c_" +legend);
-     containers_.push_back(cont);
-     legends_.push_back(legend);
-     colors_.push_back(color);
-     norms_.push_back(norm);
-   }
- }
-  void container1DStack::removeContribution(TString legendname){
-    bool found=false;
-    std::vector<TString>::iterator leg=legends_.begin();
-    std::vector<int>::iterator col=colors_.begin();
-    std::vector<double>::iterator norm=norms_.begin();
-    
-    for(std::vector<ztop::container1D>::iterator cont=containers_.begin();cont<containers_.end();++cont){
-      if(*leg == legendname){
-	legends_.erase(leg);
-	containers_.erase(cont);
-	colors_.erase(col);
-	norms_.erase(norm);
-	found=true;
-	break;
-      }
-      ++leg;++col;++norm;
-      for(std::map<TString,size_t>::iterator lego=legorder_.begin(); lego!=legorder_.end();++lego){
-	if(lego->first == legendname)
-	  legorder_.erase(lego);
-      }
-    }
-    if(!found) std::cout << "container1DStack::removeContribution: " << legendname << " not found." <<std::endl;
-
-  }
-
- void container1DStack::mergeSameLegends(){
-   //redundant
- }
-
- ztop::container1D container1DStack::getContribution(TString contr){
-   ztop::container1D out;
-   if(containers_.size() > 0){
-     out=containers_[0];
-     out.clear();
-     int i=0;
-     bool notfound=true;
-     for(std::vector<TString>::iterator name=legends_.begin();name<legends_.end();++name){
-       if(contr == *name){
-	 out=out + containers_[i] * norms_[i] ;
-	 notfound=false;
-	 break;
-       }
-       i++;
-     }
-     if(notfound) std::cout << "container1DStack::getContribution: " << contr << " not found!" <<std::endl;
-   }
-   
-   return out;
- }
-  ztop::container1D container1DStack::getContributionsBut(TString contr){
-   ztop::container1D out;
-   if(containers_.size() > 0){
-     out=containers_[0];
-     out.clear();
-     int i=0;
-     for(std::vector<TString>::iterator name=legends_.begin();name<legends_.end();++name){
-       if(contr != *name) out=out+containers_[i] * norms_[i];
-     i++;
-     }
-   }
-   return out;
- }
-
-  ztop::container1D container1DStack::getContributionsBut(std::vector<TString> contr){
-    ztop::container1D out;
-    if(containers_.size() > 0){
-      out=containers_[0];
-      out.clear();
-      for(unsigned int i=0;i<legends_.size();i++){
-	bool get=true;
-	for(std::vector<TString>::iterator name=contr.begin();name<contr.end();++name){
-	  if(*name == legends_[i]){
-	    get=false;
-	    break;
-	  }
+containerStack::containerStack(){
+	mode=notset;
+	if(cs_makelist)cs_list.push_back(this);
+}
+containerStack::containerStack(TString name) : name_(name), dataleg_("data") {
+	mode=notset;
+	if(cs_makelist) cs_list.push_back(this);
+}
+containerStack::~containerStack(){
+	for(unsigned int i=0;i<cs_list.size();i++){
+		if(cs_list[i] == this) cs_list.erase(cs_list.begin()+i);
+		break;
 	}
-	if(get) out = out+ containers_[i] * norms_[i];
-      }
-    }
-    return out;
-  }
-
-  
-  void container1DStack::multiplyNorm(TString legendentry, double multi){
-    int i=0;
-    for(std::vector<TString>::iterator name=legends_.begin();name<legends_.end();++name){
-      if(legendentry == *name){
-	norms_[i] = norms_[i] * multi;
-      }
-      i++;
-    }
-  }
-
-  void container1DStack::multiplyAllMCNorms(double multiplier){
-    for(unsigned int i=0;i<norms_.size();i++){
-      if(legends_.at(i)!=dataleg_)
-	norms_.at(i)=norms_.at(i) * multiplier;
-    }
-  }
-
-  void container1DStack::addGlobalRelMCError(TString sysname,double error){
-    for(unsigned int i=0;i<containers_.size();i++){
-      if(legends_[i]!=dataleg_) containers_[i].addGlobalRelError(sysname,error);
-    }
-  }
-  void container1DStack::addMCErrorStack(TString sysname,container1DStack errorstack, bool ignoreMCStat){
-    for(unsigned int i=0; i<size();i++){
-      for(unsigned int j=i;j<errorstack.size();j++){
-	errorstack.containers_[j] = errorstack.containers_[j] * errorstack.norms_[j]; //normalize (in case there is any remultiplication done or something)
-	errorstack.norms_[j]=1;
-	if(legends_[i] == errorstack.legends_[j] && legends_[i]!=dataleg_){
-	  containers_[i] = containers_[i] * norms_[i];
-	  norms_[i]=1;
-	  containers_[i].addErrorContainer(sysname,errorstack.containers_[j],ignoreMCStat);
+}
+void containerStack::push_back(ztop::container1D cont, TString legend, int color, double norm){
+	if(mode==notset)
+		mode=dim1;
+	else if(mode!=dim1){
+		std::cout << "containerStack::push_back: trying to add 1D container to non-1D stack!" << std::endl;
+		return;
 	}
-      }
-    }
-  }
-
-  void container1DStack::addRelSystematicsFrom(ztop::container1DStack stack){
-    for(std::vector<ztop::container1D>::iterator cont=stack.containers_.begin();cont<stack.containers_.end();++cont){
-      TString name=cont->getName();
-      for(unsigned int i=0;i<containers_.size();i++){
-	if(containers_[i].getName() == name){
-	  containers_[i].addRelSystematicsFrom(*cont);
-	  break;
+	bool wasthere=false;
+	for(unsigned int i=0;i<legends_.size();i++){
+		if(legend == legends_[i]){
+			if(container1D::debug)
+				std::cout << "containerStack::push_back: found same legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
+			containers_[i] = containers_[i] * norms_[i] + cont * norm;
+			containers_[i].setName("c_" +legend);
+			norms_[i]=1;
+			wasthere=true;
+			break;
+		}
 	}
-      }
-    }
-  }
-
-  void container1DStack::removeError(TString sysname){
-    for(unsigned int i=0; i<size();i++){
-      containers_[i].removeError(sysname);
-    }
-  }
-
-  void container1DStack::renameSyst(TString old, TString New){
-    for(unsigned int i=0; i<size();i++){
-      containers_[i].renameSyst(old,New);
-    }
-  }
-  ztop::container1D & container1DStack::getContainer(TString name){
-    bool found=false;
-    for(unsigned int i=0;i<containers_.size();i++){
-      if(containers_[i].getName() == name){
-	containers_[i] = containers_[i] * norms_[i];
-	norms_[i] = 1.;
-	found=true;
-	return containers_[i];
-      }
-    }
-    if(!found) std::cout << "container1DStack::getContainer: container with name " << name << " not found, returning first container! all names are formatted: c_legendentry" << std::endl;
-    return containers_[0];;
-  }
-  ztop::container1D container1DStack::getFullMCContainer(){
-    container1D out=containers_[0];
-    out.clear();
-    for(unsigned int i=0;i<containers_.size();i++){
-      if(legends_[i] != dataleg_) out = out + containers_[i]*norms_[i];
-    }
-    return out;
-  }
-
-  THStack * container1DStack::makeTHStack(TString stackname){
-    if(stackname == "") stackname = name_+"_s";
-    THStack *tstack = new THStack(stackname,stackname);
-
-    std::vector<size_t> sorted=sortEntries(false);
-
-    for(unsigned int it=0;it<size();it++){
-    	size_t i=sorted.at(it);
-    	if(getLegend(i) != dataleg_){
-    		container1D tempcont = getContainer(i);
-    		tempcont = tempcont * getNorm(i);
-    		TH1D * h = (TH1D*)tempcont.getTH1D(getLegend(i)+" "+getName()+"_stack_h")->Clone();
-    		h->SetFillColor(getColor(i));
-    		for(int bin = 1 ; bin < h->GetNbinsX()+1;bin++){
-    			h->SetBinError(bin,0);
-    		}
-    		tstack->Add(h);
-    	}
-    }
-    return  tstack;
-  }
-  TLegend * container1DStack::makeTLegend(bool inverse){
-    TLegend *leg = new TLegend((Double_t)0.65,(Double_t)0.50,(Double_t)0.95,(Double_t)0.90);
-    leg->Clear();
-    leg->SetFillStyle(0);
-    leg->SetBorderSize(0);
-
-    std::vector<size_t> sorted=sortEntries(inverse);
-
-    for(unsigned int it=0;it<size();it++){
-      size_t i=sorted.at(it);
-      container1D tempcont = getContainer(i);
-      tempcont = tempcont * getNorm(i);
-      TH1D * h = (TH1D*)tempcont.getTH1D(getLegend(i)+" "+getName()+"_leg")->Clone();
-      h->SetFillColor(getColor(i));
-      if(getLegend(i) != dataleg_) leg->AddEntry(h,getLegend(i),"f");
-      else leg->AddEntry(h,getLegend(i),"ep");
-      //  delete h;
-    }
-    
-    return leg;
-  }
-  void container1DStack::drawControlPlot(TString name, bool drawxaxislabels, double resizelabels){
-    if(name=="") name=name_;
-    int dataentry=0;
-    bool gotdentry=false;
-    bool gotuf=false;
-    bool gotof=false;
-    for(unsigned int i=0;i<size();i++){ // get datalegend and check if underflow or overflow in any container
-      if(getLegend(i) == dataleg_){
-        dataentry=i;
-	gotdentry=true;
-	if(gotof && gotuf) break;
-      }
-      if(containers_[i].getOverflow() < -0.9){
-	gotof=true;
-	if(gotdentry && gotuf) break;
-      }
-      if(containers_[i].getUnderflow() < -0.9){
-	gotuf=true;
-	if(gotdentry && gotof) break;
-      }
-    }
-    float multiplier=1;
-    double ylow,yhigh,xlow,xhigh;
-    if(gPad){
-      gPad->GetPadPar(xlow,ylow,xhigh,yhigh);
-      multiplier = (float)1/(yhigh-ylow);
-    }
-    containers_[dataentry].setLabelSize(resizelabels * multiplier);
-    TGraphAsymmErrors * g = containers_[dataentry].getTGraph(name);
-    TH1D * h =containers_[dataentry].getTH1D(name+"_h"); // needed to be able to set log scale etc.
-
-    float xmax=containers_[dataentry].getXMax();
-    float xmin=containers_[dataentry].getXMin();
-    h->Draw("AXIS");
-    if(!drawxaxislabels){
-      h->GetXaxis()->SetLabelSize(0);
-    }
-    else {
-      if(gPad){
-	gPad->SetLeftMargin(0.15);
-	gPad->SetBottomMargin(0.15);
-      }
-    }
-    g->Draw("P");
-    makeTHStack(name)->Draw("same");
-    makeMCErrors()->Draw("2");
-    makeTLegend()->Draw("same");
-    g->Draw("e1,P,same");
-    if(gPad) gPad->RedrawAxis();
-
-    if(gPad && drawxaxislabels && containers_[dataentry].getNBins() >0){
-      float yrange=fabs(gPad->GetUymax()-gPad->GetUymin());
-      float xrange = fabs(xmax-xmin);
-      if(gotuf){
-	TLatex * la = new TLatex(containers_[dataentry].getBinCenter(1)-xrange*0.06,gPad->GetUymin()-0.15*yrange,"#leq");
-	la->Draw("same");
-      }
-      if(gotof){
-	TLatex * la2 = new TLatex(containers_[dataentry].getBinCenter(containers_[dataentry].getNBins())+xrange*0.06,gPad->GetUymin()-0.15*yrange,"#leq");
-	la2->Draw("same");
-      }
-    }
-
-  }
-
-  TGraphAsymmErrors * container1DStack::makeMCErrors(){
-    TGraphAsymmErrors * g =getFullMCContainer().getTGraph();
-    g->SetFillStyle(3005);
-    return g;
-  }
-
-  void container1DStack::drawRatioPlot(TString name,double resizelabels){
-    //prepare container
-    if(name=="") name=name_;
-    int dataentry=0;
-    bool gotdentry=false;
-    bool gotuf=false;
-    bool gotof=false;
-    for(unsigned int i=0;i<size();i++){ // get datalegend and check if underflow or overflow in any container
-      if(getLegend(i) == dataleg_){
-        dataentry=i;
-	gotdentry=true;
-	if(gotof && gotuf) break;
-      }
-      if(containers_[i].getOverflow() < -0.9){
-	gotof=true;
-	if(gotdentry && gotuf) break;
-      }
-      if(containers_[i].getUnderflow() < -0.9){
-	gotuf=true;
-	if(gotdentry && gotof) break;
-      }
-    }
-    container1D data = containers_[dataentry];
-    data.setShowWarnings(false);   
-    container1D mc = getFullMCContainer();
-    mc.setShowWarnings(false);   
-    data.setDivideBinomial(false);
-    mc.setDivideBinomial(false);
-    container1D ratio=data;
-    ratio.clear(); 
-    ratio.setShowWarnings(false);   
-    container1D relmcerr=data;
-    relmcerr.clear();
-    container1D mccopy=mc;
-    for(int i=0; i<ratio.getNBins()+1; i++){ //includes underflow right now, doesn't matter
-      relmcerr.setBinContent(i,1.);
-      relmcerr.setBinErrorUp(i,mc.getBinErrorUp(i) / mc.getBinContent(i));
-      relmcerr.setBinErrorDown(i,mc.getBinErrorDown(i) / mc.getBinContent(i));
-      //set mc error to zero for the ratio plot
-      mccopy.setBinErrorUp(i,0);
-      mccopy.setBinErrorDown(i,0);
-    }
-    ratio = data / mccopy;
-    float multiplier=1;
-    double ylow,yhigh,xlow,xhigh;
-    if(gPad){
-      gPad->GetPadPar(xlow,ylow,xhigh,yhigh);
-      multiplier = (float)1/(yhigh-ylow);
-    }
-    //   multiplier = multiplier * resizelabels;
-    ratio.setLabelSize(multiplier * resizelabels);
-
-    TGraphAsymmErrors * gratio = ratio.getTGraph(name,false,false,true); //don't divide by binwidth, no x errors
-    // rescale axis titles etc.
-    TH1D * h = ratio.getTH1D(name+"_h_r",false); //no bw div
-    h->GetYaxis()->SetTitle("data/MC");
-    h->GetYaxis()->SetRangeUser(0.5,1.5);
-    h->GetYaxis()->SetNdivisions(505);
-    h->GetXaxis()->SetTickLength(0.03 * multiplier);
-    h->Draw("AXIS");
-    gratio->Draw("P");
-    TGraphAsymmErrors * gmcerr = relmcerr.getTGraph(name+"_relerr",false,false,false);
-    gmcerr->SetFillStyle(3005);
-    gmcerr->Draw("2,same");
-    TLine * l = new TLine(mc.getXMin(),1,mc.getXMax(),1);
-    l->Draw("same");
-    float xmax=containers_[dataentry].getXMax();
-    float xmin=containers_[dataentry].getXMin();
-    if(gPad && containers_[dataentry].getNBins() >0){
-      float yrange=fabs(gPad->GetUymax()-gPad->GetUymin());
-      float xrange = fabs(xmax-xmin);
-      if(gotuf){
-	TLatex * la = new TLatex(containers_[dataentry].getBinCenter(1)-xrange*0.06,gPad->GetUymin()-0.15*yrange,"#leq");
-	la->SetTextSize(la->GetTextSize() * multiplier * resizelabels);
-	la->Draw("same");
-      }
-      if(gotof){
-	TLatex * la2 = new TLatex(containers_[dataentry].getBinCenter(containers_[dataentry].getNBins())+xrange*0.06,gPad->GetUymin()-0.15*yrange,"#leq");
-	la2->SetTextSize(la2->GetTextSize() * multiplier * resizelabels);
-	la2->Draw("same");
-      }
-    }
-  }
-
-  TCanvas * container1DStack::makeTCanvas(bool drawratioplot){
-    TCanvas * c = new TCanvas(name_+"_c",name_+"_c");
-    if(container1DStack::batchmode)
-      c->SetBatch();
-    TH1D * htemp=new TH1D("sometemphisto"+name_,"sometemphisto"+name_,2,0,1); //creates all gPad stuff etc and prevents seg vio, which happens in some cases; weird
-    htemp->Draw();
-    if(!drawratioplot){
-      c->cd();
-      drawControlPlot();
-    }
-    else{
-      double labelresize=1.;
-      double divideat=0.3;
-      c->Divide(1,2);
-      c->SetFrameBorderSize(0);
-      c->cd(1)->SetLeftMargin(0.15);
-      c->cd(1)->SetBottomMargin(0.03);
-      c->cd(1)->SetPad(0,divideat,1,1);
-      drawControlPlot(name_,false,labelresize);
-      c->cd(2)->SetBottomMargin(0.4 * 0.3/divideat);
-      c->cd(2)->SetLeftMargin(0.15);
-      c->cd(2)->SetTopMargin(0);
-      c->cd(2)->SetPad(0,0,1,divideat);
-      gStyle->SetOptTitle(0);
-      drawRatioPlot("",labelresize);
-      c->cd(1)->RedrawAxis();
-    }
-    if(gStyle){
-       gStyle->SetOptTitle(0);
-       gStyle->SetOptStat(0);
-    }
-    delete htemp;
-    return c;
-  }
-
-  //just perform functions on the containers with same names
-  ztop::container1DStack container1DStack::operator + (container1DStack stack){
-    for(unsigned int i=0;i<containers_.size();i++){
-      for(unsigned int j=0;j<stack.containers_.size();j++){
-	if(containers_[i].getName() == stack.containers_[j].getName()){
-	  stack.containers_[j] = containers_[i] + stack.containers_[j];
+	if(!wasthere){
+		cont.setName("c_" +legend);
+		containers_.push_back(cont);
+		legends_.push_back(legend);
+		colors_.push_back(color);
+		norms_.push_back(norm);
 	}
-      }
-    }
-    return stack;
-  }
-  ztop::container1DStack container1DStack::operator - (container1DStack stack){
-    for(unsigned int i=0;i<containers_.size();i++){
-      for(unsigned int j=0;j<stack.containers_.size();j++){
-	if(containers_[i].getName() == stack.containers_[j].getName()){
-	  stack.containers_[j] = containers_[i] - stack.containers_[j];
+}
+void containerStack::push_back(ztop::container2D cont, TString legend, int color, double norm){
+	if(mode==notset)
+		mode=dim2;
+	else if(mode!=dim2){
+		std::cout << "containerStack::push_back: trying to add 2D container to non-2D stack!" << std::endl;
+		return;
 	}
-      }
-    }
-    return stack;
-  }
-  ztop::container1DStack container1DStack::operator / (container1DStack  stack){
-    for(unsigned int i=0;i<containers_.size();i++){
-      for(unsigned int j=0;j<stack.containers_.size();j++){
-	if(containers_[i].getName() == stack.containers_[j].getName()){
-	  stack.containers_[j] = containers_[i] / stack.containers_[j];
+	bool wasthere=false;
+	for(unsigned int i=0;i<legends_.size();i++){
+		if(legend == legends_[i]){
+			if(container2D::debug)
+				std::cout << "containerStack::push_back: found same legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
+			containers2D_[i] = containers2D_[i] * norms_[i] + cont * norm;
+			containers2D_[i].setName("c_" +legend);
+			norms_[i]=1;
+			wasthere=true;
+			break;
+		}
 	}
-      }
-    }
-    return stack;
-  }
-  ztop::container1DStack container1DStack::operator * (container1DStack  stack){
-    for(unsigned int i=0;i<containers_.size();i++){
-      for(unsigned int j=0;j<stack.containers_.size();j++){
-	if(containers_[i].getName() == stack.containers_[j].getName()){
-	  stack.containers_[j] = containers_[i] * stack.containers_[j];
+	if(!wasthere){
+		cont.setName("c_" +legend);
+		containers2D_.push_back(cont);
+		legends_.push_back(legend);
+		colors_.push_back(color);
+		norms_.push_back(norm);
 	}
-      }
-    }
-    return stack;
-  }
-  ztop::container1DStack container1DStack::operator * (double scalar){
-    ztop::container1DStack out=*this;
-    for(unsigned int i=0;i<containers_.size();i++) containers_[i] = containers_[i] * scalar;
-    return out;
-  }
-  ztop::container1DStack container1DStack::operator * (float scalar){
-    return *this * (double)scalar;
-  }
-  ztop::container1DStack container1DStack::operator * (int scalar){
-    return *this * (double)scalar;
-  }
+}
+void containerStack::push_back(ztop::container1DUnfold cont, TString legend, int color, double norm){
+	if(mode==notset)
+		mode=unfolddim1;
+	else if(mode!=unfolddim1){
+		std::cout << "containerStack::push_back: trying to add 1DUnfold container to non-1DUnfold stack!" << std::endl;
+		return;
+	}
 
-  //rovate memberfunc
-  int container1DStack::checkLegOrder(){
-    for(std::map<TString,size_t>::iterator it=legorder_.begin();it!=legorder_.end();++it){
-      if(it->second > size()){
-	std::cout << "container1DStack::checkLegOrder: "<< name_ << ": legend ordering numbers (" <<it->second << ") need to be <= size of stack! ("<< size()<<")" <<std::endl;
+	bool wasthere=false;
+	for(unsigned int i=0;i<legends_.size();i++){
+		if(legend == legends_[i]){
+			if(container1D::debug)
+				std::cout << "containerStack::push_back: found same legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
+			containers1DUnfold_[i] = containers1DUnfold_[i];// * norms_[i]  + cont * norm;
+			containers1DUnfold_[i].setName("c_" +legend);
+			norms_[i]=1;
+			wasthere=true;
+			break;
+		}
+	}
+	if(!wasthere){
+		cont.setName("c_" +legend);
+		containers1DUnfold_.push_back(cont);
+		legends_.push_back(legend);
+		colors_.push_back(color);
+		norms_.push_back(norm);
+	}
+
+}
+void containerStack::removeContribution(TString legendname){
+	bool found=false;
+	std::vector<TString>::iterator leg=legends_.begin();
+	std::vector<int>::iterator col=colors_.begin();
+	std::vector<double>::iterator norm=norms_.begin();
+	size_t rmpos=0;
+	for(size_t i=0;i<legends_.size();i++){
+		if(*leg == legendname){
+			legends_.erase(leg);
+			colors_.erase(col);
+			norms_.erase(norm);
+			rmpos=i;
+			found=true;
+			break;
+		}
+		++leg;++col;++norm;
+		for(std::map<TString,size_t>::iterator lego=legorder_.begin(); lego!=legorder_.end();++lego){
+			if(lego->first == legendname)
+				legorder_.erase(lego);
+		}
+	}
+	if(mode==dim1)
+		containers_.erase(containers_.begin()+rmpos);
+	else if(mode==dim2)
+		containers2D_.erase(containers2D_.begin()+rmpos);
+	else if(mode==unfolddim1)
+		containers1DUnfold_.erase(containers1DUnfold_.begin()+rmpos);
+
+	if(!found) std::cout << "containerStack::removeContribution: " << legendname << " not found." <<std::endl;
+
+}
+
+void containerStack::mergeSameLegends(){
+	//redundant
+}
+int containerStack::getContributionIdx(TString legname){
+	for(size_t i=0;i<legends_.size();i++){
+		if(legname == legends_.at(i))
+			return i;
+	}
+	std::cout << "containerStack::getContributionIdx: " << legname << " not found!" <<std::endl;
 	return -1;
-      }
-    }
-    return 0;
-  }
+}
 
-  std::vector<size_t> container1DStack::sortEntries(bool inverse){
-
-    std::vector<int> ordering;
-    std::vector<size_t> dontuse;
-
-    ordering.resize(size(),-1);
-    for(unsigned int it=0;it<size();it++){ 
-      if(checkLegOrder()>-1 && legorder_.find(legends_[it])!=legorder_.end()){
-	ordering.at(legorder_.find(legends_[it])->second)=it;
-	dontuse.push_back(it);
-      }
-    }
-    
-
-    for(size_t it=0;it<ordering.size();it++){ //fill rest
-      int ord=ordering.at(it);
-      if(ord<0){ //not yet filled
-	for(size_t newit=0;newit<size();newit++){
-	  bool use=true;
-	  for(size_t j=0;j<dontuse.size();j++){
-	    if(newit == dontuse.at(j))
-	      use=false;
-	  }
-	  if(use){
-	    ordering.at(it)=(int)newit;
-	  }
+ztop::container1D containerStack::getContribution(TString contr){
+	ztop::container1D out;
+	int idx=getContributionIdx(contr);
+	if(idx<0 || mode != dim1)
+		return out;
+	else
+		return containers_.at(idx) * norms_.at(idx);
+}
+ztop::container2D containerStack::getContribution2D(TString contr){
+	ztop::container2D out;
+	int idx=getContributionIdx(contr);
+	if(idx<0 || mode != dim2)
+		return out;
+	else
+		return containers2D_.at(idx) * norms_.at(idx);
+}
+ztop::container1DUnfold containerStack::getContribution1DUnfold(TString contr){
+	ztop::container1DUnfold out;
+	int idx=getContributionIdx(contr);
+	if(idx<0 || mode != unfolddim1)
+		return out;
+	else
+		return containers1DUnfold_.at(idx) * norms_.at(idx);
+	return out; //prevents warning
+}
+ztop::container1D containerStack::getContributionsBut(TString contr){
+	ztop::container1D out;
+	if(mode != dim1)
+		return out;
+	out=containers_.at(0);
+	out.clear();
+	int i=0;
+	for(std::vector<TString>::iterator name=legends_.begin();name<legends_.end();++name){
+		if(contr != *name) out=out+containers_[i] * norms_[i];
+		i++;
 	}
-      }
-    }
+	return out;
+}
+ztop::container2D containerStack::getContributions2DBut(TString contr){
+	ztop::container2D out;
+	if(mode != dim2)
+		return out;
+	out=containers2D_.at(0);
+	out.clear();
+	int i=0;
+	for(std::vector<TString>::iterator name=legends_.begin();name<legends_.end();++name){
+		if(contr != *name) out=out+containers2D_[i] * norms_[i];
+		i++;
+	}
+	return out;
+}
+ztop::container1DUnfold containerStack::getContributions1DUnfoldBut(TString contr){
+	ztop::container1DUnfold out;
+	if(mode != dim2)
+		return out;
+	out=containers1DUnfold_.at(0);
+	out.clear();
+	int i=0;
+	for(std::vector<TString>::iterator name=legends_.begin();name<legends_.end();++name){
+		if(contr != *name) out=out+containers1DUnfold_[i] * norms_[i];
+		i++;
+	}
+	return out;
+}
+ztop::container1D containerStack::getContributionsBut(std::vector<TString> contr){
+	ztop::container1D out;
+	if(mode!=dim1)
+		return out;
+	out=containers_.at(0);
+	out.clear();
+	for(unsigned int i=0;i<legends_.size();i++){
+		bool get=true;
+		for(std::vector<TString>::iterator name=contr.begin();name<contr.end();++name){
+			if(*name == legends_[i]){
+				get=false;
+				break;
+			}
+		}
+		if(get) out = out+ containers_[i] * norms_[i];
+	}
+	return out;
+}
+ztop::container2D containerStack::getContributions2DBut(std::vector<TString> contr){
+	ztop::container2D out;
+	if(mode!=dim2)
+		return out;
+	out=containers2D_.at(0);
+	out.clear();
+	for(unsigned int i=0;i<legends_.size();i++){
+		bool get=true;
+		for(std::vector<TString>::iterator name=contr.begin();name<contr.end();++name){
+			if(*name == legends_[i]){
+				get=false;
+				break;
+			}
+		}
+		if(get) out = out+ containers2D_[i] * norms_[i];
+	}
+	return out;
+}
+ztop::container1DUnfold containerStack::getContributions1DUnfoldBut(std::vector<TString> contr){
+	ztop::container1DUnfold out;
+	if(mode!=unfolddim1)
+		return out;
+	out=containers1DUnfold_.at(0);
+	out.clear();
+	for(unsigned int i=0;i<legends_.size();i++){
+		bool get=true;
+		for(std::vector<TString>::iterator name=contr.begin();name<contr.end();++name){
+			if(*name == legends_[i]){
+				get=false;
+				break;
+			}
+		}
+		if(get) out = out+ containers1DUnfold_[i] * norms_[i];
+	}
+	return out;
+}
 
-    std::vector<size_t> out;
+void containerStack::multiplyNorm(TString legendentry, double multi){
+	int i=0;
+	for(std::vector<TString>::iterator name=legends_.begin();name<legends_.end();++name){
+		if(legendentry == *name){
+			norms_[i] = norms_[i] * multi;
+		}
+		i++;
+	}
+}
 
-    if(inverse){
-      out.resize(ordering.size(),0);
-      size_t outidx=ordering.size()-1;
-      for(size_t i=0;i<ordering.size();i++){
-	out.at(outidx)=ordering.at(i);
-	outidx--;
-      }
-    }
-    else{
-      for(size_t i=0;i<ordering.size();i++)
-	out.push_back((size_t) ordering.at(i));
-    }
-    return out;
-  }
+void containerStack::multiplyAllMCNorms(double multiplier){
+	for(unsigned int i=0;i<norms_.size();i++){
+		if(legends_.at(i)!=dataleg_)
+			norms_.at(i)=norms_.at(i) * multiplier;
+	}
+}
+
+void containerStack::addGlobalRelMCError(TString sysname,double error){
+	for(unsigned int i=0;i<containers_.size();i++){
+		if(legends_[i]!=dataleg_) containers_[i].addGlobalRelError(sysname,error);
+	}
+	for(unsigned int i=0;i<containers2D_.size();i++){
+		if(legends_[i]!=dataleg_) containers2D_[i].addGlobalRelError(sysname,error);
+	}
+	for(unsigned int i=0;i<containers1DUnfold_.size();i++){
+		if(legends_[i]!=dataleg_) containers1DUnfold_[i].addGlobalRelError(sysname,error);
+	}
+}
+void containerStack::addMCErrorStack(TString sysname,containerStack errorstack){
+	if(mode!=errorstack.mode){
+		std::cout << "containerStack::addMCErrorStack: stacks must have same type" << std::endl;
+		return;
+	}
+
+	for(unsigned int i=0; i<size();i++){
+		for(unsigned int j=i;j<errorstack.size();j++){
+			errorstack.norms_[j]=1;
+			if(legends_[i] == errorstack.legends_[j] && legends_[i]!=dataleg_){
+				if(mode==dim1){
+				errorstack.containers_[j] = errorstack.containers_[j] * errorstack.norms_[j]; //normalize (in case there is any remultiplication done or something)
+				errorstack.norms_[j]=1;
+				containers_[i] = containers_[i] * norms_[i];
+				norms_[i]=1;
+				containers_[i].addErrorContainer(sysname,errorstack.containers_[j]);
+				}
+				else if(mode==dim2){
+					errorstack.containers2D_[j] = errorstack.containers2D_[j] * errorstack.norms_[j]; //normalize (in case there is any remultiplication done or something)
+					errorstack.norms_[j]=1;
+					containers2D_[i] = containers2D_[i] * norms_[i];
+					norms_[i]=1;
+					containers2D_[i].addErrorContainer(sysname,errorstack.containers2D_[j]);
+				}
+				else if(mode==unfolddim1){
+					errorstack.containers1DUnfold_[j] = errorstack.containers1DUnfold_[j] * errorstack.norms_[j]; //normalize (in case there is any remultiplication done or something)
+					errorstack.norms_[j]=1;
+					containers1DUnfold_[i] = containers1DUnfold_[i] * norms_[i];
+					norms_[i]=1;
+					containers1DUnfold_[i].addErrorContainer(sysname,errorstack.containers1DUnfold_[j]);
+				}
+				else{
+					std::cout << "containerStack::addMCErrorStack: no mode for any Stack set! doing nothing!" << std::endl;
+					return;
+				}
+			}
+		}
+	}
+}
+
+void containerStack::addRelSystematicsFrom(ztop::containerStack stack){
+	for(std::vector<ztop::container1D>::iterator cont=stack.containers_.begin();cont<stack.containers_.end();++cont){
+		TString name=cont->getName();
+		for(unsigned int i=0;i<containers_.size();i++){
+			if(containers_[i].getName() == name){
+				containers_[i].addRelSystematicsFrom(*cont);
+				break;
+			}
+		}
+	}
+	for(std::vector<ztop::container2D>::iterator cont=stack.containers2D_.begin();cont<stack.containers2D_.end();++cont){
+		TString name=cont->getName();
+		for(unsigned int i=0;i<containers2D_.size();i++){
+			if(containers2D_[i].getName() == name){
+				containers2D_[i].addRelSystematicsFrom(*cont);
+				break;
+			}
+		}
+	}
+
+	for(std::vector<ztop::container1DUnfold>::iterator cont=stack.containers1DUnfold_.begin();cont<stack.containers1DUnfold_.end();++cont){
+		TString name=cont->getName();
+		for(unsigned int i=0;i<containers1DUnfold_.size();i++){
+			if(containers1DUnfold_[i].getName() == name){
+				containers1DUnfold_[i].addRelSystematicsFrom(*cont);
+				break;
+			}
+		}
+	}
+}
+
+void containerStack::removeError(TString sysname){
+	for(unsigned int i=0; i<containers_.size();i++){
+		containers_[i].removeError(sysname);
+	}
+	for(unsigned int i=0; i<containers2D_.size();i++){
+		containers2D_[i].removeError(sysname);
+	}
+	for(unsigned int i=0; i<containers1DUnfold_.size();i++){
+		containers1DUnfold_[i].removeError(sysname);
+	}
+}
+
+void containerStack::renameSyst(TString old, TString New){
+	for(unsigned int i=0; i<containers_.size();i++){
+		containers_[i].renameSyst(old,New);
+	}
+	for(unsigned int i=0; i<containers2D_.size();i++){
+		containers2D_[i].renameSyst(old,New);
+	}
+	for(unsigned int i=0; i<containers1DUnfold_.size();i++){
+		containers1DUnfold_[i].renameSyst(old,New);
+	}
+}
+ztop::container1D & containerStack::getContainer(TString name){
+	bool found=false;
+	for(unsigned int i=0;i<containers_.size();i++){
+		if(containers_[i].getName() == name){
+			containers_[i] = containers_[i] * norms_[i];
+			norms_[i] = 1.;
+			found=true;
+			return containers_[i];
+		}
+	}
+	if(!found) std::cout << "containerStack::getContainer: container with name " << name << " not found, returning first container! all names are formatted: c_legendentry" << std::endl;
+	return containers_.at(0);
+}
+ztop::container2D & containerStack::getContainer2D(TString name){
+	bool found=false;
+	for(unsigned int i=0;i<containers2D_.size();i++){
+		if(containers2D_[i].getName() == name){
+			containers2D_[i] = containers2D_[i] * norms_[i];
+			norms_[i] = 1.;
+			found=true;
+			return containers2D_[i];
+		}
+	}
+	if(!found) std::cout << "containerStack::getContainer2D: container with name " << name << " not found, returning first container! all names are formatted: c_legendentry" << std::endl;
+	return containers2D_.at(0);
+}
+ztop::container1DUnfold & containerStack::getContainer1DUnfold(TString name){
+	bool found=false;
+	for(unsigned int i=0;i<containers1DUnfold_.size();i++){
+		if(containers1DUnfold_[i].getName() == name){
+			containers1DUnfold_[i] = containers1DUnfold_[i] * norms_[i];
+			norms_[i] = 1.;
+			found=true;
+			return containers1DUnfold_[i];
+		}
+	}
+	if(!found) std::cout << "containerStack::getContainer1DUnfold: container with name " << name << " not found, returning first container! all names are formatted: c_legendentry" << std::endl;
+	return containers1DUnfold_.at(0);
+}
+ztop::container1D containerStack::getFullMCContainer(){
+	container1D out;
+	if(containers_.size()<1)
+		return out;
+	out=containers_[0];
+	out.clear();
+	for(unsigned int i=0;i<containers_.size();i++){
+		if(legends_[i] != dataleg_) out = out + containers_[i]*norms_[i];
+	}
+	return out;
+}
+ztop::container2D containerStack::getFullMCContainer2D(){
+	container2D out;
+	if(containers2D_.size()<1)
+		return out;
+	out=containers2D_[0];
+	out.clear();
+	for(unsigned int i=0;i<containers2D_.size();i++){
+		if(legends_[i] != dataleg_) out = out + containers2D_[i]*norms_[i];
+	}
+	return out;
+}
+ztop::container1DUnfold containerStack::getFullMCContainer1DUnfold(){
+	container1DUnfold out;
+	if(containers1DUnfold_.size()<1)
+		return out;
+	out=containers1DUnfold_[0];
+	out.clear();
+	for(unsigned int i=0;i<containers1DUnfold_.size();i++){
+		if(legends_[i] != dataleg_) out = out + containers1DUnfold_[i]*norms_[i];
+	}
+	return out;
+}
+
+THStack * containerStack::makeTHStack(TString stackname){
+	if(mode!=dim1){
+		std::cout << "containerStack::makeTHStack: only available for 1dim stacks!" <<std::endl;
+		return 0;
+	}
+	if(stackname == "") stackname = name_+"_s";
+	THStack *tstack = new THStack(stackname,stackname);
+
+	std::vector<size_t> sorted=sortEntries(false);
+
+	for(unsigned int it=0;it<size();it++){
+		size_t i=sorted.at(it);
+		if(getLegend(i) != dataleg_){
+			container1D tempcont = getContainer(i);
+			tempcont = tempcont * getNorm(i);
+			TH1D * h = (TH1D*)tempcont.getTH1D(getLegend(i)+" "+getName()+"_stack_h")->Clone();
+			h->SetFillColor(getColor(i));
+			for(int bin = 1 ; bin < h->GetNbinsX()+1;bin++){
+				h->SetBinError(bin,0);
+			}
+			tstack->Add(h);
+		}
+	}
+	return  tstack;
+}
+TLegend * containerStack::makeTLegend(bool inverse){
+	if(mode!=dim1){
+		std::cout << "containerStack::makeTLegend: only available for 1dim stacks!" <<std::endl;
+		return 0;
+	}
+	TLegend *leg = new TLegend((Double_t)0.65,(Double_t)0.50,(Double_t)0.95,(Double_t)0.90);
+	leg->Clear();
+	leg->SetFillStyle(0);
+	leg->SetBorderSize(0);
+
+	std::vector<size_t> sorted=sortEntries(inverse);
+
+	for(unsigned int it=0;it<size();it++){
+		size_t i=sorted.at(it);
+		container1D tempcont = getContainer(i);
+		tempcont = tempcont * getNorm(i);
+		TH1D * h = (TH1D*)tempcont.getTH1D(getLegend(i)+" "+getName()+"_leg")->Clone();
+		h->SetFillColor(getColor(i));
+		if(getLegend(i) != dataleg_) leg->AddEntry(h,getLegend(i),"f");
+		else leg->AddEntry(h,getLegend(i),"ep");
+		//  delete h;
+	}
+
+	return leg;
+}
+void containerStack::drawControlPlot(TString name, bool drawxaxislabels, double resizelabels){
+	if(mode!=dim1){
+		std::cout << "containerStack::drawControlPlot: only available for 1dim stacks!" <<std::endl;
+		return;
+	}
+	if(name=="") name=name_;
+	int dataentry=0;
+	bool gotdentry=false;
+	bool gotuf=false;
+	bool gotof=false;
+	for(unsigned int i=0;i<size();i++){ // get datalegend and check if underflow or overflow in any container
+		if(getLegend(i) == dataleg_){
+			dataentry=i;
+			gotdentry=true;
+			if(gotof && gotuf) break;
+		}
+		if(containers_[i].getOverflow() < -0.9){
+			gotof=true;
+			if(gotdentry && gotuf) break;
+		}
+		if(containers_[i].getUnderflow() < -0.9){
+			gotuf=true;
+			if(gotdentry && gotof) break;
+		}
+	}
+	float multiplier=1;
+	double ylow,yhigh,xlow,xhigh;
+	if(gPad){
+		gPad->GetPadPar(xlow,ylow,xhigh,yhigh);
+		multiplier = (float)1/(yhigh-ylow);
+	}
+	containers_[dataentry].setLabelSize(resizelabels * multiplier);
+	TGraphAsymmErrors * g = containers_[dataentry].getTGraph(name);
+	TH1D * h =containers_[dataentry].getTH1D(name+"_h"); // needed to be able to set log scale etc.
+
+	float xmax=containers_[dataentry].getXMax();
+	float xmin=containers_[dataentry].getXMin();
+	h->Draw("AXIS");
+	if(!drawxaxislabels){
+		h->GetXaxis()->SetLabelSize(0);
+	}
+	else {
+		if(gPad){
+			gPad->SetLeftMargin(0.15);
+			gPad->SetBottomMargin(0.15);
+		}
+	}
+	g->Draw("P");
+	makeTHStack(name)->Draw("same");
+	makeMCErrors()->Draw("2");
+	makeTLegend()->Draw("same");
+	g->Draw("e1,P,same");
+	if(gPad) gPad->RedrawAxis();
+
+	if(gPad && drawxaxislabels && containers_[dataentry].getNBins() >0){
+		float yrange=fabs(gPad->GetUymax()-gPad->GetUymin());
+		float xrange = fabs(xmax-xmin);
+		if(gotuf){
+			TLatex * la = new TLatex(containers_[dataentry].getBinCenter(1)-xrange*0.06,gPad->GetUymin()-0.15*yrange,"#leq");
+			la->Draw("same");
+		}
+		if(gotof){
+			TLatex * la2 = new TLatex(containers_[dataentry].getBinCenter(containers_[dataentry].getNBins())+xrange*0.06,gPad->GetUymin()-0.15*yrange,"#leq");
+			la2->Draw("same");
+		}
+	}
+
+}
+
+TGraphAsymmErrors * containerStack::makeMCErrors(){
+	TGraphAsymmErrors * g =getFullMCContainer().getTGraph();
+	g->SetFillStyle(3005);
+	return g;
+}
+
+void containerStack::drawRatioPlot(TString name,double resizelabels){
+	if(mode!=dim1){
+		std::cout << "containerStack::drawRatioPlot: only available for 1dim stacks!" <<std::endl;
+		return;
+	}
+	//prepare container
+	if(name=="") name=name_;
+	int dataentry=0;
+	bool gotdentry=false;
+	bool gotuf=false;
+	bool gotof=false;
+	for(unsigned int i=0;i<size();i++){ // get datalegend and check if underflow or overflow in any container
+		if(getLegend(i) == dataleg_){
+			dataentry=i;
+			gotdentry=true;
+			if(gotof && gotuf) break;
+		}
+		if(containers_[i].getOverflow() < -0.9){
+			gotof=true;
+			if(gotdentry && gotuf) break;
+		}
+		if(containers_[i].getUnderflow() < -0.9){
+			gotuf=true;
+			if(gotdentry && gotof) break;
+		}
+	}
+	container1D data = containers_[dataentry];
+	data.setShowWarnings(false);
+	container1D mc = getFullMCContainer();
+	mc.setShowWarnings(false);
+	//data.setDivideBinomial(false);
+	//mc.setDivideBinomial(false);
+	container1D ratio=data;
+	ratio.clear();
+	ratio.setShowWarnings(false);
+	container1D relmcerr=data;
+	relmcerr.clear();
+	container1D mccopy=mc;
+	for(size_t i=0; i<ratio.getNBins()+1; i++){ //includes underflow right now, doesn't matter
+		relmcerr.setBinContent(i,1.);
+		relmcerr.setBinErrorUp(i,mc.getBinErrorUp(i) / mc.getBinContent(i));
+		relmcerr.setBinErrorDown(i,mc.getBinErrorDown(i) / mc.getBinContent(i));
+		//set mc error to zero for the ratio plot
+		mccopy.setBinErrorUp(i,0);
+		mccopy.setBinErrorDown(i,0);
+	}
+	bool temp=histoContent::divideStatCorrelated;
+	histoContent::divideStatCorrelated =false;
+	ratio = data / mccopy;
+	histoContent::divideStatCorrelated =temp;
+	float multiplier=1;
+	double ylow,yhigh,xlow,xhigh;
+	if(gPad){
+		gPad->GetPadPar(xlow,ylow,xhigh,yhigh);
+		multiplier = (float)1/(yhigh-ylow);
+	}
+	//   multiplier = multiplier * resizelabels;
+	ratio.setLabelSize(multiplier * resizelabels);
+
+	TGraphAsymmErrors * gratio = ratio.getTGraph(name,false,false,true); //don't divide by binwidth, no x errors
+	// rescale axis titles etc.
+	TH1D * h = ratio.getTH1D(name+"_h_r",false); //no bw div
+	h->GetYaxis()->SetTitle("data/MC");
+	h->GetYaxis()->SetRangeUser(0.5,1.5);
+	h->GetYaxis()->SetNdivisions(505);
+	h->GetXaxis()->SetTickLength(0.03 * multiplier);
+	h->Draw("AXIS");
+	gratio->Draw("P");
+	TGraphAsymmErrors * gmcerr = relmcerr.getTGraph(name+"_relerr",false,false,false);
+	gmcerr->SetFillStyle(3005);
+	gmcerr->Draw("2,same");
+	TLine * l = new TLine(mc.getXMin(),1,mc.getXMax(),1);
+	l->Draw("same");
+	float xmax=containers_[dataentry].getXMax();
+	float xmin=containers_[dataentry].getXMin();
+	if(gPad && containers_[dataentry].getNBins() >0){
+		float yrange=fabs(gPad->GetUymax()-gPad->GetUymin());
+		float xrange = fabs(xmax-xmin);
+		if(gotuf){
+			TLatex * la = new TLatex(containers_[dataentry].getBinCenter(1)-xrange*0.06,gPad->GetUymin()-0.15*yrange,"#leq");
+			la->SetTextSize(la->GetTextSize() * multiplier * resizelabels);
+			la->Draw("same");
+		}
+		if(gotof){
+			TLatex * la2 = new TLatex(containers_[dataentry].getBinCenter(containers_[dataentry].getNBins())+xrange*0.06,gPad->GetUymin()-0.15*yrange,"#leq");
+			la2->SetTextSize(la2->GetTextSize() * multiplier * resizelabels);
+			la2->Draw("same");
+		}
+	}
+}
+
+TCanvas * containerStack::makeTCanvas(bool drawratioplot){
+	if(mode!=dim1){
+		std::cout << "containerStack::makeTCanvas: only available for 1dim stacks!" <<std::endl;
+		return 0;
+	}
+	TCanvas * c = new TCanvas(name_+"_c",name_+"_c");
+	if(containerStack::batchmode)
+		c->SetBatch();
+	TH1D * htemp=new TH1D("sometemphisto"+name_,"sometemphisto"+name_,2,0,1); //creates all gPad stuff etc and prevents seg vio, which happens in some cases; weird
+	htemp->Draw();
+	if(!drawratioplot){
+		c->cd();
+		drawControlPlot();
+	}
+	else{
+		double labelresize=1.;
+		double divideat=0.3;
+		c->Divide(1,2);
+		c->SetFrameBorderSize(0);
+		c->cd(1)->SetLeftMargin(0.15);
+		c->cd(1)->SetBottomMargin(0.03);
+		c->cd(1)->SetPad(0,divideat,1,1);
+		drawControlPlot(name_,false,labelresize);
+		c->cd(2)->SetBottomMargin(0.4 * 0.3/divideat);
+		c->cd(2)->SetLeftMargin(0.15);
+		c->cd(2)->SetTopMargin(0);
+		c->cd(2)->SetPad(0,0,1,divideat);
+		gStyle->SetOptTitle(0);
+		drawRatioPlot("",labelresize);
+		c->cd(1)->RedrawAxis();
+	}
+	if(gStyle){
+		gStyle->SetOptTitle(0);
+		gStyle->SetOptStat(0);
+	}
+	delete htemp;
+	return c;
+}
+
+//just perform functions on the containers with same names
+ztop::containerStack containerStack::operator + (containerStack stack){
+	if(mode!=stack.mode){
+		std::cout << "containerStack::operator +: stacks must be of same dimension, returning input" << std::endl;
+		return stack;
+	}
+	for(unsigned int i=0;i<containers_.size();i++){
+		for(unsigned int j=0;j<stack.containers_.size();j++){
+			if(containers_[i].getName() == stack.containers_[j].getName()){
+				stack.containers_[j] = containers_[i] + stack.containers_[j];
+			}
+		}
+	}
+	for(unsigned int i=0;i<containers2D_.size();i++){
+		for(unsigned int j=0;j<stack.containers2D_.size();j++){
+			if(containers2D_[i].getName() == stack.containers2D_[j].getName()){
+				stack.containers2D_[j] = containers2D_[i] + stack.containers2D_[j];
+			}
+		}
+	}
+	for(unsigned int i=0;i<containers1DUnfold_.size();i++){
+		for(unsigned int j=0;j<stack.containers1DUnfold_.size();j++){
+			if(containers1DUnfold_[i].getName() == stack.containers1DUnfold_[j].getName()){
+				stack.containers1DUnfold_[j] = containers1DUnfold_[i] + stack.containers1DUnfold_[j];
+			}
+		}
+	}
+	return stack;
+}
+ztop::containerStack containerStack::operator - (containerStack stack){
+	if(mode!=stack.mode){
+		std::cout << "containerStack::operator -: stacks must be of same dimension, returning input" << std::endl;
+		return stack;
+	}
+	for(unsigned int i=0;i<containers_.size();i++){
+		for(unsigned int j=0;j<stack.containers_.size();j++){
+			if(containers_[i].getName() == stack.containers_[j].getName()){
+				stack.containers_[j] = containers_[i] - stack.containers_[j];
+			}
+		}
+	}
+	for(unsigned int i=0;i<containers2D_.size();i++){
+		for(unsigned int j=0;j<stack.containers2D_.size();j++){
+			if(containers2D_[i].getName() == stack.containers2D_[j].getName()){
+				stack.containers2D_[j] = containers2D_[i] - stack.containers2D_[j];
+			}
+		}
+	}
+	for(unsigned int i=0;i<containers1DUnfold_.size();i++){
+		for(unsigned int j=0;j<stack.containers1DUnfold_.size();j++){
+			if(containers1DUnfold_[i].getName() == stack.containers1DUnfold_[j].getName()){
+				stack.containers1DUnfold_[j] = containers1DUnfold_[i] - stack.containers1DUnfold_[j];
+			}
+		}
+	}
+	return stack;
+}
+ztop::containerStack containerStack::operator / (containerStack  stack){
+	if(mode!=stack.mode){
+		std::cout << "containerStack::operator /: stacks must be of same dimension, returning input" << std::endl;
+		return stack;
+	}
+	for(unsigned int i=0;i<containers_.size();i++){
+		for(unsigned int j=0;j<stack.containers_.size();j++){
+			if(containers_[i].getName() == stack.containers_[j].getName()){
+				stack.containers_[j] = containers_[i] / stack.containers_[j];
+			}
+		}
+	}
+	for(unsigned int i=0;i<containers2D_.size();i++){
+		for(unsigned int j=0;j<stack.containers2D_.size();j++){
+			if(containers2D_[i].getName() == stack.containers2D_[j].getName()){
+				stack.containers2D_[j] = containers2D_[i] / stack.containers2D_[j];
+			}
+		}
+	}
+	for(unsigned int i=0;i<containers1DUnfold_.size();i++){
+		for(unsigned int j=0;j<stack.containers1DUnfold_.size();j++){
+			if(containers1DUnfold_[i].getName() == stack.containers1DUnfold_[j].getName()){
+				stack.containers1DUnfold_[j] = containers1DUnfold_[i] / stack.containers1DUnfold_[j];
+			}
+		}
+	}
+	return stack;
+}
+ztop::containerStack containerStack::operator * (containerStack  stack){
+	if(mode!=stack.mode){
+		std::cout << "containerStack::operator /: stacks must be of same dimension, returning input" << std::endl;
+		return stack;
+	}
+	for(unsigned int i=0;i<containers_.size();i++){
+		for(unsigned int j=0;j<stack.containers_.size();j++){
+			if(containers_[i].getName() == stack.containers_[j].getName()){
+				stack.containers_[j] = containers_[i] * stack.containers_[j];
+			}
+		}
+	}
+	for(unsigned int i=0;i<containers2D_.size();i++){
+		for(unsigned int j=0;j<stack.containers2D_.size();j++){
+			if(containers2D_[i].getName() == stack.containers2D_[j].getName()){
+				stack.containers2D_[j] = containers2D_[i] * stack.containers2D_[j];
+			}
+		}
+	}
+	for(unsigned int i=0;i<containers1DUnfold_.size();i++){
+		for(unsigned int j=0;j<stack.containers1DUnfold_.size();j++){
+			if(containers1DUnfold_[i].getName() == stack.containers1DUnfold_[j].getName()){
+				stack.containers1DUnfold_[j] = containers1DUnfold_[i] * stack.containers1DUnfold_[j];
+			}
+		}
+	}
+	return stack;
+}
+ztop::containerStack containerStack::operator * (double scalar){
+	ztop::containerStack out=*this;
+	for(unsigned int i=0;i<containers_.size();i++) out.containers_[i] = containers_[i] * scalar;
+	for(unsigned int i=0;i<containers2D_.size();i++) out.containers2D_[i] = containers2D_[i] * scalar;
+	for(unsigned int i=0;i<containers1DUnfold_.size();i++) out.containers1DUnfold_[i] = containers1DUnfold_[i] * scalar;
+	return out;
+}
+ztop::containerStack containerStack::operator * (float scalar){
+	return *this * (double)scalar;
+}
+ztop::containerStack containerStack::operator * (int scalar){
+	return *this * (double)scalar;
+}
+
+//rovate memberfunc
+int containerStack::checkLegOrder(){
+	for(std::map<TString,size_t>::iterator it=legorder_.begin();it!=legorder_.end();++it){
+		if(it->second > size()){
+			std::cout << "containerStack::checkLegOrder: "<< name_ << ": legend ordering numbers (" <<it->second << ") need to be <= size of stack! ("<< size()<<")" <<std::endl;
+			return -1;
+		}
+	}
+	return 0;
+}
+
+std::vector<size_t> containerStack::sortEntries(bool inverse){
+
+	std::vector<int> ordering;
+	std::vector<size_t> dontuse;
+
+	ordering.resize(size(),-1);
+	for(unsigned int it=0;it<size();it++){
+		if(checkLegOrder()>-1 && legorder_.find(legends_[it])!=legorder_.end()){
+			ordering.at(legorder_.find(legends_[it])->second)=it;
+			dontuse.push_back(it);
+		}
+	}
+
+
+	for(size_t it=0;it<ordering.size();it++){ //fill rest
+		int ord=ordering.at(it);
+		if(ord<0){ //not yet filled
+			for(size_t newit=0;newit<size();newit++){
+				bool use=true;
+				for(size_t j=0;j<dontuse.size();j++){
+					if(newit == dontuse.at(j))
+						use=false;
+				}
+				if(use){
+					ordering.at(it)=(int)newit;
+				}
+			}
+		}
+	}
+
+	std::vector<size_t> out;
+
+	if(inverse){
+		out.resize(ordering.size(),0);
+		size_t outidx=ordering.size()-1;
+		for(size_t i=0;i<ordering.size();i++){
+			out.at(outidx)=ordering.at(i);
+			outidx--;
+		}
+	}
+	else{
+		for(size_t i=0;i<ordering.size();i++)
+			out.push_back((size_t) ordering.at(i));
+	}
+	return out;
+}
 
 }//namespace

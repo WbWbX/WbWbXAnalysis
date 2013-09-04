@@ -18,16 +18,16 @@ namespace ztop{
 bool container1DUnfold::debug=false;
 std::vector<container1DUnfold*> container1DUnfold::c_list;
 bool container1DUnfold::c_makelist=false;
-bool container1DUnfold::printinfo=false;
+//bool container1DUnfold::printinfo=false;
 
-container1DUnfold::container1DUnfold(): container2D(), xaxis1Dname_(""), yaxis1Dname_(""),tempgen_(TEMPGENDEFAULT),recofill_(true),isMC_(false),flushed_(false),unfold_(0){
+container1DUnfold::container1DUnfold(): container2D(), xaxis1Dname_(""), yaxis1Dname_(""),tempgen_(TEMPGENDEFAULT),recofill_(true),isMC_(false),flushed_(false),binbybin_(false){
 	if(c_makelist){
 		c_list.push_back(this);
 	}
 }
 container1DUnfold::container1DUnfold( std::vector<float> genbins, std::vector<float> recobins, TString name,TString xaxisname,TString yaxisname, bool mergeufof):
-				container2D( genbins , recobins , name,xaxisname+"_reco",xaxisname+"_gen",mergeufof), xaxis1Dname_(xaxisname), yaxis1Dname_(yaxisname),
-				tempgen_(TEMPGENDEFAULT),recofill_(true),isMC_(false),flushed_(false),unfold_(0) {
+						container2D( genbins , recobins , name,xaxisname+"_reco",xaxisname+"_gen",mergeufof), xaxis1Dname_(xaxisname), yaxis1Dname_(yaxisname),
+						tempgen_(TEMPGENDEFAULT),recofill_(true),isMC_(false),flushed_(false),binbybin_(false) {
 	//bins are set, containers created, at least conts_[0] exists with all options (binomial, mergeufof etc)
 	gencont_=conts_.at(0);
 	gencont_.clear();
@@ -45,12 +45,29 @@ container1DUnfold::~container1DUnfold(){
 			c_list.erase(c_list.begin()+i);
 		break;
 	}
+	/*
 	if(unfold_) delete unfold_;
 	for(size_t i=0;i<unfolds_.size();i++)
 		if(unfolds_.at(i)) delete unfolds_.at(i);
+		*/
 }
-
-
+/*
+void container1DUnfold::subdivideRecoBins(int div){
+	std::vector<float> out;
+	for(size_t i=0;i<xbins_.size()-1;i++){
+		float width=bins.at(i+1)-bins.at(i);
+		if(i<bins.size()-2){
+			for(size_t j=0;j<div;j++)
+				out.push_back(bins.at(i)+j*width/div);
+		}
+		else{
+			for(size_t j=0;j<=div;j++)
+				out.push_back(bins.at(i)+j*width/div);
+		}
+	}
+	return out;
+}
+ */
 container1DUnfold container1DUnfold::operator + (const container1DUnfold & second){
 	if(second.xbins_ != xbins_ || second.ybins_ != ybins_){
 		std::cout << "container1DUnfold::operator +: "<< name_ << " and " << second.name_<<" must have same binning! returning *this" << std::endl;
@@ -135,19 +152,19 @@ void container1DUnfold::setDivideBinomial(bool binomial){
 	refolded_.setDivideBinomial(binomial);
 	divideBinomial_=binomial;
 }
-void container1DUnfold::addErrorContainer(const TString & sysname,const container1DUnfold & cont,double weight,bool ignoreMCStat){
+void container1DUnfold::addErrorContainer(const TString & sysname,const container1DUnfold & cont,double weight){
 	if(xbins_ != cont.xbins_ || ybins_ != cont.ybins_){
 		std::cout << "container1DUnfold::addErrorContainer: " << name_ << " and " << cont.name_ << " must have same x and y axis!" << std::endl;
 	}
 	for(size_t i=0;i<conts_.size();i++)
-		conts_.at(i).addErrorContainer(sysname,cont.conts_.at(i),weight,ignoreMCStat);
-	gencont_.addErrorContainer(sysname,cont.gencont_,weight,ignoreMCStat);
-	datacont_.addErrorContainer(sysname,cont.datacont_,weight,ignoreMCStat);
-	unfolded_.addErrorContainer(sysname,cont.unfolded_,weight,ignoreMCStat);
-	refolded_.addErrorContainer(sysname,cont.refolded_,weight,ignoreMCStat);
+		conts_.at(i).addErrorContainer(sysname,cont.conts_.at(i),weight);
+	gencont_.addErrorContainer(sysname,cont.gencont_,weight);
+	datacont_.addErrorContainer(sysname,cont.datacont_,weight);
+	unfolded_.addErrorContainer(sysname,cont.unfolded_,weight);
+	refolded_.addErrorContainer(sysname,cont.refolded_,weight);
 }
-void container1DUnfold::addErrorContainer(const TString & sysname,const container1DUnfold & cont,bool ignoreMCStat){
-	addErrorContainer(sysname,cont,1,ignoreMCStat);
+void container1DUnfold::addErrorContainer(const TString & sysname,const container1DUnfold & cont){
+	addErrorContainer(sysname,cont,1);
 }
 
 void container1DUnfold::addGlobalRelError(TString name,double relerr){
@@ -170,7 +187,7 @@ void container1DUnfold::addRelSystematicsFrom(const container1DUnfold & cont){
 	unfolded_.addRelSystematicsFrom(cont.datacont_);
 	refolded_.addRelSystematicsFrom(cont.refolded_);
 }
-bool container1DUnfold::checkCongruentBinBoundaries(){
+bool container1DUnfold::checkCongruentBinBoundaries() const{
 	for(size_t xbin=0;xbin<xbins_.size();xbin++){
 		bool fits=false;
 		for(size_t ybin=0;ybin<ybins_.size();ybin++){
@@ -187,7 +204,7 @@ bool container1DUnfold::checkCongruentBinBoundaries(){
 	return true;
 }
 
-container1D container1DUnfold::getPurity(){
+const container1D container1DUnfold::getPurity() const{
 	if(!checkCongruentBinBoundaries()){
 		std::cout << "container1DUnfold::getPurity: plotting purity not possible because of non fitting bin boundaries for " << name_ << std::endl;
 		return container1D();
@@ -217,7 +234,7 @@ container1D container1DUnfold::getPurity(){
 	container1D out;
 	return out;
 }
-container1D container1DUnfold::getStability(bool includeeff){
+const container1D container1DUnfold::getStability(bool includeeff) const{
 	/*if(!checkCongruentBinBoundaries()){
 		std::cout << "container1DUnfold::getStability: plotting purity not possible because of non fitting bin boundaries for " << name_ << std::endl;
 	}
@@ -258,7 +275,7 @@ container1D container1DUnfold::getStability(bool includeeff){
  * TH2D * prepareRespMatrix(bool nominal=true,unsigned int systNumber=0)
  * -prepares matrix and does some checks for nominal or systematic variation
  */
-TH2D * container1DUnfold::prepareRespMatrix(bool nominal,unsigned int systNumber){ //for each syste
+TH2D * container1DUnfold::prepareRespMatrix(bool nominal,unsigned int systNumber) const{ //for each syste
 	if(getNBinsX() < 1 || getNBinsY() <1)
 		return 0;
 	if(!nominal && systNumber>=getSystSize()){
@@ -280,25 +297,28 @@ TH2D * container1DUnfold::prepareRespMatrix(bool nominal,unsigned int systNumber
 	}
 
 	if(nominal)
-		return getTH2D("respMatrix_nominal",false,true);;
+		return getTH2D("respMatrix_nominal",false,true);
 
-/*
- * systematics.
- * naming of histograms changed to make multithreading (maybe) possible
- * assume syst stat of same order as nominal stat.
- */
+	/*
+	 * systematics.
+	 * naming of histograms changed to make multithreading (maybe) possible
+	 * assume syst stat of same order as nominal stat.
+	 */
 	TH2D * h=getTH2DSyst("respMatrix_"+getSystErrorName(systNumber),systNumber,false,true);
 	return h;
 
 }
-
+/*
 int container1DUnfold::unfold(TUnfold::ERegMode regmode, bool LCurve){
 
 
-	/*
-	 *
-	 * preparation nominal
-	 */
+
+	if(binbybin_){
+		std::cout << "container1DUnfold::unfold: doing binByBin unfolding - not really implemented yet" << std::endl;
+
+	}
+
+
 	TH1::AddDirectory(false);
 	if(debug)
 		std::cout << "container1DUnfold::unfold: preparing response matrix" << std::endl;
@@ -330,13 +350,11 @@ int container1DUnfold::unfold(TUnfold::ERegMode regmode, bool LCurve){
 		std::cout << "container1DUnfold::unfold: unfolding done for nominal" << std::endl;
 	//done for nominal
 
-	/*
-	 * prepare loop for systematics
-	 */
+
 	bool dodatasyst=true;
 	if(getDataContainer().getSystSize() != 0 && getDataContainer().getSystSize() != getSystSize()){
 		std::cout << "WARNING! container1DUnfold::unfold: ambiguous association of data systematics and MC systematics. "
-		<< "data will be unfolded without systematic variations." << std::endl;
+				<< "data will be unfolded without systematic variations." << std::endl;
 		dodatasyst=false;
 	}
 	if(getDataContainer().getSystSize() <1){
@@ -367,16 +385,7 @@ int container1DUnfold::unfold(TUnfold::ERegMode regmode, bool LCurve){
 		delete SysResponsematrix;
 		delete SysDatahist;
 	}
-	/*
-	 * there might be an addional loop needed if MC independent data systematics are introduced not given in the list of syst.
-	 * if filling is setup properly, this will not happen
-	 */
 
-
-	/*
-	 * scanning L-Curve loop for systematics.
-	 * parallelise this one!!
-	 */
 	if(debug)
 		std::cout << "container1DUnfold::unfold: scanning L-Curve of systematics" << std::endl;
 	for(size_t sys=0;sys<getSystSize();sys++){
@@ -384,9 +393,7 @@ int container1DUnfold::unfold(TUnfold::ERegMode regmode, bool LCurve){
 			std::cout << "container1DUnfold::unfold: scanning L-Curve of "<< name_ << ": " << getSystErrorName(sys) << std::endl;
 		unfolds_.at(sys)->scanLCurve();
 	}
-	/*
-	 * getting output and merging it into unfolded_ etc. should be ok in serial mode
-	 */
+
 	for(size_t sys=0;sys<getSystSize();sys++){
 		TH1 * huf=unfolds_.at(sys)->getUnfolded();
 		if(!huf){
@@ -401,9 +408,9 @@ int container1DUnfold::unfold(TUnfold::ERegMode regmode, bool LCurve){
 
 
 
-	    return 0;
+	return 0;
 }
-
+*/
 
 ///////////////
 
@@ -412,7 +419,10 @@ void container1DUnfold::flushAllListed(){
 		container1DUnfold::c_list.at(i)->flush();
 }
 
-
+void container1DUnfold::setAllListedMC(bool ISMC){
+	for(size_t i=0;i<container1DUnfold::c_list.size();i++)
+		container1DUnfold::c_list.at(i)->setMC(ISMC);
+}
 
 }
 

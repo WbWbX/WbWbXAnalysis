@@ -14,12 +14,13 @@
 
 namespace ztop{
 
-  class container1DStackVector{
+
+  class containerStackVector{
 
   public:
-    container1DStackVector();
-    container1DStackVector(TString);
-    ~container1DStackVector();
+    containerStackVector();
+    containerStackVector(TString);
+    ~containerStackVector();
     void setName(TString Name){name_=Name;}
     TString getName(){return name_;}
     void setSyst(TString sys){isSyst_=sys;}
@@ -29,19 +30,23 @@ namespace ztop{
     void setLegendOrder(TString , size_t); //do it afterwards
 
     // void add(ztop::container1D &, TString, int, double);
-    void addList( TString, int, double);
     void add(ztop::container1D &, TString, int, double,int legor=-1); //+legorder
-    void addList( TString, int, double,size_t); //+legorder
+    void add(ztop::container2D &, TString, int, double,int legor=-1); //+legorder
+    void add(ztop::container1DUnfold &, TString, int, double,int legor=-1); //+legorder
 
-    std::vector<ztop::container1DStack> getVector(){return stacks_;}
-    ztop::container1DStack getStack(TString);
-    ztop::container1DStack getStack(unsigned int n){return stacks_[n];}
+    void addList( TString, int, double,int legor=-1); //+legorder
+    void addList2D( TString, int, double,int legor=-1);
+    void addList1DUnfold( TString, int, double,int legor=-1);
+
+    std::vector<ztop::containerStack> getVector(){return stacks_;}
+    ztop::containerStack getStack(TString);
+    ztop::containerStack getStack(unsigned int n){return stacks_[n];}
     void removeContribution(TString);
 
-    void addMCErrorStackVector(TString,ztop::container1DStackVector, bool ignoreMCStat=true);
-    void addMCErrorStackVector(ztop::container1DStackVector, bool ignoreMCStat=true);
+    void addMCErrorStackVector(TString,ztop::containerStackVector);
+    void addMCErrorStackVector(ztop::containerStackVector);
     void addGlobalRelMCError(TString,double);
-    void addRelSystematicsFrom(ztop::container1DStackVector);
+    void addRelSystematicsFrom(ztop::containerStackVector);
     void removeError(TString);
     void renameSyst(TString,TString); //! old new
 
@@ -52,24 +57,26 @@ namespace ztop{
     void writeAllToTFile(TString, bool recreate=false, TString treename="stored_objects");
     void writeAllToTFile(TFile * , TString treename="stored_objects");
     void loadFromTree(TTree *, TString);
-    container1DStackVector* getFromTree(TTree *, TString);
+    containerStackVector* getFromTree(TTree *, TString);
     void listAllInTree(TTree *);
 
     void clear(){stacks_.clear();name_="";}
-    static std::vector<container1DStackVector*> csv_list;
+    static std::vector<containerStackVector*> csv_list;
     static bool csv_makelist;
     static void csv_clearlist(){csv_list.clear();}
+    static bool debug;
 
   private:
     TString name_;
     TString isSyst_;
-    std::vector<ztop::container1DStack> stacks_;
+    std::vector<ztop::containerStack> stacks_;
 
 
 
   };
 
 
+  typedef  containerStackVector container1DStackVector;
 }
 
 

@@ -19,10 +19,13 @@ namespace ztop{
 
 class unfolder {
 public:
-	unfolder(){};
+	unfolder() : verb_(false),unfolder_(0),bestLcurve_(0),bestLogTauLogChi2_(0),lcurve_(0),histMunfold_(0),logTauX_(0),logTauY_(0),
+	init_(false),ready_(false),tau_(0),chi2a_(0),chi2l_(0),ndof_(0),ibest_(0),name_(""){}
 	unfolder(TString name);
 	~unfolder();
 
+	void setName(TString name){name_=name;}
+	const TString & getName() const {return name_;}
 
 	unfolder & operator = (const unfolder & rhs){copyfrom(rhs);return *this;}
 	unfolder(const unfolder & rhs){copyfrom(rhs);}
@@ -53,6 +56,11 @@ public:
 	TH1 *histMunfold(){return histMunfold_;}
 	TSpline *logTauX(){return logTauX_;}
 	TSpline *logTauY(){return logTauY_;}
+
+	/* functions like:
+	 *
+	 * -drawLCurve ...
+	 */
 
 
 private:

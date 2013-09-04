@@ -56,7 +56,7 @@ container2D::container2D( std::vector<float> xbins,std::vector<float> ybins, TSt
 
 	for(size_t i=0;i<ybins_.size();i++){ //OF and UF
 		container1D temp(xbins,"","","",mergeufof);
-		temp.setDivideBinomial(divideBinomial_);
+		//temp.setDivideBinomial(divideBinomial_);
 		conts_.push_back(temp);
 	}
 	xbins_=conts_.at(0).getBins();
@@ -69,71 +69,70 @@ container2D::container2D( std::vector<float> xbins,std::vector<float> ybins, TSt
 		c_list.push_back(this);
 }
 
-double container2D::getBinContent(int xbin,int ybin){
+const double &container2D::getBinContent(const size_t & xbin,const size_t & ybin) const{
 	if((unsigned int)xbin>xbins_.size() || (unsigned int)ybin> ybins_.size()){
 		std::cout << "container2D::getBinContent: xbin or ybin is out of range!! return -1" << std::endl;
-		return -1.;
 	}
 	return conts_.at(ybin).getBinContent(xbin);
 }
-double container2D::getBinEntries(int xbin, int ybin){
-	if(ybin<0 || (unsigned int)ybin>ybins_.size()){
-		std::cout << "container2D::getBinEntries: ybin out of range! return -1" << std::endl;
-		return -1.;
+const size_t &container2D::getBinEntries(const size_t & xbin, const size_t & ybin) const{
+	if(ybin>=ybins_.size()){
+		std::cout << "container2D::getBinEntries: ybin out of range! return " << std::endl;
 	}
 	return conts_.at(ybin).getBinEntries(xbin);
 }
-double container2D::getBinErrorUp(int xbin, int ybin, bool onlystat,TString limittosys){
-	if(ybin<0 || (unsigned int)ybin>ybins_.size()){
+double container2D::getBinErrorUp(const size_t & xbin, const size_t & ybin, bool onlystat,TString limittosys) const{
+	if(ybin>=ybins_.size()){
 		std::cout << "container2D::getBinErrorUp: ybin out of range! return -1" << std::endl;
-		return -1.;
 	}
 	return conts_.at(ybin).getBinErrorUp(xbin,  onlystat, limittosys);
 }
-double container2D::getBinErrorDown(int xbin, int ybin, bool onlystat,TString limittosys){
-	if(ybin<0 || (unsigned int)ybin>ybins_.size()){
+double container2D::getBinErrorDown(const size_t & xbin, const size_t & ybin, bool onlystat,TString limittosys) const{
+	if(ybin>=ybins_.size()){
 		std::cout << "container2D::getBinErrorDown: ybin out of range! return -1" << std::endl;
-		return -1.;
 	}
 	return conts_.at(ybin).getBinErrorDown(xbin,  onlystat, limittosys);
 }
-double container2D::getBinError(int xbin, int ybin, bool onlystat,TString limittosys){
-	if(ybin<0 || (unsigned int)ybin>ybins_.size()){
+double container2D::getBinError(const size_t & xbin, const size_t & ybin, bool onlystat,TString limittosys) const{
+	if(ybin>=ybins_.size()){
 		std::cout << "container2D::getBinError: ybin out of range! return -1" << std::endl;
-		return -1.;
 	}
 	return conts_.at(ybin).getBinError(xbin,  onlystat, limittosys);
 }
 
-double  container2D::getSystError(unsigned int number, int xbin, int ybin){
-	if((size_t)ybin>=ybins_.size() || (size_t)xbin>=xbins_.size()){
+ double container2D::getSystError(unsigned int number, const size_t & xbin, const size_t & ybin) const{
+	if(ybin>=ybins_.size() || xbin>=xbins_.size()){
+		std::cout << "container2D::getSystError: xbin or ybin out of range" << std::endl;
+	}
+	const container1D * c=&conts_.at(ybin);
+	return c->getSystError(number,xbin);
+}
+double  container2D::getSystErrorStat(unsigned int number, const size_t & xbin, const size_t & ybin) const{
+	if(ybin>=ybins_.size() || xbin>=xbins_.size()){
 		std::cout << "container2D::getSystError: xbin or ybin out of range" << std::endl;
 		return 0;
 	}
-	container1D * c=&conts_.at((size_t)ybin);
-	return c->getSystError(number,xbin);
+	const container1D * c=&conts_.at(ybin);
+	return c->getSystErrorStat(number,xbin);
 }
-TString  container2D::getSystErrorName(unsigned int number){
+const TString & container2D::getSystErrorName(const size_t & number) const{
 	if(conts_.size()<1){
-		std::cout << "container2D::getSystError: number "<< number << " out of range (" << getSystSize()-1 << ")"<< std::endl;
-		return "";
-	}
-	if(conts_.at(0).getSystSize()<1){
-
-		return "";
+		std::cout << "container2D::getSystError: number "<< number << " out of range (" << (int)getSystSize()-1 << ")"<< std::endl;
+		return name_;
 	}
 	return conts_.at(0).getSystErrorName(number);
 }
-double container2D::projectBinContentToY(int ybin,bool includeUFOF){
+/*
+ double container2D::projectBinContentToY(const size_t & ybin,bool includeUFOF) const{
 	if((size_t)ybin >= ybins_.size()){
 		std::cout << "container2D::projectBinToY: ybin out of range" << std::endl;
 		return 0;
 	}
-	container1D * c=&conts_.at(ybin);
+	const container1D * c=&conts_.at(ybin);
 	return c->integral(includeUFOF);
 
 }
-double container2D::projectBinContentToX(int xbin,bool includeUFOF){
+ double container2D::projectBinContentToX(const size_t & xbin,bool includeUFOF) const{
 	if((size_t)xbin >= xbins_.size()){
 		std::cout << "container2D::projectBinToX: xbin out of range" << std::endl;
 	}
@@ -152,38 +151,69 @@ double container2D::projectBinContentToX(int xbin,bool includeUFOF){
 	}
 	return content;
 }
-container1D container2D::projectToX(bool includeUFOF){
+ */
+/**
+ * container2D::projectToX(bool includeUFOF=false)
+ */
+container1D container2D::projectToX(bool includeUFOF) const{
+	bool tempc_makelist=container1D::c_makelist;
+	container1D::c_makelist=false;
 	if(ybins_.size()<2 || xbins_.size()<2){//not real container
 		std::cout << "container2D::projectToX: plotting purity not possible because of too less bins for " << name_ << std::endl;
+		container1D::c_makelist=tempc_makelist;
 		return container1D();
 	}
-
-return container1D();
+	size_t minc=0, maxc=ybins_.size()-1;
+	if(!includeUFOF){
+		minc++; maxc--;
+	}
+	bool temp=histoContent::addStatCorrelated; //bin stats NOT correlated
+	histoContent::addStatCorrelated=false;
+	container1D out = conts_.at(0);
+	out.clear(); //empty. only binning remains
+	for(size_t i=minc;i<=maxc;i++)
+		out += conts_[i];
+	histoContent::addStatCorrelated=temp;
+	container1D::c_makelist=tempc_makelist;
+	return out;
 }
-container1D container2D::projectToY(bool includeUFOF){
-	bool temp=container1D::c_makelist;
+/**
+ * container2D::projectToY(bool includeUFOF=false)
+ */
+container1D container2D::projectToY(bool includeUFOF) const{
+	bool tempc_makelist=container1D::c_makelist;
 	container1D::c_makelist=false;
 	if(ybins_.size()<2 || xbins_.size()<2){//not real container
 		std::cout << "container2D::projectToY: plotting purity not possible because of too less bins for " << name_ << std::endl;
-		container1D out;
-		container1D::c_makelist=temp;
-		return out;
+		container1D::c_makelist=tempc_makelist;
+		return container1D();
 	}
 	std::vector<float> newbins=ybins_;
 	newbins.erase(newbins.begin()); //erase underflow
-	container1D out(newbins,name_+"_yProjection",yaxisname_,""); //underflow recreated
-	for(int ybin=0;ybin<(int)ybins_.size();ybin++){
-		int xbincont=ybin;
-		container1D * ycont=&conts_.at(ybin);
-		double content=ycont->integral(includeUFOF);
-		//double staterr=ycont
-		//ycont->sys
-
-		///UNDER CONSTR
+	container1D layercont(newbins,name_+"_yProjection",yaxisname_,"");//underflow recreated
+	container1D out;
+	bool temp=histoContent::addStatCorrelated; //bin stats NOT correlated
+	histoContent::addStatCorrelated=false;
+	for(int systLayer=-1;systLayer<(int) conts_.at(0).contents_.layerSize();systLayer++){
+		for(size_t ybin=0;ybin<ybins_.size();ybin++){
+			const container1D * ycont=&conts_[ybin];
+			const double &content=ycont->integral(includeUFOF,systLayer);
+			const double &staterr=ycont->integralStat(includeUFOF,systLayer);
+			const size_t &entries=ycont->integralEntries(includeUFOF,systLayer);
+			layercont.setBinContent(ybin,content); //fill in nominal
+			layercont.setBinStat(ybin,staterr); //fill in nominal
+			layercont.setBinEntries(ybin,entries);
+		}
+		if(systLayer>=0){
+			const TString& name=getSystErrorName((size_t)systLayer);
+			out.addErrorContainer(name,layercont);
+		}
+		else{
+			out=layercont;
+		}
 	}
-
-
-	container1D::c_makelist=temp;
+	histoContent::addStatCorrelated=temp;
+	container1D::c_makelist=tempc_makelist;
 	return out;
 }
 
@@ -195,16 +225,16 @@ container1D container2D::projectToY(bool includeUFOF){
  * may even use other graphic representations as root
  * in principle drawing of systematics etc can be managed by the class .setDrawStatOnly, .drawSyst...., .setStyle, .setStyle.setMarker/Line.... (style is own new struct/class)
  */
-TH2D * container2D::getTH2D(TString name, bool dividebybinwidth, bool onlystat){
+TH2D * container2D::getTH2D(TString name, bool dividebybinwidth, bool onlystat) const{
 	if(getNBinsX() < 1 || getNBinsY() <1)
 		return 0; //there is not even one real, non OF or UF container
 	if(dividebybinwidth)
 		std::cout << "container2D::getTH2D: dividebybinwidth not supported yet!!" << std::endl;
 
 	TH2D * h=new TH2D(name,name,getNBinsX(),&(xbins_.at(1)),getNBinsY(),&(ybins_.at(1)));
-	double entries=0;
-	for(int xbin=0;xbin<=getNBinsX()+1;xbin++){ // 0 underflow, genBins+1 overflow included!!
-		for(int ybin=0;ybin<=getNBinsY()+1;ybin++){
+	size_t entries=0;
+	for(size_t xbin=0;xbin<=getNBinsX()+1;xbin++){ // 0 underflow, genBins+1 overflow included!!
+		for(size_t ybin=0;ybin<=getNBinsY()+1;ybin++){
 			entries+=getBinEntries(xbin,ybin);
 			double cont=getBinContent(xbin,ybin);
 			h->SetBinContent(xbin,ybin,cont);
@@ -219,15 +249,18 @@ TH2D * container2D::getTH2D(TString name, bool dividebybinwidth, bool onlystat){
 /**
  * TH2D * container2D::getTH2DSyst(TString name, unsigned int systNo, bool dividebybinwidth=false, bool statErrors=false)
  */
-TH2D * container2D::getTH2DSyst(TString name, unsigned int systNo, bool dividebybinwidth, bool statErrors){
+TH2D * container2D::getTH2DSyst(TString name, unsigned int systNo, bool dividebybinwidth, bool statErrors) const{
 	TH2D * h=getTH2D(name,dividebybinwidth,true);
 	if(!h) return 0;
 
-	for(int xbin=0;xbin<=getNBinsX()+1;xbin++){ // 0 underflow, genBins+1 overflow included!!
-		for(int ybin=0;ybin<=getNBinsY()+1;ybin++){
+	for(size_t xbin=0;xbin<=getNBinsX()+1;xbin++){ // 0 underflow, genBins+1 overflow included!!
+		for(size_t ybin=0;ybin<=getNBinsY()+1;ybin++){
 			double cont=getBinContent(xbin,ybin)+getSystError(systNo,xbin,ybin);
 			h->SetBinContent(xbin,ybin,cont);
-			if(!statErrors)
+			double stat=getSystErrorStat(systNo,xbin,ybin);
+			if(statErrors)
+				h->SetBinError(xbin,ybin,stat);
+			else
 				h->SetBinError(xbin,ybin,0);
 		}
 	}
@@ -235,9 +268,10 @@ TH2D * container2D::getTH2DSyst(TString name, unsigned int systNo, bool divideby
 
 }
 void container2D::setDivideBinomial(bool binomial){
-	for(size_t i=0;i<conts_.size();i++)
+	std::cout << "container2D::setDivideBinomial: obsolete / switch on static histoContent options" <<std::endl;
+	/*for(size_t i=0;i<conts_.size();i++)
 		conts_.at(i).setDivideBinomial(binomial);
-	divideBinomial_=binomial;
+	divideBinomial_=binomial;*/
 }
 
 
@@ -266,10 +300,6 @@ container2D container2D::operator - (const container2D & second){
 container2D container2D::operator / (const container2D & second){
 	if(second.xbins_ != xbins_ || second.ybins_ != ybins_){
 		std::cout << "container2D::operator /: "<< name_ << " and " << second.name_<<" must have same binning! returning *this"  << std::endl;
-		return *this;
-	}
-	if(second.divideBinomial_!=divideBinomial_){
-		std::cout << "container2D::operator /: "<< name_ << " and " << second.name_<<" must have same divide option (divideBinomial). returning *this" <<  std::endl;
 		return *this;
 	}
 	container2D out=second;
@@ -302,17 +332,17 @@ container2D container2D::operator * (float val){
 container2D container2D::operator * (int val){
 	return *this * (double) val;
 }
-void container2D::addErrorContainer(const TString & sysname,const container2D & second ,double weight,bool ignoreMCStat){
+void container2D::addErrorContainer(const TString & sysname,const container2D & second ,double weight){
 	if(second.xbins_ != xbins_ || second.ybins_ != ybins_){
 		std::cout << "container2D::addErrorContainer "<< name_ << " and " << second.name_<<" must have same binning!"  << std::endl;
 		return;
 	}
 	for(size_t i=0;i<conts_.size();i++){
-		conts_.at(i).addErrorContainer(sysname, second.conts_.at(i),weight, ignoreMCStat);
+		conts_.at(i).addErrorContainer(sysname, second.conts_.at(i),weight);
 	}
 }
-void container2D::addErrorContainer(const TString & sysname,const container2D & second ,bool ignoreMCStat){
-	addErrorContainer(sysname,second , 1,ignoreMCStat);
+void container2D::addErrorContainer(const TString & sysname,const container2D & second ){
+	addErrorContainer(sysname,second , 1);
 }
 void container2D::addRelSystematicsFrom(const container2D & second){
 	if(second.xbins_ != xbins_ || second.ybins_ != ybins_){

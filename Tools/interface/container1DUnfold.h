@@ -10,14 +10,11 @@
 
 #include "container2D.h"
 #include <iostream>
-#include "TSpline.h"
-#include "unfolder.h"
 
 /**
  * Warning:
- * due to internal reasons, statistics on systematic variation are NOT accounted for.
- * To change this, the whole container1D substructure would need to be changed
- * ->do in future
+ * due to internal reasons, statistics on systematic variation are NOW accounted for
+ *
  */
 
 /*
@@ -37,6 +34,7 @@ public:
 
 	~container1DUnfold();
 
+	//void subdivideRecoBins(int div);
 
 	void clear(){container2D::clear(); gencont_.clear(); datacont_.clear();}
 	void reset(){container2D::reset(); gencont_.reset();datacont_.reset();}
@@ -50,9 +48,10 @@ public:
 	void setMC(bool ismc){isMC_=ismc; if(!isMC_) flushed_=true;}
 	bool getMC(){return isMC_;}
 
+	void setBinByBin(bool bbb){binbybin_=bbb;}
 
-	container1D getGenContainer(){return gencont_;}
-	container1D getDataContainer(){return datacont_;}
+	const container1D & getGenContainer() const {return gencont_;}
+	const container1D & getDataContainer() const {return datacont_;}
 
 
 	void setDataContainer(container1D cont){datacont_=cont;}
@@ -69,35 +68,39 @@ public:
 
     void setDivideBinomial(bool);
 
-    void addErrorContainer(const TString & ,const container1DUnfold &,double weight,bool ignoreMCStat=true);  //! adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down"
-    void addErrorContainer(const TString & ,const container1DUnfold &,bool ignoreMCStat=true);  //! adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down"
+    void addErrorContainer(const TString & ,const container1DUnfold &,double weight);  //! adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down"
+    void addErrorContainer(const TString & ,const container1DUnfold &);  //! adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down"
     void addRelSystematicsFrom(const container1DUnfold &);
     void addGlobalRelError(TString,double);
 
     static std::vector<container1DUnfold *> c_list;
     static bool debug;
     static bool c_makelist;
-    static bool printinfo;
 
     /**
      * does nothing for data where flushed_ is always true
      */
     void flush(){if(!flushed_) flushMC();flushed_=true;}
-
+/*
     int unfold(TUnfold::ERegMode regmode=TUnfold::kRegModeCurvature, bool LCurve=true);
+*/
+    const container1D & getUnfolded() const {return unfolded_;}
+    const container1D & getRefolded() const {return refolded_;}
 
-    container1D getUnfolded(){return unfolded_;}
-    container1D getRefolded(){return refolded_;}
+    void setUnfolded(const container1D & UF)  { unfolded_=UF;}
+    void setRefolded(const container1D & RF)  { refolded_=RF;}
 
-    container1D getPurity();
-    container1D getStability(bool includeeff);
-    bool checkCongruentBinBoundaries();
+    const container1D getPurity() const;
+    const container1D getStability(bool includeeff) const;
+    bool checkCongruentBinBoundaries() const;
 
-    TH2D * prepareRespMatrix(bool nominal=true,unsigned int systNumber=0);
+    TH2D * prepareRespMatrix(bool nominal=true,unsigned int systNumber=0) const;
 
-    unfolder * getUnfolder(int num=-1){if(num<0) return unfold_;else return unfolds_.at(num);}
+//    unfolder * getUnfolder(int num=-1){if(num<0) return unfold_;else return unfolds_.at(num);}
 
     static void flushAllListed();
+    static void setAllListedMC(bool ISMC);
+
 
 private:
 
@@ -114,13 +117,14 @@ private:
 
    bool isMC_;
    bool flushed_;
+   bool binbybin_;
 
    container1D gencont_,datacont_,unfolded_,refolded_;
-
+/*
    //destructor safe
    unfolder * unfold_;
    std::vector<unfolder *> unfolds_;
-
+*/
    //some functions that should not be used although inherited
    void addErrorContainer(const TString & ,const container2D &,double,bool){}
    void addErrorContainer(const TString &,const container2D & ,bool){}
