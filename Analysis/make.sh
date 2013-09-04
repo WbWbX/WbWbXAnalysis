@@ -33,6 +33,9 @@ linklibs="$linklibs -l${libs[${i}]}"
 cp ${CMSLIBS}lib${libs[${i}]}.so $libdir
 done
 
+if [ $1 ];
+then
+
 echo compiling analyse.C
 infile=analyse.C
 
@@ -45,3 +48,7 @@ echo compiling mergeSyst.cc
 
 g++ $ROOTFLAGS -fopenmp -I$CPLUS_INCLUDE_PATH -c -o $infile.o $infile
 g++ -o mergeSyst.exe -fopenmp -Wall $ROOTLIBS -Llib$linklibs $infile.o
+
+else
+	echo "only compiled analyzer code, NOT steering program (analyse.exe)"
+fi

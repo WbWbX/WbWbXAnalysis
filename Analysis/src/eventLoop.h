@@ -16,12 +16,16 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 	using namespace std;
 	using namespace ztop;
 
+	containerStackVector::debug=true;
 
 	bool isMC=true;
 	if(legendname==dataname_) isMC=false;
 
 
 	//check if file exists
+	if(testmode_)
+		std::cout << "testmode("<< anaid << "): check input file" << std::endl;
+
 	TFile *f;
 	if(!fileExists((datasetdirectory_+inputfile).Data())){
 		std::cout << datasetdirectory_+inputfile << " not found!!" << std::endl;
@@ -37,6 +41,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
 	//   define binnings
 
+	if(testmode_)
+		std::cout << "testmode("<< anaid << "): defining bins" << std::endl;
 
 	vector<float> drbins;
 	for(float i=0;i<40;i++) drbins << i/40;
@@ -75,7 +81,10 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 	for(float i=0;i<120;i++) bsfs <<  (i/100);
 
 	vector<float> mlb_bins;
-	for(float i=0;i<35;i++) mlb_bins << i*10;
+	vector<float> genmlb_bins;
+	for(float i=0;i<350;i+=10) mlb_bins << i;
+	for(float i=0;i<350;i+=35) genmlb_bins << i;
+
 
 	vector<float> phi_bins;
 	for(float i=-3.1415;i<=3.1415;i+=3.1415/20) phi_bins << i;
@@ -89,7 +98,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
 	/// comment: rearrange to object clusters!!   PER BINWIDTH!!!!! HAS TO BE ADDED!!
 
-
+	if(testmode_)
+		std::cout << "testmode("<< anaid << "): preparing container1Ds" << std::endl;
 
 	container1D::c_clearlist(); // should be empty just in case
 	container1D::c_makelist=true; //switch on automatic listing
@@ -286,19 +296,33 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
 	container1D::c_makelist=false; //switch off automatic listing
 
+	if(testmode_)
+		std::cout << "testmode("<< anaid << "): preparing container1DUnfolds" << std::endl;
+
+	//////////////UNFOLDING DISTRIBUTIONS/////////////
+	container1DUnfold::c_makelist=true;
+
+	container1DUnfold unf_mlb(genmlb_bins,mlb_bins,"m_lb unfold","M_{lb} [GeV]", "N_{evt}");
+
+
+	container1DUnfold::setAllListedMC(isMC);
+	container1DUnfold::c_makelist=false;
+
 
 	//setting the right normalisation for MC and the histos for inclusive cross section determination
 	double oldnorm=norm;
 
 	double genentries=0;
 	if(isMC){
+		if(testmode_)
+			std::cout << "testmode("<< anaid << "): getting genTree for normalisation" << std::endl;
 
 		TTree * tnorm = (TTree*) f->Get("preCutPUInfo/preCutPUInfo");
 		genentries=tnorm->GetEntries();
 
 		delete tnorm;
 		norm = lumi_ * norm / genentries;
-		for(int i=1;i<=generated.getNBins();i++){
+		for(size_t i=1;i<=generated.getNBins();i++){
 			generated.setBinContent(i, genentries);
 			generated.setBinError(i, sqrt(genentries));
 		}
@@ -306,13 +330,13 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 		TTree * tfgen = (TTree*) f->Get("postCutPUInfo/PUTreePostCut");
 		if(tfgen){
 			fgen=tfgen->GetEntries();
-			for(int i=1;i<=generated2.getNBins();i++){
+			for(size_t i=1;i<=generated2.getNBins();i++){
 				generated2.setBinContent(i, fgen);
 				generated2.setBinError(i, sqrt(fgen));
 			}
 		}
 		else{
-			for(int i=1;i<=generated.getNBins();i++){
+			for(size_t i=1;i<=generated.getNBins();i++){
 				generated2.setBinContent(i, genentries);
 				generated2.setBinError(i, sqrt(genentries));
 			}
@@ -320,11 +344,11 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
 	}
 	else{//not mc
-		for(int i=1;i<=generated.getNBins();i++){
+		for(size_t i=1;i<=generated.getNBins();i++){
 			generated.setBinContent(i, 0);
 			generated.setBinError(i, 0);
 		}
-		for(int i=1;i<=generated2.getNBins();i++){
+		for(size_t i=1;i<=generated2.getNBins();i++){
 			generated2.setBinContent(i, 0);
 			generated2.setBinError(i, 0);
 		}
@@ -332,22 +356,28 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 	}
 
 	/////////////////////////// configure scalefactors ////
+	if(testmode_)
+		std::cout << "testmode("<< anaid << "):  configuring scalefactors" << std::endl;
+
 
 	getElecSF()->setIsMC(isMC);
 	getMuonSF()->setIsMC(isMC);
 	getTriggerSF()->setIsMC(isMC);
 
 	//init b-tag scale factor utility
+	if(testmode_)
+		std::cout << "testmode("<< anaid << "): preparing btag SF" << std::endl;
 
 	if(getBTagSF()->setSampleName(toString(inputfile)) < 0){
 		p_finished.get(anaid)->pwrite(-2);
 		return;
 	}
 
-	cout << "running on: " << datasetdirectory_ << inputfile << "    legend: " << legendname << "\nxsec: " << oldnorm << ", genEvents: " << genentries <<endl;
+	//cout << "running on: " << datasetdirectory_ << inputfile << "    legend: " << legendname << "\nxsec: " << oldnorm << ", genEvents: " << genentries <<endl;
 	// get main analysis tree
 
 	/////////open main tree and prepare collections
+
 
 	TTree * t = (TTree*) f->Get("PFTree/PFTree");
 
@@ -423,11 +453,16 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 	///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
 
+	if(testmode_)
+		std::cout << "testmode("<< anaid << "): starting main loop" << std::endl;
+
+
 	Long64_t nEntries=t->GetEntries();
 	if(norm==0) nEntries=0; //skip for norm0
 	if(testmode_) nEntries*=0.01;
 	for(Long64_t entry=0;entry<nEntries;entry++){
-		if(showstatusbar_) displayStatusBar(entry,nEntries);
+		//if(showstatusbar_) displayStatusBar(entry,nEntries);
+
 
 		if((entry +1)* 100 % nEntries <100){
 			int status=(entry+1) * 100 / nEntries;
@@ -437,44 +472,83 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 		b_Event->GetEntry(entry);
 		double puweight=1;
 		if (isMC) puweight = getPUReweighter()->getPUweight(pEvent->truePU());
+		if(testmode_ && entry==0)
+			std::cout << "testmode("<< anaid << "): got first event entry" << std::endl;
+
 
 		puweight0.fill(puweight,puweight);
 
 		///gen stuff wo cuts!
 		if(isMC){
+			/* define all generator variables here as 0
+			 * if no gen info available (background samples e.g.)
+			 * they are just filled with zeros
+			 */
+			if(testmode_ && entry==0)
+				std::cout << "testmode("<< anaid << "): got first MC gen entry" << std::endl;
+
+			double mlbgen;
+
 			b_GenJets->GetEntry(entry);
 			if(pGenJets->size()>1){ //gen info there
+				if(testmode_ && entry==0)
+					std::cout << "testmode("<< anaid << "): entered signal genInfo part" << std::endl;
 
-				//recreate mother daughter relations
+
+				//recreate mother daughter relations?!
 				b_GenBHadrons->GetEntry(entry);
 
 				///make vector of pointers (NOT constant!!)
 
-				//   gen_dileptonEta.fill();
-				//   gen_mlb.fill();
+				std::vector<int> bhadids;
 				for(size_t i=0;i<pGenBHadrons->size();i++){
-					gen_bhadronpt.fill(pGenBHadrons->at(i).pt());
+					NTGenParticle * bhad=&pGenBHadrons->at(i);
+					gen_bhadronpt.fill(bhad->pt());
 
+					bhadids<<bhad->genId();
 
-
-
+				}
+				PolarLorentzVector p4genbjet;
+				for(size_t i=0;i<pGenJets->size();i++){
+					NTGenJet * genjet=&pGenJets->at(i);
+					if(genjet->motherIts().size()>0){
+						int motherid=genjet->motherIts().at(0);
+						if(-1<isIn(motherid,bhadids)){
+							p4genbjet = genjet->p4();
+							break;
+						}
+					}
 				}
 
 				b_GenLeptons1->GetEntry(entry);
-				if(pGenLeptons1->size() > 1){
+				if(pGenLeptons1->size() > 1){ ///
+					PolarLorentzVector p4leadinglep=pGenLeptons1->at(0).p4();
+					mlbgen=(p4genbjet+p4leadinglep).M();
 
 					PolarLorentzVector p4dil=pGenLeptons1->at(0).p4() + pGenLeptons1->at(1).p4();
 					diletagen.fill(p4dil.Eta(),puweight);
 
 				}
 
+
 				//recreateRelations(mothers, daughters) --serach for genid and motherit, daugherits
 
 
 
 			}
-		}
+			/*
+			 * fill gen info here
+			 */
+
+
+			unf_mlb.fillGen(mlbgen,puweight);
+
+
+		} /// isMC ends
 		b_TriggerBools->GetEntry(entry);
+
+		if(testmode_ && entry==0)
+			std::cout << "testmode("<< anaid << "): got trigger boolians" << std::endl;
 
 		//do trigger stuff - onlye 8TeV for now
 		if(!is7TeV_){
@@ -731,7 +805,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 			leadingptlep=seclep;
 			secleadingptlep=firstlep;
 		}
-//just to avoid warnings
+		//just to avoid warnings
 		leadingptlep->pt();
 		secleadingptlep->pt();
 
@@ -1103,7 +1177,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 			double mlb=(leadingptlep->p4()+btaggedjets.at(0)->p4()).M();
 
 			mlb8.fill(mlb,puweight);
-
+			unf_mlb.fillReco(mlb,puweight);
 		}
 		if(isZrange){
 			invmassZ8.fill(invLepMass,puweight);
@@ -1125,12 +1199,19 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
 
 	}//main event loop ends
-	if(showstatusbar_)std::cout << std::endl; //for status bar
+	//if(showstatusbar_)std::cout << std::endl; //for status bar
+
+	if(testmode_ )
+		std::cout << "testmode("<< anaid << "): finished main loop" << std::endl;
+
 
 	// Fill all containers in the stackVector
 
 	// std::cout << "Filling containers to the Stack\n" << std::endl;
 	btagsf_.makeEffs(); //only does that if switched on, so safe
+
+	if(testmode_ )
+		std::cout << "testmode("<< anaid << "): prepared b-tag eff" << std::endl;
 
 	// delete t;
 	f->Close(); //deletes t
@@ -1153,8 +1234,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 	int canwrite=p_allowwrite.get(anaid)->pread();
 	if(canwrite>0){ //wait for permission
 
-
-		std::cout << "allowed " << anaid << " to write" << endl;
+		if(testmode_ )
+			std::cout << "testmode("<< anaid << "): allowed to write to file " << getOutPath()+".root"<< std::endl;
 
 		TFile * outfile;
 
@@ -1181,6 +1262,16 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 		//btagsf_
 
 		csv->addList(legendname,color,norm,legord);
+		if(testmode_ )
+			std::cout << "testmode("<< anaid << "): added 1D List"<< std::endl;
+		csv->addList2D(legendname,color,norm,legord);
+		if(testmode_ )
+			std::cout << "testmode("<< anaid << "): added 2D List"<< std::endl;
+		csv->addList1DUnfold(legendname,color,norm,legord);
+		if(testmode_ )
+			std::cout << "testmode("<< anaid << "): added 1DUnfold List"<< std::endl;
+
+
 		outfile->Close();
 		delete outfile;
 
@@ -1189,10 +1280,22 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
 		outtree= new TTree("stored_objects","stored_objects");
 		outtree->Branch("allContainerStackVectors",&csv);
+		if(testmode_ )
+			std::cout << "testmode("<< anaid << "): added Branch"<< std::endl;
 		outtree->Fill();
+		if(testmode_ )
+			std::cout << "testmode("<< anaid << "): filled new outfile tree"<< std::endl;
+
 		outtree->Write("",TObject::kOverwrite);//"",TObject::kOverwrite);
+		if(testmode_ )
+					std::cout << "testmode("<< anaid << "): written new outfile tree"<< std::endl;
+
 		outfile->Close();
 		delete outfile;
+
+		if(testmode_ )
+			std::cout << "testmode("<< anaid << "): written main output"<< std::endl;
+
 
 		///btagsf
 		if(btagsf_.makesEff()){

@@ -49,7 +49,7 @@ energies=("8TeV"
 
 
 
-dir=${dirname}_$(date +%F_%H:%M)
+dir=${dirname}_$(date +%F_%H:%M)__GI #ensure git ignore for these folders
 
 echo "running in dir $dir"
 

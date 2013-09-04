@@ -105,9 +105,12 @@ public:
   }
 
   void setDataSetDirectory(TString dir){datasetdirectory_=dir;}
-  void setShowStatusBar(bool show){showstatusbar_=show;}
+  void setShowStatus(bool show){showstatus_=show;}
   void setOnlySummary(bool show){onlySummary_=show;}
   void setTestMode(bool test){testmode_=test;}
+
+  //COMPAT
+  void setShowStatusBar(bool show){showstatus_=show;}
 
   ztop::container1DStackVector * getPlots(){return & analysisplots_;}
 
@@ -137,7 +140,7 @@ private:
 
   TString replaceExtension(TString );
 
-  bool showstatusbar_,onlySummary_,testmode_;
+  bool showstatus_,onlySummary_,testmode_;
 
   TString name_,dataname_,channel_,syst_,energy_;
   bool b_ee_,b_emu_,b_mumu_,is7TeV_;
