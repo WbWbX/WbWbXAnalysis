@@ -7,7 +7,7 @@ namespace ztop{
 
   std::vector<effTriple *> effTriple::effTriple_list;
   bool effTriple::makelist=false;
-
+  bool ztop::histWrapper::addStatUncorr=true;
 
   void effTriple::addToList(){
     if(makelist)
