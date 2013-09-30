@@ -611,9 +611,13 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	Handle<std::vector<pat::MET> > mvamets;
 	iEvent.getByLabel(mvamet_,mvamets);
 
-	Handle<std::vector<reco::Vertex> > vertices;
 	iEvent.getByLabel(vertices_, vertices);
 	vtxs  = *(vertices.product());
+
+
+	if(susy_)
+		iEvent.getByLabel("allConversions", conversions);
+
 
 	if(vtxs.size()>0){
 		if(debugmode) std::cout << "vtxs.size()>0" << std::endl;
@@ -645,7 +649,6 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		math::XYZPoint beamSpotPosition;
 		beamSpotPosition.SetCoordinates(0,0,0);
 
-		edm::Handle<reco::BeamSpot> bsHandle;
 		iEvent.getByLabel("offlineBeamSpot",bsHandle);
 
 		//double BSx=0,BSy=0,BSz=0;

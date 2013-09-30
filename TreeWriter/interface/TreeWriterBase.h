@@ -206,8 +206,6 @@ public:
 
   edm::Service<TFileService> fs;
 
-  reco::VertexCollection vtxs;
-  math::XYZPoint beamSpotPosition;
 
 
   bool debugmode;
@@ -223,6 +221,17 @@ public:
   edm::InputTag genBHadIndex_, genBHadFlavour_, genBHadJetIndex_;
 
   bool useBHadrons_;
+
+
+  //some handles that also need to be used in virtual functions
+
+  reco::VertexCollection vtxs;
+  math::XYZPoint beamSpotPosition;
+
+	edm::Handle<reco::BeamSpot> bsHandle;
+  edm::Handle<std::vector<reco::Vertex> > vertices;
+  edm::Handle<reco::ConversionCollection> conversions;
+
 
 };
 

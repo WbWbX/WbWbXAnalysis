@@ -9,6 +9,7 @@
 #define CONTAINERUNFOLDER_H_
 #include "container1DUnfold.h"
 #include "unfolder.h"
+#include "containerStack.h"
 
 namespace ztop{
 
@@ -28,6 +29,7 @@ public:
 
 	void setOptions(/* options */);
 	container1D unfold(const container1DUnfold &);
+	container1DUnfold prepareFromStack(const containerStack&);
 
 	const std::vector<unfolder * > & getSystUnfolder() const {return unfsyst_;}
 	unfolder * getNominalUnfolder() const {return unfnominal_;}
