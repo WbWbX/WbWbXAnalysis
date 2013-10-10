@@ -28,9 +28,10 @@ public:
 	container1D(std::vector<float> , TString name="",TString xaxisname="",TString yaxisname="", bool mergeufof=false); //! construct with binning
 	~container1D();
 
-	TString getName(){return name_;}
+
+	const TString & getName()const{return name_;}
 	void setName(TString Name){name_=Name;}
-	void setNames(TString name, TString xaxis, TString yaxis){name_=name;xname_=xaxis;yname_=yaxis;}
+	void setNames(TString name, TString xaxis, TString yaxis){if(name!="")name_=name;if(xaxis!="")xname_=xaxis;if(yaxis!="")yname_=yaxis;}
 	void setShowWarnings(bool show){showwarnings_=show;}
 
 	void fill(const double & val, const double & weight=1);    //! fills with weight
@@ -52,6 +53,9 @@ public:
 	size_t getNBins() const;       //! returns nuberof bins
 	const std::vector<float> & getBins() const {return bins_;}
 
+	const histoBin & getBin(const size_t & no, const int& layer=-1)const{return contents_.getBin(no,layer);}
+	histoBin & getBin(const size_t & no, const int& layer=-1){return contents_.getBin(no,layer);}
+
 	double getBinCenter(const size_t &) const;
 	double getBinWidth(const size_t &) const; //! returns total bin width NOT 0.5* width
 
@@ -72,9 +76,13 @@ public:
 	double getSystErrorStat(const size_t & number, const size_t & bin) const; //returns DEVIATION!
 
 	const TString & getSystErrorName(const size_t & number) const;
+	const size_t & getSystErrorIndex(const TString & ) const;
 
-	double getOverflow(const int& systLayer=-1);                              //!returns -1 if overflow was merged with last bin
-	double getUnderflow(const int& systLayer=-1);                             //!returns -1 if underflow was merged with last bin
+	container1D breakDownSyst(const size_t & bin, bool updown) const;
+	container1D sortByBinNames(const container1D & ) const;
+
+	double getOverflow(const int& systLayer=-1) const;                              //!returns -1 if overflow was merged with last bin
+	double getUnderflow(const int& systLayer=-1) const;                             //!returns -1 if underflow was merged with last bin
 
 	double integral(bool includeUFOF=false,const int& systLayer=-1) const;
 	double cIntegral(float from=0, float to=0,const int& systLayer=-1) const;       //! includes the full bin "from" or "to" is in
@@ -85,6 +93,11 @@ public:
 	size_t integralEntries(bool includeUFOF=false,const int& systLayer=-1) const;
 	size_t cIntegralEntries(float from=0, float to=0,const int& systLayer=-1) const;       //! includes the full bin "from" or "to" is in
 
+	double getYMax(bool dividebybinwidth ,const int& systLayer=-1) const;
+	double getYMin(bool dividebybinwidth, const int& systLayer=-1) const;
+
+	double normalize(bool includeUFOF=true, const double &normto=1);
+
 
 	void reset();    //! resets all uncertainties and binning, keeps names and axis
 	void clear();    //! sets all bin contents to zero; clears all systematic uncertainties
@@ -92,16 +105,19 @@ public:
 	void setLabelSize(double size){labelmultiplier_=size;}       //! 1 for default
 	TH1D * getTH1D(TString name="", bool dividebybinwidth=true, bool onlystat=false) const; //! returns a TH1D pointer with symmetrized errors (TString name); small bug with content(bin)=0 and error(bin)=0
 	TH1D * getTH1DSyst(TString name, size_t systNo, bool dividebybinwidth=true, bool statErrors=false) const;
-	operator TH1D() const {TH1D* h=getTH1D();TH1D hr=*h;delete h;return hr;}
+	//operator TH1D() const {TH1D* h=getTH1D();TH1D hr=*h;delete h;return hr;}
 	// bad practise operator TH1D*(){return getTH1D();}
-	container1D & operator = (const TH1D &);
-	container1D & import(TH1 *);
+	//container1D & operator = (const TH1D &);
+	container1D & import(TH1 *,bool isbinwidthdivided=false);
 	void writeTH1D(TString name="",bool dividebybinwidth=true, bool onlystat=false) const; //! writes TH1D->Write() with symmetrized errors (TString name)
 
 	TGraphAsymmErrors * getTGraph(TString name="", bool dividebybinwidth=true,bool onlystat=false,bool noXErrors=false) const;
+	TGraphAsymmErrors * getTGraphSwappedAxis(TString name="", bool dividebybinwidth=true,bool onlystat=false,bool noXErrors=false) const;
 	operator TGraphAsymmErrors() const {return *getTGraph();}
 	operator TGraphAsymmErrors*() const {return getTGraph();}
 	void writeTGraph(TString name="",bool dividebybinwidth=true,bool onlystat=false, bool noXErrors=false) const; //! writes TGraph to TFile (must be opened)
+
+	void drawFullPlot(TString name="", bool dividebybinwidth=true,const TString &extraoptions="");
 
 	void setDivideBinomial(bool);                                   //! default true
 	void setMergeUnderFlowOverFlow(bool merge){mergeufof_=merge;}   //! merges underflow/overflow in first or last bin, respectively
@@ -118,6 +134,12 @@ public:
 	container1D operator * (double);            //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
 
 
+	//void mergeBins(size_t ,size_t );
+	std::vector<float> getCongruentBinBoundaries(const container1D &) const;
+	container1D rebinToBinning(const std::vector<float> & newbins) const;
+	container1D rebinToBinning(const container1D &) const;
+	container1D rebin(size_t merge) const;
+
 	void addErrorContainer(const TString &,const container1D&, double);  //! adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down"
 	void addErrorContainer(const TString &,const container1D&);        //! adds deviation to (this) as systematic uncertianty with name. name must be ".._up" or ".._down"
 	void addRelSystematicsFrom(const container1D &);
@@ -131,6 +153,7 @@ public:
 
 	void transformStatToSyst(const TString&);
 	void setAllErrorsZero(){contents_.removeAdditionalLayers();contents_.clearLayerStat(-1);} //! sets all errors zero
+	void removeAllSystematics(){contents_.removeAdditionalLayers();}
 
 	static bool c_makelist;
 	static std::vector<container1D*> c_list;
@@ -140,6 +163,11 @@ public:
 	static void setOperatorDefaults();
 
 	void coutFullContent() const;
+
+	bool hasSameLayers(const container1D&) const;
+	bool hasSameLayerOrdering(const container1D&) const;
+
+
 
 protected:
 	bool showwarnings_;
@@ -170,6 +198,12 @@ protected:
 
 	double labelmultiplier_;
 
+	TGraphAsymmErrors * gp_;
+	TH1D * hp_;
+
+//containerStyle * style_; //if NULL, use some defaults, else use style
+	//containerStyle  persstyle_; //only when saving
+
 	TString stripVariation(const TString&) const;
 	double getDominantVariationUp(const TString &,const size_t &) const;
 	double getDominantVariationDown(const TString &,const size_t &) const;
@@ -177,6 +211,8 @@ protected:
 	double sq(const double&) const; //helper
 
 	void createManualError();
+
+
 
 };
 

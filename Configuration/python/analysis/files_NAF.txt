@@ -82,6 +82,15 @@
 100   /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_mumuttbarbg                genFilter=Top genFilterString=MuonMuon,MuonMuonViaTau genFilterInvert=true
 100   /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_emuttbarbg                genFilter=Top genFilterString=ElectronMuon,ElectronMuonViaTau genFilterInvert=true
 
+#signal extensions
+400  /TTJets_MassiveBinDECAY_8TeV-madgraph-gridpack/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM     tree_8TeV_eettbar_ext                    genFilter=Top genFilterString=ElectronElectron isSignal=true
+400  /TTJets_MassiveBinDECAY_8TeV-madgraph-gridpack/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM      tree_8TeV_mumuttbar_ext                  genFilter=Top genFilterString=MuonMuon isSignal=true
+400  /TTJets_MassiveBinDECAY_8TeV-madgraph-gridpack/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM      tree_8TeV_emuttbar_ext                   genFilter=Top genFilterString=ElectronMuon isSignal=true
+100  /TTJets_MassiveBinDECAY_8TeV-madgraph-gridpack/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM      tree_8TeV_eettbarviatau_ext              genFilter=Top genFilterString=ElectronElectronViaTau
+100  /TTJets_MassiveBinDECAY_8TeV-madgraph-gridpack/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM     tree_8TeV_mumuttbarviatau_ext            genFilter=Top genFilterString=MuonMuonViaTau
+100  /TTJets_MassiveBinDECAY_8TeV-madgraph-gridpack/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM    tree_8TeV_emuttbarviatau_ext             genFilter=Top genFilterString=ElectronMuonViaTau
+
+
 ######single top
 
 20  /T_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM                     tree_8TeV_tW

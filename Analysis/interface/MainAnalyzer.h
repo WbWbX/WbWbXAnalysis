@@ -1,38 +1,19 @@
 #ifndef MainAnalyzer_h
 #define MainAnalyzer_h
 
-#include "TtZAnalysis/DataFormats/src/classes.h" //gets all the dataformats
-#include "TtZAnalysis/DataFormats/interface/elecRhoIsoAdder.h"
+#include "TString.h"
 #include "TopAnalysis/ZTopUtils/interface/PUReweighter.h"
-#include "TtZAnalysis/plugins/leptonSelector2.h"
-#include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 #include "TtZAnalysis/Tools/interface/containerStackVector.h"
-//#include "TtZAnalysis/Tools/interface/containerUF.h"
 #include "TtZAnalysis/DataFormats/interface/NTJERAdjuster.h"
 #include "TtZAnalysis/DataFormats/interface/NTJECUncertainties.h"
 #include "TtZAnalysis/DataFormats/interface/NTBTagSF.h"
-//#include "TtZAnalysis/Tools/interface/bTagSF.h"
-#include "TTree.h"
-#include "TFile.h"
-#include <fstream>
-//#include <omp.h>
-#include "TtZAnalysis/Analysis/interface/AnalysisUtils.h"
 #include "Pipes.h"
-
-#include <cstdlib>
 #include "scalefactors.h"
+#include <cstdlib>
 
-bool testmode=true;
+
 
 #define IPC_BUFFERSIZE 101
-
-namespace ztop{
-  typedef std::vector<ztop::NTElectron>::iterator NTElectronIt;
-  typedef std::vector<ztop::NTMuon>::iterator NTMuonIt;
-  typedef std::vector<ztop::NTJet>::iterator NTJetIt;
-  typedef std::vector<ztop::NTTrack>::iterator NTTrackIt;
-  typedef std::vector<ztop::NTSuClu>::iterator NTSuCluIt;
-}
 
 ///// now available: removeContribution; use it to run on the systematics etc (only signal) or pdf stuff (remove nominal,for(i) add pdf[i], xsec, remove pdf[i])
 
@@ -112,7 +93,7 @@ public:
   //COMPAT
   void setShowStatusBar(bool show){showstatus_=show;}
 
-  ztop::container1DStackVector * getPlots(){return & analysisplots_;}
+  ztop::containerStackVector * getPlots(){return & analysisplots_;}
 
   int start();
   //  void start(TString);
@@ -156,7 +137,7 @@ private:
   ztop::NTJECUncertainties  jecuncertainties_;
   ztop::NTBTagSF  btagsf_;
 
-  ztop::container1DStackVector  analysisplots_;
+  ztop::containerStackVector  analysisplots_;
 
   size_t filecount_;
   TString outfileadd_;

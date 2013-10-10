@@ -22,9 +22,10 @@ namespace ztop{
 class container2D {
 public:
 	 container2D();
-    container2D( std::vector<float> ,std::vector<float> , TString name="",TString xaxisname="",TString yaxisname="", bool mergeufof=false); //! construct with binning
+    container2D(const std::vector<float> & ,const std::vector<float> &, TString name="",TString xaxisname="",TString yaxisname="", bool mergeufof=false); //! construct with binning
 	~container2D();
 
+	void setBinning(const std::vector<float> &xbins, std::vector<float> ybins);
 	//setaxis etc still missing. should be ok as long as default constr. is protected
 
 	void setName(TString name){name_=name;}
@@ -37,6 +38,9 @@ public:
     const size_t & getBinEntries(const size_t&,const size_t&) const;
     const std::vector<float> & getBinsX() const{return xbins_;}     //! returns  x bins
     const std::vector<float> & getBinsY() const{return ybins_;}       //! returns y bins
+
+    const histoBin & getBin(const size_t &,const size_t&,const int &layer=-1) const;
+    histoBin & getBin(const size_t&,const size_t&,const int& layer=-1);
 
     void fill(const double & xval, const double & yval, const double & weight=1);    //! fills with weight
 
@@ -54,9 +58,15 @@ public:
 */
      container1D projectToX(bool includeUFOF=false) const;
      container1D projectToY(bool includeUFOF=false) const;
+     container1D getYSlice(size_t ybinno) const;
+     container1D getXSlice(size_t xbinno) const;
+
+     void setXSlice(size_t xbinno,const container1D &, bool UFOF=true);
+     void setYSlice(size_t xbinno,const container1D &, bool UFOF=true);
 
     void removeError(TString);
     void renameSyst(TString, TString);
+    void removeAllSystematics();
 
     TH2D * getTH2D(TString name="", bool dividebybinwidth=false, bool onlystat=false) const;
     TH2D * getTH2DSyst(TString name, unsigned int systNo, bool dividebybinwidth=false, bool statErrors=false) const;
@@ -67,6 +77,7 @@ public:
     container2D operator - (const container2D &);       //! adds errors in squares; treats same named systematics as correlated!!
     container2D operator / (const container2D &);       //! binomial stat error or uncorr error (depends on setDivideBinomial()); treats same named systematics as correlated
     container2D operator * (const container2D &);       //! adds stat errors in squares; treats same named systematics as correlated!!
+    container2D operator *= (double val){*this=*this*val;return *this;} //fast hack!            //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
     container2D operator * (double);            //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
     container2D operator * (float);             //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
     container2D operator * (int);               //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
@@ -122,6 +133,18 @@ inline size_t ztop::container2D::getBinNoY(const double & var) const {
 inline void ztop::container2D::fill(const double & xval, const double & yval, const double & weight){
 	int ybin=getBinNoY(yval);
 	conts_[ybin].fill(xval,weight);
+}
+/**
+ * not protected
+ */
+inline const histoBin & ztop::container2D::getBin(const size_t &xbinno,const size_t &ybinno,const int &layer) const{
+	return conts_[ybinno].getBin(xbinno,layer);
+}
+/**
+ * not protected
+ */
+inline histoBin & ztop::container2D::getBin(const size_t &xbinno,const size_t& ybinno,const int &layer){
+	return conts_[ybinno].getBin(xbinno,layer);
 }
 
 }

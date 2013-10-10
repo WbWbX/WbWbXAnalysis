@@ -25,7 +25,7 @@ public:
 	containerAxisStyle();
 	~containerAxisStyle();
 
-	bool applyAxisRange(); //if min>max false (default)
+	bool applyAxisRange() const; //if min>max false (default)
 
 	float titleSize;
 	float labelSize;
@@ -37,24 +37,41 @@ public:
 	float max,min; //if min > max, don't apply
 
 };
+class containerStyle;
+class textBox{
+	friend class containerStyle;
+public:
+	textBox();
+	textBox(float,float,const TString &,float textsize=1);
+	~textBox();
+	void setText(const TString &);
+	void setTextSize(float);
+	void setCoords(float,float);
+	const TString & getText() const;
+	const float & getTextSize() const;
+	const float & getX() const;
+	const float &  getY() const;
 
-
+private:
+	float x_,y_;
+	TString text_;
+	float textsize_;
+};
 
 class containerStyle{
 public:
 	enum templates{normalPlot,controlPlotData, controlPlotMC, ratioPlotData, ratioPlotMC, crosssectionPlot, systematicsPlot}; // make as many as you like...
 	enum errorBarStyles{noErr,normalErr,perpErr,rectErr,fillErr,noXNormalErr,noXPerpErr,noXRectErr}; //if syst errors are present, it refers to outer errors (for rect, perp etc)
 
+
 	containerStyle();
+	containerStyle(templates );
 	~containerStyle();
 
 	void useTemplate(templates temp);
 
 
-	containerAxisStyle * xAxisStyle(){return &xaxis_;}
-	containerAxisStyle * yAxisStyle(){return &yaxis_;}
-
-
+	void multiplySymbols(float val);
 
 	float markerSize;
 	int markerStyle;
@@ -74,45 +91,11 @@ public:
 	float leftMargin;
 	float rightMargin;
 
-private:
-	containerAxisStyle xaxis_;
-	containerAxisStyle yaxis_;
-};
-
-
-
-/**
- * divide stuff, has vector of containerStyle in, some templates, all accessible
- */
-/*
-class canvasStyle{
-public:
-	canvasStyle();
-	~canvasStyle();
-
-	void newPad(const containerStyle &);
-
-
-private:
-	std::vector<containerStyle> padstyles_;
-	std::vector<TString> padnames_;
 
 };
-*/
+
+
+
 }//namespace
 
 #endif /* CONTAINERSTYLE_H_ */
-/*
- * h->GetYaxis()->SetTitleSize(0.06*labelmultiplier_);
-	h->GetYaxis()->SetLabelSize(0.05*labelmultiplier_);
-	h->GetYaxis()->SetTitleOffset(h->GetYaxis()->GetTitleOffset() / labelmultiplier_);
-	h->GetYaxis()->SetTitle(yname_);
-	h->GetYaxis()->SetNdivisions(510);
-	h->GetXaxis()->SetTitleSize(0.06*labelmultiplier_);
-	h->GetXaxis()->SetLabelSize(0.05*labelmultiplier_);
-	h->GetXaxis()->SetTitle(xname_);
-	h->LabelsDeflate("X");
-	h->SetMarkerStyle(20);
-	if(wasunderflow_) h->SetTitle((TString)h->GetTitle() + "_uf");
-	if(wasoverflow_)  h->SetTitle((TString)h->GetTitle() + "_of");
- */

@@ -8,7 +8,7 @@
 
 
 #include "../interface/container2D.h"
-
+#include <algorithm>
 
 
 namespace ztop{
@@ -31,31 +31,27 @@ container2D::~container2D(){
 	}
 }
 
-container2D::container2D( std::vector<float> xbins,std::vector<float> ybins, TString name,TString xaxisname,TString yaxisname, bool mergeufof) : mergeufof_(mergeufof), xaxisname_(xaxisname), yaxisname_(yaxisname), name_(name)
+container2D::container2D(const std::vector<float> &xbins,const std::vector<float> &ybins, TString name,TString xaxisname,TString yaxisname, bool mergeufof) : mergeufof_(mergeufof), xaxisname_(xaxisname), yaxisname_(yaxisname), name_(name)
 {
 	//create for each ybin (plus UF OF) a container1D
+	setBinning(xbins,ybins);
+	if(container2D::c_makelist)
+		c_list.push_back(this);
+}
+
+void container2D::setBinning(const std::vector<float> &xbins, std::vector<float> ybins){
 	bool temp=container1D::c_makelist;
 	container1D::c_makelist=false;
-
-
-	float lastbin;
-	for(size_t i=0;i<ybins.size();i++){
-		if(i<1){
-			lastbin=ybins.at(i);
-		}
-		else if(lastbin >= ybins.at(i)){
-			std::cout << "container2D::setBins: bins must be in increasing order!" << std::endl;
-			std::exit(EXIT_FAILURE);
-		}
-	}
-
-
+	ybins_.clear();
+	conts_.clear();
+	xbins_.clear();
+	std::sort(ybins.begin(),ybins.end());
 	ybins_.push_back(0); //UF
 	ybins_.insert(ybins_.end(),ybins.begin(),ybins.end()); //OF is the last one
 	//ybins_.push_back(0);
 
 	for(size_t i=0;i<ybins_.size();i++){ //OF and UF
-		container1D temp(xbins,"","","",mergeufof);
+		container1D temp(xbins,"",xaxisname_,"",mergeufof_);
 		//temp.setDivideBinomial(divideBinomial_);
 		conts_.push_back(temp);
 	}
@@ -65,8 +61,6 @@ container2D::container2D( std::vector<float> xbins,std::vector<float> ybins, TSt
 		std::cout << "containers size: " << conts_.size() << " ybins size: " << ybins_.size() << std::endl;
 	}
 	container1D::c_makelist=temp;
-	if(container2D::c_makelist)
-		c_list.push_back(this);
 }
 
 const double &container2D::getBinContent(const size_t & xbin,const size_t & ybin) const{
@@ -100,7 +94,7 @@ double container2D::getBinError(const size_t & xbin, const size_t & ybin, bool o
 	return conts_.at(ybin).getBinError(xbin,  onlystat, limittosys);
 }
 
- double container2D::getSystError(unsigned int number, const size_t & xbin, const size_t & ybin) const{
+double container2D::getSystError(unsigned int number, const size_t & xbin, const size_t & ybin) const{
 	if(ybin>=ybins_.size() || xbin>=xbins_.size()){
 		std::cout << "container2D::getSystError: xbin or ybin out of range" << std::endl;
 	}
@@ -216,6 +210,117 @@ container1D container2D::projectToY(bool includeUFOF) const{
 	container1D::c_makelist=tempc_makelist;
 	return out;
 }
+
+
+container1D container2D::getYSlice(size_t ybinno) const{
+	if(ybinno >= ybins_.size()){
+		std::cout << "container2D::getYSlice: bin out of range for " <<name_ << std::endl;
+		return container1D();
+	}
+	container1D out = conts_.at(ybinno);
+	out.setName(name_+"_YSlice_"+toTString(ybinno));
+	return out;
+}
+container1D container2D::getXSlice(size_t xbinno) const{
+	if(xbinno >= xbins_.size()){
+		std::cout << "container2D::getXSlice: bin out of range for " <<name_ << std::endl;
+		return container1D();
+	}
+	std::vector<float> rybins=ybins_;
+	rybins.erase(rybins.begin()); //no UF
+	container1D out(rybins,name_+"_XSlice_"+toTString(xbinno),yaxisname_,"");
+	for(int layer=-1;layer<(int)getSystSize();layer++){
+		int outlayer=-1;
+		if(layer>-1)
+			outlayer=out.contents_.addLayer(getSystErrorName(layer));
+		for(size_t bin=0;bin<ybins_.size();bin++){
+			out.contents_.getBin(bin,outlayer) = conts_.at(bin).contents_.getBin(xbinno,layer);
+		}
+	}
+	return out;
+}
+/**
+ * do not allow different syst (as far as their names are concerned)
+ */
+void container2D::setXSlice(size_t xbinno,const container1D & in, bool UFOF){
+	if(in.bins_ != ybins_){
+		std::cout << "container2D::setXSlice: wrong binning! doing nothing"<< std::endl;
+		return;
+	}
+	if(xbinno >= xbins_.size()){
+		std::cout << "container2D::setXSlice: bin out of range" << std::endl;
+		return;
+	}
+	if(debug){
+		std::cout << "container2D::setXSlice: syst size in: "<< in.getSystSize() <<" syst size this: "<< getSystSize()<< std::endl;
+
+	}
+	if(in.getSystSize() == getSystSize()){
+		//check whther same layers or add or something to be figured out
+		for(int lay=-1;lay<(int)getSystSize();lay++){
+			int layer=lay;
+			if(layer>-1){
+				layer=in.getSystErrorIndex(getSystErrorName(lay));}
+			if(layer>=(int)getSystSize()){
+				std::cout << "container2D::setXSlice: layer "<< getSystErrorName(lay) << " not found, systematics of input container don't match! output undefined" <<std::endl;
+				return;
+			}
+			for(size_t bin=0;bin<ybins_.size();bin++){//do some other bin filling stuff
+				if(!UFOF && (bin==0 || bin==ybins_.size()-1))
+					continue;
+				getBin(xbinno,bin,lay) = in.getBin(bin,layer);
+			}
+		}
+		return; //all went fine
+	}
+	else if(debug){
+		std::cout << "container2D::setXSlice: input syst:";
+		for(size_t i=0;i<in.getSystSize();i++)
+			std::cout << in.getSystErrorName(i)<< " ";
+		std::cout << std::endl;
+		std::cout << "container2D::setXSlice: this  syst:";
+		for(size_t i=0;i<getSystSize();i++)
+			std::cout << getSystErrorName(i)<< " ";
+		std::cout << std::endl;
+	}
+	//nothing of the above - give error message
+
+	std::cout << "container2D::setXSlice: systematics of input container don't match! doing nothing" <<std::endl;
+}
+/**
+ * do not allow different syst (as far as their names are concerned)
+ */
+void container2D::setYSlice(size_t ybinno,const container1D & in, bool UFOF){
+	if(in.bins_ != xbins_){
+		std::cout << "container2D::setYSlice: wrong binning! doing nothing"<< std::endl;
+		return;
+	}
+	if(ybinno >= ybins_.size()){
+		std::cout << "container2D::setYSlice: bin out of range" << std::endl;
+		return;
+	}
+	if(in.getSystSize() == getSystSize()){
+		//check whther same layers or add or something to be figured out
+		for(int lay=-1;lay<(int)getSystSize();lay++){
+			int layer=lay;
+			if(layer>-1){
+				layer=in.getSystErrorIndex(getSystErrorName(lay));}
+			if(layer>=(int)getSystSize()){
+				std::cout << "container2D::setYSlice: layer "<< getSystErrorName(lay) << " not found, systematics of input container don't match! output undefined" <<std::endl;
+				return;
+			}
+			for(size_t bin=0;bin<xbins_.size();bin++){//do some other bin filling stuff
+				if(!UFOF && (bin==0 || bin==xbins_.size()-1))
+					continue;
+				getBin(bin,ybinno,lay) = in.getBin(bin,layer);
+			}
+		}
+		return; //all went fine
+	}
+	//nothing of the above - give error message
+	std::cout << "container2D::setYSlice: systematics of input container don't match at all! doing nothing" <<std::endl;
+}
+
 
 /**
  * on long term, put this in own class responsible for all drawing stuff (same for 1D containers)
@@ -361,6 +466,11 @@ void container2D::removeError(TString err){
 void container2D::renameSyst(TString old, TString New){
 	for(size_t i=0;i<conts_.size();i++){
 		conts_.at(i).renameSyst(old,New);
+	}
+}
+void container2D::removeAllSystematics(){
+	for(size_t i=0;i<conts_.size();i++){
+		conts_.at(i).removeAllSystematics();
 	}
 }
 void container2D::reset(){

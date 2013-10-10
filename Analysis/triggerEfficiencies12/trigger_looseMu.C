@@ -85,10 +85,14 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
 
 void trigger_looseMu(){
 
-  triggerAnalyzer::testmode=true;
+  triggerAnalyzer::testmode=false;
+
+  triggerAnalyzer::lowMCStat=false;
 
   using namespace std;
   using namespace ztop;
+
+  bool includecorr=true;
 
   std::vector<float> binsmumueta, bins2dee, bins2dmue,binsptmu, binspte, bins2dmumu;
   
@@ -108,7 +112,7 @@ void trigger_looseMu(){
 
   ta_mumud.setMode("mumu");
   ta_mumud.setMassCutLow(12);
-  ta_mumud.setIncludeCorr(false);
+  ta_mumud.setIncludeCorr(includecorr);
   // ta_mumud.checkTriggerPaths(true); ta_mumud.setUseMatching(false);
 
   ta_mumud.setBinsEta(binsmumueta);
@@ -125,9 +129,9 @@ void trigger_looseMu(){
   
   //TString dir="/scratch/hh/dust/naf/cms/user/kieseler/trees_Apr13_04/";
   
-  TString dir="/scratch/hh/dust/naf/cms/user/kieseler/trees_ES_Jul13/";
+  TString dir="/scratch/hh/dust/naf/cms/user/kieseler/trees_ES_Jul13_04/";
 
-  cout << "\n\n\n\n\nWarning!! Wrong muon cone size!!!! JUST FOR TESTING\n\n\n\n" <<endl;
+
 
   TString cmssw_base=getenv("CMSSW_BASE");
   TString pileuproot = cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13.json.txt_PU.root";
@@ -135,10 +139,10 @@ void trigger_looseMu(){
 
   std::vector<TString> mumumcfiles, datafilesFull,datafilesRunb,datafilesRunc, datafilesRuna,datafilesRund;
  
-  mumumcfiles //  << dir+"tree_8TeV_mumuttbar.root" 
-    // << dir+"tree_8TeV_mumuttbarviatau.root" ;
+  mumumcfiles  // << dir+"tree_8TeV_mumuttbar.root"
+   // << dir+"tree_8TeV_mumuttbarviatau.root" ;
     //<< dir+"tree_8TeV_dymumu60120.root";
-    << dir+"../NAF_workingDir/04METDYtt_2013-08-12T18-54-26/naf_tree_8TeV_dymumu60120/tree_8TeV_dymumu60120.root";
+    << dir+"tree_8TeV_dymumu60120.root";
   // datafilesFull  << dir + "tree_8TeV_MET_runA_06Aug.root"  
   // 		 << dir + "tree_8TeV_MET_runA_13Jul.root"  
   // 		 << dir + "tree_8TeV_MET_runB_13Jul.root"  
@@ -190,7 +194,7 @@ datafilesFull //  << dir + "tree_8TeV_MET_runA_06Aug.root"
 
   vector<string> trigObj_Mu17TkMu8;
   trigObj_Mu17TkMu8 << "hltL3fL1sMu10MuOpenL1f0L2f10L3Filtered17"       << "hltL3fL1sMu10MuOpenOR3p5L1f0L2f10L3Filtered17"
-		    << "hltDiMuonGlbFiltered17TrkFiltered8"             ;
+		  << "hltDiMuonGlbFiltered17TrkFiltered8"              ;
 
   vector<string> trigObj_OR;
   trigObj_OR << trigObj_Mu17Mu8 << trigObj_Mu17TkMu8;
@@ -273,7 +277,7 @@ datafilesFull //  << dir + "tree_8TeV_MET_runA_06Aug.root"
   ta_mumudD.setRunCutHigh(208686);
 
   triggerAnalyzer ta_mumuMCD=ta_mumuMC;
-  ta_mumuMCD.setPUFile(cmssw_base+"/src/TtZAnalysis/Data/RunDprompt.json.txt_PU.root");
+  ta_mumuMCD.setPUFile(cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13RunD.json.txt_PU.root");
   ta_mumudD.Eff();
   ta_mumuMCD.Eff();
   makeFullOutput(ta_mumudD, ta_mumuMCD, "RunDMu17Mu8", "Run D, Mu17Mu8", 0.01);
@@ -370,7 +374,7 @@ datafilesFull //  << dir + "tree_8TeV_MET_runA_06Aug.root"
   ta_mumuMCD.setPUFile(cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13RunD.json.txt_PU.root");
   ta_mumudD.Eff();
   ta_mumuMCD.Eff();
-  makeFullOutput(ta_mumudC, ta_mumuMCD, "RunDMu17TkMu8", "Run D, Mu17TkMu8", 0.01);
+  makeFullOutput(ta_mumudD, ta_mumuMCD, "RunDMu17TkMu8", "Run D, Mu17TkMu8", 0.01);
 
   
   ///combine
@@ -452,7 +456,7 @@ datafilesFull //  << dir + "tree_8TeV_MET_runA_06Aug.root"
   ta_mumudC.setRunCutHigh(203746);
 
   ta_mumuMCC=ta_mumuMC;
-  ta_mumuMC.setPUFile(cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13RunC.json.txt_PU.root");
+  ta_mumuMCC.setPUFile(cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13RunC.json.txt_PU.root");
   ta_mumudC.Eff();
   ta_mumuMCC.Eff();
   makeFullOutput(ta_mumudC, ta_mumuMCC, "RunCOR", "Run C,  Mu17TkMu8 OR Mu17Mu8", 0.01);
@@ -469,7 +473,7 @@ datafilesFull //  << dir + "tree_8TeV_MET_runA_06Aug.root"
   ta_mumuMCD.setPUFile(cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13RunD.json.txt_PU.root");
   ta_mumudD.Eff();
   ta_mumuMCD.Eff();
-  makeFullOutput(ta_mumudC, ta_mumuMCD, "RunDOR", "Run D, Mu17TkMu8 OR Mu17Mu8", 0.01);
+  makeFullOutput(ta_mumudD, ta_mumuMCD, "RunDOR", "Run D, Mu17TkMu8 OR Mu17Mu8", 0.01);
 
   
   ////combine

@@ -18,7 +18,7 @@
 namespace ztop{
   
 
-  std::pair<std::vector<ztop::NTElectron* > , std::vector<ztop::NTMuon* > > getOppoQHighestPtPair(const std::vector<ztop::NTElectron*> &elecs, const std::vector<ztop::NTMuon*> & muons){
+  std::pair<std::vector<ztop::NTElectron* > , std::vector<ztop::NTMuon* > > getOppoQHighestPtPair(const std::vector<ztop::NTElectron*> &elecs, const std::vector<ztop::NTMuon*> & muons, int qmulti=1){
     double sumpt=0;
     //double emupt=0;
     std::vector<ztop::NTElectron*> outelecs;
@@ -29,7 +29,7 @@ namespace ztop{
 
     for(unsigned int i=0;i<elecs.size();i++){
       for(unsigned int j=i;j<elecs.size();j++){
-	if(elecs[i]->q() * elecs[j]->q() < 0 && sumpt < (elecs[i]->pt() + elecs[j]->pt())){
+	if(qmulti*elecs[i]->q() * elecs[j]->q() < 0 && sumpt < (elecs[i]->pt() + elecs[j]->pt())){
 	  sumpt=elecs[i]->pt() + elecs[j]->pt();
 	  a=i;
 	  b=j;
@@ -39,7 +39,7 @@ namespace ztop{
     }
     for(unsigned int i=0;i<muons.size();i++){
       for(unsigned int j=i;j<muons.size();j++){
-	if(muons[i]->q() * muons[j]->q() < 0 && sumpt < (muons[i]->pt() + muons[j]->pt())){
+	if(qmulti*muons[i]->q() * muons[j]->q() < 0 && sumpt < (muons[i]->pt() + muons[j]->pt())){
 	  sumpt=muons[i]->pt() + muons[j]->pt();
 	  a=i;
 	  b=j;
@@ -49,7 +49,7 @@ namespace ztop{
     }
     for(unsigned int i=0;i<elecs.size();i++){
       for(unsigned int j=0;j<muons.size();j++){
-	if(elecs[i]->q() * muons[j]->q() < 0 && sumpt < (elecs[i]->pt() + muons[j]->pt())){
+	if(qmulti*elecs[i]->q() * muons[j]->q() < 0 && sumpt < (elecs[i]->pt() + muons[j]->pt())){
 	  sumpt=elecs[i]->pt() + muons[j]->pt();
 	  a=i;
 	  b=j;

@@ -13,7 +13,9 @@
 #include <cstdlib>
 
 namespace ztop{
-
+/**
+ *
+ */
 class histoBin{
 public:
 	histoBin():content_(0),entries_(0),stat2_(0),name_(""){}
@@ -35,7 +37,7 @@ public:
 	void addEntry();
 
 	void setName(const TString & name){name_=name;}
-	const TString & getName(){return name_;}
+	const TString & getName() const {return name_;}
 
 	void multiply(const double&);
 
@@ -84,6 +86,8 @@ inline void histoBin::addEntry(){
  * stat are always absolute (~sqrt(n))
  *
  * only simple protection on some functions that are not important in terms of performance
+ *
+ * all operations (add, subtract, multiply, divide) use parallelization
  */
 class histoBins{
 public:
@@ -91,10 +95,12 @@ public:
 	histoBins(size_t Size); //defines size
 	~histoBins(){}
 	void setSize(size_t);
+	bool resize(const size_t & newsize);
 
 	histoBin & getBin(size_t binno){return bins_[binno];}//not protected
 	const histoBin & getBin(size_t binno) const {return bins_[binno];}
 	size_t size() const {return bins_.size();}
+
 
 	void setName(const TString & name){name_=name;}
 	const TString & getName(){return name_;}

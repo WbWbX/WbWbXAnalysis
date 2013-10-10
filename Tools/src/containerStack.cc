@@ -1,4 +1,6 @@
 #include "../interface/containerStack.h"
+#include <algorithm>
+#include <vector>
 
 namespace ztop{
 
@@ -7,11 +9,10 @@ bool containerStack::cs_makelist=false;
 bool containerStack::batchmode=true;
 bool containerStack::debug=false;
 
-containerStack::containerStack(){
-	mode=notset;
+containerStack::containerStack() : name_(""), dataleg_("data"), mode(notset){
 	if(cs_makelist)cs_list.push_back(this);
 }
-containerStack::containerStack(TString name) : name_(name), dataleg_("data") {
+containerStack::containerStack(TString name) : name_(name), dataleg_("data"), mode(notset) {
 	mode=notset;
 	if(cs_makelist) cs_list.push_back(this);
 }
@@ -42,12 +43,13 @@ void containerStack::push_back(ztop::container1D cont, TString legend, int color
 	}
 	if(!wasthere){
 		cont.setName("c_" +legend);
-		containers_.push_back(cont);
+		containers_.push_back(cont*norm);
 		legends_.push_back(legend);
 		colors_.push_back(color);
-		norms_.push_back(norm);
+		norms_.push_back(1);
 	}
 }
+
 void containerStack::push_back(ztop::container2D cont, TString legend, int color, double norm){
 	if(mode==notset)
 		mode=dim2;
@@ -69,10 +71,10 @@ void containerStack::push_back(ztop::container2D cont, TString legend, int color
 	}
 	if(!wasthere){
 		cont.setName("c_" +legend);
-		containers2D_.push_back(cont);
+		containers2D_.push_back(cont*norm);
 		legends_.push_back(legend);
 		colors_.push_back(color);
-		norms_.push_back(norm);
+		norms_.push_back(1);
 	}
 }
 void containerStack::push_back(ztop::container1DUnfold cont, TString legend, int color, double norm){
@@ -82,14 +84,16 @@ void containerStack::push_back(ztop::container1DUnfold cont, TString legend, int
 		std::cout << "containerStack::push_back: trying to add 1DUnfold container to non-1DUnfold stack!" << std::endl;
 		return;
 	}
-
+	container1D cont1d=cont.getControlPlot();
 	bool wasthere=false;
 	for(unsigned int i=0;i<legends_.size();i++){
 		if(legend == legends_[i]){
 			if(container1D::debug)
 				std::cout << "containerStack::push_back: found same legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
-			containers1DUnfold_[i] = containers1DUnfold_[i];// * norms_[i]  + cont * norm;
+			containers1DUnfold_[i] = containers1DUnfold_[i] * norms_[i]  + cont * norm;
 			containers1DUnfold_[i].setName("c_" +legend);
+			containers_[i] = containers_[i] * norms_[i] + cont1d * norm;
+			containers_[i].setName("c_" +legend);
 			norms_[i]=1;
 			wasthere=true;
 			break;
@@ -97,10 +101,11 @@ void containerStack::push_back(ztop::container1DUnfold cont, TString legend, int
 	}
 	if(!wasthere){
 		cont.setName("c_" +legend);
-		containers1DUnfold_.push_back(cont);
+		containers1DUnfold_.push_back(cont * norm);
+		containers_.push_back(cont1d * norm);
 		legends_.push_back(legend);
 		colors_.push_back(color);
-		norms_.push_back(norm);
+		norms_.push_back(1);
 	}
 
 }
@@ -139,7 +144,7 @@ void containerStack::removeContribution(TString legendname){
 void containerStack::mergeSameLegends(){
 	//redundant
 }
-int containerStack::getContributionIdx(TString legname){
+int containerStack::getContributionIdx(TString legname) const{
 	for(size_t i=0;i<legends_.size();i++){
 		if(legname == legends_.at(i))
 			return i;
@@ -226,7 +231,7 @@ ztop::container1D containerStack::getContributionsBut(std::vector<TString> contr
 				break;
 			}
 		}
-		if(get) out = out+ containers_[i] * norms_[i];
+		if(get) out += containers_[i] * norms_[i];
 	}
 	return out;
 }
@@ -271,16 +276,37 @@ void containerStack::multiplyNorm(TString legendentry, double multi){
 	int i=0;
 	for(std::vector<TString>::iterator name=legends_.begin();name<legends_.end();++name){
 		if(legendentry == *name){
-			norms_[i] = norms_[i] * multi;
+			if(dim1){
+				containers_.at(i)*=multi;
+			}
+			else if(dim2){
+				containers2D_.at(i)*=multi;
+			}
+			else if(unfolddim1){
+				containers_.at(i)*=multi;
+				containers1DUnfold_.at(i)*=multi;
+			}
+			break;
 		}
 		i++;
 	}
+
 }
 
 void containerStack::multiplyAllMCNorms(double multiplier){
-	for(unsigned int i=0;i<norms_.size();i++){
-		if(legends_.at(i)!=dataleg_)
-			norms_.at(i)=norms_.at(i) * multiplier;
+	for(unsigned int i=0;i<legends_.size();i++){
+		if(legends_.at(i)!=dataleg_){
+			if(dim1){
+				containers_.at(i)*=multiplier;
+			}
+			else if(dim2){
+				containers2D_.at(i)*=multiplier;
+			}
+			else if(unfolddim1){
+				containers_.at(i)*=multiplier;
+				containers1DUnfold_.at(i)*=multiplier;
+			}
+		}
 	}
 }
 
@@ -306,11 +332,11 @@ void containerStack::addMCErrorStack(TString sysname,containerStack errorstack){
 			errorstack.norms_[j]=1;
 			if(legends_[i] == errorstack.legends_[j] && legends_[i]!=dataleg_){
 				if(mode==dim1){
-				errorstack.containers_[j] = errorstack.containers_[j] * errorstack.norms_[j]; //normalize (in case there is any remultiplication done or something)
-				errorstack.norms_[j]=1;
-				containers_[i] = containers_[i] * norms_[i];
-				norms_[i]=1;
-				containers_[i].addErrorContainer(sysname,errorstack.containers_[j]);
+					errorstack.containers_[j] = errorstack.containers_[j] * errorstack.norms_[j]; //normalize (in case there is any remultiplication done or something)
+					errorstack.norms_[j]=1;
+					containers_[i] = containers_[i] * norms_[i];
+					norms_[i]=1;
+					containers_[i].addErrorContainer(sysname,errorstack.containers_[j]);
 				}
 				else if(mode==dim2){
 					errorstack.containers2D_[j] = errorstack.containers2D_[j] * errorstack.norms_[j]; //normalize (in case there is any remultiplication done or something)
@@ -463,10 +489,11 @@ ztop::container1DUnfold containerStack::getFullMCContainer1DUnfold(){
 }
 
 THStack * containerStack::makeTHStack(TString stackname){
-	if(mode!=dim1){
+	if(!checkDrawDimension()){
 		std::cout << "containerStack::makeTHStack: only available for 1dim stacks!" <<std::endl;
 		return 0;
 	}
+	TH1::AddDirectory(false);
 	if(stackname == "") stackname = name_+"_s";
 	THStack *tstack = new THStack(stackname,stackname);
 
@@ -488,7 +515,7 @@ THStack * containerStack::makeTHStack(TString stackname){
 	return  tstack;
 }
 TLegend * containerStack::makeTLegend(bool inverse){
-	if(mode!=dim1){
+	if(!checkDrawDimension()){
 		std::cout << "containerStack::makeTLegend: only available for 1dim stacks!" <<std::endl;
 		return 0;
 	}
@@ -501,7 +528,7 @@ TLegend * containerStack::makeTLegend(bool inverse){
 
 	for(unsigned int it=0;it<size();it++){
 		size_t i=sorted.at(it);
-		container1D tempcont = getContainer(i);
+		container1D tempcont = containers_[i];
 		tempcont = tempcont * getNorm(i);
 		TH1D * h = (TH1D*)tempcont.getTH1D(getLegend(i)+" "+getName()+"_leg")->Clone();
 		h->SetFillColor(getColor(i));
@@ -512,11 +539,12 @@ TLegend * containerStack::makeTLegend(bool inverse){
 
 	return leg;
 }
-void containerStack::drawControlPlot(TString name, bool drawxaxislabels, double resizelabels){
-	if(mode!=dim1){
-		std::cout << "containerStack::drawControlPlot: only available for 1dim stacks!" <<std::endl;
+void containerStack::drawControlPlot(TString name, bool drawxaxislabels, double resizelabels) {
+	if(!checkDrawDimension()){
+		std::cout << "containerStack::drawControlPlot: only available for 1dim(unfold) stacks!" <<std::endl;
 		return;
 	}
+	TH1::AddDirectory(false);
 	if(name=="") name=name_;
 	int dataentry=0;
 	bool gotdentry=false;
@@ -588,10 +616,11 @@ TGraphAsymmErrors * containerStack::makeMCErrors(){
 }
 
 void containerStack::drawRatioPlot(TString name,double resizelabels){
-	if(mode!=dim1){
+	if(!checkDrawDimension()){
 		std::cout << "containerStack::drawRatioPlot: only available for 1dim stacks!" <<std::endl;
 		return;
 	}
+	TH1::AddDirectory(false);
 	//prepare container
 	if(name=="") name=name_;
 	int dataentry=0;
@@ -677,18 +706,227 @@ void containerStack::drawRatioPlot(TString name,double resizelabels){
 		}
 	}
 }
+/**
+ * requires all norms=1
+ * returns at 0: left to right
+ *         at 1: right to left
+ *   idx is index of signal. data is being ignored
+ */
+std::vector<container1D> containerStack::getPEffPlots(size_t idx)const{
+	if(idx>=containers_.size()){
+		std::cout << "containerStack::getPEffPlot: idx out of range, return empty" <<std::endl;
+		return std::vector<container1D>();
+	}
+	container1D sigcont=containers_.at(0);
+	sigcont.clear();
+	container1D bgcont=sigcont;
+	container1D peff=sigcont; //, ...
+	//sig,bg
+	for(size_t i=0;i<containers_.size();i++){
+		if(i==idx)
+			sigcont=containers_.at(i);
+		else if(legends_.at(i)!=dataleg_)
+			bgcont+=containers_.at(i);
+	}
+	//cont ready
+	//make lhs
+	size_t binssize=bgcont.getBins().size();
+	double integralsig=0,integralbg=0;
 
+	double fullsignintegral=sigcont.integral(true);
+	//NOT PARALLEL! NEEDS TO BE SEQUENTIAL
+	for(size_t i=0;i<binssize;i++){
+		integralsig+=sigcont.getBinContent(i);
+		integralbg+=bgcont.getBinContent(i);
+		double content=integralsig/fullsignintegral * integralsig/(integralsig+integralbg);
+		if(content!=content)content=0;
+		peff.getBin(i).setContent(content); //eff * purity
+	}
+	// HERE WE ARE  peff.
+	peff.setNames("p*eff","","P*#epsilon");
+	std::vector<container1D> out;
+	out.push_back(peff);
+
+	integralsig=0;integralbg=0;
+	for(size_t i=binssize;i>0;i--){
+		integralsig+=sigcont.getBinContent(i-1);
+		integralbg+=bgcont.getBinContent(i-1);
+		double content=integralsig/fullsignintegral * integralsig/(integralsig+integralbg);
+		if(content!=content)content=0;
+		peff.getBin(i-1).setContent(content); //eff * purity
+	}
+	out.push_back(peff);
+
+	return out; //default
+}
+
+void containerStack::drawPEffPlot(TString name,double resizelabels)const{
+	if(signals_.size()<1){
+		std::cout << "containerStack::drawPEffPlot: no signal set, doing nothing" <<std::endl;
+		return;
+	}
+	if(containers_.size()<1){
+		std::cout << "containerStack::drawPEffPlot: no 1dmin containers available. Doing nothing" <<std::endl;
+		return;
+	}
+	std::vector<size_t> sidx=getSignalIdxs();
+	TH1::AddDirectory(false);
+	std::vector<std::vector<container1D> > plotss;
+	double ymax=0;
+	for(size_t i=0;i<sidx.size();i++){
+		std::vector<container1D> plots=getPEffPlots(sidx.at(i));
+		for(size_t j=0;j<plots.size();j++)
+			if(ymax<plots.at(j).getYMax(false)) ymax=plots.at(j).getYMax(false);
+		plotss.push_back(plots);
+	}
+	for(size_t i=0;i<sidx.size();i++){
+		std::vector<container1D> & plots=plotss.at(i);
+		if(plots.size()>1){
+			if(i==0){
+				float multiplier=1;
+				double ylow,yhigh,xlow,xhigh;
+				if(gPad){
+					gPad->GetPadPar(xlow,ylow,xhigh,yhigh);
+					multiplier = (float)1/(yhigh-ylow);
+				}
+				plots.at(0).setLabelSize(resizelabels*multiplier);
+			}
+			TH1D * h1=plots.at(0).getTH1D("",false,true);
+			TH1D * h2=plots.at(1).getTH1D("",false,true);
+			h2->SetLineStyle(9);
+			h1->SetLineColor(colors_.at(sidx.at(i)));
+			h2->SetLineColor(colors_.at(sidx.at(i)));
+			h1->SetLineWidth(2);
+			h2->SetLineWidth(2);
+			h1->SetMarkerStyle(1);
+			h2->SetMarkerStyle(1);
+			h1->SetOption("");
+			h2->SetOption("");
+			if(i==0){
+				h1->GetYaxis()->SetNdivisions(505);
+				h1->GetYaxis()->SetRangeUser(ymax*0.00000000001,ymax*1.05);
+				h1->Draw();
+			}
+			else{
+				h1->Draw("same");
+			}
+			h2->Draw("same");
+		}
+	}
+
+}
+
+
+void containerStack::drawSBGPlot(TString name,double resizelabels,bool invert){
+	if(!checkDrawDimension()){
+		std::cout << "containerStack::drawRatioPlot: only available for 1dim stacks!" <<std::endl;
+		return;
+	}
+	TH1::AddDirectory(false);
+	//prepare container
+	if(name=="") name=name_;
+	//int dataentry=0;
+	bool gotdentry=false;
+	bool gotuf=false;
+	bool gotof=false;
+	for(unsigned int i=0;i<size();i++){ // get datalegend and check if underflow or overflow in any container
+		if(getLegend(i) == dataleg_){
+			//dataentry=i;
+			gotdentry=true;
+			if(gotof && gotuf) break;
+		}
+		if(containers_[i].getOverflow() < -0.9){
+			gotof=true;
+			if(gotdentry && gotuf) break;
+		}
+		if(containers_[i].getUnderflow() < -0.9){
+			gotuf=true;
+			if(gotdentry && gotof) break;
+		}
+	}
+	//prepare container
+	std::vector<container1D> vsgbg;
+	double totmax=-999;
+	for(size_t i=0;i<legends_.size();i++){
+		if(legends_[i]==dataleg_) continue;
+		container1D sig=containers_[i];
+		container1D bg=sig;
+		bg.clear();
+		container1D sgbg=bg;
+		//get all other contributions
+		for(size_t j=0;j<legends_.size();j++){
+			if(i==j) continue;
+			if(legends_[j]==dataleg_) continue;
+			bg += containers_[j];
+		}
+		sig.setAllErrorsZero();
+		std::vector<float> bins=sig.getBins();
+		double sinteg=0, bginteg=0;
+		for(size_t j=0;j<bins.size();j++){
+			size_t bin=j;
+			if(invert) bin=bins.size()-1-j;
+			sinteg  += sig.getBinContent(bin);
+			bginteg += bg.getBinContent(bin);
+			double snr=sinteg/(sinteg+bginteg);
+			if(snr!=snr) snr=0; //nan protection
+			if(totmax < snr) totmax=snr;
+			sgbg.setBinContent(bin,snr);
+		}
+		sgbg.normalize();
+		vsgbg.push_back(sgbg);
+	}
+
+	float multiplier=1;
+	double ylow,yhigh,xlow,xhigh;
+	if(gPad){
+		gPad->GetPadPar(xlow,ylow,xhigh,yhigh);
+		multiplier = (float)1/(yhigh-ylow);
+	}
+	bool firstdraw=true;
+	for(size_t i=0;i<vsgbg.size();i++){
+		//get TH1Ds
+		container1D * c=&vsgbg[i];
+		if(firstdraw)
+			c->setLabelSize(multiplier * resizelabels);
+		TH1D * h=c->getTH1D("");
+		h->GetYaxis()->SetRangeUser(0,totmax*1.05);
+		h->SetLineColor(colors_[i]);
+		h->SetLineWidth(2);
+		if(firstdraw){
+			if(invert)
+				h->GetYaxis()->SetTitle("#frac{sg}{sg+bg}#leftarrow");
+			else
+				h->GetYaxis()->SetTitle("#frac{sg}{sg+bg}#rightarrow");
+			h->Draw();
+			firstdraw=false;
+		}
+		else{
+			h->Draw("same");
+		}
+	}
+}
+/*
 TCanvas * containerStack::makeTCanvas(bool drawratioplot){
-	if(mode!=dim1){
+	if(drawratioplot) return makeTCanvas(ratio);
+	else return makeTCanvas(normal);
+}
+ */
+TCanvas * containerStack::makeTCanvas(plotmode plotMode){
+	if(!checkDrawDimension()){
 		std::cout << "containerStack::makeTCanvas: only available for 1dim stacks!" <<std::endl;
 		return 0;
 	}
-	TCanvas * c = new TCanvas(name_+"_c",name_+"_c");
+	TH1::AddDirectory(false);
+	TString canvasname=name_+"_c";
+	if(mode==unfolddim1)
+		canvasname = canvasname + "_uf";
+	TCanvas * c = new TCanvas(canvasname,canvasname);
 	if(containerStack::batchmode)
 		c->SetBatch();
 	TH1D * htemp=new TH1D("sometemphisto"+name_,"sometemphisto"+name_,2,0,1); //creates all gPad stuff etc and prevents seg vio, which happens in some cases; weird
 	htemp->Draw();
-	if(!drawratioplot){
+	gStyle->SetOptTitle(0);
+	if(plotMode == normal){
 		c->cd();
 		drawControlPlot();
 	}
@@ -705,10 +943,28 @@ TCanvas * containerStack::makeTCanvas(bool drawratioplot){
 		c->cd(2)->SetLeftMargin(0.15);
 		c->cd(2)->SetTopMargin(0);
 		c->cd(2)->SetPad(0,0,1,divideat);
-		gStyle->SetOptTitle(0);
-		drawRatioPlot("",labelresize);
+		if(plotMode == ratio)
+			drawRatioPlot("",labelresize);
+		else if(plotMode == sigbg)
+			drawPEffPlot("",labelresize);
 		c->cd(1)->RedrawAxis();
 	}
+	/*else{
+		c->Divide(1,3);
+		c->SetFrameBorderSize(0);
+		c->cd(1)->SetLeftMargin(0.15);
+		c->cd(1)->SetBottomMargin(0.0);
+		c->cd(2)->SetLeftMargin(0.15);
+		c->cd(2)->SetBottomMargin(0.0);
+		c->cd(3)->SetLeftMargin(0.15);
+		c->cd(3)->SetBottomMargin(0.4);
+		drawControlPlot(name_,false,1);
+		c->cd(2);
+		drawSBGPlot("",1,false);
+		c->cd(3);
+		drawSBGPlot("",1,true);
+		c->cd(1)->RedrawAxis();
+	}*/
 	if(gStyle){
 		gStyle->SetOptTitle(0);
 		gStyle->SetOptStat(0);
@@ -844,9 +1100,185 @@ ztop::containerStack containerStack::operator * (int scalar){
 	return *this * (double)scalar;
 }
 
-//rovate memberfunc
-int containerStack::checkLegOrder(){
-	for(std::map<TString,size_t>::iterator it=legorder_.begin();it!=legorder_.end();++it){
+
+bool containerStack::setsignal(const TString& sign){
+	for(size_t i=0;i<legends_.size();i++){
+		if(sign == legends_[i]){
+			signals_.clear();
+			signals_.push_back(sign);
+			return true;
+		}
+	}
+	std::cout << "containerStack::setsignal: signalname " << sign << " not found in legend entries. doing nothing" <<std::endl;
+	return false;
+}
+bool containerStack::addSignal(const TString& sign){
+	if(std::find(signals_.begin(),signals_.end(),sign)!=signals_.end())
+		return true; //already in
+	for(size_t i=0;i<legends_.size();i++){
+		if(sign == legends_[i]){
+			signals_.push_back(sign);
+			return true;
+		}
+	}
+	std::cout << "containerStack::setsignal: signalname " << sign << " not found in legend entries. doing nothing" <<std::endl;
+	return false;
+}
+bool containerStack::setsignals(const std::vector<TString> & signs){
+	if(!checkSignals(signs)){
+		std::cout << "containerStack::setsignals: not all signals found in legend entries" <<std::endl;
+		return false;
+	}
+	signals_=signs;
+	return true;
+}
+std::vector<size_t> containerStack::getSignalIdxs() const{
+	std::vector<size_t> out;
+	for(size_t i=0;i<signals_.size();i++)
+		out.push_back((size_t)(std::find(legends_.begin(),legends_.end(),signals_.at(i)) - legends_.begin()));
+	return out;
+}
+
+container1DUnfold containerStack::produceUnfoldingContainer(const std::vector<TString> &sign) const{// if sign empty use "setsignal"
+	/*
+   ad all signal -> cuf
+   add all recocont_ w/o signaldef -> set BG of cuf
+   (add all) with datadef -> setData in cuf
+	 */
+
+
+	container1DUnfold out;
+	if(mode != unfolddim1 || containers1DUnfold_.size()<1){
+		std::cout << "containerStack::produceUnfoldingContainer: No unfolding information, return empty" <<std::endl;
+		return out;
+	}
+	if(debug)
+		checknorms();
+	bool temp=container1DUnfold::c_makelist;
+	container1DUnfold::c_makelist=false;
+	bool temp2=container1D::c_makelist;
+	container1D::c_makelist=false;
+	bool temp3=histoContent::addStatCorrelated;
+	histoContent::addStatCorrelated=false;
+
+	std::vector<TString> signals=signals_;
+
+	if(sign.size()>0)
+		signals=sign;
+	out=containers1DUnfold_.at(0);
+	out.clear();
+	container1D background=containers1DUnfold_.at(0).getRecoContainer();
+	background.clear();
+	container1D data=background;
+
+	//find signal
+
+	for(size_t leg=0;leg<legends_.size();leg++){
+		bool issignal=false;
+		const container1DUnfold * cuf=&containers1DUnfold_.at(leg);
+		for(size_t sig=0;sig<signals.size();sig++){
+			if(signals.at(sig) == legends_.at(leg)){
+				if(debug)
+					std::cout << "containerStack::produceUnfoldingContainer: identified " << legends_.at(leg) << " as signal -> add to signal, norm: "<< norms_[leg] <<std::endl;
+				container1DUnfold normcuf= *cuf;
+				normcuf = normcuf*norms_[leg];
+				out = out + normcuf;
+				issignal=true;
+				break;
+			}
+		}
+		if(!issignal && legends_.at(leg) != dataleg_){
+			if(debug)
+				std::cout << "containerStack::produceUnfoldingContainer: identified as BG: "<< legends_.at(leg) <<  ", norm: "<< norms_[leg] << std::endl;
+			container1D bg=cuf->getRecoContainer();
+			background = background + bg*norms_[leg];
+		}
+		if(legends_.at(leg) == dataleg_){
+			if(debug)
+				std::cout << "containerStack::produceUnfoldingContainer: identified as data: "<< legends_.at(leg) << std::endl;
+			container1D d=cuf->getRecoContainer();
+			data = data + d*norms_[leg];
+		}
+	}
+	//migration matrix, eff, background prepared -> finished
+	out.setBackground(background);
+	out.setRecoContainer(data);
+	container1DUnfold::c_makelist=temp;
+	container1D::c_makelist=temp2;
+	histoContent::addStatCorrelated=temp3;
+
+	return out;
+}
+container1DUnfold containerStack::produceXCheckUnfoldingContainer(const std::vector<TString> & sign) const{ /* if sign empty use "setsignal"
+   just adds all with signaldef (to be then unfolded and a comparison plot to be made gen vs unfolded gen) -> SWITCH OFF SYSTEMATICS HERE! (should be independent)
+
+ */
+	//define operators (propagate from containers) for easy handling
+	// also define += etc. and use container += if better, needs to be implemented (later)
+	container1DUnfold out;
+	if(mode != unfolddim1 || containers1DUnfold_.size()<1){
+		std::cout << "containerStack::produceXCheckUnfoldingContainer: No unfolding information, return empty" <<std::endl;
+		return out;
+	}
+	if(debug)
+		checknorms();
+
+	bool temp=container1DUnfold::c_makelist;
+	container1DUnfold::c_makelist=false;
+	bool temp2=container1D::c_makelist;
+	container1D::c_makelist=false;
+	bool temp3=histoContent::addStatCorrelated;
+	histoContent::addStatCorrelated=false;
+
+	std::vector<TString> signals=signals_;
+	if(sign.size()>0)
+		signals=sign;
+	out=containers1DUnfold_.at(0);
+	out.clear();
+	for(size_t leg=0;leg<legends_.size();leg++){
+		const container1DUnfold * cuf=&containers1DUnfold_.at(leg);
+		for(size_t sig=0;sig<signals.size();sig++){
+			if(signals.at(sig) == legends_.at(leg)){ //so damn not fast
+				container1DUnfold normcuf=*cuf;
+				normcuf = normcuf*norms_[leg];
+				out = out + normcuf;
+				break;
+			}
+		}
+	}
+	container1DUnfold::c_makelist=temp;
+	container1D::c_makelist=temp2;
+	histoContent::addStatCorrelated=temp3;
+	return out;
+}
+
+bool containerStack::checknorms() const{
+	bool out=true;
+	for(size_t i=0;i<norms_.size();i++){
+		if(norms_[i] != 1){
+			if(debug){
+				std::cout << "containerStack::checknorms: Norm for " << legends_[i] << " is not 1; " << norms_[i] << std::endl;
+				out=false;
+			}
+			else{
+				return false;
+			}
+		}
+	}
+	return out;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////private member functions////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+int containerStack::checkLegOrder() const{
+	for(std::map<TString,size_t>::const_iterator it=legorder_.begin();it!=legorder_.end();++it){
 		if(it->second > size()){
 			std::cout << "containerStack::checkLegOrder: "<< name_ << ": legend ordering numbers (" <<it->second << ") need to be <= size of stack! ("<< size()<<")" <<std::endl;
 			return -1;
@@ -854,11 +1286,21 @@ int containerStack::checkLegOrder(){
 	}
 	return 0;
 }
+/**
+ * might need a rewrite
+ */
+std::vector<size_t> containerStack::sortEntries(bool inverse) const{
 
-std::vector<size_t> containerStack::sortEntries(bool inverse){
 
 	std::vector<int> ordering;
 	std::vector<size_t> dontuse;
+
+	if(legorder_.size()<1){ //not filled
+		std::vector<size_t> easyorder;
+		for(size_t i=0;i<legends_.size();i++)
+			easyorder.push_back(i);
+		return easyorder;
+	}
 
 	ordering.resize(size(),-1);
 	for(unsigned int it=0;it<size();it++){
@@ -900,6 +1342,30 @@ std::vector<size_t> containerStack::sortEntries(bool inverse){
 			out.push_back((size_t) ordering.at(i));
 	}
 	return out;
+}
+
+bool containerStack::checkDrawDimension() const{
+	return (mode==dim1 || mode==unfolddim1);
+}
+
+bool containerStack::checkSignals(const std::vector<TString> &signs) const{
+	size_t count=0;
+	for(size_t j=0;j< signs.size();j++){
+		bool succ=false;
+		const TString & sign=signs.at(j);
+		for(size_t i=0;i<legends_.size();i++){
+			if(sign == legends_[i]){
+				succ=true;
+				break;
+			}
+		}
+		if(succ)
+			count++;
+	}
+	if(count != signs.size()){
+		return false;
+	}
+	return true;
 }
 
 }//namespace

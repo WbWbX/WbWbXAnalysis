@@ -44,8 +44,8 @@ public:
 	}
 
 	indexMap & operator << (const T& t){
-		 push_back(t);
-		 return *this;
+		push_back(t);
+		return *this;
 	}
 	indexMap & operator << (const indexMap& m){
 		for(size_t i=0;i<m.size_;i++){
@@ -105,10 +105,26 @@ public:
 		return size_-1;
 	}
 
+	const T & operator[](const size_t index) const{
+		return getData(index);
+	}
+	const T & at(const size_t index) const{
+		return getData(index);
+	}
+
 	void clear(){
 		map_.clear();
 		imap_.clear();
 		size_=0;
+	}
+
+	bool operator==(const indexMap & rhs) const{
+		if(map_ != rhs.map_)
+			return false;
+		return true;
+	}
+	bool operator!=(const indexMap & rhs) const{
+		return !(*this==rhs);
 	}
 
 private:

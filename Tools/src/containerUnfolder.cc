@@ -49,26 +49,64 @@ containerUnfolder::~containerUnfolder(){
 void containerUnfolder::setOptions(){
 
 }
-container1D containerUnfolder::unfold(const container1DUnfold & cuf){
 
-	container1D out;
+container1D containerUnfolder::binbybinunfold(container1DUnfold & cuf){
+
+	//efficiency:
+
+	//get full gen&reco
+	container1D genreco=cuf.projectToY(false);
+	container1D gen=cuf.getGenContainer();
+	genreco=genreco.rebinToBinning(gen); //make same bins
+
+	//operations
+	bool temp=histoContent::divideStatCorrelated; //all same named syst,nom, etc are assumed to be stat corr
+	histoContent::divideStatCorrelated=true;
+	container1D effinv=gen/genreco;
+	histoContent::divideStatCorrelated=temp;
+
+	temp=histoContent::subtractStatCorrelated;
+	histoContent::subtractStatCorrelated=false;
+	container1D sel=cuf.getRecoContainer();
+	container1D bg=cuf.getBackground();
+	container1D smbg=sel - bg;
+	histoContent::subtractStatCorrelated=temp;
+
+	temp=histoContent::multiplyStatCorrelated;
+	histoContent::multiplyStatCorrelated=false;
+	container1D smbgrb=smbg.rebinToBinning(effinv);
+	container1D xsec=smbgrb * effinv;
+	histoContent::multiplyStatCorrelated=temp;
+
+	cuf.setUnfolded(xsec);
+	cuf.setRefolded(cuf.getRecoContainer());
+	return xsec;
+
+}
+container1D containerUnfolder::unfold(/*const*/ container1DUnfold & cuf){
+
+	container1D out,refolded;
+
+	if(cuf.isBinByBin()){
+		container1D out=binbybinunfold(cuf);
+		return out;
+	}
 
 	TUnfold::ERegMode regmode=regmode_;
 	bool LCurve=LCurve_;
-	if(0){ //binbybin_){
-		std::cout << "containerUnfolder::unfold: doing binByBin unfolding - not really implemented yet" << std::endl;
-	}
+
 
 	/*
 	 *
 	 * preparation nominal
 	 */
+	bool outisBWdiv=false; //for debuggung purposes
 	TH1::AddDirectory(false);
 	if(debug)
 		std::cout << "containerUnfolder::unfold: preparing response matrix" << std::endl;
 	TH2* responsematrix=cuf.prepareRespMatrix();
 	unfnominal_ = new unfolder(cuf.getName()+"_nominal");
-	TH1* datahist=cuf.getDataContainer().getTH1D(cuf.getName()+"_datahist_nominal",false);
+	TH1* datahist=cuf.getRecoContainer().getTH1D(cuf.getName()+"_datahist_nominal",false,true);
 	if(debug)
 		std::cout << "containerUnfolder::unfold: initialising unfolder" << std::endl;
 	unfnominal_->init(responsematrix,datahist,TUnfold::kHistMapOutputHoriz,regmode);
@@ -83,9 +121,8 @@ container1D containerUnfolder::unfold(const container1DUnfold & cuf){
 	if(debug)
 		std::cout << "containerUnfolder::unfold: getting output" << std::endl;
 	if(unfnominal_->ready()){
-		out.import(unfnominal_->getUnfolded());
-
-		//refolded_.import(unfnominal_->getReUnfolded());
+		out.import(unfnominal_->getUnfolded(),outisBWdiv);
+		refolded.import(unfnominal_->getRefolded(),outisBWdiv);
 	}
 	else{
 		std::cout << "containerUnfolder::unfold: unfolding for nominal failed!! skipping rest" << std::endl;
@@ -99,12 +136,12 @@ container1D containerUnfolder::unfold(const container1DUnfold & cuf){
 	 * prepare loop for systematics
 	 */
 	bool dodatasyst=true;
-	if(cuf.getDataContainer().getSystSize() != 0 && cuf.getDataContainer().getSystSize() != cuf.getSystSize()){
+	if(cuf.getRecoContainer().getSystSize() != 0 && cuf.getRecoContainer().getSystSize() != cuf.getSystSize()){
 		std::cout << "WARNING! containerUnfolder::unfold: ambiguous association of data systematics and MC systematics. "
 				<< "data will be unfolded without systematic variations." << std::endl;
 		dodatasyst=false;
 	}
-	if(cuf.getDataContainer().getSystSize() <1){
+	if(cuf.getRecoContainer().getSystSize() <1){
 		std::cout << "containerUnfolder::unfold: dataContainer has no info about systematics. If intended, ok, if not, check!" << std::endl;
 		dodatasyst=false;
 	}
@@ -119,9 +156,9 @@ container1D containerUnfolder::unfold(const container1DUnfold & cuf){
 		SysResponsematrix->Draw("COLZ");
 		TH1* SysDatahist=0;
 		if(dodatasyst)
-			SysDatahist=cuf.getDataContainer().getTH1DSyst(cuf.getName()+"_datahist_"+cuf.getSystErrorName(sys),sys,false,true);
+			SysDatahist=cuf.getRecoContainer().getTH1DSyst(cuf.getName()+"_datahist_"+cuf.getSystErrorName(sys),sys,false,true);
 		else
-			SysDatahist=cuf.getDataContainer().getTH1D(cuf.getName()+"_datahist_nominal_fake"+cuf.getSystErrorName(sys),false);
+			SysDatahist=cuf.getRecoContainer().getTH1D(cuf.getName()+"_datahist_nominal_fake"+cuf.getSystErrorName(sys),false,true);
 		unfolder * uf=new unfolder(cuf.getName()+"_"+cuf.getSystErrorName(sys));
 		int verb=uf->init(SysResponsematrix,SysDatahist);
 		if(verb>10000){
@@ -154,15 +191,22 @@ container1D containerUnfolder::unfold(const container1DUnfold & cuf){
 	 */
 	for(size_t sys=0;sys<cuf.getSystSize();sys++){
 		TH1 * huf=unfsyst_.at(sys)->getUnfolded();
+		TH1 * hrf=unfsyst_.at(sys)->getRefolded();
 		if(!huf){
 			std::cout << "containerUnfolder::unfold: unfolding result for " << cuf.getName() << ": " << cuf.getSystErrorName(sys) << " could not be retrieved. stopping unfolding!" << std::endl;
 			return -3;
 		}
-		container1D syscont;
-		syscont.import(huf);
+		container1D syscont,sysref;
+		syscont.import(huf,outisBWdiv);
+		sysref.import(hrf,outisBWdiv);
 		delete huf;
-		out.addErrorContainer(cuf.getSystErrorName(sys),syscont,true); //ignoreMCStat=true
+		delete hrf;
+		out.addErrorContainer(cuf.getSystErrorName(sys),syscont,true); //ignoreMCStat=true, shouldnt do anything
+		refolded.addErrorContainer(cuf.getSystErrorName(sys),sysref,true); //ignoreMCStat=true
 	}
+	//const container1D setter=out;
+	cuf.setUnfolded(out);
+	cuf.setRefolded(refolded);
 	return out;
 }
 

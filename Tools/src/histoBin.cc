@@ -6,6 +6,7 @@
  */
 #include "../interface/histoBin.h"
 #include <iostream>
+#include <omp.h>
 namespace ztop{
 
 
@@ -29,6 +30,14 @@ void histoBins::setSize(size_t Size){
 	histoBin hb;
 	bins_.resize(Size,hb);
 }
+/**
+ * returns true if bins were added
+ */
+bool histoBins::resize(const size_t & newsize){
+	size_t oldsize=bins_.size();
+	bins_.resize(newsize);
+	return bins_.size()>oldsize;
+}
 
 /**
  * histoBins::add(const histoBins& rhl,bool statCorr)
@@ -38,6 +47,7 @@ void histoBins::setSize(size_t Size){
 int histoBins::add(const histoBins& rhs,bool statCorr){
 	if(size()!=rhs.size())
 		return -1;
+#pragma omp parallel for
 	for(size_t i=0;i<size();i++){
 		getBin(i).addToContent(rhs.getBin(i).getContent());
 		double staterr=0;
@@ -60,6 +70,7 @@ int histoBins::add(const histoBins& rhs,bool statCorr){
 int histoBins::subtract(const histoBins& rhs,bool statCorr){
 	if(size()!=rhs.size())
 		return -1;
+#pragma omp parallel for
 	for(size_t i=0;i<size();i++){
 		getBin(i).setContent(getBin(i).getContent()-rhs.getBin(i).getContent());
 		double staterr=0;
@@ -82,6 +93,7 @@ int histoBins::subtract(const histoBins& rhs,bool statCorr){
 int histoBins::divide(const histoBins& rhs,bool statCorr){
 	if(size()!=rhs.size())
 		return -1;
+#pragma omp parallel for
 	for(size_t i=0;i<size();i++){
 		double div=0;
 		if(rhs.getBin(i).getContent()==0){
@@ -114,6 +126,7 @@ int histoBins::divide(const histoBins& rhs,bool statCorr){
 int histoBins::multiply(const histoBins& rhs,bool statCorr){
 	if(size()!=rhs.size())
 		return -1;
+#pragma omp parallel for
 	for(size_t i=0;i<size();i++){
 		const double & ca=getBin(i).getContent();
 		const double & cb=rhs.getBin(i).getContent();
@@ -138,6 +151,7 @@ int histoBins::multiply(const histoBins& rhs,bool statCorr){
 	return 0;
 }
 void histoBins::multiply(const double& val){
+#pragma omp parallel for
 	for(size_t i=0;i<size();i++)
 		bins_[i].multiply(val);
 }

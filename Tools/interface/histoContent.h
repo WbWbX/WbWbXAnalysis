@@ -30,6 +30,7 @@ public:
 
 	size_t size() const {return nominal_.size();}
 	size_t layerSize() const {return additionalbins_.size();}
+	bool resizeBins(const size_t & newsize);
 
 	size_t addLayer(const TString &); //pushes back
 	size_t addLayer(const TString &, const histoBins & ); //pushes back
@@ -54,6 +55,7 @@ public:
 
 	void clearLayerContent(const int &);
 	void clearLayerStat(const int &);
+
 
 	void removeAdditionalLayers(){additionalbins_.clear();layermap_.clear();}
 
@@ -95,6 +97,8 @@ public:
 	histoContent operator * (const double &);
 
 	void cout() const;
+
+	bool hasSameLayerMap(const histoContent & hc) const{return layermap_==hc.layermap_;}
 
 private:
 	histoBins nominal_;

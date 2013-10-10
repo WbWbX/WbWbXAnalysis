@@ -590,6 +590,21 @@ if newMuons:
         )
 
 
+if susy:
+    
+    from PhysicsTools.PatAlgos.tools.pfTools import *
+    process.muIsoSequencetwo = setupPFMuonIso(process, 'muons', 'PFIso2')
+    adaptPFIsoMuons( process, applyPostfix(process,"patMuonsPFlow",""), 'PFIso2', "04")
+    getattr(process,'patPF2PATSequence'+pfpostfix).replace(getattr(process,'patMuons'+pfpostfix),
+                                                       getattr(process,'muIsoSequencetwo') *
+                                                       getattr(process,'patMuons'+pfpostfix))
+    
+
+    process.patMuonsPFlow.useParticleFlow = cms.bool(False)
+    process.patMuonsPFlow.pfMuonSource = cms.InputTag("particleFlow")
+    process.muonMatchPFlow.src     = "muons"
+
+    
 
 ################Jets########## 
 
@@ -828,8 +843,8 @@ elif susy:
     from TtZAnalysis.Workarounds.usePFIsoCone import *
     usePFIsoCone(process)
     #load the standard pat objects
-    process.kinMuons.src = 'patMuons'
-    process.kinElectrons.src = 'patElectrons'
+    #process.kinMuons.src = 'patMuons'
+    #process.kinElectrons.src = 'patElectrons'
 
 else:
     process.load('TtZAnalysis.TreeWriter.treewriter_ttz_cff')
@@ -856,10 +871,10 @@ if isSignal and genFilter=="Top":
     process.PFTree.genJets           = 'ak5GenJetsPlusHadron'
 
 
-if not (includereco or includetrigger):
-    process.PFTree.muonSrc = 'kinMuons'
-    process.PFTree.elecGSFSrc =  'kinElectrons'
-    process.PFTree.elecPFSrc =  'kinPFElectrons'
+# always: if not (includereco or includetrigger):
+process.PFTree.muonSrc = 'kinMuons'
+process.PFTree.elecGSFSrc =  'kinElectrons'
+process.PFTree.elecPFSrc =  'kinPFElectrons'
 
 
 
@@ -905,9 +920,9 @@ process.path = cms.Path( process.goodOfflinePrimaryVertices *
                         process.treeSequence
                          )
 
-if susy:
-    process.path.replace(getattr(process,'patPF2PATSequence'+pfpostfix),
-                 process.patDefaultSequence)
+#if susy:
+#    process.path.replace(getattr(process,'patPF2PATSequence'+pfpostfix),
+#                 process.patDefaultSequence)
 
 if isFastSim:
     massSearchReplaceAnyInputTag(process.path,cms.InputTag("kt6PFJets","rho", "RECO"), cms.InputTag("kt6PFJets","rho", "HLT"),True)

@@ -21,6 +21,9 @@ libs=("TopAnalysisZTopUtils"
 
 #exit
 
+if [ $1 == "all" ];
+then
+	
 scram b -j12
 
 libdir=$CMSSW_BASE/src/TtZAnalysis/Analysis/lib
@@ -33,8 +36,6 @@ linklibs="$linklibs -l${libs[${i}]}"
 cp ${CMSLIBS}lib${libs[${i}]}.so $libdir
 done
 
-if [ $1 ];
-then
 
 echo compiling analyse.C
 infile=analyse.C
@@ -49,6 +50,30 @@ echo compiling mergeSyst.cc
 g++ $ROOTFLAGS -fopenmp -I$CPLUS_INCLUDE_PATH -c -o $infile.o $infile
 g++ -o mergeSyst.exe -fopenmp -Wall $ROOTLIBS -Llib$linklibs $infile.o
 
-else
-	echo "only compiled analyzer code, NOT steering program (analyse.exe)"
+
+infile=unfold.C
+
+g++ $ROOTFLAGS -fopenmp -I$CPLUS_INCLUDE_PATH -c -o $infile.o $infile
+g++ -o unfold.exe -fopenmp -Wall $ROOTLIBS -Llib$linklibs $infile.o
+fi
+
+if [ $1 == "unfold" ];
+then
+	
+
+libdir=$CMSSW_BASE/src/TtZAnalysis/Analysis/lib
+
+mkdir -p $libdir
+linklibs=""
+
+for (( i=0;i<${#libs[@]};i++)); do
+linklibs="$linklibs -l${libs[${i}]}"
+done
+	
+	
+infile=unfold.C
+
+g++ $ROOTFLAGS -fopenmp -I$CPLUS_INCLUDE_PATH -c -o $infile.o $infile
+g++ -o unfold.exe -fopenmp -Wall $ROOTLIBS -Llib$linklibs $infile.o
+
 fi

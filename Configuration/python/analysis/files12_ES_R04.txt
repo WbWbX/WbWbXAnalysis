@@ -26,10 +26,6 @@
 180  /MET/Run2012C-22Jan2013-v1/AOD         tree_8TeV_MET_runC_22Jan       muCone03=false includetrigger=true ttH=true isMC=false globalTag=FT_53_V21_AN5   json/ReRecoJan13.json.txt
 180  /METParked/Run2012D-22Jan2013-v1/AOD   tree_8TeV_MET_runD_22Jan       muCone03=false includetrigger=true ttH=true isMC=false globalTag=FT_53_V21_AN5   json/ReRecoJan13.json.txt
 
-90   /MET/Run2012A-22Jan2013-v1/AOD         tree_8TeV_MET_runA_22Jan        includetrigger=true ttH=true isMC=false globalTag=FT_53_V21_AN5   json/ReRecoJan13.json.txt
-120  /MET/Run2012B-22Jan2013-v1/AOD         tree_8TeV_MET_runB_22Jan        includetrigger=true ttH=true isMC=false globalTag=FT_53_V21_AN5   json/ReRecoJan13.json.txt
-180  /MET/Run2012C-22Jan2013-v1/AOD         tree_8TeV_MET_runC_22Jan        includetrigger=true ttH=true isMC=false globalTag=FT_53_V21_AN5   json/ReRecoJan13.json.txt
-180  /METParked/Run2012D-22Jan2013-v1/AOD   tree_8TeV_MET_runD_22Jan        includetrigger=true ttH=true isMC=false globalTag=FT_53_V21_AN5   json/ReRecoJan13.json.txt
 
 #90  /MET/Run2012A-13Jul2012-v1/AOD           tree_8TeV_MET_runA_13Jul    muCone03=false includetrigger=true ttH=true isMC=false globalTag=FT_53_V6C_AN4     json/RunA13Jul.json.txt
 #20  /MET/Run2012A-recover-06Aug2012-v1/AOD   tree_8TeV_MET_runA_06Aug    muCone03=false includetrigger=true ttH=true isMC=false globalTag=FT_53_V6C_AN4   json/RunA06Aug.json.txt

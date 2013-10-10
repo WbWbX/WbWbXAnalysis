@@ -6,6 +6,17 @@
  */
 #include "../interface/unfolder.h"
 #include <TError.h>
+#include <iostream>
+#include "TSpline.h"
+#include "TH1.h"
+#include "TGraph.h"
+#include "TString.h"
+#include "TCanvas.h"
+
+/**
+ * takes care that all output histograms are NOT divided by binwidth (what about UF/OF?)
+ *
+ */
 
 namespace ztop{
 
@@ -98,13 +109,30 @@ TH1*  unfolder::getUnfolded(){
 	if(!init_ || !ready_)
 		return 0;
 	TH1::AddDirectory(false);
-	return unfolder_->GetOutput(name_+"_unfolded");
+	TH1 * h=unfolder_->GetOutput(name_+"_unfolded");
+	multiplyByBinWidth(h);
+	return h;
 }
-TH1*  unfolder::getReUnfolded(){
+TH1*  unfolder::getRefolded(){
 	if(!init_ || !ready_)
 		return 0;
 	TH1::AddDirectory(false);
 	return unfolder_->GetFoldedOutput(name_+"_refolded");
+}
+
+TCanvas * unfolder::drawControlHistos() const{ //needs to be done
+	TCanvas * c = new TCanvas();
+	return c;
+}
+
+void unfolder::multiplyByBinWidth(TH1 *h) const{
+	return;
+	for(int bin=1;bin<h->GetNbinsX();bin++){
+		double cont=h->GetBinContent(bin)*(h->GetBinWidth(bin));
+		double err=h->GetBinError(bin)*(h->GetBinWidth(bin));
+		h->SetBinContent(bin, cont);
+		h->SetBinError(bin, err);
+	}
 }
 
 }//namespace

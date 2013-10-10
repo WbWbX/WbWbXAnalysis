@@ -21,121 +21,157 @@
 namespace ztop{
 
 
-  class containerStack{
-    
-  public:
-    containerStack();
-    containerStack(TString);
-    ~containerStack();
+class containerStack{
 
-    bool is2D(){if(mode==dim2) return true; else return false;}
-    bool is1D(){if(mode==dim1) return true; else return false;}
-    bool is1DUnfold(){if(mode==unfolddim1) return true; else return false;}
-
-    void push_back(ztop::container1D, TString, int, double); //! adds container with, name, colour, norm to stack
-    void push_back(ztop::container2D, TString, int, double); //! adds container with, name, colour, norm to stack
-    void push_back(ztop::container1DUnfold, TString, int, double); //! adds container with, name, colour, norm to stack
-    void removeContribution(TString); //! removes contribution
-    
-    void setDataLegend(TString leg="data"){dataleg_=leg;}
-
-    void setLegendOrder(TString leg, size_t no){legorder_[leg]=no;}
-
-    void mergeSameLegends();       //! shouldn't be necessary
-    ztop::container1D getContribution(TString);   //! does not ignore data; makes copy, doesn't change member containers!
-    ztop::container1D getContributionsBut(TString);  //!does not ignore data; makes copy, doesn't change member containers!
-    ztop::container1D getContributionsBut(std::vector<TString>);  //!does not ignore data; makes copy, doesn't change member containers!
-
-    ztop::container2D getContribution2D(TString);   //! does not ignore data; makes copy, doesn't change member containers!
-    ztop::container2D getContributions2DBut(TString);  //!does not ignore data; makes copy, doesn't change member containers!
-    ztop::container2D getContributions2DBut(std::vector<TString>);  //!does not ignore data; makes copy, doesn't change member containers!
-
-    ztop::container1DUnfold getContribution1DUnfold(TString);   //! does not ignore data; makes copy, doesn't change member containers!
-    ztop::container1DUnfold getContributions1DUnfoldBut(TString);  //!does not ignore data; makes copy, doesn't change member containers!
-    ztop::container1DUnfold getContributions1DUnfoldBut(std::vector<TString>);  //!does not ignore data; makes copy, doesn't change member containers!
-
-    TString getName(){return name_;}
-    unsigned int size(){return colors_.size();}
-    TString & getLegend(unsigned int i){return legends_[i];}
-    int & getColor (unsigned int i){return colors_[i];};
-    double & getNorm  (unsigned int i){return norms_[i];}
-
-    container1D & getContainer(unsigned int i){return containers_[i];}
-    container1D & getContainer(TString);
-    container1D getFullMCContainer();           //! gets the sum of all MC containers (normalized with their stored norm) including error handling
-
-    container2D & getContainer2D(unsigned int i){return containers2D_[i];}
-    container2D & getContainer2D(TString);
-    container2D getFullMCContainer2D();           //! gets the sum of all MC containers (normalized with their stored norm) including error handling
-
-    container1DUnfold & getContainer1DUnfold(unsigned int i){return containers1DUnfold_[i];}
-    container1DUnfold & getContainer1DUnfold(TString);
-    container1DUnfold getFullMCContainer1DUnfold();           //! gets the sum of all MC containers (normalized with their stored norm) including error handling
-
-    void multiplyNorm(TString , double);
-    void multiplyAllMCNorms(double);
-    void addGlobalRelMCError(TString,double);   //! adds a global systematic variation to the systematics stored (e.g. lumi)
-    void addMCErrorStack(TString,containerStack);  //! calls container1D::addErrorContainer for each same named member container
-    void addRelSystematicsFrom(ztop::containerStack);
-    void removeError(TString);
-    void renameSyst(TString, TString); //! old, new
-
-    void clear(){containers_.clear();legends_.clear();colors_.clear();norms_.clear();}
-    
-    void setName(TString name){name_=name;}
-    
-    THStack * makeTHStack(TString stackname = "");
-    TLegend * makeTLegend(bool inverse=true);
-    void drawControlPlot(TString name="", bool drawxaxislabels=true, double resizelabels=1); // the extra axis is in both... sorry for that!
-    TGraphAsymmErrors * makeMCErrors();
-    void drawRatioPlot(TString name="",double resizelabels=1);
-
-    TCanvas * makeTCanvas(bool drawratioplot=true);
+public:
 
 
-    //define operators (propagate from containers) for easy handling
-    // also define += etc. and use container += if better, needs to be implemented (later)
+	enum plotmode{normal,ratio,sigbg};
 
-    containerStack operator + ( containerStack );
-    containerStack operator - ( containerStack );
-    containerStack operator / ( containerStack );
-    containerStack operator * ( containerStack );
-    containerStack operator * (double);
-    containerStack operator * (float);
-    containerStack operator * (int);
-    
-    static std::vector<ztop::containerStack*> cs_list;
-    static bool cs_makelist;
-    static void cs_clearlist(){cs_list.clear();}
-    static bool debug;
+	containerStack();
+	containerStack(TString);
+	~containerStack();
 
-    static bool batchmode;
+	bool is2D(){if(mode==dim2) return true; else return false;}
+	bool is1D(){if(mode==dim1) return true; else return false;}
+	bool is1DUnfold(){if(mode==unfolddim1) return true; else return false;}
 
-  private:
-    TString name_;
-    std::vector<ztop::container1D> containers_;
-    std::vector<ztop::container2D> containers2D_;
-    std::vector<ztop::container1DUnfold> containers1DUnfold_;
-    std::vector<TString> legends_;
-    std::vector<int> colors_;
-    std::vector<double> norms_;
-    TString dataleg_;
+	void push_back(ztop::container1D, TString, int, double); //! adds container with, name, colour, norm to stack
+	void push_back(ztop::container2D, TString, int, double); //! adds container with, name, colour, norm to stack
+	void push_back(ztop::container1DUnfold, TString, int, double); //! adds container with, name, colour, norm to stack
+	void removeContribution(TString); //! removes contribution
 
-    enum dimension{notset,dim1,dim2,unfolddim1};
-    dimension mode;
+	void setDataLegend(TString leg="data"){dataleg_=leg;}
 
-    std::map<TString,size_t> legorder_;
-    
-    int checkLegOrder();
+	void setLegendOrder(TString leg, size_t no){legorder_[leg]=no;}
 
-    std::vector<size_t> sortEntries(bool inverse);
+	void mergeSameLegends();       //! shouldn't be necessary
+	ztop::container1D getContribution(TString);   //! does not ignore data; makes copy, doesn't change member containers!
+	ztop::container1D getContributionsBut(TString);  //!does not ignore data; makes copy, doesn't change member containers!
+	ztop::container1D getContributionsBut(std::vector<TString>);  //!does not ignore data; makes copy, doesn't change member containers!
 
-    int getContributionIdx(TString);
+	ztop::container2D getContribution2D(TString);   //! does not ignore data; makes copy, doesn't change member containers!
+	ztop::container2D getContributions2DBut(TString);  //!does not ignore data; makes copy, doesn't change member containers!
+	ztop::container2D getContributions2DBut(std::vector<TString>);  //!does not ignore data; makes copy, doesn't change member containers!
+
+	ztop::container1DUnfold getContribution1DUnfold(TString);   //! does not ignore data; makes copy, doesn't change member containers!
+	ztop::container1DUnfold getContributions1DUnfoldBut(TString);  //!does not ignore data; makes copy, doesn't change member containers!
+	ztop::container1DUnfold getContributions1DUnfoldBut(std::vector<TString>);  //!does not ignore data; makes copy, doesn't change member containers!
+
+	const TString & getName() const{return name_;}
+	size_t size() const{return colors_.size();}
+	TString & getLegend(unsigned int i){return legends_[i];}
+	int & getColor (unsigned int i){return colors_[i];};
+	double & getNorm  (unsigned int i){return norms_[i];}
+
+	container1D & getContainer(unsigned int i){return containers_[i];}
+	container1D & getContainer(TString);
+	container1D getFullMCContainer();           //! gets the sum of all MC containers (normalized with their stored norm) including error handling
+
+	container2D & getContainer2D(unsigned int i){return containers2D_[i];}
+	container2D & getContainer2D(TString);
+	container2D getFullMCContainer2D();           //! gets the sum of all MC containers (normalized with their stored norm) including error handling
+
+	container1DUnfold & getContainer1DUnfold(unsigned int i){return containers1DUnfold_[i];}
+	container1DUnfold & getContainer1DUnfold(TString);
+	container1DUnfold getFullMCContainer1DUnfold();           //! gets the sum of all MC containers (normalized with their stored norm) including error handling
+
+	void multiplyNorm(TString , double);
+	void multiplyAllMCNorms(double);
+	void addGlobalRelMCError(TString,double);   //! adds a global systematic variation to the systematics stored (e.g. lumi)
+	void addMCErrorStack(TString,containerStack);  //! calls container1D::addErrorContainer for each same named member container
+	void addRelSystematicsFrom(ztop::containerStack);
+	void removeError(TString);
+	void renameSyst(TString, TString); //! old, new
+
+	void clear(){containers_.clear();legends_.clear();colors_.clear();norms_.clear();}
+
+	void setName(TString name){name_=name;}
+
+	THStack * makeTHStack(TString stackname = "");
+	TLegend * makeTLegend(bool inverse=true);
+	void drawControlPlot(TString name="", bool drawxaxislabels=true, double resizelabels=1); // the extra axis is in both... sorry for that!
+	TGraphAsymmErrors * makeMCErrors();
+	void drawRatioPlot(TString name="",double resizelabels=1);
+	std::vector<container1D>  getPEffPlots(size_t idx)const;
+	void drawPEffPlot(TString name="",double resizelabels=1)const;
+	void drawSBGPlot(TString name="",double resizelabels=1,bool invert=false);
+
+	//TCanvas * makeTCanvas(bool drawratioplot=true);
+	TCanvas * makeTCanvas(plotmode plotMode=ratio);
+
+
+	containerStack operator + ( containerStack );
+	containerStack operator - ( containerStack );
+	containerStack operator / ( containerStack );
+	containerStack operator * ( containerStack );
+	containerStack operator * (double);
+	containerStack operator * (float);
+	containerStack operator * (int);
+
+	bool setsignal(const TString&);
+	bool addSignal(const TString&);
+	bool setsignals(const std::vector<TString> &);// (just return whether successful)
+	std::vector<size_t> getSignalIdxs() const;
+	container1DUnfold produceUnfoldingContainer(const std::vector<TString> &sign=std::vector<TString>()) const;// if sign empty use "setsignal"
+	/*
+       ad all signal -> cuf
+       add all recocont_ w/o signaldef -> set BG of cuf
+       (add all) with datadef -> setData in cuf
+	 */
+	container1DUnfold produceXCheckUnfoldingContainer(const std::vector<TString> & sign=std::vector<TString>()) const; /* if sign empty use "setsignal"
+       just adds all with signaldef (to be then unfolded and a comparison plot to be made gen vs unfolded gen) -> SWITCH OFF SYSTEMATICS HERE! (should be independent)
+
+	 */
+	//define operators (propagate from containers) for easy handling
+	// also define += etc. and use container += if better, needs to be implemented (later)
+
+
+	static std::vector<ztop::containerStack*> cs_list;
+	static bool cs_makelist;
+	static void cs_clearlist(){cs_list.clear();}
+	static bool debug;
+
+	static bool batchmode;
+
+
+	//debugging functions
+	bool checknorms() const;
+
+private:
+	TString name_;
+	std::vector<ztop::container1D> containers_;
+	std::vector<ztop::container2D> containers2D_;
+	std::vector<ztop::container1DUnfold> containers1DUnfold_;
+	std::vector<TString> legends_;
+	std::vector<int> colors_;
+	std::vector<double> norms_;
+	TString dataleg_;
+
+	enum dimension{notset,dim1,dim2,unfolddim1};
+	dimension mode;
+
+
+	std::map<TString,size_t> legorder_;
+
+	int checkLegOrder() const;
+
+	std::vector<size_t> sortEntries(bool inverse) const;
+
+	std::vector<TString> signals_;
+
+
+	int getContributionIdx(TString) const;
+	bool checkDrawDimension() const;
+	bool checkSignals(const std::vector<TString> &) const;
+
+
 
 };
-  
 
-  typedef containerStack container1DStack;
+
+
+typedef containerStack container1DStack;
 
 }
 #endif

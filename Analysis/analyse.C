@@ -141,20 +141,20 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
 		ana.getBTagSF()->setSystematic("light down");
 	}
 	else if(Syst=="TT_MATCH_up"){
-		ana.setFilePostfixReplace("ttbar.root","ttbar_ttmup.root");
-		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_ttmup.root");
+		ana.setFilePostfixReplace("ttbar_ext.root","ttbar_ttmup.root");
+		ana.setFilePostfixReplace("ttbarviatau_ext.root","ttbarviatau_ttmup.root");
 	}
 	else if(Syst=="TT_MATCH_down"){
-		ana.setFilePostfixReplace("ttbar.root","ttbar_ttmdown.root");
-		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_ttmdown.root");
+		ana.setFilePostfixReplace("ttbar_ext.root","ttbar_ttmdown.root");
+		ana.setFilePostfixReplace("ttbarviatau_ext.root","ttbarviatau_ttmdown.root");
 	}
 	else if(Syst=="TT_SCALE_up"){
-		ana.setFilePostfixReplace("ttbar.root","ttbar_ttscaleup.root");
-		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_ttscaleup.root");
+		ana.setFilePostfixReplace("ttbar_ext.root","ttbar_ttscaleup.root");
+		ana.setFilePostfixReplace("ttbarviatau_ext.root","ttbarviatau_ttscaleup.root");
 	}
 	else if(Syst=="TT_SCALE_down"){
-		ana.setFilePostfixReplace("ttbar.root","ttbar_ttscaledown.root");
-		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_ttscaledown.root");
+		ana.setFilePostfixReplace("ttbar_ext.root","ttbar_ttscaledown.root");
+		ana.setFilePostfixReplace("ttbarviatau_ext.root","ttbarviatau_ttscaledown.root");
 	}
 	else if(Syst=="Z_MATCH_up"){
 		ana.setFilePostfixReplace("60120.root","60120_Zmup.root");

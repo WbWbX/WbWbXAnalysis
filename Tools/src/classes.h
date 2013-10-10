@@ -7,6 +7,10 @@
 #include "../interface/container2D.h"
 #include "../interface/containerStack.h"
 #include "../interface/containerStackVector.h"
+#include "../interface/containerStyle.h"
+#include "../interface/plotStyle.h"
+#include "../interface/canvasStyle.h"
+#include "../interface/plotter.h"
 
 
 #include "../TUnfold/TUnfold.h"
@@ -64,7 +68,15 @@ struct dictionary {
 	ztop::unfolder asdsdad;
 	std::vector<ztop::unfolder> sdadasdasdsl;
 
+	ztop::textBox dsfsd;
+	ztop::containerStyle sdfewfij;
+	ztop::plotStyle dsfdsfl;
+	ztop::canvasStyle dsfdf;
+	ztop::plotter ijdfsij;
 
+	std::vector<ztop::textBox> vdsfsd;
+	std::vector<ztop::containerStyle> vsdfewfij;
+	std::vector<ztop::plotStyle> vdsfdsfl;
 
 	/*
     TUnfold tunf;

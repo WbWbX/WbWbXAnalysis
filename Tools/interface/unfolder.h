@@ -9,11 +9,12 @@
 #define UNFOLDER_H_
 
 #include "../TUnfold/TUnfoldDensity.h"
-#include <iostream>
-#include "TSpline.h"
-#include "TH1.h"
-#include "TGraph.h"
-#include "TString.h"
+
+class TCanvas;
+class TGraph;
+class TSpline;
+class TH1;
+class TH2;
 
 namespace ztop{
 
@@ -41,7 +42,7 @@ public:
 	int scanTau(int steps=30);
 //if ready
 	TH1*  getUnfolded(); //returns output directly
-	TH1*  getReUnfolded(); //returns output directly
+	TH1*  getRefolded(); //returns output directly
 
 	bool ready(){return ready_;}
 
@@ -61,6 +62,10 @@ public:
 	 *
 	 * -drawLCurve ...
 	 */
+	/**
+	 * draws lcurve, tauscan, refolded vs input
+	 */
+	TCanvas * drawControlHistos() const;
 
 
 private:
@@ -86,6 +91,8 @@ private:
 	int ibest_;
 
 	TString name_;
+
+	void multiplyByBinWidth(TH1 *)const;
 
 };
 

@@ -78,6 +78,7 @@ public:
 		isMC_=false;
 
 		statusbar_=false;
+		prescaleCutHigh_=20;
 
 		includecorr_=true;
 		masscutlow_=20;
@@ -111,7 +112,7 @@ public:
 
 	void checkTriggerPaths(bool check){checktriggerpaths_=check;}
 
-
+	void setPrescaleCut(unsigned int cut){prescaleCutHigh_=cut;}
 	void setChain(TChain * t1){t_=t1;}
 	void setChain(std::vector<TString> data){TChain * c=makeChain(data);setChain(c);}
 
@@ -161,6 +162,10 @@ public:
 			std::cout << "triggerAnalyzer operator +: alltriples must be same size!" << std::endl;
 			return out;
 		}
+		if(isMC_)
+			histWrapper::addStatUncorr=false;
+		else
+			histWrapper::addStatUncorr=true;
 		for(size_t i=0;i<alltriples_.size();i++) out.alltriples_.at(i) = out.alltriples_.at(i) + alltriples_.at(i);
 		for(size_t i=0;i<storedOut_.size();i++) out.storedOut_.at(i) += storedOut_.at(i);
 		out.globalDen_ += globalDen_;
@@ -204,8 +209,9 @@ public:
 		vector<float> binsmass;
 
 		for(float i=0;i<300;i++){
-
-			float bin=i*30;
+			float bin=0;
+			if(mode_>0) bin=i*3; //more bins for mumu
+			else bin=i*30;
 
 			if(bin>=300) break;
 			binsmass << bin;
@@ -362,15 +368,22 @@ public:
 		map<string,unsigned int> * pTriggersWithPrescales=0;
 		t_->SetBranchAddress("AllTriggersWithPrescales",&pTriggersWithPrescales);
 
-		vector<vector<NTTriggerObject> *> pTriggerobjects;
+		vector<NTTriggerObject> * pTriggerobjects[]={0,0,0,0,0,0,0,0,0,0};
+		const size_t pTriggerobjectsSize=10;
+
+		/*pTriggerobjects.clear();
 		for(size_t i=0;i<trigsObj_.size();i++){
 			vector<NTTriggerObject> * temp = 0;
 			pTriggerobjects.push_back(temp);
-		}
+		}*/
 		vector<size_t> invalidbranches;
 		for(size_t i=0;i<trigsObj_.size();i++){
+			if(i>=10){
+				std::cout << "Branch adress: " << "NTTriggerObjects_"+(TString)trigsObj_.at(i) << " will not be set, exceeds limit of 10" << std::endl;
+			}
 			if(t_->GetBranch(("NTTriggerObjects_"+(TString)trigsObj_.at(i)))){
-				t_->SetBranchAddress("NTTriggerObjects_"+(TString)trigsObj_.at(i),&pTriggerobjects.at(i));
+				t_->SetBranchAddress("NTTriggerObjects_"+(TString)trigsObj_.at(i),&pTriggerobjects[i]);
+				if(testmode) std::cout << "Branch adress: " << "NTTriggerObjects_"+(TString)trigsObj_.at(i) << " set" << std::endl;
 			}
 			else{
 				cout << "Branch " << "NTTriggerObjects_"+(TString)trigsObj_.at(i) 
@@ -421,14 +434,18 @@ public:
 
 
 		Long64_t n = t_->GetEntries();
-		cout  << "Entries in tree: " << n << endl;
+		cout  << "Entries in tree: " << n ;
 
-		//TRAPTEST//
-		//n*=0.01;
+
 		if(testmode)
-			n*=0.01;
+			n*=0.001;
+		if(lowMCStat && isMC_){
+			n*=0.1;
+			cout  << " reduced to: " << n;
+		}
+		cout << std::endl;
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+		if(testmode) std::cout << "entering main loop" << std::endl;
 		for(Long64_t i=0;i<n;i++){  //main loop
 
 			selectedElecs_.clear();
@@ -442,7 +459,10 @@ public:
 			bool b_twoJets=false;
 			bool b_met=false;
 
+
 			t_->GetEntry(i);
+			if(testmode && i<2)
+				std::cout << "got entry "<<i << std::endl;
 
 			if(statusbar_)
 				displayStatusBar(i,n);
@@ -492,7 +512,7 @@ public:
 			}
 
 			//check met trigger and use the one with lowest prescale
-			unsigned int prescaleCutHigh=20;
+
 
 			unsigned int prescale=99999;
 			unsigned int largestprescale=0;
@@ -528,7 +548,7 @@ public:
 
 			if(prescaleweight_){
 
-				if(prescale > prescaleCutHigh) continue; //get rid of high prescales
+				if(prescale > prescaleCutHigh_) continue; //get rid of high prescales
 
 				puweight*=(double) prescale;
 			}
@@ -550,34 +570,7 @@ public:
 
 			if(match_){
 				firedDilepTrigger=false;
-				int matchedno=0;
 
-				if(mode_>0.1){ //mumu
-					for(size_t g=0;g<selectedMuons_.size();g++){
-						ztop::NTMuon * muon = selectedMuons_.at(g);
-						bool foundmatched=false;
-						for(size_t j=0;j<muon->matchedTrig().size();j++){
-							//std::cout << muon->matchedTrig().at(j) << std::endl;
-							for(size_t k=0;k<trigs_.size();k++){
-								if(((TString)muon->matchedTrig().at(j)).Contains(trigs_.at(k))){
-									matchedno++;
-									foundmatched=true;
-									break;
-								}
-							}
-							if(foundmatched)
-								break;
-						}
-					}
-				}
-				if(mode_<-0.1){ //ee
-
-				}
-				if(mode_==0){ //emu
-
-				}
-				if(matchedno > 1)  //The selected muons have fired the trigger! machedno >0 also means, trigger has fired but not ness. due to selected muons
-					firedDilepTrigger=true;
 			}
 
 
@@ -621,14 +614,12 @@ public:
 
 			vector<NTTriggerObject *> alltrigobj;
 			/////// make trigger object collections ////
-			for(size_t to=0;to<pTriggerobjects.size();to++){ //merge collections
-			  if(!pTriggerobjects.at(to)){
-			    cout << "pTriggerobjects.at(" << to << ") is NULL.... exit" <<endl;
-			    exit(EXIT_FAILURE);
-			  }
-			  for(size_t j=0;j<pTriggerobjects.at(to)->size();j++){
-			    alltrigobj.push_back(&pTriggerobjects.at(to)->at(j));
-			  }
+			for(size_t to=0;to<pTriggerobjectsSize;to++){ //merge collections
+				if(pTriggerobjects[to]){
+					for(size_t j=0;j<pTriggerobjects[to]->size();j++){
+						alltrigobj.push_back(&pTriggerobjects[to]->at(j));
+					}
+				}
 			}
 			//  std::cout << puweight << std::endl;
 
@@ -1131,6 +1122,7 @@ public:
 
 
 	static bool testmode;
+	static bool lowMCStat;
 
 protected:
 	std::vector<float> binseta_;
@@ -1167,7 +1159,7 @@ protected:
 
 	double globalDen_;
 	vector<double> storedOut_;
-
+	unsigned int prescaleCutHigh_;
 
 };
 
@@ -1429,6 +1421,6 @@ void analyzeAll(triggerAnalyzer &ta_eed, triggerAnalyzer &ta_eeMC, triggerAnalyz
 
 
 bool triggerAnalyzer::testmode=false;
-
+bool triggerAnalyzer::lowMCStat=false;
 
 #endif

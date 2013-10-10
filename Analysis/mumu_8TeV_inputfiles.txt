@@ -1,9 +1,9 @@
 #
 #mc
 #
-tree_8TeV_mumuttbar.root t#bar{t} 633 234 0
+tree_8TeV_mumuttbar_ext.root t#bar{t} 633 234 0
 tree_8TeV_dymumu60120.root Z#rightarrowll 852 3532.8 1
-tree_8TeV_mumuttbarviatau.root t#bar{t}(#tau) 632 234 2
+tree_8TeV_mumuttbarviatau_ext.root t#bar{t}(#tau) 632 234 2
 tree_8TeV_mumuttbarbg.root t#bar{t}bg 634 234 3
 tree_8TeV_tW.root singleTop 616 11.2 4
 tree_8TeV_tbarW.root singleTop 616 11.2 4

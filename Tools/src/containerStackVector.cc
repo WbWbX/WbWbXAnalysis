@@ -1,4 +1,5 @@
 #include "../interface/containerStackVector.h"
+#include <omp.h>
 
 bool ztop::container1D::debug =false;
 
@@ -123,8 +124,16 @@ void containerStackVector::addList1DUnfold(TString leg, int color, double norm,i
 }
 
 
-
-
+/**
+ * call AFTER!!! adding new stacks
+ */
+void containerStackVector::addSignal(const TString & signame){
+	size_t size=stacks_.size();
+#pragma omp parallel for
+	for(size_t i=0;i<size;i++){
+		stacks_.at(i).addSignal(signame);
+	}
+}
 
 
 
@@ -286,10 +295,10 @@ void containerStackVector::writeAllToTFile(TString filename, bool recreate, TStr
 	if(debug)
 		std::cout << "containerStackVector::writeAllToTFile: ratio plots drawn" << std::endl;
 
-	TDirectory * d2 = f->mkdir(name,name);
+	TDirectory * d2 = f->mkdir(name+ "_sgbg",name+ "_sgbg");
 	d2->cd();
 	for(std::vector<containerStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
-		TCanvas * c2=stack->makeTCanvas(false);
+		TCanvas * c2=stack->makeTCanvas(containerStack::plotmode::sigbg);
 		if(c2){
 			c2->Write();
 			delete c2;
@@ -353,10 +362,10 @@ void containerStackVector::writeAllToTFile(TFile * f, TString treename){
 	}
 	//d.Close();
 	// f.cd();
-	TDirectory * d2 = f->mkdir(name,name);
+	TDirectory * d2 = f->mkdir(name+ "_sgbg",name+ "_sgbg");
 	d2->cd();
 	for(std::vector<containerStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
-		TCanvas * c2=stack->makeTCanvas(false);
+		TCanvas * c2=stack->makeTCanvas(containerStack::plotmode::sigbg);
 		if(c2){
 			c2->Write();
 			delete c2;

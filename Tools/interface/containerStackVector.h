@@ -38,6 +38,8 @@ namespace ztop{
     void addList2D( TString, int, double,int legor=-1);
     void addList1DUnfold( TString, int, double,int legor=-1);
 
+    void addSignal(const TString &);
+
     std::vector<ztop::containerStack> getVector(){return stacks_;}
     ztop::containerStack getStack(TString);
     ztop::containerStack getStack(unsigned int n){return stacks_[n];}
@@ -70,7 +72,7 @@ namespace ztop{
     TString name_;
     TString isSyst_;
     std::vector<ztop::containerStack> stacks_;
-
+    TString tempsig_;
 
 
   };

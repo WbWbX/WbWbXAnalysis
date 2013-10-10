@@ -1,6 +1,27 @@
-#include "../interface/MainAnalyzer.h"
+
 #include "FWCore/FWLite/interface/AutoLibraryLoader.h"
+#include "../interface/MainAnalyzer.h"
+
+#include "TtZAnalysis/DataFormats/interface/elecRhoIsoAdder.h"
+#include "TtZAnalysis/plugins/leptonSelector2.h"
+#include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
+#include "TTree.h"
+#include "TFile.h"
+#include <fstream>
+//#include <omp.h>
+#include "TtZAnalysis/Analysis/interface/AnalysisUtils.h"
+
 #include "eventLoop.h"
+
+
+namespace ztop{
+  typedef std::vector<ztop::NTElectron>::iterator NTElectronIt;
+  typedef std::vector<ztop::NTMuon>::iterator NTMuonIt;
+  typedef std::vector<ztop::NTJet>::iterator NTJetIt;
+  typedef std::vector<ztop::NTTrack>::iterator NTTrackIt;
+  typedef std::vector<ztop::NTSuClu>::iterator NTSuCluIt;
+}
+
 
 MainAnalyzer::MainAnalyzer(){
 
@@ -140,7 +161,7 @@ int MainAnalyzer::start(){
 			std::cout << "-----------------" << std::endl;
 			for(size_t i=0;i<filenumber;i++){
 				if(succ.at(i) <0)
-					std::cout  << "failed:     \t" << infiles_.at(i) << std::endl;
+					std::cout  << "failed(" << succ.at(i)<<"):   \t" << infiles_.at(i) << std::endl;
 			}
 
 			for(size_t i=0;i<filenumber;i++){
@@ -199,7 +220,8 @@ void MainAnalyzer::readFileList(){
 	if(inputfiles.is_open()){
 		while(inputfiles.good()){
 			inputfiles >> filename;
-
+			if(filename.size()<1)
+				continue;
 			if(((TString)filename).Contains("#")){
 				getline(inputfiles,filename); //just ignore complete line
 				//	std::cout << "ignoring: " << filename << std::endl;

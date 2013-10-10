@@ -5,6 +5,7 @@
  *      Author: kiesej
  */
 #include "../interface/histoContent.h"
+#include <omp.h>
 
 namespace ztop{
 
@@ -12,12 +13,12 @@ namespace ztop{
  * assume statistics of bins to be correlated/uncorrelated when adding
  * histoContent. This also applies for the statistics of the systematic entries
  */
-bool histoContent::addStatCorrelated=true;
+bool histoContent::addStatCorrelated=false;
 /**
  * assume statistics of bins to be correlated/uncorrelated when subtracting
  * histoContent. This also applies for the statistics of the systematic entries
  */
-bool histoContent::subtractStatCorrelated=true;
+bool histoContent::subtractStatCorrelated=false;
 /**
  * assume statistics of bins to be correlated/uncorrelated when dividing
  * histoContent. This also applies for the statistics of the systematic entries
@@ -60,8 +61,16 @@ void histoContent::clearLayerStat(const int & idx){
 	for(size_t i=0;i<nominal_.size();i++)
 		getBin(i,idx).setStat(0);
 }
-
-
+/**
+ * returns true if bins were added, returns false if bins were removed
+ */
+bool histoContent::resizeBins(const size_t & newsize){
+	bool added=nominal_.resize(newsize);
+#pragma omp parallel for
+	for(size_t i=0;i<layerSize();i++)
+		additionalbins_.at(i).resize(newsize);
+	return added;
+}
 
 /**
  * adds a layer of content with <name> to the existing ones.
@@ -123,7 +132,7 @@ size_t histoContent::addLayer(const TString & name, const histoBins & histbins){
 size_t histoContent::addLayerFromNominal(const TString & name, const histoContent & external){
 	if(nominal_.size() < 1){
 		std::cout << "histoContent::addLayerFromNominal: first construct! default constructor is not supposed to be used" <<std::endl;
-		return -2;
+		return 999999999999;
 	}
 	size_t idx=layermap_.getIndex(name);
 
