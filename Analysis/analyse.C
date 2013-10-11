@@ -94,12 +94,34 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
 	ana.setOutDir(outdir);
 	ana.getBTagSF()->setMakeEff(dobtag);
 	ana.setBTagSFFile(btagfile);
+	if(testmode){
+		ana.getBTagSF()->setMakeEff(true);
+		ana.setBTagSFFile(btagfile+"TESTMODE");
+	}
 	//add indication for non-correlated syst by adding the energy to syst name!! then the getCrossSections stuff should recognise it
 
 	//although it produces overhead, add background rescaling here?
 
 	if(Syst=="nominal"){
 		//all already defined
+	}
+	else if(Syst=="TRIGGER_down"){
+		ana.getTriggerSF()->setSystematics("down");
+	}
+	else if(Syst=="TRIGGER_up"){
+		ana.getTriggerSF()->setSystematics("up");
+	}
+	else if(Syst=="ELECSF_up"){
+		ana.getElecSF()->setSystematics("up");
+	}
+	else if(Syst=="ELECSF_down"){
+		ana.getElecSF()->setSystematics("down");
+	}
+	else if(Syst=="MUONSF_up"){
+		ana.getMuonSF()->setSystematics("up");
+	}
+	else if(Syst=="MUONSF_down"){
+		ana.getMuonSF()->setSystematics("down");
 	}
 	else if(Syst=="JES_up"){
 		ana.getJECUncertainties()->setSystematics("up");

@@ -17,7 +17,7 @@
 #include <poll.h>
 #include <vector>
 
-#define IPC_BUFFERSIZE 256
+#define IPC_BUFFERSIZE 128
 
 template<class T>
 class IPCPipe{
@@ -93,7 +93,6 @@ private:
 		ipcs_.clear();
 	}
 };
-
 
 
 #endif /* PIPES_H_ */

@@ -28,7 +28,7 @@
 #include "TtZAnalysis/DataFormats/interface/NTGenParticle.h"
 #include "TtZAnalysis/DataFormats/interface/NTGenJet.h"
 
-void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, double norm,size_t legord,size_t anaid){
+void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, double norm,size_t legord, size_t anaid){
 
 
 
@@ -36,9 +36,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 	using namespace ztop;
 
 	//DIRTY HACK needs to go in inputfiles.txt
-	bool issignal=false;
-	if(legendname == "t#bar{t}" || legendname =="t#bar{t}(#tau)")
-		issignal=true;
+	bool issignal=issignal_.at(anaid);
 
 	containerStackVector::debug=true;
 
@@ -223,6 +221,16 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 	container1D muonmember01(multibinsvertx, "muon member 0 step 1", "m_{0}", "N_{#mu}");
 	container1D muonmember02(multibinsvertx, "muon member 0 step 2", "m_{0}", "N_{#mu}");
 	container1D muonmember03(multibinsvertx, "muon member 0 step 3", "m_{0}", "N_{#mu}");
+
+	vector<float> samesignbins;
+	samesignbins << -0.5 << 0.5 << 1.5 << 2.5;
+	container1D samesignpair2(samesignbins, "same sign pairs step 2", "mumu, emu, ee", "N_{ss}");
+	container1D samesignpair3(samesignbins, "same sign pairs step 3", "mumu, emu, ee", "N_{ss}");
+	container1D samesignpair4(samesignbins, "same sign pairs step 4", "mumu, emu, ee", "N_{ss}");
+	container1D samesignpair5(samesignbins, "same sign pairs step 5", "mumu, emu, ee", "N_{ss}");
+	container1D samesignpair6(samesignbins, "same sign pairs step 6", "mumu, emu, ee", "N_{ss}");
+	container1D samesignpair7(samesignbins, "same sign pairs step 7", "mumu, emu, ee", "N_{ss}");
+	container1D samesignpair8(samesignbins, "same sign pairs step 8", "mumu, emu, ee", "N_{ss}");
 
 	container1D vertexmulti0(multibinsvertx, "vertex multiplicity step 0", "n_{vtx}", "N_{evt}");
 	container1D vertexmulti1(multibinsvertx, "vertex multiplicity step 1", "n_{vtx}", "N_{evt}");
@@ -1472,6 +1480,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 		p_finished.get(anaid)->pwrite(1); //turns of write blocking, too
 	}
 	else{
+		std::cout << "testmode("<< anaid << "): failed to write to file " << getOutPath()+".root"<< std::endl;
 		p_finished.get(anaid)->pwrite(-2); //write failed
 	}
 
@@ -1480,6 +1489,6 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
 }
 
-
+//- 99: exception -1: file not found, -2 write failed
 
 #endif /* EVENTLOOP_H_ */

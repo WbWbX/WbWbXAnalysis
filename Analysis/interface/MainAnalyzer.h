@@ -13,8 +13,6 @@
 
 
 
-#define IPC_BUFFERSIZE 101
-
 ///// now available: removeContribution; use it to run on the systematics etc (only signal) or pdf stuff (remove nominal,for(i) add pdf[i], xsec, remove pdf[i])
 
 //// run in batch mode otherwise it is dramatically slowed down by all the drawing stuff; the latter might also produce seg violations in the canvas libs.
@@ -155,6 +153,7 @@ private:
   std::vector<int> colz_;
   std::vector<double> norms_;
   std::vector<size_t> legord_;
+  std::vector<bool> issignal_;
 
 ///communication pipes
 

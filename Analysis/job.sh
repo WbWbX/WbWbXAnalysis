@@ -8,16 +8,17 @@
 #$ -l h_cpu=00:59:00
 #
 #(the maximum memory usage of this job)
-#$ -l h_vmem=1024M
+#$ -l h_vmem=2048M
 #
 #(stderr and stdout are merged together to stdout)
 #$ -j y
 #
 #$ -cwd -V
-#$ -l h_stack=1024M
+#$ -l h_stack=1536M
 #$ -pe multicore 6 -R y
 
-
+#don't overthread the wn
+export OMP_NUM_THREADS=1
 
 workdir=$CMSSW_BASE/src/TtZAnalysis/Analysis/##WORKDIR##
 

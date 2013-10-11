@@ -11,6 +11,8 @@
 //#include <omp.h>
 #include "TtZAnalysis/Analysis/interface/AnalysisUtils.h"
 
+#include "TtZAnalysis/Tools/interface/fileReader.h"
+
 #include "eventLoop.h"
 
 
@@ -130,7 +132,7 @@ int MainAnalyzer::start(){
 	status.resize(filenumber,0);
 
 	while(!NoneEqual(succ,0)){ //wait for daughters until all are done or failed
-
+		bool newwrite=false;
 		for(size_t i=0;i<filenumber;i++){
 			if(p_finished.get(i)->preadready())
 				succ.at(i)=p_finished.get(i)->pread(); //testing
@@ -142,12 +144,13 @@ int MainAnalyzer::start(){
 		if(it_readytowrite >= 0){ // daugh ready to write
 			p_allowwrite.get(it_readytowrite)->pwrite(1);
 			succ.at(it_readytowrite)=p_finished.get(it_readytowrite)->pread();   //wait for successful/ns write
+			newwrite=true;
 		} //else do nothing - none ready to write
 
 		else{
-			sleep(5); //if nothing happened only check every 2 sec
+			sleep(5); //if nothing happened only check every 5 sec
 		}
-		if(showstatus_){
+		if(showstatus_ || newwrite){
 			int done=0,sdone=0;
 			std::cout << "\n\n" << std::endl;
 			for(size_t i=0;i<filenumber;i++){
@@ -202,13 +205,36 @@ void MainAnalyzer::readFileList(){
 	using namespace ztop;
 	using namespace std;
 
-
+	fileReader fr;
+	fr.setDelimiter(",");
+	fr.setComment("$");
+	fr.readFile(filelist_.Data());
 
 	infiles_.clear();
 	legentries_.clear();
 	colz_.clear();
 	norms_.clear();
 	legord_.clear();
+	issignal_.clear();
+
+	for(size_t line=0;line<fr.nLines();line++){
+		if(fr.nEntries(line) < 5){
+			std::cout << "MainAnalyzer::readFileList: line " << line << " of inputfile is broken ("<<fr.nEntries(line)<< " entries.)" <<std::endl;
+			sleep(2);
+			continue;
+		}
+		infiles_.push_back   (fr.getData<TString>(line,0));
+		legentries_.push_back(fr.getData<TString>(line,1));
+		colz_.push_back      (fr.getData<int>    (line,2));
+		norms_.push_back     (fr.getData<double> (line,3));
+		legord_.push_back    (fr.getData<size_t> (line,4));
+		if(fr.nEntries(line) > 5)
+			issignal_.push_back(fr.getData<bool> (line,5));
+		else
+			issignal_.push_back(false);
+	}
+
+/*
 
 	ifstream inputfiles (filelist_.Data());
 	string filename;
@@ -251,6 +277,7 @@ void MainAnalyzer::readFileList(){
 	else{
 		cout << "MainAnalyzer::setFileList(): input file list not found" << endl;
 	}
+	*/
 
 }
 
@@ -278,6 +305,7 @@ void MainAnalyzer::copyAll(const MainAnalyzer & analyzer){
 	legentries_=analyzer.legentries_;
 	colz_=analyzer.colz_;
 	norms_=analyzer.norms_;
+	issignal_=analyzer.issignal_;
 	outfileadd_=analyzer.outfileadd_;
 
 	//pipes are NOT in here. they need to be created during running?
