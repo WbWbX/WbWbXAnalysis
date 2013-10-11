@@ -65,7 +65,7 @@ size_t associateEnergy(TString s){
 
 ztop::container1DStackVector getFromFile(TString name)
 {
-	TFile * ftemp=new TFile(name+"_plots.root","read");
+	TFile * ftemp=new TFile(name+".root","read");
 	TTree * ttemp = (TTree*)ftemp->Get("stored_objects");
 	ztop::container1DStackVector vtemp;
 	vtemp.loadFromTree(ttemp,name);
