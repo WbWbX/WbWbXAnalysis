@@ -461,7 +461,6 @@ double container1D::integral(bool includeUFOF,const int& systLayer) const{
 		maxbin=bins_.size() -1;
 	}
 	double integr=0;
-#pragma omp parallel for reduction(+:integr)
 	for(unsigned int i=minbin;i<maxbin;i++){
 		integr+=contents_.getBin(i,systLayer).getContent();
 	}
@@ -477,7 +476,6 @@ double container1D::cIntegral(float from, float to,const int& systLayer) const{
 	if(systLayer >= (int)contents_.layerSize())
 		return 0;
 	double integr=0;
-#pragma omp parallel for reduction(+:integr)
 	for(size_t i=minbin;i<=maxbin;i++){
 		integr+=contents_.getBin(i,systLayer).getContent();
 	}
@@ -502,7 +500,6 @@ double container1D::integralStat(bool includeUFOF,const int& systLayer) const{
 		maxbin=bins_.size() -1;
 	}
 	double integr2=0;
-#pragma omp parallel for reduction(+:integr2)
 	for(unsigned int i=minbin;i<maxbin;i++){
 		integr2+=contents_.getBin(i,systLayer).getStat2();
 	}
@@ -519,7 +516,6 @@ double container1D::cIntegralStat(float from, float to,const int& systLayer) con
 	if(systLayer >= (int)contents_.layerSize())
 		return 0;
 	double integr2=0;
-#pragma omp parallel for reduction(+:integr2)
 	for(size_t i=minbin;i<=maxbin;i++){
 		integr2+=contents_.getBin(i,systLayer).getStat2();
 	}
@@ -544,7 +540,6 @@ size_t container1D::integralEntries(bool includeUFOF,const int& systLayer) const
 		maxbin=bins_.size() -1;
 	}
 	size_t integr=0;
-#pragma omp parallel for reduction(+:integr)
 	for(unsigned int i=minbin;i<maxbin;i++){
 		integr+=contents_.getBin(i,systLayer).getEntries();
 	}
@@ -561,7 +556,6 @@ size_t container1D::cIntegralEntries(float from, float to,const int& systLayer) 
 	if(systLayer >= (int)contents_.layerSize())
 		return 0;
 	size_t integr=0;
-#pragma omp parallel for reduction(+:integr)
 	for(size_t i=minbin;i<=maxbin;i++){
 		integr+=contents_.getBin(i,systLayer).getEntries();
 	}

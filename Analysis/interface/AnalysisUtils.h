@@ -76,6 +76,18 @@ TString getChannel(int argc, char* argv[]){
   return out;
 }
 
+TString getMode(int argc, char* argv[]){
+  TString out="xsec";
+  for(int i=1;i<argc;i++){
+    //  std::cout << argv[i] << std::endl;;
+    if (i + 1 != argc){
+      if((TString)argv[i] == "-m")
+	out=(TString)argv[i+1];
+      // std::cout << "outfile " << out << std::endl;
+    }
+  }
+  return out;
+}
 TString getEnergy(int argc, char* argv[]){
   TString out="8TeV";
   for(int i=1;i<argc;i++){

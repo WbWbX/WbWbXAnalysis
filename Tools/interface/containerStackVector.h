@@ -68,6 +68,8 @@ namespace ztop{
     static void csv_clearlist(){csv_list.clear();}
     static bool debug;
 
+    static bool fastadd;
+
   private:
     TString name_;
     TString isSyst_;

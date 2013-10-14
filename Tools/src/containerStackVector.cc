@@ -9,7 +9,7 @@ namespace ztop{
 std::vector<containerStackVector*> containerStackVector::csv_list;
 bool containerStackVector::csv_makelist=false;
 bool containerStackVector::debug=false;
-
+bool containerStackVector::fastadd=true;
 
 containerStackVector::containerStackVector(){
 	if(csv_makelist)csv_list.push_back(this);
@@ -158,14 +158,20 @@ void containerStackVector::removeContribution(TString contribution){
 	}
 }
 
-void containerStackVector::addMCErrorStackVector(TString sysname,ztop::containerStackVector stackvec){
-	for(std::vector<containerStack>::iterator istack=stacks_.begin();istack<stacks_.end(); ++istack){
-		for(std::vector<containerStack>::iterator estack=stackvec.stacks_.begin();estack<stackvec.stacks_.end(); ++estack){
-			if(istack->getName() == estack->getName()){
-				istack->addMCErrorStack(sysname,*estack);
-				break;
+void containerStackVector::addMCErrorStackVector(TString sysname, ztop::containerStackVector stackvec){
+	if(!fastadd){
+		for(std::vector<containerStack>::iterator istack=stacks_.begin();istack<stacks_.end(); ++istack){
+			for(std::vector<containerStack>::iterator estack=stackvec.stacks_.begin();estack<stackvec.stacks_.end(); ++estack){
+				if(istack->getName() == estack->getName()){
+					istack->addMCErrorStack(sysname,*estack);
+					break;
+				}
 			}
 		}
+	}
+	else{//fastadd requires same ordering of all stacks (usually the case)
+		for(size_t i=0;i<stacks_.size();i++)
+			stacks_.at(i).addMCErrorStack(sysname,stackvec.stacks_.at(i));
 	}
 }
 void containerStackVector::addMCErrorStackVector(ztop::containerStackVector stackvec){
@@ -177,13 +183,19 @@ void containerStackVector::addGlobalRelMCError(TString sysname,double error){
 	}
 }
 void containerStackVector::addRelSystematicsFrom(ztop::containerStackVector stackvec){
-	for(std::vector<containerStack>::iterator istack=stacks_.begin();istack<stacks_.end(); ++istack){
-		for(std::vector<containerStack>::iterator estack=stackvec.stacks_.begin();estack<stackvec.stacks_.end(); ++estack){
-			if(istack->getName() == estack->getName()){
-				istack->addRelSystematicsFrom(*estack);
-				break;
+	if(!fastadd){
+		for(std::vector<containerStack>::iterator istack=stacks_.begin();istack<stacks_.end(); ++istack){
+			for(std::vector<containerStack>::iterator estack=stackvec.stacks_.begin();estack<stackvec.stacks_.end(); ++estack){
+				if(istack->getName() == estack->getName()){
+					istack->addRelSystematicsFrom(*estack);
+					break;
+				}
 			}
 		}
+	}
+	else{//fastadd requires same ordering of all stacks (usually the case)
+		for(size_t i=0;i<stacks_.size();i++)
+			stacks_.at(i).addRelSystematicsFrom(stackvec.stacks_.at(i));
 	}
 }
 

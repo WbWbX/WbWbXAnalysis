@@ -22,7 +22,7 @@ containerStack::~containerStack(){
 		break;
 	}
 }
-void containerStack::push_back(ztop::container1D cont, TString legend, int color, double norm){
+void containerStack::push_back(ztop::container1D cont, TString legend, int color, double norm, int legord){
 	if(mode==notset)
 		mode=dim1;
 	else if(mode!=dim1){
@@ -37,6 +37,7 @@ void containerStack::push_back(ztop::container1D cont, TString legend, int color
 			containers_[i] = containers_[i] * norms_[i] + cont * norm;
 			containers_[i].setName("c_" +legend);
 			norms_[i]=1;
+			legorder_[i]=legord;
 			wasthere=true;
 			break;
 		}
@@ -47,10 +48,11 @@ void containerStack::push_back(ztop::container1D cont, TString legend, int color
 		legends_.push_back(legend);
 		colors_.push_back(color);
 		norms_.push_back(1);
+		legorder_.push_back(legord);
 	}
 }
 
-void containerStack::push_back(ztop::container2D cont, TString legend, int color, double norm){
+void containerStack::push_back(ztop::container2D cont, TString legend, int color, double norm, int legord){
 	if(mode==notset)
 		mode=dim2;
 	else if(mode!=dim2){
@@ -65,6 +67,7 @@ void containerStack::push_back(ztop::container2D cont, TString legend, int color
 			containers2D_[i] = containers2D_[i] * norms_[i] + cont * norm;
 			containers2D_[i].setName("c_" +legend);
 			norms_[i]=1;
+			legorder_[i]=legord;
 			wasthere=true;
 			break;
 		}
@@ -75,9 +78,10 @@ void containerStack::push_back(ztop::container2D cont, TString legend, int color
 		legends_.push_back(legend);
 		colors_.push_back(color);
 		norms_.push_back(1);
+		legorder_.push_back(legord);
 	}
 }
-void containerStack::push_back(ztop::container1DUnfold cont, TString legend, int color, double norm){
+void containerStack::push_back(ztop::container1DUnfold cont, TString legend, int color, double norm, int legord){
 	if(mode==notset)
 		mode=unfolddim1;
 	else if(mode!=unfolddim1){
@@ -95,6 +99,7 @@ void containerStack::push_back(ztop::container1DUnfold cont, TString legend, int
 			containers_[i] = containers_[i] * norms_[i] + cont1d * norm;
 			containers_[i].setName("c_" +legend);
 			norms_[i]=1;
+			legorder_[i]=legord;
 			wasthere=true;
 			break;
 		}
@@ -102,17 +107,36 @@ void containerStack::push_back(ztop::container1DUnfold cont, TString legend, int
 	if(!wasthere){
 		cont.setName("c_" +legend);
 		containers1DUnfold_.push_back(cont * norm);
+		cont1d.setName("c_" +legend);
 		containers_.push_back(cont1d * norm);
 		legends_.push_back(legend);
 		colors_.push_back(color);
 		norms_.push_back(1);
+		legorder_.push_back(legord);
 	}
 
 }
+
+void containerStack::setLegendOrder(const TString &leg, const size_t& no){
+	for(size_t i=0;i<legends_.size();i++){
+		if(legends_.at(i)==leg){
+			if(legorder_.size()>i){
+				legorder_.at(i)=no;
+				return;
+			}
+			else{
+				std::cout << "containerStack::setLegendOrder: size doesn't match" <<std::endl;
+				return;
+			}
+		}
+	}
+}
+
 void containerStack::removeContribution(TString legendname){
 	bool found=false;
 	std::vector<TString>::iterator leg=legends_.begin();
 	std::vector<int>::iterator col=colors_.begin();
+	std::vector<int>::iterator lego=legorder_.begin();
 	std::vector<double>::iterator norm=norms_.begin();
 	size_t rmpos=0;
 	for(size_t i=0;i<legends_.size();i++){
@@ -120,17 +144,15 @@ void containerStack::removeContribution(TString legendname){
 			legends_.erase(leg);
 			colors_.erase(col);
 			norms_.erase(norm);
+			legorder_.erase(lego);
 			rmpos=i;
 			found=true;
 			break;
 		}
-		++leg;++col;++norm;
-		for(std::map<TString,size_t>::iterator lego=legorder_.begin(); lego!=legorder_.end();++lego){
-			if(lego->first == legendname)
-				legorder_.erase(lego);
-		}
+		++leg;++col;++norm;++lego;
+
 	}
-	if(mode==dim1)
+	if(mode==dim1 || mode==unfolddim1)
 		containers_.erase(containers_.begin()+rmpos);
 	else if(mode==dim2)
 		containers2D_.erase(containers2D_.begin()+rmpos);
@@ -331,7 +353,7 @@ void containerStack::addMCErrorStack(TString sysname,containerStack errorstack){
 		for(unsigned int j=i;j<errorstack.size();j++){
 			errorstack.norms_[j]=1;
 			if(legends_[i] == errorstack.legends_[j] && legends_[i]!=dataleg_){
-				if(mode==dim1){
+				if(mode==dim1 || mode==unfolddim1){
 					errorstack.containers_[j] = errorstack.containers_[j] * errorstack.norms_[j]; //normalize (in case there is any remultiplication done or something)
 					errorstack.norms_[j]=1;
 					containers_[i] = containers_[i] * norms_[i];
@@ -1276,22 +1298,53 @@ bool containerStack::checknorms() const{
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-int containerStack::checkLegOrder() const{
+/**
+ * rewrite: always true
+ */
+int containerStack::checkLegOrder() const{ //depre
+	return 0;
+	/*
 	for(std::map<TString,size_t>::const_iterator it=legorder_.begin();it!=legorder_.end();++it){
 		if(it->second > size()){
 			std::cout << "containerStack::checkLegOrder: "<< name_ << ": legend ordering numbers (" <<it->second << ") need to be <= size of stack! ("<< size()<<")" <<std::endl;
 			return -1;
 		}
 	}
-	return 0;
+	return 0; */
 }
 /**
  * might need a rewrite
  */
-std::vector<size_t> containerStack::sortEntries(bool inverse) const{
+std::vector<size_t> containerStack::sortEntries(/* std::vector<int> inputlegord OR map with legnames?, */bool inverse) const{
 
+	//new implementation
+	std::vector<int> inputlegord=legorder_;
+	std::vector<int> sortedilo=inputlegord;
+	if(inverse)
+		std::sort(sortedilo.begin(),sortedilo.end(),std::greater<int>());
+	else
+		std::sort(sortedilo.begin(),sortedilo.end());
 
+	std::vector<size_t> legasso;
+	//protect size etc
+
+	for(size_t i=0;i<inputlegord.size();i++){
+		int oval=inputlegord.at(i);
+		for(size_t j=0;j<inputlegord.size();j++){//search in sorted
+			if(oval==sortedilo.at(j)){ //has position j
+				legasso.push_back(j);
+				break;
+			}
+		}
+	}
+	//fill not asso
+	for(size_t i=legasso.size();i<legends_.size();i++)
+		legasso.push_back(i);
+
+	return legasso;
+	///end new implementation
+
+	/*
 	std::vector<int> ordering;
 	std::vector<size_t> dontuse;
 
@@ -1342,6 +1395,7 @@ std::vector<size_t> containerStack::sortEntries(bool inverse) const{
 			out.push_back((size_t) ordering.at(i));
 	}
 	return out;
+	 */
 }
 
 bool containerStack::checkDrawDimension() const{

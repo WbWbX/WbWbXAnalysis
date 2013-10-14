@@ -34,10 +34,10 @@ void unfold(int argc, char* argv[]){
 	TH1::AddDirectory(false);
 	AutoLibraryLoader::enable();
 
-	ztop::containerUnfolder::debug=true;
-	ztop::container2D::debug=true;
-	ztop::container1DUnfold::debug=true;
-	ztop::containerStack::debug=true;
+	ztop::containerUnfolder::debug=false;
+	ztop::container2D::debug=false;
+	ztop::container1DUnfold::debug=false;
+	ztop::containerStack::debug=false;
 
 	bool debug=true;
 
@@ -95,6 +95,10 @@ void unfold(int argc, char* argv[]){
 		return;
 	}
 	if(!pcsv){
+		csvname.ReplaceAll("_syst","");
+		pcsv=pcsv->getFromTree(t,csvname);
+	}
+	if(!pcsv){
 		std::cout << "containerStackVector not found! exit" << std::endl;
 		return;
 	}
@@ -119,14 +123,14 @@ void unfold(int argc, char* argv[]){
 		ztop::containerStack  stack=csv.getStack(i);
 		if(stack.is1DUnfold()){
 			if(!stack.getName().Contains("Z")){
-				if(stack.setsignals(ttsignals)){
-					tobeunfolded.push_back(stack);
-					stacknames.push_back(stack.getName());
-				}
+				//if(stack.setsignals(ttsignals)){
+				tobeunfolded.push_back(stack);
+				stacknames.push_back(stack.getName());
+				/*}
 				else{
 					std::cout << "signals not found in stack - check! exit" <<std::endl;
 					return;
-				}
+				}*/
 			}
 			else{
 				if(stack.setsignals(zsignals)){
@@ -164,6 +168,9 @@ void unfold(int argc, char* argv[]){
 	//parallel for?!?
 	f = new TFile(outfile,"RECREATE");
 	f->cd();
+	TTree *outtree= new TTree("stored_objects","stored_objects");
+	ztop::container1D * cpointer=0;
+	outtree->Branch("unfoldedContainers",&cpointer);
 	for(size_t i=0;i<ufsize;i++){
 		TString name=stacknames.at(i);
 
@@ -174,7 +181,12 @@ void unfold(int argc, char* argv[]){
 		unfolder.unfold(data);
 		ztop::container1D unfolded=data.getUnfolded();
 		ztop::container1D refolded=data.getRefolded();
-
+		unfolded.setName(data.getName()+"_unfolded");
+		refolded.setName(data.getName()+"_refolded");
+		cpointer=&unfolded;
+		outtree->Fill();
+		cpointer=&refolded;
+		outtree->Fill();
 		//TDirectory *d = new TDirectory(data.getName(),data.getName());
 		//d->cd();
 		/////////
@@ -217,6 +229,7 @@ void unfold(int argc, char* argv[]){
 		delete c;
 		//delete d;
 	}
+
 	f->Close();
 	delete f;
 

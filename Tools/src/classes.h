@@ -19,6 +19,7 @@
 #include "../TUnfold/TUnfoldSys.h"
 #include "../interface/unfolder.h"
 
+#include "../interface/containerUnfolder.h"
 
 namespace
 {
@@ -67,6 +68,7 @@ struct dictionary {
 
 	ztop::unfolder asdsdad;
 	std::vector<ztop::unfolder> sdadasdasdsl;
+	ztop::containerUnfolder ijsdfoijerg;
 
 	ztop::textBox dsfsd;
 	ztop::containerStyle sdfewfij;

@@ -8,31 +8,33 @@ then
 echo "preparing b-efficiencies -> will be safed in channel_energy_syst_btags.root. need to be merged afterwards"
 fi
 
+mode="ttxsec";#yet to be implemented
+
 channels=( "ee"
 "mumu"
 "emu"
 );
 systs=("nominal"
-#"TRIGGER_up"
-#"TRIGGER_down"
-#"ELECSF_up"
-#"ELECSF_down"
-#"MUONSF_up"
-#"MUONSF_down"
-#"PU_up"
-#"PU_down"
-#"JER_up"
-#"JER_down"
-#"JES_up"
-#"JES_down"
+"TRIGGER_up"
+"TRIGGER_down"
+"ELECSF_up"
+"ELECSF_down"
+"MUONSF_up"
+"MUONSF_down"
+"PU_up"
+"PU_down"
+"JER_up"
+"JER_down"
+"JES_up"
+"JES_down"
 #"BTAGH_up"
 #"BTAGH_down"
 #"BTAGL_up"
 #"BTAGL_down"
-#"TT_MATCH_down"
-#"TT_MATCH_up"
-#"TT_SCALE_down"
-#"TT_SCALE_up"
+"TT_MATCH_down"
+"TT_MATCH_up"
+"TT_SCALE_down"
+"TT_SCALE_up"
 #"Z_MATCH_down"
 #"Z_MATCH_up"
 #"Z_SCALE_down"
@@ -100,9 +102,9 @@ for (( i=0;i<${#channels[@]};i++)); do
 	    outnames=( "${outnames[@]}" "${outname}" );
 	    if [[ $dobtag ]] ;
 	    then
-		sed -e "s/##OUTNAME##/${outname}/" -e "s/##PARAMETERS##/-b -c ${channel} -s ${syst}/" -e "s/##WORKDIR##/${dir}/" < ../job.sh > jobscripts/${outname}
+		sed -e "s/##OUTNAME##/${outname}/" -e "s/##PARAMETERS##/-b -c ${channel} -s ${syst} -e ${energy} -m ${mode}/" -e "s/##WORKDIR##/${dir}/" < ../job.sh > jobscripts/${outname}
 	    else
-		sed -e "s/##OUTNAME##/${outname}/" -e "s/##PARAMETERS##/-c ${channel} -s ${syst}/" -e "s/##WORKDIR##/${dir}/" < ../job.sh > jobscripts/${outname}
+		sed -e "s/##OUTNAME##/${outname}/" -e "s/##PARAMETERS##/-c ${channel} -s ${syst} -e ${energy} -m ${mode}/" -e "s/##WORKDIR##/${dir}/" < ../job.sh > jobscripts/${outname}
 	    fi
 	    chmod +x jobscripts/${outname}
 	    if [[ $SGE_CELL ]] ;

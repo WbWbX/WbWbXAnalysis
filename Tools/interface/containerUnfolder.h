@@ -30,7 +30,7 @@ public:
 	void setOptions(/* options */);
 	container1D binbybinunfold(container1DUnfold & cuf);
 	container1D unfold( container1DUnfold &);
-	container1DUnfold prepareFromStack(const containerStack&);
+	//container1DUnfold prepareFromStack(const containerStack&);
 
 	const std::vector<unfolder * > & getSystUnfolder() const {return unfsyst_;}
 	unfolder * getNominalUnfolder() const {return unfnominal_;}

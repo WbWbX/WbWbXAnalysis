@@ -36,14 +36,14 @@ public:
 	bool is1D(){if(mode==dim1) return true; else return false;}
 	bool is1DUnfold(){if(mode==unfolddim1) return true; else return false;}
 
-	void push_back(ztop::container1D, TString, int, double); //! adds container with, name, colour, norm to stack
-	void push_back(ztop::container2D, TString, int, double); //! adds container with, name, colour, norm to stack
-	void push_back(ztop::container1DUnfold, TString, int, double); //! adds container with, name, colour, norm to stack
+	void push_back(ztop::container1D, TString, int, double, int legord=-1); //! adds container with, name, colour, norm to stack
+	void push_back(ztop::container2D, TString, int, double, int legord=-1); //! adds container with, name, colour, norm to stack
+	void push_back(ztop::container1DUnfold, TString, int, double, int legord=-1); //! adds container with, name, colour, norm to stack
 	void removeContribution(TString); //! removes contribution
 
 	void setDataLegend(TString leg="data"){dataleg_=leg;}
 
-	void setLegendOrder(TString leg, size_t no){legorder_[leg]=no;}
+	void setLegendOrder(const TString &leg, const size_t& no);
 
 	void mergeSameLegends();       //! shouldn't be necessary
 	ztop::container1D getContribution(TString);   //! does not ignore data; makes copy, doesn't change member containers!
@@ -152,7 +152,7 @@ private:
 	dimension mode;
 
 
-	std::map<TString,size_t> legorder_;
+	std::vector<int> legorder_;
 
 	int checkLegOrder() const;
 

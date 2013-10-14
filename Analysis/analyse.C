@@ -264,7 +264,7 @@ int main(int argc, char* argv[]){
 	TString outfile=getOutFile(argc, argv);  //-o <outfile> should be something like channel_energy_syst.root // only for plots
 	bool status=getShowStatus(argc, argv);    //-S enables default false
 	bool testmode=getTestMode(argc, argv); 	//-T enables default false
-
+	TString mode=getMode(argc,argv);     //-m (xsec,....) default xsec changes legends to some extend
 	bool mergefiles=false; //get these things from the options to..
 	std::vector<TString> filestomerge;
 
