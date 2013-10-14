@@ -5,7 +5,7 @@
 #$ -l site=hh
 #
 #(the cpu time for this job)
-#$ -l h_cpu=02:59:00
+#$ -l h_cpu=04:59:00
 #
 #(the maximum memory usage of this job)
 #$ -l h_vmem=2048M
