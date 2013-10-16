@@ -79,7 +79,8 @@ public:
 	void multiplyNorm(TString , double);
 	void multiplyAllMCNorms(double);
 	void addGlobalRelMCError(TString,double);   //! adds a global systematic variation to the systematics stored (e.g. lumi)
-	void addMCErrorStack(TString,containerStack);  //! calls container1D::addErrorContainer for each same named member container
+	void addMCErrorStack(const TString&,const containerStack &) ; //only for comp reasons
+	void addErrorStack(const TString& , containerStack ); //! calls container1D::addErrorContainer for each same named member container
 	void addRelSystematicsFrom(ztop::containerStack);
 	void removeError(TString);
 	void renameSyst(TString, TString); //! old, new

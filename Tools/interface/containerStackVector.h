@@ -45,7 +45,8 @@ namespace ztop{
     ztop::containerStack getStack(unsigned int n){return stacks_[n];}
     void removeContribution(TString);
 
-    void addMCErrorStackVector(TString,ztop::containerStackVector);
+    void addMCErrorStackVector(const TString&,const ztop::containerStackVector&);
+    void addErrorStackVector(const TString&,const ztop::containerStackVector&);
     void addMCErrorStackVector(ztop::containerStackVector);
     void addGlobalRelMCError(TString,double);
     void addRelSystematicsFrom(ztop::containerStackVector);

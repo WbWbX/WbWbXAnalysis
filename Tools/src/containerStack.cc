@@ -32,8 +32,8 @@ void containerStack::push_back(ztop::container1D cont, TString legend, int color
 	bool wasthere=false;
 	for(unsigned int i=0;i<legends_.size();i++){
 		if(legend == legends_[i]){
-			if(container1D::debug)
-				std::cout << "containerStack::push_back: found same legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
+			if(containerStack::debug)
+				std::cout << "containerStack::push_back(1D): found same legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
 			containers_[i] = containers_[i] * norms_[i] + cont * norm;
 			containers_[i].setName("c_" +legend);
 			norms_[i]=1;
@@ -43,6 +43,8 @@ void containerStack::push_back(ztop::container1D cont, TString legend, int color
 		}
 	}
 	if(!wasthere){
+		if(containerStack::debug)
+			std::cout << "containerStack::push_back (1D): new legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
 		cont.setName("c_" +legend);
 		containers_.push_back(cont*norm);
 		legends_.push_back(legend);
@@ -56,14 +58,14 @@ void containerStack::push_back(ztop::container2D cont, TString legend, int color
 	if(mode==notset)
 		mode=dim2;
 	else if(mode!=dim2){
-		std::cout << "containerStack::push_back: trying to add 2D container to non-2D stack!" << std::endl;
+		std::cout << "containerStack::push_back(2D): trying to add 2D container to non-2D stack!" << std::endl;
 		return;
 	}
 	bool wasthere=false;
 	for(unsigned int i=0;i<legends_.size();i++){
 		if(legend == legends_[i]){
-			if(container2D::debug)
-				std::cout << "containerStack::push_back: found same legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
+			if(containerStack::debug)
+				std::cout << "containerStack::push_back(2D): found same legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
 			containers2D_[i] = containers2D_[i] * norms_[i] + cont * norm;
 			containers2D_[i].setName("c_" +legend);
 			norms_[i]=1;
@@ -73,6 +75,8 @@ void containerStack::push_back(ztop::container2D cont, TString legend, int color
 		}
 	}
 	if(!wasthere){
+		if(containerStack::debug)
+			std::cout << "containerStack::push_back (2D): new legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
 		cont.setName("c_" +legend);
 		containers2D_.push_back(cont*norm);
 		legends_.push_back(legend);
@@ -92,8 +96,8 @@ void containerStack::push_back(ztop::container1DUnfold cont, TString legend, int
 	bool wasthere=false;
 	for(unsigned int i=0;i<legends_.size();i++){
 		if(legend == legends_[i]){
-			if(container1D::debug)
-				std::cout << "containerStack::push_back: found same legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
+			if(containerStack::debug)
+				std::cout << "containerStack::push_back(1DUF): found same legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
 			containers1DUnfold_[i] = containers1DUnfold_[i] * norms_[i]  + cont * norm;
 			containers1DUnfold_[i].setName("c_" +legend);
 			containers_[i] = containers_[i] * norms_[i] + cont1d * norm;
@@ -105,6 +109,8 @@ void containerStack::push_back(ztop::container1DUnfold cont, TString legend, int
 		}
 	}
 	if(!wasthere){
+		if(containerStack::debug)
+			std::cout << "containerStack::push_back (1DUF): new legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
 		cont.setName("c_" +legend);
 		containers1DUnfold_.push_back(cont * norm);
 		cont1d.setName("c_" +legend);
@@ -343,42 +349,66 @@ void containerStack::addGlobalRelMCError(TString sysname,double error){
 		if(legends_[i]!=dataleg_) containers1DUnfold_[i].addGlobalRelError(sysname,error);
 	}
 }
-void containerStack::addMCErrorStack(TString sysname,containerStack errorstack){
+void containerStack::addMCErrorStack(const TString &sysname,const containerStack &errorstack){
+	addErrorStack( sysname, errorstack);
+}
+
+void containerStack::addErrorStack(const TString & sysname, containerStack errorstack){
 	if(mode!=errorstack.mode){
-		std::cout << "containerStack::addMCErrorStack: stacks must have same type" << std::endl;
+		std::cout << "containerStack::addErrorStack: stacks must have same type" << std::endl;
 		return;
+	}
+	if(debug){
+		std::cout << "containerStack::addErrorStack: " << name_ << std::endl;
+		std::cout << "legends lhs: ";
+		for(size_t i=0;i<legends_.size();i++)
+			std::cout << legends_.at(i) << " ";
+		std::cout << std::endl;
+		std::cout << "legends rhs: ";
+		for(size_t i=0;i<errorstack.legends_.size();i++)
+			std::cout << errorstack.legends_.at(i) << " ";
+		std::cout << std::endl;
 	}
 
 	for(unsigned int i=0; i<size();i++){
-		for(unsigned int j=i;j<errorstack.size();j++){
-			errorstack.norms_[j]=1;
-			if(legends_[i] == errorstack.legends_[j] && legends_[i]!=dataleg_){
-				if(mode==dim1 || mode==unfolddim1){
-					errorstack.containers_[j] = errorstack.containers_[j] * errorstack.norms_[j]; //normalize (in case there is any remultiplication done or something)
-					errorstack.norms_[j]=1;
-					containers_[i] = containers_[i] * norms_[i];
-					norms_[i]=1;
-					containers_[i].addErrorContainer(sysname,errorstack.containers_[j]);
-				}
-				else if(mode==dim2){
-					errorstack.containers2D_[j] = errorstack.containers2D_[j] * errorstack.norms_[j]; //normalize (in case there is any remultiplication done or something)
-					errorstack.norms_[j]=1;
-					containers2D_[i] = containers2D_[i] * norms_[i];
-					norms_[i]=1;
-					containers2D_[i].addErrorContainer(sysname,errorstack.containers2D_[j]);
-				}
-				else if(mode==unfolddim1){
-					errorstack.containers1DUnfold_[j] = errorstack.containers1DUnfold_[j] * errorstack.norms_[j]; //normalize (in case there is any remultiplication done or something)
-					errorstack.norms_[j]=1;
-					containers1DUnfold_[i] = containers1DUnfold_[i] * norms_[i];
-					norms_[i]=1;
-					containers1DUnfold_[i].addErrorContainer(sysname,errorstack.containers1DUnfold_[j]);
-				}
-				else{
-					std::cout << "containerStack::addMCErrorStack: no mode for any Stack set! doing nothing!" << std::endl;
-					return;
-				}
+		//bool found=false;/*
+		for(unsigned int j=0;j<errorstack.size();j++){
+			if(legends_[i] == errorstack.legends_[j]){ //costs performance!
+		 */
+		std::vector<TString>::iterator it=std::find(errorstack.legends_.begin(),errorstack.legends_.end(),legends_[i]);
+		if(it!=errorstack.legends_.end()){
+			size_t j=it-errorstack.legends_.begin();
+			found=true;
+			if(mode==dim1 || mode==unfolddim1){
+				errorstack.containers_[j] = errorstack.containers_[j] * errorstack.norms_[j]; //normalize (in case there is any remultiplication done or something)
+				errorstack.norms_[j]=1;
+				containers_[i] = containers_[i] * norms_[i];
+				norms_[i]=1;
+				containers_[i].addErrorContainer(sysname,errorstack.containers_[j]);
 			}
+			else if(mode==dim2){
+				errorstack.containers2D_[j] = errorstack.containers2D_[j] * errorstack.norms_[j]; //normalize (in case there is any remultiplication done or something)
+				errorstack.norms_[j]=1;
+				containers2D_[i] = containers2D_[i] * norms_[i];
+				norms_[i]=1;
+				containers2D_[i].addErrorContainer(sysname,errorstack.containers2D_[j]);
+			}
+			else if(mode==unfolddim1){
+				errorstack.containers1DUnfold_[j] = errorstack.containers1DUnfold_[j] * errorstack.norms_[j]; //normalize (in case there is any remultiplication done or something)
+				errorstack.norms_[j]=1;
+				containers1DUnfold_[i] = containers1DUnfold_[i] * norms_[i];
+				norms_[i]=1;
+				containers1DUnfold_[i].addErrorContainer(sysname,errorstack.containers1DUnfold_[j]);
+			}
+			else{
+				std::cout << "containerStack::addErrorStack: no mode for any Stack set! doing nothing!" << std::endl;
+				return;
+			}
+			break;
+		}//legfound
+		/*} */
+		else{ //if(!found)
+			std::cout << "containerStack::addErrorStack: legend " << legends_[i] << " not found." << std::endl;
 		}
 	}
 }
@@ -515,25 +545,50 @@ THStack * containerStack::makeTHStack(TString stackname){
 		std::cout << "containerStack::makeTHStack: only available for 1dim stacks!" <<std::endl;
 		return 0;
 	}
+	if(debug)
+		std::cout << "containerStack::makeTHStack: ..." <<std::endl;
 	TH1::AddDirectory(false);
 	if(stackname == "") stackname = name_+"_s";
 	THStack *tstack = new THStack(stackname,stackname);
 
 	std::vector<size_t> sorted=sortEntries(false);
+	if(debug)
+		std::cout << "containerStack::makeTHStack: sorted entries" <<std::endl;
 
+	if(debug)
+		std::cout << "containerStack::makeTHStack: size="<<containers_.size() <<std::endl;
 	for(unsigned int it=0;it<size();it++){
+		if(debug)
+			std::cout << "containerStack::makeTHStack: get "<< it;
 		size_t i=sorted.at(it);
 		if(getLegend(i) != dataleg_){
+			if(debug)
+				std::cout <<"->"<<i << ": " << getLegend(i)<< std::endl;
 			container1D tempcont = getContainer(i);
+			if(debug)
+				std::cout <<"got cont" <<std::endl;
 			tempcont = tempcont * getNorm(i);
-			TH1D * h = (TH1D*)tempcont.getTH1D(getLegend(i)+" "+getName()+"_stack_h")->Clone();
+			std::cout <<"norm multi" <<std::endl;
+			TH1D * htemp=tempcont.getTH1D(getLegend(i)+" "+getName()+"_stack_h");
+			std::cout <<"got th1" <<std::endl;
+			if(!htemp)
+				continue;
+			TH1D * h = (TH1D*)htemp->Clone();
+			delete htemp;
+			std::cout <<"th1!=0" <<std::endl;
 			h->SetFillColor(getColor(i));
 			for(int bin = 1 ; bin < h->GetNbinsX()+1;bin++){
 				h->SetBinError(bin,0);
 			}
+
+			std::cout <<"bin error" <<std::endl;
 			tstack->Add(h);
+
+			std::cout <<"add" <<std::endl;
 		}
 	}
+	if(debug)
+		std::cout << "containerStack::makeTHStack: stack produced" <<std::endl;
 	return  tstack;
 }
 TLegend * containerStack::makeTLegend(bool inverse){
@@ -541,6 +596,8 @@ TLegend * containerStack::makeTLegend(bool inverse){
 		std::cout << "containerStack::makeTLegend: only available for 1dim stacks!" <<std::endl;
 		return 0;
 	}
+	if(debug)
+		std::cout << "containerStack::makeTLegend: drawing..." <<std::endl;
 	TLegend *leg = new TLegend((Double_t)0.65,(Double_t)0.50,(Double_t)0.95,(Double_t)0.90);
 	leg->Clear();
 	leg->SetFillStyle(0);
@@ -566,6 +623,8 @@ void containerStack::drawControlPlot(TString name, bool drawxaxislabels, double 
 		std::cout << "containerStack::drawControlPlot: only available for 1dim(unfold) stacks!" <<std::endl;
 		return;
 	}
+	if(debug)
+		std::cout << "containerStack::drawControlPlot: drawing " <<name_ <<std::endl;
 	TH1::AddDirectory(false);
 	if(name=="") name=name_;
 	int dataentry=0;
@@ -642,6 +701,8 @@ void containerStack::drawRatioPlot(TString name,double resizelabels){
 		std::cout << "containerStack::drawRatioPlot: only available for 1dim stacks!" <<std::endl;
 		return;
 	}
+	if(debug)
+		std::cout << "containerStack::drawRatioPlot: drawing..." <<std::endl;
 	TH1::AddDirectory(false);
 	//prepare container
 	if(name=="") name=name_;
@@ -791,6 +852,8 @@ void containerStack::drawPEffPlot(TString name,double resizelabels)const{
 		std::cout << "containerStack::drawPEffPlot: no 1dmin containers available. Doing nothing" <<std::endl;
 		return;
 	}
+	if(debug)
+		std::cout << "containerStack::drawPEffPlot: drawing..." <<std::endl;
 	std::vector<size_t> sidx=getSignalIdxs();
 	TH1::AddDirectory(false);
 	std::vector<std::vector<container1D> > plotss;
@@ -844,6 +907,8 @@ void containerStack::drawSBGPlot(TString name,double resizelabels,bool invert){
 		std::cout << "containerStack::drawRatioPlot: only available for 1dim stacks!" <<std::endl;
 		return;
 	}
+	if(debug)
+		std::cout << "containerStack::drawSBGPlot: drawing..." <<std::endl;
 	TH1::AddDirectory(false);
 	//prepare container
 	if(name=="") name=name_;
@@ -947,6 +1012,8 @@ TCanvas * containerStack::makeTCanvas(plotmode plotMode){
 		c->SetBatch();
 	TH1D * htemp=new TH1D("sometemphisto"+name_,"sometemphisto"+name_,2,0,1); //creates all gPad stuff etc and prevents seg vio, which happens in some cases; weird
 	htemp->Draw();
+	if(debug)
+		std::cout << "containerStack::makeTCanvas: prepared canvas "<< canvasname << ", drawing plots" <<std::endl;
 	gStyle->SetOptTitle(0);
 	if(plotMode == normal){
 		c->cd();
@@ -1223,7 +1290,8 @@ container1DUnfold containerStack::produceUnfoldingContainer(const std::vector<TS
 		}
 	}
 	//migration matrix, eff, background prepared -> finished
-	out.setBackground(background);
+	//background needs to be ADDED!!!
+	out.setBackground(out.getBackground()+background);
 	out.setRecoContainer(data);
 	container1DUnfold::c_makelist=temp;
 	container1D::c_makelist=temp2;
@@ -1328,10 +1396,11 @@ std::vector<size_t> containerStack::sortEntries(/* std::vector<int> inputlegord 
 	std::vector<size_t> legasso;
 	//protect size etc
 
-	for(size_t i=0;i<inputlegord.size();i++){
-		int oval=inputlegord.at(i);
-		for(size_t j=0;j<inputlegord.size();j++){//search in sorted
-			if(oval==sortedilo.at(j)){ //has position j
+	//BULLSHIT
+	for(size_t i=0;i<sortedilo.size();i++){
+		int oval=sortedilo.at(i);
+		for(size_t j=0;j<inputlegord.size();j++){//search in internal ordering
+			if(oval==inputlegord.at(j)){ //has position j
 				legasso.push_back(j);
 				break;
 			}
@@ -1340,6 +1409,13 @@ std::vector<size_t> containerStack::sortEntries(/* std::vector<int> inputlegord 
 	//fill not asso
 	for(size_t i=legasso.size();i<legends_.size();i++)
 		legasso.push_back(i);
+
+	if(debug){
+		std::cout << "containerStack::sortEntries: ";
+		for(size_t i=0;i<legasso.size();i++)
+			std::cout << legasso.at(i) << " " << legends_.at(i) << " ";
+		std::cout<<std::endl;
+	}
 
 	return legasso;
 	///end new implementation

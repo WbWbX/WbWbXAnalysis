@@ -9,7 +9,7 @@ namespace ztop{
 std::vector<containerStackVector*> containerStackVector::csv_list;
 bool containerStackVector::csv_makelist=false;
 bool containerStackVector::debug=false;
-bool containerStackVector::fastadd=true;
+bool containerStackVector::fastadd=false;
 
 containerStackVector::containerStackVector(){
 	if(csv_makelist)csv_list.push_back(this);
@@ -42,9 +42,7 @@ void containerStackVector::add(ztop::container1D & container, TString leg , int 
 		if(s->getName() == container.getName()){
 			if(container1D::debug)
 				std::cout << "containerStackVector::add: adding " << s->getName() << " to existing stack"  <<std::endl;
-			s->push_back(container, leg, color, norm);
-			if(legor>-1)
-				s->setLegendOrder(leg,(size_t)legor);
+			s->push_back(container, leg, color, norm,legor);
 			found=true;
 			break;
 		}
@@ -53,9 +51,7 @@ void containerStackVector::add(ztop::container1D & container, TString leg , int 
 		if(container1D::debug)
 			std::cout << "containerStackVector::add: creating new stack " << container.getName()  <<std::endl;
 		ztop::containerStack newstack(container.getName());
-		newstack.push_back(container, leg, color, norm);
-		if(legor>-1)
-			newstack.setLegendOrder(leg,(size_t)legor);
+		newstack.push_back(container, leg, color, norm,legor);
 		stacks_.push_back(newstack);
 	}
 }
@@ -65,9 +61,7 @@ void containerStackVector::add(ztop::container2D & container, TString leg , int 
 		if(s->getName() == container.getName()){
 			if(container1D::debug)
 				std::cout << "containerStackVector::add: adding " << s->getName() << " to existing stack"  <<std::endl;
-			s->push_back(container, leg, color, norm);
-			if(legor>-1)
-				s->setLegendOrder(leg,(size_t)legor);
+			s->push_back(container, leg, color, norm,legor);
 			found=true;
 			break;
 		}
@@ -76,9 +70,7 @@ void containerStackVector::add(ztop::container2D & container, TString leg , int 
 		if(container1D::debug)
 			std::cout << "containerStackVector::add: creating new stack " << container.getName()  <<std::endl;
 		ztop::containerStack newstack(container.getName());
-		newstack.push_back(container, leg, color, norm);
-		if(legor>-1)
-			newstack.setLegendOrder(leg,(size_t)legor);
+		newstack.push_back(container, leg, color, norm,legor);
 		stacks_.push_back(newstack);
 	}
 }
@@ -88,9 +80,7 @@ void containerStackVector::add(ztop::container1DUnfold & container, TString leg 
 		if(s->getName() == container.getName()){
 			if(container1D::debug)
 				std::cout << "containerStackVector::add: adding " << s->getName() << " to existing stack"  <<std::endl;
-			s->push_back(container, leg, color, norm);
-			if(legor>-1)
-				s->setLegendOrder(leg,(size_t)legor);
+			s->push_back(container, leg, color, norm,legor);
 			found=true;
 			break;
 		}
@@ -99,9 +89,7 @@ void containerStackVector::add(ztop::container1DUnfold & container, TString leg 
 		if(container1D::debug)
 			std::cout << "containerStackVector::add: creating new stack " << container.getName()  <<std::endl;
 		ztop::containerStack newstack(container.getName());
-		newstack.push_back(container, leg, color, norm);
-		if(legor>-1)
-			newstack.setLegendOrder(leg,(size_t)legor);
+		newstack.push_back(container, leg, color, norm,legor);
 		stacks_.push_back(newstack);
 	}
 }
@@ -158,11 +146,17 @@ void containerStackVector::removeContribution(TString contribution){
 	}
 }
 
-void containerStackVector::addMCErrorStackVector(TString sysname, ztop::containerStackVector stackvec){
+void containerStackVector::addMCErrorStackVector(const TString &sysname, const ztop::containerStackVector & stackvec){
+	addErrorStackVector(sysname , stackvec);
+}
+void containerStackVector::addErrorStackVector(const TString &sysname,const  ztop::containerStackVector & stackvec){
 	if(!fastadd){
 		for(std::vector<containerStack>::iterator istack=stacks_.begin();istack<stacks_.end(); ++istack){
-			for(std::vector<containerStack>::iterator estack=stackvec.stacks_.begin();estack<stackvec.stacks_.end(); ++estack){
+			for(std::vector<containerStack>::const_iterator estack=stackvec.stacks_.begin();estack<stackvec.stacks_.end(); ++estack){
 				if(istack->getName() == estack->getName()){
+					if(debug)
+						std::cout << "containerStackVector::addMCErrorStackVector: adding sys " << sysname
+							<< " to stack " << istack->getName() << std::endl;
 					istack->addMCErrorStack(sysname,*estack);
 					break;
 				}
