@@ -22,7 +22,7 @@ public:
 	void setPosErr(TVector3 v){poserr_=v;}
 	void setIdx(int idx){idx_=idx;}
 	void setNDof(float ndf){ndof_=ndf;}
-	void setChi2(double chi2){chi2_=chi2;}
+	void setChi2(double inchi2){chi2_=inchi2;}
 
 	const TVector3 & position(){return pos_;}
 	const TVector3 & positionErr(){return poserr_;}
