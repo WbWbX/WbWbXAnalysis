@@ -568,7 +568,6 @@ THStack * containerStack::makeTHStack(TString stackname){
 
 			tempcont = tempcont * getNorm(i);
 			TH1D * htemp=tempcont.getTH1D(getLegend(i)+" "+getName()+"_stack_h");
-			std::cout <<"got th1" <<std::endl;
 			if(!htemp)
 				continue;
 			TH1D * h = (TH1D*)htemp->Clone();
