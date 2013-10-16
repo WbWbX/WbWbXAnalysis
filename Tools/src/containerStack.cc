@@ -565,26 +565,21 @@ THStack * containerStack::makeTHStack(TString stackname){
 			if(debug)
 				std::cout <<"->"<<i << ": " << getLegend(i)<< std::endl;
 			container1D tempcont = getContainer(i);
-			if(debug)
-				std::cout <<"got cont" <<std::endl;
+
 			tempcont = tempcont * getNorm(i);
-			std::cout <<"norm multi" <<std::endl;
 			TH1D * htemp=tempcont.getTH1D(getLegend(i)+" "+getName()+"_stack_h");
 			std::cout <<"got th1" <<std::endl;
 			if(!htemp)
 				continue;
 			TH1D * h = (TH1D*)htemp->Clone();
 			delete htemp;
-			std::cout <<"th1!=0" <<std::endl;
 			h->SetFillColor(getColor(i));
 			for(int bin = 1 ; bin < h->GetNbinsX()+1;bin++){
 				h->SetBinError(bin,0);
 			}
 
-			std::cout <<"bin error" <<std::endl;
 			tstack->Add(h);
 
-			std::cout <<"add" <<std::endl;
 		}
 	}
 	if(debug)
