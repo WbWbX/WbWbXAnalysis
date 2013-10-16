@@ -371,14 +371,14 @@ void containerStack::addErrorStack(const TString & sysname, containerStack error
 	}
 
 	for(unsigned int i=0; i<size();i++){
-		//bool found=false;/*
+		/*bool found=false;
 		for(unsigned int j=0;j<errorstack.size();j++){
 			if(legends_[i] == errorstack.legends_[j]){ //costs performance!
 		 */
 		std::vector<TString>::iterator it=std::find(errorstack.legends_.begin(),errorstack.legends_.end(),legends_[i]);
 		if(it!=errorstack.legends_.end()){
 			size_t j=it-errorstack.legends_.begin();
-			found=true;
+			//found=true;
 			if(mode==dim1 || mode==unfolddim1){
 				errorstack.containers_[j] = errorstack.containers_[j] * errorstack.norms_[j]; //normalize (in case there is any remultiplication done or something)
 				errorstack.norms_[j]=1;
