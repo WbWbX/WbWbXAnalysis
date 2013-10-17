@@ -1,53 +1,26 @@
 
 #defaults: isMC=true, includetrigger=true, includereco=false
-#inputs are seperated by min 2 spaces; use runall4!!
+#inputs are seperated by min 2 spaces; use runallNaf!!
 
 
-#### 8TeV GR_P_V41_AN3
-
-### data PROMPT
-
-#150  /DoubleElectron/Run2012A-13Jul2012-v1/AOD                 tree_8TeV_ee_runA_13Jul   isMC=false globalTag=FT_53_V6C_AN3     json/Full19.json.txt
-#20   /DoubleElectron/Run2012A-recover-06Aug2012-v1/AOD         tree_8TeV_ee_runA_06Aug   isMC=false globalTag=FT_53_V6C_AN3    json/Full19.json.txt
-#250  /DoubleElectron/Run2012B-13Jul2012-v1/AOD                 tree_8TeV_ee_runB_13Jul   isMC=false globalTag=FT_53_V6C_AN3     json/Full19.json.txt
-#20   /DoubleElectron/Run2012C-24Aug2012-v1/AOD                 tree_8TeV_ee_runC_24Aug   isMC=false globalTag=FT53_V10A_AN3    json/Full19.json.txt
-#300  /DoubleElectron/Run2012C-PromptReco-v2/AOD                tree_8TeV_ee_runC_prompt  isMC=false globalTag=GR_P_V42_AN3    json/Full19.json.txt
-#20   /DoubleElectron/Run2012C-EcalRecover_11Dec2012-v1/AOD     tree_8TeV_ee_runC_11Dec   isMC=false globalTag=FT_P_V42C_AN3    json/Full19.json.txt
-#350  /DoubleElectron/Run2012D-PromptReco-v1/AOD                tree_8TeV_ee_runD_prompt  isMC=false globalTag=GR_P_V42_AN3    json/Full19.json.txt
-
-#150  /DoubleMu/Run2012A-13Jul2012-v1/AOD                    tree_8TeV_mumu_runA_13Jul   isMC=false globalTag=FT_53_V6C_AN3     json/Full19.json.txt
-#20   /DoubleMu/Run2012A-recover-06Aug2012-v1/AOD            tree_8TeV_mumu_runA_06Aug   isMC=false globalTag=FT_53_V6C_AN3    json/Full19.json.txt
-#250  /DoubleMu/Run2012B-13Jul2012-v4/AOD                    tree_8TeV_mumu_runB_13Jul   isMC=false globalTag=FT_53_V6C_AN3     json/Full19.json.txt
-#20   /DoubleMu/Run2012C-24Aug2012-v1/AOD                    tree_8TeV_mumu_runC_24Aug   isMC=false globalTag=FT53_V10A_AN3    json/Full19.json.txt
-#300  /DoubleMu/Run2012C-PromptReco-v2/AOD                   tree_8TeV_mumu_runC_prompt  isMC=false globalTag=GR_P_V42_AN3    json/Full19.json.txt
-#20   /DoubleMu/Run2012C-EcalRecover_11Dec2012-v1/AOD        tree_8TeV_mumu_runC_11Dec   isMC=false globalTag=FT_P_V42C_AN3    json/Full19.json.txt
-#350  /DoubleMu/Run2012D-PromptReco-v1/AOD                   tree_8TeV_mumu_runD_prompt  isMC=false globalTag=GR_P_V42_AN3    json/Full19.json.txt
-
-#150  /MuEG/Run2012A-13Jul2012-v1/AOD             tree_8TeV_emu_runA_13Jul   isMC=false globalTag=FT_53_V6C_AN3     json/Full19.json.txt
-#20   /MuEG/Run2012A-recover-06Aug2012-v1/AOD     tree_8TeV_emu_runA_06Aug   isMC=false globalTag=FT_53_V6C_AN3    json/Full19.json.txt
-#250  /MuEG/Run2012B-13Jul2012-v1/AOD             tree_8TeV_emu_runB_13Jul   isMC=false globalTag=FT_53_V6C_AN3     json/Full19.json.txt
-#20   /MuEG/Run2012C-24Aug2012-v1/AOD             tree_8TeV_emu_runC_24Aug   isMC=false globalTag=FT53_V10A_AN3    json/Full19.json.txt
-#300  /MuEG/Run2012C-PromptReco-v2/AOD            tree_8TeV_emu_runC_prompt  isMC=false globalTag=GR_P_V42_AN3    json/Full19.json.txt
-#20   /MuEG/Run2012C-EcalRecover_11Dec2012-v1/AOD  tree_8TeV_emu_runC_11Dec  isMC=false globalTag=FT_P_V42C_AN3    json/Full19.json.txt
-#350  /MuEG/Run2012D-PromptReco-v1/AOD            tree_8TeV_emu_runD_prompt  isMC=false globalTag=GR_P_V42_AN3    json/Full19.json.txt
-
+####
 
 ##RERECO !?!!!
 
-170  /DoubleElectron/Run2012A-22Jan2013-v1/AOD   tree_8TeV_ee_runA_22Jan      isMC=false globalTag=FT_53_V21_AN5   json/ReRecoJan13.json.txt
-250  /DoubleElectron/Run2012B-22Jan2013-v1/AOD   tree_8TeV_ee_runB_22Jan      isMC=false globalTag=FT_53_V21_AN5   json/ReRecoJan13.json.txt
-300  /DoubleElectron/Run2012C-22Jan2013-v1/AOD   tree_8TeV_ee_runC_22Jan      isMC=false globalTag=FT_53_V21_AN5   json/ReRecoJan13.json.txt
-350  /DoubleElectron/Run2012D-22Jan2013-v1/AOD   tree_8TeV_ee_runD_22Jan      isMC=false globalTag=FT_53_V21_AN5   json/ReRecoJan13.json.txt
+170  /DoubleElectron/Run2012A-22Jan2013-v1/AOD   tree_8TeV_ee_runA_22Jan      isMC=false globalTag=FT53_V21A_AN6   json/ReRecoJan13.json.txt
+250  /DoubleElectron/Run2012B-22Jan2013-v1/AOD   tree_8TeV_ee_runB_22Jan      isMC=false globalTag=FT53_V21A_AN6   json/ReRecoJan13.json.txt
+300  /DoubleElectron/Run2012C-22Jan2013-v1/AOD   tree_8TeV_ee_runC_22Jan      isMC=false globalTag=FT53_V21A_AN6   json/ReRecoJan13.json.txt
+350  /DoubleElectron/Run2012D-22Jan2013-v1/AOD   tree_8TeV_ee_runD_22Jan      isMC=false globalTag=FT53_V21A_AN6   json/ReRecoJan13.json.txt
 
-170  /DoubleMu/Run2012A-22Jan2013-v1/AOD         tree_8TeV_mumu_runA_22Jan    isMC=false globalTag=FT_53_V21_AN5   json/ReRecoJan13.json.txt
-250  /DoubleMuParked/Run2012B-22Jan2013-v1/AOD   tree_8TeV_mumu_runB_22Jan    isMC=false globalTag=FT_53_V21_AN5   json/ReRecoJan13.json.txt
-300  /DoubleMuParked/Run2012C-22Jan2013-v1/AOD   tree_8TeV_mumu_runC_22Jan    isMC=false globalTag=FT_53_V21_AN5   json/ReRecoJan13.json.txt
-350  /DoubleMuParked/Run2012D-22Jan2013-v1/AOD   tree_8TeV_mumu_runD_22Jan    isMC=false globalTag=FT_53_V21_AN5   json/ReRecoJan13.json.txt
+170  /DoubleMu/Run2012A-22Jan2013-v1/AOD         tree_8TeV_mumu_runA_22Jan    isMC=false globalTag=FT53_V21A_AN6   json/ReRecoJan13.json.txt
+250  /DoubleMuParked/Run2012B-22Jan2013-v1/AOD   tree_8TeV_mumu_runB_22Jan    isMC=false globalTag=FT53_V21A_AN6   json/ReRecoJan13.json.txt
+300  /DoubleMuParked/Run2012C-22Jan2013-v1/AOD   tree_8TeV_mumu_runC_22Jan    isMC=false globalTag=FT53_V21A_AN6   json/ReRecoJan13.json.txt
+350  /DoubleMuParked/Run2012D-22Jan2013-v1/AOD   tree_8TeV_mumu_runD_22Jan    isMC=false globalTag=FT53_V21A_AN6   json/ReRecoJan13.json.txt
 
-170  /MuEG/Run2012A-22Jan2013-v1/AOD             tree_8TeV_emu_runA_22Jan     isMC=false globalTag=FT_53_V21_AN5   json/ReRecoJan13.json.txt
-250  /MuEG/Run2012B-22Jan2013-v1/AOD             tree_8TeV_emu_runB_22Jan     isMC=false globalTag=FT_53_V21_AN5   json/ReRecoJan13.json.txt
-300  /MuEG/Run2012C-22Jan2013-v1/AOD             tree_8TeV_emu_runC_22Jan     isMC=false globalTag=FT_53_V21_AN5   json/ReRecoJan13.json.txt
-350  /MuEG/Run2012D-22Jan2013-v1/AOD             tree_8TeV_emu_runD_22Jan     isMC=false globalTag=FT_53_V21_AN5   json/ReRecoJan13.json.txt
+170  /MuEG/Run2012A-22Jan2013-v1/AOD             tree_8TeV_emu_runA_22Jan     isMC=false globalTag=FT53_V21A_AN6   json/ReRecoJan13.json.txt
+250  /MuEG/Run2012B-22Jan2013-v1/AOD             tree_8TeV_emu_runB_22Jan     isMC=false globalTag=FT53_V21A_AN6   json/ReRecoJan13.json.txt
+300  /MuEG/Run2012C-22Jan2013-v1/AOD             tree_8TeV_emu_runC_22Jan     isMC=false globalTag=FT53_V21A_AN6   json/ReRecoJan13.json.txt
+350  /MuEG/Run2012D-22Jan2013-v1/AOD             tree_8TeV_emu_runD_22Jan     isMC=false globalTag=FT53_V21A_AN6   json/ReRecoJan13.json.txt
 
 
 
@@ -75,9 +48,9 @@
 150   /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_eettbar                    genFilter=Top genFilterString=ElectronElectron isSignal=true
 150   /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_mumuttbar                  genFilter=Top genFilterString=MuonMuon isSignal=true
 150   /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_emuttbar                   genFilter=Top genFilterString=ElectronMuon isSignal=true
-100  /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_eettbarviatau              genFilter=Top genFilterString=ElectronElectronViaTau
-100  /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_mumuttbarviatau            genFilter=Top genFilterString=MuonMuonViaTau
-100  /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_emuttbarviatau             genFilter=Top genFilterString=ElectronMuonViaTau
+100  /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_eettbarviatau              genFilter=Top genFilterString=ElectronElectronViaTau isSignal=true
+100  /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_mumuttbarviatau            genFilter=Top genFilterString=MuonMuonViaTau isSignal=true
+100  /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_emuttbarviatau             genFilter=Top genFilterString=ElectronMuonViaTau isSignal=true
 100   /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_eettbarbg                genFilter=Top genFilterString=ElectronElectron,ElectronElectronViaTau genFilterInvert=true
 100   /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_mumuttbarbg                genFilter=Top genFilterString=MuonMuon,MuonMuonViaTau genFilterInvert=true
 100   /TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_emuttbarbg                genFilter=Top genFilterString=ElectronMuon,ElectronMuonViaTau genFilterInvert=true
@@ -86,9 +59,9 @@
 400  /TTJets_MassiveBinDECAY_8TeV-madgraph-gridpack/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM     tree_8TeV_eettbar_ext                    genFilter=Top genFilterString=ElectronElectron isSignal=true
 400  /TTJets_MassiveBinDECAY_8TeV-madgraph-gridpack/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM      tree_8TeV_mumuttbar_ext                  genFilter=Top genFilterString=MuonMuon isSignal=true
 400  /TTJets_MassiveBinDECAY_8TeV-madgraph-gridpack/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM      tree_8TeV_emuttbar_ext                   genFilter=Top genFilterString=ElectronMuon isSignal=true
-100  /TTJets_MassiveBinDECAY_8TeV-madgraph-gridpack/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM      tree_8TeV_eettbarviatau_ext              genFilter=Top genFilterString=ElectronElectronViaTau
-100  /TTJets_MassiveBinDECAY_8TeV-madgraph-gridpack/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM     tree_8TeV_mumuttbarviatau_ext            genFilter=Top genFilterString=MuonMuonViaTau
-100  /TTJets_MassiveBinDECAY_8TeV-madgraph-gridpack/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM    tree_8TeV_emuttbarviatau_ext             genFilter=Top genFilterString=ElectronMuonViaTau
+100  /TTJets_MassiveBinDECAY_8TeV-madgraph-gridpack/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM      tree_8TeV_eettbarviatau_ext              genFilter=Top genFilterString=ElectronElectronViaTau isSignal=true
+100  /TTJets_MassiveBinDECAY_8TeV-madgraph-gridpack/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM     tree_8TeV_mumuttbarviatau_ext            genFilter=Top genFilterString=MuonMuonViaTau isSignal=true
+100  /TTJets_MassiveBinDECAY_8TeV-madgraph-gridpack/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM    tree_8TeV_emuttbarviatau_ext             genFilter=Top genFilterString=ElectronMuonViaTau isSignal=true
 
 
 ######single top
@@ -153,12 +126,12 @@
 #####Matching Z
 
 
-400  /DYJetsToLL_M-50_matchingdown_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_dymumu60120_Zmdown     genFilter=Z isSignal=true genFilterString=MuonMuon genFilterMassLow=60 genFilterMassHigh=120
-400  /DYJetsToLL_M-50_matchingdown_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_dyee60120_Zmdown       genFilter=Z isSignal=true genFilterString=ElectronElectron genFilterMassLow=60 genFilterMassHigh=120
+#400  /DYJetsToLL_M-50_matchingdown_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_dymumu60120_Zmdown     genFilter=Z isSignal=true genFilterString=MuonMuon genFilterMassLow=60 genFilterMassHigh=120
+#400  /DYJetsToLL_M-50_matchingdown_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_dyee60120_Zmdown       genFilter=Z isSignal=true genFilterString=ElectronElectron genFilterMassLow=60 genFilterMassHigh=120
 
 
-400  /DYJetsToLL_M-50_matchingup_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_dymumu60120_Zmup     genFilter=Z isSignal=true genFilterString=MuonMuon genFilterMassLow=60 genFilterMassHigh=120
-400  /DYJetsToLL_M-50_matchingup_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_dyee60120_Zmup       genFilter=Z isSignal=true genFilterString=ElectronElectron genFilterMassLow=60 genFilterMassHigh=120
+#400  /DYJetsToLL_M-50_matchingup_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_dymumu60120_Zmup     genFilter=Z isSignal=true genFilterString=MuonMuon genFilterMassLow=60 genFilterMassHigh=120
+#400  /DYJetsToLL_M-50_matchingup_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_dyee60120_Zmup       genFilter=Z isSignal=true genFilterString=ElectronElectron genFilterMassLow=60 genFilterMassHigh=120
 
 
 
@@ -195,12 +168,12 @@
 #####Scale Z
 
 
-400  /DYJetsToLL_M-50_scaledown_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_dymumu60120_Zscaledown     genFilter=Z isSignal=true genFilterString=MuonMuon genFilterMassLow=60 genFilterMassHigh=120
-400  /DYJetsToLL_M-50_scaledown_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_dyee60120_Zscaledown       genFilter=Z isSignal=true genFilterString=ElectronElectron genFilterMassLow=60 genFilterMassHigh=120
+#400  /DYJetsToLL_M-50_scaledown_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_dymumu60120_Zscaledown     genFilter=Z isSignal=true genFilterString=MuonMuon genFilterMassLow=60 genFilterMassHigh=120
+#400  /DYJetsToLL_M-50_scaledown_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_dyee60120_Zscaledown       genFilter=Z isSignal=true genFilterString=ElectronElectron genFilterMassLow=60 genFilterMassHigh=120
 
 
-400  /DYJetsToLL_M-50_scaleup_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_dymumu60120_Zscaleup     genFilter=Z isSignal=true genFilterString=MuonMuon genFilterMassLow=60 genFilterMassHigh=120
-400  /DYJetsToLL_M-50_scaleup_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_dyee60120_Zscaleup       genFilter=Z isSignal=true genFilterString=ElectronElectron genFilterMassLow=60 genFilterMassHigh=120
+#400  /DYJetsToLL_M-50_scaleup_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_dymumu60120_Zscaleup     genFilter=Z isSignal=true genFilterString=MuonMuon genFilterMassLow=60 genFilterMassHigh=120
+#400  /DYJetsToLL_M-50_scaleup_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM     tree_8TeV_dyee60120_Zscaleup       genFilter=Z isSignal=true genFilterString=ElectronElectron genFilterMassLow=60 genFilterMassHigh=120
 
 
 
