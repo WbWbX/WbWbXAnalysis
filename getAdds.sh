@@ -60,16 +60,16 @@ cd EGamma/EGammaAnalysisTools/data
 cat download.url | xargs wget
 cd $CMSSW_BASE/src
 
-echo "MET  Filter"
+#echo "MET  Filter"
 
-addpkg RecoMET/METFilters V00-00-10
-cvs co -r V00-00-08 RecoMET/METAnalyzers
-cvs co -r V00-03-23 CommonTools/RecoAlgos
+#addpkg RecoMET/METFilters V00-00-10
+#cvs co -r V00-00-08 RecoMET/METAnalyzers
+#cvs co -r V00-03-23 CommonTools/RecoAlgos
 # Additional packages for the tracking POG filters
-cvs co -r V01-00-11-01 DPGAnalysis/Skims
-cvs co -r V00-11-17 DPGAnalysis/SiStripTools
-cvs co -r V00-00-08 DataFormats/TrackerCommon
-cvs co -r V01-09-05 RecoLocalTracker/SubCollectionProducers
+#cvs co -r V01-00-11-01 DPGAnalysis/Skims
+#cvs co -r V00-11-17 DPGAnalysis/SiStripTools
+#cvs co -r V00-00-08 DataFormats/TrackerCommon
+#cvs co -r V01-09-05 RecoLocalTracker/SubCollectionProducers
 
 if [[ "$CMSSW_VERSION" == "CMSSW_5_3_3_patch3"  ]]
 then
