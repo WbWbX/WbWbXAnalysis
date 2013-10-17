@@ -7,7 +7,7 @@ cd ${CMSSW_BASE}/src
 # the things I use from the TopAnalysis code
 #
 
-if [[ "${CMSSW_VERSION}" != "CMSSW_5_3_3_patch3" && "${CMSSW_VERSION}" != "CMSSW_5_3_5" && "${CMSSW_VERSION}" != "CMSSW_5_3_7" && "${CMSSW_VERSION}" != "CMSSW_5_3_11" ]];
+if [[ "${CMSSW_VERSION}" != "CMSSW_5_3_3_patch3" && "${CMSSW_VERSION}" != "CMSSW_5_3_5" && "${CMSSW_VERSION}" != "CMSSW_5_3_7" && "${CMSSW_VERSION}" != "CMSSW_5_3_11" && "${CMSSW_VERSION}" != "CMSSW_5_3_12_patch2" ]];
 then
     echo 'warning! '"$CMSSW_VERSION"' not supported for automatic checkout of pat packages! add them manually!'
 fi
@@ -129,6 +129,18 @@ addpkg TopQuarkAnalysis/TopSkimming V07-01-04
 addpkg TopQuarkAnalysis/TopTools    V06-07-13
 
 fi
+
+if [[ "$CMSSW_VERSION" == "CMSSW_5_3_12_patch2" ]]
+then
+
+git cms-addpkg PhysicsTools/PatAlgos
+git cms-merge-topic cms-analysis-tools:5_3_12_patch2-metUncertainties
+git cms-merge-topic cms-analysis-tools:5_3_12_patch2-newJECs
+git cms-merge-topic cms-analysis-tools:5_3_12_patch2-mvaElIdPatFunction
+
+
+fi
+
 
 #for analysis stuff:
 
