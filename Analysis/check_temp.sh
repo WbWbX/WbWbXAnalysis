@@ -13,7 +13,7 @@ for file in *; do
     #echo "checking $fullpath"
     if [[ -e "${fullpath}.root" ]];
     then
-	if [ -e "${fullpath}_plots.root" ];
+	if [ -e "${fullpath}_fin" ];
 	then
 	    echo "${jobname} \e[1;42m successfully done \e[0m "
 	   # if [[ "${jobname}" == *"nominal"*]]
@@ -37,5 +37,5 @@ for file in *; do
     fi
 done
 
-echo "for merging of systematics of successful jobs do:"
-echo "../mergeSyst.exe ${done[@]}"
+echo "for merging of systematics of successful jobs do (in output dir):"
+echo "mergeSyst ${done[@]}"
