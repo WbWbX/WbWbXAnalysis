@@ -7,6 +7,10 @@ ROOTFLAGS=`root-config --cflags`
 ROOTLIBS=`root-config --libs`
 
 CMSLIBS=$CMSSW_BASE/lib/$SCRAM_ARCH/
+LOCBIN=$CMSSW_BASE/src/TtZAnalysis/Analysis/bin
+BUILDDIR=$CMSSW_BASE/src/TtZAnalysis/Analysis/build
+SRCDIR=$CMSSW_BASE/src/TtZAnalysis/Analysis/app_src
+LOCLIB=$CMSSW_BASE/src/TtZAnalysis/Analysis/lib
 #declare -a libs
 libs=("TopAnalysisZTopUtils" 
     "TtZAnalysisDataFormats" 
@@ -21,70 +25,59 @@ libs=("TopAnalysisZTopUtils"
 
 #exit
 
-if [ $1 == "all" ];
-then
-    
-    scram b -j12
 
-fi
-if  [ $1 == "all" ] || [ $1 == "run" ];
-then
-
-    libdir=$CMSSW_BASE/src/TtZAnalysis/Analysis/lib
-
-    mkdir -p $libdir
+function compile(){
+    infile=$1
     linklibs=""
+    libdir=$LOCLIB
 
     for (( i=0;i<${#libs[@]};i++)); do
 	linklibs="$linklibs -l${libs[${i}]}"
 	cp ${CMSLIBS}lib${libs[${i}]}.so $libdir
     done
+    echo compiling $infile
 
+    g++ $ROOTFLAGS -fopenmp -I$CPLUS_INCLUDE_PATH -c -o $BUILDDIR/$infile.o $SRCDIR/$infile.cc
+    g++ -o $LOCBIN/$1 -fopenmp -Wall $ROOTLIBS -L$libdir $linklibs -l${CMSSW_BASE}/src/TtZAnalysis/Tools/TUnfold/libunfold.so $BUILDDIR/$infile.o
 
-    echo compiling analyse.C
-    infile=analyse.C
+}
+function anenv(){
+    test=`echo $PATH | grep ${CMSSW_BASE}/src/TtZAnalysis/Analysis/bin`
+    if [ $test ]
+    then
+	echo env ok
+    else
+	export PATH=${CMSSW_BASE}/src/TtZAnalysis/Analysis/bin:$PATH
+    fi
+}
 
-    g++ $ROOTFLAGS -fopenmp -I$CPLUS_INCLUDE_PATH -c -o $infile.o $infile
-    g++ -o analyse.exe -fopenmp -Wall $ROOTLIBS -Llib$linklibs -l${CMSSW_BASE}/src/TtZAnalysis/Tools/TUnfold/libunfold.so $infile.o
+if [ $1 == "all" ];
+then
+    cd $CMSSW_BASE/src/TtZAnalysis/Analysis
+    scram b -j12
 
-    infile=mergeSyst.cc
+fi
+cd $BUILDDIR
+if  [ $1 == "all" ] || [ $1 == "run" ];
+then
 
-    echo compiling mergeSyst.cc
+    compile analyse;
+    compile mergeSyst
 
-    g++ $ROOTFLAGS -fopenmp -I$CPLUS_INCLUDE_PATH -c -o $infile.o $infile
-    g++ -o mergeSyst.exe -fopenmp -Wall $ROOTLIBS -Llib$linklibs $infile.o
-
-
-    infile=unfoldTtBar.C
-
-    g++ $ROOTFLAGS -fopenmp -I$CPLUS_INCLUDE_PATH -c -o $infile.o $infile
-    g++ -o unfoldTtBar.exe -fopenmp -Wall $ROOTLIBS -Llib$linklibs $infile.o
 fi
 
-if [ $1 == "unfold" ];
+if  [ $1 == "all" ] || [ $1 == "unfold" ];
 then
     
-
-    libdir=$CMSSW_BASE/src/TtZAnalysis/Analysis/lib
-
-    mkdir -p $libdir
-    linklibs=""
-
-    for (( i=0;i<${#libs[@]};i++)); do
-	linklibs="$linklibs -l${libs[${i}]}"
-    done
-    
-    
-    infile=unfoldTtBar.C
-
-    g++ $ROOTFLAGS -fopenmp -I$CPLUS_INCLUDE_PATH -c -o $infile.o $infile
-    g++ -o unfoldTtBar.exe -fopenmp -Wall $ROOTLIBS -Llib$linklibs $infile.o
+    compile unfoldTtBar
 
 fi
 
+if  [ $1 == "all" ] || [ $1 == "helper" ];
+then
+    
+    compile makePlots
 
-infile=makePlots.cc
+fi
 
-    g++ $ROOTFLAGS -fopenmp -I$CPLUS_INCLUDE_PATH -c -o $infile.o $infile
-    g++ -o makePlots.exe -fopenmp -Wall $ROOTLIBS -Llib$linklibs $infile.o
-
+anenv
