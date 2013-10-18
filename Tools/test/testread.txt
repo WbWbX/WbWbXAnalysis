@@ -1,0 +1,38 @@
+$ comments
+$ ,delimiter
+$ [marker]
+
+some stuff before starting , sdfijre, erwgoijr, dsfuihewf, dsfijewf 32543
+
+
+
+[valuedefs]
+
+value1=value1val
+value2 = value2val $comment
+
+value3 =   true, value4 =   400
+
+value5 =5
+
+[valuedefs-end]
+
+[inputfiles]
+
+filename.root,legendentry lala,8,220 , 1 , true
+filename2.root,  legendentry2,81,2220 ,2 ,false
+filename3.root,    legendentry someblank 4, 82,  2230  , 4 , true
+$commented line, with    , commas $
+linewithcomment, lalalegend, 33, 220 , 5 , true$somecomment
+$d
+
+[inputfiles-end]
+[otherstuff]
+
+lalala lalala , sdfew , $jaja
+sadf
+sdf
+sdf
+
+dff
+
