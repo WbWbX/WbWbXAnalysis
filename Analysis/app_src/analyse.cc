@@ -1,5 +1,6 @@
 #include "TtZAnalysis/Analysis/interface/MainAnalyzer.h"
 #include "TtZAnalysis/Analysis/interface/AnalysisUtils.h"
+#include "TtZAnalysis/Tools/interface/fileReader.h"
 //#include "Analyzer.cc"
 //should be taken care of by the linker!
 
@@ -14,62 +15,50 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
 	using namespace std;
 	using namespace ztop;
 	if(testmode){
-	ztop::container1D::debug =false;
-	ztop::containerStack::debug=false;
-	ztop::containerStackVector::debug=false;
-	}
-	//define all options HERE!!!
-	//read PU file from filelist.txt? makes sense somehow... do it!!!
-	//all files relative to CMSSW_BASE
-	//put systematics requiring other samples in a separate subdir in treedir and call it from other inputfiles.txt
-	//let samplename for btag be without the whole path (check in btagbase)
-	//make btagbase writeable
-
-	TString treedir="/data/user/kiesej/Analysis2012/trees/trees_Jun13_03/";
-	if((TString)getenv("SGE_CELL") != ""){ //on the naf
-		treedir="/scratch/hh/dust/naf/cms/user/kieseler/trees_Jun13_03/";
-	}
-	else if((TString)getenv("HOST") == "cmsng401"){
-		treedir="/data/kiesej/Analysis/trees/trees_Jun13_03/";
+		ztop::container1D::debug =false;
+		ztop::containerStack::debug=false;
+		ztop::containerStackVector::debug=false;
 	}
 
 
-	TString jecfile,btagfile,pufile,inputfilewochannel,muonsffile,muonsfhisto,elecsffile,elecsfhisto,trigsffile,trigsfhisto; //...
+	TString inputfilewochannel="config.txt";
+	TString inputfile=channel+"_"+energy+"_"+inputfilewochannel;
+	// TString
+	if(maninputfile!="")
+		inputfile=maninputfile;
 
-	inputfilewochannel="inputfiles.txt";
-	// 7 TeV stuff needs to be implemented
-	// Syst variations
-	// define all nominal here
-
-	// bug fixes with jets?!? the index stuff?
-
-	// all relative to cmssw_base except for inputfiles (will be copied)
-	if(energy == "8TeV"){
-		jecfile="/src/TtZAnalysis/Data/Summer13_V4_DATA_UncertaintySources_AK5PFchs.txt";
-		//btagfile="/src/TtZAnalysis/Data";
-		// pufile="/src/TtZAnalysis/Data/Full19.json.txt_PU.root";
-		pufile="ReRecoJan13.json.txt_PU";
-		muonsffile="/src/TopAnalysis/Configuration/analysis/diLeptonic/data/MuonSF_198fbReReco.root";
-		muonsfhisto="MuonIdIsoSF";
-		elecsffile="/src/TopAnalysis/Configuration/analysis/diLeptonic/data/ElectronSF_198fbReReco.root";
-		elecsfhisto="ElectronIdIsoSF";
-		trigsffile="/src/TopAnalysis/Configuration/analysis/diLeptonic/data/triggerSummary_"+channel+"_19fb.root";
-		trigsfhisto="scalefactor eta2d with syst";
-	}
+	fileReader fr;
+	fr.setComment("$");
+	fr.setDelimiter(",");
+	fr.setStartMarker("[parameters-begin]");
+	fr.setEndMarker("[parameters-end]");
+	fr.readFile(inputfile.Data());
 
 
-	else if(energy == "7TeV"){ // 7 TeV definitions here including nominal ones
-		jecfile="/src/TtZAnalysis/Data/JEC11_V12_AK5PF_UncertaintySources.txt";
-		pufile="ReRecoNov2011.json_PU";
+	TString treedir,jecfile,pufile,muonsffile,muonsfhisto,elecsffile,elecsfhisto,trigsffile; //...
 
-	}
-	btagfile="all_btags.root";
 
+	if(lumi<0)
+		lumi=fr.getValue<double>("Lumi");
+	treedir=              fr.getValue<TString>("inputFilesDir");
+	jecfile=   cmssw_base+fr.getValue<TString>("JECFile");
+	muonsffile=cmssw_base+fr.getValue<TString>("MuonSFFile");
+	muonsfhisto=          fr.getValue<TString>("MuonSFHisto");
+	elecsffile=cmssw_base+fr.getValue<TString>("ElecSFFile");
+	elecsfhisto=          fr.getValue<TString>("ElecSFHisto");
+	trigsffile=cmssw_base+fr.getValue<TString>("TriggerSFFile");
+	pufile=    cmssw_base+fr.getValue<TString>("PUFile");
+
+
+
+	std::cout << "inputfile read" << std::endl;
+
+	//hard coded:
+
+	TString trigsfhisto="scalefactor eta2d with syst";
+	TString btagfile="all_btags.root";
 	if(dobtag)
 		btagfile=channel+"_"+energy+"_"+Syst+"_btags.root";
-
-
-
 
 	///set input files list etc (common)
 
@@ -81,7 +70,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
 	ana.setTestMode(testmode);
 	ana.setLumi(lumi);
 	ana.setDataSetDirectory(treedir);
-	ana.getPUReweighter()->setDataTruePUInput((TString)cmssw_base+"/src/TtZAnalysis/Data/"+pufile+".root");
+	ana.getPUReweighter()->setDataTruePUInput(pufile+".root");
 	ana.setChannel(channel);
 	ana.setEnergy(energy);
 	if(energy == "8TeV"){
@@ -90,14 +79,14 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
 	else if(energy == "7TeV"){
 		ana.getPUReweighter()->setMCDistrFall11();
 	}
-	ana.getElecSF()->setInput(cmssw_base+elecsffile,elecsfhisto);
-	ana.getMuonSF()->setInput(cmssw_base+muonsffile,muonsfhisto);
-	ana.getTriggerSF()->setInput(cmssw_base+trigsffile,trigsfhisto);
+	ana.getElecSF()->setInput(elecsffile,elecsfhisto);
+	ana.getMuonSF()->setInput(muonsffile,muonsfhisto);
+	ana.getTriggerSF()->setInput(trigsffile,trigsfhisto);
 	ana.setOutFileAdd(outfileadd);
 	ana.setOutDir(outdir);
 	ana.getBTagSF()->setMakeEff(dobtag);
 	ana.setBTagSFFile(btagfile);
-	ana.getJECUncertainties()->setFile((cmssw_base+jecfile).Data());
+	ana.getJECUncertainties()->setFile((jecfile).Data());
 	if(testmode){
 		ana.getBTagSF()->setMakeEff(true);
 		ana.setBTagSFFile(btagfile+"TESTMODE");
@@ -149,10 +138,10 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
 		ana.getJERAdjuster()->setSystematics("down");
 	}
 	else if(Syst=="PU_up"){
-		ana.getPUReweighter()->setDataTruePUInput((TString)cmssw_base+"/src/TtZAnalysis/Data/"+pufile+"_up.root");
+		ana.getPUReweighter()->setDataTruePUInput(pufile+"_up.root");
 	}
 	else if(Syst=="PU_down"){
-		ana.getPUReweighter()->setDataTruePUInput((TString)cmssw_base+"/src/TtZAnalysis/Data/"+pufile+"_down.root");
+		ana.getPUReweighter()->setDataTruePUInput(pufile+"_down.root");
 	}
 	else if(Syst=="BTAGH_up"){
 		ana.getBTagSF()->setSystematic("heavy up");
@@ -200,10 +189,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
 	}
 
 
-	TString inputfile=channel+"_"+energy+"_"+inputfilewochannel;
-	// TString
-	if(maninputfile!="")
-		inputfile=maninputfile;
+
 	ana.setFileList(inputfile);
 	ana.setSyst(Syst);
 
@@ -215,7 +201,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
 		//create a file outputname_norun that gives a hint that nothing has been done
 		//and check in the sleep loop whether outputname_norun exists
 		//not needed because merging is done by hand after check, now
-		std::cout << "analyse.exe: "<< channel <<"_" << energy <<"_" << Syst << " nothing done - maybe some input strings wrong" << std::endl;
+		std::cout << "analyse "<< channel <<"_" << energy <<"_" << Syst << " nothing done - maybe some input strings wrong" << std::endl;
 	}
 	else{
 		//if PDF var not found make the same file as above
@@ -266,7 +252,7 @@ int main(int argc, char* argv[]){
 	TString channel = getChannel(argc, argv);//-c <chan>
 	TString syst = getSyst(argc, argv);      //-s <syst>
 	TString energy = getEnergy(argc, argv); //-e default 8TeV
-	double lumi=getLumi(argc, argv);        //-l default 19789
+	double lumi=getLumi(argc, argv);        //-l default -1
 	bool dobtag=prepareBTag(argc, argv);    //-b switches on default false
 	TString outfile=getOutFile(argc, argv);  //-o <outfile> should be something like channel_energy_syst.root // only for plots
 	bool status=getShowStatus(argc, argv);    //-S enables default false
