@@ -172,12 +172,12 @@ int main(int argc, char* argv[]){
 	//check if file exists, if yes, assume btags have been recreated and merge
 
 	if(names.size()>0){
-		std::ifstream OutFileTest(("../"+names.at(0)+"_btags.root").Data());
+		std::ifstream OutFileTest((names.at(0)+"_btags.root").Data());
 		if(OutFileTest) { //btags were created
 			cout << "merging btag SF" <<endl;
 
 			for(size_t i=0;i<names.size();i++){
-				TString filename="../"+names.at(i)+"_btags.root";
+				TString filename=names.at(i)+"_btags.root";
 				NTBTagSF temp;
 
 				std::ifstream OutFileTest2(filename.Data());

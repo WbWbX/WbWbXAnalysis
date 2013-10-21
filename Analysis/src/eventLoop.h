@@ -35,7 +35,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 	using namespace std;
 	using namespace ztop;
 
-	//DIRTY HACK needs to go in inputfiles.txt
+
 	bool issignal=issignal_.at(anaid);
 
 	containerStackVector::debug=true;
@@ -247,6 +247,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
 	container1D invmass2(massbins, "dilepton invariant mass step 2", "m_{ll} [GeV]", "N_{evt}");
 	container1D invmass3(massbins, "dilepton invariant mass step 3", "m_{ll} [GeV]", "N_{evt}");
+	vector<float> finemllbins;
+	for(float i=50;i<150;i+=0.5) finemllbins <<i;
+	container1D invmass3fine(finemllbins, "dilepton invariant mass fine step 3", "m_{ll} [GeV]", "N_{evt}");
 	container1D invmass20(massbins, "dilepton invariant mass step 20", "m_{ll} [GeV]", "N_{evt}"); //Z
 	container1D invmass4(massbins, "dilepton invariant mass step 4", "m_{ll} [GeV]", "N_{evt}");
 	container1D invmass5(massbins, "dilepton invariant mass step 5", "m_{ll} [GeV]", "N_{evt}");
@@ -274,6 +277,13 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 	container1D jetpt6(ptbinsfull, "jet pt step 6", "p_{T} [GeV]","N_{jets}");
 	container1D jetpt7(ptbinsfull, "jet pt step 7", "p_{T} [GeV]","N_{jets}");
 	container1D jetpt8(ptbinsfull, "jet pt step 8", "p_{T} [GeV]","N_{jets}");
+
+	container1D leadjetpt3(ptbinsfull, "leading jet pt step 3", "p_{T} [GeV]","N_{jets}");
+	container1D leadjetpt4(ptbinsfull, "leading jet pt step 4", "p_{T} [GeV]","N_{jets}");
+	container1D leadjetpt5(ptbinsfull, "leading jet pt step 5", "p_{T} [GeV]","N_{jets}");
+	container1D leadjetpt6(ptbinsfull, "leading jet pt step 6", "p_{T} [GeV]","N_{jets}");
+	container1D leadjetpt7(ptbinsfull, "leading jet pt step 7", "p_{T} [GeV]","N_{jets}");
+	container1D leadjetpt8(ptbinsfull, "leading jet pt step 8", "p_{T} [GeV]","N_{jets}");
 
 	container1D jeteta3(etabinsjets, "jet eta step 3", "#eta_{jet}","N_{jets}");
 	container1D jeteta4(etabinsjets, "jet eta step 4", "#eta_{jet}","N_{jets}");
@@ -312,14 +322,18 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 	container1D btagmulti8(multibinsbtag, "b-jet multiplicity step 8", "n_{b-tags}", "N_{jets}",true);
 	container1D btagmulti9(multibinsbtag, "b-jet multiplicity step 9", "n_{b-tags}", "N_{jets}",true);
 
+	container1D sumdphiletmet4(dphi_bins, "WARNING sum deltaphi step 4", "#Delta#phi(l_{1},MET)+#Delta#phi(l_{2},MET)","E/bw");
+	container1D sumdphiletmet5(dphi_bins, "WARNING sum deltaphi step 5", "#Delta#phi(l_{1},MET)+#Delta#phi(l_{2},MET)","E/bw");
+	container1D sumdphiletmet6(dphi_bins, "WARNING sum deltaphi step 6", "#Delta#phi(l_{1},MET)+#Delta#phi(l_{2},MET)","E/bw");
+	container1D sumdphiletmet7(dphi_bins, "WARNING sum deltaphi step 7", "#Delta#phi(l_{1},MET)+#Delta#phi(l_{2},MET)","E/bw");
 	container1D sumdphiletmet8(dphi_bins, "WARNING sum deltaphi step 8", "#Delta#phi(l_{1},MET)+#Delta#phi(l_{2},MET)","E/bw");
 	container1D sumdphiletmet9(dphi_bins, "WARNING sum deltaphi step 9", "#Delta#phi(l_{1},MET)+#Delta#phi(l_{2},MET)","E/bw");
 
-	container1D hlt5(ht_bins, "HLT step 5", "H_{T}[GeV]","E/bw");
-	container1D hlt6(ht_bins, "HLT step 6", "H_{T}[GeV]","E/bw");
-	container1D hlt7(ht_bins, "HLT step 7", "H_{T}[GeV]","E/bw");
-	container1D hlt8(ht_bins, "HLT step 8", "H_{T}[GeV]","E/bw");
-	container1D hlt9(ht_bins, "HLT step 9", "H_{T}[GeV]","E/bw");
+	container1D lljt5(ht_bins, "lljt step 5", "llj_{T}[GeV]","E/bw");
+	container1D lljt6(ht_bins, "lljt step 6", "llj_{T}[GeV]","E/bw");
+	container1D lljt7(ht_bins, "lljt step 7", "llj_{T}[GeV]","E/bw");
+	container1D lljt8(ht_bins, "lljt step 8", "llj_{T}[GeV]","E/bw");
+	container1D lljt9(ht_bins, "lljt step 9", "llj_{T}[GeV]","E/bw");
 
 	container1D btagScFs(bsfs, "b-tag event SFs", "SF_{evt}", "N_{evt}",true);
 
@@ -368,10 +382,12 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 	container1DUnfold unf_mlb8(genmlb_bins,mlb_bins,"m_lb unfold step 8","M_{lb} [GeV]", "N_{evt}");
 	container1DUnfold unf_mlb9(genmlb_bins,mlb_bins,"m_lb unfold step 9","M_{lb} [GeV]", "N_{evt}");
 
-	vector<float> inclbins; inclbins << -0.5 << 0.5 << 1.5; //vis PS, fullPS
+	vector<float> inclbins; inclbins << 0.5 << 1.5; //vis PS, fullPS
 
-	container1DUnfold unf_incl8(inclbins,inclbins,"inclusive step 8","vis/Full","N_{evt}");
-	unf_incl8.setBinByBin(true); //independent bins
+	container1DUnfold unf_tot8(inclbins,inclbins,"total step 8","bin","N_{evt}");
+	unf_tot8.setBinByBin(true); //independent bins
+	container1DUnfold unf_vis8(inclbins,inclbins,"visible step 8","bin","N_{evt}");
+	unf_vis8.setBinByBin(true); //independent bins
 
 	container1DUnfold::setAllListedMC(isMC);
 	container1DUnfold::c_makelist=false;
@@ -393,7 +409,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 		norm = lumi_ * norm / genentries;
 		for(size_t i=1;i<=generated.getNBins();i++){
 			generated.setBinContent(i, genentries);
-			generated.setBinError(i, sqrt(genentries));
+			generated.setBinStat(i,sqrt(genentries));
 		}
 		double fgen=0;
 		TTree * tfgen = (TTree*) f->Get("postCutPUInfo/PUTreePostCut");
@@ -401,13 +417,13 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 			fgen=tfgen->GetEntries();
 			for(size_t i=1;i<=generated2.getNBins();i++){
 				generated2.setBinContent(i, fgen);
-				generated2.setBinError(i, sqrt(fgen));
+				generated2.setBinStat(i, sqrt(fgen));
 			}
 		}
 		else{
 			for(size_t i=1;i<=generated.getNBins();i++){
 				generated2.setBinContent(i, genentries);
-				generated2.setBinError(i, sqrt(genentries));
+				generated2.setBinStat(i, sqrt(genentries));
 			}
 		}
 
@@ -415,11 +431,11 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 	else{//not mc
 		for(size_t i=1;i<=generated.getNBins();i++){
 			generated.setBinContent(i, 0);
-			generated.setBinError(i, 0);
+			generated.setBinStat(i, 0);
 		}
 		for(size_t i=1;i<=generated2.getNBins();i++){
 			generated2.setBinContent(i, 0);
-			generated2.setBinError(i, 0);
+			generated2.setBinStat(i, 0);
 		}
 		norm=1;
 	}
@@ -537,6 +553,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 		//if(showstatusbar_) displayStatusBar(entry,nEntries);
 
 
+		container1DUnfold::flushAllListed();
+
 		if((entry +1)* 100 % nEntries <100){
 			int status=(entry+1) * 100 / nEntries;
 			p_status.get(anaid)->pwrite(status);
@@ -566,8 +584,25 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 			b_GenLeptons3->GetEntry(entry);
 			if(pGenLeptons3->size()>1){ //gen info there
 				visPS=false;
-				if(testmode_ && entry==0)
+				if(testmode_ && entry==0){
 					std::cout << "testmode("<< anaid << "): entered signal genInfo part" << std::endl;
+				}
+				bool isDilepton=false;
+				b_GenBHadrons->GetEntry(entry);
+
+				b_GenJets->GetEntry(entry);
+				b_GenLeptons1->GetEntry(entry);
+
+
+				if(pGenLeptons3->size()>1 && testmode_ && false){
+					std::cout
+					<< pGenLeptons3->at(0).pt() << "," << pGenLeptons3->at(0).eta() << " \t"
+					<< pGenLeptons3->at(1).pt() << " " << pGenLeptons3->at(1).eta() << " \n"
+
+					<<std::endl;
+					p_finished.get(anaid)->pwrite(34);
+					return;
+				}
 
 
 				//recreate mother daughter relations?!
@@ -650,8 +685,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 			unf_mlb8.fillGen(mlbgen,puweight);
 			unf_mlb9.fillGen(mlbgen,puweight);
 
-			if(visPS) unf_incl8.fillGen(0,puweight);
-			unf_incl8.fillGen(1,puweight); //fullPS
+			if(visPS) unf_tot8.fillGen(0,puweight);
+			unf_tot8.fillGen(1,puweight); //fullPS
 
 
 		} /// isMC ends
@@ -719,6 +754,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
 
 		size_t mintightmuons=0;
+		if(b_mumu_)
+			mintightmuons=0;
 
 		vector<NTMuon*> kinmuons,idmuons,isomuons,tightmuons,loosemuons;
 		for(size_t i=0;i<pMuons->size();i++){
@@ -956,9 +993,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
 		///////// 20 GeV cut /// STEP 3 ///////////////////
 
-		if(invLepMass < 0)//20)
+		if(invLepMass < 20)
 			continue;
-
 
 
 
@@ -1004,13 +1040,18 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 		adjustedmet.setP4(LorentzVector(nmpx,nmpy,0,sqrt(nmpx*nmpx+nmpy*nmpy)));
 
 
+		double sumdphi=fabs(leadingptlep->phi()-adjustedmet.phi())+fabs(secleadingptlep->phi()-adjustedmet.phi());
+
 
 		//fill container
 
 		for(size_t i=0;i<nolidjets.size();i++){
 			jetpt3.fill( nolidjets.at(i)->pt(),puweight);
 			jeteta3.fill(nolidjets.at(i)->eta(),puweight);
+			if(i < 2)
+				leadjetpt3.fill( nolidjets.at(i)->pt(),puweight);
 		}
+
 
 		for(size_t i=0;i<isoelectrons.size();i++){
 			eleceta3.fill(isoelectrons.at(i)->eta(), puweight);
@@ -1030,6 +1071,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 		metphi3u.fill(pMet->phi(),puweight);
 		metphi3.fill(adjustedmet.phi(), puweight);
 		invmass3.fill(invLepMass,puweight);
+		invmass3fine.fill(invLepMass,puweight);
 		vertexmulti3.fill(pEvent->vertexMulti(),puweight);
 		selection.fill(3,puweight);
 
@@ -1081,6 +1123,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 			for(size_t i=0;i<hardjets.size();i++){
 				jetpt4.fill(hardjets.at(i)->pt(),puweight);
 				jeteta4.fill(hardjets.at(i)->eta(),puweight);
+				if(i < 2)
+					leadjetpt4.fill( nolidjets.at(i)->pt(),puweight);
 			}
 
 			for(size_t i=0;i<isoelectrons.size();i++){
@@ -1096,6 +1140,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 				muoniso4.fill(isomuons.at(i)->isoVal(),puweight);
 			}
 
+			sumdphiletmet4.fill(sumdphi,puweight);
 			invmass4.fill(invLepMass,puweight);
 			vertexmulti4.fill(pEvent->vertexMulti(),puweight);
 			jetmulti4.fill(hardjets.size(),puweight);
@@ -1116,9 +1161,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 		///////////////////// at least one jet cut STEP 5 ////////////
 
 		if(hardjets.size() < 1) continue;
-		double hlt=leadingptlep->pt()+secleadingptlep->pt();
-		for(size_t i=0;i<hardjets.size();i++)
-			hlt+=hardjets[i]->pt();
+		double lljt=leadingptlep->pt()+secleadingptlep->pt();
+		//for(size_t i=0;i<hardjets.size();i++)
+			lljt+=hardjets.at(0)->pt();
 		//ht+=adjustedmet.met();
 
 		if(!Znotemu){
@@ -1126,6 +1171,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 			for(size_t i=0;i<hardjets.size();i++){
 				jetpt5.fill(hardjets.at(i)->pt(),puweight);
 				jeteta5.fill(hardjets.at(i)->eta(),puweight);
+				if(i < 2)
+					leadjetpt5.fill( nolidjets.at(i)->pt(),puweight);
 			}
 
 			for(size_t i=0;i<isoelectrons.size();i++){
@@ -1141,6 +1188,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 				//	muoniso5.fill(isomuons.at(i)->isoVal(),puweight);
 			}
 
+			sumdphiletmet5.fill(sumdphi,puweight);
 			invmass5.fill(invLepMass,puweight);
 			vertexmulti5.fill(pEvent->vertexMulti(),puweight);
 			jetmulti5.fill(hardjets.size(),puweight);
@@ -1149,7 +1197,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 			met5.fill(adjustedmet.met(), puweight);
 			metphi5u.fill(pMet->phi(),puweight);
 			metphi5.fill(adjustedmet.phi(), puweight);
-			hlt5.fill(hlt,puweight);
+			lljt5.fill(lljt,puweight);
 			sel_step[5]+=puweight;
 
 		}
@@ -1162,12 +1210,15 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 		/////////////////////// at least two jets STEP 6 /////////////
 
 		if(hardjets.size() < 2) continue;
+		//if(lljt<180) continue;
 
 		if(!Znotemu){
 
 			for(size_t i=0;i<hardjets.size();i++){
 				jetpt6.fill(hardjets.at(i)->pt(),puweight);
 				jeteta6.fill(hardjets.at(i)->eta(),puweight);
+				if(i < 2)
+					leadjetpt6.fill( nolidjets.at(i)->pt(),puweight);
 			}
 
 			for(size_t i=0;i<isoelectrons.size();i++){
@@ -1183,6 +1234,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 				//	muoniso6.fill(isomuons.at(i)->isoVal(),puweight);
 			}
 
+			sumdphiletmet6.fill(sumdphi,puweight);
 			invmass6.fill(invLepMass,puweight);
 			vertexmulti6.fill(pEvent->vertexMulti(),puweight);
 			jetmulti6.fill(hardjets.size(),puweight);
@@ -1192,7 +1244,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 			metphi6u.fill(pMet->phi(),puweight);
 			metphi6.fill(adjustedmet.phi(), puweight);
 
-			hlt6.fill(hlt,puweight);
+			lljt6.fill(lljt,puweight);
 
 			sel_step[6]+=puweight;
 		}
@@ -1224,6 +1276,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 			for(size_t i=0;i<hardjets.size();i++){
 				jetpt7.fill(hardjets.at(i)->pt(),puweight);
 				jeteta7.fill(hardjets.at(i)->eta(),puweight);
+				if(i < 2)
+					leadjetpt7.fill( nolidjets.at(i)->pt(),puweight);
 			}
 
 			for(size_t i=0;i<isoelectrons.size();i++){
@@ -1239,6 +1293,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 				//	muoniso7.fill(isomuons.at(i)->isoVal(),puweight);
 			}
 
+			sumdphiletmet7.fill(sumdphi,puweight);
 			invmass7.fill(invLepMass,puweight);
 			vertexmulti7.fill(pEvent->vertexMulti(),puweight);
 			jetmulti7.fill(hardjets.size(),puweight);
@@ -1246,7 +1301,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 			met7.fill(adjustedmet.met(), puweight);
 			metphi7.fill(adjustedmet.phi(), puweight);
 			btagmulti7.fill(btaggedjets.size(),puweight);
-			hlt7.fill(hlt,puweight);
+			lljt7.fill(lljt,puweight);
 
 
 			sel_step[7]+=puweight;
@@ -1263,7 +1318,6 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
 		double mlb=(leadingptlep->p4()+btaggedjets.at(0)->p4()).M();
 
-		double sumdphi=fabs(leadingptlep->phi()-adjustedmet.phi())+fabs(secleadingptlep->phi()-adjustedmet.phi());
 
 
 		double bsf=1;//getBTagSF()->getSF(hardjets); // returns 1 for data!!!
@@ -1277,6 +1331,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 			for(size_t i=0;i<hardjets.size();i++){
 				jetpt8.fill(hardjets.at(i)->pt(),puweight);
 				jeteta8.fill(hardjets.at(i)->eta(),puweight);
+				if(i < 2)
+					leadjetpt8.fill( nolidjets.at(i)->pt(),puweight);
 			}
 
 			for(size_t i=0;i<isoelectrons.size();i++){
@@ -1304,12 +1360,13 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 			sel_step[8]+=puweight;
 
 			sumdphiletmet8.fill(sumdphi,puweight);
-			hlt8.fill(hlt,puweight);
+			lljt8.fill(lljt,puweight);
 
 			//mlb8.fill(mlb,puweight);
 			unf_mlb8.fillReco(mlb,puweight);
-			if(visPS) unf_incl8.fillReco(0,puweight);
-			unf_incl8.fillReco(1,puweight);
+
+			unf_vis8.fillReco(1,puweight);
+			unf_tot8.fillReco(1,puweight);
 
 		}
 		if(isZrange){
@@ -1325,7 +1382,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
 			ttfinal_selection9.fill(1,puweight);
 			sumdphiletmet9.fill(sumdphi,puweight);
-			hlt9.fill(hlt,puweight);
+			lljt9.fill(lljt,puweight);
 			unf_mlb9.fillReco(mlb,puweight);
 
 		}
@@ -1333,9 +1390,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 			invmassZ9.fill(invLepMass,puweight);
 		}
 
-
 	}//main event loop ends
 	//if(showstatusbar_)std::cout << std::endl; //for status bar
+	container1DUnfold::flushAllListed();
 
 	if(testmode_ )
 		std::cout << "testmode("<< anaid << "): finished main loop" << std::endl;
@@ -1395,8 +1452,6 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 			}
 		}
 
-		//btagsf_
-
 		csv->addList(legendname,color,norm,legord);
 		if(testmode_ )
 			std::cout << "testmode("<< anaid << "): added 1D List"<< std::endl;
@@ -1439,15 +1494,15 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 		if(btagsf_.makesEff()){
 			ztop::NTBTagSF  btsf;
 			TFile * bsffile;
-			if(!fileExists(btagsffile_.Data())) {
-				bsffile=new TFile(btagsffile_,"RECREATE");
+			if(!fileExists(outdir_+btagsffile_.Data())) {
+				bsffile=new TFile(outdir_+btagsffile_,"RECREATE");
 			}
 			else{
-				bsffile=new TFile(btagsffile_,"READ");
+				bsffile=new TFile(outdir_+btagsffile_,"READ");
 				if(bsffile->Get("stored_objects")){
 					TTree * btt = (TTree*) bsffile->Get("stored_objects");
 					if(btt->GetBranch("allbTagBase")){
-						btsf.readFromTFile(btagsffile_);
+						btsf.readFromTFile(outdir_+btagsffile_);
 						//ztop::NTBTagSF  btsf2=btagsf_ + btsf;
 						btagsf_ = (btagsf_ + btsf); //combine both if sample already exists, couts warning but doesn't change anything
 					}
@@ -1455,7 +1510,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 			}
 			bsffile->Close();
 			delete bsffile;
-			btagsf_.writeToTFile(btagsffile_); //recreates the file
+			btagsf_.writeToTFile(outdir_+btagsffile_); //recreates the file
 
 		}///makes eff
 
