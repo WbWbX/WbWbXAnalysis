@@ -1,16 +1,34 @@
 #!/bin/sh
-cd ..
-eval `scramv1 runtime -sh`
+####
+#
+# run before cloning any usercode (also TtZAnalysis) rep into CMSSW_BASE/src...
+# needs CMS env
+#
+####
+if [[ "${CMSSW_VERSION}" != "CMSSW_5_3_11" && "${CMSSW_VERSION}" != "CMSSW_5_3_12_patch2" ]];
+then
+    echo 'warning! '"$CMSSW_VERSION"' not supported for automatic checkout of pat packages! add them manually!'
+fi
+
 
 cd ${CMSSW_BASE}/src
+
+
+
+if [[ "$CMSSW_VERSION" == "CMSSW_5_3_12_patch2" ]]
+then
+
+git cms-addpkg PhysicsTools/PatAlgos
+git cms-merge-topic cms-analysis-tools:5_3_12_patch2-metUncertainties
+git cms-merge-topic cms-analysis-tools:5_3_12_patch2-newJECs
+git cms-merge-topic cms-analysis-tools:5_3_12_patch2-mvaElIdPatFunction
+
+
+fi
 
 # the things I use from the TopAnalysis code
 #
 
-if [[ "${CMSSW_VERSION}" != "CMSSW_5_3_3_patch3" && "${CMSSW_VERSION}" != "CMSSW_5_3_5" && "${CMSSW_VERSION}" != "CMSSW_5_3_7" && "${CMSSW_VERSION}" != "CMSSW_5_3_11" && "${CMSSW_VERSION}" != "CMSSW_5_3_12_patch2" ]];
-then
-    echo 'warning! '"$CMSSW_VERSION"' not supported for automatic checkout of pat packages! add them manually!'
-fi
 
 if [[ $1 == "SUSY" ]];
 then
@@ -18,38 +36,21 @@ then
     cvs co -d WWAnalysis/SkimStep UserCode/Mangano/WWAnalysis/SkimStep 
 fi
 
+
+echo checking out TtZAnalysis package
+cd ${CMSSW_BASE}/src
+git clone https://github.com/jkiesele/TtZAnalysis.git
+
+#fast hack
+ln -s ${CMSSW_BASE}/src/TtZAnalysis/Tools/TUnfold/libunfold.so ${CMSSW_BASE}/lib/${SCRAM_ARCH}/libunfold.so
+
 ##TopAnalysis package
 cd ${CMSSW_BASE}/src
 git clone https://git.cern.ch/reps/TopAnalysis
 
 
 
-cd ${CMSSW_BASE}/src/TtZAnalysis/Configuration/python/analysis
-ln -s ${CMSSW_BASE}/src/TopAnalysis/Configuration/analysis/diLeptonic/scripts/runallGC.pl runallGC.pl
-ln -s ${CMSSW_BASE}/src/TopAnalysis/Configuration/analysis/diLeptonic/scripts/runallCrab.pl runallCrab.pl
 
-ln -s  ${CMSSW_BASE}/src/TtZAnalysis/Configuration/python/analysis/ReRecoNov2011.json ${CMSSW_BASE}/src/TtZAnalysis/Data/ReRecoNov2011.json
-ln -s  ${CMSSW_BASE}/src/TtZAnalysis/Configuration/python/analysis/HCP.json ${CMSSW_BASE}/src/TtZAnalysis/Data/HCP.json
-
-cd $CMSSW_BASE/src/TtZAnalysis/Data
-ln -s /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/PileUp PileUpJsons
-cd $CMSSW_BASE/src
-
-# get sample files
-
-#echo "adding samplefiles (update from DAS)"
-
-#cd TtZAnalysis/Configuration/python/samples
-#./update_samplefiles2012.sh
-#cd mc
-#./updatemcfiles12.sh
-cd $CMSSW_BASE/src
-
-# the private JEC uncertainties code (standalone) should be obsolete now
-
-#echo "modified JEC Uncertainty utility.."
-
-#cp -r /afs/desy.de/user/k/kiesej/public/code/CondFormats .
 
 
 echo "Electron MVA stuff"
@@ -70,44 +71,6 @@ cd $CMSSW_BASE/src
 #cvs co -r V00-11-17 DPGAnalysis/SiStripTools
 #cvs co -r V00-00-08 DataFormats/TrackerCommon
 #cvs co -r V01-09-05 RecoLocalTracker/SubCollectionProducers
-
-if [[ "$CMSSW_VERSION" == "CMSSW_5_3_3_patch3"  ]]
-then
-
-echo "checking out release V08-09-42 for ${CMSSW_VERSION} "
-
-addpkg DataFormats/PatCandidates       V06-05-06-02
-addpkg PhysicsTools/PatAlgos           V08-09-42
-addpkg PhysicsTools/PatUtils           V03-09-26
-addpkg CommonTools/RecoUtils           V00-00-12
-addpkg CommonTools/RecoAlgos           V00-03-24
-addpkg CommonTools/ParticleFlow        V00-03-16
-addpkg RecoParticleFlow/PFProducer   V15-02-05-01
-addpkg DataFormats/ParticleFlowCandidate   V15-03-04      
-addpkg DataFormats/TrackReco   V10-02-02      
-addpkg DataFormats/VertexReco   V02-00-04 
-
-echo 'checked out release V08-09-42 - check if newest one'
-
-fi
-
-if [[ "$CMSSW_VERSION" == "CMSSW_5_3_5" ]]
-then
-
-echo "checking out pat release V08-09-43 for ${CMSSW_VERSION} "
-
-addpkg DataFormats/PatCandidates V06-05-06-03
-addpkg PhysicsTools/PatAlgos     V08-09-43
-
-fi
-
-if [[ "$CMSSW_VERSION" == "CMSSW_5_3_7" ]]
-then
-
-addpkg DataFormats/PatCandidates V06-05-06-03
-addpkg PhysicsTools/PatAlgos     V08-09-48
-addpkg DataFormats/StdDictionaries V00-02-14
-addpkg FWCore/GuiBrowsers V00-00-70
 
 
 fi
