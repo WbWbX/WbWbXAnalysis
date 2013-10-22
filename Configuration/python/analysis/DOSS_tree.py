@@ -7,7 +7,7 @@ options = VarParsing.VarParsing()
 
 options.register ('is2011',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"is 2011 data/MC")
 options.register ('crab',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"uses crab")
-options.register ('globalTag','START53_V26',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"global tag")
+options.register ('globalTag','START53_V27',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"global tag")
 options.register ('reportEvery',1000,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.int,"report every")
 options.register ('maxEvents',-1,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.int,"maximum events")
 options.register ('skipEvents', 0, VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, "skip N events")
@@ -375,16 +375,16 @@ if isMC:
 
 #### for data ###
 else:
-    ## add extra filter for ECal laser Calib
+   
 
     process.preFilterSequence = cms.Sequence(process.preCutPUInfo *
                                              process.requireRecoLeps)
 
-    if not is2011:
-        process.load('RecoMET.METFilters.ecalLaserCorrFilter_cfi')
-        getattr(process, 'preFilterSequence').replace(process.preCutPUInfo,
-                                                      process.ecalLaserCorrFilter *
-                                                      process.preCutPUInfo)
+#    if not is2011:
+#        process.load('RecoMET.METFilters.ecalLaserCorrFilter_cfi')
+#        getattr(process, 'preFilterSequence').replace(process.preCutPUInfo,
+#                                                      process.ecalLaserCorrFilter *
+#                                                      process.preCutPUInfo)
 
     
     
@@ -416,34 +416,6 @@ process.noscraping = cms.EDFilter(
 ## The iso-based HBHE noise filter ___________________________________________||
 process.load('CommonTools.RecoAlgos.HBHENoiseFilter_cfi')
 
-## The CSC beam halo tight filter ____________________________________________||
-## The tracking failure filter _______________________________________________||
-if not is2011:
-    process.load('RecoMET.METFilters.trackingFailureFilter_cfi')
-    process.load('RecoMET.METAnalyzers.CSCHaloFilter_cfi')
-
-## The HCAL laser filter _____________________________________________________||
-    process.load("RecoMET.METFilters.hcalLaserEventFilter_cfi")
-
-## The ECAL dead cell trigger primitive filter _______________________________||
-    process.load('RecoMET.METFilters.EcalDeadCellTriggerPrimitiveFilter_cfi')
-    process.EcalDeadCellTriggerPrimitiveFilter.tpDigiCollection = cms.InputTag("ecalTPSkimNA")
-
-
-## The EE bad SuperCrystal filter ____________________________________________||
-    process.load('RecoMET.METFilters.eeBadScFilter_cfi')
-
-## The ECAL laser correction filter
-###process.load('RecoMET.METFilters.ecalLaserCorrFilter_cfi')
-## already plugged in before
-
-## The Good vertices collection needed by the tracking failure filter ________||
-process.goodVertices = cms.EDFilter(
-  "VertexSelector",
-  filter = cms.bool(False),
-  src = cms.InputTag("offlinePrimaryVertices"),
-  cut = cms.string("!isFake && ndof > 4 && abs(z) <= 24 && position.rho < 2")
-)
 
 
 
@@ -453,30 +425,16 @@ process.goodVertices = cms.EDFilter(
 if is2011 or not isPrompt:
     process.filtersSeq = cms.Sequence(
         process.primaryVertexFilter *
-        process.goodVertices *
+        #process.goodVertices *
         process.noscraping *
         process.HBHENoiseFilter 
         )
-else:
-    process.filtersSeq = cms.Sequence(
-        process.primaryVertexFilter *
-        process.noscraping *
-        process.HBHENoiseFilter *
-        process.CSCTightHaloFilter *
-        process.hcalLaserEventFilter *
-        process.EcalDeadCellTriggerPrimitiveFilter *
-        process.goodVertices * 
-        process.trackingFailureFilter *
-        process.eeBadScFilter #*
-        #process.ecalLaserCorrFilter * ##is already in prefilterseq... nasty but ok
-        #process.trkPOGFilters
-        )
+
 
 
 
 if isMC:
-    process.filtersSeq = cms.Sequence(process.goodVertices 
-                                      )
+    process.filtersSeq = cms.Sequence()
 
 
 ### if its not signal do some pre filtering:
@@ -522,7 +480,7 @@ else:
 
 
 from PhysicsTools.PatAlgos.tools.pfTools import *
-usePF2PAT(process, runPF2PAT=True, jetAlgo='AK5', runOnMC=isMC, postfix=pfpostfix, jetCorrections=jetCorr, pvCollection=cms.InputTag('goodVertices'),typeIMetCorrections=True) 
+usePF2PAT(process, runPF2PAT=True, jetAlgo='AK5', runOnMC=isMC, postfix=pfpostfix, jetCorrections=jetCorr, pvCollection=cms.InputTag('goodOfflinePrimaryVertices'),typeIMetCorrections=True) 
 
 
 if not is2011:
@@ -854,7 +812,7 @@ else:
 
 
 
-process.PFTree.vertexSrc         = 'goodVertices'
+#process.PFTree.vertexSrc         = 'goodVertices' #use standard
 process.PFTree.metSrc            = 'patMETs'+pfpostfix
 process.PFTree.mvaMetSrc            = 'patMETs'+pfpostfix
 process.PFTree.includeTrigger    = includetrigger
