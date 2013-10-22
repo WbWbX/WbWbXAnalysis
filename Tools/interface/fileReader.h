@@ -17,11 +17,13 @@ namespace ztop{
 
 class fileReader{
 public:
-	fileReader():trim_(" \t"),comment_("#"),delimiter_(","){}
+	fileReader():trim_(" \t"),comment_("#"),delimiter_(","),start_(""),end_(""){}
 	~fileReader(){clear();}
 	void setTrim(const std::string& tr){trim_=tr;}
 	void setComment(const std::string& c){comment_=c;}
 	void setDelimiter(const std::string& d){delimiter_=d;}
+	void setStartMarker(const std::string& d){start_=d;}
+	void setEndMarker(const std::string& d){end_=d;}
 
 	std::string & ltrim(std::string & str) const;
 	std::string & rtrim(std::string & str) const;
@@ -40,11 +42,21 @@ public:
 		return out;
 	}
 
+	std::string getValueString(const std::string &, bool checkdoubles=true);
+
+	template<class T>
+	T getValue(const std::string & str, bool checkdoubles=true){
+		T out;
+		std::stringstream ss(getValueString(str,checkdoubles));
+		ss >> out;
+		return out;
+	}
 
 	void clear(){lines_.clear();}
+	static bool debug;
 
 private:
-	std::string trim_,comment_,delimiter_;
+	std::string trim_,comment_,delimiter_,start_,end_;
 	std::vector<std::vector<std::string> > lines_;
 
 };
@@ -53,6 +65,13 @@ template<>
 bool fileReader::getData<bool>(const size_t &line,const size_t &entry) const{
 	bool out;
 	std::stringstream ss(getData(line).at(entry));
+	ss >> std::boolalpha >> out;
+	return out;
+}
+template<>
+bool fileReader::getValue<bool>(const std::string & str, bool checkdoubles){
+	bool out;
+	std::stringstream ss(getValueString(str,checkdoubles));
 	ss >> std::boolalpha >> out;
 	return out;
 }
