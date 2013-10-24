@@ -20,14 +20,14 @@
 #don't overthread the wn
 export OMP_NUM_THREADS=1
 
-workdir=$CMSSW_BASE/src/TtZAnalysis/Analysis/##WORKDIR##
+workdir=##WORKDIR##
 
 cd $workdir
 
-exec > "stdout_##OUTNAME##.txt" 2>&1
+exec > "stdout/##OUTNAME##.txt" 2>&1
 
 export LD_LIBRARY_PATH=$workdir/lib:$LD_LIBRARY_PATH 
-$workdir/analyse.exe ##PARAMETERS##
+$workdir/analyse ##PARAMETERS##
 
 
 #runthe executable here

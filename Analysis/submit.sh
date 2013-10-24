@@ -1,40 +1,40 @@
 #!/bin/sh
 
 dirname=$1
-dobtag=$2
+addParameters=$2
 
 if [[ $dobtag ]]
 then
-echo "preparing b-efficiencies -> will be safed in channel_energy_syst_btags.root. need to be merged afterwards"
+    echo "preparing b-efficiencies -> will be safed in channel_energy_syst_btags.root. need to be merged afterwards"
 fi
 
 mode="ttxsec";#yet to be implemented
 
-channels=( "ee"
-"mumu"
-"emu"
+channels=( #"ee"
+    "emu"
+    #"mumu"
 );
 systs=("nominal"
-"TRIGGER_up"
-"TRIGGER_down"
-"ELECSF_up"
-"ELECSF_down"
-"MUONSF_up"
-"MUONSF_down"
-"PU_up"
-"PU_down"
-"JER_up"
-"JER_down"
-"JES_up"
-"JES_down"
+    #"TRIGGER_up"
+    #"TRIGGER_down"
+    #"ELECSF_up"
+    #"ELECSF_down"
+    #"MUONSF_up"
+    #"MUONSF_down"
+    #"PU_up"
+    #"PU_down"
+    "JER_up"
+    "JER_down"
+    "JES_up"
+    "JES_down"
 #"BTAGH_up"
 #"BTAGH_down"
 #"BTAGL_up"
 #"BTAGL_down"
-"TT_MATCH_down"
-"TT_MATCH_up"
-"TT_SCALE_down"
-"TT_SCALE_up"
+    "TT_MATCH_down"
+    "TT_MATCH_up"
+    "TT_SCALE_down"
+    "TT_SCALE_up"
 #"Z_MATCH_down"
 #"Z_MATCH_up"
 #"Z_SCALE_down"
@@ -60,31 +60,44 @@ energies=("8TeV"
 
 dir=${dirname}_$(date +%F_%H:%M)__GI #ensure git ignore for these folders
 
+
 echo "running in dir $dir"
 
+analysisDir=$CMSSW_BASE/src/TtZAnalysis/Analysis/
+
+
+cd $analysisDir
+mkdir -p workdir
+cd workdir
 mkdir $dir
 cd $dir
-cp ../submit.sh .
-cp ../analyse.exe .
-cp -r ../lib .
-cp ../*inputfiles.txt .
-cp ../*testfiles.txt .
-cp ../*btags.root .
-cp ../mergeSyst.exe .
+workdir=`pwd`
+cp $analysisDir/submit.sh .
+cp $analysisDir/bin/analyse .
+cp -r $analysisDir/lib .
+cp $analysisDir/*config.txt .
+cp $analysisDir/*btags.root .
 
 mkdir source
 cd source 
-cp ../../src/eventLoop.h .
-cp ../../src/MainAnalyzer.cc .
-cp ../../interface/MainAnalyzer.h .
-cp ../../analyse.C .
-cp ../../mergeSyst.cc .
-cd ..
+cp $analysisDir/src/eventLoop.h .
+cp $analysisDir/src/MainAnalyzer.cc .
+cp $analysisDir/interface/MainAnalyzer.h .
+cp $analysisDir/app_src/analyse.cc .
+
+cd $workdir
 mkdir jobscripts
-workdir=`pwd`
+mkdir stdout
+
+BATCHDIR=$workdir/batch
+
+if [[ $SGE_CELL ]] ;
+then
+    mkdir -p $BATCHDIR
+fi
 
 
-sed -e 's;##WORKDIR##;'${workdir}';g' < ../check_temp.sh > check.sh
+sed -e 's;##WORKDIR##;'${workdir}';g' < $analysisDir/check_temp.sh > check.sh
 chmod +x check.sh
 
 #check wheter running on naf or wgs and do qsub or dirty "&"
@@ -99,25 +112,22 @@ for (( i=0;i<${#channels[@]};i++)); do
 ##here do qsub or dirty &
 	    outname=${channel}_${energy}_${syst};
 	   # array=( "${array[@]}" "jack" )
-	    outnames=( "${outnames[@]}" "${outname}" );
-	    if [[ $dobtag ]] ;
-	    then
-		sed -e "s/##OUTNAME##/${outname}/" -e "s/##PARAMETERS##/-b -c ${channel} -s ${syst} -e ${energy} -m ${mode}/" -e "s/##WORKDIR##/${dir}/" < ../job.sh > jobscripts/${outname}
-	    else
-		sed -e "s/##OUTNAME##/${outname}/" -e "s/##PARAMETERS##/-c ${channel} -s ${syst} -e ${energy} -m ${mode}/" -e "s/##WORKDIR##/${dir}/" < ../job.sh > jobscripts/${outname}
-	    fi
+	    outnames=( "${outnames[@]}" "${outname}" ); 
+	    sed -e "s/##OUTNAME##/${outname}/" -e "s/##PARAMETERS##/-c ${channel} -s ${syst} -e ${energy} -m ${mode} ${addParameters}/" -e "s;##WORKDIR##;${workdir};" < $analysisDir/job.sh > jobscripts/${outname}
 	    chmod +x jobscripts/${outname}
 	    if [[ $SGE_CELL ]] ;
 	    then
-		qsub jobscripts/${outname}
+		cd $BATCHDIR
+		echo qsub $workdir/jobscripts/${outname}
+		cd $workdir
 	    else
 		all=`ps ax | grep -E 'analyse.exe' | wc -l`
-		defunct=`ps ax | grep -E 'analyse.exe' | grep -E 'defunct' | wc -l`
+		defunct=`ps ax | grep -E 'analyse' | grep -E 'defunct' | wc -l`
 		running=`expr $all - $defunct`
 		while [ $running  -gt 10 ]; do
 		    sleep 2;
 		    all=`ps ax | grep -E 'analyse.exe' | wc -l`
-		    defunct=`ps ax | grep -E 'analyse.exe' | grep -E 'defunct' | wc -l`
+		    defunct=`ps ax | grep -E 'analyse' | grep -E 'defunct' | wc -l`
 		    running=`expr $all - $defunct`
 		done
 		echo "starting ${outname}"
