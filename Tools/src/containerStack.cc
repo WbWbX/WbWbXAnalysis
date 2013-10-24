@@ -386,25 +386,20 @@ void containerStack::addErrorStack(const TString & sysname, containerStack error
 				norms_[i]=1;
 				containers_[i].addErrorContainer(sysname,errorstack.containers_[j]);
 			}
-			else if(mode==dim2){
+			if(mode==dim2){
 				errorstack.containers2D_[j] = errorstack.containers2D_[j] * errorstack.norms_[j]; //normalize (in case there is any remultiplication done or something)
 				errorstack.norms_[j]=1;
 				containers2D_[i] = containers2D_[i] * norms_[i];
 				norms_[i]=1;
 				containers2D_[i].addErrorContainer(sysname,errorstack.containers2D_[j]);
 			}
-			else if(mode==unfolddim1){
+			if(mode==unfolddim1){
 				errorstack.containers1DUnfold_[j] = errorstack.containers1DUnfold_[j] * errorstack.norms_[j]; //normalize (in case there is any remultiplication done or something)
 				errorstack.norms_[j]=1;
 				containers1DUnfold_[i] = containers1DUnfold_[i] * norms_[i];
 				norms_[i]=1;
 				containers1DUnfold_[i].addErrorContainer(sysname,errorstack.containers1DUnfold_[j]);
 			}
-			else{
-				std::cout << "containerStack::addErrorStack: no mode for any Stack set! doing nothing!" << std::endl;
-				return;
-			}
-			break;
 		}//legfound
 		/*} */
 		else{ //if(!found)

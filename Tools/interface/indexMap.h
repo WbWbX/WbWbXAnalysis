@@ -39,7 +39,7 @@ public:
 		if(mit!=map_.end())
 			return mit->second;
 		std::cout << "indexMap::getData: out of range" << std::endl;
-		std::out_of_range("indexMap::getData: out of range");
+		throw std::out_of_range("indexMap::getData: out of range");
 		return map_.begin()->second; //just to avoid warnings
 	}
 

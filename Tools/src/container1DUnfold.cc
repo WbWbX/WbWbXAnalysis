@@ -20,14 +20,25 @@ std::vector<container1DUnfold*> container1DUnfold::c_list;
 bool container1DUnfold::c_makelist=false;
 //bool container1DUnfold::printinfo=false;
 
-container1DUnfold::container1DUnfold(): container2D(), xaxis1Dname_(""), yaxis1Dname_(""),tempgen_(TEMPGENDEFAULT),recofill_(true),isMC_(false),flushed_(false),binbybin_(false){
+/*
+ *
+   double tempgen_,tempreco_,tempgenweight_,tempweight_;
+   bool recofill_,genfill_;
+
+   bool isMC_;
+ */
+
+container1DUnfold::container1DUnfold(): container2D(), xaxis1Dname_(""), yaxis1Dname_(""),
+		tempgen_(0),tempreco_(0),tempgenweight_(1),tempweight_(1),recofill_(false),
+		genfill_(false),isMC_(false),flushed_(true),binbybin_(false),lumi_(1){
 	if(c_makelist){
 		c_list.push_back(this);
 	}
 }
 container1DUnfold::container1DUnfold( std::vector<float> genbins, std::vector<float> recobins, TString name,TString xaxisname,TString yaxisname, bool mergeufof):
-												container2D( genbins , recobins , name,xaxisname+"_reco",xaxisname+"_gen",mergeufof), xaxis1Dname_(xaxisname), yaxis1Dname_(yaxisname),
-												tempgen_(TEMPGENDEFAULT),recofill_(true),isMC_(false),flushed_(false),binbybin_(false) {
+														container2D( genbins , recobins , name,xaxisname+"_reco",xaxisname+"_gen",mergeufof), xaxis1Dname_(xaxisname),
+														yaxis1Dname_(yaxisname),tempgen_(0),tempreco_(0),tempgenweight_(1),tempweight_(1),recofill_(false),genfill_(false),
+														isMC_(false),flushed_(true),binbybin_(false),lumi_(1) {
 	//bins are set, containers created, at least conts_[0] exists with all options (binomial, mergeufof etc)
 	gencont_=conts_.at(0);
 	gencont_.clear();
@@ -70,8 +81,8 @@ void container1DUnfold::setBinning(const std::vector<float> & genbins,const std:
 
 void container1DUnfold::removeAllSystematics(){
 	for(size_t i=0;i<conts_.size();i++){
-			conts_.at(i).removeAllSystematics();
-		}
+		conts_.at(i).removeAllSystematics();
+	}
 	recocont_.removeAllSystematics();
 	unfolded_.removeAllSystematics();
 	gencont_.removeAllSystematics();
@@ -377,6 +388,26 @@ TH2D * container1DUnfold::prepareRespMatrix(bool nominal,unsigned int systNumber
 
 }
 
+void container1DUnfold::coutUnfoldedBinContent(size_t bin) const{
+	if(!isBinByBin()){
+		std::cout << "container1DUnfold::coutUnfoldedBinContent: only implemented for bin-by-bin unfolded distributions so far, doing nothing" <<std::endl;
+		return;
+	}
+	if(bin >= unfolded_.getBins().size()){
+		std::cout << "container1DUnfold::coutUnfoldedBinContent: bin out of range, doing nothing" << std::endl;
+		return;
+	}
+	std::cout << "relative background: " <<std::endl;
+	container1D treco=getRecoContainer();
+	bool temp=histoContent::divideStatCorrelated;
+	histoContent::divideStatCorrelated=false;
+	(getBackground()/treco).coutBinContent(bin);
+	histoContent::divideStatCorrelated=temp;
+	std::cout << "unfolded: " <<std::endl;
+	getUnfolded().coutBinContent(bin);
+
+}
+
 ///////////////
 
 void container1DUnfold::flushAllListed(){
@@ -387,6 +418,11 @@ void container1DUnfold::flushAllListed(){
 void container1DUnfold::setAllListedMC(bool ISMC){
 	for(size_t i=0;i<container1DUnfold::c_list.size();i++)
 		container1DUnfold::c_list.at(i)->setMC(ISMC);
+}
+
+void container1DUnfold::setAllListedLumi(double lumi){
+	for(size_t i=0;i<container1DUnfold::c_list.size();i++)
+		container1DUnfold::c_list.at(i)->setLumi(lumi);
 }
 void container1DUnfold::checkAllListed(){
 	for(size_t i=0;i<container1DUnfold::c_list.size();i++)

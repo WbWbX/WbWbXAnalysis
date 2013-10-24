@@ -51,7 +51,10 @@ public:
 	bool getMC(){return isMC_;}
 
 	void setBinByBin(bool bbb);
-	bool isBinByBin(){return binbybin_;}
+	bool isBinByBin() const{return binbybin_;}
+
+	void setLumi(double lumi){lumi_=lumi;}
+	const double& getLumi(){return lumi_;}
 
 	const container1D & getGenContainer() const {return gencont_;}
 	const container1D & getRecoContainer() const {return recocont_;}
@@ -59,6 +62,7 @@ public:
 
 	void setRecoContainer(const container1D &cont);
 	void setBackground(const container1D &cont);
+	void addToBackground(const container1D &cont){setBackground(getBackground()+cont);}
 	container1D getBackground() const;
 
 	/*
@@ -86,7 +90,6 @@ public:
     /**
      * does nothing for data where flushed_ is always true
      */
-    void flush(){if(!flushed_) flushMC();flushed_=true;}
     bool check();
 
     const container1D & getControlPlot() const{return recocont_;}
@@ -103,28 +106,38 @@ public:
 
     TH2D * prepareRespMatrix(bool nominal=true,unsigned int systNumber=0) const;
 
+    // someformat getCovarianceMatrix(size_t syst) { // M_ij = d_i * d_j, d_i= nominal_i-sys_i, i=bin}
+
     static void flushAllListed();
     static void setAllListedMC(bool ISMC);
+    static void setAllListedLumi(double lumi);
     static void checkAllListed();
+
+    void coutUnfoldedBinContent(size_t bin) const;
+
+    void flush();
 
 private:
 
     void fill(const double & xval, const double & yval, const double & weight=1){
     	container2D::fill(xval,yval,weight);
     }
-    void flushMC();
+
 
 
    TString xaxis1Dname_,yaxis1Dname_;
 
    double tempgen_,tempreco_,tempgenweight_,tempweight_;
-   bool recofill_;
+   bool recofill_,genfill_;
 
    bool isMC_;
    bool flushed_;
    bool binbybin_;
 
    container1D gencont_,recocont_,unfolded_,refolded_;
+
+   double lumi_;
+
 /*
    //destructor safe
    unfolder * unfold_;
@@ -137,42 +150,40 @@ private:
 
    std::vector<float> subdivide(const std::vector<float> & bins, size_t div);
 };
-inline void container1DUnfold::flushMC(){ //only for MC
-	if(conts_.size()<1){
-		std::cout << "container1DUnfold::flush: attempt to flush container1DUnfold with no bins - exit" << std::endl;
-		std::exit(EXIT_FAILURE);
-	}
-	gencont_.fill(tempgen_,tempgenweight_);
-	if(recofill_){
+inline void container1DUnfold::flush(){ //only for MC
+	if(flushed_)
+		return;
+
+	if(genfill_)
+		gencont_.fill(tempgen_,tempgenweight_);
+	if(recofill_)
+		recocont_.fill(tempreco_,tempweight_);
+
+	if(genfill_ && !recofill_) //put in Reco UF bins
+		fill(tempgen_,ybins_[1]-100,tempgenweight_);
+	else if(recofill_ && !genfill_) //put in gen underflow bins -> goes to background
+		fill(xbins_[1]-100,tempreco_,tempweight_);
+	else if(genfill_ && recofill_)
 		fill(tempgen_,tempreco_,tempweight_);
-	}
-	else{ //put in UF bin
-		fill(tempgen_,ybins_[0]-100,tempgenweight_);
-	}
+
 	recofill_=false;
+	genfill_=false;
+	flushed_=true;
 }
 
 
 inline void container1DUnfold::fillGen(const double & val, const double & weight){
-	flushed_=false;
-	if(isMC_){
-		if(TEMPGENDEFAULT != tempgen_)
-			flushMC();
 		tempgen_=val;
 		tempgenweight_=weight;
-	}
+		genfill_=true;
+		flushed_=false;
 }
 
 inline void container1DUnfold::fillReco(const double & val, const double & weight){ //fills and resets tempgen_
-	if(isMC_){
 		tempreco_=val;
 		tempweight_=weight;
 		recofill_=true;
-		recocont_.fill(val,weight);
-	}
-	else{
-		recocont_.fill(val,weight);
-	}
+		flushed_=false;
 }
 
 

@@ -27,6 +27,8 @@ public:
 	container1D(float , TString name="",TString xaxisname="",TString yaxisname="", bool mergeufof=false);              //! construct with bin width (for dynamic filling - not yet implemented)
 	container1D(std::vector<float> , TString name="",TString xaxisname="",TString yaxisname="", bool mergeufof=false); //! construct with binning
 	~container1D();
+	container1D(const container1D&);
+	container1D& operator=(const container1D&);
 
 
 	const TString & getName()const{return name_;}
@@ -167,7 +169,7 @@ public:
 	bool hasSameLayers(const container1D&) const;
 	bool hasSameLayerOrdering(const container1D&) const;
 
-
+	void coutBinContent(size_t bin) const;
 
 protected:
 	bool showwarnings_;
@@ -205,14 +207,14 @@ protected:
 	//containerStyle  persstyle_; //only when saving
 
 	TString stripVariation(const TString&) const;
-	double getDominantVariationUp(const TString &,const size_t &) const;
-	double getDominantVariationDown(const TString &,const size_t &) const;
+	double getDominantVariationUp( TString ,const size_t &) const;
+	double getDominantVariationDown( TString ,const size_t &) const;
 
 	double sq(const double&) const; //helper
 
 	void createManualError();
 
-
+	void copyFrom(const container1D&);
 
 };
 

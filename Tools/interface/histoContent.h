@@ -100,6 +100,8 @@ public:
 
 	bool hasSameLayerMap(const histoContent & hc) const{return layermap_==hc.layermap_;}
 
+	static bool debug;
+
 private:
 	histoBins nominal_;
 	std::vector<histoBins> additionalbins_;
@@ -111,6 +113,7 @@ private:
 /**
  * not protected wrt to no range and layer range
  */
+//bool histoContent::debug=false;
 inline histoBin & histoContent::getBin(size_t no,const int &layer){
 	if(layer<0)
 		return nominal_.getBin(no);
@@ -118,10 +121,12 @@ inline histoBin & histoContent::getBin(size_t no,const int &layer){
 		return additionalbins_.at((size_t)layer).getBin(no);
 }
 inline const histoBin & histoContent::getBin(size_t no,const int &layer) const{
-	if(layer<0)
-		return nominal_.getBin(no);
-	else
-		return additionalbins_.at((size_t)layer).getBin(no);
+	if(layer<0){
+		return nominal_.getBin(no);}
+	else{
+		if(debug)
+			std::cout << "histoContent::getBin: getLayer " << layer << " in " << layerSize() << std::endl;
+		return additionalbins_.at((size_t)layer).getBin(no);}
 }
 
 inline void histoContent::setBinContent(const size_t & binno,const double &content,const int &layer){

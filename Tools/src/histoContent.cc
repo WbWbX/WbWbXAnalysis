@@ -30,6 +30,8 @@ bool histoContent::divideStatCorrelated=true;
  */
 bool histoContent::multiplyStatCorrelated=true;
 
+bool histoContent::debug=false;
+
 void histoContent::setOperatorDefaults(){
 	addStatCorrelated=false;
 	subtractStatCorrelated=false;
@@ -66,7 +68,6 @@ void histoContent::clearLayerStat(const int & idx){
  */
 bool histoContent::resizeBins(const size_t & newsize){
 	bool added=nominal_.resize(newsize);
-#pragma omp parallel for
 	for(size_t i=0;i<layerSize();i++)
 		additionalbins_.at(i).resize(newsize);
 	return added;
@@ -100,16 +101,18 @@ size_t histoContent::addLayer(const TString & name){
 
 size_t histoContent::addLayer(const TString & name, const histoBins & histbins){
 	if(nominal_.size() < 1){
-		std::cout << "histoContent::addLayer: first construct! default constructor is not supposed to be used" <<std::endl;
+		std::cout << "histoContent::addLayer(..histoBins): first construct! default constructor is not supposed to be used" <<std::endl;
 		return layerSize();
 	}
 	if(histbins.size() != nominal_.size()){
-		std::cout << "histoContent::addLayer: arguments size does not match. doing nothing" <<std::endl;
+		std::cout << "histoContent::addLayer(..histoBins): arguments size does not match. doing nothing" <<std::endl;
 		return layerSize();
 	}
 	size_t idx=layermap_.getIndex(name);
 
 	if(idx>=layermap_.size()){ //layer does not exist yet
+		if(debug)
+			std::cout << "histoContent::addLayer(..histoBins): adding layer " << name << std::endl;
 		histoBins binning(histbins);
 		binning.setName(name);
 		binning.setLayer(layermap_.size());
@@ -117,7 +120,7 @@ size_t histoContent::addLayer(const TString & name, const histoBins & histbins){
 		return layermap_.push_back(name);
 	}
 	else{
-		std::cout << "histoContent::addLayer: layer that should have been filled externally already exists doing nothing " <<std::endl;
+		std::cout << "histoContent::addLayer(..histoBins): layer that should have been filled externally already exists doing nothing " <<std::endl;
 		return layerSize();
 	}
 	return idx;
@@ -137,15 +140,19 @@ size_t histoContent::addLayerFromNominal(const TString & name, const histoConten
 	size_t idx=layermap_.getIndex(name);
 
 	if(idx>=layermap_.size()){ //layer does not exist yet
+		if(debug)
+			std::cout << "histoContent::addLayerFromNominal: adding layer " << name <<" " << idx << " ";
 		histoBins binning(size());
 		binning.setName(name);
 		binning.setLayer(layermap_.size());
 		additionalbins_.push_back(binning);
 		idx= layermap_.push_back(name);
+		if(debug)
+			std::cout << " at idx: " << idx <<std::endl;
 	}
 	int err=additionalbins_[idx].add(external.nominal_,addStatCorrelated);
 	if(err<0)
-		std::cout << "histoContent::addLayerFromNominal: bining does not match" <<std::endl;
+		std::cout << "histoContent::addLayerFromNominal: binning does not match" <<std::endl;
 	return idx;
 }
 

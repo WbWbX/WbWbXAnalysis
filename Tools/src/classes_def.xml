@@ -4,6 +4,7 @@
   <class name="std::pair<TString,std::vector<double> >"/>
   <class name="std::vector<std::pair<TString,std::vector<double> > >"/>
   <class name="std::vector<long int>"/>
+  <class name="std::vector<int>"/>
        <class name="ztop::histoBin"/>
       <class name="std::vector<ztop::histoBin>"/>
       <class name="ztop::histoBins"/>

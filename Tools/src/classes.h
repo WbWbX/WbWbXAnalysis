@@ -30,6 +30,7 @@ struct dictionary {
 	std::pair<TString,std::vector<double> > jj;
 	std::vector<std::pair<TString,std::vector<double> > > j;
 	std::vector<long int> kl;
+	std::vector<int> klsdsda;
 	ztop::histoBin isaojewd;
 	std::vector<ztop::histoBin> asdqwewq;
 	ztop::histoBins asdkeowd;

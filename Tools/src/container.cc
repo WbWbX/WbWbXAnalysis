@@ -80,6 +80,13 @@ container1D::~container1D(){
 	if(gp_) delete gp_;
 	if(hp_) delete hp_;
 }
+container1D::container1D(const container1D &c){
+	copyFrom(c);
+}
+container1D& container1D::operator=(const container1D& c){
+	copyFrom(c);
+	return *this;
+}
 
 void container1D::setBins(std::vector<float> bins){
 	reset();
@@ -104,6 +111,8 @@ void container1D::setBinWidth(float binwidth){
  */
 void container1D::setBinErrorUp(const size_t& bin, const double &err){
 	if(!manualerror_){
+		if(debug)
+			std::cout << "container1D::setBinErrorUp: creating manual error" <<std::endl;
 		createManualError();}
 	if(bin>=bins_.size()){
 		std::cout << "container1D::setBinErrorUp: bin not existent, doing nothing" << std::endl;
@@ -119,6 +128,8 @@ void container1D::setBinErrorUp(const size_t& bin, const double &err){
  */
 void container1D::setBinErrorDown(const size_t &bin, const double &err){
 	if(!manualerror_){
+		if(debug)
+			std::cout << "container1D::setBinErrorDown: creating manual error" <<std::endl;
 		createManualError();}
 	if(bin>=bins_.size()){
 		std::cout << "container1D::setBinErrorDown: bin not existent, doing nothing" << std::endl;
@@ -132,6 +143,8 @@ void container1D::setBinErrorDown(const size_t &bin, const double &err){
  */
 void container1D::setBinError(const size_t &bin, const double & err){
 	if(!manualerror_){
+		if(debug)
+			std::cout << "container1D::setBinError: creating manual error" <<std::endl;
 		createManualError();}
 	if(bin>=bins_.size()){
 		std::cout << "container1D::setBinError: bin not existent, doing nothing" << std::endl;
@@ -239,7 +252,7 @@ double container1D::getBinErrorUp(const size_t & bin, bool onlystat,const TStrin
 			std::vector<TString> sources;
 			for(size_t i=0;i<contents_.layerSize();i++){ //there might be room for improvement here...
 				if(debug){
-					std::cout << "container1D::getBinErrorUp: checking variation with index: " <<i<<std::endl;
+					std::cout << "container1D::getBinErrorUp: checking variation with index: " <<i<< "("<< contents_.layerSize() << ")"<<std::endl;
 					std::cout << "container1D::getBinErrorUp: stripping variation with name: " <<contents_.getLayerName(i)<<std::endl;
 				}
 				TString source=stripVariation(contents_.getLayerName(i));
@@ -617,8 +630,12 @@ TH1D * container1D::getTH1D(TString name, bool dividebybinwidth, bool onlystat) 
 	if(name=="") name=name_;
 	if(bins_.size() < 2)
 		return 0;
+	if(debug)
+		std::cout << "container1D::getTH1D: bins ok, creating TH1D" <<std::endl;
 	TH1D *  h = new TH1D(name,name,getNBins(),&(bins_.at(1)));
 	double entriessum=0;
+	if(debug)
+		std::cout << "container1D::getTH1D: bins ok, filling TH1D bins" <<std::endl;
 	for(size_t i=0;i<=getNBins()+1;i++){ // 0 underflow, genBins+1 overflow
 		double cont=getBinContent(i);
 		if(dividebybinwidth && i>0 && i<getNBins()+1) cont=cont/getBinWidth(i);
@@ -629,6 +646,9 @@ TH1D * container1D::getTH1D(TString name, bool dividebybinwidth, bool onlystat) 
 		entriessum +=contents_.getBin(i).getEntries();
 	}
 	h->SetEntries(entriessum);
+
+	if(debug)
+		std::cout << "container1D::getTH1D: performing some formatting" <<std::endl;
 	h->GetYaxis()->SetTitleSize(0.06*labelmultiplier_);
 	h->GetYaxis()->SetLabelSize(0.05*labelmultiplier_);
 	h->GetYaxis()->SetTitleOffset(h->GetYaxis()->GetTitleOffset() / labelmultiplier_);
@@ -677,14 +697,14 @@ container1D & container1D::operator = (const TH1D & h){
 		cbins.push_back(h.GetBinLowEdge(bin));
 
 	container1D out(cbins,h.GetName(),h.GetXaxis()->GetTitle(),h.GetYaxis()->GetTitle(),false);
-	*this=out;
+ *this=out;
 	for(int bin=0;bin<=nbins+1;bin++){
 		setBinContent(bin,h.GetBinContent(bin));
 		setBinStat(bin,h.GetBinError(bin));
 	}
 	return *this;
 }
-*/
+ */
 container1D & container1D::import(TH1 * h,bool isbinwidthdivided){
 	int nbins=h->GetNbinsX();
 	std::vector<float> cbins;
@@ -982,7 +1002,8 @@ void container1D::addErrorContainer(const TString & sysname,const container1D & 
 		return;
 	}
 	//add layer with name and fill with content..
-
+	if(debug)
+		std::cout << "container1D::addErrorContainer: " << name_ << std::endl;
 	contents_.addLayerFromNominal(sysname,deviatingContainer.contents_);
 
 }
@@ -1100,33 +1121,61 @@ bool container1D::hasSameLayers(const container1D& cont) const{
 bool container1D::hasSameLayerOrdering(const container1D& cont) const{
 	return contents_.hasSameLayerMap(cont.contents_);
 }
+/**
+ * all systematics
+ */
+void container1D::coutBinContent(size_t bin) const{
+	using namespace std;
+	if(bin>=bins_.size()){
+		cout << "container1D::coutBinContent: "<< bin << " bin out of range" <<endl;
+		return;
+	}
+	double content=getBinContent(bin);
+	cout << "container1D::coutBinContent: bin " << bin << endl;
+	cout << content << " \t+-" << getBinStat(bin) << endl;
+	for(int i=0;i<(int) getSystSize();i++){
+		cout << getSystErrorName(i) << "\t" << getSystError(i,bin)/content * 100 << "% +-";
+		cout	<< getSystErrorStat(i,bin)/content * 100 << "%" << endl;
+	}
+	cout << endl;
+}
 
 //protected
 
 TString container1D::stripVariation(const TString &in) const{
 	TString out=in;
-	out.Resize(in.Last('_'));
+	//out.Resize(in.Last('_'));
+	out.ReplaceAll("_up","");
+	out.ReplaceAll("_down","");
 	return out;
 }
 /**
  * not protected!!
  */
-double container1D::getDominantVariationUp(const TString & sysname, const size_t& bin) const{
+double container1D::getDominantVariationUp( TString  sysname, const size_t& bin) const{ //copy on purpose
 	double up=0,down=0;
 	const double & cont=contents_.getBin(bin).getContent();
 	size_t idx=contents_.getLayerIndex(sysname+"_up");
+	if(idx >= contents_.layerSize())
+		std::cout << "container1D::getDominantVariationUp: serious error: " << sysname << "_up not found" << std::endl;
 	up=contents_.getBin(bin,idx).getContent()-cont;
 	idx=contents_.getLayerIndex(sysname+"_down");
+	if(idx >= contents_.layerSize())
+		std::cout << "container1D::getDominantVariationUp: serious error: " << sysname << "_down not found" << std::endl;
 	down=contents_.getBin(bin,idx).getContent()-cont;
 	if(up>down)down=up;
 	return down;
 }
-double container1D::getDominantVariationDown(const TString & sysname, const size_t& bin) const{
+double container1D::getDominantVariationDown( TString  sysname, const size_t& bin) const{//copy on purpose
 	double up=0,down=0;
 	const double & cont=contents_.getBin(bin).getContent();
 	size_t idx=contents_.getLayerIndex(sysname+"_up");
+	if(idx >= contents_.layerSize())
+		std::cout << "container1D::getDominantVariationDown: serious error: " << sysname << "_up not found" << std::endl;
 	up=contents_.getBin(bin,idx).getContent()-cont;
 	idx=contents_.getLayerIndex(sysname+"_down");
+	if(idx >= contents_.layerSize())
+		std::cout << "container1D::getDominantVariationDown: serious error: " << sysname << "_down not found" << std::endl;
 	down=contents_.getBin(bin,idx).getContent()-cont;
 	if(up<down)down=up;
 	return down;
@@ -1138,6 +1187,8 @@ double container1D::getDominantVariationDown(const TString & sysname, const size
 void container1D::createManualError(){
 	if(manualerror_)
 		return;
+	if(debug)
+		std::cout << "container1D::createManualError..." << std::endl;
 	contents_.removeAdditionalLayers();
 	contents_.addLayer("manual_error_up");
 	contents_.addLayer("manual_error_down");
@@ -1153,6 +1204,25 @@ void container1D::setOperatorDefaults(){
 	histoContent::subtractStatCorrelated=false;
 	histoContent::divideStatCorrelated=true;
 	histoContent::multiplyStatCorrelated=true;
+}
+
+void container1D::copyFrom(const container1D& c){
+	showwarnings_=c.showwarnings_;
+	binwidth_=c.binwidth_;
+	canfilldyn_=c.canfilldyn_;
+	manualerror_=c.manualerror_;
+	bins_=c.bins_;
+	contents_=c.contents_;
+	mergeufof_=c.mergeufof_;
+	wasunderflow_=c.wasunderflow_;
+	wasoverflow_=c.wasoverflow_;
+	divideBinomial_=c.divideBinomial_;
+	name_=c.name_, xname_=c.xname_, yname_=c.yname_;
+	labelmultiplier_=c.labelmultiplier_;
+
+	gp_=0;
+	hp_=0;
+
 }
 
 }//namespace

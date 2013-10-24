@@ -78,7 +78,7 @@ container1D containerUnfolder::binbybinunfold(container1DUnfold & cuf){
 	container1D xsec=smbgrb * effinv;
 	histoContent::multiplyStatCorrelated=temp;
 
-	cuf.setUnfolded(xsec);
+	cuf.setUnfolded(xsec * 1/cuf.getLumi());
 	cuf.setRefolded(cuf.getRecoContainer());
 	return xsec;
 
@@ -205,7 +205,7 @@ container1D containerUnfolder::unfold(/*const*/ container1DUnfold & cuf){
 		refolded.addErrorContainer(cuf.getSystErrorName(sys),sysref,true); //ignoreMCStat=true
 	}
 	//const container1D setter=out;
-	cuf.setUnfolded(out);
+	cuf.setUnfolded(out* 1/cuf.getLumi());
 	cuf.setRefolded(refolded);
 	return out;
 }
