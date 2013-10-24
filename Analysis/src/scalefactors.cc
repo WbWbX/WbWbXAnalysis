@@ -7,6 +7,7 @@
 #include "../interface/scalefactors.h"
 #include "TFile.h"
 #include <cstdlib>
+#include <stdexcept>
 
 namespace ztop{
 /**
@@ -21,13 +22,13 @@ namespace ztop{
 int scalefactors::setInput(TString filename, TString histname){
 	TFile *  f= new TFile(filename, "READ");
 	if(f->IsZombie()){
-		std::cout << "scalefactors::setInput: file " << filename << " not found. exit!" << std::endl;
-		return -1;
+		std::cout << "scalefactors::setInput: file " << filename << " not found.!" << std::endl;
+		throw std::runtime_error("scalefactors::setInput: file not found");
 	}
 	TH1 * ph = (TH1*) f->Get(histname);
 	if(ph->IsZombie()){
 		std::cout << "scalefactors::setInput: histo " << histname << " not found in file " << filename << " exit!" << std::endl;
-		return -2;
+		throw std::runtime_error("scalefactors::setInput: histo not found");
 	}
 	TString classname=ph->ClassName();
 	if(classname.Contains("TH2D")){
@@ -44,7 +45,7 @@ int scalefactors::setInput(TString filename, TString histname){
 	}
 	else{
 		std::cout << "scalefactors::setInput: class of input histo must be TH1D or TH2D" << std::endl;
-		return -3;
+		throw std::runtime_error("scalefactors::setInput: histo wrong format");
 	}
 
 }
@@ -83,6 +84,7 @@ scalefactors::scalefactors(const ztop::scalefactors & rhs){
 	isth2d_= rhs.isth2d_;
 	syst_  = rhs.syst_;
 	isMC_  = rhs.isMC_;
+	rangecheck_  = rhs.rangecheck_;
 	if(isth2d_)
 		h=&th2d_;
 	else

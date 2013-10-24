@@ -12,18 +12,20 @@
 #include "TH2D.h"
 #include "TString.h"
 #include <iostream>
+#include <stdexcept>
 
 namespace ztop{
 
 class scalefactors{
 	public:
-	scalefactors(){syst_=100;h=0;}
+	scalefactors(): h(0), isth2d_(false), isMC_(false), syst_(100), rangecheck_(true){}
 	scalefactors(const scalefactors&);
 	~scalefactors(){}
 
 	int setInput(TString filename, TString histname);
 	int setSystematics(TString updownnom);
 	void setIsMC(bool is){isMC_=is;}
+	void setRangeCheck(bool check){rangecheck_=check;}
 
 	double getScalefactor(double xval,double yval=0);
 
@@ -33,6 +35,7 @@ class scalefactors{
 	TH1 * h;
 	bool isth2d_,isMC_;
 	int syst_;
+	bool rangecheck_;
 
 };
 
@@ -51,8 +54,12 @@ inline double scalefactors::getScalefactor(double xval,double yval){
 
 	Int_t bin=h->FindBin(xval,yval);
 	double content=h->GetBinContent(bin);
-	if(content<0.001){
+	if(content<0.001 && rangecheck_){
 		std::cout << "scalefactors::getScalefactor: scale factor very small ~0. warning\nmaybe ut of range? input was: " << xval<< ","<< yval<< std::endl;
+		throw std::runtime_error("scalefactors::getScalefactor: scale factor very small ~0. maybe ut of range");
+	}
+	if(content<0.001){
+		return 1;
 	}
 	if(syst_>99)
 		return content;
