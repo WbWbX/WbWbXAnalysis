@@ -87,6 +87,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
 	ana.getBTagSF()->setMakeEff(dobtag);
 	ana.setBTagSFFile(btagfile);
 	ana.getJECUncertainties()->setFile((jecfile).Data());
+	ana.getJECUncertainties()->setSystematics("no");
 	if(testmode){
 		ana.getBTagSF()->setMakeEff(true);
 		ana.setBTagSFFile(btagfile+"TESTMODE");

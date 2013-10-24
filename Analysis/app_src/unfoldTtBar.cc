@@ -181,8 +181,10 @@ void unfold(int argc, char* argv[]){
 		if(unfolded.getNBins() < 3){
 			std::cout << "\n\n" << name << std::endl;
 			for(size_t bin=1;bin<=unfolded.getNBins();bin++)
-				unfolded.coutBinContent(bin);
+				//unfolded.coutBinContent(bin);
+				data.coutUnfoldedBinContent(bin); //dangerous
 			std::cout << "\n\n"  << std::endl;
+
 		}
 		if(debug)
 			c->Print(name+"_unfolded.eps");
