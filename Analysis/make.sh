@@ -41,27 +41,20 @@ function compile(){
     g++ -o $LOCBIN/$1 -fopenmp -Wall $ROOTLIBS -L$libdir $linklibs -l${CMSSW_BASE}/src/TtZAnalysis/Tools/TUnfold/libunfold.so $BUILDDIR/$infile.o
 
 }
-function anenv(){
-    test=`echo $PATH | grep ${CMSSW_BASE}/src/TtZAnalysis/Analysis/bin`
-    if [ $test ]
-    then
-	echo env ok
-    else
-	export PATH=${CMSSW_BASE}/src/TtZAnalysis/Analysis/bin:$PATH
-    fi
-}
 
-if [ $1 == "all" ];
-then
+
+#if [ $1 == "all" ];
+#then
     cd $CMSSW_BASE/src/TtZAnalysis/Analysis
     scram b -j12
 
-fi
+#fi
+
 cd $BUILDDIR
 if  [ $1 == "all" ] || [ $1 == "run" ];
 then
 
-    compile analyse;
+    compile analyse
     compile mergeSyst
 
 fi
@@ -76,8 +69,7 @@ fi
 if  [ $1 == "all" ] || [ $1 == "helper" ];
 then
     
-    compile makePlots
+    compile plotCSV
 
 fi
 
-anenv
