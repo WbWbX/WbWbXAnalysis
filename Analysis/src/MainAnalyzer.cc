@@ -37,6 +37,10 @@ MainAnalyzer::MainAnalyzer(){
 	is7TeV_=false;
 	showstatus_=false;
 	onlySummary_=false;
+	filecount_=0;
+	testmode_=false;
+	//showstatusbar_=false;
+	lumi_=0;
 
 }
 
@@ -91,6 +95,9 @@ int MainAnalyzer::start(){
 	///communication stuff...
 
 	size_t filenumber=infiles_.size();
+	std::cout << "Running on files: " <<std::endl;
+	for(size_t i=0;i<infiles_.size();i++)
+		std::cout << infiles_.at(i) <<std::endl;
 
 	//create pipes
 	p_idx.open(filenumber);
@@ -208,6 +215,8 @@ void MainAnalyzer::readFileList(){
 	fileReader fr;
 	fr.setDelimiter(",");
 	fr.setComment("$");
+	fr.setStartMarker("[inputfiles-begin]");
+	fr.setEndMarker("[inputfiles-end]");
 	fr.readFile(filelist_.Data());
 
 	infiles_.clear();
@@ -223,7 +232,7 @@ void MainAnalyzer::readFileList(){
 			sleep(2);
 			continue;
 		}
-		infiles_.push_back   (fr.getData<TString>(line,0));
+		infiles_.push_back   (replaceExtension(fr.getData<TString>(line,0)));
 		legentries_.push_back(fr.getData<TString>(line,1));
 		colz_.push_back      (fr.getData<int>    (line,2));
 		norms_.push_back     (fr.getData<double> (line,3));

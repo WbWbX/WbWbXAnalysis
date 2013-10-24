@@ -106,6 +106,9 @@ public:
   ztop::scalefactors * getElecSF(){return &elecsf_;}
   ztop::scalefactors * getTriggerSF(){return &triggersf_;}
 
+  ztop::scalefactors * getElecEnergySF(){return &elecenergysf_;}
+  ztop::scalefactors * getMuonEnergySF(){return &muonenergysf_;}
+
   MainAnalyzer & operator= (const MainAnalyzer &);
 
   
@@ -144,7 +147,7 @@ private:
   TString btagsffile_;
 
   //for scalefactors provided in THXX format:
-  ztop::scalefactors elecsf_,muonsf_,triggersf_;
+  ztop::scalefactors elecsf_,muonsf_,triggersf_,elecenergysf_,muonenergysf_;
 
 
   //for parallel stuff

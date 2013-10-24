@@ -112,8 +112,20 @@ TString getOutfile(int argc, char* argv[]){
   }
   return out;
 }
+TString getInputfile(int argc, char* argv[]){
+  TString out="";
+  for(int i=1;i<argc;i++){
+    //  std::cout << argv[i] << std::endl;;
+    if (i + 1 != argc){
+      if((TString)argv[i] == "-i")
+	out=(TString)argv[i+1];
+      // std::cout << "outfile " << out << std::endl;
+    }
+  }
+  return out;
+}
 float getLumi(int argc, char* argv[]){
-  double out=19789;
+  double out=-1;
   for(int i=1;i<argc;i++){
     //  std::cout << argv[i] << std::endl;; 
     if (i + 1 != argc){
