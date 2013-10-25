@@ -111,9 +111,11 @@ int main(int argc, char* argv[]){
 
 	for(int i=1;i<argc;i++){
 		if((TString)argv[i] == "-o"){ //output
-			output=(TString)argv[i+1];
-			i++;
+			if(i+1<argc){
+				output=(TString)argv[i+1];
+				i++;}
 			continue;
+
 		}
 		names.push_back(stripRoot((TString)argv[i]));
 	}
@@ -158,9 +160,9 @@ int main(int argc, char* argv[]){
 			ztop::container1DStackVector *outvec=&vnominal.at(i).at(j);
 			if(outvec->getName() =="")//in case energies are not considered
 				continue;
-			outvec->setName(outvec->getName()+output);
+			outvec->setName(outvec->getName()+"_"+output);
 			cout << "writing " << outvec->getName() << endl;
-			outvec->writeAllToTFile(outvec->getName()+output+"_syst.root",true);
+			outvec->writeAllToTFile(outvec->getName()+"_syst.root",true);
 			cout << "syst: " << outvec->getStack(0).getContainer(0).getSystSize() << endl;
 		}
 	}

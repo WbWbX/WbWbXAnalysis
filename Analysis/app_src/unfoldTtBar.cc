@@ -53,17 +53,28 @@ void unfold(int argc, char* argv[]){
 	 * set unfolding options etc.... not yet available
 	 */
 
-	TString out="",in="";
+	TString out="",in="",signal="";
+	bool moreoutput=false;
 	for(int i=1;i<argc;i++){
 		//  std::cout << argv[i] << std::endl;;
-		if (i + 1 != argc){
-			if((TString)argv[i] == "-o"){
+
+		if((TString)argv[i] == "-o"){
+			if (i + 1 != argc){
 				out=(TString)argv[i+1];
 				std::cout << out << std::endl;
 				i++;
 			}
 		}
-		if((TString)argv[i] != "-o"){
+		else if((TString)argv[i] == "-v"){
+			moreoutput=true;
+		}
+		else if((TString)argv[i] == "-v"){
+			if (i + 1 != argc){
+				signal=(TString)argv[i+1];
+				i++;
+			}
+		}
+		else {
 			in=(TString)argv[i];
 			std::cout << in << std::endl;
 		}
@@ -81,6 +92,9 @@ void unfold(int argc, char* argv[]){
 		std::cout << "tree stored_objects not found in input file. exit" << std::endl;
 		return;
 	}
+
+	ztop::containerUnfolder::printinfo = moreoutput;
+
 	TTree * t = (TTree*)f->Get("stored_objects");
 	ztop::containerStackVector *pcsv;
 	TString csvname=in;
@@ -147,17 +161,27 @@ void unfold(int argc, char* argv[]){
 	for(size_t i=0;i<stacknames.size();i++)
 		stacknames.at(i).ReplaceAll(" ", "_");
 
+	///unfolding and output part!!
+	TString outdir="unfolded"+out+"/";
+	system(("mkdir -p unfolded"+out).Data());
+
 	size_t ufsize=datatobeunf.size();
 	//parallel for?!?
-	f = new TFile(outfile,"RECREATE");
+	f = new TFile(outdir+outfile,"RECREATE");
 	f->cd();
 	TTree *outtree= new TTree("stored_objects","stored_objects");
 	ztop::container1D * cpointer=0;
 	outtree->Branch("unfoldedContainers",&cpointer);
-
+	TDirectory * d=0;
 	for(size_t i=0;i<ufsize;i++){
 		TString name=stacknames.at(i);
-
+		TString nameus=name;
+		nameus.ReplaceAll(" ","_");
+		f->cd();
+		d = new TDirectory(nameus,nameus);
+		d->cd();
+		outdir="unfolded/"+nameus+"/";
+		system(("mkdir -p "+outdir).Data());
 		ztop::container1DUnfold & data=datatobeunf[i];
 		ztop::container1DUnfold & check=xchecktobeunf[i];
 		std::cout << "unfolding " << data.getName() << " syst: ";
@@ -187,7 +211,7 @@ void unfold(int argc, char* argv[]){
 
 		}
 		if(debug)
-			c->Print(name+"_unfolded.eps");
+			c->Print(outdir+name+"_unfolded.eps");
 		c->Write();
 		c->Clear();
 		setNameAndTitle(c,name+"_refolded_recoBG");
@@ -197,7 +221,7 @@ void unfold(int argc, char* argv[]){
 		reco.drawFullPlot("",true,"same");
 		data.getBackground().drawFullPlot("",true,"same");
 		if(debug)
-			c->Print(name+"_refolded_recoBG.eps");
+			c->Print(outdir+name+"_refolded_recoBG.eps");
 		c->Write();
 
 		c->Clear();
@@ -211,7 +235,7 @@ void unfold(int argc, char* argv[]){
 		gen->SetMarkerColor(kRed);
 		gen->Draw("same");
 		if(debug)
-			c->Print(name+"_checkUnfoldGen.eps");
+			c->Print(outdir+name+"_checkUnfoldGen.eps");
 		c->Write();
 		c->Clear();
 		setNameAndTitle(c,name+"normalized");
@@ -219,9 +243,9 @@ void unfold(int argc, char* argv[]){
 		gen->DrawNormalized("same");
 		c->Write();
 		if(debug)
-			c->Print(name+"normalized");
+			c->Print(outdir+name+"normalized");
 		delete c;
-		//delete d;
+		delete d;
 	}
 
 	f->Close();
