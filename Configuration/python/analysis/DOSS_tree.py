@@ -81,8 +81,7 @@ isFastSim=options.isFastSim
 debug=options.debug
 isPrompt=options.isPrompt
 
-if susy:
-    isPrompt=True
+
 
 useBHadrons=False #will be changes for top filter sequence!
 
@@ -422,6 +421,8 @@ process.load('CommonTools.RecoAlgos.HBHENoiseFilter_cfi')
 ## The tracking POG filters __________________________________________________||
 #process.load('RecoMET.METFilters.trackingPOGFilters_cff')
 
+process.filtersSeq = cms.Sequence()
+
 if is2011 or not isPrompt:
     process.filtersSeq = cms.Sequence(
         process.primaryVertexFilter *
@@ -429,7 +430,6 @@ if is2011 or not isPrompt:
         process.noscraping *
         process.HBHENoiseFilter 
         )
-
 
 
 
@@ -901,3 +901,6 @@ process.outpath    = cms.EndPath()
 
 print "\nglobal Tag: " + globalTag
 
+if isPrompt:
+    print "prompt reco not supported anymore! exit"
+    exit(8888)
