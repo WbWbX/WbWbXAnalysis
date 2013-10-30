@@ -830,11 +830,15 @@ if isSignal and genFilter=="Top":
     process.PFTree.genJets           = 'ak5GenJetsPlusHadron'
 
 
-# always: if not (includereco or includetrigger):
-process.PFTree.muonSrc = 'kinMuons'
-process.PFTree.elecGSFSrc =  'kinElectrons'
-process.PFTree.elecPFSrc =  'kinPFElectrons'
+if not includereco:
+    process.PFTree.muonSrc = 'kinMuons'
+    process.PFTree.elecGSFSrc =  'kinElectrons'
+    process.PFTree.elecPFSrc =  'kinPFElectrons'
 
+if includereco:
+    process.PFTree.muonSrc = 'patMuonsWithTrigger'
+    process.PFTree.elecGSFSrc =  'patGSFElectronsWithTrigger'
+    process.PFTree.elecPFSrc =  'patPFElectronsWithTrigger'
 
 
 
