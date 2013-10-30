@@ -193,7 +193,31 @@ void rescaleDY(ztop::container1DStackVector * vec, std::vector<TString> contribu
 
 }
 
+namespace ztop{
 
+template <class T>
+std::vector<T> subdivide(const std::vector<T> & bins, size_t div){
+	std::vector<T> out;
+	for(size_t i=0;i<bins.size()-1;i++){
+		float width=bins.at(i+1)-bins.at(i);
+		if((int)i<(int)bins.size()-2){
+			for(size_t j=0;j<div;j++)
+				out.push_back(bins.at(i)+j*width/div);
+		}
+		else{
+			for(size_t j=0;j<=div;j++)
+				out.push_back(bins.at(i)+j*width/div);
+		}
+	}
+	return out;
+}
+
+template <class T>
+bool comparePt(T a, T b){
+	return (a->pt() < b->pt());
+}
+
+}
 
 
 #endif
