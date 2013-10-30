@@ -11,7 +11,7 @@
 #include "scalefactors.h"
 #include <cstdlib>
 
-
+namespace ztop{class NTEvent;}
 
 ///// now available: removeContribution; use it to run on the systematics etc (only signal) or pdf stuff (remove nominal,for(i) add pdf[i], xsec, remove pdf[i])
 
@@ -112,6 +112,10 @@ public:
   MainAnalyzer & operator= (const MainAnalyzer &);
 
   
+  ///analysis helper functions
+
+  bool checkTrigger(std::vector<bool> * ,ztop::NTEvent * , bool , size_t);
+
 
 private:
 

@@ -23,6 +23,7 @@ namespace ztop{
     //sets
     void setNotConv(bool IsNotConv){isNotConv_=IsNotConv;}
     void setECalP4(LorentzVector ECalp4){ecalp4_=ECalp4;}
+    void setECalP4(PolarLorentzVector ECalp4){ecalp4_=ECalp4;}
     void setId(std::vector<std::pair<std::string,float> > Ids , bool keepMvaOnly=true){
 
       ids_=Ids;
