@@ -327,6 +327,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 	container1D secjetpt7(ptbinsfull, "2nd leading jet pt step 7", "p_{T} [GeV]","N_{jets}");
 	container1D secjetpt8(ptbinsfull, "2nd leading jet pt step 8", "p_{T} [GeV]","N_{jets}");
 
+
+	container1D bjetpt8(ptbinsfull, "b-jet pt step 8", "p_{T} [GeV]","N_{jets}");
+
 	container1D jeteta3(etabinsjets, "jet eta step 3", "#eta_{jet}","N_{jets}");
 	container1D jeteta4(etabinsjets, "jet eta step 4", "#eta_{jet}","N_{jets}");
 	container1D jeteta5(etabinsjets, "jet eta step 5", "#eta_{jet}","N_{jets}");
@@ -704,16 +707,18 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
 				}
 				PolarLorentzVector p4genbjet;
+				vector<NTGenJet *> genbjets;;
 				for(size_t i=0;i<pGenJets->size();i++){
 					NTGenJet * genjet=&pGenJets->at(i);
 					if(genjet->motherIts().size()>0){
 						int motherid=genjet->motherIts().at(0);
 						if(-1<isIn(motherid,bhadids)){
-							p4genbjet = genjet->p4();
-							break;
+							genbjets << genjet;
 						}
 					}
 				}
+				if(genbjets.size()>0)
+					p4genbjet=genbjets.at(0)->p4();
 
 				if(pGenLeptons1->size() > 1){ ///
 					PolarLorentzVector p4leadinglep=pGenLeptons1->at(0).p4();
@@ -1465,6 +1470,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 			//mlb8.fill(mlb,puweight);
 			unf_mlb8.fillReco(mlb,puweight);
 
+			bjetpt8.fill(btaggedjets.at(0)->pt(),puweight);
 
 			unf_tot8.fillReco(1,puweight);
 
