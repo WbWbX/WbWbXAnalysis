@@ -9,6 +9,7 @@
 #define EVENTLOOP_H_
 #include "../interface/MainAnalyzer.h"
 #include "../interface/AnalysisUtils.h"
+#include "../interface/NTFullEvent.h"
 
 #include "TtZAnalysis/DataFormats/interface/NTLepton.h"
 #include "TtZAnalysis/DataFormats/interface/NTMuon.h"
@@ -241,21 +242,27 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 	container1D muonmember03(multibinsvertx, "muon member 0 step 3", "m_{0}", "N_{#mu}");
 
 
-	container1D leadLeppt(ptbinsfull, "leadLep pt step 0", "p_{T} [GeV]", "N_{#mu}");
-	container1D leadLeppt3(ptbinsfull, "leadLep pt step 3", "p_{T} [GeV]", "N_{#mu}");
-	container1D leadLeppt4(ptbinsfull, "leadLep pt step 4", "p_{T} [GeV]", "N_{#mu}");
-	container1D leadLeppt5(ptbinsfull, "leadLep pt step 5", "p_{T} [GeV]", "N_{#mu}");
-	container1D leadLeppt6(ptbinsfull, "leadLep pt step 6", "p_{T} [GeV]", "N_{#mu}");
-	container1D leadLeppt7(ptbinsfull, "leadLep pt step 7", "p_{T} [GeV]", "N_{#mu}");
-	container1D leadLeppt8(ptbinsfull, "leadLep pt step 8", "p_{T} [GeV]", "N_{#mu}");
+	container1D leadLeppt(ptbinsfull, "leadLep pt step 0", "p_{T} [GeV]", "N_{l}");
+	container1D leadLeppt3(ptbinsfull, "leadLep pt step 3", "p_{T} [GeV]", "N_{l}");
+	container1D leadLeppt4(ptbinsfull, "leadLep pt step 4", "p_{T} [GeV]", "N_{l}");
+	container1D leadLeppt5(ptbinsfull, "leadLep pt step 5", "p_{T} [GeV]", "N_{l}");
+	container1D leadLeppt6(ptbinsfull, "leadLep pt step 6", "p_{T} [GeV]", "N_{l}");
+	container1D leadLeppt7(ptbinsfull, "leadLep pt step 7", "p_{T} [GeV]", "N_{l}");
+	container1D leadLeppt8(ptbinsfull, "leadLep pt step 8", "p_{T} [GeV]", "N_{l}");
 
-	container1D secleadLeppt(ptbinsfull, "secLeadLep pt step 0", "p_{T} [GeV]", "N_{#mu}");
-	container1D secLeadLeppt3(ptbinsfull, "secLeadLep pt step 3", "p_{T} [GeV]", "N_{#mu}");
-	container1D secLeadLeppt4(ptbinsfull, "secLeadLep pt step 4", "p_{T} [GeV]", "N_{#mu}");
-	container1D secLeadLeppt5(ptbinsfull, "secLeadLep pt step 5", "p_{T} [GeV]", "N_{#mu}");
-	container1D secLeadLeppt6(ptbinsfull, "secLeadLep pt step 6", "p_{T} [GeV]", "N_{#mu}");
-	container1D secLeadLeppt7(ptbinsfull, "secLeadLep pt step 7", "p_{T} [GeV]", "N_{#mu}");
-	container1D secLeadLeppt8(ptbinsfull, "secLeadLep pt step 8", "p_{T} [GeV]", "N_{#mu}");
+	container1D secleadLeppt(ptbinsfull, "secLeadLep pt step 0", "p_{T} [GeV]", "N_{l}");
+	container1D secLeadLeppt3(ptbinsfull, "secLeadLep pt step 3", "p_{T} [GeV]", "N_{l}");
+	container1D secLeadLeppt4(ptbinsfull, "secLeadLep pt step 4", "p_{T} [GeV]", "N_{l}");
+	container1D secLeadLeppt5(ptbinsfull, "secLeadLep pt step 5", "p_{T} [GeV]", "N_{l}");
+	container1D secLeadLeppt6(ptbinsfull, "secLeadLep pt step 6", "p_{T} [GeV]", "N_{l}");
+	container1D secLeadLeppt7(ptbinsfull, "secLeadLep pt step 7", "p_{T} [GeV]", "N_{l}");
+	container1D secLeadLeppt8(ptbinsfull, "secLeadLep pt step 8", "p_{T} [GeV]", "N_{l}");
+
+	vector<float> lepd0V_bins;
+	for(float i=0;i<0.01;i+=0.0005) lepd0V_bins<<i;
+	container1D lepd0V3(lepd0V_bins, "lept d0V step 3", "d0V [cm]", "N_{l}");
+	container1D lepd0V4(lepd0V_bins, "lept d0V step 4", "d0V [cm]", "N_{l}");
+	container1D lepd0V8(lepd0V_bins, "lept d0V step 8", "d0V [cm]", "N_{l}");
 
 	vector<float> samesignbins;
 	samesignbins << -0.5 << 0.5 << 1.5 << 2.5;
@@ -327,6 +334,23 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 	container1D secjetpt7(ptbinsfull, "2nd leading jet pt step 7", "p_{T} [GeV]","N_{jets}");
 	container1D secjetpt8(ptbinsfull, "2nd leading jet pt step 8", "p_{T} [GeV]","N_{jets}");
 
+	std::vector<float> jetratio_bins;
+	for(float i=0;i<10;i+=0.3) jetratio_bins<<i;
+
+	container1D jetratio3(jetratio_bins, "1st/2nd leading jet pt step 3", "p_{T}/p_{T}","N_{jets}");
+	container1D jetratio4(jetratio_bins, "1st/2nd leading jet pt step 4", "p_{T}/p_{T}","N_{jets}");
+	container1D jetratio5(jetratio_bins, "1st/2nd leading jet pt step 5", "p_{T}/p_{T}","N_{jets}");
+	container1D jetratio6(jetratio_bins, "1st/2nd leading jet pt step 6", "p_{T}/p_{T}","N_{jets}");
+	container1D jetratio7(jetratio_bins, "1st/2nd leading jet pt step 6", "p_{T}/p_{T}","N_{jets}");
+	container1D jetratio8(jetratio_bins, "1st/2nd leading jet pt step 6", "p_{T}/p_{T}","N_{jets}");
+
+	std::vector<float> jetbtag_bins;
+	for(float i=0;i<1;i+=0.05)jetbtag_bins<<i;
+
+	container1D jetbtag5(jetbtag_bins, "leading jet btag step 5", "p_{T}/p_{T}","N_{jets}");
+	container1D jetbtag6(jetbtag_bins, "leading jet btag step 6", "p_{T}/p_{T}","N_{jets}");
+	container1D jetbtag7(jetbtag_bins, "leading jet btag step 7", "p_{T}/p_{T}","N_{jets}");
+	container1D jetbtag8(jetbtag_bins, "leading jet btag step 8", "p_{T}/p_{T}","N_{jets}");
 
 	container1D bjetpt8(ptbinsfull, "b-jet pt step 8", "p_{T} [GeV]","N_{jets}");
 
@@ -610,7 +634,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
 	Long64_t nEntries=t->GetEntries();
 	if(norm==0) nEntries=0; //skip for norm0
-	if(testmode_) nEntries*=0.05;
+	if(testmode_) nEntries*=0.03;
 	for(Long64_t entry=0;entry<nEntries;entry++){
 		//if(showstatusbar_) displayStatusBar(entry,nEntries);
 
@@ -1094,7 +1118,12 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 		double nmpy=pMet->p4().Py() + dpy;
 		adjustedmet.setP4(LorentzVector(nmpx,nmpy,0,sqrt(nmpx*nmpx+nmpy*nmpy)));
 
+		double jetptratio=0;
+		if(nolidjets.size()>1){
+			jetptratio=nolidjets.at(0)->pt()/nolidjets.at(1)->pt();
+		}
 
+		jetratio3.fill(jetptratio,puweight);
 		//double sumdphi=fabs(leadingptlep->phi()-adjustedmet.phi())+fabs(secleadingptlep->phi()-adjustedmet.phi());
 
 
@@ -1124,7 +1153,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 		}
 		leadLeppt3.fill(leadingptlep->pt(),puweight);
 		secLeadLeppt3.fill(secleadingptlep->pt(),puweight);
-
+		lepd0V3.fill(leadingptlep->d0V(),puweight);
+		lepd0V3.fill(secleadingptlep->d0V(),puweight);
 
 		met3u.fill(pMet->met(),puweight);
 		met3.fill(adjustedmet.met(), puweight);
@@ -1204,6 +1234,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
 			leadLeppt4.fill(leadingptlep->pt(),puweight);
 			secLeadLeppt4.fill(secleadingptlep->pt(),puweight);
+			lepd0V4.fill(leadingptlep->d0V(),puweight);
+			lepd0V4.fill(secleadingptlep->d0V(),puweight);
 
 			//sumdphiletmet4.fill(sumdphi,puweight);
 			invmass4.fill(invLepMass,puweight);
@@ -1215,6 +1247,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 			metphi4u.fill(pMet->phi(),puweight);
 			metphi4.fill(adjustedmet.phi(), puweight);
 
+			jetratio4.fill(jetptratio,puweight);
 			sel_step[4]+=puweight;
 
 		}
@@ -1229,6 +1262,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 		double lljt=leadingptlep->pt()+secleadingptlep->pt();
 		//for(size_t i=0;i<hardjets.size();i++)
 		lljt+=hardjets.at(0)->pt();
+		double leadingjetbtag=hardjets.at(0)->btag();
 		//ht+=adjustedmet.met();
 		double mllj=0;
 		double phijl=0,phijll=0;;
@@ -1279,6 +1313,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 			phijl5.fill(phijl,puweight);
 			phijll5.fill(phijll,puweight);
 
+
+			jetratio5.fill(jetptratio,puweight);
+			jetbtag5.fill(leadingjetbtag,puweight);
 			sel_step[5]+=puweight;
 
 		}
@@ -1290,8 +1327,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
 		/////////////////////// at least two jets STEP 6 /////////////
 
-		if(hardjets.size() < 2) continue;
+		//if(hardjets.size() < 2) continue;
 		//if(lljt<140) continue;
+		//if(phijll > 2.65 && phijll < 3.55) continue;
 
 		if(!Znotemu){
 
@@ -1335,6 +1373,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 			phijl6.fill(phijl,puweight);
 			phijll6.fill(phijll,puweight);
 
+			jetratio6.fill(jetptratio,puweight);
+			jetbtag6.fill(leadingjetbtag,puweight);
 			sel_step[6]+=puweight;
 		}
 		if(isZrange){
@@ -1401,6 +1441,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 			phijll7.fill(phijll,puweight);
 
 
+			jetratio7.fill(jetptratio,puweight);
+			jetbtag7.fill(leadingjetbtag,puweight);
 			sel_step[7]+=puweight;
 		}
 		if(isZrange){
@@ -1449,6 +1491,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
 			leadLeppt8.fill(leadingptlep->pt(),puweight);
 			secLeadLeppt8.fill(secleadingptlep->pt(),puweight);
+			lepd0V8.fill(leadingptlep->d0V(),puweight);
+			lepd0V8.fill(secleadingptlep->d0V(),puweight);
 
 			invmass8.fill(invLepMass,puweight);
 			vertexmulti8.fill(pEvent->vertexMulti(),puweight);
@@ -1472,6 +1516,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
 			bjetpt8.fill(btaggedjets.at(0)->pt(),puweight);
 
+			jetratio8.fill(jetptratio,puweight);
+			jetbtag8.fill(leadingjetbtag,puweight);
 			unf_tot8.fillReco(1,puweight);
 
 		}
