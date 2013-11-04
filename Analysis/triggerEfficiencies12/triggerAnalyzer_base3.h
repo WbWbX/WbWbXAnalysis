@@ -92,6 +92,13 @@ public:
 		selectionstep_=0;
 
 		globalDen_=0;
+
+		tempp0_=0;
+		tempp1_=0;
+		tempp2_=0;
+		tempp3_=0;
+
+		mcpufile_="";
 		//  std::cout << "Don't forget to check if all trigger Prescales are 1. If they are its either MC or an error in prescaletable. then use the one from event before or skip event - maybe checking one known prescale is sufficient" << std::endl;
 
 	}
@@ -122,7 +129,8 @@ public:
 
 	TString getModeS(){if(mode_==-1) return "ee";if(mode_==0) return "emu";else return "mumu";}
 
-	void setPUFile(TString file){pufile_=file;};
+	void setPUFile(TString file){pufile_=file;}
+	void setMCPUFile(TString file){mcpufile_=file;}
 
 	void setIncludeCorr(bool inc){includecorr_=inc;}
 
@@ -353,7 +361,12 @@ public:
 
 		PUReweighter PUweight;
 		if(isMC_) PUweight.setDataTruePUInput(datapileup);
-		if(isMC_)PUweight.setMCDistrSum12();
+		if(isMC_ && mcpufile_==""){
+			PUweight.setMCDistrSum12();
+		}
+		else if(isMC_ && mcpufile_!=""){
+			PUweight.setMCTruePUInput(mcpufile_.Data());
+		}
 
 		vector<NTMuon> * pMuons = 0;
 		t_->SetBranchAddress("NTMuons",&pMuons);//, &b_NTMuons);
@@ -387,11 +400,20 @@ public:
 			}
 			else{
 				cout << "Branch " << "NTTriggerObjects_"+(TString)trigsObj_.at(i) 
-				     << " not found\n    will be ignored" << endl;
+				    				 << " not found\n    will be ignored" << endl;
 				invalidbranches << i;
 			}
 		}
-		
+
+		std::vector<double> * pStopMass=0;
+		std::vector<double> * pChiMass=0;
+		//try to get SUSY branches
+		if(t_->GetBranch("StopMass")){
+			t_->SetBranchAddress("StopMass",&pStopMass);
+			t_->SetBranchAddress("ChiMass",&pChiMass);
+		}
+
+
 		pair<string,double> dilepton("dilepton", 0);
 		pair<string,double> ZVeto   ("ZVeto   ", 0);
 		pair<string,double> oneJet  ("oneJet  ", 0);
@@ -437,10 +459,16 @@ public:
 		cout  << "Entries in tree: " << n ;
 
 
-		if(testmode)
-			n*=0.001;
+		if(testmode){
+			n*=0.01;
+			cout  << " reduced to: " << n;
+		}
 		if(lowMCStat && isMC_){
-			n*=0.1;
+			n*=0.01;
+			cout  << " reduced to: " << n;
+		}
+		if(lowDataStat && !isMC_){
+			n*=0.001;
 			cout  << " reduced to: " << n;
 		}
 		cout << std::endl;
@@ -461,6 +489,10 @@ public:
 
 
 			t_->GetEntry(i);
+
+			tempp0_=pStopMass;
+			tempp1_=pChiMass;
+
 			if(testmode && i<2)
 				std::cout << "got entry "<<i << std::endl;
 
@@ -470,6 +502,7 @@ public:
 
 			double puweight=1;
 			if(isMC_) puweight=PUweight.getPUweight(pEvent->truePU());
+			//puweight=1;
 
 			if(mode_>0.1 && pMuons->size()<2) continue;
 
@@ -501,9 +534,13 @@ public:
 			for(std::map<std::string, unsigned int>::iterator trigP=pTriggersWithPrescales->begin();trigP!=pTriggersWithPrescales->end();++trigP){
 				const string * name= &(trigP->first);
 
+				/*if(std::find(dileptriggers.begin(),dileptriggers.end(),*name) !=  dileptriggers.end())
+					firedDilepTrigger=true; */
 				//check dilepton trigger
+
 				for(unsigned int ctrig=0;ctrig<dileptriggers.size(); ctrig++){
-					if(name->find(dileptriggers.at(ctrig))!=string::npos){
+					if(name->find(dileptriggers.at(ctrig))!=string::npos && (name->size()-dileptriggers.at(ctrig).size()) < 5){ //allow something like "_v10"
+						//if(*name == dileptriggers.at(ctrig)){
 						firedDilepTrigger=true;
 						break;
 					}
@@ -1122,7 +1159,7 @@ public:
 
 
 	static bool testmode;
-	static bool lowMCStat;
+	static bool lowMCStat,lowDataStat;
 
 protected:
 	std::vector<float> binseta_;
@@ -1145,7 +1182,7 @@ protected:
 	bool coutalltriggerpaths_;
 	bool includecorr_;
 	int mode_; // -1: ee 0: emu 1:mumu
-	TString pufile_;
+	TString pufile_,mcpufile_;
 	bool prescaleweight_;
 	int selectionstep_;
 
@@ -1160,6 +1197,11 @@ protected:
 	double globalDen_;
 	vector<double> storedOut_;
 	unsigned int prescaleCutHigh_;
+
+	std::vector<double>  *tempp0_;
+	std::vector<double>  *tempp1_;
+	std::vector<double>  *tempp2_;
+	std::vector<double>  *tempp3_;
 
 };
 
@@ -1422,5 +1464,6 @@ void analyzeAll(triggerAnalyzer &ta_eed, triggerAnalyzer &ta_eeMC, triggerAnalyz
 
 bool triggerAnalyzer::testmode=false;
 bool triggerAnalyzer::lowMCStat=false;
+bool triggerAnalyzer::lowDataStat=false;
 
 #endif

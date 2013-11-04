@@ -11,8 +11,9 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
   using namespace ztop;
 
   std::vector<ztop::NTElectron* > tempelecs;
-  std::vector<ztop::NTMuon* > tempmuons;
+  std::vector<ztop::NTMuon* > tempmuons,centralmuons;
   std::vector<ztop::NTMuon* > globalmuons;
+
 
   for(size_t i=0;i<inputMuons->size();i++){
 	  ztop::NTMuon * muon = &inputMuons->at(i);
@@ -25,6 +26,8 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
 	  if(!(muon->isGlobal() || muon->isTracker())) continue;
 	  if(fabs(muon->isoVal()) > 0.15) continue;
 	  tempmuons << muon;
+	  if(fabs(muon->eta()) > 2.1) continue;
+	  centralmuons <<muon;
   }
 
  
@@ -60,11 +63,12 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
   else if(mode_==0){ //emu
     if(selectedElecs_.size() < 1 || selectedMuons_.size() <1) return 0;
     mass=(selectedElecs_.at(0)->p4() + selectedMuons_.at(0)->p4()).M();
-   
+    if(fabs(selectedMuons_.at(0)->eta()) > 2.1) return 0;
   }
   else{ //mumu
     if(selectedMuons_.size() <2) return 0;
     mass=(selectedMuons_.at(0)->p4() + selectedMuons_.at(1)->p4()).M();
+    if(fabs(selectedMuons_.at(0)->eta()) > 2.1 && fabs(selectedMuons_.at(1)->eta()) > 2.1) return 0;
   }
 
   
@@ -87,7 +91,7 @@ void trigger_007(){
   binsmumueta << -2.4 << -2.1 << -1.2 << -0.9 << 0.9 << 1.2 << 2.1 << 2.4;
   bins2dmumu << 0 << 0.9 << 1.2 << 2.1 << 2.4;
   bins2dee <<0 << 1.47 << 2.4;
-  bins2dmue << 0 << 1.2 << 2.1 ;
+  bins2dmue << 0 << 1.2 << 2.1 << 2.4;
 
 
 
@@ -137,12 +141,14 @@ void trigger_007(){
 
   
 
-  TString dir="/scratch/hh/dust/naf/cms/user/kieseler/trees_PS_trig_03/";
-
+  TString dir= "/scratch/hh/dust/naf/cms/user/kieseler/trees_ES_Jul13/";
+    //"/scratch/hh/dust/naf/cms/user/kieseler/trees_PS_trig_03/";
   TString cmssw_base=getenv("CMSSW_BASE");
-  TString PURunA = cmssw_base+"/src/TtZAnalysis/Data/RunAComp.json.txt_PU.root";
-  TString PURunB = cmssw_base+"/src/TtZAnalysis/Data/RunB13Jul.json.txt_PU.root";
-    TString PURunAB = cmssw_base+"/src/TtZAnalysis/Data/RunABComp_PU.root";
+  TString PURunA = cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13RunA.json.txt_PU.root";
+//cmssw_base+"/src/TtZAnalysis/Data/RunAComp.json.txt_PU.root";
+  TString PURunB = cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13RunB.json.txt_PU.root";
+//cmssw_base+"/src/TtZAnalysis/Data/RunB13Jul.json.txt_PU.root";
+    TString PURunAB = cmssw_base+"/src/TtZAnalysis/Data/RunABComp_PU.root NOTUSE";
   TString PURunC = cmssw_base+"/src/TtZAnalysis/Data/RunCComp.json.txt_PU.root";
   TString PURunD = cmssw_base+"/src/TtZAnalysis/Data/RunDprompt.json.txt_PU.root";
 
@@ -160,29 +166,31 @@ void trigger_007(){
   emumcfiles << dir+"tree_8TeV_emuttbar.root" 
 	     << dir+"tree_8TeV_emuttbarviatau.root" ;
 
-  datafilesFull  << dir + "tree_8TeV_MET_runA_06Aug.root"  
-		 << dir + "tree_8TeV_MET_runA_13Jul.root"  
-		 << dir + "tree_8TeV_MET_runB_13Jul.root"  
-		 << dir + "tree_8TeV_MET_runC_prompt.root"
-		 << dir + "tree_8TeV_MET_runC_24Aug.root"  
-		 << dir + "tree_8TeV_MET_runC_11Dec.root"  
-		 << dir + "tree_8TeV_MET_runD_prompt.root";
+  datafilesFull // << dir + "tree_8TeV_MET_runA_06Aug.root"  
+		// << dir + "tree_8TeV_MET_runA_13Jul.root"  
+		// << dir + "tree_8TeV_MET_runB_13Jul.root"  
+		// << dir + "tree_8TeV_MET_runC_prompt.root"
+		// << dir + "tree_8TeV_MET_runC_24Aug.root"  
+		// << dir + "tree_8TeV_MET_runC_11Dec.root"  
+		// << dir + "tree_8TeV_MET_runD_prompt.root";
+    << "notuse";
 
-  datafilesRunA  << dir + "tree_8TeV_MET_runA_06Aug.root"  
-	 	 << dir + "tree_8TeV_MET_runA_13Jul.root";
+  datafilesRunA  << dir + "tree_8TeV_MET_runA_22Jan.root"  ;
+  //   << dir + "tree_8TeV_MET_runA_13Jul.root"
+  //   << dir + "tree_8TeV_MET_runA_06Aug.root";
 
-  datafilesRunB  << dir + "tree_8TeV_MET_runB_13Jul.root";
-
+  datafilesRunB  << dir + "tree_8TeV_MET_runB_22Jan.root";
+   // << dir +  "tree_8TeV_MET_runB_13Jul.root";
 
   datafilesRunAB  << datafilesRunA << datafilesRunB;
 
-  datafilesRunC  << dir + "tree_8TeV_MET_runC_prompt.root"
+  /* datafilesRunC  << dir + "tree_8TeV_MET_runC_prompt.root"
 		 << dir + "tree_8TeV_MET_runC_24Aug.root"  
 		 << dir + "tree_8TeV_MET_runC_11Dec.root";
 
   datafilesRunD  << dir + "tree_8TeV_MET_runD_prompt.root";
   
-
+  */
 
   //for others just copy data and mc, change input and pu file
  
@@ -202,7 +210,7 @@ void trigger_007(){
 
 
 
-   analyzeAll( ta_eed,  ta_eeMC,  ta_mumud,  ta_mumuMC,  ta_emud,  ta_emuMC,"direct_full","direct 5 fb^{-1}");
+  //analyzeAll( ta_eed,  ta_eeMC,  ta_mumud,  ta_mumuMC,  ta_emud,  ta_emuMC,"direct_full","direct 5 fb^{-1}");
 
 
 

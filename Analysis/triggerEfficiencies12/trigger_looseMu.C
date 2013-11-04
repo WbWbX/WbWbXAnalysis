@@ -8,7 +8,7 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
 
   bool domatching=false;
 
-    if( inputMuons->size() >2) return 0;
+   // if( inputMuons->size() >2) return 0;
 
   ////////ONLY FOR TESTING!!! IF SWITCHED ON EFF=1 BY CONSTRUCTION DONT USE THIS THING FOR ANY EFF!!
 
@@ -21,7 +21,7 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
     if(muon->pt() < 20) continue;
     if(fabs(muon->eta()) > 2.4) continue;
     if(!(muon->isGlobal() || muon->isTracker())) continue;
-    if(fabs(muon->isoVal()) > 0.2) continue;
+    //if(fabs(muon->isoVal()) > 0.2) continue;
     match=false;
 
     if(domatching){
@@ -71,7 +71,7 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
 
    
 
-    if(selectedMuons_.at(0)->q() == selectedMuons_.at(1)->q())   return 0;
+    //if(selectedMuons_.at(0)->q() == selectedMuons_.at(1)->q())   return 0;
     mass=(selectedMuons_.at(0)->p4() + selectedMuons_.at(1)->p4()).M();
   }
 
@@ -88,11 +88,13 @@ void trigger_looseMu(){
   triggerAnalyzer::testmode=false;
 
   triggerAnalyzer::lowMCStat=false;
+  triggerAnalyzer::lowDataStat=true;
+
 
   using namespace std;
   using namespace ztop;
 
-  bool includecorr=true;
+  bool includecorr=false;
 
   std::vector<float> binsmumueta, bins2dee, bins2dmue,binsptmu, binspte, bins2dmumu;
   
@@ -118,8 +120,8 @@ void trigger_looseMu(){
   ta_mumud.setBinsEta(binsmumueta);
   ta_mumud.setBinsEta2dX(bins2dmumu);
   ta_mumud.setBinsEta2dY(bins2dmumu);
-  ta_mumud.setMassCutLow(60);
-  ta_mumud.setMassCutHigh(120);
+  //ta_mumud.setMassCutLow(60);
+  //ta_mumud.setMassCutHigh(120);
 
  
 
@@ -129,8 +131,8 @@ void trigger_looseMu(){
   
   //TString dir="/scratch/hh/dust/naf/cms/user/kieseler/trees_Apr13_04/";
   
-  TString dir="/scratch/hh/dust/naf/cms/user/kieseler/trees_ES_Jul13_04/";
-
+  //TString dir="/scratch/hh/dust/naf/cms/user/kieseler/trees_ES_Jul13_04/";
+  TString dir="/scratch/hh/dust/naf/cms/user/kieseler/DYTemp/";
 
 
   TString cmssw_base=getenv("CMSSW_BASE");
@@ -142,7 +144,8 @@ void trigger_looseMu(){
   mumumcfiles  // << dir+"tree_8TeV_mumuttbar.root"
    // << dir+"tree_8TeV_mumuttbarviatau.root" ;
     //<< dir+"tree_8TeV_dymumu60120.root";
-    << dir+"tree_8TeV_dymumu60120.root";
+   // << dir+"tree_8TeV_dymumu60120.root";
+  << dir+"tree_8TeV_dy_hueges_noGen.root";
   // datafilesFull  << dir + "tree_8TeV_MET_runA_06Aug.root"  
   // 		 << dir + "tree_8TeV_MET_runA_13Jul.root"  
   // 		 << dir + "tree_8TeV_MET_runB_13Jul.root"  

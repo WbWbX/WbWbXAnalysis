@@ -8,8 +8,11 @@ echo '\n\nrunning in directory' "${dirstring}."
 
 mkdir $dirstring
 cd $dirstring
-cp ../do_triggerAnalyzer_SUSY.C .
-cp ../makeplotsnice.h .
-cp ../make2dplots.h .
-nohup root -l -b -q do_triggerAnalyzer_SUSY.C++ > output.txt 
+cp ../triggerAnalyzer_base3.h .
+#cp ../prescaleList.h .
+cp ../trigger_SUSY.C .
+cp ../histoStyle.h .
+cp ../getSubSetRoot.C .
+touch $HOSTNAME
+nohup root -l -b -q trigger_SUSY.C++ > output.txt 
 echo "done with ${dirstring}"

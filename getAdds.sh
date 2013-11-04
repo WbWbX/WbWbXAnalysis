@@ -23,18 +23,13 @@ git cms-merge-topic cms-analysis-tools:5_3_12_patch2-metUncertainties
 git cms-merge-topic cms-analysis-tools:5_3_12_patch2-newJECs
 git cms-merge-topic cms-analysis-tools:5_3_12_patch2-mvaElIdPatFunction
 
+git cms-addpkg FWCore/FWLite
+git cms-addpkg ElectroWeakAnalysis/Utilities
 
 fi
 
 # the things I use from the TopAnalysis code
 #
-
-
-if [[ $1 == "SUSY" ]];
-then
-    echo 'checking out additional SUSY packagesf for efficiency studies.'
-    cvs co -d WWAnalysis/SkimStep UserCode/Mangano/WWAnalysis/SkimStep 
-fi
 
 
 echo checking out TtZAnalysis package
@@ -61,54 +56,18 @@ cd EGamma/EGammaAnalysisTools/data
 cat download.url | xargs wget
 cd $CMSSW_BASE/src
 
-#echo "MET  Filter"
+echo "MET  Filter"
 
-#addpkg RecoMET/METFilters V00-00-10
-#cvs co -r V00-00-08 RecoMET/METAnalyzers
-#cvs co -r V00-03-23 CommonTools/RecoAlgos
-# Additional packages for the tracking POG filters
-#cvs co -r V01-00-11-01 DPGAnalysis/Skims
-#cvs co -r V00-11-17 DPGAnalysis/SiStripTools
-#cvs co -r V00-00-08 DataFormats/TrackerCommon
-#cvs co -r V01-09-05 RecoLocalTracker/SubCollectionProducers
+cvs co -r V00-00-13-01 RecoMET/METFilters
+cvs co -r V00-00-08 RecoMET/METAnalyzers
+cvs co -r V00-03-23 CommonTools/RecoAlgos
+cvs co -r V01-00-11-01 DPGAnalysis/Skims
+cvs co -r V00-11-17 DPGAnalysis/SiStripTools
+cvs co -r V00-00-08 DataFormats/TrackerCommon
+cvs co -r V01-09-05 RecoLocalTracker/SubCollectionProducers
 
+#git cms-addpkg  RecoMET/METFilters #??
 
-fi
-if [[ "$CMSSW_VERSION" == "CMSSW_5_3_11" ]]
-then
-
-addpkg DataFormats/PatCandidates V06-05-06-12
-addpkg PhysicsTools/PatAlgos     V08-09-61
-addpkg PhysicsTools/PatUtils
-addpkg RecoBTag/ImpactParameter V01-04-09-01
-addpkg RecoBTag/SecondaryVertex V01-10-06
-addpkg RecoBTag/SoftLepton      V05-09-11
-addpkg RecoBTau/JetTagComputer  V02-03-02
-addpkg RecoBTag/Configuration   V00-07-05
-addpkg RecoParticleFlow/PFProducer V15-02-06
-
-addpkg TopQuarkAnalysis/Configuration
-addpkg TopQuarkAnalysis/TopSkimming V07-01-04
-addpkg TopQuarkAnalysis/TopTools    V06-07-13
-
-fi
-
-if [[ "$CMSSW_VERSION" == "CMSSW_5_3_12_patch2" ]]
-then
-
-git cms-addpkg PhysicsTools/PatAlgos
-git cms-merge-topic cms-analysis-tools:5_3_12_patch2-metUncertainties
-git cms-merge-topic cms-analysis-tools:5_3_12_patch2-newJECs
-git cms-merge-topic cms-analysis-tools:5_3_12_patch2-mvaElIdPatFunction
-
-
-fi
-
-
-#for analysis stuff:
-
-addpkg FWCore/FWLite
-addpkg ElectroWeakAnalysis/Utilities
 
 #
 #echo "setting LHAPDF path to /afs/naf.desy.de/user/k/kieseler/public/lhapdf"
