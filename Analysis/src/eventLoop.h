@@ -934,7 +934,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 	p_askwrite.get(anaid)->pwrite(anaid);
 	//std::cout << anaid << " (" << inputfile << ")" << " asking for write permissions to " <<getOutPath() << endl;
 	int canwrite=p_allowwrite.get(anaid)->pread();
-	if(canwrite>0){ //wait for permission
+	if(canwrite>0 || singlestatus_){ //wait for permission
 
 		if(testmode_ )
 			std::cout << "testmode("<< anaid << "): allowed to write to file " << getOutPath()+".root"<< std::endl;
