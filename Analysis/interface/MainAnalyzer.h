@@ -126,7 +126,7 @@ private:
 
   TString replaceExtension(TString );
 
-  bool showstatus_,onlySummary_,testmode_,singlestatus_;
+  bool showstatus_,onlySummary_,testmode_,singlefile_;
 
   TString name_,dataname_,channel_,syst_,energy_;
   bool b_ee_,b_emu_,b_mumu_,is7TeV_;

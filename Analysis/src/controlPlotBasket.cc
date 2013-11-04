@@ -38,16 +38,16 @@ container1D * controlPlotBasket::addPlot(const TString & name, const TString & x
 				throw std::logic_error("controlPlotBasket::addPlot: plots cannot have same names!");
 			}
 		}
-		//container1D * cont = new container1D(tempbins_,newname, xaxisname, yaxisname, mergeufof);
-		bool temp=container1D::c_makelist;
-		container1D::c_makelist=false;
-		container1D tcont(tempbins_,newname, xaxisname, yaxisname, mergeufof);
-		container1D::c_makelist=temp;
-		namelist.push_back(tcont.getName());
-		scplots_.at(tmpstep_).push_back(tcont);
+		container1D * cont = new container1D(tempbins_,newname, xaxisname, yaxisname, mergeufof);
+		//bool temp=container1D::c_makelist;
+		//container1D::c_makelist=false;
+		//container1D tcont(tempbins_,newname, xaxisname, yaxisname, mergeufof);
+		//container1D::c_makelist=temp;
+		namelist.push_back(cont->getName());
+		cplots_.at(tmpstep_).push_back(cont);
 	}
 	//else just return pointer
-	lcont_=&scplots_[tmpstep_][tmpidx_++];
+	lcont_=cplots_[tmpstep_][tmpidx_++];//at(tmpstep_).at(tmpidx_++);//
 	return lcont_;//; //not safe but fast
 }
 
@@ -56,16 +56,16 @@ void controlPlotBasket::initStep(const size_t & step){
 
 	tmpidx_=0;
 	tmpstep_=step;
+	tmpnewstep_=false;
 	if(step<size_){
-		tmpnewstep_=false;
 		return;
 	}
 	else if(step==size_){//create step
 		tmpnewstep_=true;
-		//cplots_.push_back(std::vector<container1D *>());
-		scplots_.push_back(std::vector<container1D >());
+		cplots_.push_back(std::vector<container1D *>());
+		//scplots_.push_back(std::vector<container1D >());
 
-		size_=scplots_.size();
+		size_=cplots_.size();
 		return;
 	}
 

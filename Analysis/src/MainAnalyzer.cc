@@ -41,7 +41,7 @@ MainAnalyzer::MainAnalyzer(){
 	testmode_=false;
 	//showstatusbar_=false;
 	lumi_=0;
-	singlestatus_=false;
+	singlefile_=false;
 
 }
 
@@ -220,13 +220,15 @@ int MainAnalyzer::start(){
 			return -1;
 	}//
 	else{ //only one process to spawn
-		singlestatus_=true;
+		singlefile_=true;
 		try{
 			analyze(0);
 		}
 		catch(...){
 			return -99;
 		}
+		if(testmode_)
+			std::cout << "single file done" <<std::endl;
 		return 1;
 	}
 }

@@ -306,7 +306,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 		if((entry +1)* 100 % nEntries <100){
 			int status=(entry+1) * 100 / nEntries;
 			p_status.get(anaid)->pwrite(status);
-			if(singlestatus_)
+			if(singlefile_)
 				std::cout <<"single run " << legendname <<"  "<< status << "%" << std::endl;
 		}
 
@@ -900,6 +900,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
 	}//main event loop ends
 	//if(showstatusbar_)std::cout << std::endl; //for status bar
+	container1D::c_makelist =false;
 	container1DUnfold::flushAllListed();
 
 	if(testmode_ )
@@ -918,7 +919,6 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 	f->Close(); //deletes t
 	delete f;
 
-	container1D::c_makelist =false;
 
 	///////////////////////////////
 	///////////////////////////////
@@ -930,11 +930,13 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 	///////////////////////////////
 	///////////////////////////////
 
-
-	p_askwrite.get(anaid)->pwrite(anaid);
+	if(!singlefile_)
+		p_askwrite.get(anaid)->pwrite(anaid);
 	//std::cout << anaid << " (" << inputfile << ")" << " asking for write permissions to " <<getOutPath() << endl;
-	int canwrite=p_allowwrite.get(anaid)->pread();
-	if(canwrite>0 || singlestatus_){ //wait for permission
+	int canwrite=0;
+	if(!singlefile_)
+		canwrite=p_allowwrite.get(anaid)->pread();
+	if(canwrite>0 || singlefile_){ //wait for permission
 
 		if(testmode_ )
 			std::cout << "testmode("<< anaid << "): allowed to write to file " << getOutPath()+".root"<< std::endl;
@@ -1040,6 +1042,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 		}
 		std::cout << "factor for extrapolation (single dataset genentries/tree-entries)" << genentries << "/" << nEntries <<std::endl;
 
+		if(singlefile_) return;
 
 		//all operations done
 		p_finished.get(anaid)->pwrite(1); //turns of write blocking, too
