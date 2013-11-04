@@ -156,7 +156,7 @@ void containerStackVector::addErrorStackVector(const TString &sysname,const  zto
 				if(istack->getName() == estack->getName()){
 					if(debug)
 						std::cout << "containerStackVector::addMCErrorStackVector: adding sys " << sysname
-							<< " to stack " << istack->getName() << std::endl;
+						<< " to stack " << istack->getName() << std::endl;
 					istack->addMCErrorStack(sysname,*estack);
 					break;
 				}
@@ -292,10 +292,39 @@ void containerStackVector::writeAllToTFile(TString filename, bool recreate, TStr
 	TDirectory * d = f->mkdir(name + "_ratio",name + "_ratio");
 	d->cd();
 	for(std::vector<containerStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
-		TCanvas * c=stack->makeTCanvas();
-		if(c){
-			c->Write();
-			delete c;
+		if(stack->is1DUnfold()){
+			TDirectory * din=d->mkdir(stack->getName(),stack->getName());
+			din->cd();
+			TCanvas * c=stack->makeTCanvas();
+			if(c){
+				c->Write();
+				delete c;
+			}
+
+			container1DUnfold cuf=stack->getSignalContainer();
+			cuf.checkCongruentBinBoundariesXY();
+			TH1D * pur=cuf.getPurity().getTH1D("purity",false,false,false);
+			TH1D * stab=cuf.getStability().getTH1D("stability",false,false,false);
+			if(pur){
+				c =new TCanvas("purity_stab","purity_stab");
+				pur->SetMarkerColor(kBlue);
+				stab->SetMarkerColor(kRed); //put to plotter after testing
+				pur->GetYaxis()->SetRangeUser(0,1);
+				pur->Draw();
+				stab->Draw("same");
+				c->Write();
+				delete c;
+				delete pur;
+				delete stab;
+			}
+			d->cd();
+		}
+		else if(stack->is1D()){
+			TCanvas * c=stack->makeTCanvas();
+			if(c){
+				c->Write();
+				delete c;
+			}
 		}
 	}
 	if(debug)

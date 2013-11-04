@@ -46,17 +46,17 @@ public:
 	void setLegendOrder(const TString &leg, const size_t& no);
 
 	void mergeSameLegends();       //! shouldn't be necessary
-	ztop::container1D getContribution(TString);   //! does not ignore data; makes copy, doesn't change member containers!
-	ztop::container1D getContributionsBut(TString);  //!does not ignore data; makes copy, doesn't change member containers!
-	ztop::container1D getContributionsBut(std::vector<TString>);  //!does not ignore data; makes copy, doesn't change member containers!
+	ztop::container1D getContribution(TString)const;   //! does not ignore data; makes copy, doesn't change member containers!
+	ztop::container1D getContributionsBut(TString)const;  //!does not ignore data; makes copy, doesn't change member containers!
+	ztop::container1D getContributionsBut(std::vector<TString>)const;  //!does not ignore data; makes copy, doesn't change member containers!
 
-	ztop::container2D getContribution2D(TString);   //! does not ignore data; makes copy, doesn't change member containers!
-	ztop::container2D getContributions2DBut(TString);  //!does not ignore data; makes copy, doesn't change member containers!
-	ztop::container2D getContributions2DBut(std::vector<TString>);  //!does not ignore data; makes copy, doesn't change member containers!
+	ztop::container2D getContribution2D(TString)const;   //! does not ignore data; makes copy, doesn't change member containers!
+	ztop::container2D getContributions2DBut(TString)const;  //!does not ignore data; makes copy, doesn't change member containers!
+	ztop::container2D getContributions2DBut(std::vector<TString>)const;  //!does not ignore data; makes copy, doesn't change member containers!
 
-	ztop::container1DUnfold getContribution1DUnfold(TString);   //! does not ignore data; makes copy, doesn't change member containers!
-	ztop::container1DUnfold getContributions1DUnfoldBut(TString);  //!does not ignore data; makes copy, doesn't change member containers!
-	ztop::container1DUnfold getContributions1DUnfoldBut(std::vector<TString>);  //!does not ignore data; makes copy, doesn't change member containers!
+	ztop::container1DUnfold getContribution1DUnfold(TString)const;   //! does not ignore data; makes copy, doesn't change member containers!
+	ztop::container1DUnfold getContributions1DUnfoldBut(TString)const;  //!does not ignore data; makes copy, doesn't change member containers!
+	ztop::container1DUnfold getContributions1DUnfoldBut(std::vector<TString>)const;  //!does not ignore data; makes copy, doesn't change member containers!
 
 	const TString & getName() const{return name_;}
 	size_t size() const{return colors_.size();}
@@ -66,15 +66,15 @@ public:
 
 	container1D & getContainer(unsigned int i){return containers_[i];}
 	container1D & getContainer(TString);
-	container1D getFullMCContainer();           //! gets the sum of all MC containers (normalized with their stored norm) including error handling
+	container1D getFullMCContainer()const;           //! gets the sum of all MC containers (normalized with their stored norm) including error handling
 
 	container2D & getContainer2D(unsigned int i){return containers2D_[i];}
 	container2D & getContainer2D(TString);
-	container2D getFullMCContainer2D();           //! gets the sum of all MC containers (normalized with their stored norm) including error handling
+	container2D getFullMCContainer2D()const;           //! gets the sum of all MC containers (normalized with their stored norm) including error handling
 
 	container1DUnfold & getContainer1DUnfold(unsigned int i){return containers1DUnfold_[i];}
 	container1DUnfold & getContainer1DUnfold(TString);
-	container1DUnfold getFullMCContainer1DUnfold();           //! gets the sum of all MC containers (normalized with their stored norm) including error handling
+	container1DUnfold getFullMCContainer1DUnfold()const;           //! gets the sum of all MC containers (normalized with their stored norm) including error handling
 
 	void multiplyNorm(TString , double);
 	void multiplyAllMCNorms(double);
@@ -115,6 +115,8 @@ public:
 	bool setsignals(const std::vector<TString> &);// (just return whether successful)
 	std::vector<size_t> getSignalIdxs() const;
 	container1DUnfold produceUnfoldingContainer(const std::vector<TString> &sign=std::vector<TString>()) const;// if sign empty use "setsignal"
+
+
 	/*
        ad all signal -> cuf
        add all recocont_ w/o signaldef -> set BG of cuf
@@ -126,6 +128,8 @@ public:
 	 */
 	//define operators (propagate from containers) for easy handling
 	// also define += etc. and use container += if better, needs to be implemented (later)
+
+	container1DUnfold getSignalContainer(const std::vector<TString> &sign=std::vector<TString>()) const;
 
 
 	static std::vector<ztop::containerStack*> cs_list;

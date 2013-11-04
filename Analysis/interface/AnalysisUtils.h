@@ -162,7 +162,7 @@ bool getTestMode(int argc, char* argv[]){
 	return false;
 }
 
-void rescaleDY(ztop::container1DStackVector * vec, std::vector<TString> contributions, double scalescale=1, bool textout=true, TString identifier="dilepton invariant massZ "){
+void rescaleDY(ztop::container1DStackVector * vec, std::vector<TString> contributions, double scalescale=1, bool textout=true, TString identifier="mll Z Range "){
 
   using namespace ztop; 
 
@@ -214,7 +214,7 @@ std::vector<T> subdivide(const std::vector<T> & bins, size_t div){
 
 template <class T>
 bool comparePt(T a, T b){
-	return (a->pt() < b->pt());
+	return (a->pt() > b->pt());
 }
 
 }

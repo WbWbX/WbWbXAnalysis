@@ -79,7 +79,7 @@ int main(int argc, char* argv[]){
 	using namespace std;
 	AutoLibraryLoader::enable();
 
-	containerStackVector::fastadd=true;
+	containerStackVector::fastadd=false;
 	//containerStackVector::debug=true;
 	//containerStack::debug=true;
 
@@ -154,15 +154,18 @@ int main(int argc, char* argv[]){
 	}
 
 	cout << "writing output..." << endl;
+	TString outadd="";
+	if(output != "")
+		outadd="_"+output;
 
 	for(size_t i=0;i<vnominal.size();i++){ //energies
 		for(size_t j=0;j<vnominal.at(i).size();j++){ //channels
 			ztop::container1DStackVector *outvec=&vnominal.at(i).at(j);
 			if(outvec->getName() =="")//in case energies are not considered
 				continue;
-			outvec->setName(outvec->getName()+"_"+output);
+			outvec->setName(outvec->getName()+outadd+"_syst");
 			cout << "writing " << outvec->getName() << endl;
-			outvec->writeAllToTFile(outvec->getName()+"_syst.root",true);
+			outvec->writeAllToTFile(outvec->getName()+".root",true);
 			cout << "syst: " << outvec->getStack(0).getContainer(0).getSystSize() << endl;
 		}
 	}

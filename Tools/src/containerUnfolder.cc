@@ -54,6 +54,8 @@ container1D containerUnfolder::binbybinunfold(container1DUnfold & cuf){
 
 	//efficiency:
 
+	if(debug)
+		std::cout << "containerUnfolder::binbybinunfold "<< cuf.getName() << std::endl;
 	//get full gen&reco
 	container1D genreco=cuf.projectToY(false);
 	container1D gen=cuf.getGenContainer();
@@ -62,23 +64,39 @@ container1D containerUnfolder::binbybinunfold(container1DUnfold & cuf){
 	//operations
 	bool temp=histoContent::divideStatCorrelated; //all same named syst,nom, etc are assumed to be stat corr
 	histoContent::divideStatCorrelated=true;
+	if(debug)
+		std::cout << "containerUnfolder::binbybinunfold: creating efficiencies: (bin1): ";
 	container1D effinv=gen/genreco;
 	histoContent::divideStatCorrelated=temp;
+	if(debug)
+			std::cout << 1/effinv.getBinContent(1) << std::endl;
 
 	temp=histoContent::subtractStatCorrelated;
 	histoContent::subtractStatCorrelated=false;
+	if(debug)
+		std::cout << "containerUnfolder::binbybinunfold: getting N_sel - N_bg (bin1) ";
 	container1D sel=cuf.getRecoContainer();
 	container1D bg=cuf.getBackground();
 	container1D smbg=sel - bg;
 	histoContent::subtractStatCorrelated=temp;
+	if(debug)
+			std::cout << smbg.getBinContent(1) << std::endl;
 
 	temp=histoContent::multiplyStatCorrelated;
 	histoContent::multiplyStatCorrelated=false;
+	if(debug)
+		std::cout << "containerUnfolder::binbybinunfold: rebinning N_sel-N_bg to efficiencies" << std::endl;
 	container1D smbgrb=smbg.rebinToBinning(effinv);
+	if(debug)
+		std::cout << "containerUnfolder::binbybinunfold: compute xsec (w/o lumi)" << std::endl;
 	container1D xsec=smbgrb * effinv;
 	histoContent::multiplyStatCorrelated=temp;
 
-	cuf.setUnfolded(xsec * 1/cuf.getLumi());
+	if(debug)
+		std::cout << "containerUnfolder::binbybinunfold: correct for lumi" << std::endl;
+	double lumiinv=1/cuf.getLumi();
+	xsec = xsec * lumiinv;
+	cuf.setUnfolded(xsec);
 	cuf.setRefolded(cuf.getRecoContainer());
 	return xsec;
 
@@ -86,6 +104,11 @@ container1D containerUnfolder::binbybinunfold(container1DUnfold & cuf){
 container1D containerUnfolder::unfold(/*const*/ container1DUnfold & cuf){
 
 	container1D out,refolded;
+
+	if(cuf.getBackground().integral() > cuf.getRecoContainer().integral() * 0.3){
+		std::cout << "containerUnfolder::unfold: " << cuf.getName() << " has more background than signal, skipping" <<std::endl;
+		return container1D();
+	}
 
 	if(cuf.isBinByBin()){
 		container1D out=binbybinunfold(cuf);
@@ -106,6 +129,7 @@ container1D containerUnfolder::unfold(/*const*/ container1DUnfold & cuf){
 		std::cout << "containerUnfolder::unfold: preparing response matrix" << std::endl;
 	TH2* responsematrix=cuf.prepareRespMatrix();
 	unfnominal_ = new unfolder(cuf.getName()+"_nominal");
+	unfnominal_->setVerbose(printinfo);
 	TH1* datahist=cuf.getRecoContainer().getTH1D(cuf.getName()+"_datahist_nominal",false,true);
 	if(debug)
 		std::cout << "containerUnfolder::unfold: initialising unfolder" << std::endl;
@@ -160,6 +184,7 @@ container1D containerUnfolder::unfold(/*const*/ container1DUnfold & cuf){
 		else
 			SysDatahist=cuf.getRecoContainer().getTH1D(cuf.getName()+"_datahist_nominal_fake"+cuf.getSystErrorName(sys),false,true);
 		unfolder * uf=new unfolder(cuf.getName()+"_"+cuf.getSystErrorName(sys));
+		uf->setVerbose(printinfo);
 		int verb=uf->init(SysResponsematrix,SysDatahist);
 		if(verb>10000){
 			std::cout << "containerUnfolder::unfold: init of unfolder for "<< cuf.getName()<< ": "
@@ -182,7 +207,7 @@ container1D containerUnfolder::unfold(/*const*/ container1DUnfold & cuf){
 	if(debug)
 		std::cout << "containerUnfolder::unfold: scanning L-Curve of systematics" << std::endl;
 	for(size_t sys=0;sys<cuf.getSystSize();sys++){
-		if(debug)
+		if(debug||printinfo)
 			std::cout << "containerUnfolder::unfold: scanning L-Curve of "<< cuf.getName() << ": " << cuf.getSystErrorName(sys) << std::endl;
 		unfsyst_.at(sys)->scanLCurve();
 	}
@@ -205,7 +230,9 @@ container1D containerUnfolder::unfold(/*const*/ container1DUnfold & cuf){
 		refolded.addErrorContainer(cuf.getSystErrorName(sys),sysref,true); //ignoreMCStat=true
 	}
 	//const container1D setter=out;
-	cuf.setUnfolded(out* 1/cuf.getLumi());
+	double lumiinv=1/cuf.getLumi();
+	out=out*lumiinv;
+	cuf.setUnfolded(out);
 	cuf.setRefolded(refolded);
 	return out;
 }

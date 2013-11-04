@@ -34,7 +34,7 @@ void unfold(int argc, char* argv[]){
 	TH1::AddDirectory(false);
 	AutoLibraryLoader::enable();
 
-	ztop::containerUnfolder::debug=false;
+	ztop::containerUnfolder::debug=true;
 	ztop::container2D::debug=false;
 	ztop::container1DUnfold::debug=false;
 	ztop::containerStack::debug=false;
@@ -55,6 +55,7 @@ void unfold(int argc, char* argv[]){
 
 	TString out="",in="",signal="";
 	bool moreoutput=false;
+	bool inset=false;
 	for(int i=1;i<argc;i++){
 		//  std::cout << argv[i] << std::endl;;
 
@@ -68,19 +69,23 @@ void unfold(int argc, char* argv[]){
 		else if((TString)argv[i] == "-v"){
 			moreoutput=true;
 		}
-		else if((TString)argv[i] == "-v"){
+		else if((TString)argv[i] == "-s"){
 			if (i + 1 != argc){
 				signal=(TString)argv[i+1];
 				i++;
 			}
 		}
 		else {
+			if(inset){
+				std::cout << "You have to specify exactly one input file" << std::endl;
+				return;
+			}
 			in=(TString)argv[i];
-			std::cout << in << std::endl;
+			inset=true;
 		}
 	}
-	if(in=="" || (out=="" && argc>2) || (out != "" && argc > 4)){
-		std::cout << "You have to specify axactly one input file and might specify an output name! exit" << std::endl;
+	if(!inset){
+		std::cout << "You have to specify exactly one input" << std::endl;
 		return;
 	}
 	//input checked
@@ -136,8 +141,13 @@ void unfold(int argc, char* argv[]){
 	for(size_t i=0; i<csvsize;i++){
 		ztop::containerStack  stack=csv.getStack(i);
 		if(stack.is1DUnfold()){
-			stacknames.push_back(stack.getName());
-			tobeunfolded.push_back(stack);
+			bool use=true;
+			if(signal!="")
+				use=stack.setsignal(signal);
+			if(use){
+				stacknames.push_back(stack.getName());
+				tobeunfolded.push_back(stack);
+			}
 		}
 	}
 
@@ -178,19 +188,24 @@ void unfold(int argc, char* argv[]){
 		TString nameus=name;
 		nameus.ReplaceAll(" ","_");
 		f->cd();
-		d = new TDirectory(nameus,nameus);
+		d = f->mkdir(nameus,nameus);
 		d->cd();
 		outdir="unfolded/"+nameus+"/";
 		system(("mkdir -p "+outdir).Data());
 		ztop::container1DUnfold & data=datatobeunf[i];
+		if(data.getBackground().integral() > data.getRecoContainer().integral() * 0.3){
+			std::cout << "containerUnfolder::unfold: " << name << " has more background than signal, skipping xcheck" <<std::endl;
+			continue;
+		}
 		ztop::container1DUnfold & check=xchecktobeunf[i];
 		std::cout << "unfolding " << data.getName() << " syst: ";
-		for(size_t s=0;s<data.getSystSize();s++)
-			std::cout  << data.getSystErrorName(s) << " ";
+		//	for(size_t s=0;s<data.getSystSize();s++)
+		//		std::cout  << data.getSystErrorName(s) << " ";
 		std::cout  << std::endl;
 		unfolder.unfold(data);
 		ztop::container1D unfolded=data.getUnfolded();
 		ztop::container1D refolded=data.getRefolded();
+
 		unfolded.setName(data.getName()+"_unfolded");
 		refolded.setName(data.getName()+"_refolded");
 		cpointer=&unfolded;
@@ -210,7 +225,7 @@ void unfold(int argc, char* argv[]){
 			std::cout << "\n\n"  << std::endl;
 
 		}
-		if(debug)
+
 			c->Print(outdir+name+"_unfolded.eps");
 		c->Write();
 		c->Clear();
@@ -220,7 +235,7 @@ void unfold(int argc, char* argv[]){
 		//ztop::container1D recmbg=reco-data.getBackground();
 		reco.drawFullPlot("",true,"same");
 		data.getBackground().drawFullPlot("",true,"same");
-		if(debug)
+
 			c->Print(outdir+name+"_refolded_recoBG.eps");
 		c->Write();
 

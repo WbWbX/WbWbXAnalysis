@@ -73,13 +73,13 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
 	SETBINSRANGE(8,-0.5,7.5);
 	addPlot("hard jet multi", "N_{jet}","N_{evt}");
 	FILL(hardjets,size());
-	addPlot("loose jet multi", "N_{jet}", "N_{evt}");
+	addPlot("med jet multi", "N_{jet}", "N_{evt}");
 	FILL(medjets,size());
 
 	SETBINSRANGE(5,-0.5,4.5);
 	addPlot("hard b jet multi", "N_{bjet}","N_{evt}",true);
 	FILL(hardbjets,size());
-	addPlot("loose b jet multi","N{bjet}","N_{evt}",true);
+	addPlot("med b jet multi","N{bjet}","N_{evt}",true);
 	FILL(medbjets,size());
 
 	SETBINSRANGE(40,0,200);
@@ -104,8 +104,8 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
 	addPlot("dphi ((ll),j)","#Delta#phi(ll,j)","N_{evt}/bw");
 	FILLSINGLE(dphillj);
 
-	SETBINSRANGE(70,0,2000);
-	addPlot("top discr","D_{top}","N_{evt}/bw");
+	SETBINSRANGE(70,0,1200);
+	addPlot("top discr","D_{top}","N_{evt}/bw",true);
 	FILLSINGLE(topdiscr);
 
 	///EVT VARS

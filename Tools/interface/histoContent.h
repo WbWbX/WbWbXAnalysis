@@ -62,13 +62,13 @@ public:
 	histoBin & getBin(size_t ,const int &layer=-1);
 	const histoBin & getBin(size_t ,const int &layer=-1) const;
 
-	void setBinContent(const size_t & ,const double &,const int &layer=-1);
-	const double & getBinContent(const size_t & binno,const int &layer=-1) const;
+	void setBinContent(const size_t & ,const float &,const int &layer=-1);
+	const float & getBinContent(const size_t & binno,const int &layer=-1) const;
 
-	void setBinStat(const size_t & binno,const double &stat,const int &layer=-1);
-	double getBinStat(const size_t & binno,const int &layer=-1) const;
+	void setBinStat(const size_t & binno,const float &stat,const int &layer=-1);
+	float getBinStat(const size_t & binno,const int &layer=-1) const;
 
-	void setBinEntries(const size_t & binno,const double &stat,const int &layer=-1);
+	void setBinEntries(const size_t & binno,const float &stat,const int &layer=-1);
 	const size_t & getBinEntries(const size_t & binno,const int &layer=-1) const;
 
 	void clear();
@@ -93,8 +93,8 @@ public:
 	histoContent & operator *= (const histoContent&);
 	histoContent operator * (const histoContent&);
 
-	histoContent & operator *= (const double &);
-	histoContent operator * (const double &);
+	histoContent & operator *= (const float &);
+	histoContent operator * (const float &);
 
 	void cout() const;
 
@@ -129,19 +129,19 @@ inline const histoBin & histoContent::getBin(size_t no,const int &layer) const{
 		return additionalbins_.at((size_t)layer).getBin(no);}
 }
 
-inline void histoContent::setBinContent(const size_t & binno,const double &content,const int &layer){
+inline void histoContent::setBinContent(const size_t & binno,const float &content,const int &layer){
 	getBin(binno,layer).setContent(content);
 }
-inline const double & histoContent::getBinContent(const size_t & binno,const int &layer) const{
+inline const float & histoContent::getBinContent(const size_t & binno,const int &layer) const{
 	return getBin(binno,layer).getContent();
 }
-inline void histoContent::setBinStat(const size_t & binno,const double &stat,const int &layer){
+inline void histoContent::setBinStat(const size_t & binno,const float &stat,const int &layer){
 	getBin(binno,layer).setStat(stat);
 }
-inline double  histoContent::getBinStat(const size_t & binno,const int &layer) const{
+inline float  histoContent::getBinStat(const size_t & binno,const int &layer) const{
 	return getBin(binno,layer).getStat();
 }
-inline void histoContent::setBinEntries(const size_t & binno,const double &stat,const int &layer){
+inline void histoContent::setBinEntries(const size_t & binno,const float &stat,const int &layer){
 	getBin(binno,layer).setEntries(stat);
 }
 inline const size_t & histoContent::getBinEntries(const size_t & binno,const int &layer) const{

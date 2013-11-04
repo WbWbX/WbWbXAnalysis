@@ -44,7 +44,7 @@ tree_8TeV_mumu_runD_22Jan.root,data,1,1,10
 [parameters-begin] 
 $$ all directories except for inputfiles are relative to $CMSSW_BASE
 
-inputFilesDir = /scratch/hh/dust/naf/cms/user/kieseler/trees_Jun13_03/ $for naf
+inputFilesDir = /scratch/hh/dust/naf/cms/user/kieseler/trees_Oct13_03/ $for naf
 $inputFilesDir = /data/user/kiesej/Analysis2012/trees/trees_Jun13_03/ $for desy-cms012
 
 Lumi           = 19789

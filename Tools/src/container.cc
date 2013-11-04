@@ -1,21 +1,21 @@
 #include "../interface/container.h"
 #include <algorithm>
 #include <parallel/algorithm>
-#include <omp.h>
+//#include <omp.h>
 
 //some more operators
-ztop::container1D operator * (double multiplier, const ztop::container1D & cont){ //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
+ztop::container1D operator * (float multiplier, const ztop::container1D & cont){ //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
 	ztop::container1D out=cont;
 	return out * multiplier;
 }
-ztop::container1D operator * (float multiplier, const ztop::container1D & cont){  //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
+/*ztop::container1D operator * (double multiplier, const ztop::container1D & cont){  //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
 	ztop::container1D out=cont;
 	return out * multiplier;
-}
-ztop::container1D operator * (int multiplier, const ztop::container1D & cont){    //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
+}*/
+/*ztop::container1D operator * (int multiplier, const ztop::container1D & cont){    //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
 	ztop::container1D out=cont;
 	return out * multiplier;
-}
+}*/
 
 
 
@@ -35,11 +35,13 @@ container1D::container1D(){
 	mergeufof_=true;
 	wasunderflow_=false;
 	wasoverflow_=false;
+	plottag=none;
 	gp_=0;
 	hp_=0;
 	if(c_makelist)c_list.push_back(this);
 }
 container1D::container1D(float binwidth, TString name,TString xaxisname,TString yaxisname, bool mergeufof){ //currently not used
+	plottag=none;
 	binwidth_=binwidth;
 	canfilldyn_=true;
 	//divideBinomial_=true;
@@ -57,6 +59,7 @@ container1D::container1D(float binwidth, TString name,TString xaxisname,TString 
 	hp_=0;
 }
 container1D::container1D(std::vector<float> bins, TString name,TString xaxisname,TString yaxisname, bool mergeufof){
+	plottag=none;
 	setBins(bins);
 	//divideBinomial_=true;
 	manualerror_=false;
@@ -109,7 +112,7 @@ void container1D::setBinWidth(float binwidth){
  * deletes all systematic entries and creates a new systematics! layer
  * named manually_set_(up/down)
  */
-void container1D::setBinErrorUp(const size_t& bin, const double &err){
+void container1D::setBinErrorUp(const size_t& bin, const float &err){
 	if(!manualerror_){
 		if(debug)
 			std::cout << "container1D::setBinErrorUp: creating manual error" <<std::endl;
@@ -126,7 +129,7 @@ void container1D::setBinErrorUp(const size_t& bin, const double &err){
  * named manually_set_(up/down)
  * for a downward vairiation input a POSITIVE value!
  */
-void container1D::setBinErrorDown(const size_t &bin, const double &err){
+void container1D::setBinErrorDown(const size_t &bin, const float &err){
 	if(!manualerror_){
 		if(debug)
 			std::cout << "container1D::setBinErrorDown: creating manual error" <<std::endl;
@@ -141,7 +144,7 @@ void container1D::setBinErrorDown(const size_t &bin, const double &err){
  * deletes all systematic entries and creates a new systematics! layer
  * named manually_set_(up/down)
  */
-void container1D::setBinError(const size_t &bin, const double & err){
+void container1D::setBinError(const size_t &bin, const float & err){
 	if(!manualerror_){
 		if(debug)
 			std::cout << "container1D::setBinError: creating manual error" <<std::endl;
@@ -153,7 +156,7 @@ void container1D::setBinError(const size_t &bin, const double & err){
 	contents_.getBin(bin,0).setContent(contents_.getBin(bin).getContent()+err);
 	contents_.getBin(bin,1).setContent(contents_.getBin(bin).getContent()-err);
 }
-void container1D::setBinStat(const size_t &bin, const double & err, const int &sysLayer){
+void container1D::setBinStat(const size_t &bin, const float & err, const int &sysLayer){
 	if(bin<bins_.size() && (sysLayer<0 ||(size_t)sysLayer < contents_.layerSize() )){
 		contents_.getBin(bin,sysLayer).setStat(err);
 	}
@@ -169,7 +172,7 @@ void container1D::setBinEntries(const size_t &bin, const size_t & entries, const
 		std::cout << "container1D::setBinEntries: bin not existent!" << std::endl;
 	}
 }
-void container1D::setBinContent(const size_t & bin, const double &content, const int &sysLayer){
+void container1D::setBinContent(const size_t & bin, const float &content, const int &sysLayer){
 	if(bin<bins_.size()&& (sysLayer<0 ||(size_t)sysLayer < contents_.layerSize() )){
 		contents_.getBin(bin,sysLayer).setContent(content);
 	}
@@ -182,8 +185,8 @@ void container1D::setBinContent(const size_t & bin, const double &content, const
 size_t container1D::getNBins() const{
 	return bins_.size()-2;
 }
-double container1D::getBinCenter(const size_t &bin) const{
-	double center=0;
+float container1D::getBinCenter(const size_t &bin) const{
+	float center=0;
 	if((bin>=bins_.size()) && showwarnings_){
 		std::cout << "container1D::getBinCenter: ("<< name_ <<") bin not existent!" << std::endl;
 		return 0;
@@ -199,8 +202,8 @@ double container1D::getBinCenter(const size_t &bin) const{
 	}
 	return center;
 }
-double container1D::getBinWidth(const size_t &bin) const{
-	double width=0;
+float container1D::getBinWidth(const size_t &bin) const{
+	float width=0;
 	if(!(bin<bins_.size()-1) && showwarnings_){
 		std::cout << "container1D::getBinWidth: ("<< name_ <<") bin not existent!" << std::endl;
 	}
@@ -210,7 +213,7 @@ double container1D::getBinWidth(const size_t &bin) const{
 	return width;
 }
 
-const double & container1D::getBinContent(const size_t &bin,const int &sysLayer) const{
+const float & container1D::getBinContent(const size_t &bin,const int &sysLayer) const{
 	if(bin<bins_.size()&& (sysLayer<0 ||(size_t)sysLayer < contents_.layerSize())){
 		return contents_.getBin(bin,sysLayer).getContent();
 	}
@@ -226,7 +229,7 @@ const size_t & container1D::getBinEntries(const size_t& bin,const int &sysLayer)
 	}
 	return contents_.getBin(bin,sysLayer).getEntries();
 }
-double container1D::getBinStat(const size_t& bin,const int &sysLayer) const{
+float container1D::getBinStat(const size_t& bin,const int &sysLayer) const{
 	if(bin>=bins_.size() || sysLayer>=(long)contents_.layerSize()){
 		std::cout << "container1D::getBinStat: bin out of range, returning stat2 of underflow" << std::endl;
 		return contents_.getBin(0).getStat2();
@@ -241,8 +244,8 @@ double container1D::getBinStat(const size_t& bin,const int &sysLayer) const{
  * statistics of systematics are not taken into account here
  * always returns a POSITIVE value
  */
-double container1D::getBinErrorUp(const size_t & bin, bool onlystat,const TString &limittosys)const {
-	double fullerr2=0;
+float container1D::getBinErrorUp(const size_t & bin, bool onlystat,const TString &limittosys)const {
+	float fullerr2=0;
 	if(bin<bins_.size()){
 		fullerr2=contents_.getBin(bin).getStat2(); //stat
 		if(onlystat)
@@ -278,8 +281,8 @@ double container1D::getBinErrorUp(const size_t & bin, bool onlystat,const TStrin
  * no effect if onlystat=true
  * always returns a POSITIVE value
  */
-double container1D::getBinErrorDown(const size_t & bin,bool onlystat,const TString & limittosys) const{
-	double fullerr2=0;
+float container1D::getBinErrorDown(const size_t & bin,bool onlystat,const TString & limittosys) const{
+	float fullerr2=0;
 	if(bin<bins_.size()){
 		fullerr2=contents_.getBin(bin).getStat2(); //stat
 		if(onlystat)
@@ -314,8 +317,8 @@ double container1D::getBinErrorDown(const size_t & bin,bool onlystat,const TStri
  * the stat. error. limittosys identifies a systematic source the output should be limited to.
  * no effect if onlystat=true
  */
-double container1D::getBinError(const size_t & bin,bool onlystat,const TString & limittosys) const{
-	double symmerror=0;
+float container1D::getBinError(const size_t & bin,bool onlystat,const TString & limittosys) const{
+	float symmerror=0;
 	if(getBinErrorUp(bin,onlystat,limittosys) > fabs(getBinErrorDown(bin,onlystat,limittosys))) symmerror=getBinErrorUp(bin,onlystat,limittosys);
 	else symmerror=fabs(getBinErrorDown(bin,onlystat,limittosys));
 	return symmerror;
@@ -324,7 +327,7 @@ double container1D::getBinError(const size_t & bin,bool onlystat,const TString &
  * container1D::getSystError(unsigned int number, int bin)
  * returns deviation from nominal for systematic error with <number>
  */
-double container1D::getSystError(const size_t& number, const size_t&  bin) const{
+float container1D::getSystError(const size_t& number, const size_t&  bin) const{
 
 	if(number>=contents_.layerSize()){
 		std::cout << "container1D::getSystError: " << number << " out of range(" << contents_.layerSize() << "-1)" << std::endl;
@@ -334,10 +337,10 @@ double container1D::getSystError(const size_t& number, const size_t&  bin) const
 		std::cout << "container1D::getSystError: " << bin << " out of range(" << bins_.size() << ") (incl UF/OF)" << std::endl;
 		return 0;
 	}
-	double err=contents_.getBin(bin,number).getContent()-contents_.getBin(bin).getContent();
+	float err=contents_.getBin(bin,number).getContent()-contents_.getBin(bin).getContent();
 	return err;
 }
-double container1D::getSystErrorStat(const size_t& number, const size_t&  bin) const{
+float container1D::getSystErrorStat(const size_t& number, const size_t&  bin) const{
 
 	if(number>=contents_.layerSize()){
 		std::cout << "container1D::getSystError: " << number << " out of range(" << contents_.layerSize() << "-1)" << std::endl;
@@ -373,11 +376,11 @@ container1D container1D::breakDownSyst(const size_t & bin, bool updown) const{
 		std::cout << "container1D::breakDownSyst: bin out of range, return empty" << std::endl;
 		return out;
 	}
-	std::vector<double> errs;
-	std::vector<double> stats;
+	std::vector<float> errs;
+	std::vector<float> stats;
 	std::vector<TString> names;
 	float cbin=bins.at(0);
-	double nominal=getBinContent(bin);
+	float nominal=getBinContent(bin);
 	for(size_t i=0;i<getSystSize();i++){
 		const TString & name=getSystErrorName(i);
 		if(updown && name.EndsWith("_down")){
@@ -430,8 +433,8 @@ container1D container1D::sortByBinNames(const container1D & reference) const{
 	return out;
 }
 
-double container1D::getOverflow(const int& systLayer) const{
-	double ret=0;
+float container1D::getOverflow(const int& systLayer) const{
+	float ret=0;
 	if(systLayer > (int)contents_.layerSize())
 		return 0;
 	if(contents_.size()>0){
@@ -443,8 +446,8 @@ double container1D::getOverflow(const int& systLayer) const{
 	if(wasoverflow_) ret=-1.;
 	return ret;
 }
-double container1D::getUnderflow(const int& systLayer) const{
-	double ret=0;
+float container1D::getUnderflow(const int& systLayer) const{
+	float ret=0;
 	if(systLayer > (int)contents_.layerSize())
 		return 0;
 	if(contents_.size()>0){
@@ -459,7 +462,7 @@ double container1D::getUnderflow(const int& systLayer) const{
 /**
  * get the integral. default: nominal (systLayer=-1)
  */
-double container1D::integral(bool includeUFOF,const int& systLayer) const{
+float container1D::integral(bool includeUFOF,const int& systLayer) const{
 	if(bins_.size()<1)
 		return 0;
 	size_t minbin,maxbin;
@@ -473,7 +476,7 @@ double container1D::integral(bool includeUFOF,const int& systLayer) const{
 		minbin=1;
 		maxbin=bins_.size() -1;
 	}
-	double integr=0;
+	float integr=0;
 	for(unsigned int i=minbin;i<maxbin;i++){
 		integr+=contents_.getBin(i,systLayer).getContent();
 	}
@@ -482,13 +485,13 @@ double container1D::integral(bool includeUFOF,const int& systLayer) const{
 /**
  * get the integral . default: nominal (systLayer=-1)
  */
-double container1D::cIntegral(float from, float to,const int& systLayer) const{
+float container1D::cIntegral(float from, float to,const int& systLayer) const{
 	//select bins
 	unsigned int minbin=getBinNo(from);
 	unsigned int maxbin=getBinNo(to);
 	if(systLayer >= (int)contents_.layerSize())
 		return 0;
-	double integr=0;
+	float integr=0;
 	for(size_t i=minbin;i<=maxbin;i++){
 		integr+=contents_.getBin(i,systLayer).getContent();
 	}
@@ -498,7 +501,7 @@ double container1D::cIntegral(float from, float to,const int& systLayer) const{
  * get the integral. default: nominal (systLayer=-1)
  * assumes uncorrelated Stat inbetween bins
  */
-double container1D::integralStat(bool includeUFOF,const int& systLayer) const{
+float container1D::integralStat(bool includeUFOF,const int& systLayer) const{
 	if(bins_.size()<1)
 		return 0;
 	size_t minbin,maxbin;
@@ -512,7 +515,7 @@ double container1D::integralStat(bool includeUFOF,const int& systLayer) const{
 		minbin=1;
 		maxbin=bins_.size() -1;
 	}
-	double integr2=0;
+	float integr2=0;
 	for(unsigned int i=minbin;i<maxbin;i++){
 		integr2+=contents_.getBin(i,systLayer).getStat2();
 	}
@@ -522,13 +525,13 @@ double container1D::integralStat(bool includeUFOF,const int& systLayer) const{
  * get the integral. default: nominal (systLayer=-1)
  * assumes uncorrelated Stat inbetween bins
  */
-double container1D::cIntegralStat(float from, float to,const int& systLayer) const{
+float container1D::cIntegralStat(float from, float to,const int& systLayer) const{
 	//select bins
 	unsigned int minbin=getBinNo(from);
 	unsigned int maxbin=getBinNo(to);
 	if(systLayer >= (int)contents_.layerSize())
 		return 0;
-	double integr2=0;
+	float integr2=0;
 	for(size_t i=minbin;i<=maxbin;i++){
 		integr2+=contents_.getBin(i,systLayer).getStat2();
 	}
@@ -577,10 +580,10 @@ size_t container1D::cIntegralEntries(float from, float to,const int& systLayer) 
 /**
  * only for visible bins
  */
-double container1D::getYMax(bool dividebybinwidth,const int& systLayer) const{
-	double max=-999999999999.;
+float container1D::getYMax(bool dividebybinwidth,const int& systLayer) const{
+	float max=-999999999999.;
 	for(size_t i=1;i<bins_.size()-1;i++){ //only in visible bins
-		double binc=getBinContent(i,systLayer);
+		float binc=getBinContent(i,systLayer);
 		if(dividebybinwidth) binc*= 1/getBinWidth(i);
 		if(max < binc) max = binc;
 	}
@@ -590,10 +593,10 @@ double container1D::getYMax(bool dividebybinwidth,const int& systLayer) const{
 /**
  * only for visible bins
  */
-double container1D::getYMin(bool dividebybinwidth,const int& systLayer) const{
-	double min=999999999999.;
+float container1D::getYMin(bool dividebybinwidth,const int& systLayer) const{
+	float min=999999999999.;
 	for(size_t i=1;i<bins_.size()-1;i++){ //only in visible bins
-		double binc=getBinContent(i,systLayer);
+		float binc=getBinContent(i,systLayer);
 		if(dividebybinwidth) binc*= 1/getBinWidth(i);
 		if(min > binc) min = binc;
 	}
@@ -603,8 +606,8 @@ double container1D::getYMin(bool dividebybinwidth,const int& systLayer) const{
 /**
  * normalizes container and returns normalization factor (to reverse normalization)
  */
-double container1D::normalize(bool includeUFOF,const double& normto){
-	double norm=normto/integral(includeUFOF);
+float container1D::normalize(bool includeUFOF,const float& normto){
+	float norm=normto/integral(includeUFOF);
 	*this *= norm;
 	return norm;
 }
@@ -626,21 +629,22 @@ void container1D::clear(){
  * creates new TH1D and returns pointer to it
  *  getTH1D(TString name="", bool dividebybinwidth=true, bool onlystat=false)
  */
-TH1D * container1D::getTH1D(TString name, bool dividebybinwidth, bool onlystat) const{
+TH1D * container1D::getTH1D(TString name, bool dividebybinwidth, bool onlystat, bool nostat) const{
 	if(name=="") name=name_;
 	if(bins_.size() < 2)
 		return 0;
 	if(debug)
 		std::cout << "container1D::getTH1D: bins ok, creating TH1D" <<std::endl;
 	TH1D *  h = new TH1D(name,name,getNBins(),&(bins_.at(1)));
-	double entriessum=0;
+	float entriessum=0;
 	if(debug)
 		std::cout << "container1D::getTH1D: bins ok, filling TH1D bins" <<std::endl;
 	for(size_t i=0;i<=getNBins()+1;i++){ // 0 underflow, genBins+1 overflow
-		double cont=getBinContent(i);
+		float cont=getBinContent(i);
 		if(dividebybinwidth && i>0 && i<getNBins()+1) cont=cont/getBinWidth(i);
 		h->SetBinContent(i,cont);
-		double err=getBinError(i,onlystat);
+		float err=getBinError(i,onlystat);
+		if(nostat) err-=getBinError(i,true);
 		if(dividebybinwidth && i>0 && i<getNBins()+1) err=err/getBinWidth(i);
 		h->SetBinError(i,err);
 		entriessum +=contents_.getBin(i).getEntries();
@@ -676,8 +680,8 @@ TH1D * container1D::getTH1DSyst(TString name, size_t systNo, bool dividebybinwid
 
 	//now shift by systematic
 	for(size_t i=0;i<=getNBins()+1;i++){ // 0 underflow, genBins+1 overflow
-		double newcont=getBin(i,systNo).getContent();
-		double newstat=getBin(i,systNo).getStat();
+		float newcont=getBin(i,systNo).getContent();
+		float newstat=getBin(i,systNo).getStat();
 		if(dividebybinwidth){
 			newcont=newcont/getBinWidth(i);
 			newstat=newstat/getBinWidth(i);
@@ -714,11 +718,11 @@ container1D & container1D::import(TH1 * h,bool isbinwidthdivided){
 	container1D out(cbins,h->GetName(),h->GetXaxis()->GetTitle(),h->GetYaxis()->GetTitle(),false);
 	*this=out;
 	for(int bin=0;bin<=nbins+1;bin++){
-		double cont=h->GetBinContent(bin);
+		float cont=h->GetBinContent(bin);
 		if(isbinwidthdivided && bin>0 && bin<nbins)
 			cont*=getBinWidth(bin);
 		setBinContent(bin,cont);
-		double err=h->GetBinError(bin);
+		float err=h->GetBinError(bin);
 		if(isbinwidthdivided && bin>0 && bin<nbins)
 			err*=getBinWidth(bin);
 		setBinStat(bin,err);
@@ -726,22 +730,22 @@ container1D & container1D::import(TH1 * h,bool isbinwidthdivided){
 	return *this;
 }
 
-void container1D::writeTH1D(TString name, bool dividebybinwidth,bool onlystat) const{
-	TH1D * h = getTH1D(name,dividebybinwidth,onlystat);
+void container1D::writeTH1D(TString name, bool dividebybinwidth,bool onlystat, bool nostat) const{
+	TH1D * h = getTH1D(name,dividebybinwidth,onlystat,nostat);
 	h->Draw();
 	h->Write();
 	delete h;
 }
 
-TGraphAsymmErrors * container1D::getTGraph(TString name, bool dividebybinwidth, bool onlystat, bool noXErrors) const{
+TGraphAsymmErrors * container1D::getTGraph(TString name, bool dividebybinwidth, bool onlystat, bool noXErrors, bool nostat) const{
 
 	if(name=="") name=name_;
-	double x[getNBins()];
-	double xeh[getNBins()];
-	double xel[getNBins()];
-	double y[getNBins()];
-	double yel[getNBins()];
-	double yeh[getNBins()];
+	float x[getNBins()];
+	float xeh[getNBins()];
+	float xel[getNBins()];
+	float y[getNBins()];
+	float yel[getNBins()];
+	float yeh[getNBins()];
 	for(size_t i=1;i<=getNBins();i++){
 		x[i-1]=getBinCenter(i);
 		float scale=1;
@@ -776,15 +780,15 @@ TGraphAsymmErrors * container1D::getTGraph(TString name, bool dividebybinwidth, 
 
 	return g;
 }
-TGraphAsymmErrors * container1D::getTGraphSwappedAxis(TString name, bool dividebybinwidth, bool onlystat, bool noXErrors) const{
+TGraphAsymmErrors * container1D::getTGraphSwappedAxis(TString name, bool dividebybinwidth, bool onlystat, bool noXErrors, bool nostat) const{
 
 	if(name=="") name=name_;
-	double x[getNBins()];
-	double xeh[getNBins()];
-	double xel[getNBins()];
-	double y[getNBins()];
-	double yel[getNBins()];
-	double yeh[getNBins()];
+	float x[getNBins()];
+	float xeh[getNBins()];
+	float xel[getNBins()];
+	float y[getNBins()];
+	float yel[getNBins()];
+	float yeh[getNBins()];
 	for(size_t i=1;i<=getNBins();i++){
 		x[i-1]=getBinCenter(i);
 		float scale=1;
@@ -819,8 +823,8 @@ TGraphAsymmErrors * container1D::getTGraphSwappedAxis(TString name, bool divideb
 
 	return g;
 }
-void container1D::writeTGraph(TString name, bool dividebybinwidth, bool onlystat,bool noXErrors) const{
-	TGraphAsymmErrors * g=getTGraph(name,dividebybinwidth,onlystat,noXErrors);
+void container1D::writeTGraph(TString name, bool dividebybinwidth, bool onlystat,bool noXErrors, bool nostat) const{
+	TGraphAsymmErrors * g=getTGraph(name,dividebybinwidth,onlystat,noXErrors,nostat);
 	g->SetName(name);
 	g->Draw("AP");
 	g->Write();
@@ -838,7 +842,7 @@ void container1D::drawFullPlot(TString name, bool dividebybinwidth,const TString
 }
 
 void container1D::setDivideBinomial(bool divideBinomial){
-	divideBinomial_=divideBinomial;
+	//divideBinomial_=divideBinomial;
 	std::cout << "container1D::setDivideBinomial not needed anymore!" << name_ << std::endl;
 }
 
@@ -900,12 +904,12 @@ container1D container1D::operator * (const container1D & multiplier){
 	out *= multiplier;
 	return out;
 }
-container1D & container1D::operator *= (double scalar){
+container1D & container1D::operator *= (float scalar){
 	contents_ *= scalar;
 	return *this;
 }
 
-container1D container1D::operator * (double scalar){
+container1D container1D::operator * (float scalar){
 	container1D out= * this;
 	out*=scalar;
 	return out;
@@ -983,10 +987,10 @@ container1D container1D::rebin(size_t merge) const{
 
 
 /*
- * container1D::addErrorContainer(TString sysname,container1D deviatingContainer, double weight)
+ * container1D::addErrorContainer(TString sysname,container1D deviatingContainer, float weight)
  * same named systematics do not exist by construction, makes all <>StatCorrelated options obsolete
  */
-void container1D::addErrorContainer(const TString & sysname,const container1D & deviatingContainer, double weight){
+void container1D::addErrorContainer(const TString & sysname,const container1D & deviatingContainer, float weight){
 	if(bins_!=deviatingContainer.bins_){
 		std::cout << "container1D::addErrorContainer(): not same binning! doing nothing for "<<name_ << " " << sysname << std::endl;
 		return;
@@ -1036,21 +1040,21 @@ void container1D::addRelSystematicsFrom(const ztop::container1D & rhs){
 	histoContent::subtractStatCorrelated=tempSubtractStatCorrelated;
 
 }
-void container1D::addGlobalRelErrorUp(const TString & sysname,const double &relerr){
+void container1D::addGlobalRelErrorUp(const TString & sysname,const float &relerr){
 	if(sysname.EndsWith("_up") || sysname.EndsWith("_down")){
 		std::cout << "container1D::addGlobalRelErrorUp: name of syst. mustn't be named <>_up or <>_down! this is done automatically! doing nothing" << std::endl;
 		return;
 	}
 	addErrorContainer(sysname+"_up", ((*this) * (relerr+1)));
 }
-void container1D::addGlobalRelErrorDown(const TString & sysname,const double &relerr){
+void container1D::addGlobalRelErrorDown(const TString & sysname,const float &relerr){
 	if(sysname.EndsWith("_up") || sysname.EndsWith("_down")){
 		std::cout << "container1D::addGlobalRelErrorDown: name of syst. mustn't be named <>_up or <>_down! this is done automatically! doing nothing" << std::endl;
 		return;
 	}
 	addErrorContainer(sysname+"_down", ((*this) * (1-relerr)));
 }
-void container1D::addGlobalRelError(const TString & sysname,const double &relerr){
+void container1D::addGlobalRelError(const TString & sysname,const float &relerr){
 	addGlobalRelErrorUp(sysname,relerr);
 	addGlobalRelErrorDown(sysname,relerr);
 }
@@ -1072,8 +1076,8 @@ void container1D::transformStatToSyst(const TString &sysname){
 	down.removeAdditionalLayers();
 	up.removeAdditionalLayers();
 	for(size_t bin=0;bin<nominal.size();bin++){
-		double nom=nominal.getBin(bin).getContent();
-		double stat=nominal.getBin(bin).getStat();
+		float nom=nominal.getBin(bin).getContent();
+		float stat=nominal.getBin(bin).getStat();
 		up.getBin(bin).setContent(nom+stat);
 		up.getBin(bin).setStat(0);
 		down.getBin(bin).setContent(nom-stat);
@@ -1130,7 +1134,7 @@ void container1D::coutBinContent(size_t bin) const{
 		cout << "container1D::coutBinContent: "<< bin << " bin out of range" <<endl;
 		return;
 	}
-	double content=getBinContent(bin);
+	float content=getBinContent(bin);
 	cout << "container1D::coutBinContent: bin " << bin << endl;
 	cout << content << " \t+-" << getBinStat(bin) << endl;
 	for(int i=0;i<(int) getSystSize();i++){
@@ -1152,9 +1156,9 @@ TString container1D::stripVariation(const TString &in) const{
 /**
  * not protected!!
  */
-double container1D::getDominantVariationUp( TString  sysname, const size_t& bin) const{ //copy on purpose
-	double up=0,down=0;
-	const double & cont=contents_.getBin(bin).getContent();
+float container1D::getDominantVariationUp( TString  sysname, const size_t& bin) const{ //copy on purpose
+	float up=0,down=0;
+	const float & cont=contents_.getBin(bin).getContent();
 	size_t idx=contents_.getLayerIndex(sysname+"_up");
 	if(idx >= contents_.layerSize())
 		std::cout << "container1D::getDominantVariationUp: serious error: " << sysname << "_up not found" << std::endl;
@@ -1166,9 +1170,9 @@ double container1D::getDominantVariationUp( TString  sysname, const size_t& bin)
 	if(up>down)down=up;
 	return down;
 }
-double container1D::getDominantVariationDown( TString  sysname, const size_t& bin) const{//copy on purpose
-	double up=0,down=0;
-	const double & cont=contents_.getBin(bin).getContent();
+float container1D::getDominantVariationDown( TString  sysname, const size_t& bin) const{//copy on purpose
+	float up=0,down=0;
+	const float & cont=contents_.getBin(bin).getContent();
 	size_t idx=contents_.getLayerIndex(sysname+"_up");
 	if(idx >= contents_.layerSize())
 		std::cout << "container1D::getDominantVariationDown: serious error: " << sysname << "_up not found" << std::endl;
@@ -1216,7 +1220,7 @@ void container1D::copyFrom(const container1D& c){
 	mergeufof_=c.mergeufof_;
 	wasunderflow_=c.wasunderflow_;
 	wasoverflow_=c.wasoverflow_;
-	divideBinomial_=c.divideBinomial_;
+	//divideBinomial_=c.divideBinomial_;
 	name_=c.name_, xname_=c.xname_, yname_=c.yname_;
 	labelmultiplier_=c.labelmultiplier_;
 

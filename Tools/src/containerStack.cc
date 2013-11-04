@@ -35,7 +35,7 @@ void containerStack::push_back(ztop::container1D cont, TString legend, int color
 			if(containerStack::debug)
 				std::cout << "containerStack::push_back(1D): found same legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
 			containers_[i] = containers_[i] * norms_[i] + cont * norm;
-			containers_[i].setName("c_" +legend);
+			containers_[i].setName("c_" +legend+"_"+getName());
 			norms_[i]=1;
 			legorder_[i]=legord;
 			wasthere=true;
@@ -45,7 +45,7 @@ void containerStack::push_back(ztop::container1D cont, TString legend, int color
 	if(!wasthere){
 		if(containerStack::debug)
 			std::cout << "containerStack::push_back (1D): new legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
-		cont.setName("c_" +legend);
+		cont.setName("c_" +legend+"_"+getName());
 		containers_.push_back(cont*norm);
 		legends_.push_back(legend);
 		colors_.push_back(color);
@@ -67,7 +67,7 @@ void containerStack::push_back(ztop::container2D cont, TString legend, int color
 			if(containerStack::debug)
 				std::cout << "containerStack::push_back(2D): found same legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
 			containers2D_[i] = containers2D_[i] * norms_[i] + cont * norm;
-			containers2D_[i].setName("c_" +legend);
+			containers2D_[i].setName("c_" +legend+"_"+getName());
 			norms_[i]=1;
 			legorder_[i]=legord;
 			wasthere=true;
@@ -77,7 +77,7 @@ void containerStack::push_back(ztop::container2D cont, TString legend, int color
 	if(!wasthere){
 		if(containerStack::debug)
 			std::cout << "containerStack::push_back (2D): new legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
-		cont.setName("c_" +legend);
+		cont.setName("c_" +legend+"_"+getName());
 		containers2D_.push_back(cont*norm);
 		legends_.push_back(legend);
 		colors_.push_back(color);
@@ -101,7 +101,7 @@ void containerStack::push_back(ztop::container1DUnfold cont, TString legend, int
 			containers1DUnfold_[i] = containers1DUnfold_[i] * norms_[i]  + cont * norm;
 			containers1DUnfold_[i].setName("c_" +legend);
 			containers_[i] = containers_[i] * norms_[i] + cont1d * norm;
-			containers_[i].setName("c_" +legend);
+			containers_[i].setName("c_" +legend+"_"+getName());
 			norms_[i]=1;
 			legorder_[i]=legord;
 			wasthere=true;
@@ -111,9 +111,9 @@ void containerStack::push_back(ztop::container1DUnfold cont, TString legend, int
 	if(!wasthere){
 		if(containerStack::debug)
 			std::cout << "containerStack::push_back (1DUF): new legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
-		cont.setName("c_" +legend);
+		cont.setName("c_" +legend+"_"+getName());
 		containers1DUnfold_.push_back(cont * norm);
-		cont1d.setName("c_" +legend);
+		cont1d.setName("c_" +legend+"_"+getName());
 		containers_.push_back(cont1d * norm);
 		legends_.push_back(legend);
 		colors_.push_back(color);
@@ -181,71 +181,82 @@ int containerStack::getContributionIdx(TString legname) const{
 	return -1;
 }
 
-ztop::container1D containerStack::getContribution(TString contr){
+ztop::container1D containerStack::getContribution(TString contr) const{
 	ztop::container1D out;
 	int idx=getContributionIdx(contr);
 	if(idx<0 || mode != dim1)
 		return out;
-	else
-		return containers_.at(idx) * norms_.at(idx);
+	out=containers_.at(idx);
+	out*= norms_.at(idx);
+	return out;
 }
-ztop::container2D containerStack::getContribution2D(TString contr){
+ztop::container2D containerStack::getContribution2D(TString contr)const{
 	ztop::container2D out;
 	int idx=getContributionIdx(contr);
 	if(idx<0 || mode != dim2)
 		return out;
-	else
-		return containers2D_.at(idx) * norms_.at(idx);
+	out=containers2D_.at(idx);
+	out*= norms_.at(idx);
+	return out;
 }
-ztop::container1DUnfold containerStack::getContribution1DUnfold(TString contr){
+ztop::container1DUnfold containerStack::getContribution1DUnfold(TString contr)const{
 	ztop::container1DUnfold out;
 	int idx=getContributionIdx(contr);
 	if(idx<0 || mode != unfolddim1)
 		return out;
-	else
-		return containers1DUnfold_.at(idx) * norms_.at(idx);
-	return out; //prevents warning
+	out=containers1DUnfold_.at(idx);
+	out*= norms_.at(idx);
+	return out;
 }
-ztop::container1D containerStack::getContributionsBut(TString contr){
+ztop::container1D containerStack::getContributionsBut(TString contr)const{
 	ztop::container1D out;
 	if(mode != dim1)
 		return out;
 	out=containers_.at(0);
 	out.clear();
 	int i=0;
-	for(std::vector<TString>::iterator name=legends_.begin();name<legends_.end();++name){
-		if(contr != *name) out=out+containers_[i] * norms_[i];
+	for(std::vector<TString>::const_iterator name=legends_.begin();name<legends_.end();++name){
+		if(contr != *name){
+			container1D temp=containers_[i];
+			out=out+temp * norms_[i];
+		}
 		i++;
 	}
 	return out;
 }
-ztop::container2D containerStack::getContributions2DBut(TString contr){
+ztop::container2D containerStack::getContributions2DBut(TString contr) const{
 	ztop::container2D out;
 	if(mode != dim2)
 		return out;
 	out=containers2D_.at(0);
 	out.clear();
 	int i=0;
-	for(std::vector<TString>::iterator name=legends_.begin();name<legends_.end();++name){
-		if(contr != *name) out=out+containers2D_[i] * norms_[i];
+	for(std::vector<TString>::const_iterator name=legends_.begin();name<legends_.end();++name){
+		if(contr != *name){
+			container2D temp=containers2D_[i];
+			out=out+temp * norms_[i];
+		}
 		i++;
 	}
 	return out;
 }
-ztop::container1DUnfold containerStack::getContributions1DUnfoldBut(TString contr){
+ztop::container1DUnfold containerStack::getContributions1DUnfoldBut(TString contr) const{
 	ztop::container1DUnfold out;
 	if(mode != dim2)
 		return out;
 	out=containers1DUnfold_.at(0);
 	out.clear();
 	int i=0;
-	for(std::vector<TString>::iterator name=legends_.begin();name<legends_.end();++name){
-		if(contr != *name) out=out+containers1DUnfold_[i] * norms_[i];
+	for(std::vector<TString>::const_iterator name=legends_.begin();name<legends_.end();++name){
+		if(contr != *name){
+			container1DUnfold temp=containers1DUnfold_[i];
+			out=out+temp * norms_[i];
+		}
 		i++;
 	}
 	return out;
 }
-ztop::container1D containerStack::getContributionsBut(std::vector<TString> contr){
+ztop::container1D containerStack::getContributionsBut(std::vector<TString> contr) const{
 	ztop::container1D out;
 	if(mode!=dim1)
 		return out;
@@ -253,17 +264,20 @@ ztop::container1D containerStack::getContributionsBut(std::vector<TString> contr
 	out.clear();
 	for(unsigned int i=0;i<legends_.size();i++){
 		bool get=true;
-		for(std::vector<TString>::iterator name=contr.begin();name<contr.end();++name){
+		for(std::vector<TString>::const_iterator name=contr.begin();name<contr.end();++name){
 			if(*name == legends_[i]){
 				get=false;
 				break;
 			}
 		}
-		if(get) out += containers_[i] * norms_[i];
+		if(get){
+			container1D temp=containers_[i];
+			out +=  temp* norms_[i];
+		}
 	}
 	return out;
 }
-ztop::container2D containerStack::getContributions2DBut(std::vector<TString> contr){
+ztop::container2D containerStack::getContributions2DBut(std::vector<TString> contr) const{
 	ztop::container2D out;
 	if(mode!=dim2)
 		return out;
@@ -271,17 +285,20 @@ ztop::container2D containerStack::getContributions2DBut(std::vector<TString> con
 	out.clear();
 	for(unsigned int i=0;i<legends_.size();i++){
 		bool get=true;
-		for(std::vector<TString>::iterator name=contr.begin();name<contr.end();++name){
+		for(std::vector<TString>::const_iterator name=contr.begin();name<contr.end();++name){
 			if(*name == legends_[i]){
 				get=false;
 				break;
 			}
 		}
-		if(get) out = out+ containers2D_[i] * norms_[i];
+		if(get){
+			container2D temp=containers2D_[i] ;
+			out = out+ temp* norms_[i];
+		}
 	}
 	return out;
 }
-ztop::container1DUnfold containerStack::getContributions1DUnfoldBut(std::vector<TString> contr){
+ztop::container1DUnfold containerStack::getContributions1DUnfoldBut(std::vector<TString> contr) const{
 	ztop::container1DUnfold out;
 	if(mode!=unfolddim1)
 		return out;
@@ -289,13 +306,16 @@ ztop::container1DUnfold containerStack::getContributions1DUnfoldBut(std::vector<
 	out.clear();
 	for(unsigned int i=0;i<legends_.size();i++){
 		bool get=true;
-		for(std::vector<TString>::iterator name=contr.begin();name<contr.end();++name){
+		for(std::vector<TString>::const_iterator name=contr.begin();name<contr.end();++name){
 			if(*name == legends_[i]){
 				get=false;
 				break;
 			}
 		}
-		if(get) out = out+ containers1DUnfold_[i] * norms_[i];
+		if(get){
+			container1DUnfold temp=containers1DUnfold_[i] ;
+			out = out+ temp* norms_[i];
+		}
 	}
 	return out;
 }
@@ -463,6 +483,7 @@ void containerStack::renameSyst(TString old, TString New){
 	}
 }
 ztop::container1D & containerStack::getContainer(TString name){
+
 	bool found=false;
 	for(unsigned int i=0;i<containers_.size();i++){
 		if(containers_[i].getName() == name){
@@ -501,36 +522,45 @@ ztop::container1DUnfold & containerStack::getContainer1DUnfold(TString name){
 	if(!found) std::cout << "containerStack::getContainer1DUnfold: container with name " << name << " not found, returning first container! all names are formatted: c_legendentry" << std::endl;
 	return containers1DUnfold_.at(0);
 }
-ztop::container1D containerStack::getFullMCContainer(){
+ztop::container1D containerStack::getFullMCContainer()const{
 	container1D out;
 	if(containers_.size()<1)
 		return out;
 	out=containers_[0];
 	out.clear();
 	for(unsigned int i=0;i<containers_.size();i++){
-		if(legends_[i] != dataleg_) out = out + containers_[i]*norms_[i];
+		if(legends_[i] != dataleg_) {
+			container1D temp=containers_[i];
+			out = out + temp*norms_[i];
+		}
 	}
 	return out;
 }
-ztop::container2D containerStack::getFullMCContainer2D(){
+ztop::container2D containerStack::getFullMCContainer2D()const{
 	container2D out;
 	if(containers2D_.size()<1)
 		return out;
 	out=containers2D_[0];
 	out.clear();
 	for(unsigned int i=0;i<containers2D_.size();i++){
-		if(legends_[i] != dataleg_) out = out + containers2D_[i]*norms_[i];
+		if(legends_[i] != dataleg_){
+			container2D temp= containers2D_[i];
+			out = out + temp*norms_[i];
+		}
 	}
 	return out;
 }
-ztop::container1DUnfold containerStack::getFullMCContainer1DUnfold(){
+ztop::container1DUnfold containerStack::getFullMCContainer1DUnfold()const {
 	container1DUnfold out;
 	if(containers1DUnfold_.size()<1)
 		return out;
 	out=containers1DUnfold_[0];
 	out.clear();
 	for(unsigned int i=0;i<containers1DUnfold_.size();i++){
-		if(legends_[i] != dataleg_) out = out + containers1DUnfold_[i]*norms_[i];
+		if(legends_[i] != dataleg_){
+			container1DUnfold temp=containers1DUnfold_[i];
+			out = out + temp*norms_[i];
+		}
 	}
 	return out;
 }
@@ -723,13 +753,26 @@ void containerStack::drawRatioPlot(TString name,double resizelabels){
 	container1D ratio=data;
 	ratio.clear();
 	ratio.setShowWarnings(false);
-	container1D relmcerr=data;
-	relmcerr.clear();
+	container1D relmcerrstat=data;
+	relmcerrstat.clear();
+	container1D relmcerrsys=relmcerrstat;
 	container1D mccopy=mc;
 	for(size_t i=0; i<ratio.getNBins()+1; i++){ //includes underflow right now, doesn't matter
-		relmcerr.setBinContent(i,1.);
-		relmcerr.setBinErrorUp(i,mc.getBinErrorUp(i) / mc.getBinContent(i));
-		relmcerr.setBinErrorDown(i,mc.getBinErrorDown(i) / mc.getBinContent(i));
+		relmcerrstat.setBinContent(i,1.);
+		double errfullup=mc.getBinErrorUp(i)/mc.getBinContent(i);
+		double errfulldown=mc.getBinErrorDown(i) / mc.getBinContent(i);
+		double errstatup=mc.getBinErrorUp(i,true)/mc.getBinContent(i);
+		double errstatdown=mc.getBinErrorDown(i,true) / mc.getBinContent(i);
+		double errsysup=sqrt(errfullup*errfullup - errstatup*errstatup);
+		double errsysdown=sqrt(errfulldown*errfulldown - errstatdown*errstatdown);
+		if(mc.getBinContent(i) ==0){
+			errfullup=0;errfulldown=0;errsysup=0;errsysdown=0;
+		}
+		relmcerrstat.setBinErrorUp(i,errfullup);
+		relmcerrstat.setBinErrorDown(i,errfulldown);
+		relmcerrsys.setBinContent(i,1.);
+		relmcerrsys.setBinErrorUp(i,errsysup);
+		relmcerrsys.setBinErrorDown(i,errsysdown);
 		//set mc error to zero for the ratio plot
 		mccopy.setBinErrorUp(i,0);
 		mccopy.setBinErrorDown(i,0);
@@ -756,9 +799,15 @@ void containerStack::drawRatioPlot(TString name,double resizelabels){
 	h->GetXaxis()->SetTickLength(0.03 * multiplier);
 	h->Draw("AXIS");
 	gratio->Draw("P");
-	TGraphAsymmErrors * gmcerr = relmcerr.getTGraph(name+"_relerr",false,false,false);
+	TGraphAsymmErrors * gmcerr = relmcerrstat.getTGraph(name+"_relerrstat",false,false,false);
+	TGraphAsymmErrors * gmcerrsys = relmcerrsys.getTGraph(name+"_relerrsys",false,false,false);
 	gmcerr->SetFillStyle(3005);
+	gmcerrsys->SetFillStyle(1001);
+	gmcerrsys->SetFillColor(kCyan-10);
+	gmcerrsys->Draw("2,same");
 	gmcerr->Draw("2,same");
+	gratio->Draw("P,same");
+
 	TLine * l = new TLine(mc.getXMin(),1,mc.getXMax(),1);
 	l->Draw("same");
 	float xmax=containers_[dataentry].getXMax();
@@ -1021,8 +1070,10 @@ TCanvas * containerStack::makeTCanvas(plotmode plotMode){
 		c->cd(2)->SetLeftMargin(0.15);
 		c->cd(2)->SetTopMargin(0);
 		c->cd(2)->SetPad(0,0,1,divideat);
-		if(plotMode == ratio)
+		if(plotMode == ratio){
 			drawRatioPlot("",labelresize);
+			c->cd(2)->RedrawAxis();
+		}
 		else if(plotMode == sigbg)
 			drawPEffPlot("",labelresize);
 		c->cd(1)->RedrawAxis();
@@ -1344,6 +1395,32 @@ bool containerStack::checknorms() const{
 			}
 		}
 	}
+	return out;
+}
+
+
+container1DUnfold containerStack::getSignalContainer(const std::vector<TString> &sign) const{
+	bool mklist=container1DUnfold::c_makelist;
+	container1DUnfold::c_makelist=false;
+	if(mode!=unfolddim1){
+		std::cout << "containerStack::getSignalContainer: bo container1DUnfold content, return empty" <<std::endl;
+		container1DUnfold c;
+		container1DUnfold::c_makelist=mklist;
+		return c;
+	}
+	std::vector<TString> signals=sign;
+	if(signals.size()<1)
+		signals=signals_;
+	container1DUnfold out;
+	if(containers1DUnfold_.size()>0)
+		out=containers1DUnfold_.at(0);
+	out.clear();
+	for(size_t i=0;i<signals.size();i++){
+		container1DUnfold ctemp=getContribution1DUnfold(signals.at(i));
+		out = out + ctemp;
+	}
+
+	container1DUnfold::c_makelist=mklist;
 	return out;
 }
 

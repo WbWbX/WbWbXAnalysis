@@ -13,6 +13,7 @@
 
 
 namespace ztop{
+std::vector<TString> controlPlotBasket::namelist;
 
 controlPlotBasket::~controlPlotBasket(){
 	for(size_t i=0;i<cplots_.size();i++)
@@ -30,11 +31,23 @@ container1D * controlPlotBasket::addPlot(const TString & name, const TString & x
 			std::cout << "controlPlotBasket::addPlot: puweight needs to be set" << std::endl;
 			throw std::logic_error("controlPlotBasket::addPlot: puweight needs to be set");
 		}
-		container1D * cont = new container1D(tempbins_,name+" step "+toTString(tmpstep_), xaxisname, yaxisname, mergeufof);
-		cplots_.at(tmpstep_).push_back(cont);
+		TString newname=name+" step "+toTString(tmpstep_);
+		for(size_t i=0;i<namelist.size();i++){
+			if(namelist.at(i) == newname){
+				std::cout <<"controlPlotBasket::addPlot: plots cannot have same names!" << std::endl;
+				throw std::logic_error("controlPlotBasket::addPlot: plots cannot have same names!");
+			}
+		}
+		//container1D * cont = new container1D(tempbins_,newname, xaxisname, yaxisname, mergeufof);
+		bool temp=container1D::c_makelist;
+		container1D::c_makelist=false;
+		container1D tcont(tempbins_,newname, xaxisname, yaxisname, mergeufof);
+		container1D::c_makelist=temp;
+		namelist.push_back(tcont.getName());
+		scplots_.at(tmpstep_).push_back(tcont);
 	}
 	//else just return pointer
-	lcont_=cplots_[tmpstep_][tmpidx_++];
+	lcont_=&scplots_[tmpstep_][tmpidx_++];
 	return lcont_;//; //not safe but fast
 }
 
@@ -49,8 +62,10 @@ void controlPlotBasket::initStep(const size_t & step){
 	}
 	else if(step==size_){//create step
 		tmpnewstep_=true;
-		cplots_.push_back(std::vector<container1D *>());
-		size_=cplots_.size();
+		//cplots_.push_back(std::vector<container1D *>());
+		scplots_.push_back(std::vector<container1D >());
+
+		size_=scplots_.size();
 		return;
 	}
 

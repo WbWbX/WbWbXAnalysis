@@ -21,6 +21,7 @@ namespace ztop{
  */
 int scalefactors::setInput(TString filename, TString histname){
 	TFile *  f= new TFile(filename, "READ");
+	isglobal_=false;
 	if(f->IsZombie()){
 		std::cout << "scalefactors::setInput: file " << filename << " not found.!" << std::endl;
 		throw std::runtime_error("scalefactors::setInput: file not found");
@@ -35,12 +36,14 @@ int scalefactors::setInput(TString filename, TString histname){
 		th2d_ = *(TH2D*)ph;
 		h = & th2d_;
 		isth2d_=true;
+		isglobal_=false;
 		return 0;
 	}
 	else if(classname.Contains("TH1D")){
 		th1d_ = *(TH1D*)ph;
 		h = & th1d_;
 		isth2d_=false;
+		isglobal_=false;
 		return 0;
 	}
 	else{
@@ -49,6 +52,16 @@ int scalefactors::setInput(TString filename, TString histname){
 	}
 
 }
+/**
+ * errors in percent!
+ */
+void scalefactors::setGlobal(double sf, double errup,double errdown){
+	glsf_=sf;
+	glsfup_=glsf_+errup/100;
+	glsfd_=glsf_-errdown/100;
+	isglobal_=true;
+}
+
 /**
  * sets systematic variation.
  * returns -1 in case of no success and sets to nominal

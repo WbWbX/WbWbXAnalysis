@@ -11,7 +11,7 @@ namespace ztop{
 
 
 
-void histoBin::multiply(const double&val){
+void histoBin::multiply(const float&val){
 	content_*=val;
 	stat2_=stat2_*val*val;
 	entries_*=val;
@@ -49,7 +49,7 @@ int histoBins::add(const histoBins& rhs,bool statCorr){
 		return -1;
 	for(size_t i=0;i<size();i++){
 		getBin(i).addToContent(rhs.getBin(i).getContent());
-		double staterr=0;
+		float staterr=0;
 		if(statCorr){
 			staterr=getBin(i).getStat()+rhs.getBin(i).getStat();
 			getBin(i).setStat(staterr);
@@ -71,7 +71,7 @@ int histoBins::subtract(const histoBins& rhs,bool statCorr){
 		return -1;
 	for(size_t i=0;i<size();i++){
 		getBin(i).setContent(getBin(i).getContent()-rhs.getBin(i).getContent());
-		double staterr=0;
+		float staterr=0;
 		if(statCorr){
 			staterr=getBin(i).getStat()-rhs.getBin(i).getStat();
 			getBin(i).setStat(staterr);
@@ -92,7 +92,7 @@ int histoBins::divide(const histoBins& rhs,bool statCorr){
 	if(size()!=rhs.size())
 		return -1;
 	for(size_t i=0;i<size();i++){
-		double div=0;
+		float div=0;
 		if(rhs.getBin(i).getContent()==0){
 			if(showwarnings) std::cout << "histoBins::divide: 0 content in bin " << i << std::endl;
 			div=0;
@@ -100,7 +100,7 @@ int histoBins::divide(const histoBins& rhs,bool statCorr){
 		else{
 			div=getBin(i).getContent()/rhs.getBin(i).getContent();
 		}
-		double staterr2=0;
+		float staterr2=0;
 		if(statCorr){
 			staterr2=fabs(div*(1-div)/rhs.getBin(i).getContent());
 			if(staterr2!=staterr2) staterr2=0; //nan safe
@@ -124,16 +124,16 @@ int histoBins::multiply(const histoBins& rhs,bool statCorr){
 	if(size()!=rhs.size())
 		return -1;
 	for(size_t i=0;i<size();i++){
-		const double & ca=getBin(i).getContent();
-		const double & cb=rhs.getBin(i).getContent();
-		const double & ea2=getBin(i).getStat2();
-		const double & eb2=rhs.getBin(i).getStat2();
+		const float & ca=getBin(i).getContent();
+		const float & cb=rhs.getBin(i).getContent();
+		const float & ea2=getBin(i).getStat2();
+		const float & eb2=rhs.getBin(i).getStat2();
 
-		double mult=ca*cb;
-		double staterr2=0;
+		float mult=ca*cb;
+		float staterr2=0;
 		if(statCorr){
-			double ea=sqrt(ea2);
-			double eb=sqrt(eb2);
+			float ea=sqrt(ea2);
+			float eb=sqrt(eb2);
 			staterr2=(ca+ea)*(cb+eb) - mult;
 		}
 		else{
@@ -146,7 +146,7 @@ int histoBins::multiply(const histoBins& rhs,bool statCorr){
 	}
 	return 0;
 }
-void histoBins::multiply(const double& val){
+void histoBins::multiply(const float& val){
 	for(size_t i=0;i<size();i++)
 		bins_[i].multiply(val);
 }

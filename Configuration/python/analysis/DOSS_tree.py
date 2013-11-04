@@ -390,40 +390,15 @@ else:
 
 #from PhysicsTools.PatAlgos.patTemplate_cfg import *
 
-
+############All filters################
 filtervertices=True
 if isSignal:
     filtervertices=False
+process.load("RecoMET.METFilters.metFilters_cff")
 
-## The good primary vertex filter ____________________________________________||
-process.primaryVertexFilter = cms.EDFilter(
-    "VertexSelector",
-    src = cms.InputTag("offlinePrimaryVertices"),
-    cut = cms.string("!isFake && ndof > 4 && abs(z) <= 24 && position.Rho <= 2"),
-    filter = cms.bool(filtervertices)
-    )
+process.filtersSeq = cms.Sequence(process.metFilters)
 
-## The beam scraping filter __________________________________________________||
-process.noscraping = cms.EDFilter(
-    "FilterOutScraping",
-    applyfilter = cms.untracked.bool(True),
-    debugOn = cms.untracked.bool(False),
-    numtrack = cms.untracked.uint32(10),
-    thresh = cms.untracked.double(0.25)
-    )
-
-## The iso-based HBHE noise filter ___________________________________________||
-process.load('CommonTools.RecoAlgos.HBHENoiseFilter_cfi')
-
-
-
-
-## The tracking POG filters __________________________________________________||
-#process.load('RecoMET.METFilters.trackingPOGFilters_cff')
-
-process.filtersSeq = cms.Sequence()
-
-if is2011 or not isPrompt:
+if is2011:
     process.filtersSeq = cms.Sequence(
         process.primaryVertexFilter *
         #process.goodVertices *
@@ -431,14 +406,8 @@ if is2011 or not isPrompt:
         process.HBHENoiseFilter 
         )
 
-
-
-if isMC:
+if isMC: #no data filters in MC
     process.filtersSeq = cms.Sequence()
-
-
-### if its not signal do some pre filtering:
-
     
 if not isSignal:
     process.preFilterSequence += process.requireRecoLeps

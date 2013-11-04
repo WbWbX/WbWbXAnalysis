@@ -22,48 +22,48 @@ public:
 	histoBin(TString name):content_(0),entries_(0),stat2_(0),name_(name){}
 	~histoBin(){}
 
-	const double & getContent() const {return content_;}
-	double getStat()            const {return sqrt(stat2_);}
+	const float & getContent() const {return content_;}
+	float getStat()            const {return sqrt(stat2_);}
 	const size_t & getEntries() const {return entries_;}
-	const double & getStat2()   const {return stat2_;}
+	const float & getStat2()   const {return stat2_;}
 
-	void setContent(const double &);
+	void setContent(const float &);
 	void setEntries(const int &);
-	void setStat(const double &);
-	void setStat2(const double &);
+	void setStat(const float &);
+	void setStat2(const float &);
 
-	void addToContent(const double &);
-	void addToStat(const double &);
+	void addToContent(const float &);
+	void addToStat(const float &);
 	void addEntry();
 
 	void setName(const TString & name){name_=name;}
 	const TString & getName() const {return name_;}
 
-	void multiply(const double&);
+	void multiply(const float&);
 
 private:
-	double content_;
+	float content_;
 	size_t entries_;
-	double stat2_;
+	float stat2_;
 	TString name_;
 };
 
-inline void histoBin::setContent(const double & val){
+inline void histoBin::setContent(const float & val){
 	content_=val;
 }
 inline void histoBin::setEntries(const int & val){
 	entries_=val;
 }
-inline void histoBin::setStat(const double & val){
+inline void histoBin::setStat(const float & val){
 	stat2_=val*val;
 }
-inline void histoBin::setStat2(const double & val){
+inline void histoBin::setStat2(const float & val){
 	stat2_=val;
 }
 /**
  * add linearly
  */
-inline void histoBin::addToContent(const double & val){
+inline void histoBin::addToContent(const float & val){
 	content_+=val;
 }
 /**
@@ -71,7 +71,7 @@ inline void histoBin::addToContent(const double & val){
  * internally this is done in sqares, so whenever possible use addToStat()
  * and NOT something like setStat(sqrt(getStat**2 + something**2))
  */
-inline void histoBin::addToStat(const double & val){
+inline void histoBin::addToStat(const float & val){
 	stat2_+=val*val;
 }
 inline void histoBin::addEntry(){
@@ -112,7 +112,7 @@ public:
 	int divide(const histoBins&,bool statCorr);
 	int multiply(const histoBins&,bool statCorr);
 
-	void multiply(const double& );
+	void multiply(const float& );
 
 	static bool showwarnings;
 

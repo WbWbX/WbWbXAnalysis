@@ -321,13 +321,13 @@ histoContent histoContent::operator * (const histoContent& rhs){
 	out*=rhs;
 	return out;
 }
-histoContent & histoContent::operator *= (const double & val){
+histoContent & histoContent::operator *= (const float & val){
 	nominal_.multiply(val);
 	for(size_t i=0;i<layerSize();i++)
 		additionalbins_[i].multiply(val);
 	return *this;
 }
-histoContent histoContent::operator * (const double & val){
+histoContent histoContent::operator * (const float & val){
 	histoContent out=*this;
 	out*=val;
 	return out;

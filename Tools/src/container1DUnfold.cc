@@ -11,6 +11,7 @@
  * multicore usage for unfolding to be implemented
  */
 #include <omp.h>
+#include <stdexcept>
 
 namespace ztop{
 
@@ -22,7 +23,7 @@ bool container1DUnfold::c_makelist=false;
 
 /*
  *
-   double tempgen_,tempreco_,tempgenweight_,tempweight_;
+   float tempgen_,tempreco_,tempgenweight_,tempweight_;
    bool recofill_,genfill_;
 
    bool isMC_;
@@ -36,9 +37,9 @@ container1DUnfold::container1DUnfold(): container2D(), xaxis1Dname_(""), yaxis1D
 	}
 }
 container1DUnfold::container1DUnfold( std::vector<float> genbins, std::vector<float> recobins, TString name,TString xaxisname,TString yaxisname, bool mergeufof):
-														container2D( genbins , recobins , name,xaxisname+"_reco",xaxisname+"_gen",mergeufof), xaxis1Dname_(xaxisname),
-														yaxis1Dname_(yaxisname),tempgen_(0),tempreco_(0),tempgenweight_(1),tempweight_(1),recofill_(false),genfill_(false),
-														isMC_(false),flushed_(true),binbybin_(false),lumi_(1) {
+																		container2D( genbins , recobins , name,xaxisname+"_reco",xaxisname+"_gen",mergeufof), xaxis1Dname_(xaxisname),
+																		yaxis1Dname_(yaxisname),tempgen_(0),tempreco_(0),tempgenweight_(1),tempweight_(1),recofill_(false),genfill_(false),
+																		isMC_(false),flushed_(true),binbybin_(false),lumi_(1),congruentbins_(false) {
 	//bins are set, containers created, at least conts_[0] exists with all options (binomial, mergeufof etc)
 	gencont_=conts_.at(0);
 	gencont_.clear();
@@ -49,6 +50,7 @@ container1DUnfold::container1DUnfold( std::vector<float> genbins, std::vector<fl
 	recocont_ = container1D(databins,name_+"_data",xaxis1Dname_,yaxis1Dname_,mergeufof_);
 	unfolded_ = container1D(mcbins,name_+"_unfolded",xaxis1Dname_,yaxis1Dname_,mergeufof_);
 	refolded_ = container1D(mcbins,name_+"_refolded",xaxis1Dname_,yaxis1Dname_,mergeufof_);
+	congruentbins_=checkCongruentBinBoundariesXY();
 	if(c_makelist){
 		c_list.push_back(this);
 	}
@@ -77,6 +79,7 @@ void container1DUnfold::setBinning(const std::vector<float> & genbins,const std:
 	recocont_ = container1D(databins,name_+"_data",xaxis1Dname_,yaxis1Dname_,mergeufof_);
 	unfolded_ = container1D(mcbins,name_+"_unfolded",xaxis1Dname_,yaxis1Dname_,mergeufof_);
 	refolded_ = container1D(mcbins,name_+"_refolded",xaxis1Dname_,yaxis1Dname_,mergeufof_);
+	congruentbins_=checkCongruentBinBoundariesXY();
 }
 
 void container1DUnfold::removeAllSystematics(){
@@ -90,7 +93,7 @@ void container1DUnfold::removeAllSystematics(){
 }
 
 void container1DUnfold::setBinByBin(bool bbb){
-	if(!checkCongruentBinBoundariesXY()){
+	if(!congruentbins_){
 		std::cout << "container1DUnfold::setBinByBin: only possible if congruent bin boundaries for reco/gen! doing nothing" <<std::endl;
 		return;
 	}
@@ -188,7 +191,7 @@ container1DUnfold container1DUnfold::operator * (const container1DUnfold & secon
 	out.refolded_=refolded_*second.refolded_;
 	return out;
 }
-container1DUnfold container1DUnfold::operator * (double val){
+container1DUnfold container1DUnfold::operator * (float val){
 	container1DUnfold out=*this;
 	for(size_t i=0;i<conts_.size();i++){
 		out.conts_.at(i) = conts_.at(i) * val;
@@ -208,7 +211,7 @@ void container1DUnfold::setDivideBinomial(bool binomial){
 	refolded_.setDivideBinomial(binomial);
 	divideBinomial_=binomial;
 }
-void container1DUnfold::addErrorContainer(const TString & sysname,const container1DUnfold & cont,double weight){
+void container1DUnfold::addErrorContainer(const TString & sysname,const container1DUnfold & cont,float weight){
 	if(xbins_ != cont.xbins_ || ybins_ != cont.ybins_){
 		std::cout << "container1DUnfold::addErrorContainer: " << name_ << " and " << cont.name_ << " must have same x and y axis!" << std::endl;
 	}
@@ -230,7 +233,7 @@ void container1DUnfold::addErrorContainer(const TString & sysname,const containe
 	addErrorContainer(sysname,cont,1);
 }
 
-void container1DUnfold::addGlobalRelError(TString name,double relerr){
+void container1DUnfold::addGlobalRelError(TString name,float relerr){
 	for(size_t i=0;i<conts_.size();i++)
 		conts_.at(i).addGlobalRelError(name,relerr);
 	gencont_.addGlobalRelError(name,relerr);
@@ -251,6 +254,9 @@ void container1DUnfold::addRelSystematicsFrom(const container1DUnfold & cont){
 	refolded_.addRelSystematicsFrom(cont.refolded_);
 }
 bool container1DUnfold::checkCongruentBinBoundariesXY() const{
+	if(ybins_.size() <2|| ybins_.size() <2)
+		return false; //emtpy
+
 	std::vector<float> sames(ybins_.size()); //always larger than xbins
 	std::vector<float>::iterator it=std::set_intersection(xbins_.begin(),xbins_.end(),ybins_.begin(),ybins_.end(),sames.begin());
 	sames.resize(it-sames.begin());
@@ -270,6 +276,32 @@ bool container1DUnfold::checkCongruentBinBoundariesXY() const{
 	}
 	return true; */
 }
+/**
+ * assumes  ybins >= xbins. should be the case for container1DUnfold
+ */
+histoBin container1DUnfold::getDiagonalBin(const size_t & xbin, int layer) const{
+	if(xbin>=xbins_.size()){
+		std::cout << "container1DUnfold::getDiagonalBin: bin out of range" <<std::endl;
+		throw std::out_of_range("container1DUnfold::getDiagonalBin: bin out of range");
+	}
+	if(!congruentbins_){
+		std::cout << "container1DUnfold::getDiagonalBin: only works for congruent bin boundaries" <<std::endl;
+		return histoBin();
+	}
+	if(xbin==xbins_.size()-1){ //overflow bin, just one
+		return histoBin(getBin(xbin,ybins_.size()-1,layer));
+	}
+
+	//add up until reaches bin boundary
+	size_t ybin=getBinNoY(xbins_.at(xbin));
+	histoBin out(getBin(xbin,ybin,layer));
+	for(ybin=getBinNoY(xbins_.at(xbin)+1);ybin<getBinNoY(xbins_.at(xbin+1)) ;ybin++){
+		out.addToContent(getBin(xbin,ybin,layer).getContent());
+		out.setEntries(out.getEntries() + getBin(xbin,ybin,layer).getEntries());
+		out.setStat2(out.getStat2() + getBin(xbin,ybin,layer).getStat2());
+	}
+	return out;
+}
 
 bool container1DUnfold::check(){
 	if(!binbybin_ && ybins_.size() == xbins_.size()){ // recobins==genbins and no binbybin -> rebin reco
@@ -281,11 +313,31 @@ bool container1DUnfold::check(){
 	}
 	return true;
 }
-const container1D container1DUnfold::getPurity() const{
-	if(!checkCongruentBinBoundariesXY()){
-		std::cout << "container1DUnfold::getPurity: plotting purity not possible because of non fitting bin boundaries for " << name_ << std::endl;
-		return container1D();
+container1D container1DUnfold::getPurity() const{
+	bool mklist=container1D::c_makelist;
+	container1D::c_makelist=false;
+	if(!congruentbins_){
+		container1D c;
+		container1D::c_makelist=mklist;
+		return c;
 	}
+	container1D rec=projectToY(true);//UFOF? include "BG"
+
+	rec=rec.rebinToBinning(getGenContainer());
+	container1D recgen=getGenContainer();
+
+	for(int sys=-1;sys<(int)getSystSize();sys++)
+		for(size_t bin=0;bin<recgen.getBins().size();bin++){
+			recgen.getBin(bin,sys) = getDiagonalBin(bin,sys);}
+
+	//asume a "good" response matrix with most elements being diagonal, so assume stat correlation between both
+	bool temp=histoContent::divideStatCorrelated;
+	histoContent::divideStatCorrelated=true;
+	container1D purity=recgen/rec;
+	histoContent::divideStatCorrelated=temp;
+	container1D::c_makelist=mklist;
+	return purity;
+	////////old code
 
 	/*if(ybins_.size()<2 || xbins_.size()<2){//not real container
 		std::cout << "container1DUnfold::getPurity: plotting purity not possible because of too less bins for " << name_ << std::endl;
@@ -308,11 +360,38 @@ const container1D container1DUnfold::getPurity() const{
 	container1D out=nrecgen/nrec;
 	out.setName(name_+"_purity");
 
+
 	container1D::c_makelist=temp; */
-	container1D out;
-	return out;
+
 }
-const container1D container1DUnfold::getStability(bool includeeff) const{
+
+container1D container1DUnfold::getStability(bool includeeff) const{
+
+	bool mklist=container1D::c_makelist;
+	container1D::c_makelist=false;
+	if(!congruentbins_){
+		std::cout << "container1DUnfold::getPurity: plotting stability not possible because of non fitting bin boundaries for " << name_ << std::endl;
+		container1D c;
+		container1D::c_makelist=mklist;
+		return c;
+	}
+	container1D gen=projectToX(includeeff);//UFOF? include "BG"
+
+	//rec.rebinToBinning(getGenContainer());
+	container1D recgen=getGenContainer();
+	for(int sys=-1;sys<(int)getSystSize();sys++)
+		for(size_t bin=0;bin<recgen.getBins().size();bin++)
+			recgen.getBin(bin,sys) = getDiagonalBin(bin,sys);
+
+	//asume a "good" response matrix with most elements being diagonal, so assume stat correlation between both
+	bool temp=histoContent::divideStatCorrelated;
+	histoContent::divideStatCorrelated=true;
+	container1D stability=recgen/gen;
+	histoContent::divideStatCorrelated=temp;
+
+	container1D::c_makelist=mklist;
+	return stability;
+
 	/*if(!checkCongruentBinBoundariesXY()){
 		std::cout << "container1DUnfold::getStability: plotting purity not possible because of non fitting bin boundaries for " << name_ << std::endl;
 	}
@@ -364,8 +443,8 @@ TH2D * container1DUnfold::prepareRespMatrix(bool nominal,unsigned int systNumber
 	 * check whether everything was filled consistently
 	 * if so, underflow+all conts should be the same as gencont.
 	 */
-	double genint=gencont_.integral(false);
-	double allint=0;
+	float genint=gencont_.integral(false);
+	float allint=0;
 	for(size_t i=0;i<conts_.size();i++){
 		allint+=conts_.at(i).integral(false);
 	}
@@ -387,6 +466,8 @@ TH2D * container1DUnfold::prepareRespMatrix(bool nominal,unsigned int systNumber
 	return h;
 
 }
+
+
 
 void container1DUnfold::coutUnfoldedBinContent(size_t bin) const{
 	if(!isBinByBin()){
@@ -420,7 +501,7 @@ void container1DUnfold::setAllListedMC(bool ISMC){
 		container1DUnfold::c_list.at(i)->setMC(ISMC);
 }
 
-void container1DUnfold::setAllListedLumi(double lumi){
+void container1DUnfold::setAllListedLumi(float lumi){
 	for(size_t i=0;i<container1DUnfold::c_list.size();i++)
 		container1DUnfold::c_list.at(i)->setLumi(lumi);
 }

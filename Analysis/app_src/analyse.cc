@@ -35,7 +35,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
 	fr.readFile(inputfile.Data());
 
 
-	TString treedir,jecfile,pufile,muonsffile,muonsfhisto,elecsffile,elecsfhisto,trigsffile; //...
+	TString treedir,jecfile,pufile,muonsffile,muonsfhisto,elecsffile,elecsfhisto,trigsffile,elecensffile,muonensffile; //...
 
 
 	if(lumi<0)
@@ -48,7 +48,8 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
 	elecsfhisto=          fr.getValue<TString>("ElecSFHisto");
 	trigsffile=cmssw_base+fr.getValue<TString>("TriggerSFFile");
 	pufile=    cmssw_base+fr.getValue<TString>("PUFile");
-
+	//elecensffile =cmssw_base+fr.getValue<TString>("ElecEnergySFFile");
+	//muonensffile =cmssw_base+fr.getValue<TString>("MuonEnergySFFile");
 
 
 	std::cout << "inputfile read" << std::endl;
@@ -82,6 +83,10 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
 	ana.getElecSF()->setInput(elecsffile,elecsfhisto);
 	ana.getMuonSF()->setInput(muonsffile,muonsfhisto);
 	ana.getTriggerSF()->setInput(trigsffile,trigsfhisto);
+
+	ana.getElecEnergySF()->setGlobal(1,0.5,0.5);
+	ana.getMuonEnergySF()->setGlobal(1,0.5,0.5);
+
 	ana.setOutFileAdd(outfileadd);
 	ana.setOutDir(outdir);
 	ana.getBTagSF()->setMakeEff(dobtag);
@@ -116,6 +121,18 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
 	}
 	else if(Syst=="MUONSF_down"){
 		ana.getMuonSF()->setSystematics("down");
+	}
+	else if(Syst=="MUONES_up"){
+		ana.getMuonEnergySF()->setSystematics("up");
+	}
+	else if(Syst=="MUONES_down"){
+		ana.getMuonEnergySF()->setSystematics("down");
+	}
+	else if(Syst=="ELECES_up"){
+		ana.getElecEnergySF()->setSystematics("up");
+	}
+	else if(Syst=="ELECES_down"){
+		ana.getElecEnergySF()->setSystematics("down");
 	}
 	else if(Syst=="JES_up"){
 		ana.getJECUncertainties()->setSystematics("up");

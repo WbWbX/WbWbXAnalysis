@@ -21,6 +21,10 @@ namespace ztop{
 
 class container2D {
 public:
+
+
+	enum plotTag{none,topdf};
+
 	 container2D();
     container2D(const std::vector<float> & ,const std::vector<float> &, TString name="",TString xaxisname="",TString yaxisname="", bool mergeufof=false); //! construct with binning
 	~container2D();
@@ -31,8 +35,8 @@ public:
 	void setName(TString name){name_=name;}
 	const TString &getName() const {return name_;}
 
-    size_t getBinNoX(const double&) const; // returns bin index number for (double variable)
-    size_t getBinNoY(const double&) const; //! returns bin index number for (double variable)
+    size_t getBinNoX(const float&) const; // returns bin index number for (float variable)
+    size_t getBinNoY(const float&) const; //! returns bin index number for (float variable)
     size_t getNBinsX() const {return xbins_.size()-2;}       //! returns numberof x bins
     size_t getNBinsY() const {return ybins_.size()-2;}   //! returns numberof x bins
     const size_t & getBinEntries(const size_t&,const size_t&) const;
@@ -42,19 +46,19 @@ public:
     const histoBin & getBin(const size_t &,const size_t&,const int &layer=-1) const;
     histoBin & getBin(const size_t&,const size_t&,const int& layer=-1);
 
-    void fill(const double & xval, const double & yval, const double & weight=1);    //! fills with weight
+    void fill(const float & xval, const float & yval, const float & weight=1);    //! fills with weight
 
     size_t getSystSize() const {if(conts_.size()<1) return 0; else return conts_.at(0).getSystSize();}
-    const double &getBinContent(const size_t & xbin,const size_t & ybin) const;
-    double getBinErrorUp(const size_t & xbin, const size_t & ybin, bool onlystat=false,TString limittosys="") const;
-    double getBinErrorDown(const size_t &,const size_t &,bool onlystat=false,TString limittosys="") const;
-    double getBinError(const size_t &,const size_t &,bool onlystat=false,TString limittosys="") const;
-    double getSystError(unsigned int number, const size_t & xbin, const size_t & ybin) const;
-    double getSystErrorStat(unsigned int number, const size_t & xbin, const size_t & ybin) const;
+    const float &getBinContent(const size_t & xbin,const size_t & ybin) const;
+    float getBinErrorUp(const size_t & xbin, const size_t & ybin, bool onlystat=false,TString limittosys="") const;
+    float getBinErrorDown(const size_t &,const size_t &,bool onlystat=false,TString limittosys="") const;
+    float getBinError(const size_t &,const size_t &,bool onlystat=false,TString limittosys="") const;
+    float getSystError(unsigned int number, const size_t & xbin, const size_t & ybin) const;
+    float getSystErrorStat(unsigned int number, const size_t & xbin, const size_t & ybin) const;
     const TString & getSystErrorName(const size_t & number) const;
 /*
-     double projectBinContentToY(const size_t & ybin,bool includeUFOF=false) const;
-     double projectBinContentToX(const size_t & xbin,bool includeUFOF=false) const;
+     float projectBinContentToY(const size_t & ybin,bool includeUFOF=false) const;
+     float projectBinContentToX(const size_t & xbin,bool includeUFOF=false) const;
 */
      container1D projectToX(bool includeUFOF=false) const;
      container1D projectToY(bool includeUFOF=false) const;
@@ -77,17 +81,17 @@ public:
     container2D operator - (const container2D &);       //! adds errors in squares; treats same named systematics as correlated!!
     container2D operator / (const container2D &);       //! binomial stat error or uncorr error (depends on setDivideBinomial()); treats same named systematics as correlated
     container2D operator * (const container2D &);       //! adds stat errors in squares; treats same named systematics as correlated!!
-    container2D operator *= (double val){*this=*this*val;return *this;} //fast hack!            //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
-    container2D operator * (double);            //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
-    container2D operator * (float);             //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
+    container2D operator *= (float val){*this=*this*val;return *this;} //fast hack!            //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
+    container2D operator * (float);            //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
+    container2D operator * (double val){return *this*(float)val;}             //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
     container2D operator * (int);               //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
 
 
 
-    void addErrorContainer(const TString & ,const container2D &,double);  //! adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down"
+    void addErrorContainer(const TString & ,const container2D &,float);  //! adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down"
     void addErrorContainer(const TString &,const container2D & );        //! adds deviation to (this) as systematic uncertianty with name. name must be ".._up" or ".._down"
     void addRelSystematicsFrom(const container2D &);
-    void addGlobalRelError(TString,double);
+    void addGlobalRelError(TString,float);
 
     void reset();    //! resets all uncertainties and binning, keeps names and axis
     void clear();    //! sets all bin contents to zero; clears all systematic uncertainties
@@ -96,6 +100,8 @@ public:
     static bool debug;
     static std::vector<container2D*> c_list;
     static bool c_makelist;
+
+    plotTag plottag;
 
 protected:
 
@@ -112,13 +118,13 @@ protected:
 
 };
 
-inline size_t ztop::container2D::getBinNoX(const double & var) const{
+inline size_t ztop::container2D::getBinNoX(const float & var) const{
 	if(conts_.size()>0)
 		return conts_.at(0).getBinNo(var);
 	else
 		return -1;
 }
-inline size_t ztop::container2D::getBinNoY(const double & var) const {
+inline size_t ztop::container2D::getBinNoY(const float & var) const {
 
   if(ybins_.size() <2){
     return 0;
@@ -130,7 +136,7 @@ inline size_t ztop::container2D::getBinNoY(const double & var) const {
     return it-ybins_.begin()-1;
 
 }
-inline void ztop::container2D::fill(const double & xval, const double & yval, const double & weight){
+inline void ztop::container2D::fill(const float & xval, const float & yval, const float & weight){
 	int ybin=getBinNoY(yval);
 	conts_[ybin].fill(xval,weight);
 }

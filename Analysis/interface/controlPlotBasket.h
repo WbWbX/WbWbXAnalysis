@@ -16,7 +16,7 @@
 #define FILL(A,B) if(event()->A)last()->fill(event()->A->B,*event()->puweight)
 #define FILLSINGLE(A) if(event()->A)last()->fill(*(event()->A),*event()->puweight)
 #define SETBINS if(isNewStep()) setBins()
-#define SETBINSRANGE(N,L,H) if(isNewStep()) setBins(); for(float i=L;i<=((float) H*(float)N);i+=((float)H-(float)L)) getBins().push_back((i/(float)N))
+#define SETBINSRANGE(N,L,H) if(isNewStep()) setBins(); for(float i=(float)L;i<=((float) H*(float)N);i+=((float)H-(float)L)) getBins().push_back((i/(float)N))
 
 namespace ztop{
 class NTFullEvent;
@@ -46,6 +46,8 @@ public:
 
 	container1D *  &last(){return lcont_;}
 
+	static std::vector<TString> namelist;
+
 private:
 
 
@@ -57,6 +59,7 @@ private:
 	size_t size_;
 	std::vector<float> tempbins_;
 	std::vector< std::vector<ztop::container1D *> > cplots_; //step,plot
+	std::vector< std::vector<ztop::container1D> > scplots_; //stack! step,plot
 
 };
 }//namespace

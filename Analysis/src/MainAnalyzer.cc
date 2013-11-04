@@ -17,11 +17,11 @@
 
 
 namespace ztop{
-  typedef std::vector<ztop::NTElectron>::iterator NTElectronIt;
-  typedef std::vector<ztop::NTMuon>::iterator NTMuonIt;
-  typedef std::vector<ztop::NTJet>::iterator NTJetIt;
-  typedef std::vector<ztop::NTTrack>::iterator NTTrackIt;
-  typedef std::vector<ztop::NTSuClu>::iterator NTSuCluIt;
+typedef std::vector<ztop::NTElectron>::iterator NTElectronIt;
+typedef std::vector<ztop::NTMuon>::iterator NTMuonIt;
+typedef std::vector<ztop::NTJet>::iterator NTJetIt;
+typedef std::vector<ztop::NTTrack>::iterator NTTrackIt;
+typedef std::vector<ztop::NTSuClu>::iterator NTSuCluIt;
 }
 
 
@@ -41,6 +41,7 @@ MainAnalyzer::MainAnalyzer(){
 	testmode_=false;
 	//showstatusbar_=false;
 	lumi_=0;
+	singlestatus_=false;
 
 }
 
@@ -107,94 +108,127 @@ int MainAnalyzer::start(){
 	p_status.open(filenumber);
 
 	daughPIDs_.resize(filenumber,0);
-
-	//spawn child processes
-	for(size_t i=0;i<filenumber;i++){
-		daughPIDs_.at(i)=fork();
-		if(daughPIDs_.at(i)==0){ //child
-			try{
-				analyze(p_idx.get(i)->pread());
-			}
-			catch(...){
-				p_finished.get(i)->pwrite(-99);
-				std::exit(EXIT_FAILURE);
-			}
-			std::exit(EXIT_SUCCESS);
-		}
-		else{ //send start signal for ith daughter process
-			p_idx.get(i)->pwrite(i);
-			usleep(100000);
-		}
-	}
-
-	//daughters never reach here
-	//wait until all childs are initialised and screen output is done
-	if(!testmode_)
-		sleep(10);
-
 	std::cout << "running on " << filenumber << " files" << std::endl;
 	std::vector<int> succ;
 	succ.resize(filenumber,0);
 	std::vector<int> status;
 	status.resize(filenumber,0);
 
-	while(!NoneEqual(succ,0)){ //wait for daughters until all are done or failed
-		bool newwrite=false;
+	size_t running=0;
+	size_t maxchilds=6;
+	size_t done=0,failed=0;
+
+	//spawn child processes
+	//if only one process, don't fork!!
+
+	if(filenumber>1){
 		for(size_t i=0;i<filenumber;i++){
-			if(p_finished.get(i)->preadready())
-				succ.at(i)=p_finished.get(i)->pread(); //testing
-			while(p_status.get(i)->preadready())
-				status.at(i)=p_status.get(i)->pread();// asks for status, read full buffer and store last value
+			daughPIDs_.at(i)=fork();
+			if(daughPIDs_.at(i)==0){ //child
+				try{
+					analyze(p_idx.get(i)->pread());
+				}
+				catch(...){
+					p_finished.get(i)->pwrite(-99);
+					std::exit(EXIT_FAILURE);
+				}
+				std::exit(EXIT_SUCCESS);
+			}
+			else{ //send start signal for ith daughter process
+				p_idx.get(i)->pwrite(i);
+				running++;
+
+				while(done < filenumber){//!NoneEqual(succ,0)){
+					//wait for daughters until all are done or failed
+					if(running < maxchilds && filenumber - done >= maxchilds)
+						break;
+
+
+					bool newwrite=false;
+					for(size_t j=0;j<filenumber;j++){
+						//if(p_finished.get(j)->preadready()){
+						//	succ.at(j)=p_finished.get(j)->pread(); //testing
+						//}
+						while(p_status.get(j)->preadready())
+							status.at(j)=p_status.get(j)->pread();// asks for status, read full buffer and store last value
+					}
+
+					int it_readytowrite=checkForWriteRequest();
+
+					if(it_readytowrite >= 0){ // daugh ready to write
+						p_allowwrite.get(it_readytowrite)->pwrite(1);
+						succ.at(it_readytowrite)=p_finished.get(it_readytowrite)->pread();   //wait for successful/ns write
+						newwrite=true;
+						if(succ.at(it_readytowrite) !=0){
+							done++;
+							running--;
+						}
+						if(succ.at(it_readytowrite)<0)
+							failed++;
+					} //else do nothing - none ready to write
+
+					else{
+						sleep(5); //if nothing happened only check every 5 sec
+					}
+					if(showstatus_ || newwrite){
+						int sdone=0;
+						failed=0;
+						std::cout << "\n\n" << std::endl;
+						for(size_t j=0;j<filenumber;j++){
+							if(succ.at(j) == 0)
+								std::cout <<  "running "<< status.at(j) << "%:"<< "\t" <<infiles_.at(j)  << std::endl;
+							if(succ.at(j) >0)
+								sdone++;
+							if(succ.at(j) <0)
+								failed++;
+						}
+						std::cout << "-----------------" << std::endl;
+						for(size_t j=0;j<filenumber;j++){
+							if(succ.at(j) <0)
+								std::cout  << "failed(" << succ.at(j)<<"):   \t" << infiles_.at(j) << std::endl;
+						}
+
+						for(size_t j=0;j<filenumber;j++){
+							if(succ.at(j) >0)
+								std::cout  << " done:      \t" << infiles_.at(j) << std::endl;
+						}
+						std::cout << "\n\n" << done << "(" << failed << " failed) / " << filenumber << " done\n\n"<< std::endl;
+					}
+				}
+
+			}
 		}
 
-		int it_readytowrite=checkForWriteRequest();
-		if(it_readytowrite >= 0){ // daugh ready to write
-			p_allowwrite.get(it_readytowrite)->pwrite(1);
-			succ.at(it_readytowrite)=p_finished.get(it_readytowrite)->pread();   //wait for successful/ns write
-			newwrite=true;
-		} //else do nothing - none ready to write
+		//daughters never reach here
+		//wait until all childs are initialised and screen output is done
+		if(!testmode_)
+			sleep(10);
 
-		else{
-			sleep(5); //if nothing happened only check every 5 sec
+
+
+
+		sleep(1);
+		bool nonefailed=true;
+		for(size_t i=0;i<succ.size();i++){
+			std::cout << succ.at(i) << "\t" << infiles_.at(i) << std::endl;
+			if(succ.at(i) < 0)
+				nonefailed=false;
 		}
-		if(showstatus_ || newwrite){
-			int done=0,sdone=0;
-			std::cout << "\n\n" << std::endl;
-			for(size_t i=0;i<filenumber;i++){
-				if(succ.at(i) == 0)
-					std::cout <<  "running "<< status.at(i) << "%:"<< "\t" <<infiles_.at(i)  << std::endl;
-				if(succ.at(i) !=0)
-					done++;
-				if(succ.at(i) >0)
-					sdone++;
-			}
-			std::cout << "-----------------" << std::endl;
-			for(size_t i=0;i<filenumber;i++){
-				if(succ.at(i) <0)
-					std::cout  << "failed(" << succ.at(i)<<"):   \t" << infiles_.at(i) << std::endl;
-			}
-
-			for(size_t i=0;i<filenumber;i++){
-				if(succ.at(i) >0)
-					std::cout  << " done:      \t" << infiles_.at(i) << std::endl;
-			}
-
-			std::cout << "\n\n" << sdone << "(" << done-sdone << " failed) / " << filenumber << " done\n\n"<< std::endl;
+		if(nonefailed)
+			return 1; //only parent
+		else
+			return -1;
+	}//
+	else{ //only one process to spawn
+		singlestatus_=true;
+		try{
+			analyze(0);
 		}
-
+		catch(...){
+			return -99;
+		}
+		return 1;
 	}
-	sleep(1);
-	bool nonefailed=true;
-	for(size_t i=0;i<succ.size();i++){
-		std::cout << succ.at(i) << "\t" << infiles_.at(i) << std::endl;
-		if(succ.at(i) < 0)
-			nonefailed=false;
-	}
-	if(nonefailed)
-		return 1; //only parent
-	else
-		return -1;
-
 }
 
 TString MainAnalyzer::replaceExtension(TString filename){
@@ -243,7 +277,7 @@ void MainAnalyzer::readFileList(){
 			issignal_.push_back(false);
 	}
 
-/*
+	/*
 
 	ifstream inputfiles (filelist_.Data());
 	string filename;
@@ -286,7 +320,7 @@ void MainAnalyzer::readFileList(){
 	else{
 		cout << "MainAnalyzer::setFileList(): input file list not found" << endl;
 	}
-	*/
+	 */
 
 }
 

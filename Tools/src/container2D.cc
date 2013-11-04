@@ -63,7 +63,7 @@ void container2D::setBinning(const std::vector<float> &xbins, std::vector<float>
 	container1D::c_makelist=temp;
 }
 
-const double &container2D::getBinContent(const size_t & xbin,const size_t & ybin) const{
+const float &container2D::getBinContent(const size_t & xbin,const size_t & ybin) const{
 	if((unsigned int)xbin>xbins_.size() || (unsigned int)ybin> ybins_.size()){
 		std::cout << "container2D::getBinContent: xbin or ybin is out of range!! return -1" << std::endl;
 	}
@@ -75,33 +75,33 @@ const size_t &container2D::getBinEntries(const size_t & xbin, const size_t & ybi
 	}
 	return conts_.at(ybin).getBinEntries(xbin);
 }
-double container2D::getBinErrorUp(const size_t & xbin, const size_t & ybin, bool onlystat,TString limittosys) const{
+float container2D::getBinErrorUp(const size_t & xbin, const size_t & ybin, bool onlystat,TString limittosys) const{
 	if(ybin>=ybins_.size()){
 		std::cout << "container2D::getBinErrorUp: ybin out of range! return -1" << std::endl;
 	}
 	return conts_.at(ybin).getBinErrorUp(xbin,  onlystat, limittosys);
 }
-double container2D::getBinErrorDown(const size_t & xbin, const size_t & ybin, bool onlystat,TString limittosys) const{
+float container2D::getBinErrorDown(const size_t & xbin, const size_t & ybin, bool onlystat,TString limittosys) const{
 	if(ybin>=ybins_.size()){
 		std::cout << "container2D::getBinErrorDown: ybin out of range! return -1" << std::endl;
 	}
 	return conts_.at(ybin).getBinErrorDown(xbin,  onlystat, limittosys);
 }
-double container2D::getBinError(const size_t & xbin, const size_t & ybin, bool onlystat,TString limittosys) const{
+float container2D::getBinError(const size_t & xbin, const size_t & ybin, bool onlystat,TString limittosys) const{
 	if(ybin>=ybins_.size()){
 		std::cout << "container2D::getBinError: ybin out of range! return -1" << std::endl;
 	}
 	return conts_.at(ybin).getBinError(xbin,  onlystat, limittosys);
 }
 
-double container2D::getSystError(unsigned int number, const size_t & xbin, const size_t & ybin) const{
+float container2D::getSystError(unsigned int number, const size_t & xbin, const size_t & ybin) const{
 	if(ybin>=ybins_.size() || xbin>=xbins_.size()){
 		std::cout << "container2D::getSystError: xbin or ybin out of range" << std::endl;
 	}
 	const container1D * c=&conts_.at(ybin);
 	return c->getSystError(number,xbin);
 }
-double  container2D::getSystErrorStat(unsigned int number, const size_t & xbin, const size_t & ybin) const{
+float  container2D::getSystErrorStat(unsigned int number, const size_t & xbin, const size_t & ybin) const{
 	if(ybin>=ybins_.size() || xbin>=xbins_.size()){
 		std::cout << "container2D::getSystError: xbin or ybin out of range" << std::endl;
 		return 0;
@@ -117,7 +117,7 @@ const TString & container2D::getSystErrorName(const size_t & number) const{
 	return conts_.at(0).getSystErrorName(number);
 }
 /*
- double container2D::projectBinContentToY(const size_t & ybin,bool includeUFOF) const{
+ float container2D::projectBinContentToY(const size_t & ybin,bool includeUFOF) const{
 	if((size_t)ybin >= ybins_.size()){
 		std::cout << "container2D::projectBinToY: ybin out of range" << std::endl;
 		return 0;
@@ -126,7 +126,7 @@ const TString & container2D::getSystErrorName(const size_t & number) const{
 	return c->integral(includeUFOF);
 
 }
- double container2D::projectBinContentToX(const size_t & xbin,bool includeUFOF) const{
+ float container2D::projectBinContentToX(const size_t & xbin,bool includeUFOF) const{
 	if((size_t)xbin >= xbins_.size()){
 		std::cout << "container2D::projectBinToX: xbin out of range" << std::endl;
 	}
@@ -139,7 +139,7 @@ const TString & container2D::getSystErrorName(const size_t & number) const{
 	if(lowestybin>=highestybin){
 		std::cout << "container2D::projectBinToX: cannot project to X, too less ybins" <<std::endl;
 	}
-	double content=0;
+	float content=0;
 	for(int ybin=lowestybin;ybin<=highestybin;ybin++){
 		content+=conts_.at(ybin).getBinContent(xbin);
 	}
@@ -191,8 +191,8 @@ container1D container2D::projectToY(bool includeUFOF) const{
 	for(int systLayer=-1;systLayer<(int) conts_.at(0).contents_.layerSize();systLayer++){
 		for(size_t ybin=0;ybin<ybins_.size();ybin++){
 			const container1D * ycont=&conts_[ybin];
-			const double &content=ycont->integral(includeUFOF,systLayer);
-			const double &staterr=ycont->integralStat(includeUFOF,systLayer);
+			const float &content=ycont->integral(includeUFOF,systLayer);
+			const float &staterr=ycont->integralStat(includeUFOF,systLayer);
 			const size_t &entries=ycont->integralEntries(includeUFOF,systLayer);
 			layercont.setBinContent(ybin,content); //fill in nominal
 			layercont.setBinStat(ybin,staterr); //fill in nominal
@@ -341,9 +341,9 @@ TH2D * container2D::getTH2D(TString name, bool dividebybinwidth, bool onlystat) 
 	for(size_t xbin=0;xbin<=getNBinsX()+1;xbin++){ // 0 underflow, genBins+1 overflow included!!
 		for(size_t ybin=0;ybin<=getNBinsY()+1;ybin++){
 			entries+=getBinEntries(xbin,ybin);
-			double cont=getBinContent(xbin,ybin);
+			float cont=getBinContent(xbin,ybin);
 			h->SetBinContent(xbin,ybin,cont);
-			double err=getBinError(xbin,ybin,onlystat);
+			float err=getBinError(xbin,ybin,onlystat);
 			h->SetBinError(xbin,ybin,err);
 		}
 	}
@@ -360,9 +360,9 @@ TH2D * container2D::getTH2DSyst(TString name, unsigned int systNo, bool divideby
 
 	for(size_t xbin=0;xbin<=getNBinsX()+1;xbin++){ // 0 underflow, genBins+1 overflow included!!
 		for(size_t ybin=0;ybin<=getNBinsY()+1;ybin++){
-			double cont=getBinContent(xbin,ybin)+getSystError(systNo,xbin,ybin);
+			float cont=getBinContent(xbin,ybin)+getSystError(systNo,xbin,ybin);
 			h->SetBinContent(xbin,ybin,cont);
-			double stat=getSystErrorStat(systNo,xbin,ybin);
+			float stat=getSystErrorStat(systNo,xbin,ybin);
 			if(statErrors)
 				h->SetBinError(xbin,ybin,stat);
 			else
@@ -424,20 +424,17 @@ container2D container2D::operator * (const container2D & second){
 	}
 	return out;
 }
-container2D container2D::operator * (double val){
+container2D container2D::operator * (float val){
 	container2D out=*this;
 	for(size_t i=0;i<conts_.size();i++){
 		out.conts_.at(i) = conts_.at(i) * val;
 	}
 	return out;
 }
-container2D container2D::operator * (float val){
-	return *this * (double)val;
-}
 container2D container2D::operator * (int val){
-	return *this * (double) val;
+	return *this * (float) val;
 }
-void container2D::addErrorContainer(const TString & sysname,const container2D & second ,double weight){
+void container2D::addErrorContainer(const TString & sysname,const container2D & second ,float weight){
 	if(second.xbins_ != xbins_ || second.ybins_ != ybins_){
 		std::cout << "container2D::addErrorContainer "<< name_ << " and " << second.name_<<" must have same binning!"  << std::endl;
 		return;
@@ -483,7 +480,7 @@ void container2D::clear(){
 		conts_.at(i).clear();
 	}
 }
-void container2D::addGlobalRelError(TString errname,double val){
+void container2D::addGlobalRelError(TString errname,float val){
 	for(size_t i=0;i<conts_.size();i++){
 		conts_.at(i).addGlobalRelError(errname,val);
 	}
