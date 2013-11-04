@@ -288,7 +288,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 	zplots.setEvent(evt);
 
 	//switch on listing
-	container1D::c_makelist =true;
+	//container1D::c_makelist =true;
 
 
 
@@ -548,12 +548,12 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 			if(elec->mHits() > 0) continue;
 
 			/////////only temporarily////!! rho iso stuff
-			NTSuClu suclu;
-			LorentzVector ecalp4;
-			ecalp4=pElectrons->at(i).ECalP4();
-			suclu.setP4(ecalp4);
-			elec->setSuClu(suclu);
-			elecrhoisoadd.addRhoIso(*elec);
+			//NTSuClu suclu;
+			//LorentzVector ecalp4;
+			//ecalp4=pElectrons->at(i).ECalP4();
+			//suclu.setP4(ecalp4);
+			//elec->setSuClu(suclu);
+			//elecrhoisoadd.addRhoIso(*elec);
 
 			idelectrons <<  elec;
 

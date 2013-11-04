@@ -1,7 +1,7 @@
 /*
  * NTFullEvent.h
  *
- *  Created on: Oct 29, 2013
+ *  Created on: Oct 29; 2013
  *      Author: kiesej
  */
 
@@ -30,7 +30,16 @@ public:
 	puweight(0){};
 	~NTFullEvent(){}
 
-	void reset(){NTFullEvent();}
+	void reset(){
+		idjets=0;medjets=0;hardjets=0;medbjets=0;hardbjets=0;
+		allmuons=0;kinmuons=0;idmuons=0;isomuons=0;
+		allelectrons=0;kinelectrons=0;idelectrons=0;isoelectrons=0;
+		allleptons=0;kinleptons=0;idleptons=0;isoleptons=0;
+		leadinglep=0;secleadinglep=0;
+		simplemet=0;adjustedmet=0;
+		mll=0;leplepdr=0;dphillj=0;ht=0;ptllj=0;topdiscr=0;
+		puweight=0;
+	}
 
 	ztop::NTEvent * event;
 
