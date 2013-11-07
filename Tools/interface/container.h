@@ -85,6 +85,8 @@ public:
 
 	container1D breakDownSyst(const size_t & bin, bool updown) const;
 	container1D sortByBinNames(const container1D & ) const;
+	container1D getSystContainer(const int &syslayer)const;
+	container1D getRelErrorsContainer()const;
 
 	float getOverflow(const int& systLayer=-1) const;                              //!returns -1 if overflow was merged with last bin
 	float getUnderflow(const int& systLayer=-1) const;                             //!returns -1 if underflow was merged with last bin
@@ -102,6 +104,7 @@ public:
 	float getYMin(bool dividebybinwidth, const int& systLayer=-1) const;
 
 	float normalize(bool includeUFOF=true, const float &normto=1);
+	void normalizeToContainer(const container1D & ); /////////
 
 
 	void reset();    //! resets all uncertainties and binning, keeps names and axis

@@ -433,6 +433,30 @@ container1D container1D::sortByBinNames(const container1D & reference) const{
 	return out;
 }
 
+container1D container1D::getSystContainer(const int& syslayer)const{
+	container1D out;
+	if(syslayer > (int) getSystSize()){
+		std::cout << "container1D::getSystContainer: syst out of range" <<std::endl;
+		throw std::out_of_range("container1D::getSystContainer: syst out of range");
+	}
+	if(syslayer<0){
+		out=*this;
+		out.removeAllSystematics();
+	}
+	else{
+		out=*this;
+		out.clear();
+		out.contents_.getNominal()=contents_.getLayer((size_t)syslayer);
+		out.setName(out.getName()+"_"+getSystErrorName((size_t)syslayer));
+	}
+	return out;
+}
+container1D container1D::getRelErrorsContainer()const{
+	container1D out=*this;
+	out.normalizeToContainer(*this);
+	return out;
+}
+
 float container1D::getOverflow(const int& systLayer) const{
 	float ret=0;
 	if(systLayer > (int)contents_.layerSize())
@@ -611,7 +635,16 @@ float container1D::normalize(bool includeUFOF,const float& normto){
 	*this *= norm;
 	return norm;
 }
-
+/**
+ * normalize to container (bin-by-bin)
+ * this normalizes to the nominal content!
+ */
+void container1D::normalizeToContainer(const container1D & cont){
+	container1D tcont=cont;
+	tcont.setAllErrorsZero();
+	//when dividing all systematics will be recreated from nominal (now with 0 stat error)
+	*this/=tcont;
+}
 
 void container1D::reset(){
 	binwidth_=0;
