@@ -44,6 +44,8 @@ options.register ('isPrompt',False,VarParsing.VarParsing.multiplicity.singleton,
 options.register ('debug',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"enters debug mode")
 options.register ('isFastSim',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"FastSim")
 
+options.register ('muPOGTest',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"FastSim")
+
 
 import sys
 
@@ -394,9 +396,13 @@ else:
 filtervertices=True
 if isSignal:
     filtervertices=False
-process.load("RecoMET.METFilters.metFilters_cff")
 
-process.filtersSeq = cms.Sequence(process.metFilters)
+
+process.filtersSeq = cms.Sequence()
+
+if not isMC:
+    process.load("RecoMET.METFilters.metFilters_cff")
+    process.filtersSeq = cms.Sequence(process.metFilters)
 
 if is2011:
     process.filtersSeq = cms.Sequence(
@@ -406,8 +412,7 @@ if is2011:
         process.HBHENoiseFilter 
         )
 
-if isMC: #no data filters in MC
-    process.filtersSeq = cms.Sequence()
+
     
 if not isSignal:
     process.preFilterSequence += process.requireRecoLeps
@@ -533,6 +538,9 @@ if susy:
     process.muonMatchPFlow.src     = "muons"
 
     
+if options.muPOGTest:
+    process.pfMuonsFromVertexPFlow.d0Cut = cms.double(1000.2)
+    process.pfMuonsFromVertexPFlow.dzCut = cms.double(1000.5)
 
 ################Jets########## 
 
