@@ -5,14 +5,14 @@
 #$ -l site=hh
 #
 #(the cpu time for this job)
-#$ -l h_cpu=11:59:00
+#$ -l h_cpu=01:59:00
 #
 #(the maximum memory usage of this job)
 #$ -l h_vmem=2048M
 #
 #(stderr and stdout are merged together to stdout)
 #$ -j y
-#$ -m ae
+#$ -m a
 #$ -cwd -V
 #$ -l h_stack=1536M
 #$ -pe multicore 6 -R y

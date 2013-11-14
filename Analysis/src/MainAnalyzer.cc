@@ -42,6 +42,7 @@ MainAnalyzer::MainAnalyzer(){
 	//showstatusbar_=false;
 	lumi_=0;
 	singlefile_=false;
+	maxchilds_=8;
 
 }
 
@@ -115,7 +116,7 @@ int MainAnalyzer::start(){
 	status.resize(filenumber,0);
 
 	size_t running=0;
-	size_t maxchilds=6;
+
 	size_t done=0,failed=0;
 
 	//spawn child processes
@@ -140,7 +141,7 @@ int MainAnalyzer::start(){
 
 				while(done < filenumber){//!NoneEqual(succ,0)){
 					//wait for daughters until all are done or failed
-					if(running < maxchilds && filenumber - done >= maxchilds)
+					if(running < maxchilds_ && filenumber - done >= maxchilds_)
 						break;
 
 
@@ -207,7 +208,7 @@ int MainAnalyzer::start(){
 
 
 
-		sleep(1);
+
 		bool nonefailed=true;
 		for(size_t i=0;i<succ.size();i++){
 			std::cout << succ.at(i) << "\t" << infiles_.at(i) << std::endl;

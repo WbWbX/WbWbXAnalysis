@@ -67,6 +67,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
 	TString outdir="output";
 
 	MainAnalyzer ana;
+	ana.setMaxChilds(6);
 	ana.setShowStatus(status);
 	ana.setTestMode(testmode);
 	ana.setLumi(lumi);
@@ -201,6 +202,23 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
 	else if(Syst=="Z_SCALE_down"){
 		ana.setFilePostfixReplace("60120.root","60120_Zscaledown.root");
 	}
+	else if(Syst=="MT_6_down"){
+		ana.setFilePostfixReplace("ttbar_ext.root","ttbar_mt166.5.root");
+		ana.setFilePostfixReplace("ttbarviatau_ext.root","ttbarviatau_mt166.5.root");
+	}
+	else if(Syst=="MT_3_down"){
+		ana.setFilePostfixReplace("ttbar_ext.root","ttbar_mt169.5.root");
+		ana.setFilePostfixReplace("ttbarviatau_ext.root","ttbarviatau_mt169.5.root");
+	}
+	else if(Syst=="MT_3_up"){
+		ana.setFilePostfixReplace("ttbar_ext.root","ttbar_mt175.5.root");
+		ana.setFilePostfixReplace("ttbarviatau_ext.root","ttbarviatau_mt175.5.root");
+	}
+	else if(Syst=="MT_6_up"){
+		ana.setFilePostfixReplace("ttbar_ext.root","ttbar_mt178.5.root");
+		ana.setFilePostfixReplace("ttbarviatau_ext.root","ttbarviatau_mt178.5.root");
+	}
+
 	//......
 	else{
 		didnothing=true;
@@ -226,7 +244,12 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
 		//end of configuration
 
 		// recreate file
-		system(("rm -rf "+ana.getOutPath()+".root").Data());
+
+		TString fulloutfilepath=ana.getOutPath()+".root";
+		TString workdir=ana.getOutDir() +"../";
+		TString batchdir=workdir+"batch/";
+
+		system(("rm -rf "+fulloutfilepath).Data());
 
 		int fullsucc=ana.start();
 
@@ -242,7 +265,9 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
 			if(!channel.Contains("emu"))
 				rescaleDY(&csv, dycontributions);
 			//csv.writeAllToTFile(ana.getOutPath()+"_plots.root",true);
-			system(("touch "+ana.getOutPath()+"_fin").Data());
+			if(!testmode){
+				system(("touch "+batchdir+ana.getOutFileName()+"_fin").Data());
+			}
 			sleep(1);
 			std::cout <<"\nFINISHED with "<< channel <<"_" << energy <<"_" << Syst <<std::endl;
 			delete f;
@@ -250,7 +275,9 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
 		}
 		else{
 			std::cout << "at least one job failed!" << std::endl;
-			system(("touch "+ana.getOutPath()+"_failed").Data());
+			if(!testmode){
+				system(("touch "+batchdir+ana.getOutFileName()+"_failed").Data());
+			}
 		}
 	}
 
