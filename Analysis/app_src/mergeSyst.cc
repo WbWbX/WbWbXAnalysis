@@ -107,7 +107,7 @@ int main(int argc, char* argv[]){
 	//read in files
 
 	TString output;
-
+	TString ignore;
 
 	for(int i=1;i<argc;i++){
 		if((TString)argv[i] == "-o"){ //output
@@ -117,8 +117,25 @@ int main(int argc, char* argv[]){
 			continue;
 
 		}
+		if((TString)argv[i] == "-i"){ //ignore
+			if(i+1<argc){
+				ignore=(TString)argv[i+1];
+				i++;}
+			continue;
+
+		}
 		names.push_back(stripRoot((TString)argv[i]));
 	}
+	//get rid of ignore pattern
+
+	std::vector<TString> newnames;
+	for(size_t i=0;i<names.size();i++){
+		if(names.at(i).Contains(ignore))
+			continue;
+		newnames.push_back(names.at(i));
+
+	}
+	names=newnames;
 
 	//fill nominal
 
