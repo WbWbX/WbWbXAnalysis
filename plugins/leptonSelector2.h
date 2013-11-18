@@ -52,7 +52,7 @@ getOppoQHighestPtPair(const std::vector<ztop::NTElectron*> &elecs, const std::ve
 	}
 	for(unsigned int i=0;i<elecs.size();i++){
 		for(unsigned int j=0;j<muons.size();j++){
-			if(i==j) continue;
+			//if(i==j) continue;
 			if(qmulti*elecs[i]->q() * muons[j]->q() < 0 && sumpt < (elecs[i]->pt() + muons[j]->pt())){
 				sumpt=elecs[i]->pt() + muons[j]->pt();
 				a=i;
