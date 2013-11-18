@@ -10,10 +10,10 @@ $  [parameters-begin] until [parameters-end]
 $ inputfile,                       legend entry,        color,   xsection,   legendNumber,  (opt) isSignal
 
 
-tree_8TeV_emuttbar_ext.root,       t#bar{t},		633,	  248.5,	  0, true
+tree_8TeV_emuttbar.root,       t#bar{t},		633,	  248.5,	  0, true
 tree_8TeV_dyee60120.root,          Z#rightarrowll, 	852,	  3532.8, 1
 tree_8TeV_dymumu60120.root,        Z#rightarrowll,	852,	  3532.8, 1
-tree_8TeV_emuttbarviatau_ext.root, t#bar{t}(#tau), 	632,	  248.5,	  2, true
+tree_8TeV_emuttbarviatau.root, t#bar{t}(#tau), 	632,	  248.5,	  2, true
 tree_8TeV_emuttbarbg.root,         t#bar{t}bg,	   	634,	  248.5,	  3
 tree_8TeV_tW.root,                 singleTop,	   	616,	  11.1,	  4
 tree_8TeV_tbarW.root,		   singleTop,	   	616,	  11.1,	  4
