@@ -1457,6 +1457,7 @@ ztop::NTGenParticle TreeWriterBase::makeNTGen(const reco::GenParticle * p){
 	out.setP4(p->p4());
 	out.setPdgId(p->pdgId());
 	out.setStatus(p->status());
+	out.setQ(p->charge());
 	// out.setGenId(idmap.at(p));
 	return out;
 }
