@@ -527,7 +527,7 @@ if susy:
     
     from PhysicsTools.PatAlgos.tools.pfTools import *
     process.muIsoSequencetwo = setupPFMuonIso(process, 'muons', 'PFIso2')
-    adaptPFIsoMuons( process, applyPostfix(process,"patMuonsPFlow",""), 'PFIso2', "04")
+    adaptPFIsoMuons( process, applyPostfix(process,"patMuonsPFlow",""), 'PFIso2', "03")
     getattr(process,'patPF2PATSequence'+pfpostfix).replace(getattr(process,'patMuons'+pfpostfix),
                                                        getattr(process,'muIsoSequencetwo') *
                                                        getattr(process,'patMuons'+pfpostfix))
