@@ -679,8 +679,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 			idelectrons <<  elec;
 
 			//select iso electrons
-			if(!mode_invertiso && elec->isoVal()>0.15) continue;
-			if(mode_invertiso && elec->isoVal()<0.15) continue;
+			if(!mode_invertiso && elec->rhoIso()>0.15) continue;
+			if(mode_invertiso && elec->rhoIso()<0.15) continue;
 			isoelectrons <<  elec;
 		}
 
@@ -852,6 +852,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 			if(!noOverlap(treejets.at(i), isomuons, 0.5)) continue;
 			if(!noOverlap(treejets.at(i), isoelectrons, 0.5)) continue;
 			if(fabs(treejets.at(i)->eta())>2.5) continue;
+			if(treejets.at(i)->pt() < 10) continue;
 			idjets << (treejets.at(i));
 
 			if(treejets.at(i)->pt() < 10) continue;
@@ -944,11 +945,18 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 		evt.dphilljjets=&dphilljjets;
 		evt.dphiplushardjets=&dphiplushardjets;
 
-		PolarLorentzVector S4=leadingptlep->p4() + secleadingptlep->p4();
+		PolarLorentzVector H4;
 		for(size_t i=0;i<idjets.size();i++)
-			S4-=idjets.at(i)->p4();
+			H4+=idjets.at(i)->p4();
+		float ht=H4.Pt();
+		evt.ht=&ht;
 
+		PolarLorentzVector S4=leadingptlep->p4() + secleadingptlep->p4() -H4;
 		evt.S4=&S4;
+
+		PolarLorentzVector allobjects4=S4+ H4 + H4;
+		evt.allobjects4=&allobjects4;
+
 
 		sel_step[3]+=puweight;
 		plots.makeControlPlots(step);
@@ -1012,7 +1020,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 		step++;
 
 
-		if(dphiplushardjets.size() < 2) continue;
+		if(hardjets.size() < 2) continue;
 		//if(!midphi && medjets.size()<2) continue;
 		//if(ptllj<140) continue;
 		/*if(dphillj > 2.65 && dphillj < 3.55){

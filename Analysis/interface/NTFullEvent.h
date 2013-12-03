@@ -30,6 +30,7 @@ public:
 	mll(0),leplepdr(0),dphillj(0),dphilljj(0),detallj(0),detalljj(0),ht(0),ptllj(0),topdiscr(0),
 	midphi(0),
 	S4(0),
+	allobjects4(0),
 	puweight(0){};
 	~NTFullEvent(){}
 
@@ -44,6 +45,7 @@ public:
 		mll=0;leplepdr=0;dphillj=0;dphilljj=0;detallj=0;detalljj=0;ht=0;ptllj=0;topdiscr=0;
 		midphi=0;
 		S4=0;
+		allobjects4=0;
 		puweight=0;
 	}
 
@@ -93,6 +95,7 @@ public:
 
 	bool *midphi;
 	PolarLorentzVector * S4;
+	PolarLorentzVector * allobjects4;
 
 	float * puweight;
 

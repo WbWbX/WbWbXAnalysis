@@ -92,10 +92,10 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
 	////JETS & MET
 
 	SETBINS << 0 << 10 << 20 << 25 << 30 << 35 << 40 << 45 << 50 << 60 << 70 << 100 << 200;
-	addPlot("leading id jet pt","p_{T} [GeV]", "N_{j}/bw");
+	addPlot("leading id jet pt","p_{T} [GeV]", "N_{j}/GeV");
 	if(event()->idjets && event()->idjets->size()>0)
 		FILL(idjets->at(0),pt());
-	addPlot("secleading id jet pt","p_{T} [GeV]", "N_{j}/bw");
+	addPlot("secleading id jet pt","p_{T} [GeV]", "N_{j}/GeV");
 	if(event()->idjets && event()->idjets->size()>1)
 		FILL(idjets->at(1),pt());
 
@@ -127,8 +127,8 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
 		FILL(hardjets->at(1),btag()) ;
 
 
-	SETBINSRANGE(40,0,200);
-	addPlot("met adjusted","E_{T}^{miss} [GeV]","N_{evt}/bw");
+	SETBINSRANGE(80,0,400);
+	addPlot("met adjusted","E_{T}^{miss} [GeV]","N_{evt}/GeV");
 	FILL(adjustedmet,met());
 
 	SETBINSRANGE(80,-0.5,0.5);
@@ -143,50 +143,52 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
 	}
 
 	SETBINSRANGE(80,0,300);
-	addPlot("S4 pt","p_{T}^{S4} [GeV]","N_{evt}/bw");
+	addPlot("S4 pt","p_{T}^{S4} [GeV]","N_{evt}/GeV");
 	FILL(S4,pt());
 
-
+	SETBINSRANGE(80,0,400);
+	addPlot("allobjects pt","p_{T}^{all} [GeV]","N_{evt}/GeV");
+	FILL(allobjects4,pt());
 
 	//Combined vars
 
 	SETBINSRANGE(120,0,240);
-	addPlot("mll Range","m_{ll}[GeV]","N_{evt}/bw",true);
+	addPlot("mll Range","m_{ll}[GeV]","N_{evt}/GeV");
 	FILLSINGLE(mll);
 
 	SETBINSRANGE(40,0,300);
-	addPlot("HT","H_{T}","N_{evt}/bw");
+	addPlot("HT","H_{T}","N_{evt}/GeV");
 	FILLSINGLE(ht);
 
 	SETBINSRANGE(20,60,300);
-	addPlot("pt llj","p_{T}(llj)","N_{evt}/bw");
+	addPlot("pt llj","p_{T}(llj)","N_{evt}/GeV");
 	FILLSINGLE(ptllj);
 
 	SETBINSRANGE(30,0,M_PI);
-	addPlot("dphi (ll,j)","#Delta#phi(ll,j)","N_{evt}/bw");
+	addPlot("dphi (ll,j)","#Delta#phi(ll,j)","N_{evt}/GeV");
 	FILLSINGLE(dphillj);
 
 	SETBINSRANGE(30,0,M_PI);
-	addPlot("dphi (ll,jj)","#Delta#phi(ll,jj)","N_{evt}/bw");
+	addPlot("dphi (ll,jj)","#Delta#phi(ll,jj)","N_{evt}/GeV");
 	FILLSINGLE(dphilljj);
 
 	SETBINSRANGE(30,-8,8);
-	addPlot("deta (ll,j)","#Delta#eta(ll,j)","N_{evt}/bw");
+	addPlot("deta (ll,j)","#Delta#eta(ll,j)","N_{evt}/GeV");
 	FILLSINGLE(detallj);
 
 	SETBINSRANGE(30,-8,8);
-	addPlot("deta (ll,jj)","#Delta#eta(ll,jj)","N_{evt}/bw");
+	addPlot("deta (ll,jj)","#Delta#eta(ll,jj)","N_{evt}/GeV");
 	FILLSINGLE(detalljj);
 
 	///middphi range
 
 
 	SETBINSRANGE(30,0,M_PI);
-	addPlot("dphi ((ll),j) midphi","#Delta#phi(ll,j)","N_{evt}/bw");
+	addPlot("dphi ((ll),j) midphi","#Delta#phi(ll,j)","N_{evt}/GeV");
 	if(middphi && middphiInfo) FILLSINGLE(dphillj);
 
 	SETBINSRANGE(20,60,300);
-	addPlot("pt llj midphi","p_{T}(llj)","N_{evt}/bw");
+	addPlot("pt llj midphi","p_{T}(llj)","N_{evt}/GeV");
 	if(middphi && middphiInfo) FILLSINGLE(ptllj);
 
 	SETBINSRANGE(10,-0.5,9.5);
@@ -197,30 +199,30 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
 
 
 	SETBINS << 0 << 10 << 20 << 25 << 30 << 35 << 40 << 45 << 50 << 60 << 70 << 100 << 200;
-	addPlot("leading id jet pt midphi","p_{T} [GeV]", "N_{j}/bw");
+	addPlot("leading id jet pt midphi","p_{T} [GeV]", "N_{j}/GeV");
 	if(event()->idjets && event()->idjets->size()>0)
 		if(middphi && middphiInfo) FILL(idjets->at(0),pt());
-	addPlot("secleading id jet pt midphi","p_{T} [GeV]", "N_{j}/bw");
+	addPlot("secleading id jet pt midphi","p_{T} [GeV]", "N_{j}/GeV");
 	if(event()->idjets && event()->idjets->size()>1)
 		if(middphi && middphiInfo) FILL(idjets->at(1),pt());
 
 	SETBINSRANGE(30,-8,8);
-	addPlot("deta (ll,j) midphi","#Delta#eta(ll,j)","N_{evt}/bw");
+	addPlot("deta (ll,j) midphi","#Delta#eta(ll,j)","N_{evt}/GeV");
 	if(middphi && middphiInfo)FILLSINGLE(detallj);
 
 	SETBINSRANGE(30,-8,8);
-	addPlot("deta (ll,jj) midphi","#Delta#eta(ll,jj)","N_{evt}/bw");
+	addPlot("deta (ll,jj) midphi","#Delta#eta(ll,jj)","N_{evt}/GeV");
 	if(middphi && middphiInfo)FILLSINGLE(detalljj);
 
 	///NOT MIDPHI RANGE
 
 
 	SETBINSRANGE(30,0,M_PI);
-	addPlot("dphi ((ll),j) NOTmidphi","#Delta#phi(ll,j)","N_{evt}/bw");
+	addPlot("dphi ((ll),j) NOTmidphi","#Delta#phi(ll,j)","N_{evt}/GeV");
 	if(!middphi && middphiInfo) FILLSINGLE(dphillj);
 
 	SETBINSRANGE(20,60,300);
-	addPlot("pt llj NOTmidphi","p_{T}(llj)","N_{evt}/bw");
+	addPlot("pt llj NOTmidphi","p_{T}(llj)","N_{evt}/GeV");
 	if(!middphi && middphiInfo) FILLSINGLE(ptllj);
 
 	SETBINSRANGE(10,-0.5,9.5);
@@ -230,10 +232,10 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
 	if(!middphi && middphiInfo) FILL(hardjets,size());
 
 	SETBINS << 0 << 10 << 20 << 25 << 30 << 35 << 40 << 45 << 50 << 60 << 70 << 100 << 200;
-	addPlot("leading id jet pt NOTmidphi","p_{T} [GeV]", "N_{j}/bw");
+	addPlot("leading id jet pt NOTmidphi","p_{T} [GeV]", "N_{j}/GeV");
 	if(event()->idjets && event()->idjets->size()>0)
 		if(!middphi && middphiInfo) FILL(idjets->at(0),pt());
-	addPlot("secleading id jet pt NOTmidphi","p_{T} [GeV]", "N_{j}/bw");
+	addPlot("secleading id jet pt NOTmidphi","p_{T} [GeV]", "N_{j}/GeV");
 	if(event()->idjets && event()->idjets->size()>1)
 		if(!middphi && middphiInfo) FILL(idjets->at(1),pt());
 

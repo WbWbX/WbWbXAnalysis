@@ -37,7 +37,7 @@ public:
 
 	const NTFullEvent * event(){return evt_;}
 
-	container1D *addPlot(const TString & name, const TString & xaxisname,const TString & yaxisname, const bool & mergeufof=false);
+	container1D *addPlot(const TString & name, const TString & xaxisname,const TString & yaxisname, const bool & mergeufof=true);
 
 	void initStep(const size_t& step);
 
