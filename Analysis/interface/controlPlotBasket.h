@@ -16,7 +16,10 @@
 #define FILL(A,B) if(event()->A)last()->fill(event()->A->B,*event()->puweight)
 #define FILLSINGLE(A) if(event()->A)last()->fill(*(event()->A),*event()->puweight)
 #define SETBINS if(isNewStep()) setBins()
-#define SETBINSRANGE(N,L,H) if(isNewStep()) setBins(); for(float i=(float)L;i<=((float) H*(float)N);i+=((float)H-(float)L)) getBins().push_back((i/(float)N))
+#define SETBINSRANGE(N,L,H) if(isNewStep()){ \
+	setBins(); \
+	for(float i=(float)L;i<=((float) H);i+=((float)H-(float)L)/((float)N)) \
+	getBins().push_back(i);}
 
 namespace ztop{
 class NTFullEvent;

@@ -13,7 +13,6 @@
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 
 
-//selectpassingProbes does NOT include the isolation cut!!!! be careful
 
 namespace ztop{
 
@@ -24,52 +23,53 @@ getOppoQHighestPtPair(const std::vector<ztop::NTElectron*> &elecs, const std::ve
 	//double emupt=0;
 	std::vector<ztop::NTElectron*> outelecs;
 	std::vector<ztop::NTMuon*> outmuons;
-	int channel=99; // ee,mumu,emu
+	enum channels {ee,mumu,emu,no};
+	channels channel=no;
 	unsigned int a=999;
 	unsigned int b=999;
 
 	for(unsigned int i=0;i<elecs.size();i++){
 		for(unsigned int j=i;j<elecs.size();j++){
 			if(i==j) continue;
-			if(qmulti*elecs[i]->q() * elecs[j]->q() < 0 && sumpt < (elecs[i]->pt() + elecs[j]->pt())){
-				sumpt=elecs[i]->pt() + elecs[j]->pt();
+			if(qmulti*elecs.at(i)->q() * elecs.at(j)->q() < 0 && sumpt < (elecs.at(i)->pt() + elecs.at(j)->pt())){
+				sumpt=elecs.at(i)->pt() + elecs.at(j)->pt();
 				a=i;
 				b=j;
-				channel=0;
+				channel=ee;
 			}
 		}
 	}
 	for(unsigned int i=0;i<muons.size();i++){
 		for(unsigned int j=i;j<muons.size();j++){
 			if(i==j) continue;
-			if(qmulti*muons[i]->q() * muons[j]->q() < 0 && sumpt < (muons[i]->pt() + muons[j]->pt())){
-				sumpt=muons[i]->pt() + muons[j]->pt();
+			if(qmulti*muons.at(i)->q() * muons.at(j)->q() < 0 && sumpt < (muons.at(i)->pt() + muons.at(j)->pt())){
+				sumpt=muons.at(i)->pt() + muons.at(j)->pt();
 				a=i;
 				b=j;
-				channel=1;
+				channel=mumu;
 			}
 		}
 	}
 	for(unsigned int i=0;i<elecs.size();i++){
 		for(unsigned int j=0;j<muons.size();j++){
 			//if(i==j) continue;
-			if(qmulti*elecs[i]->q() * muons[j]->q() < 0 && sumpt < (elecs[i]->pt() + muons[j]->pt())){
-				sumpt=elecs[i]->pt() + muons[j]->pt();
+			if(qmulti* elecs.at(i)->q() * muons.at(j)->q() < 0 && sumpt < (elecs.at(i)->pt() + muons.at(j)->pt())){
+				sumpt=elecs.at(i)->pt() + muons.at(j)->pt();
 				a=i;
 				b=j;
-				channel=2;
+				channel=emu;
 			}
 		}
 	}
-	if(channel == 0){
-		outelecs << elecs[a] << elecs[b];
+	if(channel == ee){
+		outelecs.push_back(elecs.at(a)); outelecs.push_back(elecs.at(b));
 	}
-	else if(channel == 1){
-		outmuons << muons[a] << muons[b];
+	else if(channel == mumu){
+		outmuons.push_back(muons.at(a)); outmuons.push_back(muons.at(b));
 	}
-	else if(channel == 2){
-		outelecs << elecs[a];
-		outmuons << muons[b];
+	else if(channel == emu){
+		outelecs.push_back(elecs.at(a));
+		outmuons.push_back(muons.at(b));
 	}
 	std::pair<std::vector<ztop::NTElectron*>, std::vector<ztop::NTMuon*> > out(outelecs,outmuons);
 	return out;

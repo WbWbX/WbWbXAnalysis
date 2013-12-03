@@ -46,5 +46,8 @@
 	<class name="std::vector<ztop::textBox>"/> 
 	<class name="std::vector<ztop::containerStyle>"/> 
 	<class name="std::vector<ztop::plotStyle>"/>
+		<class name="ztop::graph"/>
+		<class name="std::vector<ztop::graph>"/>
+	
 </lcgdict>
  

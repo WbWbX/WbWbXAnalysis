@@ -31,7 +31,7 @@ bool container1DUnfold::c_makelist=false;
 
 container1DUnfold::container1DUnfold(): container2D(), xaxis1Dname_(""), yaxis1Dname_(""),
 		tempgen_(0),tempreco_(0),tempgenweight_(1),tempweight_(1),recofill_(false),
-		genfill_(false),isMC_(false),flushed_(true),binbybin_(false),lumi_(1){
+		genfill_(false),isMC_(false),flushed_(true),binbybin_(false),lumi_(1),congruentbins_(false){
 	if(c_makelist){
 		c_list.push_back(this);
 	}
@@ -41,6 +41,8 @@ container1DUnfold::container1DUnfold( std::vector<float> genbins, std::vector<fl
 																		yaxis1Dname_(yaxisname),tempgen_(0),tempreco_(0),tempgenweight_(1),tempweight_(1),recofill_(false),genfill_(false),
 																		isMC_(false),flushed_(true),binbybin_(false),lumi_(1),congruentbins_(false) {
 	//bins are set, containers created, at least conts_[0] exists with all options (binomial, mergeufof etc)
+
+
 	gencont_=conts_.at(0);
 	gencont_.clear();
 	std::vector<float> databins=ybins_;
@@ -242,16 +244,16 @@ void container1DUnfold::addGlobalRelError(TString name,float relerr){
 	refolded_.addGlobalRelError(name,relerr);
 }
 
-void container1DUnfold::addRelSystematicsFrom(const container1DUnfold & cont){
+void container1DUnfold::getRelSystematicsFrom(const container1DUnfold & cont){
 	if(xbins_ != cont.xbins_ || ybins_ != cont.ybins_){
-		std::cout << "container1DUnfold::addRelSystematicsFrom: " << name_ << " and " << cont.name_ << " must have same x and y axis!" << std::endl;
+		std::cout << "container1DUnfold::getRelSystematicsFrom: " << name_ << " and " << cont.name_ << " must have same x and y axis!" << std::endl;
 	}
 	for(size_t i=0;i<conts_.size();i++)
-		conts_.at(i).addRelSystematicsFrom(cont.conts_.at(i));
-	gencont_.addRelSystematicsFrom(cont.gencont_);
-	recocont_.addRelSystematicsFrom(cont.recocont_);
-	unfolded_.addRelSystematicsFrom(cont.unfolded_);
-	refolded_.addRelSystematicsFrom(cont.refolded_);
+		conts_.at(i).getRelSystematicsFrom(cont.conts_.at(i));
+	gencont_.getRelSystematicsFrom(cont.gencont_);
+	recocont_.getRelSystematicsFrom(cont.recocont_);
+	unfolded_.getRelSystematicsFrom(cont.unfolded_);
+	refolded_.getRelSystematicsFrom(cont.refolded_);
 }
 bool container1DUnfold::checkCongruentBinBoundariesXY() const{
 	if(ybins_.size() <2|| ybins_.size() <2)
@@ -321,7 +323,7 @@ container1D container1DUnfold::getPurity() const{
 		container1D::c_makelist=mklist;
 		return c;
 	}
-	container1D rec=projectToY(true);//UFOF? include "BG"
+	container1D rec=getRecoContainer();//projectToY(true);//UFOF? include "BG"
 
 	rec=rec.rebinToBinning(getGenContainer());
 	container1D recgen=getGenContainer();
@@ -448,8 +450,8 @@ TH2D * container1DUnfold::prepareRespMatrix(bool nominal,unsigned int systNumber
 	for(size_t i=0;i<conts_.size();i++){
 		allint+=conts_.at(i).integral(false);
 	}
-	if(fabs((genint-allint)/genint) > 0.001){
-		std::cout << "container1DUnfold::prepareRespMatrix: something went wrong in the filling process (high weights?)  of " << name_ <<  "\n genint: "<< genint
+	if(fabs((genint-allint)/genint) > 0.1){
+		std::cout << "container1DUnfold::prepareRespMatrix: something went wrong in the filling process (wrong UF/OF?)  of " << name_ <<  "\n genint: "<< genint
 				<< " response matrix int: "<< allint << std::endl;
 		//return 0;
 	}
@@ -469,24 +471,27 @@ TH2D * container1DUnfold::prepareRespMatrix(bool nominal,unsigned int systNumber
 
 
 
-void container1DUnfold::coutUnfoldedBinContent(size_t bin) const{
+TString container1DUnfold::coutUnfoldedBinContent(size_t bin) const{
 	if(!isBinByBin()){
 		std::cout << "container1DUnfold::coutUnfoldedBinContent: only implemented for bin-by-bin unfolded distributions so far, doing nothing" <<std::endl;
-		return;
+		return "";
 	}
 	if(bin >= unfolded_.getBins().size()){
 		std::cout << "container1DUnfold::coutUnfoldedBinContent: bin out of range, doing nothing" << std::endl;
-		return;
+		return "";
 	}
+	TString out;
 	std::cout << "relative background: " <<std::endl;
+	out+="relative background: \n";
 	container1D treco=getRecoContainer();
 	bool temp=histoContent::divideStatCorrelated;
 	histoContent::divideStatCorrelated=false;
-	(getBackground()/treco).coutBinContent(bin);
+	out+=(getBackground()/treco).coutBinContent(bin);
 	histoContent::divideStatCorrelated=temp;
 	std::cout << "unfolded: " <<std::endl;
-	getUnfolded().coutBinContent(bin);
-
+	out+="unfolded: \n";
+	out+=getUnfolded().coutBinContent(bin);
+	return out;
 }
 
 ///////////////

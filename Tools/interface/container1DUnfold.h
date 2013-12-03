@@ -35,6 +35,8 @@ public:
 
 	~container1DUnfold();
 
+
+
 	void setBinning(const std::vector<float> & genbins,const std::vector<float> &recobins);
 	//void subdivideRecoBins(int div);
 
@@ -80,7 +82,7 @@ public:
 
     void addErrorContainer(const TString & ,const container1DUnfold &,float weight);  //! adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down"
     void addErrorContainer(const TString & ,const container1DUnfold &);  //! adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down"
-    void addRelSystematicsFrom(const container1DUnfold &);
+    void getRelSystematicsFrom(const container1DUnfold &);
     void addGlobalRelError(TString,float);
 
     static std::vector<container1DUnfold *> c_list;
@@ -114,7 +116,7 @@ public:
     static void setAllListedLumi(float lumi);
     static void checkAllListed();
 
-    void coutUnfoldedBinContent(size_t bin) const;
+    TString coutUnfoldedBinContent(size_t bin) const;
 
     void flush();
 
@@ -149,7 +151,7 @@ private:
    //some functions that should not be used although inherited
    void addErrorContainer(const TString & ,const container2D &,float){}
    void addErrorContainer(const TString &,const container2D &){}
-   void addRelSystematicsFrom(const container2D &){}
+   void getRelSystematicsFrom(const container2D &){}
 
    std::vector<float> subdivide(const std::vector<float> & bins, size_t div);
 };
@@ -162,12 +164,14 @@ inline void container1DUnfold::flush(){ //only for MC
 	if(recofill_)
 		recocont_.fill(tempreco_,tempweight_);
 
-	if(genfill_ && !recofill_) //put in Reco UF bins
-		fill(tempgen_,ybins_[1]-100,tempgenweight_);
-	else if(recofill_ && !genfill_) //put in gen underflow bins -> goes to background
-		fill(xbins_[1]-100,tempreco_,tempweight_);
-	else if(genfill_ && recofill_)
+	if(genfill_ && !recofill_){ //put in Reco UF bins
+		fill(tempgen_,ybins_[1]-100,tempgenweight_);}
+	else if(recofill_ && !genfill_){ //put in gen underflow bins -> goes to background
+		fill(xbins_[1]-100,tempreco_,tempweight_);}
+	else if(genfill_ && recofill_){
 		fill(tempgen_,tempreco_,tempweight_);
+		fill(tempgen_,ybins_[1]-100,(tempgenweight_-tempweight_)); // w_gen * (1 - recoweight), tempweight_=fullweight=tempgenweight_*recoweight
+	}
 
 	recofill_=false;
 	genfill_=false;

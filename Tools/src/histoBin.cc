@@ -17,6 +17,16 @@ void histoBin::multiply(const float&val){
 	entries_*=val;
 }
 
+bool histoBin::operator != (const histoBin& rhs)const{
+	if(entries_!=rhs.entries_) return true;
+	if(content_!=rhs.content_) return true;
+	if(stat2_!=rhs.stat2_) return true;
+	if(name_!=rhs.name_) return true;
+	return false;
+}
+bool histoBin::operator == (const histoBin& rhs)const{
+	return !(*this!=rhs);
+}
 
 /////binning//////
 
@@ -92,6 +102,7 @@ int histoBins::divide(const histoBins& rhs,bool statCorr){
 	if(size()!=rhs.size())
 		return -1;
 	for(size_t i=0;i<size();i++){
+		bool divbinstatcorr=statCorr;
 		float div=0;
 		if(rhs.getBin(i).getContent()==0){
 			if(showwarnings) std::cout << "histoBins::divide: 0 content in bin " << i << std::endl;
@@ -101,7 +112,8 @@ int histoBins::divide(const histoBins& rhs,bool statCorr){
 			div=getBin(i).getContent()/rhs.getBin(i).getContent();
 		}
 		float staterr2=0;
-		if(statCorr){
+
+		if(divbinstatcorr){
 			staterr2=fabs(div*(1-div)/rhs.getBin(i).getContent());
 			if(staterr2!=staterr2) staterr2=0; //nan safe
 		}
@@ -150,7 +162,15 @@ void histoBins::multiply(const float& val){
 	for(size_t i=0;i<size();i++)
 		bins_[i].multiply(val);
 }
-
+bool histoBins::operator !=(const histoBins& rhs) const{
+	if(layer_ != rhs.layer_) return true;
+	if(bins_!=rhs.bins_) return true;
+	if(name_!=rhs.name_) return true;
+	return false;
+}
+bool histoBins::operator ==(const histoBins& rhs) const{
+	return !(*this!=rhs);
+}
 
 }//namespace
 

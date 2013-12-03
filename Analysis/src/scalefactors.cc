@@ -75,14 +75,17 @@ void scalefactors::setGlobal(double sf, double errup,double errdown){
 int scalefactors::setSystematics(TString updownnom){
 	if(updownnom.Contains("nom")){
 		syst_=100;
+		std::cout << "scalefactors::setSystematics: set to " << updownnom << std::endl;
 		return 0;
 	}
 	else if(updownnom.Contains("down")){
 		syst_=-1;
+		std::cout << "scalefactors::setSystematics: set to " << updownnom << std::endl;
 		return 0;
 	}
 	else if(updownnom.Contains("up")){
 		syst_=1;
+		std::cout << "scalefactors::setSystematics: set to " << updownnom << std::endl;
 		return 0;
 	}
 	else{

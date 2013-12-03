@@ -23,9 +23,13 @@ do
     fulloutpath=../output/$file
     fullcheckpath=../batch/$file
     jobname=$file
+    jobid=""
     if [ ${SGE_CELL} ]
     then
-	jobid=`ls ../batch/${file}.po* 2>/dev/null | awk -F".po" '{print $NF}'`
+	if [ -e "../stdout/${file}.txt" ];
+	then
+	    jobid=`ls ../batch/${file}.po* 2>&1 | awk -F".po" '{print $NF}'`
+	fi
 	jobrunning=`echo $rjobs | grep ${jobid} 2>/dev/null | head -c 3`;
 	jobEqw=`echo $Eqwjobs | grep ${jobid} 2>/dev/null | head -c 3`;
 	jobQ=`echo $qjobs | grep ${jobid} 2>/dev/null | head -c 3`;
@@ -41,7 +45,7 @@ do
 	then
 	    echo "${jobname} \e[1;31m partially failed \e[0m"
 	else
-	    if [ ${SGE_CELL} ]
+	    if [ $jobid ]
 	    then
 		
 		if [ ${jobrunning} ]
@@ -64,7 +68,7 @@ do
 	echo "${jobname} \e[1;31m completely failed \e[0m"
     elif [ -e "../stdout/${file}.txt" ];
     then
-	if [ ${SGE_CELL} ]
+	if [ $jobid ]
 	then
 	    if [ ${jobrunning} ]
 	    then
@@ -78,7 +82,7 @@ do
 	    echo "${jobname} \e[1;32m seems to be running\e[0m"
 	fi
     else
-	if [ ${SGE_CELL} ]
+	if [ $jobid ]
 	then
 	    if [ ${jobEqw} ]
 	    then

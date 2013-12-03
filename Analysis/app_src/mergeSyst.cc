@@ -128,15 +128,16 @@ int main(int argc, char* argv[]){
 	}
 	//get rid of ignore pattern
 
-	std::vector<TString> newnames;
-	for(size_t i=0;i<names.size();i++){
-		if(names.at(i).Contains(ignore))
-			continue;
-		newnames.push_back(names.at(i));
+	if(ignore!=""){
+		std::vector<TString> newnames;
+		for(size_t i=0;i<names.size();i++){
+			if(names.at(i).Contains(ignore))
+				continue;
+			newnames.push_back(names.at(i));
 
+		}
+		names=newnames;
 	}
-	names=newnames;
-
 	//fill nominal
 
 	cout << "loading nominal plots... ";

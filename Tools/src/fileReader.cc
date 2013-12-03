@@ -13,9 +13,21 @@
 namespace ztop{
 
 
+
 bool fileReader::debug=false;
 
-std::string & fileReader::ltrim(std::string & str) const{
+
+
+
+/**
+ * cuts on right side of the string
+ * example:
+ * 	   setTrim(#)
+ * 	   string="#######this is a string####"
+ * 	   rtrim(string)
+ *     now: string="#######this is a string"
+ */
+std::string & fileReader::rtrim(std::string & str) const{
 	size_t endpos = str.find_last_not_of(trim_);
 	if( std::string::npos != endpos )
 	{
@@ -23,7 +35,30 @@ std::string & fileReader::ltrim(std::string & str) const{
 	}
 	return str;
 }
-
+/**
+ * cuts on right side of the string
+ * example:
+ * 	   setTrim(#)
+ * 	   string="#######this is a string####"
+ * 	   ltrim(string)
+ *     now: string="this is a string####"
+ */
+std::string & fileReader::ltrim(std::string & str) const{
+	size_t startpos = str.find_first_not_of(trim_);
+	if( std::string::npos != startpos )
+	{
+		str = str.substr(startpos );
+	}
+	return str;
+}
+/**
+ * cuts everything that follows the comment marker (one char)
+ * example:
+ *     setComment("&")
+ *     string="this is a string &with a comment"
+ *     trimcomments(string)
+ *     now: string=="this is a string "
+ */
 std::string & fileReader::trimcomments(std::string & str) const{
 	size_t endpos = str.find(comment_);
 	if( std::string::npos != endpos)
@@ -32,14 +67,7 @@ std::string & fileReader::trimcomments(std::string & str) const{
 	}
 	return str;
 }
-std::string & fileReader::rtrim(std::string & str) const{
-	size_t startpos = str.find_first_not_of(trim_);
-	if( std::string::npos != startpos )
-	{
-		str = str.substr(startpos );
-	}
-	return str;
-}
+
 // trim from both ends
 std::string &fileReader::trim(std::string &s) const {
 	return ltrim(rtrim(s));
@@ -61,6 +89,10 @@ void fileReader::readFile(const std::string &filename){
 					<< "delimiter: " << delimiter_ << " comments: " << comment_ << std::endl;
 
 		}
+		if(blindmode_){
+			vector <string> record;
+			lines_.push_back(record);
+		}
 		bool started=false;
 		bool ended=false;
 		while ( myfile.good() )
@@ -70,13 +102,19 @@ void fileReader::readFile(const std::string &filename){
 			string s;
 
 			if (!getline( myfile, s )) break;
-			trimcomments(s);
-			trim(s);
 
+			if(blindmode_){
+				lines_.at(0).push_back(s);
+				continue;
+			}
+			else{
+				trimcomments(s);
+				trim(s);
+			}
 
 			if(s.size()<1)
 				continue;
-			if(!started && start_.size() !=0 && s.find(start_) == string::npos) //wait for start marker on line basis
+			if(!blindmode_ && !started && start_.size() !=0 && s.find(start_) == string::npos) //wait for start marker on line basis
 				continue;
 
 			if(debug && !started)

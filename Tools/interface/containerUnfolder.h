@@ -24,10 +24,17 @@ namespace ztop{
 
 class containerUnfolder{
 public:
-	containerUnfolder(): unfnominal_(0),usecontoptions_(true),regmode_(TUnfold::kRegModeCurvature),LCurve_(true){}
+	enum scanModes{LCurve,minCorr};
+
+	containerUnfolder(): unfnominal_(0),usecontoptions_(true),regmode_(TUnfold::kRegModeCurvature),scanmode_(minCorr){}
 	~containerUnfolder();
 
+	void clear();
+
 	void setOptions(/* options */);
+	void setScanMode(scanModes scmd){scanmode_=scmd;}
+	void setRegMode(TUnfold::ERegMode regmode){regmode_=regmode;}
+	void setIgnoreSyst(std::vector<TString> ign){ignoresyst_=ign;}
 	container1D binbybinunfold(container1DUnfold & cuf);
 	container1D unfold( container1DUnfold &);
 	//container1DUnfold prepareFromStack(const containerStack&);
@@ -44,7 +51,8 @@ private:
 	bool usecontoptions_;
 
 	TUnfold::ERegMode regmode_;
-	bool LCurve_;
+	scanModes scanmode_;
+	std::vector<TString> ignoresyst_;
 };
 
 }//namespace

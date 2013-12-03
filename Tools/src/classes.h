@@ -20,6 +20,7 @@
 #include "../interface/unfolder.h"
 
 #include "../interface/containerUnfolder.h"
+#include "../interface/graph.h"
 
 namespace
 {
@@ -81,16 +82,11 @@ struct dictionary {
 	std::vector<ztop::containerStyle> vsdfewfij;
 	std::vector<ztop::plotStyle> vdsfdsfl;
 
-	/*
-    TUnfold tunf;
-    TUnfoldDensity tunfdes;
-    TUnfoldSys tunfsys;
-    TUnfoldBinning tunfb;
-    std::vector<TUnfold> tunfv;
-    std::vector<TUnfoldDensity> tunfdesv;
-    std::vector<TUnfoldSys> tunfsysv;
-    std::vector<TUnfoldBinning> tunfbv;
-	 */
+
+	ztop::graph weewrefd;
+	std::vector<ztop::graph> vweewrefd;
+
+
 };
 }
 

@@ -3,7 +3,7 @@
 #include "../interface/MainAnalyzer.h"
 
 #include "TtZAnalysis/DataFormats/interface/elecRhoIsoAdder.h"
-#include "TtZAnalysis/plugins/leptonSelector2.h"
+
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 #include "TTree.h"
 #include "TFile.h"
@@ -41,6 +41,7 @@ MainAnalyzer::MainAnalyzer(){
 	testmode_=false;
 	//showstatusbar_=false;
 	lumi_=0;
+	mode_="";
 	singlefile_=false;
 	maxchilds_=8;
 

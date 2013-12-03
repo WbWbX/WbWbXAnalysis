@@ -89,8 +89,10 @@ public:
 	void setOnlySummary(bool show){onlySummary_=show;}
 	void setTestMode(bool test){testmode_=test;}
 
+	void setMode(TString mode){mode_=mode;}
+
 	//COMPAT
-	void setShowStatusBar(bool show){showstatus_=show;}
+	//void setShowStatusBar(bool show){showstatus_=show;}
 
 	ztop::containerStackVector * getPlots(){return & analysisplots_;}
 
@@ -133,6 +135,8 @@ private:
 	bool b_ee_,b_emu_,b_mumu_,is7TeV_;
 	TString datasetdirectory_;
 	double lumi_;
+
+	TString mode_;
 
 	TString filelist_;
 	std::vector<TString> fwithfix_,ftorepl_;

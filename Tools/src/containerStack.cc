@@ -423,17 +423,27 @@ void containerStack::addErrorStack(const TString & sysname, containerStack error
 		}//legfound
 		/*} */
 		else{ //if(!found)
-			std::cout << "containerStack::addErrorStack: legend " << legends_[i] << " not found." << std::endl;
+			std::cout << "containerStack::addErrorStack: legend " << legends_[i] << " not found. - don't worry too much about it, adding 0 error" << std::endl;
+			if(mode==dim1 || mode==unfolddim1){
+				containers_[i].addErrorContainer(sysname,containers_[i]);
+			}
+			if(mode==dim2){
+				containers2D_[i].addErrorContainer(sysname,containers2D_[i]);
+			}
+			if(mode==unfolddim1){
+				containers1DUnfold_[i].addErrorContainer(sysname,containers1DUnfold_[i]);
+			}
+
 		}
 	}
 }
 
-void containerStack::addRelSystematicsFrom(ztop::containerStack stack){
+void containerStack::getRelSystematicsFrom(ztop::containerStack stack){
 	for(std::vector<ztop::container1D>::iterator cont=stack.containers_.begin();cont<stack.containers_.end();++cont){
 		TString name=cont->getName();
 		for(unsigned int i=0;i<containers_.size();i++){
 			if(containers_[i].getName() == name){
-				containers_[i].addRelSystematicsFrom(*cont);
+				containers_[i].getRelSystematicsFrom(*cont);
 				break;
 			}
 		}
@@ -442,7 +452,7 @@ void containerStack::addRelSystematicsFrom(ztop::containerStack stack){
 		TString name=cont->getName();
 		for(unsigned int i=0;i<containers2D_.size();i++){
 			if(containers2D_[i].getName() == name){
-				containers2D_[i].addRelSystematicsFrom(*cont);
+				containers2D_[i].getRelSystematicsFrom(*cont);
 				break;
 			}
 		}
@@ -452,7 +462,7 @@ void containerStack::addRelSystematicsFrom(ztop::containerStack stack){
 		TString name=cont->getName();
 		for(unsigned int i=0;i<containers1DUnfold_.size();i++){
 			if(containers1DUnfold_[i].getName() == name){
-				containers1DUnfold_[i].addRelSystematicsFrom(*cont);
+				containers1DUnfold_[i].getRelSystematicsFrom(*cont);
 				break;
 			}
 		}
@@ -750,6 +760,7 @@ void containerStack::drawRatioPlot(TString name,double resizelabels){
 	mc.setShowWarnings(false);
 	//data.setDivideBinomial(false);
 	//mc.setDivideBinomial(false);
+	/*
 	container1D ratio=data;
 	ratio.clear();
 	ratio.setShowWarnings(false);
@@ -781,6 +792,11 @@ void containerStack::drawRatioPlot(TString name,double resizelabels){
 	histoContent::divideStatCorrelated =false;
 	ratio = data / mccopy;
 	histoContent::divideStatCorrelated =temp;
+	*/
+	container1D ratio=data;
+	ratio.normalizeToContainer(mc);
+	mc=mc.getRelErrorsContainer();
+
 	float multiplier=1;
 	double ylow,yhigh,xlow,xhigh;
 	if(gPad){
@@ -798,9 +814,12 @@ void containerStack::drawRatioPlot(TString name,double resizelabels){
 	h->GetYaxis()->SetNdivisions(505);
 	h->GetXaxis()->SetTickLength(0.03 * multiplier);
 	h->Draw("AXIS");
-	gratio->Draw("P");
+	gratio->Draw("P");/*
 	TGraphAsymmErrors * gmcerr = relmcerrstat.getTGraph(name+"_relerrstat",false,false,false);
-	TGraphAsymmErrors * gmcerrsys = relmcerrsys.getTGraph(name+"_relerrsys",false,false,false);
+	TGraphAsymmErrors * gmcerrsys = relmcerrsys.getTGraph(name+"_relerrsys",false,false,false); */
+	TGraphAsymmErrors * gmcerr = mc.getTGraph(name+"_relerrstat",false,false,false);
+	TGraphAsymmErrors * gmcerrsys = mc.getTGraph(name+"_relerrsys",false,false,false,true);
+
 	gmcerr->SetFillStyle(3005);
 	gmcerrsys->SetFillStyle(1001);
 	gmcerrsys->SetFillColor(kCyan-10);

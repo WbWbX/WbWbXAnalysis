@@ -48,7 +48,7 @@ public:
 	histoBins & getLayer(const TString &) ;
 
 	const histoBins & getNominal() const;
-	 histoBins & getNominal() ;
+	histoBins & getNominal() ;
 
 	void removeLayer(const size_t &);
 	void removeLayer(const TString &);
@@ -56,6 +56,7 @@ public:
 	void clearLayerContent(const int &);
 	void clearLayerStat(const int &);
 
+	std::map<size_t,size_t> mergeLayers(const histoContent &);
 
 	void removeAdditionalLayers(){additionalbins_.clear();layermap_.clear();}
 
@@ -96,12 +97,40 @@ public:
 	histoContent & operator *= (const float &);
 	histoContent operator * (const float &);
 
+	bool operator != (const histoContent&) const;
+	bool operator == (const histoContent&) const;
+
 	void cout() const;
 
 	bool hasSameLayerMap(const histoContent & hc) const{return layermap_==hc.layermap_;}
 
 	static bool debug;
 
+	/*
+	 * high level possibilities to parametrize systematics binwise etc.
+	 * in development
+	 * e.g. possibility to return histcontent for a given value
+	 * 	(not nec. one of input variations -> calculated by parameterization)
+	 *
+	 * assumptions:
+	 * 		-systematics are named as <name>_<variation delta>_<up/down>
+	 * 		-dependence is linear (for now)
+	 * needs:
+	 * 	    -map to identify the groups (not necessarily private member)
+	 * 	    -way to save parameterization (for each bin) once it is done
+	 * 	    -switch to change parameterization (linear, 2nd order, ((3rd order)))
+	 * 	    -class to do the fitting
+	 * 	    	-fitting takes into account statistic errors on sys var (switch!! on/off - depends on stat corr)
+	 *
+	 *
+	 * 	-----------> maybe better in container1D....
+	 */
+
+
+
+	/*
+	 *
+	 */
 private:
 	histoBins nominal_;
 	std::vector<histoBins> additionalbins_;

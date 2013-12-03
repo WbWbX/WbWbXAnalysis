@@ -12,6 +12,7 @@
 #include "../interface/NTFullEvent.h"
 #include "../interface/ttbarControlPlots.h"
 #include "../interface/ZControlPlots.h"
+#include "TtZAnalysis/plugins/leptonSelector2.h"
 
 #include "TtZAnalysis/DataFormats/interface/NTLepton.h"
 #include "TtZAnalysis/DataFormats/interface/NTMuon.h"
@@ -44,11 +45,29 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 	 *
 	 */
 
-
-
 	using namespace std;
 	using namespace ztop;
 
+
+	//some mode options
+	//if(mode_=="xsec"); //standard
+	bool mode_samesign=false;
+	if(mode_.Contains("samesign")){
+		mode_samesign=true;
+		std::cout << "entering same sign mode" <<std::endl;
+	}
+	size_t mintightmuons=0;
+	if(mode_.Contains("tightmuons")){
+		mintightmuons=1;
+		if(b_mumu_)
+			mintightmuons=2;
+		std::cout << "entering tight muon mode" <<std::endl;
+	}
+	bool mode_invertiso=false;
+	if(mode_.Contains("invertiso")){
+		mode_invertiso=true;
+		std::cout << "entering invert iso mode" <<std::endl;
+	}
 
 	bool issignal=issignal_.at(anaid);
 
@@ -100,6 +119,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 	container1D generated2(onebin, "generated filtered events", "gen", "N_{gen}");
 
 
+
 	container1D::c_makelist=false; //switch off automatic listing
 
 	if(testmode_)
@@ -109,12 +129,53 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 	container1DUnfold::c_makelist=true;
 
 	//some other distributions
+	///MLB
 
 	vector<float> genmlb_bins;
-	genmlb_bins << 0 << 110 << 150 << 230  << 350;
-	vector<float> mlb_bins=subdivide<float>(genmlb_bins,10);
-	container1DUnfold unf_mlb8(genmlb_bins,mlb_bins,"m_lb unfold step 8","M_{lb} [GeV]", "N_{evt}");
-	container1DUnfold unf_mlb9(genmlb_bins,mlb_bins,"m_lb unfold step 9","M_{lb} [GeV]", "N_{evt}");
+	genmlb_bins  << 0 << 50 << 90 << 120 << 140 << 160 << 230  << 350;
+	vector<float> ivangen_mlbbins;
+	ivangen_mlbbins << 0 << 70 << 116 << 150 <<400;
+	vector<float> mlb_bins=ztop::subdivide<float>(genmlb_bins,5);
+	vector<float> ivan_mlbbins=subdivide<float>(ivangen_mlbbins,5);
+
+	container1DUnfold unf_mlb8(genmlb_bins,mlb_bins,"m_lb unfold step 8","M_{lb} [GeV]", "N/GeV");
+
+	container1DUnfold unf_ivanmlb8(ivangen_mlbbins,ivan_mlbbins,"m_lb ivansbins unfold step 8","M_{lb} [GeV]", "N/GeV");
+	container1DUnfold unf_mlbbbb8(genmlb_bins,mlb_bins,"m_lb unfold BBB step 8","M_{lb} [GeV]", "N/GeV");
+	unf_mlbbbb8.setBinByBin(true);
+
+	container1DUnfold unf_mlb9(genmlb_bins,mlb_bins,"m_lb unfold step 9","M_{lb} [GeV]", "N/GeV");
+
+	genmlb_bins=ztop::subdivide<float>(genmlb_bins,5);
+	mlb_bins=ztop::subdivide<float>(mlb_bins,5);
+	container1DUnfold unf_mlbfb8(genmlb_bins,mlb_bins,"m_lb unfold finebinned step 8","M_{lb} [GeV]", "N/GeV");
+
+
+	///lepton quantities
+
+	vector<float> genlpt_bins; genlpt_bins  << 20 << 30 << 40 << 50 << 60 << 70 << 80 << 100 << 130 << 160 << 250;
+	vector<float> recolpt_bins= subdivide<float>(genlpt_bins,10);
+	container1DUnfold unf_ptl(genlpt_bins,recolpt_bins,"lep_plus pt unfold step 8","p_{T}^{l} [GeV]", "N/GeV");
+
+	vector<float> genllpt_bins; genllpt_bins << 40  << 60  << 70 << 80  << 90 << 100 << 130 << 160 << 250<<350 <<400 << 500;
+	vector<float> recollpt_bins= subdivide<float>(genllpt_bins,10);
+	container1DUnfold unf_ptll(genllpt_bins,recollpt_bins,"sum lep pt unfold step 8","p_{T}^{l1}+p_{T}^{l2} [GeV]", "N/GeV");
+
+	vector<float> genllE_bins; genllE_bins << 40 << 50 << 60 << 80 << 90 << 100 << 110
+	<< 120 << 130 << 140 << 150 << 160 << 180 << 200 << 210 << 220 << 230 << 240 <<250 << 350 << 450 << 600;
+	vector<float> recollE_bins= subdivide<float>(genllE_bins,10);
+	container1DUnfold unf_Ell(genllE_bins,recollE_bins,"sum lep E unfold step 8","E^{l1}+E^{l2} [GeV]", "N/GeV");
+
+	vector<float> gendilpt_bins; gendilpt_bins << 0 << 10 << 20 << 30 << 40 << 50 << 60 << 80 << 100 << 110 << 120 << 130 << 150 << 250;
+	vector<float> recodilpt_bins= subdivide<float>(gendilpt_bins,10);
+	container1DUnfold unf_dilpt(gendilpt_bins,recodilpt_bins,"dilepton pt unfold step 8","p_{T}^{ll} [GeV]", "N/GeV");
+
+	vector<float> genmll_bins; genmll_bins  << 20 << 30 << 40 << 50 << 60 << 70 << 80 << 90 << 100 << 110 << 120 << 130 << 140 << 150 <<  160 << 200 << 250 << 350;
+	vector<float> recomll_bins= subdivide<float>(genmll_bins,10);
+	container1DUnfold unf_mll(genmll_bins,recomll_bins,"dilepton mass unfold step 8","m_{ll} [GeV]", "N/GeV");
+
+
+
 
 	vector<float> inclbins; inclbins << 0.5 << 1.5; //vis PS, fullPS
 
@@ -266,7 +327,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
 
 	double sel_step[]={0,0,0,0,0,0,0,0,0};
-
+	float count_samesign=0;
 	///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
@@ -280,6 +341,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 	if(testmode_)
 		std::cout << "testmode("<< anaid << "): starting main loop" << std::endl;
 
+
+
+	container1D::c_makelist =true;
 	//define event
 	NTFullEvent evt;
 	ttbarControlPlots plots;//for the Z part just make another class (or add a boolian)..
@@ -287,16 +351,27 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 	plots.setEvent(evt);
 	zplots.setEvent(evt);
 
+	float tpuweight=0;
+	evt.puweight=&tpuweight;
+	//get the plots in the right order. not necessary but nicer
+	for(size_t i=0;i<10;i++){ //steps
+		plots.makeControlPlots(i);
+		zplots.makeControlPlots(i);
+	}
 	//switch on listing
-	//container1D::c_makelist =true;
-
-
-
+	/*vector<float> testbins;
+	for(float i=0;i<200;i++) testbins << i;
+	vector<container1D*> testconts;
+	size_t ntestconts=10000;
+	for(size_t i=0;i<ntestconts;i++)
+		testconts.push_back(new container1D(testbins));
+	 */
 	Long64_t nEntries=t->GetEntries();
 	if(norm==0) nEntries=0; //skip for norm0
-	if(testmode_) nEntries*=0.03;
+	if(testmode_) nEntries*=0.08;
 	for(Long64_t entry=0;entry<nEntries;entry++){
 		//if(showstatusbar_) displayStatusBar(entry,nEntries);
+
 
 		size_t step=0;
 		evt.reset();
@@ -311,12 +386,14 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 		}
 
 		b_Event->GetEntry(entry);
-		double puweight=1;
+		float puweight=1;
 		if (isMC) puweight = getPUReweighter()->getPUweight(pEvent->truePU());
 		if(testmode_ && entry==0)
 			std::cout << "testmode("<< anaid << "): got first event entry" << std::endl;
 
 		evt.puweight=&puweight;
+
+
 
 		bool visPS=true;
 		///gen stuff wo cuts!
@@ -330,6 +407,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 				std::cout << "testmode("<< anaid << "): got first MC gen entry" << std::endl;
 
 			double mlbgen=-1;
+			NTGenParticle * genlep_plus=0;NTGenParticle *genlep_minus=0;
 
 			b_GenLeptons3->GetEntry(entry);
 			if(pGenLeptons3->size()>1){ //gen info there
@@ -365,7 +443,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
 				for(size_t i=0;i<pGenLeptons1->size();i++){
 					NTGenParticle * lep=&(pGenLeptons1->at(i));
-					if(lep->pt()>20 && fabs(lep->eta())<2.4)
+					if(lep->pt()>20 && fabs(lep->eta())<2.5)
 						visGenLeptons1.push_back(lep);
 				}
 				for(size_t i=0;i<pGenLeptons3->size();i++){
@@ -404,14 +482,23 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 						}
 					}
 				}
-				if(genbjets.size()>0)
-					p4genbjet=genbjets.at(0)->p4();
+				vector<NTGenJet *> visgenbjets;;
+				for(size_t i=0;i<genbjets.size();i++){
+					NTGenJet * bjet=genbjets.at(i);
+					if(bjet->pt()<30) continue;
+					if(fabs(bjet->eta()) >2.5) continue;
+					visgenbjets << bjet;
+				}
 
-				if(pGenLeptons1->size() > 1){ ///
-					PolarLorentzVector p4leadinglep=pGenLeptons1->at(0).p4();
+
+				if(visgenbjets.size()>0)
+					p4genbjet=visgenbjets.at(0)->p4();
+
+				if(visGenLeptons1.size() > 1){ ///
+					PolarLorentzVector p4leadinglep=visGenLeptons1.at(0)->p4();
 					mlbgen=(p4genbjet+p4leadinglep).M();
 
-					PolarLorentzVector p4dil=pGenLeptons1->at(0).p4() + pGenLeptons1->at(1).p4();
+					//PolarLorentzVector p4dil=pGenLeptons1->at(0).p4() + pGenLeptons1->at(1).p4();
 
 				}
 				if(b_GenZs){
@@ -424,20 +511,55 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 				}
 				//recreateRelations(mothers, daughters) --serach for genid and motherit, daugherits
 
+				//leptons
 
+				/*
+					container1DUnfold unf_ptl(genlpt_bins,recolpt_bins,"lep+ pt unfold step 8","p_{T}^{l} [GeV]", "N/GeV");
+
+					container1DUnfold unf_ptll(genllpt_bins,recollpt_bins,"sum lep pt unfold step 8","p_{T}^{l1}+p_{T}^{l2} [GeV]", "N/GeV");
+
+					container1DUnfold unf_Ell(genllE_bins,recollE_bins,"sum lep E unfold step 8","E^{l1}+E^{l2} [GeV]", "N/GeV");
+
+					container1DUnfold unf_dilpt(gendilpt_bins,recodilpt_bins,"dilepton pt unfold step 8","p_{T}^{ll} [GeV]", "N/GeV");
+
+					container1DUnfold unf_mll(genmll_bins,recomll_bins,"dilepton mass unfold step 8","m_{ll} [GeV]", "N/GeV");
+				 */
+
+				///THIS IS A WORKAROUND!!!
+				for(size_t i=0;i<visGenLeptons1.size();i++){
+					switch(i){
+					case 0:  genlep_plus=visGenLeptons1.at(i);break;
+					case 1:  genlep_minus=visGenLeptons1.at(i);break;
+					}
+				}
 
 			}
 			/*
 			 * fill gen info here
 			 */
+			//float temppuweight=puweight;
+			//puweight=1;
+			if(mlbgen>=0){
+				unf_ivanmlb8.fillGen(mlbgen,puweight);
+				unf_mlb8.fillGen(mlbgen,puweight);
+				unf_mlbfb8.fillGen(mlbgen,puweight);
+				unf_mlbbbb8.fillGen(mlbgen,puweight);
+				unf_mlb9.fillGen(mlbgen,puweight);
+			}
 
+			if(genlep_plus && genlep_minus){
+				unf_ptl.fillGen(genlep_plus->pt(),puweight);
+				unf_ptl.fillGen(genlep_minus->pt(),puweight);
 
-			unf_mlb8.fillGen(mlbgen,puweight);
-			unf_mlb9.fillGen(mlbgen,puweight);
+				unf_ptll.fillGen(genlep_plus->pt()+genlep_minus->pt(),puweight);
+				unf_Ell.fillGen(genlep_plus->E()+genlep_minus->E(),puweight);
+				unf_dilpt.fillGen((genlep_plus->p4()+genlep_minus->p4()).Pt(),puweight);
+				unf_mll.fillGen((genlep_plus->p4()+genlep_minus->p4()).M(),puweight);
+			}
 
 			if(visPS) unf_tot8.fillGen(0,puweight);
 			unf_tot8.fillGen(1,puweight); //fullPS,
-
+			//puweight=temppuweight;
 
 		} /// isMC ends
 
@@ -452,6 +574,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 			std::cout << "testmode("<< anaid << "): got trigger boolians" << std::endl;
 		if(!checkTrigger(p_TriggerBools,pEvent, isMC,anaid)) continue;
 
+
 		/////////////////////AFTER TRIGGER//////////////////
 		////////////////////////////////////////////////////
 		////////////////////MAKE COLLECTIONS////////////////
@@ -464,9 +587,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 		 * Muons
 		 */
 		b_Muons->GetEntry(entry);
-		size_t mintightmuons=1;
-		if(b_mumu_)
-			mintightmuons=2;
+
 
 		vector<NTLepton *> allleps;
 
@@ -511,11 +632,11 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
 		for(size_t i=0;i<idmuons.size();i++){
 			NTMuon * muon =  idmuons.at(i);
-			if(muon->isoVal() > 0.15) continue;
+			if(!mode_invertiso && muon->isoVal() > 0.15) continue;
+			if(mode_invertiso && muon->isoVal() < 0.15) continue;
 			isomuons <<  muon;
 
 		}
-
 
 		/*
 		 * Electrons
@@ -532,7 +653,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 			NTElectron * elec=&(pElectrons->at(i));
 			double ensf=getElecEnergySF()->getScalefactor(elec->eta());
 			elec->setECalP4(elec->ECalP4() * ensf);
-			elec->setP4(elec->p4() * ensf);
+			elec->setP4(elec->ECalP4() * ensf); //both the same now!!
 			allleps << elec;
 			if(!gotfirst && elec->ECalP4().Pt() < 20)  continue;
 			if(doLargeAcceptance) gotfirst=true;
@@ -558,7 +679,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 			idelectrons <<  elec;
 
 			//select iso electrons
-			if(elec->isoVal()>0.15) continue;
+			if(!mode_invertiso && elec->isoVal()>0.15) continue;
+			if(mode_invertiso && elec->isoVal()<0.15) continue;
 			isoelectrons <<  elec;
 		}
 
@@ -568,6 +690,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
 		std::sort(allleps.begin(),allleps.end(), comparePt<ztop::NTLepton*>);
 		evt.allleptons=&allleps;
+
 
 		/*
 		 * Step 0 kin electrons and muons
@@ -583,7 +706,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 		/*
 		 * Jets
 		 */
-
+		/*	for(size_t i=0;i<ntestconts;i++)
+				testconts.at(i)->fill(1); */
 
 
 		sel_step[0]+=puweight;
@@ -592,6 +716,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 		//////////two ID leptons STEP 1///////////////////////////////
 		step++;
 
+
 		if(b_ee_ && idelectrons.size() < 2) continue;
 		if(b_mumu_ && (idmuons.size() < 2 || tightmuons.size() < mintightmuons)) continue;
 		if(b_emu_ && (idmuons.size() + idelectrons.size() < 2 || tightmuons.size() < mintightmuons)) continue;
@@ -599,6 +724,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 		sel_step[1]+=puweight;
 		plots.makeControlPlots(step);
 		zplots.makeControlPlots(step);
+
+
+
 		//////// require two iso leptons  STEP 2  //////
 		step++;
 
@@ -607,41 +735,53 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 		if(b_emu_ && isomuons.size() + isoelectrons.size() < 2) continue;
 
 		//make pair
-		pair<vector<NTElectron*>, vector<NTMuon*> > leppair,sspair;
-		leppair = ztop::getOppoQHighestPtPair(isoelectrons, isomuons);
+		pair<vector<NTElectron*>, vector<NTMuon*> > oppopair,sspair;
+		oppopair = ztop::getOppoQHighestPtPair(isoelectrons, isomuons);
 		sspair = ztop::getOppoQHighestPtPair(isoelectrons, isomuons,-1);
 
-		double mll=0;
+		pair<vector<NTElectron*>, vector<NTMuon*> > *leppair=&oppopair;
+		if(mode_samesign)
+			leppair=&sspair;
+
+		//fast count_samesign counting
+		if(b_ee_ && sspair.first.size() >1)
+			count_samesign+=puweight;
+		else if(b_mumu_&&sspair.second.size() > 1)
+			count_samesign+=puweight;
+		else if(b_emu_ && sspair.first.size() > 0 && sspair.second.size() > 0)
+			count_samesign+=puweight;
+
+		float mll=0;
 		LorentzVector dilp4;
 
 		NTLepton * firstlep=0,*seclep=0, *leadingptlep=0, *secleadingptlep=0;
 		double lepweight=1;
 		if(b_ee_){
-			if(leppair.first.size() <2) continue;
-			dilp4=leppair.first[0]->p4() + leppair.first[1]->p4();
+			if(leppair->first.size() <2) continue;
+			dilp4=leppair->first[0]->p4() + leppair->first[1]->p4();
 			mll=dilp4.M();
-			firstlep=leppair.first[0];
-			seclep=leppair.first[1];
+			firstlep=leppair->first[0];
+			seclep=leppair->first[1];
 			lepweight*=getElecSF()->getScalefactor(fabs(firstlep->eta()),firstlep->pt());
 			lepweight*=getElecSF()->getScalefactor(fabs(seclep->eta()),seclep->pt());
 			lepweight*=getTriggerSF()->getScalefactor(fabs(firstlep->eta()),fabs(seclep->eta()));
 		}
 		else if(b_mumu_){
-			if(leppair.second.size() < 2) continue;
-			dilp4=leppair.second[0]->p4() + leppair.second[1]->p4();
+			if(leppair->second.size() < 2) continue;
+			dilp4=leppair->second[0]->p4() + leppair->second[1]->p4();
 			mll=dilp4.M();
-			firstlep=leppair.second[0];
-			seclep=leppair.second[1];
+			firstlep=leppair->second[0];
+			seclep=leppair->second[1];
 			lepweight*=getMuonSF()->getScalefactor(fabs(firstlep->eta()),firstlep->pt());
 			lepweight*=getMuonSF()->getScalefactor(fabs(seclep->eta()),seclep->pt());
 			lepweight*=getTriggerSF()->getScalefactor(fabs(firstlep->eta()),fabs(seclep->eta()));
 		}
 		else if(b_emu_){
-			if(leppair.first.size() < 1 || leppair.second.size() < 1) continue;
-			dilp4=leppair.first[0]->p4() + leppair.second[0]->p4();
+			if(leppair->first.size() < 1 || leppair->second.size() < 1) continue;
+			dilp4=leppair->first[0]->p4() + leppair->second[0]->p4();
 			mll=dilp4.M();
-			firstlep=leppair.first[0];
-			seclep=leppair.second[0];
+			firstlep=leppair->first[0];
+			seclep=leppair->second[0];
 			lepweight*=getElecSF()->getScalefactor(fabs(firstlep->eta()),firstlep->pt());
 			lepweight*=getMuonSF()->getScalefactor(fabs(seclep->eta()),seclep->pt());
 			lepweight*=getTriggerSF()->getScalefactor(fabs(firstlep->eta()),fabs(seclep->eta()));
@@ -660,10 +800,13 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 		evt.secleadinglep=secleadingptlep;
 		evt.mll=&mll;
 
+		puweight*=lepweight;
+
 		if(isMC && fabs(puweight) > 99999){
 			p_finished.get(anaid)->pwrite(-88);
 			return;
 		}
+
 
 
 		sel_step[2]+=puweight;
@@ -708,30 +851,104 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 			if(!(treejets.at(i)->id())) continue;
 			if(!noOverlap(treejets.at(i), isomuons, 0.5)) continue;
 			if(!noOverlap(treejets.at(i), isoelectrons, 0.5)) continue;
+			if(fabs(treejets.at(i)->eta())>2.5) continue;
 			idjets << (treejets.at(i));
 
 			if(treejets.at(i)->pt() < 10) continue;
-			if(fabs(treejets.at(i)->eta())>2.5) continue;
 			medjets << treejets.at(i);
 			if(treejets.at(i)->pt() < 30) continue;
 			hardjets << treejets.at(i);
 		}
 		//jets
+		//		std::sort
+		std::sort(idjets.begin(),idjets.end(), comparePt<ztop::NTJet*>);
+		std::sort(medjets.begin(),medjets.end(), comparePt<ztop::NTJet*>);
+		std::sort(hardjets.begin(),hardjets.end(), comparePt<ztop::NTJet*>);
 
-		//evt.medjets=&
+
 
 		b_Met->GetEntry(entry);
 
-		//adjust MET
-
 		NTMet adjustedmet = *pMet;
+		evt.simplemet=pMet;
+		evt.adjustedmet=&adjustedmet;
 		double nmpx=pMet->p4().Px() + dpx;
 		double nmpy=pMet->p4().Py() + dpy;
 		adjustedmet.setP4(LorentzVector(nmpx,nmpy,0,sqrt(nmpx*nmpx+nmpy*nmpy)));
 
+		///////////////combined variables////////////
 
-		evt.simplemet=pMet;
-		evt.adjustedmet=&adjustedmet;
+		float dphillj=0,dphilljj=0,detallj=0,detalljj=0;
+		float pi=M_PI;
+		bool midphi=false;
+
+		if(hardjets.size() >0){
+			dphillj=fabs( (leadingptlep->p4()+secleadingptlep->p4()).Phi() - hardjets.at(0)->p4().Phi() );
+			dphillj=pi-fabs(dphillj-pi);
+			evt.dphillj=&dphillj;
+			evt.midphi=&midphi;
+			detallj=(leadingptlep->p4()+secleadingptlep->p4()).Eta() - hardjets.at(0)->p4().Eta();
+			evt.detallj=&detallj;
+		}
+
+		if(dphillj > 2.64)
+			midphi=true;
+
+		if(hardjets.size() >1){
+			dphilljj=fabs( (leadingptlep->p4()+secleadingptlep->p4()).Phi() - (hardjets.at(0)->p4()+hardjets.at(1)->p4()).Phi() );
+			dphilljj=pi-fabs(dphilljj-pi);
+			evt.dphilljj=&dphilljj;
+			detalljj=(leadingptlep->p4()+secleadingptlep->p4()).Eta() - (hardjets.at(0)->p4()+hardjets.at(1)->p4()).Eta();
+			evt.detalljj=&detalljj;
+		}
+		float topdiscr=0;
+		evt.topdiscr=&topdiscr;
+
+		float ptllj=leadingptlep->pt()+secleadingptlep->pt();
+		evt.ptllj=&ptllj;
+		if(hardjets.size() >0)
+			ptllj+=hardjets.at(0)->pt();
+
+
+
+
+
+		vector<NTJet*> hardbjets;
+		evt.hardbjets=&hardbjets;
+		vector<NTJet*> medbjets;
+		evt.medbjets=&medbjets;
+		for(size_t i=0;i<hardjets.size();i++){
+			getBTagSF()->fillEff(hardjets.at(i), puweight);
+			//  cout << hardjets.at(i)->genPartonFlavour() << endl;
+			if(hardjets.at(i)->btag() < 0.244) continue;
+			hardbjets.push_back(hardjets.at(i));
+		}
+
+		for(size_t i=0;i<medjets.size();i++){
+			getBTagSF()->fillEff(medjets.at(i), puweight);
+			//  cout << hardjets.at(i)->genPartonFlavour() << endl;
+			if(medjets.at(i)->btag() < 0.244) continue;
+			medbjets.push_back(medjets.at(i));
+		}
+
+		float jetpt_phi=dphillj*dphillj*30/(M_PI*M_PI);
+		vector<NTJet*> dphilljjets;
+		for(size_t i=0;i<idjets.size();i++){
+			if(idjets.at(i)->pt()<jetpt_phi) continue;
+			dphilljjets << idjets.at(i);
+		}
+
+		vector<NTJet*> dphiplushardjets=mergeVectors(hardjets,dphilljjets);
+		std::sort(dphiplushardjets.begin(),dphiplushardjets.end(), comparePt<ztop::NTJet*>);
+
+		evt.dphilljjets=&dphilljjets;
+		evt.dphiplushardjets=&dphiplushardjets;
+
+		PolarLorentzVector S4=leadingptlep->p4() + secleadingptlep->p4();
+		for(size_t i=0;i<idjets.size();i++)
+			S4-=idjets.at(i)->p4();
+
+		evt.S4=&S4;
 
 		sel_step[3]+=puweight;
 		plots.makeControlPlots(step);
@@ -771,33 +988,18 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 		step++;
 
 		if(hardjets.size() < 1) continue;
-		double ptllj=leadingptlep->pt()+secleadingptlep->pt();
-		evt.ptllj=&ptllj;
-		//for(size_t i=0;i<hardjets.size();i++)
-		ptllj+=hardjets.at(0)->pt();
 
 
-		double leadingjetbtag=hardjets.at(0)->btag();
 		//ht+=adjustedmet.met();
-		double mllj=0;
-		double phijl=0,dphillj=0;
-		evt.dphillj=&dphillj;
-		if(hardjets.size() >0){
-			mllj=(leadingptlep->p4()+secleadingptlep->p4()+hardjets.at(0)->p4()).M();
-			phijl=fabs(leadingptlep->phi()-hardjets.at(0)->p4().Phi());
-			dphillj=fabs((leadingptlep->p4()+secleadingptlep->p4()).Phi() - hardjets.at(0)->p4().Phi());
-		}
-		double topdiscr=0;
-		evt.topdiscr=&topdiscr;
-		topdiscr = (ptllj-60) * fabs(dphillj-3.1415);// * (1+ leadingjetbtag);
+		//double mllj=0;
+		//double phijl=0;
 
-		if(medjets.size()>1)
-			topdiscr*=2;
 
 		if(!Znotemu){
 
 			sel_step[5]+=puweight;
 			plots.makeControlPlots(step);
+
 
 		}
 		if(isZrange){
@@ -809,9 +1011,14 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 		/////////////////////// at least two jets STEP 6 /////////////
 		step++;
 
-		//if(hardjets.size() < 2) continue;
+
+		if(dphiplushardjets.size() < 2) continue;
+		//if(!midphi && medjets.size()<2) continue;
 		//if(ptllj<140) continue;
-		//if(dphillj > 2.65 && dphillj < 3.55) continue;
+		/*if(dphillj > 2.65 && dphillj < 3.55){
+			if(ptllj < 190)
+				continue;
+		} */
 
 		if(!Znotemu){
 
@@ -829,23 +1036,6 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 		if(!b_emu_ && adjustedmet.met() < 40) continue;
 
 
-		vector<NTJet*> hardbjets;
-		evt.hardbjets=&hardbjets;
-		vector<NTJet*> medbjets;
-		evt.medbjets=&medbjets;
-		for(size_t i=0;i<hardjets.size();i++){
-			getBTagSF()->fillEff(hardjets.at(i), puweight);
-			//  cout << hardjets.at(i)->genPartonFlavour() << endl;
-			if(hardjets.at(i)->btag() < 0.244) continue;
-			hardbjets.push_back(hardjets.at(i));
-		}
-
-		for(size_t i=0;i<medjets.size();i++){
-			getBTagSF()->fillEff(medjets.at(i), puweight);
-			//  cout << hardjets.at(i)->genPartonFlavour() << endl;
-			if(medjets.at(i)->btag() < 0.244) continue;
-			medbjets.push_back(medjets.at(i));
-		}
 
 
 		if(!Znotemu){
@@ -858,11 +1048,12 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
 		}
 
+		//	puweight*=0.5;
 
 		///////////////////// btag cut STEP 8 //////////////////////////
 		step++;
 		if(hardbjets.size() < 1) continue;
-
+		//if(leadingjetbtag<0.244) continue; //cut on leading pt jet
 
 		double mlb=(leadingptlep->p4()+hardbjets.at(0)->p4()).M();
 
@@ -874,11 +1065,36 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 		puweight= puweight * bsf;
 
 		if(!Znotemu){
+			NTLepton * recolep_plus=0, * recolep_minus=0;
+			if(leadingptlep->q()>0){
+				recolep_plus=leadingptlep;
+				recolep_minus=secleadingptlep;
+			}
+			else{
+				recolep_plus=secleadingptlep;
+				recolep_minus=leadingptlep;
+			}
 
 			plots.makeControlPlots(step);
 			sel_step[8]+=puweight;
+
 			unf_tot8.fillReco(1,puweight);
+
+			unf_ivanmlb8.fillReco(mlb,puweight);
 			unf_mlb8.fillReco(mlb,puweight);
+			unf_mlbfb8.fillReco(mlb,puweight);
+			unf_mlbbbb8.fillReco(mlb,puweight);
+
+			//leptons
+
+			unf_ptl.fillReco(recolep_plus->pt(),puweight);
+			unf_ptl.fillReco(recolep_minus->pt(),puweight);
+
+			unf_ptll.fillReco(leadingptlep->pt()+secleadingptlep->pt(),puweight);
+			unf_Ell.fillReco(leadingptlep->E()+secleadingptlep->E(),puweight);
+			unf_dilpt.fillReco((leadingptlep->p4()+secleadingptlep->p4()).Pt(),puweight);
+			unf_mll.fillReco((leadingptlep->p4()+secleadingptlep->p4()).M(),puweight);
+
 
 		}
 		if(isZrange){
@@ -918,7 +1134,10 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 	// delete t;
 	f->Close(); //deletes t
 	delete f;
-
+	/*s
+	for(size_t i=0;i<ntestconts;i++)
+			delete testconts.at(i);
+	 */
 
 	///////////////////////////////
 	///////////////////////////////
@@ -1040,7 +1259,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 				cout << "  => sync step 5 \t1btag";
 			std::cout  << std::endl;
 		}
-		std::cout << "factor for extrapolation (single dataset genentries/tree-entries)" << genentries << "/" << nEntries <<std::endl;
+		std::cout << "factor for extrapolation (single dataset genentries/tree-entries) " << genentries << "/" << nEntries <<std::endl;
+		std::cout << "count_samesign pairs at dilepton selection: " << count_samesign <<std::endl;
 
 		if(singlefile_) return;
 

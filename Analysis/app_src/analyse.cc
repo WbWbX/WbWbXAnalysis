@@ -5,7 +5,7 @@
 //should be taken care of by the linker!
 
 
-void analyse(TString channel, TString Syst, TString energy, TString outfileadd, double lumi, bool dobtag, bool status,bool testmode,TString maninputfile){ //options like syst..
+void analyse(TString channel, TString Syst, TString energy, TString outfileadd, double lumi, bool dobtag, bool status,bool testmode,TString maninputfile,TString mode){ //options like syst..
 
 	bool didnothing=false;
 	//some env variables
@@ -68,6 +68,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
 
 	MainAnalyzer ana;
 	ana.setMaxChilds(6);
+	ana.setMode(mode);
 	ana.setShowStatus(status);
 	ana.setTestMode(testmode);
 	ana.setLumi(lumi);
@@ -175,20 +176,20 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
 		ana.getBTagSF()->setSystematic("light down");
 	}
 	else if(Syst=="TT_MATCH_up"){
-		ana.setFilePostfixReplace("ttbar_ext.root","ttbar_ttmup.root");
-		ana.setFilePostfixReplace("ttbarviatau_ext.root","ttbarviatau_ttmup.root");
+		ana.setFilePostfixReplace("ttbar.root","ttbar_ttmup.root");
+		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_ttmup.root");
 	}
 	else if(Syst=="TT_MATCH_down"){
-		ana.setFilePostfixReplace("ttbar_ext.root","ttbar_ttmdown.root");
-		ana.setFilePostfixReplace("ttbarviatau_ext.root","ttbarviatau_ttmdown.root");
+		ana.setFilePostfixReplace("ttbar.root","ttbar_ttmdown.root");
+		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_ttmdown.root");
 	}
 	else if(Syst=="TT_SCALE_up"){
-		ana.setFilePostfixReplace("ttbar_ext.root","ttbar_ttscaleup.root");
-		ana.setFilePostfixReplace("ttbarviatau_ext.root","ttbarviatau_ttscaleup.root");
+		ana.setFilePostfixReplace("ttbar.root","ttbar_ttscaleup.root");
+		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_ttscaleup.root");
 	}
 	else if(Syst=="TT_SCALE_down"){
-		ana.setFilePostfixReplace("ttbar_ext.root","ttbar_ttscaledown.root");
-		ana.setFilePostfixReplace("ttbarviatau_ext.root","ttbarviatau_ttscaledown.root");
+		ana.setFilePostfixReplace("ttbar.root","ttbar_ttscaledown.root");
+		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_ttscaledown.root");
 	}
 	else if(Syst=="Z_MATCH_up"){
 		ana.setFilePostfixReplace("60120.root","60120_Zmup.root");
@@ -203,20 +204,20 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
 		ana.setFilePostfixReplace("60120.root","60120_Zscaledown.root");
 	}
 	else if(Syst=="MT_6_down"){
-		ana.setFilePostfixReplace("ttbar_ext.root","ttbar_mt166.5.root");
-		ana.setFilePostfixReplace("ttbarviatau_ext.root","ttbarviatau_mt166.5.root");
+		ana.setFilePostfixReplace("ttbar.root","ttbar_mt166.5.root");
+		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mt166.5.root");
 	}
 	else if(Syst=="MT_3_down"){
-		ana.setFilePostfixReplace("ttbar_ext.root","ttbar_mt169.5.root");
-		ana.setFilePostfixReplace("ttbarviatau_ext.root","ttbarviatau_mt169.5.root");
+		ana.setFilePostfixReplace("ttbar.root","ttbar_mt169.5.root");
+		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mt169.5.root");
 	}
 	else if(Syst=="MT_3_up"){
-		ana.setFilePostfixReplace("ttbar_ext.root","ttbar_mt175.5.root");
-		ana.setFilePostfixReplace("ttbarviatau_ext.root","ttbarviatau_mt175.5.root");
+		ana.setFilePostfixReplace("ttbar.root","ttbar_mt175.5.root");
+		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mt175.5.root");
 	}
 	else if(Syst=="MT_6_up"){
-		ana.setFilePostfixReplace("ttbar_ext.root","ttbar_mt178.5.root");
-		ana.setFilePostfixReplace("ttbarviatau_ext.root","ttbarviatau_mt178.5.root");
+		ana.setFilePostfixReplace("ttbar.root","ttbar_mt178.5.root");
+		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mt178.5.root");
 	}
 
 	//......
@@ -231,6 +232,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
 
 
 	std::cout << "doing btag: " << dobtag <<std::endl;
+
 
 
 	if(didnothing){
@@ -262,9 +264,15 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
 			}
 			vector<TString> dycontributions;
 			dycontributions << "Z#rightarrowll" << "DY#rightarrowll";
-			if(!channel.Contains("emu"))
+			if(!channel.Contains("emu")){
 				rescaleDY(&csv, dycontributions);
-			//csv.writeAllToTFile(ana.getOutPath()+"_plots.root",true);
+				f->Close();
+				csv.writeAllToTFile(ana.getOutPath()+".root",true,!testmode);
+			}
+			else if(testmode){
+				csv.writeAllToTFile(ana.getOutPath()+".root",true,!testmode);
+			}
+
 			if(!testmode){
 				system(("touch "+batchdir+ana.getOutFileName()+"_fin").Data());
 			}
@@ -302,7 +310,7 @@ int main(int argc, char* argv[]){
 	TString outfile=getOutFile(argc, argv);  //-o <outfile> should be something like channel_energy_syst.root // only for plots
 	bool status=getShowStatus(argc, argv);    //-S enables default false
 	bool testmode=getTestMode(argc, argv); 	//-T enables default false
-	TString mode=getMode(argc,argv);     //-m (xsec,....) default xsec changes legends to some extend
+	TString mode=getMode(argc,argv);     //-m (xsec,....) default xsec changes legends? to some extend
 	bool mergefiles=false; //get these things from the options to..
 	TString inputfile=getInputfile(argc,argv);
 
@@ -312,6 +320,6 @@ int main(int argc, char* argv[]){
 		//do the merging with filestomerge
 	}
 	else{
-		analyse(channel, syst, energy, outfile, lumi,dobtag , status, testmode,inputfile );
+		analyse(channel, syst, energy, outfile, lumi,dobtag , status, testmode,inputfile,mode );
 	}
 }

@@ -10,6 +10,7 @@
 #include "TtZAnalysis/Tools/interface/container1DUnfold.h"
 #include "TtZAnalysis/Tools/interface/containerStackVector.h"
 #include "TtZAnalysis/Tools/interface/containerStack.h"
+#include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 #include "TString.h"
 #include <iostream>
 #include "TFile.h"
@@ -33,31 +34,18 @@ void setNameAndTitle(TCanvas *c, TString name){
 void unfold(int argc, char* argv[]){
 	TH1::AddDirectory(false);
 	AutoLibraryLoader::enable();
-
-	ztop::containerUnfolder::debug=true;
-	ztop::container2D::debug=false;
-	ztop::container1DUnfold::debug=false;
-	ztop::containerStack::debug=false;
-
+	using namespace ztop;
 	bool debug=true;
 
-	//std::vector<TString> ttsignals,zsignals;
-	//ttsignals.push_back("t#bar{t}");
-	//zsignals.push_back("Z#rightarrowll");
-	//signals.push_back("t#bar{t}(#tau)");
-
-	std::vector<TString> stacknames;
-
-	ztop::containerUnfolder unfolder;
 	/*
-	 * set unfolding options etc.... not yet available
+	 *
+	 * get options
 	 */
-
 	TString out="",in="",signal="";
+	bool ignoremass=false;
 	bool moreoutput=false;
 	bool inset=false;
 	for(int i=1;i<argc;i++){
-		//  std::cout << argv[i] << std::endl;;
 
 		if((TString)argv[i] == "-o"){
 			if (i + 1 != argc){
@@ -75,6 +63,9 @@ void unfold(int argc, char* argv[]){
 				i++;
 			}
 		}
+		else if((TString)argv[i] == "-i"){
+			ignoremass=true;
+		}
 		else {
 			if(inset){
 				std::cout << "You have to specify exactly one input file" << std::endl;
@@ -84,6 +75,7 @@ void unfold(int argc, char* argv[]){
 			inset=true;
 		}
 	}
+
 	if(!inset){
 		std::cout << "You have to specify exactly one input" << std::endl;
 		return;
@@ -93,12 +85,43 @@ void unfold(int argc, char* argv[]){
 		in.Append(".root");
 
 	TFile * f = new TFile(in,"READ");
+	if(f->IsZombie()){
+		std::cout << "file could not be opened/does not exist. exit" << std::endl;
+		return;
+	}
 	if(!(f->Get("stored_objects"))){
 		std::cout << "tree stored_objects not found in input file. exit" << std::endl;
 		return;
 	}
 
+	if(moreoutput){
+		ztop::containerUnfolder::debug=true;
+		ztop::container2D::debug=false;
+		ztop::container1DUnfold::debug=true;
+		ztop::containerStack::debug=false;
+	}
 	ztop::containerUnfolder::printinfo = moreoutput;
+
+	/*
+	 * configure output and options
+	 *
+	 */
+
+	TString outfile=in;
+	outfile.ReplaceAll(".root","");
+	outfile+="_"+out;
+	TString outdir=outfile+"_unfolded/";
+	outfile+="_unfolded.root";
+
+
+	system(("mkdir -p "+outdir).Data());
+
+	std::vector<TString> ign;
+	if(ignoremass){
+		ign << "MT_3_down" << "MT_3_up"<< "MT_6_down" << "MT_6_up";
+	}
+
+
 
 	TTree * t = (TTree*)f->Get("stored_objects");
 	ztop::containerStackVector *pcsv;
@@ -128,13 +151,6 @@ void unfold(int argc, char* argv[]){
 	f->Close();
 	delete f;
 
-	//prepare output file
-	TString outfile=out;
-	if(outfile==""){
-		outfile=in;
-		outfile.ReplaceAll(".root","_unfolded.root");
-	}
-
 	//get right stacks and set signal
 	size_t csvsize=csv.getVector().size();
 	std::vector<ztop::containerStack> tobeunfolded;
@@ -145,59 +161,48 @@ void unfold(int argc, char* argv[]){
 			if(signal!="")
 				use=stack.setsignal(signal);
 			if(use){
-				stacknames.push_back(stack.getName());
+				std::cout << "Set signal to " << signal << " for stack " << stack.getName() <<std::endl;
 				tobeunfolded.push_back(stack);
 			}
 		}
 	}
 
 
-	//prepare container1DUnfolds
-	if(debug)
-		std::cout << "main: produceUnfoldingContainer..." <<std::endl;
-	std::vector<ztop::container1DUnfold> datatobeunf,xchecktobeunf;
-	for(size_t i=0;i<tobeunfolded.size();i++){
-		ztop::containerStack * stack=&tobeunfolded.at(i);
-		datatobeunf.push_back(stack->produceUnfoldingContainer());
-		if(debug)
-			std::cout << "main: produceUnfoldingContainer for "<< stack->getName() <<std::endl;
-		xchecktobeunf.push_back(stack->produceXCheckUnfoldingContainer());
-		if(debug)
-			std::cout << "main: produceXCheckContainer for "<< stack->getName() <<std::endl;
-	}
-
-	//do unfolding
-
-	for(size_t i=0;i<stacknames.size();i++)
-		stacknames.at(i).ReplaceAll(" ", "_");
-
 	///unfolding and output part!!
-	TString outdir="unfolded"+out+"/";
-	system(("mkdir -p unfolded"+out).Data());
 
-	size_t ufsize=datatobeunf.size();
+	ztop::containerUnfolder unfolder;
+	//unfolder.setRegMode(TUnfold::kRegModeDerivative);
+	unfolder.setScanMode(ztop::containerUnfolder::minCorr);
+	unfolder.setIgnoreSyst(ign);
+
+	size_t ufsize=tobeunfolded.size();
 	//parallel for?!?
 	f = new TFile(outdir+outfile,"RECREATE");
 	f->cd();
 	TTree *outtree= new TTree("stored_objects","stored_objects");
 	ztop::container1D * cpointer=0;
+	ztop::container1DUnfold * cufpointer=0;
 	outtree->Branch("unfoldedContainers",&cpointer);
+	outtree->Branch("container1DUnfolds",&cufpointer);
 	TDirectory * d=0;
 	for(size_t i=0;i<ufsize;i++){
-		TString name=stacknames.at(i);
+		unfolder.clear();
+		ztop::containerStack * stack=&tobeunfolded.at(i);
+
+		TString name=stack->getName();
 		TString nameus=name;
 		nameus.ReplaceAll(" ","_");
 		f->cd();
 		d = f->mkdir(nameus,nameus);
 		d->cd();
-		outdir="unfolded/"+nameus+"/";
-		system(("mkdir -p "+outdir).Data());
-		ztop::container1DUnfold & data=datatobeunf[i];
-		if(data.getBackground().integral() > data.getRecoContainer().integral() * 0.3){
+		TString outdirin=outdir+nameus+"/";
+		system(("mkdir -p "+outdirin).Data());
+
+		ztop::container1DUnfold  data=stack->produceUnfoldingContainer();
+		if(data.getBackground().integral() > data.getRecoContainer().integral() * 0.3 ||  data.getRecoContainer().integral()==0){
 			std::cout << "containerUnfolder::unfold: " << name << " has more background than signal, skipping xcheck" <<std::endl;
 			continue;
 		}
-		ztop::container1DUnfold & check=xchecktobeunf[i];
 		std::cout << "unfolding " << data.getName() << " syst: ";
 		//	for(size_t s=0;s<data.getSystSize();s++)
 		//		std::cout  << data.getSystErrorName(s) << " ";
@@ -209,13 +214,15 @@ void unfold(int argc, char* argv[]){
 		unfolded.setName(data.getName()+"_unfolded");
 		refolded.setName(data.getName()+"_refolded");
 		cpointer=&unfolded;
+		cufpointer=&data;
 		outtree->Fill();
-		cpointer=&refolded;
-		outtree->Fill();
+
 		//TDirectory *d = new TDirectory(data.getName(),data.getName());
 		//d->cd();
 		/////////
+		d->cd();
 		TCanvas * c = new TCanvas(name+"_unfolded",name+"_unfolded");
+		c->Draw();
 		unfolded.drawFullPlot();
 		if(unfolded.getNBins() < 3){
 			std::cout << "\n\n" << name << std::endl;
@@ -225,44 +232,125 @@ void unfold(int argc, char* argv[]){
 			std::cout << "\n\n"  << std::endl;
 
 		}
-
-			c->Print(outdir+name+"_unfolded.eps");
-		c->Write();
+		d->cd();
+		//c->Write();
+		d->WriteTObject(c,c->GetName());
+		c->Print(outdirin+name+"_unfolded.pdf");
 		c->Clear();
+
+		TDirectory * histdir=d->mkdir("hists","hists");
+		TGraphAsymmErrors * singleg=unfolded.getTGraph();
+		histdir->WriteTObject(singleg,singleg->GetName());
+		delete singleg;
+		d->cd();
+
 		setNameAndTitle(c,name+"_refolded_recoBG");
 		refolded.drawFullPlot();
 		ztop::container1D reco=data.getRecoContainer();
 		//ztop::container1D recmbg=reco-data.getBackground();
 		reco.drawFullPlot("",true,"same");
 		data.getBackground().drawFullPlot("",true,"same");
+		d->cd();
+		//c->Write();
+		d->WriteTObject(c,c->GetName());
+		c->Print(outdirin+name+"_refolded_recoBG.pdf");
 
-			c->Print(outdir+name+"_refolded_recoBG.eps");
-		c->Write();
+		if(moreoutput)
+			std::cout << "making control plot" << std::endl;
+		c=stack->makeTCanvas();
+		d->WriteTObject(c,((TString)c->GetName()+"_cplot").Data());
+		delete c;
 
-		c->Clear();
-		setNameAndTitle(c,name+"_checkUnfoldGen");
 
+		if(moreoutput)
+			std::cout << "making stab/pur plot" << std::endl;
+		c=new TCanvas();
+		setNameAndTitle(c,name+"_pur_stab");
+		ztop::container1DUnfold cuf=stack->getSignalContainer();
+		cuf.checkCongruentBinBoundariesXY();
+		TH1D * pur=cuf.getPurity().getTH1D("purity",false,false,false);
+		TH1D * stab=cuf.getStability().getTH1D("stability",false,false,false);
+		if(pur){
+			stab->SetLineColor(kRed);
+			stab->SetMarkerColor(kRed);
+			pur->GetYaxis()->SetRangeUser(0,1);
+			pur->Draw();
+			stab->Draw("same");
+		}
+		d->WriteTObject(c,((TString)c->GetName()+"_purStab").Data());
+
+
+		///
+		if(moreoutput)
+			std::cout << "making regularization plots" << std::endl;
+		if(!data.isBinByBin()){
+
+			///lcurve plots
+			c=new TCanvas();
+			setNameAndTitle(c,name+"_lcurve");
+			unfolder.getNominalUnfolder()->drawLCurve();
+			d->WriteTObject(c,c->GetName());
+			c->Clear();
+
+			setNameAndTitle(c,name+"_tau");
+			unfolder.getNominalUnfolder()->drawTau();
+			d->WriteTObject(c,c->GetName());
+			/////check distributions
+			c->Clear();
+
+			//all syst curves:
+
+			TDirectory * indir=d->mkdir("sys","sys");
+			indir->cd();
+			for(size_t sys=0;sys<data.getSystSize()-ign.size();sys++){
+				setNameAndTitle(c,name+"_"+data.getSystErrorName(sys)+"_tau");
+				unfolder.getSystUnfolder().at(sys)->drawTau();
+				indir->WriteTObject(c,c->GetName());
+				/////check distributions
+				c->Clear();
+				setNameAndTitle(c,name+"_"+data.getSystErrorName(sys)+"_lcurve");
+				unfolder.getSystUnfolder().at(sys)->drawLCurve();
+				indir->WriteTObject(c,c->GetName());
+				/////check distributions
+				c->Clear();
+
+			}
+		}
+
+		////////make cross check
+		unfolder.clear();
+		std::cout << "Making XCheck for " << name << std::endl;
+		d->cd();
+		setNameAndTitle(c,name+"_checkUnfoldGen.pdf");
+
+		ztop::container1DUnfold  check=stack->produceXCheckUnfoldingContainer();
 		unfolder.unfold(check);
+
 		ztop::container1D checkunfolded=check.getUnfolded();
-		const ztop::container1D& generated=check.getGenContainer();
-		checkunfolded.drawFullPlot();
-		TH1D*   gen =check.getGenContainer().getTH1D("",true,true);
+		float max=checkunfolded.getYMax(true);
+		ztop::container1D generated=check.getGenContainer();
+		generated *= (1/check.getLumi());
+		if(max < generated.getYMax(true)) max=generated.getYMax(true);
+		TH1D * ufgen=checkunfolded.getTH1D("genUF",true,true);
+		TH1D*   gen =generated.getTH1D("gen",true,true);
 		gen->SetMarkerColor(kRed);
+		ufgen->GetYaxis()->SetRangeUser(0,max*1.1);
+		ufgen->Draw();
 		gen->Draw("same");
 		if(debug)
-			c->Print(outdir+name+"_checkUnfoldGen.eps");
-		c->Write();
-		c->Clear();
-		setNameAndTitle(c,name+"normalized");
-		unfolded.getTH1D()->DrawNormalized();
-		gen->DrawNormalized("same");
-		c->Write();
-		if(debug)
-			c->Print(outdir+name+"normalized");
-		delete c;
+			c->Print(outdirin+name+"_checkUnfoldGen.pdf");
+		d->cd();
+		//c->Write();
+		d->WriteTObject(c,c->GetName());
+		d->Close();
 		delete d;
-	}
+		delete ufgen;
+		delete gen;
+		delete pur;
+		delete stab;
 
+	}
+	f->WriteTObject(outtree,outtree->GetName());
 	f->Close();
 	delete f;
 

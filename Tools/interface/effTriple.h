@@ -253,6 +253,7 @@ public:
 
 	void scale(double SF){hists_.at(0).scale(SF);hists_.at(1).scale(SF);}
 
+
 	effTriple operator + (const effTriple & second){
 		effTriple out=second;
 		out.hists_.at(0) = out.hists_.at(0) + hists_.at(0);

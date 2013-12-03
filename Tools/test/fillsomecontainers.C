@@ -48,6 +48,10 @@
 	c1.addErrorContainer("syst3_down",c3*1.02);
 
 
+graph g;
+
+g.import(&c1);
+
 
 
 }

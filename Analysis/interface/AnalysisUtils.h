@@ -162,14 +162,14 @@ bool getTestMode(int argc, char* argv[]){
 	return false;
 }
 
-void rescaleDY(ztop::container1DStackVector * vec, std::vector<TString> contributions, double scalescale=1, bool textout=true, TString identifier="mll Z Range "){
+void rescaleDY(ztop::container1DStackVector * vec, std::vector<TString> contributions, double scalescale=1, bool textout=true, TString identifier="mll Z Range"){
 
   using namespace ztop; 
 
   std::vector<TString> ident;ident.clear();
   std::vector<double> scales;scales.clear();
   for(int i=5;i<=9;i++){
-    TString stepstring="step "+toTString(i);
+    TString stepstring=" step "+toTString(i);
     double dymc = 0;
     std::vector<TString> allbutdyanddata;
 
@@ -215,6 +215,22 @@ std::vector<T> subdivide(const std::vector<T> & bins, size_t div){
 template <class T>
 bool comparePt(T a, T b){
 	return (a->pt() > b->pt());
+}
+
+template <class T>
+std::vector<T> mergeVectors(const std::vector<T>& a, const std::vector<T> & b){
+	std::vector<T> out=b;
+	for(size_t i=0;i<a.size();i++){
+		bool notfound=true;
+		for(size_t j=0;j<b.size();j++){
+			if(a.at(i)==b.at(j)){
+				notfound=false;
+				break;
+			}
+		}
+		if(notfound) out.push_back(a.at(i));
+	}
+	return out;
 }
 
 }

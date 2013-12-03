@@ -37,12 +37,19 @@ bool containerUnfolder::debug=false;
 
 
 containerUnfolder::~containerUnfolder(){
-	if(unfnominal_) delete unfnominal_;
-	for(size_t i=0;i<unfsyst_.size();i++)
-		if(unfsyst_.at(i)) delete unfsyst_.at(i);
+	clear();
+//delete option pointers?
 }
 
-
+void containerUnfolder::clear(){//don't delete options
+	if(unfnominal_){
+		delete unfnominal_;
+		unfnominal_=0;
+	}
+	for(size_t i=0;i<unfsyst_.size();i++)
+		 delete unfsyst_.at(i);
+	unfsyst_.clear();
+}
 /**
  * implement later, right now, just use default ones
  */
@@ -53,6 +60,8 @@ void containerUnfolder::setOptions(){
 container1D containerUnfolder::binbybinunfold(container1DUnfold & cuf){
 
 	//efficiency:
+	bool tempmakelist=container1D::c_makelist;
+	container1D::c_makelist=false;
 
 	if(debug)
 		std::cout << "containerUnfolder::binbybinunfold "<< cuf.getName() << std::endl;
@@ -69,7 +78,7 @@ container1D containerUnfolder::binbybinunfold(container1DUnfold & cuf){
 	container1D effinv=gen/genreco;
 	histoContent::divideStatCorrelated=temp;
 	if(debug)
-			std::cout << 1/effinv.getBinContent(1) << std::endl;
+		std::cout << 1/effinv.getBinContent(1) << std::endl;
 
 	temp=histoContent::subtractStatCorrelated;
 	histoContent::subtractStatCorrelated=false;
@@ -80,7 +89,7 @@ container1D containerUnfolder::binbybinunfold(container1DUnfold & cuf){
 	container1D smbg=sel - bg;
 	histoContent::subtractStatCorrelated=temp;
 	if(debug)
-			std::cout << smbg.getBinContent(1) << std::endl;
+		std::cout << smbg.getBinContent(1) << std::endl;
 
 	temp=histoContent::multiplyStatCorrelated;
 	histoContent::multiplyStatCorrelated=false;
@@ -98,15 +107,22 @@ container1D containerUnfolder::binbybinunfold(container1DUnfold & cuf){
 	xsec = xsec * lumiinv;
 	cuf.setUnfolded(xsec);
 	cuf.setRefolded(cuf.getRecoContainer());
+	container1D::c_makelist=tempmakelist;
 	return xsec;
 
 }
 container1D containerUnfolder::unfold(/*const*/ container1DUnfold & cuf){
 
+	bool tempmakelist=container1D::c_makelist;
+	container1D::c_makelist=false;
 	container1D out,refolded;
 
 	if(cuf.getBackground().integral() > cuf.getRecoContainer().integral() * 0.3){
 		std::cout << "containerUnfolder::unfold: " << cuf.getName() << " has more background than signal, skipping" <<std::endl;
+		return container1D();
+	}
+	if(cuf.getRecoContainer().integral() == 0){
+		std::cout << "containerUnfolder::unfold: " << cuf.getName() << " empty, skipping" <<std::endl;
 		return container1D();
 	}
 
@@ -114,16 +130,15 @@ container1D containerUnfolder::unfold(/*const*/ container1DUnfold & cuf){
 		container1D out=binbybinunfold(cuf);
 		return out;
 	}
+	clear();
 
 	TUnfold::ERegMode regmode=regmode_;
-	bool LCurve=LCurve_;
-
 
 	/*
 	 *
 	 * preparation nominal
 	 */
-	bool outisBWdiv=false; //for debuggung purposes
+	bool outisBWdiv=false; //for debugging purposes
 	TH1::AddDirectory(false);
 	if(debug)
 		std::cout << "containerUnfolder::unfold: preparing response matrix" << std::endl;
@@ -135,8 +150,8 @@ container1D containerUnfolder::unfold(/*const*/ container1DUnfold & cuf){
 		std::cout << "containerUnfolder::unfold: initialising unfolder" << std::endl;
 	unfnominal_->init(responsematrix,datahist,TUnfold::kHistMapOutputHoriz,regmode);
 	if(debug)
-		std::cout << "containerUnfolder::unfold: scanning L-Curve" << std::endl;
-	if(LCurve)
+		std::cout << "containerUnfolder::unfold: scanning L-Curve/Tau" << std::endl;
+	if(scanmode_==LCurve)
 		unfnominal_->scanLCurve();
 	else
 		unfnominal_->scanTau();
@@ -172,6 +187,9 @@ container1D containerUnfolder::unfold(/*const*/ container1DUnfold & cuf){
 	if(debug)
 		std::cout << "containerUnfolder::unfold: init systematics" << std::endl;
 	for(size_t sys=0;sys<cuf.getSystSize();sys++){
+		if(std::find(ignoresyst_.begin(),ignoresyst_.end(),cuf.getSystErrorName(sys)) != ignoresyst_.end())
+			continue;
+
 		TH2* SysResponsematrix=cuf.prepareRespMatrix(false,sys);
 		if(!SysResponsematrix){
 			std::cout << "containerUnfolder::unfold: Response matrix for " << cuf.getSystErrorName(sys) << " could not be created. stopping unfolding!" << std::endl;
@@ -189,6 +207,7 @@ container1D containerUnfolder::unfold(/*const*/ container1DUnfold & cuf){
 		if(verb>10000){
 			std::cout << "containerUnfolder::unfold: init of unfolder for "<< cuf.getName()<< ": "
 					<< cuf.getSystErrorName(sys) << " not successful. Will not unfold distribution"<< std::endl;
+			continue;
 		}
 		unfsyst_.push_back(uf);
 		delete SysResponsematrix;
@@ -205,16 +224,19 @@ container1D containerUnfolder::unfold(/*const*/ container1DUnfold & cuf){
 	 * parallelise this one!!
 	 */
 	if(debug)
-		std::cout << "containerUnfolder::unfold: scanning L-Curve of systematics" << std::endl;
-	for(size_t sys=0;sys<cuf.getSystSize();sys++){
+		std::cout << "containerUnfolder::unfold: scanning L-Curve/Tau of systematics" << std::endl;
+	for(size_t sys=0;sys<unfsyst_.size();sys++){
 		if(debug||printinfo)
-			std::cout << "containerUnfolder::unfold: scanning L-Curve of "<< cuf.getName() << ": " << cuf.getSystErrorName(sys) << std::endl;
-		unfsyst_.at(sys)->scanLCurve();
+			std::cout << "containerUnfolder::unfold: scanning L-Curve/Tau of "<< cuf.getName() << ": " << cuf.getSystErrorName(sys) << std::endl;
+		if(scanmode_==LCurve)
+			unfsyst_.at(sys)->scanLCurve();
+		else
+			unfsyst_.at(sys)->scanTau();
 	}
 	/*
 	 * getting output and merging it into unfolded_ etc. should be ok in serial mode
 	 */
-	for(size_t sys=0;sys<cuf.getSystSize();sys++){
+	for(size_t sys=0;sys<unfsyst_.size();sys++){
 		TH1 * huf=unfsyst_.at(sys)->getUnfolded();
 		TH1 * hrf=unfsyst_.at(sys)->getRefolded();
 		if(!huf){
@@ -234,6 +256,7 @@ container1D containerUnfolder::unfold(/*const*/ container1DUnfold & cuf){
 	out=out*lumiinv;
 	cuf.setUnfolded(out);
 	cuf.setRefolded(refolded);
+	container1D::c_makelist=tempmakelist;
 	return out;
 }
 

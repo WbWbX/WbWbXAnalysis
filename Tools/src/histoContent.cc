@@ -63,6 +63,15 @@ void histoContent::clearLayerStat(const int & idx){
 	for(size_t i=0;i<nominal_.size();i++)
 		getBin(i,idx).setStat(0);
 }
+std::map<size_t,size_t> histoContent::mergeLayers(const histoContent & rhs){
+	histoContent nrhs=rhs;
+	//add layers that are in lhs but not in rhs to rhs
+	nrhs.addLayers(*this);
+	//add layers that are in rhs but not in lhs to lhs
+	//and get association map
+	return addLayers(nrhs);
+}
+
 /**
  * returns true if bins were added, returns false if bins were removed
  */
@@ -331,6 +340,19 @@ histoContent histoContent::operator * (const float & val){
 	histoContent out=*this;
 	out*=val;
 	return out;
+}
+
+bool histoContent::operator != (const histoContent& rhs)const{
+/*histoBins nominal_;
+	std::vector<histoBins> additionalbins_;
+	indexMap<TString> layermap_; */
+	if(nominal_!=rhs.nominal_) return true;
+	if(layermap_!=rhs.layermap_) return true;
+	if(additionalbins_!=rhs.additionalbins_) return true;
+	return false;
+}
+bool histoContent::operator == (const histoContent& rhs)const{
+	return !(*this!=rhs);
 }
 
 void histoContent::cout() const{

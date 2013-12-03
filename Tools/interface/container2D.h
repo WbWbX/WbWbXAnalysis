@@ -29,11 +29,21 @@ public:
     container2D(const std::vector<float> & ,const std::vector<float> &, TString name="",TString xaxisname="",TString yaxisname="", bool mergeufof=false); //! construct with binning
 	~container2D();
 
+	bool isDummy(){return xbins_.size()<2;}
+
 	void setBinning(const std::vector<float> &xbins, std::vector<float> ybins);
 	//setaxis etc still missing. should be ok as long as default constr. is protected
 
 	void setName(TString name){name_=name;}
 	const TString &getName() const {return name_;}
+
+
+	void setXAxisName(const TString& name){xaxisname_=name;}
+	const TString& getXAxisName()const {return xaxisname_;}
+
+	void setYAxisName(const TString& name){yaxisname_=name;}
+	const TString& getYAxisName()const {return yaxisname_;}
+
 
     size_t getBinNoX(const float&) const; // returns bin index number for (float variable)
     size_t getBinNoY(const float&) const; //! returns bin index number for (float variable)
@@ -90,7 +100,7 @@ public:
 
     void addErrorContainer(const TString & ,const container2D &,float);  //! adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down"
     void addErrorContainer(const TString &,const container2D & );        //! adds deviation to (this) as systematic uncertianty with name. name must be ".._up" or ".._down"
-    void addRelSystematicsFrom(const container2D &);
+    void getRelSystematicsFrom(const container2D &);
     void addGlobalRelError(TString,float);
 
     void reset();    //! resets all uncertainties and binning, keeps names and axis

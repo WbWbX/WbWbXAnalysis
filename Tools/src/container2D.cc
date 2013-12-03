@@ -40,6 +40,12 @@ container2D::container2D(const std::vector<float> &xbins,const std::vector<float
 }
 
 void container2D::setBinning(const std::vector<float> &xbins, std::vector<float> ybins){
+	if(xbins.size()<1 || ybins.size() <1){
+		std::cout << "container2D::setBinning: bins have to be at least of size 1! ybins: "<<  ybins.size()<< " xbins: "<< xbins.size()<<" name: " <<name_ <<std::endl;
+		throw std::logic_error("container2D::setBinning: bins have to be at least of size 1!");
+	}
+
+
 	bool temp=container1D::c_makelist;
 	container1D::c_makelist=false;
 	ybins_.clear();
@@ -446,13 +452,13 @@ void container2D::addErrorContainer(const TString & sysname,const container2D & 
 void container2D::addErrorContainer(const TString & sysname,const container2D & second ){
 	addErrorContainer(sysname,second , 1);
 }
-void container2D::addRelSystematicsFrom(const container2D & second){
+void container2D::getRelSystematicsFrom(const container2D & second){
 	if(second.xbins_ != xbins_ || second.ybins_ != ybins_){
-		std::cout << "container2D::addRelSystematicsFrom "<< name_ << " and " << second.name_<<" must have same binning!"  << std::endl;
+		std::cout << "container2D::getRelSystematicsFrom "<< name_ << " and " << second.name_<<" must have same binning!"  << std::endl;
 		return;
 	}
 	for(size_t i=0;i<conts_.size();i++){
-		conts_.at(i).addRelSystematicsFrom(second.conts_.at(i));
+		conts_.at(i).getRelSystematicsFrom(second.conts_.at(i));
 	}
 }
 void container2D::removeError(TString err){

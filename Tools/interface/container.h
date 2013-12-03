@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <complex>
 #include "histoContent.h"
+#include "graph.h"
 
 ////////bins include their border on the right side!!
 
@@ -33,11 +34,19 @@ public:
 	container1D(const container1D&);
 	container1D& operator=(const container1D&);
 
+	bool isDummy(){return bins_.size()<2;}
 
 	const TString & getName()const{return name_;}
 	void setName(TString Name){name_=Name;}
 	void setNames(TString name, TString xaxis, TString yaxis){if(name!="")name_=name;if(xaxis!="")xname_=xaxis;if(yaxis!="")yname_=yaxis;}
 	void setShowWarnings(bool show){showwarnings_=show;}
+
+	void setXAxisName(const TString& name){xname_=name;}
+	const TString& getXAxisName()const {return xname_;}
+
+	void setYAxisName(const TString& name){yname_=name;}
+	const TString& getYAxisName()const {return yname_;}
+
 
 	void fill(const float & val, const float & weight=1);    //! fills with weight
 	void fillDyn(float what, float weight=1); //! not implemented yet
@@ -152,7 +161,7 @@ public:
 
 	void addErrorContainer(const TString &,const container1D&, float);  //! adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down"
 	void addErrorContainer(const TString &,const container1D&);        //! adds deviation to (this) as systematic uncertianty with name. name must be ".._up" or ".._down"
-	void addRelSystematicsFrom(const container1D &);
+	void getRelSystematicsFrom(const container1D &);
 	void addGlobalRelErrorUp(const TString &,const float &);    //! adds a global relative uncertainty with name; "..up" automatically added
 	void addGlobalRelErrorDown(const TString &,const float &);  //! adds a global relative uncertainty with name; "..down" automatically added
 	void addGlobalRelError(const TString &,const float &);      //! adds a global relative symmetric uncertainty with name; creates ".._up" and ".._down" variation names
@@ -177,9 +186,19 @@ public:
 	bool hasSameLayers(const container1D&) const;
 	bool hasSameLayerOrdering(const container1D&) const;
 
-	void coutBinContent(size_t bin) const;
+	TString coutBinContent(size_t bin) const;
 
 	plotTag plottag;
+
+	/*
+	 * high level stuff e.g. transforming particular systematic to a container y(x)=y(variation)
+	 * should work for variations named VARIATION_<value>_<up/down>
+	 * other uncertainties stay untouched and are just propagated to each variation
+	 * if variation doesn't hold a value, +-1 is assumed
+	 */
+
+	container1D getDependenceOnSystematicC(const size_t& bin,const TString & sys)const;
+	ztop::graph getDependenceOnSystematic(const size_t& bin, TString  sys,float offset=0,TString replacename="")const;
 
 protected:
 	bool showwarnings_;
@@ -190,31 +209,21 @@ protected:
 
 	std::vector<float> bins_;
 	histoContent contents_;
-	/*
-	std::vector<float> content_;
-	std::vector<long int> entries_;
-	std::vector<float> staterrup_;
-	std::vector<float> staterrdown_;  //has POSITIVE entries
-
-	std::vector<std::pair<TString, std::vector<float> > > syserrors_; //syst (name, each bin) stores absolute DEVIATIONS from nominal!!!!
-	 */
 
 
 	bool mergeufof_;
 	bool wasunderflow_;
 	bool wasoverflow_;
 
-	//bool divideBinomial_;
 
 	TString name_, xname_, yname_;
 
 	float labelmultiplier_;
 
+	//not optimal and a problem when copying etc but better than nothing for fast interactive usage
 	TGraphAsymmErrors * gp_;
 	TH1D * hp_;
 
-	//containerStyle * style_; //if NULL, use some defaults, else use style
-	//containerStyle  persstyle_; //only when saving
 
 	TString stripVariation(const TString&) const;
 	float getDominantVariationUp( TString ,const size_t &) const;

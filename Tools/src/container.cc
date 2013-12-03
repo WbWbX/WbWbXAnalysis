@@ -92,6 +92,11 @@ container1D& container1D::operator=(const container1D& c){
 }
 
 void container1D::setBins(std::vector<float> bins){
+
+	if(bins.size()<1){
+		std::cout << "container1D::setBins: bins have to be at least of size 1! "<< name_ <<std::endl;
+		throw std::logic_error("container1D::setBins: bins have to be at least of size 1!");
+	}
 	reset();
 	//NEW: just sort bins. no error message anymore
 	std::sort(bins.begin(),bins.end());
@@ -643,7 +648,10 @@ void container1D::normalizeToContainer(const container1D & cont){
 	container1D tcont=cont;
 	tcont.setAllErrorsZero();
 	//when dividing all systematics will be recreated from nominal (now with 0 stat error)
+	bool temp=histoContent::divideStatCorrelated;
+	histoContent::divideStatCorrelated=false;
 	*this/=tcont;
+	histoContent::divideStatCorrelated=temp;
 }
 
 void container1D::reset(){
@@ -769,16 +777,21 @@ void container1D::writeTH1D(TString name, bool dividebybinwidth,bool onlystat, b
 	h->Write();
 	delete h;
 }
-
+/**
+ * bins with zero content and zero stat error are being ignored! -> IMPLEMENT
+ */
 TGraphAsymmErrors * container1D::getTGraph(TString name, bool dividebybinwidth, bool onlystat, bool noXErrors, bool nostat) const{
 
 	if(name=="") name=name_;
-	float x[getNBins()];
-	float xeh[getNBins()];
-	float xel[getNBins()];
-	float y[getNBins()];
-	float yel[getNBins()];
-	float yeh[getNBins()];
+
+
+	float x[getNBins()];for(size_t i=0;i<getNBins();i++) x[i]=0;
+	float xeh[getNBins()];for(size_t i=0;i<getNBins();i++) xeh[i]=0;
+	float xel[getNBins()];for(size_t i=0;i<getNBins();i++) xeh[i]=0;
+	float y[getNBins()];for(size_t i=0;i<getNBins();i++) y[i]=0;
+	float yel[getNBins()];for(size_t i=0;i<getNBins();i++) yel[i]=0;
+	float yeh[getNBins()];for(size_t i=0;i<getNBins();i++) yeh[i]=0;
+
 	for(size_t i=1;i<=getNBins();i++){
 		x[i-1]=getBinCenter(i);
 		float scale=1;
@@ -793,10 +806,18 @@ TGraphAsymmErrors * container1D::getTGraph(TString name, bool dividebybinwidth, 
 			xel[i-1]=getBinWidth(i)/2;
 		}
 		y[i-1]=getBinContent(i)*scale;
-		yeh[i-1]=getBinErrorUp(i,onlystat)*scale;
-		yel[i-1]=getBinErrorDown(i,onlystat)*scale;
+		if(!nostat){
+			yeh[i-1]=getBinErrorUp(i,onlystat)*scale;
+			yel[i-1]=getBinErrorDown(i,onlystat)*scale;
+		}
+		else{
+			yeh[i-1]=sqrt(sq(getBinErrorUp(i,onlystat)) - sq(getBinErrorUp(i,true)) )*scale;
+			yel[i-1]=sqrt(sq(getBinErrorDown(i,onlystat)) - sq(getBinErrorDown(i,true)))*scale;
+		}
 
 	}
+
+
 	TGraphAsymmErrors * g = new TGraphAsymmErrors(getNBins(),x,y,xel,xeh,yel,yeh);
 	g->SetName(name);
 	g->SetTitle(name);
@@ -835,9 +856,14 @@ TGraphAsymmErrors * container1D::getTGraphSwappedAxis(TString name, bool divideb
 			xeh[i-1]=getBinWidth(i)/2;
 			xel[i-1]=getBinWidth(i)/2;
 		}
-		y[i-1]=getBinContent(i)*scale;
-		yeh[i-1]=getBinErrorUp(i,onlystat)*scale;
-		yel[i-1]=getBinErrorDown(i,onlystat)*scale;
+		if(!nostat){
+			yeh[i-1]=getBinErrorUp(i,onlystat)*scale;
+			yel[i-1]=getBinErrorDown(i,onlystat)*scale;
+		}
+		else{
+			yeh[i-1]=(getBinErrorUp(i,onlystat) - getBinErrorUp(i,true) )*scale;
+			yel[i-1]=(getBinErrorDown(i,onlystat) - getBinErrorDown(i,true))*scale;
+		}
 
 	}
 	TGraphAsymmErrors * g = new TGraphAsymmErrors(getNBins(),y,x,yel,yeh,xel,xeh);
@@ -1047,14 +1073,32 @@ void container1D::addErrorContainer(const TString & sysname,const container1D & 
 void container1D::addErrorContainer(const TString & sysname,const container1D  &deviatingContainer){
 	addErrorContainer(sysname,deviatingContainer,1);
 }
-void container1D::addRelSystematicsFrom(const ztop::container1D & rhs){
+void container1D::getRelSystematicsFrom(const ztop::container1D & rhs){
 	if(bins_!=rhs.bins_){
-		std::cout << "container1D::addRelSystematicsFrom(): not same binning!" << std::endl;
+		std::cout << "container1D::getRelSystematicsFrom(): not same binning!" << std::endl;
 		return;
 	}
-	std::cout << "container1D::addRelSystematicsFrom(): check this function it produces bullshit -> exit!!" << std::endl;
+	//what about already existing errors....? average them? better do it by hand in that case
+	bool tempmakelist=c_makelist;
+	container1D relerrs=rhs.getRelErrorsContainer(); //here we have all syst and nominal (and syst) stat
+
+	//clear old syst
+	removeAllSystematics();
+	//what about nominal stat?
+	// since this nominal and rhs nominal stat might be (un)correlated?
+	// FOR LATER
+	// first do fast fix: don't take into account problem and just treat rhs nominal and lhs nominal
+	// as correlated (true for most syst)
+	//relerrs.set
+
+
+
+	c_makelist=tempmakelist;
+	///old part
+	std::cout << "container1D::getRelSystematicsFrom(): check this function it produces bullshit -> exit!!" << std::endl;
 	std::exit(EXIT_FAILURE);
 	/////CHECK/////
+
 	bool tempSubtractStatCorrelated=histoContent::subtractStatCorrelated; //should not do anything here
 	histoContent::subtractStatCorrelated=true;
 	histoContent nominal=rhs.contents_;
@@ -1161,22 +1205,165 @@ bool container1D::hasSameLayerOrdering(const container1D& cont) const{
 /**
  * all systematics
  */
-void container1D::coutBinContent(size_t bin) const{
+TString container1D::coutBinContent(size_t bin) const{
 	using namespace std;
 	if(bin>=bins_.size()){
 		cout << "container1D::coutBinContent: "<< bin << " bin out of range" <<endl;
-		return;
+		return "";
 	}
+	TString out;
 	float content=getBinContent(bin);
 	cout << "container1D::coutBinContent: bin " << bin << endl;
 	cout << content << " \t+-" << getBinStat(bin) << endl;
+	out+=toTString(content) +" \t+-"+ toTString(getBinStat(bin))+"\n";
+
 	for(int i=0;i<(int) getSystSize();i++){
 		cout << getSystErrorName(i) << "\t" << getSystError(i,bin)/content * 100 << "% +-";
+		out+=getSystErrorName(i) + "\t" + toTString(getSystError(i,bin)/content * 100) + "% +-";
 		cout	<< getSystErrorStat(i,bin)/content * 100 << "%" << endl;
+		out+=toTString(getSystErrorStat(i,bin)/content * 100) + "%\n";
 	}
 	cout << endl;
+	out+="\n";
+	return out;
 }
 
+/**
+ * for bin
+ * sys has to be formatted <name> without up or down or (if existent) value
+ * fills in values divided by binwidth!!!!
+ * superseeded!
+ */
+container1D container1D::getDependenceOnSystematicC(const size_t & bin,const TString & sys) const{
+
+return container1D();
+}
+
+/**
+ * for bin
+ * sys has to be formatted <name> without up or down or (if existent) value
+ * fills in values divided by binwidth!!!!
+ */
+graph container1D::getDependenceOnSystematic(const size_t & bin, TString sys,float offset,TString replacename) const{ //copy on purpose
+
+	bool divbw=true;
+	if(bin>=bins_.size()){
+		std::cout << "container1D::getDependenceOnSystematic: bin out of range." << std::endl;
+		throw std::out_of_range("container1D::getDependenceOnSystematic: bin out of range.");
+	}
+	else if(bin==bins_.size()-1){
+		std::cout << "container1D::getDependenceOnSystematic: warning no binwidth division for underflow/of bin" << std::endl;
+		divbw=false;
+	}
+
+	bool makelist=graph::g_makelist;
+	graph::g_makelist=false;
+	bool hasvariations=true;
+
+	//get variation indices and values
+	std::vector<size_t> varidx;
+	std::vector<const histoBin *> values;
+	std::vector<float> variations;
+	for(size_t i=0;i<getSystSize();i++){
+		TString syserrorname=getSystErrorName(i);
+		if(syserrorname.Contains(sys+"_")){
+
+			if(hasvariations && (syserrorname == sys+"_up" || syserrorname == sys+"_down"))
+				hasvariations=false;
+			if(hasvariations){
+				//split name
+				std::stringstream ss(getSystErrorName(i).Data());
+				std::string item,val;
+				float value=99;
+				while(std::getline(ss,item,'_')){
+					if(item=="up"){
+						value=atof(val.data());
+						break;
+					}
+					else if(item=="down"){
+						value=atof(val.data());
+						value*=-1;
+						break;
+					}
+					val=item;
+				}
+				value+=offset;
+				variations.push_back(value);
+			}
+			else{
+				if(syserrorname == sys+"_up")
+					variations.push_back(1);
+				else if (syserrorname == sys+"_down")
+					variations.push_back(-1);
+			}
+			varidx.push_back(i);
+			values.push_back(&getBin(bin,i));
+		}
+	}
+	//got indices and variation values
+	if(variations.size() <1){
+		std::cout << "container1D::getDependenceOnSystematic: systematic " << sys << " not found. return empty" << std::endl;
+		graph def;
+		graph::g_makelist=makelist;
+		return def;
+	}
+	if(replacename!="") sys=replacename;
+	//if(offset) newnames=sys;
+	TString add="#Delta";
+	if(offset) add="";
+
+	//get rid of possible units in name
+	std::vector<TString> units;
+	TString newname=sys;
+	units << "[GeV]"<< "[MeV]"<< "[pb]"<< "[fb]"<< "[nb]" << "[pb/GeV]"<< "[pb/MeV]"<< "[pb]"<< "[fb]"<< "[nb]";
+	for(size_t i=0;i<units.size();i++){
+		if(newname.EndsWith(units.at(i)))
+			newname.ReplaceAll(units.at(i),"");
+	}
+
+	TString newnames=add+newname+": "+getXAxisName()+"("+
+			toTString(getBinCenter(bin)-0.5*getBinWidth(bin))+"-"+
+			toTString(getBinCenter(bin)+0.5*getBinWidth(bin))+")";
+	graph out(values.size()+1,newnames); //one point for each value + nominal
+
+	 out.setXAxisName(add+sys);
+	variations.push_back(offset); //nominal
+	values.push_back(&getBin(bin));
+
+
+	float scale=1;
+	if(divbw) scale = 1/getBinWidth(bin);
+	for(int sysidx=-1;sysidx<(int)getSystSize();sysidx++){
+		if(sysidx>-1 && std::find(varidx.begin(),varidx.end(),(size_t)sysidx) != varidx.end()) //don't use these sysidx
+			continue;
+		size_t sysindex=0;
+		TString tsysname,stsysname;
+		if(sysidx>-1){
+			tsysname=getSystErrorName(sysidx);
+			stsysname=stripVariation(tsysname);
+			sysindex=out.xcoords_.addLayer(tsysname);
+			sysindex=out.ycoords_.addLayer(tsysname);
+			for(size_t p=0;p<out.getNPoints();p++){
+				out.ycoords_.getBin(p,sysindex)=getBin(bin,sysidx); //takes care of sysnominal content and stat
+				float nomcont=out.getPointYContent(p);
+				out.ycoords_.getBin(p,sysindex).multiply( nomcont/getBinContent(bin));
+				out.setPointXContent(p,variations.at(p),sysindex);
+			}
+		}
+		else{
+			for(size_t p=0;p<out.getNPoints();p++){
+				out.ycoords_.getBin(p)=*values.at(p); //takes care of sysnominal content and stat
+				out.ycoords_.getBin(p).multiply(scale);
+				out.setPointXContent(p,variations.at(p));
+			}
+		}
+
+	}
+
+
+	graph::g_makelist=makelist;
+	return out;
+}
 //protected
 
 TString container1D::stripVariation(const TString &in) const{

@@ -27,6 +27,7 @@ namespace ztop{
     TString getSyst(){return isSyst_;}
 
     void listStacks();
+    std::vector<TString> getStackNames(bool);
     void setLegendOrder(TString , size_t); //do it afterwards
 
     // void add(ztop::container1D &, TString, int, double);
@@ -49,7 +50,7 @@ namespace ztop{
     void addErrorStackVector(const TString&,const ztop::containerStackVector&);
     void addMCErrorStackVector(ztop::containerStackVector);
     void addGlobalRelMCError(TString,double);
-    void addRelSystematicsFrom(ztop::containerStackVector);
+    void getRelSystematicsFrom(ztop::containerStackVector);
     void removeError(TString);
     void renameSyst(TString,TString); //! old new
 
@@ -57,7 +58,8 @@ namespace ztop{
     void multiplyNorms(TString, std::vector<double>, std::vector<TString>, bool showmessages=false);   //! multiplies norm of all MC with legendname  ,  with factor  ,  for step identifier string (step_string contains the id string)
     void multiplyAllMCNorms(double);
 
-    void writeAllToTFile(TString, bool recreate=false, TString treename="stored_objects");
+    void writeAllToTFile(TString, bool recreate=false, bool onlydata=false, TString treename="stored_objects");
+    void printAll(TString,TString,TString);
     void writeAllToTFile(TFile * , TString treename="stored_objects");
     void loadFromTree(TTree *, TString);
     containerStackVector* getFromTree(TTree *, TString);

@@ -7,7 +7,7 @@
 
 #ifndef NTFULLEVENT_H_
 #define NTFULLEVENT_H_
-
+#include "TtZAnalysis/DataFormats/interface/mathdefs.h"
 namespace ztop{
 
 class NTEvent;
@@ -20,24 +20,30 @@ class NTMet;
 class NTFullEvent{
 public:
 	NTFullEvent(): event(0),
-	idjets(0),medjets(0),hardjets(0),medbjets(0),hardbjets(0),
+	idjets(0),medjets(0),hardjets(0),medbjets(0),hardbjets(0),dphilljjets(0),dphiplushardjets(0),
 	allmuons(0),kinmuons(0),idmuons(0),isomuons(0),
 	allelectrons(0),kinelectrons(0),idelectrons(0),isoelectrons(0),
 	allleptons(0),kinleptons(0),idleptons(0),isoleptons(0),
 	leadinglep(0),secleadinglep(0),
+	//leadingjetbtag(0),secleadingjetbtag(0),
 	simplemet(0),adjustedmet(0),
-	mll(0),leplepdr(0),dphillj(0),ht(0),ptllj(0),topdiscr(0),
+	mll(0),leplepdr(0),dphillj(0),dphilljj(0),detallj(0),detalljj(0),ht(0),ptllj(0),topdiscr(0),
+	midphi(0),
+	S4(0),
 	puweight(0){};
 	~NTFullEvent(){}
 
 	void reset(){
-		idjets=0;medjets=0;hardjets=0;medbjets=0;hardbjets=0;
+		idjets=0;medjets=0;hardjets=0;medbjets=0;hardbjets=0;dphilljjets=0;dphiplushardjets=0;
 		allmuons=0;kinmuons=0;idmuons=0;isomuons=0;
 		allelectrons=0;kinelectrons=0;idelectrons=0;isoelectrons=0;
 		allleptons=0;kinleptons=0;idleptons=0;isoleptons=0;
 		leadinglep=0;secleadinglep=0;
+		//leadingjetbtag=0;secleadingjetbtag=0;
 		simplemet=0;adjustedmet=0;
-		mll=0;leplepdr=0;dphillj=0;ht=0;ptllj=0;topdiscr=0;
+		mll=0;leplepdr=0;dphillj=0;dphilljj=0;detallj=0;detalljj=0;ht=0;ptllj=0;topdiscr=0;
+		midphi=0;
+		S4=0;
 		puweight=0;
 	}
 
@@ -48,6 +54,9 @@ public:
 	std::vector<ztop::NTJet*> * hardjets;
 	std::vector<ztop::NTJet*> * medbjets;
 	std::vector<ztop::NTJet*> * hardbjets;
+	std::vector<ztop::NTJet*> * dphilljjets;
+	std::vector<ztop::NTJet*> * dphiplushardjets;
+
 
 	std::vector<ztop::NTMuon*> * allmuons;
 	std::vector<ztop::NTMuon*> * kinmuons;
@@ -67,17 +76,25 @@ public:
 	ztop::NTLepton* leadinglep;
 	ztop::NTLepton* secleadinglep;
 
+
 	ztop::NTMet * simplemet;
 	ztop::NTMet * adjustedmet;
 
-	double * mll;
-	double * leplepdr;
-	double * dphillj;
-	double * ht;
-	double * ptllj;
-	double * topdiscr;
+	float * mll;
+	float * leplepdr;
+	float * dphillj;
+	float * dphilljj;
+	float * detallj;
+	float * detalljj;
+	float * ht;
+	float * ptllj;
+	float * topdiscr;
 
-	double * puweight;
+
+	bool *midphi;
+	PolarLorentzVector * S4;
+
+	float * puweight;
 
 };
 }//namespace

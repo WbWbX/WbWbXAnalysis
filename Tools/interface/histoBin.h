@@ -41,6 +41,10 @@ public:
 
 	void multiply(const float&);
 
+
+	bool operator == (const histoBin&) const;
+	bool operator != (const histoBin&) const;
+
 private:
 	float content_;
 	size_t entries_;
@@ -113,6 +117,9 @@ public:
 	int multiply(const histoBins&,bool statCorr);
 
 	void multiply(const float& );
+
+	bool operator == (const histoBins&) const;
+	bool operator != (const histoBins&) const;
 
 	static bool showwarnings;
 

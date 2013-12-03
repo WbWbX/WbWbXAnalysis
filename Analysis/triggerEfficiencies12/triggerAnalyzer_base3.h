@@ -99,6 +99,7 @@ public:
 		tempp3_=0;
 
 		mcpufile_="";
+		t_=0;
 		//  std::cout << "Don't forget to check if all trigger Prescales are 1. If they are its either MC or an error in prescaletable. then use the one from event before or skip event - maybe checking one known prescale is sufficient" << std::endl;
 
 	}

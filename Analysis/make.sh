@@ -1,5 +1,6 @@
 #!/bin/sh
 
+cd $CMSSW_BASE/src/TtZAnalysis/Analysis
 
 
 export CPLUS_INCLUDE_PATH=$CMSSW_BASE/src
@@ -17,6 +18,7 @@ libs=("TopAnalysisZTopUtils"
     "TtZAnalysisTools"
     "TtZAnalysisAnalysis"
     "FWCoreFWLite"
+    "unfold"
 #"DataFormatsStdDictionaries"
 #"CondFormatsJetMETObjects"
 );
@@ -57,6 +59,7 @@ then
     compile analyse
     compile mergeSyst
 
+
 fi
 
 if  [ $1 == "all" ] || [ $1 == "unfold" ];
@@ -70,6 +73,20 @@ if  [ $1 == "all" ] || [ $1 == "helper" ];
 then
     
     compile plotCSV
-
+    compile printVariations
+    compile mtFromXsec
+fi
+if  [ $1 == "all" ] || [ $1 == "www" ];
+then
+    
+    compile dumpToWWW
+    
 fi
 
+
+if  [ $1 == "all" ] || [ $1 == "combined" ];
+then
+    
+    compile mergeUnfoldDump
+    
+fi

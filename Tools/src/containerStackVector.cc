@@ -1,5 +1,9 @@
 #include "../interface/containerStackVector.h"
 #include <omp.h>
+#include "../interface/fileReader.h"
+#include "../interface/indexMap.h"
+
+#include "FWCore/FWLite/interface/AutoLibraryLoader.h"
 
 bool ztop::container1D::debug =false;
 
@@ -28,6 +32,26 @@ void containerStackVector::listStacks(){
 	for(std::vector<ztop::containerStack>::iterator stack=stacks_.begin();stack<stacks_.end();++stack){
 		std::cout << stack->getName() << std::endl;
 	}
+}
+
+std::vector<TString> containerStackVector::getStackNames(bool withoutstep){
+	fileReader fr;
+	fr.setComment(" step ");
+	std::vector<TString> out;
+	indexMap<std::string> used;
+	for(std::vector<ztop::containerStack>::iterator stack=stacks_.begin();stack<stacks_.end();++stack){
+		TString tmptst=stack->getName();
+		std::string tmp=tmptst.Data();
+		if(withoutstep) fr.trimcomments(tmp);
+		if(withoutstep && used.getIndex(tmp) < used.size()){ // not new
+			//do nothing
+		}
+		else{
+			out.push_back((TString) tmp);
+			used.push_back(tmp);
+		}
+	}
+	return out;
 }
 
 void containerStackVector::setLegendOrder(TString leg, size_t no){
@@ -176,12 +200,12 @@ void containerStackVector::addGlobalRelMCError(TString sysname,double error){
 		stack->addGlobalRelMCError(sysname,error);
 	}
 }
-void containerStackVector::addRelSystematicsFrom(ztop::containerStackVector stackvec){
+void containerStackVector::getRelSystematicsFrom(ztop::containerStackVector stackvec){
 	if(!fastadd){
 		for(std::vector<containerStack>::iterator istack=stacks_.begin();istack<stacks_.end(); ++istack){
 			for(std::vector<containerStack>::iterator estack=stackvec.stacks_.begin();estack<stackvec.stacks_.end(); ++estack){
 				if(istack->getName() == estack->getName()){
-					istack->addRelSystematicsFrom(*estack);
+					istack->getRelSystematicsFrom(*estack);
 					break;
 				}
 			}
@@ -189,7 +213,7 @@ void containerStackVector::addRelSystematicsFrom(ztop::containerStackVector stac
 	}
 	else{//fastadd requires same ordering of all stacks (usually the case)
 		for(size_t i=0;i<stacks_.size();i++)
-			stacks_.at(i).addRelSystematicsFrom(stackvec.stacks_.at(i));
+			stacks_.at(i).getRelSystematicsFrom(stackvec.stacks_.at(i));
 	}
 }
 
@@ -239,10 +263,11 @@ void containerStackVector::multiplyAllMCNorms(double multiplier){
 	}
 }
 
-void containerStackVector::writeAllToTFile(TString filename, bool recreate, TString treename){
+void containerStackVector::writeAllToTFile(TString filename, bool recreate, bool onlydata,TString treename){
 	if(debug)
 		std::cout << "containerStackVector::writeAllToTFile(TString filename, bool recreate, TString treename)" << std::endl;
 
+	AutoLibraryLoader::enable();
 	TString name;
 
 	if(name_=="") name="no_name";
@@ -284,6 +309,12 @@ void containerStackVector::writeAllToTFile(TString filename, bool recreate, TStr
 
 	delete t;
 
+	if(onlydata){
+		f->Close();
+		delete f;
+		return;
+	}
+
 	bool batch=containerStack::batchmode;
 	containerStack::batchmode=true;
 	if(debug)
@@ -291,6 +322,13 @@ void containerStackVector::writeAllToTFile(TString filename, bool recreate, TStr
 
 	TDirectory * d = f->mkdir(name + "_ratio",name + "_ratio");
 	d->cd();
+
+	//use a file reader to strip stuff
+	fileReader fr;
+	fr.setComment(" step ");
+	indexMap<std::string> dirs;
+	std::vector<TDirectory *> dirpv;
+
 	for(std::vector<containerStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
 		if(stack->is1DUnfold()){
 			TDirectory * din=d->mkdir(stack->getName(),stack->getName());
@@ -317,14 +355,44 @@ void containerStackVector::writeAllToTFile(TString filename, bool recreate, TStr
 				delete pur;
 				delete stab;
 			}
+			c =new TCanvas("MResp","MResp");
+			TH2D * resp=cuf.prepareRespMatrix(true);
+			resp->Draw("colz");
+			c->Write();
+			delete c;
+			delete resp;
+			TDirectory * dsys=din->mkdir("sys","sys");
+			dsys->cd();
+			for(size_t i=0;i<cuf.getSystSize();i++){
+				c =new TCanvas("MResp_"+cuf.getSystErrorName(i),"MResp_"+cuf.getSystErrorName(i));
+				resp=cuf.prepareRespMatrix(false,i);
+				resp->Draw("colz");
+				c->Write();
+				delete c;
+				delete resp;
+			}
 			d->cd();
 		}
 		else if(stack->is1D()){
+			std::string dirname=stack->getName().Data();
+			fr.trimcomments(dirname);
+			size_t diridx=dirs.getIndex(dirname);
+			TDirectory * tdir=0;
+			if(diridx>=dirs.size()){ //new dir
+				tdir=d->mkdir(dirname.data(),dirname.data());
+				dirpv.push_back(tdir);
+				dirs.push_back(dirname);
+			}
+			//d->mkdir(); //cd dir with idx
+			tdir=dirpv.at(diridx);
+			tdir->cd();
 			TCanvas * c=stack->makeTCanvas();
 			if(c){
+				//tdir->WriteObject(c,c->GetName());
 				c->Write();
 				delete c;
 			}
+			d->cd();
 		}
 	}
 	if(debug)
@@ -332,15 +400,35 @@ void containerStackVector::writeAllToTFile(TString filename, bool recreate, TStr
 
 	TDirectory * d2 = f->mkdir(name+ "_sgbg",name+ "_sgbg");
 	d2->cd();
+
+	dirs.clear();
+	dirpv.clear();
+
 	for(std::vector<containerStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
-		TCanvas * c2=stack->makeTCanvas(containerStack::plotmode::sigbg);
-		if(c2){
-			c2->Write();
-			delete c2;
+		if(stack->is1D()){
+			std::string dirname=stack->getName().Data();
+			fr.trimcomments(dirname);
+			size_t diridx=dirs.getIndex(dirname);
+			TDirectory * tdir=0;
+			if(diridx>=dirs.size()){ //new dir
+				tdir=d2->mkdir(dirname.data(),dirname.data());
+				dirpv.push_back(tdir);
+				dirs.push_back(dirname);
+			}
+			//d->mkdir(); //cd dir with idx
+			tdir=dirpv.at(diridx);
+			tdir->cd();
+			TCanvas * c=stack->makeTCanvas(containerStack::plotmode::sigbg);
+			if(c){
+				//tdir->WriteObject(c,c->GetName());
+				c->Write();
+				delete c;
+			}
+			d2->cd();
 		}
 	}
 	if(debug)
-		std::cout << "containerStackVector::writeAllToTFile: normal plots drawn" << std::endl;
+		std::cout << "containerStackVector::writeAllToTFile: sig/bg plots drawn" << std::endl;
 
 
 	f->Close();
@@ -352,7 +440,25 @@ void containerStackVector::writeAllToTFile(TString filename, bool recreate, TStr
 
 }
 
+
+void containerStackVector::printAll(TString namestartswith,TString directory,TString extension){
+	for(std::vector<containerStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
+		if(stack->is1D() || stack->is1DUnfold() ){
+			if(namestartswith=="" || stack->getName().BeginsWith(namestartswith)){
+				TCanvas * c=stack->makeTCanvas(containerStack::plotmode::ratio);
+				if(c){
+					TString newname=stack->getName();
+					newname.ReplaceAll(" ","_");
+					c->Print(directory+newname+extension);
+					delete c;
+				}
+			}
+		}
+	}
+}
+
 void containerStackVector::writeAllToTFile(TFile * f, TString treename){
+	AutoLibraryLoader::enable();
 	TString name;
 	if(name_=="") name="no_name";
 	else name = name_;
@@ -413,6 +519,7 @@ void containerStackVector::writeAllToTFile(TFile * f, TString treename){
 
 
 void containerStackVector::loadFromTree(TTree * t, TString name){
+	AutoLibraryLoader::enable();
 	/*
     containerStackVector * csv=0;
     t->SetBranchAddress("allContainerStackVectors", &csv);
@@ -428,13 +535,19 @@ void containerStackVector::loadFromTree(TTree * t, TString name){
     if(!found) std::cout << "containerStackVector::loadFromTree: " << name << " not found in tree " << t->GetName() << std::endl;
 	 */
 	containerStackVector csv;
-	if(csv.getFromTree(t,name))
-		*this=*(csv.getFromTree(t,name));
+	containerStackVector * pcsv=csv.getFromTree(t,name);
+	if(pcsv)
+		*this=*pcsv;
 }
 
 containerStackVector * containerStackVector::getFromTree(TTree * t, TString name){
+	AutoLibraryLoader::enable();
 	containerStackVector * csv=0;
 	bool found=false;
+	if(!t)
+		return 0;
+	if(!t->GetBranch("allContainerStackVectors"))
+		return 0;
 	t->SetBranchAddress("allContainerStackVectors", &csv);
 	for(float n=0;n<t->GetEntries();n++){
 		t->GetEntry(n);
@@ -458,6 +571,7 @@ containerStackVector * containerStackVector::getFromTree(TTree * t, TString name
 
 
 void containerStackVector::listAllInTree(TTree * t){
+	AutoLibraryLoader::enable();
 	containerStackVector * csv=0;
 	t->SetBranchAddress("allContainerStackVectors", &csv);
 	for(float n=0;n<t->GetEntries();n++){
