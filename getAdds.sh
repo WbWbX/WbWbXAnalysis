@@ -21,7 +21,7 @@ then
 git cms-addpkg PhysicsTools/PatAlgos
 git cms-merge-topic cms-analysis-tools:5_3_12_patch2-metUncertainties
 git cms-merge-topic cms-analysis-tools:5_3_12_patch2-newJECs
-git cms-merge-topic cms-analysis-tools:5_3_12_patch2-mvaElIdPatFunction
+#git cms-merge-topic cms-analysis-tools:5_3_12_patch2-mvaElIdPatFunction
 
 git cms-addpkg FWCore/FWLite
 git cms-addpkg ElectroWeakAnalysis/Utilities
