@@ -43,10 +43,10 @@ namespace ztop{
     void setIsPf(bool is){ispf_=is;}
 
     //gets
-    PolarLorentzVector ECalP4(){return ecalp4_;}
-    bool isNotConv(){return isNotConv_;}
-    std::vector<std::pair<std::string,float> > ids(){return ids_;}
-    ztop::NTIsolation iso(){return iso_;}
+    const PolarLorentzVector &ECalP4()const{return ecalp4_;}
+    const bool &isNotConv()const{return isNotConv_;}
+    const std::vector<std::pair<std::string,float> > &ids()const{return ids_;}
+    const ztop::NTIsolation &iso()const{return iso_;}
     //ztop::NTIsolation iso04(){return iso04_;}
 
 
@@ -64,13 +64,14 @@ namespace ztop{
       }
       return idtemp;
     }
-    double rhoIso(){return rhoIso_;}
-    float mvaId(){ return mvaId_;}
+    //double rhoIso(){return rhoIso_;}
+    const double & rhoIso() const {return rhoIso_;}
+    const float & mvaId() const{ return mvaId_;}
 
-    std::vector<std::string> matchedTrig(){return matchedTrig_;}
-    NTSuClu suClu(){return suClu_;}
-    int mHits(){return mHits_;}
-    bool isPf(){return ispf_;}
+    const std::vector<std::string> & matchedTrig() const {return matchedTrig_;}
+    const NTSuClu & suClu()const{return suClu_;}
+    const int & mHits()const{return mHits_;}
+    const bool & isPf() const{return ispf_;}
 
 
  //extra

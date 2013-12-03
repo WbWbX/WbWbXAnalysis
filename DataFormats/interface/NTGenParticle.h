@@ -18,7 +18,7 @@ namespace ztop{
     void setGenId(int genid){genid_=genid;};
     void setQ(int charge){q_=charge;}
 
-    const int & genId(){return genid_;}
+    const int & genId()const{return genid_;}
 
     void setMothers(const std::vector<ztop::NTGenParticle *> & p){motherPs_=p;}
     void setDaughters(const std::vector<ztop::NTGenParticle *> & p){daughterPs_=p;}
@@ -31,19 +31,19 @@ namespace ztop{
 
     void setStatus(int Status){status_=Status;}
 
-    int pdgId(){return pdgid_;}
-    int status(){return status_;}
+   const int& pdgId()const{return pdgid_;}
+   const int& status()const{return status_;}
 
     const PolarLorentzVector & p4(){return p4_;}
-    double pt(){return p4_.Pt();}
-    double  E() {return p4_.E();}
-    double  e() {return p4_.E();}
-    double  phi(){return p4_.Phi();}
-    double  eta(){return p4_.Eta();}
-    double  m(){return p4_.M();}
-    int q(){return q_;}
+    double pt()const{return p4_.Pt();}
+    double  E()const {return p4_.E();}
+    double  e()const {return p4_.E();}
+    double  phi()const{return p4_.Phi();}
+    double  eta()const{return p4_.Eta();}
+    double  m()const{return p4_.M();}
+    const int& q()const{return q_;}
 
-    
+    //setget mixed
     std::vector<int> & daughterIts(){return daughterits_;}
     std::vector<int> & motherIts(){return motherits_;}
 

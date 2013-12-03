@@ -15,10 +15,10 @@ namespace ztop{
 
 
     //gets
-    double chargedHadronIso(){return ChargedHadronIso_;}
-    double neutralHadronIso(){return NeutralHadronIso_;}
-    double photonIso(){return PhotonIso_;}
-    double puChargedHadronIso(){return PuChargedHadronIso_;}
+    const double &chargedHadronIso()const{return ChargedHadronIso_;}
+    const double &neutralHadronIso()const{return NeutralHadronIso_;}
+    const double &photonIso()const{return PhotonIso_;}
+    const double &puChargedHadronIso()const{return PuChargedHadronIso_;}
 
   protected:
     double ChargedHadronIso_;

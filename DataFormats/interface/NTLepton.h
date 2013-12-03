@@ -25,22 +25,22 @@ class NTLepton{
   void setGenP4(LorentzVector genP4In){genP4_=genP4In;}
 
   //gets
-  const PolarLorentzVector & p4(){return p4_;}
-  const PolarLorentzVector & genP4(){return genP4_;}
-  double pt(){return p4_.Pt();}
-  double E() {return p4_.E();}
-  double e() {return p4_.E();}
-  double phi(){return p4_.Phi();}
-  double eta(){return p4_.Eta();}
-  double m(){return p4_.M();}
-  int q(){ return q_;}
-  double dzV(){return dZV_;}
-  double dzVErr(){return dZVErr_;}
-  double dZBs(){return dZBs_;}
-  double d0V(){return d0V_;}
-  double d0Bs(){return d0Bs_;}
+  const PolarLorentzVector & p4()const{return p4_;}
+  const PolarLorentzVector & genP4()const{return genP4_;}
+  double pt()const{return p4_.Pt();}
+  double E() const{return p4_.E();}
+  double e() const{return p4_.E();}
+  double phi()const{return p4_.Phi();}
+  double eta()const{return p4_.Eta();}
+  double m()const{return p4_.M();}
+ const int& q()const{ return q_;}
+  const double &dzV()const{return dZV_;}
+  const double &dzVErr()const{return dZVErr_;}
+ const double & dZBs()const{return dZBs_;}
+  const double& d0V()const{return d0V_;}
+  const double d0Bs()const{return d0Bs_;}
 
-  int genMatch(){return genid_;}
+  const int& genMatch()const{return genid_;}
 
 
  protected:

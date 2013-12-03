@@ -33,19 +33,19 @@ namespace ztop{
 
     //gets
 
-    bool isGlobal(){return isGlobal_;}
-    bool isTracker(){return isTracker_;}
-    double normChi2(){return normChi2_;}
-    int trkHits(){return trkHits_;}
-    int pixHits(){return pixHits_;}
-    int muonHits(){return muonHits_;}
-    ztop::NTIsolation iso(){return iso_;}
-    double isoVal(){
+    const bool& isGlobal()const{return isGlobal_;}
+    const bool& isTracker()const{return isTracker_;}
+    const double &normChi2()const{return normChi2_;}
+    const int& trkHits()const{return trkHits_;}
+    const int& pixHits()const{return pixHits_;}
+    const int& muonHits()const{return muonHits_;}
+    const ztop::NTIsolation& iso()const{return iso_;}
+    double isoVal() const{
 return (iso_.chargedHadronIso() + std::max(0.0,iso_.neutralHadronIso() + iso_.photonIso() - 0.5*iso_.puChargedHadronIso()))/p4_.pt();
 }
-    std::vector<std::string> matchedTrig(){return matchedTrig_;}
-    PolarLorentzVector trackP4(){return trkP4_;}
-    bool isPf(){return ispf_;}
+   const std::vector<std::string>& matchedTrig()const{return matchedTrig_;}
+    const PolarLorentzVector &trackP4()const{return trkP4_;}
+    const bool &isPf()const{return ispf_;}
 
     //extra
 

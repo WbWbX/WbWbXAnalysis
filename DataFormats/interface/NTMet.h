@@ -13,9 +13,9 @@ namespace ztop{
   void setP4(ztop::LorentzVector P4){p4_=P4;}
 
   //gets
-  double met(){return p4_.Et();}
-  double phi(){return p4_.Phi();}
-  ztop::LorentzVector p4(){return p4_;};
+  double met()const{return p4_.Et();}
+  double phi()const{return p4_.Phi();}
+  const ztop::LorentzVector &p4()const{return p4_;};
 
  protected:
 

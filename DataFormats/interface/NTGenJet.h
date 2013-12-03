@@ -21,17 +21,17 @@ namespace ztop{
 
     void setGenId(int genid){genid_=genid;}
 
-    int genId(){return genid_;}
-    const std::vector<int> &  motherIts(){return motherits_;}
-    const std::vector<ztop::NTGenParticle *> & mothers(){return motherPs_;}
+    const int& genId()const{return genid_;}
+    const std::vector<int> &  motherIts()const{return motherits_;}
+    const std::vector<ztop::NTGenParticle *> & mothers()const{return motherPs_;}
 
-    const PolarLorentzVector & p4(){return p4_;}
-    double pt(){return p4_.Pt();}
-    double E() {return p4_.E();}
-    double e() {return p4_.E();}
-    double phi(){return p4_.Phi();}
-    double eta(){return p4_.Eta();}
-    double m(){return p4_.M();}
+    const PolarLorentzVector & p4()const{return p4_;}
+    double pt()const{return p4_.Pt();}
+    double E()const {return p4_.E();}
+    double e()const {return p4_.E();}
+    double phi()const{return p4_.Phi();}
+    double eta()const{return p4_.Eta();}
+    double m()const{return p4_.M();}
 
     //extra
 

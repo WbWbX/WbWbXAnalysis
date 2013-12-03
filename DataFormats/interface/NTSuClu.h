@@ -9,9 +9,9 @@ namespace ztop{
     ~NTSuClu(){};
 
     void setP4(LorentzVector P4energ){P4_=P4energ;};
-    LorentzVector p4(){return P4_;};
-    double eta(){return P4_.Eta();}
-    double pt(){return P4_.Pt();}
+    const LorentzVector & p4()const{return P4_;};
+    double  eta()const{return P4_.Eta();}
+    double pt() const{return P4_.Pt();}
   private:
     LorentzVector P4_;
   };

@@ -27,13 +27,13 @@ namespace ztop{
     double eventNo(){return eventNo_;}
 
     double vertexMulti(){return vertexMulti_;}
-    std::vector<std::string> firedTriggers(){return triggers_;}
+   const std::vector<std::string>& firedTriggers()const{return triggers_;}
 
-    float truePU(int BX=0){return truePU_[1+BX];}
-    double trueAvgPU(){return (truePU_[0]+truePU_[1]+truePU_[2])/3;}
+    const float& truePU(int BX=0)const{return truePU_[1+BX];}
+    double trueAvgPU()const{return (truePU_[0]+truePU_[1]+truePU_[2])/3;}
 
     double isoRho(unsigned int identifier){return rhos_[identifier];}
-    double PDFWeight(unsigned int id){return pdfweights_[id];}
+    const double& PDFWeight(unsigned int id)const{return pdfweights_[id];}
     unsigned int PDFWeightsSize(){return pdfweights_.size();}
 
   protected:
