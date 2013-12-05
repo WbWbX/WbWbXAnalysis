@@ -8,6 +8,7 @@ ROOTFLAGS=`root-config --cflags`
 ROOTLIBS=`root-config --libs`
 
 CMSLIBS=$CMSSW_BASE/lib/$SCRAM_ARCH/
+EXTLIBS=${CMSSW_BASE}/external/${SCRAM_ARCH}/lib/
 LOCBIN=$CMSSW_BASE/src/TtZAnalysis/Analysis/bin
 BUILDDIR=$CMSSW_BASE/src/TtZAnalysis/Analysis/build
 SRCDIR=$CMSSW_BASE/src/TtZAnalysis/Analysis/app_src
@@ -18,7 +19,6 @@ libs=("TopAnalysisZTopUtils"
     "TtZAnalysisTools"
     "TtZAnalysisAnalysis"
     "FWCoreFWLite"
-    "unfold"
 #"DataFormatsStdDictionaries"
 #"CondFormatsJetMETObjects"
 );
@@ -37,6 +37,7 @@ function compile(){
 	linklibs="$linklibs -l${libs[${i}]}"
 	cp ${CMSLIBS}lib${libs[${i}]}.so $libdir
     done
+    cp $EXTLIBS/libunfold.so $libdir
     echo compiling $infile
 
     g++ $ROOTFLAGS -fopenmp -I$CPLUS_INCLUDE_PATH -c -o $BUILDDIR/$infile.o $SRCDIR/$infile.cc

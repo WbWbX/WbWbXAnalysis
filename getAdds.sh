@@ -37,7 +37,7 @@ cd ${CMSSW_BASE}/src
 git clone https://github.com/jkiesele/TtZAnalysis.git
 
 #fast hack
-ln -s ${CMSSW_BASE}/src/TtZAnalysis/Tools/TUnfold/libunfold.so ${CMSSW_BASE}/lib/${SCRAM_ARCH}/libunfold.so
+ln -s ${CMSSW_BASE}/src/TtZAnalysis/Tools/TUnfold/libunfold.so ${CMSSW_BASE}/external/${SCRAM_ARCH}/lib/libunfold.so
 
 ##TopAnalysis package
 cd ${CMSSW_BASE}/src
