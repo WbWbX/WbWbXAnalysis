@@ -164,7 +164,7 @@ private:
 	TH1D divideTH1D(const TH1D &h1, const TH1D &h2, bool binomial=true){ //! out = h1 / h2
 		TH1D out=h1;
 		for(int binx=1;binx<=h1.GetNbinsX()+1;binx++){
-			double cont=0;
+			double cont=1;
 			double err=0;
 			if(h2.GetBinContent(binx) !=0){
 				cont=h1.GetBinContent(binx) / h2.GetBinContent(binx);
@@ -186,7 +186,7 @@ private:
 		TH2D out=h1;
 		for(int binx=1;binx<=h1.GetNbinsX()+1;binx++){
 			for(int biny=1;biny<=h1.GetNbinsY()+1;biny++){
-				double cont=0;
+				double cont=1;
 				double err=0;
 				if(h2.GetBinContent(binx,biny) !=0){
 					cont=h1.GetBinContent(binx,biny) / h2.GetBinContent(binx,biny);
