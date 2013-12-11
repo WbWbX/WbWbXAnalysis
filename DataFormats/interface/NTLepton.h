@@ -38,7 +38,7 @@ class NTLepton{
   const double &dzVErr()const{return dZVErr_;}
  const double & dZBs()const{return dZBs_;}
   const double& d0V()const{return d0V_;}
-  const double d0Bs()const{return d0Bs_;}
+  const double &d0Bs()const{return d0Bs_;}
 
   const int& genMatch()const{return genid_;}
 
