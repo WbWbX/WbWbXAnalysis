@@ -111,6 +111,8 @@ public:
 
 	void setElectrons(TString elecs){whichelectrons_=elecs;}
 
+	void setDisplayStatus(bool disp){statusbar_=disp;}
+
 	void setBinsEta(std::vector<float> binseta){binseta_.clear();binseta_=binseta;};
 	void setBinsEta2dX(std::vector<float> binseta2dx){binseta2dx_.clear();binseta2dx_=binseta2dx;};
 	void setBinsEta2dY(std::vector<float> binseta2dy){binseta2dy_.clear();binseta2dy_=binseta2dy;};
@@ -498,7 +500,7 @@ public:
 				std::cout << "got entry "<<i << std::endl;
 
 			if(statusbar_)
-				displayStatusBar(i,n);
+				displayStatusBar(i,n,10);
 
 
 			double puweight=1;
@@ -876,7 +878,7 @@ public:
 		string MCdata="data";
 
 		if(isMC_) MCdata="MC";
-		cout << "\n\nIn channel " << mode_<< "   " << MCdata << endl;
+		cout << "\n\nIn channel " << mode_<< " (ee,emu,mumu)  " << MCdata << endl;
 		cout << "triggers: " <<endl;
 		//if(!isMC_){
 		for(unsigned int i=0;i<dileptriggers.size();i++){

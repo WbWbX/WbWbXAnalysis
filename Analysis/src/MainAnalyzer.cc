@@ -82,7 +82,7 @@ int MainAnalyzer::start(){
 
 	analysisplots_.setName(getOutFileName());
 	analysisplots_.setSyst(getSyst());
-	int btagsyst=getBTagSF()->getSystematic();
+	bTagBase::systematics btagsyst=getBTagSF()->getSystematic();
 	//load btag:
 	if(!(getBTagSF()->makesEff())){
 		std::cout << "loading b-tag File: " << btagsffile_ << std::endl;
@@ -92,7 +92,7 @@ int MainAnalyzer::start(){
 			return -3;
 		}
 		getBTagSF()->readFromTFile(btagsffile_);
-		getBTagSF()->setSystematic(btagsyst);
+		getBTagSF()->bTagBase::setSystematic(btagsyst);
 	}
 
 	///communication stuff...
@@ -131,6 +131,10 @@ int MainAnalyzer::start(){
 					analyze(p_idx.get(i)->pread());
 				}
 				catch(...){
+					std::cout << "\n*******\nException thrown in " << infiles_.at(i) << std::endl;
+					//fake write
+					p_askwrite.get(i)->pwrite(i);
+					p_allowwrite.get(i)->pread();
 					p_finished.get(i)->pwrite(-99);
 					std::exit(EXIT_FAILURE);
 				}

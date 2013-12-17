@@ -96,7 +96,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
 	ana.getJECUncertainties()->setFile((jecfile).Data());
 	ana.getJECUncertainties()->setSystematics("no");
 	if(testmode){
-		ana.getBTagSF()->setMakeEff(true);
+		//ana.getBTagSF()->setMakeEff(true);
 		ana.setBTagSFFile(btagfile+"TESTMODE");
 	}
 	//add indication for non-correlated syst by adding the energy to syst name!! then the getCrossSections stuff should recognise it

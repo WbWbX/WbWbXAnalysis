@@ -8,7 +8,7 @@ bool muonId(ztop::NTMuon * muon){
 	if(!muon->isGlobal()) return false;
 	if(!muon->isPf()) return false;
 	if(fabs(muon->eta()) > 2.4) return false;
-	if(muon->isoVal() > 0.12) return false;
+	if(muon->isoVal() > 0.15) return false; //0.15!!!!but with r=03
 	if(muon->normChi2() > 10) return false;
 
 	if(muon->muonHits() <1) return false;
@@ -30,6 +30,7 @@ bool elecId(ztop::NTElectron * elec){
 
 	if(fabs(elec->eta())>2.5) return false;
 	if(fabs(elec->eta()) > 1.4442 && fabs(elec->eta()) < 1.566)return false;
+	//if(fabs(elec->suClu().eta()) > 1.4442 && fabs(elec->suClu().eta()) < 1.566)return false;
 	if(elec->rhoIso() > 0.15) return false;
 
 	if(fabs(elec->d0V()) >= 0.02) return false;
@@ -54,6 +55,7 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
 	using namespace ztop;
 	float stopMass=0;
 	float chiMass=0;
+
 
 	std::vector<double> * pStopMass=tempp0_;
 	std::vector<double>  * pChiMass=tempp1_;
@@ -168,9 +170,16 @@ void trigger_SUSY(){
 	//triggerAnalyzer::testmode=true;
 	//triggerAnalyzer::lowMCStat=true;
 
-	bool susymc=true;
-	if(susymc)
-		triggerAnalyzer::lowMCStat=false;
+	bool susymc=false;
+	//if(susymc)
+	//	triggerAnalyzer::lowMCStat=true;
+
+	bool displayStatus=true;
+	bool sepruns=false;
+
+
+	enum channels{ee,emu,mumu,all};
+	channels usechan=mumu;
 
 	using namespace std;
 	using namespace ztop;
@@ -178,7 +187,7 @@ void trigger_SUSY(){
 	std::vector<float> binsmumueta, bins2dee, bins2dmue,binsptmu, binspte, bins2dmumu;
 
 	binsmumueta << -2.4 << -2.1 << -1.2 << -0.9 << 0.9 << 1.2 << 2.1 << 2.4;
-	bins2dmumu << 0 << 0.9 << 1.2 << 2.1 << 2.4;
+	bins2dmumu << 0 << 0.9 << 1.2 << 2.1 << 2.4;//2.1 << 2.4;
 	bins2dee <<0 << 1.4442 << 1.566 << 2.5;
 	bins2dmue << 0 << 1.2 << 2.4;
 	binsptmu << 10 << 15 << 20 << 40 << 70 << 200;
@@ -216,6 +225,12 @@ void trigger_SUSY(){
 	ta_emud.setBinsEta2dY(bins2dmue);
 	ta_emud.setBinsPt(binspte);
 
+
+	//displayStatus
+	ta_eed.setDisplayStatus(displayStatus);
+	ta_emud.setDisplayStatus(displayStatus);
+	ta_mumud.setDisplayStatus(displayStatus);
+
 	triggerAnalyzer ta_eeMC=ta_eed;
 	triggerAnalyzer ta_mumuMC=ta_mumud;
 	triggerAnalyzer ta_emuMC=ta_emud;
@@ -225,8 +240,7 @@ void trigger_SUSY(){
 	ta_emuMC.setIsMC(true);
 
 
-
-	TString dir="/scratch/hh/dust/naf/cms/user/kieseler/trees_SUSYES_Oct13/"; //"/scratch/hh/dust/naf/cms/user/kieseler/trees_ES_Jul13/";
+	TString dir="/scratch/hh/dust/naf/cms/user/kieseler/trees_SUSYES_Dec13/"; //"/scratch/hh/dust/naf/cms/user/kieseler/trees_ES_Jul13/";
 	TString mcpufile= dir+ "SUSY_FS_PU.root";
 	if(susymc){
 		ta_eeMC.setMCPUFile(mcpufile);
@@ -337,7 +351,8 @@ void trigger_SUSY(){
 	ta_mumuMCA.setPUFile(PURunA);
 	ta_emuMCA.setPUFile(PURunA);
 
-	analyzeAll( ta_eedA,  ta_eeMCA,  ta_mumudA,  ta_mumuMCA,  ta_emudA,  ta_emuMCA,"RunA","Run A");
+	if(sepruns)
+		analyzeAll( ta_eedA,  ta_eeMCA,  ta_mumudA,  ta_mumuMCA,  ta_emudA,  ta_emuMCA,"RunA","Run A");
 
 	triggerAnalyzer ta_eedB=ta_eed;
 	triggerAnalyzer ta_mumudB=ta_mumud;
@@ -356,7 +371,8 @@ void trigger_SUSY(){
 	ta_mumuMCB.setPUFile(PURunB);
 	ta_emuMCB.setPUFile(PURunB);
 
-	analyzeAll( ta_eedB,  ta_eeMCB,  ta_mumudB,  ta_mumuMCB,  ta_emudB,  ta_emuMCB,"RunB","Run B");
+	if(sepruns)
+		analyzeAll( ta_eedB,  ta_eeMCB,  ta_mumudB,  ta_mumuMCB,  ta_emudB,  ta_emuMCB,"RunB","Run B");
 
 	triggerAnalyzer ta_eedC=ta_eed;
 	triggerAnalyzer ta_mumudC=ta_mumud;
@@ -376,7 +392,8 @@ void trigger_SUSY(){
 	ta_mumuMCC.setPUFile(PURunC);
 	ta_emuMCC.setPUFile(PURunC);
 
-	analyzeAll( ta_eedC,  ta_eeMCC,  ta_mumudC,  ta_mumuMCC,  ta_emudC,  ta_emuMCC,"RunC","Run C");
+	if(sepruns)
+		analyzeAll( ta_eedC,  ta_eeMCC,  ta_mumudC,  ta_mumuMCC,  ta_emudC,  ta_emuMCC,"RunC","Run C");
 
 
 	triggerAnalyzer ta_eedD=ta_eed;
@@ -397,7 +414,38 @@ void trigger_SUSY(){
 	ta_mumuMCD.setPUFile(PURunD);
 	ta_emuMCD.setPUFile(PURunD);
 
-	analyzeAll( ta_eedD,  ta_eeMCD,  ta_mumudD,  ta_mumuMCD,  ta_emudD,  ta_emuMCD,"RunD","Run D");
+	if(sepruns){
+		analyzeAll( ta_eedD,  ta_eeMCD,  ta_mumudD,  ta_mumuMCD,  ta_emudD,  ta_emuMCD,"RunD","Run D");
+	}
+	else{
+
+		if(usechan==ee || usechan==all){
+			ta_eedA.Eff();
+			ta_eedB.Eff();
+			ta_eedC.Eff();
+			ta_eedD.Eff();
+		}
+
+		if(usechan==emu || usechan==all){
+			ta_emudA.Eff();
+			ta_emudB.Eff();
+			ta_emudC.Eff();
+			ta_emudD.Eff();
+
+		}
+		if(usechan==mumu || usechan==all){
+			ta_mumudA.Eff();
+			ta_mumudB.Eff();
+			ta_mumudC.Eff();
+			ta_mumudD.Eff();
+
+		}
+
+
+		//MC
+
+	}
+
 
 
 	double lumiA=0.890;
@@ -408,85 +456,112 @@ void trigger_SUSY(){
 	double lumitotal=lumiA+lumiB+lumiC+lumiD;
 
 	//for ee
-	double eetotal=ta_eedA.getGlobalDen() + ta_eedB.getGlobalDen() + ta_eedC.getGlobalDen() + ta_eedD.getGlobalDen();
-	double eeMCtotal=ta_eeMCA.getGlobalDen() + ta_eeMCB.getGlobalDen() + ta_eeMCC.getGlobalDen() + ta_eeMCD.getGlobalDen();
+	TString eestring;
+	if(usechan==ee|| usechan==all){
+		double eetotal=ta_eedA.getGlobalDen() + ta_eedB.getGlobalDen() + ta_eedC.getGlobalDen() + ta_eedD.getGlobalDen();
+		double eeMCtotal=ta_eeMCA.getGlobalDen() + ta_eeMCB.getGlobalDen() + ta_eeMCC.getGlobalDen() + ta_eeMCD.getGlobalDen();
 
-	double eeAscale=eetotal/ta_eedA.getGlobalDen() * lumiA/lumitotal;
-	ta_eedA.scale(eeAscale);
-	double eeMCAscale=eeMCtotal/ta_eeMCA.getGlobalDen() * lumiA/lumitotal;
-	ta_eeMCA.scale(eeMCAscale);
-	double eeBscale=eetotal/ta_eedB.getGlobalDen() * lumiB/lumitotal;
-	ta_eedB.scale(eeBscale);
-	double eeMCBscale=eeMCtotal/ta_eeMCB.getGlobalDen() * lumiB/lumitotal;
-	ta_eeMCB.scale(eeMCBscale);
-	double eeCscale=eetotal/ta_eedC.getGlobalDen() * lumiC/lumitotal;
-	ta_eedC.scale(eeCscale);
-	double eeMCCscale=eeMCtotal/ta_eeMCC.getGlobalDen() * lumiC/lumitotal;
-	ta_eeMCC.scale(eeMCCscale);
-	double eeDscale=eetotal/ta_eedD.getGlobalDen() * lumiD/lumitotal;
-	ta_eedD.scale(eeDscale);
-	double eeMCDscale=eeMCtotal/ta_eeMCD.getGlobalDen() * lumiD/lumitotal;
-	ta_eeMCD.scale(eeMCDscale);
+		double eeAscale=eetotal/ta_eedA.getGlobalDen() * lumiA/lumitotal;
+		ta_eedA.scale(eeAscale);
+		double eeMCAscale=eeMCtotal/ta_eeMCA.getGlobalDen() * lumiA/lumitotal;
+		ta_eeMCA.scale(eeMCAscale);
+		double eeBscale=eetotal/ta_eedB.getGlobalDen() * lumiB/lumitotal;
+		ta_eedB.scale(eeBscale);
+		double eeMCBscale=eeMCtotal/ta_eeMCB.getGlobalDen() * lumiB/lumitotal;
+		ta_eeMCB.scale(eeMCBscale);
+		double eeCscale=eetotal/ta_eedC.getGlobalDen() * lumiC/lumitotal;
+		ta_eedC.scale(eeCscale);
+		double eeMCCscale=eeMCtotal/ta_eeMCC.getGlobalDen() * lumiC/lumitotal;
+		ta_eeMCC.scale(eeMCCscale);
+		double eeDscale=eetotal/ta_eedD.getGlobalDen() * lumiD/lumitotal;
+		ta_eedD.scale(eeDscale);
+		double eeMCDscale=eeMCtotal/ta_eeMCD.getGlobalDen() * lumiD/lumitotal;
+		ta_eeMCD.scale(eeMCDscale);
 
 
-	triggerAnalyzer eedFull = ta_eedA + ta_eedB + ta_eedC + ta_eedD;
-	triggerAnalyzer eemcFull = ta_eeMCA + ta_eeMCB + ta_eeMCC + ta_eeMCD;
-	TString eestring= makeFullOutput(eedFull, eemcFull, "ee_Full", "ee Full 19 fb^{-1}", 0.01);
-
+		triggerAnalyzer eedFull = ta_eedA + ta_eedB + ta_eedC + ta_eedD;
+		triggerAnalyzer eemcFull;
+		if(sepruns){
+			eemcFull = ta_eeMCA + ta_eeMCB + ta_eeMCC + ta_eeMCD;
+		}
+		else{
+			eemcFull=ta_eeMC;
+			eemcFull.Eff();;
+		}
+		eestring= makeFullOutput(eedFull, eemcFull, "ee_Full", "ee Full 19 fb^{-1}", 0.01);
+	}
 	////
-	double mumutotal=ta_mumudA.getGlobalDen() + ta_mumudB.getGlobalDen() + ta_mumudC.getGlobalDen() + ta_mumudD.getGlobalDen();
-	double mumuMCtotal=ta_mumuMCA.getGlobalDen() + ta_mumuMCB.getGlobalDen() + ta_mumuMCC.getGlobalDen() + ta_mumuMCD.getGlobalDen();
+	TString mumustring;
+	if(usechan==mumu||usechan==all){
+		double mumutotal=ta_mumudA.getGlobalDen() + ta_mumudB.getGlobalDen() + ta_mumudC.getGlobalDen() + ta_mumudD.getGlobalDen();
+		double mumuMCtotal=ta_mumuMCA.getGlobalDen() + ta_mumuMCB.getGlobalDen() + ta_mumuMCC.getGlobalDen() + ta_mumuMCD.getGlobalDen();
 
-	double mumuAscale=mumutotal/ta_mumudA.getGlobalDen() * lumiA/lumitotal;
-	ta_mumudA.scale(mumuAscale);
-	double mumuMCAscale=mumuMCtotal/ta_mumuMCA.getGlobalDen() * lumiA/lumitotal;
-	ta_mumuMCA.scale(mumuMCAscale);
-	double mumuBscale=mumutotal/ta_mumudB.getGlobalDen() * lumiB/lumitotal;
-	ta_mumudB.scale(mumuBscale);
-	double mumuMCBscale=mumuMCtotal/ta_mumuMCB.getGlobalDen() * lumiB/lumitotal;
-	ta_mumuMCB.scale(mumuMCBscale);
-	double mumuCscale=mumutotal/ta_mumudC.getGlobalDen() * lumiC/lumitotal;
-	ta_mumudC.scale(mumuCscale);
-	double mumuMCCscale=mumuMCtotal/ta_mumuMCC.getGlobalDen() * lumiC/lumitotal;
-	ta_mumuMCC.scale(mumuMCCscale);
-	double mumuDscale=mumutotal/ta_mumudD.getGlobalDen() * lumiD/lumitotal;
-	ta_mumudD.scale(mumuDscale);
-	double mumuMCDscale=mumuMCtotal/ta_mumuMCD.getGlobalDen() * lumiD/lumitotal;
-	ta_mumuMCD.scale(mumuMCDscale);
+		double mumuAscale=mumutotal/ta_mumudA.getGlobalDen() * lumiA/lumitotal;
+		ta_mumudA.scale(mumuAscale);
+		double mumuMCAscale=mumuMCtotal/ta_mumuMCA.getGlobalDen() * lumiA/lumitotal;
+		ta_mumuMCA.scale(mumuMCAscale);
+		double mumuBscale=mumutotal/ta_mumudB.getGlobalDen() * lumiB/lumitotal;
+		ta_mumudB.scale(mumuBscale);
+		double mumuMCBscale=mumuMCtotal/ta_mumuMCB.getGlobalDen() * lumiB/lumitotal;
+		ta_mumuMCB.scale(mumuMCBscale);
+		double mumuCscale=mumutotal/ta_mumudC.getGlobalDen() * lumiC/lumitotal;
+		ta_mumudC.scale(mumuCscale);
+		double mumuMCCscale=mumuMCtotal/ta_mumuMCC.getGlobalDen() * lumiC/lumitotal;
+		ta_mumuMCC.scale(mumuMCCscale);
+		double mumuDscale=mumutotal/ta_mumudD.getGlobalDen() * lumiD/lumitotal;
+		ta_mumudD.scale(mumuDscale);
+		double mumuMCDscale=mumuMCtotal/ta_mumuMCD.getGlobalDen() * lumiD/lumitotal;
+		ta_mumuMCD.scale(mumuMCDscale);
 
 
-	triggerAnalyzer mumudFull = ta_mumudA + ta_mumudB + ta_mumudC + ta_mumudD;
-	triggerAnalyzer mumumcFull = ta_mumuMCA + ta_mumuMCB + ta_mumuMCC + ta_mumuMCD;
-	TString mumustring= makeFullOutput(mumudFull, mumumcFull, "mumu_Full", "mumu Full 19 fb^{-1}", 0.01);
-
+		triggerAnalyzer mumudFull = ta_mumudA + ta_mumudB + ta_mumudC + ta_mumudD;
+		triggerAnalyzer mumumcFull;// = ta_mumuMCA + ta_mumuMCB + ta_mumuMCC + ta_mumuMCD;
+		if(sepruns){
+			mumumcFull = ta_mumuMCA + ta_mumuMCB + ta_mumuMCC + ta_mumuMCD;
+		}
+		else{
+			mumumcFull=ta_mumuMC;
+			mumumcFull.Eff();;
+		}
+		mumustring= makeFullOutput(mumudFull, mumumcFull, "mumu_Full", "mumu Full 19 fb^{-1}", 0.01);
+	}
 
 	///
-	double emutotal=ta_emudA.getGlobalDen() + ta_emudB.getGlobalDen() + ta_emudC.getGlobalDen() + ta_emudD.getGlobalDen();
-	double emuMCtotal=ta_emuMCA.getGlobalDen() + ta_emuMCB.getGlobalDen() + ta_emuMCC.getGlobalDen() + ta_emuMCD.getGlobalDen();
+	TString emustring;
+	if(usechan==emu || usechan==all){
+		double emutotal=ta_emudA.getGlobalDen() + ta_emudB.getGlobalDen() + ta_emudC.getGlobalDen() + ta_emudD.getGlobalDen();
+		double emuMCtotal=ta_emuMCA.getGlobalDen() + ta_emuMCB.getGlobalDen() + ta_emuMCC.getGlobalDen() + ta_emuMCD.getGlobalDen();
 
-	double emuAscale=emutotal/ta_emudA.getGlobalDen() * lumiA/lumitotal;
-	ta_emudA.scale(emuAscale);
-	double emuMCAscale=emuMCtotal/ta_emuMCA.getGlobalDen() * lumiA/lumitotal;
-	ta_emuMCA.scale(emuMCAscale);
-	double emuBscale=emutotal/ta_emudB.getGlobalDen() * lumiB/lumitotal;
-	ta_emudB.scale(emuBscale);
-	double emuMCBscale=emuMCtotal/ta_emuMCB.getGlobalDen() * lumiB/lumitotal;
-	ta_emuMCB.scale(emuMCBscale);
-	double emuCscale=emutotal/ta_emudC.getGlobalDen() * lumiC/lumitotal;
-	ta_emudC.scale(emuCscale);
-	double emuMCCscale=emuMCtotal/ta_emuMCC.getGlobalDen() * lumiC/lumitotal;
-	ta_emuMCC.scale(emuMCCscale);
-	double emuDscale=emutotal/ta_emudD.getGlobalDen() * lumiD/lumitotal;
-	ta_emudD.scale(emuDscale);
-	double emuMCDscale=emuMCtotal/ta_emuMCD.getGlobalDen() * lumiD/lumitotal;
-	ta_emuMCD.scale(emuMCDscale);
+		double emuAscale=emutotal/ta_emudA.getGlobalDen() * lumiA/lumitotal;
+		ta_emudA.scale(emuAscale);
+		double emuMCAscale=emuMCtotal/ta_emuMCA.getGlobalDen() * lumiA/lumitotal;
+		ta_emuMCA.scale(emuMCAscale);
+		double emuBscale=emutotal/ta_emudB.getGlobalDen() * lumiB/lumitotal;
+		ta_emudB.scale(emuBscale);
+		double emuMCBscale=emuMCtotal/ta_emuMCB.getGlobalDen() * lumiB/lumitotal;
+		ta_emuMCB.scale(emuMCBscale);
+		double emuCscale=emutotal/ta_emudC.getGlobalDen() * lumiC/lumitotal;
+		ta_emudC.scale(emuCscale);
+		double emuMCCscale=emuMCtotal/ta_emuMCC.getGlobalDen() * lumiC/lumitotal;
+		ta_emuMCC.scale(emuMCCscale);
+		double emuDscale=emutotal/ta_emudD.getGlobalDen() * lumiD/lumitotal;
+		ta_emudD.scale(emuDscale);
+		double emuMCDscale=emuMCtotal/ta_emuMCD.getGlobalDen() * lumiD/lumitotal;
+		ta_emuMCD.scale(emuMCDscale);
 
 
 
-	triggerAnalyzer emudFull = ta_emudA + ta_emudB + ta_emudC + ta_emudD;
-	triggerAnalyzer emumcFull = ta_emuMCA + ta_emuMCB + ta_emuMCC + ta_emuMCD;
-	TString emustring=makeFullOutput(emudFull, emumcFull, "emu_Full", "emu Full 19 fb^{-1}", 0.01);
-
+		triggerAnalyzer emudFull = ta_emudA + ta_emudB + ta_emudC + ta_emudD;
+		triggerAnalyzer emumcFull;// = ta_emuMCA + ta_emuMCB + ta_emuMCC + ta_emuMCD;
+		if(sepruns){
+			emumcFull = ta_emuMCA + ta_emuMCB + ta_emuMCC + ta_emuMCD;
+		}
+		else{
+			emumcFull=ta_emuMC;
+			emumcFull.Eff();;
+		}
+		emustring=makeFullOutput(emudFull, emumcFull, "emu_Full", "emu Full 19 fb^{-1}", 0.01);
+	}
 	std::cout << "\n\nweighted output summary: " << std::endl;
 
 	std::cout << "channel  & $\\epsilon_{data}$ & $\\epsilon_{MC}$ & SF & $\\alpha$ \\\\ " << std::endl;

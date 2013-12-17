@@ -99,9 +99,9 @@ void trigger_007(){
   triggerAnalyzer ta_mumud;
   triggerAnalyzer ta_emud;
 
-  ta_eed.setRunCutHigh(196531); //ignore runs > 5 fb (196531)
-  ta_mumud.setRunCutHigh(196531);
-  ta_emud.setRunCutHigh(196531);
+ // ta_eed.setRunCutHigh(196531); //ignore runs > 5 fb (196531)
+ // ta_mumud.setRunCutHigh(196531);
+ // ta_emud.setRunCutHigh(196531);
 
   //set the "old style options"
 
@@ -149,8 +149,8 @@ void trigger_007(){
   TString PURunB = cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13RunB.json.txt_PU.root";
 //cmssw_base+"/src/TtZAnalysis/Data/RunB13Jul.json.txt_PU.root";
     TString PURunAB = cmssw_base+"/src/TtZAnalysis/Data/RunABComp_PU.root NOTUSE";
-  TString PURunC = cmssw_base+"/src/TtZAnalysis/Data/RunCComp.json.txt_PU.root";
-  TString PURunD = cmssw_base+"/src/TtZAnalysis/Data/RunDprompt.json.txt_PU.root";
+  TString PURunC = cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13RunC.json.txt_PU.root";
+  TString PURunD = cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13RunD.json.txt_PU.root";
 
   TString pileuproot = cmssw_base+"/src/TtZAnalysis/Data/Full19.json.txt_PU.root";
 
@@ -183,6 +183,10 @@ void trigger_007(){
    // << dir +  "tree_8TeV_MET_runB_13Jul.root";
 
   datafilesRunAB  << datafilesRunA << datafilesRunB;
+
+  datafilesRunC  << dir + "tree_8TeV_MET_runC_22Jan.root";
+  datafilesRunD  << dir + "tree_8TeV_MET_runD_22Jan.root";
+
 
   /* datafilesRunC  << dir + "tree_8TeV_MET_runC_prompt.root"
 		 << dir + "tree_8TeV_MET_runC_24Aug.root"  
@@ -264,7 +268,7 @@ void trigger_007(){
   triggerAnalyzer ta_eeMCC=ta_eeMC;
   triggerAnalyzer ta_mumuMCC=ta_mumuMC;
   triggerAnalyzer ta_emuMCC=ta_emuMC;
-/*
+
 
   ta_eeMCC.setPUFile(PURunC);
   ta_mumuMCC.setPUFile(PURunC);
@@ -291,15 +295,15 @@ void trigger_007(){
   ta_mumuMCD.setPUFile(PURunD);
   ta_emuMCD.setPUFile(PURunD);
 
-  //  analyzeAll( ta_eedD,  ta_eeMCD,  ta_mumudD,  ta_mumuMCD,  ta_emudD,  ta_emuMCD,"RunD","Run D");
-*/
+    analyzeAll( ta_eedD,  ta_eeMCD,  ta_mumudD,  ta_mumuMCD,  ta_emudD,  ta_emuMCD,"RunD","Run D");
+
 
   double lumiA=0.890;
   double lumiB=4.430;
- // double lumiC=7.026;
- // double lumiD=7.272;
+  double lumiC=7.026;
+  double lumiD=7.272;
 
-  double lumitotal=lumiA+lumiB;//+lumiC+lumiD;
+  double lumitotal=lumiA+lumiB+lumiC+lumiD;
 
   //for ee
   double eetotal=ta_eedA.getGlobalDen() + ta_eedB.getGlobalDen();// + ta_eedC.getGlobalDen() + ta_eedD.getGlobalDen();
@@ -313,7 +317,7 @@ void trigger_007(){
   ta_eedB.scale(eeBscale);
   double eeMCBscale=eeMCtotal/ta_eeMCB.getGlobalDen() * lumiB/lumitotal;
   ta_eeMCB.scale(eeMCBscale);
-/*  double eeCscale=eetotal/ta_eedC.getGlobalDen() * lumiC/lumitotal;
+  double eeCscale=eetotal/ta_eedC.getGlobalDen() * lumiC/lumitotal;
   ta_eedC.scale(eeCscale);
   double eeMCCscale=eeMCtotal/ta_eeMCC.getGlobalDen() * lumiC/lumitotal;
   ta_eeMCC.scale(eeMCCscale);
@@ -321,11 +325,11 @@ void trigger_007(){
   ta_eedD.scale(eeDscale);
   double eeMCDscale=eeMCtotal/ta_eeMCD.getGlobalDen() * lumiD/lumitotal;
   ta_eeMCD.scale(eeMCDscale);
-*/
+
   triggerAnalyzer eedFull = ta_eedA + ta_eedB ;//+ ta_eedC + ta_eedD;
   triggerAnalyzer eemcFull = ta_eeMCA + ta_eeMCB;// + ta_eeMCC + ta_eeMCD;
 
-  TString eestring=makeFullOutput(eedFull, eemcFull, "ee_5fb", "ee 5 fb^{-1}", 0.01);
+  TString eestring=makeFullOutput(eedFull, eemcFull, "ee_19fb", "ee 19 fb^{-1}", 0.01);
 
   ////
   double mumutotal=ta_mumudA.getGlobalDen() + ta_mumudB.getGlobalDen();// + ta_mumudC.getGlobalDen() + ta_mumudD.getGlobalDen();
@@ -339,7 +343,7 @@ void trigger_007(){
   ta_mumudB.scale(mumuBscale);
   double mumuMCBscale=mumuMCtotal/ta_mumuMCB.getGlobalDen() * lumiB/lumitotal;
   ta_mumuMCB.scale(mumuMCBscale);
-/*  double mumuCscale=mumutotal/ta_mumudC.getGlobalDen() * lumiC/lumitotal;
+  double mumuCscale=mumutotal/ta_mumudC.getGlobalDen() * lumiC/lumitotal;
   ta_mumudC.scale(mumuCscale);
   double mumuMCCscale=mumuMCtotal/ta_mumuMCC.getGlobalDen() * lumiC/lumitotal;
   ta_mumuMCC.scale(mumuMCCscale);
@@ -347,10 +351,10 @@ void trigger_007(){
   ta_mumudD.scale(mumuDscale);
   double mumuMCDscale=mumuMCtotal/ta_mumuMCD.getGlobalDen() * lumiD/lumitotal;
   ta_mumuMCD.scale(mumuMCDscale);
-*/
-  triggerAnalyzer mumudFull = ta_mumudA + ta_mumudB;// + ta_mumudC + ta_mumudD;
-  triggerAnalyzer mumumcFull = ta_mumuMCA + ta_mumuMCB;// + ta_mumuMCC + ta_mumuMCD;
-  TString mumustring=makeFullOutput(mumudFull, mumumcFull, "mumu_5fb", "mumu 5 fb^{-1}", 0.01);
+
+  triggerAnalyzer mumudFull = ta_mumudA + ta_mumudB + ta_mumudC + ta_mumudD;
+  triggerAnalyzer mumumcFull = ta_mumuMCA + ta_mumuMCB + ta_mumuMCC + ta_mumuMCD;
+  TString mumustring=makeFullOutput(mumudFull, mumumcFull, "mumu_19fb", "mumu 19 fb^{-1}", 0.01);
 
 
   ///
@@ -365,7 +369,7 @@ void trigger_007(){
   ta_emudB.scale(emuBscale);
   double emuMCBscale=emuMCtotal/ta_emuMCB.getGlobalDen() * lumiB/lumitotal;
   ta_emuMCB.scale(emuMCBscale);
-/* double emuCscale=emutotal/ta_emudC.getGlobalDen() * lumiC/lumitotal;
+  double emuCscale=emutotal/ta_emudC.getGlobalDen() * lumiC/lumitotal;
   ta_emudC.scale(emuCscale);
   double emuMCCscale=emuMCtotal/ta_emuMCC.getGlobalDen() * lumiC/lumitotal;
   ta_emuMCC.scale(emuMCCscale);
@@ -373,11 +377,11 @@ void trigger_007(){
   ta_emudD.scale(emuDscale);
   double emuMCDscale=emuMCtotal/ta_emuMCD.getGlobalDen() * lumiD/lumitotal;
   ta_emuMCD.scale(emuMCDscale);
-*/
 
-  triggerAnalyzer emudFull = ta_emudA + ta_emudB;// + ta_emudC + ta_emudD;
-  triggerAnalyzer emumcFull = ta_emuMCA + ta_emuMCB;// + ta_emuMCC + ta_emuMCD;
-  TString emustring=makeFullOutput(emudFull, emumcFull, "emu_5fb", "emu 5 fb^{-1}", 0.01);
+
+  triggerAnalyzer emudFull = ta_emudA + ta_emudB + ta_emudC + ta_emudD;
+  triggerAnalyzer emumcFull = ta_emuMCA + ta_emuMCB + ta_emuMCC + ta_emuMCD;
+  TString emustring=makeFullOutput(emudFull, emumcFull, "emu_19fb", "emu 19 fb^{-1}", 0.01);
 
 
   std::cout << "\n\nweighted output summary: " << std::endl;

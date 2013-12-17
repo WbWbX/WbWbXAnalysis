@@ -21,6 +21,7 @@ class NTFullEvent{
 public:
 	NTFullEvent(): event(0),
 	idjets(0),medjets(0),hardjets(0),medbjets(0),hardbjets(0),dphilljjets(0),dphiplushardjets(0),
+	selectedjets(0),selectedbjets(0),
 	allmuons(0),kinmuons(0),idmuons(0),isomuons(0),
 	allelectrons(0),kinelectrons(0),idelectrons(0),isoelectrons(0),
 	allleptons(0),kinleptons(0),idleptons(0),isoleptons(0),
@@ -36,6 +37,7 @@ public:
 
 	void reset(){
 		idjets=0;medjets=0;hardjets=0;medbjets=0;hardbjets=0;dphilljjets=0;dphiplushardjets=0;
+		selectedjets=0;selectedbjets=0;
 		allmuons=0;kinmuons=0;idmuons=0;isomuons=0;
 		allelectrons=0;kinelectrons=0;idelectrons=0;isoelectrons=0;
 		allleptons=0;kinleptons=0;idleptons=0;isoleptons=0;
@@ -58,6 +60,8 @@ public:
 	std::vector<ztop::NTJet*> * hardbjets;
 	std::vector<ztop::NTJet*> * dphilljjets;
 	std::vector<ztop::NTJet*> * dphiplushardjets;
+    std::vector<ztop::NTJet*> * selectedjets;
+	std::vector<ztop::NTJet*> * selectedbjets;
 
 
 	std::vector<ztop::NTMuon*> * allmuons;
