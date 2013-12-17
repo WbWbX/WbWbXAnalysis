@@ -161,6 +161,8 @@ private:
 
 	TString ptf_;
 
+	double sq(const double& a){return a*a;}
+
 	TH1D divideTH1D(const TH1D &h1, const TH1D &h2, bool binomial=true){ //! out = h1 / h2
 		TH1D out=h1;
 		for(int binx=1;binx<=h1.GetNbinsX()+1;binx++){
@@ -170,10 +172,21 @@ private:
 				cont=h1.GetBinContent(binx) / h2.GetBinContent(binx);
 				double err1=h1.GetBinError(binx)/h2.GetBinContent(binx);
 				double err2=cont/h2.GetBinContent(binx) * h2.GetBinError(binx);
-				if(binomial)
-					err=sqrt(cont*(1-cont)/ h1.GetBinContent(binx));
-				else
+				if(binomial){
+					double d_num2=sq(h1.GetBinError(binx));
+					double d_den2=sq(h2.GetBinError(binx));
+					double N_den=h2.GetBinContent(binx);
+					double N_num=h1.GetBinContent(binx);
+
+					err=d_num2 * sq( N_den - N_num) +(d_den2-d_num2) * sq(N_num);
+
+					err=sqrt(err) / sq(N_den);
+					//err=sqrt(cont*(1-cont)* h1.GetBinError(binx))/h1.GetBinContent(binx); //scale and weight safe
+				}
+				else{
 					err=sqrt(err1*err1 + err2*err2);
+
+				}
 			}
 			out.SetBinContent(binx,cont);
 			out.SetBinError(binx,err);
@@ -192,10 +205,21 @@ private:
 					cont=h1.GetBinContent(binx,biny) / h2.GetBinContent(binx,biny);
 					double err1=h1.GetBinError(binx,biny)/h2.GetBinContent(binx,biny);
 					double err2=cont/h2.GetBinContent(binx,biny) * h2.GetBinError(binx,biny);
-					if(binomial)
-						err=sqrt(cont*(1-cont)/ h1.GetBinContent(binx,biny));
-					else
+					if(binomial){
+						//err=sqrt(cont*(1-cont) * h1.GetBinError(binx,biny))/h1.GetBinContent(binx,biny);
+						double d_num2=sq(h1.GetBinError(binx,biny));
+						double d_den2=sq(h2.GetBinError(binx,biny));
+						double N_den=h2.GetBinContent(binx,biny);
+						double N_num=h1.GetBinContent(binx,biny);
+
+						err=d_num2 * sq( N_den - N_num) +(d_den2-d_num2) * sq(N_num);
+
+						err=sqrt(err) / sq(N_den);
+					}
+					else{
 						err=sqrt(err1*err1 + err2*err2);
+
+					}
 				}
 				out.SetBinContent(binx,biny,cont);
 				out.SetBinError(binx,biny,err);

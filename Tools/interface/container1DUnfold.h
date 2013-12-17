@@ -29,47 +29,47 @@
 namespace ztop{
 class container1DUnfold: public container2D {
 public:
-	container1DUnfold();
-	container1DUnfold( std::vector<float> genbins, std::vector<float> recobins, TString name="",TString xaxisname="",TString yaxisname="", bool mergeufof=false);
-	container1DUnfold( std::vector<float> genbins, TString name="",TString xaxisname="",TString yaxisname="", bool mergeufof=false);
+    container1DUnfold();
+    container1DUnfold( std::vector<float> genbins, std::vector<float> recobins, TString name="",TString xaxisname="",TString yaxisname="", bool mergeufof=false);
+    container1DUnfold( std::vector<float> genbins, TString name="",TString xaxisname="",TString yaxisname="", bool mergeufof=false);
 
-	~container1DUnfold();
-
-
-
-	void setBinning(const std::vector<float> & genbins,const std::vector<float> &recobins);
-	//void subdivideRecoBins(int div);
-
-	void clear(){container2D::clear(); gencont_.clear(); recocont_.clear();}
-	void reset(){container2D::reset(); gencont_.reset();recocont_.reset();}
-	void removeError(TString name){container2D::removeError(name); gencont_.removeError(name); recocont_.removeError(name);}
-	void renameSyst(TString old , TString New){container2D::renameSyst(old,New);gencont_.renameSyst(old,New);recocont_.renameSyst(old, New);}
-	void removeAllSystematics();
-
-	void fillGen(const float & val, const float & weight=1); //if isMC false only fill one specific container - which one?? 0<->underflow? or first one...?
-	void fillReco(const float & yval, const float & weight=1);
-
-	void setMC(bool ismc){isMC_=ismc; if(!isMC_) flushed_=true;}
-	bool getMC(){return isMC_;}
-
-	void setBinByBin(bool bbb);
-	bool isBinByBin() const{return binbybin_;}
-
-	void setLumi(float lumi){lumi_=lumi;}
-	const float& getLumi(){return lumi_;}
-
-	const container1D & getGenContainer() const {return gencont_;}
-	const container1D & getRecoContainer() const {return recocont_;}
+    ~container1DUnfold();
 
 
-	void setRecoContainer(const container1D &cont);
-	void setBackground(const container1D &cont);
-	void addToBackground(const container1D &cont){setBackground(getBackground()+cont);}
-	container1D getBackground() const;
 
-	/*
-	 * only container1DUnfold operator * (float) operates on the unfolded distribution.. let's see for the others
-	 */
+    void setBinning(const std::vector<float> & genbins,const std::vector<float> &recobins);
+    //void subdivideRecoBins(int div);
+
+    void clear(){container2D::clear(); gencont_.clear(); recocont_.clear();}
+    void reset(){container2D::reset(); gencont_.reset();recocont_.reset();}
+    void removeError(TString name){container2D::removeError(name); gencont_.removeError(name); recocont_.removeError(name);unfolded_.removeError(name);}
+    void renameSyst(TString old , TString New){container2D::renameSyst(old,New);gencont_.renameSyst(old,New);recocont_.renameSyst(old, New);}
+    void removeAllSystematics();
+
+    void fillGen(const float & val, const float & weight=1); //if isMC false only fill one specific container - which one?? 0<->underflow? or first one...?
+    void fillReco(const float & yval, const float & weight=1);
+
+    void setMC(bool ismc){isMC_=ismc; if(!isMC_) flushed_=true;}
+    bool getMC(){return isMC_;}
+
+    void setBinByBin(bool bbb);
+    bool isBinByBin() const{return binbybin_;}
+
+    void setLumi(float lumi){lumi_=lumi;}
+    const float& getLumi(){return lumi_;}
+
+    const container1D & getGenContainer() const {return gencont_;}
+    const container1D & getRecoContainer() const {return recocont_;}
+
+
+    void setRecoContainer(const container1D &cont);
+    void setBackground(const container1D &cont);
+    void addToBackground(const container1D &cont){setBackground(getBackground()+cont);}
+    container1D getBackground() const;
+
+    /*
+     * only container1DUnfold operator * (float) operates on the unfolded distribution.. let's see for the others
+     */
 
     container1DUnfold operator + (const container1DUnfold &);       //! adds stat errors in squares; treats same named systematics as correlated!!
     container1DUnfold operator - (const container1DUnfold &);       //! adds errors in squares; treats same named systematics as correlated!!
@@ -102,8 +102,8 @@ public:
     void setUnfolded(const container1D & UF)  { unfolded_=UF;}
     void setRefolded(const container1D & RF)  { refolded_=RF;}
 
-     container1D getPurity() const;
-     container1D getStability(bool includeeff=true) const;
+    container1D getPurity() const;
+    container1D getStability(bool includeeff=true) const;
     bool checkCongruentBinBoundariesXY() const;
     histoBin getDiagonalBin(const size_t & xbin, int layer=-1) const;
 
@@ -123,74 +123,74 @@ public:
 private:
 
     void fill(const float & xval, const float & yval, const float & weight=1){
-    	container2D::fill(xval,yval,weight);
+        container2D::fill(xval,yval,weight);
     }
 
 
 
-   TString xaxis1Dname_,yaxis1Dname_;
+    TString xaxis1Dname_,yaxis1Dname_;
 
-   float tempgen_,tempreco_,tempgenweight_,tempweight_;
-   bool recofill_,genfill_;
+    float tempgen_,tempreco_,tempgenweight_,tempweight_;
+    bool recofill_,genfill_;
 
-   bool isMC_;
-   bool flushed_;
-   bool binbybin_;
+    bool isMC_;
+    bool flushed_;
+    bool binbybin_;
 
-   container1D gencont_,recocont_,unfolded_,refolded_;
+    container1D gencont_,recocont_,unfolded_,refolded_;
 
-   float lumi_;
+    float lumi_;
 
-   bool congruentbins_;
+    bool congruentbins_;
 
-/*
+    /*
    //destructor safe
    unfolder * unfold_;
    std::vector<unfolder *> unfolds_;
-*/
-   //some functions that should not be used although inherited
-   void addErrorContainer(const TString & ,const container2D &,float){}
-   void addErrorContainer(const TString &,const container2D &){}
-   void getRelSystematicsFrom(const container2D &){}
+     */
+    //some functions that should not be used although inherited
+    void addErrorContainer(const TString & ,const container2D &,float){}
+    void addErrorContainer(const TString &,const container2D &){}
+    void getRelSystematicsFrom(const container2D &){}
 
-   std::vector<float> subdivide(const std::vector<float> & bins, size_t div);
+    std::vector<float> subdivide(const std::vector<float> & bins, size_t div);
 };
 inline void container1DUnfold::flush(){ //only for MC
-	if(flushed_)
-		return;
+    if(flushed_)
+        return;
 
-	if(genfill_)
-		gencont_.fill(tempgen_,tempgenweight_);
-	if(recofill_)
-		recocont_.fill(tempreco_,tempweight_);
+    if(genfill_)
+        gencont_.fill(tempgen_,tempgenweight_);
+    if(recofill_)
+        recocont_.fill(tempreco_,tempweight_);
 
-	if(genfill_ && !recofill_){ //put in Reco UF bins
-		fill(tempgen_,ybins_[1]-100,tempgenweight_);}
-	else if(recofill_ && !genfill_){ //put in gen underflow bins -> goes to background
-		fill(xbins_[1]-100,tempreco_,tempweight_);}
-	else if(genfill_ && recofill_){
-		fill(tempgen_,tempreco_,tempweight_);
-		fill(tempgen_,ybins_[1]-100,(tempgenweight_-tempweight_)); // w_gen * (1 - recoweight), tempweight_=fullweight=tempgenweight_*recoweight
-	}
+    if(genfill_ && !recofill_){ //put in Reco UF bins
+        fill(tempgen_,ybins_[1]-100,tempgenweight_);}
+    else if(recofill_ && !genfill_){ //put in gen underflow bins -> goes to background
+        fill(xbins_[1]-100,tempreco_,tempweight_);}
+    else if(genfill_ && recofill_){
+        fill(tempgen_,tempreco_,tempweight_);
+        fill(tempgen_,ybins_[1]-100,(tempgenweight_-tempweight_)); // w_gen * (1 - recoweight), tempweight_=fullweight=tempgenweight_*recoweight
+    }
 
-	recofill_=false;
-	genfill_=false;
-	flushed_=true;
+    recofill_=false;
+    genfill_=false;
+    flushed_=true;
 }
 
 
 inline void container1DUnfold::fillGen(const float & val, const float & weight){
-		tempgen_=val;
-		tempgenweight_=weight;
-		genfill_=true;
-		flushed_=false;
+    tempgen_=val;
+    tempgenweight_=weight;
+    genfill_=true;
+    flushed_=false;
 }
 
 inline void container1DUnfold::fillReco(const float & val, const float & weight){ //fills and resets tempgen_
-		tempreco_=val;
-		tempweight_=weight;
-		recofill_=true;
-		flushed_=false;
+    tempreco_=val;
+    tempweight_=weight;
+    recofill_=true;
+    flushed_=false;
 }
 
 

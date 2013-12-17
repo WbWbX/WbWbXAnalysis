@@ -2,43 +2,45 @@
 #define NTBTagSF_H
 #include "TopAnalysis/ZTopUtils/interface/bTagBase.h"
 #include "TtZAnalysis/DataFormats/interface/NTJet.h"
+#include "FWCore/FWLite/interface/AutoLibraryLoader.h"
 
 namespace ztop{
 
-  class NTBTagSF : public bTagBase{
-  public:
-    NTBTagSF(){bTagBase();std::cout << "WARNING DONT USE THIS CLASS - except for testing - UNFINISHED"<<std::endl;}
+class NTBTagSF : public bTagBase{
+public:
+    NTBTagSF():bTagBase(){}
     ~NTBTagSF(){}
 
     void fillEff(ztop::NTJet * jet, double puweight){ //!overload: jet, puweight
-      bTagBase::fillEff(jet->p4(), jet->genPartonFlavour(), jet->btag(), puweight);
+        bTagBase::fillEff(jet->pt(), fabs(jet->eta()), jet->genPartonFlavour(), jet->btag(), puweight);
     }
 
-    double getNTEventWeight(const std::vector<ztop::NTJet *> &);
+    void setSystematic(const TString &);
+    bool makesEff(){return bTagBase::getMakeEff();}
+
+    float getNTEventWeight(const std::vector<ztop::NTJet *> &);
 
     NTBTagSF  operator + (NTBTagSF  second);
 
-  };
+
+    void writeToTFile(TString, std::string treename="stored_objects"); //! writes whole class to TFile
+    void readFromTFile(TString , std::string treename="stored_objects");  //! reads whole class from TFile
+
+
+};
 }
 
 
 namespace ztop{
 
-  inline double NTBTagSF::getNTEventWeight(const std::vector<ztop::NTJet *> & jets){
-    // std::vector<const ztop::LorentzVector *> p4s;p4s.clear();
-    std::vector< ztop::PolarLorentzVector> p4sv; p4sv.clear();//!change asap when new dataformats ready 
-    std::vector<int> genPartonFlavours;
+inline float NTBTagSF::getNTEventWeight(const std::vector<ztop::NTJet *> & jets){
+    resetCounter();
     for(size_t i=0;i<jets.size();i++){
-      //  ztop::LorentzVector * p4= &(jets.at(i)->p4());
-      p4sv.push_back((jets.at(i)->p4()));
-      if(jets.at(i)->pt() != jets.at(i)->pt())
-	std::cout << "nan input" << std::endl;
-      //   p4s << &(p4sv.at(i));
-      genPartonFlavours.push_back(jets.at(i)->genPartonFlavour());
+        ztop::NTJet *jet=jets.at(i);
+        countJet(jet->pt(),fabs(jet->eta()),jet->genPartonFlavour());
     }
-    double weight= bTagBase::getEventWeight(p4sv , genPartonFlavours);
-    return weight;
-  }
+    return getEventSF();
+}
 }
 
 
