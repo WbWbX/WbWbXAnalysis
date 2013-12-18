@@ -9,6 +9,7 @@
 #include "TtZAnalysis/DataFormats/interface/NTBTagSF.h"
 #include "Pipes.h"
 #include "scalefactors.h"
+#include "reweightfunctions.h"
 #include <cstdlib>
 
 namespace ztop{class NTEvent;}
@@ -112,6 +113,8 @@ public:
 	ztop::scalefactors * getElecEnergySF(){return &elecenergysf_;}
 	ztop::scalefactors * getMuonEnergySF(){return &muonenergysf_;}
 
+	ztop::reweightfunctions * getTopPtReweighter(){return &topptReweighter_;}
+
 	MainAnalyzer & operator= (const MainAnalyzer &);
 
 
@@ -157,7 +160,7 @@ private:
 
 	//for scalefactors provided in THXX format:
 	ztop::scalefactors elecsf_,muonsf_,triggersf_,elecenergysf_,muonenergysf_;
-
+	ztop::reweightfunctions topptReweighter_;
 
 	//for parallel stuff
 

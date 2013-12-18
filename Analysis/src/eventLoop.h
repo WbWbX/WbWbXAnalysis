@@ -417,6 +417,14 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
             b_GenLeptons3->GetEntry(entry);
             if(pGenLeptons3->size()>1){ //gen info there
+
+                ///////////////TOPPT REWEIGHTING////////
+                b_GenTops->GetEntry(entry);
+                if(pGenTops->size()>1) //ttbar sample
+                    puweight *= sqrt(getTopPtReweighter()->getWeight(pGenTops->at(0).pt()) *
+                            getTopPtReweighter()->getWeight(pGenTops->at(1).pt()));
+
+
                 visPS=false;
                 if(testmode_ && entry==0){
                     std::cout << "testmode("<< anaid << "): entered signal genInfo part" << std::endl;
@@ -928,7 +936,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
 
 
-        vector<NTJet*> * selectedjets=&dphiplushardjets;
+        vector<NTJet*> * selectedjets=&hardjets;
 
 
         evt.dphilljjets=&dphilljjets;
@@ -1031,8 +1039,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
         /////////////////////// at least two jets STEP 6 /////////////
         step++;
 
-        if(midphi && dphiplushardjets.size()<2) continue;
-        //if(hardjets.size() < 2) continue;
+        //if(midphi && dphiplushardjets.size()<2) continue;
+        if(selectedjets->size() < 2) continue;
         //if(!midphi && medjets.size()<2) continue;
         //if(ptllj<140) continue;
         /*if(dphillj > 2.65 && dphillj < 3.55){

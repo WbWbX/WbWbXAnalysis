@@ -37,10 +37,13 @@ systs=("nominal"
    #"JES_up"
    #"JES_down"
 
-# "BTAGH_up"
-# "BTAGH_down"
-# "BTAGL_up"
-#"BTAGL_down"
+   #"BTAGH_up"
+   #"BTAGH_down"
+   #"BTAGL_up"
+   #"BTAGL_down"
+
+    "TOPPT_up"
+    "TOPPT_down"
 
    #"TT_MATCH_down"
    #"TT_MATCH_up"
