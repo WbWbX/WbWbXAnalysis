@@ -16,7 +16,7 @@ float reweightfunctions::getWeight(const float& in) const{
         if(syst_ == nominal)
             return TMath::Exp(0.156-0.00137*in);
         if(syst_ == up)
-            return 2*TMath::Exp(0.156-0.00137*in);
+            return 1+(2.*(TMath::Exp(0.156-0.00137*in)-1));
         if(syst_ == down)
             return 1;
     }
