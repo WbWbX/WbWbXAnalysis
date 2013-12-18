@@ -565,84 +565,150 @@ int main(int argc, char* argv[]){
 
         c->Write();
         c->Print(plot+"_topmass_"+fitmodestr+".pdf");
-        c->Clear();
-        c->SetName("chi2point per bin");
-        c->SetTitle("chi2point per bin");
-        c->Divide(vdivs,hdivs);
+
         //draw single chi2points
-        std::vector<ztop::graph> vchi2points;
-        for(size_t i=1;i<ufcont.getBins().size()-1;i++){
-            c->cd(i);
-            c->cd(i)->SetBottomMargin(0.15);
-            c->cd(i)->SetLeftMargin(0.15);
-            ztop::graph * gd=&sysdepperbind.at(i-1);
-            ztop::graph chi2point=gd->getChi2Points(sysdepperbinmc.at(i-1));
-            chi2point.chi2definition=fitmode;
-            //chi2point.setYAxisName("#Delta/#Delta_{err}");
-            vchi2points.push_back(chi2point);
-            TGraphAsymmErrors * chi2pg=chi2point.getTGraph();//toTString(ufcont.getBinCenter(i)));
-            allobjs_p.push_back(chi2pg);
-            chi2pg->Draw("AP");
+        std::vector<std::vector<ztop::graph> > vchi2points;
+        std::vector<TString> sysnames;
+        for(int sys=-2;sys<(int)ufwovar.getSystSize();sys++){
+            c->Clear();
+            vchi2points.push_back(std::vector<ztop::graph>());
+
+            if(sys<-1){
+                c->SetName("chi2point per bin all sys");
+                c->SetTitle("chi2point per bin all sys");
+                sysnames.push_back("all sys");
+            }
+            else if (sys < 0){
+                c->SetName("chi2point per bin nominal");
+                c->SetTitle("chi2point per bin nominal");
+                sysnames.push_back("nominal");
+            }
+            else{
+                c->SetName("chi2point per bin " + ufwovar.getSystErrorName((size_t)sys));
+                c->SetTitle("chi2point per bin "+ ufwovar.getSystErrorName((size_t)sys));
+                sysnames.push_back(ufwovar.getSystErrorName((size_t)sys));
+            }
+            c->Divide(vdivs,hdivs);
+            for(size_t i=1;i<ufcont.getBins().size()-1;i++){
+                c->cd(i);
+                c->cd(i)->SetBottomMargin(0.15);
+                c->cd(i)->SetLeftMargin(0.15);
+                ztop::graph  gd=sysdepperbind.at(i-1);
+                if(sys<-1)
+                    c->cd(i); //do nothing
+                else if(sys<0)
+                    gd=gd.getNominalGraph();
+                else
+                    gd=gd.getSystGraph(sys);
+                ztop::graph chi2point=gd.getChi2Points(sysdepperbinmc.at(i-1));
+
+                chi2point.chi2definition=fitmode;
+                //chi2point.setYAxisName("#Delta/#Delta_{err}");
+                vchi2points.at(sys+2).push_back(chi2point);
+                TGraphAsymmErrors * chi2pg=chi2point.getTGraph();//toTString(ufcont.getBinCenter(i)));
+                allobjs_p.push_back(chi2pg);
+                chi2pg->Draw("AP");
+            }
+            c->Write();
+            c->Print(plot+"_topmass_"+fitmodestr+".pdf");
         }
-        c->Write();
-        c->Print(plot+"_topmass_"+fitmodestr+".pdf");
-        c->Clear();
+
         if(binmax<1)binmax=ufcont.getBins().size()-2;
         if(binmin>binmax)binmin=1;
         ztop::graph fullChi2;
         fullChi2.chi2definition=fitmode;
         float fullchi2minimum=0;
+        std::vector<float> masspoints,errl,errr;
         if(binmin>0 && binmin<ufcont.getBins().size()-1 && binmax>0 && binmax<=ufcont.getBins().size()-2){
-            fullChi2=vchi2points.at(binmin-1);
-            fullChi2.setName(entryforplots);
-            //fullChi2.clear();
-            for(size_t i=binmin+1;i<=binmax;i++){
-                if(i==(size_t)binexclude) continue;
-                fullChi2=fullChi2.addY(vchi2points.at(i-1));
+            for(size_t outi=0;outi<vchi2points.size();outi++){
+                c->Clear();
+
+                fullChi2=vchi2points.at(outi).at(binmin-1);
+                fullChi2.setName(entryforplots);
+                //fullChi2.clear();
+                for(size_t i=binmin+1;i<=binmax;i++){
+                    if(i==(size_t)binexclude) continue;
+                    fullChi2=fullChi2.addY(vchi2points.at(outi).at(i-1));
+                }
+                fullChi2.setYAxisName("#chi^{2}");
+                fullchi2minimum=fullChi2.getYMin();
+                fullChi2.setName("chi2 "+sysnames.at(outi));
+                TGraphAsymmErrors * chi2=fullChi2.getTGraph();
+                allobjs_p.push_back(chi2);
+                c->SetName("chi2 "+sysnames.at(outi) );
+                c->SetTitle("chi2 "+sysnames.at(outi));
+                c->SetBottomMargin(0.15);
+                c->SetLeftMargin(0.15);
+                //gPad->SetLogy();
+                chi2->Draw("AP");
+                // c->Write();
+                // c->Print(plot+"_topmass_"+fitmodestr+".pdf");
+                // chi2->Write();
+
+                c->SetName("chi2 fit "+sysnames.at(outi) );
+                c->SetTitle("chi2 fit "+sysnames.at(outi));
+
+                TF1 *f1 = new TF1("f1","pol4",fullChi2.getXMin(),fullChi2.getXMax());
+                chi2->Fit("f1","VR");
+
+                f1->Draw("same");
+                fullchi2minimum=f1->GetMinimum(fullChi2.getXMin(),fullChi2.getXMax());
+                std::cout << "minimum: " << fullchi2minimum <<std::endl;
+                float plotmin=fullchi2minimum-1;
+
+                float epsilon=(fullChi2.getXMax()-fullChi2.getXMin()/5);
+                float Xminimum=f1->GetX(fullchi2minimum,fullChi2.getXMin(),fullChi2.getXMax());
+                float xpleft=f1->GetX(fullchi2minimum+1,fullChi2.getXMin(),Xminimum);
+                float xpright=f1->GetX(fullchi2minimum+1,Xminimum,fullChi2.getXMax());
+                TLine * xlinel=new TLine(xpleft,plotmin,xpleft,fullchi2minimum+1);
+                TLine * xliner=new TLine(xpright,plotmin,xpright,fullchi2minimum+1);
+                TLine * xlinec=new TLine(Xminimum,plotmin,Xminimum,fullchi2minimum);
+                TLine * yline=new TLine(fullChi2.getXMin(),fullchi2minimum+1,xpleft,fullchi2minimum+1);
+                TLine * yline2=new TLine(fullChi2.getXMin(),fullchi2minimum,Xminimum,fullchi2minimum);
+                yline->Draw("same");
+                yline2->Draw("same");
+                xlinel->Draw("same");
+                xliner->Draw("same");
+                xlinec->Draw("same");
+                std::cout << "most probable top mass for syst " << sysnames.at(outi)  << "  " << Xminimum << std::endl;
+
+
+                masspoints.push_back(Xminimum);
+                errl.push_back(xpleft);
+                errr.push_back(xpright);
+
+
+                c->Print(plot+"_topmass_"+fitmodestr+".pdf");
+                chi2->GetYaxis()->SetRangeUser(plotmin,fullchi2minimum+6);
+                c->Print(plot+"_topmass_"+fitmodestr+".pdf");
+
             }
-            fullChi2.setYAxisName("#chi^{2}");
-            fullchi2minimum=fullChi2.getYMin();
-            c->SetName("chi2");
-            c->SetTitle("chi2");
-            c->SetBottomMargin(0.15);
-            c->SetLeftMargin(0.15);
-            TGraphAsymmErrors * chi2=fullChi2.getTGraph();
-            allobjs_p.push_back(chi2);
-            chi2->Draw("AP");
-            c->Write();
-            c->Print(plot+"_topmass_"+fitmodestr+".pdf");
-            chi2->Write();
-            TF1 *f1 = new TF1("f1","pol4",fullChi2.getXMin(),fullChi2.getXMax());
-            chi2->Fit("f1","VR");
 
-            f1->Draw("same");
-            fullchi2minimum=f1->GetMinimum(fullChi2.getXMin(),fullChi2.getXMax());
-            std::cout << "minimum: " << fullchi2minimum <<std::endl;
-            float plotmin=fullchi2minimum-1;
-
-            float epsilon=(fullChi2.getXMax()-fullChi2.getXMin()/5);
-            float Xminimum=f1->GetX(fullchi2minimum,fullChi2.getXMin(),fullChi2.getXMax());
-            float xpleft=f1->GetX(fullchi2minimum+1,fullChi2.getXMin(),Xminimum);
-            float xpright=f1->GetX(fullchi2minimum+1,Xminimum,fullChi2.getXMax());
-            TLine * xlinel=new TLine(xpleft,plotmin,xpleft,fullchi2minimum+1);
-            TLine * xliner=new TLine(xpright,plotmin,xpright,fullchi2minimum+1);
-            TLine * xlinec=new TLine(Xminimum,plotmin,Xminimum,fullchi2minimum);
-            TLine * yline=new TLine(fullChi2.getXMin(),fullchi2minimum+1,xpleft,fullchi2minimum+1);
-            TLine * yline2=new TLine(fullChi2.getXMin(),fullchi2minimum,Xminimum,fullchi2minimum);
-            yline->Draw("same");
-            yline2->Draw("same");
-            xlinel->Draw("same");
-            xliner->Draw("same");
-            xlinec->Draw("same");
-            std::cout << "most paobable top mass " << Xminimum << std::endl;
-            c->Print(plot+"_topmass_"+fitmodestr+".pdf");
-            chi2->GetYaxis()->SetRangeUser(plotmin,fullchi2minimum+6);
-            c->Print(plot+"_topmass_"+fitmodestr+".pdf)");
-        }
+        }//sysloop
         else{
+
             std::cout << "chosen bins not appropriate " << std::endl;
         }
+        float deltaminus2=0;
+        float deltaplus2=0;
+        float temp=0;
+        std::cout << "Summary" <<std::endl;
+        for(size_t i=0;i<masspoints.size();i++){
+            if(i>0)
+                temp= (masspoints.at(1)-masspoints.at(i));
+            if(temp<0)
+                deltaminus2+=temp*temp;
+            else
+                deltaplus2+=temp*temp;
 
+            std::cout << masspoints.at(i) << "\t" << "+"<<errr.at(i)-masspoints.at(i) <<"-"<<masspoints.at(i)-errl.at(i)<<"\t"<< sysnames.at(i) <<std::endl;
+
+
+        }
+        std::cout << "Full summary: "
+                << masspoints.at(1) << "\t" << "+" << sqrt(deltaplus2) << " -" << sqrt(deltaminus2) << std::endl;
+
+        c->Print(plot+"_topmass_"+fitmodestr+".pdf)");
     }
     //delete c;
     //p.cleanMem();
