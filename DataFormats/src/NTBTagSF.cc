@@ -5,6 +5,18 @@
 
 namespace ztop{
 
+void NTBTagSF::setWorkingPoint(const TString& wpstring){
+    std::cout << "NTBTagSF::setWorkingPoint: " << wpstring << std::endl;
+    if(wpstring=="csvl"){
+        bTagBase::setWorkingPoint(workingPoints::csvl_wp);}
+    else if(wpstring=="csvm"){
+        bTagBase::setWorkingPoint(workingPoints::csvm_wp);}
+    else if(wpstring=="csvt"){
+        bTagBase::setWorkingPoint(workingPoints::csvt_wp);}
+    else{
+        throw std::logic_error(("NTBTagSF::setWorkingPoint: doesn't exist"));
+    }
+}
 
 
 void  NTBTagSF::setSystematic(const TString &sys=""){
@@ -45,9 +57,12 @@ NTBTagSF  NTBTagSF::operator + (NTBTagSF  second){
 
 
 
-
+/**
+ * recreates file!
+ */
 void NTBTagSF::writeToTFile(TString filename, std::string treename){
     AutoLibraryLoader::enable();
+    TH1::AddDirectory(false);
     TFile * f = new TFile(filename,"RECREATE");
     bool madenew=false;
     TTree * t=0;
@@ -81,6 +96,7 @@ void NTBTagSF::writeToTFile(TString filename, std::string treename){
 
 void NTBTagSF::readFromTFile(TString filename, std::string treename){
     AutoLibraryLoader::enable();
+    TH1::AddDirectory(false);
     TFile * f = new TFile(filename);
     TTree * t = (TTree*) f->Get(treename.data());
     NTBTagSF * bt=0;
@@ -102,6 +118,7 @@ void NTBTagSF::readFromTFile(TString filename, std::string treename){
     }
     f->Close();
     delete f;
+
 }
 
 }//namespace
