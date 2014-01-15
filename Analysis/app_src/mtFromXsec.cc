@@ -9,7 +9,7 @@
 
 #include "TtZAnalysis/Tools/interface/containerStackVector.h"
 #include "TtZAnalysis/Tools/interface/fileReader.h"
-#include "TtZAnalysis/Tools/interface/plotter.h"
+//#include "TtZAnalysis/Tools/interface/plotter.h"
 #include "TtZAnalysis/Tools/interface/simpleRatioPlotter.h"
 #include <vector>
 #include "TString.h"
@@ -294,7 +294,7 @@ int main(int argc, char* argv[]){
 
     if(lumi<0)
         lumi=cuf.getLumi();
-    container1D signal=cuf.getGenContainer();
+    container1D signal=cuf.getBinnedGenContainer();
     TString xname=signal.getXAxisName();
     xname.ReplaceAll("_reco","");
 

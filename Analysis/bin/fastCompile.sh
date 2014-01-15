@@ -35,3 +35,5 @@ g++ $ROOTFLAGS -fopenmp -I$CPLUS_INCLUDE_PATH -c -o $infile.o $infile
 g++ -o $infile.exe -fopenmp -Wall $ROOTLIBS -L$CMSLIBS $linklibs $infile.o  
 chmod +x $infile.exe
 ./$infile.exe
+rm -f $infile.exe
+rm -f $infile.o

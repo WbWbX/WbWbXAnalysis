@@ -19,7 +19,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
         ztop::containerStack::debug=false;
         ztop::containerStackVector::debug=false;
     }
-
+    bool userandomtagging=true;
 
     TString inputfilewochannel="config.txt";
     TString inputfile=channel+"_"+energy+"_"+inputfilewochannel;
@@ -36,7 +36,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
 
 
     TString treedir,jecfile,pufile,muonsffile,muonsfhisto,elecsffile,elecsfhisto,trigsffile,elecensffile,muonensffile; //...
-
+    TString btagWP;
 
     if(lumi<0)
         lumi=fr.getValue<double>("Lumi");
@@ -51,20 +51,28 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
     //elecensffile =cmssw_base+fr.getValue<TString>("ElecEnergySFFile");
     //muonensffile =cmssw_base+fr.getValue<TString>("MuonEnergySFFile");
 
+    btagWP=               fr.getValue<TString>("btagWP");
+    TString btagfile=     fr.getValue<TString>("btagFile");
+
+    TString trigsfhisto="scalefactor eta2d with syst";
+
 
     std::cout << "inputfile read" << std::endl;
 
     //hard coded:
 
-    TString trigsfhisto="scalefactor eta2d with syst";
-    TString btagfile="all_btags.root";
-    if(dobtag)
-        btagfile=channel+"_"+energy+"_"+Syst+"_btags.root";
+    system("mkdir -p output");
+    TString outdir="output";
+
+
+    if(dobtag){
+        btagfile=outdir+"/"+ channel+"_"+energy+"_"+Syst+"_btags.root";
+        system(("rm -f "+btagfile).Data());
+    }
+
 
     ///set input files list etc (common)
 
-    system("mkdir -p output");
-    TString outdir="output";
 
     MainAnalyzer ana;
     ana.setMaxChilds(6);
@@ -90,16 +98,19 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
     ana.getMuonEnergySF()->setGlobal(1,0.5,0.5);
 
     ana.getTopPtReweighter()->setFunction(reweightfunctions::toppt);
+    ana.getTopPtReweighter()->setSystematics(reweightfunctions::nominal);
 
     ana.setOutFileAdd(outfileadd);
     ana.setOutDir(outdir);
     ana.getBTagSF()->setMakeEff(dobtag);
     ana.setBTagSFFile(btagfile);
+    ana.getBTagSF()->useRandomTechnique(userandomtagging);
+    ana.getBTagSF()->setWorkingPoint(btagWP);
     ana.getJECUncertainties()->setFile((jecfile).Data());
     ana.getJECUncertainties()->setSystematics("no");
-    if(testmode){
-        //ana.getBTagSF()->setMakeEff(true);
+    if(testmode && dobtag){
         ana.setBTagSFFile(btagfile+"TESTMODE");
+        system(("rm -f "+btagfile+"TESTMODE").Data());
     }
     //add indication for non-correlated syst by adding the energy to syst name!! then the getCrossSections stuff should recognise it
 

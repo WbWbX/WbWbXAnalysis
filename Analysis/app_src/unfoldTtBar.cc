@@ -328,7 +328,7 @@ void unfold(int argc, char* argv[]){
 
 		ztop::container1D checkunfolded=check.getUnfolded();
 		float max=checkunfolded.getYMax(true);
-		ztop::container1D generated=check.getGenContainer();
+		ztop::container1D generated=check.getBinnedGenContainer();
 		generated *= (1/check.getLumi());
 		if(max < generated.getYMax(true)) max=generated.getYMax(true);
 		TH1D * ufgen=checkunfolded.getTH1D("genUF",true,true);

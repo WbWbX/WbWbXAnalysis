@@ -14,6 +14,35 @@
 //[analyse]... or do bg stuff here
 
 //merge btags here
+void mergeBTags(std::vector<TString> names){
+    using namespace ztop;
+    using namespace std;
+    NTBTagSF btags;
+    //check if file exists, if yes, assume btags have been recreated and merge
+
+    if(names.size()>0){
+        std::ifstream OutFileTest((names.at(0)+"_btags.root").Data());
+        if(OutFileTest) { //btags were created
+            cout << "merging btag SF" <<endl;
+
+            for(size_t i=0;i<names.size();i++){
+                TString filename=names.at(i)+"_btags.root";
+                NTBTagSF temp;
+
+                std::ifstream OutFileTest2(filename.Data());
+                if(OutFileTest2){
+                    temp.readFromTFile(filename);
+                    btags=btags+temp;
+                }
+                else{
+                    cout << "btag file " << filename << " not found" << endl;
+                }
+            }
+            btags.writeToTFile("all_btags.root");
+        }
+
+    }
+}
 
 
 TString stripRoot(TString s){
@@ -72,6 +101,17 @@ ztop::container1DStackVector getFromFile(TString name)
 	delete ttemp;
 	delete ftemp;
 	return vtemp;
+}
+
+ztop::container1DStackVector *getFromFileToMem(TString name)
+{
+    TFile * ftemp=new TFile(name+".root","read");
+    TTree * ttemp = (TTree*)ftemp->Get("stored_objects");
+    ztop::container1DStackVector * vtemp=new ztop::container1DStackVector();
+    vtemp->loadFromTree(ttemp,name);
+    delete ttemp;
+    delete ftemp;
+    return vtemp;
 }
 
 int main(int argc, char* argv[]){
@@ -150,6 +190,7 @@ int main(int argc, char* argv[]){
 	cout << endl;
 
 	//get syst
+	/*
 	cout << "loading syst variations... ";
 	for(size_t i=0;i<names.size();i++){
 		if(!names.at(i).Contains("_nominal")){
@@ -159,16 +200,19 @@ int main(int argc, char* argv[]){
 	}
 	cout << endl;
 	///maybe do some BG variations here//add to vsysvecs
-
+*/
 	//fill other syst
 
 	cout << "adding variations to nominal..." <<endl;
 
-	for(size_t i=0;i<vsysvecs.size();i++){
-		TString name=vsysvecs.at(i).getName();
+	for(size_t i=0;i<names.size();i++){
+		TString name=names.at(i);
+		if(name.Contains("_nominal")) continue;
+		containerStackVector * sysvec=getFromFileToMem(name);
 		cout << "adding variation " << name << std::endl;
 		ztop::container1DStackVector  *nominal = & vnominal.at(associateEnergy(name)).at(associateChannel(name));
-		nominal->addMCErrorStackVector(vsysvecs.at(i));
+		nominal->addMCErrorStackVector(*sysvec);
+		delete sysvec;
 	}
 
 	cout << "writing output..." << endl;
@@ -189,33 +233,8 @@ int main(int argc, char* argv[]){
 	}
 
 	/////////part to merge btagSF
+	mergeBTags(names);
 
-
-	NTBTagSF btags;
-	//check if file exists, if yes, assume btags have been recreated and merge
-
-	if(names.size()>0){
-		std::ifstream OutFileTest((names.at(0)+"_btags.root").Data());
-		if(OutFileTest) { //btags were created
-			cout << "merging btag SF" <<endl;
-
-			for(size_t i=0;i<names.size();i++){
-				TString filename=names.at(i)+"_btags.root";
-				NTBTagSF temp;
-
-				std::ifstream OutFileTest2(filename.Data());
-				if(OutFileTest2){
-					temp.readFromTFile(filename);
-					btags=btags+temp;
-				}
-				else{
-					cout << "btag file " << filename << " not found" << endl;
-				}
-			}
-			btags.writeToTFile("all_btags.root");
-		}
-
-	}
 
 	return 0;
 }
