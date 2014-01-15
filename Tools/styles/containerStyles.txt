@@ -1,0 +1,101 @@
+    $comments
+    $$ Format: [containerStyle - <name>]
+    $
+    $  all styles with respect to root styles
+    $
+    $ parameters
+    
+    $ [end containerStyle]
+    
+     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+    
+ [containerStyle - Test]
+    
+    
+    markerSize   = 1
+    markerStyle  = 23
+    markerColor  = 632
+ 
+    lineSize     = 1
+    lineStyle    = 1
+    lineColor    = 1
+
+    fillStyle    = 0
+    fillColor    = 0
+
+    rootDrawOpt  = e1
+    drawStyle    = normal $ can be other options (TBI)
+    
+    
+    
+ [end containerStyle]   
+  
+     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+      
+    
+ [containerStyle - Default]
+    
+    
+    markerSize   = 1
+    markerStyle  = 23
+    markerColor  = 1
+ 
+    lineSize     = 1
+    lineStyle    = 1
+    lineColor    = 1
+
+    fillStyle    = 0
+    fillColor    = 0
+
+    rootDrawOpt  = e1
+    drawStyle    = normal $ can be other options (TBI)
+    
+    
+    
+ [end containerStyle]
+ 
+ 
+     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+    
+ [containerStyle - MCLine]
+    
+    
+    markerSize   = 1
+    markerStyle  = 23
+    markerColor  = 1
+ 
+    lineSize     = 2
+    lineStyle    = 1
+    lineColor    = 1
+
+    fillStyle    = 0
+    fillColor    = 0
+
+    rootDrawOpt  = e1
+    drawStyle    = normal $ can be other options (TBI)
+    
+    
+    
+ [end containerStyle]
+ 
+     
+ [containerStyle - MCStack]
+    
+    
+    markerSize   = 0
+    markerStyle  = 23
+    markerColor  = 1
+ 
+    lineSize     = 1
+    lineStyle    = 1 
+    lineColor    = 1 $ will be changed for each sample
+
+    fillStyle    = 1001
+    fillColor    = 1 $ will be changed for each sample
+
+    rootDrawOpt  = H
+    drawStyle    = normal $ can be other options (TBI)
+    
+    
+    
+ [end containerStyle]
