@@ -48,7 +48,6 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     using namespace std;
     using namespace ztop;
 
-    double btagworkingpoint=0.244;//0.679;//0.244;
 
     //some mode options
     //if(mode_=="xsec"); //standard
@@ -140,6 +139,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     vector<float> ivan_mlbbins=subdivide<float>(ivangen_mlbbins,5);
 
     container1DUnfold unf_mlb8(genmlb_bins,mlb_bins,"m_lb unfold step 8","M_{lb} [GeV]", "N/GeV");
+
+    float mlbcombthresh=165;
+    container1DUnfold unf_mlbcomb8(genmlb_bins,mlb_bins,"m_lb pair comb unfold step 8","M_{lb} [GeV]", "N/GeV");
 
     container1DUnfold unf_ivanmlb8(ivangen_mlbbins,ivan_mlbbins,"m_lb ivansbins unfold step 8","M_{lb} [GeV]", "N/GeV");
     container1DUnfold unf_mlbbbb8(genmlb_bins,mlb_bins,"m_lb unfold BBB step 8","M_{lb} [GeV]", "N/GeV");
@@ -255,7 +257,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     if(getBTagSF()->getSystematic() != bTagBase::nominal)
         btagSysAdd="nominal";
 
-    if(getBTagSF()->setSampleName((channel_+btagSysAdd+toString(inputfile)).Data()) < 0){
+    if(getBTagSF()->setSampleName((channel_+"_"+btagSysAdd+"_"+toString(inputfile)).Data()) < 0){
+        p_askwrite.get(anaid)->pwrite(anaid);
         p_finished.get(anaid)->pwrite(-2);
         return;
     }
@@ -400,7 +403,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
         evt.puweight=&puweight;
 
 
-
+        vector<NTGenParticle*> gentops;
         bool visPS=true;
         ///gen stuff wo cuts!
         if(isMC){
@@ -412,7 +415,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
             if(testmode_ && entry==0)
                 std::cout << "testmode("<< anaid << "): got first MC gen entry" << std::endl;
 
-            double mlbgen=-1;
+            double mlbgen=-1,mlbcomgen=-1;
             NTGenParticle * genlep_plus=0;NTGenParticle *genlep_minus=0;
 
             b_GenLeptons3->GetEntry(entry);
@@ -420,11 +423,13 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
                 ///////////////TOPPT REWEIGHTING////////
                 b_GenTops->GetEntry(entry);
-                if(pGenTops->size()>1) //ttbar sample
+                if(pGenTops->size()>1){ //ttbar sample
                     puweight *= sqrt(getTopPtReweighter()->getWeight(pGenTops->at(0).pt()) *
                             getTopPtReweighter()->getWeight(pGenTops->at(1).pt()));
-
-
+                    gentops.push_back(&pGenTops->at(0));
+                    gentops.push_back(&pGenTops->at(0));
+                    evt.gentops=&gentops;
+                }
                 visPS=false;
                 if(testmode_ && entry==0){
                     std::cout << "testmode("<< anaid << "): entered signal genInfo part" << std::endl;
@@ -510,7 +515,15 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
                 if(visGenLeptons1.size() > 1){ ///
                     PolarLorentzVector p4leadinglep=visGenLeptons1.at(0)->p4();
+                    PolarLorentzVector p4secleadinglep=visGenLeptons1.at(1)->p4();
                     mlbgen=(p4genbjet+p4leadinglep).M();
+                    if(mlbgen>mlbcombthresh){
+                        mlbcomgen=(p4genbjet+p4secleadinglep).M();
+                        if(mlbcomgen>mlbcombthresh)mlbcomgen=mlbgen;
+                    }
+                    else{
+                        mlbcomgen=mlbgen;
+                    }
 
                     //PolarLorentzVector p4dil=pGenLeptons1->at(0).p4() + pGenLeptons1->at(1).p4();
 
@@ -543,6 +556,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
             if(mlbgen>=0){
                 unf_ivanmlb8.fillGen(mlbgen,puweight);
                 unf_mlb8.fillGen(mlbgen,puweight);
+
+                unf_mlbcomb8.fillGen(mlbcomgen,puweight);
+
                 unf_mlbfb8.fillGen(mlbgen,puweight);
                 unf_mlbbbb8.fillGen(mlbgen,puweight);
                 unf_mlb9.fillGen(mlbgen,puweight);
@@ -960,18 +976,10 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
         vector<NTJet*>  selectedbjets;
         evt.selectedbjets=&selectedbjets;
 
-        for(size_t i=0;i<hardjets.size();i++){
-            if(hardjets.at(i)->btag() < btagworkingpoint) continue;
-            hardbjets.push_back(hardjets.at(i));
-        }
-        //MEDBJETS=dphiplushardjets - btagged!!!
-        for(size_t i=0;i<dphiplushardjets.size();i++){
-            if(medjets.at(i)->btag() < btagworkingpoint) continue;
-            medbjets.push_back(dphiplushardjets.at(i));
-        }
 
+        getBTagSF()->changeNTJetTags(selectedjets);
         for(size_t i=0;i<selectedjets->size();i++){
-            if(selectedjets->at(i)->btag() > btagworkingpoint)
+            if(selectedjets->at(i)->btag() < getBTagSF()->getWPDiscrValue())
                 continue;
             selectedbjets.push_back(selectedjets->at(i));
         }
@@ -1015,7 +1023,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
         ///////////////////// at least one jet cut STEP 5 ////////////
         step++;
 
-        if(hardjets.size() < 1) continue;
+        if(selectedjets->size() < 1) continue;
 
 
         //ht+=adjustedmet.met();
@@ -1087,12 +1095,12 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
         //if(leadingjetbtag<0.244) continue; //cut on leading pt jet
 
         double mlb=(leadingptlep->p4()+selectedbjets.at(0)->p4()).M();
+        double mlbcomb=(secleadingptlep->p4()+selectedbjets.at(0)->p4()).M();
+        if(!(mlb>mlbcombthresh && mlbcomb<mlbcombthresh))
+            mlbcomb=mlb;
 
-
-
-        double bsf=1;//getBTagSF()->getSF(hardjets); // returns 1 for data!!!
+        double bsf=1;
         bsf=getBTagSF()->getNTEventWeight(*selectedjets);
-        //  if(bsf < 0.3) cout << bsf << endl;
         puweight*= bsf;
 
 
@@ -1114,6 +1122,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
             unf_ivanmlb8.fillReco(mlb,puweight);
             unf_mlb8.fillReco(mlb,puweight);
+            unf_mlbcomb8.fillReco(mlbcomb,puweight);
             unf_mlbfb8.fillReco(mlb,puweight);
             unf_mlbbbb8.fillReco(mlb,puweight);
 
@@ -1257,32 +1266,16 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
         ///btagsf
         if(btagsf_.makesEff()){
-
-            /*TFile * bsffile;
-			if(!fileExists(outdir_+btagsffile_.Data())) {
-				bsffile=new TFile(outdir_+btagsffile_,"RECREATE");
-			}
-			else{
-				bsffile=new TFile(outdir_+btagsffile_,"READ");
-				if(bsffile->Get("stored_objects")){
-					TTree * btt = (TTree*) bsffile->Get("stored_objects");
-					if(btt->GetBranch("allbTagBase")){
-						btsf.readFromTFile(outdir_+btagsffile_);
-						//ztop::NTBTagSF  btsf2=btagsf_ + btsf;
-						btagsf_ = (btagsf_ + btsf); //combine both if sample already exists, couts warning but doesn't change anything
-					}
-				}
-			}
-			bsffile->Close();
-			delete bsffile;
-			btagsf_.writeToTFile(outdir_+btagsffile_); //recreates the file
-             */
-            if(fileExists(outdir_+btagsffile_.Data())){
+            if(fileExists(btagsffile_.Data())){
+                if(testmode_ )
+                    std::cout << "testmode("<< anaid << "): reading btag file"<< std::endl;
                 ztop::NTBTagSF  btsf;
-                btsf.readFromTFile(outdir_+btagsffile_);
+                btsf.readFromTFile(btagsffile_);
                 btagsf_ = (btagsf_ + btsf);
             }
-            btagsf_.writeToTFile(outdir_+btagsffile_); //recreates the file
+            if(testmode_ )
+                std::cout << "testmode("<< anaid << "): writing btag file"<< std::endl;
+            btagsf_.writeToTFile(btagsffile_); //recreates the file
         }///makes eff
 
         std::cout << inputfile << ": " << std::endl;

@@ -61,4 +61,7 @@ TriggerSFFile  = /src/TopAnalysis/Configuration/analysis/diLeptonic/data/trigger
 PUFile         = /src/TtZAnalysis/Data/ReRecoJan13.json.txt_PU $without .root
 
 
+btagWP         = csvl
+btagFile       = all_btags.root
+
 [parameters-end]

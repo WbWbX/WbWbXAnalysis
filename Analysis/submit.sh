@@ -17,25 +17,25 @@ channels=( "ee"
 );
 systs=("nominal"
 
-    #"TRIGGER_up"
-    #"TRIGGER_down"
-    #"ELECSF_up"
-    #"ELECSF_down"
-    #"MUONSF_up"
-    #"MUONSF_down"
+    "TRIGGER_up"
+    "TRIGGER_down"
+    "ELECSF_up"
+    "ELECSF_down"
+   "MUONSF_up"
+   "MUONSF_down"
 
-    #"ELECES_up"
-    #"ELECES_down"
-    #"MUONES_up"
-    #"MUONES_down"
+    "ELECES_up"
+    "ELECES_down"
+    "MUONES_up"
+    "MUONES_down"
 
-    #"PU_up"
-    #"PU_down"
+    "PU_up"
+    "PU_down"
 
-   #"JER_up"
-   #"JER_down"
-   #"JES_up"
-   #"JES_down"
+   "JER_up"
+   "JER_down"
+   "JES_up"
+   "JES_down"
 
    #"BTAGH_up"
    #"BTAGH_down"
@@ -45,35 +45,35 @@ systs=("nominal"
     "TOPPT_up"
     "TOPPT_down"
 
-   #"TT_MATCH_down"
-   #"TT_MATCH_up"
-   #"TT_SCALE_down"
-   #"TT_SCALE_up"
+   "TT_MATCH_down"
+   "TT_MATCH_up"
+   "TT_SCALE_down"
+   "TT_SCALE_up"
 
-   #"MT_3_down"
-   #"MT_3_up"
-   #"MT_6_down"
-   #"MT_6_up"
+   "MT_3_down"
+   "MT_3_up"
+   "MT_6_down"
+   "MT_6_up"
 
 
-#"Z_MATCH_down"
-#"Z_MATCH_up"
-#"Z_SCALE_down"
-#"Z_SCALE_up"
+   #"Z_MATCH_down"
+   #"Z_MATCH_up"
+   #"Z_SCALE_down"
+   #"Z_SCALE_up"
 );
 energies=("8TeV"
 #"7TeV"
 );
 
 
-#create new subdir (analysis_timestamp) , copy source there and make dir inside (output).
-# add script there to get plots, merge etc as independent as possible from rest (will need container classes at least)
+#creates new subdir (analysis_timestamp) , copy source there and make dir inside (output).
+# adds script there to get plots, merge etc as independent as possible from rest (will need container classes at least)
 
 
-# define all syst here in an array
+# defined all syst here in an array
 # qsub stuff
-# check in background whether files are done (sleep 30)
-# if all done go to dir (if not yet there) analysis_timestamp and merge stuff to have all syst there
+# check in background whether files are done (sleep 30) --> not impl
+# if all done go to dir (if not yet there) analysis_timestamp and merge stuff to have all syst there -> not impl
 
 # may want to have an additional script for pdf variations (to get all of them) needs level of communication between tree and this script...? how many variations..? or just do 40 and skip non existing, mark file in output and ignore in the following
 

@@ -63,12 +63,12 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
   else if(mode_==0){ //emu
     if(selectedElecs_.size() < 1 || selectedMuons_.size() <1) return 0;
     mass=(selectedElecs_.at(0)->p4() + selectedMuons_.at(0)->p4()).M();
-    if(fabs(selectedMuons_.at(0)->eta()) > 2.1) return 0;
+   // if(fabs(selectedMuons_.at(0)->eta()) > 2.1) return 0;
   }
   else{ //mumu
     if(selectedMuons_.size() <2) return 0;
     mass=(selectedMuons_.at(0)->p4() + selectedMuons_.at(1)->p4()).M();
-    if(fabs(selectedMuons_.at(0)->eta()) > 2.1 && fabs(selectedMuons_.at(1)->eta()) > 2.1) return 0;
+   // if(fabs(selectedMuons_.at(0)->eta()) > 2.1 && fabs(selectedMuons_.at(1)->eta()) > 2.1) return 0;
   }
 
   

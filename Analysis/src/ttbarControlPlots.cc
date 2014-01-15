@@ -33,6 +33,11 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
         middphiInfo=true;
         middphi=*(event()->midphi);
     }
+    ///GEN
+    SETBINSRANGE(50,0,500);
+    addPlot("top pt", "p_{T}^{t}[GeV]","N_{t}/GeV");
+    FILLFOREACH(gentops,pt());
+
 
     ///LEPTONS
 
@@ -85,9 +90,19 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
         FILL(allleptons->at(1),pt());
 
     SETBINSRANGE(30,0,0.01);
-    addPlot("lept d0V", "d0V [cm]", "N_{l}");
+    addPlot("lept d0V", "d0V [cm]", "N_{l}[1/cm]");
     FILLFOREACH(allleptons,d0V());
 
+    SETBINSRANGE(150,-1,1);
+    addPlot("lep-lep dZ", "dZ [cm]", "N_{l}[1/cm]");
+    if(event()->leadinglep && event()->secleadinglep){
+        last()->fill(event()->leadinglep->dzV()-event()->secleadinglep->dzV(),*(event()->puweight));
+    }
+
+
+    SETBINSRANGE(100,-1,1);
+    addPlot("lept dZV", "dZV [cm]", "N_{l}[1/cm]");
+    FILLFOREACH(allleptons,dzV());
 
     ////JETS & MET
 
@@ -98,6 +113,8 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
     addPlot("secleading id jet pt","p_{T} [GeV]", "N_{j}/GeV");
     if(event()->idjets && event()->idjets->size()>1)
         FILL(idjets->at(1),pt());
+    addPlot("idjets pt","p_{T} [GeV]", "N_{j}/GeV");
+    FILLFOREACH(idjets,pt());
 
     SETBINSRANGE(10,-0.5,9.5);
     addPlot("hard jet multi", "N_{jet}","N_{evt}");
@@ -110,24 +127,20 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
     FILL(dphiplushardjets,size());
 
 
-    SETBINSRANGE(5,-0.5,4.5);
-    addPlot("hard b jet multi", "N_{bjet}","N_{evt}",true);
-    FILL(hardbjets,size());
-    addPlot("med b jet multi","N{bjet}","N_{evt}",true);
-    FILL(medbjets,size());
+
     addPlot("selected b jet multi","N{bjet}","N_{evt}",true);
     FILL(selectedbjets,size());
 
 
-    SETBINSRANGE(20,0,1);
+    SETBINSRANGE(40,-1.2,1.2);
     addPlot("leading jet btag","D_{1^{st}jet}","evt/bw");
-    if(event()->hardjets && event()->hardjets->size()>0)
-        FILL(hardjets->at(0),btag()) ;
+    if(event()->selectedjets && event()->selectedjets->size()>0)
+        FILL(selectedjets->at(0),btag()) ;
 
-    SETBINSRANGE(20,0,1);
+    SETBINSRANGE(40,-1.2,1.2);
     addPlot("secleading jet btag","D_{1^{st}jet}","evt/bw");
-    if(event()->hardjets && event()->hardjets->size()>1)
-        FILL(hardjets->at(1),btag()) ;
+    if(event()->selectedjets && event()->selectedjets->size()>1)
+        FILL(selectedjets->at(1),btag()) ;
 
 
     SETBINSRANGE(80,0,400);

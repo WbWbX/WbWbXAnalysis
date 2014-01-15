@@ -16,10 +16,12 @@ class NTMuon;
 class NTElectron;
 class NTLepton;
 class NTMet;
+class NTGenParticle;
 
 class NTFullEvent{
 public:
 	NTFullEvent(): event(0),
+	gentops(0),
 	idjets(0),medjets(0),hardjets(0),medbjets(0),hardbjets(0),dphilljjets(0),dphiplushardjets(0),
 	selectedjets(0),selectedbjets(0),
 	allmuons(0),kinmuons(0),idmuons(0),isomuons(0),
@@ -36,6 +38,8 @@ public:
 	~NTFullEvent(){}
 
 	void reset(){
+	    event=0;
+	    gentops=0;
 		idjets=0;medjets=0;hardjets=0;medbjets=0;hardbjets=0;dphilljjets=0;dphiplushardjets=0;
 		selectedjets=0;selectedbjets=0;
 		allmuons=0;kinmuons=0;idmuons=0;isomuons=0;
@@ -52,6 +56,8 @@ public:
 	}
 
 	ztop::NTEvent * event;
+
+	std::vector<ztop::NTGenParticle *> * gentops;
 
 	std::vector<ztop::NTJet*> * idjets;
 	std::vector<ztop::NTJet*> * medjets;

@@ -76,6 +76,7 @@ namespace
     std::vector<ztop::NTBTagSF> kedV;
     std::vector<ztop::NTJECUncertainties> kkssV;
     std::vector<ztop::NTJERAdjuster> ksdskV;
+    std::vector<TObject*> kjnfjkefrerfe;
     
 
   };
