@@ -16,9 +16,16 @@ class TCanvas;
 
 namespace ztop{
 
-class parameterExtractor : public tObjectList{
+/**
+ * NO PLOTTING!!!
+ */
+
+class parameterExtractor {
 public:
-    parameterExtractor(): paraname_(""),aname_(""),bname_(""),acolor_(0),bcolor_(632){}
+
+    enum likelihoodModes{lh_chi2,lh_chi2Swapped};
+
+    parameterExtractor(): LHMode_(lh_chi2){}
     ~parameterExtractor(){}
 
     // defaults should suffice
@@ -26,19 +33,13 @@ public:
     // parameterExtractor(const parameterExtractor&);
     // parameterExtractor & operator = (const parameterExtractor&);
 
-    void setParaName(const TString&);
 
-    void setInputA(const std::vector<graph>&); //graphs already come with para information; graph per bin
-    void setInputB(const std::vector<graph>&);
+    void setInputA(const std::vector<graph>& vg){agraphs_=vg;} //graphs already come with para information; graph per bin
+    void setInputB(const std::vector<graph>& vg){bgraphs_=vg;}
 
-    void setInputA(const graph &); //for one bin (just internally clears and pushes back)
-    void setInputB(const graph &);
+    void setInputA(const graph &g){agraphs_.clear();agraphs_.push_back(g);} //for one bin (just internally clears and pushes back)
+    void setInputB(const graph &g){bgraphs_.clear();bgraphs_.push_back(g);}
 
-    void setNameA(const TString&);
-    void setNameB(const TString&);
-
-    void setColorA(int);
-    void setColorB(int);
 
     bool checkSizes();
 
@@ -46,23 +47,36 @@ public:
 
     size_t getSize();
 
-    void plotAllInput(TCanvas * ); //plots in canvas with legend etc, keeps track of created graphs
 
 
     ////
 
+    void setLikelihoodMode(likelihoodModes lhm){LHMode_=lhm;}
+
+    std::vector<graph> createLikelihoods();
 
 
 protected:
     /* */
+    graph createLikelihood(size_t ); //for one graph, not directly size protected
 
 
 private:
-    TString paraname_;
     std::vector<graph> agraphs_,bgraphs_;
-    std::vector<float> avals_,bvals_;
-    TString aname_,bname_;
-    int acolor_,bcolor_;
+    likelihoodModes LHMode_;
+
+
+    ///helper functions, throw except if something wrong
+    void checkChi2Conditions(const graph&,const graph&);
+
+    ////implementation of likelihoods for one graph
+    graph createChi2Likelihood(const graph&,const graph&);
+    graph createChi2SwappedLikelihood(const graph&,const graph&);
+
+    /* ..... */
+
+
+
 };
 }//ns
 
