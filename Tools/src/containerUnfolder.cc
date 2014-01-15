@@ -67,7 +67,7 @@ container1D containerUnfolder::binbybinunfold(container1DUnfold & cuf){
 		std::cout << "containerUnfolder::binbybinunfold "<< cuf.getName() << std::endl;
 	//get full gen&reco
 	container1D genreco=cuf.projectToY(false);
-	container1D gen=cuf.getGenContainer();
+	container1D gen=cuf.getBinnedGenContainer();
 	genreco=genreco.rebinToBinning(gen); //make same bins
 
 	//operations

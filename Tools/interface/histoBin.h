@@ -32,6 +32,8 @@ public:
 	void setStat(const float &);
 	void setStat2(const float &);
 
+	void clear();
+
 	void addToContent(const float &);
 	void addToStat(const float &);
 	void addEntry();
@@ -117,6 +119,7 @@ public:
 	int multiply(const histoBins&,bool statCorr);
 
 	void multiply(const float& );
+	void removeStat();
 
 	bool operator == (const histoBins&) const;
 	bool operator != (const histoBins&) const;

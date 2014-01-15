@@ -15,11 +15,14 @@ void container2DTest(){
 	using namespace std;
 	using namespace ztop;
 
-	vector<float> binsx,binsy;
+	vector<float> binsx,binsy, otherbins;
 	for(float i=-8;i<12;i+=2){
 		binsx << i;
 		binsy << i;
 	}
+
+	otherbins << -8 << -4 << 0 << 4 << 8 << 12;
+
 	//binsx << 4<< 6<< 7<<8;
 	container2D c1(binsx,binsy,"testcont","xaxis","yaxis");
 	container2D c2(binsx,binsy,"testcont2","xaxis","yaxis");

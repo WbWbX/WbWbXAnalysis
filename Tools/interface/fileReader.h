@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include "TString.h"
 
 namespace ztop{
 
@@ -78,8 +79,22 @@ inline bool fileReader::getValue<bool>(const std::string & str, bool checkdouble
 	ss >> std::boolalpha >> out;
 	return out;
 }
-
-
+template<>
+inline std::string fileReader::getData<std::string>(const size_t &line,const size_t &entry) const{
+    return (getData(line).at(entry));
+}
+template<>
+inline std::string fileReader::getValue<std::string>(const std::string & str, bool checkdoubles){
+    return getValueString(str,checkdoubles);
+}
+template<>
+inline TString fileReader::getData<TString>(const size_t &line,const size_t &entry) const{
+    return (TString)(getData(line).at(entry));
+}
+template<>
+inline TString fileReader::getValue<TString>(const std::string & str, bool checkdoubles){
+    return (TString)getValueString(str,checkdoubles);
+}
 }
 
 

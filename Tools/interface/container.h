@@ -20,6 +20,7 @@
 
 namespace ztop{
 class container2D;
+class containerStyle;
 
 class container1D{
 	friend class container2D;
@@ -34,7 +35,7 @@ public:
 	container1D(const container1D&);
 	container1D& operator=(const container1D&);
 
-	bool isDummy(){return bins_.size()<2;}
+	bool isDummy()const{return bins_.size()<2;}
 
 	const TString & getName()const{return name_;}
 	void setName(TString Name){name_=Name;}
@@ -133,6 +134,8 @@ public:
 	//operator TGraphAsymmErrors() const {return *getTGraph();}
 	//operator TGraphAsymmErrors*() const {return getTGraph();}
 	void writeTGraph(TString name="",bool dividebybinwidth=true,bool onlystat=false, bool noXErrors=false, bool nostat=false) const; //! writes TGraph to TFile (must be opened)
+
+	graph convertToGraph(bool dividebybinwidth=true)const;
 
 	void drawFullPlot(TString name="", bool dividebybinwidth=true,const TString &extraoptions="");
 

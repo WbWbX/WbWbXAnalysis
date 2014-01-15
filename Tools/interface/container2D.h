@@ -18,8 +18,10 @@
      */
 
 namespace ztop{
+class container1DUnfold;
 
 class container2D {
+    friend class container1DUnfold;
 public:
 
 
@@ -55,6 +57,9 @@ public:
 
     const histoBin & getBin(const size_t &,const size_t&,const int &layer=-1) const;
     histoBin & getBin(const size_t&,const size_t&,const int& layer=-1);
+
+    container2D rebinXToBinning(const std::vector<float>& )const;
+    container2D rebinYToBinning(const std::vector<float>& )const;
 
     void fill(const float & xval, const float & yval, const float & weight=1);    //! fills with weight
 

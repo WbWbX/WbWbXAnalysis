@@ -148,8 +148,11 @@ void fileReader::readFile(const std::string &filename){
 					ended=true;
 					break;
 				}
-
+				if(debug)
+				    std::cout << "read \"" << s2 << "\""<<std::endl;
 				trim(s2);
+                if(debug)
+                    std::cout << "trimmed to \"" << s2 << "\"" << std::endl;
 				if(s2.size()<1)
 					continue;
 				noentry=false;
@@ -190,7 +193,7 @@ std::string fileReader::getValueString(const std::string & val, bool checkdouble
 	for(size_t line=0;line<nLines();line++){
 		for(size_t entr=0;entr<nEntries(line);entr++){
 			std::string & s=lines_.at(line).at(entr);
-			std::size_t pos=s.find(val);
+			size_t pos=s.find(val);
 			if(pos != std::string::npos){ //found
 				if(checkdoubles && count > 0){//except
 					throw std::logic_error("fileReader::getValue: value defined twice! Source of errors!");

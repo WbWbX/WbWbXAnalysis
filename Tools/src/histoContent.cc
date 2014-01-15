@@ -44,6 +44,14 @@ void histoContent::clear(){
 	layermap_.clear();
 	additionalbins_.clear();
 }
+/**
+ * sets all entries,content,stat in each bin for all layers to zero. Does not remove layers, not change bin names
+ */
+void histoContent::setAllZero(){
+    nominal_.multiply(0);
+    for(size_t i=0;i<additionalbins_.size();i++)
+        additionalbins_.at(i).multiply(0);
+}
 
 histoContent::histoContent(size_t nbins){
 	nominal_=histoBins(nbins);
@@ -74,6 +82,7 @@ std::map<size_t,size_t> histoContent::mergeLayers(const histoContent & rhs){
 
 /**
  * returns true if bins were added, returns false if bins were removed
+ * keeps all layers and layer mapping
  */
 bool histoContent::resizeBins(const size_t & newsize){
 	bool added=nominal_.resize(newsize);

@@ -81,6 +81,66 @@ const size_t &container2D::getBinEntries(const size_t & xbin, const size_t & ybi
     }
     return conts_.at(ybin).getBinEntries(xbin);
 }
+
+container2D container2D::rebinXToBinning(const std::vector<float> & newbins)const{
+    size_t maxbinssize=xbins_.size();
+    if(newbins.size()>maxbinssize) maxbinssize=newbins.size();
+    std::vector<float> sames(maxbinssize);
+    std::vector<float>::iterator it=std::set_intersection(++xbins_.begin(),xbins_.end(),newbins.begin(),newbins.end(),sames.begin());//ignore UF
+    sames.resize(it-sames.begin());
+    //check if possible at all:
+    if(sames.size()!=newbins.size()){
+        std::cout << "container2D::rebinXToBinning: binning not compatible" <<std::endl;
+        return *this;
+    }
+    container2D out=*this;
+
+
+    for(size_t i=0;i<conts_.size();i++)
+        out.conts_.at(i)=out.conts_.at(i).rebinToBinning(newbins);
+
+    out.xbins_=out.conts_.at(0).getBins();
+    return out;
+
+}
+
+container2D container2D::rebinYToBinning(const std::vector<float> & newbins) const{
+    size_t maxbinssize=ybins_.size();
+    if(newbins.size()>maxbinssize) maxbinssize=newbins.size();
+    std::vector<float> sames(maxbinssize);
+    std::vector<float>::iterator it=std::set_intersection(++ybins_.begin(),ybins_.end(),newbins.begin(),newbins.end(),sames.begin());//ignore UF
+    sames.resize(it-sames.begin());
+    //check if possible at all:
+    if(sames.size()!=newbins.size()){
+        std::cout << "container2D::rebinYToBinning: binning not compatible" <<std::endl;
+        return *this;
+    }
+    container2D out=*this;
+    out.ybins_.clear();
+    out.ybins_.push_back(0); //UF
+    out.ybins_.insert(out.ybins_.end(),newbins.begin(),newbins.end());
+    out.conts_.clear();
+
+
+    for(size_t i=0;i<out.ybins_.size();i++){
+        out.conts_.push_back(conts_.at(0));
+        if(i>0) //UF remains the same
+            out.conts_.at(i).contents_.setAllZero();
+    }
+
+
+    bool tempaddStatCorrelated=histoContent::addStatCorrelated;
+   histoContent::addStatCorrelated=false;
+    for(size_t i=1;i<ybins_.size();i++){
+        size_t outbin=out.getBinNoY(ybins_.at(i));
+        out.conts_.at(outbin)+=conts_.at(i);
+    }
+    histoContent::addStatCorrelated=tempaddStatCorrelated;
+
+    return out;
+
+}
+
 float container2D::getBinErrorUp(const size_t & xbin, const size_t & ybin, bool onlystat,TString limittosys) const{
     if(ybin>=ybins_.size()){
         std::cout << "container2D::getBinErrorUp: ybin out of range! return -1" << std::endl;

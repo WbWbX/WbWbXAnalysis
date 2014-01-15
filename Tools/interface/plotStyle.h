@@ -9,44 +9,45 @@
 #define ZTOPPLOTSTYLE_H_
 #include "containerStyle.h"
 #include <vector>
+class TH1;
+class TVirtualPad;
 /**
  * containerStyle -> plotStyle -> canvasStyle
  */
 namespace ztop{
 
 /**
- * can handle overlaying containerStyles
+ * handles axis and axis labels etc
+ * can create TH1F to
  */
 class plotStyle{
 public:
-	enum templates{singlePlot,stackPlot,ratioPlot,crosssectionsGenPlot,systematicsBreakdownPlot};
 
 	plotStyle();
-	plotStyle(templates temp);
+	plotStyle( axisStyle xaxis, axisStyle yaxis,
+	        float bottommargin,float topmargin,float leftmargin,float rightmargin,bool dividebybinwidth,bool horizontalplot=false):
+	           bottomMargin(bottommargin),topMargin(topmargin),leftMargin(leftmargin),rightMargin(rightmargin),
+	           divideByBinWidth(dividebybinwidth),horizontal(horizontalplot),
+	           xaxis_(xaxis),yaxis_(yaxis)  {}
+
 	~plotStyle();
 
-	size_t size() const{return cstyles_.size();}
 
-	size_t addStyle(const containerStyle & cstyle){cstyles_.push_back(cstyle);return cstyles_.size()-1;}
-	containerStyle * getStyle(size_t idx=0);
-	const containerStyle * getStyle(size_t idx=0) const;
-
-	void clear(){cstyles_.clear();}
-
-
-	void useTemplate(templates temp);
-
-
-	void multiplySymbols(float val);
+	void absorbYScaling(float val);
+    void absorbXScaling(float val);
 
 	void setAxisDefaults();
-	containerAxisStyle * xAxisStyle(){return &xaxis_;}
-	containerAxisStyle * yAxisStyle(){return &yaxis_;}
-	const containerAxisStyle * xAxisStyle()const{return &xaxis_;}
-	const containerAxisStyle * yAxisStyle()const{return &yaxis_;}
+	axisStyle * xAxisStyle(){return &xaxis_;}
+	axisStyle * yAxisStyle(){return &yaxis_;}
+	const axisStyle * xAxisStyle()const{return &xaxis_;}
+	const axisStyle * yAxisStyle()const{return &yaxis_;}
 
-	void setLegXRange(float xlow,float xhigh);
-	void setLegYRange(float ylow,float yhigh);
+	void readFromFile(const std::string &,const std::string  stylename);
+
+
+	void applyAxisStyle(TH1*)const;
+    void applyPadStyle(TVirtualPad*)const;
+
 
 	float bottomMargin;
 	float topMargin;
@@ -56,12 +57,12 @@ public:
 	bool divideByBinWidth;
 	bool horizontal;
 
-	float legxlow,legxhigh,legylow,legyhigh;
-private:
-	std::vector<containerStyle> cstyles_;
 
-	containerAxisStyle xaxis_;
-	containerAxisStyle yaxis_;
+
+private:
+
+	axisStyle xaxis_;
+	axisStyle yaxis_;
 
 
 

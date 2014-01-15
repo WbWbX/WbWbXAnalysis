@@ -24,7 +24,6 @@
 
 
 
-#define TEMPGENDEFAULT -99999
 
 namespace ztop{
 class container1DUnfold: public container2D {
@@ -39,6 +38,8 @@ public:
 
     void setBinning(const std::vector<float> & genbins,const std::vector<float> &recobins);
     //void subdivideRecoBins(int div);
+
+    container1DUnfold rebinToBinning(const std::vector<float> &)const;
 
     void clear(){container2D::clear(); gencont_.clear(); recocont_.clear();}
     void reset(){container2D::reset(); gencont_.reset();recocont_.reset();}
@@ -60,6 +61,10 @@ public:
 
     const container1D & getGenContainer() const {return gencont_;}
     const container1D & getRecoContainer() const {return recocont_;}
+
+    container1D  getBinnedGenContainer() const{return gencont_.rebinToBinning(genbins_);}
+
+    const std::vector<float> & getGenBins()const{return genbins_;}
 
 
     void setRecoContainer(const container1D &cont);
@@ -106,7 +111,9 @@ public:
     container1D getStability(bool includeeff=true) const;
     bool checkCongruentBinBoundariesXY() const;
     histoBin getDiagonalBin(const size_t & xbin, int layer=-1) const;
+    container1D getDiagonal()const;
 
+    container2D getResponseMatrix()const;
     TH2D * prepareRespMatrix(bool nominal=true,unsigned int systNumber=0) const;
 
     // someformat getCovarianceMatrix(size_t syst) { // M_ij = d_i * d_j, d_i= nominal_i-sys_i, i=bin}
@@ -125,7 +132,8 @@ private:
     void fill(const float & xval, const float & yval, const float & weight=1){
         container2D::fill(xval,yval,weight);
     }
-
+    container2D rebinXToBinning(const std::vector<float>& vec)const{return container2D::rebinXToBinning(vec);}
+    container2D rebinYToBinning(const std::vector<float>& vec)const{return container2D::rebinYToBinning(vec);}
 
 
     TString xaxis1Dname_,yaxis1Dname_;
@@ -138,6 +146,7 @@ private:
     bool binbybin_;
 
     container1D gencont_,recocont_,unfolded_,refolded_;
+    std::vector<float> genbins_;
 
     float lumi_;
 
@@ -154,6 +163,8 @@ private:
     void getRelSystematicsFrom(const container2D &){}
 
     std::vector<float> subdivide(const std::vector<float> & bins, size_t div);
+
+    bool checkCongruence(const std::vector<float>&, const std::vector<float>&)const;
 };
 inline void container1DUnfold::flush(){ //only for MC
     if(flushed_)

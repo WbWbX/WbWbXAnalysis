@@ -14,6 +14,7 @@
 #include <vector>
 
 class TGraphAsymmErrors;
+class TH1;
 
 namespace ztop{
 class container1D;
@@ -29,6 +30,8 @@ public:
 	graph(const TString &name="");
 	graph(const size_t & npoints,const TString &name="");
 	~graph();
+
+	bool isEmpty()const{return getNPoints()<1;}
 
 	void setName(const TString& name){name_=name;}
 	const TString& getName()const {return name_;}
@@ -68,22 +71,27 @@ public:
 	float getPointYError(const size_t & point, bool onlystat,const TString &limittosys="")const;
 
 
-	 float  getXMax() const;
-	 float  getXMin() const;
-	 float  getYMax() const;
-	 float  getYMin() const;
+	 float  getXMax(size_t & point) const;
+	 float  getXMin(size_t & point) const;
+	 float  getYMax(size_t & point) const;
+	 float  getYMin(size_t & point) const;
+     float  getXMax() const;
+     float  getXMin() const;
+     float  getYMax() const;
+     float  getYMin() const;
 
 
 	size_t addErrorGraph(const TString &name,const graph &); //needs to have same point indices... if not check by closest point?
 	graph getSystGraph(const size_t sysidx)const;
 	graph getNominalGraph()const;
-
+	graph getRelYErrorsGraph()const;
 
 	const TString & getSystErrorName(const size_t & number) const;
 	const size_t & getSystErrorIndex(const TString & ) const;
 	size_t getSystSize() const{return ycoords_.layerSize();}
 
 	void removeYErrors(); //comes handy
+    void removeXErrors(); //comes handy
 
 	void sortPointsByX();
 
@@ -94,6 +102,9 @@ public:
 	graph addY(const graph &) const;//if any x errors differ, let it fail
 	void clear();
 
+	void normalizeToGraph(const graph &);
+
+
 	/*
 	 * import/export + root interface
 	 */
@@ -102,6 +113,7 @@ public:
 
 	TGraphAsymmErrors * getTGraph(TString name="",bool onlystat=false) const;
 
+	TH1 * getAxisTH1(bool tighty=false,bool tightx=true)const;
 
 	/*
 	 *
@@ -120,9 +132,7 @@ public:
 private:
 
 	TString name_;
-	/**
-	 * a bit weird.. but X points/coordinates have a y error and y points have an x error (due to reusing of histocontent)
-	 */
+
 	histoContent xcoords_,ycoords_;
 	float labelmultiplier_;
 	TString yname_,xname_;

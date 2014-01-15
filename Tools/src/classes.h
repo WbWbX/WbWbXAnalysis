@@ -9,8 +9,8 @@
 #include "../interface/containerStackVector.h"
 #include "../interface/containerStyle.h"
 #include "../interface/plotStyle.h"
-#include "../interface/canvasStyle.h"
-#include "../interface/plotter.h"
+//#include "../interface/canvasStyle.h"
+//#include "../interface/plotter.h"
 
 
 #include "../TUnfold/TUnfold.h"
@@ -21,6 +21,8 @@
 
 #include "../interface/containerUnfolder.h"
 #include "../interface/graph.h"
+#include "../interface/plot.h"
+#include "../interface/tObjectList.h"
 
 namespace
 {
@@ -75,8 +77,8 @@ struct dictionary {
 	ztop::textBox dsfsd;
 	ztop::containerStyle sdfewfij;
 	ztop::plotStyle dsfdsfl;
-	ztop::canvasStyle dsfdf;
-	ztop::plotter ijdfsij;
+	//ztop::canvasStyle dsfdf;
+//	ztop::plotter ijdfsij;
 
 	std::vector<ztop::textBox> vdsfsd;
 	std::vector<ztop::containerStyle> vsdfewfij;
@@ -86,7 +88,10 @@ struct dictionary {
 	ztop::graph weewrefd;
 	std::vector<ztop::graph> vweewrefd;
 
+	ztop::tObjectList jhwefiuhwefjn;
+	std::vector<ztop::tObjectList> sdwefwerewfds;
 
+	ztop::plot pltggg;
 };
 }
 

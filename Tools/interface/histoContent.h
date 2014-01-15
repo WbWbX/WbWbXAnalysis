@@ -73,6 +73,7 @@ public:
 	const size_t & getBinEntries(const size_t & binno,const int &layer=-1) const;
 
 	void clear();
+	void setAllZero();
 
 	static void setOperatorDefaults();
 

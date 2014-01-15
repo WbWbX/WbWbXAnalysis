@@ -40,14 +40,19 @@
 	<class name="ztop::textBox"/>
 	<class name="ztop::containerStyle"/> 
 	<class name="ztop::plotStyle"/>
-	<class name="ztop::canvasStyle"/> 
-	<class name="ztop::plotter"/> 
+	
+	
 
 	<class name="std::vector<ztop::textBox>"/> 
 	<class name="std::vector<ztop::containerStyle>"/> 
 	<class name="std::vector<ztop::plotStyle>"/>
 		<class name="ztop::graph"/>
 		<class name="std::vector<ztop::graph>"/>
+        <class name="ztop::plot"/>
+        <class name="ztop::tObjectList"/>
+        <class name="std::vector<ztop::tObjectList>"/>
+        <class name="std::vector<TObject*>"/>
+        
 	
 </lcgdict>
  
