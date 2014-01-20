@@ -265,20 +265,28 @@ void unfold(int argc, char* argv[]){
 		if(moreoutput)
 			std::cout << "making stab/pur plot" << std::endl;
 		c=new TCanvas();
+		c->cd(1)->SetBottomMargin(0.15);
+		c->cd(1)->SetLeftMargin(0.15);
 		setNameAndTitle(c,name+"_pur_stab");
 		ztop::container1DUnfold cuf=stack->getSignalContainer();
 		cuf.checkCongruentBinBoundariesXY();
 		TH1D * pur=cuf.getPurity().getTH1D("purity",false,false,false);
 		TH1D * stab=cuf.getStability().getTH1D("stability",false,false,false);
+		TLegend * leg=0;
 		if(pur){
 			stab->SetLineColor(kRed);
 			stab->SetMarkerColor(kRed);
 			pur->GetYaxis()->SetRangeUser(0,1);
 			pur->Draw();
 			stab->Draw("same");
+			 leg=new TLegend((Double_t)0.65,(Double_t)0.50,(Double_t)0.95,(Double_t)0.90);
+			leg->AddEntry(pur,"purity","ep");
+            leg->AddEntry(stab,"stability","ep");
+            leg->Draw("same");
+
 		}
 		d->WriteTObject(c,((TString)c->GetName()+"_purStab").Data());
-
+		if(leg) delete leg;
 
 		///
 		if(moreoutput)

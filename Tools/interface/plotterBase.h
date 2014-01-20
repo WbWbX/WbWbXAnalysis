@@ -11,7 +11,6 @@
 #include "tObjectList.h"
 #include "containerStyle.h"
 #include "plotStyle.h"
-#include "canvasStyle.h"
 #include "graph.h"
 
 class TH1D;

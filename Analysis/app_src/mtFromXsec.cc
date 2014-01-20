@@ -692,16 +692,24 @@ int main(int argc, char* argv[]){
         float deltaminus2=0;
         float deltaplus2=0;
         float temp=0;
-        std::cout << "Summary" <<std::endl;
+        std::cout << "Summary - the sums assume ORDERING!!!! CHECK" <<std::endl;
         for(size_t i=0;i<masspoints.size();i++){
             if(i>0)
-                temp= (masspoints.at(1)-masspoints.at(i));
+                temp= (masspoints.at(i)-masspoints.at(1));
             if(temp<0)
                 deltaminus2+=temp*temp;
             else
                 deltaplus2+=temp*temp;
-
-            std::cout << masspoints.at(i) << "\t" << "+"<<errr.at(i)-masspoints.at(i) <<"-"<<masspoints.at(i)-errl.at(i)<<"\t"<< sysnames.at(i) <<std::endl;
+            if(i<2){
+                cout.setf(ios::fixed,ios::floatfield);
+                cout.precision(2);
+                std::cout << masspoints.at(i) << "\t" << "+"<<errr.at(i)-masspoints.at(i) <<"-"<<masspoints.at(i)-errl.at(i)<<"\t"<< sysnames.at(i) <<std::endl;
+            }
+            else{
+                cout.setf(ios::fixed,ios::floatfield);
+                cout.precision(2);
+                std::cout << masspoints.at(i)-masspoints.at(1) << "\t" << "+"<<errr.at(i)-masspoints.at(i) <<"-"<<masspoints.at(i)-errl.at(i)<<"\t"<< sysnames.at(i) <<std::endl;
+            }
 
 
         }

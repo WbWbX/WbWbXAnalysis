@@ -413,6 +413,9 @@ TH2D * container2D::getTH2D(TString name, bool dividebybinwidth, bool onlystat) 
             h->SetBinError(xbin,ybin,err);
         }
     }
+    h->GetXaxis()->SetTitle(xaxisname_);
+    h->GetYaxis()->SetTitle(yaxisname_);
+
     h->SetEntries(entries);
 
     return h;
