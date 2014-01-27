@@ -398,11 +398,10 @@ if isSignal:
     filtervertices=False
 
 
-process.filtersSeq = cms.Sequence()
+#process.filtersSeq = cms.Sequence()
 
-if not isMC:
-    process.load("RecoMET.METFilters.metFilters_cff")
-    process.filtersSeq = cms.Sequence(process.metFilters)
+process.load("TtZAnalysis.Workarounds.metFilters_cff")
+process.filtersSeq = cms.Sequence(process.ignoreMetFilters)
 
 if is2011:
     process.filtersSeq = cms.Sequence(
@@ -465,13 +464,49 @@ process.pfPileUp.checkClosestZVertex = False
 ##################################
 #  MVA eID
 ##################################
-process.load('EGamma.EGammaAnalysisTools.electronIdMVAProducer_cfi')
+process.load('EgammaAnalysis.ElectronTools.electronIdMVAProducer_cfi')
 process.eidMVASequence = cms.Sequence(  process.mvaTrigV0 )
 getattr(process,'patElectrons'+pfpostfix).electronIDSources.mvaTrigV0    = cms.InputTag("mvaTrigV0")
 getattr(process, 'patPF2PATSequence'+pfpostfix).replace(getattr(process,'patElectrons'+pfpostfix),
                                               process.eidMVASequence *
                                               getattr(process,'patElectrons'+pfpostfix)
                                               )
+
+##########Energy corrections
+process.load("EgammaAnalysis.ElectronTools.electronRegressionEnergyProducer_cfi")
+process.eleRegressionEnergy.inputElectronsTag= 'gsfElectrons'
+process.eleRegressionEnergy.inputCollectionType=0
+process.eleRegressionEnergy.useRecHitCollections=True
+process.eleRegressionEnergy.produceValueMaps=True
+
+process.load("EgammaAnalysis.ElectronTools.calibratedElectrons_cfi")
+process.calibratedElectrons.isMC=isMC
+if isMC:
+    process.calibratedElectrons.inputDataset = "Summer12_LegacyPaper"
+
+process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService",
+                                                   calibratedElectrons = cms.PSet(
+        initialSeed = cms.untracked.uint32(123456789),
+        engineName = cms.untracked.string('TRandom3')
+        )
+)
+
+process.calibratedElectrons.updateEnergyError = cms.bool(True)
+process.calibratedElectrons.correctionsType = cms.int32(2)
+process.calibratedElectrons.combinationType = cms.int32(3)
+
+
+process.elecEnergyCalibration = cms.Sequence(
+    process.eleRegressionEnergy *
+    process.calibratedElectrons
+    )
+
+
+
+getattr(process,'patElectrons'+pfpostfix).electronIDSources = cms.PSet(mvaTrigV0 = cms.InputTag("mvaTrigV0"))
+
+
+
 
 ########
 #   adapt electrons to R=03 and use gsf
@@ -504,6 +539,23 @@ getattr(process,'patPFElectrons'+pfpostfix).isolationValues = cms.PSet(
 
 ######### end of electron implementation ########
 ##### MUONS ########
+
+##energy corrections
+process.load("TopAnalysis.ZTopUtils.correctmuonenergy_cff")
+process.correctMuonEnergy.muonSrc = 'pfMuonsFromVertex'+pfpostfix
+process.correctMuonEnergy.muonType = "pfMuons"
+process.correctMuonEnergy.isMC = isMC
+process.correctMuonEnergy.debug=False
+
+process.correctRecoMuonEnergy=process.correctMuonEnergy.clone()
+process.correctRecoMuonEnergy.muonSrc = 'muons'
+process.correctRecoMuonEnergy.muonType = "recoMuons"
+
+
+getattr(process,'patPF2PATSequence'+pfpostfix).replace(getattr(process,'pfMuonsFromVertex'+pfpostfix),
+                                                     getattr(process,'pfMuonsFromVertex'+pfpostfix) *
+                                                     process.correctMuonEnergy)
+
 
 if newMuons:
 
@@ -786,7 +838,7 @@ else:
     process.load('TtZAnalysis.TreeWriter.treewriter_ttz_cff')
 
 
-
+process.ecalLaserCorrFilter.EBLaserMAX=cms.double(0.3) #filters all
 
 
 #process.PFTree.vertexSrc         = 'goodVertices' #use standard
@@ -840,6 +892,7 @@ process.PFTree.debugmode= debug
 process.treeSequence = cms.Sequence(process.patTriggerSequence *
                                     process.superClusters *
                                     process.treeJets *
+                                    process.combinedbools *
                                     process.PFTree)
 
 
@@ -847,17 +900,19 @@ process.treeSequence = cms.Sequence(process.patTriggerSequence *
 ##### does this prevent segfaults?
 
 ###### Path
+process.dump=cms.EDAnalyzer('EventContentAnalyzer')
 
 process.path = cms.Path( process.goodOfflinePrimaryVertices *
+                         #process.dump *
+                         process.elecEnergyCalibration *
+                         process.correctRecoMuonEnergy * #pfMuon eneergy is hidden in pf2pat sequence
+                         
                          process.preFilterSequence *
                          process.filtersSeq *
-                        #  process.inclusiveVertexing *   ## segfaults?!?! in the newest release or MC
-                        
-                      #  process.btagging *             #not yet implemented fully in pf2pat sequence../ needed for new btagging tag
-                        
+                      
                         getattr(process,'patPF2PATSequence'+pfpostfix) *
-                        process.isoJetSequence  *
-                        process.treeSequence
+                        process.isoJetSequence # *
+                        #process.treeSequence
                          )
 
 #if susy:
@@ -874,6 +929,21 @@ if isFastSim:
 #### plug in vertex filter and change collections
 
 process.outpath    = cms.EndPath()
+
+massSearchReplaceAnyInputTag(process.path,cms.InputTag("gsfElectrons",""), cms.InputTag("calibratedElectrons" , "calibratedGsfElectrons"),True)
+
+process.calibratedElectrons.inputElectronsTag = cms.InputTag('gsfElectrons','','RECO')
+process.eleRegressionEnergy.inputElectronsTag = cms.InputTag('gsfElectrons','','RECO')
+
+massSearchReplaceAnyInputTag(process.path,cms.InputTag("pfMuonsFromVertex"+pfpostfix), cms.InputTag("correctMuonEnergy"),True)
+process.correctMuonEnergy.muonSrc = 'pfMuonsFromVertex'+pfpostfix
+
+massSearchReplaceAnyInputTag(process.path,cms.InputTag('muons'), cms.InputTag("correctRecoMuonEnergy"),True)
+process.correctRecoMuonEnergy.muonSrc = 'muons'
+
+###USE calibrated gsf at the bottom (masssearchandreplace.)
+
+
 
 
 print "\nglobal Tag: " + globalTag
