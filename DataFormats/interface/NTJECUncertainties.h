@@ -7,9 +7,9 @@
 
 namespace ztop{
 
-  class NTJECUncertainties{
+class NTJECUncertainties{
 
-  public:
+public:
     NTJECUncertainties(){}
     ~NTJECUncertainties(){}
 
@@ -20,19 +20,22 @@ namespace ztop{
     std::vector<unsigned int> &  sources(){JecBase_.sources().clear(); return JecBase_.sources();}
 
     void applyToJet(ztop::NTJet * jet ){
-      ztop::PolarLorentzVector p4in = jet->p4();
-      JecBase_.applyJECUncertainties(p4in);
-      jet->setP4(p4in);
+        float recopt=jet->pt();
+        float recoeta=jet->eta();
+        float recophi=jet->phi();
+        float recom=jet->p4().M();
+        JecBase_.applyJECUncertainties(recopt,recoeta,recophi,recom);
+        jet->setP4(ztop::PolarLorentzVector(recopt,recoeta,recophi,recom));
     }
     void applyToJets(std::vector<ztop::NTJet *> jets){
-      for(size_t i=0;i<jets.size();i++)
-	applyToJet(jets.at(i));
+        for(size_t i=0;i<jets.size();i++)
+            applyToJet(jets.at(i));
     }
 
-  protected:
+protected:
     JECBase JecBase_;
 
-  };
+};
 
 }
 #endif

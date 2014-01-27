@@ -18,9 +18,12 @@ namespace ztop{
       }
     }
     void correctJet(ztop::NTJet* jet){
-      ztop::PolarLorentzVector temp=jet->p4();
-      correctP4(temp, jet->genP4());
-      jet->setP4(temp);
+      float recopt=jet->pt();
+      float recoeta=jet->eta();
+      float recophi=jet->phi();
+      float recom=jet->p4().M();
+      correctP4(recopt,recoeta,recophi,recom, jet->genP4().pt());
+      jet->setP4(ztop::PolarLorentzVector(recopt,recoeta,recophi,recom));
     }
 
   };
