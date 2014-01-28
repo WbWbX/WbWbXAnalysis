@@ -1,8 +1,8 @@
 #ifndef NTMet_h
 #define NTMet_h
-
+#include "mathdefs.h"
 namespace ztop{
-  typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > LorentzVector;
+
  
   class NTMet{
  public:
@@ -11,15 +11,17 @@ namespace ztop{
   //sets
 
   void setP4(ztop::LorentzVector P4){p4_=P4;}
+  void setP4(ztop::PolarLorentzVector P4){p4_=P4;}
+  void setP4(D_LorentzVector p4In){p4_=PolarLorentzVector(p4In.pt(),p4In.Eta(),p4In.Phi(),p4In.M());}
 
   //gets
-  double met()const{return p4_.Et();}
-  double phi()const{return p4_.Phi();}
-  const ztop::LorentzVector &p4()const{return p4_;};
+  float met()const{return p4_.Et();}
+  float phi()const{return p4_.Phi();}
+  const ztop::PolarLorentzVector &p4()const{return p4_;};
 
  protected:
 
-  ztop::LorentzVector p4_;
+  ztop::PolarLorentzVector p4_;
   };
 }
 #endif

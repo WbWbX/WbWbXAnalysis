@@ -22,6 +22,7 @@
 #include "../interface/NTBTagSF.h"
 #include "../interface/NTJECUncertainties.h"
 #include "../interface/NTJERAdjuster.h"
+#include "../interface/mathdefs.h"
 
 //backward comp
 
@@ -78,6 +79,8 @@ namespace
     std::vector<ztop::NTJERAdjuster> ksdskV;
     std::vector<TObject*> kjnfjkefrerfe;
     
+    ztop::LorentzVector vecfff;
+    ztop::PolarLorentzVector dsfvecpolar;
 
   };
 

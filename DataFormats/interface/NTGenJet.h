@@ -14,6 +14,7 @@ namespace ztop{
 
     void setP4(PolarLorentzVector p4In){p4_=p4In;}
     void setP4(LorentzVector p4In){p4_=p4In;}
+    void setP4(D_LorentzVector p4In){p4_=PolarLorentzVector(p4In.pt(),p4In.Eta(),p4In.Phi(),p4In.M());}
  
     void setMotherIts(const std::vector<int> & its){motherits_=its;}
     void setMothers(const std::vector<ztop::NTGenParticle *> & p){motherPs_=p;}
@@ -26,28 +27,28 @@ namespace ztop{
     const std::vector<ztop::NTGenParticle *> & mothers()const{return motherPs_;}
 
     const PolarLorentzVector & p4()const{return p4_;}
-    double pt()const{return p4_.Pt();}
-    double E()const {return p4_.E();}
-    double e()const {return p4_.E();}
-    double phi()const{return p4_.Phi();}
-    double eta()const{return p4_.Eta();}
-    double m()const{return p4_.M();}
+    float pt()const{return p4_.Pt();}
+    float E()const {return p4_.E();}
+    float e()const {return p4_.E();}
+    float phi()const{return p4_.Phi();}
+    float eta()const{return p4_.Eta();}
+    float m()const{return p4_.M();}
 
     //extra
 
-    void setMember(std::string Membername, double value){
+    void setMember(std::string Membername, float value){
       memberss_[Membername]=value;
     }
-    double getMember(std::string membername){
+    float getMember(std::string membername){
       if(memberss_.find(membername) != memberss_.end())
 	return memberss_.find(membername)->second;
       else
 	return -99999999999;
     }
-    void setMember(int Memberidx, double value){
+    void setMember(int Memberidx, float value){
       members_[Memberidx]=value;
     }
-    double getMember(int memberidx){
+    float getMember(int memberidx){
       if(members_.find(memberidx) != members_.end())
 	return members_.find(memberidx)->second;
       else
@@ -62,8 +63,8 @@ namespace ztop{
     std::vector<ztop::NTGenParticle *> motherPs_;
     int genid_;
 
-    std::map<std::string, double> memberss_;
-    std::map<int, double> members_;
+    std::map<std::string, float> memberss_;
+    std::map<int, float> members_;
 
   };
 }

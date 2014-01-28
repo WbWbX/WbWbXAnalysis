@@ -12,23 +12,24 @@ namespace ztop{
     ~NTTrack(){}
 
     void setP4(LorentzVector p4In){p4_=p4In;}
+    void setP4(D_LorentzVector p4In){p4_=PolarLorentzVector(p4In.pt(),p4In.Eta(),p4In.Phi(),p4In.M());}
     void setQ(int qIn){q_=qIn;}
-    void setDzV(double Dz){dzV_=Dz;}
-    void setDzVErr(double DzErr){dzVErr_=DzErr;}
+    void setDzV(float Dz){dzV_=Dz;}
+    void setDzVErr(float DzErr){dzVErr_=DzErr;}
 
     const PolarLorentzVector & p4(){return p4_;}
-    double pt(){return p4_.Pt();}
-    double phi(){return p4_.Phi();}
-    double eta(){return p4_.Eta();}
-    double p() {return p4_.E();}
+    float pt(){return p4_.Pt();}
+    float phi(){return p4_.Phi();}
+    float eta(){return p4_.Eta();}
+    float p() {return p4_.E();}
     int q(){ return q_;}
-    double dzV(){return dzV_;}
-    double dzVErr(){return dzVErr_;}
+    float dzV(){return dzV_;}
+    float dzVErr(){return dzVErr_;}
   protected:
     PolarLorentzVector p4_;
     int q_;
-    double dzV_;
-    double dzVErr_;
+    float dzV_;
+    float dzVErr_;
 
   };
 

@@ -19,7 +19,7 @@ namespace ztop{
     void setUse2012EA(bool use){use2012EA_=use;}
     void setCone(float cone){cone_=cone;}
 
-    void setRho(double rho){rho_=rho;};
+    void setRho(float rho){rho_=rho;};
 
     void addRhoIso(std::vector<ztop::NTElectron> &);
     void addRhoIso(ztop::NTElectron &);
@@ -29,10 +29,10 @@ namespace ztop{
 
     void checkCorrectInput();
 
-    double getRhoIso(ztop::NTElectron &);
-    double Aeff(double);
+    float getRhoIso(ztop::NTElectron &);
+    float Aeff(float);
 
-    double rho_;
+    float rho_;
     float cone_;
     bool ismc_;
     bool use2012EA_;

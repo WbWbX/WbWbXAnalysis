@@ -44,5 +44,10 @@
   <class name="std::map<int,double>"/>
 
 
+ 
+    <class name="ztop::LorentzVector"/> 
+    <class name="ztop::PolarLorentzVector"/> 
+
+
 </lcgdict>
  

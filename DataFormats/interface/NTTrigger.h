@@ -19,35 +19,7 @@
 
 
 namespace ztop{
-  /*
-  class NTTriggerMap {
-  public:
-    NTTriggerMap(){}
-    ~NTTriggerMap(){}
 
-    void setStartEventNo(double no){start_=no;}
-    void setEndEventNo(double no){end_=no;}
-
-    double getStartEventNo(){return start_;}
-    double getEndEventNo(){return end_;}
-
-    std::map<std::string, unsigned int> getMap(){return mapping_;}
-    unsigned int & index(std::string name){
-      if(mapping_.find(name) < mapping_.end()){
-	return mapping_.find(name)->second;
-      }
-      else{
-	mapping_[name] = mapping_.size();
-      }
-    } //! also adds if not existent!
-    unsigned int size(){return mapping_.size();}
- 
-  private:
-    double start_,end_;
-    std::unordered_map<std::string, unsigned int> mapping_;
-
-  };
-  */
   class NTTrigger {
   public:
     NTTrigger(){}

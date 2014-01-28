@@ -8,13 +8,13 @@ namespace ztop{
     else incorr_=true;
   }
 
-  double elecRhoIsoAdder::getRhoIso(ztop::NTElectron & elec){
+  float elecRhoIsoAdder::getRhoIso(ztop::NTElectron & elec){
 
-    double chargedH  = elec.iso().chargedHadronIso();
-    double neutralH  = elec.iso().neutralHadronIso();
-    double photon    = elec.iso().photonIso();
+    float chargedH  = elec.iso().chargedHadronIso();
+    float neutralH  = elec.iso().neutralHadronIso();
+    float photon    = elec.iso().photonIso();
 
-    double rhoIso=(chargedH + std::max(neutralH+photon - rho_*Aeff(elec.suClu().eta()), 0.0))/elec.pt();
+    float rhoIso=(chargedH + std::max(neutralH+photon - rho_*Aeff(elec.suClu().eta()), (float) 0.0))/elec.pt();
     return rhoIso;
   } 
 
@@ -22,7 +22,7 @@ namespace ztop{
 
   void  elecRhoIsoAdder::addRhoIso(ztop::NTElectron & elec){
     checkCorrectInput();
-    double rhoiso=getRhoIso(elec);
+    float rhoiso=getRhoIso(elec);
     elec.setRhoIso(rhoiso);
   }
 
@@ -35,9 +35,9 @@ namespace ztop{
 
  
 
-  double elecRhoIsoAdder::Aeff(double suclueta){
-    double aeff=0;
-    double eta=fabs(suclueta);
+  float elecRhoIsoAdder::Aeff(float suclueta){
+    float aeff=0;
+    float eta=fabs(suclueta);
     if(cone_==0.3f){
       if(use2012EA_){
 	if(ismc_ && 1==0){ //always false

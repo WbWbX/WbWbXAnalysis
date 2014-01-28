@@ -6,26 +6,26 @@
 
 namespace ztop{
 
-  class NTJERAdjuster : public JERBase{
+class NTJERAdjuster : public JERBase{
 
-  public:
+public:
     NTJERAdjuster(){}
     ~NTJERAdjuster(){}
 
     void correctJets(std::vector<ztop::NTJet*> & jets){
-      for(size_t i=0;i<jets.size();i++){
-	correctJet(jets.at(i));
-      }
+        for(size_t i=0;i<jets.size();i++){
+            correctJet(jets.at(i));
+        }
     }
     void correctJet(ztop::NTJet* jet){
-      float recopt=jet->pt();
-      float recoeta=jet->eta();
-      float recophi=jet->phi();
-      float recom=jet->p4().M();
-      correctP4(recopt,recoeta,recophi,recom, jet->genP4().pt());
-      jet->setP4(ztop::PolarLorentzVector(recopt,recoeta,recophi,recom));
+        float recopt=jet->pt();
+        float recoeta=std::abs(jet->eta());
+        float recophi=jet->phi();
+        float recom=jet->p4().M();
+        correctP4(recopt,recoeta,recophi,recom, jet->genP4().pt());
+        jet->setP4(ztop::PolarLorentzVector(recopt,jet->eta(),recophi,recom));
     }
 
-  };
+};
 }
 #endif

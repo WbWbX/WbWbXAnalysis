@@ -13,15 +13,16 @@ class NTTriggerObject{
   //sets
   void setP4(LorentzVector p4In){p4_=p4In;}
   void setP4(PolarLorentzVector p4In){p4_=p4In;}
+  void setP4(D_LorentzVector p4In){p4_=PolarLorentzVector(p4In.pt(),p4In.Eta(),p4In.Phi(),p4In.M());}
 
   //gets
   const PolarLorentzVector & p4(){return p4_;}
-  double pt(){return p4_.Pt();}
-  double E() {return p4_.E();}
-  double e() {return p4_.E();}
-  double phi(){return p4_.Phi();}
-  double eta(){return p4_.Eta();}
-  double m(){return p4_.M();}
+  float pt(){return p4_.Pt();}
+  float E() {return p4_.E();}
+  float e() {return p4_.E();}
+  float phi(){return p4_.Phi();}
+  float eta(){return p4_.Eta();}
+  float m(){return p4_.M();}
 
  protected:
   PolarLorentzVector p4_;  

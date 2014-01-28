@@ -15,8 +15,8 @@ namespace ztop{
 
 
 
-  class NTElectron : public NTLepton {
-  public:
+class NTElectron : public NTLepton {
+public:
 
     explicit NTElectron(){q_=0;rhoIso_=-99;};
     ~NTElectron(){};
@@ -24,16 +24,17 @@ namespace ztop{
     void setNotConv(bool IsNotConv){isNotConv_=IsNotConv;}
     void setECalP4(LorentzVector ECalp4){ecalp4_=ECalp4;}
     void setECalP4(PolarLorentzVector ECalp4){ecalp4_=ECalp4;}
+    void setECalP4(D_LorentzVector p4In){ecalp4_=PolarLorentzVector(p4In.pt(),p4In.Eta(),p4In.Phi(),p4In.M());}
     void setId(std::vector<std::pair<std::string,float> > Ids , bool keepMvaOnly=true){
 
-      ids_=Ids;
-      mvaId_=id("mvaTrigV0");
-      if(keepMvaOnly){
-	ids_.clear();
-      }
+        ids_=Ids;
+        mvaId_=id("mvaTrigV0");
+        if(keepMvaOnly){
+            ids_.clear();
+        }
     }
     void setIso(ztop::NTIsolation Iso){iso_=Iso;}
-    void setRhoIso(double RhoIso){rhoIso_=RhoIso;}
+    void setRhoIso(float RhoIso){rhoIso_=RhoIso;}
     //void setIso04(ztop::NTIsolation Iso04){iso04_=Iso04;}
 
     void setMatchedTrig(std::vector<std::string> MatchedTrig){matchedTrig_=MatchedTrig;}
@@ -50,22 +51,22 @@ namespace ztop{
     //ztop::NTIsolation iso04(){return iso04_;}
 
 
-    double isoVal(){
-      return (iso_.chargedHadronIso() + std::max(0.0,iso_.neutralHadronIso() + iso_.photonIso() - 0.5*iso_.puChargedHadronIso()))/p4_.Pt();
+    float isoVal(){
+        return (iso_.chargedHadronIso() + std::max(0.0,iso_.neutralHadronIso() + iso_.photonIso() - 0.5*iso_.puChargedHadronIso()))/p4_.Pt();
     }
 
     float id(std::string idName) {
-      float idtemp=-9999;
-      for(unsigned int i=0; i<ids_.size(); i++){
-	if(idName == ids_[i].first){
-	  idtemp=ids_[i].second;
-	  break;
-	}
-      }
-      return idtemp;
+        float idtemp=-9999;
+        for(unsigned int i=0; i<ids_.size(); i++){
+            if(idName == ids_[i].first){
+                idtemp=ids_[i].second;
+                break;
+            }
+        }
+        return idtemp;
     }
-    //double rhoIso(){return rhoIso_;}
-    const double & rhoIso() const {return rhoIso_;}
+    //float rhoIso(){return rhoIso_;}
+    const float & rhoIso() const {return rhoIso_;}
     const float & mvaId() const{ return mvaId_;}
 
     const std::vector<std::string> & matchedTrig() const {return matchedTrig_;}
@@ -74,45 +75,45 @@ namespace ztop{
     const bool & isPf() const{return ispf_;}
 
 
- //extra
+    //extra
 
-    void setMember(std::string Membername, double value){
-      memberss_[Membername]=value;
+    void setMember(std::string Membername, float value){
+        memberss_[Membername]=value;
     }
-    double getMember(std::string membername){
-      if(memberss_.find(membername) != memberss_.end())
-	return memberss_.find(membername)->second;
-      else
-	return -99999999999;
+    float getMember(std::string membername){
+        if(memberss_.find(membername) != memberss_.end())
+            return memberss_.find(membername)->second;
+        else
+            return -99999999999;
     }
-    void setMember(int Memberidx, double value){
-      members_[Memberidx]=value;
+    void setMember(int Memberidx, float value){
+        members_[Memberidx]=value;
     }
-    double getMember(int memberidx){
-      if(members_.find(memberidx) != members_.end())
-	return members_.find(memberidx)->second;
-      else
-	return -99999999999;
+    float getMember(int memberidx){
+        if(members_.find(memberidx) != members_.end())
+            return members_.find(memberidx)->second;
+        else
+            return -99999999999;
     }
 
 
-  protected:
+protected:
     float mvaId_;
     ztop::NTSuClu suClu_;
     bool isNotConv_,ispf_;
     std::vector<std::pair<std::string,float> > ids_;
     ztop::NTIsolation iso_;
-    double rhoIso_;
+    float rhoIso_;
     PolarLorentzVector ecalp4_;
     //ztop::NTIsolation iso04_;
     int mHits_;
 
     std::vector<std::string> matchedTrig_;
 
-    std::map<std::string, double> memberss_;
-    std::map<int, double> members_;
+    std::map<std::string, float> memberss_;
+    std::map<int, float> members_;
 
-  };
+};
 
 }
 

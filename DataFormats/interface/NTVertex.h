@@ -22,19 +22,19 @@ public:
 	void setPosErr(TVector3 v){poserr_=v;}
 	void setIdx(int idx){idx_=idx;}
 	void setNDof(float ndf){ndof_=ndf;}
-	void setChi2(double inchi2){chi2_=inchi2;}
+	void setChi2(float inchi2){chi2_=inchi2;}
 
 	const TVector3 & position(){return pos_;}
 	const TVector3 & positionErr(){return poserr_;}
 	const float & ndof(){return ndof_;}
-	const double & chi2(){return chi2_;}
-	double normChi2(){return chi2_/(double)ndof_;}
+	const float & chi2(){return chi2_;}
+	float normChi2(){return chi2_/(float)ndof_;}
 	int id(){return idx_;}
 
 private:
 	TVector3 pos_;
 	TVector3 poserr_;
-	double chi2_;
+	float chi2_;
 	float ndof_;
 	int idx_;
 

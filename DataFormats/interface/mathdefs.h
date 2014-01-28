@@ -13,8 +13,12 @@
 //#include "LorentzVector.h"
 
 namespace ztop{
-  typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > LorentzVector;
-  typedef ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<double> > PolarLorentzVector;
+  typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > LorentzVector;
+  typedef ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<float> > PolarLorentzVector;
+
+
+  typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > D_LorentzVector;
+  typedef ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<double> > D_PolarLorentzVector;
 
 }
 
