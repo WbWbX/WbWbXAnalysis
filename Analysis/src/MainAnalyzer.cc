@@ -146,7 +146,8 @@ int MainAnalyzer::start(){
 
                 while(done < filenumber){//!NoneEqual(succ,0)){
                     //wait for daughters until all are done or failed
-                    if(running < maxchilds_ && filenumber - done >= maxchilds_)
+                    if(running < maxchilds_ &&
+                            (filenumber - done >= maxchilds_ || (i<filenumber-1 /* dont skip last */ && filenumber < maxchilds_)))
                         break;
 
 
