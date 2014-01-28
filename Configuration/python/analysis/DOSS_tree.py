@@ -911,8 +911,8 @@ process.path = cms.Path( process.goodOfflinePrimaryVertices *
                          process.filtersSeq *
                       
                         getattr(process,'patPF2PATSequence'+pfpostfix) *
-                        process.isoJetSequence # *
-                        #process.treeSequence
+                        process.isoJetSequence  *
+                        process.treeSequence
                          )
 
 #if susy:
