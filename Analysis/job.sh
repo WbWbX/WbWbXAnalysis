@@ -8,13 +8,13 @@
 #$ -l h_rt=02:55:00
 #
 #(the maximum memory usage of this job)
-#$ -l h_vmem=2048M
+#$ -l h_vmem=1024M
 #
 #(stderr and stdout are merged together to stdout)
 #$ -j y
 #$ -m a
 #$ -cwd -V
-#$ -l h_stack=1536M
+#( -l h_stack=1536M) #try with small stack
 #$ -pe local 6 -R y
 #$ -P af-cms
 

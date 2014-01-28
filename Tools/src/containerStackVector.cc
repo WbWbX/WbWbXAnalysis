@@ -334,7 +334,8 @@ void containerStackVector::writeAllToTFile(TString filename, bool recreate, bool
     std::vector<TDirectory *> dirpv;
 
     plotterControlPlot pl;
-    pl.readStyleFromFile("/afs/naf.desy.de/user/k/kieseler/recentProj/src/TtZAnalysis/Tools/styles/controlPlots_standard.txt");
+    std::string cmsswbase=getenv("CMSSW_BASE");
+    pl.readStyleFromFile(cmsswbase+"/src/TtZAnalysis/Tools/styles/controlPlots_standard.txt");
 
     gStyle->SetOptStat(0);
 
@@ -450,6 +451,7 @@ void containerStackVector::writeAllToTFile(TString filename, bool recreate, bool
     if(debug)
         std::cout << "containerStackVector::writeAllToTFile: ratio plots drawn" << std::endl;
 
+    /*
     TDirectory * d2 = f->mkdir(name+ "_sgbg",name+ "_sgbg");
     d2->cd();
 
@@ -483,7 +485,7 @@ void containerStackVector::writeAllToTFile(TString filename, bool recreate, bool
     if(debug)
         std::cout << "containerStackVector::writeAllToTFile: sig/bg plots drawn" << std::endl;
 
-
+*/
     f->Close();
     delete f;
 

@@ -21,6 +21,7 @@ libs=("TopAnalysisZTopUtils"
     "TtZAnalysisTools"
     "TtZAnalysisAnalysis"
     "FWCoreFWLite"
+    "unfold"
 #"DataFormatsStdDictionaries"
 #"CondFormatsJetMETObjects"
 );
@@ -34,12 +35,13 @@ function compile(){
     infile=$1
     linklibs=""
     libdir=$LOCLIB
+    mkdir -p $libdir
 
     for (( i=0;i<${#libs[@]};i++)); do
 	linklibs="$linklibs -l${libs[${i}]}"
 	cp ${CMSLIBS}lib${libs[${i}]}.so $libdir
     done
-    cp $EXTLIBS/libunfold.so $libdir
+    cp $EXTLIBS/libunfold.so $libdir 
     echo compiling $infile
 
     g++ $ROOTFLAGS -fopenmp -I$CPLUS_INCLUDE_PATH -c -o $BUILDDIR/$infile.o $SRCDIR/$infile.cc
@@ -79,6 +81,7 @@ then
     compile printVariations
     compile mtFromXsec
 fi
+
 if  [ $1 == "all" ] || [ $1 == "www" ];
 then
     

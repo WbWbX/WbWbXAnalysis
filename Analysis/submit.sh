@@ -15,7 +15,7 @@ channels=( "ee"
     "emu"
     "mumu"
 );
-systs=(#"nominal"
+systs=("nominal"
 
     #"TRIGGER_up"
     #"TRIGGER_down"
@@ -50,10 +50,10 @@ systs=(#"nominal"
    #"TT_SCALE_down"
    #"TT_SCALE_up"
 
-   "MT_3_down"
-   "MT_3_up"
-   "MT_6_down"
-   "MT_6_up"
+#   "MT_3_down"
+#   "MT_3_up"
+#   "MT_6_down"
+#   "MT_6_up"
 
 
    #"Z_MATCH_down"
@@ -79,7 +79,7 @@ energies=("8TeV"
 
 
 
-dir=${dirname}_$(date +%F_%H:%M)__GI #ensure git ignore for these folders
+dir=$(date +"%Y%m%d_%H%M")_${dirname} #ensure git ignore for these folders
 
 
 echo "running in dir $dir"
@@ -88,15 +88,26 @@ analysisDir=$CMSSW_BASE/src/TtZAnalysis/Analysis/
 
 
 cd $analysisDir
-mkdir -p workdir
+#mkdir -p workdir
+mkdir -p /nfs/dust/cms/user/$USER/AnalysisWorkdir
+if [[ ! -L "workdir" ]]
+then
+    ln -s /nfs/dust/cms/user/$USER/AnalysisWorkdir workdir 
+fi
 cd workdir
 mkdir $dir
+if [[ -L "last" ]]
+then
+rm last
+fi
+ln -s $dir last
 cd $dir
 workdir=`pwd`
 cp $analysisDir/submit.sh .
 cp $analysisDir/bin/analyse .
 cp -r $analysisDir/lib .
 cp $analysisDir/*config.txt .
+
 cp $analysisDir/*btags.root .
 
 mkdir source
@@ -136,7 +147,7 @@ for (( i=0;i<${#channels[@]};i++)); do
 	    outnames=( "${outnames[@]}" "${outname}" ); 
 	    sed -e "s/##OUTNAME##/${outname}/" -e "s/##PARAMETERS##/-c ${channel} -s ${syst} -e ${energy} ${addParameters}/" -e "s;##WORKDIR##;${workdir};" < $analysisDir/job.sh > jobscripts/${outname}
 	    chmod +x jobscripts/${outname}
-	    if [[ $SGE_CELL ]] ;
+	    if [[ $SGE_CELLL ]] ;
 	    then
 		cd $BATCHDIR
 		qsub $workdir/jobscripts/${outname}
@@ -153,7 +164,7 @@ for (( i=0;i<${#channels[@]};i++)); do
 		done
 		echo "starting ${outname}"
 		./jobscripts/${outname} &
-		sleep 2;
+		sleep 10;
 	    fi
 
 ###make the merge line
