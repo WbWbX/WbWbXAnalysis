@@ -30,6 +30,8 @@ public:
 
 ztop::NTMuon TreeWriterTtZ::makeNTMuon(const pat::Muon & muon){
 
+
+
  
   ztop::LorentzVector p4zero(0,0,0,0);
   ztop::NTMuon tempmuon;
@@ -126,7 +128,7 @@ ztop::NTMuon TreeWriterTtZ::makeNTMuon(const pat::Muon & muon){
 
 
 
-  tempmuon.setMember(0,muon.numberOfMatchedStations());
+  tempmuon.setMatchedStations(muon.numberOfMatchedStations());
 
 
 
@@ -140,7 +142,10 @@ ztop::NTElectron TreeWriterTtZ::makeNTElectron(const pat::Electron & electron){
    ztop::NTElectron tempelec;
 
   ztop::NTIsolation Iso;
-       
+
+
+ // electron.p4Error(0);
+
   Iso.setChargedHadronIso(electron.chargedHadronIso());
   Iso.setNeutralHadronIso(electron.neutralHadronIso());
   Iso.setPhotonIso(electron.photonIso());
@@ -153,6 +158,7 @@ ztop::NTElectron TreeWriterTtZ::makeNTElectron(const pat::Electron & electron){
   tempelec.setECalP4(electron.ecalDrivenMomentum());
   tempelec.setIsPf(electron.isPF());
   tempelec.setP4(electron.p4());
+  tempelec.setP4Err(electron.p4Error(reco::GsfElectron::P4Kind::P4_COMBINATION));
   tempelec.setQ(electron.charge());
   double vz=-9999;
   double vzerr=-9999;

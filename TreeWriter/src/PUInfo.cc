@@ -208,8 +208,11 @@ PUInfo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    if(includepdfweights_ && !IsRealData){
      edm::Handle<std::vector<double> > weightHandle;
      iEvent.getByLabel(pdfweights_, weightHandle);
+     std::vector<float> pdfweights;
+     for(size_t i=0;i<weightHandle->size();i++)
+     pdfweights.push_back(weightHandle->at(i));
      
-     ntevent.setPDFWeights(*weightHandle);
+     ntevent.setPDFWeights(pdfweights);
    }
 
    Ntuple ->Fill();

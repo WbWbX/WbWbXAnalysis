@@ -122,7 +122,7 @@ ztop::NTMuon TreeWriterTtH::makeNTMuon(const pat::Muon & muon){
 
 
 
-  tempmuon.setMember(0,muon.numberOfMatchedStations());
+  tempmuon.setMatchedStations(muon.numberOfMatchedStations());
 
 
 
@@ -148,6 +148,7 @@ ztop::NTElectron TreeWriterTtH::makeNTElectron(const pat::Electron & electron){
   tempelec.setECalP4(electron.ecalDrivenMomentum());
   tempelec.setIsPf(electron.isPF());
   tempelec.setP4(electron.p4());
+  tempelec.setP4Err(electron.p4Error(reco::GsfElectron::P4Kind::P4_COMBINATION));
   tempelec.setQ(electron.charge());
   double vz=-9999;
   double vzerr=-9999;

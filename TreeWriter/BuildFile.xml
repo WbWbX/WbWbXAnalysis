@@ -14,7 +14,7 @@
 <use name="TrackingTools/Records"/>
 <use name="MagneticField/Engine"/>
 <use name="RecoEgamma/EgammaTools"/>
-<use name="EGamma/EGammaAnalysisTools"/>
+<use name="EgammaAnalysis/ElectronTools"/>
 <flags EDM_PLUGIN="1"/>
 <export>
    <lib name="1"/>
