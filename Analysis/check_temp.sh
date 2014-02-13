@@ -28,7 +28,7 @@ do
     then
 	if [ -e "../stdout/${file}.txt" ];
 	then
-	    jobid=`ls ../batch/${file}.po* 2>&1 | awk -F".po" '{print $NF}'`
+	    jobid=`ls ../batch/${file}.o* 2>&1 | awk -F".o" '{print $NF}'`
 	fi
 	jobrunning=`echo $rjobs | grep ${jobid} 2>/dev/null | head -c 3`;
 	jobEqw=`echo $Eqwjobs | grep ${jobid} 2>/dev/null | head -c 3`;

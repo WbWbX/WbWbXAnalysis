@@ -24,13 +24,13 @@ systs=("nominal"
    #"MUONSF_up"
    #"MUONSF_down"
 
-    #"ELECES_up"
-    #"ELECES_down"
-    #"MUONES_up"
-    #"MUONES_down"
+   #"ELECES_up"
+   #"ELECES_down"
+   #"MUONES_up"
+   #"MUONES_down"
 
-    #"PU_up"
-    #"PU_down"
+   #"PU_up"
+   #"PU_down"
 
    #"JER_up"
    #"JER_down"
@@ -50,10 +50,12 @@ systs=("nominal"
    #"TT_SCALE_down"
    #"TT_SCALE_up"
 
-#   "MT_3_down"
-#   "MT_3_up"
-#   "MT_6_down"
-#   "MT_6_up"
+   #"MT_3_down"
+   #"MT_3_up"
+   #"MT_6_down"
+   #"MT_6_up"
+   #"MT_1_down"
+   #"MT_1_up"
 
 
    #"Z_MATCH_down"
@@ -147,7 +149,7 @@ for (( i=0;i<${#channels[@]};i++)); do
 	    outnames=( "${outnames[@]}" "${outname}" ); 
 	    sed -e "s/##OUTNAME##/${outname}/" -e "s/##PARAMETERS##/-c ${channel} -s ${syst} -e ${energy} ${addParameters}/" -e "s;##WORKDIR##;${workdir};" < $analysisDir/job.sh > jobscripts/${outname}
 	    chmod +x jobscripts/${outname}
-	    if [[ $SGE_CELLL ]] ;
+	    if [[ $SGE_CELL ]] ;
 	    then
 		cd $BATCHDIR
 		qsub $workdir/jobscripts/${outname}
