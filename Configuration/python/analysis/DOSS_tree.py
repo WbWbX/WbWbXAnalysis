@@ -25,7 +25,7 @@ options.register ('PDF','cteq65',VarParsing.VarParsing.multiplicity.singleton,Va
 options.register ('inputScript','TtZAnalysis.Configuration.samples.mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"input Script")
 options.register ('json','nojson',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"json files")
 options.register ('isSync',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"switch on for sync")
-options.register('samplename', 'standard', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "which sample to run over - obsolete")
+options.register('oppoQ', True, VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.bool, "require opposite charge leptons (for data and BG only)")
 options.register ('laseroff',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"use ECal Laser filter")
 
 options.register ('jpsi',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"make trees for J/Psi")
@@ -131,20 +131,8 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.load('Configuration.EventContent.EventContent_cff')
 
-if not isMC and not is2011 and isPrompt: # https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagJetProbabilityCalibration?redirectedfrom=CMS.SWGuideBTagJetProbabilityCalibration#Calibration_in_52x_and_53x_Data
-    process.GlobalTag.toGet = cms.VPSet(
-        cms.PSet(record = cms.string("BTagTrackProbability2DRcd"),
-                 tag = cms.string("TrackProbabilityCalibration_2D_Data53X_v2"),
-                 connect = cms.untracked.string("frontier://FrontierPrep/CMS_COND_BTAU")),
-        cms.PSet(record = cms.string("BTagTrackProbability3DRcd"),
-                 tag = cms.string("TrackProbabilityCalibration_3D_Data53X_v2"),
-                 connect = cms.untracked.string("frontier://FrontierPrep/CMS_COND_BTAU"))
-        )
 
-##  not needed anymore in rereco
-
-if isMC and not is2011:
-
+if isMC:
     process.GlobalTag.toGet = cms.VPSet(
         cms.PSet(record = cms.string("BTagTrackProbability2DRcd"),
                  tag = cms.string("TrackProbabilityCalibration_2D_MC53X_v2"),
@@ -154,22 +142,9 @@ if isMC and not is2011:
                  connect = cms.untracked.string("frontier://FrontierPrep/CMS_COND_BTAU"))
         )
 
-
-if isMC and is2011:
-
-    process.GlobalTag.toGet = cms.VPSet(
-        cms.PSet(record = cms.string("BTagTrackProbability2DRcd"),
-                 tag = cms.string("TrackProbabilityCalibration_2D_MC_80_Ali44_v1"),
-                 connect = cms.untracked.string("frontier://FrontierPrep/CMS_COND_BTAU")),
-        cms.PSet(record = cms.string("BTagTrackProbability3DRcd"),
-                 tag = cms.string("TrackProbabilityCalibration_3D_MC_80_Ali44_v1"),
-                 connect = cms.untracked.string("frontier://FrontierPrep/CMS_COND_BTAU"))
-        )
-
-#data 2011 is ok
-
 #Options
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(wantSummary))
+process.GlobalTag.globaltag = globalTag + '::All'
 
 
 
@@ -179,7 +154,6 @@ process.MessageLogger.destinations = ['cout', 'cerr']
 #process.MessageLogger.suppressWarning=['particleFlowDisplacedVertexCandidate','The interpolated laser correction is <= zero! (0). Using 1. as correction factor.']
 process.MessageLogger.cerr.FwkReport.reportEvery = reportEvery
 
-process.GlobalTag.globaltag = globalTag + '::All'
 #process.source = cms.Source('PoolSource',fileNames=cms.untracked.vstring( inputFiles ), skipEvents=cms.untracked.uint32( skipEvents ) )
 process.out    = cms.OutputModule("PoolOutputModule", outputCommands =  cms.untracked.vstring(), fileName = cms.untracked.string( outputFile + '_PatTuple') )
 
@@ -218,8 +192,8 @@ if realdata and not (json=="nojson"):
 outFileName = outputFile + '.root'
 
 process.TFileService = cms.Service("TFileService",
-    fileName = cms.string(outFileName)
-)
+                                   fileName = cms.string(outFileName)
+                                   )
 
 
 #####pre filter sequences#######
@@ -238,6 +212,7 @@ process.load('TtZAnalysis.TreeWriter.puinfo_cff')
 
 process.PUInfo.includePDFWeights = includePDFWeights
 process.PUInfo.pdfWeights = "pdfWeights:"+PDF
+process.PUInfo.vertexSrc='offlinePrimaryVertices'
 
 process.preCutPUInfo = process.PUInfo.clone()
 process.preCutPUInfo.treeName = 'preCutPUInfo'
@@ -246,20 +221,115 @@ process.postCutPUInfo = process.PUInfo.clone()
 process.postCutPUInfo.treeName = 'PUTreePostCut'
 process.postCutPUInfo.includePDFWeights = False
 
-process.pfLeps = cms.EDFilter("PdgIdPFCandidateSelector",
-                              pdgId = cms.vint32(-13, 13, 11, -11),
-                              src = cms.InputTag("particleFlow")
-                              )
-process.allLeps = cms.EDProducer("CandViewMerger",
-                                 src = cms.VInputTag(cms.InputTag("gsfElectrons"), cms.InputTag("pfLeps"))
+
+############pre filters to speed up cmsRun
+## run before any "large" algos are run
+process.makeVLLeps=cms.Sequence()
+
+process.pfVLMusId = cms.EDFilter("PdgIdPFCandidateSelector",
+                                 pdgId = cms.vint32(-13, 13),
+                                 src = cms.InputTag("particleFlow")
                                  )
-process.requireMinLeptons = cms.EDFilter("CandViewCountFilter",
-                                         src = cms.InputTag('allLeps'),
-                                         minNumber = cms.uint32(minleptons)
+process.makeVLLeps+=process.pfVLMusId
+process.pfVLEsId = cms.EDFilter("PdgIdPFCandidateSelector",
+                                pdgId = cms.vint32(-11, 11),
+                                src = cms.InputTag("particleFlow")
+                                )
+process.makeVLLeps+=process.pfVLEsId
+
+process.pfVLMus=cms.EDFilter("GenericPFCandidateSelector",
+                             src = cms.InputTag("pfVLMusId"),
+                             cut = cms.string('pt>8')
+                             )
+process.makeVLLeps+=process.pfVLMus
+process.pfVLEs=cms.EDFilter("GenericPFCandidateSelector",
+                            src = cms.InputTag("pfVLEsId"),
+                            cut = cms.string('pt>8')
+                            )
+process.makeVLLeps+=process.pfVLEs
+
+
+process.VLMus = cms.EDFilter("PtMinCandViewSelector",
+                             src = cms.InputTag("muons"),
+                             ptMin = cms.double(8)
+                             )
+process.makeVLLeps+=process.VLMus
+
+process.VLEs = cms.EDFilter("PtMinCandViewSelector",
+                            src = cms.InputTag("gsfElectrons"),
+                            ptMin = cms.double(8)
+                            )
+process.makeVLLeps+=process.VLEs
+process.EpfMu = cms.EDProducer("CandViewMerger",
+                               src = cms.VInputTag(cms.InputTag("VLEs"), cms.InputTag("pfVLMus"))
+                               )
+process.makeVLLeps+=process.EpfMu
+process.pfEMu = cms.EDProducer("CandViewMerger",
+                               src = cms.VInputTag(cms.InputTag("pfVLEs"), cms.InputTag("VLMus"))
+                               )
+process.makeVLLeps+=process.pfEMu
+process.pfEpfMu = cms.EDProducer("CandViewMerger",
+                                 src = cms.VInputTag(cms.InputTag("pfVLEs"), cms.InputTag("pfVLMus"))
+                                 )
+process.makeVLLeps+=process.pfEpfMu
+process.EMu = cms.EDProducer("CandViewMerger",
+                             src = cms.VInputTag(cms.InputTag("VLEs"), cms.InputTag("VLMus"))
+                             )
+process.makeVLLeps+=process.EMu
+process.pfEE = cms.EDProducer("CandViewMerger",
+                             src = cms.VInputTag(cms.InputTag("VLEs"), cms.InputTag("pfVLEs"))
+                             )
+
+process.makeVLLeps+=process.pfEE
+process.pfMuMu = cms.EDProducer("CandViewMerger",
+                             src = cms.VInputTag(cms.InputTag("VLMus"), cms.InputTag("pfVLMus"))
+                             )
+process.makeVLLeps+=process.pfMuMu
+
+process.requireMinLeptons = cms.EDFilter("SimpleCounter",
+                                         src = cms.VInputTag(cms.InputTag("EMu"),
+                                                             cms.InputTag("pfEpfMu"),
+                                                             cms.InputTag("pfEMu"),
+                                                             cms.InputTag("EpfMu"),
+                                                             cms.InputTag("pfVLMus"),  
+                                                             cms.InputTag("pfVLEs"),   
+                                                             cms.InputTag("VLMus"),
+                                                             cms.InputTag("VLEs"),
+                                                             cms.InputTag("pfEE"),  
+                                                             cms.InputTag("pfMuMu")
+                                                             ),
+                                         minNumber = cms.uint32(minleptons),
+                                         requireOppoQ = cms.bool(options.oppoQ)
                                          )
 
-process.requireRecoLeps =  cms.Sequence(process.pfLeps *
-                                        process.allLeps *
+
+###channel specific preselections on data and non signal samples (DY is signal!):
+if (not isMC) or ("ttbarbg" in outputFile):
+    if "emu" in outputFile:
+        process.requireMinLeptons.src = cms.VInputTag(cms.InputTag("EMu"),
+                                                      cms.InputTag("pfEpfMu"),
+                                                      cms.InputTag("pfEMu"),
+                                                      cms.InputTag("EpfMu")
+                                                      )
+
+    if "mumu" in outputFile:
+        process.requireMinLeptons.src = cms.VInputTag(cms.InputTag("pfVLMus"),    
+                                                      cms.InputTag("VLMus"), 
+                                                      cms.InputTag("pfMuMu")
+                                                      )
+    if "ee" in outputFile:
+        process.requireMinLeptons.src = cms.VInputTag(cms.InputTag("pfVLEs"), 
+                                                      cms.InputTag("VLEs"),
+                                                      cms.InputTag("pfEE")  
+                                                      )
+
+
+
+
+#if not (includetrigger or includereco):
+
+
+process.requireRecoLeps =  cms.Sequence(process.makeVLLeps *
                                         process.requireMinLeptons)
 
 process.preFilterSequence = cms.Sequence()
@@ -295,23 +365,32 @@ if isMC:
         process.load("TopAnalysis.TopUtils.GenLevelBJetProducer_cff")
         process.produceGenLevelBJetsPlusHadron.deltaR = 5.0
         process.produceGenLevelBJetsPlusHadron.noBBbarResonances = True
-        process.produceGenLevelBJetsPlusHadron.doImprovedHadronMatching = True
-       # process.produceGenLevelBJetsPlusHadron.doValidationPlotsForImprovedHadronMatching = False
+        #process.produceGenLevelBJetsPlusHadron.doImprovedHadronMatching = True
+        # process.produceGenLevelBJetsPlusHadron.doValidationPlotsForImprovedHadronMatching = False
+        process.load("TopAnalysis.TopUtils.sequences.improvedJetHadronQuarkMatching_cff")
+        process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
+    
+
+        
+        process.load("TopAnalysis.TopUtils.GenLevelBJetProducer_cfi")
+        process.produceGenLevelBJets.deltaR = 5.0
+        process.produceGenLevelBJets.noBBbarResonances = True
+        
+        process.load("TopAnalysis.TopUtils.GenHFHadronMatcher_cff")
+        process.matchGenHFHadronJets.flavour = 5
+        process.matchGenHFHadronJets.noBBbarResonances = True
+        
         process.load("TopAnalysis.TopUtils.sequences.improvedJetHadronQuarkMatching_cff")
 
-##top projections turned off -> re-switch this?
-
-       # process.genParticlesForJetsNoNuPlusHadron.ignoreParticleIDs += cms.vuint32( 12,14,16)
-       # process.genParticlesForJetsNoMuNoNuPlusHadron.ignoreParticleIDs += cms.vuint32( 12,13,14,16)
-
         useBHadrons=True
+# process.produceGenLevelBJetsPlusHadron = process.matchGenHFHadronJets.clone()
 
         process.preFilterSequence = cms.Sequence(process.preCutPUInfo * 
                                                  process.topsequence *
                                                  process.postCutPUInfo *
                                                  process.improvedJetHadronQuarkMatchingSequence *
-                                                 process.produceGenLevelBJetsPlusHadron #*
-                                                 #process.requireRecoLeps
+                                                 process.produceGenLevelBJets *
+                                                 process.matchGenHFHadronJets
                                                  )
 
 
@@ -347,18 +426,15 @@ if isMC:
             print 'genFilter Z inverted'
             process.preFilterSequence = cms.Sequence(process.preCutPUInfo * 
                                                      ~process.generatorZFilter *
-                                                     process.postCutPUInfo )#*
-                                                    # process.requireRecoLeps)
+                                                     process.postCutPUInfo )
         else:
             process.preFilterSequence = cms.Sequence(process.preCutPUInfo * 
                                                      process.generatorZFilter *
-                                                     process.postCutPUInfo)#*
-                                                    # process.requireRecoLeps)
+                                                     process.postCutPUInfo)
             
-   
+            
     else:
-        process.preFilterSequence = cms.Sequence(process.preCutPUInfo )#* 
-                                                 #process.requireRecoLeps)
+        process.preFilterSequence = cms.Sequence(process.preCutPUInfo )
     if includePDFWeights:
         getattr(process, 'preFilterSequence').replace(process.preCutPUInfo,
                                                       process.pdfWeights *
@@ -376,10 +452,9 @@ if isMC:
 
 #### for data ###
 else:
-   
+    
 
-    process.preFilterSequence = cms.Sequence(process.preCutPUInfo *
-                                             process.requireRecoLeps)
+    process.preFilterSequence = cms.Sequence(process.preCutPUInfo)
 
 #    if not is2011:
 #        process.load('RecoMET.METFilters.ecalLaserCorrFilter_cfi')
@@ -400,8 +475,18 @@ if isSignal:
 
 #process.filtersSeq = cms.Sequence()
 
-process.load("TtZAnalysis.Workarounds.metFilters_cff")
-process.filtersSeq = cms.Sequence(process.ignoreMetFilters)
+process.load("TopAnalysis.ZTopUtils.metFilters_cff")
+process.noscraping = cms.EDFilter(
+    "FilterOutScraping",
+    applyfilter = cms.untracked.bool(True),
+    debugOn = cms.untracked.bool(False),
+    numtrack = cms.untracked.uint32(10),
+    thresh = cms.untracked.double(0.25)
+    )
+if isMC:
+    process.filtersSeq = cms.Sequence(process.ignoreMetFilters)
+else:
+    process.filtersSeq = cms.Sequence(process.noscraping * process.metFilters)
 
 if is2011:
     process.filtersSeq = cms.Sequence(
@@ -468,9 +553,9 @@ process.load('EgammaAnalysis.ElectronTools.electronIdMVAProducer_cfi')
 process.eidMVASequence = cms.Sequence(  process.mvaTrigV0 )
 getattr(process,'patElectrons'+pfpostfix).electronIDSources.mvaTrigV0    = cms.InputTag("mvaTrigV0")
 getattr(process, 'patPF2PATSequence'+pfpostfix).replace(getattr(process,'patElectrons'+pfpostfix),
-                                              process.eidMVASequence *
-                                              getattr(process,'patElectrons'+pfpostfix)
-                                              )
+                                                        process.eidMVASequence *
+                                                        getattr(process,'patElectrons'+pfpostfix)
+                                                        )
 
 ##########Energy corrections
 process.load("EgammaAnalysis.ElectronTools.electronRegressionEnergyProducer_cfi")
@@ -489,7 +574,7 @@ process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService
         initialSeed = cms.untracked.uint32(123456789),
         engineName = cms.untracked.string('TRandom3')
         )
-)
+                                                   )
 
 process.calibratedElectrons.updateEnergyError = cms.bool(True)
 process.calibratedElectrons.correctionsType = cms.int32(2)
@@ -515,17 +600,17 @@ from TtZAnalysis.Workarounds.useGsfElectrons import *
 
 process.patPFElectronsPFlow = getattr(process,'patElectrons'+pfpostfix).clone()
 getattr(process,'patPF2PATSequence'+pfpostfix).replace(getattr(process,'patElectrons'+pfpostfix),
-                                                     getattr(process,'patElectrons'+pfpostfix) *
-                                                     process.patPFElectronsPFlow)
+                                                       getattr(process,'patElectrons'+pfpostfix) *
+                                                       process.patPFElectronsPFlow)
 
 
 ####### make default patElectrons collection fed by gsf
 useGsfElectronsInPF2PAT(process,pfpostfix,electronIsoCone)
 # bugfixes made in pfTools and ofIsolation
-    
+
 
 ####### adapt pfElectrons 
-    
+
 getattr(process,'patPFElectrons'+pfpostfix).isolationValues = cms.PSet(
     pfChargedHadrons = cms.InputTag("elPFIsoValueCharged"+electronIsoCone+"PFId"+pfpostfix),
     pfChargedAll = cms.InputTag("elPFIsoValueChargedAll"+electronIsoCone+"PFId"+pfpostfix),
@@ -534,7 +619,7 @@ getattr(process,'patPFElectrons'+pfpostfix).isolationValues = cms.PSet(
     pfPhotons = cms.InputTag("elPFIsoValueGamma"+electronIsoCone+"PFId"+pfpostfix)
     )
 
-    
+
 
 
 ######### end of electron implementation ########
@@ -553,8 +638,8 @@ process.correctRecoMuonEnergy.muonType = "recoMuons"
 
 
 getattr(process,'patPF2PATSequence'+pfpostfix).replace(getattr(process,'pfMuonsFromVertex'+pfpostfix),
-                                                     getattr(process,'pfMuonsFromVertex'+pfpostfix) *
-                                                     process.correctMuonEnergy)
+                                                       getattr(process,'pfMuonsFromVertex'+pfpostfix) *
+                                                       process.correctMuonEnergy)
 
 
 if newMuons:
@@ -581,8 +666,8 @@ if susy:
     process.muIsoSequencetwo = setupPFMuonIso(process, 'muons', 'PFIso2')
     adaptPFIsoMuons( process, applyPostfix(process,"patMuonsPFlow",""), 'PFIso2', "03")
     getattr(process,'patPF2PATSequence'+pfpostfix).replace(getattr(process,'patMuons'+pfpostfix),
-                                                       getattr(process,'muIsoSequencetwo') *
-                                                       getattr(process,'patMuons'+pfpostfix))
+                                                           getattr(process,'muIsoSequencetwo') *
+                                                           getattr(process,'patMuons'+pfpostfix))
     
 
     process.patMuonsPFlow.useParticleFlow = cms.bool(False)
@@ -618,7 +703,7 @@ if jpsi:
 #getattr(process,'patPF2PATSequence'+pfpostfix).replace(getattr(process,'pfNoPileUp'+pfpostfix),
 #                                                       getattr(process,'pfNoPileUp'+pfpostfix) *
 #                                                       getattr(process,'pfJets'+pfpostfix))
-                                                       
+    
 
 
 ##just for taus
@@ -661,6 +746,121 @@ if is2011:
                                                            getattr(process,'patJets'+pfpostfix))
 
 
+################################################
+########################
+################################################
+################################################
+########################
+
+#MVA met
+
+process.load('RecoMET.METPUSubtraction.mvaPFMET_leptons_cff') 
+#process.mvametSequence = = cms.Sequence( process.pfMEtMVAsequence) 
+process.calibratedAK5PFJetsForPFMEtMVA.src = 'pfJets' +pfpostfix
+if isMC:
+    process.calibratedAK5PFJetsForPFMEtMVA.correctors= cms.vstring("ak5PFL1FastL2L3")
+else:
+    process.calibratedAK5PFJetsForPFMEtMVA.correctors= cms.vstring("ak5PFL1FastL2L3Residual")
+
+process.pfMEtMVA.srcUncorrJets='pfJets' +pfpostfix
+process.pfMEtMVA.srcVertices = 'goodOfflinePrimaryVertices'
+process.pfMEtMVA.inputFileNames = cms.PSet(
+    U     = cms.FileInPath('RecoMET/METPUSubtraction/data/gbrmet_53_June2013_type1.root'),
+    DPhi  = cms.FileInPath('RecoMET/METPUSubtraction/data/gbrmetphi_53_June2013_type1.root'),
+    CovU1 = cms.FileInPath('RecoMET/METPUSubtraction/data/gbru1cov_53_Dec2012.root'),
+    CovU2 = cms.FileInPath('RecoMET/METPUSubtraction/data/gbru2cov_53_Dec2012.root')
+    )
+
+process.pfMEtMVA.srcLeptons=cms.VInputTag("isomuons","isoelectrons","isotaus") #should be adapted to analysis selection.. 
+
+process.pfMEtMVA.srcRho = cms.InputTag("kt6PFJets","rho","RECO")
+process.patMEtMVA= getattr(process,'patMETs'+pfpostfix).clone()
+process.patMEtMVA.metSource = 'pfMEtMVA'
+
+
+
+
+#### other mets
+process.mets = cms.Sequence()
+process.load("JetMETCorrections.Type1MET.pfMETCorrections_cff")
+process.load("JetMETCorrections.Type1MET.pfMETsysShiftCorrections_cfi")
+
+
+#Not in 53X
+process.pfMEtSysShiftCorrParameters_2012runABCDvsNvtx_data = cms.PSet( # CV: ReReco data + Summer'13 JEC
+    px = cms.string("+4.83642e-02 + 2.48870e-01*Nvtx"),
+    py = cms.string("-1.50135e-01 - 8.27917e-02*Nvtx")
+    )
+
+process.pfMEtSysShiftCorrParameters_2012runABCDvsNvtx_mc = cms.PSet( # CV: Summer'12 MC + Summer'13 JEC
+    px = cms.string("+1.62861e-01 - 2.38517e-02*Nvtx"),
+    py = cms.string("+3.60860e-01 - 1.30335e-01*Nvtx")
+    )
+
+if isMC:
+    process.pfJetMETcorr.jetCorrLabel = "ak5PFL1FastL2L3"
+    process.pfMEtSysShiftCorr.parameter = process.pfMEtSysShiftCorrParameters_2012runABCDvsNvtx_mc
+else:
+    process.pfJetMETcorr.jetCorrLabel = "ak5PFL1FastL2L3Residual"
+    process.pfMEtSysShiftCorr.parameter = process.pfMEtSysShiftCorrParameters_2012runABCDvsNvtx_data
+
+process.pfMetT0T1Txy=process.pfType1CorrectedMet.clone()
+process.pfMetT0T1Txy.applyType0Corrections = cms.bool(True)
+
+process.pfMetT0T1Txy.srcType1Corrections = cms.VInputTag(
+    cms.InputTag('pfJetMETcorr', 'type1') ,
+    cms.InputTag('pfMEtSysShiftCorr')
+    )
+
+
+process.pfMetT0T1=process.pfType1CorrectedMet.clone()
+process.pfMetT0T1.applyType0Corrections = cms.bool(True)
+
+process.pfMetT1Txy=process.pfType1CorrectedMet.clone()
+#process.pfMetT1Txy.src=cms.InputTag('pfMEtSysShiftCorr')
+process.pfMetT1Txy.applyType0Corrections = cms.bool(False)
+process.pfMetT1Txy.srcType1Corrections = cms.VInputTag(
+    cms.InputTag('pfJetMETcorr', 'type1'),
+    cms.InputTag('pfMEtSysShiftCorr')
+
+    )
+
+process.pfType1CorrectedMet=process.pfType1CorrectedMet.clone()
+process.pfType1CorrectedMet.applyType0Corrections = cms.bool(False)
+process.pfType1CorrectedMet.srcType1Corrections = cms.VInputTag(
+    cms.InputTag('pfJetMETcorr', 'type1') ,
+
+    )
+
+#process.patPFMetPFlow
+
+process.patpfMetT1      = getattr(process,'patPFMet'+pfpostfix).clone()
+process.patpfMetT0T1Txy = getattr(process,'patPFMet'+pfpostfix).clone()
+process.patpfMetT0T1    = getattr(process,'patPFMet'+pfpostfix).clone()
+process.patpfMetT1Txy   = getattr(process,'patPFMet'+pfpostfix).clone()
+process.patpfMetT1.metSource = 'pfType1CorrectedMet'
+process.patpfMetT0T1Txy.metSource = 'pfMetT0T1Txy'
+process.patpfMetT0T1.metSource = 'pfMetT0T1'
+process.patpfMetT1Txy.metSource = 'pfMetT1Txy'
+
+
+process.mets+=process.pfMEtMVAsequence 
+process.mets+=process.patMEtMVA
+process.mets+=process.pfMEtSysShiftCorrSequence
+process.mets+=process.producePFMETCorrections
+process.mets+=process.pfMetT0T1Txy
+process.mets+=process.pfMetT0T1
+process.mets+=process.pfMetT1Txy
+process.mets+=process.patpfMetT1
+process.mets+=process.patpfMetT0T1Txy
+process.mets+=process.patpfMetT0T1
+process.mets+=process.patpfMetT1Txy
+
+getattr(process,'patPF2PATSequence'+pfpostfix).replace(getattr(process,'patMETs'+pfpostfix),
+                                                       process.mets*
+                                                       getattr(process,'patMETs'+pfpostfix))
+
+
 ###### Match triggers to leptons
 
 from PhysicsTools.PatAlgos.tools.trigTools import *
@@ -676,14 +876,14 @@ process.patTrigger.onlyStandAlone = False
 #process.patTrigger.addL1Algos = True
 
 process.patGSFElectronsTriggerMatches = cms.EDProducer("PATTriggerMatcherDRDPtLessByR",
-    matchedCuts = cms.string("path(\"HLT_Ele27_WP80_v*\")"),
-    src = cms.InputTag("patElectrons"+ pfpostfix),
-    maxDPtRel = cms.double(10),
-    resolveByMatchQuality = cms.bool(True),
-    maxDeltaR = cms.double(0.2),
-    resolveAmbiguities = cms.bool(True),
-    matched = cms.InputTag("patTrigger")
-)
+                                                       matchedCuts = cms.string("path(\"HLT_Ele27_WP80_v*\")"),
+                                                       src = cms.InputTag("patElectrons"+ pfpostfix),
+                                                       maxDPtRel = cms.double(10),
+                                                       resolveByMatchQuality = cms.bool(True),
+                                                       maxDeltaR = cms.double(0.2),
+                                                       resolveAmbiguities = cms.bool(True),
+                                                       matched = cms.InputTag("patTrigger")
+                                                       )
 process.patPFElectronsTriggerMatches = process.patGSFElectronsTriggerMatches.clone()
 process.patPFElectronsTriggerMatches.src = 'patPFElectrons'+pfpostfix
 
@@ -725,12 +925,12 @@ process.patMuonsWithTrigger = cms.EDProducer("PATTriggerMatchMuonEmbedder",
 
 if includereco or includetrigger:
     process.triggerMatches =  cms.Sequence(#process.reducedPatTrigger *
-                                           process.patGSFElectronsTriggerMatches *
-                                           process.patPFElectronsTriggerMatches *
-                                           process.patMuonsTriggerMatches *
-                                           process.patGSFElectronsWithTrigger *
-                                           process.patPFElectronsWithTrigger *
-                                           process.patMuonsWithTrigger)
+        process.patGSFElectronsTriggerMatches *
+        process.patPFElectronsTriggerMatches *
+        process.patMuonsTriggerMatches *
+        process.patGSFElectronsWithTrigger *
+        process.patPFElectronsWithTrigger *
+        process.patMuonsWithTrigger)
     
 
 else:
@@ -782,8 +982,8 @@ if includetrigger or jpsi:
 
 
 process.MuonGSFMerge = cms.EDProducer("CandViewMerger",
-                                     src = cms.VInputTag(cms.InputTag("kinMuons"),  cms.InputTag("kinElectrons"))
-                                     )
+                                      src = cms.VInputTag(cms.InputTag("kinMuons"),  cms.InputTag("kinElectrons"))
+                                      )
 
 process.MuonPFMerge = cms.EDProducer("CandViewMerger",
                                      src = cms.VInputTag(cms.InputTag("kinMuons"),  cms.InputTag("kinPFElectrons"))
@@ -791,20 +991,21 @@ process.MuonPFMerge = cms.EDProducer("CandViewMerger",
 
 
 process.filterkinLeptons = cms.EDFilter("SimpleCounter",
-                                       src = cms.VInputTag(cms.InputTag("kinMuons"),  
-                                                           cms.InputTag("kinElectrons"),   
-                                                           cms.InputTag("kinPFElectrons"),
-                                                           cms.InputTag("MuonGSFMerge"),
-                                                           cms.InputTag("MuonPFMerge")),
-                                       minNumber = cms.uint32(minleptons)
-                                       )
+                                        src = cms.VInputTag(cms.InputTag("kinMuons"),  
+                                                            cms.InputTag("kinElectrons"),   
+                                                            cms.InputTag("kinPFElectrons"),
+                                                            cms.InputTag("MuonGSFMerge"),
+                                                            cms.InputTag("MuonPFMerge")),
+                                        minNumber = cms.uint32(minleptons),
+                                        requireOppoQ = cms.bool(options.oppoQ)
+                                        )
 
 process.kinLeptonFilterSequence = cms.Sequence(process.kinMuons *
-                                              process.kinElectrons *
-                                              process.kinPFElectrons *
-                                              process.MuonGSFMerge *
-                                              process.MuonPFMerge *
-                                              process.filterkinLeptons)
+                                               process.kinElectrons *
+                                               process.kinPFElectrons *
+                                               process.MuonGSFMerge *
+                                               process.MuonPFMerge *
+                                               process.filterkinLeptons)
 
 if not isSignal:
     getattr(process,'patPF2PATSequence'+pfpostfix).replace(getattr(process,'patMuons'+pfpostfix),
@@ -820,7 +1021,7 @@ else: ## is Signal
                                                            process.kinMuons *
                                                            process.kinElectrons *
                                                            process.kinPFElectrons )
-                                                       
+    
 
 ########## Prepare Tree ##
 if ttH:
@@ -838,12 +1039,15 @@ else:
     process.load('TtZAnalysis.TreeWriter.treewriter_ttz_cff')
 
 
-process.ecalLaserCorrFilter.EBLaserMAX=cms.double(0.3) #filters all
 
 
 #process.PFTree.vertexSrc         = 'goodVertices' #use standard
 process.PFTree.metSrc            = 'patMETs'+pfpostfix
-process.PFTree.mvaMetSrc            = 'patMETs'+pfpostfix
+process.PFTree.mvaMetSrc          = 'patMEtMVA'
+process.PFTree.metT1Src            = 'patpfMetT1'
+process.PFTree.metT0T1TxySrc        ='patpfMetT0T1Txy'
+process.PFTree.metT0T1Src           ='patpfMetT0T1'
+process.PFTree.metT1TxySrc          ='patpfMetT1Txy'
 process.PFTree.includeTrigger    = includetrigger
 process.PFTree.includeReco       = includereco
 process.PFTree.rhoJetsIsoNoPu    = cms.InputTag("kt6PFJetsForIsoNoPU","rho",process.name_())
@@ -892,7 +1096,7 @@ process.PFTree.debugmode= debug
 process.treeSequence = cms.Sequence(process.patTriggerSequence *
                                     process.superClusters *
                                     process.treeJets *
-                                    process.combinedbools *
+                                    
                                     process.PFTree)
 
 
@@ -902,18 +1106,16 @@ process.treeSequence = cms.Sequence(process.patTriggerSequence *
 ###### Path
 process.dump=cms.EDAnalyzer('EventContentAnalyzer')
 
-process.path = cms.Path( process.goodOfflinePrimaryVertices *
-                         #process.dump *
-                         process.elecEnergyCalibration *
-                         process.correctRecoMuonEnergy * #pfMuon eneergy is hidden in pf2pat sequence
-                         
-                         process.preFilterSequence *
-                         process.filtersSeq *
-                      
-                        getattr(process,'patPF2PATSequence'+pfpostfix) *
-                        process.isoJetSequence  *
-                        process.treeSequence
-                         )
+process.path = cms.Path( 
+    process.elecEnergyCalibration *
+    process.correctRecoMuonEnergy * #pfMuon eneergy is hidden in pf2pat sequence
+    process.preFilterSequence *
+    process.goodOfflinePrimaryVertices *
+    process.filtersSeq *
+    getattr(process,'patPF2PATSequence'+pfpostfix) *
+    process.isoJetSequence  *
+    process.treeSequence
+    )
 
 #if susy:
 #    process.path.replace(getattr(process,'patPF2PATSequence'+pfpostfix),

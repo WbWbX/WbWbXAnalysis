@@ -57,7 +57,7 @@ my @kill;
 
 # prepare workingdir
 
-my $globalWorkingdir="/scratch/hh/dust/naf/cms/user/$ENV{USER}/NAF_workingDir";
+my $globalWorkingdir="/nfs/dust/cms/user/$ENV{USER}/NAF_workingDir";
 
 unless(-e $globalWorkingdir){
     print "creating global NAF working dir at $globalWorkingdir...\n";
@@ -75,7 +75,7 @@ my $fullCMSSWcfpath=File::Spec->rel2abs($arg{c});
 my $cfgfilename = ( split m{/}, $arg{c} )[-1];
 my $nafJobSplitter="$ENV{CMSSW_BASE}/src/TopAnalysis/TopUtils/scripts/nafJobSplitter2.pl";
 
-my $startstring="#!/bin/sh\nexport SCRAM_ARCH=$ENV{SCRAM_ARCH}\nexport VO_CMS_SW_DIR=$ENV{VO_CMS_SW_DIR}\nsource $ENV{VO_CMS_SW_DIR}/cmsset_default.sh\n\necho \"using CMSSW located here: $ENV{CMSSW_BASE}\"\ncd $ENV{CMSSW_BASE}\neval `scramv1 runtime -sh`\ncd -\n\nexport PYTHONPATH=/scratch/hh/dust/naf/cms/user/\$USER/.nafJobSplitter/python:\$PYTHONPATH\n";
+my $startstring="#!/bin/sh\nexport SCRAM_ARCH=$ENV{SCRAM_ARCH}\nexport VO_CMS_SW_DIR=$ENV{VO_CMS_SW_DIR}\nsource $ENV{VO_CMS_SW_DIR}/cmsset_default.sh\n\necho \"using CMSSW located here: $ENV{CMSSW_BASE}\"\ncd $ENV{CMSSW_BASE}\neval `scramv1 runtime -sh`\ncd -\n\nexport PYTHONPATH=/nfs/dust/cms/user/\$USER/.nafJobSplitter/python:\$PYTHONPATH\nexport NJS_MEM=1999\n";
 
 push @run, $startstring;
 push @check, $startstring;
