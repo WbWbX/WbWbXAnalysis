@@ -175,6 +175,7 @@ public:
   bool usegsf_;
 
   edm::InputTag muons_, recomuons_, pfelecs_, gsfelecs_,recoelecs_, jets_, met_, vertices_, trigresults_, puinfo_, recotracks_, recosuclus_,rhojetsiso_,rhojetsisonopu_,rhoiso_,pdfweights_, genparticles_, genjets_,mvamet_,pattriggerevent_;
+  edm::InputTag  t1met_,t0t1txymet_,t0t1met_,t1txymet_;
   //rhojets_,rhojetsiso_,rhojetsnopu_,rhojetsisonopu_,rhoiso_;
 
   bool includereco_, includetrigger_, pfinput_,includepdfweights_,includegen_,susy_,jpsi_;
@@ -187,9 +188,10 @@ public:
   std::vector<ztop::NTTrack> nttracks;
   std::vector<ztop::NTSuClu> ntsuclus;
   ztop::NTMet ntmet;
-  ztop::NTMet ntmvamet;
+  ztop::NTMet ntmvamet,ntt1met,ntt0t1txymet,ntt0t1met,ntt1txymet;
   ztop::NTEvent ntevent;
   ztop::NTTrigger nttrigger;
+  float genmet_f;
 
   std::vector<ztop::NTVertex> goodvtx,jetvtx,dimuonvtx;
 

@@ -6,7 +6,7 @@
  */
 
 #include "../interface/containerUnfolder.h"
-
+#include <omp.h>
 
 /*
 class containerUnfolder{
@@ -225,6 +225,7 @@ container1D containerUnfolder::unfold(/*const*/ container1DUnfold & cuf){
 	 */
 	if(debug)
 		std::cout << "containerUnfolder::unfold: scanning L-Curve/Tau of systematics" << std::endl;
+#pragma omp parallel for
 	for(size_t sys=0;sys<unfsyst_.size();sys++){
 		if(debug||printinfo)
 			std::cout << "containerUnfolder::unfold: scanning L-Curve/Tau of "<< cuf.getName() << ": " << cuf.getSystErrorName(sys) << std::endl;

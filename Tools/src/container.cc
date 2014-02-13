@@ -1,6 +1,9 @@
 #include "../interface/container.h"
 #include <algorithm>
+#include "FWCore/FWLite/interface/AutoLibraryLoader.h"
 #include <parallel/algorithm>
+#include "TTree.h"
+#include "TFile.h"
 //#include <omp.h>
 
 //some more operators
@@ -1480,5 +1483,95 @@ void container1D::copyFrom(const container1D& c){
     hp_=0;
 
 }
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
+/////////////IO////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+void container1D::loadFromTree(TTree *t, const TString & plotname){
+    if(!t || t->IsZombie()){
+        throw std::runtime_error("container1D::loadFromTree: tree not ok");
+    }
+    ztop::container1D * cuftemp=0;
+    if(!t->GetBranch("container1Ds")){
+        throw std::runtime_error("container1D::loadFromTree: branch container1Ds not found");
+    }
+    bool found=false;
+    size_t count=0;
+    t->SetBranchAddress("container1Ds", &cuftemp);
+    for(float n=0;n<t->GetEntries();n++){
+        t->GetEntry(n);
+        if(cuftemp->getName()==(plotname)){
+            found=true;
+            count++;
+            *this=*cuftemp;
+        }
+    }
+   if(!found){
+        throw std::runtime_error("container1D::loadFromTree: no container with name not found");
+    }
+    if(count>1){
+        std::cout << "container1DUnfold::loadFromTree: found more than one object with name "
+                << getName() << ", took the first one." << std::endl;
+    }
+}
+void container1D::loadFromTFile(TFile *f, const TString & plotname){
+    if(!f || f->IsZombie()){
+        throw std::runtime_error("container1D::loadFromTFile: file not ok");
+    }
+    AutoLibraryLoader::enable();
+    TTree * ttemp = (TTree*)f->Get("container1Ds");
+    loadFromTree(ttemp,plotname);
+    delete ttemp;
+}
+void container1D::loadFromTFile(const TString& filename,
+        const TString & plotname){
+    TFile * ftemp=new TFile(filename,"read");
+    loadFromTFile(ftemp,plotname);
+    delete ftemp;
+}
+
+void container1D::writeToTree(TTree *t){
+    if(!t || t->IsZombie()){
+        throw std::runtime_error("container1D::writeToTree: tree not ok");
+    }
+    ztop::container1D * cufpointer=this;
+    if(t->GetBranch("container1Ds")){
+        t->SetBranchAddress("container1Ds", &cufpointer);
+    }
+    else{
+        t->Branch("container1Ds",&cufpointer);
+        t->SetBranchAddress("container1Ds", &cufpointer);
+    }
+
+    t->Fill();
+    t->Write(t->GetName(),TObject::kOverwrite);
+}
+void container1D::writeToTFile(TFile *f){
+    if(!f || f->IsZombie()){
+        throw std::runtime_error("container1D::loadFromTFile: file not ok");
+    }
+    f->cd();
+    TTree * ttemp = (TTree*)f->Get("container1Ds");
+    if(!ttemp || ttemp->IsZombie())//create
+        ttemp = new TTree("container1Ds","container1Ds");
+    writeToTree(ttemp);
+    delete ttemp;
+}
+void container1D::writeToTFile(const TString& filename){
+    TFile * ftemp=new TFile(filename,"update");
+    if(!ftemp || ftemp->IsZombie()){
+        delete ftemp;
+        ftemp=new TFile(filename,"create");
+    }
+
+    writeToTFile(ftemp);
+    delete ftemp;
+}
+
 
 }//namespace

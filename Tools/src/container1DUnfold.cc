@@ -6,13 +6,15 @@
  */
 
 #include "../interface/container1DUnfold.h"
+#include "FWCore/FWLite/interface/AutoLibraryLoader.h"
 
 /*
  * multicore usage for unfolding to be implemented
  */
 #include <omp.h>
 #include <stdexcept>
-
+#include "TTree.h"
+#include "TFile.h"
 namespace ztop{
 
 
@@ -37,9 +39,9 @@ container1DUnfold::container1DUnfold(): container2D(), xaxis1Dname_(""), yaxis1D
     }
 }
 container1DUnfold::container1DUnfold( std::vector<float> genbins, std::vector<float> recobins, TString name,TString xaxisname,TString yaxisname, bool mergeufof):
-	               															                                                                container2D( recobins /*genbins*/ , recobins , name,xaxisname+"_reco",xaxisname+"_gen",mergeufof), xaxis1Dname_(xaxisname),
-	               															                                                                yaxis1Dname_(yaxisname),tempgen_(0),tempreco_(0),tempgenweight_(1),tempweight_(1),recofill_(false),genfill_(false),
-	               															                                                                isMC_(false),flushed_(true),binbybin_(false),lumi_(1),congruentbins_(false) {
+	               															                                                                                                                        container2D( recobins /*genbins*/ , recobins , name,xaxisname+"_reco",xaxisname+"_gen",mergeufof), xaxis1Dname_(xaxisname),
+	               															                                                                                                                        yaxis1Dname_(yaxisname),tempgen_(0),tempreco_(0),tempgenweight_(1),tempweight_(1),recofill_(false),genfill_(false),
+	               															                                                                                                                        isMC_(false),flushed_(true),binbybin_(false),lumi_(1),congruentbins_(false) {
     //bins are set, containers created, at least conts_[0] exists with all options (binomial, mergeufof etc)
 
     genbins_=genbins; //can be changed and rebinned afterwards
@@ -533,6 +535,97 @@ bool container1DUnfold::checkCongruence(const std::vector<float>& a, const std::
     sames.resize(it-sames.begin());
     return sames.size() == a.size();
 }
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
+/////////////IO////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+void container1DUnfold::loadFromTree(TTree *t, const TString & plotname){
+    if(!t || t->IsZombie()){
+        throw std::runtime_error("container1DUnfold::loadFromTree: tree not ok");
+    }
+    ztop::container1DUnfold * cuftemp=0;
+    if(!t->GetBranch("container1DUnfolds")){
+        throw std::runtime_error("container1DUnfold::loadFromTree: branch container1DUnfolds not found");
+    }
+    bool found=false;
+    size_t count=0;
+
+    t->SetBranchAddress("container1DUnfolds", &cuftemp);
+    for(float n=0;n<t->GetEntries();n++){
+        t->GetEntry(n);
+        if(cuftemp->getName()==(plotname)){
+            found=true;
+            count++;
+            *this=*cuftemp;
+        }
+    }
+
+    if(!found){
+        throw std::runtime_error("container1DUnfold::loadFromTree: no container with name not found");
+    }
+    if(count>1){
+        std::cout << "container1DUnfold::loadFromTree: found more than one object with name "
+                << getName() << ", took the first one." << std::endl;
+    }
+}
+void container1DUnfold::loadFromTFile(TFile *f, const TString & plotname){
+    if(!f || f->IsZombie()){
+        throw std::runtime_error("container1DUnfold::loadFromTFile: file not ok");
+    }
+    AutoLibraryLoader::enable();
+    TTree * ttemp = (TTree*)f->Get("container1DUnfolds");
+    loadFromTree(ttemp,plotname);
+    delete ttemp;
+}
+void container1DUnfold::loadFromTFile(const TString& filename,
+        const TString & plotname){
+    TFile * ftemp=new TFile(filename,"read");
+    loadFromTFile(ftemp,plotname);
+    delete ftemp;
+}
+
+void container1DUnfold::writeToTree(TTree *t){
+    if(!t || t->IsZombie()){
+        throw std::runtime_error("container1DUnfold::writeToTree: tree not ok");
+    }
+    ztop::container1DUnfold * cufpointer=this;
+    TBranch *b=0;
+    if(t->GetBranch("container1DUnfolds")){
+        t->SetBranchAddress("container1DUnfolds", &cufpointer, &b);
+    }
+    else{
+        b=t->Branch("container1DUnfolds",&cufpointer);
+    }
+
+    t->Fill();
+    t->Write(t->GetName(),TObject::kOverwrite);
+}
+void container1DUnfold::writeToTFile(TFile *f){
+    if(!f || f->IsZombie()){
+        throw std::runtime_error("container1DUnfold::loadFromTFile: file not ok");
+    }
+    f->cd();
+    TTree * ttemp = (TTree*)f->Get("container1DUnfolds");
+    if(!ttemp || ttemp->IsZombie())//create
+        ttemp = new TTree("container1DUnfolds","container1DUnfolds");
+    writeToTree(ttemp);
+    delete ttemp;
+}
+void container1DUnfold::writeToTFile(const TString& filename){
+    TFile * ftemp=new TFile(filename,"update");
+    if(!ftemp || ftemp->IsZombie()){
+        delete ftemp;
+        ftemp=new TFile(filename,"create");
+    }
+    writeToTFile(ftemp);
+    delete ftemp;
+}
+
 
 }
 

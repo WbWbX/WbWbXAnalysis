@@ -10,6 +10,10 @@
 #include <algorithm>
 #include "../interface/container.h"
 #include "TH1F.h"
+#include "TTree.h"
+#include "TFile.h"
+#include "FWCore/FWLite/interface/AutoLibraryLoader.h"
+
 namespace ztop{
 namespace graphhelperfunctions{
 struct sort_pairbyfirst {
@@ -616,6 +620,98 @@ const histoBin & graph::getPointY(const size_t & pointidx,const int & layer) con
     }
     return ycoords_.getBin(pointidx,layer);
 }
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
+/////////////IO////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+void graph::loadFromTree(TTree *t, const TString & plotname){
+    if(!t || t->IsZombie()){
+        throw std::runtime_error("graph::loadFromTree: tree not ok");
+    }
+    ztop::graph * cuftemp=0;
+    if(!t->GetBranch("graphs")){
+        throw std::runtime_error("graph::loadFromTree: branch graphs not found");
+    }
+    bool found=false;
+    size_t count=0;
+    t->SetBranchAddress("graphs", &cuftemp);
+    for(float n=0;n<t->GetEntries();n++){
+        t->GetEntry(n);
+        if(cuftemp->getName()==(plotname)){
+            found=true;
+            count++;
+        }
+    }
+    if(found){
+        *this=*cuftemp;
+    }
+    else{
+        throw std::runtime_error("graph::loadFromTree: no container with name not found");
+    }
+    if(count>1){
+        std::cout << "graphUnfold::loadFromTree: found more than one object with name "
+                << getName() << ", took the last one." << std::endl;
+    }
+}
+void graph::loadFromTFile(TFile *f, const TString & plotname){
+    if(!f || f->IsZombie()){
+        throw std::runtime_error("graph::loadFromTFile: file not ok");
+    }
+    AutoLibraryLoader::enable();
+    TTree * ttemp = (TTree*)f->Get("graphs");
+    loadFromTree(ttemp,plotname);
+    delete ttemp;
+}
+void graph::loadFromTFile(const TString& filename,
+        const TString & plotname){
+    TFile * ftemp=new TFile(filename,"read");
+    loadFromTFile(ftemp,plotname);
+    delete ftemp;
+}
+
+void graph::writeToTree(TTree *t){
+    if(!t || t->IsZombie()){
+        throw std::runtime_error("graph::writeToTree: tree not ok");
+    }
+    ztop::graph * cufpointer=this;
+    if(t->GetBranch("graphs")){
+        t->SetBranchAddress("graphs", &cufpointer);
+    }
+    else{
+        t->Branch("graphs",&cufpointer);
+        t->SetBranchAddress("graphs", &cufpointer);
+    }
+
+    t->Fill();
+    t->Write(t->GetName(),TObject::kOverwrite);
+}
+void graph::writeToTFile(TFile *f){
+    if(!f || f->IsZombie()){
+        throw std::runtime_error("graph::loadFromTFile: file not ok");
+    }
+    f->cd();
+    TTree * ttemp = (TTree*)f->Get("graphs");
+    if(!ttemp || ttemp->IsZombie())//create
+        ttemp = new TTree("graphs","graphs");
+    writeToTree(ttemp);
+    delete ttemp;
+}
+void graph::writeToTFile(const TString& filename){
+    TFile * ftemp=new TFile(filename,"update");
+    if(!ftemp || ftemp->IsZombie()){
+        delete ftemp;
+        ftemp=new TFile(filename,"create");
+    }
+
+    writeToTFile(ftemp);
+    delete ftemp;
+}
+
 
 }//namespace
 

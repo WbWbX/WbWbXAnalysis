@@ -289,15 +289,15 @@ void containerStackVector::writeAllToTFile(TString filename, bool recreate, bool
     else{
         t = new TTree(treename,treename);
     }
-    if(t->GetBranch("allContainerStackVectors")){ //branch does  exist
+    if(t->GetBranch("containerStackVectors")){ //branch does  exist
         bool temp=csv_makelist;
         csv_makelist=false;
         containerStackVector * csv = this;
-        t->SetBranchAddress("allContainerStackVectors",&csv);
+        t->SetBranchAddress("containerStackVectors",&csv);
         csv_makelist=temp;
     }
     else{
-        t->Branch("allContainerStackVectors",this);
+        t->Branch("containerStackVectors",this);
         std::cout << "containerStackVector::writeAllToTFile: added branch" << std::endl;
     }
     if(debug)
@@ -363,7 +363,7 @@ void containerStackVector::writeAllToTFile(TString filename, bool recreate, bool
             container1DUnfold cuf=stack->getSignalContainer();
             containerStack rebinned=stack->rebinXToBinning(cuf.getGenBins());
             rebinned.setName(stack->getName()+"_genbins");
-             c = new TCanvas(rebinned.getName());
+            c = new TCanvas(rebinned.getName());
             pl.setTitle(rebinned.getName());
             pl.usePad(c);
             pl.setStack(&rebinned);
@@ -485,7 +485,7 @@ void containerStackVector::writeAllToTFile(TString filename, bool recreate, bool
     if(debug)
         std::cout << "containerStackVector::writeAllToTFile: sig/bg plots drawn" << std::endl;
 
-*/
+     */
     f->Close();
     delete f;
 
@@ -529,15 +529,15 @@ void containerStackVector::writeAllToTFile(TFile * f, TString treename){
     else{
         t = new TTree(treename,treename);
     }
-    if(t->GetBranch("allContainerStackVectors")){ //branch does exist
+    if(t->GetBranch("containerStackVectors")){ //branch does exist
         bool temp=csv_makelist;
         csv_makelist=false;
         containerStackVector * csv = this;
-        t->SetBranchAddress("allContainerStackVectors",&csv);
+        t->SetBranchAddress("containerStackVectors",&csv);
         csv_makelist=temp;
     }
     else{
-        t->Branch("allContainerStackVectors",this);
+        t->Branch("containerStackVectors",this);
         std::cout << "containerStackVector::writeAllToTFile: added branch" << std::endl;
     }
     t->Fill();
@@ -582,17 +582,48 @@ void containerStackVector::loadFromTree(TTree * t, TString name){
     containerStackVector * pcsv=csv.getFromTree(t,name);
     if(pcsv)
         *this=*pcsv;
+    else
+        throw std::runtime_error("containerStackVector::loadFromTree: no CSV found in tree");
+
+
 }
 
 containerStackVector * containerStackVector::getFromTree(TTree * t, TString name){
     AutoLibraryLoader::enable();
-    containerStackVector * csv=0;
+    if(!t || t->IsZombie()){
+            throw std::runtime_error("containerStackVector::loadFromTree: tree not ok");
+        }
+        ztop::containerStackVector * cuftemp=0;
+        if(!t->GetBranch("containerStackVectors")){
+            throw std::runtime_error("containerStackVector::loadFromTree: branch containerStackVectors not found");
+        }
+        bool found=false;
+        size_t count=0;
+        t->SetBranchAddress("containerStackVectors", &cuftemp);
+        for(float n=0;n<t->GetEntries();n++){
+            t->GetEntry(n);
+            std::cout << cuftemp->getName() << std::endl;
+            if(cuftemp->getName()==(name)){
+                found=true;
+                count++;
+                *this=*cuftemp;
+            }
+        }
+       if(!found){
+            throw std::runtime_error("containerStackVector::loadFromTree: no containerStackVector with name not found");
+        }
+        if(count>1){
+            std::cout << "containerStackVector::loadFromTree: found more than one object with name "
+                    << getName() << ", took the first one." << std::endl;
+        }
+        return cuftemp;
+ /*   containerStackVector * csv=0;
     bool found=false;
     if(!t)
         return 0;
-    if(!t->GetBranch("allContainerStackVectors"))
+    if(!t->GetBranch("containerStackVectors"))
         return 0;
-    t->SetBranchAddress("allContainerStackVectors", &csv);
+    t->SetBranchAddress("containerStackVectors", &csv);
     for(float n=0;n<t->GetEntries();n++){
         t->GetEntry(n);
         TString vname=toTString(csv->getName());
@@ -610,18 +641,33 @@ containerStackVector * containerStackVector::getFromTree(TTree * t, TString name
     if(!found){
         std::cout << "containerStackVector::getFromTree: " << name << " not found in tree " << t->GetName() << "\nreturning 0 pointer!" <<std::endl;
     }
-    return 0;
+    return 0; */
+}
+void containerStackVector::loadFromTFile(TFile * f,const TString& csvname,TString treename){
+    if(!f || f->IsZombie()){
+        throw std::runtime_error("containerStackVector::loadFromTFile: file not ok.");
+    }
+    TTree * ttemp = (TTree*)f->Get(treename);
+    loadFromTree(ttemp,csvname);
+    delete ttemp;
+}
+void containerStackVector::loadFromTFile(const TString& filename,const TString& csvname,TString treename){
+    TFile * ftemp=new TFile(filename,"read");
+    loadFromTFile(ftemp,csvname,treename);
+    delete ftemp;
 }
 
 
 void containerStackVector::listAllInTree(TTree * t){
     AutoLibraryLoader::enable();
     containerStackVector * csv=0;
-    t->SetBranchAddress("allContainerStackVectors", &csv);
+    t->SetBranchAddress("containerStackVectors", &csv);
     for(float n=0;n<t->GetEntries();n++){
         t->GetEntry(n);
         std::cout << csv->getName() << std::endl;
     }
 }
+
+
 
 }

@@ -33,7 +33,7 @@ ztop::NTMuon TreeWriterTtZ::makeNTMuon(const pat::Muon & muon){
 
 
  
-  ztop::LorentzVector p4zero(0,0,0,0);
+  ztop::NTLorentzVector<float> p4zero(0,0,0,0);
   ztop::NTMuon tempmuon;
 
   tempmuon.setIsPf(muon.isPFMuon());
@@ -50,7 +50,8 @@ ztop::NTMuon TreeWriterTtZ::makeNTMuon(const pat::Muon & muon){
   tempmuon.setQ   (muon.charge());
 
   if(includereco_ && !(muon.innerTrack()).isNull()){
-    ztop::LorentzVector trkp4(muon.innerTrack()->px(),muon.innerTrack()->py(),muon.innerTrack()->pz(),muon.innerTrack()->p());
+      ztop::NTLorentzVector<float> trkp4;
+      trkp4.setPxPyPzE(muon.innerTrack()->px(),muon.innerTrack()->py(),muon.innerTrack()->pz(),muon.innerTrack()->p());
     tempmuon.setTrackP4(trkp4);
   }
   else{
@@ -137,7 +138,7 @@ ztop::NTMuon TreeWriterTtZ::makeNTMuon(const pat::Muon & muon){
 }
 ztop::NTElectron TreeWriterTtZ::makeNTElectron(const pat::Electron & electron){
   
-  ztop::LorentzVector p4zero(0,0,0,0);
+    ztop::NTLorentzVector<float> p4zero(0,0,0,0);
 
    ztop::NTElectron tempelec;
 
@@ -218,7 +219,8 @@ ztop::NTElectron TreeWriterTtZ::makeNTElectron(const pat::Electron & electron){
     suclue=electron.superCluster()->rawEnergy();
     math::XYZPoint suclupoint=electron.superCluster()->position();
     double magnitude=sqrt(suclupoint.mag2());
-    ztop::LorentzVector suclup4(suclue*suclupoint.x() / magnitude,suclue*suclupoint.y() / magnitude,suclue*suclupoint.z() / magnitude,suclue);
+    ztop::NTLorentzVector<float> suclup4;
+    suclup4.setPxPyPzE(suclue*suclupoint.x() / magnitude,suclue*suclupoint.y() / magnitude,suclue*suclupoint.z() / magnitude,suclue);
     ztop::NTSuClu suclu;
     suclu.setP4(suclup4);
     tempelec.setSuClu(suclu);
@@ -232,7 +234,7 @@ ztop::NTElectron TreeWriterTtZ::makeNTElectron(const pat::Electron & electron){
 
 ztop::NTJet TreeWriterTtZ::makeNTJet(const pat::Jet & jet){
 
-  ztop::LorentzVector p4zero(0,0,0,0);
+    ztop::NTLorentzVector<float> p4zero(0,0,0,0);
 
   ztop::NTJet tempjet;
 

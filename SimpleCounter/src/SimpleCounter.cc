@@ -9,7 +9,7 @@
 
  Implementation:
      [Notes on implementation]
-*/
+ */
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Thu Oct  4 16:04:20 CEST 2012
@@ -38,26 +38,27 @@
 //
 
 class SimpleCounter : public edm::EDFilter {
-   public:
-      explicit SimpleCounter(const edm::ParameterSet&);
-      ~SimpleCounter();
+public:
+    explicit SimpleCounter(const edm::ParameterSet&);
+    ~SimpleCounter();
 
-      static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
+    static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
-   private:
-      virtual void beginJob() ;
-      virtual bool filter(edm::Event&, const edm::EventSetup&);
-      virtual void endJob() ;
-      
-      virtual bool beginRun(edm::Run&, edm::EventSetup const&);
-      virtual bool endRun(edm::Run&, edm::EventSetup const&);
-      virtual bool beginLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup const&);
-      virtual bool endLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup const&);
+private:
+    virtual void beginJob() ;
+    virtual bool filter(edm::Event&, const edm::EventSetup&);
+    virtual void endJob() ;
 
-      // ----------member data ---------------------------
+    virtual bool beginRun(edm::Run&, edm::EventSetup const&);
+    virtual bool endRun(edm::Run&, edm::EventSetup const&);
+    virtual bool beginLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup const&);
+    virtual bool endLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup const&);
 
-  std::vector<edm::InputTag> inputs_;
-  unsigned int minnumber_;
+    // ----------member data ---------------------------
+
+    std::vector<edm::InputTag> inputs_;
+    unsigned int minnumber_;
+    bool oppoQ_;
 
 };
 
@@ -74,18 +75,19 @@ class SimpleCounter : public edm::EDFilter {
 //
 SimpleCounter::SimpleCounter(const edm::ParameterSet& iConfig)
 {
-   //now do what ever initialization is needed
-  inputs_    = iConfig.getParameter<std::vector<edm::InputTag> > ("src");
-  minnumber_ = iConfig.getParameter<unsigned int> ("minNumber");
+    //now do what ever initialization is needed
+    inputs_    = iConfig.getParameter<std::vector<edm::InputTag> > ("src");
+    minnumber_ = iConfig.getParameter<unsigned int> ("minNumber");
+    oppoQ_ = iConfig.getParameter<bool> ("requireOppoQ");
 
 }
 
 
 SimpleCounter::~SimpleCounter()
 {
- 
-   // do anything here that needs to be done at desctruction time
-   // (e.g. close files, deallocate resources etc.)
+
+    // do anything here that needs to be done at desctruction time
+    // (e.g. close files, deallocate resources etc.)
 
 }
 
@@ -99,23 +101,30 @@ bool
 SimpleCounter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
 
-  bool enough=false;
+    bool enough=false;
+    using namespace edm;
+    Handle<reco::CandidateView> pIn;
 
-   using namespace edm;
+    for(std::vector<edm::InputTag>::const_iterator input=inputs_.begin(); input<inputs_.end();++input){
+        iEvent.getByLabel(*input,pIn);
 
-
-   Handle<reco::CandidateView> pIn;
-
-   for(std::vector<edm::InputTag>::const_iterator input=inputs_.begin(); input<inputs_.end();++input){
-     iEvent.getByLabel(*input,pIn);
-     if(pIn->size() >= minnumber_){
-       enough=true;
-       break;
-     }
-   }
-
-
-   return enough;
+        if(pIn->size() >= minnumber_){
+            if(oppoQ_){
+                int q0=pIn->at(0).charge();
+                for(size_t i=1;i<pIn->size();i++){
+                    if(pIn->at(i).charge() * q0 < 0){
+                        enough=true;
+                        break;
+                    }
+                }
+            }
+            else{
+                enough=true;
+            }
+        }
+        if(enough) break;
+    }
+    return enough;
 }
 
 // ------------ method called once each job just before starting event loop  ------------
@@ -133,38 +142,38 @@ SimpleCounter::endJob() {
 bool 
 SimpleCounter::beginRun(edm::Run&, edm::EventSetup const&)
 { 
-  return true;
+    return true;
 }
 
 // ------------ method called when ending the processing of a run  ------------
 bool 
 SimpleCounter::endRun(edm::Run&, edm::EventSetup const&)
 {
-  return true;
+    return true;
 }
 
 // ------------ method called when starting to processes a luminosity block  ------------
 bool 
 SimpleCounter::beginLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup const&)
 {
-  return true;
+    return true;
 }
 
 // ------------ method called when ending the processing of a luminosity block  ------------
 bool 
 SimpleCounter::endLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup const&)
 {
-  return true;
+    return true;
 }
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
 void
 SimpleCounter::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
-  //The following says we do not know what parameters are allowed so do no validation
-  // Please change this to state exactly what you do use, even if it is no parameters
-  edm::ParameterSetDescription desc;
-  desc.setUnknown();
-  descriptions.addDefault(desc);
+    //The following says we do not know what parameters are allowed so do no validation
+    // Please change this to state exactly what you do use, even if it is no parameters
+    edm::ParameterSetDescription desc;
+    desc.setUnknown();
+    descriptions.addDefault(desc);
 }
 //define this as a plug-in
 DEFINE_FWK_MODULE(SimpleCounter);

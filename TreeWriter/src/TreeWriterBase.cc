@@ -19,6 +19,12 @@ TreeWriterBase::TreeWriterBase(const edm::ParameterSet& iConfig)
     btagalgo_    =iConfig.getParameter<std::string>       ("btagAlgo");
     met_         =iConfig.getParameter<edm::InputTag>    ( "metSrc" );
     mvamet_         =iConfig.getParameter<edm::InputTag>    ( "mvaMetSrc" );
+    t1met_         =iConfig.getParameter<edm::InputTag>    ( "metT1Src" );
+    t0t1txymet_         =iConfig.getParameter<edm::InputTag>    ( "metT0T1TxySrc" );
+    t0t1met_         =iConfig.getParameter<edm::InputTag>    ( "metT0T1Src" );
+    t1txymet_         =iConfig.getParameter<edm::InputTag>    ( "metT1TxySrc" );
+
+
     vertices_    =iConfig.getParameter<edm::InputTag>    ( "vertexSrc" );
 
     includereco_  =iConfig.getParameter<bool>              ( "includeReco" );
@@ -142,7 +148,7 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     std::string addForPF;
     if(pfinput_) addForPF="bla";
 
-    LorentzVector p4zero(0,0,0,0);
+    ztop::NTLorentzVector<float> p4zero(0,0,0,0);
 
     ntmuons.clear();
     ntleptons.clear();
@@ -167,7 +173,7 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     ntallnus.clear();
 
     ntgenjets.clear();
-
+    genmet_f=0;
     vstopmass.clear();
     vchimass.clear();
 
@@ -377,7 +383,7 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         //all nus (for met or other stuff)
 
         if(debugmode) std::cout << "filling all neutrinos" << std::endl;
-
+         genmet_f=0;
         for(size_t i=0;i<allgen.size();i++){
             if(isAbsApprox(allgen.at(i)->pdgId(), 12)
                     || isAbsApprox(allgen.at(i)->pdgId(), 14)
@@ -386,8 +392,11 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                 // temp.setGenId(genidit++);
                 ntallnus << temp;
                 allnus << allgen.at(i);
+                genmet_f+=allgen.at(i)->pt();
             }
         }
+
+        if(debugmode) std::cout << "filling genMet" << std::endl;
 
 
         ////////////////////////////////////// 1st entry of (nt)bs should contain a b quark
@@ -513,8 +522,8 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                         if( fabs( fabs(allgen.at(i)->daughter(j)->pdgId())-6 ) <0.1 ) { // if the i-th daughter is a top or an anti-top
                             foundTop = true;
 
-                            LorentzVector LVstop( allgen.at(i)->px(), allgen.at(i)->py(), allgen.at(i)->pz(), allgen.at(i)->energy() );
-                            LorentzVector LVtop( allgen.at(i)->daughter(j)->px(), allgen.at(i)->daughter(j)->py(), allgen.at(i)->daughter(j)->pz(), allgen.at(i)->daughter(j)->energy() );
+                            D_LorentzVector LVstop( allgen.at(i)->px(), allgen.at(i)->py(), allgen.at(i)->pz(), allgen.at(i)->energy() );
+                            D_LorentzVector LVtop( allgen.at(i)->daughter(j)->px(), allgen.at(i)->daughter(j)->py(), allgen.at(i)->daughter(j)->pz(), allgen.at(i)->daughter(j)->energy() );
 
                             vchimass.push_back( (LVstop-LVtop).M() );
                             //std::cout << "chi0 mass = " << (LVstop-LVtop).M() << endl;
@@ -542,6 +551,7 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 
 
+        if(debugmode) std::cout <<"includegen left" << std::endl;
     }//isMC and includegen end
 
     if(debugmode){
@@ -564,7 +574,6 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             }
         }
     }
-    if(debugmode) std::cout <<"includegen left" << std::endl;
 
     //////////starting RECO part
 
@@ -608,11 +617,17 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     Handle<std::vector<pat::Jet> > jets;
     iEvent.getByLabel(jets_,jets);
 
-    Handle<std::vector<pat::MET> > mets;
-    iEvent.getByLabel(met_,mets);
 
-    Handle<std::vector<pat::MET> > mvamets;
+    ///met handles
+    //t1met_,t0t1txymet_,t0t1ymet_,t1txymet_;
+    Handle<std::vector<pat::MET> > mets,mvamets,t1mets,t0t1mets,t0t1txymets,t1txymets;
+    iEvent.getByLabel(met_,mets);
     iEvent.getByLabel(mvamet_,mvamets);
+    iEvent.getByLabel(t1met_,t1mets);
+    iEvent.getByLabel(t0t1txymet_,t0t1txymets);
+    iEvent.getByLabel(t0t1met_,t0t1mets);
+    iEvent.getByLabel(t1txymet_,t1txymets);
+
 
     iEvent.getByLabel(vertices_, vertices);
     vtxs  = *(vertices.product());
@@ -764,7 +779,8 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                     }
                 }
                 if(pfmuptr.isNonnull() && pfmuptr->trackRef().isNonnull()){
-                    LorentzVector ptrack(pfmuptr->trackRef()->px(),
+                    ztop::NTLorentzVector<float> ptrack;
+                    ptrack.setPxPyPzE(pfmuptr->trackRef()->px(),
                             pfmuptr->trackRef()->py(),
                             pfmuptr->trackRef()->pz(),
                             pfmuptr->trackRef()->p());
@@ -772,7 +788,7 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                     tempmuon.setTrackP4(ptrack);
                 }
                 else{
-                    tempmuon.setTrackP4(LorentzVector());
+                    tempmuon.setTrackP4( ztop::NTLorentzVector<float>());
                 }
             }
 
@@ -946,15 +962,34 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         for(std::vector<pat::MET>::const_iterator met=mets->begin(); met<mets->end() ; met++){
             ntmet.setP4(met->p4());
             break;
-
         }
 
+        if(debugmode) std::cout <<"mvamets" << std::endl;
         for(std::vector<pat::MET>::const_iterator met=mvamets->begin(); met<mvamets->end() ; met++){
             ntmvamet.setP4(met->p4());
             break;
-
         }
-
+        if(debugmode) std::cout <<"t1mets" << std::endl;
+        for(std::vector<pat::MET>::const_iterator met=t1mets->begin(); met<t1mets->end() ; met++){
+            ntt1met.setP4(met->p4());
+            break;
+        }
+        if(debugmode) std::cout <<"t0t1txymets" << std::endl;
+        for(std::vector<pat::MET>::const_iterator met=t0t1txymets->begin(); met<t0t1txymets->end() ; met++){
+            ntt0t1txymet.setP4(met->p4());
+            break;
+        }
+        if(debugmode) std::cout <<"t0t1mets" << std::endl;
+        for(std::vector<pat::MET>::const_iterator met=t0t1mets->begin(); met<t0t1mets->end() ; met++){
+            ntt0t1met.setP4(met->p4());
+            break;
+        }
+        if(debugmode) std::cout <<"t1txymets" << std::endl;
+        for(std::vector<pat::MET>::const_iterator met=t1txymets->begin(); met<t1txymets->end() ; met++){
+            ntt1txymet.setP4(met->p4());
+            break;
+        }
+        if(debugmode) std::cout <<"met loops end" << std::endl;
 
         if(includereco_){
 
@@ -969,8 +1004,10 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                     if(fabs(track2->eta()) > 2.6) continue;
                     if(track->charge() == track2->charge()) continue;
                     ztop::NTTrack nttrack;
-                    ztop::LorentzVector p1(track->px(), track->py(), track->pz(), track->p());
-                    ztop::LorentzVector p2(track2->px(), track2->py(), track2->pz(), track2->p());
+                    ztop::NTLorentzVector<float> p1;
+                    p1.setPxPyPzE(track->px(), track->py(), track->pz(), track->p());
+                    ztop::NTLorentzVector<float> p2;
+                    p2.setPxPyPzE(track2->px(), track2->py(), track2->pz(), track2->p());
                     if((p1+p2).M() > 55 && (p1+p2).M() < 125){
                         nttrack.setP4(p1);
                         nttrack.setQ(track->charge());
@@ -988,7 +1025,8 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                 float suclue=suclu->rawEnergy();
                 math::XYZPoint suclupoint=suclu->position();
                 float magnitude=sqrt(suclupoint.mag2());
-                ztop::LorentzVector suclup4(suclue*suclupoint.x() / magnitude,suclue*suclupoint.y() / magnitude,suclue*suclupoint.z() / magnitude,suclue);
+                NTLorentzVector<float>  suclup4;
+                suclup4.setPxPyPzE(suclue*suclupoint.x() / magnitude,suclue*suclupoint.y() / magnitude,suclue*suclupoint.z() / magnitude,suclue);
                 if(suclup4.Pt() < 8) continue;
 
                 for(std::vector<reco::SuperCluster>::const_iterator suclu2=recosuclus->begin(); suclu2<recosuclus->end(); suclu2++){
@@ -998,7 +1036,8 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                     float suclue2=suclu2->rawEnergy();
                     math::XYZPoint suclupoint2=suclu2->position();
                     float magnitude2=sqrt(suclupoint2.mag2());
-                    ztop::LorentzVector suclup42(suclue2*suclupoint2.x() / magnitude2,suclue2*suclupoint2.y() / magnitude2,suclue2*suclupoint2.z() / magnitude2,suclue2);
+                    NTLorentzVector<float>  suclup42;
+                    suclup42.setPxPyPzE(suclue2*suclupoint2.x() / magnitude2,suclue2*suclupoint2.y() / magnitude2,suclue2*suclupoint2.z() / magnitude2,suclue2);
 
                     if(suclup42.Pt() < 8) continue;
 
@@ -1125,7 +1164,7 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 
     //rhoiso,,rhojetsiso,,rhojetsisonopu
-    edm::Handle<float> rho;
+    edm::Handle<double> rho;
 
 
     if(debugmode) std::cout << "add rho iso" << std::endl;
@@ -1195,7 +1234,7 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                 for(unsigned int k=0; k<keys.size(); ++k) {
                     const trigger::TriggerObject & to = toc[keys[k]];
                     NTTriggerObject tempobj;
-                    PolarLorentzVector vec(to.pt(),to.eta(),to.phi(),to.mass());
+                    NTLorentzVector<float> vec(to.pt(),to.eta(),to.phi(),to.mass());
 
                     tempobj.setP4(vec);
                     trigObjVec.at(i).push_back(tempobj);
@@ -1257,8 +1296,13 @@ TreeWriterBase::beginJob()
     Ntuple->Branch("NTJets", "std::vector<ztop::NTJet>", &ntjets);
 
     Ntuple->Branch("NTMet", "ztop::NTMet", &ntmet);
-
     Ntuple->Branch("NTMvaMet", "ztop::NTMet", &ntmvamet);
+
+    Ntuple->Branch("NTMvaMet", "ztop::NTMet", &ntt1met);
+    Ntuple->Branch("NTT0T1TxyMet", "ztop::NTMet", &ntt0t1txymet);
+    Ntuple->Branch("NTT0T1Met", "ztop::NTMet", &ntt0t1met);
+    Ntuple->Branch("NTT1TxyMet", "ztop::NTMet", &ntt1txymet);
+
     Ntuple->Branch("NTEvent", "ztop::NTEvent", &ntevent);
 
     Ntuple->Branch("TriggerBools",   "std::vector<bool>", &triggerBools_);
@@ -1294,6 +1338,7 @@ TreeWriterBase::beginJob()
 
     Ntuple->Branch("NTGenJets",      "std::vector<ztop::NTGenJet>",      &ntgenjets);
 
+    Ntuple->Branch("genMet",           &genmet_f);
 
     Ntuple->Branch("NTGenParticles",      "std::vector<ztop::NTGenParticle>", &ntpart);
     if(susy_){

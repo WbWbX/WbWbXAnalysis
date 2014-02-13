@@ -58,12 +58,14 @@ namespace ztop{
     void multiplyNorms(TString, std::vector<double>, std::vector<TString>, bool showmessages=false);   //! multiplies norm of all MC with legendname  ,  with factor  ,  for step identifier string (step_string contains the id string)
     void multiplyAllMCNorms(double);
 
-    void writeAllToTFile(TString, bool recreate=false, bool onlydata=false, TString treename="stored_objects");
+    void writeAllToTFile(TString, bool recreate=false, bool onlydata=false, TString treename="containerStackVectors");
     void printAll(TString,TString,TString);
-    void writeAllToTFile(TFile * , TString treename="stored_objects");
+    void writeAllToTFile(TFile * , TString treename="containerStackVectors");
     void loadFromTree(TTree *, TString);
     containerStackVector* getFromTree(TTree *, TString);
     void listAllInTree(TTree *);
+    void loadFromTFile(TFile * ,const TString& csvname, TString treename="containerStackVectors");
+    void loadFromTFile(const TString& filename ,const TString& csvname, TString treename="containerStackVectors");
 
     void clear(){stacks_.clear();name_="";}
     static std::vector<containerStackVector*> csv_list;
@@ -84,6 +86,7 @@ namespace ztop{
 
 
   typedef  containerStackVector container1DStackVector;
+
 }
 
 

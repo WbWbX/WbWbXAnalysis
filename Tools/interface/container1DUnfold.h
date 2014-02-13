@@ -21,7 +21,8 @@
  * helper class to store unfolding output etc
  *
  */
-
+class TTree;
+class TFile;
 
 
 
@@ -126,6 +127,16 @@ public:
     TString coutUnfoldedBinContent(size_t bin) const;
 
     void flush();
+
+
+    ///IO
+    void loadFromTree(TTree *, const TString & plotname);
+    void loadFromTFile(TFile *, const TString & plotname);
+    void loadFromTFile(const TString& filename, const TString & plotname);
+
+    void writeToTree(TTree *);
+    void writeToTFile(TFile *);
+    void writeToTFile(const TString& filename);
 
 private:
 
