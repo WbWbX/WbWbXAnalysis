@@ -24,6 +24,12 @@ typedef std::vector<ztop::NTTrack>::iterator NTTrackIt;
 typedef std::vector<ztop::NTSuClu>::iterator NTSuCluIt;
 }
 
+void MainAnalyzer::reportError(int errorno, size_t anaid){
+    p_askwrite.get(anaid)->pwrite(anaid);
+    p_allowwrite.get(anaid)->pread();
+    p_finished.get(anaid)->pwrite(errorno);
+}
+
 
 MainAnalyzer::MainAnalyzer(){
 
@@ -133,9 +139,7 @@ int MainAnalyzer::start(){
                 catch(...){
                     std::cout << "\n*******\nException thrown in " << infiles_.at(i) << std::endl;
                     //fake write
-                    p_askwrite.get(i)->pwrite(i);
-                    p_allowwrite.get(i)->pread();
-                    p_finished.get(i)->pwrite(-99);
+                    reportError(-99,i);
                     std::exit(EXIT_FAILURE);
                 }
                 std::exit(EXIT_SUCCESS);

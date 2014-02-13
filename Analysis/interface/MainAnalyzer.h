@@ -122,6 +122,11 @@ public:
 
 	bool checkTrigger(std::vector<bool> * ,ztop::NTEvent * , bool , size_t);
 
+	/**
+	 * for child processes
+	 *
+	 */
+	void reportError(int , size_t );
 
 private:
 
@@ -190,6 +195,15 @@ private:
 	size_t maxchilds_;
 	pid_t PID_;
 	std::vector<pid_t> daughPIDs_;
+
+	template <class T>
+	std::vector<T*> produceCollection(std::vector<T> * t){
+	    std::vector<T*> out;
+	    for(size_t i=0;i<t->size();i++)
+	        out.push_back(&(t->at(i)));
+	    return out;
+	}
+
 
 
 };

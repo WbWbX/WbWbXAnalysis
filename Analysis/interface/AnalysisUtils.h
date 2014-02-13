@@ -23,217 +23,59 @@ void recreateRelations(typename std::vector<a *> & mothers, typename std::vector
 
 }
 
-*/
+ */
 ///DON'T !!! do options stuff here!!!
 
-////options parser
-
-TString getSyst(int argc, char* argv[]){
-  using namespace ztop;
-  TString out;
-  bool foundoption=false;
-  for(int i=1;i<argc;i++){ 
-    if (i + 1 != argc){
-      if((TString)argv[i] == "-s"){
-	foundoption=true;
-	i++;
-      }
-      else if(((TString)argv[i]).Contains("-")){ //any other option
-	foundoption=false;
-      }
-      if(foundoption){
-	TString temp=argv[i];
-	out = temp;
-      }
-    }
-  }
-  return out;
-}
-
-TString getOutFile(int argc, char* argv[]){
-  TString out;
-  for(int i=1;i<argc;i++){
-    //  std::cout << argv[i] << std::endl;; 
-    if (i + 1 != argc){
-      if((TString)argv[i] == "-o")
-	out=(TString)argv[i+1];
-      // std::cout << "outfile " << out << std::endl;
-    }
-  }
-  return out;
-}
-
-TString getChannel(int argc, char* argv[]){
-  TString out;
-  for(int i=1;i<argc;i++){
-    //  std::cout << argv[i] << std::endl;; 
-    if (i + 1 != argc){
-      if((TString)argv[i] == "-c")
-	out=(TString)argv[i+1];
-      // std::cout << "outfile " << out << std::endl;
-    }
-  }
-  return out;
-}
-
-TString getMode(int argc, char* argv[]){
-  TString out="xsec";
-  for(int i=1;i<argc;i++){
-    //  std::cout << argv[i] << std::endl;;
-    if (i + 1 != argc){
-      if((TString)argv[i] == "-m")
-	out=(TString)argv[i+1];
-      // std::cout << "outfile " << out << std::endl;
-    }
-  }
-  return out;
-}
-TString getEnergy(int argc, char* argv[]){
-  TString out="8TeV";
-  for(int i=1;i<argc;i++){
-    //  std::cout << argv[i] << std::endl;; 
-    if (i + 1 != argc){
-      if((TString)argv[i] == "-e")
-	out=(TString)argv[i+1];
-      // std::cout << "outfile " << out << std::endl;
-    }
-  }
-  return out;
-}
-TString getOutfile(int argc, char* argv[]){
-  TString out="def_out.root";
-  for(int i=1;i<argc;i++){
-    //  std::cout << argv[i] << std::endl;; 
-    if (i + 1 != argc){
-      if((TString)argv[i] == "-o")
-	out=(TString)argv[i+1];
-      // std::cout << "outfile " << out << std::endl;
-    }
-  }
-  return out;
-}
-TString getInputfile(int argc, char* argv[]){
-  TString out="";
-  for(int i=1;i<argc;i++){
-    //  std::cout << argv[i] << std::endl;;
-    if (i + 1 != argc){
-      if((TString)argv[i] == "-i")
-	out=(TString)argv[i+1];
-      // std::cout << "outfile " << out << std::endl;
-    }
-  }
-  return out;
-}
-float getLumi(int argc, char* argv[]){
-  double out=-1;
-  for(int i=1;i<argc;i++){
-    //  std::cout << argv[i] << std::endl;; 
-    if (i + 1 != argc){
-      if((TString)argv[i] == "-l")
-	out=atof(argv[i+1]);
-      // std::cout << "outfile " << out << std::endl;
-    }
-  }
-  return out;
-}
-bool prepareBTag(int argc, char* argv[]){
-for(int i=1;i<argc;i++){
-    //  std::cout << argv[i] << std::endl;; 
-    //if (i + 1 != argc){
-      if((TString)argv[i] == "-b")
-	return true;
-      // std::cout << "outfile " << out << std::endl;
-      // }
-  }
- return false;
-}
-bool getShowStatus(int argc, char* argv[]){
-	for(int i=1;i<argc;i++){
-		if((TString)argv[i] == "-S")
-			return true;
-	}
-	return false;
-}
-bool getTestMode(int argc, char* argv[]){
-	for(int i=1;i<argc;i++){
-		if((TString)argv[i] == "-T")
-			return true;
-	}
-	return false;
-}
-
-void rescaleDY(ztop::container1DStackVector * vec, std::vector<TString> contributions, double scalescale=1, bool textout=true, TString identifier="mll Z Range"){
-
-  using namespace ztop; 
-
-  std::vector<TString> ident;ident.clear();
-  std::vector<double> scales;scales.clear();
-  for(int i=5;i<=9;i++){
-    TString stepstring=" step "+toTString(i);
-    double dymc = 0;
-    std::vector<TString> allbutdyanddata;
-
-    for(unsigned int j=0;j<contributions.size();j++){
-      dymc += vec->getStack(identifier+stepstring).getContribution(contributions.at(j)).integral();
-      allbutdyanddata << contributions.at(j);
-    }
-    double d = vec->getStack(identifier+stepstring).getContribution("data").integral();
-    allbutdyanddata << "data";
-    double rest = vec->getStack(identifier+stepstring).getContributionsBut(allbutdyanddata).integral();
-    if(rest==0) rest=1;
-    double scale = (d-rest)/dymc;
-    scales << scale*scalescale;
-    ident << stepstring;
-    if(textout) std::cout << "Scalefactor for "<< vec->getName() << " " << stepstring << ": " << scale << std::endl;
-  }
-  //  ztop::container1DStackVector rescaled=vec;
-  for(unsigned int i=0;i<contributions.size();i++){
-    vec->multiplyNorms(contributions.at(i), scales, ident);
-  }
-
-}
 
 namespace ztop{
 
+
+//////old options parser
+
+
+void rescaleDY(ztop::container1DStackVector * vec, std::vector<TString> contributions, double scalescale=1, bool textout=true,
+        TString identifier="mll Z Range");
+
 template <class T>
 std::vector<T> subdivide(const std::vector<T> & bins, size_t div){
-	std::vector<T> out;
-	for(size_t i=0;i<bins.size()-1;i++){
-		float width=bins.at(i+1)-bins.at(i);
-		if((int)i<(int)bins.size()-2){
-			for(size_t j=0;j<div;j++)
-				out.push_back(bins.at(i)+j*width/div);
-		}
-		else{
-			for(size_t j=0;j<=div;j++)
-				out.push_back(bins.at(i)+j*width/div);
-		}
-	}
-	return out;
+    std::vector<T> out;
+    for(size_t i=0;i<bins.size()-1;i++){
+        float width=bins.at(i+1)-bins.at(i);
+        if((int)i<(int)bins.size()-2){
+            for(size_t j=0;j<div;j++)
+                out.push_back(bins.at(i)+j*width/div);
+        }
+        else{
+            for(size_t j=0;j<=div;j++)
+                out.push_back(bins.at(i)+j*width/div);
+        }
+    }
+    return out;
 }
 
 template <class T>
 bool comparePt(T a, T b){
-	return (a->pt() > b->pt());
+    return (a->pt() > b->pt());
 }
 
 template <class T>
 std::vector<T> mergeVectors(const std::vector<T>& a, const std::vector<T> & b){
-	std::vector<T> out=b;
-	for(size_t i=0;i<a.size();i++){
-		bool notfound=true;
-		for(size_t j=0;j<b.size();j++){
-			if(a.at(i)==b.at(j)){
-				notfound=false;
-				break;
-			}
-		}
-		if(notfound) out.push_back(a.at(i));
-	}
-	return out;
+    std::vector<T> out=b;
+    for(size_t i=0;i<a.size();i++){
+        bool notfound=true;
+        for(size_t j=0;j<b.size();j++){
+            if(a.at(i)==b.at(j)){
+                notfound=false;
+                break;
+            }
+        }
+        if(notfound) out.push_back(a.at(i));
+    }
+    return out;
 }
 
-}
+
+}//ztop
 
 
 #endif
