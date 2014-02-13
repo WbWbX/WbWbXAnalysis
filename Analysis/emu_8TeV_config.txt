@@ -48,10 +48,10 @@ tree_8TeV_emu_runD_22Jan.root,data,1,1,10
 [parameters-begin] 
 $$ all directories except for inputfiles are relative to $CMSSW_BASE
 
-inputFilesDir = /nfs/dust/cms/user/kiesej/trees_Oct13_03/ $for naf
+inputFilesDir = /nfs/dust/cms/user/kiesej/trees_Feb14/ $for naf
 $inputFilesDir = /data/user/kiesej/Analysis2012/trees/trees_Jun13_03/ $for desy-cms012
 
-Lumi           = 19789
+Lumi           = 19741
 
 JECFile        = /src/TtZAnalysis/Data/Summer13_V4_DATA_UncertaintySources_AK5PFchs.txt
 $JECFile        = /src/TtZAnalysis/Data/Fall12_V7_DATA_UncertaintySources_AK5PF.txt
