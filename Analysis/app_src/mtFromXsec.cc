@@ -145,7 +145,7 @@ ztop::container1DStackVector getCSVFromFile(TString name)
         delete ftemp;
         return ztop::container1DStackVector();
     }
-    TTree * ttemp = (TTree*)ftemp->Get("stored_objects");
+    TTree * ttemp = (TTree*)ftemp->Get("containerStackVectors");
     ztop::container1DStackVector vtemp;
     vtemp.loadFromTree(ttemp,stripStuff(name));
     delete ttemp;
@@ -156,7 +156,7 @@ ztop::container1DStackVector getCSVFromFile(TString name)
 ztop::container1DUnfold getCUFFromFile(TString filename,TString plotname)
 {
     TFile * ftemp=new TFile(stripRoot(filename)+".root","read");
-    TTree * ttemp = (TTree*)ftemp->Get("stored_objects");
+    TTree * ttemp = (TTree*)ftemp->Get("container1DUnfolds");
     if(!ttemp || ttemp->IsZombie()){
         delete ttemp;
         return ztop::container1DUnfold();
@@ -266,7 +266,6 @@ int main(int argc, char* argv[]){
         //else inputfile
         ninputfiles++;
         inputfile=(TString)argv[i];
-        csv=getCSVFromFile(inputfile);
     }
     if(ninputfiles>1){
         std::cout << "WARNING: more than 1 input file, using last......" <<std::endl;
@@ -274,19 +273,28 @@ int main(int argc, char* argv[]){
 
     TH1::AddDirectory(false);
 
+    plot="c_t#bar{t}_"+plot;
+
     float massoffset=172.5;
     TString entryforplots="m_{t}^{MG} [GeV]";
 
     container1DUnfold cuf;
-    cuf=getCUFFromFile(inputfile,plot);
+  //  cuf=getCUFFromFile(inputfile,plot);
+    cuf.loadFromTFile(inputfile,plot);
+    TString cufname=cuf.getName();
+    cufname.ReplaceAll("c_t#bar{t}_","");
+    cuf.setName(cufname);
+    plot.ReplaceAll("c_t#bar{t}_","");
     bool wasunfolded=true;
-    if(cuf.isDummy()){//
+  /*  if(cuf.isDummy()){//
+
+        try{ csv=getCSVFromFile(inputfile);} catch(...){}
         wasunfolded=false;
         //try to get from stack
         containerStack stack=csv.getStack(plot);
         //get signal container
         cuf=stack.getSignalContainer();
-    }
+    } */
     if(cuf.isDummy()){//still not found
         std::cout << "printvariations: no containers found!!" << std::endl;
         return -1;

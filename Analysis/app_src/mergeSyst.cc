@@ -95,7 +95,7 @@ size_t associateEnergy(TString s){
 ztop::container1DStackVector getFromFile(TString name)
 {
 	TFile * ftemp=new TFile(name+".root","read");
-	TTree * ttemp = (TTree*)ftemp->Get("stored_objects");
+	TTree * ttemp = (TTree*)ftemp->Get("containerStackVectors");
 	ztop::container1DStackVector vtemp;
 	vtemp.loadFromTree(ttemp,name);
 	delete ttemp;
@@ -106,7 +106,7 @@ ztop::container1DStackVector getFromFile(TString name)
 ztop::container1DStackVector *getFromFileToMem(TString name)
 {
     TFile * ftemp=new TFile(name+".root","read");
-    TTree * ttemp = (TTree*)ftemp->Get("stored_objects");
+    TTree * ttemp = (TTree*)ftemp->Get("containerStackVectors");
     ztop::container1DStackVector * vtemp=new ztop::container1DStackVector();
     vtemp->loadFromTree(ttemp,name);
     delete ttemp;

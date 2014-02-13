@@ -26,6 +26,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
     // TString
     if(maninputfile!="")
         inputfile=maninputfile;
+    //do not prepend path (batch submission)
 
     fileReader fr;
     fr.setComment("$");
@@ -231,6 +232,14 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
         ana.setFilePostfixReplace("ttbar.root","ttbar_mt169.5.root");
         ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mt169.5.root");
     }
+    else if(Syst=="MT_1_down"){
+        ana.setFilePostfixReplace("ttbar.root","ttbar_mt171.5.root");
+        ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mt171.5.root");
+    }
+    else if(Syst=="MT_1_up"){
+        ana.setFilePostfixReplace("ttbar.root","ttbar_mt173.5.root");
+        ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mt173.5.root");
+    }
     else if(Syst=="MT_3_up"){
         ana.setFilePostfixReplace("ttbar.root","ttbar_mt175.5.root");
         ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mt175.5.root");
@@ -278,15 +287,12 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
         ztop::container1DStackVector csv;
 
         if(fullsucc>=0){
-            TFile * f = new TFile(ana.getOutPath()+".root","read");
-            if(f->Get("stored_objects")){
-                csv.loadFromTree((TTree*)f->Get("stored_objects"),ana.getPlots()->getName());
-            }
+
+            csv.loadFromTFile(ana.getOutPath()+".root",ana.getPlots()->getName());
             vector<TString> dycontributions;
             dycontributions << "Z#rightarrowll" << "DY#rightarrowll";
             if(!channel.Contains("emu")){
                 rescaleDY(&csv, dycontributions);
-                f->Close();
                 csv.writeAllToTFile(ana.getOutPath()+".root",true,!testmode);
             }
             else if(testmode){
@@ -298,11 +304,18 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
             }
             sleep(1);
             std::cout <<"\nFINISHED with "<< channel <<"_" << energy <<"_" << Syst <<std::endl;
-            delete f;
+
 
         }
         else{
-            std::cout << "at least one job failed!" << std::endl;
+            std::cout << "at least one job failed!\n"
+                    << "error code meaning: "
+                    << "-99: std::exception thrown somewhere\n"
+                    << "-3 : problems finding b-tagging efficiencies (file/file format) \n"
+                    << "-2 : write to output file failed "
+                    << "-1 : input file not found\n"
+                    << std::endl;
+            //put more once you introduce one
             if(!testmode){
                 system(("touch "+batchdir+ana.getOutFileName()+"_failed").Data());
             }
@@ -317,23 +330,26 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
 
 
 //////////////////
-
+#include "TtZAnalysis/Tools/interface/optParser.h"
 
 int main(int argc, char* argv[]){
 
+    using namespace ztop;
 
-    TString channel = getChannel(argc, argv);//-c <chan>
-    TString syst = getSyst(argc, argv);      //-s <syst>
-    TString energy = getEnergy(argc, argv); //-e default 8TeV
-    double lumi=getLumi(argc, argv);        //-l default -1
-    bool dobtag=prepareBTag(argc, argv);    //-b switches on default false
-    TString outfile=getOutFile(argc, argv);  //-o <outfile> should be something like channel_energy_syst.root // only for plots
-    bool status=getShowStatus(argc, argv);    //-S enables default false
-    bool testmode=getTestMode(argc, argv); 	//-T enables default false
-    TString mode=getMode(argc,argv);     //-m (xsec,....) default xsec changes legends? to some extend
-    bool mergefiles=false; //get these things from the options to..
-    TString inputfile=getInputfile(argc,argv);
+    optParser parse(argc,argv);
+    TString channel= parse.getOpt<TString>  ("c","emu");         //-c channel
+    TString syst   = parse.getOpt<TString>  ("s","nominal");     //-s <syst>
+    TString energy = parse.getOpt<TString>  ("e","8TeV");        //-e default 8TeV
+    double lumi    = parse.getOpt<float>    ("l",-1);            //-l default -1
+    bool dobtag    = parse.getOpt<bool>     ("b",false);         //-b switches on default false
+    TString outfile= parse.getOpt<TString>  ("o","");            //-o <outfile> should be something like channel_energy_syst.root // only for plots
+    bool status    = parse.getOpt<bool>     ("S",false);         //-S enables default false
+    bool testmode  = parse.getOpt<bool>     ("T",false);         //-T enables default false
+    TString mode   = parse.getOpt<TString>  ("m","xsec");        //-m (xsec,....) default xsec changes legends? to some extend
+    TString inputfile= parse.getOpt<TString>  ("i","");          //-i empty will use automatic
+    parse.doneParsing();
 
+    bool mergefiles=false;
     std::vector<TString> filestomerge;
 
     if(mergefiles){

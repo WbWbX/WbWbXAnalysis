@@ -37,7 +37,7 @@ TString stripStuff(TString s){      /// needs rewriting for "/" part
 ztop::container1DStackVector getFromFile(TString filename, TString cname)
 {
 	TFile * ftemp=new TFile(filename,"read");
-	TTree * ttemp = (TTree*)ftemp->Get("stored_objects");
+	TTree * ttemp = (TTree*)ftemp->Get("containerStackVectors");
 	ztop::container1DStackVector vtemp;
 	vtemp.loadFromTree(ttemp,cname);
 	delete ttemp;
