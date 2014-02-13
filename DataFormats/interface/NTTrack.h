@@ -3,6 +3,8 @@
 
 
 #include "mathdefs.h"
+#include "NTLorentzVector.h"
+
 namespace ztop{
  
   class NTTrack{
@@ -11,13 +13,13 @@ namespace ztop{
     explicit NTTrack(){q_=0;}
     ~NTTrack(){}
 
-    void setP4(LorentzVector p4In){p4_=p4In;}
-    void setP4(D_LorentzVector p4In){p4_=PolarLorentzVector(p4In.pt(),p4In.Eta(),p4In.Phi(),p4In.M());}
+    void setP4(NTLorentzVector<float> p4In){p4_=p4In;}
+    void setP4(D_LorentzVector p4In){p4_=NTLorentzVector<float>(p4In.pt(),p4In.Eta(),p4In.Phi(),p4In.M());}
     void setQ(int qIn){q_=qIn;}
     void setDzV(float Dz){dzV_=Dz;}
     void setDzVErr(float DzErr){dzVErr_=DzErr;}
 
-    const PolarLorentzVector & p4(){return p4_;}
+    const NTLorentzVector<float> & p4(){return p4_;}
     float pt(){return p4_.Pt();}
     float phi(){return p4_.Phi();}
     float eta(){return p4_.Eta();}
@@ -26,7 +28,7 @@ namespace ztop{
     float dzV(){return dzV_;}
     float dzVErr(){return dzVErr_;}
   protected:
-    PolarLorentzVector p4_;
+    NTLorentzVector<float> p4_;
     int q_;
     float dzV_;
     float dzVErr_;

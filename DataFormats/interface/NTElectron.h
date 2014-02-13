@@ -5,6 +5,7 @@
 #include "NTLepton.h"
 #include "NTIsolation.h"
 #include "NTSuClu.h"
+#include "NTLorentzVector.h"
 #include <vector>
 #include <string>
 
@@ -22,9 +23,8 @@ public:
     ~NTElectron(){};
     //sets
     void setNotConv(bool IsNotConv){isNotConv_=IsNotConv;}
-    void setECalP4(LorentzVector ECalp4){ecalp4_=ECalp4;}
-    void setECalP4(PolarLorentzVector ECalp4){ecalp4_=ECalp4;}
-    void setECalP4(D_LorentzVector p4In){ecalp4_=PolarLorentzVector(p4In.pt(),p4In.Eta(),p4In.Phi(),p4In.M());}
+    void setECalP4(NTLorentzVector<float> ECalp4){ecalp4_=ECalp4;}
+    void setECalP4(D_LorentzVector p4In){ecalp4_=NTLorentzVector<float>(p4In.pt(),p4In.Eta(),p4In.Phi(),p4In.M());}
     void setId(std::vector<std::pair<std::string,float> > Ids , bool keepMvaOnly=true){
 
         ids_=Ids;
@@ -44,7 +44,7 @@ public:
     void setIsPf(bool is){ispf_=is;}
 
     //gets
-    const PolarLorentzVector &ECalP4()const{return ecalp4_;}
+    const NTLorentzVector<float>  &ECalP4()const{return ecalp4_;}
     const bool &isNotConv()const{return isNotConv_;}
     const std::vector<std::pair<std::string,float> > &ids()const{return ids_;}
     const ztop::NTIsolation &iso()const{return iso_;}
@@ -104,7 +104,7 @@ protected:
     std::vector<std::pair<std::string,float> > ids_;
     ztop::NTIsolation iso_;
     float rhoIso_;
-    PolarLorentzVector ecalp4_;
+    NTLorentzVector<float> ecalp4_;
     //ztop::NTIsolation iso04_;
     int mHits_;
 

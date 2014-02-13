@@ -9,6 +9,8 @@
 #include <string>
 #include <algorithm>
 #include <map>
+#include "NTLorentzVector.h"
+
 
 namespace ztop{
 
@@ -28,7 +30,7 @@ public:
     void setMatchedStations(int matched){ matchedstations_=matched;}
     void setIso(ztop::NTIsolation Iso){iso_=Iso;}
     void setMatchedTrig(std::vector<std::string> MatchedTrig){matchedTrig_=MatchedTrig;}
-    void setTrackP4(ztop::LorentzVector trkp4in){trkP4_=trkp4in;}
+    void setTrackP4(ztop::NTLorentzVector<float> trkp4in){trkP4_=trkp4in;}
     void setIsPf(bool ispf){ispf_=ispf;}
 
 
@@ -46,7 +48,7 @@ public:
         return (iso_.chargedHadronIso() + std::max(0.0,iso_.neutralHadronIso() + iso_.photonIso() - 0.5*iso_.puChargedHadronIso()))/p4_.pt();
     }
     const std::vector<std::string>& matchedTrig()const{return matchedTrig_;}
-    const PolarLorentzVector &trackP4()const{return trkP4_;}
+    const NTLorentzVector<float> &trackP4()const{return trkP4_;}
     const bool &isPf()const{return ispf_;}
 
     //extra
@@ -82,7 +84,7 @@ protected:
     int muonHits_,matchedstations_;
     ztop::NTIsolation iso_;
     std::vector<std::string> matchedTrig_;
-    PolarLorentzVector trkP4_;
+    NTLorentzVector<float> trkP4_;
 
 
     std::map<std::string, float> memberss_;

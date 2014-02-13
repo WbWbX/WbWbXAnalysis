@@ -1,5 +1,9 @@
 <lcgdict>
 
+    <class name="ztop::NTLorentzVector<float>"/> 
+    <class name="std::vector<ztop::NTLorentzVector<float> >"/> 
+    <class name="std::vector<float>"/> 
+    
 <class name="std::vector<std::string>"/>
   <class name="std::vector<std::vector<std::string> >"/>
   <class name="ztop::NTLepton"/>
@@ -40,13 +44,14 @@
   <class name="ztop::NTJERAdjuster"/>
   <class name="std::vector<ztop::NTJERAdjuster>"/>
   <class name="std::map<std::string,double>"/>
+  <class name="std::map<std::string,float>"/>
   <class name="std::map<std::string,unsigned int>"/>
-  <class name="std::map<int,double>"/>
+  
+  <class name="std::map<int,float>"/>
+  <class name="std::vector<std::pair<std::string,float> >"/>
 
 
  
-    <class name="ztop::LorentzVector"/> 
-    <class name="ztop::PolarLorentzVector"/> 
 
 
 </lcgdict>

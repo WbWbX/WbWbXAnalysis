@@ -3,6 +3,8 @@
 
 #include "mathdefs.h"
 #include <map>
+#include "NTLorentzVector.h"
+
 
 namespace ztop{
  
@@ -12,12 +14,12 @@ namespace ztop{
   explicit NTJet(){};
     ~NTJet(){};
     //sets
-    void setP4(LorentzVector p4In){p4_=p4In;}
-    void setP4(PolarLorentzVector p4In){p4_=p4In;}
-    void setP4(D_LorentzVector p4In){p4_=PolarLorentzVector(p4In.pt(),p4In.Eta(),p4In.Phi(),p4In.M());}
-    void setGenP4(PolarLorentzVector genP4In){genP4_=genP4In;}
-    void setGenP4(LorentzVector genP4In){genP4_=genP4In;}
-    void setGenP4(D_LorentzVector p4In){genP4_=PolarLorentzVector(p4In.pt(),p4In.Eta(),p4In.Phi(),p4In.M());}
+    void setP4(NTLorentzVector<float> p4In){p4_=p4In;}
+   // void setP4(PolarLorentzVector p4In){p4_=p4In;}
+    void setP4(D_LorentzVector p4In){p4_=NTLorentzVector<float>(p4In.pt(),p4In.Eta(),p4In.Phi(),p4In.M());}
+  //  void setGenP4(PolarLorentzVector genP4In){genP4_=genP4In;}
+    void setGenP4(NTLorentzVector<float> genP4In){genP4_=genP4In;}
+    void setGenP4(D_LorentzVector p4In){genP4_=NTLorentzVector<float>(p4In.pt(),p4In.Eta(),p4In.Phi(),p4In.M());}
     void setGenPartonFlavour(int partonFlavour){genPartonFlav_=partonFlavour;}
     void setBtag(float Btag){btag_=Btag;}
     void setId(bool ID){id_=ID;}
@@ -26,8 +28,8 @@ namespace ztop{
     void setGenMatch(int id_int){genid_=id_int;}
 
   //gets
-    const PolarLorentzVector &  p4(){return p4_;}
-    PolarLorentzVector p4Uncorr(){return p4_ * (1/corrfact_);}
+    const NTLorentzVector<float> &  p4(){return p4_;}
+    NTLorentzVector<float> p4Uncorr(){return p4_ * (1/corrfact_);}
     int genMatch(){return genid_;}
 
     float pt(){return p4_.Pt();}
@@ -41,7 +43,7 @@ namespace ztop{
     float emEnergyFraction(){return emenergyfraction_;}
 
     //gen
-    const PolarLorentzVector & genP4(){return genP4_;}
+    const NTLorentzVector<float> & genP4(){return genP4_;}
     float genPt(){return genP4_.Pt();}
     float genE() {return genP4_.E();}
     float genPhi(){return genP4_.Phi();}
@@ -74,8 +76,8 @@ namespace ztop{
 
   protected:
     int genid_;
-    PolarLorentzVector p4_;
-    PolarLorentzVector genP4_;
+    NTLorentzVector<float> p4_;
+    NTLorentzVector<float> genP4_;
     int genPartonFlav_;
     float btag_;
     float emenergyfraction_;

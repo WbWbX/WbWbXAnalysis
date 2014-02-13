@@ -2,6 +2,8 @@
 #define NTGenLepton_h
 
 #include "mathdefs.h"
+#include "NTLorentzVector.h"
+
 namespace ztop{
 
 
@@ -10,9 +12,9 @@ namespace ztop{
     explicit NTGenLepton(){}
     ~NTGenLepton(){}
 
-    void setP4(const PolarLorentzVector& p4In){p4_=p4In;}
-    void setP4(const LorentzVector& p4In){p4_=p4In;}
-    void setP4(D_LorentzVector p4In){p4_=PolarLorentzVector(p4In.pt(),p4In.Eta(),p4In.Phi(),p4In.M());}
+   // void setP4(const PolarLorentzVector& p4In){p4_=p4In;}
+    void setP4(const NTLorentzVector<float>& p4In){p4_=p4In;}
+    void setP4(D_LorentzVector p4In){p4_=NTLorentzVector<float>(p4In.pt(),p4In.Eta(),p4In.Phi(),p4In.M());}
     void setPdgId(int id){pdgid_=id;}
     void setMothers(std::vector<int> mothers){mothers_=mothers;}
     void setDaughters(std::vector<int> daughters){daughters_=daughters;}
@@ -21,7 +23,7 @@ namespace ztop{
     int pdgId(){return pdgid_;}
     int status(){return status_;}
 
-    const PolarLorentzVector& p4(){return p4_;}
+    const NTLorentzVector<float>& p4(){return p4_;}
     float pt(){return p4_.Pt();}
     float E() {return p4_.E();}
     float e() {return p4_.E();}
@@ -39,7 +41,7 @@ namespace ztop{
 
 
     int pdgid_, status_;
-    PolarLorentzVector p4_;
+    NTLorentzVector<float> p4_;
     std::vector<int> mothers_, daughters_;
 
   };

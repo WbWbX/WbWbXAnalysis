@@ -52,6 +52,7 @@ NTBTagSF  NTBTagSF::operator + (NTBTagSF  second){
     //none of the samples are the same
     second.histos_.insert(histos_.begin(),histos_.end()); // samplename vec<hist>
     second.effhistos_.insert(effhistos_.begin(),effhistos_.end()); // samplename vec<hist>
+    second.medianMap_.insert(medianMap_.begin(),medianMap_.end()); // median map
     return second;
 }
 
@@ -60,25 +61,25 @@ NTBTagSF  NTBTagSF::operator + (NTBTagSF  second){
 /**
  * recreates file!
  */
-void NTBTagSF::writeToTFile(TString filename, std::string treename){
+void NTBTagSF::writeToTFile(TString filename){
     AutoLibraryLoader::enable();
     TH1::AddDirectory(false);
     TFile * f = new TFile(filename,"RECREATE");
     bool madenew=false;
     TTree * t=0;
-    if(f->Get((treename).data())){
-        t = (TTree*) f->Get(treename.data());
+    if(f->Get("NTBTagSFs")){
+        t = (TTree*) f->Get("NTBTagSFs");
     }
     else{
         madenew=true;
-        t = new TTree(treename.data(),treename.data());
+        t = new TTree("NTBTagSFs","NTBTagSFs");
     }
-    if(t->GetBranch("allNTBTagSF")){ //branch does  exist
+    if(t->GetBranch("NTBTagSFs")){ //branch does  exist
         NTBTagSF * bt=this;
-        t->SetBranchAddress("allNTBTagSF", &bt);
+        t->SetBranchAddress("NTBTagSFs", &bt);
     }
     else{
-        t->Branch("allNTBTagSF",this);
+        t->Branch("NTBTagSFs",this);
         std::cout << "NTBTagSF::writeToTFile: added branch" << std::endl;
     }
     setMakeEff(false);
@@ -94,13 +95,13 @@ void NTBTagSF::writeToTFile(TString filename, std::string treename){
 
 
 
-void NTBTagSF::readFromTFile(TString filename, std::string treename){
+void NTBTagSF::readFromTFile(TString filename){
     AutoLibraryLoader::enable();
     TH1::AddDirectory(false);
     TFile * f = new TFile(filename);
-    TTree * t = (TTree*) f->Get(treename.data());
+    TTree * t = (TTree*) f->Get("NTBTagSFs");
     NTBTagSF * bt=0;
-    int branchret=t->SetBranchAddress("allNTBTagSF", &bt) ;
+    int branchret=t->SetBranchAddress("NTBTagSFs", &bt) ;
     if(branchret <0){
         std::cout << "NTBTagSF::readFromTFile: reading branch not successful (return " << branchret << ")" <<std::endl;
         throw std::runtime_error("NTBTagSF::readFromTFile: branch not found");

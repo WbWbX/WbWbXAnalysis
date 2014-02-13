@@ -34,8 +34,8 @@ public:
     NTBTagSF  operator + (NTBTagSF  second);
 
 
-    void writeToTFile(TString, std::string treename="stored_objects"); //! writes whole class to TFile
-    void readFromTFile(TString , std::string treename="stored_objects");  //! reads whole class from TFile
+    void writeToTFile(TString); //! writes whole class to TFile
+    void readFromTFile(TString);  //! reads whole class from TFile
 
 private:
     bool userandom_;

@@ -23,6 +23,7 @@
 #include "../interface/NTJECUncertainties.h"
 #include "../interface/NTJERAdjuster.h"
 #include "../interface/mathdefs.h"
+#include "../interface/NTLorentzVector.h"
 
 //backward comp
 
@@ -31,7 +32,11 @@ namespace top{using namespace ztop;}
 namespace
 {
   struct dictionary {
-    
+
+
+      ztop::NTLorentzVector<float> vecfff;
+      std::vector<ztop::NTLorentzVector<float> > dfwe3rel;
+      std::vector<float> dsfwefewfds;
     std::vector<std::string> dummy1;
     std::vector<std::vector<std::string> > dummy2;
     ztop::NTLepton dummy5;
@@ -67,8 +72,11 @@ namespace
 
 
     std::map<std::string, double> ksdjsda;
+    std::map<std::string, float> ksdjdsfsda;
     std::map<std::string, unsigned int> ksdjsssda;
-    std::map<int, double> ijdfj;
+   // std::map<int, double> ijdfj;
+    std::map<int, float> ijddsfsfj;
+    std::vector<std::pair<std::string, float > > oisdjfoiwjefo;
 
 
     ztop::NTBTagSF ked;
@@ -79,8 +87,6 @@ namespace
     std::vector<ztop::NTJERAdjuster> ksdskV;
     std::vector<TObject*> kjnfjkefrerfe;
     
-    ztop::LorentzVector vecfff;
-    ztop::PolarLorentzVector dsfvecpolar;
 
   };
 

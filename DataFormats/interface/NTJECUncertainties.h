@@ -4,6 +4,8 @@
 #include "TopAnalysis/ZTopUtils/interface/JECBase.h"
 #include "TtZAnalysis/DataFormats/interface/NTJet.h"
 
+#include "NTLorentzVector.h"
+
 
 namespace ztop{
 
@@ -25,7 +27,7 @@ public:
         float recophi=jet->phi();
         float recom=jet->p4().M();
         JecBase_.applyJECUncertainties(recopt,recoeta,recophi,recom);
-        jet->setP4(ztop::PolarLorentzVector(recopt,recoeta,recophi,recom));
+        jet->setP4(ztop::NTLorentzVector<float>(recopt,recoeta,recophi,recom));
     }
     void applyToJets(std::vector<ztop::NTJet *> jets){
         for(size_t i=0;i<jets.size();i++)

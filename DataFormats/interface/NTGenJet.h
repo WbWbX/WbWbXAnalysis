@@ -1,6 +1,7 @@
 #ifndef NTGenJet_h
 #define NTGenJet_h
 #include "mathdefs.h"
+#include "NTLorentzVector.h"
 #include <map>
 
 namespace ztop{
@@ -12,9 +13,9 @@ namespace ztop{
     ~NTGenJet(){}
 
 
-    void setP4(PolarLorentzVector p4In){p4_=p4In;}
-    void setP4(LorentzVector p4In){p4_=p4In;}
-    void setP4(D_LorentzVector p4In){p4_=PolarLorentzVector(p4In.pt(),p4In.Eta(),p4In.Phi(),p4In.M());}
+  //  void setP4(PolarLorentzVector p4In){p4_=p4In;}
+    void setP4(NTLorentzVector<float> p4In){p4_=p4In;}
+    void setP4(D_LorentzVector p4In){p4_=NTLorentzVector<float>(p4In.pt(),p4In.Eta(),p4In.Phi(),p4In.M());}
  
     void setMotherIts(const std::vector<int> & its){motherits_=its;}
     void setMothers(const std::vector<ztop::NTGenParticle *> & p){motherPs_=p;}
@@ -26,10 +27,10 @@ namespace ztop{
     const std::vector<int> &  motherIts()const{return motherits_;}
     const std::vector<ztop::NTGenParticle *> & mothers()const{return motherPs_;}
 
-    const PolarLorentzVector & p4()const{return p4_;}
+    const NTLorentzVector<float>  & p4()const{return p4_;}
     float pt()const{return p4_.Pt();}
-    float E()const {return p4_.E();}
-    float e()const {return p4_.E();}
+    float E()const {return p4_.e();}
+    float e()const {return p4_.e();}
     float phi()const{return p4_.Phi();}
     float eta()const{return p4_.Eta();}
     float m()const{return p4_.M();}
@@ -58,7 +59,7 @@ namespace ztop{
 
   protected:
 
-    PolarLorentzVector p4_;
+    NTLorentzVector<float>  p4_;
     std::vector<int> motherits_;
     std::vector<ztop::NTGenParticle *> motherPs_;
     int genid_;

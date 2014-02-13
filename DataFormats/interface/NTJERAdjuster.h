@@ -3,6 +3,8 @@
 
 #include "TtZAnalysis/DataFormats/interface/NTJet.h"
 #include "TopAnalysis/ZTopUtils/interface/JERBase.h"
+#include "NTLorentzVector.h"
+
 
 namespace ztop{
 
@@ -23,7 +25,7 @@ public:
         float recophi=jet->phi();
         float recom=jet->p4().M();
         correctP4(recopt,recoeta,recophi,recom, jet->genP4().pt());
-        jet->setP4(ztop::PolarLorentzVector(recopt,jet->eta(),recophi,recom));
+        jet->setP4(ztop::NTLorentzVector<float>(recopt,jet->eta(),recophi,recom));
     }
 
 };

@@ -13,6 +13,7 @@ namespace ztop{
 namespace seal{
 int sealDataFormats(){
 	//nothing
+    NTLorentzVector<float> vect;
 	NTVertex v;
 	NTElectron e;
 	NTLepton l;

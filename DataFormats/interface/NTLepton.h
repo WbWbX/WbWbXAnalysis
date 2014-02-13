@@ -2,6 +2,7 @@
 #define NTLepton_h
 
 #include "mathdefs.h"
+#include "NTLorentzVector.h"
 
 namespace ztop{
 
@@ -11,9 +12,9 @@ class NTLepton{
   explicit NTLepton(){q_=0;};
   ~NTLepton(){};
   //sets
-  void setP4(LorentzVector p4In){p4_=p4In;}
-  void setP4(PolarLorentzVector p4In){p4_=p4In;}
-  void setP4(D_LorentzVector p4In){p4_=PolarLorentzVector(p4In.pt(),p4In.Eta(),p4In.Phi(),p4In.M());}
+  void setP4(NTLorentzVector<float> p4In){p4_=p4In;}
+ // void setP4(PolarLorentzVector p4In){p4_=p4In;}
+  void setP4(D_LorentzVector p4In){p4_=NTLorentzVector<float>(p4In.pt(),p4In.Eta(),p4In.Phi(),p4In.M());}
   void setP4Err(const float & err){p4err_=err;}
   void setQ(int qIn){q_=qIn;}
   void setDzV(float DZV){dZV_=DZV;}
@@ -23,12 +24,12 @@ class NTLepton{
   void setD0Bs(float in){d0Bs_=in;}
 
   void setGenMatch(int matchid){genid_=matchid;}
-  void setGenP4(PolarLorentzVector genP4In){genP4_=genP4In;}
-  void setGenP4(LorentzVector genP4In){genP4_=genP4In;}
+ // void setGenP4(PolarLorentzVector genP4In){genP4_=genP4In;}
+  void setGenP4(NTLorentzVector<float> genP4In){genP4_=genP4In;}
 
   //gets
-  const PolarLorentzVector & p4()const{return p4_;}
-  const PolarLorentzVector & genP4()const{return genP4_;}
+  const NTLorentzVector<float> & p4()const{return p4_;}
+  const NTLorentzVector<float> & genP4()const{return genP4_;}
   const float & p4Err(){return p4err_;}
   float pt()const{return p4_.Pt();}
   float E() const{return p4_.E();}
@@ -47,10 +48,10 @@ class NTLepton{
 
 
  protected:
-  PolarLorentzVector p4_;  
+  NTLorentzVector<float> p4_;
   float p4err_;
   int q_;
-  PolarLorentzVector genP4_;
+  NTLorentzVector<float> genP4_;
   float dZV_;
   float dZVErr_;
   float dZBs_;
