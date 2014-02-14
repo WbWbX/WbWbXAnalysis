@@ -58,6 +58,14 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
     addPlot("electron mva id", "Id", "N_{e}");
     FILLFOREACH(kinelectrons,mvaId());
 
+    SETBINSRANGE(80,0,0.5);
+    addPlot("electron saved Eunc", "#DeltaE/E [Gev]", "N_{e}");
+    if(event()->kinelectrons){
+        for(size_t i=0;i<event()->kinelectrons->size();i++)
+            last()->fill(event()->kinelectrons->at(i)->p4Err() /
+                    event()->kinelectrons->at(i)->e() ,*event()->puweight);
+    }
+
 
     SETBINSRANGE(10,0,10);
     addPlot("leadlep-secleadlep dR", "dR", "N_{e}*N_{#mu}/bw",true);

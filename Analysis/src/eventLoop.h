@@ -3,6 +3,13 @@
  *
  *  Created on: Jul 17, 2013
  *      Author: kiesej
+ *
+ *
+ *      THIS IS NOT REALLY A HEADER FILE
+ *
+ *      it only defines the analyze() function of MainAnalyzer and is put in a
+ *      separate file only for structure reasons!
+ *      Do not include it in any other file than MainAnalyzer.cc
  */
 
 #ifndef EVENTLOOP_H_
@@ -54,21 +61,32 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     TString electrontype="NTPFElectrons";
 
     //some mode options
-    //if(mode_=="xsec"); //standard
+    /* implement here not to overload MainAnalyzer class with private members
+     *  they are even allowed to overwrite existing configuration
+     *  with the main purpose of trying new things
+     *
+     *  each option has to start with a CAPITAL letter and must not contain other capital letters
+     *  This allows for parsing of more than one option at once
+     *
+     *  These options should get a cleanup once in a while
+     */
+
+
+
     bool mode_samesign=false;
-    if(mode_.Contains("samesign")){
+    if(mode_.Contains("Samesign")){
         mode_samesign=true;
         std::cout << "entering same sign mode" <<std::endl;
     }
     size_t mintightmuons=0;
-    if(mode_.Contains("tightmuons")){
+    if(mode_.Contains("Tightmuons")){
         mintightmuons=1;
         if(b_mumu_)
             mintightmuons=2;
         std::cout << "entering tight muon mode" <<std::endl;
     }
     bool mode_invertiso=false;
-    if(mode_.Contains("invertiso")){
+    if(mode_.Contains("Invertiso")){
         mode_invertiso=true;
         std::cout << "entering invert iso mode" <<std::endl;
     }
@@ -92,41 +110,27 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
         mettype="NTT1TxyMet";
         std::cout << "entering t1txymet mode" <<std::endl;
     }
-    if(mode_.Contains("gsfelectrons")){
+    if(mode_.Contains("Gsfelectrons")){
         electrontype="NTElectrons";
         std::cout << "entering gsfelectrons mode" <<std::endl;
     }
-    if(mode_.Contains("pfelectrons")){
+    if(mode_.Contains("Pfelectrons")){
         electrontype="NTPFElectrons";
         std::cout << "entering pfelectrons mode" <<std::endl;
     }
 
-    if(mode_.Contains("btagcsvt")){
+    if(mode_.Contains("Btagcsvt")){
         getBTagSF()->setWorkingPoint("csvt");
         std::cout << "entering btagcsvt mode" <<std::endl;
     }
 
     bool issignal=issignal_.at(anaid);
 
-    containerStackVector::debug=true;
-
     bool isMC=true;
     if(legendname==dataname_) isMC=false;
 
     //per sample configuration
 
-    getTriggerSF()->setRangeCheck(false);
-    getElecSF()->setRangeCheck(false);
-    getMuonSF()->setRangeCheck(false);
-    getElecSF()->setIsMC(isMC);
-    getMuonSF()->setIsMC(isMC);
-    getTriggerSF()->setIsMC(isMC);
-
-    //some global checks
-    getElecEnergySF()->setRangeCheck(false);
-    getMuonEnergySF()->setRangeCheck(false);
-    getElecEnergySF()->setIsMC(isMC);
-    getMuonEnergySF()->setIsMC(isMC);
 
     //check if file exists
     if(testmode_)
@@ -147,87 +151,45 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
     //   define some norm containers
 
-    if(testmode_)
-        std::cout << "testmode("<< anaid << "): defining bins" << std::endl;
 
-    vector<float> onebin;
-    onebin << 0.5 << 1.5;
-    container1D generated(onebin, "generated events", "gen", "N_{gen}");
-    container1D generated2(onebin, "generated filtered events", "gen", "N_{gen}");
-
-
-
-    container1D::c_makelist=false; //switch off automatic listing
 
     if(testmode_)
         std::cout << "testmode("<< anaid << "): preparing container1DUnfolds" << std::endl;
 
     //////////////analysis plots/////////////
-    container1DUnfold::c_makelist=true;
+
 
     analysisPlotsJan jansplots_step8(8);
     if((TString)getenv("USER") == (TString)"kiesej"){
         jansplots_step8.enable();
     }
- /*   if((TString)getenv("USER") == (TString)"dolinska"){
+    /*   if((TString)getenv("USER") == (TString)"dolinska"){
         jansplots_step8.enable();
     } */
 
     jansplots_step8.bookPlots();
 
-
-
-    container1DUnfold::c_makelist=false;
+    //global settings for analysis plots
     container1DUnfold::setAllListedMC(isMC);
     container1DUnfold::setAllListedLumi((float)lumi_);
 
-    double genentries=0;
-    if(isMC){
-        if(testmode_)
-            std::cout << "testmode("<< anaid << "): getting genTree for normalisation" << std::endl;
 
-        TTree * tnorm = (TTree*) f->Get("preCutPUInfo/preCutPUInfo");
-        genentries=tnorm->GetEntries();
+    //setup everything for control plots
+    NTFullEvent evt;
+    ttbarControlPlots plots;//for the Z part just make another class (or add a boolian)..
+    ZControlPlots zplots;
+    plots.setEvent(evt);
+    zplots.setEvent(evt);
+    plots.initSteps(10);
+    zplots.initSteps(10);
+    jansplots_step8.setEvent(evt);
 
-        delete tnorm;
-        norm = lumi_ * norm / genentries;
-        for(size_t i=1;i<=generated.getNBins();i++){
-            generated.setBinContent(i, (float)genentries);
-            generated.setBinStat(i,sqrt(genentries));
-        }
-        double fgen=0;
-        TTree * tfgen = (TTree*) f->Get("postCutPUInfo/PUTreePostCut");
-        if(tfgen){
-            fgen=tfgen->GetEntries();
-            for(size_t i=1;i<=generated2.getNBins();i++){
-                generated2.setBinContent(i, (float)fgen);
-                generated2.setBinStat(i, sqrt(fgen));
-            }
-        }
-        else{
-            for(size_t i=1;i<=generated.getNBins();i++){
-                generated2.setBinContent(i, (float)genentries);
-                generated2.setBinStat(i, sqrt(genentries));
-            }
-        }
 
-    }
-    else{//not mc
-        for(size_t i=1;i<=generated.getNBins();i++){
-            generated.setBinContent(i, 0);
-            generated.setBinStat(i, 0);
-        }
-        for(size_t i=1;i<=generated2.getNBins();i++){
-            generated2.setBinContent(i, 0);
-            generated2.setBinStat(i, 0);
-        }
-        norm=1;
-    }
+    //get normalization
+
+    norm=createNormalizationInfo(f,isMC,anaid);
 
     /////////////////////////// configure scalefactors ////
-    if(testmode_)
-        std::cout << "testmode("<< anaid << "):  configuring scalefactors" << std::endl;
-
 
 
     //init b-tag scale factor utility
@@ -235,19 +197,32 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
         std::cout << "testmode("<< anaid << "): preparing btag SF" << std::endl;
 
     //make sure the nominal scale factors are used for varations of the SF
-    TString btagSysAdd=getSyst();
+    TString btagSysAdd=topmass_+"_"+getSyst();
     if(getBTagSF()->getSystematic() != bTagBase::nominal)
-        btagSysAdd="nominal";
+        btagSysAdd=topmass_+"_nominal";
 
     if(getBTagSF()->setSampleName((channel_+"_"+btagSysAdd+"_"+toString(inputfile)).Data()) < 0){
         reportError(-3,anaid);
         return;
     }
 
-    //cout << "running on: " << datasetdirectory_ << inputfile << "    legend: " << legendname << "\nxsec: " << oldnorm << ", genEvents: " << genentries <<endl;
-    // get main analysis tree
+    //range check switched off because of different ranges in bins compared to diff Xsec (leps)
+    getTriggerSF()->setRangeCheck(false);
+    getElecSF()->setRangeCheck(false);
+    getMuonSF()->setRangeCheck(false);
+    getElecSF()->setIsMC(isMC);
+    getMuonSF()->setIsMC(isMC);
+    getTriggerSF()->setIsMC(isMC);
 
-    /////////open main tree and prepare collections
+    //some global checks
+    getElecEnergySF()->setRangeCheck(false);
+    getMuonEnergySF()->setRangeCheck(false);
+    getElecEnergySF()->setIsMC(isMC);
+    getMuonEnergySF()->setIsMC(isMC);
+
+
+
+    /////////open main tree and prepare branches / collections
 
 
     TTree * t = (TTree*) f->Get("PFTree/PFTree");
@@ -255,33 +230,21 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     TBranch * b_TriggerBools=0;
     std::vector<bool> * p_TriggerBools=0;
     t->SetBranchAddress("TriggerBools",&p_TriggerBools, &b_TriggerBools);
-
-    //0 Ele
-    //1,2 Mu
-
     TBranch * b_Electrons=0;
     vector<NTElectron> * pElectrons = 0;
-    // t->SetBranchAddress("NTPFElectrons",&pElectrons,&b_Electrons);
     t->SetBranchAddress(electrontype,&pElectrons,&b_Electrons);
-
     TBranch * b_Muons=0;
     vector<NTMuon> * pMuons = 0;
     t->SetBranchAddress("NTMuons",&pMuons, &b_Muons);
-
     TBranch * b_Jets=0;         // ##TRAP##
     vector<NTJet> * pJets=0;
     t->SetBranchAddress("NTJets",&pJets, &b_Jets);
-
     TBranch * b_Met=0;
     NTMet * pMet = 0;
     t->SetBranchAddress(mettype,&pMet,&b_Met);
-
     TBranch * b_Event=0;
     NTEvent * pEvent = 0;
     t->SetBranchAddress("NTEvent",&pEvent,&b_Event);
-
-    /// generator branches should exist everywhere but empty for non signal processes
-
     TBranch * b_GenTops=0;
     vector<NTGenParticle> * pGenTops=0;
     t->SetBranchAddress("NTGenTops",&pGenTops,&b_GenTops);
@@ -299,23 +262,15 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     TBranch * b_GenLeptons1=0;
     vector<NTGenParticle> *pGenLeptons1 =0;
     t->SetBranchAddress("NTGenLeptons1",&pGenLeptons1,&b_GenLeptons1);
-
     TBranch * b_GenJets=0;
     vector<NTGenJet> * pGenJets=0;
     t->SetBranchAddress("NTGenJets",&pGenJets,&b_GenJets);
-
     TBranch * b_GenNeutrinos=0;
     vector<NTGenParticle> * pGenNeutrinos=0;
     t->SetBranchAddress("NTGenNeutrinos",&pGenNeutrinos,&b_GenNeutrinos);
 
 
-    /*
-     * ONLY because of a bug in current trees
-     */
-    elecRhoIsoAdder elecrhoisoadd(isMC);
-    elecrhoisoadd.setUse2012EA(!is7TeV_);
-
-
+    //some helpers
     double sel_step[]={0,0,0,0,0,0,0,0,0};
     float count_samesign=0;
     ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
@@ -331,58 +286,25 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     if(testmode_)
         std::cout << "testmode("<< anaid << "): starting main loop" << std::endl;
 
-
-
-    container1D::c_makelist =true;
-    //define event
-    NTFullEvent evt;
-    ttbarControlPlots plots;//for the Z part just make another class (or add a boolian)..
-    ZControlPlots zplots;
-    plots.setEvent(evt);
-    zplots.setEvent(evt);
-    jansplots_step8.setEvent(evt);
-
-
-
-    float tpuweight=0;
-    evt.puweight=&tpuweight;
-    //get the plots in the right order. not necessary but nicer
-    for(size_t i=0;i<10;i++){ //steps
-        plots.makeControlPlots(i);
-        zplots.makeControlPlots(i);
-    }
-    //switch on listing
-    /*vector<float> testbins;
-	for(float i=0;i<200;i++) testbins << i;
-	vector<container1D*> testconts;
-	size_t ntestconts=10000;
-	for(size_t i=0;i<ntestconts;i++)
-		testconts.push_back(new container1D(testbins));
-     */
     Long64_t nEntries=t->GetEntries();
     if(norm==0) nEntries=0; //skip for norm0
     if(testmode_) nEntries*=0.08;
     for(Long64_t entry=0;entry<nEntries;entry++){
-        //if(showstatusbar_) displayStatusBar(entry,nEntries);
+
+
+        ////////////////////////////////////////////////////
+        ////////////////////  INIT EVENT ///////////////////
+        /////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////
 
 
         size_t step=0;
         evt.reset();
-
-
-        container1DUnfold::flushAllListed();
-
-        if((entry +1)* 100 % nEntries <100){
-            int status=(entry+1) * 100 / nEntries;
-            p_status.get(anaid)->pwrite(status);
-            if(singlefile_)
-                std::cout <<"single run " << legendname <<"  "<< status << "%" << std::endl;
-        }
-
-        ////////////////////////////////////////////////////
-        ////////////////////LINK TO EVENT///////////////////
-
         evt.event=pEvent;
+        container1DUnfold::flushAllListed(); //important to call each event
+
+        //reports current status to parent
+        reportStatus(entry,nEntries,anaid);
 
         b_Event->GetEntry(entry);
         float puweight=1;
@@ -556,7 +478,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
         bool gotfirst=false;
         for(size_t i=0;i<pMuons->size();i++){
             NTMuon* muon = & pMuons->at(i);
-            muon->setP4(muon->p4() * getMuonEnergySF()->getScalefactor(muon->eta()));
+            if(isMC)
+                muon->setP4(muon->p4() * getMuonEnergySF()->getScalefactor(muon->eta()));
             allleps << muon;
             if(!gotfirst && muon->pt() < 20)       continue;
             if(doLargeAcceptance) gotfirst=true;
@@ -607,13 +530,21 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
         gotfirst=false;
         for(size_t i=0;i<pElectrons->size();i++){
             NTElectron * elec=&(pElectrons->at(i));
-            double ensf=getElecEnergySF()->getScalefactor(elec->eta());
+            float ensf=1;
+            if(isMC){
+                if(getElecEnergySF()->isSystematicsDown()){
+                    ensf=1-(elec->p4Err() / elec->e());
+                }
+                else if (getElecEnergySF()->isSystematicsUp()){
+                    ensf=1+(elec->p4Err() / elec->e());
+                }
+            }
             elec->setECalP4(elec->ECalP4() * ensf);
             elec->setP4(elec->ECalP4() * ensf); //both the same now!!
             allleps << elec;
-            if(!gotfirst && elec->ECalP4().Pt() < 20)  continue;
+            if(!gotfirst && elec->pt() < 20)  continue;
             if(doLargeAcceptance) gotfirst=true;
-            if( elec->ECalP4().Pt() < 10) continue;
+            if( elec->pt() < 10) continue;
             if(fabs(elec->eta()) > 2.4) continue;      ///common muon/elec phasespace
             //if(!noOverlap(&(pElectrons->at(i)), kinmuons, 0.1)) continue;   ////!!!CHANGE
             kinelectrons  << elec;
@@ -624,13 +555,6 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
             if(elec->mvaId() < 0.5) continue;
             if(elec->mHits() > 0) continue;
 
-            /////////only temporarily////!! rho iso stuff
-            //NTSuClu suclu;
-            //LorentzVector ecalp4;
-            //ecalp4=pElectrons->at(i).ECalP4();
-            //suclu.setP4(ecalp4);
-            //elec->setSuClu(suclu);
-            //elecrhoisoadd.addRhoIso(*elec);
 
             idelectrons <<  elec;
 
@@ -641,9 +565,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
         }
 
         /*
-         * Make some plots of initial lepton distributions
+         * make all lepton collection (merged muons and electrons)
          */
-
         std::sort(allleps.begin(),allleps.end(), comparePt<ztop::NTLepton*>);
         evt.allleptons=&allleps;
 
@@ -651,13 +574,11 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
         /*
          * Step 0 after trigger and ntuple cuts on leptons
          */
-
-
-
-
         sel_step[0]+=puweight;
         plots.makeControlPlots(step);
         zplots.makeControlPlots(step);
+
+
         //////////two ID leptons STEP 1///////////////////////////////
         step++;
 
@@ -671,8 +592,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
         zplots.makeControlPlots(step);
 
 
-
-        //////// require two iso leptons  STEP 2  //////
+        //////// require two iso leptons  STEP 2  //////////////////////////
         step++;
 
         if(b_ee_ && isoelectrons.size() < 2) continue;
@@ -752,17 +672,19 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
         puweight*=lepweight;
 
+        //just a quick faety net against very weird weights
         if(isMC && fabs(puweight) > 99999){
-            p_finished.get(anaid)->pwrite(-88);
+            reportError(-88,anaid);
             return;
         }
-
-
 
         sel_step[2]+=puweight;
         plots.makeControlPlots(step);
         zplots.makeControlPlots(step);
-        ///////// 20 GeV cut /// STEP 3 ///////////////////
+
+
+
+        ///////// 20 GeV cut /// STEP 3 ///////////////////////////////////////
         step++;
 
         if(mll < 20)
@@ -1052,10 +974,18 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
             zplots.makeControlPlots(step);
         }
 
-    }//main event loop ends
-    //if(showstatusbar_)std::cout << std::endl; //for status bar
-    container1D::c_makelist =false;
-    container1DUnfold::flushAllListed();
+    }
+
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////    MAIN LOOP ENDED    /////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////    POST PROCESSING    /////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+
+    container1DUnfold::flushAllListed(); // call once again after last event processed
 
     if(testmode_ )
         std::cout << "testmode("<< anaid << "): finished main loop" << std::endl;
@@ -1111,7 +1041,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
         }
 
         TTree * outtree;
-        ztop::container1DStackVector * csv=&analysisplots_;
+        ztop::container1DStackVector * csv=&allplotsstackvector_;
 
         // std::cout << "trying to get tree" <<std::endl;
 
@@ -1190,8 +1120,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
                 cout << "  => sync step 5 \t1btag";
             std::cout  << std::endl;
         }
-        std::cout << "factor for extrapolation (single dataset genentries/tree-entries) " << genentries << "/" << nEntries <<std::endl;
-        std::cout << "count_samesign pairs at dilepton selection: " << count_samesign <<std::endl;
+
 
         if(singlefile_) return;
 
@@ -1208,7 +1137,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
 }
 
-//- 99: exception -1: file not found, -2 write failed
+
 
 bool MainAnalyzer::checkTrigger(std::vector<bool> * p_TriggerBools,ztop::NTEvent * pEvent, bool isMC,size_t anaid){
 

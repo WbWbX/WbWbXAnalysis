@@ -5,7 +5,7 @@
 //should be taken care of by the linker!
 
 
-void analyse(TString channel, TString Syst, TString energy, TString outfileadd, double lumi, bool dobtag, bool status,bool testmode,TString maninputfile,TString mode){ //options like syst..
+void analyse(TString channel, TString Syst, TString energy, TString outfileadd, double lumi, bool dobtag, bool status,bool testmode,TString maninputfile,TString mode,TString topmass){ //options like syst..
 
     bool didnothing=false;
     //some env variables
@@ -67,7 +67,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
 
 
     if(dobtag){
-        btagfile=outdir+"/"+ channel+"_"+energy+"_"+Syst+"_btags.root";
+        btagfile=outdir+"/"+ channel+"_"+energy+"_"+topmass+"_"+Syst+"_btags.root";
         system(("rm -f "+btagfile).Data());
     }
 
@@ -85,6 +85,8 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
     ana.getPUReweighter()->setDataTruePUInput(pufile+".root");
     ana.setChannel(channel);
     ana.setEnergy(energy);
+    ana.setSyst(Syst);
+    ana.setTopMass(topmass);
     if(energy == "8TeV"){
         ana.getPUReweighter()->setMCDistrSum12();
     }
@@ -96,7 +98,9 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
     ana.getTriggerSF()->setInput(trigsffile,trigsfhisto);
 
     ana.getElecEnergySF()->setGlobal(1,0.5,0.5);
-    ana.getMuonEnergySF()->setGlobal(1,0.5,0.5);
+    ana.getMuonEnergySF()->setGlobal(1,0.2,0.2); //new from muon POG twiki
+//https://twiki.cern.ch/twiki/bin/viewauth/CMS/MuonReferenceResolution
+    //this is for muons without the corrections so it should be even better with
 
     ana.getTopPtReweighter()->setFunction(reweightfunctions::toppt);
     ana.getTopPtReweighter()->setSystematics(reweightfunctions::nominal);
@@ -224,6 +228,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
     else if(Syst=="Z_SCALE_down"){
         ana.setFilePostfixReplace("60120.root","60120_Zscaledown.root");
     }
+    /* THIS WILL BE REPLACED AT A CERTAIN POINT */
     else if(Syst=="MT_6_down"){
         ana.setFilePostfixReplace("ttbar.root","ttbar_mt166.5.root");
         ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mt166.5.root");
@@ -257,10 +262,10 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
 
 
     ana.setFileList(inputfile);
-    ana.setSyst(Syst);
 
 
-    std::cout << "doing btag: " << dobtag <<std::endl;
+
+    std::cout << "Calculating btag efficiencies: " << dobtag <<std::endl;
 
 
 
@@ -309,10 +314,11 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
         }
         else{
             std::cout << "at least one job failed!\n"
-                    << "error code meaning: "
-                    << "-99: std::exception thrown somewhere\n"
+                    << "error code meaning: \n"
+                    << "-99: std::exception thrown somewhere (see output)\n"
+                    << "-88: a suspiciously high weight was assigned to a MC event\n"
                     << "-3 : problems finding b-tagging efficiencies (file/file format) \n"
-                    << "-2 : write to output file failed "
+                    << "-2 : write to output file failed\n"
                     << "-1 : input file not found\n"
                     << std::endl;
             //put more once you introduce one
@@ -347,6 +353,7 @@ int main(int argc, char* argv[]){
     bool testmode  = parse.getOpt<bool>     ("T",false);         //-T enables default false
     TString mode   = parse.getOpt<TString>  ("m","xsec");        //-m (xsec,....) default xsec changes legends? to some extend
     TString inputfile= parse.getOpt<TString>  ("i","");          //-i empty will use automatic
+    TString topmass  = parse.getOpt<TString>  ("mt","172.5");          //-i empty will use automatic
     parse.doneParsing();
 
     bool mergefiles=false;
@@ -356,6 +363,6 @@ int main(int argc, char* argv[]){
         //do the merging with filestomerge
     }
     else{
-        analyse(channel, syst, energy, outfile, lumi,dobtag , status, testmode,inputfile,mode );
+        analyse(channel, syst, energy, outfile, lumi,dobtag , status, testmode,inputfile,mode,topmass);
     }
 }

@@ -6,6 +6,7 @@
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 //#include "MainAnalyzer.h"
 #include <cstdlib>
+#include <string>
 
 /*
 template<class a>
@@ -73,6 +74,8 @@ std::vector<T> mergeVectors(const std::vector<T>& a, const std::vector<T> & b){
     }
     return out;
 }
+
+bool hasEnding (std::string const &fullString, std::string const &ending);
 
 
 }//ztop

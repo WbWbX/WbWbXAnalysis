@@ -9,6 +9,13 @@ $  [parameters-begin] until [parameters-end]
 
 $ inputfile,                       legend entry,        color,   xsection,   legendNumber,  (opt) isSignal
 
+$data
+$
+tree_8TeV_emu_runA_22Jan.root,data,1,1,10
+tree_8TeV_emu_runB_22Jan.root,data,1,1,10
+tree_8TeV_emu_runC_22Jan.root,data,1,1,10
+tree_8TeV_emu_runD_22Jan.root,data,1,1,10
+
 
 tree_8TeV_emuttbar.root,       t#bar{t},		633,	  248.5,	  0, true
 tree_8TeV_dyee60120.root,          Z#rightarrowll, 	852,	  3532.8, 1
@@ -34,12 +41,6 @@ tree_8TeV_qcdem3080.root,	   QCD,			400,	  4615893,9
 tree_8TeV_qcdem80170.root,	   QCD,			400,	  183294, 9
 tree_8TeV_qcdmu15.root,		   QCD,			400,	  134680, 9
 $
-$data
-$
-tree_8TeV_emu_runA_22Jan.root,data,1,1,10
-tree_8TeV_emu_runB_22Jan.root,data,1,1,10
-tree_8TeV_emu_runC_22Jan.root,data,1,1,10
-tree_8TeV_emu_runD_22Jan.root,data,1,1,10
 
 [inputfiles-end]
 

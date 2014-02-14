@@ -63,6 +63,7 @@ then
 
     compile analyse
     compile mergeSyst
+    compile mergeSyst2
 
 
 fi

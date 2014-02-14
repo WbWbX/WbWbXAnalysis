@@ -29,7 +29,8 @@ public:
 	void setIsMC(bool is){isMC_=is;}
 	void setRangeCheck(bool check){rangecheck_=check;}
 
-
+	bool isSystematicsUp(){return (syst_ <100 && syst_>0);}
+	bool isSystematicsDown(){return ( syst_<0);}
 
 	double getScalefactor(double xval,double yval=0);
 

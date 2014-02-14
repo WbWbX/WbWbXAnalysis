@@ -7,6 +7,13 @@ $  [parameters-begin] until [parameters-end]
 [inputfiles-begin]
 $ inputfile,  legend entry,   color,   xsection,   legendNumber,  (opt) isSignal (true/false)
 
+$data
+$
+tree_8TeV_mumu_runA_22Jan.root,data,1,1,10
+tree_8TeV_mumu_runB_22Jan.root,data,1,1,10
+tree_8TeV_mumu_runC_22Jan.root,data,1,1,10
+tree_8TeV_mumu_runD_22Jan.root,data,1,1,10
+
 
 $mc
 
@@ -27,13 +34,6 @@ tree_8TeV_dymumu5060.root,	     DY#rightarrowll,  858, 3532.8,  8
 tree_8TeV_dymumu120inf.root,	     DY#rightarrowll,  858, 3532.8,  8
 
 tree_8TeV_qcdmu15.root,		     QCD,	       400, 134680,  9
-
-$data
-$
-tree_8TeV_mumu_runA_22Jan.root,data,1,1,10
-tree_8TeV_mumu_runB_22Jan.root,data,1,1,10
-tree_8TeV_mumu_runC_22Jan.root,data,1,1,10
-tree_8TeV_mumu_runD_22Jan.root,data,1,1,10
 
 
 

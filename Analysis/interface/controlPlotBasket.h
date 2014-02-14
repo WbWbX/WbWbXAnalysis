@@ -17,9 +17,9 @@
 #define FILLSINGLE(A) if(event()->A)last()->fill(*(event()->A),*event()->puweight)
 #define SETBINS if(isNewStep()) setBins()
 #define SETBINSRANGE(N,L,H) if(isNewStep()){ \
-	setBins(); \
-	for(float i=(float)L;i<=((float) H);i+=((float)H-(float)L)/((float)N)) \
-	getBins().push_back(i);}
+        setBins(); \
+        for(float i=(float)L;i<=((float) H);i+=((float)H-(float)L)/((float)N)) \
+        getBins().push_back(i);}
 
 namespace ztop{
 class NTFullEvent;
@@ -30,39 +30,44 @@ class NTFullEvent;
  */
 class controlPlotBasket{
 public:
-	controlPlotBasket():tmpidx_(0),tmpstep_(0),tmpnewstep_(true),evt_(0),lcont_(0),size_(0){}
-	virtual ~controlPlotBasket();
+    controlPlotBasket():tmpidx_(0),tmpstep_(0),tmpnewstep_(true),evt_(0),lcont_(0),size_(0),initphase_(false){}
+    virtual ~controlPlotBasket();
 
-	void setEvent(const NTFullEvent & evt){evt_=&evt;}
+    void setEvent(const NTFullEvent & evt){evt_=&evt;}
 
-	const NTFullEvent * event(){return evt_;}
 
-	container1D *addPlot(const TString & name, const TString & xaxisname,const TString & yaxisname, const bool & mergeufof=true);
+    virtual void makeControlPlots(const size_t& step)=0;
+    /**
+     * this is an optional function. But it helps to keep a particular ordering of the plots!
+     */
+    void initSteps(size_t no);
 
-	void initStep(const size_t& step);
+protected:
+    const NTFullEvent * event(){return evt_;}
 
-	const bool & isNewStep()const{return tmpnewstep_;}
-	std::vector<float> & setBins(){tempbins_.clear();return tempbins_;}
-	std::vector<float> & getBins(){return tempbins_;}
+    container1D *addPlot(const TString & name, const TString & xaxisname,const TString & yaxisname, const bool & mergeufof=true);
 
-	virtual void makeControlPlots(const size_t& step)=0;
+    void initStep(const size_t& step);
+    std::vector<float> & setBins(){tempbins_.clear();return tempbins_;}
+    std::vector<float> & getBins(){return tempbins_;}
+    container1D *  &last(){return lcont_;}
 
-	container1D *  &last(){return lcont_;}
-
-	static std::vector<TString> namelist;
+    const bool & isNewStep()const{return tmpnewstep_;}
 
 private:
 
 
-	size_t tmpidx_;
-	size_t tmpstep_;
-	bool tmpnewstep_;
-	const NTFullEvent * evt_;
-	container1D * lcont_;
-	size_t size_;
-	std::vector<float> tempbins_;
-	std::vector< std::vector<ztop::container1D *> > cplots_; //step,plot
-	std::vector< std::vector<ztop::container1D> > scplots_; //stack! step,plot
+    static std::vector<TString> namelist;
+    size_t tmpidx_;
+    size_t tmpstep_;
+    bool tmpnewstep_;
+    const NTFullEvent * evt_;
+    container1D * lcont_;
+    size_t size_;
+    std::vector<float> tempbins_;
+    std::vector< std::vector<ztop::container1D *> > cplots_; //step,plot
+    std::vector< std::vector<ztop::container1D> > scplots_; //stack! step,plot
+    bool initphase_;
 
 };
 }//namespace

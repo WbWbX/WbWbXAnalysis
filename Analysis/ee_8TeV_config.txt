@@ -9,6 +9,13 @@ $  [parameters-begin] until [parameters-end]
 
 $ inputfile,  legend entry,   color,   xsection,   legendNumber,  (opt) isSignal
 
+$data
+
+tree_8TeV_ee_runA_22Jan.root,  data,1,1,10
+tree_8TeV_ee_runB_22Jan.root,  data,1,1,10
+tree_8TeV_ee_runC_22Jan.root,  data,1,1,10
+tree_8TeV_ee_runD_22Jan.root,  data,1,1,10
+
 $mc
 
 tree_8TeV_eettbar.root,        t#bar{t},               633,  248.5,    0, true
@@ -31,12 +38,6 @@ tree_8TeV_qcdem2030.root,          QCD,                    400, 2914860, 9
 tree_8TeV_qcdem3080.root,          QCD,                    400, 4615893, 9
 tree_8TeV_qcdem80170.root,         QCD,                    400, 183294,  9
 
-$data
-
-tree_8TeV_ee_runA_22Jan.root,  data,1,1,10
-tree_8TeV_ee_runB_22Jan.root,  data,1,1,10
-tree_8TeV_ee_runC_22Jan.root,  data,1,1,10
-tree_8TeV_ee_runD_22Jan.root,  data,1,1,10
 
 [inputfiles-end]
 

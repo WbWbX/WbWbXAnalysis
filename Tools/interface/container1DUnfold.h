@@ -94,6 +94,14 @@ public:
     static std::vector<container1DUnfold *> c_list;
     static bool debug;
     static bool c_makelist;
+    static void c_deletelist(){
+        size_t count=0,listsize=c_list.size();
+        for(unsigned int i=0;i<listsize;i++){
+            if(c_list[count]) delete c_list[count]; //delete also removes entry from list
+            else count++; //that should never happen if list not touched from outside
+        }
+    }
+
 
     /**
      * does nothing for data where flushed_ is always true

@@ -181,7 +181,14 @@ public:
 
     static bool c_makelist;
     static std::vector<container1D*> c_list;
-    static void c_clearlist(){c_list.clear();}
+    static void c_deletelist(){
+        size_t count=0,listsize=c_list.size();
+        for(unsigned int i=0;i<listsize;i++){
+            if(c_list[count]) delete c_list[count]; //delete also removes entry from list
+            else count++; //that should never happen if list not touched from outside
+        }
+    }
+
     static bool debug;
 
     static void setOperatorDefaults();

@@ -11,11 +11,11 @@
 #include "container.h"
 
 
-    /*
-     * to be implemented:
-     * hasunderflow/overflow (can be function that checks entries in corr containers
-     *
-     */
+/*
+ * to be implemented:
+ * hasunderflow/overflow (can be function that checks entries in corr containers
+ *
+ */
 
 namespace ztop{
 class container1DUnfold;
@@ -25,26 +25,26 @@ class container2D {
 public:
 
 
-	enum plotTag{none,topdf};
+    enum plotTag{none,topdf};
 
-	 container2D();
+    container2D();
     container2D(const std::vector<float> & ,const std::vector<float> &, TString name="",TString xaxisname="",TString yaxisname="", bool mergeufof=false); //! construct with binning
-	~container2D();
+    ~container2D();
 
-	bool isDummy(){return xbins_.size()<2;}
+    bool isDummy(){return xbins_.size()<2;}
 
-	void setBinning(const std::vector<float> &xbins, std::vector<float> ybins);
-	//setaxis etc still missing. should be ok as long as default constr. is protected
+    void setBinning(const std::vector<float> &xbins, std::vector<float> ybins);
+    //setaxis etc still missing. should be ok as long as default constr. is protected
 
-	void setName(TString name){name_=name;}
-	const TString &getName() const {return name_;}
+    void setName(TString name){name_=name;}
+    const TString &getName() const {return name_;}
 
 
-	void setXAxisName(const TString& name){xaxisname_=name;}
-	const TString& getXAxisName()const {return xaxisname_;}
+    void setXAxisName(const TString& name){xaxisname_=name;}
+    const TString& getXAxisName()const {return xaxisname_;}
 
-	void setYAxisName(const TString& name){yaxisname_=name;}
-	const TString& getYAxisName()const {return yaxisname_;}
+    void setYAxisName(const TString& name){yaxisname_=name;}
+    const TString& getYAxisName()const {return yaxisname_;}
 
 
     size_t getBinNoX(const float&) const; // returns bin index number for (float variable)
@@ -71,17 +71,17 @@ public:
     float getSystError(unsigned int number, const size_t & xbin, const size_t & ybin) const;
     float getSystErrorStat(unsigned int number, const size_t & xbin, const size_t & ybin) const;
     const TString & getSystErrorName(const size_t & number) const;
-/*
+    /*
      float projectBinContentToY(const size_t & ybin,bool includeUFOF=false) const;
      float projectBinContentToX(const size_t & xbin,bool includeUFOF=false) const;
-*/
-     container1D projectToX(bool includeUFOF=false) const;
-     container1D projectToY(bool includeUFOF=false) const;
-     container1D getYSlice(size_t ybinno) const;
-     container1D getXSlice(size_t xbinno) const;
+     */
+    container1D projectToX(bool includeUFOF=false) const;
+    container1D projectToY(bool includeUFOF=false) const;
+    container1D getYSlice(size_t ybinno) const;
+    container1D getXSlice(size_t xbinno) const;
 
-     void setXSlice(size_t xbinno,const container1D &, bool UFOF=true);
-     void setYSlice(size_t xbinno,const container1D &, bool UFOF=true);
+    void setXSlice(size_t xbinno,const container1D &, bool UFOF=true);
+    void setYSlice(size_t xbinno,const container1D &, bool UFOF=true);
 
     void removeError(TString);
     void renameSyst(TString, TString);
@@ -115,6 +115,13 @@ public:
     static bool debug;
     static std::vector<container2D*> c_list;
     static bool c_makelist;
+    static void c_deletelist(){
+        size_t count=0,listsize=c_list.size();
+        for(unsigned int i=0;i<listsize;i++){
+            if(c_list[count]) delete c_list[count]; //delete also removes entry from list
+            else count++; //that should never happen if list not touched from outside
+        }
+    }
 
     plotTag plottag;
 
@@ -122,8 +129,8 @@ protected:
 
 
 
-	std::vector<ztop::container1D> conts_; //! for each y axis bin one container
-	std::vector<float> xbins_,ybins_;
+    std::vector<ztop::container1D> conts_; //! for each y axis bin one container
+    std::vector<float> xbins_,ybins_;
     bool divideBinomial_;
     bool mergeufof_;
 
@@ -134,38 +141,38 @@ protected:
 };
 
 inline size_t ztop::container2D::getBinNoX(const float & var) const{
-	if(conts_.size()>0)
-		return conts_.at(0).getBinNo(var);
-	else
-		return -1;
+    if(conts_.size()>0)
+        return conts_.at(0).getBinNo(var);
+    else
+        return -1;
 }
 inline size_t ztop::container2D::getBinNoY(const float & var) const {
 
-  if(ybins_.size() <2){
-    return 0;
-  }
-  std::vector<float>::const_iterator it=std::lower_bound(ybins_.begin()+1, ybins_.end(), var);
-  if(var==*it)
-    return it-ybins_.begin();
-  else
-    return it-ybins_.begin()-1;
+    if(ybins_.size() <2){
+        return 0;
+    }
+    std::vector<float>::const_iterator it=std::lower_bound(ybins_.begin()+1, ybins_.end(), var);
+    if(var==*it)
+        return it-ybins_.begin();
+    else
+        return it-ybins_.begin()-1;
 
 }
 inline void ztop::container2D::fill(const float & xval, const float & yval, const float & weight){
-	int ybin=getBinNoY(yval);
-	conts_[ybin].fill(xval,weight);
+    int ybin=getBinNoY(yval);
+    conts_[ybin].fill(xval,weight);
 }
 /**
  * not protected
  */
 inline const histoBin & ztop::container2D::getBin(const size_t &xbinno,const size_t &ybinno,const int &layer) const{
-	return conts_[ybinno].getBin(xbinno,layer);
+    return conts_[ybinno].getBin(xbinno,layer);
 }
 /**
  * not protected
  */
 inline histoBin & ztop::container2D::getBin(const size_t &xbinno,const size_t& ybinno,const int &layer){
-	return conts_[ybinno].getBin(xbinno,layer);
+    return conts_[ybinno].getBin(xbinno,layer);
 }
 
 }

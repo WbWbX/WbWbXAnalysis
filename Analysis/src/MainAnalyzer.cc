@@ -30,6 +30,12 @@ void MainAnalyzer::reportError(int errorno, size_t anaid){
     p_finished.get(anaid)->pwrite(errorno);
 }
 
+void MainAnalyzer::reportStatus(Long64_t entry,Long64_t nEntries,size_t anaid){
+    if((entry +1)* 100 % nEntries <100){
+        int status=(entry+1) * 100 / nEntries;
+        p_status.get(anaid)->pwrite(status);
+    }
+}
 
 MainAnalyzer::MainAnalyzer(){
 
@@ -50,7 +56,15 @@ MainAnalyzer::MainAnalyzer(){
     mode_="";
     singlefile_=false;
     maxchilds_=8;
-
+    topmass_="mt172.5";
+}
+/**
+ * takes care of not already deleted containers etc
+ */
+MainAnalyzer::~MainAnalyzer(){
+    ztop::container1D::c_deletelist();
+    ztop::container1DUnfold::c_deletelist();
+    ztop::container2D::c_deletelist();
 }
 
 
@@ -66,14 +80,18 @@ int MainAnalyzer::checkForWriteRequest(){
 
 
 
-
+/**
+ * handles all the parallalization and global init things
+ */
 int MainAnalyzer::start(){
 
     using namespace std;
     using namespace ztop;
 
 
-    /// put MC code here, make containerlist private!!
+    ///////////////////////////////////////////////////////
+    ////////////////// GLOBAL FILE READ ETC..//////////////
+    ///////////////////////////////////////////////////////
 
     clear();
 
@@ -86,8 +104,8 @@ int MainAnalyzer::start(){
         return -1;
     }
 
-    analysisplots_.setName(getOutFileName());
-    analysisplots_.setSyst(getSyst());
+    allplotsstackvector_.setName(getOutFileName());
+    allplotsstackvector_.setSyst(getSyst());
     bTagBase::systematics btagsyst=getBTagSF()->getSystematic();
     //load btag:
     if(!(getBTagSF()->makesEff())){
@@ -126,8 +144,11 @@ int MainAnalyzer::start(){
 
     size_t done=0,failed=0;
 
-    //spawn child processes
-    //if only one process, don't fork!!
+    ////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////
+    ////////////////// SPAWN CHILD PROCESSES AND KEEP TRACK ////////////////
+    ////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////
 
     if(filenumber>1){
         for(size_t i=0;i<filenumber;i++){
@@ -136,10 +157,16 @@ int MainAnalyzer::start(){
                 try{
                     analyze(p_idx.get(i)->pread());
                 }
-                catch(...){
-                    std::cout << "\n*******\nException thrown in " << infiles_.at(i) << std::endl;
-                    //fake write
-                    reportError(-99,i);
+                catch(std::exception& e){
+                  //  reportError(-99,i);
+                    //this is a special error report. make sure the couts are atomic
+                    p_askwrite.get(i)->pwrite(i);
+                    p_allowwrite.get(i)->pread();
+                    std::cout << "*************** Exception ***************" << std::endl;
+                    std::cout << e.what() << std::endl;
+                    std::cout << "in " << infiles_.at(i) << '\n'<<std::endl;
+                    p_finished.get(i)->pwrite(-99);
+
                     std::exit(EXIT_FAILURE);
                 }
                 std::exit(EXIT_SUCCESS);
@@ -215,10 +242,6 @@ int MainAnalyzer::start(){
         if(!testmode_)
             sleep(10);
 
-
-
-
-
         bool nonefailed=true;
         for(size_t i=0;i<succ.size();i++){
             std::cout << succ.at(i) << "\t" << infiles_.at(i) << std::endl;
@@ -230,6 +253,7 @@ int MainAnalyzer::start(){
         else
             return -1;
     }//
+    ///part for only one single file (test modes)
     else{ //only one process to spawn
         singlefile_=true;
         try{
@@ -290,50 +314,7 @@ void MainAnalyzer::readFileList(){
             issignal_.push_back(false);
     }
 
-    /*
 
-	ifstream inputfiles (filelist_.Data());
-	string filename;
-	string legentry;
-	int color;
-	double norm;
-	string oldline="";
-	size_t legord;
-	if(inputfiles.is_open()){
-		while(inputfiles.good()){
-			inputfiles >> filename;
-			if(filename.size()<1)
-				continue;
-			if(((TString)filename).Contains("#")){
-				getline(inputfiles,filename); //just ignore complete line
-				//	std::cout << "ignoring: " << filename << std::endl;
-				continue;
-			}
-			inputfiles >> legentry >> color >> norm >> legord;
-			if(oldline != filename){
-
-				std::cout << "adding: " << replaceExtension(filename) << "\t" << legentry << "\t" << color << "\t" << norm << "\t" << legord << std::endl;
-
-				TString infile=replaceExtension(filename);
-
-				infiles_    << infile;
-				legentries_ << legentry;
-				colz_       << color;
-				norms_      << norm;
-				legord_ << legord;
-				oldline=filename;
-			}
-
-		}
-		if((uint)freplaced_ != fwithfix_.size()){
-			cout << "replacing at least some postfixes was not sucessful! expected to replace "<< fwithfix_.size() << " replaced "<< freplaced_ << " exit" << endl;
-
-		}
-	}
-	else{
-		cout << "MainAnalyzer::setFileList(): input file list not found" << endl;
-	}
-     */
 
 }
 
@@ -363,7 +344,7 @@ void MainAnalyzer::copyAll(const MainAnalyzer & analyzer){
     topptReweighter_=analyzer.topptReweighter_;
 
 
-    analysisplots_ = analyzer.analysisplots_;
+    allplotsstackvector_ = analyzer.allplotsstackvector_;
     showstatus_=analyzer.showstatus_;
 
     infiles_=analyzer.infiles_;
@@ -394,5 +375,63 @@ void MainAnalyzer::analyze(size_t i){
 
 }
 
+
+float MainAnalyzer::createNormalizationInfo(TFile *f, bool isMC,size_t anaid){
+    float norm=1;
+    using namespace ztop;
+    using namespace std;
+
+    vector<float> onebin;
+    onebin << 0.5 << 1.5;
+    bool tmp=container1D::c_makelist;
+    container1D::c_makelist=true;
+    container1D * generated=  new container1D(onebin, "generated events", "gen", "N_{gen}");
+    container1D * generated2=  new container1D(onebin, "generated filtered events", "gen", "N_{gen}");
+    container1D::c_makelist=tmp; //switch off automatic listing
+
+    float genentries=0;
+    if(isMC){
+
+        TTree * tnorm = (TTree*) f->Get("preCutPUInfo/preCutPUInfo");
+        genentries=tnorm->GetEntries();
+
+        delete tnorm;
+        norm = lumi_   / genentries;
+        for(size_t i=1;i<=generated->getNBins();i++){
+            generated->setBinContent(i, (float)genentries);
+            generated->setBinStat(i,sqrt(genentries));
+        }
+        double fgen=0;
+        TTree * tfgen = (TTree*) f->Get("postCutPUInfo/PUTreePostCut");
+        if(tfgen){
+            fgen=tfgen->GetEntries();
+            for(size_t i=1;i<=generated2->getNBins();i++){
+                generated2->setBinContent(i, (float)fgen);
+                generated2->setBinStat(i, sqrt(fgen));
+            }
+        }
+        else{
+            for(size_t i=1;i<=generated->getNBins();i++){
+                generated2->setBinContent(i, (float)genentries);
+                generated2->setBinStat(i, sqrt(genentries));
+            }
+        }
+
+    }
+    else{//not mc
+        for(size_t i=1;i<=generated->getNBins();i++){
+            generated->setBinContent(i, 0);
+            generated->setBinStat(i, 0);
+        }
+        for(size_t i=1;i<=generated2->getNBins();i++){
+            generated2->setBinContent(i, 0);
+            generated2->setBinStat(i, 0);
+        }
+        norm=1;
+    }
+    norm*=norms_.at(anaid);
+
+    return norm;
+}
 
 
