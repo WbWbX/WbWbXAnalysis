@@ -354,8 +354,30 @@ int main(int argc, char* argv[]){
     TString mode   = parse.getOpt<TString>  ("m","xsec");        //-m (xsec,....) default xsec changes legends? to some extend
     TString inputfile= parse.getOpt<TString>  ("i","");          //-i empty will use automatic
     TString topmass  = parse.getOpt<TString>  ("mt","172.5");          //-i empty will use automatic
+    bool help=  parse.getOpt<bool>  ("h",false);
+    if(!help){//try other option
+      help = parse.getOpt<bool>  ("-help",false);
+    }
+    if(argc<2) help=true;
     parse.doneParsing();
-
+    if(help){ //display a help message
+      std::cout << "analyse - Options:\n"
+		<< "  -c   channel (ee, emu, mumu), default: emu\n"
+		<< "  -s   systematic variation <var>_<up/down>, default: nominal\n"
+		<< "  -e   energy (8TeV, 7 TeV), default: 8TeV\n"
+		<< "  -l   luminosity, default -1 (= read from config file)\n"
+		<< "  -b   produce b-tag efficiencies (switch)\n"
+		<< "  -o   additional output id\n"
+		<< "  -S   show regular status update (switch)\n"
+		<< "  -T   enable testmode: 8% of stat, more printout\n"
+		<< "  -m   additional mode options"
+		<< "  -i   specify input manually\n"
+		<< "  -mt  top mass value to be used, default: 172.5\n\n"
+		<< "  --help\n"
+		<< "  -h   display this help message\n"
+		<< std::endl;
+      exit(EXIT_SUCCESS);
+    }
     bool mergefiles=false;
     std::vector<TString> filestomerge;
 
