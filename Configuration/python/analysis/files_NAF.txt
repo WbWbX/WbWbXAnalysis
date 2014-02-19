@@ -100,32 +100,32 @@
 ######systematics
 #matching (most important)  TTBAR
 ######systematics
-#matching (most important)  TTBAR
+#matching (most important)  TTBAR  #
 
-300  /TTJets_MSDecays_matchingup_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM       tree_8TeV_eettbar_ttmup                    genFilter=Top isSignal=true genFilterString=ElectronElectron
-300  /TTJets_MSDecays_matchingup_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM       tree_8TeV_mumuttbar_ttmup                  genFilter=Top isSignal=true genFilterString=MuonMuon
-300  /TTJets_MSDecays_matchingup_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM      tree_8TeV_emuttbar_ttmup                   genFilter=Top isSignal=true genFilterString=ElectronMuon
+300  /TTJets_MSDecays_matchingup_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v2/AODSIM       tree_8TeV_eettbar_ttmup                    genFilter=Top isSignal=true genFilterString=ElectronElectron
+300  /TTJets_MSDecays_matchingup_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v2/AODSIM       tree_8TeV_mumuttbar_ttmup                  genFilter=Top isSignal=true genFilterString=MuonMuon
+300  /TTJets_MSDecays_matchingup_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v2/AODSIM      tree_8TeV_emuttbar_ttmup                   genFilter=Top isSignal=true genFilterString=ElectronMuon
 
-300  /TTJets_MSDecays_matchingup_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM    tree_8TeV_eettbarviatau_ttmup              genFilter=Top isSignal=true genFilterString=ElectronElectronViaTau
-300  /TTJets_MSDecays_matchingup_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM     tree_8TeV_mumuttbarviatau_ttmup            genFilter=Top isSignal=true genFilterString=MuonMuonViaTau
-300  /TTJets_MSDecays_matchingup_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM     tree_8TeV_emuttbarviatau_ttmup             genFilter=Top isSignal=true genFilterString=ElectronMuonViaTau
+300  /TTJets_MSDecays_matchingup_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v2/AODSIM    tree_8TeV_eettbarviatau_ttmup              genFilter=Top isSignal=true genFilterString=ElectronElectronViaTau
+300  /TTJets_MSDecays_matchingup_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v2/AODSIM     tree_8TeV_mumuttbarviatau_ttmup            genFilter=Top isSignal=true genFilterString=MuonMuonViaTau
+300  /TTJets_MSDecays_matchingup_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v2/AODSIM     tree_8TeV_emuttbarviatau_ttmup             genFilter=Top isSignal=true genFilterString=ElectronMuonViaTau
 
-300  /TTJets_MSDecays_matchingup_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM     tree_8TeV_eettbarbg_ttmup                genFilter=Top genFilterString=ElectronElectron,ElectronElectronViaTau genFilterInvert=true
-300  /TTJets_MSDecays_matchingup_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM     tree_8TeV_mumuttbarbg_ttmup                genFilter=Top genFilterString=MuonMuon,MuonMuonViaTau genFilterInvert=true
-300  /TTJets_MSDecays_matchingup_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM     tree_8TeV_emuttbarbg_ttmup                genFilter=Top genFilterString=ElectronMuon,ElectronMuonViaTau genFilterInvert=true
+300  /TTJets_MSDecays_matchingup_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v2/AODSIM     tree_8TeV_eettbarbg_ttmup                genFilter=Top genFilterString=ElectronElectron,ElectronElectronViaTau genFilterInvert=true
+300  /TTJets_MSDecays_matchingup_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v2/AODSIM     tree_8TeV_mumuttbarbg_ttmup                genFilter=Top genFilterString=MuonMuon,MuonMuonViaTau genFilterInvert=true
+300  /TTJets_MSDecays_matchingup_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v2/AODSIM     tree_8TeV_emuttbarbg_ttmup                genFilter=Top genFilterString=ElectronMuon,ElectronMuonViaTau genFilterInvert=true
 
 
-300  /TTJets_MSDecays_matchingdown_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM       tree_8TeV_eettbar_ttmdown                    genFilter=Top isSignal=true genFilterString=ElectronElectron
-300  /TTJets_MSDecays_matchingdown_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM       tree_8TeV_mumuttbar_ttmdown                  genFilter=Top isSignal=true genFilterString=MuonMuon
-300  /TTJets_MSDecays_matchingdown_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM      tree_8TeV_emuttbar_ttmdown                   genFilter=Top isSignal=true genFilterString=ElectronMuon
+300  /TTJets_MSDecays_matchingdown_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v2/AODSIM       tree_8TeV_eettbar_ttmdown                    genFilter=Top isSignal=true genFilterString=ElectronElectron
+300  /TTJets_MSDecays_matchingdown_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v2/AODSIM       tree_8TeV_mumuttbar_ttmdown                  genFilter=Top isSignal=true genFilterString=MuonMuon
+300  /TTJets_MSDecays_matchingdown_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v2/AODSIM      tree_8TeV_emuttbar_ttmdown                   genFilter=Top isSignal=true genFilterString=ElectronMuon
 
-300  /TTJets_MSDecays_matchingdown_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM    tree_8TeV_eettbarviatau_ttmdown              genFilter=Top isSignal=true genFilterString=ElectronElectronViaTau
-300  /TTJets_MSDecays_matchingdown_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM     tree_8TeV_mumuttbarviatau_ttmdown            genFilter=Top isSignal=true genFilterString=MuonMuonViaTau
-300  /TTJets_MSDecays_matchingdown_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM     tree_8TeV_emuttbarviatau_ttmdown             genFilter=Top isSignal=true genFilterString=ElectronMuonViaTau
+300  /TTJets_MSDecays_matchingdown_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v2/AODSIM    tree_8TeV_eettbarviatau_ttmdown              genFilter=Top isSignal=true genFilterString=ElectronElectronViaTau
+300  /TTJets_MSDecays_matchingdown_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v2/AODSIM     tree_8TeV_mumuttbarviatau_ttmdown            genFilter=Top isSignal=true genFilterString=MuonMuonViaTau
+300  /TTJets_MSDecays_matchingdown_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v2/AODSIM     tree_8TeV_emuttbarviatau_ttmdown             genFilter=Top isSignal=true genFilterString=ElectronMuonViaTau
 
-300  /TTJets_MSDecays_matchingdown_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM     tree_8TeV_eettbarbg_ttmdown                genFilter=Top genFilterString=ElectronElectron,ElectronElectronViaTau genFilterInvert=true
-300  /TTJets_MSDecays_matchingdown_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM     tree_8TeV_mumuttbarbg_ttmdown                genFilter=Top genFilterString=MuonMuon,MuonMuonViaTau genFilterInvert=true
-300  /TTJets_MSDecays_matchingdown_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM     tree_8TeV_emuttbarbg_ttmdown                genFilter=Top genFilterString=ElectronMuon,ElectronMuonViaTau genFilterInvert=true
+300  /TTJets_MSDecays_matchingdown_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v2/AODSIM     tree_8TeV_eettbarbg_ttmdown                genFilter=Top genFilterString=ElectronElectron,ElectronElectronViaTau genFilterInvert=true
+300  /TTJets_MSDecays_matchingdown_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v2/AODSIM     tree_8TeV_mumuttbarbg_ttmdown                genFilter=Top genFilterString=MuonMuon,MuonMuonViaTau genFilterInvert=true
+300  /TTJets_MSDecays_matchingdown_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v2/AODSIM     tree_8TeV_emuttbarbg_ttmdown                genFilter=Top genFilterString=ElectronMuon,ElectronMuonViaTau genFilterInvert=true
 
 
 

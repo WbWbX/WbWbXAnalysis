@@ -566,6 +566,7 @@ void container1DUnfold::loadFromTree(TTree *t, const TString & plotname){
     }
 
     if(!found){
+        std::cout << "searching for: " << plotname << "... error!" << std::endl;
         throw std::runtime_error("container1DUnfold::loadFromTree: no container with name not found");
     }
     if(count>1){

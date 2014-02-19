@@ -8,13 +8,14 @@
 #include "../interface/AnalysisUtils.h"
 
 namespace ztop{
-void rescaleDY(ztop::container1DStackVector * vec, std::vector<TString> contributions, double scalescale, bool textout, TString identifier){
+void rescaleDY(ztop::container1DStackVector * vec, std::vector<TString> contributions,
+        double scalescale, bool textout, TString identifier, int startingstep=4){
 
     using namespace ztop;
 
     std::vector<TString> ident;ident.clear();
     std::vector<double> scales;scales.clear();
-    for(int i=5;i<=9;i++){
+    for(int i=startingstep;i<=9;i++){
         TString stepstring=" step "+toTString(i);
         double dymc = 0;
         std::vector<TString> allbutdyanddata;
