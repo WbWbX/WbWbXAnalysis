@@ -22,7 +22,7 @@ void containerTest(){
 
 	container1D cont1(bins);
 
-	for(int i=0;i<200;i++){
+	for(int i=0;i<20000;i++){
 		cont1.fill(1);
 		cont1.fill(4);
 		cont1.fill(4);
@@ -58,17 +58,32 @@ void containerTest(){
 	c2->cd();
 
 	cont1*=(1/1.1);
-	cont1*=10;
+	cont1*=10.;
 
-	cont1.coutFullContent();
+	container1D ctemp=cont2;
+	//just for testing
+	for(size_t bin=0;bin<cont2.getBins().size();bin++)
+	    cont2.setBinStat(bin,0);
+    cont2*=0.1;
+	cont2.coutFullContent();
+	cont2.removeAllSystematics();
 
-	cont1.addRelSystematicsFrom(cont2);
+    cont2.addGlobalRelErrorDown("oldbla",0.1);
+    cont2.addGlobalRelErrorUp("oldbla",0.);
+    cout << "oldsys" << endl;
+    cont2.coutFullContent();
+	cont2.getRelSystematicsFrom(ctemp);
 	cout << "after addRelSystematicsFrom" << endl;
-	cont1.coutFullContent();
+	cont2.coutFullContent();
 
-	cont1.getTH1D("",false,true)->Draw("e1");
-	cont1.getTGraph("",false,false)->Draw("same,P");
+
+
+	cont2.getTH1D("",false,true)->Draw("e1");
+	cont2.getTGraph("",false,false)->Draw("same,P");
 
 }
-
+int main(){
+    containerTest();
+    return 0;
+}
 

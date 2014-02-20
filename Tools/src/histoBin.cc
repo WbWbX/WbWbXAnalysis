@@ -154,7 +154,7 @@ int histoBins::multiply(const histoBins& rhs,bool statCorr){
         if(statCorr){
             float ea=sqrt(ea2);
             float eb=sqrt(eb2);
-            staterr2=(ca+ea)*(cb+eb) - mult;
+            staterr2=((ca+ea)*(cb+eb) - mult)*((ca+ea)*(cb+eb) - mult);
         }
         else{
 

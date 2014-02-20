@@ -1125,36 +1125,28 @@ void container1D::getRelSystematicsFrom(const ztop::container1D & rhs){
     // first do fast fix: don't take into account problem and just treat rhs nominal and lhs nominal
     // as correlated (true for most syst)
     //relerrs.set
-
-
-
-    c_makelist=tempmakelist;
-    ///old part
-    std::cout << "container1D::getRelSystematicsFrom(): check this function it produces bullshit -> exit!!" << std::endl;
-    std::exit(EXIT_FAILURE);
-    /////CHECK/////
-
-    bool tempSubtractStatCorrelated=histoContent::subtractStatCorrelated; //should not do anything here
-    histoContent::subtractStatCorrelated=true;
-    histoContent nominal=rhs.contents_;
-    nominal.removeAdditionalLayers();
-    histoContent reldiff = nominal - rhs.contents_;
-    reldiff /= nominal;
-    reldiff.clearLayerContent(-1); //clears nominal. only syst now should anyway be 0
-    reldiff.clearLayerStat(-1);
-    histoContent lhsnominal=contents_;
-    lhsnominal.removeAdditionalLayers();
-    //for each syst in reldiff, a lhs nominal is copied and multiplied by reldiff;
-    lhsnominal *= reldiff;
-
-    //now, lhsnominal contains systematics from rhs scaled to *this.
-    contents_=lhsnominal;
-    histoContent::subtractStatCorrelated=tempSubtractStatCorrelated;
+    relerrs.contents_.clearLayerStat(-1); //clear stat of nominal relerrors layer
+   // histoContent::multiplyStatCorrelated doesn't have to be set -> no systematics!
+    *this*=relerrs;
+    std::cout << "container1D::getRelSystematicsFrom: carefully check the output of this function! not well tested" <<std::endl;
+    return;
+}
+void container1D::addRelSystematicsFrom(const ztop::container1D & rhs){
+    size_t nsysrhs=rhs.contents_.layerSize();
+    container1D relerr=rhs.getRelErrorsContainer();
+   for(size_t i=0;i<nsysrhs;i++){
+       size_t oldlayersize=getSystSize();
+       size_t newlayerit=contents_.addLayer(relerr.getSystErrorName(i));
+       if(oldlayersize<getSystSize()){ //new one
+           contents_.getLayer(newlayerit).multiply(relerr.contents_.getLayer(i),false);
+       }
+   }
 
 }
+
 void container1D::addGlobalRelErrorUp(const TString & sysname,const float &relerr){
     if(sysname.EndsWith("_up") || sysname.EndsWith("_down")){
-        std::cout << "container1D::addGlobalRelErrorUp: name of syst. mustn't be named <>_up or <>_down! this is done automatically! doing nothing" << std::endl;
+        std::cout << "container1D::addGlobalRelErrorUp: name of syst. must not be named <>_up or <>_down! this is done automatically! doing nothing" << std::endl;
         return;
     }
     addErrorContainer(sysname+"_up", ((*this) * (relerr+1)));

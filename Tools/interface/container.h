@@ -166,7 +166,15 @@ public:
 
     void addErrorContainer(const TString &,const container1D&, float);  //! adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down"
     void addErrorContainer(const TString &,const container1D&);        //! adds deviation to (this) as systematic uncertianty with name. name must be ".._up" or ".._down"
+    /**
+     * deletes the systematics and adds relative contributions from input
+     */
     void getRelSystematicsFrom(const container1D &);
+    /**
+     * adds relative systematics from input to the set of systematics if they don't exist
+     * if they already exist, they are left untouched
+     */
+    void addRelSystematicsFrom(const container1D &);
     void addGlobalRelErrorUp(const TString &,const float &);    //! adds a global relative uncertainty with name; "..up" automatically added
     void addGlobalRelErrorDown(const TString &,const float &);  //! adds a global relative uncertainty with name; "..down" automatically added
     void addGlobalRelError(const TString &,const float &);      //! adds a global relative symmetric uncertainty with name; creates ".._up" and ".._down" variation names

@@ -35,7 +35,7 @@ void containerStack::push_back(ztop::container1D cont, TString legend, int color
             if(containerStack::debug)
                 std::cout << "containerStack::push_back(1D): found same legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
             containers_[i] = containers_[i] * norms_[i] + cont * norm;
-            containers_[i].setName("c_" +legend+"_"+getName());
+            containers_[i].setName(getName());
             norms_[i]=1;
             legorder_[i]=legord;
             wasthere=true;
@@ -45,7 +45,7 @@ void containerStack::push_back(ztop::container1D cont, TString legend, int color
     if(!wasthere){
         if(containerStack::debug)
             std::cout << "containerStack::push_back (1D): new legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
-        cont.setName("c_" +legend+"_"+getName());
+        cont.setName(getName());
         containers_.push_back(cont*norm);
         legends_.push_back(legend);
         colors_.push_back(color);
@@ -67,7 +67,7 @@ void containerStack::push_back(ztop::container2D cont, TString legend, int color
             if(containerStack::debug)
                 std::cout << "containerStack::push_back(2D): found same legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
             containers2D_[i] = containers2D_[i] * norms_[i] + cont * norm;
-            containers2D_[i].setName("c_" +legend+"_"+getName());
+            containers2D_[i].setName(getName());
             norms_[i]=1;
             legorder_[i]=legord;
             wasthere=true;
@@ -77,7 +77,7 @@ void containerStack::push_back(ztop::container2D cont, TString legend, int color
     if(!wasthere){
         if(containerStack::debug)
             std::cout << "containerStack::push_back (2D): new legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
-        cont.setName("c_" +legend+"_"+getName());
+        cont.setName(getName());
         containers2D_.push_back(cont*norm);
         legends_.push_back(legend);
         colors_.push_back(color);
@@ -99,9 +99,9 @@ void containerStack::push_back(ztop::container1DUnfold cont, TString legend, int
             if(containerStack::debug)
                 std::cout << "containerStack::push_back(1DUF): found same legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
             containers1DUnfold_[i] = containers1DUnfold_[i] * norms_[i]  + cont * norm;
-            containers1DUnfold_[i].setName("c_" +legend);
+            containers1DUnfold_[i].setName(getName());
             containers_[i] = containers_[i] * norms_[i] + cont1d * norm;
-            containers_[i].setName("c_" +legend+"_"+getName());
+            containers_[i].setName(getName());
             norms_[i]=1;
             legorder_[i]=legord;
             wasthere=true;
@@ -111,9 +111,9 @@ void containerStack::push_back(ztop::container1DUnfold cont, TString legend, int
     if(!wasthere){
         if(containerStack::debug)
             std::cout << "containerStack::push_back (1DUF): new legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
-        cont.setName("c_" +legend+"_"+getName());
+        cont.setName(getName());
         containers1DUnfold_.push_back(cont * norm);
-        cont1d.setName("c_" +legend+"_"+getName());
+        cont1d.setName(getName());
         containers_.push_back(cont1d * norm);
         legends_.push_back(legend);
         colors_.push_back(color);
