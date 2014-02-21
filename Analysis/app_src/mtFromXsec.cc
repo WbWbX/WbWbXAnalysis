@@ -275,7 +275,7 @@ int main(int argc, char* argv[]){
 
     plot="c_t#bar{t}_"+plot;
 
-    float massoffset=172.5;
+    float nominalmassoffset=172.5;
     TString entryforplots="m_{t}^{MG} [GeV]";
 
     container1DUnfold cuf;
@@ -355,7 +355,7 @@ int main(int argc, char* argv[]){
     h->SetMarkerSize(0);
     h->SetLineWidth(2);
     //h->Draw("");
-    leg->AddEntry(h,entryforplots+"="+toTString(massoffset),"lpf");
+    leg->AddEntry(h,entryforplots+"="+toTString(nominalmassoffset),"lpf");
 
     std::vector<TH1D *> phists;
     std::vector<container1D> conts;
@@ -381,13 +381,13 @@ int main(int argc, char* argv[]){
         while(std::getline(ss,item,'_')){
             if(item=="up"){
                 value=atof(val.data());
-                value+=massoffset;
+                value+=nominalmassoffset;
                 break;
             }
             else if(item=="down"){
                 value=atof(val.data());
                 value*=-1;
-                value+=massoffset;
+                value+=nominalmassoffset;
                 break;
             }
             val=item;
@@ -401,7 +401,7 @@ int main(int argc, char* argv[]){
 				deltam=3;
 			else if(sysname.Contains("_6_"))
 				deltam=6;*/
-        nnorm= sigmtopmulti(172.5,value-massoffset);
+        nnorm= sigmtopmulti(172.5,value-nominalmassoffset);
         tcont *= nnorm;
 
         conts.push_back(tcont);
@@ -561,9 +561,9 @@ int main(int argc, char* argv[]){
             c->cd(i)->SetBottomMargin(0.15);
             c->cd(i)->SetLeftMargin(0.15);
 
-            ztop::graph datadep=ufcont.getDependenceOnSystematic(i,variation,massoffset,entryforplots);
+            ztop::graph datadep=ufcont.getDependenceOnSystematic(i,variation,nominalmassoffset,entryforplots);
             datadep.chi2definition=fitmode;
-            ztop::graph mcdep=nominal.getDependenceOnSystematic(i,variation,massoffset,entryforplots);
+            ztop::graph mcdep=nominal.getDependenceOnSystematic(i,variation,nominalmassoffset,entryforplots);
             mcdep.chi2definition=fitmode;
             sysdepperbind.push_back(datadep);
             sysdepperbinmc.push_back(mcdep);

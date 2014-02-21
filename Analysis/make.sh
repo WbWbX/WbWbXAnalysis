@@ -63,7 +63,7 @@ then
 
     compile analyse
     compile mergeSyst
-    compile mergeSyst2
+    
 
 
 fi
@@ -81,6 +81,7 @@ then
     compile plotCSV
     compile printVariations
     compile mtFromXsec
+    compile mtFromXsec2
 fi
 
 if  [ $1 == "all" ] || [ $1 == "www" ];

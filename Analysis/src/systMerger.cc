@@ -15,6 +15,8 @@
 #include "TFile.h"
 #include <iostream>
 #include "FWCore/FWLite/interface/AutoLibraryLoader.h"
+#include <omp.h>
+
 
 namespace ztop{
 
@@ -65,11 +67,12 @@ void systMerger::setInputStrings(const std::vector<std::string>& instrings){
 }
 
 
-void systMerger::start(){
+std::vector<TString>  systMerger::start(){
     searchNominals();
     searchSystematics();
-    mergeAndSafe();
+    std::vector<TString>  outfilenames=mergeAndSafe();
     mergeBTags();
+    return outfilenames;
 }
 
 
@@ -129,14 +132,16 @@ containerStackVector * systMerger::getFromFileToMem( TString dir, const TString 
 }
 
 
-void systMerger::mergeAndSafe(){
+std::vector<TString>  systMerger::mergeAndSafe(){
     if(debug) std::cout << "systMerger::mergeAndSafe" <<std::endl;
-
+    std::vector<TString>  outputfilenames;
     //get a nominal
     TString dir=indir_;
     TString outadd="";
     if(outfileadd_.Length()>0)
         outadd="_"+outfileadd_;
+    //parallel for all nominals
+#pragma omp parallel for
     for(size_t nom=0;nom<nominals_.size();nom++){
         containerStackVector * nominal=getFromFileToMem(dir,instrings_.at(nominals_.at(nom)));
         for(size_t sys=0;sys<syst_.at(nom).size();sys++){
@@ -147,11 +152,12 @@ void systMerger::mergeAndSafe(){
         }
         nominal->setName(nominal->getName()+outadd+"_syst");
         std::cout << "systMerger: writing "<< nominal->getName() << std::endl;
+        outputfilenames << nominal->getName()+".root";
         nominal->writeAllToTFile(nominal->getName()+".root",true);
         delete nominal;
     }
 
-
+    return outputfilenames;
 }
 
 void systMerger::mergeBTags()const{

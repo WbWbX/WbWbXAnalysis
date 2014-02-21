@@ -28,7 +28,7 @@ public:
 
     void setOutFileAdd(const TString & ofa){outfileadd_=ofa;}
 
-    void start();
+    std::vector<TString>  start();
 
     static bool debug;
 
@@ -42,7 +42,7 @@ private:
 
     ztop::containerStackVector * getFromFileToMem( TString dir, const TString& name)const;
 
-    void mergeAndSafe();
+    std::vector<TString> mergeAndSafe();
 
     void mergeBTags()const;
 
