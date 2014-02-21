@@ -6,6 +6,7 @@ option=$1
 
 cd jobscripts
 
+
 if [ ${SGE_CELL} ]
 then
     joblist=`qstat -u ${USER} 2>/dev/null`
@@ -14,9 +15,6 @@ then
     Eqwjobs=`echo ${joblist} | awk '{for (i=1; i<=NF; i++){ if($i=="Eqw") print $(i-4) }}'`
 fi
 
-#qcommand="qstat -u ${USER} -j ${jobid} | grep sge_o_log_name"
-
-#for (( i=0;i<${#alljobs[@]};i++)); do
 for file in *; 
 do
 
@@ -56,11 +54,13 @@ do
 		    echo "${jobname} \e[1;31m in Eqw state (${jobid})\e[0m"
 		else
 		    echo "${jobname} \e[1;31m  partially done but aborted\e[0m"
-		    tresubmit=( "${tresubmit[@]}" "; qsub ../jobscripts/${jobname}" );
-		    oldids=( "${oldids[@]}" "*${jobid}" );
+		    tresubmit=( "${tresubmit[@]}" "../jobscripts/${jobname}" );
+		    rmfiles=( "${rmfiles[@]}" "rm -f ../batch/${file}.o${jobid}; rm -f ../output/${file}.root;rm -f ../stdout/${file}.txt;" );
 		fi
 	    else
-		echo "${jobname} \e[1;32m partially done\e[0m"
+		echo "${jobname} \e[1;31m  partially done but without ID \e[0m"
+		tresubmit=( "${tresubmit[@]}" "../jobscripts/${jobname}" );
+		rmfiles=( "${rmfiles[@]}" "rm -f ../output/${file}.root;rm -f ../stdout/${file}.txt;" );
 	    fi
 	fi
     elif [ -e "${fullcheckpath}_failed" ];
@@ -75,11 +75,13 @@ do
 		echo "${jobname} \e[1;32m running (${jobid})\e[0m"
 	    else
 		echo "${jobname} \e[1;31m aborted before producing output\e[0m"
-		tresubmit=( "${tresubmit[@]}" "; qsub ../jobscripts/${jobname}" );
-		oldids=( "${oldids[@]}" "*${jobid}" );
+		tresubmit=( "${tresubmit[@]}" "../jobscripts/${jobname}" );
+		rmfiles=( "${rmfiles[@]}" "rm -f ../batch/${file}.o${jobid}; rm -f ../output/${file}.root;rm -f ../stdout/${file}.txt" );
 	    fi
 	else
-	    echo "${jobname} \e[1;32m seems to be running\e[0m"
+	    echo "${jobname} \e[1;31m  partially done but without ID \e[0m"
+	    tresubmit=( "${tresubmit[@]}" "../jobscripts/${jobname}" );
+	    rmfiles=( "${rmfiles[@]}" "rm -f ../output/${file}.root;rm -f ../stdout/${file}.txt;" );
 	fi
     else
 	if [ $jobid ]
@@ -99,17 +101,27 @@ done
 
 echo "for merging of systematics of successful jobs do (in output dir):"
 echo "mergeSyst ${jdone[@]}"
+
 if [ ${SGE_CELL} ]
 then
-    echo "to resubmit aborted jobs clear id files etc by hand!"
-fi
-exit
-##some thoughts on auto resubmit
-    if [ 1 ]
-    then 
-	echo "resubmitting jobs"
+    if [[ "${option}" == "resubmit" ]]
+    then
+	eval `echo "${rmfiles[@]}"`
 	cd ../batch
-	rm ${oldids[@]} 2>/dev/null
-	eval `echo ${tresubmit[@]}`
+	for (( i=0;i<${#tresubmit[@]};i++)); do
+	    
+    #then
+	    if [ ${tresubmit[${i}]} ]
+	    then
+		qsub ${tresubmit[${i}]}
+	    fi
+    #fi
+	done
+    else
+	echo "to resubmit aborted jobs run check.sh resubmit!"
+	
+
     fi
+else
+    echo "You are not on the NAF. Resubmitting not possible"
 fi
