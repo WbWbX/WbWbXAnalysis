@@ -7,6 +7,7 @@
 
 #include "../interface/containerUnfolder.h"
 #include <omp.h>
+#include <stdexcept>
 
 /*
 class containerUnfolder{
@@ -186,16 +187,19 @@ container1D containerUnfolder::unfold(/*const*/ container1DUnfold & cuf){
 	}
 	if(debug)
 		std::cout << "containerUnfolder::unfold: init systematics" << std::endl;
+	unfsyst_.resize(cuf.getSystSize(),0);
+#pragma omp parallel for
 	for(size_t sys=0;sys<cuf.getSystSize();sys++){
 		if(std::find(ignoresyst_.begin(),ignoresyst_.end(),cuf.getSystErrorName(sys)) != ignoresyst_.end())
 			continue;
 
 		TH2* SysResponsematrix=cuf.prepareRespMatrix(false,sys);
 		if(!SysResponsematrix){
-			std::cout << "containerUnfolder::unfold: Response matrix for " << cuf.getSystErrorName(sys) << " could not be created. stopping unfolding!" << std::endl;
-			return -2;
+			std::cout << "containerUnfolder::unfold: Response matrix for " << cuf.getSystErrorName(sys)
+			        << " could not be created. stopping unfolding!" << std::endl;
+			throw std::runtime_error("");
 		}
-		SysResponsematrix->Draw("COLZ");
+		//SysResponsematrix->Draw("COLZ");
 		TH1* SysDatahist=0;
 		if(dodatasyst)
 			SysDatahist=cuf.getRecoContainer().getTH1DSyst(cuf.getName()+"_datahist_"+cuf.getSystErrorName(sys),sys,false,true);
@@ -209,7 +213,7 @@ container1D containerUnfolder::unfold(/*const*/ container1DUnfold & cuf){
 					<< cuf.getSystErrorName(sys) << " not successful. Will not unfold distribution"<< std::endl;
 			continue;
 		}
-		unfsyst_.push_back(uf);
+		unfsyst_.at(sys)=uf;
 		delete SysResponsematrix;
 		delete SysDatahist;
 	}

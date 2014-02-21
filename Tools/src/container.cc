@@ -1138,6 +1138,7 @@ void container1D::addRelSystematicsFrom(const ztop::container1D & rhs){
        size_t oldlayersize=getSystSize();
        size_t newlayerit=contents_.addLayer(relerr.getSystErrorName(i));
        if(oldlayersize<getSystSize()){ //new one
+           if(debug) std::cout << "container1D::addRelSystematicsFrom: adding new syst "<< relerr.getSystErrorName(i)<< " to container " <<name_ <<std::endl;
            contents_.getLayer(newlayerit).multiply(relerr.contents_.getLayer(i),false);
        }
    }

@@ -35,7 +35,7 @@ namespace ztop{
 
 
 void rescaleDY(ztop::container1DStackVector * vec, std::vector<TString> contributions, double scalescale=1, bool textout=true,
-        TString identifier="mll Z Range");
+        TString identifier="mll Z Range", int startingstep=4);
 
 template <class T>
 std::vector<T> subdivide(const std::vector<T> & bins, size_t div){

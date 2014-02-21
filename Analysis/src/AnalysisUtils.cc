@@ -9,7 +9,7 @@
 
 namespace ztop{
 void rescaleDY(ztop::container1DStackVector * vec, std::vector<TString> contributions,
-        double scalescale, bool textout, TString identifier, int startingstep=4){
+        double scalescale, bool textout, TString identifier, int startingstep){
 
     using namespace ztop;
 

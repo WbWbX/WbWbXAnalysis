@@ -60,6 +60,7 @@ void containerTest(){
 	cont1*=(1/1.1);
 	cont1*=10.;
 
+	container1D::debug=true;
 	container1D ctemp=cont2;
 	//just for testing
 	for(size_t bin=0;bin<cont2.getBins().size();bin++)
@@ -72,7 +73,7 @@ void containerTest(){
     cont2.addGlobalRelErrorUp("oldbla",0.);
     cout << "oldsys" << endl;
     cont2.coutFullContent();
-	cont2.getRelSystematicsFrom(ctemp);
+	cont2.addRelSystematicsFrom(ctemp);
 	cout << "after addRelSystematicsFrom" << endl;
 	cont2.coutFullContent();
 
