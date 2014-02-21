@@ -531,14 +531,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
         for(size_t i=0;i<pElectrons->size();i++){
             NTElectron * elec=&(pElectrons->at(i));
             float ensf=1;
-            if(isMC){
-                if(getElecEnergySF()->isSystematicsDown()){
-                    ensf=1-(elec->p4Err() / elec->e());
-                }
-                else if (getElecEnergySF()->isSystematicsUp()){
-                    ensf=1+(elec->p4Err() / elec->e());
-                }
-            }
+            if(isMC)
+                ensf=getElecEnergySF()->getScalefactor(elec->eta());
+
             elec->setECalP4(elec->ECalP4() * ensf);
             elec->setP4(elec->ECalP4() * ensf); //both the same now!!
             allleps << elec;
@@ -1150,10 +1145,14 @@ bool MainAnalyzer::checkTrigger(std::vector<bool> * p_TriggerBools,ztop::NTEvent
         if(b_mumu_){
             if(!(p_TriggerBools->at(1) || p_TriggerBools->at(2)))
                 return false;
+            else
+                return true;
         }
         else if(b_ee_){
             if(!p_TriggerBools->at(0))
                 return false;
+            else
+                return true;
         }
         else if(b_emu_){
             if(p_TriggerBools->size()<10){
@@ -1162,6 +1161,8 @@ bool MainAnalyzer::checkTrigger(std::vector<bool> * p_TriggerBools,ztop::NTEvent
             }
             if(!(p_TriggerBools->at(10) || p_TriggerBools->at(11)))
                 return false;
+            else
+                return true;
         }
     }
     else{ //is7TeV_

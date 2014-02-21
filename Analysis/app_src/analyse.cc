@@ -5,7 +5,9 @@
 //should be taken care of by the linker!
 
 
-void analyse(TString channel, TString Syst, TString energy, TString outfileadd, double lumi, bool dobtag, bool status,bool testmode,TString maninputfile,TString mode,TString topmass){ //options like syst..
+void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
+        double lumi, bool dobtag, bool status,bool testmode,TString maninputfile,
+        TString mode,TString topmass){ //options like syst..
 
     bool didnothing=false;
     //some env variables
@@ -97,9 +99,9 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
     ana.getMuonSF()->setInput(muonsffile,muonsfhisto);
     ana.getTriggerSF()->setInput(trigsffile,trigsfhisto);
 
-    ana.getElecEnergySF()->setGlobal(1,0.5,0.5);
-    ana.getMuonEnergySF()->setGlobal(1,0.2,0.2); //new from muon POG twiki
-//https://twiki.cern.ch/twiki/bin/viewauth/CMS/MuonReferenceResolution
+    ana.getElecEnergySF()->setGlobal(1,0.2,0.2);
+    ana.getMuonEnergySF()->setGlobal(1,0.3,0.3); //new from muon POG twiki
+    //https://twiki.cern.ch/twiki/bin/viewauth/CMS/MuonReferenceResolution
     //this is for muons without the corrections so it should be even better with
 
     ana.getTopPtReweighter()->setFunction(reweightfunctions::toppt);
@@ -229,6 +231,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
         ana.setFilePostfixReplace("60120.root","60120_Zscaledown.root");
     }
     /* THIS WILL BE REPLACED AT A CERTAIN POINT */
+    /*
     else if(Syst=="MT_6_down"){
         ana.setFilePostfixReplace("ttbar.root","ttbar_mt166.5.root");
         ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mt166.5.root");
@@ -253,13 +256,20 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd, 
         ana.setFilePostfixReplace("ttbar.root","ttbar_mt178.5.root");
         ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mt178.5.root");
     }
-
+     */
     //......
     else{
         didnothing=true;
     }
 
+    //top mass
 
+    if(topmass != "172.5"){
+        std::cout << "replacing top mass value of 172.5 with "<< topmass << std::endl;
+        ana.setFilePostfixReplace("ttbar.root","ttbar_mt"+topmass+ ".root");
+        ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mt"+topmass+ ".root");
+
+    }
 
     ana.setFileList(inputfile);
 
@@ -356,27 +366,27 @@ int main(int argc, char* argv[]){
     TString topmass  = parse.getOpt<TString>  ("mt","172.5");          //-i empty will use automatic
     bool help=  parse.getOpt<bool>  ("h",false);
     if(!help){//try other option
-      help = parse.getOpt<bool>  ("-help",false);
+        help = parse.getOpt<bool>  ("-help",false);
     }
     if(argc<2) help=true;
     parse.doneParsing();
     if(help){ //display a help message
-      std::cout << "analyse - Options:\n"
-		<< "  -c   channel (ee, emu, mumu), default: emu\n"
-		<< "  -s   systematic variation <var>_<up/down>, default: nominal\n"
-		<< "  -e   energy (8TeV, 7 TeV), default: 8TeV\n"
-		<< "  -l   luminosity, default -1 (= read from config file)\n"
-		<< "  -b   produce b-tag efficiencies (switch)\n"
-		<< "  -o   additional output id\n"
-		<< "  -S   show regular status update (switch)\n"
-		<< "  -T   enable testmode: 8% of stat, more printout\n"
-		<< "  -m   additional mode options"
-		<< "  -i   specify input manually\n"
-		<< "  -mt  top mass value to be used, default: 172.5\n\n"
-		<< "  --help\n"
-		<< "  -h   display this help message\n"
-		<< std::endl;
-      exit(EXIT_SUCCESS);
+        std::cout << "analyse - Options:\n"
+                << "  -c   channel (ee, emu, mumu), default: emu\n"
+                << "  -s   systematic variation <var>_<up/down>, default: nominal\n"
+                << "  -e   energy (8TeV, 7 TeV), default: 8TeV\n"
+                << "  -l   luminosity, default -1 (= read from config file)\n"
+                << "  -b   produce b-tag efficiencies (switch)\n"
+                << "  -o   additional output id\n"
+                << "  -S   show regular status update (switch)\n"
+                << "  -T   enable testmode: 8% of stat, more printout\n"
+                << "  -m   additional mode options"
+                << "  -i   specify input manually\n"
+                << "  -mt  top mass value to be used, default: 172.5\n\n"
+                << "  --help\n"
+                << "  -h   display this help message\n"
+                << std::endl;
+        exit(EXIT_SUCCESS);
     }
     bool mergefiles=false;
     std::vector<TString> filestomerge;
