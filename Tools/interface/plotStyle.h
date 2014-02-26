@@ -42,7 +42,7 @@ public:
 	const axisStyle * xAxisStyle()const{return &xaxis_;}
 	const axisStyle * yAxisStyle()const{return &yaxis_;}
 
-	void readFromFile(const std::string &,const std::string  stylename);
+	void readFromFile(const std::string &,const std::string  stylename, bool requireall=true);
 
 
 	void applyAxisStyle(TH1*)const;

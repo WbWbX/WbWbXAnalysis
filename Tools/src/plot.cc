@@ -29,6 +29,8 @@ plot::plot(const container1D *c,bool divbbw){
     divbybw_=divbbw;
     statg_ = addObject(c->getTGraph("",divbybw_,true,false,false));
     systg_ = addObject(c->getTGraph("",divbybw_,false,false,false));
+    statg_->SetDrawOption("");
+    systg_->SetDrawOption("");
     isBWdiv_=divbybw_;
     inputg_.import(c,divbbw);
 }
@@ -40,6 +42,8 @@ plot::plot(const graph* g){
     TH1::AddDirectory(false);
     statg_ = addObject(g->getTGraph("",true));
     systg_ = addObject(g->getTGraph("",false));
+    statg_->SetDrawOption("");
+    systg_->SetDrawOption("");
     isBWdiv_=false;
     divbybw_=false;
     inputg_=*g;
@@ -79,6 +83,8 @@ void plot::createFrom(const container1D * c,bool divbbw){
     TH1::AddDirectory(false);
     statg_ = addObject(c->getTGraph("",divbybw_,true,false,false));
     systg_ = addObject(c->getTGraph("",divbybw_,false,false,false));
+    statg_->SetDrawOption("");
+    systg_->SetDrawOption("");
     isBWdiv_=divbybw_;
     inputg_.import(c,divbbw);
 }
@@ -92,6 +98,8 @@ void plot::createFrom(const graph * g){
     TH1::AddDirectory(false);
     statg_ = addObject(g->getTGraph("",true));
     systg_ = addObject(g->getTGraph("",false));
+    statg_->SetDrawOption("");
+    systg_->SetDrawOption("");
     isBWdiv_=false;
     inputg_=*g;
 }
@@ -107,6 +115,8 @@ void plot::removeXErrors(){
     inputg_.removeXErrors();
     statg_ = addObject(inputg_.getTGraph("",true));
     systg_ = addObject(inputg_.getTGraph("",false));
+    statg_->SetDrawOption("");
+    systg_->SetDrawOption("");
 }
 
 void plot::Draw(const TString& opt)const{

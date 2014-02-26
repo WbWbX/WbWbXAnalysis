@@ -9,11 +9,12 @@
 #define TOBJECTLIST_H_
 #include "TObject.h"
 #include <vector>
+#include "TH1.h"
 
 namespace ztop{
 class tObjectList{
 public:
-    tObjectList(){}
+    tObjectList(){TH1::AddDirectory(false);}
     ~tObjectList(){
         cleanMem();
     }

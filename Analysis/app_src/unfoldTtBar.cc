@@ -20,12 +20,14 @@ int main(int argc, char* argv[]){
     parse.bepicky=true;
     TString out   = parse.getOpt<TString>("o","");
     bool moreoutput=parse.getOpt<bool>   ("v",false);
+    bool printpdfs=parse.getOpt<bool>   ("p",false);
     std::vector<TString> allin = parse.getRest<TString>();
 
 
     for(size_t i=0;i<allin.size();i++){
         TtBarUnfolder unf;
         unf.verbose=moreoutput;
+        unf.printpdfs=printpdfs;
         unf.unfold(out,allin.at(i));
     }
 

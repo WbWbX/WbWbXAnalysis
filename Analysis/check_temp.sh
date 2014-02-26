@@ -2,6 +2,9 @@
 
 cd ##WORKDIR##
 
+
+workdir=`pwd`
+
 option=$1
 
 cd jobscripts
@@ -15,6 +18,11 @@ then
     Eqwjobs=`echo ${joblist} | awk '{for (i=1; i<=NF; i++){ if($i=="Eqw") print $(i-4) }}'`
 fi
 
+tresubmit=()
+rmfiles=()
+jdone=()
+allj=()
+
 for file in *; 
 do
 
@@ -22,6 +30,7 @@ do
     fullcheckpath=../batch/$file
     jobname=$file
     jobid=""
+    allj=( "${allj[@]}" "${file}" );
     if [ ${SGE_CELL} ]
     then
 	if [ -e "../stdout/${file}.txt" ];
@@ -60,7 +69,7 @@ do
 	    else
 		echo "${jobname} \e[1;31m  partially done but without ID \e[0m"
 		tresubmit=( "${tresubmit[@]}" "../jobscripts/${jobname}" );
-		rmfiles=( "${rmfiles[@]}" "rm -f ../output/${file}.root;rm -f ../stdout/${file}.txt;" );
+		rmfiles=( "${rmfiles[@]}" "rm -f ../batch/${file}.o${jobid}; rm -f ../output/${file}.root;rm -f ../stdout/${file}.txt;" );
 	    fi
 	fi
     elif [ -e "${fullcheckpath}_failed" ];
@@ -76,12 +85,12 @@ do
 	    else
 		echo "${jobname} \e[1;31m aborted before producing output\e[0m"
 		tresubmit=( "${tresubmit[@]}" "../jobscripts/${jobname}" );
-		rmfiles=( "${rmfiles[@]}" "rm -f ../batch/${file}.o${jobid}; rm -f ../output/${file}.root;rm -f ../stdout/${file}.txt" );
+		rmfiles=( "${rmfiles[@]}" "rm -f ../batch/${file}.o${jobid}; rm -f ../output/${file}.root;rm -f ../stdout/${file}.txt;" );
 	    fi
 	else
 	    echo "${jobname} \e[1;31m  partially done but without ID \e[0m"
 	    tresubmit=( "${tresubmit[@]}" "../jobscripts/${jobname}" );
-	    rmfiles=( "${rmfiles[@]}" "rm -f ../output/${file}.root;rm -f ../stdout/${file}.txt;" );
+	    rmfiles=( "${rmfiles[@]}" "rm -f ../batch/${file}.o${jobid}; rm -f ../output/${file}.root;rm -f ../stdout/${file}.txt;" );
 	fi
     else
 	if [ $jobid ]
@@ -94,34 +103,69 @@ do
 		echo  "${jobname} \e[1;30m waiting (${jobid})\e[0m"
 	    fi
 	else
-	    echo  "${jobname} \e[1;30m waiting \e[0m"
+	    echo  "${jobname} \e[1;31m is not submitted or died without any tracable reason!! \e[0m"
+	    tresubmit=( "${tresubmit[@]}" "../jobscripts/${jobname}" );
+	    rmfiles=( "${rmfiles[@]}" "rm -f ../batch/${file}.o${jobid}; rm -f ../output/${file}.root;rm -f ../stdout/${file}.txt;" );
 	fi
     fi
 done
 
-echo "for merging of systematics of successful jobs do (in output dir):"
-echo "mergeSyst ${jdone[@]}"
+
+#echo "for merging of systematics of successful jobs do (in output dir):"
+#echo "mergeSyst ${jdone[@]}"
 
 if [ ${SGE_CELL} ]
 then
     if [[ "${option}" == "resubmit" ]]
     then
+	echo "resubmitting ${#tresubmit[@]} jobs: ${tresubmit[@]}"
 	eval `echo "${rmfiles[@]}"`
 	cd ../batch
 	for (( i=0;i<${#tresubmit[@]};i++)); do
-	    
-    #then
-	    if [ ${tresubmit[${i}]} ]
+	    if [ "${tresubmit[${i}]}" ]
 	    then
-		qsub ${tresubmit[${i}]}
+	
+		 qsub ${tresubmit[${i}]}
 	    fi
-    #fi
 	done
     else
-	echo "to resubmit aborted jobs run check.sh resubmit!"
-	
+	if [[ ${#tresubmit[@]} > 0 ]]
+	then
+	    echo "to resubmit aborted/died jobs run check.sh resubmit!"
+	    #echo "${tresubmit[@]}"
+	fi
 
     fi
-else
-    echo "You are not on the NAF. Resubmitting not possible"
 fi
+
+
+
+if [ "${#allj[@]}" -gt "${#jdone[@]}" ]
+then
+
+    echo "you have still unfinished jobs: (${#jdone[@]} / ${#allj[@]} done)"
+
+
+else
+exit
+    echo "all your jobs have finished, trying to merge systematics...."
+    cd $workdir/output
+
+    test=`echo $PATH | grep ${CMSSW_BASE}/src/TtZAnalysis/Analysis/bin`
+    if [ $test ]
+    then
+	mergeSyst ${jdone[@]}
+    else
+	if [ ${CMSSW_BASE} ]
+	then
+	    echo "Your TtZAnalysis environment is not setup correctly, setting it up and merging"
+	    export PATH=${CMSSW_BASE}/src/TtZAnalysis/Analysis/bin:$PATH
+	    mergeSyst ${jdone[@]}
+	else
+	    echo "Cannot merge systematics. Has to be run from a CMSSW environment"
+	fi
+    fi
+
+
+fi
+

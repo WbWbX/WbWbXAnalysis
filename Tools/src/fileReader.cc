@@ -185,6 +185,8 @@ std::vector<std::string> fileReader::getData(const size_t &line) const{
  * less performance but safer
  * can be switched off by bool
  * then last value is returned
+ *
+ * if value is not found empty string will be returned
  */
 std::string fileReader::getValueString(const std::string & val, bool checkdoubles){
 	std::string out;
@@ -201,11 +203,11 @@ std::string fileReader::getValueString(const std::string & val, bool checkdouble
 				pos=s.find("=");
 				if(pos!= std::string::npos){
 					if(pos+1 >= s.size())
-						throw std::logic_error("fileReader::getValue: value definition empty");
+						return std::string("");
 					std::string s2(s.begin()+pos+1,s.end());
 					trim(s2);
 					if(s2.size()<1)
-						throw std::logic_error("fileReader::getValue: value definition empty");
+						return std::string("");
 					out=s2;
 					count++;
 				}

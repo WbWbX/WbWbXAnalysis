@@ -35,32 +35,47 @@ public:
     ~plotterCompare(){cleanMem();}
 
     void setNominalPlot(const container1D *c,bool divbw=true);
-
     void setComparePlot(const container1D *c,size_t idx,bool divbw=true);
+    void setNominalPlot(const graph *c);
+    void setComparePlot(const graph *c,size_t idx);
 
+    //set ids before reading style file!
+    /**
+     * If ids are not set they are assumed to be NominalUpper, NominalRatio
+     * and CompareUpper<N> N=0,1,2... (same for ratio)
+     * else Ids are added e.g. NominalUpper<idnominal>, CompareUpper<idcompare>
+     */
+    std::string & nominalId(){return nominalid_;}
+    const std::string & nominalId()const{return nominalid_;}
+    std::vector<std::string> & compareIds(){return compids_;}
+    const std::vector<std::string> & compareIds()const{return compids_;}
 
-//void setComparePlotStyles();
-//void setNominalPlotStyle();
-    void readStyleFromFile(const std::string& );
+    //void setComparePlotStyles();
+    //void setNominalPlotStyle();
+    void readStyleFromFile(const std::string&,const std::string& marker="" );
     /*
-    * expects entries:
-    * [plotterCompareStyle] defines size N>0
-    * [containerStyle - NominalUpper]
-    * N x [containerStyle - CompareUpper<N-1>]
-    * [containerStyle - NominalRatio]
-    * N x [containerStyle - CompareRatio<N-1>]
-    * [plotStyle - Upper]
-    * [plotStyle - Ratio]
-    */
+     * expects entries:
+     * [plotterCompareStyle] defines size N>0
+     * [containerStyle - NominalUpper]
+     * N x [containerStyle - CompareUpper<N-1>]
+     * [containerStyle - NominalRatio]
+     * N x [containerStyle - CompareRatio<N-1>]
+     * [plotStyle - Upper]
+     * [plotStyle - Ratio]
+     */
 
     void clear();
     void clearPlots();
     void cleanMem();
+    /**
+     * returns numer of total plots including nominal
+     */
+    size_t size(){return compareplots_.size()+1;}
 
 protected:
     void preparePad();
     void drawPlots();
-   // void drawTextBoxes();
+    // void drawTextBoxes();
     void drawLegends();
 
 
@@ -72,6 +87,9 @@ private:
     containerStyle nomstyleratio_;
     std::vector<containerStyle> compstylesupper_;
     std::vector<containerStyle> compstylesratio_;
+
+    std::string nominalid_;
+    std::vector<std::string> compids_;
 
 
     float divideat_;
@@ -86,6 +104,9 @@ private:
 
     plot plotterCompareStyle(const plot&);
     void makeRatioPlots(); //sets mem*
+
+    float getMaximumUpper();
+
 
 };
 

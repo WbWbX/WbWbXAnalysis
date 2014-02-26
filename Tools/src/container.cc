@@ -1524,6 +1524,7 @@ void container1D::loadFromTFile(TFile *f, const TString & plotname){
 }
 void container1D::loadFromTFile(const TString& filename,
         const TString & plotname){
+    AutoLibraryLoader::enable();
     TFile * ftemp=new TFile(filename,"read");
     loadFromTFile(ftemp,plotname);
     delete ftemp;

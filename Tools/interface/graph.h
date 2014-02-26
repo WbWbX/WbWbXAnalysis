@@ -82,6 +82,11 @@ public:
     float  getYMax() const;
     float  getYMin() const;
 
+    histoContent & getYCoords(){return ycoords_;}
+    histoContent & getXCoords(){return xcoords_;}
+    const histoContent & getYCoords()const{return ycoords_;}
+    const histoContent & getXCoords()const{return xcoords_;}
+
 
     size_t addErrorGraph(const TString &name,const graph &); //needs to have same point indices... if not check by closest point?
     graph getSystGraph(const size_t sysidx)const;

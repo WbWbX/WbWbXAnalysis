@@ -177,6 +177,7 @@ void containerStackVector::addMCErrorStackVector(const TString &sysname, const z
 }
 void containerStackVector::addErrorStackVector(const TString &sysname,const  ztop::containerStackVector & stackvec){
     if(!fastadd){
+#pragma omp parallel for
         for(std::vector<containerStack>::iterator istack=stacks_.begin();istack<stacks_.end(); ++istack){
             for(std::vector<containerStack>::const_iterator estack=stackvec.stacks_.begin();estack<stackvec.stacks_.end(); ++estack){
                 if(istack->getName() == estack->getName()){
@@ -268,231 +269,198 @@ void containerStackVector::multiplyAllMCNorms(double multiplier){
 void containerStackVector::writeAllToTFile(TString filename, bool recreate, bool onlydata,TString treename){
     if(debug)
         std::cout << "containerStackVector::writeAllToTFile(TString filename, bool recreate, TString treename)" << std::endl;
+#pragma omp critical
+    {
+        AutoLibraryLoader::enable();
+        TH1::AddDirectory(false);
+        TString name;
 
-    AutoLibraryLoader::enable();
-    TH1::AddDirectory(false);
-    TString name;
 
+        if(name_=="") name="no_name";
+        else name = name_;
 
-    if(name_=="") name="no_name";
-    else name = name_;
+        TString upre="UPDATE";
+        if(recreate == true) upre="RECREATE";
 
-    TString upre="UPDATE";
-    if(recreate == true) upre="RECREATE";
+        TFile *f = new TFile(filename,upre);
+        f->cd();
+        TTree * t=0;
+        if(f->Get(treename)){
+            t = (TTree*) f->Get(treename);
+        }
+        else{
+            t = new TTree(treename,treename);
+        }
+        if(t->GetBranch("containerStackVectors")){ //branch does  exist
+            bool temp=csv_makelist;
+            csv_makelist=false;
+            containerStackVector * csv = this;
+            t->SetBranchAddress("containerStackVectors",&csv);
+            csv_makelist=temp;
+        }
+        else{
+            t->Branch("containerStackVectors",this);
+            std::cout << "containerStackVector::writeAllToTFile: added branch" << std::endl;
+        }
+        if(debug)
+            std::cout << "containerStackVector::writeAllToTFile: got branch" << std::endl;
 
-    TFile *f = new TFile(filename,upre);
-    f->cd();
-    TTree * t=0;
-    if(f->Get(treename)){
-        t = (TTree*) f->Get(treename);
-    }
-    else{
-        t = new TTree(treename,treename);
-    }
-    if(t->GetBranch("containerStackVectors")){ //branch does  exist
-        bool temp=csv_makelist;
-        csv_makelist=false;
-        containerStackVector * csv = this;
-        t->SetBranchAddress("containerStackVectors",&csv);
-        csv_makelist=temp;
-    }
-    else{
-        t->Branch("containerStackVectors",this);
-        std::cout << "containerStackVector::writeAllToTFile: added branch" << std::endl;
-    }
-    if(debug)
-        std::cout << "containerStackVector::writeAllToTFile: got branch" << std::endl;
+        t->Fill();
+        if(debug)
+            std::cout << "containerStackVector::writeAllToTFile: filled branch" << std::endl;
 
-    t->Fill();
-    if(debug)
-        std::cout << "containerStackVector::writeAllToTFile: filled branch" << std::endl;
+        t->Write("",TObject::kOverwrite);
+        if(debug)
+            std::cout << "containerStackVector::writeAllToTFile: written branch" << std::endl;
 
-    t->Write("",TObject::kOverwrite);
-    if(debug)
-        std::cout << "containerStackVector::writeAllToTFile: written branch" << std::endl;
+        delete t;
 
-    delete t;
+        if(onlydata){
+            f->Close();
+            delete f;
 
-    if(onlydata){
-        f->Close();
-        delete f;
-        return;
-    }
+        }
+        else{
+            bool batch=containerStack::batchmode;
+            containerStack::batchmode=true;
+            if(debug)
+                std::cout << "containerStackVector::writeAllToTFile: preparing plots" << std::endl;
 
-    bool batch=containerStack::batchmode;
-    containerStack::batchmode=true;
-    if(debug)
-        std::cout << "containerStackVector::writeAllToTFile: preparing plots" << std::endl;
+            TDirectory * d = f->mkdir(name + "_ratio",name + "_ratio");
+            d->cd();
 
-    TDirectory * d = f->mkdir(name + "_ratio",name + "_ratio");
-    d->cd();
+            //use a file reader to strip stuff
+            fileReader fr;
+            fr.setComment(" step ");
+            indexMap<std::string> dirs;
+            std::vector<TDirectory *> dirpv;
 
-    //use a file reader to strip stuff
-    fileReader fr;
-    fr.setComment(" step ");
-    indexMap<std::string> dirs;
-    std::vector<TDirectory *> dirpv;
+            plotterControlPlot pl;
+            std::string cmsswbase=getenv("CMSSW_BASE");
+            pl.readStyleFromFile(cmsswbase+"/src/TtZAnalysis/Tools/styles/controlPlots_standard.txt");
 
-    plotterControlPlot pl;
-    std::string cmsswbase=getenv("CMSSW_BASE");
-    pl.readStyleFromFile(cmsswbase+"/src/TtZAnalysis/Tools/styles/controlPlots_standard.txt");
+            gStyle->SetOptStat(0);
 
-    gStyle->SetOptStat(0);
+            for(std::vector<containerStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
 
-    for(std::vector<containerStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
+                if(stack->is1DUnfold()){
+                    TDirectory * din=d->mkdir(stack->getName(),stack->getName());
+                    din->cd();
+                    TCanvas *c = new TCanvas(stack->getName());
+                    pl.setTitle(stack->getName());
+                    pl.usePad(c);
+                    pl.setStack(&*stack);
+                    pl.draw();
 
-        if(stack->is1DUnfold()){
-            TDirectory * din=d->mkdir(stack->getName(),stack->getName());
-            din->cd();
-            TCanvas *c = new TCanvas(stack->getName());
-            pl.setTitle(stack->getName());
-            pl.usePad(c);
-            pl.setStack(&*stack);
-            pl.draw();
-
-            /* old impl
+                    /* old impl
                         TCanvas * c=stack->makeTCanvas();
-             */
-            if(c){
-                //tdir->WriteObject(c,c->GetName());
-                c->Write();
-                // stack->cleanMem();
-                delete c;
-            }
-            pl.cleanMem();
-            container1DUnfold cuf=stack->getSignalContainer();
-            containerStack rebinned=stack->rebinXToBinning(cuf.getGenBins());
-            rebinned.setName(stack->getName()+"_genbins");
-            c = new TCanvas(rebinned.getName());
-            pl.setTitle(rebinned.getName());
-            pl.usePad(c);
-            pl.setStack(&rebinned);
-            pl.draw();
+                     */
+                    if(c){
+                        //tdir->WriteObject(c,c->GetName());
+                        c->Write();
+                        // stack->cleanMem();
+                        delete c;
+                    }
+                    pl.cleanMem();
+                    container1DUnfold cuf=stack->getSignalContainer();
+                    containerStack rebinned=stack->rebinXToBinning(cuf.getGenBins());
+                    rebinned.setName(stack->getName()+"_genbins");
+                    c = new TCanvas(rebinned.getName());
+                    pl.setTitle(rebinned.getName());
+                    pl.usePad(c);
+                    pl.setStack(&rebinned);
+                    pl.draw();
 
-            /* old impl
+                    /* old impl
                        TCanvas * c=stack->makeTCanvas();
-             */
-            if(c){
-                //tdir->WriteObject(c,c->GetName());
-                c->Write();
-                // stack->cleanMem();
-                delete c;
-            }
-            pl.cleanMem();
+                     */
+                    if(c){
+                        //tdir->WriteObject(c,c->GetName());
+                        c->Write();
+                        // stack->cleanMem();
+                        delete c;
+                    }
+                    pl.cleanMem();
 
-            cuf.checkCongruentBinBoundariesXY();
-            TH1D * pur=cuf.getPurity().getTH1D("purity",false,false,false);
-            TH1D * stab=cuf.getStability().getTH1D("stability",false,false,false);
-            if(pur){
-                c =new TCanvas("purity_stab","purity_stab");
-                pur->SetMarkerColor(kBlue);
-                stab->SetMarkerColor(kRed); //put to plotter after testing
-                pur->GetYaxis()->SetRangeUser(0,1);
-                pur->Draw();
-                stab->Draw("same");
-                c->Write();
-                delete c;
-                delete pur;
-                delete stab;
-            }
-            c =new TCanvas("MResp","MResp");
-            TH2D * resp=cuf.getResponseMatrix().getTH2D("respMatrix_nominal",false,true);
-            resp->Draw("colz");
-            c->Write();
-            delete c;
-            delete resp;
-            TDirectory * dsys=din->mkdir("sys","sys");
-            dsys->cd();
-            for(size_t i=0;i<cuf.getSystSize();i++){
-                c =new TCanvas("MResp_"+cuf.getSystErrorName(i),"MResp_"+cuf.getSystErrorName(i));
-                resp=cuf.getResponseMatrix().getTH2DSyst("respMatrix_"+cuf.getSystErrorName(i),i,false,true);;
-                resp->Draw("colz");
-                c->Write();
-                stack->cleanMem();
-                delete c;
-                delete resp;
-            }
-            d->cd();
-        }
-        else if(stack->is1D()){
-            std::string dirname=stack->getName().Data();
-            fr.trimcomments(dirname);
-            size_t diridx=dirs.getIndex(dirname);
-            TDirectory * tdir=0;
-            if(diridx>=dirs.size()){ //new dir
-                tdir=d->mkdir(dirname.data(),dirname.data());
-                dirpv.push_back(tdir);
-                dirs.push_back(dirname);
-            }
-            //d->mkdir(); //cd dir with idx
-            tdir=dirpv.at(diridx);
-            tdir->cd();
-            //containerStack::debug=true;
-            // plotterControlPlot::debug=true;
-            TCanvas *c = new TCanvas(stack->getName());
-            pl.setTitle(stack->getName());
-            pl.usePad(c);
-            pl.setStack(&*stack);
-            pl.draw();
+                    cuf.checkCongruentBinBoundariesXY();
+                    TH1D * pur=cuf.getPurity().getTH1D("purity",false,false,false);
+                    TH1D * stab=cuf.getStability().getTH1D("stability",false,false,false);
+                    if(pur){
+                        c =new TCanvas("purity_stab","purity_stab");
+                        pur->SetMarkerColor(kBlue);
+                        stab->SetMarkerColor(kRed); //put to plotter after testing
+                        pur->GetYaxis()->SetRangeUser(0,1);
+                        pur->Draw();
+                        stab->Draw("same");
+                        c->Write();
+                        delete c;
+                        delete pur;
+                        delete stab;
+                    }
+                    c =new TCanvas("MResp","MResp");
+                    TH2D * resp=cuf.getResponseMatrix().getTH2D("respMatrix_nominal",false,true);
+                    resp->Draw("colz");
+                    c->Write();
+                    delete c;
+                    delete resp;
+                    TDirectory * dsys=din->mkdir("sys","sys");
+                    dsys->cd();
+                    for(size_t i=0;i<cuf.getSystSize();i++){
+                        c =new TCanvas("MResp_"+cuf.getSystErrorName(i),"MResp_"+cuf.getSystErrorName(i));
+                        resp=cuf.getResponseMatrix().getTH2DSyst("respMatrix_"+cuf.getSystErrorName(i),i,false,true);;
+                        resp->Draw("colz");
+                        c->Write();
+                        stack->cleanMem();
+                        delete c;
+                        delete resp;
+                    }
+                    d->cd();
+                }
+                else if(stack->is1D()){
+                    std::string dirname=stack->getName().Data();
+                    fr.trimcomments(dirname);
+                    size_t diridx=dirs.getIndex(dirname);
+                    TDirectory * tdir=0;
+                    if(diridx>=dirs.size()){ //new dir
+                        tdir=d->mkdir(dirname.data(),dirname.data());
+                        dirpv.push_back(tdir);
+                        dirs.push_back(dirname);
+                    }
+                    //d->mkdir(); //cd dir with idx
+                    tdir=dirpv.at(diridx);
+                    tdir->cd();
+                    //containerStack::debug=true;
+                    // plotterControlPlot::debug=true;
+                    TCanvas *c = new TCanvas(stack->getName());
+                    pl.setTitle(stack->getName());
+                    pl.usePad(c);
+                    pl.setStack(&*stack);
+                    pl.draw();
 
-            /* old impl
+                    /* old impl
             TCanvas * c=stack->makeTCanvas();
-             */
-            if(c){
-                //tdir->WriteObject(c,c->GetName());
-                c->Write();
-                // stack->cleanMem();
-                delete c;
+                     */
+                    if(c){
+                        //tdir->WriteObject(c,c->GetName());
+                        c->Write();
+                        // stack->cleanMem();
+                        delete c;
+                    }
+                    pl.cleanMem();
+                    d->cd();
+                }
             }
-            pl.cleanMem();
-            d->cd();
-        }
+            if(debug)
+                std::cout << "containerStackVector::writeAllToTFile: ratio plots drawn" << std::endl;
+
+
+            f->Close();
+            delete f;
+            containerStack::batchmode=batch;
+        }//not onlydata done
+        if(debug)
+            std::cout << "containerStackVector::writeAllToTFile: finished" << std::endl;
     }
-    if(debug)
-        std::cout << "containerStackVector::writeAllToTFile: ratio plots drawn" << std::endl;
-
-    /*
-    TDirectory * d2 = f->mkdir(name+ "_sgbg",name+ "_sgbg");
-    d2->cd();
-
-    dirs.clear();
-    dirpv.clear();
-
-    for(std::vector<containerStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
-        if(stack->is1D()){
-            std::string dirname=stack->getName().Data();
-            fr.trimcomments(dirname);
-            size_t diridx=dirs.getIndex(dirname);
-            TDirectory * tdir=0;
-            if(diridx>=dirs.size()){ //new dir
-                tdir=d2->mkdir(dirname.data(),dirname.data());
-                dirpv.push_back(tdir);
-                dirs.push_back(dirname);
-            }
-            //d->mkdir(); //cd dir with idx
-            tdir=dirpv.at(diridx);
-            tdir->cd();
-            TCanvas * c=stack->makeTCanvas(containerStack::plotmode::sigbg);
-            if(c){
-                //tdir->WriteObject(c,c->GetName());
-                c->Write();
-                stack->cleanMem();
-                delete c;
-            }
-            d2->cd();
-        }
-    }
-    if(debug)
-        std::cout << "containerStackVector::writeAllToTFile: sig/bg plots drawn" << std::endl;
-
-     */
-    f->Close();
-    delete f;
-
-    containerStack::batchmode=batch;
-    if(debug)
-        std::cout << "containerStackVector::writeAllToTFile: finished" << std::endl;
-
 }
 
 
@@ -504,9 +472,13 @@ void containerStackVector::printAll(TString namestartswith,TString directory,TSt
                 if(c){
                     TString newname=stack->getName();
                     newname.ReplaceAll(" ","_");
-                    c->Print(directory+newname+extension);
-                    stack->cleanMem();
-                    delete c;
+#pragma omp critical
+                    {
+                        c->Print(directory+newname+extension);
+                        stack->cleanMem();
+
+                        delete c;
+                    }
                 }
             }
         }
@@ -538,7 +510,7 @@ void containerStackVector::writeAllToTFile(TFile * f, TString treename){
     }
     else{
         t->Branch("containerStackVectors",this);
-        std::cout << "containerStackVector::writeAllToTFile: added branch" << std::endl;
+        if(debug)std::cout << "containerStackVector::writeAllToTFile: added branch" << std::endl;
     }
     t->Fill();
     t->Write("",TObject::kOverwrite);
@@ -591,33 +563,33 @@ void containerStackVector::loadFromTree(TTree * t, TString name){
 containerStackVector * containerStackVector::getFromTree(TTree * t, TString name){
     AutoLibraryLoader::enable();
     if(!t || t->IsZombie()){
-            throw std::runtime_error("containerStackVector::loadFromTree: tree not ok");
+        throw std::runtime_error("containerStackVector::loadFromTree: tree not ok");
+    }
+    ztop::containerStackVector * cuftemp=0;
+    if(!t->GetBranch("containerStackVectors")){
+        throw std::runtime_error("containerStackVector::loadFromTree: branch containerStackVectors not found");
+    }
+    bool found=false;
+    size_t count=0;
+    t->SetBranchAddress("containerStackVectors", &cuftemp);
+    for(float n=0;n<t->GetEntries();n++){
+        t->GetEntry(n);
+        std::cout << cuftemp->getName() << std::endl;
+        if(cuftemp->getName()==(name)){
+            found=true;
+            count++;
+            *this=*cuftemp;
         }
-        ztop::containerStackVector * cuftemp=0;
-        if(!t->GetBranch("containerStackVectors")){
-            throw std::runtime_error("containerStackVector::loadFromTree: branch containerStackVectors not found");
-        }
-        bool found=false;
-        size_t count=0;
-        t->SetBranchAddress("containerStackVectors", &cuftemp);
-        for(float n=0;n<t->GetEntries();n++){
-            t->GetEntry(n);
-            std::cout << cuftemp->getName() << std::endl;
-            if(cuftemp->getName()==(name)){
-                found=true;
-                count++;
-                *this=*cuftemp;
-            }
-        }
-       if(!found){
-            throw std::runtime_error("containerStackVector::loadFromTree: no containerStackVector with name not found");
-        }
-        if(count>1){
-            std::cout << "containerStackVector::loadFromTree: found more than one object with name "
-                    << getName() << ", took the first one." << std::endl;
-        }
-        return cuftemp;
- /*   containerStackVector * csv=0;
+    }
+    if(!found){
+        throw std::runtime_error("containerStackVector::loadFromTree: no containerStackVector with name not found");
+    }
+    if(count>1){
+        std::cout << "containerStackVector::loadFromTree: found more than one object with name "
+                << getName() << ", took the first one." << std::endl;
+    }
+    return cuftemp;
+    /*   containerStackVector * csv=0;
     bool found=false;
     if(!t)
         return 0;

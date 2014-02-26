@@ -110,6 +110,7 @@ void plotterControlPlot::drawPlots(){
 void plotterControlPlot::drawLegends(){
     if(debug) std::cout <<"plotterCompare::drawLegends" << std::endl;
     getPad()->cd(1);
+    legstyle_.applyLegendStyle(templegp_);
     templegp_->Draw("same");
     //use templegps_
 

@@ -12,7 +12,7 @@
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 #include <vector>
 #include "TRandom.h"
-#include "../interface/plotterCompare.h"
+#include "../interface/plotterMultiplePlots.h"
 #include "../interface/container.h"
 #include "../interface/container2D.h"
 #include "../interface/graph.h"
@@ -51,19 +51,21 @@ int main(){
    // plot::debug =true;
    // plotterCompare::debug=true;
    // textBoxes::debug=true;
-    plotterCompare tp;
+    plotterMultiplePlots tp;
    // fileReader::debug=true;
     tp.usePad(c);
     tp.setTitle("testplotter Title");
-    plotterCompare::debug=true;
+
+
+    plotterMultiplePlots::debug=true;
 
 
     std::string stylePath=(std::string)getenv("CMSSW_BASE")+"/src/TtZAnalysis/Tools/styles/";
 
-    tp.compareIds() << "_mt171.5" << "_mt173.5" << "_mt175.5" << "_mt169.5" << "_mt178.5" << "_mt166.5" ;
+  //  tp.compareIds() << "_mt171.5" << "_mt173.5" << "_mt175.5" << "_mt169.5" << "_mt178.5" << "_mt166.5" ;
 
 
-    tp.readStyleFromFile(stylePath+"comparePlots_mlbMCvsmt.txt");
+    tp.readStyleFromFile(stylePath+"multiplePlots.txt");
 
 
     c1.setNames("c1 - nominal","xaxis[units]","yaxis[units]");
@@ -74,16 +76,16 @@ int main(){
     c1.addErrorContainer("sys_down",c2*0.99);
     container1D c4=(c3+c2)*0.5;
     c4.setName("c4");
-    tp.setNominalPlot(&c1);
-    tp.setComparePlot(&c2,0);
-    tp.setComparePlot(&c3,1);
-    tp.setComparePlot(&c4,2);
+    tp.addPlot(&c1);
+    tp.addPlot(&c2,0);
+    tp.addPlot(&c3,1);
+    tp.addPlot(&c4,2);
 
-    TFile f("testPlotterCompare.root","RECREATE");
+    TFile f("testmultiplePlots.root","RECREATE");
 
     tp.draw();
     c->Write();
-    c->Print("testPlotterCompare.pdf");
+    c->Print("testmultiplePlots.pdf");
     //tp.cleanMem();
     delete c;
 

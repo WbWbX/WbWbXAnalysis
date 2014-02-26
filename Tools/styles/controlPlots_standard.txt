@@ -181,6 +181,7 @@
     xaxis.ndiv        = 510
     xaxis.max         = -1
     xaxis.min         = 1
+    xaxis.log         = false
     xaxis.name        = USEDEF
     
     yaxis.titleSize   = 0.06
@@ -190,6 +191,7 @@
     yaxis.tickLength  = 0.03
     yaxis.ndiv        = 505
     yaxis.max         = 1.5
+    yaxis.log         = false
     yaxis.min         = 0.5
     yaxis.name        = #frac{data}{MC}
     

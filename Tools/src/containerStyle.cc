@@ -20,7 +20,7 @@ axisStyle::axisStyle(): titleSize(0), labelSize(0), titleOffset(0), labelOffset(
 axisStyle::~axisStyle(){}
 
 bool axisStyle::applyAxisRange() const{
-    if(max<min) return false;
+    if(max<=min) return false;
     return true;
 }
 
@@ -86,7 +86,7 @@ void containerStyle::multiplySymbols(float val){
 }
 
 
-void containerStyle::readFromFile(const std::string & filename, const std::string& stylename){
+void containerStyle::readFromFile(const std::string & filename, const std::string& stylename,bool requireall){
     fileReader fr;
     fr.setComment("$");
     fr.setDelimiter(",");
@@ -97,23 +97,24 @@ void containerStyle::readFromFile(const std::string & filename, const std::strin
         std::cout << "containerStyle::readFromFile: did not find style "  << stylename <<std::endl;
         throw std::runtime_error("containerStyle::readFromFile: no containerStyle found");
     }
+    fr.setRequireValues(requireall);
 
-    markerColor = fr.getValue<int>("markerColor");
-    markerStyle = fr.getValue<int>("markerStyle");
-    markerSize  = fr.getValue<float>("markerSize");
+    markerColor = fr.getValue<int>("markerColor",markerColor);
+    markerStyle = fr.getValue<int>("markerStyle",markerStyle);
+    markerSize  = fr.getValue<float>("markerSize",markerSize);
 
-    lineSize    = fr.getValue<float>("lineSize");
-    lineStyle   = fr.getValue<int>("lineStyle");
-    lineColor   = fr.getValue<int>("lineColor");
+    lineSize    = fr.getValue<float>("lineSize",lineSize);
+    lineStyle   = fr.getValue<int>("lineStyle",lineStyle);
+    lineColor   = fr.getValue<int>("lineColor",lineColor);
 
-    fillStyle   = fr.getValue<int>("fillStyle");
-    fillColor   = fr.getValue<int>("fillColor");
-    sysFillStyle   = fr.getValue<int>("sysFillStyle");
-    sysFillColor   = fr.getValue<int>("sysFillColor");
+    fillStyle   = fr.getValue<int>("fillStyle",fillStyle);
+    fillColor   = fr.getValue<int>("fillColor",fillColor);
+    sysFillStyle   = fr.getValue<int>("sysFillStyle",sysFillStyle);
+    sysFillColor   = fr.getValue<int>("sysFillColor",sysFillColor);
 
-    rootDrawOpt   = fr.getValue<TString>("rootDrawOpt");
-    sysRootDrawOpt   = fr.getValue<TString>("sysRootDrawOpt");
-    drawStyle     = fr.getValue<TString>("drawStyle");
+    rootDrawOpt   = fr.getValue<TString>("rootDrawOpt",rootDrawOpt);
+    sysRootDrawOpt   = fr.getValue<TString>("sysRootDrawOpt",sysRootDrawOpt);
+    drawStyle     = fr.getValue<TString>("drawStyle",drawStyle);
 
 }
 /**

@@ -413,10 +413,11 @@ TH1 * graph::getAxisTH1(bool tighty,bool tightx)const{
         if((oldymin >0 && ymin<0) || (oldymin<0 && fabs(oldymin/ymax) < 0.01)) ymin=0; //clse to 0
     }
     if(!tightx){
-        xmin-=(0.05* (xmax-xmin));
-        xmax+=(0.05* (xmax-xmin));
+        float xminold=xmin;
+        xmin-=(0.20* (xmax-xmin));
+        xmax+=(0.20* (xmax-xminold));
     }
-    TH1F * h = new TH1F(name_+"_axis",name_+"_axis",2,xmin,xmax);
+    TH1F * h = new TH1F(name_+"_axis",name_+"_axis",200,xmin,xmax);
     h->GetXaxis()->SetTitle(xname_);
     h->GetYaxis()->SetTitle(yname_);
     h->Fill(xmax-xmin);

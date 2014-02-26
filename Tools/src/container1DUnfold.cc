@@ -38,10 +38,10 @@ container1DUnfold::container1DUnfold(): container2D(), xaxis1Dname_(""), yaxis1D
         c_list.push_back(this);
     }
 }
-container1DUnfold::container1DUnfold( std::vector<float> genbins, std::vector<float> recobins, TString name,TString xaxisname,TString yaxisname, bool mergeufof):
-	               															                                                                                                                        container2D( recobins /*genbins*/ , recobins , name,xaxisname+"_reco",xaxisname+"_gen",mergeufof), xaxis1Dname_(xaxisname),
-	               															                                                                                                                        yaxis1Dname_(yaxisname),tempgen_(0),tempreco_(0),tempgenweight_(1),tempweight_(1),recofill_(false),genfill_(false),
-	               															                                                                                                                        isMC_(false),flushed_(true),binbybin_(false),lumi_(1),congruentbins_(false) {
+container1DUnfold::container1DUnfold( std::vector<float> genbins, std::vector<float> recobins, TString name,TString xaxisname,TString yaxisname, bool mergeufof)
+:container2D( recobins /*genbins*/ , recobins , name,xaxisname+"_reco",xaxisname+"_gen",mergeufof), xaxis1Dname_(xaxisname),
+ yaxis1Dname_(yaxisname),tempgen_(0),tempreco_(0),tempgenweight_(1),tempweight_(1),recofill_(false),genfill_(false),
+ isMC_(false),flushed_(true),binbybin_(false),lumi_(1),congruentbins_(false) {
     //bins are set, containers created, at least conts_[0] exists with all options (binomial, mergeufof etc)
 
     genbins_=genbins; //can be changed and rebinned afterwards
@@ -450,17 +450,14 @@ TH2D * container1DUnfold::prepareRespMatrix(bool nominal,unsigned int systNumber
 
     //prepare rebinned containers
     container2D rebinned=getResponseMatrix().rebinXToBinning(genbins_);
-
-
-    if(nominal)
-        return rebinned.getTH2D("respMatrix_nominal",false,true);
-
-    /*
-     * systematics.
-     * naming of histograms changed to make multithreading (maybe) possible
-     * assume syst stat of same order as nominal stat.
-     */
-    TH2D * h=rebinned.getTH2DSyst("respMatrix_"+getSystErrorName(systNumber),systNumber,false,true);
+    TH2D * h=0;
+#pragma omp critical //protect new TH2D
+    {
+        if(nominal)
+            h= rebinned.getTH2D("respMatrix_nominal",false,true);
+        else
+            h=rebinned.getTH2DSyst("respMatrix_"+getSystErrorName(systNumber),systNumber,false,true);
+    } //critical
     return h;
 
 }
@@ -585,6 +582,7 @@ void container1DUnfold::loadFromTFile(TFile *f, const TString & plotname){
 }
 void container1DUnfold::loadFromTFile(const TString& filename,
         const TString & plotname){
+    AutoLibraryLoader::enable();
     TFile * ftemp=new TFile(filename,"read");
     loadFromTFile(ftemp,plotname);
     delete ftemp;

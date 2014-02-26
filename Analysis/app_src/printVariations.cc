@@ -174,7 +174,7 @@ ztop::container1DStackVector getCSVFromFile(TString name)
 ztop::container1DUnfold getCUFFromFile(TString filename,TString plotname)
 {
     TFile * ftemp=new TFile(stripRoot(filename)+".root","read");
-    TTree * ttemp = (TTree*)ftemp->Get("containerStackVectors");
+    TTree * ttemp = (TTree*)ftemp->Get("container1DUnfolds");
     if(!ttemp || ttemp->IsZombie()){
         delete ttemp;
         return ztop::container1DUnfold();
@@ -257,7 +257,7 @@ int main(int argc, char* argv[]){
         //else inputfile
         ninputfiles++;
         inputfile=(TString)argv[i];
-        csv=getCSVFromFile(inputfile);
+      // csv=getCSVFromFile(inputfile);
     }
     if(ninputfiles>1){
         std::cout << "WARNING: more than 1 input file, using last......" <<std::endl;

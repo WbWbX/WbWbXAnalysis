@@ -2,7 +2,7 @@
 [plotterCompareStyle]
 
     divideat = 0.4   $ will affect margins, text box coords etc
-    size = 3         $ size of additional plots to be compared to nominal
+    size = 6         $ size of additional plots to be compared to nominal
 
 [end plotterCompareStyle]
  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  
@@ -116,14 +116,14 @@
  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  $$$$$ from now on only define differences wrt to defaults
  
- [containerStyle - CompareUpper0]  
+ [containerStyle - CompareUpper_mt173.5]  
  
     $markerColor  = 632  
     lineColor    = 632 
     sysFillColor = 632
     
  [end containerStyle]
- [containerStyle - CompareRatio0]
+ [containerStyle - CompareRatio_mt173.5]
  
     lineColor    = 632
     sysFillColor = 632
@@ -131,7 +131,7 @@
  [end containerStyle]
  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  
  
- [containerStyle - CompareUpper1]
+ [containerStyle - CompareUpper_mt171.5]
     
     $markerColor  = 600  
     lineColor    = 600 
@@ -139,7 +139,7 @@
 
  [end containerStyle]
  
- [containerStyle - CompareRatio1]
+ [containerStyle - CompareRatio_mt171.5]
     
     lineColor    = 600
     sysFillColor = 600
@@ -147,33 +147,60 @@
  [end containerStyle]
  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 
  
- [containerStyle - CompareUpper2]
+ [containerStyle - CompareUpper_mt175.5]
    
-    lineColor    = 416 
-    sysFillColor = 416
+    lineColor    = 629 
+    sysFillColor = 629
 
  [end containerStyle]
  
- [containerStyle - CompareRatio2]
+ [containerStyle - CompareRatio_mt175.5]
    
-    lineColor    = 416
-    sysFillColor = 416
+    lineColor    = 629
+    sysFillColor = 629
 
  [end containerStyle]
  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 
- [containerStyle - CompareUpper3]
+ [containerStyle - CompareUpper_mt169.5]
    
-    lineColor    = 619 
-    sysFillColor = 619
+    lineColor    = 596 
+    sysFillColor = 596
 
  [end containerStyle]
- [containerStyle - CompareRatio3]
+ [containerStyle - CompareRatio_mt169.5]
    
-    lineColor    = 619
-    sysFillColor = 619
+    lineColor    = 596
+    sysFillColor = 596
 
  [end containerStyle]
  
+ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 
+ [containerStyle - CompareUpper_mt178.5]
+   
+    lineColor    = 624 
+    sysFillColor = 624
+
+ [end containerStyle]
+ [containerStyle - CompareRatio_mt178.5]
+   
+    lineColor    = 624
+    sysFillColor = 624
+
+ [end containerStyle]
+ 
+ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 
+ [containerStyle - CompareUpper_mt166.5]
+   
+    lineColor    = 593 
+    sysFillColor = 593
+
+ [end containerStyle]
+ [containerStyle - CompareRatio_mt166.5]
+   
+    lineColor    = 593
+    sysFillColor = 593
+
+ [end containerStyle]
  
  
   $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
@@ -212,7 +239,7 @@
     yaxis.tickLength  = 0.03
     yaxis.ndiv        = 510
     yaxis.max         = -1
-    yaxis.min         = 1
+    yaxis.min         = 0 $use this one
     yaxis.log         = false
     yaxis.name        = USEDEF
     

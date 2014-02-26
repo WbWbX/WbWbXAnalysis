@@ -19,7 +19,7 @@ plotStyle::~plotStyle(){}
 
 
 
-void plotStyle::readFromFile(const std::string & filename,const std::string  stylename){
+void plotStyle::readFromFile(const std::string & filename,const std::string  stylename, bool requireall){
     fileReader fr;
     fr.setComment("$");
     fr.setDelimiter(",");
@@ -30,38 +30,38 @@ void plotStyle::readFromFile(const std::string & filename,const std::string  sty
         std::cout << "plotStyle::readFromFile: did not find style "  << stylename <<std::endl;
         throw std::runtime_error("plotStyle::readFromFile: no plotStyle found");
     }
+    fr.setRequireValues(requireall);
 
+    bottomMargin       = fr.getValue<float>("bottomMargin",bottomMargin);
+    topMargin          = fr.getValue<float>("topMargin",topMargin);
+    leftMargin         = fr.getValue<float>("leftMargin",leftMargin);
+    rightMargin        = fr.getValue<float>("rightMargin",rightMargin);
 
-    bottomMargin       = fr.getValue<float>("bottomMargin");
-    topMargin          = fr.getValue<float>("topMargin");
-    leftMargin         = fr.getValue<float>("leftMargin");
-    rightMargin        = fr.getValue<float>("rightMargin");
+    divideByBinWidth   = fr.getValue<bool>("divideByBinWidth",divideByBinWidth);
+    horizontal         = fr.getValue<bool>("horizontal",horizontal);
 
-    divideByBinWidth   = fr.getValue<bool>("divideByBinWidth");
-    horizontal         = fr.getValue<bool>("horizontal");
+    xaxis_.titleSize   = fr.getValue<float>("xaxis.titleSize",xaxis_.titleSize);
+    xaxis_.labelSize   = fr.getValue<float>("xaxis.labelSize",xaxis_.labelSize);
+    xaxis_.titleOffset = fr.getValue<float>("xaxis.titleOffset",xaxis_.titleOffset);
+    xaxis_.labelOffset = fr.getValue<float>("xaxis.labelOffset",xaxis_.labelOffset);
+    xaxis_.tickLength  = fr.getValue<float>("xaxis.tickLength",xaxis_.tickLength);
 
-    xaxis_.titleSize   = fr.getValue<float>("xaxis.titleSize");
-    xaxis_.labelSize   = fr.getValue<float>("xaxis.labelSize");
-    xaxis_.titleOffset = fr.getValue<float>("xaxis.titleOffset");
-    xaxis_.labelOffset = fr.getValue<float>("xaxis.labelOffset");
-    xaxis_.tickLength  = fr.getValue<float>("xaxis.tickLength");
-    xaxis_.ndiv        = fr.getValue<int>  ("xaxis.ndiv");
-    xaxis_.max         = fr.getValue<float>("xaxis.max");
-    xaxis_.min         = fr.getValue<float>("xaxis.min");
-    xaxis_.log         = fr.getValue<bool> ("xaxis.log");
-    xaxis_.name         = fr.getValue<std::string> ("xaxis.name");
+    xaxis_.ndiv        = fr.getValue<int>  ("xaxis.ndiv", xaxis_.ndiv);
+    xaxis_.max         = fr.getValue<float>("xaxis.max",xaxis_.max);
+    xaxis_.min         = fr.getValue<float>("xaxis.min",xaxis_.min);
+    xaxis_.log         = fr.getValue<bool> ("xaxis.log",xaxis_.log );
+    xaxis_.name         = fr.getValue<TString> ("xaxis.name",xaxis_.name);
 
-
-    yaxis_.titleSize   = fr.getValue<float>("yaxis.titleSize");
-    yaxis_.labelSize   = fr.getValue<float>("yaxis.labelSize");
-    yaxis_.titleOffset = fr.getValue<float>("yaxis.titleOffset");
-    yaxis_.labelOffset = fr.getValue<float>("yaxis.labelOffset");
-    yaxis_.tickLength  = fr.getValue<float>("yaxis.tickLength");
-    yaxis_.ndiv        = fr.getValue<int>  ("yaxis.ndiv");
-    yaxis_.max         = fr.getValue<float>("yaxis.max");
-    yaxis_.min         = fr.getValue<float>("yaxis.min");
-    yaxis_.log         = fr.getValue<bool> ("yaxis.log");
-    yaxis_.name         = fr.getValue<std::string> ("yaxis.name");
+    yaxis_.titleSize   = fr.getValue<float>("yaxis.titleSize",yaxis_.titleSize);
+    yaxis_.labelSize   = fr.getValue<float>("yaxis.labelSize",yaxis_.labelSize);
+    yaxis_.titleOffset = fr.getValue<float>("yaxis.titleOffset",yaxis_.titleOffset);
+    yaxis_.labelOffset = fr.getValue<float>("yaxis.labelOffset",yaxis_.labelOffset);
+    yaxis_.tickLength  = fr.getValue<float>("yaxis.tickLength",yaxis_.tickLength);
+    yaxis_.ndiv        = fr.getValue<int>  ("yaxis.ndiv",yaxis_.ndiv  );
+    yaxis_.max         = fr.getValue<float>("yaxis.max",yaxis_.max);
+    yaxis_.min         = fr.getValue<float>("yaxis.min",yaxis_.min);
+    yaxis_.log         = fr.getValue<bool> ("yaxis.log",yaxis_.log);
+    yaxis_.name         = fr.getValue<TString> ("yaxis.name",yaxis_.name);
 
 }
 
@@ -118,7 +118,7 @@ void plotStyle::applyAxisStyle(TH1*h)const{
     if(!xaxis_.name.Contains("USEDEF"))
         h->GetXaxis()->SetTitle(xaxis_.name);
     if(xaxis_.applyAxisRange())
-        h->GetXaxis()->SetRangeUser(xaxis_.min,xaxis_.max);
+        h->SetAxisRange(xaxis_.min,xaxis_.max,"X");
 
     h->GetYaxis()->SetTitleSize(yaxis_.titleSize);
     h->GetYaxis()->SetTitleOffset(yaxis_.titleOffset);
@@ -129,7 +129,7 @@ void plotStyle::applyAxisStyle(TH1*h)const{
     if(!yaxis_.name.Contains("USEDEF"))
         h->GetYaxis()->SetTitle(yaxis_.name);
     if(yaxis_.applyAxisRange())
-        h->GetYaxis()->SetRangeUser(yaxis_.min,yaxis_.max);
+        h->SetAxisRange(yaxis_.min,yaxis_.max,"Y");
 
 }
 void plotStyle::applyPadStyle(TVirtualPad*c)const{
@@ -175,88 +175,7 @@ void plotStyle::setAxisDefaults(){
     yAxisStyle()->labelOffset= 0.005;
 
 }
-/*
-void plotStyle::useTemplate(templates temp){
-	setAxisDefaults();
-	if(temp==singlePlot){
-		clear();
-		containerStyle cstyle;
-		cstyle.useTemplate(containerStyle::normalPlot);
-		addStyle(cstyle);
 
-
-		bottomMargin=0.15;
-		topMargin=0.05;
-		leftMargin=0.15;
-		rightMargin=0.05;
-	}
-	else if(temp==stackPlot){ //one for data, one for MC, leave colors open
-		clear();
-		containerStyle data,mc;
-		data.useTemplate(containerStyle::controlPlotData);
-		mc.useTemplate(containerStyle::controlPlotMC);
-		addStyle(data);
-		addStyle(mc);
-		bottomMargin=0.15;
-		topMargin=0.05;
-		leftMargin=0.15;
-		rightMargin=0.05;
-	}
-	else if(temp==ratioPlot){
-		clear();
-		containerStyle data,mc;
-		data.useTemplate(containerStyle::ratioPlotData);
-		mc.useTemplate(containerStyle::ratioPlotMC);
-		addStyle(data);
-		addStyle(mc);
-		yAxisStyle()->max= 1.5;
-		yAxisStyle()->min= 0.5;
-		yAxisStyle()->ndiv=505;
-		bottomMargin=0.15;
-		topMargin=0.05;
-		leftMargin=0.15;
-		rightMargin=0.05;
-	}
-	else if(temp==crosssectionsGenPlot){
-		clear();
-		containerStyle data,mc;
-		data.useTemplate(containerStyle::crosssectionPlot);
-		mc.useTemplate(containerStyle::crosssectionPlot);
-		mc.errorStyle = containerStyle::perpErr;
-		mc.fillColor = 632;
-		mc.lineColor = 632;
-		mc.markerColor = 632;
-		addStyle(data);
-		addStyle(mc);
-		bottomMargin=0.15;
-		topMargin=0.05;
-		leftMargin=0.15;
-		rightMargin=0.05;
-	}
-	else if(temp==systematicsBreakdownPlot){
-		clear();
-		containerStyle bars(containerStyle::normalPlot),errors(containerStyle::normalPlot);
-		bars.errorStyle = containerStyle::noErr;
-		bars.fillStyle=3003;
-		errors.fillStyle=3005;
-		errors.errorStyle=containerStyle::fillErr;
-		bars.fillColor=kRed;
-		containerStyle bars2=bars;
-		bars2.fillColor=kBlue;
-		bars2.fillStyle=3002;
-		errors.fillColor=kBlack;
-		addStyle(bars);
-		addStyle(bars2);
-		addStyle(errors);
-		horizontal=true;
-		bottomMargin=0.15;
-		topMargin=0.05;
-		leftMargin=0.15;
-		rightMargin=0.05;
-	}
-
-}
- */
 
 }//namespace
 

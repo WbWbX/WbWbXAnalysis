@@ -204,13 +204,28 @@ container1D containerUnfolder::unfold(/*const*/ container1DUnfold & cuf){
 		if(dodatasyst)
 			SysDatahist=cuf.getRecoContainer().getTH1DSyst(cuf.getName()+"_datahist_"+cuf.getSystErrorName(sys),sys,false,true);
 		else
-			SysDatahist=cuf.getRecoContainer().getTH1D(cuf.getName()+"_datahist_nominal_fake"+cuf.getSystErrorName(sys),false,true);
-		unfolder * uf=new unfolder(cuf.getName()+"_"+cuf.getSystErrorName(sys));
+		    SysDatahist=cuf.getRecoContainer().getTH1D(cuf.getName()+"_datahist_nominal_fake"+cuf.getSystErrorName(sys),false,true);
+		unfolder * uf=0;
+
+		try{
+		    uf=new unfolder(cuf.getName()+"_"+cuf.getSystErrorName(sys));
+		}
+		catch(...){
+#pragma omp critical
+		    {
+		        std::cout << "containerUnfolder::unfold: bad memory alloc by new unfolder , try to switch of parallalization" << std::endl;
+
+		    }
+		    continue;
+		}
 		uf->setVerbose(printinfo);
 		int verb=uf->init(SysResponsematrix,SysDatahist);
 		if(verb>10000){
+#pragma omp critical
+            {
 			std::cout << "containerUnfolder::unfold: init of unfolder for "<< cuf.getName()<< ": "
 					<< cuf.getSystErrorName(sys) << " not successful. Will not unfold distribution"<< std::endl;
+            }
 			continue;
 		}
 		unfsyst_.at(sys)=uf;
@@ -259,6 +274,15 @@ container1D containerUnfolder::unfold(/*const*/ container1DUnfold & cuf){
 	//const container1D setter=out;
 	double lumiinv=1/cuf.getLumi();
 	out=out*lumiinv;
+	TString xaxisname=out.getXAxisName();
+	xaxisname.ReplaceAll("_reco","");
+    xaxisname.ReplaceAll(" - gen","");
+    xaxisname.ReplaceAll("-gen","");
+	out.setXAxisName(xaxisname);
+
+	xaxisname.ReplaceAll("[","[pb/");
+	xaxisname="d#sigma/d"+xaxisname;
+	out.setYAxisName(xaxisname);
 	cuf.setUnfolded(out);
 	cuf.setRefolded(refolded);
 	container1D::c_makelist=tempmakelist;

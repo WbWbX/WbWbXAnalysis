@@ -123,6 +123,12 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
         getBTagSF()->setWorkingPoint("csvt");
         std::cout << "entering btagcsvt mode" <<std::endl;
     }
+    bool onejet=false;
+    if(mode_.Contains("Onejet")){
+        onejet=true;
+        std::cout << "entering Onejet mode" <<std::endl;
+    }
+
 
     bool issignal=issignal_.at(anaid);
 
@@ -134,7 +140,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
     //check if file exists
     if(testmode_)
-        std::cout << "testmode("<< anaid << "): check input file" << std::endl;
+        std::cout << "testmode("<< anaid << "): check input file (isMC)"<< isMC << std::endl;
 
     TFile *f;
     if(!fileExists((datasetdirectory_+inputfile).Data())){
@@ -205,6 +211,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
         reportError(-3,anaid);
         return;
     }
+    getBTagSF()->setIsMC(isMC);
 
     //range check switched off because of different ranges in bins compared to diff Xsec (leps)
     getTriggerSF()->setRangeCheck(false);
@@ -894,7 +901,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
         step++;
 
         //if(midphi && dphiplushardjets.size()<2) continue;
-        if(selectedjets->size() < 2) continue;
+        if(!onejet && selectedjets->size() < 2) continue;
         //if(!midphi && medjets.size()<2) continue;
         //if(ptllj<140) continue;
         /*if(dphillj > 2.65 && dphillj < 3.55){

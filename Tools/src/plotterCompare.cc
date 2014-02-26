@@ -13,6 +13,7 @@
 #include "../interface/fileReader.h"
 #include <iostream>
 #include "TLegend.h"
+#include "TStyle.h"
 
 namespace ztop{
 
@@ -33,6 +34,22 @@ void plotterCompare::setComparePlot(const container1D *c,size_t idx,bool divbw){
     compareplots_.at(idx).createFrom(c,divbw);
 }
 
+void plotterCompare::setNominalPlot(const graph *c){
+    if(debug) std::cout <<"plotterCompare::setNominalPlot" << std::endl;
+    nominalplot_.createFrom(c);
+}
+void plotterCompare::setComparePlot(const graph *c,size_t idx){
+    if(debug) std::cout <<"plotterCompare::setComparePlot" << std::endl;
+    if(idx >= size_){
+        throw std::out_of_range("plotterCompare::setComparePlot: plotter configured for less entries");
+    }
+    if(idx >= compareplots_.size()){
+        if(debug) std::cout << "plotterCompare::setComparePlot: increasing compare plots vector" << std::endl;
+        compareplots_.resize(idx+1,plot());
+    }
+    if(debug) std::cout <<"plotterCompare::setComparePlot: setting plot" << std::endl;
+    compareplots_.at(idx).createFrom(c);
+}
 
 /**
  * makes a mem clean, keeps styles
@@ -93,14 +110,20 @@ void plotterCompare::clearPlots(){
  * [plotStyle - Ratio]
  * [plotterCompareStyle] ? (TBI)
  *
+ * require first style to be fully defined, the rest only differences
+ * nominal upper and nominal ratio
+ *
  */
-void plotterCompare::readStyleFromFile(const std::string& infile){
+void plotterCompare::readStyleFromFile(const std::string& infile,const std::string& marker){
 
 
     fileReader fr;
     fr.setComment("$");
     fr.setDelimiter(",");
-    fr.setStartMarker("[plotterCompareStyle]");
+    if(marker.length()<1)
+        fr.setStartMarker("[plotterCompareStyle]");
+    else
+        fr.setStartMarker("[plotterCompareStyle "+ marker +"]");
     fr.setEndMarker("[end plotterCompareStyle]");
     fr.readFile(infile);
     if(fr.nLines()<1){
@@ -109,23 +132,43 @@ void plotterCompare::readStyleFromFile(const std::string& infile){
 
     divideat_  = fr.getValue<float>("divideat");
     size_      = fr.getValue<size_t>("size");
-    if(debug) std::cout <<"plotterCompare::readStyleFromFile" << std::endl;
 
+    if(compids_.size()>1 && compids_.size()<size())
+        throw std::runtime_error("plotterCompare::readStyleFromFile: compare plot ids set but trying to plot more plots than ids set");
+
+    if(debug) std::cout <<"plotterCompare::readStyleFromFile: reading plot styles" << std::endl;
     upperstyle_.readFromFile(infile, "Upper");
     ratiostyle_.readFromFile(infile, "Ratio");
-    nomstyleupper_.readFromFile(infile, "NominalUpper");
-    nomstyleratio_.readFromFile(infile, "NominalRatio");
+    if(debug) std::cout <<"plotterCompare::readStyleFromFile: reading nominal styles" << std::endl;
+    nomstyleupper_.readFromFile(infile, "NominalUpper"+nominalid_,true);
+    nomstyleratio_=nomstyleupper_;
+    nomstyleratio_.readFromFile(infile, "NominalRatio"+nominalid_,false);
+
+
+    if(debug) std::cout <<"plotterCompare::readStyleFromFile: reading compare styles" << std::endl;
 
     compstylesupper_.clear();
     compstylesratio_.clear();
+    containerStyle compareupperDefault,compareRatioDefault;
+    compareupperDefault.readFromFile(infile,"CompareUpperDefault");
+    compareRatioDefault.readFromFile(infile,"CompareRatioDefault");
     for(size_t i=0;i<size_;i++){
         containerStyle temps;
-        std::ostringstream oss;
-        oss << i;
-        std::string add=oss.str();
-        temps.readFromFile(infile, "CompareUpper"+add);
+        std::string add;
+        if(compids_.size()>1){
+            add=compids_.at(i);
+        }
+        else{
+            std::ostringstream oss;
+            oss << i;
+            add=oss.str();
+        }
+        temps=compareupperDefault;
+        temps.readFromFile(infile, "CompareUpper"+add,false);
         compstylesupper_.push_back(temps);
-        temps.readFromFile(infile, "CompareRatio"+add);
+
+        temps=compareRatioDefault;
+        temps.readFromFile(infile, "CompareRatio"+add,false);
         compstylesratio_.push_back(temps);
     }
 
@@ -145,6 +188,7 @@ void plotterCompare::preparePad(){
     if(debug) std::cout <<"plotterCompare::preparePad" << std::endl;
     cleanMem();
     TVirtualPad * c = getPad();
+    gStyle->SetOptStat(0);
     c->Clear();
     c->Divide(1,2);
     c->cd(1)->SetPad(0,divideat_,1,1);
@@ -163,6 +207,8 @@ void  plotterCompare::drawPlots(){
     ratiostyle.absorbYScaling(getSubPadYScale(2));
 
     c->cd(1);
+    upperstyle.yAxisStyle()->max=getMaximumUpper();
+
     drawAllPlots(&upperstyle,&nomstyleupper_,&compstylesupper_,&nominalplot_,&compareplots_,true);
     //return;
     //make ratio plots
@@ -185,6 +231,7 @@ void  plotterCompare::drawLegends(){
     leg->Clear();
     leg->SetFillStyle(0);
     leg->SetBorderSize(0);
+    legstyle_.applyLegendStyle(leg);
 
     leg->AddEntry(nominalplot_.getStatGraph(),nominalplot_.getName(),"pel");
     for(size_t i=0;i<compareplots_.size() ; i++){
@@ -200,7 +247,10 @@ void plotterCompare::drawAllPlots(const plotStyle* ps, const containerStyle * cs
     //draw axis
     TG * g=0,*gs=0;
     TH1 * axish=0;
+    //get axis range from subplots
+
     axish=addObject(nompl->getInputGraph().getAxisTH1(false,true));
+
     ps->applyAxisStyle(axish);
     axish->Draw("AXIS");
     if(!nomlast){
@@ -258,6 +308,23 @@ void plotterCompare::makeRatioPlots(){
     memnom_ = new plot(&nomgr);
 }
 
+
+float plotterCompare::getMaximumUpper(){
+    float max=-1e20,min=1e20;
+    for(size_t i=0;i<compareplots_.size();i++){
+        if(compareplots_.at(i).getInputGraph().getYMax() > max)
+                   max=compareplots_.at(i).getInputGraph().getYMax();
+        if(compareplots_.at(i).getInputGraph().getYMin() < min)
+                   min=compareplots_.at(i).getInputGraph().getYMin();
+
+    }
+    if(nominalplot_.getInputGraph().getYMax() > max)
+        max=nominalplot_.getInputGraph().getYMax();
+    if(nominalplot_.getInputGraph().getYMin() < min)
+        min=nominalplot_.getInputGraph().getYMin();
+    max=max+fabs((max-min)*0.05);
+    return max;
+}
 }//ns
 
 

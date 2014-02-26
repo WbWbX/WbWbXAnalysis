@@ -6,7 +6,7 @@ int main(int argc, char* argv[]){
     using namespace ztop;
     using namespace std;
 
-    containerStackVector::fastadd=false;
+    containerStackVector::fastadd=false; //be careful because of parallization
 
     optParser parser(argc,argv);
     TString outputadd=parser.getOpt<TString>("o","");
@@ -16,6 +16,7 @@ int main(int argc, char* argv[]){
 
     systMerger merger;
     systMerger::debug=false;
+
     merger.setInFileAdd(inputadd);
     merger.setOutFileAdd(outputadd);
     merger.setInputStrings(allfiles);

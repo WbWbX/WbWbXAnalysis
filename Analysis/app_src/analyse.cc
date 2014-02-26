@@ -357,7 +357,8 @@ int main(int argc, char* argv[]){
     TString syst   = parse.getOpt<TString>  ("s","nominal");     //-s <syst>
     TString energy = parse.getOpt<TString>  ("e","8TeV");        //-e default 8TeV
     double lumi    = parse.getOpt<float>    ("l",-1);            //-l default -1
-    bool dobtag    = parse.getOpt<bool>     ("b",false);         //-b switches on default false
+    bool dobtag    = parse.getOpt<bool>     ("B",false);         //-B switches on default false
+
     TString outfile= parse.getOpt<TString>  ("o","");            //-o <outfile> should be something like channel_energy_syst.root // only for plots
     bool status    = parse.getOpt<bool>     ("S",false);         //-S enables default false
     bool testmode  = parse.getOpt<bool>     ("T",false);         //-T enables default false
@@ -376,7 +377,8 @@ int main(int argc, char* argv[]){
                 << "  -s   systematic variation <var>_<up/down>, default: nominal\n"
                 << "  -e   energy (8TeV, 7 TeV), default: 8TeV\n"
                 << "  -l   luminosity, default -1 (= read from config file)\n"
-                << "  -b   produce b-tag efficiencies (switch)\n"
+                << "  -B   produce b-tag efficiencies (switch)\n"
+                << "  -b   use btagfile (default all_btags.root)\n"
                 << "  -o   additional output id\n"
                 << "  -S   show regular status update (switch)\n"
                 << "  -T   enable testmode: 8% of stat, more printout\n"

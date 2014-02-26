@@ -15,12 +15,13 @@ namespace ztop{
 
 class TtBarUnfolder{
 public:
-    TtBarUnfolder():verbose(false){}
+    TtBarUnfolder():verbose(false),printpdfs(false){}
     ~TtBarUnfolder(){}
 
     TString unfold(TString out,TString in)const;
 
     bool verbose;
+    bool printpdfs;
 
 private:
     void setNameAndTitle(TCanvas *c, TString name)const;

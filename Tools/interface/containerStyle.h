@@ -98,7 +98,7 @@ public:
 	        fillStyle(fillstyle),fillColor(fillcolor){}
 
 
-	void readFromFile(const std::string & filename, const std::string& stylename);
+	void readFromFile(const std::string & filename, const std::string& stylename, bool requireall=true);
 
 	void multiplySymbols(float val);
 

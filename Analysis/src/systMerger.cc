@@ -120,14 +120,23 @@ void systMerger::searchSystematics(){
 
 containerStackVector * systMerger::getFromFileToMem( TString dir, const TString &name)const
 {
-    AutoLibraryLoader::enable();
-    if(dir!="") dir+="/";
-    TFile * ftemp=new TFile(dir+name+".root","read");
-    TTree * ttemp = (TTree*)ftemp->Get("containerStackVectors");
-    containerStackVector * vtemp=new containerStackVector();
-    vtemp->loadFromTree(ttemp,name);
-    delete ttemp;
-    delete ftemp;
+    containerStackVector * vtemp=0;
+    TFile * ftemp=0;
+    TTree * ttemp =0;
+#pragma omp critical
+    {
+        AutoLibraryLoader::enable();
+        if(dir!="") dir+="/";
+
+        ftemp=new TFile(dir+name+".root","read");
+        ttemp = (TTree*)ftemp->Get("containerStackVectors");
+
+        vtemp=new containerStackVector();
+        vtemp->loadFromTree(ttemp,name);
+        delete ttemp;
+        delete ftemp;
+    }
+
     return vtemp;
 }
 
@@ -140,8 +149,9 @@ std::vector<TString>  systMerger::mergeAndSafe(){
     TString outadd="";
     if(outfileadd_.Length()>0)
         outadd="_"+outfileadd_;
-    //parallel for all nominals
-#pragma omp parallel for
+
+    //not parallel for all nominals, file IO is the bottleneck!
+
     for(size_t nom=0;nom<nominals_.size();nom++){
         containerStackVector * nominal=getFromFileToMem(dir,instrings_.at(nominals_.at(nom)));
         for(size_t sys=0;sys<syst_.at(nom).size();sys++){
@@ -154,6 +164,7 @@ std::vector<TString>  systMerger::mergeAndSafe(){
         std::cout << "systMerger: writing "<< nominal->getName() << std::endl;
         outputfilenames << nominal->getName()+".root";
         nominal->writeAllToTFile(nominal->getName()+".root",true);
+
         delete nominal;
     }
 

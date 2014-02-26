@@ -12,6 +12,7 @@
 #include "containerStyle.h"
 #include "plotStyle.h"
 #include "graph.h"
+#include "legendStyle.h"
 
 class TH1D;
 class TGraphAsymmErrors;
@@ -37,7 +38,10 @@ public:
      void draw();
      void cleanMem(){tObjectList::cleanMem();}
 
+     size_t size(){return 0;} //to be overwritten by inheriting classes
+
      static bool debug;
+
 
 protected:
 
@@ -76,9 +80,11 @@ protected:
     float getSubPadYScale(int padidx);
     float getSubPadXScale(int padidx);
 
+
+    legendStyle legstyle_;
+
 private:
     TVirtualPad * pad_;
-
 
 //    int errToRootFillStyle(const containerStyle *s) const;
 
