@@ -10,7 +10,7 @@ namespace ztop{
 
 class NTBTagSF : public bTagBase{
 public:
-    NTBTagSF():bTagBase(),userandom_(false){}
+    NTBTagSF():bTagBase(),userandom_(false),isMC_(true){}
     ~NTBTagSF(){}
 
     void useRandomTechnique(bool use){userandom_=use;}
@@ -26,6 +26,8 @@ public:
         return bTagBase::setSampleName(getWorkingPointString()+"_"+s);
     }
 
+    void setIsMC(bool is){isMC_=is;}
+
     float getNTEventWeight(const std::vector<ztop::NTJet *> &);
 
     void changeNTJetTags( std::vector<ztop::NTJet *> &)const;
@@ -39,44 +41,8 @@ public:
 
 private:
     bool userandom_;
+    bool isMC_;
 };
-}
-
-
-namespace ztop{
-
-inline float NTBTagSF::getNTEventWeight(const std::vector<ztop::NTJet *> & jets){
-    if(userandom_) return 1.;
-    resetCounter();
-    for(size_t i=0;i<jets.size();i++){
-        ztop::NTJet *jet=jets.at(i);
-        countJet(jet->pt(),fabs(jet->eta()),jet->genPartonFlavour());
-    }
-    return getEventSF();
-}
-
-/**
- * changes the discriminator values of the jets using random technique.
- * After this step do not expect the discriminator distrubtions in data MC to match!
- */
-
-inline void NTBTagSF::changeNTJetTags( std::vector<ztop::NTJet *> *jets)const{
-    if(!userandom_ || makesEff()) return;
-    for(size_t i=0;i<jets->size();i++){
-
-        ztop::NTJet * jet=jets->at(i);
-        if(!jetIsTagged(jet->pt(),std::abs(jet->eta()),jet->genPartonFlavour(),jet->btag(),std::abs<int>(1.e6 * sin(jet->phi())))){
-            if(jet->btag()>getWPDiscrValue())
-                jet->setBtag(-0.1);
-        }
-        else if(jet->btag()<getWPDiscrValue()){
-            jet->setBtag(1.1);
-        }
-    }
-}
-inline void NTBTagSF::changeNTJetTags( std::vector<ztop::NTJet *> &jets)const{
-    NTBTagSF::changeNTJetTags(&jets);
-}
 }
 
 

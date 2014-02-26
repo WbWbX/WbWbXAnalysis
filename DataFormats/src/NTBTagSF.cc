@@ -5,6 +5,47 @@
 
 namespace ztop{
 
+
+float NTBTagSF::getNTEventWeight(const std::vector<ztop::NTJet *> & jets){
+    if(!isMC_ || userandom_|| makesEff()) return 1.;
+    resetCounter();
+    for(size_t i=0;i<jets.size();i++){
+        ztop::NTJet *jet=jets.at(i);
+        countJet(jet->pt(),fabs(jet->eta()),jet->genPartonFlavour());
+    }
+    return getEventSF();
+}
+
+/**
+ * changes the discriminator values of the jets using random technique.
+ * After this step do not expect the discriminator distrubtions in data MC to match!
+ */
+
+void NTBTagSF::changeNTJetTags( std::vector<ztop::NTJet *> *jets)const{
+    if(!isMC_ || !userandom_ || makesEff()) return;
+    for(size_t i=0;i<jets->size();i++){
+        ztop::NTJet * jet=jets->at(i);
+        if(std::abs(jet->genPartonFlavour()) == 0) continue;
+        bool shouldbetagged=false;
+        shouldbetagged= jetIsTagged(jet->pt(),std::abs(jet->eta()),jet->genPartonFlavour(),jet->btag(),
+                std::abs<int>(1.e6 * sin(jet->phi())));
+
+        // throw std::logic_error(" NTBTagSF::changeNTJetTags wrong type (undefined");
+
+        if(!shouldbetagged){
+            if(jet->btag()>getWPDiscrValue())
+                jet->setBtag(-0.1);
+        }
+        else if(jet->btag()<getWPDiscrValue()){
+            jet->setBtag(1.1);
+        }
+    }
+}
+void NTBTagSF::changeNTJetTags( std::vector<ztop::NTJet *> &jets)const{
+    NTBTagSF::changeNTJetTags(&jets);
+}
+
+
 void NTBTagSF::setWorkingPoint(const TString& wpstring){
     std::cout << "NTBTagSF::setWorkingPoint: " << wpstring << std::endl;
     if(wpstring=="csvl"){
