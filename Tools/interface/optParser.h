@@ -50,7 +50,8 @@ public:
             if(temp_.at(i) == "-"+opt){
                 if (i + 1 != temp_.size()){
                     T out=temp_.at(i+1);
-                    temp_.erase(temp_.begin()+i, temp_.begin()+i+1);
+                    if(debug) std::cout << "optparser::getOpt: got "<< temp_.at(i) << " " << temp_.at(i+1) <<std::endl;
+                    temp_.erase(temp_.begin()+i, temp_.begin()+i+2);
                     return out;
                 }
             }
@@ -70,6 +71,7 @@ public:
                     throw std::runtime_error("optParser: begin picky: not all options parsed");
                 continue;
             }
+            if(debug) std::cout << "optparser::getRest: got "<< temp_.at(i) <<std::endl;
             out.push_back((T)temp_.at(i));
         }
         return out;
@@ -86,6 +88,7 @@ public:
      * throws exception if one of the options given to the program was not parsed before getRest() is called
      */
     bool bepicky;
+    static bool debug;
 
 private:
     int argc_;
