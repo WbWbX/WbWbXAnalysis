@@ -25,7 +25,7 @@ options.register ('PDF','cteq65',VarParsing.VarParsing.multiplicity.singleton,Va
 options.register ('inputScript','TtZAnalysis.Configuration.samples.mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"input Script")
 options.register ('json','nojson',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"json files")
 options.register ('isSync',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"switch on for sync")
-options.register('oppoQ', True, VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.bool, "require opposite charge leptons (for data and BG only)")
+options.register('samplename', 'standard', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "which sample to run over - obsolete")
 options.register ('laseroff',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"use ECal Laser filter")
 
 options.register ('jpsi',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"make trees for J/Psi")
@@ -82,7 +82,6 @@ isFastSim=options.isFastSim
 
 debug=options.debug
 isPrompt=options.isPrompt
-
 
 
 useBHadrons=False #will be changes for top filter sequence!
@@ -175,16 +174,18 @@ if options.skipEvents > 0:
 realdata = True
 if isMC:
     realdata=False
-if realdata and not (json=="nojson"):
+if realdata and not (options.json=="nojson"):
     import os
-    jsonpath = json 
-
+    jsonpath = options.json 
+    print "using json:"
+    print jsonpath
+    #import FWCore.PythonUtilities.LumiList as LumiList
+    #import FWCore.ParameterSet.Types as CfgTypes
+    #myLumis = LumiList.LumiList(filename = jsonpath).getCMSSWString().split(',')
+    #process.source.lumisToProcess = CfgTypes.untracked(CfgTypes.VLuminosityBlockRange())
+    #process.source.lumisToProcess.extend(myLumis)
     import FWCore.PythonUtilities.LumiList as LumiList
-    import FWCore.ParameterSet.Types as CfgTypes
-    myLumis = LumiList.LumiList(filename = jsonpath).getCMSSWString().split(',')
-    process.source.lumisToProcess = CfgTypes.untracked(CfgTypes.VLuminosityBlockRange())
-    process.source.lumisToProcess.extend(myLumis)
-
+    process.source.lumisToProcess = LumiList.LumiList(filename = jsonpath).getVLuminosityBlockRange()
 
 
 
@@ -298,32 +299,8 @@ process.requireMinLeptons = cms.EDFilter("SimpleCounter",
                                                              cms.InputTag("pfEE"),  
                                                              cms.InputTag("pfMuMu")
                                                              ),
-                                         minNumber = cms.uint32(minleptons),
-                                         requireOppoQ = cms.bool(options.oppoQ)
+                                         minNumber = cms.uint32(minleptons)
                                          )
-
-
-###channel specific preselections on data and non signal samples (DY is signal!):
-if (not isMC) or ("ttbarbg" in outputFile):
-    if "emu" in outputFile:
-        process.requireMinLeptons.src = cms.VInputTag(cms.InputTag("EMu"),
-                                                      cms.InputTag("pfEpfMu"),
-                                                      cms.InputTag("pfEMu"),
-                                                      cms.InputTag("EpfMu")
-                                                      )
-
-    if "mumu" in outputFile:
-        process.requireMinLeptons.src = cms.VInputTag(cms.InputTag("pfVLMus"),    
-                                                      cms.InputTag("VLMus"), 
-                                                      cms.InputTag("pfMuMu")
-                                                      )
-    if "ee" in outputFile:
-        process.requireMinLeptons.src = cms.VInputTag(cms.InputTag("pfVLEs"), 
-                                                      cms.InputTag("VLEs"),
-                                                      cms.InputTag("pfEE")  
-                                                      )
-
-
 
 
 #if not (includetrigger or includereco):
@@ -996,8 +973,7 @@ process.filterkinLeptons = cms.EDFilter("SimpleCounter",
                                                             cms.InputTag("kinPFElectrons"),
                                                             cms.InputTag("MuonGSFMerge"),
                                                             cms.InputTag("MuonPFMerge")),
-                                        minNumber = cms.uint32(minleptons),
-                                        requireOppoQ = cms.bool(options.oppoQ)
+                                        minNumber = cms.uint32(minleptons)
                                         )
 
 process.kinLeptonFilterSequence = cms.Sequence(process.kinMuons *

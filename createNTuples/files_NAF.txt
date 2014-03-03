@@ -7,20 +7,20 @@
 
 ##RERECO !?!!!
 
-200  /DoubleElectron/Run2012A-22Jan2013-v1/AOD   tree_8TeV_ee_runA_22Jan      isMC=false globalTag=FT53_V21A_AN6   json/Legacy2012.json
-500  /DoubleElectron/Run2012B-22Jan2013-v1/AOD   tree_8TeV_ee_runB_22Jan      isMC=false globalTag=FT53_V21A_AN6   json/Legacy2012.json
-600  /DoubleElectron/Run2012C-22Jan2013-v1/AOD   tree_8TeV_ee_runC_22Jan      isMC=false globalTag=FT53_V21A_AN6   json/Legacy2012.json
-600  /DoubleElectron/Run2012D-22Jan2013-v1/AOD   tree_8TeV_ee_runD_22Jan      isMC=false globalTag=FT53_V21A_AN6   json/Legacy2012.json
+200  /DoubleElectron/Run2012A-22Jan2013-v1/AOD   tree_8TeV_ee_runA_22Jan      isMC=false globalTag=FT53_V21A_AN6   jsonfiles/Legacy2012.json
+500  /DoubleElectron/Run2012B-22Jan2013-v1/AOD   tree_8TeV_ee_runB_22Jan      isMC=false globalTag=FT53_V21A_AN6   jsonfiles/Legacy2012.json
+600  /DoubleElectron/Run2012C-22Jan2013-v1/AOD   tree_8TeV_ee_runC_22Jan      isMC=false globalTag=FT53_V21A_AN6   jsonfiles/Legacy2012.json
+600  /DoubleElectron/Run2012D-22Jan2013-v1/AOD   tree_8TeV_ee_runD_22Jan      isMC=false globalTag=FT53_V21A_AN6   jsonfiles/Legacy2012.json
 
-200  /DoubleMu/Run2012A-22Jan2013-v1/AOD         tree_8TeV_mumu_runA_22Jan    isMC=false globalTag=FT53_V21A_AN6   json/Legacy2012.json
-500  /DoubleMuParked/Run2012B-22Jan2013-v1/AOD   tree_8TeV_mumu_runB_22Jan    isMC=false globalTag=FT53_V21A_AN6   json/Legacy2012.json
-600  /DoubleMuParked/Run2012C-22Jan2013-v1/AOD   tree_8TeV_mumu_runC_22Jan    isMC=false globalTag=FT53_V21A_AN6   json/Legacy2012.json
-600  /DoubleMuParked/Run2012D-22Jan2013-v1/AOD   tree_8TeV_mumu_runD_22Jan    isMC=false globalTag=FT53_V21A_AN6   json/Legacy2012.json
+200  /DoubleMu/Run2012A-22Jan2013-v1/AOD         tree_8TeV_mumu_runA_22Jan    isMC=false globalTag=FT53_V21A_AN6   jsonfiles/Legacy2012.json
+500  /DoubleMuParked/Run2012B-22Jan2013-v1/AOD   tree_8TeV_mumu_runB_22Jan    isMC=false globalTag=FT53_V21A_AN6   jsonfiles/Legacy2012.json
+600  /DoubleMuParked/Run2012C-22Jan2013-v1/AOD   tree_8TeV_mumu_runC_22Jan    isMC=false globalTag=FT53_V21A_AN6   jsonfiles/Legacy2012.json
+600  /DoubleMuParked/Run2012D-22Jan2013-v1/AOD   tree_8TeV_mumu_runD_22Jan    isMC=false globalTag=FT53_V21A_AN6   jsonfiles/Legacy2012.json
 
-200  /MuEG/Run2012A-22Jan2013-v1/AOD             tree_8TeV_emu_runA_22Jan     isMC=false globalTag=FT53_V21A_AN6   json/Legacy2012.json
-500  /MuEG/Run2012B-22Jan2013-v1/AOD             tree_8TeV_emu_runB_22Jan     isMC=false globalTag=FT53_V21A_AN6   json/Legacy2012.json
-600  /MuEG/Run2012C-22Jan2013-v1/AOD             tree_8TeV_emu_runC_22Jan     isMC=false globalTag=FT53_V21A_AN6   json/Legacy2012.json
-600  /MuEG/Run2012D-22Jan2013-v1/AOD             tree_8TeV_emu_runD_22Jan     isMC=false globalTag=FT53_V21A_AN6   json/Legacy2012.json
+200  /MuEG/Run2012A-22Jan2013-v1/AOD             tree_8TeV_emu_runA_22Jan     isMC=false globalTag=FT53_V21A_AN6   jsonfiles/Legacy2012.json
+500  /MuEG/Run2012B-22Jan2013-v1/AOD             tree_8TeV_emu_runB_22Jan     isMC=false globalTag=FT53_V21A_AN6   jsonfiles/Legacy2012.json
+600  /MuEG/Run2012C-22Jan2013-v1/AOD             tree_8TeV_emu_runC_22Jan     isMC=false globalTag=FT53_V21A_AN6   jsonfiles/Legacy2012.json
+600  /MuEG/Run2012D-22Jan2013-v1/AOD             tree_8TeV_emu_runD_22Jan     isMC=false globalTag=FT53_V21A_AN6   jsonfiles/Legacy2012.json
 
 
 
@@ -243,8 +243,8 @@
 
 
 
-#100  /DoubleElectron/Run2011A-08Nov2011-v1/AOD        tree_7TeV_ee_runA_08Nov    is2011=true isMC=false globalTag=FT44_V9_AN1     json/ReRecoNov2011.json.txt
-#300  /DoubleElectron/Run2011B-19Nov2011-v1/AOD        tree_7TeV_ee_runB_19Nov    is2011=true isMC=false globalTag=FT44_V11_AN1    json/ReRecoNov2011.json.txt
-#100  /DoubleMu/Run2011A-08Nov2011-v1/AOD              tree_7TeV_mumu_runA_08Nov  is2011=true isMC=false globalTag=FT44_V9_AN1     json/ReRecoNov2011.json.txt
-#300  /DoubleMu/Run2011B-19Nov2011-v1/AOD              tree_7TeV_mumu_runB_19Nov  is2011=true isMC=false globalTag=FT44_V11_AN1    json/ReRecoNov2011.json.txt
+#100  /DoubleElectron/Run2011A-08Nov2011-v1/AOD        tree_7TeV_ee_runA_08Nov    is2011=true isMC=false globalTag=FT44_V9_AN1     jsonfiles/ReRecoNov2011.json.txt
+#300  /DoubleElectron/Run2011B-19Nov2011-v1/AOD        tree_7TeV_ee_runB_19Nov    is2011=true isMC=false globalTag=FT44_V11_AN1    jsonfiles/ReRecoNov2011.json.txt
+#100  /DoubleMu/Run2011A-08Nov2011-v1/AOD              tree_7TeV_mumu_runA_08Nov  is2011=true isMC=false globalTag=FT44_V9_AN1     jsonfiles/ReRecoNov2011.json.txt
+#300  /DoubleMu/Run2011B-19Nov2011-v1/AOD              tree_7TeV_mumu_runB_19Nov  is2011=true isMC=false globalTag=FT44_V11_AN1    jsonfiles/ReRecoNov2011.json.txt
 
