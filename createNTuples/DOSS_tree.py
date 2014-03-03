@@ -994,6 +994,7 @@ process.filterkinLeptons = cms.EDFilter("SimpleCounter",
                                                             cms.InputTag("kinPFElectrons"),
                                                             cms.InputTag("MuonGSFMerge"),
                                                             cms.InputTag("MuonPFMerge")),
+                                        requireOppoQ = cms.bool(options.oppoQ),
                                         minNumber = cms.uint32(minleptons)
                                         )
 
