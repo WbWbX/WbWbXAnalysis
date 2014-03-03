@@ -18,6 +18,8 @@
 #include "TGaxis.h"
 #include <map>
 #include "tObjectList.h"
+#include <map>
+
 
 namespace ztop{
 class plotterControlPlot;
@@ -110,6 +112,8 @@ public:
 
 	//TCanvas * makeTCanvas(bool drawratioplot=true);
 	TCanvas * makeTCanvas(plotmode plotMode=ratio);
+
+	std::map<TString, float>  getAllContentsInBin(size_t bin,bool print=false)const;
 
 	containerStack rebinXToBinning(const std::vector<float> &)const;
     containerStack rebinYToBinning(const std::vector<float> &)const;

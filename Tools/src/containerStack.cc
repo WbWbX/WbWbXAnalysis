@@ -1164,6 +1164,20 @@ TCanvas * containerStack::makeTCanvas(plotmode plotMode){
     return c;
 }
 
+std::map<TString, float> containerStack::getAllContentsInBin(size_t bin,bool print)const{
+    if(containers_.size() < 1 || bin >= containers_.at(0).getBins().size()){
+        throw std::out_of_range("containerStack::coutAllInBin: bin out of range (getNBins()) or no 1D content");
+    }
+    std::map<TString, float>  out;
+    if(print) std::cout << "Content of bin " << bin << " for containerStack " << name_ << std::endl;
+    for(size_t i=0;i<legends_.size();i++){
+        if(print) std::cout <<legends_.at(i) << ": " << containers_.at(i).getBinContent(bin) << std::endl;
+        out[legends_.at(i)] = containers_.at(i).getBinContent(bin);
+    }
+    return out;
+}
+
+
 containerStack containerStack::rebinXToBinning(const std::vector<float> & newbins)const{
 
     containerStack out=*this;
