@@ -25,6 +25,7 @@ typedef std::vector<ztop::NTSuClu>::iterator NTSuCluIt;
 }
 
 void MainAnalyzer::reportError(int errorno, size_t anaid){
+    if(errorno >0) errorno=-errorno;
     p_askwrite.get(anaid)->pwrite(anaid);
     p_allowwrite.get(anaid)->pread();
     p_finished.get(anaid)->pwrite(errorno);
