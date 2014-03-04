@@ -1,0 +1,10 @@
+
+This is the folder the source code for all executables should go to.
+Normally they should not exeed a few lines and should just configure/call functions of classes placed in the packages based on command line parameters.
+
+All files that are named *.cc will be compiled to executables and put in the ../bin directory.
+No other files should be placed here!
+
+Hints:
+There is an option parser in Tools/interface/optParser.h ;)
+Refer to mergeSyst.cc as a good example for code put here.

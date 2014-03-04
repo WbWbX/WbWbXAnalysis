@@ -44,63 +44,27 @@ function copylibs(){
 }
 function compile(){
     infile=$1
-    
-    echo compiling $infile
+    if [ $infile ]
+    then
 
-    g++ $ROOTFLAGS -fopenmp -I$CPLUS_INCLUDE_PATH -c -o $BUILDDIR/$infile.o $SRCDIR/$infile.cc
-    g++ -o $LOCBIN/$1 -fopenmp -Wall $ROOTLIBS -L$libdir $linklibs -l${CMSSW_BASE}/src/TtZAnalysis/Tools/TUnfold/libunfold.so $BUILDDIR/$infile.o
+	outfile=${infile%.cc}
+	echo compiling $infile to $outfile
+	g++ $ROOTFLAGS -fopenmp -I$CPLUS_INCLUDE_PATH -c -o $BUILDDIR/$infile.o $SRCDIR/$infile
+	g++ -o $LOCBIN/$outfile -fopenmp -Wall $ROOTLIBS -L$libdir $linklibs -l${CMSSW_BASE}/src/TtZAnalysis/Tools/TUnfold/libunfold.so $BUILDDIR/$infile.o
+    fi
 
 }
 
 
-#if [ $1 == "all" ];
-#then
-    cd $CMSSW_BASE/src/TtZAnalysis/Analysis
-    scram b -j12
-    copylibs
-
-#fi
-
-cd $BUILDDIR
-if  [ $1 == "all" ] || [ $1 == "run" ];
-then
-
-    compile analyse &
-    compile mergeSyst &
-    
-    compile mergeBtags &
-
-fi
-
-if  [ $1 == "all" ] || [ $1 == "unfold" ];
-then
-    
-    compile unfoldTtBar &
-
-fi
-
-if  [ $1 == "all" ] || [ $1 == "helper" ];
-then
-    
-    compile plotCSV &
-    compile printVariations &
-    compile mtFromXsec &
-    compile mtFromXsec2 &
-fi
-
-if  [ $1 == "all" ] || [ $1 == "www" ];
-then
-    
-    compile dumpToWWW &
-    
-fi
-
-
-if  [ $1 == "all" ] || [ $1 == "combined" ];
-then
-    
-    compile mergeUnfoldDump &
-    
-fi
-
+cd $CMSSW_BASE/src/TtZAnalysis/Analysis
+scram b -j12
+copylibs
+cd app_src
+for i in *.cc
+do
+    compile $i&
+done
+sleep 1
+echo "waiting for unfinished jobs"
 wait
+echo "done"
