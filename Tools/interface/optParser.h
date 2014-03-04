@@ -122,6 +122,19 @@ inline float optParser::getOpt<float>(const TString& opt,const float & def){
     return def;
 }
 template<>
+inline int optParser::getOpt<int>(const TString& opt,const int & def){
+    for(size_t i=0;i<temp_.size();i++){
+        if((TString)temp_.at(i) == "-"+opt){
+            if (i + 1 != temp_.size()){
+                float out=atoi(temp_.at(i+1).Data());
+                temp_.erase(temp_.begin()+i, temp_.begin()+i+1);
+                return out;
+            }
+        }
+    }
+    return def;
+}
+template<>
 inline std::vector<float> optParser::getRest<float>(){
     std::vector<float> out;
     for(size_t i=0;i<temp_.size();i++){

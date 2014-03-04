@@ -25,6 +25,7 @@ public:
 
     enum likelihoodModes{lh_chi2,lh_chi2Swapped};
 
+
     parameterExtractor(): LHMode_(lh_chi2){}
     ~parameterExtractor(){}
 
@@ -32,6 +33,8 @@ public:
 
     // parameterExtractor(const parameterExtractor&);
     // parameterExtractor & operator = (const parameterExtractor&);
+
+
 
 
     void setInputA(const std::vector<graph>& vg){agraphs_=vg;} //graphs already come with para information; graph per bin
@@ -62,6 +65,7 @@ protected:
 
 
 private:
+
     std::vector<graph> agraphs_,bgraphs_;
     likelihoodModes LHMode_;
 
@@ -74,7 +78,6 @@ private:
     graph createChi2SwappedLikelihood(const graph&,const graph&);
 
     /* ..... */
-
 
 
 };

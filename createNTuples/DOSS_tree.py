@@ -115,7 +115,7 @@ if syncfile:
 if includePDFWeights:
     import os
     newlha = os.environ['CMSSW_BASE']+'/src/TtZAnalysis/Data/data/PDFSets'
-    os.environ['LHAPATH']=newlha
+    #os.environ['LHAPATH']=newlha
 
 
 
@@ -160,7 +160,7 @@ process.out    = cms.OutputModule("PoolOutputModule", outputCommands =  cms.untr
 ################# Input script (some default one for crab
 
 process.source = cms.Source('PoolSource',fileNames=cms.untracked.vstring( '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/A89D210D-1BE2-E111-9EFB-0030487F1797.root' ))
-process.source.skipBadFiles = cms.untracked.bool( True )
+#process.source.skipBadFiles = cms.untracked.bool( True )
 
 if not inputScript=='':
     process.load(inputScript)
@@ -1143,8 +1143,8 @@ process.correctRecoMuonEnergy.muonSrc = 'muons'
 
 ###USE calibrated gsf at the bottom (masssearchandreplace.)
 
-
-
+print "\n\n\n\nrunning on lumis: "
+print process.source.lumisToProcess
 
 print "\nglobal Tag: " + globalTag
 

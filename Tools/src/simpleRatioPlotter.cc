@@ -127,7 +127,7 @@ TCanvas * simpleRatioPlotter::plotAll(const TString & canvasname, const std::vec
 
 	TCanvas * c= getCanvas();
 	//style options
-	double labelresizeTOBEIMPL=1.;
+	//double labelresizeTOBEIMPL=1.;
 	double divideat=0.3;
 	if(!getDrawSame()) {
 		c->Divide(1,2);

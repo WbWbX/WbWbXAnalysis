@@ -126,7 +126,7 @@ void plotterMultiplePlots::drawLegends(){
 float plotterMultiplePlots::getMaximum()const{
     float max=-1e20;
     for(size_t i=0;i<plots_.size();i++){
-        if(max<plots_.at(i).getInputGraph().getYMax()) max=plots_.at(i).getInputGraph().getYMax();
+        if(max<plots_.at(i).getInputGraph().getYMax(true)) max=plots_.at(i).getInputGraph().getYMax(true);
     }
     return max;
 }
@@ -135,7 +135,7 @@ float plotterMultiplePlots::getMaximum()const{
 float plotterMultiplePlots::getMinimum()const{
     float min=1e20;
     for(size_t i=0;i<plots_.size();i++){
-        if(min>plots_.at(i).getInputGraph().getYMin()) min=plots_.at(i).getInputGraph().getYMin();
+        if(min>plots_.at(i).getInputGraph().getYMin(true)) min=plots_.at(i).getInputGraph().getYMin(true);
     }
     return min;
 }

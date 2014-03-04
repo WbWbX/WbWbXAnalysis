@@ -54,7 +54,7 @@ void graph::setNPoints(const size_t & npoints){
 /**
  * don't use if you need performance. Better directly construct with number of needed points
  */
-size_t graph::addPoint(const float& x, const float & y){
+size_t graph::addPoint(const float& x, const float & y,const TString & pointname){
     histoContent newxcoords(xcoords_.size()+1);
     histoContent newycoords(xcoords_.size()+1);
     size_t oldsize=xcoords_.size();
@@ -72,6 +72,8 @@ size_t graph::addPoint(const float& x, const float & y){
     //add new content
     for(int sysl=-1;sysl<(int)newxcoords.layerSize();sysl++){
         newxcoords.getBin(oldsize,sysl).setContent(x);
+        if(sysl<0)
+            newxcoords.getBin(oldsize,-1).setName(pointname);
         newycoords.getBin(oldsize,sysl).setContent(y);
     }
 
@@ -103,6 +105,11 @@ void graph::setPointXStat(const size_t & point, const float & xcont, const int &
 void graph::setPointYStat(const size_t & point, const float & ycont, const int & syslayer){
     getPointY(point,syslayer).setStat(ycont);
 }
+void graph::setPointName(const size_t & point, const TString & pointname){
+    if(point>=getNPoints())
+        throw std::out_of_range("graph::setPointName: out of range");
+    xcoords_.getBin(point).setName(pointname);
+}
 
 //wrappers
 const float &  graph::getPointXContent(const size_t & point, const int & syslayer) const{
@@ -118,7 +125,11 @@ float   graph::getPointYStat(const size_t & point, const int & syslayer) const{
     return getPointY(point,syslayer).getStat();
 }
 
-
+const TString & graph::getPointName(const size_t & point)const{
+    if(point <= getNPoints())
+        throw std::out_of_range("graph::getPointName: out of range");
+    return xcoords_.getBin(point).getName();
+}
 
 /**
  * return index of new layer
@@ -146,6 +157,9 @@ graph  graph::getSystGraph(const size_t sysidx) const{
     graph out=*this;
     out.clear();
     out.xcoords_.getNominal()=xcoords_.getLayer(sysidx);
+    //set point names form nominal
+    for(size_t i=0;i<out.xcoords_.size();i++)
+        out.xcoords_.getBin(i).setName(xcoords_.getBin(i).getName());
     out.ycoords_.getNominal()=ycoords_.getLayer(sysidx);
     return out;
 }
@@ -264,8 +278,9 @@ void graph::normalizeToGraph(const graph& g){
  * ignores underflow and overflow
  */
 void graph::import(const container1D * cont,bool dividebybinwidth){
-    xcoords_=histoContent(cont->getNBins());
-    ycoords_=histoContent(cont->getNBins());
+    setNPoints(cont->getNBins());
+    // xcoords_=histoContent(cont->getNBins());
+    // ycoords_=histoContent(cont->getNBins());
     int syssize=(int)cont->getSystSize();
     for(int sys=-1;sys<syssize;sys++){
         if(sys>-1){
@@ -496,66 +511,102 @@ float graph::getPointXError(const size_t & point, bool onlystat,const TString &l
 
 
 
-float  graph::getXMax(size_t & point) const{
+float  graph::getXMax(size_t & point,bool includeerror) const{
     float max=-999999999999.;
     for(size_t i=0;i<getNPoints();i++){
-        const float & c=getPointXContent(i);
-        if(max < c){
-            max = c;
-            point=i;
+        if(includeerror){
+            float c=getPointXContent(i)+getPointXErrorUp(i,false);
+            if(max < c){
+                max = c;
+                point=i;
+            }
+        }
+        else{
+            const float & c=getPointXContent(i);
+            if(max < c){
+                max = c;
+                point=i;
+            }
         }
     }
     return max;
 }
-float  graph::getXMax() const{
+float  graph::getXMax(bool includeerror) const{
     size_t g;
-    return getXMax(g);
+    return getXMax(g,includeerror);
 }
 
-float  graph::getXMin(size_t & point) const{
+float  graph::getXMin(size_t & point,bool includeerror) const{
     float min=999999999999.;
     for(size_t i=0;i<getNPoints();i++){
-        const float & c=getPointXContent(i);
-        if(min > c){
-            min = c;
-            point=i;
+        if(includeerror){
+            float c=getPointXContent(i)-getPointXErrorDown(i,false);
+            if(min > c){
+                min = c;
+                point=i;
+            }
+        }
+        else{
+            const float & c=getPointXContent(i);
+            if(min > c){
+                min = c;
+                point=i;
+            }
         }
     }
     return min;
 }
-float  graph::getXMin() const{
+float  graph::getXMin(bool includeerror) const{
     size_t g;
-    return getXMin(g);
+    return getXMin(g,includeerror);
 }
-float  graph::getYMax(size_t & point) const{
+float  graph::getYMax(size_t & point,bool includeerror) const{
     float max=-999999999999.;
     for(size_t i=0;i<getNPoints();i++){
-        const float & c=getPointYContent(i);
-        if(max < c){
-            max = c;
-            point=i;
+        if(includeerror){
+            float c=getPointYContent(i)+getPointYErrorUp(i,false);
+            if(max < c){
+                max = c;
+                point=i;
+            }
+        }
+        else{
+            const float & c=getPointYContent(i);
+            if(max < c){
+                max = c;
+                point=i;
+            }
         }
     }
     return max;
 }
-float  graph::getYMax() const{
+float  graph::getYMax(bool includeerror) const{
     size_t g;
-    return getYMax(g);
+    return getYMax(g,includeerror);
 }
-float  graph::getYMin(size_t & point) const{
+float  graph::getYMin(size_t & point,bool includeerror) const{
     float min=999999999999.;
     for(size_t i=0;i<getNPoints();i++){
-        const float & c=getPointYContent(i);
-        if(min > c){
-            min = c;
-            point=i;
+        if(includeerror){
+            float c=getPointYContent(i)-getPointYErrorDown(i,false);
+            if(min > c){
+                min = c;
+                point=i;
+            }
+        }
+        else{
+            const float & c=getPointYContent(i);
+            if(min > c){
+                min = c;
+                point=i;
+            }
         }
     }
     return min;
 }
-float  graph::getYMin() const{
+float  graph::getYMin(bool includeerror) const{
     size_t g;
-    return getYMin(g);
+    return getYMin(g,includeerror);
 }
 
 
