@@ -1143,8 +1143,9 @@ process.correctRecoMuonEnergy.muonSrc = 'muons'
 
 ###USE calibrated gsf at the bottom (masssearchandreplace.)
 
-print "\n\n\n\nrunning on lumis: "
-print process.source.lumisToProcess
+if realdata and not (options.json=="nojson"):
+    print "\n\n\n\nrunning on lumis: "
+    print process.source.lumisToProcess
 
 print "\nglobal Tag: " + globalTag
 
