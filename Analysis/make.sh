@@ -10,7 +10,7 @@ ROOTLIBS="${ROOTLIBS} -L/afs/naf.desy.de/group/cms/sw/slc5_amd64_gcc462/cms/cmss
 
 
 CMSLIBS=$CMSSW_BASE/lib/$SCRAM_ARCH/
-#EXTLIBS=${CMSSW_BASE}/external/${SCRAM_ARCH}/lib/
+EXTLIBS=${CMSSW_BASE}/external/${SCRAM_ARCH}/lib/
 LOCBIN=$CMSSW_BASE/src/TtZAnalysis/Analysis/bin
 BUILDDIR=$CMSSW_BASE/src/TtZAnalysis/Analysis/build
 SRCDIR=$CMSSW_BASE/src/TtZAnalysis/Analysis/app_src
@@ -29,10 +29,8 @@ libs=("TopAnalysisZTopUtils"
 #echo $libs
 
 #exit
+function copylibs(){
 
-
-function compile(){
-    infile=$1
     linklibs=""
     libdir=$LOCLIB
     mkdir -p $libdir
@@ -41,7 +39,12 @@ function compile(){
 	linklibs="$linklibs -l${libs[${i}]}"
 	cp ${CMSLIBS}lib${libs[${i}]}.so $libdir
     done
-    #cp $EXTLIBS/libunfold.so $libdir 
+    cp $EXTLIBS/libunfold.so $libdir 
+
+}
+function compile(){
+    infile=$1
+    
     echo compiling $infile
 
     g++ $ROOTFLAGS -fopenmp -I$CPLUS_INCLUDE_PATH -c -o $BUILDDIR/$infile.o $SRCDIR/$infile.cc
@@ -54,6 +57,7 @@ function compile(){
 #then
     cd $CMSSW_BASE/src/TtZAnalysis/Analysis
     scram b -j12
+    copylibs
 
 #fi
 
@@ -61,33 +65,33 @@ cd $BUILDDIR
 if  [ $1 == "all" ] || [ $1 == "run" ];
 then
 
-    compile analyse
-    compile mergeSyst
+    compile analyse &
+    compile mergeSyst &
     
-
+    compile mergeBtags &
 
 fi
 
 if  [ $1 == "all" ] || [ $1 == "unfold" ];
 then
     
-    compile unfoldTtBar
+    compile unfoldTtBar &
 
 fi
 
 if  [ $1 == "all" ] || [ $1 == "helper" ];
 then
     
-    compile plotCSV
-    compile printVariations
-    compile mtFromXsec
-    compile mtFromXsec2
+    compile plotCSV &
+    compile printVariations &
+    compile mtFromXsec &
+    compile mtFromXsec2 &
 fi
 
 if  [ $1 == "all" ] || [ $1 == "www" ];
 then
     
-    compile dumpToWWW
+    compile dumpToWWW &
     
 fi
 
@@ -95,6 +99,8 @@ fi
 if  [ $1 == "all" ] || [ $1 == "combined" ];
 then
     
-    compile mergeUnfoldDump
+    compile mergeUnfoldDump &
     
 fi
+
+wait
