@@ -147,7 +147,7 @@ then
 
 
 else
-exit
+
     echo "all your jobs have finished, trying to merge systematics...."
     cd $workdir/output
 
