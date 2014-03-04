@@ -17,6 +17,7 @@
 #include "TCanvas.h"
 #include "TStyle.h"
 #include <cmath>
+#include "TLine.h"
 
 namespace ztop{
 
@@ -37,6 +38,8 @@ void mtExtractor::setup(){
 void  mtExtractor::cleanMem(){
     for(size_t i=0;i<pltrptrs_.size();i++){ if(pltrptrs_.at(i)) delete pltrptrs_.at(i);}
     pltrptrs_.clear();
+    if(tmpglgraph_)  delete tmpglgraph_;tmpglgraph_=0;
+    tObjectList::cleanMem();
 }
 
 
@@ -44,6 +47,11 @@ void  mtExtractor::cleanMem(){
 void mtExtractor::drawXsecDependence(TCanvas *c, bool fordata){
     //read style file heplotterComparere
     using namespace ztop;
+    TString add="MC";
+    if(fordata) add="data";
+    c->SetName("full distribution "+add);
+    c->SetTitle("full distribution "+add);
+
     plotterCompare * pltrptr=0;
     pltrptr = new plotterCompare();
     pltrptrs_.push_back(pltrptr);
@@ -85,6 +93,11 @@ void mtExtractor::drawIndivBins(TCanvas *c){
     plotterMultiplePlots plotterdef;
     plotterdef.readStyleFromFile(binsplotsstylefile_);
 
+
+    c->SetName("cross section per bin");
+    c->SetTitle("cross section per bin");
+
+
     //make pads
     int vdivs=((int)(sqrt(databingraphs_.size())-0.0001))+1;//+1;
     int hdivs=(int)((float)databingraphs_.size()/(float)vdivs)+1;
@@ -109,13 +122,9 @@ void mtExtractor::drawIndivBins(TCanvas *c){
 
 }
 
-void mtExtractor::makeAllPlots(){ //implementation of old style. FIXME
-    //read style file here
-
-
-}
 
 void mtExtractor::reset(){
+    cleanMem();
     datacont_.clear();
     mccont_.clear();
     datagraphs_.clear();
@@ -123,6 +132,12 @@ void mtExtractor::reset(){
     mtvals_.clear();
     databingraphs_.clear();
     mcbingraphs_.clear();
+    tmpbinchi2_.clear();
+    syspidx_=1;
+    allsyst_.clear();
+    allsyst_.setNPoints(1);
+    allsyst_.addErrorGraph("systatd",graph(1,""));
+    allsyst_.addErrorGraph("systatup",graph(1,""));
 }
 
 
@@ -284,7 +299,7 @@ void mtExtractor::makeBinGraphs(){
     //So no fancy extra bin finding anymore!
     // But be careful aith the ordering of systematics in graphs
 
-    //creat graph with right amount of points, assume same for MC and data
+    //create graph with right amount of points, assume same for MC and data
 
 
     for(size_t bin=0;bin<datagraphs_.at(0).getNPoints();bin++){
@@ -297,20 +312,136 @@ void mtExtractor::makeBinGraphs(){
     if(debug) std::cout << "mtExtractor::makeBinGraphs: created "<< mcbingraphs_.size() << "  mc graphs" << std::endl;
 
 }
-void mtExtractor::preparePlotters(){
-    //needed:
-    //   one plotter for MC dependence
-    //   one for data dependence
-    //   nBins for dependence per bin (without ratio)
-    //   nBins for chi2 per bin (without ratio)
-    //   one for global chi2 with zoom in (2 pads?) <-> just iterate over syst
+void mtExtractor::createBinLikelihoods(int syslayer,bool includesyst){
+    //get graphs for syst.
+    if(includesyst){
+        paraExtr_.setInputA(databingraphs_);
+        paraExtr_.setInputB(mcbingraphs_);
+        tmpSysName_="all syst.";
+    }
+    else{ //create inputs
+        if(syslayer>=(int)databingraphs_.at(0).getSystSize())
+            throw std::out_of_range("mtExtractor::createBinLikelihoods: out of range");
+        //check for same variation in MC
+        tmpSysName_=databingraphs_.at(0).getSystErrorName(syslayer);
+        std::vector<graph> dgs,mcgs;
+        for(size_t i=0;i<databingraphs_.size();i++){
+            if(syslayer>-1){
+                size_t mcsysidx=mcbingraphs_.at(i).getSystErrorIndex(databingraphs_.at(i).getSystErrorName(syslayer));
+                if(mcsysidx<mcbingraphs_.at(i).getSystSize()){
+                    mcgs.push_back(mcbingraphs_.at(i).getSystGraph(mcsysidx));
+                }
+                else{
+                    mcgs.push_back(mcbingraphs_.at(i));
+                }
+                dgs.push_back(databingraphs_.at(i).getSystGraph((size_t)syslayer));
+            }
+            else{ //nominal
+                mcgs.push_back(mcbingraphs_.at(i));
+                dgs.push_back(databingraphs_.at(i).getNominalGraph());
+            }
+        }
+        paraExtr_.setInputA(dgs);
+        paraExtr_.setInputB(mcgs);
+    }
+    //input prepared
+
+    tmpbinchi2_=paraExtr_.createLikelihoods();
+    if(debug) std::cout << "mtExtractor::createBinLikelihoods: created." <<std::endl;
 
 
 
 }
+void mtExtractor::drawBinLikelihoods(TCanvas *c){
+    plotterMultiplePlots plotterdef;
+    plotterdef.readStyleFromFile(binschi2plotsstylefile_);
+    c->SetName("#chi^{2} per bin "+tmpSysName_);
+    c->SetTitle("#chi^{2} per bin "+tmpSysName_);
+    //make pads
+    int vdivs=((int)(sqrt(tmpbinchi2_.size())-0.0001))+1;//+1;
+    int hdivs=(int)((float)tmpbinchi2_.size()/(float)vdivs)+1;
+    c->Divide(vdivs,hdivs);
+    gStyle->SetOptTitle(1);
+    for(size_t i=0;i<tmpbinchi2_.size();i++){
+        plotterMultiplePlots * pl=new plotterMultiplePlots(plotterdef);
+        pltrptrs_.push_back(pl);
+        TVirtualPad *p=c->cd(i+1);
+        pl->usePad(p);
+        graph td=tmpbinchi2_.at(i);
+        pl->setTitle(databingraphs_.at(i).getName());
+        pl->addPlot(&td);
+        pl->draw();
+    }
+
+}
+
+void mtExtractor::createGlobalLikelihood(){
+    if(tmpbinchi2_.size()<1)
+        throw std::logic_error("mtExtractor::createGlobalLikelihood: first create (non empty) likelihoods for bins");
+    //just add upp everything
+    tmpglchi2_=tmpbinchi2_.at(0);
+    gStyle->SetOptTitle(1);
+    for(size_t i=1;i<tmpbinchi2_.size();i++)
+        tmpglchi2_=tmpglchi2_.addY(tmpbinchi2_.at(i));
+
+    if(tmpglgraph_)  {delete tmpglgraph_;tmpglgraph_=0;}
+    tmpglgraph_=(tmpglchi2_.getTGraph());
+
+}
+void mtExtractor::drawGlobalLikelihood(TCanvas *c,bool zoom){
 
 
-void mtExtractor::createGlobalLikelihoods(){
+    if(!tfitf_) throw std::logic_error("mtExtractor::drawGlobalLikelihood: first fitGlobalLikelihood");
+
+    c->SetName("global #chi^{2} "+tmpSysName_);
+    c->SetTitle("global #chi^{2} "+tmpSysName_);
+
+    plotterMultiplePlots * pl=new plotterMultiplePlots; //FIXME use a fancy fitting stuff here TBI
+    pltrptrs_.push_back(pl);
+    pl->readStyleFromFile(binschi2plotsstylefile_);
+    pl->usePad(c);
+    pl->setTitle("global "+tmpSysName_);
+    pl->addPlot(&tmpglchi2_);
+    pl->draw();
+
+    float tmpglchi2_minimum=0;
+    tfitf_->Draw("same");
+    tmpglchi2_minimum=tfitf_->GetMinimum(tmpglchi2_.getXMin(),tmpglchi2_.getXMax());
+    std::cout << "minimum: " << tmpglchi2_minimum <<std::endl;
+    float plotmin=tmpglchi2_minimum-1;
+
+    float epsilon=(tmpglchi2_.getXMax()-tmpglchi2_.getXMin()/5);
+    float Xminimum=tfitf_->GetX(tmpglchi2_minimum,tmpglchi2_.getXMin(),tmpglchi2_.getXMax());
+    float xpleft=tfitf_->GetX(tmpglchi2_minimum+1,tmpglchi2_.getXMin(),Xminimum);
+    float xpright=tfitf_->GetX(tmpglchi2_minimum+1,Xminimum,tmpglchi2_.getXMax());
+    TLine * xlinel=new TLine(xpleft,plotmin,xpleft,tmpglchi2_minimum+1);
+    TLine * xliner=new TLine(xpright,plotmin,xpright,tmpglchi2_minimum+1);
+    TLine * xlinec=new TLine(Xminimum,plotmin,Xminimum,tmpglchi2_minimum);
+    TLine * yline=new TLine(tmpglchi2_.getXMin(),tmpglchi2_minimum+1,xpleft,tmpglchi2_minimum+1);
+    TLine * yline2=new TLine(tmpglchi2_.getXMin(),tmpglchi2_minimum,Xminimum,tmpglchi2_minimum);
+    yline->Draw("same");
+    yline2->Draw("same");
+    xlinel->Draw("same");
+    xliner->Draw("same");
+    xlinec->Draw("same");
+
+ //  size_t pidx= allsyst_.addPoint(Xminimum,syspidx_,tmpSysName_);
+ //  allsyst_.setPointXContent(pidx,xpleft,0);
+  // allsyst_.setPointXContent(pidx,xpright,1);
+
+}
+
+void mtExtractor::fitGlobalLikelihood(){
+    if(!tmpglgraph_)
+        throw std::logic_error("mtExtractor::fitGlobalLikelihood: need to create global likelihood before fitting it");
+
+
+    if(tfitf_) {delete tfitf_; tfitf_=0;}
+
+    tfitf_ = new TF1("f1",fitmode_,tmpglchi2_.getXMin(),tmpglchi2_.getXMax());
+    tmpglgraph_->Fit("f1","VR");
+
+
 
 
 }

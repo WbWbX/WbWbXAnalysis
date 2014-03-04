@@ -47,18 +47,20 @@ public:
     void setNPoints(const size_t & npoints); //for high perf deletes all content
     size_t getNPoints()const{return xcoords_.size();}
 
-    size_t addPoint(const float& x, const float & y);//returns point index
+    size_t addPoint(const float& x, const float & y,const TString & pointname="");//returns point index
 
     void setPointContents(const size_t & point, bool nomstat, const float & xcont, const float & ycont, const int & syslayer=-1);
     void setPointXContent(const size_t & point, const float & xcont, const int & syslayer=-1);
     void setPointYContent(const size_t & point, const float & xcont, const int & syslayer=-1);
     void setPointXStat(const size_t & point, const float & xcont, const int & syslayer=-1);
     void setPointYStat(const size_t & point, const float & xcont, const int & syslayer=-1);
+    void setPointName(const size_t & point, const TString & pointname);
 
     const float &  getPointXContent(const size_t & point, const int & syslayer=-1) const;
     const float &  getPointYContent(const size_t & point, const int & syslayer=-1) const;
     float   getPointXStat(const size_t & point, const int & syslayer=-1) const;
     float   getPointYStat(const size_t & point, const int & syslayer=-1) const;
+    const TString & getPointName(const size_t & point)const;
 
 
 
@@ -73,14 +75,14 @@ public:
     float getPointYError(const size_t & point, bool onlystat,const TString &limittosys="")const;
 
 
-    float  getXMax(size_t & point) const;
-    float  getXMin(size_t & point) const;
-    float  getYMax(size_t & point) const;
-    float  getYMin(size_t & point) const;
-    float  getXMax() const;
-    float  getXMin() const;
-    float  getYMax() const;
-    float  getYMin() const;
+    float  getXMax(size_t & point,bool includeerror=false) const;
+    float  getXMin(size_t & point,bool includeerror=false) const;
+    float  getYMax(size_t & point,bool includeerror=false) const;
+    float  getYMin(size_t & point,bool includeerror=false) const;
+    float  getXMax(bool includeerror=false) const;
+    float  getXMin(bool includeerror=false) const;
+    float  getYMax(bool includeerror=false) const;
+    float  getYMin(bool includeerror=false) const;
 
     histoContent & getYCoords(){return ycoords_;}
     histoContent & getXCoords(){return xcoords_;}
@@ -150,6 +152,9 @@ private:
 
     TString name_;
 
+    /*
+     * point names are always stored in nominal of x coordinate!
+     */
     histoContent xcoords_,ycoords_;
     float labelmultiplier_;
     TString yname_,xname_;

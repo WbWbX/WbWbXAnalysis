@@ -19,9 +19,11 @@ int main(int argc, char* argv[]){
     using namespace ztop;
     //get options
     //plotname, (fitmode), minbin, maxbin, excludebin
+    optParser::debug=true;
     optParser parse(argc,argv);
     parse.bepicky=true;
     TString plotname  =    parse.getOpt<TString>("p","m_lb pair comb unfold step 8");
+    TString output    =    parse.getOpt<TString>("o","mtFromXSec_output");
     int minbin          =  parse.getOpt<float>    ("-minbin",-1);
     int maxbin          =  parse.getOpt<float>    ("-maxbin",-1);
     int excludebin      =  parse.getOpt<float>    ("-excludebin",-1);
@@ -39,12 +41,13 @@ int main(int argc, char* argv[]){
      */
 
     //do this for each channel independently. Right now for testing reasons skip channel asso
-// maybe then also implement all plots.. but later
+    // maybe then also implement all plots.. but later
     mtExtractor extractor;
     mtExtractor::debug=true;
     extractor.setPlot(plotname);
     extractor.setInputFilesData(inputfiles);
     extractor.getExtractor()->setLikelihoodMode(parameterExtractor::lh_chi2);
+    extractor.setFitMode("pol4");
 
     extractor.setup();
     TCanvas*c=new TCanvas();
@@ -53,29 +56,53 @@ int main(int argc, char* argv[]){
     extractor.setBinsPlotterStyleFile((std::string)getenv("CMSSW_BASE")+
             "/src/TtZAnalysis/Tools/styles/multiplePlots_mlbbins.txt");
 
+    extractor.setBinsChi2PlotterStyleFile((std::string)getenv("CMSSW_BASE")+
+            "/src/TtZAnalysis/Tools/styles/multiplePlots_mlbbins.txt");
 
-    TFile f("mtfromxsec.root","RECREATE");
+    TFile f(output+".root","RECREATE");
     //for MC
     extractor.drawXsecDependence(c,false);
-    c->Print("drawMCXsecDependence.pdf(");
+    c->Print(output+".pdf(");
     c->Write();
     extractor.cleanMem();
     c->Clear();
     //for data
     extractor.drawXsecDependence(c,true);
-    c->Print("drawMCXsecDependence.pdf");
+    c->Print(output+".pdf");
     c->Write();
     extractor.cleanMem();
     c->Clear();
 
     extractor.drawIndivBins(c);
-    c->Print("drawMCXsecDependence.pdf)");
+    c->Print(output+".pdf");
     c->Write();
     extractor.cleanMem();
     c->Clear();
 
+    //for all systematics
+    for(int i=-2;i<extractor.getDataSystSize();i++){
+        if(i<-1)
+            extractor.createBinLikelihoods(i,true);
+        else
+            extractor.createBinLikelihoods(i,false);
 
+        extractor.drawBinLikelihoods(c);
+        c->Print(output+".pdf");
+        c->Write();
+        extractor.cleanMem();
+        c->Clear();
 
+        extractor.createGlobalLikelihood();
+        extractor.fitGlobalLikelihood();
+        extractor.drawGlobalLikelihood(c);
+        c->Print(output+".pdf");
+        c->Write();
+        extractor.cleanMem();
+        c->Clear();
+
+    }
+    //close
+    c->Print(output+".pdf)");
 
     f.Close();
 
