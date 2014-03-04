@@ -7,7 +7,7 @@
 
 void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
         double lumi, bool dobtag, bool status,bool testmode,TString maninputfile,
-        TString mode,TString topmass){ //options like syst..
+        TString mode,TString topmass,TString btagfile){ //options like syst..
 
     bool didnothing=false;
     //some env variables
@@ -55,7 +55,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
     //muonensffile =cmssw_base+fr.getValue<TString>("MuonEnergySFFile");
 
     btagWP=               fr.getValue<TString>("btagWP");
-    TString btagfile=     fr.getValue<TString>("btagFile");
+
 
     TString trigsfhisto="scalefactor eta2d with syst";
 
@@ -77,8 +77,11 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
     ///set input files list etc (common)
 
 
+
     MainAnalyzer ana;
     ana.setMaxChilds(6);
+    if(testmode)
+        ana.setMaxChilds(20);
     ana.setMode(mode);
     ana.setShowStatus(status);
     ana.setTestMode(testmode);
@@ -358,6 +361,7 @@ int main(int argc, char* argv[]){
     TString energy = parse.getOpt<TString>  ("e","8TeV");        //-e default 8TeV
     double lumi    = parse.getOpt<float>    ("l",-1);            //-l default -1
     bool dobtag    = parse.getOpt<bool>     ("B",false);         //-B switches on default false
+    TString btagfile = parse.getOpt<TString>  ("b","all_btags.root");        //-b btagfile default all_btags.root
 
     TString outfile= parse.getOpt<TString>  ("o","");            //-o <outfile> should be something like channel_energy_syst.root // only for plots
     bool status    = parse.getOpt<bool>     ("S",false);         //-S enables default false
@@ -397,6 +401,6 @@ int main(int argc, char* argv[]){
         //do the merging with filestomerge
     }
     else{
-        analyse(channel, syst, energy, outfile, lumi,dobtag , status, testmode,inputfile,mode,topmass);
+        analyse(channel, syst, energy, outfile, lumi,dobtag , status, testmode,inputfile,mode,topmass,btagfile);
     }
 }
