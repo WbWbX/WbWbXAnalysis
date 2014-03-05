@@ -177,9 +177,12 @@ void containerStackVector::addMCErrorStackVector(const TString &sysname, const z
 }
 void containerStackVector::addErrorStackVector(const TString &sysname,const  ztop::containerStackVector & stackvec){
     if(!fastadd){
-#pragma omp parallel for
+//#pragma omp parallel for
+        size_t position=0; //faster. probably both are at the same position, but not guaranteed
         for(std::vector<containerStack>::iterator istack=stacks_.begin();istack<stacks_.end(); ++istack){
-            for(std::vector<containerStack>::const_iterator estack=stackvec.stacks_.begin();estack<stackvec.stacks_.end(); ++estack){
+            size_t safecounter=0;
+            for(std::vector<containerStack>::const_iterator estack=stackvec.stacks_.begin()+position;1; ++estack){
+                if(estack == stackvec.stacks_.end()) estack=stackvec.stacks_.begin();
                 if(istack->getName() == estack->getName()){
                     if(debug)
                         std::cout << "containerStackVector::addMCErrorStackVector: adding sys " << sysname
@@ -187,7 +190,11 @@ void containerStackVector::addErrorStackVector(const TString &sysname,const  zto
                     istack->addMCErrorStack(sysname,*estack);
                     break;
                 }
+                safecounter++;
+                if(safecounter >= stackvec.stacks_.size()) break;
+
             }
+            position++;
         }
     }
     else{//fastadd requires same ordering of all stacks (usually the case)

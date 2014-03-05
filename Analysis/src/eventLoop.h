@@ -44,6 +44,28 @@
 #include "../interface/analysisPlotsJan.h"
 
 
+/*
+ * Running on the samples is parallelized.
+ * This function is called for each sample individually.
+ *
+ * Do not just return from this function, you must give a report to
+ * the parent process, why and that the function returned.
+ *
+ * This is automatically done after the event loop during the process of writing
+ * output.
+ * In case you want to indicate an abort due to an error, use the following syntax
+ * if(error){
+ *    //cout something in addition or so...
+ *    reportError(<error code>, anaid);
+ *    return;
+ * }
+ * This way the main program knows what happened and indicates that in the summary.
+ * If you do not return this way, the main program will be stuck in an infinite loop.
+ * (Sleeping 99.99% of the time)
+ * Error codes will always be negative. Positive values are converted
+ *
+ * Please indicate the meaning of the error code in the cout at the end of ../app_src/analyse.cc
+ */
 void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, double norm,size_t legord, size_t anaid){
 
     bool doLargeAcceptance=false;
@@ -123,6 +145,10 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
         getBTagSF()->setWorkingPoint("csvt");
         std::cout << "entering btagcsvt mode" <<std::endl;
     }
+    if(mode_.Contains("Btagcsvm")){
+        getBTagSF()->setWorkingPoint("csvm");
+        std::cout << "entering btagcsvm mode" <<std::endl;
+    }
     bool onejet=false;
     if(mode_.Contains("Onejet")){
         onejet=true;
@@ -135,12 +161,14 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     bool isMC=true;
     if(legendname==dataname_) isMC=false;
 
+
+
     //per sample configuration
 
 
     //check if file exists
     if(testmode_)
-        std::cout << "testmode("<< anaid << "): check input file (isMC)"<< isMC << std::endl;
+        std::cout << "testmode("<< anaid << "): check input file "<<inputfile << " (isMC)"<< isMC << std::endl;
 
     TFile *f;
     if(!fileExists((datasetdirectory_+inputfile).Data())){
@@ -213,6 +241,13 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     }
     getBTagSF()->setIsMC(isMC);
 
+    ////TEST
+    //another btag SF util for tight working point
+
+   // NTBTagSF medBTagSF = *getBTagSF();
+  //  medBTagSF.setWorkingPoint("csvm");
+
+
     //range check switched off because of different ranges in bins compared to diff Xsec (leps)
     getTriggerSF()->setRangeCheck(false);
     getElecSF()->setRangeCheck(false);
@@ -280,6 +315,10 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     //some helpers
     double sel_step[]={0,0,0,0,0,0,0,0,0};
     float count_samesign=0;
+
+
+
+
     ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
@@ -326,9 +365,6 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
         /////////////////// Generator Information////////////////////
         /////////////////////////////////////////////////////////////
         /////////////////////////////////////////////////////////////
-
-
-
 
         ////define all collections
         // do not move somewhere else!

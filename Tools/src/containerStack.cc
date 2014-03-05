@@ -8,6 +8,7 @@ std::vector<ztop::containerStack*> containerStack::cs_list;
 bool containerStack::cs_makelist=false;
 bool containerStack::batchmode=true;
 bool containerStack::debug=false;
+bool containerStack::addErrorsStrict=true;
 
 containerStack::containerStack() : name_(""), dataleg_("data"), mode(notset){
     if(cs_makelist)cs_list.push_back(this);
@@ -423,7 +424,10 @@ void containerStack::addErrorStack(const TString & sysname, containerStack error
         }//legfound
         /*} */
         else{ //if(!found)
-            std::cout << "containerStack::addErrorStack: legend " << legends_[i] << " not found. - don't worry too much about it, adding 0 error" << std::endl;
+            if(addErrorsStrict){
+                throw std::runtime_error("containerStack::addErrorStack: legend in one stack not found. To allow this, switch containerStack::addErrorsStrict to false");
+            }
+            std::cout << "containerStack::addErrorStack: "<< name_ << " legend " << legends_[i] << " not found. adding 0 error!" << std::endl;
             if(mode==dim1 || mode==unfolddim1){
                 containers_[i].addErrorContainer(sysname,containers_[i]);
             }

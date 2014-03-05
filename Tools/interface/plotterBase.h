@@ -25,7 +25,7 @@ namespace ztop{
  */
 class plotterBase :protected tObjectList{
 public:
-    plotterBase():tObjectList(), title_(""),pad_(0){}
+    plotterBase():tObjectList(), title_(""),tbndc_(true),pad_(0){}
     virtual ~plotterBase(){}
 
     plotterBase(const plotterBase&);
@@ -41,7 +41,8 @@ public:
      size_t size(){return 0;} //to be overwritten by inheriting classes
 
      static bool debug;
-
+     void setTextBoxes(textBoxes tb){textboxes_=tb;}
+     void setTextBoxNDC(bool p){tbndc_=p;}
 
 protected:
 
@@ -82,6 +83,7 @@ protected:
 
 
     legendStyle legstyle_;
+    bool tbndc_; //used for drawing text boxes if defined
 
 private:
     TVirtualPad * pad_;

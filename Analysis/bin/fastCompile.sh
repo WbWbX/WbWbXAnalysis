@@ -1,5 +1,9 @@
 #!/bin/sh
 
+######
+# script to do a quick check of test executables
+# it will link libabries etc and execute the executable. Intermediate build files will be removed
+
 
 infile=$1
 

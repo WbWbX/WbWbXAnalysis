@@ -13,6 +13,7 @@
 #include "TTree.h"
 #include "TFile.h"
 #include "FWCore/FWLite/interface/AutoLibraryLoader.h"
+#include "TtZAnalysis/Tools/interface/containerStyle.h"
 
 namespace ztop{
 namespace graphhelperfunctions{
@@ -126,7 +127,7 @@ float   graph::getPointYStat(const size_t & point, const int & syslayer) const{
 }
 
 const TString & graph::getPointName(const size_t & point)const{
-    if(point <= getNPoints())
+    if(point >= getNPoints())
         throw std::out_of_range("graph::getPointName: out of range");
     return xcoords_.getBin(point).getName();
 }
@@ -673,6 +674,13 @@ const histoBin & graph::getPointY(const size_t & pointidx,const int & layer) con
     return ycoords_.getBin(pointidx,layer);
 }
 
+textBoxes graph::getTextBoxesFromPoints()const{
+    textBoxes out;
+    for(size_t i=0;i<getNPoints();i++){
+        out.add(getPointXContent(i),getPointYContent(i),getPointName(i),std::min(0.03,0.7/getNPoints()));
+    }
+    return out;
+}
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -763,6 +771,8 @@ void graph::writeToTFile(const TString& filename){
     writeToTFile(ftemp);
     delete ftemp;
 }
+
+
 
 
 }//namespace

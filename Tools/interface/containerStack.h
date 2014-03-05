@@ -156,6 +156,10 @@ public:
 
 	static bool batchmode;
 
+	/**
+	 * If true all legends are required to be found in both stacks when adding errors
+	 */
+	static bool addErrorsStrict;
 
 	//debugging functions
 	bool checknorms() const;

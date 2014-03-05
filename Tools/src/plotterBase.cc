@@ -22,6 +22,7 @@ bool plotterBase::debug=false;
 
 plotterBase::plotterBase(const plotterBase& rhs): tObjectList(rhs){
     pad_ = rhs.pad_;
+    tbndc_=rhs.tbndc_;
 }
 
 TVirtualPad* plotterBase::getPad()const{
@@ -71,7 +72,8 @@ float plotterBase::getSubPadYScale(int idx){
  */
 void plotterBase::drawTextBoxes(){
     if(debug) std::cout << "plotterBase::drawTextBoxes: " << textboxes_.size() << std::endl;
-    getPad()->cd(0);
+
+        getPad()->cd(0);
 
     TLatex * tb=0;
 
@@ -81,6 +83,8 @@ void plotterBase::drawTextBoxes(){
         else
             tb=addObject(new TLatex(textboxes_.at(i).getX(), textboxes_.at(i).getY(), title_));
         tb->SetTextSize(textboxes_.at(i).getTextSize());
+        if(tbndc_)
+            tb->SetNDC(true);
         tb->Draw("same");
     }
 

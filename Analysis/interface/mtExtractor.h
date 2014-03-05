@@ -66,6 +66,7 @@ public:
 
     parameterExtractor * getExtractor(){return &paraExtr_;}
 
+    void drawResultGraph(TCanvas *c);
     graph * getResultGraph(){return &allsyst_;}
 
     void setup(); //just  runs private functions
@@ -135,7 +136,8 @@ private:
 
     parameterExtractor paraExtr_;
 
-    graph allsyst_;
+    graph allsyst_,allsystsl_,allsystsh_;
+    std::string allsyststylefile_;
     float syspidx_;
 
     TString fitmode_;

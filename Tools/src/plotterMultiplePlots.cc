@@ -78,6 +78,10 @@ void plotterMultiplePlots::drawPlots(){
     if(cstyles_.size()<plots_.size()){
         throw std::out_of_range("plotterMultiplePlots::draw: Less styles set than plots added. exit");
     }
+    if(plots_.size()<1){
+        throw std::logic_error("plotterMultiplePlots::draw: cannot draw 0 plots");
+    }
+
 
     plotStyle tempstyle=pstyle_;
     if(!tempstyle.yAxisStyle()->applyAxisRange()){ //recompute range, otherwise take from input style

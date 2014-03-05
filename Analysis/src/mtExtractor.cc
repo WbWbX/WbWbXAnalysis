@@ -135,9 +135,11 @@ void mtExtractor::reset(){
     tmpbinchi2_.clear();
     syspidx_=1;
     allsyst_.clear();
-    allsyst_.setNPoints(1);
-    allsyst_.addErrorGraph("systatd",graph(1,""));
-    allsyst_.addErrorGraph("systatup",graph(1,""));
+    allsystsl_.clear();
+    allsystsh_.clear();
+    //  allsyst_.setNPoints(1);
+    //  allsyst_.addErrorGraph("systatd",graph(1,""));
+    //  allsyst_.addErrorGraph("systatup",graph(1,""));
 }
 
 
@@ -181,6 +183,7 @@ void mtExtractor::readFiles(){
     for(size_t i=0;i<inputfiles_.size();i++){
         container1DUnfold tempcuf;
         tempcuf.loadFromTFile(inputfiles_.at(i),plotnamedata_);
+        if(debug) std::cout << "mtExtractor::readFiles: read " << tempcuf.getName() <<std::endl;
         if(tempcuf.isDummy())
             throw std::runtime_error("mtExtractor::readFiles: at least one file without container1DUnfold");
 
@@ -396,7 +399,7 @@ void mtExtractor::drawGlobalLikelihood(TCanvas *c,bool zoom){
     c->SetName("global #chi^{2} "+tmpSysName_);
     c->SetTitle("global #chi^{2} "+tmpSysName_);
 
-    plotterMultiplePlots * pl=new plotterMultiplePlots; //FIXME use a fancy fitting stuff here TBI
+    plotterMultiplePlots * pl=new plotterMultiplePlots;
     pltrptrs_.push_back(pl);
     pl->readStyleFromFile(binschi2plotsstylefile_);
     pl->usePad(c);
@@ -414,20 +417,29 @@ void mtExtractor::drawGlobalLikelihood(TCanvas *c,bool zoom){
     float Xminimum=tfitf_->GetX(tmpglchi2_minimum,tmpglchi2_.getXMin(),tmpglchi2_.getXMax());
     float xpleft=tfitf_->GetX(tmpglchi2_minimum+1,tmpglchi2_.getXMin(),Xminimum);
     float xpright=tfitf_->GetX(tmpglchi2_minimum+1,Xminimum,tmpglchi2_.getXMax());
-    TLine * xlinel=new TLine(xpleft,plotmin,xpleft,tmpglchi2_minimum+1);
-    TLine * xliner=new TLine(xpright,plotmin,xpright,tmpglchi2_minimum+1);
-    TLine * xlinec=new TLine(Xminimum,plotmin,Xminimum,tmpglchi2_minimum);
-    TLine * yline=new TLine(tmpglchi2_.getXMin(),tmpglchi2_minimum+1,xpleft,tmpglchi2_minimum+1);
-    TLine * yline2=new TLine(tmpglchi2_.getXMin(),tmpglchi2_minimum,Xminimum,tmpglchi2_minimum);
+    TLine * xlinel=addObject(new TLine(xpleft,plotmin,xpleft,tmpglchi2_minimum+1));
+    TLine * xliner=addObject(new TLine(xpright,plotmin,xpright,tmpglchi2_minimum+1));
+    TLine * xlinec=addObject(new TLine(Xminimum,plotmin,Xminimum,tmpglchi2_minimum));
+    TLine * yline=addObject(new TLine(tmpglchi2_.getXMin(),tmpglchi2_minimum+1,xpleft,tmpglchi2_minimum+1));
+    TLine * yline2=addObject(new TLine(tmpglchi2_.getXMin(),tmpglchi2_minimum,Xminimum,tmpglchi2_minimum));
     yline->Draw("same");
     yline2->Draw("same");
     xlinel->Draw("same");
     xliner->Draw("same");
     xlinec->Draw("same");
 
- //  size_t pidx= allsyst_.addPoint(Xminimum,syspidx_,tmpSysName_);
- //  allsyst_.setPointXContent(pidx,xpleft,0);
-  // allsyst_.setPointXContent(pidx,xpright,1);
+    TString pointname=tmpSysName_;
+    if(tmpSysName_=="") pointname="nominal";
+
+    allsyst_.addPoint(Xminimum,syspidx_,pointname);
+    allsystsl_.addPoint(xpleft,syspidx_,pointname);
+    allsystsh_.addPoint(xpright,syspidx_,pointname);
+    syspidx_++;
+    if(!(tmpSysName_.Contains("up")||tmpSysName_.Contains("down")))
+        syspidx_++;
+    //allsyst_.setPointXStat()
+    //  allsyst_.setPointXContent(pidx,xpleft,0);
+    // allsyst_.setPointXContent(pidx,xpright,1);
 
 }
 
@@ -443,6 +455,45 @@ void mtExtractor::fitGlobalLikelihood(){
 
 
 
+
+}
+
+void mtExtractor::drawResultGraph(TCanvas *c){
+
+    if(debug) std::cout << " mtExtractor::drawResultGraph " <<std::endl;
+    c->SetName("result graph");
+    c->SetTitle("result graph");
+
+    //add sum point
+    size_t nompoint=0;
+    for(size_t i=0;i<allsyst_.getNPoints();i++){
+        if(allsyst_.getPointName(i) == "nominal"){
+            nompoint=i;
+            break;
+        }
+    }
+
+
+    allsyststylefile_=binschi2plotsstylefile_;
+    allsyst_.removeXErrors();
+    allsyst_.addErrorGraph("chi_down",allsystsl_);
+    allsyst_.addErrorGraph("chi_up",allsystsh_);
+    plotterMultiplePlots * plotter=new plotterMultiplePlots();
+    pltrptrs_.push_back(plotter);
+    plotter->readStyleFromFile(allsyststylefile_);
+
+
+    plotter->addPlot(&allsyst_);
+    textBoxes tbxs=allsyst_.getTextBoxesFromPoints();
+    plotter->setTextBoxes(tbxs);
+    plotterBase::debug=true;
+    plotter->usePad(c);
+    plotter->setTextBoxNDC(false);
+    plotter->draw();
+
+    float nominalmass=allsyst_.getPointXContent(1);
+    TLine * xlinel=addObject(new TLine(nominalmass,0,nominalmass,syspidx_));
+    xlinel->Draw("same");
 
 }
 

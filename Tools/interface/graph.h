@@ -9,7 +9,7 @@
 #define GRAPH_H_
 
 #include "histoContent.h"
-
+#include "containerStyle.h"
 #include "TString.h"
 #include <vector>
 
@@ -123,6 +123,8 @@ public:
     TGraphAsymmErrors * getTGraph(TString name="",bool onlystat=false) const;
 
     TH1 * getAxisTH1(bool tighty=false,bool tightx=true)const;
+
+    textBoxes getTextBoxesFromPoints()const;
 
     /*
      *
