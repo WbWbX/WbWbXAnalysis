@@ -17,9 +17,14 @@ int main(int argc, char* argv[]){
 
     optParser parser(argc,argv);
     parser.bepicky=true;
-    TString outname  = parser.getOpt<TString>("o","out");
+    TString outname  = parser.getOpt<TString>("o","out","output file name <name>_btags.root (default out)");
     std::vector<TString> instrings_=parser.getRest<TString>();
 
+    parser.doneParsing();
+    if(instrings_.size()<2){
+        std::cout << "need minimum 2 input files to merge" <<std::endl;
+        parser.coutHelp();
+    }
     NTBTagSF btags;
 
 

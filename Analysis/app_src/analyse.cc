@@ -356,44 +356,23 @@ int main(int argc, char* argv[]){
     using namespace ztop;
 
     optParser parse(argc,argv);
-    TString channel= parse.getOpt<TString>  ("c","emu");         //-c channel
-    TString syst   = parse.getOpt<TString>  ("s","nominal");     //-s <syst>
-    TString energy = parse.getOpt<TString>  ("e","8TeV");        //-e default 8TeV
-    double lumi    = parse.getOpt<float>    ("l",-1);            //-l default -1
-    bool dobtag    = parse.getOpt<bool>     ("B",false);         //-B switches on default false
-    TString btagfile = parse.getOpt<TString>  ("b","all_btags.root");        //-b btagfile default all_btags.root
+    TString channel= parse.getOpt<TString>  ("c","emu","channel (ee, emu, mumu), default: emu\n");         //-c channel
+    TString syst   = parse.getOpt<TString>  ("s","nominal","systematic variation <var>_<up/down>, default: nominal");     //-s <syst>
+    TString energy = parse.getOpt<TString>  ("e","8TeV","energy (8TeV, 7 TeV), default: 8TeV");        //-e default 8TeV
+    double lumi    = parse.getOpt<float>    ("l",-1,"luminosity, default -1 (= read from config file)");            //-l default -1
+    bool dobtag    = parse.getOpt<bool>     ("B",false,"produce b-tag efficiencies (switch)");         //-B switches on default false
+    TString btagfile = parse.getOpt<TString>  ("b","all_btags.root","use btagfile (default all_btags.root)");        //-b btagfile default all_btags.root
 
-    TString outfile= parse.getOpt<TString>  ("o","");            //-o <outfile> should be something like channel_energy_syst.root // only for plots
-    bool status    = parse.getOpt<bool>     ("S",false);         //-S enables default false
-    bool testmode  = parse.getOpt<bool>     ("T",false);         //-T enables default false
-    TString mode   = parse.getOpt<TString>  ("m","xsec");        //-m (xsec,....) default xsec changes legends? to some extend
-    TString inputfile= parse.getOpt<TString>  ("i","");          //-i empty will use automatic
-    TString topmass  = parse.getOpt<TString>  ("mt","172.5");          //-i empty will use automatic
-    bool help=  parse.getOpt<bool>  ("h",false);
-    if(!help){//try other option
-        help = parse.getOpt<bool>  ("-help",false);
-    }
-    if(argc<2) help=true;
+    TString outfile= parse.getOpt<TString>  ("o","","additional output id");            //-o <outfile> should be something like channel_energy_syst.root // only for plots
+    bool status    = parse.getOpt<bool>     ("S",false,"show regular status update (switch)");         //-S enables default false
+    bool testmode  = parse.getOpt<bool>     ("T",false,"enable testmode: 8% of stat, more printout");         //-T enables default false
+    TString mode   = parse.getOpt<TString>  ("m","xsec","additional mode options");        //-m (xsec,....) default xsec changes legends? to some extend
+    TString inputfile= parse.getOpt<TString>  ("i","","specify input manually");          //-i empty will use automatic
+    TString topmass  = parse.getOpt<TString>  ("mt","172.5","top mass value to be used, default: 172.5");          //-i empty will use automatic
+
+
     parse.doneParsing();
-    if(help){ //display a help message
-        std::cout << "analyse - Options:\n"
-                << "  -c   channel (ee, emu, mumu), default: emu\n"
-                << "  -s   systematic variation <var>_<up/down>, default: nominal\n"
-                << "  -e   energy (8TeV, 7 TeV), default: 8TeV\n"
-                << "  -l   luminosity, default -1 (= read from config file)\n"
-                << "  -B   produce b-tag efficiencies (switch)\n"
-                << "  -b   use btagfile (default all_btags.root)\n"
-                << "  -o   additional output id\n"
-                << "  -S   show regular status update (switch)\n"
-                << "  -T   enable testmode: 8% of stat, more printout\n"
-                << "  -m   additional mode options"
-                << "  -i   specify input manually\n"
-                << "  -mt  top mass value to be used, default: 172.5\n\n"
-                << "  --help\n"
-                << "  -h   display this help message\n"
-                << std::endl;
-        exit(EXIT_SUCCESS);
-    }
+
     bool mergefiles=false;
     std::vector<TString> filestomerge;
 

@@ -27,6 +27,8 @@ namespace ztop{
  *
  * change to "getreset" or something (safe full strings in vector or something when setIn()
  *
+ * The options -h and --help are reserved and will display a help message!
+ *
  */
 class optParser{
 public:
@@ -38,6 +40,8 @@ public:
     }
     void reload(){
         temp_.clear();
+        if(argv_[0])
+            progname_=argv_[0];
         for(int i=1;i<argc_;i++){
             temp_.push_back((TString)argv_[i]);
         }
@@ -45,30 +49,35 @@ public:
 
 
     template <class T>
-    T getOpt(const TString& opt,const T & def){
+    T getOpt(const TString& opt,const T & def, const TString & description=""){
         for(size_t i=0;i<temp_.size();i++){
             if(temp_.at(i) == "-"+opt){
                 if (i + 1 != temp_.size()){
                     T out=temp_.at(i+1);
                     if(debug) std::cout << "optparser::getOpt: got "<< temp_.at(i) << " " << temp_.at(i+1) <<std::endl;
                     temp_.erase(temp_.begin()+i, temp_.begin()+i+2);
+                    help_.push_back("-"+opt+"  \t"+description);
                     return out;
                 }
             }
         }
+        help_.push_back("-"+opt+"  \t"+description);
         return def;
     }
     /**
      * get everything that is not parsed with "-" and was not parsed yet
+     * ignores -h and --help!
      */
     template<class T>
     std::vector<T> getRest(){
         std::vector<T> out;
         for(size_t i=0;i<temp_.size();i++){
             if(((TString)temp_.at(i)).BeginsWith("-")){
-                std::cout << "optParser: warning option "<<temp_.at(i) << " set but not parsed, yet" << std::endl;
-                if(bepicky)
-                    throw std::runtime_error("optParser: begin picky: not all options parsed");
+                if( (TString)temp_.at(i) != "-h" && (TString)temp_.at(i) != "--help"){
+                    std::cout << "optParser: warning option "<<temp_.at(i) << " set but not parsed, yet" << std::endl;
+                    if(bepicky)
+                        throw std::runtime_error("optParser: begin picky: not all options parsed");
+                }
                 continue;
             }
             if(debug) std::cout << "optparser::getRest: got "<< temp_.at(i) <<std::endl;
@@ -80,10 +89,8 @@ public:
     /**
      * call this function after getting all options
      */
-    void doneParsing(){
-        getRest<TString>();
-    }
-
+    void doneParsing();
+    void coutHelp()const;
     /**
      * throws exception if one of the options given to the program was not parsed before getRest() is called
      */
@@ -91,47 +98,56 @@ public:
     static bool debug;
 
 private:
+
     int argc_;
     char** argv_;
     std::vector<TString> temp_;
+    std::vector<TString> help_;
+    TString progname_;
 
 };
 
 template<>
-inline bool optParser::getOpt<bool>(const TString& opt,const bool & def){
+inline bool optParser::getOpt<bool>(const TString& opt,const bool & def, const TString & description){
     for(size_t i=0;i<temp_.size();i++){
         if((TString)temp_.at(i) == "-"+opt){
             temp_.erase(temp_.begin()+i);
+            help_.push_back("-"+opt+"  \t"+description);
             if(!def)return true;
             else return false;
         }
     }
+    help_.push_back("-"+opt+"  \t"+description);
     return def;
 }
 template<>
-inline float optParser::getOpt<float>(const TString& opt,const float & def){
+inline float optParser::getOpt<float>(const TString& opt,const float & def, const TString & description){
     for(size_t i=0;i<temp_.size();i++){
         if((TString)temp_.at(i) == "-"+opt){
             if (i + 1 != temp_.size()){
                 float out=atof(temp_.at(i+1).Data());
                 temp_.erase(temp_.begin()+i, temp_.begin()+i+1);
+                help_.push_back("-"+opt+"  \t"+description);
                 return out;
             }
         }
     }
+    help_.push_back("-"+opt+"  \t"+description);
     return def;
 }
 template<>
-inline int optParser::getOpt<int>(const TString& opt,const int & def){
+inline int optParser::getOpt<int>(const TString& opt,const int & def, const TString & description){
     for(size_t i=0;i<temp_.size();i++){
         if((TString)temp_.at(i) == "-"+opt){
             if (i + 1 != temp_.size()){
                 float out=atoi(temp_.at(i+1).Data());
                 temp_.erase(temp_.begin()+i, temp_.begin()+i+1);
+                help_.push_back("-"+opt+"  \t"+description);
                 return out;
             }
         }
     }
+    help_.push_back("-"+opt+"  \t"+description);
     return def;
 }
 template<>
@@ -139,9 +155,11 @@ inline std::vector<float> optParser::getRest<float>(){
     std::vector<float> out;
     for(size_t i=0;i<temp_.size();i++){
         if(((TString)temp_.at(i)).BeginsWith("-")){
-            std::cout << "optParser: warning option "<<temp_.at(i) << " set but not parsed, yet" << std::endl;
-            if(bepicky)
-                throw std::runtime_error("optParser: begin picky: not all options parsed");
+            if( (TString)temp_.at(i) != "-h" && (TString)temp_.at(i) != "--help"){
+                std::cout << "optParser: warning option "<<temp_.at(i) << " set but not parsed, yet" << std::endl;
+                if(bepicky)
+                    throw std::runtime_error("optParser: begin picky: not all options parsed");
+            }
             continue;
         }
         out.push_back(atof(temp_.at(i).Data()));

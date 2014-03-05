@@ -35,10 +35,11 @@ int mergeUnfoldDump(std::vector<std::string> infiles, TString outfile, TString t
 
     for(size_t i=0;i<outfilenames.size();i++){
         TString file=outfilenames.at(i);
+        std::cout << file << std::endl;
         file.ReplaceAll(".root","");
         TtBarUnfolder unf;
         unf.verbose=unfoldverbose;
-        TString unfoldoutputstring= unf.unfold(file+".root","");
+        TString unfoldoutputstring= unf.unfold("",file+".root");
         unfoldoutputstring.ReplaceAll("\n","<br/>");
         wwwDumper dumper;
         dumper.dumpToWWW(file+".root",title+"_"+file,descr+"<br/><br/>"+unfoldoutputstring);
@@ -56,22 +57,21 @@ int main(int argc, char* argv[]){
     optParser parse(argc,argv);
     parse.bepicky=true;
 
-    TString outfile      =  parse.getOpt<TString>("o","");
-    TString title        =  parse.getOpt<TString>("t","");
-    TString descr        =  parse.getOpt<TString>("d","");
-    TString inadd        =  parse.getOpt<TString>("i",""); //i
-    bool unfoldverbose   =  parse.getOpt<bool>("v",false);  //v
+    TString outfile      =  parse.getOpt<TString>("o","","specify output file name");
+    TString title        =  parse.getOpt<TString>("t","","title for webpage");
+    TString descr        =  parse.getOpt<TString>("d","","description");
+    TString inadd        =  parse.getOpt<TString>("i","","string added to input file names"); //i
+    bool unfoldverbose   =  parse.getOpt<bool>("v",false,"unfold in verbose mode (default: false)");  //v
 
     std::vector<std::string> infiles = parse.getRest<std::string>();
 
 
+
     ///check if everything is ok here!
-    if(infiles.size() < 1)
+    if(infiles.size() < 1 || descr.Length() <1 || title.Length()<1){
+        parse.coutHelp();
         return -1;
-    if(descr.Length() <1)
-        return -1;
-    if(title.Length()<1)
-        return -1;
+    }
 
 
 

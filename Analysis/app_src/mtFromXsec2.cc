@@ -22,13 +22,22 @@ int main(int argc, char* argv[]){
     optParser::debug=true;
     optParser parse(argc,argv);
     parse.bepicky=true;
-    TString plotname  =    parse.getOpt<TString>("p","m_lb pair comb unfold step 8");
-    TString output    =    parse.getOpt<TString>("o","mtFromXSec_output");
-    int minbin          =  parse.getOpt<float>    ("-minbin",-1);
-    int maxbin          =  parse.getOpt<float>    ("-maxbin",-1);
-    int excludebin      =  parse.getOpt<float>    ("-excludebin",-1);
+    TString plotname  =    parse.getOpt<TString>("p","m_lb pair comb unfold step 8","input plot name");
+    TString output    =    parse.getOpt<TString>("o","mtFromXSec_output","output file name");
+    TString fitmode    =    parse.getOpt<TString>("f","pol4","fit mode in root format");
+    int minbin          =  parse.getOpt<float>    ("-minbin",-1,"minimum bin number to be considered in fit");
+    int maxbin          =  parse.getOpt<float>    ("-maxbin",-1,"maximum bin number to be considered in fit");
+    int excludebin      =  parse.getOpt<float>    ("-excludebin",-1,"exclude bin from fit");
     std::vector<TString> inputfiles = parse.getRest< TString >();
 
+    parse.doneParsing();
+
+    //requirements
+    if(inputfiles.size() <1){
+        parse.coutHelp();
+        std::cout << "specify at least one input file" <<std::endl;
+        return -1;
+    }
 
     /*
      *
@@ -47,7 +56,7 @@ int main(int argc, char* argv[]){
     extractor.setPlot(plotname);
     extractor.setInputFilesData(inputfiles);
     extractor.getExtractor()->setLikelihoodMode(parameterExtractor::lh_chi2);
-    extractor.setFitMode("pol4");
+    extractor.setFitMode(fitmode);
 
     extractor.setup();
     TCanvas*c=new TCanvas();
@@ -102,6 +111,8 @@ int main(int argc, char* argv[]){
 
     }
     //close
+    extractor.drawResultGraph(c);
+    c->Write();
     c->Print(output+".pdf)");
 
     f.Close();

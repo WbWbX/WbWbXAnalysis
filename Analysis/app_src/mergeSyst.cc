@@ -9,10 +9,15 @@ int main(int argc, char* argv[]){
     containerStackVector::fastadd=false; //be careful because of parallization
 
     optParser parser(argc,argv);
-    TString outputadd=parser.getOpt<TString>("o","");
-    TString inputadd =parser.getOpt<TString>("i","");
+    TString outputadd=parser.getOpt<TString>("o","","additional string to be added to output file names");
+    TString inputadd =parser.getOpt<TString>("i","","additional string to be added to input file names");
 
     std::vector<std::string> allfiles=parser.getRest<std::string>();
+
+    if(allfiles.size() < 1){
+        std::cout << "needs minimum 1 input file" << std::endl;
+        parser.coutHelp();
+    }
 
     systMerger merger;
     systMerger::debug=false;
