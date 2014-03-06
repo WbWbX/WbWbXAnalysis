@@ -102,7 +102,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
     ana.getMuonSF()->setInput(muonsffile,muonsfhisto);
     ana.getTriggerSF()->setInput(trigsffile,trigsfhisto);
 
-    ana.getElecEnergySF()->setGlobal(1,0.2,0.2);
+    ana.getElecEnergySF()->setGlobal(1,0.15,0.15);
     ana.getMuonEnergySF()->setGlobal(1,0.3,0.3); //new from muon POG twiki
     //https://twiki.cern.ch/twiki/bin/viewauth/CMS/MuonReferenceResolution
     //this is for muons without the corrections so it should be even better with
