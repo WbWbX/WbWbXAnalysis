@@ -163,6 +163,13 @@ private:
 template<class T>
 bool NTLorentzVector<T>::bepicky=false;
 
+template<class T>
+float dR(const NTLorentzVector<T>& a,const NTLorentzVector<T>& b){
+    T deta2=(a.eta() - b.eta())*(a.eta() - b.eta());
+    T dphi2=(a.phi() - b.phi())*(a.phi() - b.phi());
+    return sqrt(deta2+dphi2);
+}
+
 }
 
 
