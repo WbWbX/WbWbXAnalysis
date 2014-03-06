@@ -43,10 +43,7 @@ TreeWriterBase::TreeWriterBase(const edm::ParameterSet& iConfig)
     puinfo_          =iConfig.getParameter<edm::InputTag>         ( "PUInfo" );
 
 
-    rho2011_  =iConfig.getParameter<bool>             ( "includeRho2011" );
 
-    rhojetsiso_       =iConfig.getParameter<edm::InputTag>    ( "rhoJetsIso" );
-    rhojetsisonopu_       =iConfig.getParameter<edm::InputTag>    ( "rhoJetsIsoNoPu" );
 
     rhoiso_       =iConfig.getParameter<edm::InputTag>    ( "rhoIso" );
 
@@ -1171,18 +1168,11 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
     iEvent.getByLabel(rhoiso_,rho);
     temprhos.push_back(*rho);
-    // if(rho2011_){
-    iEvent.getByLabel(rhojetsisonopu_,rho);
-    temprhos.push_back(*rho);
-    iEvent.getByLabel(rhojetsiso_,rho);
-    temprhos.push_back(*rho);
-    // }
     ntevent.setIsoRho(temprhos);
 
     //add rhoiso to electrons (uses 2011 corrections (second argument set to false));
-    ztop::elecRhoIsoAdder addrho(!IsRealData, !rho2011_);
-    if(rho2011_) addrho.setRho(temprhos[2]);
-    else         addrho.setRho(temprhos[0]);
+    ztop::elecRhoIsoAdder addrho(!IsRealData, false);
+    addrho.setRho(temprhos[0]);
     addrho.addRhoIso(ntpfelectrons);
     addrho.addRhoIso(ntgsfelectrons);
 

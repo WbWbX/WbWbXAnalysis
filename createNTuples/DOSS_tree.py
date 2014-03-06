@@ -382,15 +382,19 @@ if isMC:
 
         useBHadrons=True
 # process.produceGenLevelBJetsPlusHadron = process.matchGenHFHadronJets.clone()
-
-        process.preFilterSequence = cms.Sequence(process.preCutPUInfo * 
+        if isSignal:
+            process.preFilterSequence = cms.Sequence(process.preCutPUInfo * 
                                                  process.topsequence *
                                                  process.postCutPUInfo *
                                                  process.improvedJetHadronQuarkMatchingSequence *
                                                  process.produceGenLevelBJets *
                                                  process.matchGenHFHadronJets
                                                  )
-
+        else:
+            process.preFilterSequence = cms.Sequence(process.preCutPUInfo * 
+                                                     process.topsequence *
+                                                     process.postCutPUInfo 
+                                                     )
 
 
 
@@ -716,34 +720,6 @@ if jpsi:
 getattr(process,'pfIsolatedElectrons'+pfpostfix).isolationCut = 99999 
 getattr(process,'pfIsolatedMuons'+pfpostfix).isolationCut = 99999 
 
-####### Fix not automatically implemented b-tagging modules/vertices:
-
-# process.load('RecoVertex.AdaptiveVertexFinder.inclusiveVertexing_cff')
-
-######### build jets for rho value ## only if 2011 rho is used (hopefully not for that long..)
-# https://twiki.cern.ch/twiki/bin/viewauth/CMS/EgammaEARhoCorrection
-
-process.kt6PFJetsForIso = process.kt4PFJets.clone(rParam = 0.6, doRhoFastjet = True,  Rho_EtaMax = cms.double(2.5))
-process.kt6PFJetsForIsoNoPU = process.kt6PFJetsForIso.clone( src = "pfNoPileUp"+ pfpostfix)
-
-process.isoJetSequence = cms.Sequence(process.kt6PFJetsForIso * process.kt6PFJetsForIsoNoPU)
-
-### for met/jet correction (2011 data) ## warning!! postfix hardcoded! using prescription:
-# https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#JetEnCorPFnoPU
-
-process.kt6PFJets = process.kt4PFJets.clone(
-    rParam = cms.double(0.6),
-    doAreaFastjet = cms.bool(True),
-    doRhoFastjet = cms.bool(True)
-    )
-
-process.kt6PFJetsPFlow = process.kt6PFJets.clone()
-if is2011:
-    getattr(process,'patPF2PATSequence'+pfpostfix).replace(getattr(process,'patJets'+pfpostfix),
-                                                           process.kt6PFJetsPFlow *
-                                                           getattr(process,'patJets'+pfpostfix))
-
-
 ################################################
 ########################
 ################################################
@@ -1048,9 +1024,6 @@ process.PFTree.metT0T1Src           ='patpfMetT0T1'
 process.PFTree.metT1TxySrc          ='patpfMetT1Txy'
 process.PFTree.includeTrigger    = includetrigger
 process.PFTree.includeReco       = includereco
-process.PFTree.rhoJetsIsoNoPu    = cms.InputTag("kt6PFJetsForIsoNoPU","rho",process.name_())
-process.PFTree.rhoJetsIso        = cms.InputTag("kt6PFJetsForIso","rho",process.name_()) ## only used if rho 2011
-process.PFTree.includeRho2011    = is2011
 process.PFTree.includePDFWeights = includePDFWeights
 process.PFTree.pdfWeights        = "pdfWeights:"+PDF
 process.PFTree.includeGen        = isSignal
@@ -1111,7 +1084,6 @@ process.path = cms.Path(
     process.goodOfflinePrimaryVertices *
     process.filtersSeq *
     getattr(process,'patPF2PATSequence'+pfpostfix) *
-    process.isoJetSequence  *
     process.treeSequence
     )
 
