@@ -154,6 +154,11 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
         onejet=true;
         std::cout << "entering Onejet mode" <<std::endl;
     }
+    bool twodiffbtags=false;
+    if(mode_.Contains("Twodiffbtags")){
+        twodiffbtags=true;
+        std::cout << "entering Twodiffbtags mode" <<std::endl;
+    }
 
 
     bool issignal=issignal_.at(anaid);
@@ -244,8 +249,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     ////TEST
     //another btag SF util for tight working point
 
-   // NTBTagSF medBTagSF = *getBTagSF();
-  //  medBTagSF.setWorkingPoint("csvm");
+    NTBTagSF medBTagSF = *getBTagSF();
+    medBTagSF.setWorkingPoint("csvm");
 
 
     //range check switched off because of different ranges in bins compared to diff Xsec (leps)
