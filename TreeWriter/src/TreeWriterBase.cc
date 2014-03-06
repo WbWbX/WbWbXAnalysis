@@ -1171,7 +1171,7 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     ntevent.setIsoRho(temprhos);
 
     //add rhoiso to electrons (uses 2011 corrections (second argument set to false));
-    ztop::elecRhoIsoAdder addrho(!IsRealData, false);
+    ztop::elecRhoIsoAdder addrho(!IsRealData, true);
     addrho.setRho(temprhos[0]);
     addrho.addRhoIso(ntpfelectrons);
     addrho.addRhoIso(ntgsfelectrons);
