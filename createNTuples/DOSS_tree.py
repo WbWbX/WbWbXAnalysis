@@ -226,103 +226,51 @@ process.postCutPUInfo.includePDFWeights = False
 
 ############pre filters to speed up cmsRun
 ## run before any "large" algos are run
-process.makeVLLeps=cms.Sequence()
 
-process.pfVLMusId = cms.EDFilter("PdgIdPFCandidateSelector",
-                                 pdgId = cms.vint32(-13, 13),
-                                 src = cms.InputTag("particleFlow")
-                                 )
-process.makeVLLeps+=process.pfVLMusId
-process.pfVLEsId = cms.EDFilter("PdgIdPFCandidateSelector",
-                                pdgId = cms.vint32(-11, 11),
-                                src = cms.InputTag("particleFlow")
-                                )
-process.makeVLLeps+=process.pfVLEsId
+## just rewrite:
 
-process.pfVLMus=cms.EDFilter("GenericPFCandidateSelector",
-                             src = cms.InputTag("pfVLMusId"),
-                             cut = cms.string('pt>8')
-                             )
-process.makeVLLeps+=process.pfVLMus
-process.pfVLEs=cms.EDFilter("GenericPFCandidateSelector",
-                            src = cms.InputTag("pfVLEsId"),
-                            cut = cms.string('pt>8')
-                            )
-process.makeVLLeps+=process.pfVLEs
+# produce collections
+process.makeVLLeps = cms.Sequence()
 
+# loose pfMuons
 
-process.VLMus = cms.EDFilter("PtMinCandViewSelector",
-                             src = cms.InputTag("muons"),
-                             ptMin = cms.double(8)
-                             )
-process.makeVLLeps+=process.VLMus
+process.pfMus = cms.EDFilter("PdgIdPFCandidateSelector",
+    pdgId = cms.vint32(-13, 13),
+    src = cms.InputTag("particleFlow")
+)
+process.makeVLLeps+=process.pfMus
+process.pfEs = cms.EDFilter("PdgIdPFCandidateSelector",
+    pdgId = cms.vint32(-11, 11),
+    src = cms.InputTag("particleFlow")
+)
+process.makeVLLeps+=process.pfEs
 
-process.VLEs = cms.EDFilter("PtMinCandViewSelector",
-                            src = cms.InputTag("gsfElectrons"),
-                            ptMin = cms.double(8)
-                            )
-process.makeVLLeps+=process.VLEs
-process.EpfMu = cms.EDProducer("CandViewMerger",
-                               src = cms.VInputTag(cms.InputTag("VLEs"), cms.InputTag("pfVLMus"))
-                               )
-process.makeVLLeps+=process.EpfMu
-process.pfEMu = cms.EDProducer("CandViewMerger",
-                               src = cms.VInputTag(cms.InputTag("pfVLEs"), cms.InputTag("VLMus"))
-                               )
-process.makeVLLeps+=process.pfEMu
-process.pfEpfMu = cms.EDProducer("CandViewMerger",
-                                 src = cms.VInputTag(cms.InputTag("pfVLEs"), cms.InputTag("pfVLMus"))
-                                 )
-process.makeVLLeps+=process.pfEpfMu
-process.EMu = cms.EDProducer("CandViewMerger",
-                             src = cms.VInputTag(cms.InputTag("VLEs"), cms.InputTag("VLMus"))
-                             )
-process.makeVLLeps+=process.EMu
-process.pfEE = cms.EDProducer("CandViewMerger",
-                             src = cms.VInputTag(cms.InputTag("VLEs"), cms.InputTag("pfVLEs"))
-                             )
-
-process.makeVLLeps+=process.pfEE
-process.pfMuMu = cms.EDProducer("CandViewMerger",
-                             src = cms.VInputTag(cms.InputTag("VLMus"), cms.InputTag("pfVLMus"))
-                             )
-process.makeVLLeps+=process.pfMuMu
-
-process.requireMinLeptons = cms.EDFilter("SimpleCounter",
-                                         src = cms.VInputTag(cms.InputTag("EMu"),
-                                                             cms.InputTag("pfEpfMu"),
-                                                             cms.InputTag("pfEMu"),
-                                                             cms.InputTag("EpfMu"),
-                                                             cms.InputTag("pfVLMus"),  
-                                                             cms.InputTag("pfVLEs"),   
-                                                             cms.InputTag("VLMus"),
-                                                             cms.InputTag("VLEs"),
-                                                             cms.InputTag("pfEE"),  
-                                                             cms.InputTag("pfMuMu")
-                                                             ),
-                                         requireOppoQ = cms.bool(options.oppoQ),
-                                         minNumber = cms.uint32(minleptons)
+process.requireMinLeptons = cms.EDFilter("LeptonPreFilter", #filters on any opposite charge combination between muons and/or electrons
+                                         Asrc = cms.VInputTag(cms.InputTag('pfMus'),cms.InputTag('muons'),cms.InputTag('pfEs'),cms.InputTag('gsfElectrons')),
+                                         Bsrc = cms.VInputTag(),
+                                         debug = cms.bool(True),
+                                         minPt =  cms.double(8)
                                          )
+
+if(includetrigger):
+    process.requireMinLeptons.minPt=3
+
+#############
 
 
 if (not isMC) or ("ttbarbg" in outputFile):
-     if "emu" in outputFile:
-         process.requireMinLeptons.src = cms.VInputTag(cms.InputTag("EMu"),
-                                                      cms.InputTag("pfEpfMu"),
-                                                       cms.InputTag("pfEMu"),
-                                                       cms.InputTag("EpfMu")
-                                                       )
- 
-     if "mumu" in outputFile:
-         process.requireMinLeptons.src = cms.VInputTag(cms.InputTag("pfVLMus"),    
-                                                       cms.InputTag("VLMus"), 
-                                                       cms.InputTag("pfMuMu")
-                                                       )
-     if "ee" in outputFile:
-         process.requireMinLeptons.src = cms.VInputTag(cms.InputTag("pfVLEs"), 
-                                                       cms.InputTag("VLEs"),
-                                                       cms.InputTag("pfEE")  
-                                                       )
+     if "_emu" in outputFile :
+         print "emu preselection mode"
+         process.requireMinLeptons.Asrc = cms.VInputTag(cms.InputTag('pfMus'),cms.InputTag('muons'))
+         process.requireMinLeptons.Bsrc = cms.VInputTag(cms.InputTag('pfEs'),cms.InputTag('gsfElectrons'))
+     if "_mumu" in outputFile:
+         print "mumu preselection mode"
+         process.requireMinLeptons.Asrc = cms.VInputTag(cms.InputTag('pfMus'),cms.InputTag('muons'))
+         process.requireMinLeptons.Bsrc = cms.VInputTag()
+     if "_ee" in outputFile:
+         print "ee preselection mode"
+         process.requireMinLeptons.Asrc = cms.VInputTag(cms.InputTag('pfEs'),cms.InputTag('gsfElectrons'))
+         process.requireMinLeptons.Bsrc = cms.VInputTag()
 
 #if not (includetrigger or includereco):
 
@@ -971,7 +919,8 @@ process.filterkinLeptons = cms.EDFilter("SimpleCounter",
                                                             cms.InputTag("MuonGSFMerge"),
                                                             cms.InputTag("MuonPFMerge")),
                                         requireOppoQ = cms.bool(options.oppoQ),
-                                        minNumber = cms.uint32(minleptons)
+                                        minNumber = cms.uint32(minleptons),
+                                        debug=cms.bool(debug)
                                         )
 
 process.kinLeptonFilterSequence = cms.Sequence(process.kinMuons *
@@ -988,14 +937,6 @@ if not isSignal:
 
     
 
-else: ## is Signal
-
-    getattr(process,'patPF2PATSequence'+pfpostfix).replace(getattr(process,'patMuons'+pfpostfix),
-                                                           getattr(process,'patMuons'+pfpostfix) *
-                                                           process.kinMuons *
-                                                           process.kinElectrons *
-                                                           process.kinPFElectrons )
-    
 
 ########## Prepare Tree ##
 if ttH:
@@ -1035,9 +976,9 @@ if isSignal and genFilter=="Top":
 
 
 if not includereco:
-    process.PFTree.muonSrc = 'kinMuons'
-    process.PFTree.elecGSFSrc =  'kinElectrons'
-    process.PFTree.elecPFSrc =  'kinPFElectrons'
+    process.PFTree.muonSrc = 'patMuons' + pfpostfix
+    process.PFTree.elecGSFSrc =  'patElectrons' + pfpostfix
+    process.PFTree.elecPFSrc =  'patPFElectrons' + pfpostfix
 
 if includereco:
     process.PFTree.muonSrc = 'patMuonsWithTrigger'
@@ -1078,6 +1019,7 @@ process.treeSequence = cms.Sequence(process.patTriggerSequence *
 process.dump=cms.EDAnalyzer('EventContentAnalyzer')
 
 process.path = cms.Path( 
+    #process.dump *
     process.elecEnergyCalibration *
     process.correctRecoMuonEnergy * #pfMuon eneergy is hidden in pf2pat sequence
     process.preFilterSequence *
