@@ -11,6 +11,8 @@
 
 #include "TtZAnalysis/DataFormats/src/classes.h"
 
+#include <math.h>
+
 namespace ztop{
 /**
  * setbins, addplot, FILL
@@ -66,6 +68,37 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
                     event()->kinelectrons->at(i)->e() ,*event()->puweight);
     }
 
+    SETBINSRANGE(80,0.0,M_PI);
+    addPlot("Angle(ll)", "#THETA_{ll}","Nleptons/bw");
+    if(event()->leadinglep && event()->secleadinglep){
+      float angle, mag_l1, mag_l2, px_l1, py_l1, pz_l1, px_l2, py_l2, pz_l2, scal_pr;
+
+      px_l1 = event()->leadinglep->p4().Px();
+      py_l1 = event()->leadinglep->p4().Py();
+      pz_l1 = event()->leadinglep->p4().Pz();
+      px_l2 = event()->secleadinglep->p4().Px();
+      py_l2 = event()->secleadinglep->p4().Py();
+      pz_l2 = event()->secleadinglep->p4().Pz();
+      
+      mag_l1 = (px_l1*px_l1 + py_l1*py_l1 + pz_l1*pz_l1);
+      mag_l2 = (px_l2*px_l2 + py_l2*py_l2 + pz_l2*pz_l2);
+
+      scal_pr = px_l1*px_l2 + py_l1*py_l2 + pz_l1*pz_l2;
+
+      angle = acos(scal_pr/sqrt(mag_l1*mag_l2));
+
+      last()->fill(angle,*(event()->puweight));
+    }
+
+    SETBINSRANGE(80,-5.0,5.0);
+    addPlot("delta_eta_lep", "#Eta_{ll}","Nleptons/bw");
+    if(event()->leadinglep && event()->secleadinglep){
+      float delta_theta;
+
+      delta_theta = event()->leadinglep->p4().Eta() - event()->secleadinglep->p4().Eta();
+
+      last()->fill(delta_theta,*(event()->puweight));
+    }
 
     SETBINSRANGE(10,0,10);
     addPlot("leadlep-secleadlep dR", "dR", "N_{e}*N_{#mu}/bw",true);
