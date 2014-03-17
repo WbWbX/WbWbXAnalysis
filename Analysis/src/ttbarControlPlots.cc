@@ -68,7 +68,7 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
                     event()->kinelectrons->at(i)->e() ,*event()->puweight);
     }
 
-    SETBINSRANGE(80,0.0,M_PI);
+    SETBINSRANGE(80,-1.0,1.0);
     addPlot("Angle(ll)", "#THETA_{ll}","Nleptons/bw");
     if(event()->leadinglep && event()->secleadinglep){
       float angle, mag_l1, mag_l2, px_l1, py_l1, pz_l1, px_l2, py_l2, pz_l2, scal_pr;
@@ -85,8 +85,8 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
 
       scal_pr = px_l1*px_l2 + py_l1*py_l2 + pz_l1*pz_l2;
 
-      angle = acos(scal_pr/sqrt(mag_l1*mag_l2));
-
+      //angle = acos(scal_pr/sqrt(mag_l1*mag_l2));
+      angle = scal_pr/sqrt(mag_l1*mag_l2);
       last()->fill(angle,*(event()->puweight));
     }
 
@@ -100,7 +100,18 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
       last()->fill(delta_theta,*(event()->puweight));
     }
 
-    SETBINSRANGE(10,0,10);
+    SETBINSRANGE(80,0.0,12.0);
+    addPlot("delta_eta_lep combined with dphi(ll,jet)", "#eta_{ll}*(#Delta#phi - #pi)","Nleptons/bw");
+    if(middphiInfo){
+      float delta_theta, test_var1;
+
+      delta_theta = event()->leadinglep->p4().Eta() - event()->secleadinglep->p4().Eta();
+      test_var1 =  fabs(delta_theta)*fabs((*(event()->dphillj) - M_PI));
+
+      last()->fill(test_var1,*(event()->puweight));
+    }
+
+    SETBINSRANGE(50,0,6);
     addPlot("leadlep-secleadlep dR", "dR", "N_{e}*N_{#mu}/bw",true);
     FILLSINGLE(leplepdr);
 
