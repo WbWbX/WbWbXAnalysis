@@ -112,8 +112,10 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
         mode_invertiso=true;
         std::cout << "entering invert iso mode" <<std::endl;
     }
+    bool usemvamet=false;
     if(mode_.Contains("Mvamet")){
         mettype="NTMvaMet";
+        usemvamet=true;
         std::cout << "entering mvamet mode" <<std::endl;
     }
     if(mode_.Contains("Pfmet")){
@@ -248,9 +250,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
     ////TEST
     //another btag SF util for tight working point
-
-    NTBTagSF medBTagSF = *getBTagSF();
-    medBTagSF.setWorkingPoint("csvm");
+   // NTBTagSF medBTagSF = *getBTagSF();
+   // std::cout << "the following message does NOT apply to the normal selection!" << std::endl;
+   // medBTagSF.setWorkingPoint("csvm");
 
 
     //range check switched off because of different ranges in bins compared to diff Xsec (leps)
@@ -467,6 +469,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
                 }
 
                 NTLorentzVector<float>  p4genbjet;
+
                 for(size_t i=0;i<genjets.size();i++){
                     NTGenJet * genjet=genjets.at(i);
                     if(genjet->motherIts().size()>0){
@@ -790,7 +793,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
         evt.adjustedmet=&adjustedmet;
         double nmpx=pMet->p4().Px() + dpx;
         double nmpy=pMet->p4().Py() + dpy;
-        adjustedmet.setP4(D_LorentzVector(nmpx,nmpy,0,sqrt(nmpx*nmpx+nmpy*nmpy))); //COMMENTED FOR MVA MET
+        if(!usemvamet)
+            adjustedmet.setP4(D_LorentzVector(nmpx,nmpy,0,sqrt(nmpx*nmpx+nmpy*nmpy))); //COMMENTED FOR MVA MET
 
         ///////////////combined variables////////////
 

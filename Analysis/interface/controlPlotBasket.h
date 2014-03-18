@@ -18,7 +18,7 @@
 #define SETBINS if(isNewStep()) setBins()
 #define SETBINSRANGE(N,L,H) if(isNewStep()){ \
         setBins(); \
-        for(float i=(float)L;i<=((float) H);i+=((float)H-(float)L)/((float)N)) \
+        for(float i=(float)L;i<=((float) H)+((float)H-(float)L)/((float)N)*0.01;i+=((float)H-(float)L)/((float)N)) \
         getBins().push_back(i);}
 
 namespace ztop{
