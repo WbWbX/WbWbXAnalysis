@@ -272,7 +272,7 @@ int main(int argc, char* argv[]){
         //try to get from stack
         containerStack stack=csv.getStack(plot);
         //get signal container
-        cuf=stack.getSignalContainer();
+        cuf=stack.getSignalContainer1DUnfold();
     }
     if(cuf.isDummy()){//still not found
         std::cout << "printvariations: no containers found!!" << std::endl;

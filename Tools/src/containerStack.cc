@@ -1372,6 +1372,41 @@ std::vector<size_t> containerStack::getSignalIdxs() const{
     return out;
 }
 
+container1D containerStack::getSignalContainer()const{
+    if(mode != dim1 || mode !=unfolddim1){
+        return container1D();
+    }
+    std::vector<size_t> sidx=getSignalIdxs();
+    container1D out;
+    if(sidx.size()>0) out=getContainer(sidx.at(0));
+    for(size_t i=1;i<sidx.size();i++)
+        out+=getContainer(sidx.at(i));
+    return out;
+}
+container1D containerStack::getBackgroundContainer()const{
+    if(mode != dim1 || mode !=unfolddim1){
+        return container1D();
+    }
+    std::vector<size_t> sidx=getSignalIdxs();
+    container1D out;
+    bool first=true;
+    for(size_t i=0;i<containers_.size();i++){
+        if(std::find(sidx.begin(),sidx.end(),i) != sidx.end()){
+            continue;
+        }
+        if(first){
+            out=containers_.at(i);
+            first=false;
+        }
+        else{
+            out+=containers_.at(i);
+        }
+    }
+
+
+}
+
+
 container1DUnfold containerStack::produceUnfoldingContainer(const std::vector<TString> &sign) const{// if sign empty use "setsignal"
     /*
    ad all signal -> cuf
@@ -1503,11 +1538,11 @@ bool containerStack::checknorms() const{
 }
 
 
-container1DUnfold containerStack::getSignalContainer(const std::vector<TString> &sign) const{
+container1DUnfold containerStack::getSignalContainer1DUnfold(const std::vector<TString> &sign) const{
     bool mklist=container1DUnfold::c_makelist;
     container1DUnfold::c_makelist=false;
     if(mode!=unfolddim1){
-        std::cout << "containerStack::getSignalContainer: bo container1DUnfold content, return empty" <<std::endl;
+        std::cout << "containerStack::getSignalContainer1DUnfold: bo container1DUnfold content, return empty" <<std::endl;
         container1DUnfold c;
         container1DUnfold::c_makelist=mklist;
         return c;

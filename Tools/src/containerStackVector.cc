@@ -369,7 +369,7 @@ void containerStackVector::writeAllToTFile(TString filename, bool recreate, bool
                         delete c;
                     }
                     pl.cleanMem();
-                    container1DUnfold cuf=stack->getSignalContainer();
+                    container1DUnfold cuf=stack->getSignalContainer1DUnfold();
                     containerStack rebinned=stack->rebinXToBinning(cuf.getGenBins());
                     rebinned.setName(stack->getName()+"_genbins");
                     c = new TCanvas(rebinned.getName());

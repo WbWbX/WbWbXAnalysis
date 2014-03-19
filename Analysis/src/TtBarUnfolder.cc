@@ -184,7 +184,7 @@ TString TtBarUnfolder::unfold(TString out,TString in)const{
         c->cd(1)->SetBottomMargin(0.15);
         c->cd(1)->SetLeftMargin(0.15);
         setNameAndTitle(c,name+"_pur_stab");
-        ztop::container1DUnfold cuf=stack->getSignalContainer();
+        ztop::container1DUnfold cuf=stack->getSignalContainer1DUnfold();
         cuf.checkCongruentBinBoundariesXY();
         TH1D * pur=cuf.getPurity().getTH1D("purity",false,false,false);
         TH1D * stab=cuf.getStability().getTH1D("stability",false,false,false);
