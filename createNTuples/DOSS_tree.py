@@ -21,7 +21,7 @@ options.register ('genFilterInvert',False,VarParsing.VarParsing.multiplicity.sin
 options.register ('includereco',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"includes info for eff studies")
 options.register ('includetrigger',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"includes full trigger string info for event")
 options.register ('includePDF',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"includes pdf weights info for event")
-options.register ('PDF','cteq65',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"pdf set for weights")
+options.register ('PDF','cteq66',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"pdf set for weights")
 options.register ('inputScript','TtZAnalysis.Configuration.samples.mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"input Script")
 options.register ('json','nojson',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"json files")
 options.register ('isSync',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"switch on for sync")
@@ -248,7 +248,7 @@ process.makeVLLeps+=process.pfEs
 process.requireMinLeptons = cms.EDFilter("LeptonPreFilter", #filters on any opposite charge combination between muons and/or electrons
                                          Asrc = cms.VInputTag(cms.InputTag('pfMus'),cms.InputTag('muons'),cms.InputTag('pfEs'),cms.InputTag('gsfElectrons')),
                                          Bsrc = cms.VInputTag(),
-                                         debug = cms.bool(True),
+                                         debug = cms.bool(debug),
                                          minPt =  cms.double(8)
                                          )
 
@@ -1066,3 +1066,12 @@ print "\nglobal Tag: " + globalTag
 if isPrompt:
     print "prompt reco not supported anymore! exit"
     exit(8888)
+
+
+copyjson=False
+if(hasattr(process.source,'lumisToProcess')):
+	lumisToProcess=process.source.lumisToProcess
+	copyjson=True
+process.load(inputScript)
+if copyjson:
+	process.source.lumisToProcess=lumisToProcess
