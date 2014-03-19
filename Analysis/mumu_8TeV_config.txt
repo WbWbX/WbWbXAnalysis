@@ -9,10 +9,10 @@ $ inputfile,  legend entry,   color,   xsection,   legendNumber,  (opt) isSignal
 
 $data
 $
-tree_8TeV_mumu_runA_22Jan.root,data,1,1,10
-tree_8TeV_mumu_runB_22Jan.root,data,1,1,10
-tree_8TeV_mumu_runC_22Jan.root,data,1,1,10
-tree_8TeV_mumu_runD_22Jan.root,data,1,1,10
+tree_8TeV_mumu_runA_22Jan.root,data,1,1,99
+tree_8TeV_mumu_runB_22Jan.root,data,1,1,99
+tree_8TeV_mumu_runC_22Jan.root,data,1,1,99
+tree_8TeV_mumu_runD_22Jan.root,data,1,1,99
 
 
 $mc
@@ -35,6 +35,12 @@ tree_8TeV_dymumu120inf.root,	     DY#rightarrowll,  858, 3532.8,  8
 
 tree_8TeV_qcdmu15.root,		     QCD,	       400, 134680,  9
 
+
+$ rare tt processes
+
+tree_ttbarg.root,                  t#bar{t}V/#gamma,    798,      1.8,   10
+tree_ttbarw.root,                  t#bar{t}V/#gamma,    798,      0.232, 10
+tree_ttbarz.root,                  t#bar{t}V/#gamma,    798,      0.2057,10
 
 
 [inputfiles-end]
