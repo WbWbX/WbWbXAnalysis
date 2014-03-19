@@ -158,6 +158,8 @@ public:
     container1D operator * (double val){return *this*(float)val;}           //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
 
 
+
+
     //void mergeBins(size_t ,size_t );
     std::vector<float> getCongruentBinBoundaries(const container1D &) const;
     container1D rebinToBinning(const std::vector<float> & newbins) const;
@@ -205,6 +207,11 @@ public:
 
     bool hasSameLayers(const container1D&) const;
     bool hasSameLayerOrdering(const container1D&) const;
+    /**
+     * this only merges layers, it does not change any content input or *this
+     * if a layer is added, it will be a copy of nominal (with stat error=0)
+     */
+    std::map<size_t,size_t> mergeLayers(container1D& rhs){return contents_.mergeLayers(rhs.contents_);}
 
     TString coutBinContent(size_t bin) const;
 

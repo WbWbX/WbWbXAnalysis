@@ -71,13 +71,13 @@ void histoContent::clearLayerStat(const int & idx){
 	for(size_t i=0;i<nominal_.size();i++)
 		getBin(i,idx).setStat(0);
 }
-std::map<size_t,size_t> histoContent::mergeLayers(const histoContent & rhs){
-	histoContent nrhs=rhs;
+std::map<size_t,size_t> histoContent::mergeLayers( histoContent & rhs){
+	//histoContent nrhs=rhs;
 	//add layers that are in lhs but not in rhs to rhs
-	nrhs.addLayers(*this);
+	rhs.addLayers(*this);
 	//add layers that are in rhs but not in lhs to lhs
 	//and get association map
-	return addLayers(nrhs);
+	return addLayers(rhs);
 }
 
 /**

@@ -339,6 +339,49 @@ bool container1DUnfold::check(){ ///NEW
     }
     return true;
 }
+
+container1D container1DUnfold::fold(const container1D& input, bool subtractbackground) const{
+    if(debug) std::cout << "container1DUnfold::fold" <<std::endl;
+    /* TBI!!! FIXME
+     * This function folds a (generated) input distribution
+     * In contrast to the unfolding this takes place within this class.
+     * The unfolding is done by an outside class, the containerUnfolder,
+     * to keep the container1DUnfold class slim.
+     * Checks on binning etc are performed.
+     * The output will be binned in reco binning and will incorporate all systematic
+     * uncertainties (TBI2:+stat of resp matrix).
+     * It will be equivalent to a reconstructed distribution with background subtracted.
+     * If <subtractbackground> is set to false, the reconstructed background with all its uncertainties
+     * will be added
+     */
+
+    //some checks
+    if(input.isDummy()){
+        throw std::logic_error("container1DUnfold::fold: input is dummy");
+    }
+    if(isDummy()){
+        throw std::logic_error("container1DUnfold::fold: *this is dummy");
+    }
+    if(input.getBins() != conts_.at(0).getBins()){
+        throw std::logic_error("container1DUnfold::fold: input bins and response matrix bins not the same");
+    }
+
+
+    /*take care of syst layers. check whether all exist.
+     * in terms of performance improvements, assume input.layersize<*this.layersize
+     * This does not affect the fact that this function should also work if its
+     * the other way around - just slightly slower
+     */
+    container1D inc=input;
+    container1D temp=conts_.at(0);
+    std::map<size_t,size_t> layerasso=temp.mergeLayers(inc);
+
+
+    throw std::logic_error("unfinished!");
+    return inc;
+
+}
+
 container1D container1DUnfold::getPurity() const{
     bool mklist=container1D::c_makelist;
     container1D::c_makelist=false;
@@ -385,17 +428,12 @@ container1D container1DUnfold::getStability(bool includeeff) const{
     container1DUnfold rebinned=rebinToBinning(genbins_);
     container1D gen=rebinned.projectToX(includeeff);//UFOF? include "BG"
 
-    //rec.rebinToBinning(getGenContainer());
     container1D recgen=rebinned.getDiagonal();
 
-    ///NEW
-    /*
-    for(int sys=-1;sys<(int)getSystSize();sys++)
-        for(size_t bin=0;bin<recgen.getBins().size();bin++)
-            recgen.getBin(bin,sys) = getDiagonalBin(bin,sys);
-     */
+
 
     //asume a "good" response matrix with most elements being diagonal, so assume stat correlation between both
+    //anyway only affect the error bars
     bool temp=histoContent::divideStatCorrelated;
     histoContent::divideStatCorrelated=true;
     container1D stability=recgen/gen;

@@ -56,7 +56,11 @@ public:
 	void clearLayerContent(const int &);
 	void clearLayerStat(const int &);
 
-	std::map<size_t,size_t> mergeLayers(const histoContent &);
+	/**
+	 * returns mapping of layer indices of *this to input histoContent
+	 * careful input will get additional layers (copies of its nominal)
+	 */
+	std::map<size_t,size_t> mergeLayers( histoContent &);
 
 	void removeAdditionalLayers(){additionalbins_.clear();layermap_.clear();}
 
@@ -137,6 +141,10 @@ private:
 	std::vector<histoBins> additionalbins_;
 	indexMap<TString> layermap_;
 
+	/**
+	 * first map index: layer index of *this
+	 * second index: layer index of rhs
+	 */
 	std::map<size_t,size_t> addLayers(const histoContent & rhs);
 
 };

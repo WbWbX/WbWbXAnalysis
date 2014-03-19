@@ -82,7 +82,7 @@ public:
     container1DUnfold operator / (const container1DUnfold &);       //! binomial stat error or uncorr error (depends on setDivideBinomial()); treats same named systematics as correlated
     container1DUnfold operator * (const container1DUnfold &);       //! adds stat errors in squares; treats same named systematics as correlated!!
     container1DUnfold operator * (float);            //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
-    container1DUnfold operator *= (float val){*this=*this*val;return *this;}            //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
+    container1DUnfold operator *= (float val){*this=*this*val;return *this;}            //! simple scalar multiplication. stat and syst errors are scaled accordingly!! room for performance improvement
 
     void setDivideBinomial(bool);
 
@@ -108,6 +108,21 @@ public:
      */
     bool check();
 
+    /**
+     * TBI!!! FIXME
+     * This function folds a (generated) input distribution
+     * In contrast to the unfolding this takes place within this class.
+     * The unfolding is done by an outside class, the containerUnfolder,
+     * to keep the container1DUnfold class slim.
+     * Checks on binning etc are performed.
+     * The output will be binned in reco binning and will incorporate all systematic
+     * uncertainties (TBI2:+stat of resp matrix).
+     * It will be equivalent to a reconstructed distribution with background subtracted.
+     * If <subtractbackground> is set to false, the reconstructed background with all its uncertainties
+     * will be added
+     */
+    container1D fold(const container1D& input, bool subtractbackground=true) const;
+
     const container1D & getControlPlot() const{return recocont_;}
 
     const container1D & getUnfolded() const {return unfolded_;}
@@ -118,6 +133,10 @@ public:
 
     container1D getPurity() const;
     container1D getStability(bool includeeff=true) const;
+
+    /**
+     * should be obsolete now since 2D matrix anyway constructed as N x N (check) ?!
+     */
     bool checkCongruentBinBoundariesXY() const;
     histoBin getDiagonalBin(const size_t & xbin, int layer=-1) const;
     container1D getDiagonal()const;

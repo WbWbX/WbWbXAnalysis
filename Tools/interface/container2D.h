@@ -31,7 +31,7 @@ public:
     container2D(const std::vector<float> & ,const std::vector<float> &, TString name="",TString xaxisname="",TString yaxisname="", bool mergeufof=false); //! construct with binning
     ~container2D();
 
-    bool isDummy(){return xbins_.size()<2;}
+    bool isDummy()const{return xbins_.size()<2;}
 
     void setBinning(const std::vector<float> &xbins, std::vector<float> ybins);
     //setaxis etc still missing. should be ok as long as default constr. is protected
