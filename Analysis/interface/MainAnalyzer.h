@@ -87,6 +87,8 @@ public:
         ftorepl_=files;fwithfix_=pf;
     }
 
+    void usePDFWeights(int which){usepdfw_=which;}
+
     void setDataSetDirectory(TString dir){datasetdirectory_=dir;}
     void setShowStatus(bool show){showstatus_=show;}
     void setOnlySummary(bool show){onlySummary_=show;}
@@ -194,6 +196,7 @@ private:
     IPCPipes<int> p_status; //not  implemented, yet
 
     bool writeAllowed_;
+    int usepdfw_;
 
     // bool askForWrite();
     int  checkForWriteRequest();

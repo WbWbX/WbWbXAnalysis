@@ -58,6 +58,7 @@ MainAnalyzer::MainAnalyzer(){
     singlefile_=false;
     maxchilds_=8;
     topmass_="mt172.5";
+    usepdfw_=-1;
 }
 /**
  * takes care of not already deleted containers etc
@@ -162,7 +163,7 @@ int MainAnalyzer::start(){
                     analyze(p_idx.get(i)->pread());
                 }
                 catch(std::exception& e){
-                  //  reportError(-99,i);
+                    //  reportError(-99,i);
                     //this is a special error report. make sure the couts are atomic
                     p_askwrite.get(i)->pwrite(i);
                     p_allowwrite.get(i)->pread();
@@ -419,6 +420,37 @@ float MainAnalyzer::createNormalizationInfo(TFile *f, bool isMC,size_t anaid){
                 generated2->setBinContent(i, (float)genentries);
                 generated2->setBinStat(i, sqrt(genentries));
             }
+        }
+        //for PDF weights to keep normalization the same
+        if(usepdfw_>-1){
+
+            std::cout << "warning: using pdf weights is implemented, but there are pitfalls:\n"
+                    << " - the nominal pdf weight (idx 0) can be different from 1 depending on\n"
+                    << "   which pdf set is used to produce the MC sample and which to reweight.\n"
+                    << "   CHECKCHECKCHECK!!! TBI properly" ;
+
+            size_t pdfw=usepdfw_;
+            float wgenentries=0;
+            TBranch * b_Event=0;
+            NTEvent * pEvent = 0;
+            tfgen->SetBranchAddress("NTEvent",&pEvent,&b_Event);
+
+            Long64_t nEntries=tfgen->GetEntries();
+            for(Long64_t entry=0;entry<nEntries;entry++){
+                b_Event->GetEntry(entry);
+                if(pdfw < pEvent->PDFWeightsSize()){
+                    wgenentries+=pEvent->PDFWeight(pdfw);
+                }
+                else{
+                    throw std::out_of_range("PDF weight index not found");
+                }
+            }
+            for(size_t i=1;i<=generated->getNBins();i++){
+                generated->setBinContent(i, (float)wgenentries);
+                generated->setBinStat(i,sqrt(wgenentries));
+            }
+            norm = lumi_   / wgenentries;
+
         }
 
     }
