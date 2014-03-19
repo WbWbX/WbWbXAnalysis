@@ -70,37 +70,19 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
 
     ////////angluar stuff! beware - needs to be done properly later
 
-    float costheta_ll=0;
+
     SETBINSRANGE(80,-1.0,1.0);
     addPlot("cos_Angle(ll)", "cos#theta_{ll}","Nleptons/bw");
-    if(event()->leadinglep && event()->secleadinglep){
-      float mag_l1, mag_l2, px_l1, py_l1, pz_l1, px_l2, py_l2, pz_l2, scal_pr;
+    FILLSINGLE(cosleplepangle);
 
-      px_l1 = event()->leadinglep->p4().Px();
-      py_l1 = event()->leadinglep->p4().Py();
-      pz_l1 = event()->leadinglep->p4().Pz();
-      px_l2 = event()->secleadinglep->p4().Px();
-      py_l2 = event()->secleadinglep->p4().Py();
-      pz_l2 = event()->secleadinglep->p4().Pz();
-      
-      mag_l1 = (px_l1*px_l1 + py_l1*py_l1 + pz_l1*pz_l1);
-      mag_l2 = (px_l2*px_l2 + py_l2*py_l2 + pz_l2*pz_l2);
-
-      scal_pr = (px_l1*px_l2 + py_l1*py_l2 + pz_l1*pz_l2);
-
-      //angle = acos(scal_pr/sqrt(mag_l1*mag_l2));
-      costheta_ll = scal_pr/sqrt(mag_l1*mag_l2);
-      last()->fill(costheta_ll,*(event()->puweight));
-    }
     SETBINSRANGE(40,0.0,(2*M_PI));
     addPlot("delta_theta_lep combined with dphi(ll,jet)", "(cos#theta_{ll}+1)*#Delta#phi(ll,j)","N_{evt}/bw");
     if(middphiInfo){
         float test_var1;
-
-        test_var1 =  ((costheta_ll+1)* (*(event()->dphillj)));
-
+        test_var1 =  ((*(event()->cosleplepangle)+1)* (*(event()->dphillj)));
         last()->fill(test_var1,*(event()->puweight));
     }
+
     SETBINSRANGE(40,0.0,M_PI);
     addPlot("dphi(ll,jets)", "#Delta#phi(ll,jets)","N_{evt}/bw");
     if(event()->leadinglep && event()->secleadinglep
@@ -119,11 +101,11 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
     SETBINSRANGE(80,-5.0,5.0);
     addPlot("delta_eta_lep", "#Delta#eta_{ll}","Nleptons/bw");
     if(event()->leadinglep && event()->secleadinglep){
-      float delta_theta;
+      float delta_eta;
 
-      delta_theta = event()->leadinglep->p4().Eta() - event()->secleadinglep->p4().Eta();
+      delta_eta = event()->leadinglep->p4().Eta() - event()->secleadinglep->p4().Eta();
 
-      last()->fill(delta_theta,*(event()->puweight));
+      last()->fill(delta_eta,*(event()->puweight));
     }
 
     SETBINSRANGE(80,0.0,12.0);
@@ -140,6 +122,8 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
     SETBINSRANGE(50,0,6);
     addPlot("leadlep-secleadlep dR", "dR", "N_{e}*N_{#mu}/bw",true);
     FILLSINGLE(leplepdr);
+
+
 
     SETBINS << -2.4 << -2.1 << -1.47 << -0.8 << 0.8 << 1.47 << 2.1 << 2.4;
     addPlot("muon eta", "#eta_{l}","N_{#mu}");
@@ -203,9 +187,6 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
     FILL(dphilljjets,size());
     addPlot("dphiplushard jets multi", "N_{jet}", "N_{evt}");
     FILL(dphiplushardjets,size());
-
-
-
     addPlot("selected b jet multi","N{bjet}","N_{evt}",true);
     FILL(selectedbjets,size());
 
@@ -219,6 +200,12 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
     addPlot("secleading jet btag","D_{1^{st}jet}","evt/bw");
     if(event()->selectedjets && event()->selectedjets->size()>1)
         FILL(selectedjets->at(1),btag()) ;
+
+    SETBINSRANGE(40,-1.2,1.2);
+    addPlot("all jets btags","D_{b-tag}","N_{jets}/bw");
+    FILLFOREACH(selectedjets,btag());
+
+
 
 
     SETBINSRANGE(80,0,400);
@@ -352,9 +339,22 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
 
     ///fancy vars
 
-    SETBINSRANGE(70,0,1200);
-    addPlot("top discr","D_{top}","N_{evt}/bw",true);
-    FILLSINGLE(topdiscr);
+    SETBINSRANGE(50,0,1);
+    addPlot("top discr","D_{top}=(cos#theta_{ll}+1)/2*#Delta#phi(ll,j)/#pi*(-D_{b-tag}+1)","N_{evt}/bw",true);
+    if(middphiInfo && event()->cosleplepangle && event()->selectedjets){
+        //average b-tag discr
+        size_t btagged=0;float btagscontr=1;
+        for(size_t i=0 ;i<event()->selectedjets->size();i++){
+            //if(i>0) break; //only use first jet for now
+            if(event()->selectedjets->at(i)->btag()>0 && event()->selectedjets->at(i)->btag()<1){
+                btagscontr*=(- event()->selectedjets->at(i)->btag() +1);
+                btagged++;
+            }
+        }
+
+            last()->fill((* event()->cosleplepangle +1)/2* *event()->dphillj/M_PI * btagscontr,* event()->puweight);
+    }
+
 
     ///EVT VARS
 

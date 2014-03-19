@@ -40,7 +40,7 @@ public:
     leadinglep(0),secleadinglep(0),
     //leadingjetbtag(0),secleadingjetbtag(0),
     simplemet(0),adjustedmet(0),
-    mll(0),leplepdr(0),dphillj(0),dphilljj(0),detallj(0),detalljj(0),ht(0),ptllj(0),topdiscr(0),
+    mll(0),leplepdr(0),cosleplepangle(0),dphillj(0),dphilljj(0),detallj(0),detalljj(0),ht(0),ptllj(0),topdiscr(0),
     midphi(0),
     S4(0),
     allobjects4(0),
@@ -68,7 +68,7 @@ public:
         leadinglep=0;secleadinglep=0;
         //leadingjetbtag=0;secleadingjetbtag=0;
         simplemet=0;adjustedmet=0;
-        mll=0;leplepdr=0;dphillj=0;dphilljj=0;detallj=0;detalljj=0;ht=0;ptllj=0;topdiscr=0;
+        mll=0;leplepdr=0;cosleplepangle=0;dphillj=0;dphilljj=0;detallj=0;detalljj=0;ht=0;ptllj=0;topdiscr=0;
         midphi=0;
         S4=0;
         allobjects4=0;
@@ -126,6 +126,7 @@ public:
 
     float * mll;
     float * leplepdr;
+    float * cosleplepangle;
     float * dphillj;
     float * dphilljj;
     float * detallj;

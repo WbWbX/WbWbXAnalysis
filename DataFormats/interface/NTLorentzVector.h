@@ -164,10 +164,26 @@ template<class T>
 bool NTLorentzVector<T>::bepicky=false;
 
 template<class T>
-float dR(const NTLorentzVector<T>& a,const NTLorentzVector<T>& b){
+float dR_3d(const NTLorentzVector<T>& a,const NTLorentzVector<T>& b){
     T deta2=(a.eta() - b.eta())*(a.eta() - b.eta());
     T dphi2=(a.phi() - b.phi())*(a.phi() - b.phi());
     return sqrt(deta2+dphi2);
+}
+
+template<class T>
+float cosAngle_3d(const NTLorentzVector<T>& a,const NTLorentzVector<T>& b){
+    float mag_l1, mag_l2, px_l1, py_l1, pz_l1, px_l2, py_l2, pz_l2, scal_pr;
+    px_l1 = a.Px();
+    py_l1 = a.Py();
+    pz_l1 = a.Pz();
+    px_l2 = b.Px();
+    py_l2 = b.Py();
+    pz_l2 = b.Pz();
+
+    mag_l1 = (px_l1*px_l1 + py_l1*py_l1 + pz_l1*pz_l1);
+    mag_l2 = (px_l2*px_l2 + py_l2*py_l2 + pz_l2*pz_l2);
+    scal_pr = (px_l1*px_l2 + py_l1*py_l2 + pz_l1*pz_l2);
+    return scal_pr/sqrt(mag_l1*mag_l2);
 }
 
 }

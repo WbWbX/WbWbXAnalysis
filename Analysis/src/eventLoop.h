@@ -324,7 +324,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     float count_samesign=0;
 
 
-
+    size_t pdfwidx=0;
+    if(usepdfw_>-1) pdfwidx=usepdfw_;
 
     ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
@@ -366,6 +367,16 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
             std::cout << "testmode("<< anaid << "): got first event entry" << std::endl;
 
         evt.puweight=&puweight;
+        if(usepdfw_>-1 && isMC){
+            //check once
+            if(entry<1){
+                if(pdfwidx >= pEvent->PDFWeightsSize()){
+                    throw std::out_of_range("PDF weight index not found");
+                }
+            }
+
+            puweight*=pEvent->PDFWeight(pdfwidx);
+        }
 
         /////////////////////////////////////////////////////////////
         /////////////////////////////////////////////////////////////
@@ -715,6 +726,11 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
         evt.leadinglep=leadingptlep;
         evt.secleadinglep=secleadingptlep;
         evt.mll=&mll;
+
+        float leplepdr=dR_3d(leadingptlep->p4(),secleadingptlep->p4());
+        evt.leplepdr=&leplepdr;
+        float cosleplepangle=cosAngle_3d(leadingptlep->p4(),secleadingptlep->p4());
+        evt.cosleplepangle=&cosleplepangle;
 
         puweight*=lepweight;
 
