@@ -144,6 +144,7 @@ if [ "${#allj[@]}" -gt "${#jdone[@]}" ]
 then
 
     echo "you have still unfinished jobs: (${#jdone[@]} / ${#allj[@]} done)"
+    exit 6
 
 
 else
@@ -161,8 +162,11 @@ else
 	    echo "Your TtZAnalysis environment is not setup correctly, setting it up and merging"
 	    export PATH=${CMSSW_BASE}/src/TtZAnalysis/Analysis/bin:$PATH
 	    mergeSyst ${jdone[@]}
+
+	    exit 0
 	else
 	    echo "Cannot merge systematics. Has to be run from a CMSSW environment"
+	    exit 0
 	fi
     fi
 

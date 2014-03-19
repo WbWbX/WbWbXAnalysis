@@ -50,19 +50,43 @@ function compile(){
 	outfile=${infile%.cc}
 	echo compiling $infile to $outfile
 	g++ $ROOTFLAGS -fopenmp -I$CPLUS_INCLUDE_PATH -c -o $BUILDDIR/$infile.o $SRCDIR/$infile
+	if [ $? -ne 0 ]; 
+	then
+	    echo "Compilation of ${infile} not successful"
+	    exit 6
+	fi
 	g++ -o $LOCBIN/$outfile -fopenmp -Wall $ROOTLIBS -L$libdir $linklibs -l${CMSSW_BASE}/src/TtZAnalysis/Tools/TUnfold/libunfold.so $BUILDDIR/$infile.o
+	if [ $? -ne 0 ]; 
+	then
+	    echo "Compilation of ${infile} not successful"
+	    exit 6
+	fi
     fi
 
 }
 
 
 cd $CMSSW_BASE/src/TtZAnalysis/Analysis
+cd app_src
+for i in *.cc
+do
+    mv -f ../bin/${i%.cc} ../bin/${i%.cc}.old > /dev/null 2>&1 
+done
+cd -
 scram b -j12
+if [ $? -ne 0 ]; 
+then
+    echo "Error in scram while compiling! stopping... old executables are marked as <>.old"
+    exit 6
+fi
+
+
 copylibs
 cd app_src
 for i in *.cc
 do
     compile $i&
+    rm -f ../bin/${i%.cc}.old
 done
 sleep 1
 echo "waiting for unfinished jobs"

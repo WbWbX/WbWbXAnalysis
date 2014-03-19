@@ -1,9 +1,9 @@
 #!/bin/sh
 
 
-channels=( #"ee"
+channels=( "ee"
     "emu"
-    #"mumu"
+    "mumu"
 );
 ## scale and match variations will be ignored for other top masses then 172.5.. (hardcoded below)
 topmasses=( "172.5"
@@ -19,33 +19,33 @@ topmasses=( "172.5"
 );
 systs=("nominal"
 
-    "TRIGGER_up"
-    "TRIGGER_down"
-    "ELECSF_up"
-    "ELECSF_down"
-    "MUONSF_up"
-    "MUONSF_down"
+    #"TRIGGER_up"
+    #"TRIGGER_down"
+    #"ELECSF_up"
+    #"ELECSF_down"
+    #"MUONSF_up"
+    #"MUONSF_down"
 
-    "ELECES_up"
-   "ELECES_down"
-   "MUONES_up"
-   "MUONES_down"
+    #"ELECES_up"
+   #"ELECES_down"
+   #"MUONES_up"
+   #"MUONES_down"
 
-   "PU_up"
-   "PU_down"
+   #"PU_up"
+   #"PU_down"
 
-   "JER_up"
-   "JER_down"
-   "JES_up"
-   "JES_down"
+   #"JER_up"
+   #"JER_down"
+   #"JES_up"
+   #"JES_down"
 
    #"BTAGH_up"
    #"BTAGH_down"
    #"BTAGL_up"
    #"BTAGL_down"
 
-    "TOPPT_up"
-    "TOPPT_down"
+    #"TOPPT_up"
+    #"TOPPT_down"
 
    #"TT_MATCH_down"
    #"TT_MATCH_up"
@@ -192,3 +192,28 @@ for (( i=0;i<${#channels[@]};i++)); do
 	done
     done
 done
+
+function contcheck(){
+
+$workdir/check.sh
+while [ $? -ne 0 ]; 
+do
+    sleep 150
+    echo
+    echo time: $(date +"%H:%M")
+    $workdir/check.sh
+done
+
+}
+
+## continuous checking
+
+if [[ $3 == "c" ]]
+then
+    echo "swiching to continuous checking mode"
+    contcheck
+
+
+else
+    echo "to check the status run ${workdir}/check.sh"
+fi
