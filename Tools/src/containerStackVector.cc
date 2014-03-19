@@ -307,7 +307,7 @@ void containerStackVector::writeAllToTFile(TString filename, bool recreate, bool
         }
         else{
             t->Branch("containerStackVectors",this);
-            std::cout << "containerStackVector::writeAllToTFile: added branch" << std::endl;
+            if(debug) std::cout << "containerStackVector::writeAllToTFile: added branch" << std::endl;
         }
         if(debug)
             std::cout << "containerStackVector::writeAllToTFile: got branch" << std::endl;
