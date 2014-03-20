@@ -311,9 +311,12 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
             dycontributions << "Z#rightarrowll" << "DY#rightarrowll";
             if(!channel.Contains("emu")){
                 rescaleDY(&csv, dycontributions);
+                if(testmode)
+                    std::cout << "drawing plots..." <<std::endl;
                 csv.writeAllToTFile(ana.getOutPath()+".root",true,!testmode);
             }
             else if(testmode){
+                std::cout << "drawing plots..." <<std::endl;
                 csv.writeAllToTFile(ana.getOutPath()+".root",true,!testmode);
             }
 

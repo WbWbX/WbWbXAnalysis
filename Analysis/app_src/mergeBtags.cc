@@ -15,6 +15,8 @@ int main(int argc, char* argv[]){
     using namespace ztop;
     using namespace std;
 
+    bool debug=true;
+
     optParser parser(argc,argv);
     parser.bepicky=true;
     TString outname  = parser.getOpt<TString>("o","out","output file name <name>_btags.root (default out)");
@@ -44,6 +46,7 @@ int main(int argc, char* argv[]){
 
                 std::ifstream OutFileTest2(filename.Data());
                 if(OutFileTest2){
+                    if(debug) cout << "adding from file " << filename <<endl;
                     temp.readFromTFile(filename);
                     btags=btags+temp;
                 }
