@@ -8,6 +8,9 @@
 #include "../interface/AnalysisUtils.h"
 
 namespace ztop{
+/**
+ * HARDCODED NUMBER OF STEPS!! CHANGE AT SOME POINT
+ */
 void rescaleDY(ztop::container1DStackVector * vec, std::vector<TString> contributions,
         double scalescale, bool textout, TString identifier, int startingstep){
 
@@ -15,7 +18,7 @@ void rescaleDY(ztop::container1DStackVector * vec, std::vector<TString> contribu
 
     std::vector<TString> ident;ident.clear();
     std::vector<double> scales;scales.clear();
-    for(int i=startingstep;i<=9;i++){
+    for(int i=startingstep;i<=8;i++){
         TString stepstring=" step "+toTString(i);
         double dymc = 0;
         std::vector<TString> allbutdyanddata;

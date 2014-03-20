@@ -81,7 +81,7 @@ void controlPlotBasket::initStep(const size_t & step){
 }
 void controlPlotBasket::initSteps(size_t steps){
     initphase_=true; //removes some checks
-    for(size_t i=0;i<steps;i++)
+    for(size_t i=0;i<=steps;i++)
         makeControlPlots(i);
     initphase_=false;
 }

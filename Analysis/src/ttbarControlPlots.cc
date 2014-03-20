@@ -101,22 +101,22 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
     SETBINSRANGE(80,-5.0,5.0);
     addPlot("delta_eta_lep", "#Delta#eta_{ll}","Nleptons/bw");
     if(event()->leadinglep && event()->secleadinglep){
-      float delta_eta;
+        float delta_eta;
 
-      delta_eta = event()->leadinglep->p4().Eta() - event()->secleadinglep->p4().Eta();
+        delta_eta = event()->leadinglep->p4().Eta() - event()->secleadinglep->p4().Eta();
 
-      last()->fill(delta_eta,*(event()->puweight));
+        last()->fill(delta_eta,*(event()->puweight));
     }
 
     SETBINSRANGE(80,0.0,12.0);
     addPlot("delta_eta_lep combined with dphi(ll,jet)", "#Delta#eta_{ll}*(#Delta#phi - #pi)","Nleptons/bw");
     if(middphiInfo){
-      float delta_theta, test_var1;
+        float delta_theta, test_var1;
 
-      delta_theta = event()->leadinglep->p4().Eta() - event()->secleadinglep->p4().Eta();
-      test_var1 =  fabs(delta_theta)*fabs((*(event()->dphillj) - M_PI));
+        delta_theta = event()->leadinglep->p4().Eta() - event()->secleadinglep->p4().Eta();
+        test_var1 =  fabs(delta_theta)*fabs((*(event()->dphillj) - M_PI));
 
-      last()->fill(test_var1,*(event()->puweight));
+        last()->fill(test_var1,*(event()->puweight));
     }
 
     SETBINSRANGE(50,0,6);
@@ -341,19 +341,15 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
 
     SETBINSRANGE(50,0,1);
     addPlot("top discr","D_{top}=(cos#theta_{ll}+1)/2*#Delta#phi(ll,j)/#pi*(-D_{b-tag}+1)","N_{evt}/bw",true);
-    if(middphiInfo && event()->cosleplepangle && event()->selectedjets){
-        //average b-tag discr
-        size_t btagged=0;float btagscontr=1;
-        for(size_t i=0 ;i<event()->selectedjets->size();i++){
-            //if(i>0) break; //only use first jet for now
-            if(event()->selectedjets->at(i)->btag()>0 && event()->selectedjets->at(i)->btag()<1){
-                btagscontr*=(- event()->selectedjets->at(i)->btag() +1);
-                btagged++;
-            }
-        }
+    FILLSINGLE(topdiscr);
 
-            last()->fill((* event()->cosleplepangle +1)/2* *event()->dphillj/M_PI * btagscontr,* event()->puweight);
-    }
+    SETBINSRANGE(50,0,1);
+    addPlot("top discr2","D_{top,2}=(cos#theta_{ll}+1)/2*(-D_{b-tag}+1)","N_{evt}/bw",true);
+    FILLSINGLE(topdiscr2);
+
+    SETBINSRANGE(50,0,1);
+    addPlot("top discr3","D_{top,3}=(#Delta#phi(ll,j)/#pi*(-D_{b-tag}+1)","N_{evt}/bw",true);
+    FILLSINGLE(topdiscr3);
 
 
     ///EVT VARS

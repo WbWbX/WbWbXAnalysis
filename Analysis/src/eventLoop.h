@@ -100,13 +100,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
         mode_samesign=true;
         std::cout << "entering same sign mode" <<std::endl;
     }
-    size_t mintightmuons=0;
-    if(mode_.Contains("Tightmuons")){
-        mintightmuons=1;
-        if(b_mumu_)
-            mintightmuons=2;
-        std::cout << "entering tight muon mode" <<std::endl;
-    }
+
     bool mode_invertiso=false;
     if(mode_.Contains("Invertiso")){
         mode_invertiso=true;
@@ -161,7 +155,11 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
         twodiffbtags=true;
         std::cout << "entering Twodiffbtags mode" <<std::endl;
     }
-
+    bool usetopdiscr=false;
+    if(mode_.Contains("Topdiscr")){
+        usetopdiscr=true;
+        std::cout << "entering Topdiscr mode" <<std::endl;
+    }
 
     bool issignal=issignal_.at(anaid);
 
@@ -221,8 +219,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     ZControlPlots zplots;
     plots.setEvent(evt);
     zplots.setEvent(evt);
-    plots.initSteps(10);
-    zplots.initSteps(10);
+    plots.initSteps(8);
+    zplots.initSteps(8);
     jansplots_step8.setEvent(evt);
 
 
@@ -250,9 +248,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
     ////TEST
     //another btag SF util for tight working point
-   // NTBTagSF medBTagSF = *getBTagSF();
-   // std::cout << "the following message does NOT apply to the normal selection!" << std::endl;
-   // medBTagSF.setWorkingPoint("csvm");
+    // NTBTagSF medBTagSF = *getBTagSF();
+    // std::cout << "the following message does NOT apply to the normal selection!" << std::endl;
+    // medBTagSF.setWorkingPoint("csvm");
 
 
     //range check switched off because of different ranges in bins compared to diff Xsec (leps)
@@ -552,7 +550,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
             if(!(muon->isGlobal() || muon->isTracker()) ) continue;
             //try with tight muons
 
-            if(mintightmuons && muon->isGlobal()
+            if(muon->isGlobal()
                     && muon->normChi2()<10.
                     && muon->muonHits()>0
                     && muon->matchedStations() >1  //not in trees
@@ -566,7 +564,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
             //usetight=false;
 
             ///end tight
-            loosemuons <<  &(pMuons->at(i));
+          //  loosemuons <<  &(pMuons->at(i));
         }
 
         idmuons << tightmuons << loosemuons; //merge collections
@@ -602,16 +600,23 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
             if(!gotfirst && elec->pt() < 20)  continue;
             if(doLargeAcceptance) gotfirst=true;
             if( elec->pt() < 10) continue;
-            if(fabs(elec->eta()) > 2.4) continue;      ///common muon/elec phasespace
-            //if(!noOverlap(&(pElectrons->at(i)), kinmuons, 0.1)) continue;   ////!!!CHANGE
+            float abseta=fabs(elec->eta());
+            if(abseta > 2.5) continue;
             kinelectrons  << elec;
 
             ///select id electrons
             if(fabs(elec->d0V()) >0.04 ) continue;
             if(!(elec->isNotConv()) ) continue;
-            if(elec->mvaId() < 0.5) continue;
-            if(elec->mHits() > 0) continue;
+            //
+            // from https://twiki.cern.ch/twiki/bin/viewauth/CMS/MultivariateElectronIdentification#Triggering_MVA
+            if(abseta < 0.8){
+                if(elec->mvaId() < 0.94) continue;}
+            else if(abseta < 1.479){
+                if(elec->mvaId() < 0.85) continue;}
+            else if(abseta < 2.5){
+                if(elec->mvaId() < 0.92) continue;}
 
+            if(elec->mHits() > 0) continue;
 
             idelectrons <<  elec;
 
@@ -641,8 +646,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
 
         if(b_ee_ && idelectrons.size() < 2) continue;
-        if(b_mumu_ && (idmuons.size() < 2 || tightmuons.size() < mintightmuons)) continue;
-        if(b_emu_ && (idmuons.size() + idelectrons.size() < 2 || tightmuons.size() < mintightmuons)) continue;
+        if(b_mumu_ && (idmuons.size() < 2 )) continue;
+        if(b_emu_ && (idmuons.size() + idelectrons.size() < 2 )) continue;
 
         sel_step[1]+=puweight;
         plots.makeControlPlots(step);
@@ -783,8 +788,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
                 }
             }
             if(!(treejets.at(i)->id())) continue;
-            if(!noOverlap(treejets.at(i), isomuons, 0.5)) continue;
-            if(!noOverlap(treejets.at(i), isoelectrons, 0.5)) continue;
+            if(!noOverlap(treejets.at(i), isomuons,     0.4)) continue;
+            if(!noOverlap(treejets.at(i), isoelectrons, 0.4)) continue;
             if(fabs(treejets.at(i)->eta())>2.5) continue;
             if(treejets.at(i)->pt() < 10) continue;
             idjets << (treejets.at(i));
@@ -814,7 +819,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
         ///////////////combined variables////////////
 
-        float dphillj=0,dphilljj=0,detallj=0,detalljj=0;
+        float dphillj=M_PI,dphilljj=M_PI,detallj=0,detalljj=0;
         float pi=M_PI;
         bool midphi=false;
 
@@ -836,8 +841,6 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
             detalljj=(leadingptlep->p4()+secleadingptlep->p4()).Eta() - (hardjets.at(0)->p4()+hardjets.at(1)->p4()).Eta();
             evt.detalljj=&detalljj;
         }
-        float topdiscr=0;
-        evt.topdiscr=&topdiscr;
 
         float ptllj=leadingptlep->pt()+secleadingptlep->pt();
         evt.ptllj=&ptllj;
@@ -873,6 +876,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
         vector<NTJet*> * selectedjets=&hardjets;
 
 
+
+
+
         evt.dphilljjets=&dphilljjets;
         evt.dphiplushardjets=&dphiplushardjets;
         evt.selectedjets=selectedjets;
@@ -901,6 +907,27 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
                 continue;
             selectedbjets.push_back(selectedjets->at(i));
         }
+
+        float btagscontr=1;
+        for(size_t i=0 ;i<selectedjets->size();i++){
+            //if(i>0) break; //only use first jet for now
+            if(selectedjets->at(i)->btag()>0 && selectedjets->at(i)->btag()<1){
+                btagscontr*=(- selectedjets->at(i)->btag() +1);
+                break;
+            }
+        }
+        float topdiscr=1;
+        evt.topdiscr=&topdiscr;
+        topdiscr=1- ((cosleplepangle+1)/2 * dphillj/M_PI * btagscontr);
+
+        float topdiscr2=1;
+        evt.topdiscr2=&topdiscr2;
+        topdiscr2=1- ((cosleplepangle+1)/2 * btagscontr);
+
+        float topdiscr3=1;
+        evt.topdiscr3=&topdiscr3;
+        topdiscr3=1- (dphillj/M_PI * btagscontr);
+
 
         sel_step[3]+=puweight;
         plots.makeControlPlots(step);
@@ -1003,8 +1030,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
         ///////////////////// btag cut STEP 8 //////////////////////////
         step++;
-        if(selectedbjets.size() < 1) continue;
-
+        if(!usetopdiscr && selectedbjets.size() < 1) continue;
+        if(usetopdiscr && topdiscr3<0.9) continue;
         double bsf=1;
         bsf=getBTagSF()->getNTEventWeight(*selectedjets);
         puweight*= bsf;
@@ -1023,7 +1050,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
             zplots.makeControlPlots(step);
         }
         ///////////////////// 2btag cut STEP 9 //////////////////////////
-
+/*
         step++;
         if(hardbjets.size() < 2) continue;
 
@@ -1036,7 +1063,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
         if(isZrange){
             zplots.makeControlPlots(step);
         }
-
+*/
     }
 
     ///////////////////////////////////////////////////////////////////////
