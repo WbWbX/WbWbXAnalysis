@@ -79,8 +79,6 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     using namespace std;
     using namespace ztop;
 
-    TString mettype="NTMet";
-    TString electrontype="NTPFElectrons";
 
     //some mode options
     /* implement here not to overload MainAnalyzer class with private members
@@ -91,22 +89,29 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
      *  This allows for parsing of more than one option at once
      *
      *  These options should get a cleanup once in a while
+     *  The standard configuration should be visible on top
      */
 
-
-
+    TString mettype="NTT0T1TxyMet";
+    TString electrontype="NTPFElectrons";
     bool mode_samesign=false;
+    bool mode_invertiso=false;
+    bool usemvamet=false;
+    bool onejet=false;
+    bool twodiffbtags=false;
+    bool usetopdiscr=false;
+
+
+
     if(mode_.Contains("Samesign")){
         mode_samesign=true;
         std::cout << "entering same sign mode" <<std::endl;
     }
 
-    bool mode_invertiso=false;
     if(mode_.Contains("Invertiso")){
         mode_invertiso=true;
         std::cout << "entering invert iso mode" <<std::endl;
     }
-    bool usemvamet=false;
     if(mode_.Contains("Mvamet")){
         mettype="NTMvaMet";
         usemvamet=true;
@@ -115,10 +120,6 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     if(mode_.Contains("Pfmet")){
         mettype="NTMet";
         std::cout << "entering pfmet mode" <<std::endl;
-    }
-    if(mode_.Contains("T0t1txymet")){
-        mettype="NTT0T1TxyMet";
-        std::cout << "entering t0t1txymet mode" <<std::endl;
     }
     if(mode_.Contains("T0t1met")){
         mettype="NTT0T1Met";
@@ -145,21 +146,24 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
         getBTagSF()->setWorkingPoint("csvm");
         std::cout << "entering btagcsvm mode" <<std::endl;
     }
-    bool onejet=false;
     if(mode_.Contains("Onejet")){
         onejet=true;
         std::cout << "entering Onejet mode" <<std::endl;
     }
-    bool twodiffbtags=false;
     if(mode_.Contains("Twodiffbtags")){
         twodiffbtags=true;
         std::cout << "entering Twodiffbtags mode" <<std::endl;
     }
-    bool usetopdiscr=false;
     if(mode_.Contains("Topdiscr")){
         usetopdiscr=true;
         std::cout << "entering Topdiscr mode" <<std::endl;
     }
+
+
+    /*
+     * end of mode switches
+     */
+
 
     bool issignal=issignal_.at(anaid);
 
