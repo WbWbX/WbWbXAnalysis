@@ -528,13 +528,16 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
 
         vector<NTLepton *> allleps;
+        std::vector<NTLepton *> isoleptons;
+       // TBI std::vector<NTLepton *> vetoleps;
+        evt.allleptons=&allleps;
+        evt.isoleptons=&isoleptons;
 
-        vector<NTMuon*> kinmuons,idmuons,isomuons,tightmuons,loosemuons;
+        vector<NTMuon*> kinmuons,idmuons,isomuons;
         evt.kinmuons=&kinmuons;
         evt.idmuons=&idmuons;
         evt.isomuons=&isomuons;
 
-        //vector<NTMuon*> kinmuons,idmuons,isomuons,tightmuons,loosemuons;
         bool gotfirst=false;
         for(size_t i=0;i<pMuons->size();i++){
             NTMuon* muon = & pMuons->at(i);
@@ -558,7 +561,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
                     && fabs(muon->dzV())<0.2
                     && muon->pixHits()>0
                     && muon->trkHits()>5){
-                tightmuons <<  &(pMuons->at(i));
+                idmuons <<  &(pMuons->at(i));
                 continue; //no double counting
             }
             //usetight=false;
@@ -567,14 +570,14 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
           //  loosemuons <<  &(pMuons->at(i));
         }
 
-        idmuons << tightmuons << loosemuons; //merge collections
+
 
         for(size_t i=0;i<idmuons.size();i++){
             NTMuon * muon =  idmuons.at(i);
             if(!mode_invertiso && muon->isoVal() > 0.15) continue;
             if(mode_invertiso && muon->isoVal() < 0.15) continue;
             isomuons <<  muon;
-
+            isoleptons << muon;
         }
 
         /*
@@ -624,13 +627,15 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
             if(!mode_invertiso && elec->rhoIso()>0.15) continue;
             if(mode_invertiso && elec->rhoIso()<0.15) continue;
             isoelectrons <<  elec;
+            isoleptons << elec;
         }
 
         /*
          * make all lepton collection (merged muons and electrons)
          */
         std::sort(allleps.begin(),allleps.end(), comparePt<ztop::NTLepton*>);
-        evt.allleptons=&allleps;
+
+
 
 
         /*

@@ -60,13 +60,12 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
     addPlot("electron mva id", "Id", "N_{e}");
     FILLFOREACH(kinelectrons,mvaId());
 
-    SETBINSRANGE(80,0,0.5);
-    addPlot("electron saved Eunc", "#DeltaE/E [Gev]", "N_{e}");
-    if(event()->kinelectrons){
-        for(size_t i=0;i<event()->kinelectrons->size();i++)
-            last()->fill(event()->kinelectrons->at(i)->p4Err() /
-                    event()->kinelectrons->at(i)->e() ,*event()->puweight);
+    SETBINSRANGE(8,-0.5,7.5);
+    addPlot("iso lepton multi","N_{l,iso}","N_{evt}");
+    if(event()->isoleptons){
+        last()->fill(event()->isoleptons->size(),*event()->puweight);
     }
+
 
     ////////angluar stuff! beware - needs to be done properly later
 
