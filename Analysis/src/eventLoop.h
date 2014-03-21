@@ -43,6 +43,8 @@
 
 #include "../interface/analysisPlotsJan.h"
 
+#include <sys/types.h>
+#include <sys/stat.h>
 
 /*
  * Running on the samples is parallelized.
@@ -329,6 +331,18 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     size_t pdfwidx=0;
     if(usepdfw_>-1) pdfwidx=usepdfw_;
 
+    //speed up - testing!
+/*
+    struct stat filestatus;
+    stat((datasetdirectory_+inputfile).Data(), &filestatus );
+
+    cout << filestatus.st_size << " bytes\n";
+
+    t->SetCacheSize(filestatus.st_size/20);
+    if(t->GetCacheSize() > 100e6)
+        t->SetCacheSize(100e6);
+    t->AddBranchToCache("*");
+*/
     ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
