@@ -83,6 +83,7 @@ push @kill, $startstring;
 
 push @run, "cd $path\n";
 push @check, "cd $path\n";
+push @check, "$nafJobSplitter check ";
 
 while(my $line = <$IN>) {
     chomp $line;
@@ -121,11 +122,11 @@ while(my $line = <$IN>) {
     push @run, "echo submitting $outputFile with $cfgfilename for $dataset\n";
     push @run, "$nafJobSplitter -c $allOptions -d $outputFile -D $dataset -o $path -W 0 $numJobs $cfgfilename\n";
 
-    push @check, "$nafJobSplitter check naf_$outputFile\n";
+    push @check, "naf_$outputFile ";
 
 }
-push @run, "cd -\n";
-push @check, "cd -\n";
+push @run, "\necho \"jobs submitted\"\ncd -\n";
+push @check, "\necho \"check done\"\ncd -\n";
 
 #let submit script write a file after each submitted task(N jobs) and let checkJobs check if file exists (and only then perform a check
 
