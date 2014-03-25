@@ -258,7 +258,7 @@ if(includetrigger):
 #############
 
 
-if (not isMC) or ("ttbarbg" in outputFile):
+if (not isMC) or ("ttbarbg" in outputFile) or ((not isSignal) and includetrigger):
      if "_emu" in outputFile :
          print "emu preselection mode"
          process.requireMinLeptons.Asrc = cms.VInputTag(cms.InputTag('pfMus'),cms.InputTag('muons'))
