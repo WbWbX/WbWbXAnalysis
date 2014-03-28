@@ -370,7 +370,7 @@ int main(int argc, char* argv[]){
     bool status    = parse.getOpt<bool>     ("S",false,"show regular status update (switch)");         //-S enables default false
     bool testmode  = parse.getOpt<bool>     ("T",false,"enable testmode: 8% of stat, more printout");         //-T enables default false
     TString mode   = parse.getOpt<TString>  ("m","xsec","additional mode options");        //-m (xsec,....) default xsec changes legends? to some extend
-    TString inputfile= parse.getOpt<TString>  ("i","","specify input manually");          //-i empty will use automatic
+    TString inputfile= parse.getOpt<TString>  ("i","","specify configuration file input manually");          //-i empty will use automatic
     TString topmass  = parse.getOpt<TString>  ("mt","172.5","top mass value to be used, default: 172.5");          //-i empty will use automatic
 
 
