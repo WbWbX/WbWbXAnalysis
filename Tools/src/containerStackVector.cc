@@ -156,16 +156,26 @@ void containerStackVector::addSignal(const TString & signame){
 
 
 
-ztop::containerStack containerStackVector::getStack(TString name){
-    ztop::containerStack defout("DUMMY");
+const ztop::containerStack& containerStackVector::getStack(const TString& name)const{
+
+    for(std::vector<ztop::containerStack>::const_iterator s=stacks_.begin();s<stacks_.end();++s){
+        if(name == s->getName()){
+            return *s;
+        }
+    }
+    std::cout << "containerStackVector::getStack: "<< name << " not found." << std::endl;
+    throw std::out_of_range("containerStackVector::getStack: stack not found");
+}
+ztop::containerStack& containerStackVector::getStack(const TString& name){
     for(std::vector<ztop::containerStack>::iterator s=stacks_.begin();s<stacks_.end();++s){
         if(name == s->getName()){
             return *s;
         }
     }
-    std::cout << "containerStackVector::getStack: "<< name << " not found. returning empty Stack" << std::endl;
-    return defout;
+    std::cout << "containerStackVector::getStack: "<< name << " not found." << std::endl;
+    throw std::out_of_range("containerStackVector::getStack: stack not found");
 }
+
 void containerStackVector::removeContribution(TString contribution){
     for(std::vector<ztop::containerStack>::iterator stack=stacks_.begin(); stack < stacks_.end(); ++stack){
         stack->removeContribution(contribution);
@@ -177,7 +187,7 @@ void containerStackVector::addMCErrorStackVector(const TString &sysname, const z
 }
 void containerStackVector::addErrorStackVector(const TString &sysname,const  ztop::containerStackVector & stackvec){
     if(!fastadd){
-//#pragma omp parallel for
+        //#pragma omp parallel for
         size_t position=0; //faster. probably both are at the same position, but not guaranteed
         for(std::vector<containerStack>::iterator istack=stacks_.begin();istack<stacks_.end(); ++istack){
             size_t safecounter=0;
@@ -298,7 +308,17 @@ void containerStackVector::writeAllToTFile(TString filename, bool recreate, bool
         else{
             t = new TTree(treename,treename);
         }
+        if(t){
+            if(debug)
+                std::cout << "containerStackVector::writeAllToTFile: created/opened file and tree" << std::endl;
+        }
+        else{
+            std::cout << "containerStackVector::writeAllToTFile: creating/opening tree failed" << std::endl;
+        }
+
+
         if(t->GetBranch("containerStackVectors")){ //branch does  exist
+            if(debug) std::cout << "containerStackVector::writeAllToTFile: opened branch" << std::endl;
             bool temp=csv_makelist;
             csv_makelist=false;
             containerStackVector * csv = this;

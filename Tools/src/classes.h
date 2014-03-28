@@ -50,10 +50,10 @@ struct dictionary {
 	std::vector<ztop::container1D> b;
 	ztop::container2D aa;
 	std::vector<ztop::container2D> bb;
-	ztop::container1DStack asda;
-	std::vector<ztop::container1DStack> bbd;
-	ztop::container1DStackVector aaa;
-	std::vector<ztop::container1DStackVector> bbb;
+	ztop::containerStack asda;
+	std::vector<ztop::containerStack> bbd;
+	ztop::containerStackVector aaa;
+	std::vector<ztop::containerStackVector> bbb;
 
 
 	std::vector<TH2D> ijij;
@@ -90,6 +90,10 @@ struct dictionary {
 
 	ztop::tObjectList jhwefiuhwefjn;
 	std::vector<ztop::tObjectList> sdwefwerewfds;
+
+	ztop::taggedObject tagewfdsfds;
+	std::vector<ztop::taggedObject::tags> tagsqwdwed;
+	std::vector<ztop::taggedObject> taggedobjectsoijdof;
 
 	ztop::plot pltggg;
 };

@@ -340,7 +340,7 @@ bool container1DUnfold::check(){ ///NEW
     return true;
 }
 
-container1D container1DUnfold::fold(const container1D& input, bool subtractbackground) const{
+container1D container1DUnfold::fold(const container1D& input) const{
     if(debug) std::cout << "container1DUnfold::fold" <<std::endl;
     /* TBI!!! FIXME
      * This function folds a (generated) input distribution
@@ -350,8 +350,7 @@ container1D container1DUnfold::fold(const container1D& input, bool subtractbackg
      * Checks on binning etc are performed.
      * The output will be binned in reco binning and will incorporate all systematic
      * uncertainties (TBI2:+stat of resp matrix).
-     * It will be equivalent to a reconstructed distribution with background subtracted.
-     * If <subtractbackground> is set to false, the reconstructed background with all its uncertainties
+     * migrations from outside vis PS
      * will be added
      */
 
@@ -364,6 +363,9 @@ container1D container1DUnfold::fold(const container1D& input, bool subtractbackg
     }
     if(input.getBins() != conts_.at(0).getBins()){
         throw std::logic_error("container1DUnfold::fold: input bins and response matrix bins not the same");
+
+        /////TBI change this to an automatic rebinning later FIXME
+
     }
 
 
@@ -372,14 +374,51 @@ container1D container1DUnfold::fold(const container1D& input, bool subtractbackg
      * This does not affect the fact that this function should also work if its
      * the other way around - just slightly slower
      */
-    container1D inc=input;
-    container1D temp=conts_.at(0);
-    std::map<size_t,size_t> layerasso=temp.mergeLayers(inc);
+    container1D out=projectToY(); //to get syst layers etc right
+    container1D preparedinput=input;
+    out.mergeLayers(preparedinput);
 
 
-    throw std::logic_error("unfinished!");
-    return inc;
+    // prepare new response matrix
+    // normalize each column to itself (including UF/OF). This then takes care of efficiencies
+    // this step includes ALL systematics
 
+    container2D normresp=getNormResponseMatrix();
+    std::vector<container1D> & copies=normresp.conts_;
+
+    //do the M x vector  multiplication
+
+    for(size_t row=0;row<copies.size();row++){ //UF (efficiencies) and OF (nothing) excluded
+        //get layer asso
+        std::map<size_t,size_t> layerasso=copies.at(row).mergeLayers(preparedinput);
+
+        if(debug)
+            std::cout << "container1DUnfold::fold: preparedInput layers: " << preparedinput.getSystSize() << std::endl;
+        for(int sys=-1;sys<(int)copies.at(row).getSystSize();sys++){
+            float sum=0, sumstat2=0,fakeentries=0;
+
+            int inputsys=sys;
+            if(sys>-1){
+                inputsys=layerasso[(size_t)sys];
+
+                if(debug)
+                    std::cout << "container1DUnfold::fold: folding for systematic var " <<  copies.at(row).getSystErrorName(sys)
+                    << " >> " <<  preparedinput.getSystErrorName(inputsys) << std::endl;
+            }
+            for(size_t bin=0;bin<copies.at(row).getBins().size();bin++){ // include UF OF (visPS migrations)
+                sum+= copies.at(row).getBinContent(bin,sys)*preparedinput.getBinContent(bin,inputsys);
+                //assume no stat correlation between resp matrix and input
+                sumstat2+=copies.at(row).getBin(bin,sys).getStat2() * preparedinput.getBinContent(bin,inputsys) * preparedinput.getBinContent(bin,inputsys);
+                sumstat2+=preparedinput.getBin(bin,inputsys).getStat2() * copies.at(row).getBinContent(bin,sys)*copies.at(row).getBinContent(bin,sys);
+                fakeentries+=preparedinput.getBinEntries(bin,sys);
+            }
+            out.getBin(row,sys).setContent(sum);
+            out.getBin(row,sys).setStat2(sumstat2);
+            out.getBin(row,sys).setEntries(fakeentries);
+        }
+    }
+    out.setName(input.getName()+"_folded");
+    return out;
 }
 
 container1D container1DUnfold::getPurity() const{
@@ -457,6 +496,25 @@ container2D container1DUnfold::getResponseMatrix()const{
     out.name_=name_+"_respMatrix";
     return out;
 }
+container2D container1DUnfold::getNormResponseMatrix()const{
+    container2D out;
+
+    out.conts_=conts_; //! for each y axis bin one container
+    container1D xprojection=projectToX(true);
+    for(size_t i=0;i<out.conts_.size();i++)
+        out.conts_.at(i)/=xprojection;
+    out.xbins_=xbins_;
+    out.ybins_=ybins_;
+    out.divideBinomial_=divideBinomial_;
+    out.mergeufof_=mergeufof_;
+
+    out.xaxisname_=xaxis1Dname_ + " - gen";
+    out.yaxisname_=xaxis1Dname_ + " - reco";
+    out.name_=name_+"_normrespMatrix";
+    return out;
+}
+
+
 
 /**
  * TH2D * prepareRespMatrix(bool nominal=true,unsigned int systNumber=0)

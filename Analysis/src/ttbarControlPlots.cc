@@ -351,6 +351,99 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
     FILLSINGLE(topdiscr3);
 
 
+    ///vars for single top disambitguation
+    //some thoughts
+
+    SETBINSRANGE(50,1,10);
+    addPlot("lep pt ratio","R_{p_{T}}","N_{evt}/bw");
+    if(event()->leadinglep && event()->secleadinglep){
+
+        last()->fill(event()->leadinglep->pt()/event()->secleadinglep->pt(),*event()->puweight);
+
+    }
+
+    SETBINSRANGE(50,0,300);
+    addPlot("non lb lep pt", "p_{T}^{l_{not}} [GeV]","N_{evt}/GeV");
+    if(event()->selectedbjets && event()->leadinglep && event()->secleadinglep){
+        if(event()->selectedbjets->size() > 0){
+            const NTLorentzVector<float> &firstjet=event()->selectedbjets->at(0)->p4();
+            const NTLorentzVector<float> &leadlep=event()->leadinglep->p4();
+            const NTLorentzVector<float> &secleadlep=event()->secleadinglep->p4();
+            NTLepton * usedlep=event()->leadinglep;
+            NTLepton * otherlep=event()->secleadinglep;
+            NTLorentzVector<float> lbp4=firstjet+leadlep;
+            if(lbp4.m() > 165){
+                lbp4=firstjet+secleadlep;
+                usedlep=event()->secleadinglep;
+                otherlep=event()->leadinglep;
+            }
+
+            last()->fill(otherlep->pt(),*event()->puweight);
+
+        }
+    }
+
+    SETBINSRANGE(50,0,100);
+    addPlot("lb pt-otherlep pt", "p_{T}^{l_{not}} [GeV]","N_{evt}/GeV");
+    if(event()->selectedbjets && event()->leadinglep && event()->secleadinglep){
+        if(event()->selectedbjets->size() > 0){
+            const NTLorentzVector<float> &firstjet=event()->selectedbjets->at(0)->p4();
+            const NTLorentzVector<float> &leadlep=event()->leadinglep->p4();
+            const NTLorentzVector<float> &secleadlep=event()->secleadinglep->p4();
+            NTLepton * usedlep=event()->leadinglep;
+            NTLepton * otherlep=event()->secleadinglep;
+            NTLorentzVector<float> lbp4=firstjet+leadlep;
+            if(lbp4.m() > 165){
+                lbp4=firstjet+secleadlep;
+                usedlep=event()->secleadinglep;
+                otherlep=event()->leadinglep;
+            }
+
+            last()->fill(fabs(lbp4.pt( )- otherlep->pt()),*event()->puweight);
+
+        }
+    }
+    SETBINSRANGE(50,0,2*M_PI);
+    addPlot("lb phi-met phi", "p_{T}^{l_{not}} [GeV]","N_{evt}/GeV");
+    if(event()->selectedbjets && event()->leadinglep && event()->secleadinglep && event()->adjustedmet){
+        if(event()->selectedbjets->size() > 0){
+            const NTLorentzVector<float> &firstjet=event()->selectedbjets->at(0)->p4();
+            const NTLorentzVector<float> &leadlep=event()->leadinglep->p4();
+            const NTLorentzVector<float> &secleadlep=event()->secleadinglep->p4();
+            NTLepton * usedlep=event()->leadinglep;
+            NTLepton * otherlep=event()->secleadinglep;
+            NTLorentzVector<float> lbp4=firstjet+leadlep;
+            if(lbp4.m() > 165){
+                lbp4=firstjet+secleadlep;
+                usedlep=event()->secleadinglep;
+                otherlep=event()->leadinglep;
+            }
+
+            last()->fill(fabs(lbp4.phi( )- event()->adjustedmet->phi()),*event()->puweight);
+
+        }
+    }
+
+    SETBINSRANGE(50,0,5.9);
+    addPlot("dR(lb,l)", "p_{T}^{l_{not}} [GeV]","N_{evt}/GeV");
+    if(event()->selectedbjets && event()->leadinglep && event()->secleadinglep && event()->adjustedmet){
+        if(event()->selectedbjets->size() > 0){
+            const NTLorentzVector<float> &firstjet=event()->selectedbjets->at(0)->p4();
+            const NTLorentzVector<float> &leadlep=event()->leadinglep->p4();
+            const NTLorentzVector<float> &secleadlep=event()->secleadinglep->p4();
+            NTLepton * usedlep=event()->leadinglep;
+            NTLepton * otherlep=event()->secleadinglep;
+            NTLorentzVector<float> lbp4=firstjet+leadlep;
+            if(lbp4.m() > 165){
+                lbp4=firstjet+secleadlep;
+                usedlep=event()->secleadinglep;
+                otherlep=event()->leadinglep;
+            }
+
+            last()->fill(dR_3d(lbp4,otherlep->p4()),*event()->puweight);
+
+        }
+    }
     ///EVT VARS
 
     SETBINSRANGE(50,0,50);
@@ -360,6 +453,10 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
     SETBINSRANGE(50,0,2);
     addPlot("event weight","w","N_{evt}");
     FILLSINGLE(puweight);
+
+
+
+
 
 }
 

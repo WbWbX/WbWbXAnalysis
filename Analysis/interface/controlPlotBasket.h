@@ -33,7 +33,7 @@ public:
     controlPlotBasket():tmpidx_(0),tmpstep_(0),tmpnewstep_(true),evt_(0),lcont_(0),size_(0),initphase_(false){}
     virtual ~controlPlotBasket();
 
-    void setEvent(const NTFullEvent & evt){evt_=&evt;}
+    void linkEvent(const NTFullEvent & evt){evt_=&evt;}
 
 
     virtual void makeControlPlots(const size_t& step)=0;

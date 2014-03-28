@@ -10,6 +10,7 @@
 #include "TObject.h"
 #include <vector>
 #include "TH1.h"
+#include <stdexcept>
 
 namespace ztop{
 class tObjectList{
@@ -44,6 +45,9 @@ public:
 protected:
     template<class obj>
     obj * addObject( obj *o){
+        if(!o){
+            throw std::runtime_error("tObjectList::addObject: trying to add NULL");
+        }
         TObject *tobj=o;
         tobj->SetBit(kMustCleanup);
         allobj_.push_back(tobj);

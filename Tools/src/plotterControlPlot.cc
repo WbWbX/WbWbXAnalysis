@@ -120,7 +120,7 @@ void plotterControlPlot::drawLegends(){
  * returns ordered pointers to objects to add to lagends
  */
 void plotterControlPlot::drawControlPlot(){
-    if(debug) std::cout << "plotterControlPlot::drawControlPlot" <<std::endl;
+    if(debug) std::cout << "plotterControlPlot::drawControlPlot " << stackp_->getName()<<std::endl;
     getPad()->cd(1);
     TH1::AddDirectory(false);
     //make axis histo
@@ -130,6 +130,7 @@ void plotterControlPlot::drawControlPlot(){
     if(debug)std::cout <<  "found dataentry at position "<< dataentry<< " of " <<  stackp_->size()-1<< std::endl;
     tempdataentry_=dataentry;
     if(dataentry == stackp_->size()){
+        std::cout <<  "plotterControlPlot::drawControlPlot: no data entry found for " << stackp_->getName() <<std::endl;
         throw std::runtime_error("plotterControlPlot::drawControlPlot: no data entry found");
     }
 
@@ -153,65 +154,69 @@ void plotterControlPlot::drawControlPlot(){
 
     templegp_->AddEntry(dataplottemp->getSystGraph(),stackp_->getLegend(dataentry),"ep");
 
-    std::vector<TObject *> sortedout;
-    std::vector<size_t> sorted=stackp_->sortEntries(invertplots_); //invert
-    std::vector<size_t> nisorted=stackp_->sortEntries(!invertplots_); //invert
-    std::vector<TH1 *> stackedhistos;
+    if(stackp_->size()>1){ //its not only data
 
-    container1D sumcont=stackp_->getContainer(dataentry);
-    sumcont.clear();
-    bool tmpaddStatCorrelated=histoContent::addStatCorrelated;
-    histoContent::addStatCorrelated=false;
-    size_t firstmccount=0;
-    if(dataentry==0) firstmccount++;
+        std::vector<TObject *> sortedout;
+        std::vector<size_t> sorted=stackp_->sortEntries(invertplots_); //invert
+        std::vector<size_t> nisorted=stackp_->sortEntries(!invertplots_); //invert
+        std::vector<TH1 *> stackedhistos;
+
+        container1D sumcont=stackp_->getContainer(dataentry);
+        sumcont.clear();
+        bool tmpaddStatCorrelated=histoContent::addStatCorrelated;
+        histoContent::addStatCorrelated=false;
+        size_t firstmccount=0;
+        if(dataentry==0) firstmccount++;
 
 
-    for(size_t it=0;it<stackp_->size();it++){ //it is the right ordering
-        size_t i=sorted.at(it);
-        if(i != dataentry){
-            container1D tempcont = stackp_->getContainer(i);
-            tempcont *=stackp_->getNorm(i);
+        for(size_t it=0;it<stackp_->size();it++){ //it is the right ordering
+            size_t i=sorted.at(it);
+            if(i != dataentry){
+                container1D tempcont = stackp_->getContainer(i);
+                tempcont *=stackp_->getNorm(i);
 
-            sumcont+=tempcont;
+                sumcont+=tempcont;
 
-            TH1D * h=addObject(sumcont.getTH1D(stackp_->getLegend(i)+" "+stackp_->getName()+"_stack_h",true,true,true)); //no errors
-            if(!h)
-                continue;
-            mcstyleupper_.applyContainerStyle(h,false);
-            h->SetFillColor(stackp_->colors_.at(i));
-            stackedhistos.push_back(h);
+                TH1D * h=addObject(sumcont.getTH1D(stackp_->getLegend(i)+" "+stackp_->getName()+"_stack_h",true,true,true)); //no errors
+                if(!h)
+                    continue;
+                mcstyleupper_.applyContainerStyle(h,false);
+                h->SetFillColor(stackp_->colors_.at(i));
+                stackedhistos.push_back(h);
+            }
+            else{
+                stackedhistos.push_back(0);
+            }
         }
-        else{
-            stackedhistos.push_back(0);
+        //draw
+        for(size_t i=stackedhistos.size()-1; i+1>0;i--){
+
+            if(stackedhistos.at(i)){ //not data
+                stackedhistos.at(i)->Draw(mcstyleupper_.rootDrawOpt+"same");
+                templegp_->AddEntry(stackedhistos.at(i),stackp_->getLegend(sorted.at(i)),"f");
+            }
+
+
         }
+        //make errors (use sumcont)
+        TG * mcerr=addObject(sumcont.getTGraph(stackp_->getName()+"mcerr_cp",true,false,false,false));
+        mcstyleupper_.applyContainerStyle(mcerr,true);
+        mcerr->Draw("same"+mcstyleupper_.sysRootDrawOpt);
+
+        histoContent::addStatCorrelated=tmpaddStatCorrelated;
     }
-    //draw
-    for(size_t i=stackedhistos.size()-1; i+1>0;i--){
-
-        if(stackedhistos.at(i)){ //not data
-            stackedhistos.at(i)->Draw(mcstyleupper_.rootDrawOpt+"same");
-            templegp_->AddEntry(stackedhistos.at(i),stackp_->getLegend(sorted.at(i)),"f");
-        }
-
-
-    }
-    //make errors (use sumcont)
-    TG * mcerr=addObject(sumcont.getTGraph(stackp_->getName()+"mcerr_cp",true,false,false,false));
-    mcstyleupper_.applyContainerStyle(mcerr,true);
-    mcerr->Draw("same"+mcstyleupper_.sysRootDrawOpt);
-
-
     //plot data now
     dataplottemp->getSystGraph()->Draw(datastyleupper_.sysRootDrawOpt+"same");
     dataplottemp->getStatGraph()->Draw(datastyleupper_.rootDrawOpt+"same");
 
     getPad()->cd(1)->RedrawAxis();
 
-    histoContent::addStatCorrelated=tmpaddStatCorrelated;
 
 }
 void plotterControlPlot::drawRatioPlot(){
     getPad()->cd(2);
+    if(stackp_->size() < 2)
+        return;
     container1D fullmc=stackp_->getFullMCContainer(); //dont div by bw
     fullmc=fullmc.getRelErrorsContainer();
 

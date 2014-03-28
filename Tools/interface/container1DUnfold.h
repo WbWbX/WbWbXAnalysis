@@ -117,11 +117,10 @@ public:
      * Checks on binning etc are performed.
      * The output will be binned in reco binning and will incorporate all systematic
      * uncertainties (TBI2:+stat of resp matrix).
-     * It will be equivalent to a reconstructed distribution with background subtracted.
-     * If <subtractbackground> is set to false, the reconstructed background with all its uncertainties
-     * will be added
+     * Migrations from outside of defined PS will be added
+     * Statistical uncertainties of response matrix and input container will be treated as uncorrelated!
      */
-    container1D fold(const container1D& input, bool subtractbackground=true) const;
+    container1D fold(const container1D& input) const;
 
     const container1D & getControlPlot() const{return recocont_;}
 
@@ -142,6 +141,7 @@ public:
     container1D getDiagonal()const;
 
     container2D getResponseMatrix()const;
+    container2D getNormResponseMatrix()const;
     TH2D * prepareRespMatrix(bool nominal=true,unsigned int systNumber=0) const;
 
     // someformat getCovarianceMatrix(size_t syst) { // M_ij = d_i * d_j, d_i= nominal_i-sys_i, i=bin}

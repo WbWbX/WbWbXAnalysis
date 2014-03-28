@@ -13,8 +13,7 @@
 #include <complex>
 #include "histoContent.h"
 #include "graph.h"
-
-
+#include "taggedObject.h"
 ////////bins include their border on the right side!!
 
 class TFile;
@@ -24,7 +23,7 @@ namespace ztop{
 class container2D;
 class containerStyle;
 
-class container1D{
+class container1D:public taggedObject{
     friend class container2D;
 public:
 
@@ -157,7 +156,9 @@ public:
     container1D & operator *= (double val){return *this *=(float)val;}           //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
     container1D operator * (double val){return *this*(float)val;}           //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
 
+    bool operator == (const container1D &)const;
 
+    void divideByBinWidth();
 
 
     //void mergeBins(size_t ,size_t );
@@ -208,8 +209,9 @@ public:
     bool hasSameLayers(const container1D&) const;
     bool hasSameLayerOrdering(const container1D&) const;
     /**
-     * this only merges layers, it does not change any content input or *this
+     * this only merges layers, it does not change any content of input or *this
      * if a layer is added, it will be a copy of nominal (with stat error=0)
+     * return: map of (new) *this syst indices to rhs indices
      */
     std::map<size_t,size_t> mergeLayers(container1D& rhs){return contents_.mergeLayers(rhs.contents_);}
 
@@ -238,6 +240,9 @@ public:
     void writeToTFile(const TString& filename);
 
 protected:
+    //whenever you add a member, make sure it turns up in at least the copy and == operator
+
+
     bool showwarnings_;
     float binwidth_;
     bool canfilldyn_;
@@ -260,7 +265,6 @@ protected:
     //not optimal and a problem when copying etc but better than nothing for fast interactive usage
     TGraphAsymmErrors * gp_;
     TH1D * hp_;
-
 
     TString stripVariation(const TString&) const;
     float getDominantVariationUp( TString ,const size_t &) const;

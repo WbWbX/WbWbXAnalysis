@@ -376,7 +376,7 @@ MainAnalyzer & MainAnalyzer::operator = (const MainAnalyzer & analyzer){
 void MainAnalyzer::analyze(size_t i){
 
     //  std::cout << " analyze " << i<< std::endl;
-    analyze(infiles_.at(i),legentries_.at(i),colz_.at(i),norms_.at(i),legord_.at(i),i);
+    analyze(infiles_.at(i),legentries_.at(i),colz_.at(i),legord_.at(i),i);
 
 }
 

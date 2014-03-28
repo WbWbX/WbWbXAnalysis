@@ -29,10 +29,10 @@
   <class name="std::vector<ztop::container1D>"/>
   <class name="ztop::container2D"/>
   <class name="std::vector<ztop::container2D>"/>
-  <class name="ztop::container1DStack"/>
-  <class name="std::vector<ztop::container1DStack>"/>
-  <class name="ztop::container1DStackVector"/>
-  <class name="std::vector<ztop::container1DStackVector>"/>
+  <class name="ztop::containerStack"/>
+  <class name="std::vector<ztop::containerStack>"/>
+  <class name="ztop::containerStackVector"/>
+  <class name="std::vector<ztop::containerStackVector>"/>
   <class name="std::vector<TH2D>"/>
   <class name="std::map<TString,std::vector<TH2D> >"/>
     <class name="ztop::containerUnfolder"/>
@@ -52,6 +52,10 @@
         <class name="ztop::tObjectList"/>
         <class name="std::vector<ztop::tObjectList>"/>
         <class name="std::vector<TObject*>"/>
+        
+	<class name="ztop::taggedObject"/>
+	<class name="std::vector<ztop::taggedObject::tags>"/>
+	<class name="std::vector<ztop::taggedObject>"/>
         
 	
 </lcgdict>

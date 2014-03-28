@@ -30,6 +30,11 @@ void containerStack::push_back(ztop::container1D cont, TString legend, int color
         std::cout << "containerStack::push_back: trying to add 1D container to non-1D stack!" << std::endl;
         return;
     }
+    if(cont.hasTag()){
+        if(debug) std::cout << "containerStack::push_back: adding tag" << std::endl;
+        addTagsFrom(&cont);
+    }
+
     bool wasthere=false;
     for(unsigned int i=0;i<legends_.size();i++){
         if(legend == legends_[i]){
@@ -63,6 +68,9 @@ void containerStack::push_back(ztop::container2D cont, TString legend, int color
         return;
     }
     bool wasthere=false;
+    if(cont.hasTag()){
+        addTagsFrom(&cont);
+    }
     for(unsigned int i=0;i<legends_.size();i++){
         if(legend == legends_[i]){
             if(containerStack::debug)
@@ -92,6 +100,9 @@ void containerStack::push_back(ztop::container1DUnfold cont, TString legend, int
     else if(mode!=unfolddim1){
         std::cout << "containerStack::push_back: trying to add 1DUnfold container to non-1DUnfold stack!" << std::endl;
         return;
+    }
+    if(cont.hasTag()){
+        addTagsFrom(&cont);
     }
     container1D cont1d=cont.getControlPlot();
     bool wasthere=false;
@@ -1367,13 +1378,15 @@ bool containerStack::setsignals(const std::vector<TString> & signs){
 }
 std::vector<size_t> containerStack::getSignalIdxs() const{
     std::vector<size_t> out;
-    for(size_t i=0;i<signals_.size();i++)
+    for(size_t i=0;i<signals_.size();i++){
         out.push_back((size_t)(std::find(legends_.begin(),legends_.end(),signals_.at(i)) - legends_.begin()));
+    }
     return out;
 }
 
 container1D containerStack::getSignalContainer()const{
-    if(mode != dim1 || mode !=unfolddim1){
+    if(mode != dim1 && mode !=unfolddim1){
+        if(debug) std::cout << "containerStack::getSignalContainer: return dummy" <<std::endl;
         return container1D();
     }
     std::vector<size_t> sidx=getSignalIdxs();
@@ -1384,7 +1397,8 @@ container1D containerStack::getSignalContainer()const{
     return out;
 }
 container1D containerStack::getBackgroundContainer()const{
-    if(mode != dim1 || mode !=unfolddim1){
+    if(mode != dim1 && mode !=unfolddim1){
+        if(debug) std::cout << "containerStack::getBackgroundContainer: return dummy" <<std::endl;
         return container1D();
     }
     std::vector<size_t> sidx=getSignalIdxs();
@@ -1403,6 +1417,7 @@ container1D containerStack::getBackgroundContainer()const{
         }
     }
 
+    return out;
 
 }
 

@@ -44,6 +44,7 @@ public:
 	void multiply(const float&);
 
 
+
 	bool operator == (const histoBin&) const;
 	bool operator != (const histoBin&) const;
 

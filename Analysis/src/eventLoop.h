@@ -68,7 +68,7 @@
  *
  * Please indicate the meaning of the error code in the cout at the end of ../app_src/analyse.cc
  */
-void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, double norm,size_t legord, size_t anaid){
+void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,size_t legord, size_t anaid){
 
     bool doLargeAcceptance=false;
     /*means right now:
@@ -100,10 +100,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     bool mode_invertiso=false;
     bool usemvamet=false;
     bool onejet=false;
-    bool twodiffbtags=false;
     bool usetopdiscr=false;
 
-
+    float normmultiplier=1; //use in case modes need to change norm
 
     if(mode_.Contains("Samesign")){
         mode_samesign=true;
@@ -152,13 +151,24 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
         onejet=true;
         std::cout << "entering Onejet mode" <<std::endl;
     }
-    if(mode_.Contains("Twodiffbtags")){
-        twodiffbtags=true;
-        std::cout << "entering Twodiffbtags mode" <<std::endl;
-    }
+
     if(mode_.Contains("Topdiscr")){
         usetopdiscr=true;
         std::cout << "entering Topdiscr mode" <<std::endl;
+    }
+    //hmm this should actually go to readFiles function.. but then interferes with the mode idea.. leave it here for the moment
+    if(mode_.Contains("Mgdecays")){
+        std::cout << "entering Mgdecays mode: norm will be adapted" <<std::endl;
+        if(inputfile.Contains("ttbar.root")){
+            inputfile.ReplaceAll("ttbar.root", "ttbar_mgdecays.root");
+           // infiles_.at(anaid).ReplaceAll("ttbar.root", "ttbar_mgdecays.root");
+            normmultiplier=0.1049; //fully leptonic branching fraction
+        }
+        else if(inputfile.Contains("ttbarviatau.root")){
+            inputfile.ReplaceAll("ttbarviatau.root", "ttbarviatau_mgdecays.root");
+           // infiles_.at(anaid).ReplaceAll("ttbar.root", "ttbar_mgdecays.root");
+            normmultiplier=0.1049;
+        }
     }
 
 
@@ -223,17 +233,16 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     NTFullEvent evt;
     ttbarControlPlots plots;//for the Z part just make another class (or add a boolian)..
     ZControlPlots zplots;
-    plots.setEvent(evt);
-    zplots.setEvent(evt);
+    plots.linkEvent(evt);
+    zplots.linkEvent(evt);
     plots.initSteps(8);
     zplots.initSteps(8);
     jansplots_step8.setEvent(evt);
 
 
     //get normalization
-
-    norm=createNormalizationInfo(f,isMC,anaid);
-
+    double norm=createNormalizationInfo(f,isMC,anaid);
+    norm*= normmultiplier;
     /////////////////////////// configure scalefactors ////
 
 
@@ -332,7 +341,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     if(usepdfw_>-1) pdfwidx=usepdfw_;
 
     //speed up - testing!
-/*
+    /*
     struct stat filestatus;
     stat((datasetdirectory_+inputfile).Data(), &filestatus );
 
@@ -342,7 +351,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
     if(t->GetCacheSize() > 100e6)
         t->SetCacheSize(100e6);
     t->AddBranchToCache("*");
-*/
+     */
     ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
@@ -547,7 +556,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
         vector<NTLepton *> allleps;
         std::vector<NTLepton *> isoleptons;
-       // TBI std::vector<NTLepton *> vetoleps;
+        // TBI std::vector<NTLepton *> vetoleps;
         evt.allleptons=&allleps;
         evt.isoleptons=&isoleptons;
 
@@ -585,7 +594,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
             //usetight=false;
 
             ///end tight
-          //  loosemuons <<  &(pMuons->at(i));
+            //  loosemuons <<  &(pMuons->at(i));
         }
 
 
@@ -848,7 +857,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
         if(hardjets.size() >0){
             dphillj=fabs( (leadingptlep->p4()+secleadingptlep->p4()).Phi() - hardjets.at(0)->p4().Phi() );
-            dphillj=pi-fabs(dphillj-pi);
+            if(dphillj>pi)
+                dphillj=2*pi-dphillj;
+            //dphillj=pi-fabs(dphillj-pi);
             evt.dphillj=&dphillj;
             evt.midphi=&midphi;
             detallj=(leadingptlep->p4()+secleadingptlep->p4()).Eta() - hardjets.at(0)->p4().Eta();
@@ -1073,7 +1084,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
             zplots.makeControlPlots(step);
         }
         ///////////////////// 2btag cut STEP 9 //////////////////////////
-/*
+        /*
         step++;
         if(hardbjets.size() < 2) continue;
 
@@ -1086,7 +1097,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
         if(isZrange){
             zplots.makeControlPlots(step);
         }
-*/
+         */
     }
 
     ///////////////////////////////////////////////////////////////////////
@@ -1148,6 +1159,10 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, do
 
         if(!fileExists((getOutPath()+".root").Data())) {
             outfile=new TFile(getOutPath()+".root","RECREATE");
+
+            //only if new write the discriminatorfactory configuration in here
+
+
         }
         else{
             outfile=new TFile(getOutPath()+".root","READ");

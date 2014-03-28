@@ -9,6 +9,7 @@
 #define NTFULLEVENT_H_
 #include "TtZAnalysis/DataFormats/interface/mathdefs.h"
 #include "TtZAnalysis/DataFormats/interface/NTLorentzVector.h"
+#include <vector>
 namespace ztop{
 
 class NTEvent;

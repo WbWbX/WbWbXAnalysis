@@ -73,7 +73,7 @@ public:
     float createNormalizationInfo(TFile *f,bool isMC,size_t anaid);
 
     void setMaxChilds(size_t childs){maxchilds_=childs;}
-    void analyze(TString, TString, int, double,size_t,size_t i=0);
+    void analyze(TString, TString, int, size_t,size_t i=0);
     void analyze(size_t i);
 
     void setFileList(TString fl){filelist_=fl;}

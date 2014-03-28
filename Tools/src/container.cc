@@ -86,11 +86,12 @@ container1D::~container1D(){
     if(gp_) delete gp_;
     if(hp_) delete hp_;
 }
-container1D::container1D(const container1D &c){
+container1D::container1D(const container1D &c): taggedObject(c){
     copyFrom(c);
 }
-container1D& container1D::operator=(const container1D& c){
+container1D& container1D::operator=(const container1D& c) {
     copyFrom(c);
+    taggedObject::operator = (c);
     return *this;
 }
 
@@ -1009,6 +1010,32 @@ container1D container1D::operator * (float scalar){
     return out;
 }
 
+bool container1D::operator == (const container1D & rhs)const{
+    return showwarnings_==rhs.showwarnings_
+            && binwidth_==rhs.binwidth_
+            && canfilldyn_==rhs.canfilldyn_
+            && manualerror_==rhs.manualerror_
+            && bins_==rhs.bins_
+            && contents_==rhs.contents_
+            && mergeufof_==rhs.mergeufof_
+            && wasunderflow_==rhs.wasunderflow_
+            && wasoverflow_==rhs.wasoverflow_
+            && name_==rhs.name_
+            && xname_==rhs.xname_
+            && yname_==rhs.yname_
+            && labelmultiplier_==rhs.labelmultiplier_
+            //&& gp_==rhs.gp_
+           // && hp_==rhs.hp_
+            ;
+
+}
+
+void container1D::divideByBinWidth(){
+    for(int sys=-1;sys<(int)getSystSize();sys++){
+        for(size_t i=1;i<bins_.size()-1;i++) //UF and OF don't have a binwidth
+            contents_.getBin(i,sys).multiply(1/getBinWidth(i));
+    }
+}
 
 /** */
 std::vector<float> container1D::getCongruentBinBoundaries(const container1D & cont) const{
@@ -1126,7 +1153,7 @@ void container1D::getRelSystematicsFrom(const ztop::container1D & rhs){
     // as correlated (true for most syst)
     //relerrs.set
     relerrs.contents_.clearLayerStat(-1); //clear stat of nominal relerrors layer
-   // histoContent::multiplyStatCorrelated doesn't have to be set -> no systematics!
+    // histoContent::multiplyStatCorrelated doesn't have to be set -> no systematics!
     *this*=relerrs;
     std::cout << "container1D::getRelSystematicsFrom: carefully check the output of this function! not well tested" <<std::endl;
     return;
@@ -1134,14 +1161,14 @@ void container1D::getRelSystematicsFrom(const ztop::container1D & rhs){
 void container1D::addRelSystematicsFrom(const ztop::container1D & rhs){
     size_t nsysrhs=rhs.contents_.layerSize();
     container1D relerr=rhs.getRelErrorsContainer();
-   for(size_t i=0;i<nsysrhs;i++){
-       size_t oldlayersize=getSystSize();
-       size_t newlayerit=contents_.addLayer(relerr.getSystErrorName(i));
-       if(oldlayersize<getSystSize()){ //new one
-           if(debug) std::cout << "container1D::addRelSystematicsFrom: adding new syst "<< relerr.getSystErrorName(i)<< " to container " <<name_ <<std::endl;
-           contents_.getLayer(newlayerit).multiply(relerr.contents_.getLayer(i),false);
-       }
-   }
+    for(size_t i=0;i<nsysrhs;i++){
+        size_t oldlayersize=getSystSize();
+        size_t newlayerit=contents_.addLayer(relerr.getSystErrorName(i));
+        if(oldlayersize<getSystSize()){ //new one
+            if(debug) std::cout << "container1D::addRelSystematicsFrom: adding new syst "<< relerr.getSystErrorName(i)<< " to container " <<name_ <<std::endl;
+            contents_.getLayer(newlayerit).multiply(relerr.contents_.getLayer(i),false);
+        }
+    }
 
 }
 
@@ -1475,6 +1502,8 @@ void container1D::copyFrom(const container1D& c){
     gp_=0;
     hp_=0;
 
+
+
 }
 
 
@@ -1504,13 +1533,13 @@ void container1D::loadFromTree(TTree *t, const TString & plotname){
             *this=*cuftemp;
         }
     }
-   if(!found){
-       std::cout << "searching for: " << plotname << "... error!" << std::endl;
+    if(!found){
+        std::cout << "searching for: " << plotname << "... error!" << std::endl;
         throw std::runtime_error("container1D::loadFromTree: no container with name not found");
     }
     if(count>1){
-        std::cout << "container1DUnfold::loadFromTree: found more than one object with name "
-                << getName() << ", took the first one." << std::endl;
+        std::cout << "container1D::loadFromTree: found more than one object with name "
+                << getName() << ", took the last one." << std::endl;
     }
 }
 void container1D::loadFromTFile(TFile *f, const TString & plotname){
@@ -1548,7 +1577,7 @@ void container1D::writeToTree(TTree *t){
 }
 void container1D::writeToTFile(TFile *f){
     if(!f || f->IsZombie()){
-        throw std::runtime_error("container1D::loadFromTFile: file not ok");
+        throw std::runtime_error("container1D::writeToTFile: file not ok");
     }
     f->cd();
     TTree * ttemp = (TTree*)f->Get("container1Ds");

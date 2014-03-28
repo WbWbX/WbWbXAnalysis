@@ -24,7 +24,7 @@
 namespace ztop{
 class plotterControlPlot;
 
-class containerStack: public tObjectList{
+class containerStack: public tObjectList,public taggedObject{
     friend class plotterControlPlot;
 public:
 
@@ -35,9 +35,9 @@ public:
     containerStack(TString);
     ~containerStack();
 
-    bool is2D(){if(mode==dim2) return true; else return false;}
-    bool is1D(){if(mode==dim1) return true; else return false;}
-    bool is1DUnfold(){if(mode==unfolddim1) return true; else return false;}
+    bool is2D()const{if(mode==dim2) return true; else return false;}
+    bool is1D()const{if(mode==dim1) return true; else return false;}
+    bool is1DUnfold()const{if(mode==unfolddim1) return true; else return false;}
 
     void push_back(ztop::container1D, TString, int, double, int legord=-1); //! adds container with, name, colour, norm to stack
     void push_back(ztop::container2D, TString, int, double, int legord=-1); //! adds container with, name, colour, norm to stack
@@ -63,27 +63,27 @@ public:
 
     const TString & getName() const{return name_;}
     size_t size() const{return colors_.size();}
-    TString & getLegend(unsigned int i){return legends_[i];}
-    const TString & getLegend(unsigned int i)const{return legends_[i];}
-    int & getColor (unsigned int i){return colors_[i];};
-    const int & getColor (unsigned int i)const {return colors_[i];};
-   // double & getNorm  (unsigned int i){return norms_[i];}
-    const double & getNorm  (unsigned int i)const{return norms_[i];}
+    TString & getLegend(unsigned int i){return legends_.at(i);}
+    const TString & getLegend(unsigned int i)const{return legends_.at(i);}
+    int & getColor (unsigned int i){return colors_.at(i);};
+    const int & getColor (unsigned int i)const {return colors_.at(i);};
+   // double & getNorm  (unsigned int i){return norms_.at(i);}
+    const double & getNorm  (unsigned int i)const{return norms_.at(i);}
 
-    container1D & getContainer(unsigned int i){return containers_[i];}
-    const container1D & getContainer(unsigned int i)const{return containers_[i];}
+    container1D & getContainer(unsigned int i){return containers_.at(i);}
+    const container1D & getContainer(unsigned int i)const{return containers_.at(i);}
     container1D & getContainer(TString);
     container1D  getContainer(TString) const;
     container1D getFullMCContainer()const;           //! gets the sum of all MC containers (normalized with their stored norm) including error handling
 
-    container2D & getContainer2D(unsigned int i){return containers2D_[i];}
-    const container2D & getContainer2D(unsigned int i)const{return containers2D_[i];}
+    container2D & getContainer2D(unsigned int i){return containers2D_.at(i);}
+    const container2D & getContainer2D(unsigned int i)const{return containers2D_.at(i);}
     container2D & getContainer2D(TString);
     container2D  getContainer2D(TString)const;
     container2D getFullMCContainer2D()const;           //! gets the sum of all MC containers (normalized with their stored norm) including error handling
 
-    container1DUnfold & getContainer1DUnfold(unsigned int i){return containers1DUnfold_[i];}
-    const container1DUnfold & getContainer1DUnfold(unsigned int i)const{return containers1DUnfold_[i];}
+    container1DUnfold & getContainer1DUnfold(unsigned int i){return containers1DUnfold_.at(i);}
+    const container1DUnfold & getContainer1DUnfold(unsigned int i)const{return containers1DUnfold_.at(i);}
     container1DUnfold & getContainer1DUnfold(TString);
     container1DUnfold  getContainer1DUnfold(TString)const;
     container1DUnfold getFullMCContainer1DUnfold()const;           //! gets the sum of all MC containers (normalized with their stored norm) including error handling

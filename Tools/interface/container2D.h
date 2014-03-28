@@ -20,7 +20,7 @@
 namespace ztop{
 class container1DUnfold;
 
-class container2D {
+class container2D:public taggedObject {
     friend class container1DUnfold;
 public:
 

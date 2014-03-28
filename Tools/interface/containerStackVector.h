@@ -15,7 +15,7 @@
 namespace ztop{
 
 
-  class containerStackVector{
+  class containerStackVector:public taggedObject{
 
   public:
     containerStackVector();
@@ -41,9 +41,12 @@ namespace ztop{
 
     void addSignal(const TString &);
 
-    std::vector<ztop::containerStack> getVector(){return stacks_;}
-    ztop::containerStack getStack(TString);
-    ztop::containerStack getStack(unsigned int n){return stacks_[n];}
+    const std::vector<ztop::containerStack>& getVector()const{return stacks_;}
+    std::vector<ztop::containerStack>& getVector(){return stacks_;}
+    const ztop::containerStack & getStack(const TString&)const;
+    ztop::containerStack & getStack(const TString&);
+    const ztop::containerStack & getStack(unsigned int n)const{return stacks_.at(n);}
+    ztop::containerStack & getStack(unsigned int n){return stacks_.at(n);}
     void removeContribution(TString);
 
     void addMCErrorStackVector(const TString&,const ztop::containerStackVector&);
