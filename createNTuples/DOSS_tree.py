@@ -494,7 +494,8 @@ usePF2PAT(process, runPF2PAT=True, jetAlgo='AK5', runOnMC=isMC, postfix=pfpostfi
 if not is2011:
     getattr(process,'patJetCorrFactors'+pfpostfix).rho=cms.InputTag("kt6PFJets","rho","RECO")
 
-process.pfPileUp.checkClosestZVertex = False
+#for JEC
+getattr(process,'pfPileUp'+pfpostfix).checkClosestZVertex = False
 
 ##################################
 #  MVA eID
