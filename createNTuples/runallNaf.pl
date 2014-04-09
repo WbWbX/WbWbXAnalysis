@@ -73,7 +73,7 @@ mkpath($path);
 my $fullCMSSWcfpath=File::Spec->rel2abs($arg{c});
 #$fullCMSSWcfpath=$arg{c};
 my $cfgfilename = ( split m{/}, $arg{c} )[-1];
-my $nafJobSplitter="$ENV{CMSSW_BASE}/src/TopAnalysis/TopUtils/scripts/nafJobSplitter2.pl";
+my $nafJobSplitter="$ENV{CMSSW_BASE}/src/TopAnalysis/TopUtils/scripts/nafJobSplitter.pl";
 
 my $startstring="#!/bin/sh\nexport SCRAM_ARCH=$ENV{SCRAM_ARCH}\nexport VO_CMS_SW_DIR=$ENV{VO_CMS_SW_DIR}\nsource $ENV{VO_CMS_SW_DIR}/cmsset_default.sh\n\necho \"using CMSSW located here: $ENV{CMSSW_BASE}\"\ncd $ENV{CMSSW_BASE}\neval `scramv1 runtime -sh`\ncd -\n\nexport PYTHONPATH=/nfs/dust/cms/user/\$USER/.nafJobSplitter/python:\$PYTHONPATH\nexport NJS_MEM=1999\n";
 
@@ -120,7 +120,7 @@ while(my $line = <$IN>) {
 #run script, killall script should be sufficient
     
     push @run, "echo submitting $outputFile with $cfgfilename for $dataset\n";
-    push @run, "$nafJobSplitter -c $allOptions -d $outputFile -D $dataset -o $path -W 0 $numJobs $cfgfilename\n";
+    push @run, "$nafJobSplitter -C -c $allOptions -d $outputFile -D $dataset -o $path -W 0 $numJobs $cfgfilename\n";
 
     push @check, "naf_$outputFile ";
 
