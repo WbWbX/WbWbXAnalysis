@@ -71,7 +71,26 @@ public:
     void setRecoContainer(const container1D &cont);
     void setBackground(const container1D &cont);
     void addToBackground(const container1D &cont){setBackground(getBackground()+cont);}
+
+    /**
+     * returns the background as container1D
+     * if the container1DUnfold contains the signal this
+     * will contain the migrations from outside visible PS
+     * in the selected reco events
+     * This is a reco distribution
+     */
     container1D getBackground() const;
+
+    /**
+     * returns the signal generated in visible phasespace
+     * and reconstructed in measureable phasespace
+     * If this is pure background (all generated in underflow)
+     * it will just return an empty (binned) container
+     * This is a reco distribution
+     * But the overflow will contain generated but not reconstructed events
+     */
+    container1D getVisibleSignal() const;
+
 
     /*
      * only container1DUnfold operator * (float) operates on the unfolded distribution.. let's see for the others
@@ -105,11 +124,12 @@ public:
 
     /**
      * does nothing for data where flushed_ is always true
+     * deprecated! always returns true
      */
     bool check();
 
     /**
-     * TBI!!! FIXME
+     *
      * This function folds a (generated) input distribution
      * In contrast to the unfolding this takes place within this class.
      * The unfolding is done by an outside class, the containerUnfolder,
@@ -146,6 +166,10 @@ public:
 
     // someformat getCovarianceMatrix(size_t syst) { // M_ij = d_i * d_j, d_i= nominal_i-sys_i, i=bin}
 
+    /**
+     * Important!
+     * Call this function (or individual flush()) after filling is done!
+     */
     static void flushAllListed();
     static void setAllListedMC(bool ISMC);
     static void setAllListedLumi(float lumi);
@@ -153,8 +177,13 @@ public:
 
     TString coutUnfoldedBinContent(size_t bin) const;
 
+    /**
+     * Important!
+     * Call this function after filling is done!
+     */
     void flush();
 
+    void setAllowMultiRecoFill(bool allow){allowmultirecofill_=allow;}
 
     ///IO
     void loadFromTree(TTree *, const TString & plotname);
@@ -164,6 +193,9 @@ public:
     void writeToTree(TTree *);
     void writeToTFile(TFile *);
     void writeToTFile(const TString& filename);
+
+    static bool TFileContainsContainer1DUnfolds(TFile *f);
+    static bool TFileContainsContainer1DUnfolds(const TString & filename);
 
 private:
 
@@ -190,6 +222,7 @@ private:
 
     bool congruentbins_;
 
+    bool allowmultirecofill_;
     /*
    //destructor safe
    unfolder * unfold_;
@@ -203,45 +236,8 @@ private:
     std::vector<float> subdivide(const std::vector<float> & bins, size_t div);
 
     bool checkCongruence(const std::vector<float>&, const std::vector<float>&)const;
+
 };
-inline void container1DUnfold::flush(){ //only for MC
-    if(flushed_)
-        return;
-
-    if(genfill_)
-        gencont_.fill(tempgen_,tempgenweight_);
-    if(recofill_)
-        recocont_.fill(tempreco_,tempweight_);
-
-    if(genfill_ && !recofill_){ //put in Reco UF bins
-        fill(tempgen_,ybins_[1]-100,tempgenweight_);}
-    else if(recofill_ && !genfill_){ //put in gen underflow bins -> goes to background
-        fill(xbins_[1]-100,tempreco_,tempweight_);}
-    else if(genfill_ && recofill_){
-        fill(tempgen_,tempreco_,tempweight_);
-        fill(tempgen_,ybins_[1]-100,(tempgenweight_-tempweight_)); // w_gen * (1 - recoweight), tempweight_=fullweight=tempgenweight_*recoweight
-    }
-
-    recofill_=false;
-    genfill_=false;
-    flushed_=true;
-}
-
-
-inline void container1DUnfold::fillGen(const float & val, const float & weight){
-    tempgen_=val;
-    tempgenweight_=weight;
-    genfill_=true;
-    flushed_=false;
-}
-
-inline void container1DUnfold::fillReco(const float & val, const float & weight){ //fills and resets tempgen_
-    tempreco_=val;
-    tempweight_=weight;
-    recofill_=true;
-    flushed_=false;
-}
-
 
 
 

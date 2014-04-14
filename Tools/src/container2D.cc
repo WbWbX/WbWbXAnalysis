@@ -51,7 +51,11 @@ void container2D::setBinning(const std::vector<float> &xbins, std::vector<float>
     ybins_.clear();
     conts_.clear();
     xbins_.clear();
+
     std::sort(ybins.begin(),ybins.end());
+    std::vector<float>::iterator it=std::unique(ybins.begin(),ybins.end());
+    ybins.resize( std::distance(ybins.begin(),it) );
+
     ybins_.push_back(0); //UF
     ybins_.insert(ybins_.end(),ybins.begin(),ybins.end()); //OF is the last one
     //ybins_.push_back(0);
@@ -103,6 +107,22 @@ container2D container2D::rebinXToBinning(const std::vector<float> & newbins)cons
     return out;
 
 }
+container2D container2D::rebinXtoBinning(const container1D&cont)const{
+    if(isDummy() || ybins_.size()<1){
+        throw std::logic_error("container2D::rebinXtoBinning: container2D is dummy");
+    }
+    std::vector<float> newbins=conts_.at(0).getCongruentBinBoundaries(cont);
+    return rebinXToBinning(newbins);
+}
+container2D container2D::rebinYtoBinning(const container1D&cont)const{
+    if(isDummy() || ybins_.size()<1){
+        throw std::logic_error("container2D::rebinYtoBinning: container2D is dummy");
+    }
+    container1D yproj=projectToY();
+    std::vector<float> newbins=yproj.getCongruentBinBoundaries(cont);
+    return rebinYToBinning(newbins);
+}
+
 
 container2D container2D::rebinYToBinning(const std::vector<float> & newbins) const{
     size_t maxbinssize=ybins_.size();
@@ -130,7 +150,7 @@ container2D container2D::rebinYToBinning(const std::vector<float> & newbins) con
 
 
     bool tempaddStatCorrelated=histoContent::addStatCorrelated;
-   histoContent::addStatCorrelated=false;
+    histoContent::addStatCorrelated=false;
     for(size_t i=1;i<ybins_.size();i++){
         size_t outbin=out.getBinNoY(ybins_.at(i));
         out.conts_.at(outbin)+=conts_.at(i);

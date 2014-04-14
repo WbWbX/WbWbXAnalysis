@@ -126,7 +126,7 @@ inline float optParser::getOpt<float>(const TString& opt,const float & def, cons
         if((TString)temp_.at(i) == "-"+opt){
             if (i + 1 != temp_.size()){
                 float out=atof(temp_.at(i+1).Data());
-                temp_.erase(temp_.begin()+i, temp_.begin()+i+1);
+                temp_.erase(temp_.begin()+i, temp_.begin()+i+2);
                 help_.push_back("-"+opt+"  \t"+description);
                 return out;
             }
@@ -141,7 +141,7 @@ inline int optParser::getOpt<int>(const TString& opt,const int & def, const TStr
         if((TString)temp_.at(i) == "-"+opt){
             if (i + 1 != temp_.size()){
                 float out=atoi(temp_.at(i+1).Data());
-                temp_.erase(temp_.begin()+i, temp_.begin()+i+1);
+                temp_.erase(temp_.begin()+i, temp_.begin()+i+2);
                 help_.push_back("-"+opt+"  \t"+description);
                 return out;
             }
@@ -150,6 +150,22 @@ inline int optParser::getOpt<int>(const TString& opt,const int & def, const TStr
     help_.push_back("-"+opt+"  \t"+description);
     return def;
 }
+template<>
+inline std::string optParser::getOpt<std::string>(const TString& opt,const std::string & def, const TString & description){
+    for(size_t i=0;i<temp_.size();i++){
+        if((TString)temp_.at(i) == "-"+opt){
+            if (i + 1 != temp_.size()){
+                std::string out=(temp_.at(i+1).Data());
+                temp_.erase(temp_.begin()+i, temp_.begin()+i+2);
+                help_.push_back("-"+opt+"  \t"+description);
+                return out;
+            }
+        }
+    }
+    help_.push_back("-"+opt+"  \t"+description);
+    return def;
+}
+
 template<>
 inline std::vector<float> optParser::getRest<float>(){
     std::vector<float> out;

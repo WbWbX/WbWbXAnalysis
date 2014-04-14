@@ -25,12 +25,14 @@ namespace ztop{
  */
 class plotterBase :protected tObjectList{
 public:
-    plotterBase():tObjectList(), title_(""),tbndc_(true),pad_(0){}
+    plotterBase():tObjectList(), title_(""),tbndc_(true),pad_(0),drawlegend_(true){}
     virtual ~plotterBase(){}
 
     plotterBase(const plotterBase&);
 
     void setTitle(TString t){title_=t;}
+
+    void setDrawLegend(bool dl){drawlegend_=dl;}
 
     void usePad(TVirtualPad* pad){pad_=pad;}
     TVirtualPad* getPad()const; //throws if 0
@@ -49,6 +51,7 @@ protected:
     typedef TGraphAsymmErrors TG;
     TString title_;
     textBoxes textboxes_;
+
 
     //to apply styles to the objects created/from input
 /*use as subfunctions eg to apply all the styles do:
@@ -87,7 +90,7 @@ protected:
 
 private:
     TVirtualPad * pad_;
-
+    bool drawlegend_;
 //    int errToRootFillStyle(const containerStyle *s) const;
 
 };

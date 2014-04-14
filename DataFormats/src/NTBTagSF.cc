@@ -7,22 +7,50 @@ namespace ztop{
 
 
 float NTBTagSF::getNTEventWeight(const std::vector<ztop::NTJet *> & jets){
-    if(!isMC_ || userandom_|| makesEff()) return 1.;
-    resetCounter();
-    for(size_t i=0;i<jets.size();i++){
-        ztop::NTJet *jet=jets.at(i);
-        countJet(jet->pt(),fabs(jet->eta()),jet->genPartonFlavour());
+    if(!isMC_ ) return 1.;
+    if(mode_==eventsf_mode){
+        if(makesEff()) return 1;
+        resetCounter();
+        for(size_t i=0;i<jets.size();i++){
+            ztop::NTJet *jet=jets.at(i);
+            countJet(jet->pt(),fabs(jet->eta()),jet->genPartonFlavour());
+        }
+        return getEventSF();
     }
-    return getEventSF();
+    else if(mode_==shapereweighting_mode){
+        float outweight=1;
+        for(size_t i=0;i<jets.size();i++){
+            ztop::NTJet *jet=jets.at(i);
+            outweight *= getJetDiscrShapeWeight(jet->pt(),fabs(jet->eta()),jet->genPartonFlavour(),jet->btag());
+        }
+        return outweight;
+    }
+    else
+        return 1;
 }
-
+float NTBTagSF::getNTEventWeight( ztop::NTJet * jet){
+    if(!isMC_ ) return 1.;
+    if(mode_==eventsf_mode){
+        if(makesEff()) return 1;
+        resetCounter();
+        countJet(jet->pt(),fabs(jet->eta()),jet->genPartonFlavour());
+        return getEventSF();
+    }
+    else if(mode_==shapereweighting_mode){
+        return getJetDiscrShapeWeight(jet->pt(),fabs(jet->eta()),jet->genPartonFlavour(),jet->btag());
+    }
+    else
+        return 1;
+}
 /**
  * changes the discriminator values of the jets using random technique.
  * After this step do not expect the discriminator distrubtions in data MC to match!
+ *  if()
+            return;
  */
 
 void NTBTagSF::changeNTJetTags( std::vector<ztop::NTJet *> *jets)const{
-    if(!isMC_ || !userandom_ || makesEff()) return;
+    if(!isMC_ || mode_!=randomtagging_mode || makesEff()) return;
     for(size_t i=0;i<jets->size();i++){
         ztop::NTJet * jet=jets->at(i);
         if(std::abs(jet->genPartonFlavour()) == 0) continue;
@@ -59,7 +87,7 @@ void NTBTagSF::setWorkingPoint(const TString& wpstring){
     }
 }
 
-
+/*
 void  NTBTagSF::setSystematic(const TString &sys=""){
     std::cout << "NTBTagSF::setSystematic: " <<sys<<std::endl;
     if(sys=="heavy up")
@@ -76,7 +104,7 @@ void  NTBTagSF::setSystematic(const TString &sys=""){
         throw std::logic_error(("NTBTagSF::setSystematic doesn't exist"));
 
 }
-
+ */
 
 NTBTagSF  NTBTagSF::operator + (NTBTagSF  second){
     std::map<std::string,std::vector<TH2D> >::iterator sampleit,sampleit2;//=histos_.find(samplename);

@@ -56,7 +56,7 @@ public:
         T out;
         std::string s(getValueString(str,true));
         if(s.length()<1){
-            std::cout << "fileReader::getValue: value for " << str << " not found" << std::endl; std::cout << std::endl;
+            std::cout << "fileReader::getValue: value for " << str << " not found in " << tempinfilename_<< std::endl;
             throw std::runtime_error("fileReader::getValue: no value found and no default defined!");
         }
         std::stringstream ss(s);
@@ -87,6 +87,7 @@ private:
     std::vector<std::vector<std::string> > lines_;
     bool blindmode_;
     bool requirevalues_;
+    std::string tempinfilename_;
 };
 
 
@@ -102,7 +103,7 @@ inline bool fileReader::getValue<bool>(const std::string & str){
     bool out;
     std::string s(getValueString(str,true));
     if(s.length()<1){
-        std::cout << "fileReader::getValue: value for " << str << " not found" << std::endl;
+        std::cout << "fileReader::getValue: value for " << str << " not found in " << tempinfilename_<< std::endl;
         throw std::runtime_error("fileReader::getValue: value required or no default defined!");
     }
 
@@ -133,7 +134,7 @@ template<>
 inline std::string fileReader::getValue<std::string>(const std::string & str){
     std::string s(getValueString(str));
     if(s.length()<1){
-        std::cout << "fileReader::getValue: value for " << str << " not found" << std::endl;
+        std::cout << "fileReader::getValue: value for " << str << " not found in " << tempinfilename_<< std::endl;
         throw std::runtime_error("fileReader::getValue: value required or no default defined!");
     }
     return s;
@@ -155,7 +156,7 @@ template<>
 inline TString fileReader::getValue<TString>(const std::string & str){
     std::string s(getValueString(str));
     if(s.length()<1){
-        std::cout << "fileReader::getValue: value for " << str << " not found" << std::endl;
+        std::cout << "fileReader::getValue: value for " << str << " not found in " << tempinfilename_<< std::endl;
         throw std::runtime_error("fileReader::getValue: value required or no default defined!");
     }
     return (TString)s;

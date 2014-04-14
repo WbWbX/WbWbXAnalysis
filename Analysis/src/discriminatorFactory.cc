@@ -23,24 +23,36 @@
 namespace ztop{
 
 bool discriminatorFactory::debug=false;
+std::vector<discriminatorFactory*> discriminatorFactory::c_list;
+bool discriminatorFactory::c_makelist=false;
 
 
-discriminatorFactory::discriminatorFactory():
-                                                        nbins_(0),uselh_(false),step_(9999999),systidx_(-1)
-{}
+discriminatorFactory::discriminatorFactory(): nbins_(0),uselh_(false),step_(9999999),systidx_(-1),maxcomb_(1)
+{
+    if(c_makelist)
+    c_list.push_back(this);
+}
 
-discriminatorFactory::discriminatorFactory(const std::string & id):
-                                                        nbins_(0),uselh_(false),id_(id),step_(9999999),systidx_(-1)
-{}
+discriminatorFactory::discriminatorFactory(const std::string & id): nbins_(0),uselh_(false),id_(id),step_(9999999),systidx_(-1),maxcomb_(1)
+{
+    if(c_makelist)
+    c_list.push_back(this);
+}
 
 discriminatorFactory::~discriminatorFactory(){
-
+    for(size_t i=0;i<c_list.size();i++){
+        if(c_list.at(i) == this){
+            c_list.erase((c_list.begin()+i));
+        }
+    }
 }
 
 
 
 void discriminatorFactory::clear(){
     vars_.clear();
+    ranges_.clear();
+    offsets_.clear();
     for(size_t i=0;i<tobefilled_.size();i++){
         if(tobefilled_.at(i)){
             delete tobefilled_.at(i);
@@ -65,10 +77,12 @@ void discriminatorFactory::setSystematics(const TString& sysname){
 
     if(sysname!="nominal"){
         systidx_=histpointers_.at(0)->getSystErrorIndex(sysname); //they should be the same for all of them!
+
         if(systidx_ == (int)histpointers_.at(0)->getSystSize()){
             systidx_=-1; //in case you want to ignore the exception
             throw std::runtime_error("discriminatorFactory::setSystematics: Systematics could not be found");
         }
+        std::cout << "discriminatorFactory::setSystematics: loaded " << histpointers_.at(0)->getSystErrorName(systidx_) <<std::endl;
     }
     else{
         systidx_=-1;
@@ -82,7 +96,7 @@ void discriminatorFactory::setSystematics(const TString& sysname){
  * ("LH_<id_>_discr_plotname step X" )
  * var should be from the event pointer
  */
-void discriminatorFactory::addVariable( float * const * var,const TString& varshort){
+void discriminatorFactory::addVariable( float * const * var,const TString& varshort,const float& rangemin, const float& rangemax){
     if(debug)
         std::cout << "discriminatorFactory::addVariable" <<std::endl;
 
@@ -92,12 +106,16 @@ void discriminatorFactory::addVariable( float * const * var,const TString& varsh
     if(nbins_<1){
         throw std::logic_error("discriminatorFactory::addVariable: first set number of bins!");
     }
+    if(rangemin>rangemax){
+        throw std::logic_error("discriminatorFactory::addVariable: minimum range for value should be smaller than max!");
+    }
 
     if(debug)
         std::cout << "discriminatorFactory::addVariable: creating name" <<std::endl;
 
     TString varstr=varshort;
     varstr.ReplaceAll("#","");
+    varstr.ReplaceAll("/",".DIV.");
     TString fullname=id_+"_discr_"+varstr+" step "+toTString(step_);
 
 
@@ -111,9 +129,11 @@ void discriminatorFactory::addVariable( float * const * var,const TString& varsh
 
         for(size_t i=0;i<likelihoods_.size();i++){
             if(likelihoods_.at(i).getName() == "LH_"+fullname){
-
+                maxcomb_ *= likelihoods_.at(i).getYMax(false);
                 histpointers_.push_back(&likelihoods_.at(i));
                 //make sure a plot is added to the control plots!
+                // sy
+                likelihoods_.at(i).addTag(taggedObject::dontAddSyst_tag);
                 container1D::c_list.push_back(&likelihoods_.at(i));
                 if(debug)
                     std::cout << "discriminatorFactory::addVariable: loaded likelihood for " << fullname
@@ -130,7 +150,7 @@ void discriminatorFactory::addVariable( float * const * var,const TString& varsh
     //creates new plots for likelihoods
     //make bins
     std::vector<float> bins;//bins << 0 << 0.2 << 1;
-    for(float i=0;i<=1.;i+= 1./nbins_) bins.push_back(i);
+    for(float i=rangemin;i<rangemax*(1.+0.9/nbins_);i+= 1.*(rangemax-rangemin)/nbins_) bins.push_back(i);
 
     /*
      * Listing is switched on. That makes sure that the containers will be stored afterwards in a
@@ -140,7 +160,7 @@ void discriminatorFactory::addVariable( float * const * var,const TString& varsh
     container1D::c_makelist=true;
     if(debug)
         std::cout << "discriminatorFactory::addVariable: pushing back new plot" <<std::endl;
-    tobefilled_.push_back(new container1D(bins,fullname,varshort,"N_{evt}/bw",true));
+    tobefilled_.push_back(new container1D(bins,fullname,varshort,"N_{evt}/bw",false));
     container1D::c_makelist=tmpkl;
     size_t lastidx=tobefilled_.size()-1;
 
@@ -150,10 +170,13 @@ void discriminatorFactory::addVariable( float * const * var,const TString& varsh
     if(debug)
         std::cout << "discriminatorFactory::addVariable: added plot for " << fullname <<std::endl;
 
+    //offsets_.push_back(-rangemin);
+   // ranges_.push_back(rangemax-rangemin);
     vars_.push_back(var);
 
     if(debug)
-        std::cout << "discriminatorFactory::addVariable: "<< vars_.size()<< " vars with " << tobefilled_.size() << " plots"  <<std::endl;
+        std::cout << "discriminatorFactory::addVariable: "<< vars_.size()<< " vars with " << tobefilled_.size()
+        << " plots and "<< histpointers_.size()<< " likelihoods." <<std::endl;
 
 }
 void discriminatorFactory::fill(const float& weight){
@@ -164,8 +187,10 @@ void discriminatorFactory::fill(const float& weight){
     }
     size_t size=vars_.size();
     for(size_t i=0;i<size;i++){
-        if(vars_.at(i) && tobefilled_.at(i))
+        if(vars_.at(i) && tobefilled_.at(i)){
+
             tobefilled_.at(i)->fill(**vars_.at(i),weight );
+        }
     }
 }
 
@@ -186,10 +211,16 @@ float discriminatorFactory::getCombinedLikelihood()const{ //a plot needs to be a
     }
     float combLH=1;
     for(size_t i=0;i<csize;i++){
-        size_t bin=histpointers_.at(i)->getBinNo(**vars_.at(i));
+        if(!vars_.at(i) || !*vars_.at(i)) continue;
+       // float tofill=( **vars_.at(i) + offsets_.at(i) )/ranges_.at(i);
+        size_t bin=histpointers_.at(i)->getBinNo(**vars_.at(i) );
         combLH *= histpointers_.at(i)->getBinContent(bin,systidx_);
+        if(combLH/maxcomb_ < 0.0001){
+           std::cout << "discriminatorFactory::getCombinedLikelihood: returned 0 for " << histpointers_.at(i)->getName() << " input: " << **vars_.at(i)  <<std::endl;
+           return 0;
+        }
     }
-    return combLH;
+    return combLH/maxcomb_;
 }
 
 
@@ -214,7 +245,7 @@ void discriminatorFactory::extractLikelihoods(const containerStackVector &csv){
 
     for(size_t ist=0;ist<stacks->size();ist++){
         const containerStack* stack=&stacks->at(ist);
-        if(stack->hasTag(taggedObject::isLHDiscr_tag) && stack->is1D()){
+        if(stack->hasTag(taggedObject::isLHDiscr_tag) && stack->is1D() && stack->getName().BeginsWith(id_)){
             container1D temp=stack->getSignalContainer();
             if(temp.isDummy()){
                 throw std::logic_error("discriminatorFactory::extractLikelihoods: inputs are dummy");
@@ -238,16 +269,29 @@ void discriminatorFactory::extractLikelihoods(const containerStackVector &csv){
      *
      * push back all in likelihoods_
      */
-
+    likelihoods_.clear(); //clear old
     for(size_t i=0;i<signconts.size();i++){
         container1D temp;
         temp=signconts.at(i) / (signconts.at(i)+bgconts.at(i));
         temp.setName("LH_"+signconts.at(i).getName());
+        temp.addTag(taggedObject::dontDivByBW_tag);
+        if(temp.getYMax(false) > 1){
+            std::cout << "discriminatorFactory::extractLikelihoods: likelihood > 1 for " << temp.getName() <<std::endl;
+            throw std::logic_error("discriminatorFactory::extractLikelihoods: likelihood > 1!");
+        }
+        if(temp.getYMin(false) < 0){
+            std::cout << "discriminatorFactory::extractLikelihoods: likelihood < 0 for " << temp.getName() <<std::endl;
+            throw std::logic_error("discriminatorFactory::extractLikelihoods: likelihood < 0!");
+        }
         likelihoods_.push_back(temp);
     }
 
     container1D::c_makelist=tmpkl;
     // throw std::runtime_error("discriminatorFactory::extractLikelihoods: To Be Implemented");
+}
+void discriminatorFactory::extractAllLikelihoods(const containerStackVector & csv){
+    for(size_t i=0;i<c_list.size();i++)
+           c_list.at(i)->extractLikelihoods(csv);
 }
 
 
@@ -257,6 +301,8 @@ void discriminatorFactory::writeToTFile(TFile * f)const{
      * make sure that all pointer vectors are cleared before doing this
      * make a copy of object, clear all pointers and write
      */
+    bool tempmakelist=c_makelist;
+    c_makelist=false;
     discriminatorFactory copy=*this;
     copy.clear();
     if(!f || f->IsZombie()){
@@ -267,7 +313,7 @@ void discriminatorFactory::writeToTFile(TFile * f)const{
     if(!t || t->IsZombie())//create
         t = new TTree("discriminatorFactorys","discriminatorFactorys");
 
-    ztop::discriminatorFactory * cufpointer=&copy;
+    ztop::discriminatorFactory * cufpointer=0;//&copy;
     if(t->GetBranch("discriminatorFactorys")){
         t->SetBranchAddress("discriminatorFactorys", &cufpointer);
 
@@ -277,10 +323,11 @@ void discriminatorFactory::writeToTFile(TFile * f)const{
             t->GetEntry(n);
             if(cufpointer->id_==copy.id_){
                 if(*cufpointer == copy){
-                    delete t;
                     if(debug)
                         std::cout << "discriminatorFactory::writeToTFile: found same already, doing nothing" << std::endl;
-                    return; //do nothing if it would be just a 1:1 copy
+                    delete t; //do nothing if it would be just a 1:1 copy
+                    c_makelist=tempmakelist;
+                    return;
                 }
                 else{
                     throw std::logic_error("discriminatorFactory::writeToTFile: You must not write two different objects with the same id to the same file");
@@ -293,24 +340,55 @@ void discriminatorFactory::writeToTFile(TFile * f)const{
         t->Branch("discriminatorFactorys",&cufpointer);
         t->SetBranchAddress("discriminatorFactorys", &cufpointer);
     }
+    cufpointer=&copy;
+    if(debug)
+        std::cout << "writing " << getIdentifier() << " to " << f->GetName() << std::endl;
 
     t->Fill();
     t->Write(t->GetName(),TObject::kOverwrite);
     delete t;
 
-
+    c_makelist=tempmakelist;
 }
+
 void discriminatorFactory::writeToTFile(const TString& filename )const{
     TFile * ftemp=new TFile(filename,"update");
     if(!ftemp || ftemp->IsZombie()){
         delete ftemp;
         ftemp=new TFile(filename,"create");
     }
-
     writeToTFile(ftemp);
     ftemp->Close();
     delete ftemp;
 }
+
+void discriminatorFactory::writeAllToTFile(TFile *f){
+    for(size_t i=0;i<c_list.size();i++)
+        c_list.at(i)->writeToTFile(f);
+}
+void discriminatorFactory::writeAllToTFile(const TString& filename){
+    TFile * ftemp=new TFile(filename,"update");
+    if(!ftemp || ftemp->IsZombie()){
+        delete ftemp;
+        ftemp=new TFile(filename,"create");
+    }
+    for(size_t i=0;i<c_list.size();i++)
+        c_list.at(i)->writeToTFile(ftemp);
+    ftemp->Close();
+    delete ftemp;
+}
+void discriminatorFactory::writeAllToTFile(const TString& filename,const std::vector<discriminatorFactory> &vec){
+    TFile * ftemp=new TFile(filename,"update");
+    if(!ftemp || ftemp->IsZombie()){
+        delete ftemp;
+        ftemp=new TFile(filename,"create");
+    }
+    for(size_t i=0;i<vec.size();i++)
+        vec.at(i).writeToTFile(ftemp);
+    ftemp->Close();
+    delete ftemp;
+}
+
 /**
  * In a first step only works if a containerStack exists for each plot in a containerStackVector
  * just search for one. If there are more than one (usually not) that contain discr. info, give a warning
@@ -321,6 +399,8 @@ void discriminatorFactory::readFromTFile( TFile * f ,const std::string& id){
     /*
      * just to be sure: clear all pointer vectors here
      */
+    bool tempmakelist=c_makelist;
+    c_makelist=false;
     clear();
     likelihoods_.clear();
     /*
@@ -339,7 +419,7 @@ void discriminatorFactory::readFromTFile( TFile * f ,const std::string& id){
     }
     ztop::discriminatorFactory * cuftemp=0;
     if(!t->GetBranch("discriminatorFactorys")){
-        throw std::runtime_error("discriminatorFactory::loadFromTree: branch container1Ds not found");
+        throw std::runtime_error("discriminatorFactory::loadFromTree: branch discriminatorFactorys not found");
     }
     bool found=false;
     size_t count=0;
@@ -365,7 +445,7 @@ void discriminatorFactory::readFromTFile( TFile * f ,const std::string& id){
     }
 
     delete t;
-
+    c_makelist=tempmakelist;
     container1D::c_makelist=tmpkl;
 
 }
@@ -377,13 +457,58 @@ void discriminatorFactory::readFromTFile( const TString& filename ,const std::st
     delete f;
 }
 
+std::vector<discriminatorFactory> discriminatorFactory::readAllFromTFile( TFile * f){
+
+    if(!f || f->IsZombie()){
+        throw std::runtime_error("discriminatorFactory::readFromTFile: file not ok");
+    }
+    AutoLibraryLoader::enable();
+    TTree * t = (TTree*)f->Get("discriminatorFactorys");
+    std::vector<discriminatorFactory>  out;
+
+    if(!t || t->IsZombie()){
+        throw std::runtime_error("discriminatorFactorys::readFromTFile: tree not ok");
+    }
+    ztop::discriminatorFactory * cuftemp=0;
+    if(!t->GetBranch("discriminatorFactorys")){
+        throw std::runtime_error("discriminatorFactory::loadFromTree: branch discriminatorFactorys not found");
+    }
+
+
+    bool tmpkl=container1D::c_makelist;
+    container1D::c_makelist=false; //dont list copies here
+
+    t->SetBranchAddress("discriminatorFactorys", &cuftemp);
+    for(float n=0;n<t->GetEntries();n++){
+        t->GetEntry(n);
+        if(debug)
+            std::cout << "discriminatorFactory::readAllFromTFile: reading "<< cuftemp->getIdentifier() <<std::endl;
+        out.push_back(*cuftemp);
+    }
+    delete t;
+    container1D::c_makelist=tmpkl;
+
+    return out;
+
+}
+std::vector<discriminatorFactory> discriminatorFactory::readAllFromTFile(const TString& filename){
+    std::vector<discriminatorFactory> out;
+
+    TFile * f = new TFile(filename,"READ");
+    out=readAllFromTFile(f);
+    f->Close();
+    delete f;
+    return out;
+
+}
+
 bool discriminatorFactory::operator == (const discriminatorFactory&rhs)const{
     return nbins_==rhs.nbins_
 
             && uselh_==rhs.uselh_
             && id_==rhs.id_
             && step_==rhs.step_
-            &&likelihoods_==rhs.likelihoods_
+            && likelihoods_==rhs.likelihoods_
             && tobefilled_==rhs.tobefilled_
             && vars_==rhs.vars_
             && histpointers_==rhs.histpointers_

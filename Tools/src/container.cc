@@ -104,6 +104,10 @@ void container1D::setBins(std::vector<float> bins){
     reset();
     //NEW: just sort bins. no error message anymore
     std::sort(bins.begin(),bins.end());
+    //get rid of duplicates
+    std::vector<float>::iterator it=std::unique(bins.begin(),bins.end());
+    bins.resize( std::distance(bins.begin(),it) );
+
     bins_=bins;
     bins_.insert(bins_.begin(),0); //underflow
     //overflow is the last one
@@ -738,22 +742,7 @@ TH1D * container1D::getTH1DSyst(TString name, size_t systNo, bool dividebybinwid
     }
     return h;
 }
-/*
-container1D & container1D::operator = (const TH1D & h){
-	int nbins=h.GetNbinsX();
-	std::vector<float> cbins;
-	for(int bin=1;bin<=nbins+1;bin++)
-		cbins.push_back(h.GetBinLowEdge(bin));
 
-	container1D out(cbins,h.GetName(),h.GetXaxis()->GetTitle(),h.GetYaxis()->GetTitle(),false);
- *this=out;
-	for(int bin=0;bin<=nbins+1;bin++){
-		setBinContent(bin,h.GetBinContent(bin));
-		setBinStat(bin,h.GetBinError(bin));
-	}
-	return *this;
-}
- */
 container1D & container1D::import(TH1 * h,bool isbinwidthdivided){
     int nbins=h->GetNbinsX();
     std::vector<float> cbins;
@@ -771,6 +760,7 @@ container1D & container1D::import(TH1 * h,bool isbinwidthdivided){
         if(isbinwidthdivided && bin>0 && bin<nbins)
             err*=getBinWidth(bin);
         setBinStat(bin,err);
+        setBinEntries(bin,cont/err);
     }
     return *this;
 }
@@ -1025,7 +1015,7 @@ bool container1D::operator == (const container1D & rhs)const{
             && yname_==rhs.yname_
             && labelmultiplier_==rhs.labelmultiplier_
             //&& gp_==rhs.gp_
-           // && hp_==rhs.hp_
+            // && hp_==rhs.hp_
             ;
 
 }
@@ -1071,10 +1061,24 @@ container1D container1D::rebinToBinning(const std::vector<float> & newbins) cons
             size_t newbin=0;
             if(thisbin>0)
                 newbin=newcont.getBinNo(bins_.at(thisbin));
-            if(oldbinno==newbin){//add
+            if(oldbinno==newbin){//bins are added
+                //if individual bins were rescaled for some reason,
+              /*  const float& newbincontent=newcont.getBin(newbin,lay).getContent();
+                const float& addbincontent=getBin(thisbin,lay).getContent(); */
+                const float& newbinentries=newcont.getBin(newbin,lay).getEntries();
+                const float& addbinentries=getBin(thisbin,lay).getEntries();
+                const float& newbinstat2=newcont.getBin(newbin,lay).getStat2();
+                const float& addbinstat2=getBin(thisbin,lay).getStat2();
+/*
+                float errnewbinscale=newbinstat2/newbincontent;
+                float erraddbinscale=addbinstat2/addbincontent;
+*/
+                float newbinnewstat2=newbinstat2+addbinstat2;//sq(errnewbinscale)*newbinentries + sq(erraddbinscale)*addbinentries;
+
                 newcont.getBin(newbin,lay).addToContent(getBin(thisbin,lay).getContent());
-                newcont.getBin(newbin,lay).setEntries(newcont.getBin(newbin,lay).getEntries()+getBin(thisbin,lay).getEntries());
-                newcont.getBin(newbin,lay).setStat2(newcont.getBin(newbin,lay).getStat2()+getBin(thisbin,lay).getStat2());
+                newcont.getBin(newbin,lay).setEntries(newbinentries+addbinentries);
+                //  newcont.getBin(newbin,lay).setStat2(newbinnewstat2);
+                newcont.getBin(newbin,lay).setStat2(newbinnewstat2);
             }
             else{//set
                 newcont.getBin(newbin,lay).setContent(getBin(thisbin,lay).getContent());
@@ -1112,6 +1116,10 @@ container1D container1D::rebin(size_t merge) const{
  * same named systematics do not exist by construction, makes all <>StatCorrelated options obsolete
  */
 void container1D::addErrorContainer(const TString & sysname,const container1D & deviatingContainer, float weight){
+    if(hasTag(taggedObject::dontAddSyst_tag)){
+        if(showwarnings_) std::cout << "container1D::addErrorContainer: not adding syst because container has tag \"dontAddSyst_tag\": " << getName()<<std::endl;
+        return;
+    }
     if(bins_!=deviatingContainer.bins_){
         std::cout << "container1D::addErrorContainer(): not same binning! doing nothing for "<<name_ << " " << sysname << std::endl;
         return;
@@ -1142,6 +1150,7 @@ void container1D::getRelSystematicsFrom(const ztop::container1D & rhs){
     }
     //what about already existing errors....? average them? better do it by hand in that case
     bool tempmakelist=c_makelist;
+    c_makelist=false;
     container1D relerrs=rhs.getRelErrorsContainer(); //here we have all syst and nominal (and syst) stat
 
     //clear old syst
@@ -1156,6 +1165,7 @@ void container1D::getRelSystematicsFrom(const ztop::container1D & rhs){
     // histoContent::multiplyStatCorrelated doesn't have to be set -> no systematics!
     *this*=relerrs;
     std::cout << "container1D::getRelSystematicsFrom: carefully check the output of this function! not well tested" <<std::endl;
+    c_makelist=tempmakelist;
     return;
 }
 void container1D::addRelSystematicsFrom(const ztop::container1D & rhs){
@@ -1257,6 +1267,25 @@ bool container1D::hasSameLayers(const container1D& cont) const{
 bool container1D::hasSameLayerOrdering(const container1D& cont) const{
     return contents_.hasSameLayerMap(cont.contents_);
 }
+void container1D::equalizeSystematicsIdxs(container1D &rhs){
+    if(hasSameLayerOrdering(rhs))
+        return;
+    bool tmp=c_makelist;
+    c_makelist=false;
+    std::map<size_t,size_t> asso=mergeLayers(rhs);
+    container1D reordered=*this;
+    reordered.contents_.removeAdditionalLayers();
+    for(size_t i=0;i<rhs.getSystSize();i++){ //could use asso..
+        size_t oldidx=getSystErrorIndex(rhs.getSystErrorName(i));
+        reordered.contents_.addLayer(getSystErrorName(oldidx),contents_.getLayer(oldidx));
+        if(debug)
+            std::cout << "container1D::equalizeSystematicsIdxs "<<name_ << ": " << i << " " << oldidx << " " << rhs.getSystErrorName(i) << getSystErrorName(oldidx) << std::endl;
+    }
+    *this=reordered;
+
+    c_makelist=tmp;
+}
+
 /**
  * all systematics
  */
@@ -1442,8 +1471,12 @@ float container1D::getDominantVariationUp( TString  sysname, const size_t& bin) 
     if(idx >= contents_.layerSize())
         std::cout << "container1D::getDominantVariationUp: serious error: " << sysname << "_down not found" << std::endl;
     down=contents_.getBin(bin,idx).getContent()-cont;
-    if(up>down)down=up;
-    return down;
+
+    if(up < 0 && down < 0) return 0;
+    else if(up > down) return up;
+    else if(down > up) return down;
+    else return 0; //never reached only for docu purposes
+
 }
 float container1D::getDominantVariationDown( TString  sysname, const size_t& bin) const{//copy on purpose
     float up=0,down=0;
@@ -1456,8 +1489,12 @@ float container1D::getDominantVariationDown( TString  sysname, const size_t& bin
     if(idx >= contents_.layerSize())
         std::cout << "container1D::getDominantVariationDown: serious error: " << sysname << "_down not found" << std::endl;
     down=contents_.getBin(bin,idx).getContent()-cont;
-    if(up<down)down=up;
-    return down;
+
+    if(up > 0 && down > 0) return 0;
+    else if(up < down) return up;
+    else if(down < up) return down;
+    else return 0; //never reached only for docu purposes
+
 }
 /**
  * deletes all syst and creates manual entry at indices 0 and 1

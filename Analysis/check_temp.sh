@@ -103,7 +103,7 @@ do
 		echo  "${jobname} \e[1;30m waiting (${jobid})\e[0m"
 	    fi
 	else
-	    echo  "${jobname} \e[1;31m is not submitted or died without any tracable reason!! \e[0m"
+	    echo  "${jobname} \e[01;30m still queuing or \e[1;31m died without any tracable reason!! \e[0m"
 	    tresubmit=( "${tresubmit[@]}" "../jobscripts/${jobname}" );
 	    rmfiles=( "${rmfiles[@]}" "rm -f ../batch/${file}.o${jobid}; rm -f ../output/${file}.root;rm -f ../stdout/${file}.txt;" );
 	fi
@@ -121,7 +121,7 @@ then
 	echo "resubmitting ${#tresubmit[@]} jobs: ${tresubmit[@]}"
 	eval `echo "${rmfiles[@]}"`
 	cd ../batch
-	for (( i=0;i<${#tresubmit[@]};i++)); do
+	for (( i=1;i<=${#tresubmit[@]};i++)); do
 	    if [ "${tresubmit[${i}]}" ]
 	    then
 	

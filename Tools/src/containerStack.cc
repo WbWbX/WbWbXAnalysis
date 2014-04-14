@@ -644,7 +644,7 @@ THStack * containerStack::makeTHStack(TString stackname){
     if(stackname == "") stackname = name_+"_s";
     THStack *tstack = addObject(new THStack(stackname,stackname));
 
-    std::vector<size_t> sorted=sortEntries(false);
+    std::vector<size_t> sorted=getSortedIdxs(false);
     if(debug)
         std::cout << "containerStack::makeTHStack: sorted entries" <<std::endl;
 
@@ -690,7 +690,7 @@ TLegend * containerStack::makeTLegend(bool inverse){
     leg->SetFillStyle(0);
     leg->SetBorderSize(0);
 
-    std::vector<size_t> sorted=sortEntries(inverse);
+    std::vector<size_t> sorted=getSortedIdxs(inverse);
 
     for(unsigned int it=0;it<size();it++){
         size_t i=sorted.at(it);
@@ -1405,7 +1405,7 @@ container1D containerStack::getBackgroundContainer()const{
     container1D out;
     bool first=true;
     for(size_t i=0;i<containers_.size();i++){
-        if(std::find(sidx.begin(),sidx.end(),i) != sidx.end()){
+        if(std::find(sidx.begin(),sidx.end(),i) != sidx.end() || getLegend(i) == dataleg_){
             continue;
         }
         if(first){
@@ -1600,10 +1600,8 @@ int containerStack::checkLegOrder() const{ //depre
 	}
 	return 0; */
 }
-/**
- * might need a rewrite
- */
-std::vector<size_t> containerStack::sortEntries(/* std::vector<int> inputlegord OR map with legnames?, */bool inverse) const{
+
+std::vector<size_t> containerStack::getSortedIdxs(bool inverse) const{
 
     //new implementation
     std::vector<int> inputlegord=legorder_;
@@ -1616,17 +1614,12 @@ std::vector<size_t> containerStack::sortEntries(/* std::vector<int> inputlegord 
     std::vector<size_t> legasso;
     //protect size etc
 
-    //BULLSHIT
     for(size_t i=0;i<sortedilo.size();i++){
-        int oval=sortedilo.at(i);
-        for(size_t j=0;j<inputlegord.size();j++){//search in internal ordering
-            if(oval==inputlegord.at(j)){ //has position j
-                legasso.push_back(j);
-                break;
-            }
-        }
+        //get the position in input
+        size_t pos=std::find(inputlegord.begin(),inputlegord.end(),sortedilo.at(i))-inputlegord.begin();
+        legasso.push_back(pos);
     }
-    //fill not asso
+    //just prepend all others
     for(size_t i=legasso.size();i<legends_.size();i++)
         legasso.push_back(i);
 
@@ -1638,60 +1631,7 @@ std::vector<size_t> containerStack::sortEntries(/* std::vector<int> inputlegord 
     }
 
     return legasso;
-    ///end new implementation
 
-    /*
-	std::vector<int> ordering;
-	std::vector<size_t> dontuse;
-
-	if(legorder_.size()<1){ //not filled
-		std::vector<size_t> easyorder;
-		for(size_t i=0;i<legends_.size();i++)
-			easyorder.push_back(i);
-		return easyorder;
-	}
-
-	ordering.resize(size(),-1);
-	for(unsigned int it=0;it<size();it++){
-		if(checkLegOrder()>-1 && legorder_.find(legends_[it])!=legorder_.end()){
-			ordering.at(legorder_.find(legends_[it])->second)=it;
-			dontuse.push_back(it);
-		}
-	}
-
-
-	for(size_t it=0;it<ordering.size();it++){ //fill rest
-		int ord=ordering.at(it);
-		if(ord<0){ //not yet filled
-			for(size_t newit=0;newit<size();newit++){
-				bool use=true;
-				for(size_t j=0;j<dontuse.size();j++){
-					if(newit == dontuse.at(j))
-						use=false;
-				}
-				if(use){
-					ordering.at(it)=(int)newit;
-				}
-			}
-		}
-	}
-
-	std::vector<size_t> out;
-
-	if(inverse){
-		out.resize(ordering.size(),0);
-		size_t outidx=ordering.size()-1;
-		for(size_t i=0;i<ordering.size();i++){
-			out.at(outidx)=ordering.at(i);
-			outidx--;
-		}
-	}
-	else{
-		for(size_t i=0;i<ordering.size();i++)
-			out.push_back((size_t) ordering.at(i));
-	}
-	return out;
-     */
 }
 
 bool containerStack::checkDrawDimension() const{

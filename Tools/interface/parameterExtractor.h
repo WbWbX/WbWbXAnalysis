@@ -12,6 +12,8 @@
 #include "tObjectList.h"
 #include "TString.h"
 #include <vector>
+#include "TF1.h"
+
 class TCanvas;
 
 namespace ztop{
@@ -23,11 +25,11 @@ namespace ztop{
 class parameterExtractor {
 public:
 
-    enum likelihoodModes{lh_chi2,lh_chi2Swapped};
+    enum likelihoodModes{lh_chi2,lh_chi2Swapped,lh_fit};
 
 
-    parameterExtractor(): LHMode_(lh_chi2){}
-    ~parameterExtractor(){}
+    parameterExtractor(): LHMode_(lh_chi2),tmpfa_(0),tmpfb_(0),granularity_(300),clfit_(0.95){}
+    ~parameterExtractor(){}//FIXME}
 
     // defaults should suffice
 
@@ -55,9 +57,29 @@ public:
     ////
 
     void setLikelihoodMode(likelihoodModes lhm){LHMode_=lhm;}
+    likelihoodModes getLikelihoodMode()const{return LHMode_;}
 
     std::vector<graph> createLikelihoods();
 
+
+
+    void setFitFunctionA(const TString& ffc){fitfunctiona_=ffc;}
+    void setFitFunctionB(const TString& ffc){fitfunctionb_=ffc;}
+    void setFitFunctions(const TString& ffc){fitfunctionb_=ffc;fitfunctiona_=ffc;}
+
+/*
+    const std::vector<std::vector<TF1* > >&  getFitFunctionA()const{return fittedFunctionsa_;}
+    const std::vector<std::vector<TF1* > >&  getFitFunctionB()const{return fittedFunctionsb_;}
+*/
+
+    const std::vector<graph> & getFittedGraphsA()const{return fittedgraphsa_;}
+    const std::vector<graph> & getFittedGraphsB()const{return fittedgraphsb_;}
+
+    void setIntersectionGranularity(size_t grn){granularity_=grn;}
+
+    void setConfidenceLevelFitInterval(const float & cl){clfit_=cl;}
+
+    static bool debug;
 
 protected:
     /* */
@@ -76,6 +98,38 @@ private:
     ////implementation of likelihoods for one graph
     graph createChi2Likelihood(const graph&,const graph&);
     graph createChi2SwappedLikelihood(const graph&,const graph&);
+
+    ///////// intersection part ///
+
+    /**
+     * will just return graph with one point and errors
+     * the fitted functions will be put into the last references:
+     * first: graph for fit a, second: graph for fit b
+     */
+    graph createIntersectionLikelihood(const graph& grapha,const graph& graphb,
+            graph& fitteda,graph& fittedb);
+
+
+    /**
+     * only temps
+     */
+    TF1* tmpfa_,*tmpfb_;
+
+    /**
+     * for further printout
+     */
+    /*
+    std::vector<std::vector<TF1* > > fittedFunctionsa_;
+    std::vector<std::vector<TF1* > > fittedFunctionsb_;
+    */
+    std::vector<graph> fittedgraphsa_,fittedgraphsb_;
+
+    TString fitfunctiona_,fitfunctionb_;
+    size_t granularity_;
+    float clfit_;
+    //std::vector<>
+
+    double findintersect(TF1* a, TF1* b,float min, float max);
 
     /* ..... */
 

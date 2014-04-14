@@ -124,9 +124,12 @@ public:
     void setLabelSize(float size){labelmultiplier_=size;}       //! 1 for default
     TH1D * getTH1D(TString name="", bool dividebybinwidth=true, bool onlystat=false, bool nostat=false) const; //! returns a TH1D pointer with symmetrized errors (TString name); small bug with content(bin)=0 and error(bin)=0
     TH1D * getTH1DSyst(TString name, size_t systNo, bool dividebybinwidth=true, bool statErrors=false) const;
-    //operator TH1D() const {TH1D* h=getTH1D();TH1D hr=*h;delete h;return hr;}
-    // bad practise operator TH1D*(){return getTH1D();}
-    //container1D & operator = (const TH1D &);
+
+
+    /**
+     * imports TH1. Assumes errros to be stat errors! That means, bin entries are
+     * defined according to stat^2
+     */
     container1D & import(TH1 *,bool isbinwidthdivided=false);
     void writeTH1D(TString name="",bool dividebybinwidth=true, bool onlystat=false, bool nostat=false) const; //! writes TH1D->Write() with symmetrized errors (TString name)
 
@@ -214,6 +217,13 @@ public:
      * return: map of (new) *this syst indices to rhs indices
      */
     std::map<size_t,size_t> mergeLayers(container1D& rhs){return contents_.mergeLayers(rhs.contents_);}
+
+    /**
+     * This function equalizes the association of systematic indices between rhs and *this
+     * if an uncertainty does not exist, it is copied from nominal
+     * The new ordering will be derived mostly from rhs
+     */
+    void equalizeSystematicsIdxs(container1D &rhs);
 
     TString coutBinContent(size_t bin) const;
 

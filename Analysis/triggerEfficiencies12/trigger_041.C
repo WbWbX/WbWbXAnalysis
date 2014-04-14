@@ -121,7 +121,7 @@ void trigger_041(){
 
   
 
-  TString dir="/scratch/hh/dust/naf/cms/user/kieseler/trees_ES_Jul13/";
+  TString dir="/nfs/dust/cms/user/kiesej/trees_ES_Apr14/";
 
   TString cmssw_base=getenv("CMSSW_BASE");
 

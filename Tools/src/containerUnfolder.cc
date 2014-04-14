@@ -103,7 +103,7 @@ container1D containerUnfolder::binbybinunfold(container1DUnfold & cuf){
 	histoContent::multiplyStatCorrelated=temp;
 
 	if(debug)
-		std::cout << "containerUnfolder::binbybinunfold: correct for lumi" << std::endl;
+		std::cout << "containerUnfolder::binbybinunfold: correct for lumi: " <<cuf.getLumi()<< std::endl;
 	double lumiinv=1/cuf.getLumi();
 	xsec = xsec * lumiinv;
 	cuf.setUnfolded(xsec);
@@ -118,8 +118,10 @@ container1D containerUnfolder::unfold(/*const*/ container1DUnfold & cuf){
 	container1D::c_makelist=false;
 	container1D out,refolded;
 
-	if(cuf.getBackground().integral() > cuf.getRecoContainer().integral() * 0.3){
-		std::cout << "containerUnfolder::unfold: " << cuf.getName() << " has more background than signal, skipping" <<std::endl;
+	if(cuf.getBackground().integral() > cuf.getRecoContainer().integral() * 0.55){
+		std::cout << "containerUnfolder::unfold: " << cuf.getName() <<  " has more background than signal ("
+		        <<cuf.getBackground().integral()/cuf.getRecoContainer().integral()
+		        << "%), skipping" <<std::endl;
 		return container1D();
 	}
 	if(cuf.getRecoContainer().integral() == 0){

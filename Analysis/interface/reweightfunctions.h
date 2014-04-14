@@ -16,7 +16,7 @@ public:
     reweightfunctions(): syst_(nominal),type_(toppt){}
     ~reweightfunctions(){}
 
-    enum functiontype{toppt};
+    enum functiontype{toppt,flat};
     enum systematics{nominal,up,down};
 
     void setSystematics(systematics insys){syst_=insys;}

@@ -8,7 +8,7 @@
 #$ -l h_rt=02:55:00
 #
 #(the maximum memory usage of this job)
-#$ -l h_vmem=1024M
+#$ -l h_vmem=2047M
 #
 #(stderr and stdout are merged together to stdout)
 #$ -j y

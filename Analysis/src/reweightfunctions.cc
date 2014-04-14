@@ -21,6 +21,9 @@ float reweightfunctions::getWeight(const float& in) const{
         if(syst_ == down)
             return 1;
     }
+    else if(type_==flat){
+        return 1;
+    }
 
     return 1;
 }

@@ -71,5 +71,7 @@ PUFile         = /src/TtZAnalysis/Data/ReRecoJan13.json.txt_PU $without .root
 btagWP         = csvl
 btagFile       = all_btags.root
 
+btagShapeFileHF = /src/TopAnalysis/ZTopUtils/data/csv_rwt_hf.root
+btagShapeFileLF = /src/TopAnalysis/ZTopUtils/data/csv_rwt_lf.root
 
 [parameters-end]

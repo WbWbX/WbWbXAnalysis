@@ -267,6 +267,10 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
     addPlot("deta (ll,jj)","#Delta#eta(ll,jj)","N_{evt}/GeV");
     FILLSINGLE(detalljj);
 
+    SETBINSRANGE(30, 0, 2*M_PI);
+    addPlot("sum dphi l1met l2met","#Delta#phi(met,l_{1})+#Delta#phi(met,l_{2})","N_{evt}/bw");
+    FILLSINGLE(lhi_sumdphimetl);
+
     ///middphi range
 
 
@@ -446,6 +450,7 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
     }
     ///EVT VARS
 
+
     SETBINSRANGE(50,0,50);
     addPlot("vertex multiplicity", "n_{vtx}", "N_{evt}");
     FILL(event,vertexMulti());
@@ -455,6 +460,35 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
     FILLSINGLE(puweight);
 
 
+    ///for likelihoods
+
+    SETBINSRANGE(100,0,1);
+    addPlot("top likelihood output","D","N_{evt}/bw");
+    FILLSINGLE(lh_toplh);
+
+
+    SETBINSRANGE(40,0,1);
+    addPlot("top likelihood output less bins","D","N_{evt}/bw");
+    FILLSINGLE(lh_toplh);
+
+    SETBINSRANGE(100,-200,100);
+    addPlot("DXi","D_{#xi}","N_{evt}/bw");
+    if(event()->leadinglep && event()->secleadinglep && event()->adjustedmet){
+/*
+ * from alexei
+ */
+        NTVector lep1p=event()->leadinglep->p4().getNTVector();
+        NTVector lep2p=event()->secleadinglep->p4().getNTVector();
+        NTVector metp=event()->adjustedmet->p4().getNTVector();
+        NTVector bis=bisector(lep1p,lep2p);
+        float pxivis=(lep1p + lep2p) * bis;
+        float pnots=metp*bis;
+
+        float dxi=pnots- 0.85* pxivis;
+//std::cout << metp.x() << " "<< metp.y() << " "<< metp.z() << " "<< pxivis<< " " << pnots<< " " <<dxi << std::endl;
+        last()->fill(dxi,*event()->puweight);
+
+    }
 
 
 

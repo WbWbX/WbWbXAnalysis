@@ -48,6 +48,9 @@ void plotterControlPlot::readStyleFromFile(const std::string& infile){
     datastyleratio_.readFromFile(infile, "DataRatio");
     mcstyleupper_.readFromFile(infile, "MCUpper");
     mcstyleratio_.readFromFile(infile, "MCRatio");
+    //FIXME
+    mcstylepsmig_=mcstyleupper_;
+    mcstylepsmig_.readFromFile(infile, "MCUpperMigrations",false);
     //text boxes
 
     textboxes_.readFromFile(infile,"boxes");
@@ -133,8 +136,9 @@ void plotterControlPlot::drawControlPlot(){
         std::cout <<  "plotterControlPlot::drawControlPlot: no data entry found for " << stackp_->getName() <<std::endl;
         throw std::runtime_error("plotterControlPlot::drawControlPlot: no data entry found");
     }
-
-    TH1 * axish=addObject(stackp_->getContainer(dataentry).getTH1D("",true,false,false));
+    bool divbbw=true;
+    if(stackp_->hasTag(taggedObject::dontDivByBW_tag)) divbbw=false;
+    TH1 * axish=addObject(stackp_->getContainer(dataentry).getTH1D("",divbbw,false,false));
     plotStyle upperstyle=upperstyle_;
     upperstyle.absorbYScaling(getSubPadYScale(1));
     upperstyle.applyAxisStyle(axish);
@@ -142,7 +146,7 @@ void plotterControlPlot::drawControlPlot(){
 
 
     //prepare data
-    plot* dataplottemp =  new plot(&stackp_->getContainer(dataentry),true);
+    plot* dataplottemp =  new plot(&stackp_->getContainer(dataentry),divbbw);
     tempplots_.push_back(dataplottemp);
     datastyleupper_.applyContainerStyle(dataplottemp);
 
@@ -154,11 +158,14 @@ void plotterControlPlot::drawControlPlot(){
 
     templegp_->AddEntry(dataplottemp->getSystGraph(),stackp_->getLegend(dataentry),"ep");
 
+    std::vector<size_t> signalidxs=stackp_->getSignalIdxs();
+
+
     if(stackp_->size()>1){ //its not only data
 
         std::vector<TObject *> sortedout;
-        std::vector<size_t> sorted=stackp_->sortEntries(invertplots_); //invert
-        std::vector<size_t> nisorted=stackp_->sortEntries(!invertplots_); //invert
+        std::vector<size_t> sorted=stackp_->getSortedIdxs(invertplots_); //invert
+        std::vector<size_t> nisorted=stackp_->getSortedIdxs(!invertplots_); //invert
         std::vector<TH1 *> stackedhistos;
 
         container1D sumcont=stackp_->getContainer(dataentry);
@@ -168,39 +175,95 @@ void plotterControlPlot::drawControlPlot(){
         size_t firstmccount=0;
         if(dataentry==0) firstmccount++;
 
+        std::vector<TString> legendentries;
+        bool foundPSmig=false;
 
         for(size_t it=0;it<stackp_->size();it++){ //it is the right ordering
             size_t i=sorted.at(it);
             if(i != dataentry){
-                container1D tempcont = stackp_->getContainer(i);
-                tempcont *=stackp_->getNorm(i);
+                container1D tempcont;
+                if(stackp_->is1DUnfold()){ //special treatment
+                    tempcont = stackp_->getContainer1DUnfold(i).getBackground();
+                    tempcont *=stackp_->getNorm(i);
+                    sumcont+=tempcont;
+                    //is not signal
 
-                sumcont+=tempcont;
 
-                TH1D * h=addObject(sumcont.getTH1D(stackp_->getLegend(i)+" "+stackp_->getName()+"_stack_h",true,true,true)); //no errors
-                if(!h)
-                    continue;
-                mcstyleupper_.applyContainerStyle(h,false);
-                h->SetFillColor(stackp_->colors_.at(i));
-                stackedhistos.push_back(h);
+                    if(std::find(signalidxs.begin(),signalidxs.end(),i)==signalidxs.end()){//is not signal
+                        TH1D * h=addObject(sumcont.getTH1D(stackp_->getLegend(i)+" "+stackp_->getName()+"_stack_h",divbbw,true,true)); //no errors
+                        if(!h)
+                            continue;
+                        mcstyleupper_.applyContainerStyle(h,false);
+                        h->SetFillColor(stackp_->colors_.at(i));
+                        stackedhistos.push_back(h);
+                        legendentries.push_back(stackp_->getLegend(i));
+                    }
+                    else{//this is signal but PS migrations!
+                        TH1D * h=addObject(sumcont.getTH1D(stackp_->getLegend(i)+" PSmig "+stackp_->getName()+"_stack_h",divbbw,true,true)); //no errors
+                        if(!h)
+                            continue;
+                        mcstylepsmig_.applyContainerStyle(h,false);
+                        h->SetFillColor(1);//stackp_->colors_.at(i)+5);
+                        stackedhistos.push_back(h);
+                        legendentries.push_back("");
+                        if(tempcont.integral(true)!=0)
+                            foundPSmig=true;
+                        tempcont = stackp_->getContainer1DUnfold(i).getVisibleSignal();
+                        sumcont+=tempcont;
+                        TH1D * hsig=addObject(sumcont.getTH1D(stackp_->getLegend(i)+" "+stackp_->getName()+"_stack_h",divbbw,true,true));
+                        mcstyleupper_.applyContainerStyle(hsig,false);
+                        hsig->SetFillColor(stackp_->colors_.at(i));
+                        stackedhistos.push_back(hsig);
+                        legendentries.push_back(stackp_->getLegend(i));
+
+                    }
+
+
+
+                }
+                else{
+                    tempcont = stackp_->getContainer(i);
+                    tempcont *=stackp_->getNorm(i);
+                    sumcont+=tempcont;
+                    TH1D * h=addObject(sumcont.getTH1D(stackp_->getLegend(i)+" "+stackp_->getName()+"_stack_h",divbbw,true,true)); //no errors
+                    if(!h)
+                        continue;
+                    mcstyleupper_.applyContainerStyle(h,false);
+                    h->SetFillColor(stackp_->colors_.at(i));
+                    stackedhistos.push_back(h);
+                    legendentries.push_back(stackp_->getLegend(i));
+                }
+
+
             }
             else{
                 stackedhistos.push_back(0);
             }
         }
-        //draw
+        //draw in inverse order
+
+
         for(size_t i=stackedhistos.size()-1; i+1>0;i--){
 
             if(stackedhistos.at(i)){ //not data
-                stackedhistos.at(i)->Draw(mcstyleupper_.rootDrawOpt+"same");
-                templegp_->AddEntry(stackedhistos.at(i),stackp_->getLegend(sorted.at(i)),"f");
-            }
 
+                stackedhistos.at(i)->Draw(mcstyleupper_.rootDrawOpt+"same");
+                if(legendentries.at(i)!="")
+                    templegp_->AddEntry(stackedhistos.at(i),legendentries.at(i),"f");
+            }
 
         }
         //make errors (use sumcont)
-        TG * mcerr=addObject(sumcont.getTGraph(stackp_->getName()+"mcerr_cp",true,false,false,false));
+        TG * mcerr=addObject(sumcont.getTGraph(stackp_->getName()+"mcerr_cp",divbbw,false,false,false));
         mcstyleupper_.applyContainerStyle(mcerr,true);
+
+        templegp_->AddEntry(mcerr,"MC syst+stat","f");
+        if(stackp_->is1DUnfold() && foundPSmig){ //
+            TH1D * dummy=addObject(new TH1D());
+            mcstylepsmig_.applyContainerStyle(dummy,false);
+            dummy->SetFillColor(1);
+            templegp_->AddEntry(dummy,"PS migrations","f");
+        }
         mcerr->Draw("same"+mcstyleupper_.sysRootDrawOpt);
 
         histoContent::addStatCorrelated=tmpaddStatCorrelated;

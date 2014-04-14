@@ -65,6 +65,7 @@ TString TtBarUnfolder::unfold(TString out,TString in)const{
 
 
 
+
     TString csvname=in;
     csvname.ReplaceAll("_plots.root","");
     csvname.ReplaceAll(".root","");
@@ -112,10 +113,7 @@ TString TtBarUnfolder::unfold(TString out,TString in)const{
         if(printpdfs) system(("mkdir -p "+outdirin).Data());
 
         ztop::container1DUnfold  data=stack->produceUnfoldingContainer();
-        if(data.getBackground().integral() > data.getRecoContainer().integral() * 0.3 ||  data.getRecoContainer().integral()==0){
-            std::cout << "containerUnfolder::unfold: " << name << " has more background than signal, skipping xcheck" <<std::endl;
-            continue;
-        }
+
         std::cout << "unfolding " << data.getName() << " syst: " << std::endl;
         unfolder.unfold(data);
         ztop::container1D unfolded=data.getUnfolded();
@@ -131,7 +129,7 @@ TString TtBarUnfolder::unfold(TString out,TString in)const{
         TCanvas * c = new TCanvas(name+"_unfolded",name+"_unfolded");
         c->Draw();
         unfolded.drawFullPlot();
-        if(unfolded.getNBins() < 3){
+        if(unfolded.getNBins() < 6){
             std::cout << "\n\n" << name << std::endl;
             outputstring+=name+"\n\n";
             for(size_t bin=1;bin<=unfolded.getNBins();bin++){

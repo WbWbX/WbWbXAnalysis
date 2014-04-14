@@ -106,6 +106,9 @@ public:
 
     void clear(){allplotsstackvector_.clear();}
 
+    void setDiscriminatorInputFile(const std::string filename){discrInput_=filename;}
+    void setUseDiscriminators(bool use){usediscr_=use;}
+
     ztop::PUReweighter * getPUReweighter(){return & puweighter_;}
     ztop::NTJERAdjuster * getJERAdjuster(){return & jeradjuster_;}
     ztop::NTJECUncertainties * getJECUncertainties(){return & jecuncertainties_;}
@@ -120,6 +123,7 @@ public:
     ztop::reweightfunctions * getTopPtReweighter(){return &topptReweighter_;}
 
     MainAnalyzer & operator= (const MainAnalyzer &);
+
 
 
     ///analysis helper functions
@@ -208,6 +212,10 @@ private:
     std::vector<pid_t> daughPIDs_;
 
     TString topmass_;
+
+    //for discriminators
+    std::string discrInput_;
+    bool usediscr_;
 
     template <class T>
     std::vector<T*> produceCollection(std::vector<T> * t){

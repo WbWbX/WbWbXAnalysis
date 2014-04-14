@@ -20,7 +20,9 @@ public:
     mlbmin(0),
     mlbivansbins(0),
     total(0),
-    mlbcombthresh_(0){}
+    vistotal(0),
+    mlbcombthresh_(0)
+    {}
 
     ~analysisPlotsJan(){}
 
@@ -35,7 +37,8 @@ private:
     *mlb,
     *mlbmin,
     *mlbivansbins,
-    *total;
+    *total,
+    *vistotal;
 
     float mlbcombthresh_;
 

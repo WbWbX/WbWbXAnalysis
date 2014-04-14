@@ -36,18 +36,19 @@ void setupDF(ztop::discriminatorFactory & discf, ztop::NTFullEvent& evt){
 int main (){
     using namespace std;
     using namespace ztop;
-    float nenetries=10e4;
+    float nenetries=10e5;
     int scount=999;
     NTFullEvent evt;
     float puweight=1;
     evt.puweight=&puweight;
 
+    float binsmax=0.1;
     std::vector<float> bins;
-    for(float i=0;i<1.;i+=1./30.) bins<<i;
+    for(float i=0;i<binsmax;i+=binsmax/100.) bins<<i;
 
-    containerStackVector::debug=true;
+  //  containerStackVector::debug=true;
 
-    discriminatorFactory::debug=true;
+  //  discriminatorFactory::debug=true;
 
     discriminatorFactory testread;
     testread.readFromTFile("testDiscrFact_lhds.root","testDF");
@@ -59,7 +60,7 @@ int main (){
 
     setupDF(discf,evt);
 
-    containerStack::debug=true;
+  //  containerStack::debug=true;
 
     TRandom * r = new TRandom();
     r->SetSeed(scount++);
@@ -161,7 +162,7 @@ int main (){
         fullout.fill(clh);
 
     }
-    plotterBase::debug=true;
+  //  plotterBase::debug=true;
     csv.addList("data",kBlack,1,3);
 
     TFile * f= new TFile("testDiscrFact_out.root","RECREATE");
@@ -174,8 +175,8 @@ int main (){
     container1D::c_list.push_back(&fullout);
 
     discriminatorFactory testcreate("testDF");
-    container1D::debug=true;
-    containerStack::debug=true;
+  //  container1D::debug=true;
+ //   containerStack::debug=true;
     testcreate.extractLikelihoods(csv);
     csv.clear();
     testcreate.setUseLikelihoods(true);

@@ -116,7 +116,7 @@ void trigger_028(){
 
   
 
-  TString dir="/scratch/hh/dust/naf/cms/user/kieseler/trees_PS_trig_03/";
+  TString dir="/nfs/dust/cms/user/kiesej/trees_ES_Apr14/";
 
   TString cmssw_base=getenv("CMSSW_BASE");
   TString PURunA = cmssw_base+"/src/TtZAnalysis/Data/RunAComp.json.txt_PU.root";

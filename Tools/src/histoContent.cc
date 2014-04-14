@@ -94,7 +94,7 @@ bool histoContent::resizeBins(const size_t & newsize){
 /**
  * adds a layer of content with <name> to the existing ones.
  * returns the index of the new layer. layer will be a
- * copy of the content layer (-1) including statistics (is this a mistake?)
+ * copy of the content layer (-1) including statistics
  * Typically useful for systematics.
  * if layer already exists it returns the index of the layer
  *
@@ -387,8 +387,7 @@ void histoContent::cout() const{
 /**
  * if a layer does not exist, it creates new layers by copying the nominal (-1) layer
  * of the this histoContent object;
- * The stat errors from the newly created layers are removed
- * to avoid double counting when checkgin content-syst of resulting histoContent
+ * The stat errors from the newly created layers are NOT removed
  *
  * returns mapping of new layers to input histoContent.layers
  */
@@ -397,10 +396,7 @@ std::map<size_t,size_t> histoContent::addLayers(const histoContent & rhs){
 	for(size_t i=0;i<rhs.layermap_.size();i++){
 		size_t oldsize=layerSize();
 		size_t lhsidx=addLayer(rhs.layermap_.getData(i));
-		// if the layer was created from nominal, the stats are cleared
-		// otherwise it would be double counting when checking content-syst at some point
-		if(oldsize!=layerSize())
-			clearLayerStat(lhsidx);
+
 		outmapping[lhsidx]=i;
 	}
 	return outmapping;

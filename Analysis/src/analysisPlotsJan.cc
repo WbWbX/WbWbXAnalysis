@@ -39,9 +39,12 @@ void analysisPlotsJan::bookPlots(){
 
     total=addPlot(inclbins,inclbins,"total","bin","N_{evt}");
     total->setBinByBin(true); //independent bins
+    total->addTag(taggedObject::dontDivByBW_tag);
 
 
-
+    vistotal=addPlot(inclbins,inclbins,"vis total","bin","N_{evt}");
+    vistotal->setBinByBin(true); //independent bins
+    vistotal->addTag(taggedObject::dontDivByBW_tag);
 }
 
 
@@ -51,7 +54,14 @@ void analysisPlotsJan::fillPlotsGen(){
     using namespace std;
     using namespace ztop;
 
-    total->fillGen(1.,puweight());
+    if(event()->gentops && event()->gentops->size()>0)
+        total->fillGen(1.,puweight());
+
+    if(event()->genvisleptons3 && event()->genvisjets){
+        if(event()->genvisleptons3->size() > 1 && event()->genvisjets->size()>1){ //vis PS
+            vistotal->fillGen(1.,puweight());
+        }
+    }
 
     //calculate mlbs based on ME leptons
     if(event()->genvisleptons3 && event()->genvisbjetsfromtop){
@@ -86,6 +96,12 @@ void analysisPlotsJan::fillPlotsReco(){
 
     total->fillReco(1,puweight());
 
+    vistotal->fillReco(1,puweight());
+
+
+    /*
+     * this is not an event selection. just safety measures
+     */
     if(event()->leadinglep && event()->secleadinglep && event()->selectedbjets ){
         if(event()->selectedbjets->size()>0 ){
             NTLorentzVector<float> bjetp4=event()->selectedbjets->at(0)->p4();

@@ -241,10 +241,3 @@
 300  /TTJets_MSDecays_mass166_5_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM     tree_8TeV_emuttbarviatau_mt166.5             genFilter=Top isSignal=true genFilterString=ElectronMuonViaTau
 
 
-
-
-#100  /DoubleElectron/Run2011A-08Nov2011-v1/AOD        tree_7TeV_ee_runA_08Nov    is2011=true isMC=false globalTag=FT44_V9_AN1     jsonfiles/ReRecoNov2011.json.txt
-#300  /DoubleElectron/Run2011B-19Nov2011-v1/AOD        tree_7TeV_ee_runB_19Nov    is2011=true isMC=false globalTag=FT44_V11_AN1    jsonfiles/ReRecoNov2011.json.txt
-#100  /DoubleMu/Run2011A-08Nov2011-v1/AOD              tree_7TeV_mumu_runA_08Nov  is2011=true isMC=false globalTag=FT44_V9_AN1     jsonfiles/ReRecoNov2011.json.txt
-#300  /DoubleMu/Run2011B-19Nov2011-v1/AOD              tree_7TeV_mumu_runB_19Nov  is2011=true isMC=false globalTag=FT44_V11_AN1    jsonfiles/ReRecoNov2011.json.txt
-

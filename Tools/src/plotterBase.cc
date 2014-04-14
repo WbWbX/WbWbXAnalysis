@@ -23,6 +23,7 @@ bool plotterBase::debug=false;
 plotterBase::plotterBase(const plotterBase& rhs): tObjectList(rhs){
     pad_ = rhs.pad_;
     tbndc_=rhs.tbndc_;
+    drawlegend_=rhs.drawlegend_;
 }
 
 TVirtualPad* plotterBase::getPad()const{
@@ -42,7 +43,8 @@ void plotterBase::draw(){
     preparePad();//adjusts canvas that lives outside
     drawPlots(); //object handling by plot class
     drawTextBoxes(); //adds new objects to list
-    drawLegends();//adds new objects to list
+    if(drawlegend_)
+        drawLegends();//adds new objects to list
 }
 /**
  * returns >1

@@ -89,7 +89,11 @@ public:
     const histoContent & getYCoords()const{return ycoords_;}
     const histoContent & getXCoords()const{return xcoords_;}
 
-
+    /**
+     * return index of new layer
+     * needs same indices for points
+     * adds deviation of NOMINALS
+     */
     size_t addErrorGraph(const TString &name,const graph &); //needs to have same point indices... if not check by closest point?
     graph getSystGraph(const size_t sysidx)const;
     graph getNominalGraph()const;
@@ -134,6 +138,9 @@ public:
     chi2definitions chi2definition;
 
     graph getChi2Points(const graph&)const;
+
+    void shiftAllXCoordinates(const float& value);
+    void shiftAllYCoordinates(const float& value);
 
 
     static std::vector<ztop::graph *> g_list;

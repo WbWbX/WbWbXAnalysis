@@ -33,7 +33,7 @@ bool container1DUnfold::c_makelist=false;
 
 container1DUnfold::container1DUnfold(): container2D(), xaxis1Dname_(""), yaxis1Dname_(""),
         tempgen_(0),tempreco_(0),tempgenweight_(1),tempweight_(1),recofill_(false),
-        genfill_(false),isMC_(false),flushed_(true),binbybin_(false),lumi_(1),congruentbins_(false){
+        genfill_(false),isMC_(false),flushed_(true),binbybin_(false),lumi_(1),congruentbins_(false),allowmultirecofill_(false){
     if(c_makelist){
         c_list.push_back(this);
     }
@@ -41,7 +41,7 @@ container1DUnfold::container1DUnfold(): container2D(), xaxis1Dname_(""), yaxis1D
 container1DUnfold::container1DUnfold( std::vector<float> genbins, std::vector<float> recobins, TString name,TString xaxisname,TString yaxisname, bool mergeufof)
 :container2D( recobins /*genbins*/ , recobins , name,xaxisname+"_reco",xaxisname+"_gen",mergeufof), xaxis1Dname_(xaxisname),
  yaxis1Dname_(yaxisname),tempgen_(0),tempreco_(0),tempgenweight_(1),tempweight_(1),recofill_(false),genfill_(false),
- isMC_(false),flushed_(true),binbybin_(false),lumi_(1),congruentbins_(false) {
+ isMC_(false),flushed_(true),binbybin_(false),lumi_(1),congruentbins_(false),allowmultirecofill_(false){
     //bins are set, containers created, at least conts_[0] exists with all options (binomial, mergeufof etc)
 
     genbins_=genbins; //can be changed and rebinned afterwards
@@ -153,10 +153,19 @@ void container1DUnfold::setBackground(const container1D & cont){
 }
 container1D container1DUnfold::getBackground() const{
     if(xbins_.size()<1){
-        std::cout << "container1DUnfold::getBackground: No X bins!" << std::endl;
+        std::cout << "container1DUnfold::getBackground: No bins!" << std::endl;
+        throw std::logic_error("container1DUnfold::getBackground: no bins");
     }
     return getXSlice(0);
 }
+container1D container1DUnfold::getVisibleSignal() const{
+    if(xbins_.size()<1){
+        std::cout << "container1DUnfold::getVisibleSignal: No bins!" << std::endl;
+        throw std::logic_error("container1DUnfold::getVisibleSignal: no bins");
+    }
+    return projectToY(false); //no underflow included -> only visible part of response matrix -> generated and reconstructed in visible PS
+}
+
 container1DUnfold container1DUnfold::operator + (const container1DUnfold & second){
     if(second.xbins_ != xbins_ || second.ybins_ != ybins_){
         std::cout << "container1DUnfold::operator +: "<< name_ << " and " << second.name_<<" must have same binning! returning *this" << std::endl;
@@ -361,13 +370,23 @@ container1D container1DUnfold::fold(const container1D& input) const{
     if(isDummy()){
         throw std::logic_error("container1DUnfold::fold: *this is dummy");
     }
-    if(input.getBins() != conts_.at(0).getBins()){
-        throw std::logic_error("container1DUnfold::fold: input bins and response matrix bins not the same");
+    container2D normresp=getNormResponseMatrix();
 
+
+    if(input.getBins() != conts_.at(0).getBins()){
+        // throw std::logic_error("container1DUnfold::fold: input bins and response matrix bins not the same");
+        //try to rebin
+        container1DUnfold copy=*this;
+        //this will only affect the 2d part... not tooo good, but .. who cares
+        for(size_t i=0;i<conts_.size();i++){
+            copy.conts_.at(i)=copy.conts_.at(i).rebinToBinning(input);
+        }
+        normresp=copy.getNormResponseMatrix();
         /////TBI change this to an automatic rebinning later FIXME
 
     }
 
+    std::vector<container1D> & copies=normresp.conts_;
 
     /*take care of syst layers. check whether all exist.
      * in terms of performance improvements, assume input.layersize<*this.layersize
@@ -383,8 +402,6 @@ container1D container1DUnfold::fold(const container1D& input) const{
     // normalize each column to itself (including UF/OF). This then takes care of efficiencies
     // this step includes ALL systematics
 
-    container2D normresp=getNormResponseMatrix();
-    std::vector<container1D> & copies=normresp.conts_;
 
     //do the M x vector  multiplication
 
@@ -429,9 +446,11 @@ container1D container1DUnfold::getPurity() const{
         container1D::c_makelist=mklist;
         return c;
     }
+    //new impl
+
     //rebin to out binning
     container1DUnfold rebinned=rebinToBinning(genbins_);
-    container1D rec=rebinned.getRecoContainer();//projectToY(true);//UFOF? include "BG"
+    container1D rec=rebinned.getVisibleSignal();
     //  container1D gen=rebinned.getGenContainer();
 
     container1D recgen=rebinned.getDiagonal();
@@ -630,6 +649,72 @@ bool container1DUnfold::checkCongruence(const std::vector<float>& a, const std::
 }
 
 
+////////////////////////////////////////////////FILLING////////////////////////////////////////////////
+
+void container1DUnfold::flush(){ //only for MC
+    if(!flushed_){
+        if(genfill_)
+            gencont_.fill(tempgen_,tempgenweight_);
+        if(recofill_)
+            recocont_.fill(tempreco_,tempweight_);
+
+        if(genfill_ && !recofill_){ //put in Reco UF bins
+            fill(tempgen_,ybins_[1]-100,tempgenweight_);}
+        else if(recofill_ && !genfill_){ //put in gen underflow bins -> goes to background
+            fill(xbins_[1]-100,tempreco_,tempweight_);}
+        else if(genfill_ && recofill_){
+            fill(tempgen_,tempreco_,tempweight_);
+            fill(tempgen_,ybins_[1]-100,(tempgenweight_-tempweight_)); // w_gen * (1 - recoweight), tempweight_=fullweight=tempgenweight_*recoweight
+        }
+    }
+    recofill_=false;
+    genfill_=false;
+    flushed_=true;
+
+}
+
+
+void container1DUnfold::fillGen(const float & val, const float & weight){
+    if(genfill_){
+        throw std::logic_error("container1DUnfold::fillGen: Attempt to fill gen (twice) without flushing");
+    }
+    tempgen_=val;
+    tempgenweight_=weight;
+    genfill_=true;
+    flushed_=false;
+}
+
+void container1DUnfold::fillReco(const float & val, const float & weight){ //fills and resets tempgen_
+    if(recofill_ && !allowmultirecofill_){
+        throw std::logic_error("container1DUnfold::fillReco: Attempt to fill reco (twice) without flushing");
+    }
+    tempreco_=val;
+    tempweight_=weight;
+    recofill_=true;
+    flushed_=false;
+    if(allowmultirecofill_){
+        if(genfill_)
+            gencont_.fill(tempgen_,tempgenweight_);
+        if(recofill_)
+            recocont_.fill(tempreco_,tempweight_);
+
+        if(genfill_ && !recofill_){ //put in Reco UF bins
+            fill(tempgen_,ybins_[1]-100,tempgenweight_);}
+        else if(recofill_ && !genfill_){ //put in gen underflow bins -> goes to background
+            fill(xbins_[1]-100,tempreco_,tempweight_);}
+        else if(genfill_ && recofill_){
+            fill(tempgen_,tempreco_,tempweight_);
+            fill(tempgen_,ybins_[1]-100,(tempgenweight_-tempweight_)); // w_gen * (1 - recoweight), tempweight_=fullweight=tempgenweight_*recoweight
+        }
+
+        //recofill_=false;
+        flushed_=true;
+    }
+
+}
+
+
+
 
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////
@@ -719,6 +804,28 @@ void container1DUnfold::writeToTFile(const TString& filename){
     }
     writeToTFile(ftemp);
     delete ftemp;
+}
+
+bool container1DUnfold::TFileContainsContainer1DUnfolds(TFile *f){
+    if(!f || f->IsZombie()){
+        throw std::runtime_error("container1DUnfold::TFileContainsContainer1DUnfolds: file not ok");
+    }
+    TTree * t = (TTree*)f->Get("container1DUnfolds");
+    if(!t || t->IsZombie()){
+        if(t) delete t;
+        return false;
+    }
+    if(t->GetEntries()<1){
+        delete t;
+        return false;
+    }
+    delete t;
+    return true;
+
+}
+bool container1DUnfold::TFileContainsContainer1DUnfolds(const TString & filename){
+    TFile *  f = new TFile(filename, "READ");
+    return TFileContainsContainer1DUnfolds(f);
 }
 
 

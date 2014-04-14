@@ -59,6 +59,7 @@ MainAnalyzer::MainAnalyzer(){
     maxchilds_=8;
     topmass_="mt172.5";
     usepdfw_=-1;
+    usediscr_=false;
 }
 /**
  * takes care of not already deleted containers etc
@@ -113,13 +114,14 @@ int MainAnalyzer::start(){
     allplotsstackvector_.setSyst(getSyst());
     bTagBase::systematics btagsyst=getBTagSF()->getSystematic();
     //load btag:
-    if(!(getBTagSF()->makesEff())){
+    if(!(getBTagSF()->makesEff()) && getBTagSF()->getMode() != NTBTagSF::shapereweighting_mode){ //no input needed
         std::cout << "loading b-tag File: " << btagsffile_ << std::endl;
         std::ifstream testfile(btagsffile_.Data());
         if(!testfile){
             std::cout << "b-tag File " << btagsffile_ << " not found, exit (-3)" << std::endl;
             return -3;
         }
+
         getBTagSF()->readFromTFile(btagsffile_);
         getBTagSF()->bTagBase::setSystematic(btagsyst);
     }
@@ -322,8 +324,14 @@ void MainAnalyzer::readFileList(){
 
 
 }
-
+/*
 void MainAnalyzer::copyAll(const MainAnalyzer & analyzer){
+
+
+    showstatus_=analyzer.showstatus_;
+    onlySummary_=analyzer.
+    testmode_=analyzer.
+    singlefile_=analyzer.
 
     channel_=analyzer.channel_;
     b_ee_=analyzer.b_ee_;
@@ -332,6 +340,11 @@ void MainAnalyzer::copyAll(const MainAnalyzer & analyzer){
     syst_=analyzer.syst_;
     energy_=analyzer.energy_;
     dataname_=analyzer.dataname_;
+    topmass_=analyzer.topmass_;
+
+
+    discrInput_=analyzer.discrInput_;
+    usediscr_=analyzer.discrInput_;
 
     lumi_=analyzer.lumi_;
     datasetdirectory_=analyzer.datasetdirectory_;
@@ -350,7 +363,6 @@ void MainAnalyzer::copyAll(const MainAnalyzer & analyzer){
 
 
     allplotsstackvector_ = analyzer.allplotsstackvector_;
-    showstatus_=analyzer.showstatus_;
 
     infiles_=analyzer.infiles_;
     legentries_=analyzer.legentries_;
@@ -363,7 +375,8 @@ void MainAnalyzer::copyAll(const MainAnalyzer & analyzer){
 
     writeAllowed_=analyzer.writeAllowed_;
 }
-
+*/
+/*
 MainAnalyzer::MainAnalyzer(const MainAnalyzer & analyzer){
     copyAll(analyzer);
 }
@@ -372,6 +385,10 @@ MainAnalyzer & MainAnalyzer::operator = (const MainAnalyzer & analyzer){
     copyAll(analyzer);
     return *this;
 }
+*/
+
+/////////use default implementations! as long as there are not pointers or
+///other things in the member list, this is sufficient and bugs are less likely
 
 void MainAnalyzer::analyze(size_t i){
 

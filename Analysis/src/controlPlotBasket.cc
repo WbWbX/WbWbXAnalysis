@@ -37,8 +37,8 @@ container1D * controlPlotBasket::addPlot(const TString & name, const TString & x
         TString newname=name+" step "+toTString(tmpstep_);
         for(size_t i=0;i<namelist.size();i++){
             if(namelist.at(i) == newname){
-                std::cout <<"controlPlotBasket::addPlot: plots cannot have same names!" << std::endl;
-                throw std::logic_error("controlPlotBasket::addPlot: plots cannot have same names!");
+                std::cout <<"controlPlotBasket::addPlot: plots must not have same names! ("<< newname << ")"<< std::endl;
+                throw std::logic_error("controlPlotBasket::addPlot: plots must not have same names!");
             }
         }
         bool tmp=container1D::c_makelist;

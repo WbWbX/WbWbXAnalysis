@@ -29,7 +29,8 @@ public:
      */
     enum tags{
         isLHDiscr_tag,
-        dontDivByBW_tag
+        dontDivByBW_tag,
+        dontAddSyst_tag
     };
 
 

@@ -1,13 +1,15 @@
 #include "TtZAnalysis/Analysis/interface/MainAnalyzer.h"
 #include "TtZAnalysis/Analysis/interface/AnalysisUtils.h"
 #include "TtZAnalysis/Tools/interface/fileReader.h"
+#include "../interface/discriminatorFactory.h"
+#include <time.h>
 //#include "Analyzer.cc"
 //should be taken care of by the linker!
 
 
 void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
         double lumi, bool dobtag, bool status,bool testmode,TString maninputfile,
-        TString mode,TString topmass,TString btagfile){ //options like syst..
+        TString mode,TString topmass,TString btagfile,bool createLH, std::string discrfile){ //options like syst..
 
     bool didnothing=false;
     //some env variables
@@ -39,7 +41,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 
 
     TString treedir,jecfile,pufile,muonsffile,muonsfhisto,elecsffile,elecsfhisto,trigsffile,elecensffile,muonensffile; //...
-    TString btagWP;
+    TString btagWP,btagshapehffile,btagshapelffile;
 
     if(lumi<0)
         lumi=fr.getValue<double>("Lumi");
@@ -55,7 +57,8 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
     //muonensffile =cmssw_base+fr.getValue<TString>("MuonEnergySFFile");
 
     btagWP=               fr.getValue<TString>("btagWP");
-
+    btagshapehffile       =  fr.getValue<TString>("btagShapeFileHF");
+    btagshapelffile       =  fr.getValue<TString>("btagShapeFileLF");
 
     TString trigsfhisto="scalefactor eta2d with syst";
 
@@ -79,6 +82,19 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 
 
     MainAnalyzer ana;
+
+    ///some checks
+
+
+
+    NTBTagSF::modes btagmode=NTBTagSF::randomtagging_mode;
+    if(mode.Contains("Btagshape")){
+        std::cout << "Using b-tag shape reweighting" <<std::endl;
+        btagmode=NTBTagSF::shapereweighting_mode;
+        ana.getBTagSF()->readShapeReweightingFiles(cmssw_base+btagshapehffile, cmssw_base+btagshapelffile);
+
+    }
+
     ana.setMaxChilds(6);
     if(testmode)
         ana.setMaxChilds(20);
@@ -87,6 +103,8 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
     ana.setTestMode(testmode);
     ana.setLumi(lumi);
     ana.setDataSetDirectory(treedir);
+    ana.setUseDiscriminators(!createLH);
+    ana.setDiscriminatorInputFile(discrfile);
     ana.getPUReweighter()->setDataTruePUInput(pufile+".root");
     ana.setChannel(channel);
     ana.setEnergy(energy);
@@ -114,7 +132,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
     ana.setOutDir(outdir);
     ana.getBTagSF()->setMakeEff(dobtag);
     ana.setBTagSFFile(btagfile);
-    ana.getBTagSF()->useRandomTechnique(userandomtagging);
+    ana.getBTagSF()->setMode(btagmode);
     ana.getBTagSF()->setWorkingPoint(btagWP);
     ana.getJECUncertainties()->setFile((jecfile).Data());
     ana.getJECUncertainties()->setSystematics("no");
@@ -161,9 +179,11 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
     }
     else if(Syst=="JES_up"){
         ana.getJECUncertainties()->setSystematics("up");
+        ana.getBTagSF()->setSystematic(bTagBase::jesup);
     }
     else if(Syst=="JES_down"){
         ana.getJECUncertainties()->setSystematics("down");
+        ana.getBTagSF()->setSystematic(bTagBase::jesdown);
     }
     /*
   else if(Syst=="7TeV_JES_up"){
@@ -186,18 +206,60 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
     else if(Syst=="PU_down"){
         ana.getPUReweighter()->setDataTruePUInput(pufile+"_down.root");
     }
+
+    /////////btag
+
     else if(Syst=="BTAGH_up"){
-        ana.getBTagSF()->setSystematic("heavy up");
+        ana.getBTagSF()->setSystematic(bTagBase::heavyup);
     }
     else if(Syst=="BTAGH_down"){
-        ana.getBTagSF()->setSystematic("heavy down");
+        ana.getBTagSF()->setSystematic(bTagBase::heavydown);
     }
     else if(Syst=="BTAGL_up"){
-        ana.getBTagSF()->setSystematic("light up");
+        ana.getBTagSF()->setSystematic(bTagBase::lightup);
     }
     else if(Syst=="BTAGL_down"){
-        ana.getBTagSF()->setSystematic("light down");
+        ana.getBTagSF()->setSystematic(bTagBase::lightdown);
     }
+    else if(Syst=="BTAGHFS1_up"){
+        ana.getBTagSF()->setSystematic(bTagBase::hfstat1up);
+    }
+    else if(Syst=="BTAGHFS1_down"){
+        ana.getBTagSF()->setSystematic(bTagBase::hfstat1down);
+    }
+    else if(Syst=="BTAGHFS2_up"){
+        ana.getBTagSF()->setSystematic(bTagBase::hfstat2up);
+    }
+    else if(Syst=="BTAGHFS2_down"){
+        ana.getBTagSF()->setSystematic(bTagBase::hfstat2down);
+    }
+    else if(Syst=="BTAGLFS1_up"){
+        ana.getBTagSF()->setSystematic(bTagBase::lfstat1up);
+    }
+    else if(Syst=="BTAGLFS1_down"){
+        ana.getBTagSF()->setSystematic(bTagBase::lfstat1down);
+    }
+    else if(Syst=="BTAGLFS2_up"){
+        ana.getBTagSF()->setSystematic(bTagBase::lfstat2up);
+    }
+    else if(Syst=="BTAGLFS2_down"){
+        ana.getBTagSF()->setSystematic(bTagBase::lfstat2down);
+    }
+    else if(Syst=="BTAGC1_up"){
+        ana.getBTagSF()->setSystematic(bTagBase::cerr1up);
+    }
+    else if(Syst=="BTAGC1_down"){
+        ana.getBTagSF()->setSystematic(bTagBase::cerr1down);
+    }
+    else if(Syst=="BTAGC2_up"){
+        ana.getBTagSF()->setSystematic(bTagBase::cerr2up);
+    }
+    else if(Syst=="BTAGC2_down"){
+        ana.getBTagSF()->setSystematic(bTagBase::cerr2down);
+    }
+
+    /////////top pt
+
     else if(Syst=="TOPPT_up"){
         ana.getTopPtReweighter()->setSystematics(reweightfunctions::up);
     }
@@ -300,6 +362,11 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 
         system(("rm -rf "+fulloutfilepath).Data());
 
+        time_t now = time(0);
+        char* dt = ctime(&now);
+        cout << "\nStarting analyse at: " << dt << endl;
+
+
         int fullsucc=ana.start();
 
         ztop::container1DStackVector csv;
@@ -313,17 +380,38 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
                 rescaleDY(&csv, dycontributions);
                 if(testmode)
                     std::cout << "drawing plots..." <<std::endl;
-                csv.writeAllToTFile(ana.getOutPath()+".root",true,!testmode);
+
+                std::vector<discriminatorFactory> disc=discriminatorFactory::readAllFromTFile(ana.getOutPath()+".root");
+                for(size_t i=0;i<disc.size();i++){
+                    disc.at(i).extractLikelihoods(csv);
+                }
+                csv.writeAllToTFile(ana.getOutPath()+".root",true,!testmode); //recreates file
+                system(("rm -f "+ana.getOutPath()+"_discr.root").Data());
+                discriminatorFactory::writeAllToTFile(ana.getOutPath()+"_discr.root",disc);
+
+
             }
-            else if(testmode){
+            else{
                 std::cout << "drawing plots..." <<std::endl;
-                csv.writeAllToTFile(ana.getOutPath()+".root",true,!testmode);
+                std::vector<discriminatorFactory> disc=discriminatorFactory::readAllFromTFile(ana.getOutPath()+".root");
+                for(size_t i=0;i<disc.size();i++){
+                    disc.at(i).extractLikelihoods(csv);
+                }
+                if(testmode)
+                    csv.writeAllToTFile(ana.getOutPath()+".root",true,!testmode);
+                system(("rm -f "+ana.getOutPath()+"_discr.root").Data());
+                discriminatorFactory::writeAllToTFile(ana.getOutPath()+"_discr.root",disc);
             }
+
 
             if(!testmode){
                 system(("touch "+batchdir+ana.getOutFileName()+"_fin").Data());
             }
             sleep(1);
+            now = time(0);
+            dt = ctime(&now);
+            cout << "Finished analyse at: " << dt << endl;
+
             std::cout <<"\nFINISHED with "<< channel <<"_" << energy <<"_" << Syst <<std::endl;
 
 
@@ -372,6 +460,8 @@ int main(int argc, char* argv[]){
     TString mode   = parse.getOpt<TString>  ("m","xsec","additional mode options");        //-m (xsec,....) default xsec changes legends? to some extend
     TString inputfile= parse.getOpt<TString>  ("i","","specify configuration file input manually");          //-i empty will use automatic
     TString topmass  = parse.getOpt<TString>  ("mt","172.5","top mass value to be used, default: 172.5");          //-i empty will use automatic
+    bool createLH     =parse.getOpt<bool>     ("LH",false,"creates likelihoods to *_discr.root");         //-T enables default false
+    TString discrFile=parse.getOpt<TString>  ("lh","all_discr.root" , "specify discriminator input file (default) all_discr.root");          //-i empty will use automatic
 
 
     parse.doneParsing();
@@ -383,6 +473,6 @@ int main(int argc, char* argv[]){
         //do the merging with filestomerge
     }
     else{
-        analyse(channel, syst, energy, outfile, lumi,dobtag , status, testmode,inputfile,mode,topmass,btagfile);
+        analyse(channel, syst, energy, outfile, lumi,dobtag , status, testmode,inputfile,mode,topmass,btagfile,createLH,discrFile.Data());
     }
 }

@@ -42,6 +42,7 @@
 #include "TtZAnalysis/DataFormats/interface/NTLorentzVector.h"
 
 #include "../interface/analysisPlotsJan.h"
+#include "../interface/discriminatorFactory.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -161,14 +162,26 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
         std::cout << "entering Mgdecays mode: norm will be adapted" <<std::endl;
         if(inputfile.Contains("ttbar.root")){
             inputfile.ReplaceAll("ttbar.root", "ttbar_mgdecays.root");
-           // infiles_.at(anaid).ReplaceAll("ttbar.root", "ttbar_mgdecays.root");
+            // infiles_.at(anaid).ReplaceAll("ttbar.root", "ttbar_mgdecays.root");
             normmultiplier=0.1049; //fully leptonic branching fraction
         }
         else if(inputfile.Contains("ttbarviatau.root")){
             inputfile.ReplaceAll("ttbarviatau.root", "ttbarviatau_mgdecays.root");
-           // infiles_.at(anaid).ReplaceAll("ttbar.root", "ttbar_mgdecays.root");
+            // infiles_.at(anaid).ReplaceAll("ttbar.root", "ttbar_mgdecays.root");
             normmultiplier=0.1049;
         }
+    }
+    else{
+        //adapt wrong MG BR for madspin
+        if(inputfile.Contains("ttbar.root") || inputfile.Contains("ttbarviatau.root")
+                || inputfile.Contains("ttbar_mt"+topmass_+ ".root") ||
+                inputfile.Contains("ttbarviatau_mt"+topmass_+ ".root") ){
+            normmultiplier=0.1049/0.1111202;
+        }
+    }
+
+    if(mode_.Contains("Notoppt")){
+        getTopPtReweighter()->setFunction(reweightfunctions::flat);
     }
 
 
@@ -201,12 +214,47 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
         f=TFile::Open(datasetdirectory_+inputfile);
     }
 
+    NTFullEvent evt;
 
-    //define containers here
+    ////////////////////  configure discriminator factories here  ////////////////////
+    TString factname="topLH_"+channel_+"_"+energy_;
+    discriminatorFactory::c_makelist=true;
+    discriminatorFactory toplikelihood(factname.Data());
 
-    //   define some norm containers
+    discriminatorFactory::c_makelist=false;
+
+    if(usediscr_){
+        toplikelihood.readFromTFile(discrInput_,toplikelihood.getIdentifier());
+
+    }
+    else{
+        toplikelihood.setNBins(40);
+        toplikelihood.setStep(5);
+    }
+
+    toplikelihood.setUseLikelihoods(usediscr_);
 
 
+
+    toplikelihood.addVariable(&evt.lhi_leadjetbtag,"D_{b}^{jet1}",-1,1);
+    toplikelihood.addVariable(&evt.lhi_dphillj,"#Delta#phi(ll,j)",0,M_PI);
+    //if(!usediscr_) //variable gets added, likelihood computed, but it will not be used in final result
+    toplikelihood.addVariable(&evt.lhi_cosleplepangle,"#cos#theta_{ll}",-1.,1.);
+    toplikelihood.addVariable(&evt.mll,"m_{ll}",0.,300);
+    toplikelihood.addVariable(&evt.lhi_sumdphimetl,"#Delta#phi(met,l_{1})+#Delta#phi(met,l_{2})",0,2*M_PI);
+    toplikelihood.addVariable(&evt.lhi_seljetmulti,"N_{jets}",-0.5,4.5);
+    toplikelihood.addVariable(&evt.lhi_selbjetmulti,"N_{jets}",-0.5,4.5);
+    toplikelihood.addVariable(&evt.lhi_leadleppt,"p_{T}^{1st lep}",0,200);
+    toplikelihood.addVariable(&evt.ptllj,"p_{T}(llj) [GeV]",50,400);
+
+    if(usediscr_){
+        toplikelihood.setSystematics(getSyst());
+    }
+    else{
+        toplikelihood.setSystematics("nominal");
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////
 
     if(testmode_)
         std::cout << "testmode("<< anaid << "): preparing container1DUnfolds" << std::endl;
@@ -218,7 +266,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
     if((TString)getenv("USER") == (TString)"kiesej"){
         jansplots_step8.enable();
     }
-    /*   if((TString)getenv("USER") == (TString)"dolinska"){
+    /*  if((TString)getenv("USER") == (TString)"dolinska"){
         jansplots_step8.enable();
     } */
 
@@ -227,10 +275,11 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
     //global settings for analysis plots
     container1DUnfold::setAllListedMC(isMC);
     container1DUnfold::setAllListedLumi((float)lumi_);
-
+    if(testmode_)
+        container1DUnfold::setAllListedLumi((float)lumi_*0.08);
 
     //setup everything for control plots
-    NTFullEvent evt;
+
     ttbarControlPlots plots;//for the Z part just make another class (or add a boolian)..
     ZControlPlots zplots;
     plots.linkEvent(evt);
@@ -260,6 +309,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
         return;
     }
     getBTagSF()->setIsMC(isMC);
+
+
 
     ////TEST
     //another btag SF util for tight working point
@@ -314,7 +365,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
     TBranch * b_GenZs=0;
     vector<NTGenParticle> * pGenZs=0;
     t->SetBranchAddress("NTGenZs",&pGenZs,&b_GenZs);
-    // TBranch * b_GenBs=0;
+    TBranch * b_GenBs=0;
+    vector<NTGenParticle> * pGenBs=0;
+    t->SetBranchAddress("NTGenBs",&pGenBs,&b_GenBs);
     TBranch * b_GenBHadrons=0;
     vector<NTGenParticle> * pGenBHadrons=0;
     t->SetBranchAddress("NTGenBHadrons",&pGenBHadrons,&b_GenBHadrons);
@@ -341,17 +394,18 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
     if(usepdfw_>-1) pdfwidx=usepdfw_;
 
     //speed up - testing!
-    /*
+
     struct stat filestatus;
     stat((datasetdirectory_+inputfile).Data(), &filestatus );
 
-    cout << filestatus.st_size << " bytes\n";
 
-    t->SetCacheSize(filestatus.st_size/20);
-    if(t->GetCacheSize() > 100e6)
-        t->SetCacheSize(100e6);
-    t->AddBranchToCache("*");
-     */
+    if(!testmode_){
+        t->SetCacheSize(filestatus.st_size/10);
+        if(t->GetCacheSize() > 100e6)
+            t->SetCacheSize(100e6);
+        // t->AddBranchToCache("*");
+        t->SetCacheLearnEntries(1000);
+    }
     ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
@@ -365,11 +419,15 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
     if(testmode_)
         std::cout << "testmode("<< anaid << "): starting main loop" << std::endl;
 
+    float weightsbeftopptrew=0;
+    float weightsaftertopptrew=0;
+
     Long64_t nEntries=t->GetEntries();
     if(norm==0) nEntries=0; //skip for norm0
     if(testmode_) nEntries*=0.08;
     for(Long64_t entry=0;entry<nEntries;entry++){
 
+        t->LoadTree(entry);
 
         ////////////////////////////////////////////////////
         ////////////////////  INIT EVENT ///////////////////
@@ -412,7 +470,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
         ////define all collections
         // do not move somewhere else!
 
-        vector<NTGenParticle*> gentops;
+        vector<NTGenParticle*> gentops,genbs;
         vector<NTGenParticle *> genleptons1,genleptons3;
         vector<NTGenJet *> genjets;
         vector<NTGenParticle *> genbhadrons;
@@ -444,17 +502,24 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
                 b_GenLeptons1->GetEntry(entry);
                 //recreate mother daughter relations?!
                 b_GenBHadrons->GetEntry(entry);
+                b_GenBs->GetEntry(entry);
                 b_GenJets->GetEntry(entry);
                 b_GenLeptons1->GetEntry(entry);
                 ///////////////TOPPT REWEIGHTING////////
 
 
                 if(pGenTops->size()>1){ //ttbar sample
+                    weightsbeftopptrew+=puweight;
                     puweight *= sqrt(getTopPtReweighter()->getWeight(pGenTops->at(0).pt()) *
                             getTopPtReweighter()->getWeight(pGenTops->at(1).pt()));
+                    weightsaftertopptrew+=puweight;
                     gentops.push_back(&pGenTops->at(0));
                     gentops.push_back(&pGenTops->at(0));
                     evt.gentops=&gentops;
+
+                    for(size_t i=0;i<pGenBs->size();i++)
+                        genbs.push_back(&pGenBs->at(i));
+                    evt.genbs=&genbs;
                 }
 
                 if(testmode_ && entry==0){
@@ -470,10 +535,10 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
                 //define visible phase space
                 float ps_ptlepmin=20;
-                float ps_etalmax=2.5;
+                float ps_etalmax=2.4;
 
                 float ps_ptjetmin=30;
-                float ps_etajetmax=2.5;
+                float ps_etajetmax=2.4;
 
 
 
@@ -504,6 +569,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
                 }
 
+
                 NTLorentzVector<float>  p4genbjet;
 
                 for(size_t i=0;i<genjets.size();i++){
@@ -515,13 +581,13 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
                         }
                     }
                 }
+
                 for(size_t i=0;i<genbjetsfromtop.size();i++){
                     NTGenJet * bjet=genbjetsfromtop.at(i);
                     if(bjet->pt()<30) continue;
-                    if(fabs(bjet->eta()) >2.5) continue;
+                    if(fabs(bjet->eta()) >ps_etajetmax) continue;
                     genvisbjetsfromtop << bjet;
                 }
-
 
             }
             /*
@@ -579,6 +645,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
             ///select id muons
             if(!(muon->isGlobal() || muon->isTracker()) ) continue;
             //try with tight muons
+
 
             if(muon->isGlobal()
                     && muon->normChi2()<10.
@@ -763,6 +830,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
         evt.leadinglep=leadingptlep;
         evt.secleadinglep=secleadingptlep;
         evt.mll=&mll;
+
 
         float leplepdr=dR_3d(leadingptlep->p4(),secleadingptlep->p4());
         evt.leplepdr=&leplepdr;
@@ -968,6 +1036,50 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
         zplots.makeControlPlots(step);
 
 
+        ///////////////calculate likelihood inputs///////////
+
+
+        float lhi_leadjetbtag=1;
+        if(selectedjets->size()>0)
+            lhi_leadjetbtag=(selectedjets->at(0)->btag());
+        evt.lhi_leadjetbtag =&lhi_leadjetbtag;
+
+        float lhi_dphillj=dphillj;
+        evt.lhi_dphillj=&lhi_dphillj;
+
+        float lhi_cosleplepangle=cosleplepangle;
+        evt.lhi_cosleplepangle=&lhi_cosleplepangle;
+
+        float lhi_sumdphimetl=0;
+        lhi_sumdphimetl=absNormDPhi(leadingptlep->p4(),adjustedmet.p4()) + absNormDPhi(secleadingptlep->p4(),adjustedmet.p4());
+        evt.lhi_sumdphimetl=&lhi_sumdphimetl;
+
+        float lhi_seljetmulti=0;
+        lhi_seljetmulti=selectedjets->size();
+        evt.lhi_seljetmulti=&lhi_seljetmulti;
+
+        float lhi_leadleppt=leadingptlep->pt();
+        evt.lhi_leadleppt=&lhi_leadleppt;
+
+        float lhi_selbjetmulti=selectedbjets.size();
+        evt.lhi_selbjetmulti=&lhi_selbjetmulti;
+
+        float lhi_drlbl=0;
+        if(selectedbjets.size()>0){
+            NTLorentzVector<float> lbp4=selectedbjets.at(0)->p4()+leadingptlep->p4();
+            NTLorentzVector<float> lbp42=selectedbjets.at(0)->p4()+secleadingptlep->p4();
+            if(lbp4.m() > 165 && lbp42.m() < 165){
+                lhi_drlbl=dR_3d(lbp42,leadingptlep->p4());
+            }
+            else{
+                lhi_drlbl=dR_3d(lbp4,secleadingptlep->p4());
+            }
+            evt.lhi_drlbl=&lhi_drlbl;
+        }
+
+
+
+
         ////////////////////Z Selection//////////////////
         step++;
         bool isZrange=false;
@@ -1000,13 +1112,27 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
         if(selectedjets->size() < 1) continue;
 
+        if(getBTagSF()->getMode() == NTBTagSF::shapereweighting_mode){
+
+            if(onejet)
+                puweight*=getBTagSF()->getNTEventWeight(selectedjets->at(0));
+            else
+                puweight*=getBTagSF()->getNTEventWeight(*selectedjets);
+        }
 
         //ht+=adjustedmet.met();
         //double mllj=0;
         //double phijl=0;
 
 
+        float lh_toplh=0;
+        evt.lh_toplh=&lh_toplh;
+
         if(analysisMllRange){
+
+            lh_toplh=toplikelihood.getCombinedLikelihood();
+            toplikelihood.fill(puweight);
+
 
             sel_step[5]+=puweight;
             plots.makeControlPlots(step);
@@ -1031,6 +1157,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 				continue;
 		} */
 
+
         if(analysisMllRange){
 
             plots.makeControlPlots(step);
@@ -1045,6 +1172,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
         //////////////////// MET cut STEP 7//////////////////////////////////
         step++;
         if(!b_emu_ && adjustedmet.met() < 40) continue;
+
 
 
         if(analysisMllRange){
@@ -1064,15 +1192,19 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
         ///////////////////// btag cut STEP 8 //////////////////////////
         step++;
+
         if(!usetopdiscr && selectedbjets.size() < 1) continue;
-        if(usetopdiscr && topdiscr3<0.9) continue;
-        double bsf=1;
-        bsf=getBTagSF()->getNTEventWeight(*selectedjets);
-        puweight*= bsf;
+        // if(usetopdiscr && topdiscr3<0.9) continue;
+        if(usetopdiscr && lh_toplh<0.6) continue;
+        if(getBTagSF()->getMode() != NTBTagSF::shapereweighting_mode){
+            puweight*=getBTagSF()->getNTEventWeight(*selectedjets);
+        }
+
 
 
         if(analysisMllRange){
 
+           // std::cout << selectedjets->at(0)->pt() << std::endl;
 
             plots.makeControlPlots(step);
             sel_step[8]+=puweight;
@@ -1083,21 +1215,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
         if(isZrange){
             zplots.makeControlPlots(step);
         }
-        ///////////////////// 2btag cut STEP 9 //////////////////////////
-        /*
-        step++;
-        if(hardbjets.size() < 2) continue;
 
-
-
-        if(analysisMllRange){
-            plots.makeControlPlots(step);
-
-        }
-        if(isZrange){
-            zplots.makeControlPlots(step);
-        }
-         */
     }
 
     ///////////////////////////////////////////////////////////////////////
@@ -1108,6 +1226,10 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
     ///////////////////////    POST PROCESSING    /////////////////////////
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
+
+    //renorm for topptreweighting
+    if(weightsaftertopptrew>0)
+        norm*=weightsbeftopptrew/weightsaftertopptrew;
 
     container1DUnfold::flushAllListed(); // call once again after last event processed
 
@@ -1125,6 +1247,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
     if(!getBTagSF()->getMakeEff())
         std::cout << "B-Tag nan count: " << getBTagSF()->getNanCount() << std::endl;
+
 
     // delete t;
     f->Close(); //deletes t
@@ -1159,9 +1282,6 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
         if(!fileExists((getOutPath()+".root").Data())) {
             outfile=new TFile(getOutPath()+".root","RECREATE");
-
-            //only if new write the discriminatorfactory configuration in here
-
 
         }
         else{
@@ -1212,8 +1332,18 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
         if(testmode_ )
             std::cout << "testmode("<< anaid << "): written new outfile tree"<< std::endl;
 
+
+        //write discriminatorFactory configuration to newly created outfile (last job will persist)
+        discriminatorFactory::debug=true;
+        discriminatorFactory::writeAllToTFile(outfile);
+        if(testmode_ )
+            std::cout << "testmode("<< anaid << "): written "<< discriminatorFactory::c_list.size()<< " discriminatorFactorys"<< std::endl;
+
         outfile->Close();
         delete outfile;
+
+
+
 
         if(testmode_ )
             std::cout << "testmode("<< anaid << "): written main output"<< std::endl;

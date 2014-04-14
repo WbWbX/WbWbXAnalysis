@@ -1004,8 +1004,15 @@ if includetrigger: #lower pfMuon threshold
 
 process.PFTree.debugmode= debug
 
-## make tree sequence
 
+# check for mem problems in ttbarbg samples
+if "ttbarbg" in outputFile:
+    process.SimpleMemoryCheck=cms.Service("SimpleMemoryCheck",
+                                  ignoreTotal=cms.untracked.int32(1),
+                                  oncePerEventMode=cms.untracked.bool(True))
+
+
+## make tree sequence
 process.treeSequence = cms.Sequence(process.patTriggerSequence *
                                     process.superClusters *
                                     process.treeJets *
@@ -1014,7 +1021,6 @@ process.treeSequence = cms.Sequence(process.patTriggerSequence *
 
 
 
-##### does this prevent segfaults?
 
 ###### Path
 process.dump=cms.EDAnalyzer('EventContentAnalyzer')
@@ -1068,11 +1074,3 @@ if isPrompt:
     print "prompt reco not supported anymore! exit"
     exit(8888)
 
-
-copyjson=False
-if(hasattr(process.source,'lumisToProcess')):
-	lumisToProcess=process.source.lumisToProcess
-	copyjson=True
-process.load(inputScript)
-if copyjson:
-	process.source.lumisToProcess=lumisToProcess

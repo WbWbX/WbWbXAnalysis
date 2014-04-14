@@ -1,0 +1,40 @@
+
+
+
+###### config file for mt extractor ##########
+# comments
+
+# right now only important for external gen input
+# define the format of input files.
+# Filenames: filepreamble_topmass_fileendpattern (incl. e.g. ".root")
+# histonames: give list of histonames association.
+# Replace ANY blank with an underscore (m_lb_bla_step_8 = hist1234)
+# define suffix for syst up/down in systUpId/systDownId
+# define nominal id nominalId
+# define if its divided by binwidth inputIsDividedByBinWidth = true/false
+
+## define file names ##
+
+filepreamble = mcfm_
+fileendpattern = _mlb.root
+
+
+
+##   rescaling of generator input ##
+
+multiplynorm = 0.001
+previousXsecUnits = fb
+newXSecUnits = pb
+
+### map histogram names ###
+
+m_lb_pair_comb_unfold_step_8 = hist24_
+#m_lb_pair_min_unfold = hist21 ???
+
+useKeyNames = true
+
+systUpId = Up
+systDownId = Dn
+nominalId = central
+
+inputIsDividedByBinWidth = true

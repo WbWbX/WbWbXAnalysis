@@ -59,7 +59,9 @@ public:
     histoBin & getBin(const size_t&,const size_t&,const int& layer=-1);
 
     container2D rebinXToBinning(const std::vector<float>& )const;
+    container2D rebinXtoBinning(const container1D&)const;
     container2D rebinYToBinning(const std::vector<float>& )const;
+    container2D rebinYtoBinning(const container1D&)const;
 
     void fill(const float & xval, const float & yval, const float & weight=1);    //! fills with weight
 

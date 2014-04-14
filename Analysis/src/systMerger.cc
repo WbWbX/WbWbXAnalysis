@@ -16,7 +16,7 @@
 #include <iostream>
 #include "FWCore/FWLite/interface/AutoLibraryLoader.h"
 #include <omp.h>
-
+#include "../interface/discriminatorFactory.h"
 
 namespace ztop{
 
@@ -110,7 +110,7 @@ void systMerger::searchSystematics(){
             if(sys==nominals_.at(nom)) continue; //is nominal
             if(instrings_.at(sys).BeginsWith(startstring) && (infileadd_.Length() < 1 ||  instrings_.at(sys).EndsWith("_"+infileadd_))){
                 if(debug) std::cout << "systMerger::searchSystematics: identified " << instrings_.at(sys)
-                                << " for nominal " << instrings_.at(nominals_.at(nom)) << std::endl;
+                                        << " for nominal " << instrings_.at(nominals_.at(nom)) << std::endl;
 
                 syst_.at(nom).push_back(sys);
             }
@@ -152,8 +152,16 @@ std::vector<TString>  systMerger::mergeAndSafe(){
 
     //not parallel for all nominals, file IO is the bottleneck!
 
+
+    std::vector<discriminatorFactory> alldisc;
     for(size_t nom=0;nom<nominals_.size();nom++){
         containerStackVector * nominal=getFromFileToMem(dir,instrings_.at(nominals_.at(nom)));
+        TString reldir=dir;
+        if(reldir!="")reldir+="/";
+        std::vector<discriminatorFactory> disc;
+        if(fileExists(reldir+instrings_.at(nominals_.at(nom))+"_discr.root")){
+            disc=discriminatorFactory::readAllFromTFile(reldir+instrings_.at(nominals_.at(nom))+"_discr.root");//get nominal configuration
+        }
         for(size_t sys=0;sys<syst_.at(nom).size();sys++){
             containerStackVector * sysvec=getFromFileToMem(dir,instrings_.at(syst_.at(nom).at(sys)));
             if(debug) std::cout << "systMerger::mergeAndSafe: adding "<< sysvec->getName() << " to " << nominal->getName()<< std::endl;
@@ -163,10 +171,25 @@ std::vector<TString>  systMerger::mergeAndSafe(){
         nominal->setName(nominal->getName()+outadd+"_syst");
         std::cout << "systMerger: writing "<< nominal->getName() << std::endl;
         outputfilenames << nominal->getName()+".root";
+        for(size_t i=0;i<disc.size();i++){
+            disc.at(i).extractLikelihoods(*nominal);
+
+        }
+        alldisc << disc;
+        //remove old
         nominal->writeAllToTFile(nominal->getName()+".root",true);
+
+        //clear discr factory mem
+
+
+        //scope should have ended here - delete necc?
 
         delete nominal;
     }
+
+    system(((TString)"rm -f "+"all"+outadd+ "_discr.root").Data());
+    if(alldisc.size()>0)
+        discriminatorFactory::writeAllToTFile("all" +outadd+  "_discr.root",alldisc);
 
     return outputfilenames;
 }
@@ -206,9 +229,9 @@ void systMerger::mergeBTags()const{
 
             btags.writeToTFile(outfileadd_+"all_btags.root");
         }
-	else{
-	  std::cout << "systMerger: did not find a valid b-tag file. Not merging b-tag info" << std::endl;
-	}
+        else{
+            std::cout << "systMerger: did not find a valid b-tag file. Not merging b-tag info" << std::endl;
+        }
 
     }
 }

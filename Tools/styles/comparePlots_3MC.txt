@@ -81,7 +81,7 @@
     sysFillColor = 632
 
     rootDrawOpt  = Pe1 
-    sysRootDrawOpt  = e2
+    sysRootDrawOpt  = e1
     drawStyle    = normal $ can be other options (TBI)
     
     
@@ -105,7 +105,7 @@
     sysFillColor = 632
 
     rootDrawOpt  = Pe1 
-    sysRootDrawOpt  = e2
+    sysRootDrawOpt  = e1
     drawStyle    = normal $ can be other options (TBI)
     
     

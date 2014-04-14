@@ -15,6 +15,12 @@
 [end textBoxes]
 
 
+ [containerStyle - MCUpperMigrations]
+ 
+    fillStyle    = 3002
+ 
+ [end containerStyle]
+
  [containerStyle - DataUpper]
     
     $same for ratio plot and control plot
@@ -33,8 +39,8 @@
     sysFillStyle = 1001
     sysFillColor = 1
 
-    rootDrawOpt  = P,e1 
-    sysRootDrawOpt  = e1
+    rootDrawOpt  = P,e1,0 
+    sysRootDrawOpt  = e1,0
     drawStyle    = normal $ can be other options (TBI)
     
     
@@ -57,8 +63,8 @@
     sysFillStyle = 1001
     sysFillColor = 1
 
-    rootDrawOpt  = Pe1 
-    sysRootDrawOpt  = e1
+    rootDrawOpt  = Pe1,0  
+    sysRootDrawOpt  = e1,0 
     
     drawStyle    = normal $ can be other options (TBI)
     

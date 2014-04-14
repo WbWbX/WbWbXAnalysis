@@ -15,19 +15,29 @@
 
 #include "TCanvas.h"
 
+///DEBUG
+#include "TtZAnalysis/Tools/interface/fileReader.h"
+
 int main(int argc, char* argv[]){
     using namespace ztop;
     //get options
     //plotname, (fitmode), minbin, maxbin, excludebin
-    optParser::debug=true;
+    std::string cmsswbase=getenv("CMSSW_BASE");
+    // optParser::debug=true;
     optParser parse(argc,argv);
     parse.bepicky=true;
     TString plotname  =    parse.getOpt<TString>("p","m_lb pair comb unfold step 8","input plot name");
     TString output    =    parse.getOpt<TString>("o","mtFromXSec_output","output file name");
     TString fitmode    =    parse.getOpt<TString>("f","pol4","fit mode in root format");
-    int minbin          =  parse.getOpt<float>    ("-minbin",-1,"minimum bin number to be considered in fit");
-    int maxbin          =  parse.getOpt<float>    ("-maxbin",-1,"maximum bin number to be considered in fit");
-    int excludebin      =  parse.getOpt<float>    ("-excludebin",-1,"exclude bin from fit");
+    TString usepdf    =    parse.getOpt<TString>("-pdf","MSTW200","chose a PDF to be used (if external input is fed): default: MSTW200");
+    int minbin          =  parse.getOpt<int>    ("-minbin",-1,"minimum bin number to be considered in fit");
+    int maxbin          =  parse.getOpt<int>    ("-maxbin",-1,"maximum bin number to be considered in fit");
+    int excludebin      =  parse.getOpt<int>    ("-excludebin",-1,"exclude bin from fit");
+    bool usefolding     =  parse.getOpt<bool>   ("-fold",false,"use folding of genertor input");
+    bool nosyst     =  parse.getOpt<bool>   ("-nosyst",false,"skip systematics");
+    std::string extconfigfile      =  parse.getOpt<std::string>    ("-c",
+            ((TString)cmsswbase+"/src/TtZAnalysis/Analysis/configs/mtExtractor_config.txt").Data(),
+            "specify config file for external gen input");
     std::vector<TString> inputfiles = parse.getRest< TString >();
 
     parse.doneParsing();
@@ -39,6 +49,10 @@ int main(int argc, char* argv[]){
         return -1;
     }
 
+    std::cout << "starting mt extraction..." <<std::endl;
+
+
+    //fileReader::debug=true;
     /*
      *
     void setPlot(const TString& pl){plotnamedata_=pl;}
@@ -52,10 +66,24 @@ int main(int argc, char* argv[]){
     //do this for each channel independently. Right now for testing reasons skip channel asso
     // maybe then also implement all plots.. but later
     mtExtractor extractor;
+
     mtExtractor::debug=true;
+
+    parameterExtractor::debug=true;
+    container1D::debug=true;
+
+    extractor.getExtractor()->setLikelihoodMode(parameterExtractor::lh_fit);
+    extractor.getExtractor()->setFitFunctions("pol3");
+    extractor.getExtractor()->setConfidenceLevelFitInterval(0.95);
+    extractor.setExternalGenInputFilesFormat(extconfigfile);
     extractor.setPlot(plotname);
-    extractor.setInputFilesData(inputfiles);
-    extractor.getExtractor()->setLikelihoodMode(parameterExtractor::lh_chi2);
+    extractor.setExcludeBin(excludebin);
+    extractor.setMinBin(minbin);
+    extractor.setMaxBin(maxbin);
+    extractor.setUseFolding(usefolding);
+    extractor.setInputFiles(inputfiles);
+    extractor.setExternalGenInputPDF(usepdf);
+    //  extractor.getExtractor()->setLikelihoodMode(parameterExtractor::lh_chi2);
     extractor.setFitMode(fitmode);
 
     extractor.setup();
@@ -67,6 +95,12 @@ int main(int argc, char* argv[]){
 
     extractor.setBinsChi2PlotterStyleFile((std::string)getenv("CMSSW_BASE")+
             "/src/TtZAnalysis/Tools/styles/multiplePlots_mlbbins.txt");
+
+    extractor.setBinsPlusFitPlotterStyleFile((std::string)getenv("CMSSW_BASE")+
+            "/src/TtZAnalysis/Tools/styles/multiplePlots_mlbbinsPlusFit.txt");
+
+    extractor.setAllSystStyleFile((std::string)getenv("CMSSW_BASE")+
+            "/src/TtZAnalysis/Tools/styles/multiplePlots_mlbbinsTotalSyst.txt");
 
     TFile f(output+".root","RECREATE");
     //for MC
@@ -85,22 +119,34 @@ int main(int argc, char* argv[]){
     extractor.drawIndivBins(c);
     c->Print(output+".pdf");
     c->Write();
+    c->Print(output+".pdf");
+    c->Write();
     extractor.cleanMem();
     c->Clear();
 
     //for all systematics
-    for(int i=-2;i<extractor.getDataSystSize();i++){
+    for(int i=-1;i<extractor.getDataSystSize();i++){
         if(i<-1)
             extractor.createBinLikelihoods(i,true);
         else
             extractor.createBinLikelihoods(i,false);
 
+        if(i>=0 && nosyst) break;
+
+
+
         extractor.drawBinLikelihoods(c);
         c->Print(output+".pdf");
         c->Write();
-        extractor.cleanMem();
-        c->Clear();
 
+        c->Clear();
+        if(extractor.getExtractor()->getLikelihoodMode()==parameterExtractor::lh_fit){
+            extractor.drawBinsPlusFits(c,i);
+            c->Print(output+".pdf");
+            c->Write();
+            c->Clear();
+        }
+        extractor.cleanMem();
         extractor.createGlobalLikelihood();
         extractor.fitGlobalLikelihood();
         extractor.drawGlobalLikelihood(c);
@@ -111,6 +157,13 @@ int main(int argc, char* argv[]){
 
     }
     //close
+
+  //  extractor.drawIndivBins(c);
+  //  extractor.overlayBinFittedFunctions(c);
+    c->Print(output+".pdf");
+    c->Write();
+
+    c->Clear();
     extractor.drawResultGraph(c);
     c->Write();
     c->Print(output+".pdf)");

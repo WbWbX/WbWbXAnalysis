@@ -25,6 +25,7 @@ class NTFullEvent{
 public:
     NTFullEvent(): event(0),
     gentops(0),
+    genbs(0),
     genleptons1(0),
     genleptons3(0),
     genvisleptons1(0),
@@ -42,7 +43,19 @@ public:
     //leadingjetbtag(0),secleadingjetbtag(0),
     simplemet(0),adjustedmet(0),
     mll(0),leplepdr(0),cosleplepangle(0),dphillj(0),dphilljj(0),detallj(0),detalljj(0),ht(0),ptllj(0),topdiscr(0),topdiscr2(0),topdiscr3(0),
+    lhi_dphillj(0),
+    lhi_cosleplepangle(0),
+    lhi_leadjetbtag(0),
+    lhi_sumdphimetl(0),
+    lhi_seljetmulti(0),
+    lhi_selbjetmulti(0),
+    lhi_leadleppt(0),
+    lhi_drlbl(0),
+
+    lh_toplh(0),
+
     midphi(0),
+
     S4(0),
     allobjects4(0),
     puweight(0){};
@@ -52,6 +65,7 @@ public:
         event=0;
 
         gentops=0;
+        genbs=0;
         genleptons1=0;
         genleptons3=0;
         genvisleptons1=0;
@@ -70,6 +84,18 @@ public:
         //leadingjetbtag=0;secleadingjetbtag=0;
         simplemet=0;adjustedmet=0;
         mll=0;leplepdr=0;cosleplepangle=0;dphillj=0;dphilljj=0;detallj=0;detalljj=0;ht=0;ptllj=0;topdiscr=0;topdiscr2=0;topdiscr3=0;
+
+        lhi_dphillj=0;
+        lhi_cosleplepangle=0;
+        lhi_leadjetbtag=0;
+        lhi_sumdphimetl=0;
+        lhi_seljetmulti=0;
+        lhi_selbjetmulti=0;
+        lhi_leadleppt=0;
+        lhi_drlbl=0;
+
+        lh_toplh=0;
+
         midphi=0;
         S4=0;
         allobjects4=0;
@@ -79,6 +105,7 @@ public:
     ztop::NTEvent * event;
     ///generator info
     std::vector<ztop::NTGenParticle *> * gentops;
+    std::vector<ztop::NTGenParticle *> * genbs;
     std::vector<ztop::NTGenParticle *> * genleptons1;
     std::vector<ztop::NTGenParticle *> * genleptons3;
     std::vector<ztop::NTGenParticle *> * genvisleptons1;
@@ -138,7 +165,23 @@ public:
     float * topdiscr2;
     float * topdiscr3;
 
+    //inputs for likelihood lhi_<name>
 
+    float * lhi_dphillj;
+    float * lhi_cosleplepangle;
+    float * lhi_leadjetbtag;
+    float * lhi_sumdphimetl;
+    float * lhi_seljetmulti;
+    float * lhi_selbjetmulti;
+    float * lhi_leadleppt;
+    float * lhi_drlbl;
+
+    //output of LH lh_<name>
+    float * lh_toplh;
+
+
+
+    //others
     bool *midphi;
     NTLorentzVector<float> * S4;
     NTLorentzVector<float>  * allobjects4;

@@ -1,20 +1,42 @@
+To create the analysis executables, run the make.sh script.
+This will compile all dependencies and the executables.
 
-in src/MainAnalyzer... etc define all stuff
+The executables (in ./bin) have help messages (-h --help) that explain
+their usage
 
-compile with scram
+Their source code can be found in ./app_src
 
-in script:
-
-compile analyse.C for submission
-
-
-prepare b-tag stuff only manually
-
-if returns success:
-
-parse systematic string options to analyse.C.exe and submit to batch
+Control plots can be added in ./src/ttBarControlPlots.cc (refer to already added ones)
+(Or -if you prefer- derive an own class from ./interface/controlPlotBasket.h. If you
+do that, the class needs to be initialized and implemented in ./src/eventLoop.h, 
+for reference search for all occurrences of "ttBarControlPlots" and "plots")
 
 
-check every 30sec if all files exist
+Event cuts and additional corrections are applied in ./src/eventLoop.h
 
-merge if all exist and run function to addErrorContainer...
+If a new variable that is not already member of ./interface/NTFullEvent.h is supposed
+to be plotted (and you don't want to calculate it from existing members, 
+it needs to be added to the NTFullEvent in three parts of the file:
+- private member: define it as a pointer to the event content of interest
+- constructor: initialize the pointer with NULL
+- reset() member function: set the pointer to NULL
+This variable then needs to be associated to a "real" one in the event loop
+(for reference search for evt.<someExistingVariable>=&)
+
+
+Analysis plots (for differential cross sections, or inclusive...) are defined in
+classes derived from ./interface/analysisPlots.h. For reference, see
+./interface/analysisPlotsJan.h and ./src/analysisPlotsJan.cc
+
+They make use of the NTFullEvent, too, and need to be initialized and filled.
+For reference, see analysisPlotsJan and jansplots_step8
+
+
+
+
+
+/////// some naming conventions /////////
+
+all btag SF.efficiency files should be named <name>_btags.root
+all discriminator input files should be named <name>_discr.root
+all config files that are to be used with analyse should be named <name>_config.txt

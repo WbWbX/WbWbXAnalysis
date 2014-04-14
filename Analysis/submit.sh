@@ -1,56 +1,69 @@
 #!/bin/sh
 
 
-channels=( "ee"
+channels=( #"ee"
     "emu"
-    "mumu"
+    #"mumu"
 );
 ## scale and match variations will be ignored for other top masses then 172.5.. (hardcoded below)
 topmasses=( "172.5"
 
-    #"171.5"
-    #"173.5"
+    "171.5"
+    "173.5"
 
-    #"175.5"
-    #"169.5"
+    "175.5"
+    "169.5"
 
-    #"178.5"
-    #"166.5"
+    "178.5"
+    "166.5"
 );
 systs=("nominal"
 
-    #"TRIGGER_up"
-    #"TRIGGER_down"
-    #"ELECSF_up"
-    #"ELECSF_down"
-    #"MUONSF_up"
-    #"MUONSF_down"
+    "TRIGGER_up"
+    "TRIGGER_down"
+    "ELECSF_up"
+    "ELECSF_down"
+    "MUONSF_up"
+    "MUONSF_down"
 
-    #"ELECES_up"
-   #"ELECES_down"
-   #"MUONES_up"
-   #"MUONES_down"
+   "ELECES_up"
+   "ELECES_down"
+   "MUONES_up"
+   "MUONES_down"
 
-   #"PU_up"
-   #"PU_down"
+   "PU_up"
+   "PU_down"
 
-   #"JER_up"
-   #"JER_down"
-   #"JES_up"
-   #"JES_down"
+   "JER_up"
+   "JER_down"
+   "JES_up"
+   "JES_down"
 
    #"BTAGH_up"
    #"BTAGH_down"
    #"BTAGL_up"
    #"BTAGL_down"
+   #"BTAGHFS1_up"
+   #"BTAGHFS1_down"
+   #"BTAGHFS2_up"
+   #"BTAGHFS2_down"
+   #"BTAGLFS1_up"
+   #"BTAGLFS1_down"
+   #"BTAGLFS2_up"
+   #"BTAGLFS2_down"
+   #"BTAGC1_up"
+   #"BTAGC1_down"
+   #"BTAGC2_up"
+   #"BTAGC2_down"
 
-    #"TOPPT_up"
-    #"TOPPT_down"
 
-   #"TT_MATCH_down"
-   #"TT_MATCH_up"
-   #"TT_SCALE_down"
-   #"TT_SCALE_up"
+   "TOPPT_up"
+   "TOPPT_down"
+
+   "TT_MATCH_down"
+   "TT_MATCH_up"
+   "TT_SCALE_down"
+   "TT_SCALE_up"
 
 
    #"Z_MATCH_down"
@@ -69,13 +82,14 @@ energies=("8TeV"
 
 # defined all syst here in an array
 # qsub stuff
-# check in background whether files are done (sleep 30) --> not impl
-# if all done go to dir (if not yet there) analysis_timestamp and merge stuff to have all syst there -> not impl
+# check in background whether files are done (sleep 150) --> switch: last option c
+# check merges automatically if all succ done
 
 # may want to have an additional script for pdf variations (to get all of them) needs level of communication between tree and this script...? how many variations..? or just do 40 and skip non existing, mark file in output and ignore in the following
 
 dirname=$1
 addParameters=$2
+# if $3 == c, a check will be performed every 150 sec
 
 ####
 #
@@ -116,6 +130,7 @@ cp -r $analysisDir/lib .
 cp $analysisDir/*config.txt .
 
 cp $analysisDir/*btags.root .
+cp $analysisDir/*discr.root .
 
 mkdir source
 cd source 

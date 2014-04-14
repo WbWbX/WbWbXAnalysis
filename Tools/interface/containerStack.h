@@ -131,6 +131,7 @@ public:
     bool addSignal(const TString&);
     bool setsignals(const std::vector<TString> &);// (just return whether successful)
     std::vector<size_t> getSignalIdxs() const;
+    std::vector<size_t> getSortedIdxs(bool inverse) const;
 
     container1D getSignalContainer()const;
     container1D getBackgroundContainer()const;
@@ -187,7 +188,6 @@ private:
 
     int checkLegOrder() const;
 
-    std::vector<size_t> sortEntries(bool inverse) const;
 
     std::vector<TString> signals_;
 

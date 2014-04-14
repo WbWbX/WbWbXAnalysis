@@ -132,16 +132,14 @@ const TString & graph::getPointName(const size_t & point)const{
     return xcoords_.getBin(point).getName();
 }
 
-/**
- * return index of new layer
- * needs same indices for points
- */
+
 size_t graph::addErrorGraph(const TString &name, const graph & errg){
     if(errg.getNPoints()!=getNPoints()){
         std::cout << "graph::addErrorGraph: graphs need to have same number of points" <<std::endl;
         throw std::logic_error("graph::addErrorGraph: graphs need to have same number of points");
     }
     size_t sysidx=xcoords_.addLayer(name);
+    sysidx=ycoords_.addLayer(name);
     if(sysidx!=xcoords_.layerSize()-1){//layer not new!!
         std::cout << "graph::addErrorGraph: error already added, what should I do??? I decide to leave" <<std::endl;
         throw std::logic_error("graph::addErrorGraph: error already added, what should I do??? I decide to leave");
@@ -375,6 +373,25 @@ graph graph::getChi2Points(const graph & gcompare)const{
     return out;
 }
 
+void graph::shiftAllXCoordinates(const float& value){
+    for(int sysl=-1;sysl<(int)xcoords_.layerSize();sysl++){
+        for(size_t i=0;i<xcoords_.size();i++){
+            float oldcontent=xcoords_.getBinContent(i,sysl);
+            xcoords_.setBinContent(i, oldcontent+value,sysl);
+        }
+    }
+}
+
+void graph::shiftAllYCoordinates(const float& value){
+    for(int sysl=-1;sysl<(int)ycoords_.layerSize();sysl++){
+        for(size_t i=0;i<ycoords_.size();i++){
+            float oldcontent=ycoords_.getBinContent(i,sysl);
+            ycoords_.setBinContent(i, oldcontent+value,sysl);
+        }
+    }
+}
+
+
 TGraphAsymmErrors * graph::getTGraph(TString name,bool onlystat) const{
     if(name=="") name=name_;
     if(getNPoints()<1)
@@ -382,10 +399,10 @@ TGraphAsymmErrors * graph::getTGraph(TString name,bool onlystat) const{
     std::vector<float> x,y,xeh,xel,yeh,yel;
 
     for(size_t i=0;i<getNPoints();i++){
-
         x.push_back(xcoords_.getBinContent(i));
         xeh.push_back(getPointError(i,false,true,onlystat));
         xel.push_back(getPointError(i,false,false,onlystat));
+
         y.push_back(ycoords_.getBinContent(i));
         yeh.push_back(getPointError(i,true,true,onlystat));
         yel.push_back(getPointError(i,true,false,onlystat));
@@ -458,7 +475,7 @@ float graph::getPointError(const size_t & point, bool yvar, bool updown, bool on
                     std::cout << "graph::getpointErrorUp: stripping variation with name: " <<content->getLayerName(i)<<std::endl;
                 }
                 TString source=stripVariation(content->getLayerName(i));
-                if(-1==isIn(source,sources)){
+                if(std::find(sources.begin(),sources.end(),source) == sources.end()){
                     sources.push_back(source);
                     float var=getDominantVariation(source,point,yvar,updown);
                     fullerr2 += var*var;
@@ -626,9 +643,19 @@ float graph::getDominantVariation( TString  sysname, const size_t& bin, bool yva
     if(idx >= contents->layerSize())
         std::cout << "graph::getDominantVariation: serious error: " << sysname << "_down not found" << std::endl;
     down=contents->getBin(bin,idx).getContent()-cont;
-    if(getup && up>down)down=up;
-    else if(!getup && up<down)down=up;
-    return down;
+
+    if(getup){
+        if(up < 0 && down < 0) return 0;
+        if(up > down) return up;
+        if(down > up) return down;
+        else return 0; //never reached only for docu purposes
+    }
+    else{
+        if(up > 0 && down > 0) return 0;
+        else if(up < down) return up;
+        else if(down < up) return down;
+        else return 0; //never reached only for docu purposes
+    }
 }
 
 TString graph::stripVariation(const TString &in) const{

@@ -10,6 +10,7 @@
 //#include "math.h"
 #include <cmath>
 #include <limits>
+#include "NTVector.h"
 
 // in principle implementation of simplified polar lorentz vector
 // as found in root::math
@@ -150,6 +151,12 @@ public:
         return rhs.e()*e()-rhs.px()*px()-rhs.py()*py()-rhs.pz()*pz();
     }
 
+
+    NTVector getNTVector()const{
+        return NTVector ((float)px(),(float)py(),(float)pz());
+    }
+
+
     /**
      * if switched on exceptions are thrown in some cases (e.g. tachyonic lorentz vectors)
      */
@@ -185,6 +192,28 @@ float cosAngle_3d(const NTLorentzVector<T>& a,const NTLorentzVector<T>& b){
     scal_pr = (px_l1*px_l2 + py_l1*py_l2 + pz_l1*pz_l2);
     return scal_pr/sqrt(mag_l1*mag_l2);
 }
+template<class T>
+float absNormDPhi(const NTLorentzVector<T>& a,const NTLorentzVector<T>& b){
+    float dphi=fabs(a.phi()-b.phi());
+    if(dphi > M_PI) dphi=2*M_PI-dphi;
+    return dphi;
+}
+template<class T>
+float absNormDPhi(const NTLorentzVector<T>& a,const float& b){
+    float dphi=fabs(a.phi()-b);
+    if(dphi > M_PI) dphi=2*M_PI-dphi;
+    return dphi;
+}
+
+template<class T>
+float absNormDPhi(const float& a,const NTLorentzVector<T>& b){
+    float dphi=fabs(a-b.phi());
+    if(dphi > M_PI) dphi=2*M_PI-dphi;
+    return dphi;
+}
+
+
+
 
 }
 
