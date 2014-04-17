@@ -5,14 +5,11 @@
  *      Author: kiesej
  */
 #include "TtZAnalysis/Tools/interface/containerStackVector.h"
-#include "TtZAnalysis/Tools/interface/containerStack.h"
-#include "TtZAnalysis/Tools/interface/container.h"
 #include "TString.h"
 #include <iostream>
 
 /*
  * skeleton program to test in situ b-tag calibrations etc.
- * you can even check control plots by opening it with root
  *
  * if you have set up your environment (ini cmssw; cmsenv; anenv),
  * you can easily compile and run this program in one go with the command
@@ -22,17 +19,21 @@
  * (run in the same directory testInSituBTag.cc is located in)
  *
  *
- * Here, you will probably mostly deal with the containerStack and container1D classes
- * Remember, they already incorporate systematic uncertainties etc.
- * For reference check the include files on top of this code
- *
+ * Here, you will mostly deal with the containerStack and container1D classes
  * these containers are essentially histograms! Just the naming is (historically) different
+ * Remember, they already incorporate systematic uncertainties etc.
+ * For reference check the include files below
  *
  */
+#include "TtZAnalysis/Tools/interface/containerStack.h"
+#include "TtZAnalysis/Tools/interface/container.h"
 
-
-// file in /nfs/dust/cms/user/kiesej/testtemp/emu_8TeV_172.5_nominal_syst.root
-
+/*
+ * the input file is located in /nfs/dust/cms/user/kiesej/testtemp/emu_8TeV_172.5_nominal_syst.root
+ *  you can check control plots etc. by opening this file with root
+ *
+ *  If you get warnings a'la
+*/
 int main(){
 
     using namespace ztop;

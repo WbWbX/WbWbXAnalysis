@@ -651,6 +651,7 @@ void containerStackVector::loadFromTFile(TFile * f,const TString& csvname,TStrin
     delete ttemp;
 }
 void containerStackVector::loadFromTFile(const TString& filename,const TString& csvname,TString treename){
+    AutoLibraryLoader::enable(); //to avoid warnings
     TFile * ftemp=new TFile(filename,"read");
     loadFromTFile(ftemp,csvname,treename);
     delete ftemp;
