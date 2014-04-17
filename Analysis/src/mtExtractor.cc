@@ -23,13 +23,14 @@
 #include "TKey.h"
 #include "TtZAnalysis/Tools/interface/fileReader.h"
 
+
 namespace ztop{
 
 bool mtExtractor::debug=false;
 
 
 mtExtractor::mtExtractor():plotnamedata_(""),plotnamemc_(""),plottypemc_("cuf"),
-        minbin_(-1),maxbin_(-1),excludebin_(-1),tmpglgraph_(0),tfitf_(0),iseighttev_(true),defmtop_(172.5),setup_(false),syspidx_(1),dofolding_(false) {
+        minbin_(-1),maxbin_(-1),excludebin_(-1),tmpglgraph_(0),tfitf_(0),iseighttev_(true),defmtop_(172.5),setup_(false),syspidx_(1),dofolding_(false),isexternalgen_(false) {
     reset();
 }
 
@@ -64,9 +65,11 @@ void mtExtractor::setInputFiles(const std::vector<TString>& pl){
         if(pl.at(i).BeginsWith(extfilepreamble_) && pl.at(i).EndsWith(extfileendpattern)){ //this is external gen input
             plottypemc_="ext"; //at least one external!
             extgenfiles_.push_back(pl.at(i));
+            isexternalgen_=true;
         }
         else{
             cufinputfiles_.push_back(pl.at(i));
+            isexternalgen_=false;
         }
 
     }
@@ -332,6 +335,7 @@ void mtExtractor::readFiles(){
         TString extfilename;
         container1D gen;
         if(mciscuf){
+            isexternalgen_=false;
             if(!dofolding_){
                 gen=tempcuf.getBinnedGenContainer();
                 gen*= (1/tempcuf.getLumi());
@@ -346,6 +350,7 @@ void mtExtractor::readFiles(){
         }
         else{ //external input for gen
             //find right file
+            isexternalgen_=true;
             extfilename=extfilepreamble_ +toTString(mtvals_.at(i))+extfileendpattern;
             std::vector<TString>::iterator it=std::find(extgenfiles_.begin(),extgenfiles_.end(),extfilename);
             if(it==extgenfiles_.end()){
@@ -367,7 +372,7 @@ void mtExtractor::readFiles(){
             TIter next(list) ;
             TKey* key=(TKey*)next() ;
             TObject* obj ;
-            std::vector<TString> histnames,sysnames;
+            std::vector<TString> histnames,sysnames,allnames;
             while ( key ) {
                 obj = key->ReadObj() ;
                 if (  (!obj->InheritsFrom("TH1")) ) {
@@ -375,7 +380,7 @@ void mtExtractor::readFiles(){
                 }
                 else{
                     TString objname=obj->GetName();
-
+                    allnames.push_back((TString)key->GetName()+" "+(TString)objname);
                     if(usekeynames)
                         objname=key->GetName();
                     if(objname.BeginsWith(histpreamble+extfilepdf_+"_")){
@@ -390,7 +395,13 @@ void mtExtractor::readFiles(){
             }
             //get nominal
             size_t nompos = std::find(sysnames.begin(),sysnames.end(),nomid)-sysnames.begin();
-
+            if(nompos==sysnames.size()){  //not found
+                std::cout << "mtExtractor::readFiles: Histogram not found. Available histograms: " <<std::endl;
+                for(size_t nameit=0;nameit<allnames.size();nameit++){
+                    std::cout << allnames.at(nameit) <<std::endl;
+                }
+                throw std::runtime_error("mtExtractor::readFiles: Histogram not found.");
+            }
             container1D nominal;
             TH1F h=tryToGet<TH1F>(fin,histnames.at(nompos));
 
@@ -598,7 +609,7 @@ void mtExtractor::createBinLikelihoods(int syslayer,bool includesyst,bool datasy
                 dgs.push_back(databingraphs_.at(i).getSystGraph((size_t)syslayer));
             }
             else{ //nominal
-                mcgs.push_back(mcbingraphs_.at(i));
+                mcgs.push_back(mcbingraphs_.at(i).getNominalGraph());
                 dgs.push_back(databingraphs_.at(i).getNominalGraph());
             }
         }
@@ -618,9 +629,15 @@ void mtExtractor::createBinLikelihoods(int syslayer,bool includesyst,bool datasy
 }
 void mtExtractor::drawBinLikelihoods(TCanvas *c){
     plotterMultiplePlots plotterdef;
-    plotterdef.readStyleFromFile(binsplotsstylefile_);
-    c->SetName("#chi^{2} per bin "+tmpSysName_);
-    c->SetTitle("#chi^{2} per bin "+tmpSysName_);
+    plotterdef.readStyleFromFile(binsplotsstylefile_);if(getExtractor()->getLikelihoodMode()!= parameterExtractor::lh_fit
+            || getExtractor()->getLikelihoodMode()!= parameterExtractor::lh_fitintersect){
+        c->SetName("log likelihood per bin "+tmpSysName_);
+        c->SetTitle("log likelihood per bin "+tmpSysName_);
+    }
+    else{
+        c->SetName("#chi^{2} per bin "+tmpSysName_);
+        c->SetTitle("#chi^{2} per bin "+tmpSysName_);
+    }
     //make pads
     int vdivs=((int)(sqrt(tmpbinchi2_.size())-0.0001))+1;//+1;
     int hdivs=(int)((float)tmpbinchi2_.size()/(float)vdivs)+1;
@@ -656,7 +673,8 @@ void mtExtractor::overlayBinFittedFunctions(TCanvas *c){
 void mtExtractor::drawBinsPlusFits(TCanvas *c,int syst){
     if(debug)
         std::cout << "mtExtractor::drawBinsPlusFits" <<std::endl;
-    if(getExtractor()->getLikelihoodMode()!= parameterExtractor::lh_fit)
+    if(!(getExtractor()->getLikelihoodMode()== parameterExtractor::lh_fit
+            || getExtractor()->getLikelihoodMode()== parameterExtractor::lh_fitintersect))
         return;
 
 
@@ -717,7 +735,8 @@ void mtExtractor::createGlobalLikelihood(){
     if(tmpbinchi2_.size()<1)
         throw std::logic_error("mtExtractor::createGlobalLikelihood: first create (non empty) likelihoods for bins");
     if(paraExtr_.getLikelihoodMode() == parameterExtractor::lh_chi2
-            || paraExtr_.getLikelihoodMode() == parameterExtractor::lh_chi2Swapped){
+            || paraExtr_.getLikelihoodMode() == parameterExtractor::lh_chi2Swapped
+            ||(paraExtr_.getLikelihoodMode() == parameterExtractor::lh_fit && tmpbinchi2_.at(0).getNPoints() > 1)){
 
 
         //just add upp everything
@@ -729,46 +748,57 @@ void mtExtractor::createGlobalLikelihood(){
         if(tmpglgraph_)  {delete tmpglgraph_;tmpglgraph_=0;}
         tmpglgraph_=(tmpglchi2_.getTGraph());
     }
-    else if(paraExtr_.getLikelihoodMode() == parameterExtractor::lh_fit){
+    else if(paraExtr_.getLikelihoodMode() == parameterExtractor::lh_fitintersect){
         float inverrorsum=0;
         float weightedsum=0;
         ///WARNING, ONLY ONE POINT EXPECTED
         if(tmpbinchi2_.size() <1)
             throw std::runtime_error("mtExtractor::createGlobalLikelihood: in fitting mode: at least one bin expected");
-        if(tmpbinchi2_.at(0).getNPoints()>1 ||tmpbinchi2_.at(0).getNPoints()<1 )
+        if(tmpbinchi2_.at(0).getNPoints()<1 )
             throw std::runtime_error("mtExtractor::createGlobalLikelihood: in fitting mode: exaclty one point per graph expected");
 
-        tmpglchi2_=graph(1);
-        tmpglchi2_.setPointYContent(0,1);
+        //get rid of above exception to do the other implementation
 
-        for(size_t i=0;i<tmpbinchi2_.size();i++){
-            bool usebin=true;
 
-            float errormax=tmpbinchi2_.at(i).getPointXError(0,false,"");
-            if(fabs(errormax) > 0.5 * tmpbinchi2_.at(i).getPointXContent(0)){
-                if(debug) std::cout << "mtExtractor::createGlobalLikelihood: in fit mode, bin " <<i << " not used (large error)" <<std::endl;
-                continue;
+        if(tmpbinchi2_.at(0).getNPoints() == 1){
+            tmpglchi2_=graph(1);
+            tmpglchi2_.setPointYContent(0,1);
+
+            for(size_t i=0;i<tmpbinchi2_.size();i++){
+
+
+                float errormax=tmpbinchi2_.at(i).getPointXError(0,false,"");
+                if(fabs(errormax) > 0.5 * tmpbinchi2_.at(i).getPointXContent(0)){
+                    if(debug) std::cout << "mtExtractor::createGlobalLikelihood: in fit mode, bin " <<i << " not used (large error)" <<std::endl;
+                    continue;
+                }
+                inverrorsum += 1/(errormax*errormax);
+                weightedsum += tmpbinchi2_.at(i).getPointXContent(0)/(errormax*errormax);
             }
-            inverrorsum += 1/(errormax*errormax);
-            weightedsum += tmpbinchi2_.at(i).getPointXContent(0)/(errormax*errormax);
+            float weightedmean=weightedsum/inverrorsum;
+            tmpglchi2_.setPointXContent(0,weightedmean);
+            tmpglchi2_.setPointXStat(0,1/inverrorsum);
+            if(tmpglgraph_)  {delete tmpglgraph_;tmpglgraph_=0;}
+            tmpglgraph_=(tmpglchi2_.getTGraph());
         }
-        float weightedmean=weightedsum/inverrorsum;
-        tmpglchi2_.setPointXContent(0,weightedmean);
-        tmpglchi2_.setPointXStat(0,1/inverrorsum);
-        if(tmpglgraph_)  {delete tmpglgraph_;tmpglgraph_=0;}
-        tmpglgraph_=(tmpglchi2_.getTGraph());
 
     }
 
 }
 void mtExtractor::drawGlobalLikelihood(TCanvas *c,bool zoom){
     if(paraExtr_.getLikelihoodMode() == parameterExtractor::lh_chi2
-            || paraExtr_.getLikelihoodMode() == parameterExtractor::lh_chi2Swapped){
+            || paraExtr_.getLikelihoodMode() == parameterExtractor::lh_chi2Swapped
+            || (paraExtr_.getLikelihoodMode() == parameterExtractor::lh_fit  && tmpbinchi2_.at(0).getNPoints() > 1)){
 
-        if(!tfitf_) throw std::logic_error("mtExtractor::drawGlobalLikelihood: first fitGlobalLikelihood");
-
-        c->SetName("global #chi^{2} "+tmpSysName_);
-        c->SetTitle("global #chi^{2} "+tmpSysName_);
+        if(paraExtr_.getLikelihoodMode() == parameterExtractor::lh_fit ){
+            c->SetName("global log likelihood "+tmpSysName_);
+            c->SetTitle("global log likelihood "+tmpSysName_);
+        }
+        else if(paraExtr_.getLikelihoodMode() == parameterExtractor::lh_chi2
+                || paraExtr_.getLikelihoodMode() == parameterExtractor::lh_chi2Swapped){
+            c->SetName("global #chi^{2} "+tmpSysName_);
+            c->SetTitle("global #chi^{2} "+tmpSysName_);
+        }
 
         plotterMultiplePlots * pl=new plotterMultiplePlots;
         pltrptrs_.push_back(pl);
@@ -778,21 +808,61 @@ void mtExtractor::drawGlobalLikelihood(TCanvas *c,bool zoom){
         pl->addPlot(&tmpglchi2_);
         pl->draw();
 
-        float tmpglchi2_minimum=0;
-        tfitf_->Draw("same");
-        tmpglchi2_minimum=tfitf_->GetMinimum(tmpglchi2_.getXMin(),tmpglchi2_.getXMax());
-        std::cout << "minimum: " << tmpglchi2_minimum <<std::endl;
-        float plotmin=tmpglchi2_minimum-1;
 
-        float epsilon=(tmpglchi2_.getXMax()-tmpglchi2_.getXMin()/5);
-        float Xminimum=tfitf_->GetX(tmpglchi2_minimum,tmpglchi2_.getXMin(),tmpglchi2_.getXMax());
-        float xpleft=tfitf_->GetX(tmpglchi2_minimum+1,tmpglchi2_.getXMin(),Xminimum);
-        float xpright=tfitf_->GetX(tmpglchi2_minimum+1,Xminimum,tmpglchi2_.getXMax());
-        TLine * xlinel=addObject(new TLine(xpleft,plotmin,xpleft,tmpglchi2_minimum+1));
-        TLine * xliner=addObject(new TLine(xpright,plotmin,xpright,tmpglchi2_minimum+1));
-        TLine * xlinec=addObject(new TLine(Xminimum,plotmin,Xminimum,tmpglchi2_minimum));
-        TLine * yline=addObject(new TLine(tmpglchi2_.getXMin(),tmpglchi2_minimum+1,xpleft,tmpglchi2_minimum+1));
-        TLine * yline2=addObject(new TLine(tmpglchi2_.getXMin(),tmpglchi2_minimum,Xminimum,tmpglchi2_minimum));
+        float centralYValue=0;
+
+        float plotmin=0;
+
+
+        float cetralXValue=0;
+        float xpleft=0;
+        float xpright=0;
+        float intersecty=0;
+
+        if(paraExtr_.getLikelihoodMode() == parameterExtractor::lh_fit){
+            //extract from log likelihood
+            //look for maximum
+            size_t maxpoint=0;
+
+            centralYValue=tmpglchi2_.getYMax(maxpoint,false);
+            intersecty=centralYValue-0.5;
+            cetralXValue=tmpglchi2_.getPointXContent(maxpoint);
+
+            plotmin=tmpglchi2_.getYMin();
+
+            for(size_t n=maxpoint;n<tmpglchi2_.getNPoints();n++){
+                if(centralYValue - tmpglchi2_.getPointYContent(n) > 0.5){
+                    xpright=tmpglchi2_.getPointXContent(n);
+                    break;
+                }
+            }
+            for(size_t n=maxpoint;n>1;n--){ //1 to avoid warnings
+                if(centralYValue - tmpglchi2_.getPointYContent(n) > 0.5){
+                    xpleft=tmpglchi2_.getPointXContent(n);
+                    break;
+                }
+            }
+
+        }
+        else if(paraExtr_.getLikelihoodMode() == parameterExtractor::lh_chi2 || paraExtr_.getLikelihoodMode() == parameterExtractor::lh_chi2Swapped){
+            if(!tfitf_) throw std::logic_error("mtExtractor::drawGlobalLikelihood: first fitGlobalLikelihood");
+
+            tfitf_->Draw("same");
+            centralYValue=tfitf_->GetMinimum(tmpglchi2_.getXMin(),tmpglchi2_.getXMax());
+            std::cout << "minimum: " << centralYValue <<std::endl;
+            plotmin=centralYValue-1;
+            intersecty=centralYValue+1;
+
+            cetralXValue=tfitf_->GetX(centralYValue,tmpglchi2_.getXMin(),tmpglchi2_.getXMax());
+            xpleft=tfitf_->GetX(centralYValue+1,tmpglchi2_.getXMin(),cetralXValue);
+            xpright=tfitf_->GetX(centralYValue+1,cetralXValue,tmpglchi2_.getXMax());
+        }
+
+        TLine * xlinel=addObject(new TLine(xpleft,plotmin,xpleft,intersecty));
+        TLine * xliner=addObject(new TLine(xpright,plotmin,xpright,intersecty));
+        TLine * xlinec=addObject(new TLine(cetralXValue,plotmin,cetralXValue,centralYValue));
+        TLine * yline=addObject(new TLine(tmpglchi2_.getXMin(),intersecty,xpleft,intersecty));
+        TLine * yline2=addObject(new TLine(tmpglchi2_.getXMin(),centralYValue,cetralXValue,centralYValue));
         yline->Draw("same");
         yline2->Draw("same");
         xlinel->Draw("same");
@@ -802,17 +872,16 @@ void mtExtractor::drawGlobalLikelihood(TCanvas *c,bool zoom){
         TString pointname=tmpSysName_;
         if(tmpSysName_=="") pointname="nominal";
 
-        allsyst_.addPoint(Xminimum,syspidx_,pointname);
+        allsyst_.addPoint(cetralXValue,syspidx_,pointname);
         allsystsl_.addPoint(xpleft,syspidx_,pointname);
         allsystsh_.addPoint(xpright,syspidx_,pointname);
         syspidx_++;
         if(!(tmpSysName_.Contains("up")||tmpSysName_.Contains("down")))
             syspidx_++;
-        //allsyst_.setPointXStat()
-        //  allsyst_.setPointXContent(pidx,xpleft,0);
-        // allsyst_.setPointXContent(pidx,xpright,1);
+
     }
-    else if(paraExtr_.getLikelihoodMode() == parameterExtractor::lh_fit){
+    else if(paraExtr_.getLikelihoodMode() == parameterExtractor::lh_fitintersect){
+
 
         if(tmpglchi2_.getNPoints()>1 ||tmpglchi2_.getNPoints()<1 )
             throw std::runtime_error("mtExtractor::drawGlobalLikelihood: in fitting mode: exactly one point per graph expected");
@@ -840,7 +909,7 @@ void mtExtractor::drawGlobalLikelihood(TCanvas *c,bool zoom){
 
 void mtExtractor::fitGlobalLikelihood(){
     if(paraExtr_.getLikelihoodMode() != parameterExtractor::lh_chi2
-            || paraExtr_.getLikelihoodMode() != parameterExtractor::lh_chi2Swapped){
+            && paraExtr_.getLikelihoodMode() != parameterExtractor::lh_chi2Swapped){
 
         return;
     }
@@ -861,9 +930,12 @@ void mtExtractor::fitGlobalLikelihood(){
 
 void mtExtractor::drawResultGraph(TCanvas *c){
 
+
     if(debug) std::cout << " mtExtractor::drawResultGraph " <<std::endl;
     c->SetName("result graph");
     c->SetTitle("result graph");
+
+    if(tmpglchi2_.getNPoints()<1)return; //DEBUG
 
     //add sum point
     size_t nompoint=0;
@@ -877,13 +949,15 @@ void mtExtractor::drawResultGraph(TCanvas *c){
 
 
     allsyst_.removeXErrors();
+    allsyst_.addErrorGraph("stat_down",allsystsl_);
+    allsyst_.addErrorGraph("stat_up",allsystsh_);
 
     //make all syst graph: DOESNT include SYST STAT!!!
     graph allsystcombined=graph(1);
     float fakeycontent=allsyst_.getNPoints()/2 +1.5;
     float fakeystat=allsyst_.getNPoints()/2 +1.5;
     allsystcombined.setPointXContent(0,allsyst_.getPointXContent(nompoint));
-    allsystcombined.setPointXStat(0,0);
+    allsystcombined.setPointXStat(0,allsyst_.getPointXError(nompoint,false)); //this will symmetrize the stat error of nompoint
     allsystcombined.setPointYContent(0,fakeycontent);
     allsystcombined.setPointYStat(0,fakeystat);
 
@@ -894,15 +968,13 @@ void mtExtractor::drawResultGraph(TCanvas *c){
         tmperr.setPointYStat(0,fakeystat);
         tmperr.setPointYContent(0,fakeycontent);
         tmperr.setPointXContent(0,allsyst_.getPointXContent(i));
-        tmperr.setPointXStat(0,0);
+        tmperr.setPointXStat(0,allsyst_.getPointXError(i,false));
         std::cout << allsyst_.getPointXContent(i) << " for " << allsyst_.getPointName(i) <<std::endl;
         /* size_t newsys= */allsystcombined.addErrorGraph(allsyst_.getPointName(i),tmperr);
     }
 
 
 
-    allsyst_.addErrorGraph("stat_down",allsystsl_);
-    allsyst_.addErrorGraph("stat_up",allsystsh_);
 
     std::cout << "NOW" <<std::endl;
 

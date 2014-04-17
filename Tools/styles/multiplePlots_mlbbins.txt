@@ -50,7 +50,7 @@
 [containerStyle - Default]
  
     markerSize   = 1
-    markerStyle  = 26
+    markerStyle  = 20
     markerColor  = 632
  
     lineSize     = 2

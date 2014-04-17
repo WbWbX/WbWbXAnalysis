@@ -229,23 +229,25 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
     }
     else{
         toplikelihood.setNBins(40);
-        toplikelihood.setStep(5);
+        toplikelihood.setStep(7); //includes met for ee/mumu
     }
 
     toplikelihood.setUseLikelihoods(usediscr_);
 
 
 
-    toplikelihood.addVariable(&evt.lhi_leadjetbtag,"D_{b}^{jet1}",-1,1);
     toplikelihood.addVariable(&evt.lhi_dphillj,"#Delta#phi(ll,j)",0,M_PI);
-    //if(!usediscr_) //variable gets added, likelihood computed, but it will not be used in final result
     toplikelihood.addVariable(&evt.lhi_cosleplepangle,"#cos#theta_{ll}",-1.,1.);
-    toplikelihood.addVariable(&evt.mll,"m_{ll}",0.,300);
+    if(!usediscr_)
+        toplikelihood.addVariable(&evt.lhi_leadjetbtag,"D_{b}^{jet1}",-1,1);
     toplikelihood.addVariable(&evt.lhi_sumdphimetl,"#Delta#phi(met,l_{1})+#Delta#phi(met,l_{2})",0,2*M_PI);
     toplikelihood.addVariable(&evt.lhi_seljetmulti,"N_{jets}",-0.5,4.5);
-    toplikelihood.addVariable(&evt.lhi_selbjetmulti,"N_{jets}",-0.5,4.5);
-    toplikelihood.addVariable(&evt.lhi_leadleppt,"p_{T}^{1st lep}",0,200);
-    toplikelihood.addVariable(&evt.ptllj,"p_{T}(llj) [GeV]",50,400);
+    toplikelihood.addVariable(&evt.lhi_selbjetmulti,"N_{b-jets}",-0.5,4.5);
+    toplikelihood.addVariable(&evt.lhi_leadleppt,"p_{T}^{1st lep}",0,150);
+    toplikelihood.addVariable(&evt.lhi_secleadleppt,"p_{T}^{2nd lep}",0,150);
+    toplikelihood.addVariable(&evt.lhi_leadjetpt,"p_{T}^{1st jet}",0,150);
+    toplikelihood.addVariable(&evt.lhi_mll,"m_{ll}",0.,300);
+    toplikelihood.addVariable(&evt.lhi_ptllj,"p_{T}(llj) [GeV]",50,400);
 
     if(usediscr_){
         toplikelihood.setSystematics(getSyst());
@@ -419,8 +421,6 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
     if(testmode_)
         std::cout << "testmode("<< anaid << "): starting main loop" << std::endl;
 
-    float weightsbeftopptrew=0;
-    float weightsaftertopptrew=0;
 
     Long64_t nEntries=t->GetEntries();
     if(norm==0) nEntries=0; //skip for norm0
@@ -509,10 +509,10 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
 
                 if(pGenTops->size()>1){ //ttbar sample
-                    weightsbeftopptrew+=puweight;
-                    puweight *= sqrt(getTopPtReweighter()->getWeight(pGenTops->at(0).pt()) *
-                            getTopPtReweighter()->getWeight(pGenTops->at(1).pt()));
-                    weightsaftertopptrew+=puweight;
+
+                    puweight = sqrt(getTopPtReweighter()->reWeight(pGenTops->at(0).pt(),puweight) *
+                            getTopPtReweighter()->reWeight(pGenTops->at(1).pt(),puweight));
+
                     gentops.push_back(&pGenTops->at(0));
                     gentops.push_back(&pGenTops->at(0));
                     evt.gentops=&gentops;
@@ -1039,16 +1039,18 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
         ///////////////calculate likelihood inputs///////////
 
 
-        float lhi_leadjetbtag=1;
-        if(selectedjets->size()>0)
-            lhi_leadjetbtag=(selectedjets->at(0)->btag());
-        evt.lhi_leadjetbtag =&lhi_leadjetbtag;
+
 
         float lhi_dphillj=dphillj;
         evt.lhi_dphillj=&lhi_dphillj;
 
         float lhi_cosleplepangle=cosleplepangle;
         evt.lhi_cosleplepangle=&lhi_cosleplepangle;
+
+        float lhi_leadjetbtag=1;
+        if(selectedjets->size()>0)
+            lhi_leadjetbtag=(selectedjets->at(0)->btag());
+        evt.lhi_leadjetbtag =&lhi_leadjetbtag;
 
         float lhi_sumdphimetl=0;
         lhi_sumdphimetl=absNormDPhi(leadingptlep->p4(),adjustedmet.p4()) + absNormDPhi(secleadingptlep->p4(),adjustedmet.p4());
@@ -1058,11 +1060,21 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
         lhi_seljetmulti=selectedjets->size();
         evt.lhi_seljetmulti=&lhi_seljetmulti;
 
+        float lhi_selbjetmulti=selectedbjets.size();
+        evt.lhi_selbjetmulti=&lhi_selbjetmulti;
+
         float lhi_leadleppt=leadingptlep->pt();
         evt.lhi_leadleppt=&lhi_leadleppt;
 
-        float lhi_selbjetmulti=selectedbjets.size();
-        evt.lhi_selbjetmulti=&lhi_selbjetmulti;
+        float lhi_secleadleppt=secleadingptlep->pt();
+        evt.lhi_secleadleppt=&lhi_secleadleppt;
+
+        float lhi_leadjetpt=0;
+        if(selectedjets->size()>0)
+            lhi_leadjetpt=selectedjets->at(0)->pt();
+        evt.lhi_leadjetpt=&lhi_leadjetpt;
+
+        evt.lhi_mll=&mll;
 
         float lhi_drlbl=0;
         if(selectedbjets.size()>0){
@@ -1076,6 +1088,10 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
             }
             evt.lhi_drlbl=&lhi_drlbl;
         }
+
+        evt.lhi_ptllj=&ptllj;
+
+
 
 
 
@@ -1130,9 +1146,6 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
         if(analysisMllRange){
 
-            lh_toplh=toplikelihood.getCombinedLikelihood();
-            toplikelihood.fill(puweight);
-
 
             sel_step[5]+=puweight;
             plots.makeControlPlots(step);
@@ -1177,6 +1190,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
         if(analysisMllRange){
 
+            lh_toplh=toplikelihood.getCombinedLikelihood();
+            toplikelihood.fill(puweight);
+
             plots.makeControlPlots(step);
             sel_step[7]+=puweight;
         }
@@ -1195,7 +1211,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
         if(!usetopdiscr && selectedbjets.size() < 1) continue;
         // if(usetopdiscr && topdiscr3<0.9) continue;
-        if(usetopdiscr && lh_toplh<0.6) continue;
+        if(usetopdiscr && lh_toplh<0.3) continue;
         if(getBTagSF()->getMode() != NTBTagSF::shapereweighting_mode){
             puweight*=getBTagSF()->getNTEventWeight(*selectedjets);
         }
@@ -1204,7 +1220,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
         if(analysisMllRange){
 
-           // std::cout << selectedjets->at(0)->pt() << std::endl;
+            // std::cout << selectedjets->at(0)->pt() << std::endl;
 
             plots.makeControlPlots(step);
             sel_step[8]+=puweight;
@@ -1228,8 +1244,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
     ///////////////////////////////////////////////////////////////////////
 
     //renorm for topptreweighting
-    if(weightsaftertopptrew>0)
-        norm*=weightsbeftopptrew/weightsaftertopptrew;
+  //  if(weightsaftertopptrew>0)
+  //      norm*=weightsbeftopptrew/weightsaftertopptrew;
+    norm *= getTopPtReweighter()->getRenormalization();
 
     container1DUnfold::flushAllListed(); // call once again after last event processed
 

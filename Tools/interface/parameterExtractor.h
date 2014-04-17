@@ -25,10 +25,10 @@ namespace ztop{
 class parameterExtractor {
 public:
 
-    enum likelihoodModes{lh_chi2,lh_chi2Swapped,lh_fit};
+    enum likelihoodModes{lh_chi2,lh_chi2Swapped,lh_fit,lh_fitintersect};
 
 
-    parameterExtractor(): LHMode_(lh_chi2),tmpfa_(0),tmpfb_(0),granularity_(300),clfit_(0.95){}
+    parameterExtractor(): LHMode_(lh_chi2),tmpfa_(0),tmpfb_(0),granularity_(300),clfit_(0.68){}
     ~parameterExtractor(){}//FIXME}
 
     // defaults should suffice
@@ -132,6 +132,11 @@ private:
     double findintersect(TF1* a, TF1* b,float min, float max);
 
     /* ..... */
+
+    /**
+     * extnorm is the integral (not the inverse integral) of the distribution you want to get
+     */
+    double lnNormedGaus(const float & centre, const float& width, const float& evalpoint, const float& extnorm=0)const;
 
 
 };

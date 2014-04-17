@@ -12,28 +12,44 @@
 
 namespace ztop{
 
-float reweightfunctions::getWeight(const float& in) const{
+float reweightfunctions::reWeight(const float& in,const float& previousweight) {
+    if(type_==flat){
+        return previousweight;
+    }
+
+    float newweight=1;
+
     if(type_ == toppt){
         if(syst_ == nominal)
-            return TMath::Exp(0.156-0.00137*in);
+            newweight= TMath::Exp(0.156-0.00137*in);
         if(syst_ == up)
-            return std::max(0.,1+(2.*(TMath::Exp(0.156-0.00137*in)-1)));
+            newweight= std::max(0.,1+(2.*(TMath::Exp(0.156-0.00137*in)-1)));
         if(syst_ == down)
-            return 1;
+            newweight= previousweight;
     }
-    else if(type_==flat){
-        return 1;
-    }
+    unwcounter_+=previousweight;
+    wcounter_+=newweight*previousweight;
 
-    return 1;
+    return newweight*previousweight;
 }
 
-float reweightfunctions::getWeight(const float& in1,const float& in2) const{
+float reweightfunctions::reWeight(const float& in1,const float& in2,const float& previousweight) {
+    if(type_==flat){
+        return previousweight;
+    }
+    float newweight=1;
+
+    ////
     float j=in1;
     j=in2;
     j++;
     throw std::logic_error("reweightfunctions::getWeight(const float& in1,const float& in2): not implemented yet");
-    return 1;
+    /////
+
+    unwcounter_+=previousweight;
+    wcounter_+=newweight*previousweight;
+
+    return newweight*previousweight;
 }
 
 

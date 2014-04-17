@@ -77,8 +77,8 @@
   fillStyle    = 3005
   fillColor    = 1 
 
-  sysFillStyle = 3005
-  sysFillColor = 1
+  sysFillStyle = 3004
+  sysFillColor = 600
     
   rootDrawOpt  = e2 
   sysRootDrawOpt  = e2

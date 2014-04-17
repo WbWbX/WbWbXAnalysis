@@ -8,14 +8,14 @@ channels=( #"ee"
 ## scale and match variations will be ignored for other top masses then 172.5.. (hardcoded below)
 topmasses=( "172.5"
 
-    "171.5"
-    "173.5"
+    #"171.5"
+    #"173.5"
 
-    "175.5"
-    "169.5"
+    #"175.5"
+    #"169.5"
 
-    "178.5"
-    "166.5"
+    #"178.5"
+    #"166.5"
 );
 systs=("nominal"
 
@@ -39,10 +39,10 @@ systs=("nominal"
    "JES_up"
    "JES_down"
 
-   #"BTAGH_up"
-   #"BTAGH_down"
-   #"BTAGL_up"
-   #"BTAGL_down"
+   "BTAGH_up"
+   "BTAGH_down"
+   "BTAGL_up"
+   "BTAGL_down"
    #"BTAGHFS1_up"
    #"BTAGHFS1_down"
    #"BTAGHFS2_up"

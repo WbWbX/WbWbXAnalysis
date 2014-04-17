@@ -109,6 +109,11 @@ public:
 
 	bool hasSameLayerMap(const histoContent & hc) const{return layermap_==hc.layermap_;}
 
+	/**
+	 * in case layers are named <>_up or <>_down it will give a list of all <>
+	 */
+	std::vector<TString> getVariations()const;
+
 	static bool debug;
 
 	/*

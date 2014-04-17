@@ -95,7 +95,7 @@ TString TtBarUnfolder::unfold(TString out,TString in)const{
 
     size_t ufsize=tobeunfolded.size();
     //parallel for?!?
-  //  TFile* f = new TFile(outdir+outfile,"RECREATE");
+    //  TFile* f = new TFile(outdir+outfile,"RECREATE");
     TFile* f = new TFile(outfile,"RECREATE");
     f->cd();
     TDirectory * d=0;
@@ -114,10 +114,31 @@ TString TtBarUnfolder::unfold(TString out,TString in)const{
 
         ztop::container1DUnfold  data=stack->produceUnfoldingContainer();
 
+        bool correctbr=false;
+        if(brcorr_>0){
+            for(size_t i=0;i<plotids_.size();i++){
+                std::cout << data.getName() <<std::endl;
+                if(data.getName().Contains(plotids_.at(i))){
+                    correctbr=true;
+                    std::cout << "Will rescale plot " << data.getName()  << " with factor " << brcorr_ <<std::endl;
+                    break;
+                }
+            }
+        }
+
+
         std::cout << "unfolding " << data.getName() << " syst: " << std::endl;
         unfolder.unfold(data);
+
+        if(correctbr)
+                   data*=1/brcorr_;
+
+
         ztop::container1D unfolded=data.getUnfolded();
         ztop::container1D refolded=data.getRefolded();
+
+
+
         unfolded.setName(data.getName()+"_unfolded");
         unfolded.writeToTFile(f);
         refolded.setName(data.getName()+"_refolded");
@@ -134,7 +155,7 @@ TString TtBarUnfolder::unfold(TString out,TString in)const{
             outputstring+=name+"\n\n";
             for(size_t bin=1;bin<=unfolded.getNBins();bin++){
                 //unfolded.coutBinContent(bin);
-                outputstring+=data.coutUnfoldedBinContent(bin); //dangerous
+                outputstring+=data.coutUnfoldedBinContent(bin,units_); //dangerous
                 outputstring+="\n\n";
                 std::cout << "\n\n"  << std::endl;
             }

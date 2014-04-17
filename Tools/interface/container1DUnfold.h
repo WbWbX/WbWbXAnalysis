@@ -175,7 +175,7 @@ public:
     static void setAllListedLumi(float lumi);
     static void checkAllListed();
 
-    TString coutUnfoldedBinContent(size_t bin) const;
+    TString coutUnfoldedBinContent(size_t bin,const TString& units="") const;
 
     /**
      * Important!

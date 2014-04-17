@@ -28,6 +28,7 @@ int main(int argc, char* argv[]){
     parse.bepicky=true;
     TString plotname  =    parse.getOpt<TString>("p","m_lb pair comb unfold step 8","input plot name");
     TString output    =    parse.getOpt<TString>("o","mtFromXSec_output","output file name");
+    TString mode    =    parse.getOpt<TString>("m","fit","mode (fit, fitintersect,chi2)");
     TString fitmode    =    parse.getOpt<TString>("f","pol4","fit mode in root format");
     TString usepdf    =    parse.getOpt<TString>("-pdf","MSTW200","chose a PDF to be used (if external input is fed): default: MSTW200");
     int minbin          =  parse.getOpt<int>    ("-minbin",-1,"minimum bin number to be considered in fit");
@@ -43,7 +44,8 @@ int main(int argc, char* argv[]){
     parse.doneParsing();
 
     //requirements
-    if(inputfiles.size() <1){
+    if(inputfiles.size() <1 || (mode!="fit" && mode!="chi2"&&mode!="fitintersect")){
+
         parse.coutHelp();
         std::cout << "specify at least one input file" <<std::endl;
         return -1;
@@ -67,14 +69,22 @@ int main(int argc, char* argv[]){
     // maybe then also implement all plots.. but later
     mtExtractor extractor;
 
+
+
     mtExtractor::debug=true;
 
     parameterExtractor::debug=true;
     container1D::debug=true;
 
-    extractor.getExtractor()->setLikelihoodMode(parameterExtractor::lh_fit);
-    extractor.getExtractor()->setFitFunctions("pol3");
-    extractor.getExtractor()->setConfidenceLevelFitInterval(0.95);
+    if(mode=="fitintersect")
+        extractor.getExtractor()->setLikelihoodMode(parameterExtractor::lh_fitintersect);
+    else if(mode=="chi2")
+        extractor.getExtractor()->setLikelihoodMode(parameterExtractor::lh_chi2);
+    else if(mode=="fit")
+            extractor.getExtractor()->setLikelihoodMode(parameterExtractor::lh_fit);
+    extractor.getExtractor()->setFitFunctions("pol2");
+    extractor.getExtractor()->setConfidenceLevelFitInterval(0.68);
+    extractor.getExtractor()->setIntersectionGranularity(2000);
     extractor.setExternalGenInputFilesFormat(extconfigfile);
     extractor.setPlot(plotname);
     extractor.setExcludeBin(excludebin);
@@ -82,9 +92,17 @@ int main(int argc, char* argv[]){
     extractor.setMaxBin(maxbin);
     extractor.setUseFolding(usefolding);
     extractor.setInputFiles(inputfiles);
+    bool isexternalgen=extractor.getIsExternalGen();
     extractor.setExternalGenInputPDF(usepdf);
     //  extractor.getExtractor()->setLikelihoodMode(parameterExtractor::lh_chi2);
     extractor.setFitMode(fitmode);
+
+    output+="_"+plotname;
+    if(isexternalgen){
+        output+="_"+usepdf+"_ext";
+    }
+    output+="_"+mode;
+    output.ReplaceAll(" ","_");
 
     extractor.setup();
     TCanvas*c=new TCanvas();
@@ -126,9 +144,7 @@ int main(int argc, char* argv[]){
 
     //for all systematics
     for(int i=-1;i<extractor.getDataSystSize();i++){
-        if(i<-1)
-            extractor.createBinLikelihoods(i,true);
-        else
+
             extractor.createBinLikelihoods(i,false);
 
         if(i>=0 && nosyst) break;
@@ -140,12 +156,12 @@ int main(int argc, char* argv[]){
         c->Write();
 
         c->Clear();
-        if(extractor.getExtractor()->getLikelihoodMode()==parameterExtractor::lh_fit){
+        //if(extractor.getExtractor()->getLikelihoodMode()==parameterExtractor::lh_fit){
             extractor.drawBinsPlusFits(c,i);
             c->Print(output+".pdf");
             c->Write();
             c->Clear();
-        }
+        //}
         extractor.cleanMem();
         extractor.createGlobalLikelihood();
         extractor.fitGlobalLikelihood();
@@ -158,8 +174,8 @@ int main(int argc, char* argv[]){
     }
     //close
 
-  //  extractor.drawIndivBins(c);
-  //  extractor.overlayBinFittedFunctions(c);
+    //  extractor.drawIndivBins(c);
+    //  extractor.overlayBinFittedFunctions(c);
     c->Print(output+".pdf");
     c->Write();
 

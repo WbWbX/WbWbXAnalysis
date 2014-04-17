@@ -43,6 +43,7 @@ public:
     //leadingjetbtag(0),secleadingjetbtag(0),
     simplemet(0),adjustedmet(0),
     mll(0),leplepdr(0),cosleplepangle(0),dphillj(0),dphilljj(0),detallj(0),detalljj(0),ht(0),ptllj(0),topdiscr(0),topdiscr2(0),topdiscr3(0),
+
     lhi_dphillj(0),
     lhi_cosleplepangle(0),
     lhi_leadjetbtag(0),
@@ -50,7 +51,11 @@ public:
     lhi_seljetmulti(0),
     lhi_selbjetmulti(0),
     lhi_leadleppt(0),
+    lhi_secleadleppt(0),
+    lhi_leadjetpt(0),
     lhi_drlbl(0),
+    lhi_mll(0),
+    lhi_ptllj(0),
 
     lh_toplh(0),
 
@@ -92,7 +97,11 @@ public:
         lhi_seljetmulti=0;
         lhi_selbjetmulti=0;
         lhi_leadleppt=0;
+        lhi_secleadleppt=0;
+        lhi_leadjetpt=0;
         lhi_drlbl=0;
+        lhi_mll=0;
+        lhi_ptllj=0;
 
         lh_toplh=0;
 
@@ -174,7 +183,11 @@ public:
     float * lhi_seljetmulti;
     float * lhi_selbjetmulti;
     float * lhi_leadleppt;
+    float * lhi_secleadleppt;
+    float * lhi_leadjetpt;
     float * lhi_drlbl;
+    float * lhi_mll;
+    float * lhi_ptllj;
 
     //output of LH lh_<name>
     float * lh_toplh;

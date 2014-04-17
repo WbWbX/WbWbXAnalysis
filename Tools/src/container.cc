@@ -1063,16 +1063,16 @@ container1D container1D::rebinToBinning(const std::vector<float> & newbins) cons
                 newbin=newcont.getBinNo(bins_.at(thisbin));
             if(oldbinno==newbin){//bins are added
                 //if individual bins were rescaled for some reason,
-              /*  const float& newbincontent=newcont.getBin(newbin,lay).getContent();
+                /*  const float& newbincontent=newcont.getBin(newbin,lay).getContent();
                 const float& addbincontent=getBin(thisbin,lay).getContent(); */
                 const float& newbinentries=newcont.getBin(newbin,lay).getEntries();
                 const float& addbinentries=getBin(thisbin,lay).getEntries();
                 const float& newbinstat2=newcont.getBin(newbin,lay).getStat2();
                 const float& addbinstat2=getBin(thisbin,lay).getStat2();
-/*
+                /*
                 float errnewbinscale=newbinstat2/newbincontent;
                 float erraddbinscale=addbinstat2/addbincontent;
-*/
+                 */
                 float newbinnewstat2=newbinstat2+addbinstat2;//sq(errnewbinscale)*newbinentries + sq(erraddbinscale)*addbinentries;
 
                 newcont.getBin(newbin,lay).addToContent(getBin(thisbin,lay).getContent());
@@ -1289,7 +1289,7 @@ void container1D::equalizeSystematicsIdxs(container1D &rhs){
 /**
  * all systematics
  */
-TString container1D::coutBinContent(size_t bin) const{
+TString container1D::coutBinContent(size_t bin,const TString& unit) const{
     using namespace std;
     if(bin>=bins_.size()){
         cout << "container1D::coutBinContent: "<< bin << " bin out of range" <<endl;
@@ -1297,6 +1297,114 @@ TString container1D::coutBinContent(size_t bin) const{
     }
     TString out;
     float content=getBinContent(bin);
+    //rewrite to tex format
+    //cout in standard, "out" in tex table
+    /*
+     * \begin{tabular}{|c|c|}
+\hline
+¥ & ¥ \\
+\hline
+¥ & ¥ \\
+\hline
+\end{tabular}
+     */
+    TString starttable="\\begin{tabular}{|c|c|}\n  \\hline \n" ;
+    std::stringstream cont;
+    cont.setf(ios::fixed,ios::floatfield);
+    cont.precision(2);
+    cont << content;
+    starttable+= "Central & ";
+    starttable+=cont.str();
+    starttable+= unit +" \\\\ \\hline \\hline \n";
+    starttable+=" Uncertainty& [\\%]  \\\\ \\hline\n";
+
+    TString endtable="\\end{tabular}\n";
+    TString lineend="\\\\ \\hline \n";
+
+    cout << "container1D::coutBinContent: bin " << bin << endl;
+    cout << content << " \t+-" << getBinStat(bin) << endl;
+    //out+=toTString(content) +" \t+-"+ toTString(getBinStat(bin))+"\n";
+    out+=getName()+"\n\n";
+    out.ReplaceAll("_","\\_");
+    out+=starttable;
+
+
+    for(int i=0;i<(int) getSystSize();i++){
+        cout << getSystErrorName(i) << "\t" << getSystError(i,bin)/content * 100 << "% +-";
+        cout    << getSystErrorStat(i,bin)/content * 100 << "%" << endl;
+    }
+    cout << endl;
+    std::vector<TString> vars=contents_.getVariations();
+    for(size_t i=0;i<vars.size();i++){
+        size_t idx=getSystErrorIndex(vars.at(i)+"_up");
+        float errup=(getBinContent(bin,idx)-content)/content *100;
+        idx=getSystErrorIndex(vars.at(i)+"_down");
+        float errdn=(getBinContent(bin,idx)-content)/content *100;
+        std::stringstream sup,sdn;
+        sup.setf(ios::fixed,ios::floatfield);
+        sup.precision(2);
+        sdn.setf(ios::fixed,ios::floatfield);
+        sdn.precision(2);
+
+
+        TString pmmp="$\\pm^{";
+        if(errup>0 && errdn<0){
+            pmmp="$\\pm^{";
+            errdn=fabs(errdn);
+        }
+        else if(errup>0 && errdn>0){
+            pmmp="+^{";
+        }
+        else if(errup<0 && errdn>0){
+            pmmp="$\\mp^{";
+            errup=fabs(errup);
+        }
+        else if(errup<0 && errdn<0){
+            pmmp="-^{";
+            errup=fabs(errup); errdn=fabs(errdn);
+        }
+        sup << errup;
+        sdn << errdn;
+        TString varname=vars.at(i);
+        varname.ReplaceAll("_","\\_");
+        out+=varname+" & " + pmmp+sup.str()+ "}_{"+ sdn.str()+"}$" + lineend;
+
+    }
+
+
+
+    float totalerrdn=getBinErrorDown(bin,false,"")/content * 100;
+    float totalerrup=getBinErrorUp(bin,false,"")/content * 100;
+
+    std::stringstream stat;
+    stat.setf(ios::fixed,ios::floatfield);
+    stat.precision(2);
+    stat << getBinError(bin,true)/content *100;
+    out+=" stat. & $\\pm$" + stat.str();
+    out+=lineend;
+
+    cout << "total: -" << (totalerrdn) << " +" << totalerrup <<std::endl;
+
+    std::stringstream sup,sdn;
+    sup.setf(ios::fixed,ios::floatfield);
+    sup.precision(2);
+    sdn.setf(ios::fixed,ios::floatfield);
+    sdn.precision(2);
+    sup << totalerrup;
+    sdn << totalerrdn;
+    out+=(TString)"Total " + (TString)" & " + (TString)"$\\pm^{"+sup.str()+ (TString)"}_{"+ sdn.str()+(TString)"}$" + lineend + "\\hline\n";
+    sup.clear();
+    sdn.clear();
+
+
+    out+=endtable;
+
+
+
+    return out;
+    /*
+    ///old implementation
+
     cout << "container1D::coutBinContent: bin " << bin << endl;
     cout << content << " \t+-" << getBinStat(bin) << endl;
     out+=toTString(content) +" \t+-"+ toTString(getBinStat(bin))+"\n";
@@ -1307,9 +1415,13 @@ TString container1D::coutBinContent(size_t bin) const{
         cout	<< getSystErrorStat(i,bin)/content * 100 << "%" << endl;
         out+=toTString(getSystErrorStat(i,bin)/content * 100) + "%\n";
     }
+    float totalerrdn=getBinErrorDown(bin,false,"")/content * 100;
+    float totalerrup=getBinErrorUp(bin,false,"")/content * 100;
     cout << endl;
-    out+="\n";
+    cout << "total: -" << (totalerrdn) << " +" << totalerrup <<std::endl;
+    out+="\ntotal: -" + toTString((totalerrdn)) + " +" + toTString(fabs(totalerrup));
     return out;
+     */
 }
 
 /**
@@ -1473,7 +1585,7 @@ float container1D::getDominantVariationUp( TString  sysname, const size_t& bin) 
     down=contents_.getBin(bin,idx).getContent()-cont;
 
     if(up < 0 && down < 0) return 0;
-    else if(up > down) return up;
+    else if(up >= down) return up;
     else if(down > up) return down;
     else return 0; //never reached only for docu purposes
 
@@ -1491,7 +1603,7 @@ float container1D::getDominantVariationDown( TString  sysname, const size_t& bin
     down=contents_.getBin(bin,idx).getContent()-cont;
 
     if(up > 0 && down > 0) return 0;
-    else if(up < down) return up;
+    else if(up <= down) return up;
     else if(down < up) return down;
     else return 0; //never reached only for docu purposes
 

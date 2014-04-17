@@ -225,7 +225,7 @@ public:
      */
     void equalizeSystematicsIdxs(container1D &rhs);
 
-    TString coutBinContent(size_t bin) const;
+    TString coutBinContent(size_t bin,const TString & unit="") const;
 
     plotTag plottag;
 

@@ -14,6 +14,8 @@
 #include "TGraphAsymmErrors.h"
 #include "TVirtualFitter.h"
 #include "TFitResult.h"
+#include <cmath>
+#include <algorithm>
 
 namespace ztop{
 
@@ -62,6 +64,11 @@ graph parameterExtractor::createLikelihood(size_t idx){
         return createChi2SwappedLikelihood(agraphs_.at(idx),bgraphs_.at(idx));
     }
     else if(LHMode_==lh_fit){
+        graph out=createIntersectionLikelihood(agraphs_.at(idx),bgraphs_.at(idx),fittedgraphsa_.at(idx),fittedgraphsb_.at(idx));
+
+        return out;
+    }
+    else if(LHMode_==lh_fitintersect){
         graph out=createIntersectionLikelihood(agraphs_.at(idx),bgraphs_.at(idx),fittedgraphsa_.at(idx),fittedgraphsb_.at(idx));
 
         return out;
@@ -261,8 +268,8 @@ graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const gr
     //mean y should be around 0
     meanya=0;
     meanyb=0;
-    xmin=std::min(a.getXMin()*(1.05),b.getXMin()*(1.05));
-    xmax=std::max(a.getXMax()*(1.05),b.getXMax()*(1.05));
+    xmin=std::min(a.getXMin()*(1.15),b.getXMin()*(1.15));
+    xmax=std::max(a.getXMax()*(1.15),b.getXMax()*(1.15));
 
 
 
@@ -300,9 +307,12 @@ graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const gr
 
 
     //xpoints.at(0)=xmin;
+
+    std::vector<float> scancurvea(nxpoints);
+    std::vector<float> scancurveb(nxpoints);
+
     for(size_t i=0;i<xpoints.size();i++){
         xpoints.at(i)=xmin+ ((double)i)*interval;
-        //  std::cout << xpoints.at(i) <<std::endl;
     }
 
     std::cout << "GetConfidenceIntervals" <<std::endl; //DEBUG
@@ -317,14 +327,44 @@ graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const gr
 
     graph fita(nxpoints);
     graph fitb(nxpoints);
+    graph multiplied(nxpoints);
+    //start of new implementation
 
+    //dont get too nummerical, because:
+    //int_-inf^inf ( normgaus(x,mu1,s1) * normgaus(x,mu2,s2) ) = normgaus(mu1,mu2,s1+s2)
+
+    float maxconfa=*std::max_element(confintva.begin(),confintva.end());
+    float maxconfb=*std::max_element(confintvb.begin(),confintvb.end());
+    float integralwidth2=maxconfa*maxconfa+maxconfb*maxconfb;
+
+    // evaluate for each scan point
+    if(LHMode_ == lh_fit){
+        for(size_t i=0;i<xpoints.size();i++){
+            float aval=tmpfa_->EvalPar(&xpoints.at(i),0);
+            float bval=tmpfb_->EvalPar(&xpoints.at(i),0);
+
+            //for drawing
+            confintva.at(i)=maxconfa;
+            confintvb.at(i)=maxconfb;
+            float widtha=confintva.at(i);
+            float widthb=confintvb.at(i);
+            //  float integral=lnNormedGaus(aval,widtha*widtha+widthb*widthb,bval);//);
+
+            float integral=lnNormedGaus(aval,integralwidth2,bval);//);
+
+            multiplied.setPointContents(i,true,xpoints.at(i),integral);
+
+        }
+    }
+
+    ///start of old implementation
 
     float xleft=-1,xright=-1;
     bool setleft=false,setcentral=false,setright=false;
     //  float tempmin=-1000;
 
     std::vector<float> centralpoints;
-    //FIXME
+
     float olddiff=0;
     //always loop from small to high x
     std::cout << "Eval intersections" <<std::endl; //DEBUG
@@ -438,18 +478,33 @@ graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const gr
     fitteda.shiftAllYCoordinates(yshift);
     fittedb.shiftAllYCoordinates(yshift);
 
+    multiplied.shiftAllXCoordinates(xshift);
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////// SHIFTED COORDINATES ///////////////////////////////////////////
     //////////////////////////////////////////////////////   END  //////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-    return output;
+    if(LHMode_==lh_fit)
+        return multiplied;
+    else
+        return output;
 
 
 
 }
+
+double parameterExtractor::lnNormedGaus(const float & centre, const float& widthsquared, const float& evalpoint,const float& extnorm)const{
+    if(extnorm!=0){
+        return (log(1/extnorm) + (-((long double)(evalpoint-centre)*(long double)(evalpoint-centre))/((long double)(2*widthsquared))));
+    }
+    else{//calculate on the fly in max precision
+        return (log(1/sqrt(2*(3.14159265358979323846)*widthsquared)) + (-((long double)(evalpoint-centre))*((long double)(evalpoint-centre))/((long double)(2*widthsquared))));
+    }
+
+
+}
+
+
 
 
 }//namespace

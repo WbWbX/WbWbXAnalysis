@@ -84,8 +84,8 @@ size_t graph::addPoint(const float& x, const float & y,const TString & pointname
     return oldsize;
 }
 
-void graph::setPointContents(const size_t & point, bool nomstat, const float & xcont, const float & ycont, const int & syslayer){
-    if(nomstat){
+void graph::setPointContents(const size_t & point, bool contentorstat, const float & xcont, const float & ycont, const int & syslayer){
+    if(contentorstat){
         getPointX(point,syslayer).setContent(xcont);
         getPointY(point,syslayer).setContent(ycont);
     }
@@ -521,8 +521,8 @@ float graph::getPointYError(const size_t & point, bool onlystat,const TString &l
  * symmetrize to maximum
  */
 float graph::getPointXError(const size_t & point, bool onlystat,const TString &limittosys)const{
-    float up=getPointXErrorUp(point,  onlystat,limittosys);
-    float down=getPointXErrorDown(point,  onlystat,limittosys);
+    float up=fabs(getPointXErrorUp(point,  onlystat,limittosys));
+    float down=fabs(getPointXErrorDown(point,  onlystat,limittosys));
     if(up>down) return up;
     else return down;
 }
@@ -646,13 +646,13 @@ float graph::getDominantVariation( TString  sysname, const size_t& bin, bool yva
 
     if(getup){
         if(up < 0 && down < 0) return 0;
-        if(up > down) return up;
+        if(up >= down) return up;
         if(down > up) return down;
         else return 0; //never reached only for docu purposes
     }
     else{
         if(up > 0 && down > 0) return 0;
-        else if(up < down) return up;
+        else if(up <= down) return up;
         else if(down < up) return down;
         else return 0; //never reached only for docu purposes
     }

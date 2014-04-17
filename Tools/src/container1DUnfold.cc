@@ -579,7 +579,7 @@ TH2D * container1DUnfold::prepareRespMatrix(bool nominal,unsigned int systNumber
 
 
 
-TString container1DUnfold::coutUnfoldedBinContent(size_t bin) const{
+TString container1DUnfold::coutUnfoldedBinContent(size_t bin,const TString& units) const{
     if(!isBinByBin()){
         std::cout << "container1DUnfold::coutUnfoldedBinContent: only implemented for bin-by-bin unfolded distributions so far, doing nothing" <<std::endl;
         return "";
@@ -594,11 +594,11 @@ TString container1DUnfold::coutUnfoldedBinContent(size_t bin) const{
     container1D treco=getRecoContainer();
     bool temp=histoContent::divideStatCorrelated;
     histoContent::divideStatCorrelated=false;
-    out+=(getBackground()/treco).coutBinContent(bin);
+    out+=(getBackground()/treco).coutBinContent(bin,units);
     histoContent::divideStatCorrelated=temp;
     std::cout << "unfolded: " <<std::endl;
     out+="unfolded: \n";
-    out+=getUnfolded().coutBinContent(bin);
+    out+=getUnfolded().coutBinContent(bin,units);
     return out;
 }
 

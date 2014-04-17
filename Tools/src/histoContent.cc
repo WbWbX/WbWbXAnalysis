@@ -5,6 +5,7 @@
  *      Author: kiesej
  */
 #include "../interface/histoContent.h"
+#include <algorithm>
 #include <omp.h>
 
 namespace ztop{
@@ -376,6 +377,22 @@ void histoContent::cout() const{
 			std::cout << "bin " <<i << ": " << getBin(i,layer).getContent() << " pm " << getBin(i,layer).getStat()  << std::endl;
 		}
 	}
+}
+
+std::vector<TString> histoContent::getVariations()const{
+    std::vector<TString> out;
+    TString upv="_up";
+    TString dnv="_down";
+    for(size_t layer=0;layer<layermap_.size();layer++){
+         TString  layername=layermap_.getData(layer);
+         if(layername.EndsWith(upv))
+             layername.Replace(layername.Length()-upv.Length(),upv.Length(),"");
+         else if(layername.EndsWith(dnv))
+             layername.Replace(layername.Length()-dnv.Length(),dnv.Length(),"");
+        if(std::find(out.begin(),out.end(),layername) == out.end())//new one
+            out.push_back(layername);
+    }
+    return out;
 }
 
 /////////////////////////////////////////////

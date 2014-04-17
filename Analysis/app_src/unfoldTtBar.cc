@@ -7,7 +7,7 @@
 
 #include "../interface/TtBarUnfolder.h"
 #include "TtZAnalysis/Tools/interface/optParser.h"
-
+#include "TString.h"
 
 /**
  * input: files with fully merged systematics (as you like), not necessarily Canvases
@@ -28,14 +28,27 @@ int main(int argc, char* argv[]){
         std::cout << "specify at leaste one input file" <<std::endl;
         parse.coutHelp();
     }
-
+    TString outputstring;
     for(size_t i=0;i<allin.size();i++){
         TtBarUnfolder unf;
         unf.verbose=moreoutput;
         unf.printpdfs=printpdfs;
-        unf.unfold(out,allin.at(i));
+        unf.setUnits("pb");
+        //get channel
+        unf.addToBeCorrectedPlotID("total step");
+        if(allin.at(i).BeginsWith("emu_")){
+            unf.setBRCorr(0.03284);
+        }
+        else if(allin.at(i).BeginsWith("mumu_")){
+            unf.setBRCorr(0.01668);
+        }
+        else if(allin.at(i).BeginsWith("ee_")){
+            unf.setBRCorr(0.01616);
+        }
+        outputstring+=unf.unfold(out,allin.at(i));
     }
 
+    std::cout << outputstring << std::endl;
 
     return 0;
 }

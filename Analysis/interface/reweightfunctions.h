@@ -13,7 +13,7 @@ namespace ztop{
 
 class reweightfunctions{
 public:
-    reweightfunctions(): syst_(nominal),type_(toppt){}
+    reweightfunctions(): syst_(nominal),type_(toppt),unwcounter_(0),wcounter_(0){}
     ~reweightfunctions(){}
 
     enum functiontype{toppt,flat};
@@ -22,14 +22,24 @@ public:
     void setSystematics(systematics insys){syst_=insys;}
     void setFunction(functiontype func){type_=func;}
 
-    float getWeight(const float&) const;
-    float getWeight(const float&,const float&) const;
+    /**
+     * reweights the input weight.
+     * Example use:
+     * puweight = reWeight(someinputvar, puweight);
+     * Do NOT do:
+     * puweight *= reWeight(someinputvar, 1);
+     * if you intent to use getRenormalization() at some point
+     */
+    float reWeight(const float& var,const float& previousweight) ;
+    float reWeight(const float& var1,const float& var2 ,const float&previousweight) ;
 
+    float getRenormalization()const{if(wcounter_!=0)return unwcounter_/wcounter_; else return 1;}
 
 private:
 
     systematics syst_;
     functiontype type_;
+    float unwcounter_,wcounter_;
 
 };
 

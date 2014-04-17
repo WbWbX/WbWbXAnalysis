@@ -46,6 +46,7 @@ public:
     void setExternalGenInputFilesFormat(const TString& pl);
     void setExternalGenInputPDF(const TString& pl){extfilepdf_=pl;setup_=false;}
     void setInputFiles(const std::vector<TString>& pl);
+    bool getIsExternalGen()const{return isexternalgen_;}
 
     /**
      * style file should incorporate styles for plotterCompare (MC/data dependence)
@@ -171,6 +172,7 @@ private:
 
     TString fitmode_;
     bool dofolding_;
+    bool isexternalgen_;
 
     template<class T>
     T tryToGet(TFile * f,const TString& name)const{

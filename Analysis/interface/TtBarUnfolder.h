@@ -9,14 +9,19 @@
 #define TTBARUNFOLDER_H_
 
 #include "TString.h"
+#include <vector>
 class TCanvas;
 
 namespace ztop{
 
 class TtBarUnfolder{
 public:
-    TtBarUnfolder():verbose(false),printpdfs(false){}
+    TtBarUnfolder():verbose(false),printpdfs(false),brcorr_(-1){}
     ~TtBarUnfolder(){}
+    void setBRCorr(const float& br){brcorr_=br;}
+    void addToBeCorrectedPlotID(const TString & pl){plotids_.push_back(pl);}
+    void clearToBeCorrectedPlotIDs(){plotids_.clear();}
+    void setUnits(const TString & un){units_=un;}
 
     TString unfold(TString out,TString in)const;
 
@@ -25,7 +30,9 @@ public:
 
 private:
     void setNameAndTitle(TCanvas *c, TString name)const;
-
+    float brcorr_;
+    std::vector<TString> plotids_;
+    TString units_;
 };
 
 }
