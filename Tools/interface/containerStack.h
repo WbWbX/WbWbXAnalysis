@@ -154,6 +154,11 @@ public:
 
     container1DUnfold getSignalContainer1DUnfold(const std::vector<TString> &sign=std::vector<TString>()) const;
 
+    /**
+     * Function that just retunrs a formatted string listing all contributions
+     * cout the output to print them
+     */
+    TString listContributions()const;
 
     static std::vector<ztop::containerStack*> cs_list;
     static bool cs_makelist;

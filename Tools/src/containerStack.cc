@@ -1577,6 +1577,16 @@ container1DUnfold containerStack::getSignalContainer1DUnfold(const std::vector<T
     container1DUnfold::c_makelist=mklist;
     return out;
 }
+TString containerStack::listContributions()const{
+    TString out;
+    out+=getName()+" contributions:\n";
+
+    for(size_t i=0;i<legends_.size();i++){
+       out += legends_.at(i)+"\n";
+    }
+    return out;
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
