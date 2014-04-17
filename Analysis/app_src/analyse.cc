@@ -460,9 +460,11 @@ int main(int argc, char* argv[]){
     TString mode   = parse.getOpt<TString>  ("m","xsec","additional mode options");        //-m (xsec,....) default xsec changes legends? to some extend
     TString inputfile= parse.getOpt<TString>  ("i","","specify configuration file input manually");          //-i empty will use automatic
     TString topmass  = parse.getOpt<TString>  ("mt","172.5","top mass value to be used, default: 172.5");          //-i empty will use automatic
-    bool createLH     =parse.getOpt<bool>     ("LH",false,"creates likelihoods to *_discr.root");         //-T enables default false
-    TString discrFile=parse.getOpt<TString>  ("lh","all_discr.root" , "specify discriminator input file (default) all_discr.root");          //-i empty will use automatic
+    TString discrFile=parse.getOpt<TString>  ("lh","" , "specify discriminator input file. If not specified, likelihoods are created");          //-i empty will use automatic
 
+    bool createLH=false;
+    if(discrFile.Length()<1)
+        createLH=true;
 
     parse.doneParsing();
 
