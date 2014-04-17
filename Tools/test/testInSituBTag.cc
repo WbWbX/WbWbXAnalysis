@@ -32,7 +32,6 @@
  * the input file is located in /nfs/dust/cms/user/kiesej/testtemp/emu_8TeV_172.5_nominal_syst.root
  *  you can check control plots etc. by opening this file with root
  *
- *  If you get warnings a'la
 */
 int main(){
 
