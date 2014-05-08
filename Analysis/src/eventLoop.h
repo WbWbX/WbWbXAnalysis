@@ -82,6 +82,11 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
     using namespace std;
     using namespace ztop;
 
+    bool issignal=issignal_.at(anaid);
+
+    bool isMC=true;
+    if(legendname==dataname_) isMC=false;
+
 
     //some mode options
     /* implement here not to overload MainAnalyzer class with private members
@@ -174,14 +179,22 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
     else{
         //adapt wrong MG BR for madspin
         if(inputfile.Contains("ttbar.root") || inputfile.Contains("ttbarviatau.root")
-                || inputfile.Contains("ttbar_mt"+topmass_+ ".root") ||
-                inputfile.Contains("ttbarviatau_mt"+topmass_+ ".root") ){
+                || inputfile.Contains("ttbar_mt") ||
+                inputfile.Contains("ttbarviatau_mt") ){
             normmultiplier=0.1049/0.1111202;
         }
     }
 
     if(mode_.Contains("Notoppt")){
         getTopPtReweighter()->setFunction(reweightfunctions::flat);
+    }
+    bool fakedata=false,isfakedatarun=false;
+    if(mode_.Contains("Fakedata")){
+        if(legendname ==  dataname_)
+            fakedata=true;
+        isfakedatarun=true;
+        isMC=true;
+        std::cout << "THIS IS A FAKE DATA RUN: all samples will be treated (in terms of SF etc.) as MC" << std::endl;
     }
 
 
@@ -190,10 +203,6 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
      */
 
 
-    bool issignal=issignal_.at(anaid);
-
-    bool isMC=true;
-    if(legendname==dataname_) isMC=false;
 
 
 
@@ -275,7 +284,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
     jansplots_step8.bookPlots();
 
     //global settings for analysis plots
-    container1DUnfold::setAllListedMC(isMC);
+    container1DUnfold::setAllListedMC(isMC && !fakedata);
     container1DUnfold::setAllListedLumi((float)lumi_);
     if(testmode_)
         container1DUnfold::setAllListedLumi((float)lumi_*0.08);
@@ -425,7 +434,31 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
     Long64_t nEntries=t->GetEntries();
     if(norm==0) nEntries=0; //skip for norm0
     if(testmode_) nEntries*=0.08;
-    for(Long64_t entry=0;entry<nEntries;entry++){
+    Long64_t firstentry=0;
+    //for fake data all signal samples are assumed to be used as fake data
+    //split at 10%
+    if(isfakedatarun){
+        float splitat=0.9;
+        if(issignal || fakedata){
+            if(issignal){
+                nEntries*=splitat;
+                norm*= 1/splitat;
+            }
+            else if(fakedata){
+                firstentry=nEntries*splitat;
+                norm*=1/(1-splitat);
+            }
+
+            //readapt norm to right mtop value
+
+
+
+        }
+    }
+    float beftopptweights=0,aftertopptweights=0; //this is indeed needed due to sqrt() reweighting
+
+
+    for(Long64_t entry=firstentry;entry<nEntries;entry++){
 
         t->LoadTree(entry);
 
@@ -509,10 +542,10 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
 
                 if(pGenTops->size()>1){ //ttbar sample
-
+                    beftopptweights+=puweight;
                     puweight = sqrt(getTopPtReweighter()->reWeight(pGenTops->at(0).pt(),puweight) *
                             getTopPtReweighter()->reWeight(pGenTops->at(1).pt(),puweight));
-
+                    aftertopptweights+=puweight;
                     gentops.push_back(&pGenTops->at(0));
                     gentops.push_back(&pGenTops->at(0));
                     evt.gentops=&gentops;
@@ -590,11 +623,12 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
                 }
 
             }
-            /*
-             * fill gen info here
-             */
-            jansplots_step8.fillPlotsGen();
-
+            if(!fakedata){
+                /*
+                 * fill gen info here
+                 */
+                jansplots_step8.fillPlotsGen();
+            }
         } /// isMC ends
 
         /////////////////////////////////////////////////////////////
@@ -698,7 +732,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
             if(doLargeAcceptance) gotfirst=true;
             if( elec->pt() < 10) continue;
             float abseta=fabs(elec->eta());
-            if(abseta > 2.5) continue;
+            if(abseta > 2.4) continue;
             kinelectrons  << elec;
 
             ///select id electrons
@@ -890,7 +924,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
             if(!(treejets.at(i)->id())) continue;
             if(!noOverlap(treejets.at(i), isomuons,     0.4)) continue;
             if(!noOverlap(treejets.at(i), isoelectrons, 0.4)) continue;
-            if(fabs(treejets.at(i)->eta())>2.5) continue;
+            if(fabs(treejets.at(i)->eta())>2.4) continue;
             if(treejets.at(i)->pt() < 10) continue;
             idjets << (treejets.at(i));
 
@@ -1244,9 +1278,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
     ///////////////////////////////////////////////////////////////////////
 
     //renorm for topptreweighting
-  //  if(weightsaftertopptrew>0)
-  //      norm*=weightsbeftopptrew/weightsaftertopptrew;
-    norm *= getTopPtReweighter()->getRenormalization();
+      if(aftertopptweights>0)
+          norm*=beftopptweights/aftertopptweights;
+    //norm *= getTopPtReweighter()->getRenormalization();
 
     container1DUnfold::flushAllListed(); // call once again after last event processed
 
