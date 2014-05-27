@@ -113,7 +113,8 @@ NTBTagSF  NTBTagSF::operator + (NTBTagSF  second){
         for(sampleit2=second.histos_.begin();sampleit2!=second.histos_.end();++sampleit2){
             std::string samplename2=sampleit2->first;
             if(samplename1 == samplename2){
-                std::cout << "NTBTagSF::operator +: adding efficiencies with same samplename not supported! \ncheck unique naming\nwill just use old one" << std::endl;
+                std::cout << "NTBTagSF::operator +: adding efficiencies with same samplename not supported! \ncheck unique naming\nwill just use old one"
+                        << " "<<samplename2 << std::endl;
                 return *this;
             }
         }
