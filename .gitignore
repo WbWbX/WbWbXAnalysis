@@ -5,6 +5,10 @@ __init__.py
 __init__.pyc
 *__GI
 
+# Analysis/bin/ #
+#################
+#Analysis/bin/*
+
 
 # ROOT #
 ########
