@@ -48,6 +48,7 @@ public:
     size_t getNPoints()const{return xcoords_.size();}
 
     size_t addPoint(const float& x, const float & y,const TString & pointname="");//returns point index
+    size_t  addPoint(const float& x, const float & y, const float & ystaterr,const TString & pointname="");//returns point index
 
     void setPointContents(const size_t & point, bool nomstat, const float & xcont, const float & ycont, const int & syslayer=-1);
     void setPointXContent(const size_t & point, const float & xcont, const int & syslayer=-1);

@@ -12,6 +12,7 @@
 #include "TLegend.h"
 #include "TStyle.h"
 #include "TH1.h"
+#include "../interface/fileReader.h"
 
 
 namespace ztop{
@@ -44,24 +45,53 @@ void plotterMultiplePlots::readStyleFromFile(const std::string& infile){
     pstyle_.readFromFile(infile,"MultiPlots",true);
     defaults.readFromFile(infile,"Default",true);
 
+    fileReader fr;
+    fr.setDelimiter(",");
+    fr.setComment("$");
+    bool prevdrawleg=drawlegend_;
+    fr.setRequireValues(false);
+    fr.readFile(infile);
+    drawlegend_ = fr.getValue<bool>("drawLegend", prevdrawleg);
 
-    for(size_t i=0;true;i++){ //read until nothing found anymore (exception thrown) - should be done differently..
+    //count number of available containerStyles
+    size_t ncstyles=0;
+    for(size_t i=0;i<fr.nLines();i++){
+        for(size_t no=0;no<fr.nLines();no++){
+            if(fr.getData<TString>(i,0) == "[containerStyle - " + toTString(no) +"]"){
+                ncstyles++;
+                break;
+            }
+        }
+    }
+
+    for(size_t i=0;i<ncstyles;i++){ //read until nothing found anymore (exception thrown) - should be done differently..
         containerStyle temp=defaults;
         std::string add=toString(i);
         if(debug) std::cout << "plotterMultiplePlots::readStyleFromFile: reading " << add <<std::endl;
-        try{
-            temp.readFromFile(infile,add,false);
-        }catch(std::runtime_error &e){
+        // try{
+        temp.readFromFile(infile,add,false);
+        /*    }catch(std::runtime_error &e){
             if(debug) std::cout << "plotterMultiplePlots::readStyleFromFile: read "
                     << i<< " styles" <<std::endl;
             break;
-        }
+        } */
         cstyles_.push_back(temp);
     }
 
     textboxes_.readFromFile(infile,"boxes");
 
+
+
 }
+
+
+void plotterMultiplePlots::clear(){
+    plots_.clear();
+    cleanMem();
+
+
+}
+
 void plotterMultiplePlots::preparePad(){
     if(debug) std::cout <<"plotterMultiplePlots::preparePad" << std::endl;
     cleanMem();
@@ -114,6 +144,7 @@ void plotterMultiplePlots::drawPlots(){
 
 }
 void plotterMultiplePlots::drawLegends(){
+    if(!drawlegend_)  return;
     TLegend *leg = addObject(new TLegend((Double_t)0.65,(Double_t)0.50,(Double_t)0.95,(Double_t)0.90));
     leg->Clear();
     leg->SetFillStyle(0);

@@ -18,7 +18,7 @@
     
     $same for ratio plot and control plot
     
-    markerSize   = 1
+    markerSize   = 0
     markerStyle  = 20
     markerColor  = 1
  
@@ -115,6 +115,14 @@
  
  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  $$$$$ from now on only define differences wrt to defaults
+ 
+ [containerStyle - CompareUpper_mt172.5]  
+ 
+ [end containerStyle]
+ 
+ [containerStyle - CompareRatio_mt172.5]
+ 
+ [end containerStyle]
  
  [containerStyle - CompareUpper_mt173.5]  
  
@@ -279,6 +287,6 @@
     yaxis.max         = 1.5
     yaxis.min         = 0.5
     yaxis.log         = false
-    yaxis.name        = #frac{exp}{obs}
+    yaxis.name        = #frac{#sigma(m_{t})}{#sigma(172.5 GeV)}
     
 [end plotStyle]

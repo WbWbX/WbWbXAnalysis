@@ -36,7 +36,7 @@ public:
     container1D(const container1D&);
     container1D& operator=(const container1D&);
 
-    bool isDummy()const{return bins_.size()<2;}
+    bool isDummy()const{return bins_.size()<=2;}
 
     const TString & getName()const{return name_;}
     void setName(TString Name){name_=Name;}
@@ -114,12 +114,20 @@ public:
     float getYMax(bool dividebybinwidth ,const int& systLayer=-1) const;
     float getYMin(bool dividebybinwidth, const int& systLayer=-1) const;
 
-    float normalize(bool includeUFOF=true, const float &normto=1);
+    float normalize(bool includeUFOF=true, bool normsyst=false, const float &normto=1);
     void normalizeToContainer(const container1D & ); /////////
 
+    /**
+     * sets all bin contents to zero; clears all systematic uncertainties
+     * resets also binning, keeps name and axis names
+     */
+    void reset();
 
-    void reset();    //! resets all uncertainties and binning, keeps names and axis
-    void clear();    //! sets all bin contents to zero; clears all systematic uncertainties
+    /**
+     * sets all bin contents to zero; clears all systematic uncertainties
+     * keeps binning
+     */
+    void clear();
 
     void setLabelSize(float size){labelmultiplier_=size;}       //! 1 for default
     TH1D * getTH1D(TString name="", bool dividebybinwidth=true, bool onlystat=false, bool nostat=false) const; //! returns a TH1D pointer with symmetrized errors (TString name); small bug with content(bin)=0 and error(bin)=0
@@ -225,6 +233,8 @@ public:
      */
     void equalizeSystematicsIdxs(container1D &rhs);
 
+    std::vector<TString> getSystNameList()const{return contents_.getVariations();}
+
     TString coutBinContent(size_t bin,const TString & unit="") const;
 
     plotTag plottag;
@@ -236,7 +246,7 @@ public:
      * if variation doesn't hold a value, +-1 is assumed
      */
 
-    container1D getDependenceOnSystematicC(const size_t& bin,const TString & sys)const;
+    //deprec: container1D getDependenceOnSystematicC(const size_t& bin,const TString & sys)const;
     ztop::graph getDependenceOnSystematic(const size_t& bin, TString  sys,float offset=0,TString replacename="")const;
 
 

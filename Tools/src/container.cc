@@ -221,7 +221,7 @@ float container1D::getBinWidth(const size_t &bin) const{
         std::cout << "container1D::getBinWidth: ("<< name_ <<") bin not existent!" << std::endl;
     }
     else{
-        width=fabs(bins_[bin+1]-bins_[bin]);
+        width=fabs(bins_.at(bin+1)-bins_.at(bin));
     }
     return width;
 }
@@ -641,12 +641,25 @@ float container1D::getYMin(bool dividebybinwidth,const int& systLayer) const{
 }
 
 /**
- * normalizes container and returns normalization factor (to reverse normalization)
+ * normalizes container and returns normalization factor of nominal
  */
-float container1D::normalize(bool includeUFOF,const float& normto){
-    float norm=normto/integral(includeUFOF);
-    *this *= norm;
-    return norm;
+float container1D::normalize(bool includeUFOF, bool normsyst, const float& normto){
+    if(!normsyst){
+        float norm=normto/integral(includeUFOF);
+        *this *= norm;
+        return norm;
+    }
+    else{
+        //nominal
+        float outnorm=normto / integral(includeUFOF);
+        contents_.getNominal().multiply(outnorm);
+
+        for(size_t layer=0;layer<getSystSize();layer++){
+            float tmpnorm=normto / integral(includeUFOF,layer);
+            contents_.getLayer(layer).multiply(tmpnorm);
+        }
+        return outnorm;
+    }
 }
 /**
  * normalize to container (bin-by-bin)
@@ -1178,6 +1191,9 @@ void container1D::addRelSystematicsFrom(const ztop::container1D & rhs){
             if(debug) std::cout << "container1D::addRelSystematicsFrom: adding new syst "<< relerr.getSystErrorName(i)<< " to container " <<name_ <<std::endl;
             contents_.getLayer(newlayerit).multiply(relerr.contents_.getLayer(i),false);
         }
+        else{
+            if(debug) std::cout << "container1D::addRelSystematicsFrom: syst "<< relerr.getSystErrorName(i)<< " already existing in " <<name_ <<std::endl;
+        }
     }
 
 }
@@ -1187,6 +1203,7 @@ void container1D::addGlobalRelErrorUp(const TString & sysname,const float &reler
         std::cout << "container1D::addGlobalRelErrorUp: name of syst. must not be named <>_up or <>_down! this is done automatically! doing nothing" << std::endl;
         return;
     }
+
     addErrorContainer(sysname+"_up", ((*this) * (relerr+1)));
 }
 void container1D::addGlobalRelErrorDown(const TString & sysname,const float &relerr){
@@ -1197,6 +1214,7 @@ void container1D::addGlobalRelErrorDown(const TString & sysname,const float &rel
     addErrorContainer(sysname+"_down", ((*this) * (1-relerr)));
 }
 void container1D::addGlobalRelError(const TString & sysname,const float &relerr){
+    if(debug) std::cout << "container1D::addGlobalRelError: " << sysname <<std::endl;
     addGlobalRelErrorUp(sysname,relerr);
     addGlobalRelErrorDown(sysname,relerr);
 }
@@ -1424,16 +1442,7 @@ TString container1D::coutBinContent(size_t bin,const TString& unit) const{
      */
 }
 
-/**
- * for bin
- * sys has to be formatted <name> without up or down or (if existent) value
- * fills in values divided by binwidth!!!!
- * superseeded!
- */
-container1D container1D::getDependenceOnSystematicC(const size_t & bin,const TString & sys) const{
 
-    return container1D();
-}
 
 /**
  * for bin

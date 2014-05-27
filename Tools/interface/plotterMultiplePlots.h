@@ -21,7 +21,7 @@ namespace ztop{
  */
 class plotterMultiplePlots : public plotterBase{
 public:
-    plotterMultiplePlots():plotterBase(){}
+    plotterMultiplePlots():plotterBase(),drawlegend_(true){}
 
     void addPlot(const graph *c);
     void addPlot(const container1D *c,bool divbw=true);
@@ -42,11 +42,17 @@ public:
      */
     void readStyleFromFile(const std::string&);
 
+    /**
+     * cleans mem and deletes plots.
+     * Doesn't change styles
+     */
+    void clear();
 
 private:
     plotStyle pstyle_;
     std::vector<containerStyle> cstyles_;
     std::vector<plot> plots_;
+    bool drawlegend_;
 
     void preparePad();
     void drawPlots();

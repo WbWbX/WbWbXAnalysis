@@ -333,9 +333,33 @@ graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const gr
     //dont get too nummerical, because:
     //int_-inf^inf ( normgaus(x,mu1,s1) * normgaus(x,mu2,s2) ) = normgaus(mu1,mu2,s1+s2)
 
-    float maxconfa=*std::max_element(confintva.begin(),confintva.end());
+  /*  float maxconfa=*std::max_element(confintva.begin(),confintva.end());
     float maxconfb=*std::max_element(confintvb.begin(),confintvb.end());
     float integralwidth2=maxconfa*maxconfa+maxconfb*maxconfb;
+*/
+
+    //get average stat uncertainty
+    float minstata=10000;
+    float minstatb=10000;
+    if(fituncmodea_ == fitunc_statcorr){
+        for(size_t i=0;i<aIn.getNPoints();i++){
+            float tmpmin=aIn.getPointYStat(i);///aIn.getPointYContent(i);
+            if(minstata > tmpmin){
+                minstata=tmpmin;
+            }
+        }
+    }
+    if(fituncmodeb_ == fitunc_statcorr){
+        for(size_t i=0;i<bIn.getNPoints();i++){
+            float tmpmin=bIn.getPointYStat(i);///bIn.getPointYContent(i);
+            if(minstatb > tmpmin){
+                minstatb=tmpmin;
+            }
+        }
+    }
+   // minstatb*=minstatcontentb; //avoid bias towards low values
+   // minstata*=minstatcontenta;
+
 
     // evaluate for each scan point
     if(LHMode_ == lh_fit){
@@ -344,31 +368,30 @@ graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const gr
             float bval=tmpfb_->EvalPar(&xpoints.at(i),0);
 
             //for drawing
-            confintva.at(i)=maxconfa;
-            confintvb.at(i)=maxconfb;
+            if(fituncmodea_ == fitunc_statcorr){
+                confintva.at(i)=minstata;
+            }
+            if(fituncmodeb_ == fitunc_statcorr){
+                confintvb.at(i)=minstatb;
+            }
             float widtha=confintva.at(i);
             float widthb=confintvb.at(i);
+
             //  float integral=lnNormedGaus(aval,widtha*widtha+widthb*widthb,bval);//);
 
-            float integral=lnNormedGaus(aval,integralwidth2,bval);//);
+            float integral=lnNormedGaus(aval,widtha*widtha+widthb*widthb,bval);//);
+
+            integral*=-2; //chi2 definition log(L) -> -2*log(L)
 
             multiplied.setPointContents(i,true,xpoints.at(i),integral);
 
         }
     }
 
-    ///start of old implementation
 
-    float xleft=-1,xright=-1;
-    bool setleft=false,setcentral=false,setright=false;
     //  float tempmin=-1000;
 
     std::vector<float> centralpoints;
-
-    float olddiff=0;
-    //always loop from small to high x
-    std::cout << "Eval intersections" <<std::endl; //DEBUG
-    olddiff=tmpfa_->EvalPar(&xpoints.at(0),0)-tmpfb_->EvalPar(&xpoints.at(0),0);
 
     for(size_t it=0;it<xpoints.size();it++){
         float aval=tmpfa_->EvalPar(&xpoints.at(it),0);
@@ -377,42 +400,18 @@ graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const gr
         fita.setPointYStat(it,confintva.at(it));
         fitb.setPointContents(it,true,xpoints.at(it),bval);
         fitb.setPointYStat(it,confintvb.at(it));
-
-        float diff=aval-bval;
-
-        if(olddiff*diff<0){ //sign change -> intersection
-            centralpoints.push_back(xpoints.at(it));
-            olddiff=diff;
-            setcentral=true;
-        }
-
-        float envdiff;
-        if(aval>bval)
-            envdiff=(aval-confintva.at(it)) - (bval+confintvb.at(it));
-        else
-            envdiff=(bval-confintvb.at(it)) - (aval+confintva.at(it));
-
-        if(setleft && !setcentral && envdiff > 0) //the first was just a scratch and both fits increased their distance again
-            setleft=false;
-
-        if(!setleft && envdiff < 0){//env touch first time
-            xleft=xpoints.at(it);
-            setleft=true;
-        }
-        else if(setcentral && setleft && envdiff<0){//env touch another time (or last time)
-            xright=xpoints.at(it);
-            setright=true;
-        }
-
     }
 
     //reduce number in representation graphs if granularity is high
-    if(granularity_ < 50){
+
+    float maxgran=20;
+
+    if(granularity_ < maxgran){
         fitteda=(fita);
         fittedb=(fitb);
     }
     else{
-        size_t granscaler=(float)granularity_/50;
+        size_t granscaler=(float)granularity_/maxgran;
         size_t indexer=0,newsize=0;;
 
         for(size_t oldpoint=0;oldpoint<fita.getNPoints();oldpoint++){
@@ -439,7 +438,7 @@ graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const gr
             }
         }
     }
-
+/*
     //get mean central value
     float meancentral=(xmax-xmin)/2+xmin;
     if(setleft&&setright&&setcentral){
@@ -453,6 +452,7 @@ graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const gr
         xleft = meancentral - fabs(xmax-xmin)*100;
         xright= meancentral + fabs(xmax-xmin)*100;
     }
+
 
     graph output(1); //one point output graph
     output.setPointXContent(0,meancentral);
@@ -471,7 +471,7 @@ graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const gr
 
     //shift back
     output.shiftAllXCoordinates(xshift);
-
+*/
     fitteda.shiftAllXCoordinates(xshift);
     fittedb.shiftAllXCoordinates(xshift);
 
@@ -484,10 +484,9 @@ graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const gr
     //////////////////////////////////////////////// SHIFTED COORDINATES ///////////////////////////////////////////
     //////////////////////////////////////////////////////   END  //////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    if(LHMode_==lh_fit)
+
         return multiplied;
-    else
-        return output;
+
 
 
 

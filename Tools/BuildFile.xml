@@ -12,4 +12,5 @@
 <export>
   <lib   name="1"/>
 </export>
+<lib name="Minuit"/>
 <Flags CXXFLAGS="-lunfold -fopenmp"/>

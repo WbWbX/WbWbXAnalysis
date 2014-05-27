@@ -1,7 +1,7 @@
 [textBoxes - boxes]
   $ 0.25,   0.95,   DEFTITLE,            0.05
   $ 0.5,   0.95,   some text for box,   0.05
-   0.78,   0.95,   L=19.8 fb^{-1},   0.04
+  $ 0.78,   0.95,   L=19.8 fb^{-1},   0.04
 [end textBoxes]
  
  
@@ -25,8 +25,8 @@
     xaxis.labelOffset = 0.005
     xaxis.tickLength  = 0.03
     xaxis.ndiv        = 510
-    xaxis.max         = 20
-    xaxis.min         = 5
+    xaxis.max         = -1
+    xaxis.min         = 0
     xaxis.log         = false
     xaxis.name        = USEDEF
     
@@ -37,8 +37,8 @@
     yaxis.labelOffset = 0.005
     yaxis.tickLength  = 0.03
     yaxis.ndiv        = 510
-    yaxis.max         = 15000
-    yaxis.min         = -1000 $use this one
+    yaxis.max         = -1
+    yaxis.min         = 0 
     yaxis.log         = false
     yaxis.name        = USEDEF
     
@@ -49,7 +49,7 @@
  
 [containerStyle - Default]
  
-    markerSize   = 0
+    markerSize   = 1
     markerStyle  = 26
     markerColor  = 632
  

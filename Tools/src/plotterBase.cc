@@ -75,7 +75,7 @@ float plotterBase::getSubPadYScale(int idx){
 void plotterBase::drawTextBoxes(){
     if(debug) std::cout << "plotterBase::drawTextBoxes: " << textboxes_.size() << std::endl;
 
-        getPad()->cd(0);
+        getPad()->cd();
 
     TLatex * tb=0;
 

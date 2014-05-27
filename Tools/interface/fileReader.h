@@ -15,26 +15,31 @@
 #include "TString.h"
 #include <stdexcept>
 #include <iostream>
+#include "../interface/textFormatter.h"
 
 namespace ztop{
 
-class fileReader{
+class fileReader : public textFormatter{
 public:
-    fileReader():trim_(" \t"),comment_("#"),delimiter_(","),start_(""),end_(""),blindmode_(false),requirevalues_(true){}
+    fileReader(): textFormatter(), /*trim_(" \t"),comment_("#"),delimiter_(",") ,*/start_(""),end_(""),blindmode_(false),requirevalues_(true){}
     ~fileReader(){clear();}
+    /*
     void setTrim(const std::string& tr){trim_=tr;}
     void setComment(const std::string& c){comment_=c;}
     void setDelimiter(const std::string& d){delimiter_=d;}
+     */
     void setStartMarker(const std::string& d){start_=d;}
     void setEndMarker(const std::string& d){end_=d;}
 
     void setBlindMode(bool blind){blindmode_=blind;}
     void setRequireValues(bool req) {requirevalues_=req;}
 
+    /*
     std::string & ltrim(std::string & str) const;
     std::string & rtrim(std::string & str) const;
     std::string & trim(std::string & str) const;
     std::string & trimcomments(std::string & str) const;
+     */
 
     void readFile(const std::string& filename);
     bool isEmpty()const{return lines_.size()<1;}
@@ -83,11 +88,16 @@ public:
     static bool debug;
 
 private:
-    std::string trim_,comment_,delimiter_,start_,end_;
+    std::string /*trim_,comment_,delimiter_,*/start_,end_;
     std::vector<std::vector<std::string> > lines_;
     bool blindmode_;
     bool requirevalues_;
     std::string tempinfilename_;
+
+
+//make inherited private
+    std::vector<std::string> getFormatted(const std::string& in)const{return std::vector<std::string>();}
+
 };
 
 

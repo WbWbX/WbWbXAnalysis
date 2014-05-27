@@ -27,8 +27,10 @@ public:
 
     enum likelihoodModes{lh_chi2,lh_chi2Swapped,lh_fit,lh_fitintersect};
 
+    enum fituncertaintyModes{fitunc_statcorr, fitunc_statuncorr};
 
-    parameterExtractor(): LHMode_(lh_chi2),tmpfa_(0),tmpfb_(0),granularity_(300),clfit_(0.68){}
+
+    parameterExtractor(): LHMode_(lh_chi2),tmpfa_(0),tmpfb_(0),granularity_(300),clfit_(0.68),fituncmodea_(fitunc_statuncorr),fituncmodeb_(fitunc_statuncorr){}
     ~parameterExtractor(){}//FIXME}
 
     // defaults should suffice
@@ -44,6 +46,10 @@ public:
 
     void setInputA(const graph &g){agraphs_.clear();agraphs_.push_back(g);} //for one bin (just internally clears and pushes back)
     void setInputB(const graph &g){bgraphs_.clear();bgraphs_.push_back(g);}
+
+
+    void setFitUncertaintyModeA(fituncertaintyModes uncmode){fituncmodea_=uncmode;}
+    void setFitUncertaintyModeB(fituncertaintyModes uncmode){fituncmodeb_=uncmode;}
 
 
     bool checkSizes();
@@ -128,6 +134,8 @@ private:
     size_t granularity_;
     float clfit_;
     //std::vector<>
+
+    fituncertaintyModes fituncmodea_,fituncmodeb_;
 
     double findintersect(TF1* a, TF1* b,float min, float max);
 

@@ -12,6 +12,7 @@ bool ztop::container1D::debug =false;
 namespace ztop{
 
 
+
 std::vector<containerStackVector*> containerStackVector::csv_list;
 bool containerStackVector::csv_makelist=false;
 bool containerStackVector::debug=false;
@@ -258,16 +259,17 @@ void containerStackVector::multiplyNorm(TString legendname, double multi, TStrin
 }
 
 void containerStackVector::multiplyNorms(TString legendname, std::vector<double> scalefactors, std::vector<TString> identifier,bool showmessages){
-    if(! (identifier.size() == scalefactors.size())){
+    if((identifier.size() != scalefactors.size())){
         std::cout << "containerStackVector::multiplyNorms: identifiers and scalefactors must be same size!" << std::endl;
     }
     else{
         unsigned int count=0;
         for(std::vector<containerStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
             for(unsigned int i=0;i<scalefactors.size();i++){
-                if(stack->getName().Contains(identifier[i])){
-                    stack->multiplyNorm(legendname, scalefactors[i]);
-                    if(showmessages) std::cout << "rescaling " << stack->getName() << "  " <<legendname << " by " << scalefactors[i] << " for " << std::endl;
+                if(stack->getName().EndsWith(identifier.at(i))){
+                    if(showmessages) std::cout << "rescaling " << stack->getName() << "  " <<legendname << " by " << scalefactors[i] << std::endl;
+                    stack->multiplyNorm(legendname, scalefactors.at(i));
+                    if(showmessages) std::cout << "rescaling done" << std::endl;
                     count++;
                 }
             }
@@ -474,6 +476,83 @@ void containerStackVector::writeAllToTFile(TString filename, bool recreate, bool
                         delete c;
                     }
                     pl.cleanMem();
+                    d->cd();
+                }
+                else if(stack->is2D()){
+                    //make extra 2D directory
+                    TDirectory * dir2d=0;
+                    std::string dir2dname="2D_plots";
+                    size_t dir2didx=dirs.getIndex(dir2dname);
+                    if(dir2didx >= dirs.size()){
+                        dir2d=d->mkdir(dir2dname.data(),dir2dname.data());
+                        dirpv.push_back(dir2d);
+                        dirs.push_back(dir2dname);
+                    }
+                    dir2d=dirpv.at(dir2didx);
+
+                    //everything here is pretty bad style
+                    std::string dirname=stack->getName().Data();
+
+                    fr.trimcomments(dirname);
+
+                    std::string stepname((std::string)stack->getName(),dirname.length());
+
+                    size_t diridx=dirs.getIndex(dirname);
+                    TDirectory * tdir=0;
+                    if(diridx>=dirs.size()){ //new dir
+                        tdir=dir2d->mkdir(dirname.data(),dirname.data());
+                        dirpv.push_back(tdir);
+                        dirs.push_back(dirname);
+                    }
+                    //d->mkdir(); //cd dir with idx
+                    tdir=dirpv.at(diridx);
+                    tdir->cd();
+                    fr.trim(stepname);
+
+                    TDirectory * stdir=tdir->mkdir(stepname.data(),stepname.data());
+                    stdir->cd();
+
+                    for(size_t plot=0;plot<stack->size();plot++){
+
+                        ///replace with proper plotting tool at some point
+                        container2D  c2d= stack->getContainer2D(plot);
+
+                        TH2D * th2d=c2d.getTH2D(stack->getLegend(plot),true,true);
+                        if(th2d){
+
+                            TString canvasname=stack->getLegend(plot);
+                            canvasname+=+"_"+stack->getName();
+                            TCanvas *  c= new TCanvas(canvasname);
+                            th2d->Draw("colz");
+                            c->Write(canvasname);
+
+                            delete c;
+                            delete th2d;
+                        }
+                    }
+
+                    //in addition for signal and BG summed
+                    container2D  c2d= stack->getSignalContainer2D();
+                    TH2D * th2d=c2d.getTH2D("signal",true,true);
+                    if(th2d){
+                        TCanvas *  c= new TCanvas("signal_"+stack->getName());
+                        th2d->Draw("colz");
+                        c->Write("signal_"+stack->getName());
+
+                        delete c;
+                        delete th2d;
+                    }
+                    c2d= stack->getBackgroundContainer2D();
+                    th2d=c2d.getTH2D("background",true,true);
+                    if(th2d){
+                        TCanvas *  c= new TCanvas("background_"+stack->getName());
+                        th2d->Draw("colz");
+                        c->Write("background_"+stack->getName());
+
+                        delete c;
+                        delete th2d;
+                    }
+
                     d->cd();
                 }
             }

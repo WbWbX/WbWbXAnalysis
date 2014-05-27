@@ -83,6 +83,11 @@ size_t graph::addPoint(const float& x, const float & y,const TString & pointname
 
     return oldsize;
 }
+size_t  graph::addPoint(const float& x, const float & y, const float & ystaterr,const TString & pointname){
+    size_t idx=addPoint(x,y,pointname);
+    setPointYStat(idx,ystaterr);
+    return idx;
+}
 
 void graph::setPointContents(const size_t & point, bool contentorstat, const float & xcont, const float & ycont, const int & syslayer){
     if(contentorstat){

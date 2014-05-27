@@ -19,60 +19,6 @@ bool fileReader::debug=false;
 
 
 
-/**
- * cuts on right side of the string
- * example:
- * 	   setTrim(#)
- * 	   string="#######this is a string####"
- * 	   rtrim(string)
- *     now: string="#######this is a string"
- */
-std::string & fileReader::rtrim(std::string & str) const{
-    size_t endpos = str.find_last_not_of(trim_);
-    if( std::string::npos != endpos )
-    {
-        str = str.substr( 0, endpos+1 );
-    }
-    return str;
-}
-/**
- * cuts on right side of the string
- * example:
- * 	   setTrim(#)
- * 	   string="#######this is a string####"
- * 	   ltrim(string)
- *     now: string="this is a string####"
- */
-std::string & fileReader::ltrim(std::string & str) const{
-    size_t startpos = str.find_first_not_of(trim_);
-    if( std::string::npos != startpos )
-    {
-        str = str.substr(startpos );
-    }
-    return str;
-}
-/**
- * cuts everything that follows the comment marker (one char)
- * example:
- *     setComment("&")
- *     string="this is a string &with a comment"
- *     trimcomments(string)
- *     now: string=="this is a string "
- */
-std::string & fileReader::trimcomments(std::string & str) const{
-    size_t endpos = str.find(comment_);
-    if( std::string::npos != endpos)
-    {
-        str = str.substr( 0, endpos);
-    }
-    return str;
-}
-
-// trim from both ends
-std::string &fileReader::trim(std::string &s) const {
-    return ltrim(rtrim(s));
-}
-
 
 
 

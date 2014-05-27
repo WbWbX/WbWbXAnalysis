@@ -32,12 +32,17 @@ namespace ztop{
  */
 class optParser{
 public:
+
+
     optParser():bepicky(false),argc_(0),argv_(0){}
     optParser(int ac,char** av):bepicky(false),argc_(ac),argv_(av){reload();}
     void setIn(int ac,char** av){
         argc_=ac;argv_=av;
         reload();
     }
+
+    void setAdditionalDesciption(TString desc){adddescr_=desc;}
+
     void reload(){
         temp_.clear();
         if(argv_[0])
@@ -104,6 +109,7 @@ private:
     std::vector<TString> temp_;
     std::vector<TString> help_;
     TString progname_;
+    TString adddescr_;
 
 };
 

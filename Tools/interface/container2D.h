@@ -31,7 +31,7 @@ public:
     container2D(const std::vector<float> & ,const std::vector<float> &, TString name="",TString xaxisname="",TString yaxisname="", bool mergeufof=false); //! construct with binning
     ~container2D();
 
-    bool isDummy()const{return xbins_.size()<2;}
+    bool isDummy()const{return xbins_.size()<=2;}
 
     void setBinning(const std::vector<float> &xbins, std::vector<float> ybins);
     //setaxis etc still missing. should be ok as long as default constr. is protected
@@ -57,6 +57,8 @@ public:
 
     const histoBin & getBin(const size_t &,const size_t&,const int &layer=-1) const;
     histoBin & getBin(const size_t&,const size_t&,const int& layer=-1);
+
+    float getBinArea(const size_t&, const size_t&)const;
 
     container2D rebinXToBinning(const std::vector<float>& )const;
     container2D rebinXtoBinning(const container1D&)const;
@@ -89,16 +91,19 @@ public:
     void renameSyst(TString, TString);
     void removeAllSystematics();
 
-    TH2D * getTH2D(TString name="", bool dividebybinwidth=false, bool onlystat=false) const;
-    TH2D * getTH2DSyst(TString name, unsigned int systNo, bool dividebybinwidth=false, bool statErrors=false) const;
+    TH2D * getTH2D(TString name="", bool dividebybinarea=false, bool onlystat=false) const;
+    TH2D * getTH2DSyst(TString name, unsigned int systNo, bool dividebybinarea=false, bool statErrors=false) const;
 
     void setDivideBinomial(bool);
 
+    container2D & operator += (const container2D &);       //! adds stat errors in squares; treats same named systematics as correlated!!
     container2D operator + (const container2D &);       //! adds stat errors in squares; treats same named systematics as correlated!!
+    container2D & operator -= (const container2D &);       //! adds errors in squares; treats same named systematics as correlated!!
     container2D operator - (const container2D &);       //! adds errors in squares; treats same named systematics as correlated!!
+    container2D & operator /= (const container2D &);       //! binomial stat error or uncorr error (depends on setDivideBinomial()); treats same named systematics as correlated
     container2D operator / (const container2D &);       //! binomial stat error or uncorr error (depends on setDivideBinomial()); treats same named systematics as correlated
     container2D operator * (const container2D &);       //! adds stat errors in squares; treats same named systematics as correlated!!
-    container2D operator *= (float val){*this=*this*val;return *this;} //fast hack!            //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
+    container2D & operator *= (float val){container2D copy=*this*val;*this=copy;return *this;} //fast hack!            //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
     container2D operator * (float);            //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
     container2D operator * (double val){return *this*(float)val;}             //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
     container2D operator * (int);               //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
@@ -110,8 +115,18 @@ public:
     void getRelSystematicsFrom(const container2D &);
     void addGlobalRelError(TString,float);
 
-    void reset();    //! resets all uncertainties and binning, keeps names and axis
-    void clear();    //! sets all bin contents to zero; clears all systematic uncertainties
+
+    /**
+     * sets all bin contents to zero; clears all systematic uncertainties
+     * resets also binning, keeps name and axis names
+     */
+    void reset();
+
+    /**
+     * sets all bin contents to zero; clears all systematic uncertainties
+     * keeps binning
+     */
+    void clear();
 
 
     static bool debug;

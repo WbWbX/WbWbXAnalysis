@@ -89,6 +89,7 @@ public:
     container1DUnfold getFullMCContainer1DUnfold()const;           //! gets the sum of all MC containers (normalized with their stored norm) including error handling
 
     void multiplyNorm(TString , double);
+    void multiplyNorm(size_t , double);
     void multiplyAllMCNorms(double);
     void addGlobalRelMCError(TString,double);   //! adds a global systematic variation to the systematics stored (e.g. lumi)
     void addMCErrorStack(const TString&,const containerStack &) ; //only for comp reasons
@@ -133,8 +134,13 @@ public:
     std::vector<size_t> getSignalIdxs() const;
     std::vector<size_t> getSortedIdxs(bool inverse) const;
 
+    size_t getDataIdx()const;
+
     container1D getSignalContainer()const;
     container1D getBackgroundContainer()const;
+
+    container2D getSignalContainer2D()const;
+    container2D getBackgroundContainer2D()const;
 
 
     container1DUnfold produceUnfoldingContainer(const std::vector<TString> &sign=std::vector<TString>()) const;// if sign empty use "setsignal"

@@ -56,6 +56,9 @@ int main(){
 
     container1D background=bjetmultistack.getBackgroundContainer(); //this might come handy at some point
     container1D signal=bjetmultistack.getSignalContainer(); //this might come handy at some point
+    container1D data=bjetmultistack.getContainer("data");
+    container1D dyll=bjetmultistack.getContainer("DY#rightarrowll");
+
 
 
     //which systematics are available??
@@ -72,6 +75,7 @@ int main(){
     float nominal1jetcontentsignal = signal.getBinContent(onejetbin);
     float somesyst1jetcontentsignal = signal.getBinContent(onejetbin,3); //here: sys layer 3
     std::cout << "\n" << signal.getSystErrorName(3) <<std::endl; //this one we just selected
+
 
     // if you want to look at ratios, you might consider using the built-in
     // operators that account for systematics

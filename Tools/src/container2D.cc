@@ -18,6 +18,9 @@ std::vector<container2D*> container2D::c_list;
 bool container2D::c_makelist=false;
 
 container2D::container2D(): divideBinomial_(true),mergeufof_(false),xaxisname_(""),yaxisname_(""),name_("") {
+    std::vector<float> nobins;
+    nobins.push_back(1);
+    setBinning(nobins,nobins);
     if(c_makelist){
         c_list.push_back(this);
     }
@@ -84,6 +87,19 @@ const size_t &container2D::getBinEntries(const size_t & xbin, const size_t & ybi
         std::cout << "container2D::getBinEntries: ybin out of range! return " << std::endl;
     }
     return conts_.at(ybin).getBinEntries(xbin);
+}
+
+float container2D::getBinArea(const size_t& binx, const size_t& biny)const{
+    if(isDummy())
+        return 1;
+    if(binx >= xbins_.size()-1 || biny >= ybins_.size()-1 || binx<1 || biny <1){ //doesn't work for underflow, overflow
+        throw std::out_of_range("container2D::getBinArea: bin out of range (or UF,OF)");
+    }
+
+    float xw= conts_.at(biny).getBinWidth(binx);
+    float yw= ybins_.at(biny+1)-ybins_.at(biny);
+    return xw*yw;
+
 }
 
 container2D container2D::rebinXToBinning(const std::vector<float> & newbins)const{
@@ -416,11 +432,9 @@ void container2D::setYSlice(size_t ybinno,const container1D & in, bool UFOF){
  * may even use other graphic representations as root
  * in principle drawing of systematics etc can be managed by the class .setDrawStatOnly, .drawSyst...., .setStyle, .setStyle.setMarker/Line.... (style is own new struct/class)
  */
-TH2D * container2D::getTH2D(TString name, bool dividebybinwidth, bool onlystat) const{
+TH2D * container2D::getTH2D(TString name, bool dividebybinarea, bool onlystat) const{
     if(getNBinsX() < 1 || getNBinsY() <1)
         return 0; //there is not even one real, non OF or UF container
-    if(dividebybinwidth)
-        std::cout << "container2D::getTH2D: dividebybinwidth not supported yet!!" << std::endl;
 
     TH2D * h=new TH2D(name,name,getNBinsX(),&(xbins_.at(1)),getNBinsY(),&(ybins_.at(1)));
     size_t entries=0;
@@ -428,9 +442,12 @@ TH2D * container2D::getTH2D(TString name, bool dividebybinwidth, bool onlystat) 
         for(size_t ybin=0;ybin<=getNBinsY()+1;ybin++){
             entries+=getBinEntries(xbin,ybin);
             float cont=getBinContent(xbin,ybin);
-            h->SetBinContent(xbin,ybin,cont);
+            float multi=1;
+            if(dividebybinarea && ybin>0 && xbin>0 && ybin<=getNBinsY() && xbin<=getNBinsX())
+                multi/=getBinArea(xbin,ybin);
+            h->SetBinContent(xbin,ybin,cont*multi);
             float err=getBinError(xbin,ybin,onlystat);
-            h->SetBinError(xbin,ybin,err);
+            h->SetBinError(xbin,ybin,err*multi);
         }
     }
     h->GetXaxis()->SetTitle(xaxisname_);
@@ -443,17 +460,21 @@ TH2D * container2D::getTH2D(TString name, bool dividebybinwidth, bool onlystat) 
 /**
  * TH2D * container2D::getTH2DSyst(TString name, unsigned int systNo, bool dividebybinwidth=false, bool statErrors=false)
  */
-TH2D * container2D::getTH2DSyst(TString name, unsigned int systNo, bool dividebybinwidth, bool statErrors) const{
-    TH2D * h=getTH2D(name,dividebybinwidth,true);
+TH2D * container2D::getTH2DSyst(TString name, unsigned int systNo, bool dividebybinarea, bool statErrors) const{
+    TH2D * h=getTH2D(name,dividebybinarea,true);
     if(!h) return 0;
 
     for(size_t xbin=0;xbin<=getNBinsX()+1;xbin++){ // 0 underflow, genBins+1 overflow included!!
         for(size_t ybin=0;ybin<=getNBinsY()+1;ybin++){
             float cont=getBinContent(xbin,ybin)+getSystError(systNo,xbin,ybin);
-            h->SetBinContent(xbin,ybin,cont);
+            float multi=1;
+            if(dividebybinarea && ybin>0 && xbin>0 && ybin<=getNBinsY() && xbin<=getNBinsX())
+                multi/=getBinArea(xbin,ybin);
+
+            h->SetBinContent(xbin,ybin,cont*multi);
             float stat=getSystErrorStat(systNo,xbin,ybin);
             if(statErrors)
-                h->SetBinError(xbin,ybin,stat);
+                h->SetBinError(xbin,ybin,stat*multi);
             else
                 h->SetBinError(xbin,ybin,0);
         }
@@ -468,40 +489,51 @@ void container2D::setDivideBinomial(bool binomial){
 	divideBinomial_=binomial;*/
 }
 
-
-container2D container2D::operator + (const container2D & second){
+container2D & container2D::operator += (const container2D & second){
     if(second.xbins_ != xbins_ || second.ybins_ != ybins_){
-        std::cout << "container2D::operator +: "<< name_ << " and " << second.name_<<" must have same binning! returning *this" << std::endl;
+        std::cout << "container2D::operator +=: "<< name_ << " and " << second.name_<<" must have same binning! returning *this" << std::endl;
         return *this;
     }
-    container2D out=second;
+
     for(size_t i=0;i<conts_.size();i++){
-        out.conts_.at(i) = conts_.at(i) + second.conts_.at(i);
+        conts_.at(i) += second.conts_.at(i);
     }
-    return out;
+    return *this;
 }
-container2D container2D::operator - (const container2D & second){
+container2D container2D::operator + (const container2D & second){
+    container2D copy=*this;
+    return copy+=second;
+}
+container2D & container2D::operator -= (const container2D & second){
     if(second.xbins_ != xbins_ || second.ybins_ != ybins_){
         std::cout << "container2D::operator -: "<< name_ << " and " << second.name_<<" must have same binning! returning *this"  << std::endl;
         return *this;
     }
-    container2D out=second;
     for(size_t i=0;i<conts_.size();i++){
-        out.conts_.at(i) = conts_.at(i) - second.conts_.at(i);
+        conts_.at(i) -=  second.conts_.at(i);
     }
-    return out;
+    return *this;
 }
-container2D container2D::operator / (const container2D & second){
+container2D container2D::operator - (const container2D & second){
+    container2D copy=*this;
+    return copy -= second;
+}
+
+container2D & container2D::operator /= (const container2D & second){
     if(second.xbins_ != xbins_ || second.ybins_ != ybins_){
         std::cout << "container2D::operator /: "<< name_ << " and " << second.name_<<" must have same binning! returning *this"  << std::endl;
         return *this;
     }
-    container2D out=second;
     for(size_t i=0;i<conts_.size();i++){
-        out.conts_.at(i) = conts_.at(i) / second.conts_.at(i);
+        conts_.at(i) /= second.conts_.at(i);
     }
-    return out;
+    return *this;
 }
+container2D  container2D::operator / (const container2D & second){
+    container2D copy=*this;
+    return copy/=second;
+}
+
 container2D container2D::operator * (const container2D & second){
     if(second.xbins_ != xbins_ || second.ybins_ != ybins_){
         std::cout << "container2D::operator *: "<< name_ << " and " << second.name_<<" must have same binning! returning *this"  << std::endl;
@@ -516,7 +548,7 @@ container2D container2D::operator * (const container2D & second){
 container2D container2D::operator * (float val){
     container2D out=*this;
     for(size_t i=0;i<conts_.size();i++){
-        out.conts_.at(i) = conts_.at(i) * val;
+        out.conts_.at(i) *= val;
     }
     return out;
 }

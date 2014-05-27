@@ -24,7 +24,7 @@ void optParser::doneParsing(){
 void optParser::coutHelp()const{
     using namespace std;
 
-    std::cout << progname_ << " usage: "<<std::endl;
+    std::cout << progname_ << "\n\n" << adddescr_ << "\n usage: "<<std::endl;
     for(size_t i=0;i<help_.size();i++){
         if(help_.at(i).Length()>0){
             std::cout << "   " << help_.at(i) << std::endl;

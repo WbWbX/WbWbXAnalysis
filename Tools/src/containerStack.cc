@@ -332,6 +332,22 @@ ztop::container1DUnfold containerStack::getContributions1DUnfoldBut(std::vector<
     return out;
 }
 
+void containerStack::multiplyNorm(size_t i , double multi){
+    if(i>=size()){
+        throw std::out_of_range("containerStack::multiplyNorm: out of range");
+    }
+    if(dim1){
+        containers_.at(i)*=multi;
+    }
+    else if(dim2){
+        containers2D_.at(i)*=multi;
+    }
+    else if(unfolddim1){
+        containers_.at(i)*=multi;
+        containers1DUnfold_.at(i)*=multi;
+    }
+}
+
 void containerStack::multiplyNorm(TString legendentry, double multi){
     int i=0;
     for(std::vector<TString>::iterator name=legends_.begin();name<legends_.end();++name){
@@ -1384,6 +1400,16 @@ std::vector<size_t> containerStack::getSignalIdxs() const{
     return out;
 }
 
+size_t containerStack::getDataIdx()const{
+
+    for(size_t i=0;i<legends_.size();i++){
+        if(dataleg_ == legends_.at(i)){
+            return i;
+        }
+    }
+    throw std::runtime_error("containerStack::getDataIdx: no data index!");
+}
+
 container1D containerStack::getSignalContainer()const{
     if(mode != dim1 && mode !=unfolddim1){
         if(debug) std::cout << "containerStack::getSignalContainer: return dummy" <<std::endl;
@@ -1391,6 +1417,10 @@ container1D containerStack::getSignalContainer()const{
     }
     std::vector<size_t> sidx=getSignalIdxs();
     container1D out;
+    if(containers_.size()>0){
+        out=containers_.at(0);
+        out.clear();
+    }
     if(sidx.size()>0) out=getContainer(sidx.at(0));
     for(size_t i=1;i<sidx.size();i++)
         out+=getContainer(sidx.at(i));
@@ -1403,6 +1433,10 @@ container1D containerStack::getBackgroundContainer()const{
     }
     std::vector<size_t> sidx=getSignalIdxs();
     container1D out;
+    if(containers_.size()>0){
+        out=containers_.at(0);
+        out.clear();
+    }
     bool first=true;
     for(size_t i=0;i<containers_.size();i++){
         if(std::find(sidx.begin(),sidx.end(),i) != sidx.end() || getLegend(i) == dataleg_){
@@ -1420,7 +1454,51 @@ container1D containerStack::getBackgroundContainer()const{
     return out;
 
 }
+container2D containerStack::getSignalContainer2D()const{
+    if(mode != dim2){
+        if(debug) std::cout << "containerStack::getSignalContainer2D: return dummy" <<std::endl;
+        return container2D();
+    }
+    std::vector<size_t> sidx=getSignalIdxs();
+    container2D out;
+    if(containers2D_.size()>0){
+        out=containers2D_.at(0);
+        out.clear();
+    }
+    if(sidx.size()>0) out=getContainer2D(sidx.at(0));
+    for(size_t i=1;i<sidx.size();i++)
+        out+=getContainer2D(sidx.at(i));
+    return out;
+}
 
+container2D containerStack::getBackgroundContainer2D()const{
+    if(mode != dim2){
+        if(debug) std::cout << "containerStack::getBackgroundContainer2D: return dummy" <<std::endl;
+        return container2D();
+    }
+    std::vector<size_t> sidx=getSignalIdxs();
+    container2D out;
+    if(containers2D_.size()>0){
+        out=containers2D_.at(0);
+        out.clear();
+    }
+    bool first=true;
+    for(size_t i=0;i<containers2D_.size();i++){
+        if(std::find(sidx.begin(),sidx.end(),i) != sidx.end() || getLegend(i) == dataleg_){
+            continue;
+        }
+        if(first){
+            out=containers2D_.at(i);
+            first=false;
+        }
+        else{
+            out+=containers2D_.at(i);
+        }
+    }
+
+    return out;
+
+}
 
 container1DUnfold containerStack::produceUnfoldingContainer(const std::vector<TString> &sign) const{// if sign empty use "setsignal"
     /*
@@ -1582,7 +1660,7 @@ TString containerStack::listContributions()const{
     out+=getName()+" contributions:\n";
 
     for(size_t i=0;i<legends_.size();i++){
-       out += legends_.at(i)+"\n";
+        out += legends_.at(i)+"\n";
     }
     return out;
 }
