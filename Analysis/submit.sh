@@ -43,6 +43,8 @@ systs=("nominal"
    "BTAGH_down"
    "BTAGL_up"
    "BTAGL_down"
+   
+#####csv rew section
    #"BTAGHFS1_up"
    #"BTAGHFS1_down"
    #"BTAGHFS2_up"
@@ -110,13 +112,20 @@ analysisDir=$CMSSW_BASE/src/TtZAnalysis/Analysis/
 
 cd $analysisDir
 #mkdir -p workdir
-mkdir -p /nfs/dust/cms/user/$USER/AnalysisWorkdir
-if [[ ! -L "workdir" ]]
+if [[ $SGE_CELL ]] ;
 then
-    ln -s /nfs/dust/cms/user/$USER/AnalysisWorkdir workdir 
+    mkdir -p /nfs/dust/cms/user/$USER/AnalysisWorkdir
+    if [[ ! -L "workdir" ]]
+    then
+	ln -s /nfs/dust/cms/user/$USER/AnalysisWorkdir workdir 
+    fi
+    cd workdir
+    mkdir $dir
+else 
+    mkdir -p $analysisDir/desycms012Workdir  
+    cd desycms012Workdir
+    mkdir $dir
 fi
-cd workdir
-mkdir $dir
 if [[ -L "last" ]]
 then
 rm last

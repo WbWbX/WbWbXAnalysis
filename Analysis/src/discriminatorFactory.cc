@@ -14,7 +14,7 @@
 #include <iostream>
 #include "TFile.h"
 #include "TTree.h"
-
+#include "TtZAnalysis/Tools/interface/container2D.h"
 
 
 #define VAR_TO_TSTRING(variable) ztop::toTString(#variable)
@@ -27,16 +27,16 @@ std::vector<discriminatorFactory*> discriminatorFactory::c_list;
 bool discriminatorFactory::c_makelist=false;
 
 
-discriminatorFactory::discriminatorFactory(): nbins_(0),uselh_(false),step_(9999999),systidx_(-1),maxcomb_(1)
+discriminatorFactory::discriminatorFactory(): nbins_(0),uselh_(false),step_(9999999),systidx_(-1),maxcomb_(1),savecorrplots_(true)
 {
     if(c_makelist)
-    c_list.push_back(this);
+        c_list.push_back(this);
 }
 
 discriminatorFactory::discriminatorFactory(const std::string & id): nbins_(0),uselh_(false),id_(id),step_(9999999),systidx_(-1),maxcomb_(1)
 {
     if(c_makelist)
-    c_list.push_back(this);
+        c_list.push_back(this);
 }
 
 discriminatorFactory::~discriminatorFactory(){
@@ -45,6 +45,8 @@ discriminatorFactory::~discriminatorFactory(){
             c_list.erase((c_list.begin()+i));
         }
     }
+    //  clear();
+    //memory leak...
 }
 
 
@@ -59,6 +61,15 @@ void discriminatorFactory::clear(){
             tobefilled_.at(i)=0;
         }
     }
+    /*
+    for(size_t i=0;i<tobefilledcorr_.size();i++){
+        if(tobefilledcorr_.at(i)){
+            delete tobefilledcorr_.at(i);
+            tobefilledcorr_.at(i)=0;
+        }
+    }
+    */
+    tobefilledcorr_.clear();
     tobefilled_.clear();
     histpointers_.clear(); //never point to "NEW"
     //
@@ -88,6 +99,8 @@ void discriminatorFactory::setSystematics(const TString& sysname){
         systidx_=-1;
     }
 }
+
+
 
 /**
  * if create is true, create new container
@@ -143,14 +156,35 @@ void discriminatorFactory::addVariable( float * const * var,const TString& varsh
         }
 
     }
+    //make bins
+    std::vector<float> bins;//bins << 0 << 0.2 << 1;
+    for(float i=rangemin;i<rangemax*(1.+0.9/nbins_);i+= 1.*(rangemax-rangemin)/nbins_) bins.push_back(i);
+
+
+    if(debug)
+        std::cout << "discriminatorFactory::addVariable: creating all correlation plots" <<std::endl;
+    tobefilledcorr_.push_back(std::vector<container2D *>());
+
+    //if more than one var add correlation plots
+    if(vars_.size()>0){
+        bool c2dmakelist=container2D::c_makelist;
+        container2D::c_makelist=savecorrplots_;
+        for(size_t i=0;i<tobefilled_.size();i++){ //not the last one thats the one just added
+            std::vector<float> newybins(tobefilled_.at(i)->getBins().begin()+1,tobefilled_.at(i)->getBins().end());
+            TString newyaxisname=tobefilled_.at(i)->getXAxisName();
+            TString newxaxisname= varshort;
+            TString newname= id_+"_discr_"+newxaxisname+"_vs_"+newyaxisname+" step "+toTString(step_);
+            container2D * c2dtmp= new container2D(bins,newybins,newname,newxaxisname,newyaxisname);
+
+            tobefilledcorr_.at(tobefilledcorr_.size()-1).push_back(c2dtmp);
+        }
+        container2D::c_makelist=c2dmakelist;
+    }
 
     if(debug)
         std::cout << "discriminatorFactory::addVariable: creating new plot" <<std::endl;
 
     //creates new plots for likelihoods
-    //make bins
-    std::vector<float> bins;//bins << 0 << 0.2 << 1;
-    for(float i=rangemin;i<rangemax*(1.+0.9/nbins_);i+= 1.*(rangemax-rangemin)/nbins_) bins.push_back(i);
 
     /*
      * Listing is switched on. That makes sure that the containers will be stored afterwards in a
@@ -170,8 +204,11 @@ void discriminatorFactory::addVariable( float * const * var,const TString& varsh
     if(debug)
         std::cout << "discriminatorFactory::addVariable: added plot for " << fullname <<std::endl;
 
-    //offsets_.push_back(-rangemin);
-   // ranges_.push_back(rangemax-rangemin);
+
+
+
+
+
     vars_.push_back(var);
 
     if(debug)
@@ -188,8 +225,12 @@ void discriminatorFactory::fill(const float& weight){
     size_t size=vars_.size();
     for(size_t i=0;i<size;i++){
         if(vars_.at(i) && tobefilled_.at(i)){
-
             tobefilled_.at(i)->fill(**vars_.at(i),weight );
+            for(size_t j=0;j<tobefilledcorr_.at(i).size();j++){
+                //if(i==j) continue;
+                if(vars_.at(j) && tobefilledcorr_.at(i).at(j))
+                    tobefilledcorr_.at(i).at(j)->fill(**vars_.at(i),**vars_.at(j),weight);
+            }
         }
     }
 }
@@ -212,12 +253,12 @@ float discriminatorFactory::getCombinedLikelihood()const{ //a plot needs to be a
     float combLH=1;
     for(size_t i=0;i<csize;i++){
         if(!vars_.at(i) || !*vars_.at(i)) continue;
-       // float tofill=( **vars_.at(i) + offsets_.at(i) )/ranges_.at(i);
+        // float tofill=( **vars_.at(i) + offsets_.at(i) )/ranges_.at(i);
         size_t bin=histpointers_.at(i)->getBinNo(**vars_.at(i) );
         combLH *= histpointers_.at(i)->getBinContent(bin,systidx_);
         if(combLH/maxcomb_ < 0.0001){
-           std::cout << "discriminatorFactory::getCombinedLikelihood: returned 0 for " << histpointers_.at(i)->getName() << " input: " << **vars_.at(i)  <<std::endl;
-           return 0;
+            std::cout << "discriminatorFactory::getCombinedLikelihood: returned 0 for " << histpointers_.at(i)->getName() << " input: " << **vars_.at(i)  <<std::endl;
+            return 0;
         }
     }
     return combLH/maxcomb_;
@@ -291,7 +332,7 @@ void discriminatorFactory::extractLikelihoods(const containerStackVector &csv){
 }
 void discriminatorFactory::extractAllLikelihoods(const containerStackVector & csv){
     for(size_t i=0;i<c_list.size();i++)
-           c_list.at(i)->extractLikelihoods(csv);
+        c_list.at(i)->extractLikelihoods(csv);
 }
 
 

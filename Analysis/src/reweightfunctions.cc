@@ -12,7 +12,11 @@
 
 namespace ztop{
 
-float reweightfunctions::reWeight(const float& in,const float& previousweight) {
+float reweightfunctions::reWeight(const float& in, float previousweight) {
+
+    if(switchedoff_)
+        return previousweight;
+
     if(type_==flat){
         return previousweight;
     }
@@ -27,24 +31,31 @@ float reweightfunctions::reWeight(const float& in,const float& previousweight) {
         if(syst_ == down)
             newweight= previousweight;
     }
+
     unwcounter_+=previousweight;
     wcounter_+=newweight*previousweight;
 
     return newweight*previousweight;
 }
 
-float reweightfunctions::reWeight(const float& in1,const float& in2,const float& previousweight) {
+float reweightfunctions::reWeight(const float& in1,const float& in2, float previousweight) {
+    if(switchedoff_)
+        return previousweight;
+
     if(type_==flat){
         return previousweight;
     }
     float newweight=1;
 
-    ////
-    float j=in1;
-    j=in2;
-    j++;
-    throw std::logic_error("reweightfunctions::getWeight(const float& in1,const float& in2): not implemented yet");
-    /////
+    //this is the sqrt approach
+    if(type_ == toppt){
+        if(syst_ == nominal)
+            newweight= sqrt(  TMath::Exp(0.156-0.00137*in1)  * TMath::Exp(0.156-0.00137*in2) );
+        if(syst_ == up)
+            newweight= sqrt( std::max(0.,1+(2.*(TMath::Exp(0.156-0.00137*in1)-1)))* std::max(0.,1+(2.*(TMath::Exp(0.156-0.00137*in2)-1))) );
+        if(syst_ == down)
+            newweight= previousweight;
+    }
 
     unwcounter_+=previousweight;
     wcounter_+=newweight*previousweight;

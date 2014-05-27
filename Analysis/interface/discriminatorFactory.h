@@ -18,7 +18,7 @@ class TFile;
 
 namespace ztop{
 class NTFullEvent;
-
+class container2D;
 
 /**
  * put more info here
@@ -152,6 +152,8 @@ public:
     static std::vector<discriminatorFactory> readAllFromTFile( TFile * f);
     static std::vector<discriminatorFactory> readAllFromTFile(const TString& filename);
 
+    void setSaveCorrelationPlots(bool doit){savecorrplots_=doit;}
+
 
     bool operator == (const discriminatorFactory&)const;
 
@@ -180,6 +182,7 @@ private:
     //only for filling/pointing purposes, these are like control plots
     std::vector<container1D *> tobefilled_;
 
+    std::vector<std::vector< container2D *> > tobefilledcorr_;
 
     std::vector< float * const*> vars_;
     std::vector<float> offsets_;
@@ -190,6 +193,7 @@ private:
     //for using the right systematic variation
     int systidx_;
     float maxcomb_;
+    bool savecorrplots_;
 
 };
 

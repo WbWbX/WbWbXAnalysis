@@ -4,6 +4,8 @@
 ###### config file for mt extractor ##########
 # comments
 
+[naming scheme]
+
 # right now only important for external gen input
 # define the format of input files.
 # Filenames: filepreamble_topmass_fileendpattern (incl. e.g. ".root")
@@ -39,3 +41,43 @@ systDownId = Dn
 nominalId = central
 
 inputIsDividedByBinWidth = true
+
+[end naming scheme]
+
+
+[k-factor map CT10nlo]
+
+166.5 = 1.160
+169.5 = 1.160
+171.5 = 1.160
+172.5 = 1.160
+173.5 = 1.160
+175.5 = 1.160
+178.5 = 1.159
+
+[end k-factor map CT10nlo]
+
+
+[k-factor map MSTW200]
+
+166.5 = 1.087
+169.5 = 1.087
+171.5 = 1.086
+172.5 = 1.086
+173.5 = 1.086
+175.5 = 1.086
+178.5 = 1.086
+
+[end k-factor map MSTW200]
+
+[k-factor map abm11_5]
+
+166.5 = 1.099
+169.5 = 1.099
+171.5 = 1.099
+172.5 = 1.099
+173.5 = 1.099
+175.5 = 1.099
+178.5 = 1.099
+
+[end k-factor map abm11_5]

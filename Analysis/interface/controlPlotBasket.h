@@ -30,7 +30,7 @@ class NTFullEvent;
  */
 class controlPlotBasket{
 public:
-    controlPlotBasket():tmpidx_(0),tmpstep_(0),tmpnewstep_(true),evt_(0),lcont_(0),size_(0),initphase_(false){}
+    controlPlotBasket():switchedon_(true),tmpidx_(0),tmpstep_(0),tmpnewstep_(true),evt_(0),lcont_(0),size_(0),initphase_(false){}
     virtual ~controlPlotBasket();
 
     void linkEvent(const NTFullEvent & evt){evt_=&evt;}
@@ -41,6 +41,8 @@ public:
      * this is an optional function. But it helps to keep a particular ordering of the plots!
      */
     void initSteps(size_t no);
+
+    void switchOn(bool swon){switchedon_=swon;}
 
 protected:
     const NTFullEvent * event(){return evt_;}
@@ -53,6 +55,8 @@ protected:
     container1D *  &last(){return lcont_;}
 
     const bool & isNewStep()const{return tmpnewstep_;}
+
+    bool switchedon_;
 
 private:
 

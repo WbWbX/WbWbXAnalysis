@@ -104,7 +104,12 @@ scalefactors::scalefactors(const ztop::scalefactors & rhs) {
     isth2d_ = rhs.isth2d_;
     syst_ = rhs.syst_;
     isMC_ = rhs.isMC_;
+    isglobal_ = rhs.isglobal_;
+    glsf_=rhs.glsf_;
+    glsfup_=rhs.glsfup_;
+    glsfd_=rhs.glsfd_;
     rangecheck_ = rhs.rangecheck_;
+    switchedoff_=rhs.switchedoff_;
     if (isth2d_)
         h = &th2d_;
     else

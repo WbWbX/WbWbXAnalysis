@@ -52,10 +52,21 @@ public:
     lhi_selbjetmulti(0),
     lhi_leadleppt(0),
     lhi_secleadleppt(0),
+    lhi_leadlepeta(0),
+    lhi_secleadlepeta(0),
+    lhi_leadlepphi(0),
+    lhi_secleadlepphi(0),
     lhi_leadjetpt(0),
     lhi_drlbl(0),
     lhi_mll(0),
     lhi_ptllj(0),
+
+
+    lhi_cosllvsetafirstlep(0),
+    lhi_etafirstvsetaseclep(0),
+    lhi_deltaphileps(0),
+    lhi_coslepanglevsmll(0),
+    lhi_mllvssumdphimetl(0),
 
     lh_toplh(0),
 
@@ -98,10 +109,21 @@ public:
         lhi_selbjetmulti=0;
         lhi_leadleppt=0;
         lhi_secleadleppt=0;
+        lhi_leadlepeta=0;
+        lhi_secleadlepeta=0;
+        lhi_leadlepphi=0;
+        lhi_secleadlepphi=0;
         lhi_leadjetpt=0;
         lhi_drlbl=0;
         lhi_mll=0;
         lhi_ptllj=0;
+
+
+        lhi_cosllvsetafirstlep=0;
+        lhi_etafirstvsetaseclep=0;
+        lhi_deltaphileps=0;
+        lhi_coslepanglevsmll=0;
+        lhi_mllvssumdphimetl=0;
 
         lh_toplh=0;
 
@@ -184,10 +206,21 @@ public:
     float * lhi_selbjetmulti;
     float * lhi_leadleppt;
     float * lhi_secleadleppt;
+    float * lhi_leadlepeta;
+    float * lhi_secleadlepeta;
+    float * lhi_leadlepphi;
+    float * lhi_secleadlepphi;
     float * lhi_leadjetpt;
     float * lhi_drlbl;
     float * lhi_mll;
     float * lhi_ptllj;
+
+    //correlation vars
+    float * lhi_cosllvsetafirstlep;
+    float * lhi_etafirstvsetaseclep;
+    float * lhi_deltaphileps;
+    float * lhi_coslepanglevsmll;
+    float * lhi_mllvssumdphimetl;
 
     //output of LH lh_<name>
     float * lh_toplh;

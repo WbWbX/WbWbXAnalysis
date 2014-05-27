@@ -14,7 +14,7 @@
 #include "TtZAnalysis/Tools/interface/fileReader.h"
 
 #include "eventLoop.h"
-
+#include <algorithm>
 
 namespace ztop{
 typedef std::vector<ztop::NTElectron>::iterator NTElectronIt;
@@ -221,7 +221,7 @@ int MainAnalyzer::start(){
                         std::cout << "\n\n" << std::endl;
                         for(size_t j=0;j<filenumber;j++){
                             if(succ.at(j) == 0)
-                                std::cout <<  "running "<< status.at(j) << "%:"<< "\t" <<infiles_.at(j)  << std::endl;
+                                std::cout <<  "running "<< status.at(j) << "%:" << "\t" <<infiles_.at(j) << "\t" << legentries_.at(j) << std::endl;
                             if(succ.at(j) >0)
                                 sdone++;
                             if(succ.at(j) <0)
@@ -230,12 +230,12 @@ int MainAnalyzer::start(){
                         std::cout << "-----------------" << std::endl;
                         for(size_t j=0;j<filenumber;j++){
                             if(succ.at(j) <0)
-                                std::cout  << "failed(" << succ.at(j)<<"):   \t" << infiles_.at(j) << std::endl;
+                                std::cout  << "failed(" << succ.at(j)<<"):   \t"<< infiles_.at(j)<< "\t" << legentries_.at(j)  << std::endl;
                         }
 
                         for(size_t j=0;j<filenumber;j++){
                             if(succ.at(j) >0)
-                                std::cout  << " done:      \t" << infiles_.at(j) << std::endl;
+                                std::cout  << " done:      \t" << infiles_.at(j) << "\t" << legentries_.at(j)  << std::endl;
                         }
                         std::cout << "\n\n" << done << "(" << failed << " failed) / " << filenumber << " done\n\n"<< std::endl;
                     }
@@ -277,9 +277,12 @@ int MainAnalyzer::start(){
 
 TString MainAnalyzer::replaceExtension(TString filename){
 
+
     for(size_t i=0;i<ftorepl_.size();i++){
         if(filename.Contains(ftorepl_.at(i))){
+
             freplaced_++;
+
             return filename.ReplaceAll(ftorepl_.at(i),fwithfix_.at(i));
         }
     }
@@ -304,13 +307,15 @@ void MainAnalyzer::readFileList(){
     legord_.clear();
     issignal_.clear();
 
+    std::cout << "MainAnalyzer::readFileList: reading input file " << std::endl;
+
     for(size_t line=0;line<fr.nLines();line++){
         if(fr.nEntries(line) < 5){
             std::cout << "MainAnalyzer::readFileList: line " << line << " of inputfile is broken ("<<fr.nEntries(line)<< " entries.)" <<std::endl;
             sleep(2);
             continue;
         }
-        infiles_.push_back   (replaceExtension(fr.getData<TString>(line,0)));
+        infiles_.push_back   ((fr.getData<TString>(line,0)));
         legentries_.push_back(fr.getData<TString>(line,1));
         colz_.push_back      (fr.getData<int>    (line,2));
         norms_.push_back     (fr.getData<double> (line,3));
@@ -320,7 +325,11 @@ void MainAnalyzer::readFileList(){
         else
             issignal_.push_back(false);
     }
-
+    for(size_t i=0;i<infiles_.size();i++){
+        if(legentries_.at(i) == dataname_)
+            continue;
+        infiles_.at(i) =   replaceExtension(infiles_.at(i));
+    }
 
 
 }
@@ -375,7 +384,7 @@ void MainAnalyzer::copyAll(const MainAnalyzer & analyzer){
 
     writeAllowed_=analyzer.writeAllowed_;
 }
-*/
+ */
 /*
 MainAnalyzer::MainAnalyzer(const MainAnalyzer & analyzer){
     copyAll(analyzer);
@@ -385,7 +394,7 @@ MainAnalyzer & MainAnalyzer::operator = (const MainAnalyzer & analyzer){
     copyAll(analyzer);
     return *this;
 }
-*/
+ */
 
 /////////use default implementations! as long as there are not pointers or
 ///other things in the member list, this is sufficient and bugs are less likely

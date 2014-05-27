@@ -142,6 +142,16 @@ public:
      */
     void reportStatus(Long64_t entry,Long64_t nEntries, size_t anaid);
 
+
+    /**
+     * set the path to the inital configuration file (if any) to use it for further input to
+     * event loop or something else
+     *
+     * this should not be done normally and is only for special cases
+     */
+
+   void setPathToConfigFile(const TString & path){pathtoconffile_=path;}
+
 private:
 
 
@@ -149,7 +159,7 @@ private:
     void copyAll(const MainAnalyzer &);
     void readFileList(); //run automatically when start() is called
 
-    TString replaceExtension(TString );
+    TString replaceExtension(TString filename );
 
     bool showstatus_,onlySummary_,testmode_,singlefile_;
 
@@ -216,6 +226,11 @@ private:
     //for discriminators
     std::string discrInput_;
     bool usediscr_;
+
+
+
+    /////path to initial configuration file (in case adjustments are being made afterwards)
+    TString pathtoconffile_;
 
     template <class T>
     std::vector<T*> produceCollection(std::vector<T> * t){

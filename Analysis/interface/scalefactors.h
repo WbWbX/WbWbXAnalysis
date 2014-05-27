@@ -18,7 +18,7 @@ namespace ztop{
 
 class scalefactors{
 public:
-	scalefactors(): h(0), isth2d_(false), isMC_(false), syst_(100), rangecheck_(true),isglobal_(false),glsf_(0),glsfup_(0),glsfd_(0){}
+	scalefactors(): h(0), isth2d_(false), isMC_(false), syst_(100), rangecheck_(true),isglobal_(false),glsf_(0),glsfup_(0),glsfd_(0),switchedoff_(false){}
 	scalefactors(const scalefactors&);
 	~scalefactors(){}
 
@@ -28,6 +28,8 @@ public:
 
 	void setIsMC(bool is){isMC_=is;}
 	void setRangeCheck(bool check){rangecheck_=check;}
+
+	void switchOff(bool switchoff){switchedoff_=switchoff;}
 
 	bool isSystematicsUp(){return (syst_ <100 && syst_>0);}
 	bool isSystematicsDown(){return ( syst_<0);}
@@ -43,6 +45,7 @@ private:
 	bool rangecheck_;
 	bool isglobal_;
 	double glsf_,glsfup_,glsfd_;
+	bool switchedoff_;
 
 };
 
@@ -52,6 +55,8 @@ private:
  */
 
 inline double scalefactors::getScalefactor(double xval,double yval){
+    if(switchedoff_)
+        return 1;
 	if(!isMC_)
 		return 1;
 	if(!isglobal_ && !h){

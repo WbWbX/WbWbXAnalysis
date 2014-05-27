@@ -106,6 +106,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
     bool mode_invertiso=false;
     bool usemvamet=false;
     bool onejet=false;
+    bool zerojet=false;
     bool usetopdiscr=false;
 
     float normmultiplier=1; //use in case modes need to change norm
@@ -157,6 +158,10 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
         onejet=true;
         std::cout << "entering Onejet mode" <<std::endl;
     }
+    if(mode_.Contains("Zerojet")){
+        zerojet=true;
+        std::cout << "entering Onejet mode" <<std::endl;
+    }
 
     if(mode_.Contains("Topdiscr")){
         usetopdiscr=true;
@@ -177,10 +182,10 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
         }
     }
     else{
-        //adapt wrong MG BR for madspin
+        //adapt wrong MG BR for madspin and syst samples
         if(inputfile.Contains("ttbar.root") || inputfile.Contains("ttbarviatau.root")
-                || inputfile.Contains("ttbar_mt") ||
-                inputfile.Contains("ttbarviatau_mt") ){
+                || inputfile.Contains("ttbar_") ||
+                inputfile.Contains("ttbarviatau_") ){
             normmultiplier=0.1049/0.1111202;
         }
     }
@@ -194,7 +199,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
             fakedata=true;
         isfakedatarun=true;
         isMC=true;
-        std::cout << "THIS IS A FAKE DATA RUN: all samples will be treated (in terms of SF etc.) as MC" << std::endl;
+        std::cout << "THIS IS A PSEUDO-DATA RUN:" <<std::endl;// all samples MC samples will be used without weights!" << std::endl;
     }
 
 
@@ -202,8 +207,54 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
      * end of mode switches
      */
 
+    //fake data configuration
+    if(fakedata){
+        //this whole section is bad style because the configuration should be done from the outside
+        //e.g. in analyse.cc
+        //but for pseudo data there needs to be an additional case distinction in addition to MC/data
+
+        //turn off systematic variations here
+
+        getTriggerSF()->setSystematics("nom");
 
 
+        getElecEnergySF()->setSystematics("nom");
+        getElecSF()->setSystematics("nom");
+        getMuonEnergySF()->setSystematics("nom");
+        getMuonSF()->setSystematics("nom");
+
+
+        // getPUReweighter()-> //setSystematics("nom");
+        getBTagSF()->setSystematic(NTBTagSF::nominal);
+        getJECUncertainties()->setSystematics("no");
+        getJERAdjuster()->setSystematics("def");
+
+        getTopPtReweighter()->setSystematics(reweightfunctions::nominal); //setSystematics("nom");
+
+        //for other parameters reread config
+        fileReader fr;
+        fr.setComment("$");
+        fr.setDelimiter(",");
+        fr.setStartMarker("[parameters-begin]");
+        fr.setEndMarker("[parameters-end]");
+        fr.readFile(pathtoconffile_.Data());
+
+        getPUReweighter()->setDataTruePUInput(((std::string)getenv("CMSSW_BASE")+fr.getValue<string>("PUFile") +".root").data());
+
+
+        //re-adjust systematic filenames
+        inputfile.ReplaceAll("_ttscaleup.root",".root");
+        inputfile.ReplaceAll("_ttscaledown.root",".root");
+        inputfile.ReplaceAll("_ttmup.root",".root");
+        inputfile.ReplaceAll("_ttmdown.root",".root");
+        inputfile.ReplaceAll("_Zmup.root",".root");
+        inputfile.ReplaceAll("_Zmdown.root",".root");
+        inputfile.ReplaceAll("_Zscaleup.root",".root");
+        inputfile.ReplaceAll("_Zscaledown.root",".root");
+
+
+        //this is bad style.. anyway
+    }
 
 
     //per sample configuration
@@ -226,7 +277,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
     NTFullEvent evt;
 
     ////////////////////  configure discriminator factories here  ////////////////////
-    TString factname="topLH_"+channel_+"_"+energy_;
+    TString factname="topLH_"+channel_+"_"+energy_+"_"+topmass_;
     discriminatorFactory::c_makelist=true;
     discriminatorFactory toplikelihood(factname.Data());
 
@@ -243,20 +294,33 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
     toplikelihood.setUseLikelihoods(usediscr_);
 
-
+    toplikelihood.setSaveCorrelationPlots(false);
 
     toplikelihood.addVariable(&evt.lhi_dphillj,"#Delta#phi(ll,j)",0,M_PI);
     toplikelihood.addVariable(&evt.lhi_cosleplepangle,"#cos#theta_{ll}",-1.,1.);
-    if(!usediscr_)
-        toplikelihood.addVariable(&evt.lhi_leadjetbtag,"D_{b}^{jet1}",-1,1);
+   // if(!usediscr_)
+  //      toplikelihood.addVariable(&evt.lhi_leadjetbtag,"D_{b}^{jet1}",-1,1);
     toplikelihood.addVariable(&evt.lhi_sumdphimetl,"#Delta#phi(met,l_{1})+#Delta#phi(met,l_{2})",0,2*M_PI);
-    toplikelihood.addVariable(&evt.lhi_seljetmulti,"N_{jets}",-0.5,4.5);
-    toplikelihood.addVariable(&evt.lhi_selbjetmulti,"N_{b-jets}",-0.5,4.5);
+  //  toplikelihood.addVariable(&evt.lhi_seljetmulti,"N_{jets}",-0.5,4.5);
+  //  toplikelihood.addVariable(&evt.lhi_selbjetmulti,"N_{b-jets}",-0.5,4.5);
     toplikelihood.addVariable(&evt.lhi_leadleppt,"p_{T}^{1st lep}",0,150);
     toplikelihood.addVariable(&evt.lhi_secleadleppt,"p_{T}^{2nd lep}",0,150);
-    toplikelihood.addVariable(&evt.lhi_leadjetpt,"p_{T}^{1st jet}",0,150);
+    toplikelihood.addVariable(&evt.lhi_leadlepeta,"#eta^{1st lep}",-2.4,2.4);
+    toplikelihood.addVariable(&evt.lhi_secleadlepeta,"#eta^{2nd lep}",-2.4,2.4);
+    toplikelihood.addVariable(&evt.lhi_leadlepphi,"#phi^{1st lep}",-M_PI,M_PI);
+    toplikelihood.addVariable(&evt.lhi_secleadlepphi,"#phi^{2nd lep}",-M_PI,M_PI);
+  //  toplikelihood.addVariable(&evt.lhi_leadjetpt,"p_{T}^{1st jet}",0,150);
     toplikelihood.addVariable(&evt.lhi_mll,"m_{ll}",0.,300);
-    toplikelihood.addVariable(&evt.lhi_ptllj,"p_{T}(llj) [GeV]",50,400);
+   // toplikelihood.addVariable(&evt.lhi_ptllj,"p_{T}(llj) [GeV]",50,400);
+
+
+
+    toplikelihood.addVariable(&evt.lhi_cosllvsetafirstlep,"cos#theta vs #eta_{l1}",-4,2);
+    toplikelihood.addVariable(&evt.lhi_etafirstvsetaseclep,"#eta_{l1} vs #eta_{l2}",-3,3);
+    toplikelihood.addVariable(&evt.lhi_deltaphileps,"#Delta#phi(l_{1},l_{2})",-2*M_PI,2*M_PI);
+    toplikelihood.addVariable(&evt.lhi_coslepanglevsmll,"cos#theta vs m_{ll}",-1,1);
+    toplikelihood.addVariable(&evt.lhi_mllvssumdphimetl,"m_{ll} vs #Delta#phi(met,l_{1})+#Delta#phi(met,l_{2})",-10,0.5);
+
 
     if(usediscr_){
         toplikelihood.setSystematics(getSyst());
@@ -266,6 +330,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
     }
 
     /////////////////////////////////////////////////////////////////////////////////
+
+    //just a test
 
     if(testmode_)
         std::cout << "testmode("<< anaid << "): preparing container1DUnfolds" << std::endl;
@@ -302,6 +368,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
     //get normalization
     double norm=createNormalizationInfo(f,isMC,anaid);
+
     norm*= normmultiplier;
     /////////////////////////// configure scalefactors ////
 
@@ -314,6 +381,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
     TString btagSysAdd=topmass_+"_"+getSyst();
     if(getBTagSF()->getSystematic() != bTagBase::nominal)
         btagSysAdd=topmass_+"_nominal";
+
+    if(fakedata) //always use nominal
+        btagSysAdd=topmass_+"_nominal"+"_fakedata";
 
     if(getBTagSF()->setSampleName((channel_+"_"+btagSysAdd+"_"+toString(inputfile)).Data()) < 0){
         reportError(-3,anaid);
@@ -334,6 +404,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
     getTriggerSF()->setRangeCheck(false);
     getElecSF()->setRangeCheck(false);
     getMuonSF()->setRangeCheck(false);
+
     getElecSF()->setIsMC(isMC);
     getMuonSF()->setIsMC(isMC);
     getTriggerSF()->setIsMC(isMC);
@@ -343,6 +414,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
     getMuonEnergySF()->setRangeCheck(false);
     getElecEnergySF()->setIsMC(isMC);
     getMuonEnergySF()->setIsMC(isMC);
+
 
 
 
@@ -400,6 +472,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
     double sel_step[]={0,0,0,0,0,0,0,0,0};
     float count_samesign=0;
 
+    float genvisPScounter=0;
 
     size_t pdfwidx=0;
     if(usepdfw_>-1) pdfwidx=usepdfw_;
@@ -417,19 +490,6 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
         // t->AddBranchToCache("*");
         t->SetCacheLearnEntries(1000);
     }
-    ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
-    ///////////////////////////////////////// start main loop /////////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
-
-    if(testmode_)
-        std::cout << "testmode("<< anaid << "): starting main loop" << std::endl;
-
 
     Long64_t nEntries=t->GetEntries();
     if(norm==0) nEntries=0; //skip for norm0
@@ -455,7 +515,23 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
         }
     }
-    float beftopptweights=0,aftertopptweights=0; //this is indeed needed due to sqrt() reweighting
+
+    ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
+    ///////////////////////////////////////// start main loop /////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
+
+    if(testmode_)
+        std::cout << "testmode("<< anaid << "): starting main loop" << std::endl;
+
+
+
+
 
 
     for(Long64_t entry=firstentry;entry<nEntries;entry++){
@@ -542,10 +618,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
 
                 if(pGenTops->size()>1){ //ttbar sample
-                    beftopptweights+=puweight;
-                    puweight = sqrt(getTopPtReweighter()->reWeight(pGenTops->at(0).pt(),puweight) *
-                            getTopPtReweighter()->reWeight(pGenTops->at(1).pt(),puweight));
-                    aftertopptweights+=puweight;
+
+                    puweight = getTopPtReweighter()->reWeight(pGenTops->at(0).pt(),pGenTops->at(1).pt() ,puweight);
+
                     gentops.push_back(&pGenTops->at(0));
                     gentops.push_back(&pGenTops->at(0));
                     evt.gentops=&gentops;
@@ -620,6 +695,10 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
                     if(bjet->pt()<30) continue;
                     if(fabs(bjet->eta()) >ps_etajetmax) continue;
                     genvisbjetsfromtop << bjet;
+                }
+                //gen acceptance counter
+                if(genvisjets.size()>1 && genvisleptons3.size()>1 && genvisbjetsfromtop.size()>0){
+                    genvisPScounter+=puweight;
                 }
 
             }
@@ -1103,6 +1182,18 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
         float lhi_secleadleppt=secleadingptlep->pt();
         evt.lhi_secleadleppt=&lhi_secleadleppt;
 
+        float lhi_leadlepeta=leadingptlep->eta();
+        evt.lhi_leadlepeta=&lhi_leadlepeta;
+
+        float lhi_secleadlepeta=secleadingptlep->eta();
+        evt.lhi_secleadlepeta=&lhi_secleadlepeta;
+
+        float lhi_leadlepphi=leadingptlep->phi();
+        evt.lhi_leadlepphi=&lhi_leadlepphi;
+
+        float lhi_secleadlepphi=secleadingptlep->phi();
+        evt.lhi_secleadlepphi=&lhi_secleadlepphi;
+
         float lhi_leadjetpt=0;
         if(selectedjets->size()>0)
             lhi_leadjetpt=selectedjets->at(0)->pt();
@@ -1126,7 +1217,28 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
         evt.lhi_ptllj=&ptllj;
 
 
+        //correlated variables
 
+
+        float lhi_cosllvsetafirstlep =
+                lhi_cosleplepangle - (0.2*(fabs(lhi_leadlepeta)-2.4)*(fabs(lhi_leadlepeta)-2.4) +1);
+        if(lhi_cosleplepangle < -0.4)
+            lhi_cosllvsetafirstlep =
+                    lhi_cosleplepangle - (0.2*(fabs(lhi_leadlepeta)+2.4)*(fabs(lhi_leadlepeta)+2.4) +1);
+
+        evt.lhi_cosllvsetafirstlep=&lhi_cosllvsetafirstlep;
+        float lhi_etafirstvsetaseclep =
+                lhi_leadlepeta + lhi_secleadlepeta;
+        evt.lhi_etafirstvsetaseclep=&lhi_etafirstvsetaseclep;
+        float lhi_deltaphileps =
+                lhi_leadlepphi - lhi_secleadlepphi;
+        evt.lhi_deltaphileps=&lhi_deltaphileps;
+        float  lhi_coslepanglevsmll =
+                -lhi_cosleplepangle - 1/65 * (mll-90);
+        evt.lhi_coslepanglevsmll=&lhi_coslepanglevsmll;
+        float lhi_mllvssumdphimetl =
+                1/14 * (mll-25) - lhi_sumdphimetl;
+        evt.lhi_mllvssumdphimetl=&lhi_mllvssumdphimetl;
 
 
 
@@ -1160,7 +1272,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
         ///////////////////// at least one jet cut STEP 5 ////////////
         step++;
 
-        if(selectedjets->size() < 1) continue;
+        if(!zerojet && selectedjets->size() < 1) continue;
 
         if(getBTagSF()->getMode() == NTBTagSF::shapereweighting_mode){
 
@@ -1196,7 +1308,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
         step++;
 
         //if(midphi && dphiplushardjets.size()<2) continue;
-        if(!onejet && selectedjets->size() < 2) continue;
+        if(!zerojet && !onejet && selectedjets->size() < 2) continue;
         //if(!midphi && medjets.size()<2) continue;
         //if(ptllj<140) continue;
         /*if(dphillj > 2.65 && dphillj < 3.55){
@@ -1278,9 +1390,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
     ///////////////////////////////////////////////////////////////////////
 
     //renorm for topptreweighting
-      if(aftertopptweights>0)
-          norm*=beftopptweights/aftertopptweights;
-    //norm *= getTopPtReweighter()->getRenormalization();
+    norm *= getTopPtReweighter()->getRenormalization();
 
     container1DUnfold::flushAllListed(); // call once again after last event processed
 
@@ -1352,15 +1462,15 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
             }
         }
 
-        csv->addList(legendname,color,norm,legord);
-        if(testmode_ )
-            std::cout << "testmode("<< anaid << "): added 1D List"<< std::endl;
-        csv->addList2D(legendname,color,norm,legord);
-        if(testmode_ )
-            std::cout << "testmode("<< anaid << "): added 2D List"<< std::endl;
         csv->addList1DUnfold(legendname,color,norm,legord);
         if(testmode_ )
             std::cout << "testmode("<< anaid << "): added 1DUnfold List"<< std::endl;
+        csv->addList2D(legendname,color,norm,legord);
+        if(testmode_ )
+            std::cout << "testmode("<< anaid << "): added 2D List"<< std::endl;
+        csv->addList(legendname,color,norm,legord);
+        if(testmode_ )
+            std::cout << "testmode("<< anaid << "): added 1D List"<< std::endl;
 
         if(issignal)
             csv->addSignal(legendname);
@@ -1429,6 +1539,11 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
                 cout << "  => sync step 5 \t1btag";
             std::cout  << std::endl;
         }
+
+        std::cout << "\nEvents in defined visible phase space (normalized): "
+                << genvisPScounter*norm << "\n" << std::endl;
+        std::cout << "\nEvents total (normalized): "
+                << nEntries*norm << "\n" << std::endl;
 
 
         if(singlefile_) return;

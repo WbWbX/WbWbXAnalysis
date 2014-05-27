@@ -29,11 +29,11 @@ void analysisPlotsJan::bookPlots(){
 
     mlbcombthresh_=165;
 
-    mlb=addPlot(genmlb_bins,mlb_bins,"m_lb pair comb unfold","M_{lb} [GeV]", "N/GeV");
+    mlb=addPlot(genmlb_bins,mlb_bins,"m_lb pair comb unfold","m_{lb}* [GeV]", "N/GeV");
 
-    mlbmin=addPlot(genmlb_bins,mlb_bins,"m_lb pair min unfold","M_{lb} [GeV]", "N/GeV");
+    mlbmin=addPlot(genmlb_bins,mlb_bins,"m_lb pair min unfold","m_{lb} [GeV]", "N/GeV");
 
-    mlbivansbins=addPlot(ivangen_mlbbins,ivan_mlbbins,"m_lb ivansbins unfold","M_{lb} [GeV]", "N/GeV");
+    mlbivansbins=addPlot(ivangen_mlbbins,ivan_mlbbins,"m_lb ivansbins unfold","m_{lb} [GeV]", "N/GeV");
 
     vector<float> inclbins; inclbins << 0.5 << 1.5; //vis PS, fullPS
 

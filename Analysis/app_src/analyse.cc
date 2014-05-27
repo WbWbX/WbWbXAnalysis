@@ -60,6 +60,10 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
     btagshapehffile       =  fr.getValue<TString>("btagShapeFileHF");
     btagshapelffile       =  fr.getValue<TString>("btagShapeFileLF");
 
+    //mode options CAN be additionally parsed by file
+    fr.setRequireValues(false);
+    mode                 += fr.getValue<TString>("modeOptions",TString(mode));
+
     TString trigsfhisto="scalefactor eta2d with syst";
 
 
@@ -82,6 +86,9 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 
 
     MainAnalyzer ana;
+    //only used in special cases!
+    ana.setPathToConfigFile(inputfile);
+
 
     ///some checks
 

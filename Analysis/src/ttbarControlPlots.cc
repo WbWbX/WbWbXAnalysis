@@ -24,6 +24,7 @@ namespace ztop{
  */
 void ttbarControlPlots::makeControlPlots(const size_t & step){
 
+    if(!switchedon_) return;
 
 
     initStep(step);
@@ -66,6 +67,11 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
         last()->fill(event()->isoleptons->size(),*event()->puweight);
     }
 
+    SETBINSRANGE(8,-0.5,7.5);
+    addPlot("very loose lepton multi","N_{l_[vloose}}","N_{evt}");
+    if(event()->allleptons){
+        last()->fill(event()->allleptons->size(),*event()->puweight);
+    }
 
     ////////angluar stuff! beware - needs to be done properly later
 
@@ -205,6 +211,15 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
     FILLFOREACH(selectedjets,btag());
 
 
+    SETBINSRANGE(20,-2.5,2.5);
+    addPlot("leading jet eta","#eta_{1^{st}jet}","evt/bw");
+    if(event()->selectedjets && event()->selectedjets->size()>0)
+        FILL(selectedjets->at(0),eta()) ;
+
+    SETBINSRANGE(20,-2.5,2.5);
+    addPlot("secleading jet eta","#eta_{1^{st}jet}","evt/bw");
+    if(event()->selectedjets && event()->selectedjets->size()>1)
+        FILL(selectedjets->at(1),eta()) ;
 
 
     SETBINSRANGE(80,0,400);
@@ -365,6 +380,7 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
         last()->fill(event()->leadinglep->pt()/event()->secleadinglep->pt(),*event()->puweight);
 
     }
+    /*
 
     SETBINSRANGE(50,0,300);
     addPlot("non lb lep pt", "p_{T}^{l_{not}} [GeV]","N_{evt}/GeV");
@@ -449,7 +465,7 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
         }
     }
     ///EVT VARS
-
+     */
 
     SETBINSRANGE(50,0,50);
     addPlot("vertex multiplicity", "n_{vtx}", "N_{evt}");
@@ -466,6 +482,15 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
     addPlot("top likelihood output","D","N_{evt}/bw");
     FILLSINGLE(lh_toplh);
 
+    SETBINSRANGE(60,0,1);
+    addPlot("top likelihood output 1 b-jet","D","N_{evt}/bw");
+    if(event()->selectedbjets && event()->selectedbjets->size()==1)
+        FILLSINGLE(lh_toplh);
+
+    SETBINSRANGE(60,0,1);
+    addPlot("top likelihood output 2 b-jets","D","N_{evt}/bw");
+    if(event()->selectedbjets && event()->selectedbjets->size()==2)
+        FILLSINGLE(lh_toplh);
 
     SETBINSRANGE(40,0,1);
     addPlot("top likelihood output less bins","D","N_{evt}/bw");
@@ -474,9 +499,9 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
     SETBINSRANGE(100,-200,100);
     addPlot("DXi","D_{#xi}","N_{evt}/bw");
     if(event()->leadinglep && event()->secleadinglep && event()->adjustedmet){
-/*
- * from alexei
- */
+        /*
+         * from alexei
+         */
         NTVector lep1p=event()->leadinglep->p4().getNTVector();
         NTVector lep2p=event()->secleadinglep->p4().getNTVector();
         NTVector metp=event()->adjustedmet->p4().getNTVector();
@@ -485,10 +510,11 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
         float pnots=metp*bis;
 
         float dxi=pnots- 0.85* pxivis;
-//std::cout << metp.x() << " "<< metp.y() << " "<< metp.z() << " "<< pxivis<< " " << pnots<< " " <<dxi << std::endl;
+        //std::cout << metp.x() << " "<< metp.y() << " "<< metp.z() << " "<< pxivis<< " " << pnots<< " " <<dxi << std::endl;
         last()->fill(dxi,*event()->puweight);
 
     }
+
 
 
 

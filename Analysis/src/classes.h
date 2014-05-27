@@ -16,6 +16,7 @@ struct dictionary {
 
     std::vector< float *const*> d;
     std::vector<ztop::container1D *> e;
+    std::vector<std::vector<ztop::container2D *> >e2d;
     std::string f;
     ztop::discriminatorFactory c;
     //

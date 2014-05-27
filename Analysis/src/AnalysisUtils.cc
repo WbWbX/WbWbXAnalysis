@@ -18,6 +18,7 @@ void rescaleDY(ztop::container1DStackVector * vec, std::vector<TString> contribu
 
     std::vector<TString> ident;ident.clear();
     std::vector<double> scales;scales.clear();
+
     for(int i=startingstep;i<=8;i++){
         TString stepstring=" step "+toTString(i);
         double dymc = 0;
@@ -38,7 +39,7 @@ void rescaleDY(ztop::container1DStackVector * vec, std::vector<TString> contribu
     }
     //  ztop::container1DStackVector rescaled=vec;
     for(unsigned int i=0;i<contributions.size();i++){
-        vec->multiplyNorms(contributions.at(i), scales, ident);
+        vec->multiplyNorms(contributions.at(i), scales, ident,false);
     }
 
 }

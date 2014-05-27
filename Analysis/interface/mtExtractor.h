@@ -45,14 +45,27 @@ public:
      */
     void setExternalGenInputFilesFormat(const TString& pl);
     void setExternalGenInputPDF(const TString& pl){extfilepdf_=pl;setup_=false;}
+    void setRescaleNLOPred(const bool& doit){rescalepreds_=doit;}
     void setInputFiles(const std::vector<TString>& pl);
     bool getIsExternalGen()const{return isexternalgen_;}
+
+    void setFitUncertaintyModeData(parameterExtractor::fituncertaintyModes uncmode){paraExtr_.setFitUncertaintyModeA(uncmode);}
+    void setFitUncertaintyModeMC(parameterExtractor::fituncertaintyModes uncmode){paraExtr_.setFitUncertaintyModeB(uncmode);}
+
+    void setUseNormalized(bool usenormd){usenormalized_=usenormd;}
+
+    /**
+     * ONLY affects legend/color ordering. No effect on result
+     */
+    void setDefMTop(float inmt){defmtop_=inmt;}
+    float getDefMTop()const{return defmtop_;}
 
     /**
      * style file should incorporate styles for plotterCompare (MC/data dependence)
      * and styles for plotterSimple for chi2 plots
      */
-    void setComparePlotterStyleFile(const std::string& f){compplotsstylefile_=f;}
+    void setComparePlotterStyleFileMC(const std::string& f){compplotsstylefilemc_=f;}
+    void setComparePlotterStyleFileData(const std::string& f){compplotsstylefiledata_=f;}
     void setBinsPlotterStyleFile(const std::string& f){binsplotsstylefile_=f;}
     void setBinsChi2PlotterStyleFile(const std::string& f){binschi2plotsstylefile_=f;}
     void setAllSystStyleFile(const std::string & in){allsyststylefile_=in;}
@@ -73,7 +86,7 @@ public:
     void drawBinLikelihoods(TCanvas *c);
     /*
     void overlayBinFittedFunctions(TCanvas *c);
-    */
+     */
     /**
      * need to be called after each syst variation otherwise result graphs lost
      */
@@ -91,7 +104,10 @@ public:
 
     parameterExtractor * getExtractor(){return &paraExtr_;}
 
-    void drawResultGraph(TCanvas *c);
+    /**
+     * can write back nominal out with stat uncert. (for calib mode)
+     */
+    void drawResultGraph(TCanvas *c, float * nom=0, float * errd=0, float * erru=0);
     graph * getResultGraph(){return &allsyst_;}
 
     void setup(); //just  runs private functions
@@ -102,12 +118,19 @@ public:
 
     void cleanMem();
 
+    TString printConfig()const;
+
+    std::vector<float> getMtValues();
+
 private:
+
+    void setAxisLikelihoodVsMt(graph & g)const;
+    void setAxisXsecVsMt(graph & g)const;
 
     double getNewNorm(double deltam,bool eighttev=true)const;
 
     //init and read in
-    void getMtValues();
+
     void readFiles(); //type specific stuff here
     void renormalize();
     void mergeSyst();
@@ -148,9 +171,9 @@ private:
     std::vector<graph > mcbingraphs_;
 
     TString tmpSysName_;
-    std::vector<graph > tmpbinchi2_;
+    std::vector<graph > tmpbinlhds_;
     std::vector<std::vector<TF1* > > tmpbinfitsdata_,tmpbinfitsmc_;
-    graph               tmpglchi2_;
+    graph               tmpgllhd_;
     TGraphAsymmErrors * tmpglgraph_;
     TF1 * tfitf_;
 
@@ -158,7 +181,7 @@ private:
     float defmtop_;
     bool setup_;
 
-    std::string compplotsstylefile_;
+    std::string compplotsstylefilemc_,compplotsstylefiledata_;
     std::string binsplotsstylefile_;
     std::string binschi2plotsstylefile_;
     std::string binsplusfitsstylefile_;
@@ -173,6 +196,11 @@ private:
     TString fitmode_;
     bool dofolding_;
     bool isexternalgen_;
+
+    std::vector<float> predrescalers_;
+    bool rescalepreds_;
+
+    bool usenormalized_;
 
     template<class T>
     T tryToGet(TFile * f,const TString& name)const{

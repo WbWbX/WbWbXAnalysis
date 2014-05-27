@@ -30,7 +30,10 @@ bool mtExtractor::debug=false;
 
 
 mtExtractor::mtExtractor():plotnamedata_(""),plotnamemc_(""),plottypemc_("cuf"),
-        minbin_(-1),maxbin_(-1),excludebin_(-1),tmpglgraph_(0),tfitf_(0),iseighttev_(true),defmtop_(172.5),setup_(false),syspidx_(1),dofolding_(false),isexternalgen_(false) {
+        minbin_(-1),maxbin_(-1),excludebin_(-1),tmpglgraph_(0),tfitf_(0),
+        iseighttev_(true),defmtop_(172.5),setup_(false),syspidx_(1),
+        dofolding_(false),isexternalgen_(false),rescalepreds_(false),usenormalized_(false)
+{
     reset();
 }
 
@@ -56,6 +59,8 @@ void mtExtractor::setInputFiles(const std::vector<TString>& pl){
     //read format
     plottypemc_="cuf";
     fileReader fr;
+    fr.setStartMarker("[naming scheme]");
+    fr.setEndMarker("[end naming scheme]");
     fr.readFile(extfileformatfile_.Data());
     extfilepreamble_ = fr.getValue<TString>("filepreamble");
     TString extfileendpattern = fr.getValue<TString>("fileendpattern");
@@ -86,8 +91,8 @@ void mtExtractor::setup(){
     getMtValues();
     readFiles();
     renormalize();
-
     mergeSyst();
+
 
     makeGraphs();
     makeBinGraphs();
@@ -107,6 +112,8 @@ void  mtExtractor::cleanMem(){
 void mtExtractor::drawXsecDependence(TCanvas *c, bool fordata){
     if(debug)
         std::cout << "mtExtractor::drawXsecDependence" <<std::endl;
+    if(!setup_)
+        throw std::logic_error("mtExtractor::drawXsecDependence: first setup!");
     //read style file heplotterComparere
     using namespace ztop;
     TString add="MC";
@@ -123,7 +130,7 @@ void mtExtractor::drawXsecDependence(TCanvas *c, bool fordata){
     if(fordata) graphs=&datagraphs_;
 
     for(size_t i=0;i<mtvals_.size();i++){
-        if(fabs(defmtop_ - mtvals_.at(i))<0.1) continue;
+        //if(fabs(DEFTOPMASSFORNNLOMASSDEP - mtvals_.at(i))<0.1) continue;
         std::string mt=toString(mtvals_.at(i));
         mt="_mt"+mt;
         pltrptr->compareIds().push_back(mt);
@@ -131,7 +138,10 @@ void mtExtractor::drawXsecDependence(TCanvas *c, bool fordata){
 
     }
     //read style
-    pltrptr->readStyleFromFile(compplotsstylefile_);
+    if(fordata)
+        pltrptr->readStyleFromFile(compplotsstylefiledata_);
+    else
+        pltrptr->readStyleFromFile(compplotsstylefilemc_);
     //next loop set plots!
     size_t newidx=0;
     for(size_t i=0;i<mtvals_.size();i++){
@@ -153,6 +163,8 @@ void mtExtractor::drawXsecDependence(TCanvas *c, bool fordata){
 void mtExtractor::drawIndivBins(TCanvas *c,int syst){
     if(debug)
         std::cout << "mtExtractor::drawIndivBins" <<std::endl;
+    if(!setup_)
+        throw std::logic_error("mtExtractor::drawIndivBins: first setup!");
 
     if(databingraphs_.size() < 1 || (databingraphs_.size()>0 && syst >= (int)databingraphs_.at(0).getSystSize() )){
         throw std::out_of_range("mtExtractor::drawIndivBins: syst index out of range");
@@ -215,11 +227,12 @@ void mtExtractor::reset(){
     mtvals_.clear();
     databingraphs_.clear();
     mcbingraphs_.clear();
-    tmpbinchi2_.clear();
+    tmpbinlhds_.clear();
     syspidx_=1;
-    allsyst_.clear();
-    allsystsl_.clear();
-    allsystsh_.clear();
+    allsyst_=graph();
+    allsystsl_=graph();
+    allsystsh_=graph();
+
     //  allsyst_.setNPoints(1);
     //  allsyst_.addErrorGraph("systatd",graph(1,""));
     //  allsyst_.addErrorGraph("systatup",graph(1,""));
@@ -227,13 +240,18 @@ void mtExtractor::reset(){
 
 
 ///private functions
-double mtExtractor::getNewNorm(double deltam,bool eighttev)const{ //following mitov NNLO paper
+double mtExtractor::getNewNorm(double deltam,bool eighttev)const{ //following  NNLO paper arXiv:1303.6254
+
+
     if(debug)
         std::cout << "mtExtractor::getNewNorm" <<std::endl;
     double a1=0;
     double a2=0;
 
-    double mref=defmtop_;
+
+#define DEFTOPMASSFORNNLOMASSDEP 172.5
+
+    double mref=DEFTOPMASSFORNNLOMASSDEP;
     if(eighttev){
         a1=-1.1125;
         a2=0.070778;
@@ -249,9 +267,11 @@ double mtExtractor::getNewNorm(double deltam,bool eighttev)const{ //following mi
     return out;
 }
 
-void mtExtractor::getMtValues(){
+std::vector<float>  mtExtractor::getMtValues(){
+
     if(debug)
         std::cout << "mtExtractor::getMtValues" <<std::endl;
+    mtvals_.clear();
     std::vector<TString> notfoundinext;
     for(size_t i=0;i<cufinputfiles_.size();i++){
         std::string file=cufinputfiles_.at(i).Data();
@@ -279,6 +299,7 @@ void mtExtractor::getMtValues(){
             std::cout << notfoundinext.at(i)<<" ";
         std::cout << std::endl;
     }
+    return mtvals_;
 }
 
 
@@ -286,9 +307,13 @@ void mtExtractor::readFiles(){
     if(debug) std::cout << "mtExtractor::readFiles" <<std::endl;
     bool mciscuf=plottypemc_=="cuf";
 
+
     if(!mciscuf && cufinputfiles_.size() != extgenfiles_.size()){
         throw std::runtime_error("mtExtractor::readFiles: needs same number of data inputfiles and external gen files (one for each top mass)");
     }
+
+    bool unfoldfolded=false;
+
     TString extfileendpattern;
     TString histpreamble;
     TString sysupid,sysdownid,nomid;
@@ -313,6 +338,10 @@ void mtExtractor::readFiles(){
         newxsecunits=fr.getValue<TString>("newXSecUnits");
     }
 
+
+    datacont_.clear();
+    mccont_.clear();
+
     for(size_t i=0;i<cufinputfiles_.size();i++){
         container1DUnfold tempcuf;
         tempcuf.loadFromTFile(cufinputfiles_.at(i),plotnamedata_);
@@ -321,6 +350,7 @@ void mtExtractor::readFiles(){
             throw std::runtime_error("mtExtractor::readFiles: at least one file without container1DUnfold");
 
         container1D datareference;
+
         if(!dofolding_){
             datareference=tempcuf.getUnfolded();
         }
@@ -328,8 +358,10 @@ void mtExtractor::readFiles(){
             container1D temp=tempcuf.getRecoContainer();
             datareference=temp-tempcuf.getBackground();
             //rebin at first to gen
-            datareference=datareference.rebinToBinning(tempcuf.getUnfolded());
+            if(!mciscuf)
+                datareference=datareference.rebinToBinning(tempcuf.getUnfolded());
         }
+
         datacont_.push_back(datareference);
 
         TString extfilename;
@@ -342,8 +374,11 @@ void mtExtractor::readFiles(){
             }
             else{
                 gen=tempcuf.getVisibleSignal();
+                if(unfoldfolded){
+                gen=tempcuf.getGenContainer(); //
                 //gen*= (1/tempcuf.getLumi());
-                //   gen=tempcuf.fold(gen);
+                gen=tempcuf.fold(gen); //
+                }
                 gen=gen.rebinToBinning(datareference);
             }
             mccont_.push_back(gen);
@@ -452,16 +487,62 @@ void mtExtractor::readFiles(){
     }
 
 }
+
 void mtExtractor::renormalize(){
     if(debug) std::cout << "mtExtractor::renormalize" <<std::endl;
-    if(plottypemc_!=(TString)"cuf"){
+
+    if(!usenormalized_){
+        //read in renormalization map (k-factors)
+
+        fileReader fr;
+
+        fr.setStartMarker(((TString)"[k-factor map "+extfilepdf_+ "]").Data());
+        fr.setEndMarker(((TString)"[end k-factor map " +extfilepdf_+  "]").Data());
+        fr.readFile(extfileformatfile_.Data());
+
+        predrescalers_.clear();
+        for(size_t i=0;i<mtvals_.size();i++){
+            predrescalers_.push_back(fr.getValue<float>(toString(mtvals_.at(i))));
+        }
+
         //throw std::runtime_error("mtExtractor::renormalize: other mc input not supported yet");
-        std::cout << "external gen input. No renormalization needed - doing nothing" <<std::endl;
+        //std::cout << "external gen input. No renormalization needed - doing nothing" <<std::endl;
+        // if(debug) std::cout << "mtExtractor::renormalize: rescaling gen input with"
+        //}
+
+        bool usecuf= plottypemc_==(TString)"cuf";
+
+        for(size_t i=0;i<mccont_.size();i++){
+            float renorm= 1;
+            if(usecuf){
+                renorm= getNewNorm(mtvals_.at(i)-DEFTOPMASSFORNNLOMASSDEP,iseighttev_);
+                //add NNLO uncertainties
+
+                mccont_.at(i).addGlobalRelError("scale",0.034);
+                mccont_.at(i).addGlobalRelError("pdf",0.026);
+            }
+            //make suitable for n top masses
+            else{
+                if(rescalepreds_){
+                    renorm=predrescalers_.at(i);
+                }
+            }
+            mccont_.at(i) *=renorm;
+
+            if(debug) std::cout << "mtExtractor::renormalize: mt: " <<  mtvals_.at(i) << " sf: " << renorm << std::endl;
+        }
     }
-    for(size_t i=0;i<mccont_.size();i++){
-        float renorm= getNewNorm(mtvals_.at(i)-defmtop_,iseighttev_);
-        mccont_.at(i) *=renorm;
-        if(debug) std::cout << "mtExtractor::renormalize: mt: " <<  mtvals_.at(i) << " sf: " << renorm << std::endl;
+    else{
+        // FIXED:
+        // understand where large UF/OF entries in MC come from!
+        // they come from ttbg entries that go to underflow bin
+        // only for mc
+        for(size_t i=0;i<mccont_.size();i++){
+            mccont_.at(i).normalize(false,true,1);
+        }
+        for(size_t i=0;i<datacont_.size();i++){
+            datacont_.at(i).normalize(false,true,1);
+        }
     }
 
 
@@ -523,8 +604,7 @@ void mtExtractor::makeGraphs(){
 
 graph mtExtractor::makeDepInBin(const std::vector<graph> & graphs, size_t bin)const{
     graph massdep=graph(mtvals_.size());
-    massdep.setXAxisName("m_{t} [GeV]");
-    massdep.setYAxisName(graphs.at(0).getYAxisName());
+
     TString newname;
     for(size_t mtit=0;mtit<mtvals_.size();mtit++){
         const graph & g= graphs.at(mtit);
@@ -532,7 +612,7 @@ graph mtExtractor::makeDepInBin(const std::vector<graph> & graphs, size_t bin)co
             //gives bin width
             float min=g.getPointXContent(bin) - g.getPointXError(bin,true);
             float max=g.getPointXContent(bin) + g.getPointXError(bin,true);
-            newname = g.getXAxisName()+": "+toTString(min) +"-" + toTString(max);
+            newname = "m_{lb}: "+toTString(min) +"-" + toTString(max) +" GeV";
             if(debug) std::cout << "mtExtractor::makeDepInBin: new graph name: "
                     << newname << std::endl;
         }
@@ -553,7 +633,10 @@ graph mtExtractor::makeDepInBin(const std::vector<graph> & graphs, size_t bin)co
     }
 
 
+
     massdep.sortPointsByX();
+    massdep.setName(newname);
+    setAxisXsecVsMt(massdep);
     return massdep;
 }
 
@@ -618,7 +701,10 @@ void mtExtractor::createBinLikelihoods(int syslayer,bool includesyst,bool datasy
     }
     //input prepared
 
-    tmpbinchi2_=paraExtr_.createLikelihoods();
+    tmpbinlhds_=paraExtr_.createLikelihoods();
+    //style
+    for(size_t i=0;i<tmpbinlhds_.size();i++)
+        setAxisLikelihoodVsMt(tmpbinlhds_.at(i));
     /*
     tmpbinfitsdata_=paraExtr_.getFitFunctionA();
     tmpbinfitsmc_=paraExtr_.getFitFunctionB(); */
@@ -629,26 +715,27 @@ void mtExtractor::createBinLikelihoods(int syslayer,bool includesyst,bool datasy
 }
 void mtExtractor::drawBinLikelihoods(TCanvas *c){
     plotterMultiplePlots plotterdef;
-    plotterdef.readStyleFromFile(binsplotsstylefile_);if(getExtractor()->getLikelihoodMode()!= parameterExtractor::lh_fit
+    plotterdef.readStyleFromFile(binschi2plotsstylefile_);if(getExtractor()->getLikelihoodMode()!= parameterExtractor::lh_fit
             || getExtractor()->getLikelihoodMode()!= parameterExtractor::lh_fitintersect){
-        c->SetName("log likelihood per bin "+tmpSysName_);
-        c->SetTitle("log likelihood per bin "+tmpSysName_);
+        c->SetName("-2*log likelihood per bin "+tmpSysName_);
+        c->SetTitle("-2*log likelihood per bin "+tmpSysName_);
     }
     else{
         c->SetName("#chi^{2} per bin "+tmpSysName_);
         c->SetTitle("#chi^{2} per bin "+tmpSysName_);
     }
     //make pads
-    int vdivs=((int)(sqrt(tmpbinchi2_.size())-0.0001))+1;//+1;
-    int hdivs=(int)((float)tmpbinchi2_.size()/(float)vdivs)+1;
+    int vdivs=((int)(sqrt(tmpbinlhds_.size())-0.0001))+1;//+1;
+    int hdivs=(int)((float)tmpbinlhds_.size()/(float)vdivs)+1;
     c->Divide(vdivs,hdivs);
     gStyle->SetOptTitle(1);
-    for(size_t i=0;i<tmpbinchi2_.size();i++){
+    for(size_t i=0;i<tmpbinlhds_.size();i++){
         plotterMultiplePlots * pl=new plotterMultiplePlots(plotterdef);
         pltrptrs_.push_back(pl);
         TVirtualPad *p=c->cd(i+1);
         pl->usePad(p);
-        graph td=tmpbinchi2_.at(i);
+        graph td=tmpbinlhds_.at(i);
+
         pl->setTitle(databingraphs_.at(i).getName());
         pl->addPlot(&td);
         pl->draw();
@@ -720,75 +807,79 @@ void mtExtractor::drawBinsPlusFits(TCanvas *c,int syst){
         pl->setTitle(databingraphs_.at(i).getName());
         graph datafc=getExtractor()->getFittedGraphsA().at(i);
         graph mcfitc=getExtractor()->getFittedGraphsB().at(i);
+        setAxisXsecVsMt(datafc);
         datafc.setName("data fit");
         mcfitc.setName("pred fit");
         pl->addPlot(&datafc);
         pl->addPlot(&mcfitc);
         pl->addPlot(&td);
         pl->addPlot(&tmc);
+
         pl->draw();
     }
 
 }
 
 void mtExtractor::createGlobalLikelihood(){
-    if(tmpbinchi2_.size()<1)
+    if(tmpbinlhds_.size()<1)
         throw std::logic_error("mtExtractor::createGlobalLikelihood: first create (non empty) likelihoods for bins");
     if(paraExtr_.getLikelihoodMode() == parameterExtractor::lh_chi2
             || paraExtr_.getLikelihoodMode() == parameterExtractor::lh_chi2Swapped
-            ||(paraExtr_.getLikelihoodMode() == parameterExtractor::lh_fit && tmpbinchi2_.at(0).getNPoints() > 1)){
+            ||(paraExtr_.getLikelihoodMode() == parameterExtractor::lh_fit && tmpbinlhds_.at(0).getNPoints() > 1)){
 
 
         //just add upp everything
-        tmpglchi2_=tmpbinchi2_.at(0);
+        tmpgllhd_=tmpbinlhds_.at(0);
         gStyle->SetOptTitle(1);
-        for(size_t i=1;i<tmpbinchi2_.size();i++)
-            tmpglchi2_=tmpglchi2_.addY(tmpbinchi2_.at(i));
+        for(size_t i=1;i<tmpbinlhds_.size();i++)
+            tmpgllhd_=tmpgllhd_.addY(tmpbinlhds_.at(i));
 
         if(tmpglgraph_)  {delete tmpglgraph_;tmpglgraph_=0;}
-        tmpglgraph_=(tmpglchi2_.getTGraph());
+        tmpglgraph_=(tmpgllhd_.getTGraph());
     }
+    /*
     else if(paraExtr_.getLikelihoodMode() == parameterExtractor::lh_fitintersect){
         float inverrorsum=0;
         float weightedsum=0;
         ///WARNING, ONLY ONE POINT EXPECTED
-        if(tmpbinchi2_.size() <1)
+        if(tmpbinlhds_.size() <1)
             throw std::runtime_error("mtExtractor::createGlobalLikelihood: in fitting mode: at least one bin expected");
-        if(tmpbinchi2_.at(0).getNPoints()<1 )
+        if(tmpbinlhds_.at(0).getNPoints()<1 )
             throw std::runtime_error("mtExtractor::createGlobalLikelihood: in fitting mode: exaclty one point per graph expected");
 
         //get rid of above exception to do the other implementation
 
 
-        if(tmpbinchi2_.at(0).getNPoints() == 1){
-            tmpglchi2_=graph(1);
-            tmpglchi2_.setPointYContent(0,1);
+        if(tmpbinlhds_.at(0).getNPoints() == 1){
+            tmpgllhd_=graph(1);
+            tmpgllhd_.setPointYContent(0,1);
 
-            for(size_t i=0;i<tmpbinchi2_.size();i++){
+            for(size_t i=0;i<tmpbinlhds_.size();i++){
 
 
-                float errormax=tmpbinchi2_.at(i).getPointXError(0,false,"");
-                if(fabs(errormax) > 0.5 * tmpbinchi2_.at(i).getPointXContent(0)){
+                float errormax=tmpbinlhds_.at(i).getPointXError(0,false,"");
+                if(fabs(errormax) > 0.5 * tmpbinlhds_.at(i).getPointXContent(0)){
                     if(debug) std::cout << "mtExtractor::createGlobalLikelihood: in fit mode, bin " <<i << " not used (large error)" <<std::endl;
                     continue;
                 }
                 inverrorsum += 1/(errormax*errormax);
-                weightedsum += tmpbinchi2_.at(i).getPointXContent(0)/(errormax*errormax);
+                weightedsum += tmpbinlhds_.at(i).getPointXContent(0)/(errormax*errormax);
             }
             float weightedmean=weightedsum/inverrorsum;
-            tmpglchi2_.setPointXContent(0,weightedmean);
-            tmpglchi2_.setPointXStat(0,1/inverrorsum);
+            tmpgllhd_.setPointXContent(0,weightedmean);
+            tmpgllhd_.setPointXStat(0,1/inverrorsum);
             if(tmpglgraph_)  {delete tmpglgraph_;tmpglgraph_=0;}
-            tmpglgraph_=(tmpglchi2_.getTGraph());
+            tmpglgraph_=(tmpgllhd_.getTGraph());
         }
 
     }
+     */
 
 }
 void mtExtractor::drawGlobalLikelihood(TCanvas *c,bool zoom){
     if(paraExtr_.getLikelihoodMode() == parameterExtractor::lh_chi2
             || paraExtr_.getLikelihoodMode() == parameterExtractor::lh_chi2Swapped
-            || (paraExtr_.getLikelihoodMode() == parameterExtractor::lh_fit  && tmpbinchi2_.at(0).getNPoints() > 1)){
+            || (paraExtr_.getLikelihoodMode() == parameterExtractor::lh_fit  && tmpbinlhds_.at(0).getNPoints() > 1)){
 
         if(paraExtr_.getLikelihoodMode() == parameterExtractor::lh_fit ){
             c->SetName("global log likelihood "+tmpSysName_);
@@ -805,7 +896,7 @@ void mtExtractor::drawGlobalLikelihood(TCanvas *c,bool zoom){
         pl->readStyleFromFile(binschi2plotsstylefile_);
         pl->usePad(c);
         pl->setTitle("global "+tmpSysName_);
-        pl->addPlot(&tmpglchi2_);
+        pl->addPlot(&tmpgllhd_);
         pl->draw();
 
 
@@ -820,25 +911,28 @@ void mtExtractor::drawGlobalLikelihood(TCanvas *c,bool zoom){
         float intersecty=0;
 
         if(paraExtr_.getLikelihoodMode() == parameterExtractor::lh_fit){
-            //extract from log likelihood
+            //extract from -2*log likelihood
             //look for maximum
-            size_t maxpoint=0;
 
-            centralYValue=tmpglchi2_.getYMax(maxpoint,false);
-            intersecty=centralYValue-0.5;
-            cetralXValue=tmpglchi2_.getPointXContent(maxpoint);
+            float errordeltay=1;
 
-            plotmin=tmpglchi2_.getYMin();
+            size_t minpoint=0;
 
-            for(size_t n=maxpoint;n<tmpglchi2_.getNPoints();n++){
-                if(centralYValue - tmpglchi2_.getPointYContent(n) > 0.5){
-                    xpright=tmpglchi2_.getPointXContent(n);
+            centralYValue=tmpgllhd_.getYMin(minpoint,false);
+            intersecty=centralYValue+errordeltay;
+            cetralXValue=tmpgllhd_.getPointXContent(minpoint);
+
+            plotmin=centralYValue-1;
+
+            for(size_t n=minpoint;n<tmpgllhd_.getNPoints();n++){
+                if(fabs(centralYValue - tmpgllhd_.getPointYContent(n)) > errordeltay){
+                    xpright=tmpgllhd_.getPointXContent(n);
                     break;
                 }
             }
-            for(size_t n=maxpoint;n>1;n--){ //1 to avoid warnings
-                if(centralYValue - tmpglchi2_.getPointYContent(n) > 0.5){
-                    xpleft=tmpglchi2_.getPointXContent(n);
+            for(size_t n=minpoint;n>1;n--){ //1 to avoid warnings
+                if(fabs(centralYValue - tmpgllhd_.getPointYContent(n)) > errordeltay){
+                    xpleft=tmpgllhd_.getPointXContent(n);
                     break;
                 }
             }
@@ -848,21 +942,21 @@ void mtExtractor::drawGlobalLikelihood(TCanvas *c,bool zoom){
             if(!tfitf_) throw std::logic_error("mtExtractor::drawGlobalLikelihood: first fitGlobalLikelihood");
 
             tfitf_->Draw("same");
-            centralYValue=tfitf_->GetMinimum(tmpglchi2_.getXMin(),tmpglchi2_.getXMax());
+            centralYValue=tfitf_->GetMinimum(tmpgllhd_.getXMin(),tmpgllhd_.getXMax());
             std::cout << "minimum: " << centralYValue <<std::endl;
             plotmin=centralYValue-1;
             intersecty=centralYValue+1;
 
-            cetralXValue=tfitf_->GetX(centralYValue,tmpglchi2_.getXMin(),tmpglchi2_.getXMax());
-            xpleft=tfitf_->GetX(centralYValue+1,tmpglchi2_.getXMin(),cetralXValue);
-            xpright=tfitf_->GetX(centralYValue+1,cetralXValue,tmpglchi2_.getXMax());
+            cetralXValue=tfitf_->GetX(centralYValue,tmpgllhd_.getXMin(),tmpgllhd_.getXMax());
+            xpleft=tfitf_->GetX(centralYValue+1,tmpgllhd_.getXMin(),cetralXValue);
+            xpright=tfitf_->GetX(centralYValue+1,cetralXValue,tmpgllhd_.getXMax());
         }
 
         TLine * xlinel=addObject(new TLine(xpleft,plotmin,xpleft,intersecty));
         TLine * xliner=addObject(new TLine(xpright,plotmin,xpright,intersecty));
         TLine * xlinec=addObject(new TLine(cetralXValue,plotmin,cetralXValue,centralYValue));
-        TLine * yline=addObject(new TLine(tmpglchi2_.getXMin(),intersecty,xpleft,intersecty));
-        TLine * yline2=addObject(new TLine(tmpglchi2_.getXMin(),centralYValue,cetralXValue,centralYValue));
+        TLine * yline=addObject(new TLine(tmpgllhd_.getXMin(),intersecty,xpleft,intersecty));
+        TLine * yline2=addObject(new TLine(tmpgllhd_.getXMin(),centralYValue,cetralXValue,centralYValue));
         yline->Draw("same");
         yline2->Draw("same");
         xlinel->Draw("same");
@@ -880,10 +974,11 @@ void mtExtractor::drawGlobalLikelihood(TCanvas *c,bool zoom){
             syspidx_++;
 
     }
+    /*
     else if(paraExtr_.getLikelihoodMode() == parameterExtractor::lh_fitintersect){
 
 
-        if(tmpglchi2_.getNPoints()>1 ||tmpglchi2_.getNPoints()<1 )
+        if(tmpgllhd_.getNPoints()>1 ||tmpgllhd_.getNPoints()<1 )
             throw std::runtime_error("mtExtractor::drawGlobalLikelihood: in fitting mode: exactly one point per graph expected");
 
 
@@ -892,19 +987,20 @@ void mtExtractor::drawGlobalLikelihood(TCanvas *c,bool zoom){
         pl->readStyleFromFile(binschi2plotsstylefile_);
         pl->usePad(c);
         pl->setTitle("global "+tmpSysName_);
-        pl->addPlot(&tmpglchi2_);
+        pl->addPlot(&tmpgllhd_);
         pl->draw();
         TString pointname=tmpSysName_;
         if(tmpSysName_=="") pointname="nominal";
 
-        allsyst_.addPoint(tmpglchi2_.getPointXContent(0),syspidx_,pointname);
-        allsystsl_.addPoint(tmpglchi2_.getPointXContent(0)+tmpglchi2_.getPointXStat(0),syspidx_,pointname);
-        allsystsh_.addPoint(tmpglchi2_.getPointXContent(0)-tmpglchi2_.getPointXStat(0),syspidx_,pointname);
+        allsyst_.addPoint(tmpgllhd_.getPointXContent(0),syspidx_,pointname);
+        allsystsl_.addPoint(tmpgllhd_.getPointXContent(0)+tmpgllhd_.getPointXStat(0),syspidx_,pointname);
+        allsystsh_.addPoint(tmpgllhd_.getPointXContent(0)-tmpgllhd_.getPointXStat(0),syspidx_,pointname);
         syspidx_++;
         if(!(tmpSysName_.Contains("up")||tmpSysName_.Contains("down")))
             syspidx_++;
 
     }
+     */
 }
 
 void mtExtractor::fitGlobalLikelihood(){
@@ -920,7 +1016,7 @@ void mtExtractor::fitGlobalLikelihood(){
 
     if(tfitf_) {delete tfitf_; tfitf_=0;}
 
-    tfitf_ = new TF1("f1",fitmode_,tmpglchi2_.getXMin(),tmpglchi2_.getXMax());
+    tfitf_ = new TF1("f1",fitmode_,tmpgllhd_.getXMin(),tmpgllhd_.getXMax());
     tmpglgraph_->Fit("f1","VR");
 
 
@@ -928,14 +1024,14 @@ void mtExtractor::fitGlobalLikelihood(){
 
 }
 
-void mtExtractor::drawResultGraph(TCanvas *c){
+void mtExtractor::drawResultGraph(TCanvas *c, float * nomp, float * errdp, float * errup){
 
 
     if(debug) std::cout << " mtExtractor::drawResultGraph " <<std::endl;
     c->SetName("result graph");
     c->SetTitle("result graph");
 
-    if(tmpglchi2_.getNPoints()<1)return; //DEBUG
+    if(tmpgllhd_.getNPoints()<1)return; //DEBUG
 
     //add sum point
     size_t nompoint=0;
@@ -963,18 +1059,39 @@ void mtExtractor::drawResultGraph(TCanvas *c){
 
 
     for(size_t i=0;i<allsyst_.getNPoints();i++){
-        if(i==nompoint) continue;
-        graph tmperr(1);
-        tmperr.setPointYStat(0,fakeystat);
-        tmperr.setPointYContent(0,fakeycontent);
-        tmperr.setPointXContent(0,allsyst_.getPointXContent(i));
-        tmperr.setPointXStat(0,allsyst_.getPointXError(i,false));
+        if(i!=nompoint){
+            graph tmperr(1);
+            tmperr.setPointYStat(0,fakeystat);
+            tmperr.setPointYContent(0,fakeycontent);
+            tmperr.setPointXContent(0,allsyst_.getPointXContent(i));
+            tmperr.setPointXStat(0,allsyst_.getPointXError(i,false));
+            allsystcombined.addErrorGraph(allsyst_.getPointName(i),tmperr);
+        }
+        else{
+            float nom,erru,errd;
+            nom=allsyst_.getPointXContent(i);
+            erru=allsyst_.getPointXContent(i,1)-nom;
+            errd=allsyst_.getPointXContent(i,0)-nom;
+            if(erru<errd){
+                errd=erru;
+                erru=allsyst_.getPointXContent(i,0)-nom;
+            }
+            erru=fabs(erru);
+            errd=fabs(errd);
+            if(nomp)
+                *nomp=nom;
+            if(errup)
+                *errup=erru;
+            if(errdp)
+                *errdp=errd;
+
+        }
         std::cout << allsyst_.getPointXContent(i) << " for " << allsyst_.getPointName(i) <<std::endl;
-        /* size_t newsys= */allsystcombined.addErrorGraph(allsyst_.getPointName(i),tmperr);
+        /* size_t newsys= */
     }
 
 
-
+    setAxisXsecVsMt(allsystcombined);
 
     std::cout << "NOW" <<std::endl;
 
@@ -997,5 +1114,94 @@ void mtExtractor::drawResultGraph(TCanvas *c){
     xlinel->Draw("same");
 
 }
+
+
+TString mtExtractor::printConfig()const{
+    /* TString plotnamedata_;
+    TString plotnamemc_; //ff
+    TString plottypemc_; //ff
+    int minbin_;
+    int maxbin_;
+    int excludebin_;
+    std::vector<TString> cufinputfiles_;
+    std::vector<TString> extgenfiles_;
+    TString extfileformatfile_,extfilepdf_;
+    TString extfilepreamble_;
+
+    std::vector<container1D > datacont_;
+    std::vector<container1D > mccont_;
+    std::vector<graph > datagraphs_;
+    std::vector<graph > mcgraphs_;
+    std::vector<float> mtvals_;
+
+
+    std::vector<graph > databingraphs_;
+    std::vector<graph > mcbingraphs_;
+
+    TString tmpSysName_;
+    std::vector<graph > tmpbinchi2_;
+    std::vector<std::vector<TF1* > > tmpbinfitsdata_,tmpbinfitsmc_;
+    graph               tmpglchi2_;
+    TGraphAsymmErrors * tmpglgraph_;
+    TF1 * tfitf_;
+
+    bool iseighttev_;
+    float defmtop_;
+    bool setup_;
+
+    std::string compplotsstylefile_;
+    std::string binsplotsstylefile_;
+    std::string binschi2plotsstylefile_;
+    std::string binsplusfitsstylefile_;
+    std::vector<plotterBase *> pltrptrs_;
+
+    parameterExtractor paraExtr_;
+
+    graph allsyst_,allsystsl_,allsystsh_;
+    std::string allsyststylefile_;
+    float syspidx_;
+
+    TString fitmode_;
+    bool dofolding_;
+    bool isexternalgen_;
+
+    std::vector<float> predrescalers_;
+    bool rescalepreds_;
+     */
+
+    TString out;
+    out+="plotname: " + plotnamedata_ + " / " + plotnamemc_+ " (data/MC)\n";
+    out+="plottype: " + plottypemc_ +"\n";
+    out+="minbin: "+ toTString(minbin_) +"\n";
+    out+="maxbin: "+ toTString(maxbin_) +"\n";
+    out+="excludebin: "+ toTString(excludebin_) +"\n";
+    out+="def mtop: " + toTString(defmtop_)+"\n\n";
+    out+= "style files: \n" +  (TString)"compplotsstylefile: " + (TString)compplotsstylefilemc_ +(TString)"\n";
+    out+= "binsplotsstylefile: " + (TString)binsplotsstylefile_ +"\n";
+    out+= "binschi2plotsstylefile: " +  (TString)binschi2plotsstylefile_ +"\n";
+    out+= "binsplusfitsstylefile: " + (TString)binsplusfitsstylefile_ +"\n";
+    out+= "allsyststylefile: " + (TString)allsyststylefile_ +"\n\n";
+    out+= "fitmode: " +fitmode_;
+    out+="\nused folding: "+toTString(dofolding_);
+    out+="\nexternal gen: "+toTString(isexternalgen_);
+    out+="\nrescalepreds: "+toTString(rescalepreds_);
+
+    return out;
+}
+
+
+void mtExtractor::setAxisLikelihoodVsMt(graph & g)const{
+
+    g.setXAxisName("m_{t} [GeV]");
+    g.setYAxisName("-2log(L(m_{t}))");
+
+}
+void mtExtractor::setAxisXsecVsMt(graph & g)const{
+
+    g.setXAxisName("m_{t} [GeV]");
+    g.setYAxisName("d#sigma_{t#bar{T}}/dm_{lb} [pb/GeV]");
+}
+
+
 
 }
