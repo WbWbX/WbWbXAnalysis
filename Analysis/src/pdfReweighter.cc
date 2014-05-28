@@ -1,0 +1,36 @@
+/*
+ * pdfReweighter.cc
+ *
+ *  Created on: May 28, 2014
+ *      Author: kiesej
+ */
+
+
+#include "../interface/pdfReweighter.h"
+#include "TtZAnalysis/DataFormats/interface/NTEvent.h"
+#include <stdexcept>
+
+namespace ztop{
+
+pdfReweighter::pdfReweighter():simpleReweighter(),ntevent_(0),pdfidx_(0){}
+
+pdfReweighter::~pdfReweighter(){}
+
+void pdfReweighter::reWeight( float &oldweight){
+    if(switchedoff_){
+        setNewWeight(1);
+    }
+    else{
+        if(ntevent_->PDFWeightsSize()<=pdfidx_){
+            throw std::out_of_range("pdfReweighter::reWeight: pdf index out of range");
+        }
+        float newweight = ntevent_->PDFWeight(pdfidx_);
+        setNewWeight(newweight);
+    }
+    simpleReweighter::reWeight(oldweight);
+}
+
+}
+
+
+

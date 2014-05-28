@@ -7,6 +7,7 @@
 #include "TtZAnalysis/DataFormats/interface/NTJERAdjuster.h"
 #include "TtZAnalysis/DataFormats/interface/NTJECUncertainties.h"
 #include "TtZAnalysis/DataFormats/interface/NTBTagSF.h"
+#include "pdfReweighter.h"
 #include "Pipes.h"
 #include "scalefactors.h"
 #include "reweightfunctions.h"
@@ -122,6 +123,8 @@ public:
 
     ztop::reweightfunctions * getTopPtReweighter(){return &topptReweighter_;}
 
+    ztop::pdfReweighter * getPdfReweighter(){return &pdfweighter_;}
+
     MainAnalyzer & operator= (const MainAnalyzer &);
 
 
@@ -167,6 +170,11 @@ private:
     bool b_ee_,b_emu_,b_mumu_,is7TeV_;
     TString datasetdirectory_;
     double lumi_;
+    /**
+     * default: NTEvent, can be changed e.g. to use weights of different pdfs
+     * incorporated in the same ntuple
+     */
+    TString eventbranch_;
 
     TString mode_;
 
@@ -178,6 +186,8 @@ private:
     ztop::NTJERAdjuster  jeradjuster_;
     ztop::NTJECUncertainties  jecuncertainties_;
     ztop::NTBTagSF  btagsf_;
+
+    ztop::pdfReweighter pdfweighter_;
 
     ztop::containerStackVector  allplotsstackvector_;
 
@@ -240,6 +250,8 @@ private:
         return out;
     }
 
+
+    void setCacheProperties(TTree * t,const TString& inputtree)const;
 
 
 };

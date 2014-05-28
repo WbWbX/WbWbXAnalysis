@@ -7,13 +7,13 @@
 
 #ifndef REWEIGHTFUNCTIONS_H_
 #define REWEIGHTFUNCTIONS_H_
-
+#include "simpleReweighter.h"
 
 namespace ztop{
 
-class reweightfunctions{
+class reweightfunctions: public simpleReweighter{
 public:
-    reweightfunctions(): syst_(nominal),type_(toppt),unwcounter_(0),wcounter_(0),switchedoff_(false){}
+    reweightfunctions():simpleReweighter(), syst_(nominal),type_(toppt){}
     ~reweightfunctions(){}
 
     enum functiontype{toppt,flat};
@@ -22,27 +22,24 @@ public:
     void setSystematics(systematics insys){syst_=insys;}
     void setFunction(functiontype func){type_=func;}
 
-    void switchOff(bool switchoff){switchedoff_=switchoff;}
 
     /**
      * reweights the input weight.
      * Example use:
-     * puweight = reWeight(someinputvar, puweight);
-     * Do NOT do:
-     * puweight *= reWeight(someinputvar, 1);
-     * if you intent to use getRenormalization() at some point
+     * reWeight(someinputvar, puweight);
      */
-    float reWeight(const float& var, float previousweight) ;
-    float reWeight(const float& var1,const float& var2 , float previousweight) ;
+    void reWeight(const float& var, float& previousweight) ;
+    void reWeight(const float& var1,const float& var2 , float& previousweight) ;
 
-    float getRenormalization()const{if(wcounter_!=0)return unwcounter_/wcounter_; else return 1;}
 
 private:
 
+    void setNewWeight(const float &w){simpleReweighter::setNewWeight(w);}
+    void reWeight( float &oldweight){simpleReweighter::reWeight(oldweight);}
+
+
     systematics syst_;
     functiontype type_;
-    float unwcounter_,wcounter_;
-    bool switchedoff_;
 
 };
 

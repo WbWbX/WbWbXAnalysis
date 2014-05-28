@@ -42,10 +42,13 @@
 #include "TtZAnalysis/DataFormats/interface/NTLorentzVector.h"
 
 #include "../interface/analysisPlotsJan.h"
+#include "../interface/analysisPlotsAnya.h"
+
 #include "../interface/discriminatorFactory.h"
 
+#include "../interface/tBranchHandler.h"
+
 #include <sys/types.h>
-#include <sys/stat.h>
 
 /*
  * Running on the samples is parallelized.
@@ -231,6 +234,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
         getTopPtReweighter()->setSystematics(reweightfunctions::nominal); //setSystematics("nom");
 
+        getPdfReweighter()->setPdfIndex(0);
+
         //for other parameters reread config
         fileReader fr;
         fr.setComment("$");
@@ -243,15 +248,11 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
 
         //re-adjust systematic filenames
-        inputfile.ReplaceAll("_ttscaleup.root",".root");
-        inputfile.ReplaceAll("_ttscaledown.root",".root");
-        inputfile.ReplaceAll("_ttmup.root",".root");
-        inputfile.ReplaceAll("_ttmdown.root",".root");
-        inputfile.ReplaceAll("_Zmup.root",".root");
-        inputfile.ReplaceAll("_Zmdown.root",".root");
-        inputfile.ReplaceAll("_Zscaleup.root",".root");
-        inputfile.ReplaceAll("_Zscaledown.root",".root");
-
+        for(size_t i=0;i<ftorepl_.size();i++){
+            if(inputfile.EndsWith(ftorepl_.at(i))){
+                inputfile.ReplaceAll(fwithfix_.at(i),ftorepl_.at(i));
+            }
+        }
 
         //this is bad style.. anyway
     }
@@ -298,20 +299,20 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
     toplikelihood.addVariable(&evt.lhi_dphillj,"#Delta#phi(ll,j)",0,M_PI);
     toplikelihood.addVariable(&evt.lhi_cosleplepangle,"#cos#theta_{ll}",-1.,1.);
-   // if(!usediscr_)
-  //      toplikelihood.addVariable(&evt.lhi_leadjetbtag,"D_{b}^{jet1}",-1,1);
+    // if(!usediscr_)
+    //      toplikelihood.addVariable(&evt.lhi_leadjetbtag,"D_{b}^{jet1}",-1,1);
     toplikelihood.addVariable(&evt.lhi_sumdphimetl,"#Delta#phi(met,l_{1})+#Delta#phi(met,l_{2})",0,2*M_PI);
-  //  toplikelihood.addVariable(&evt.lhi_seljetmulti,"N_{jets}",-0.5,4.5);
-  //  toplikelihood.addVariable(&evt.lhi_selbjetmulti,"N_{b-jets}",-0.5,4.5);
+    //  toplikelihood.addVariable(&evt.lhi_seljetmulti,"N_{jets}",-0.5,4.5);
+    //  toplikelihood.addVariable(&evt.lhi_selbjetmulti,"N_{b-jets}",-0.5,4.5);
     toplikelihood.addVariable(&evt.lhi_leadleppt,"p_{T}^{1st lep}",0,150);
     toplikelihood.addVariable(&evt.lhi_secleadleppt,"p_{T}^{2nd lep}",0,150);
     toplikelihood.addVariable(&evt.lhi_leadlepeta,"#eta^{1st lep}",-2.4,2.4);
     toplikelihood.addVariable(&evt.lhi_secleadlepeta,"#eta^{2nd lep}",-2.4,2.4);
     toplikelihood.addVariable(&evt.lhi_leadlepphi,"#phi^{1st lep}",-M_PI,M_PI);
     toplikelihood.addVariable(&evt.lhi_secleadlepphi,"#phi^{2nd lep}",-M_PI,M_PI);
-  //  toplikelihood.addVariable(&evt.lhi_leadjetpt,"p_{T}^{1st jet}",0,150);
+    //  toplikelihood.addVariable(&evt.lhi_leadjetpt,"p_{T}^{1st jet}",0,150);
     toplikelihood.addVariable(&evt.lhi_mll,"m_{ll}",0.,300);
-   // toplikelihood.addVariable(&evt.lhi_ptllj,"p_{T}(llj) [GeV]",50,400);
+    // toplikelihood.addVariable(&evt.lhi_ptllj,"p_{T}(llj) [GeV]",50,400);
 
 
 
@@ -340,14 +341,16 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
 
     analysisPlotsJan jansplots_step8(8);
+    analysisPlotsAnya anyasplots_step8(8);
     if((TString)getenv("USER") == (TString)"kiesej"){
         jansplots_step8.enable();
     }
-    /*  if((TString)getenv("USER") == (TString)"dolinska"){
+    if((TString)getenv("USER") == (TString)"dolinska"){
         jansplots_step8.enable();
-    } */
+    }
 
     jansplots_step8.bookPlots();
+    anyasplots_step8.bookPlots();
 
     //global settings for analysis plots
     container1DUnfold::setAllListedMC(isMC && !fakedata);
@@ -364,6 +367,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
     plots.initSteps(8);
     zplots.initSteps(8);
     jansplots_step8.setEvent(evt);
+    anyasplots_step8.setEvent(evt);
 
 
     //get normalization
@@ -392,14 +396,6 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
     getBTagSF()->setIsMC(isMC);
 
 
-
-    ////TEST
-    //another btag SF util for tight working point
-    // NTBTagSF medBTagSF = *getBTagSF();
-    // std::cout << "the following message does NOT apply to the normal selection!" << std::endl;
-    // medBTagSF.setWorkingPoint("csvm");
-
-
     //range check switched off because of different ranges in bins compared to diff Xsec (leps)
     getTriggerSF()->setRangeCheck(false);
     getElecSF()->setRangeCheck(false);
@@ -415,58 +411,33 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
     getElecEnergySF()->setIsMC(isMC);
     getMuonEnergySF()->setIsMC(isMC);
 
+    if(!isMC)
+        getPdfReweighter()->switchOff(true);
 
 
 
-    /////////open main tree and prepare branches / collections
 
-
+    /*
+     * Open Main tree,
+     * Set branches
+     * the handler is only a small wrapper
+     */
     TTree * t = (TTree*) f->Get("PFTree/PFTree");
 
-    TBranch * b_TriggerBools=0;
-    std::vector<bool> * p_TriggerBools=0;
-    t->SetBranchAddress("TriggerBools",&p_TriggerBools, &b_TriggerBools);
-    TBranch * b_Electrons=0;
-    vector<NTElectron> * pElectrons = 0;
-    t->SetBranchAddress(electrontype,&pElectrons,&b_Electrons);
-    TBranch * b_Muons=0;
-    vector<NTMuon> * pMuons = 0;
-    t->SetBranchAddress("NTMuons",&pMuons, &b_Muons);
-    TBranch * b_Jets=0;         // ##TRAP##
-    vector<NTJet> * pJets=0;
-    t->SetBranchAddress("NTJets",&pJets, &b_Jets);
-    TBranch * b_Met=0;
-    NTMet * pMet = 0;
-    t->SetBranchAddress(mettype,&pMet,&b_Met);
-    TBranch * b_Event=0;
-    NTEvent * pEvent = 0;
-    t->SetBranchAddress("NTEvent",&pEvent,&b_Event);
-    TBranch * b_GenTops=0;
-    vector<NTGenParticle> * pGenTops=0;
-    t->SetBranchAddress("NTGenTops",&pGenTops,&b_GenTops);
-    // TBranch * b_GenWs=0;
-    TBranch * b_GenZs=0;
-    vector<NTGenParticle> * pGenZs=0;
-    t->SetBranchAddress("NTGenZs",&pGenZs,&b_GenZs);
-    TBranch * b_GenBs=0;
-    vector<NTGenParticle> * pGenBs=0;
-    t->SetBranchAddress("NTGenBs",&pGenBs,&b_GenBs);
-    TBranch * b_GenBHadrons=0;
-    vector<NTGenParticle> * pGenBHadrons=0;
-    t->SetBranchAddress("NTGenBHadrons",&pGenBHadrons,&b_GenBHadrons);
-    TBranch * b_GenLeptons3=0;
-    vector<NTGenParticle> *pGenLeptons3 =0;
-    t->SetBranchAddress("NTGenLeptons3",&pGenLeptons3,&b_GenLeptons3);
-    TBranch * b_GenLeptons1=0;
-    vector<NTGenParticle> *pGenLeptons1 =0;
-    t->SetBranchAddress("NTGenLeptons1",&pGenLeptons1,&b_GenLeptons1);
-    TBranch * b_GenJets=0;
-    vector<NTGenJet> * pGenJets=0;
-    t->SetBranchAddress("NTGenJets",&pGenJets,&b_GenJets);
-    TBranch * b_GenNeutrinos=0;
-    vector<NTGenParticle> * pGenNeutrinos=0;
-    t->SetBranchAddress("NTGenNeutrinos",&pGenNeutrinos,&b_GenNeutrinos);
-
+    tBranchHandler<std::vector<bool> >     b_TriggerBools(t,"TriggerBools");
+    tBranchHandler<vector<NTElectron> >    b_Electrons(t,electrontype);
+    tBranchHandler<vector<NTMuon> >        b_Muons(t,"NTMuons");
+    tBranchHandler<vector<NTJet> >         b_Jets(t,"NTJets");
+    tBranchHandler<NTMet>                  b_Met(t,mettype);
+    tBranchHandler<NTEvent>                b_Event(t,eventbranch_);
+    tBranchHandler<vector<NTGenParticle> > b_GenTops(t,"NTGenTops");
+    tBranchHandler<vector<NTGenParticle> > b_GenZs(t,"NTGenZs");
+    tBranchHandler<vector<NTGenParticle> > b_GenBs(t,"NTGenBs");
+    tBranchHandler<vector<NTGenParticle> > b_GenBHadrons(t,"NTGenBHadrons");
+    tBranchHandler<vector<NTGenParticle> > b_GenLeptons3(t,"NTGenLeptons3");
+    tBranchHandler<vector<NTGenParticle> > b_GenLeptons1(t,"NTGenLeptons1");
+    tBranchHandler<vector<NTGenJet> >      b_GenJets(t,"NTGenJets");
+    tBranchHandler<vector<NTGenParticle> > b_GenNeutrinos(t,"NTGenNeutrinos");
 
     //some helpers
     double sel_step[]={0,0,0,0,0,0,0,0,0};
@@ -474,21 +445,10 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
     float genvisPScounter=0;
 
-    size_t pdfwidx=0;
-    if(usepdfw_>-1) pdfwidx=usepdfw_;
-
-    //speed up - testing!
-
-    struct stat filestatus;
-    stat((datasetdirectory_+inputfile).Data(), &filestatus );
-
-
     if(!testmode_){
-        t->SetCacheSize(filestatus.st_size/10);
-        if(t->GetCacheSize() > 100e6)
-            t->SetCacheSize(100e6);
-        // t->AddBranchToCache("*");
-        t->SetCacheLearnEntries(1000);
+        // this enables some caching while reading the tree. Speeds up batch mode
+        // significantly!
+        setCacheProperties(t,datasetdirectory_+inputfile);
     }
 
     Long64_t nEntries=t->GetEntries();
@@ -530,10 +490,6 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
         std::cout << "testmode("<< anaid << "): starting main loop" << std::endl;
 
 
-
-
-
-
     for(Long64_t entry=firstentry;entry<nEntries;entry++){
 
         t->LoadTree(entry);
@@ -546,29 +502,23 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
         size_t step=0;
         evt.reset();
-        evt.event=pEvent;
+        evt.event=b_Event.content();
         container1DUnfold::flushAllListed(); //important to call each event
 
         //reports current status to parent
         reportStatus(entry,nEntries,anaid);
 
-        b_Event->GetEntry(entry);
+        b_Event.getEntry(entry);
         float puweight=1;
-        if (isMC) puweight = getPUReweighter()->getPUweight(pEvent->truePU());
+        if (isMC) puweight = getPUReweighter()->getPUweight(b_Event.content()->truePU());
         if(testmode_ && entry==0)
             std::cout << "testmode("<< anaid << "): got first event entry" << std::endl;
 
         evt.puweight=&puweight;
-        if(usepdfw_>-1 && isMC){
-            //check once
-            if(entry<1){
-                if(pdfwidx >= pEvent->PDFWeightsSize()){
-                    throw std::out_of_range("PDF weight index not found");
-                }
-            }
 
-            puweight*=pEvent->PDFWeight(pdfwidx);
-        }
+        getPdfReweighter()->setNTEvent(b_Event.content());
+        getPdfReweighter()->reWeight(puweight);
+
 
         /////////////////////////////////////////////////////////////
         /////////////////////////////////////////////////////////////
@@ -602,31 +552,31 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
             if(testmode_ && entry==0)
                 std::cout << "testmode("<< anaid << "): got first MC gen entry" << std::endl;
 
-            b_GenLeptons3->GetEntry(entry);
-            if(pGenLeptons3->size()>1){ //gen info there
+            b_GenLeptons3.getEntry(entry);
+            if(b_GenLeptons3.content()->size()>1){ //gen info there
 
-                b_GenTops->GetEntry(entry);
-                b_GenBHadrons->GetEntry(entry);
-                b_GenJets->GetEntry(entry);
-                b_GenLeptons1->GetEntry(entry);
+                b_GenTops.getEntry(entry);
+                b_GenBHadrons.getEntry(entry);
+                b_GenJets.getEntry(entry);
+                b_GenLeptons1.getEntry(entry);
                 //recreate mother daughter relations?!
-                b_GenBHadrons->GetEntry(entry);
-                b_GenBs->GetEntry(entry);
-                b_GenJets->GetEntry(entry);
-                b_GenLeptons1->GetEntry(entry);
+                b_GenBHadrons.getEntry(entry);
+                b_GenBs.getEntry(entry);
+                b_GenJets.getEntry(entry);
+                b_GenLeptons1.getEntry(entry);
                 ///////////////TOPPT REWEIGHTING////////
 
 
-                if(pGenTops->size()>1){ //ttbar sample
+                if(b_GenTops.content()->size()>1){ //ttbar sample
 
-                    puweight = getTopPtReweighter()->reWeight(pGenTops->at(0).pt(),pGenTops->at(1).pt() ,puweight);
+                    getTopPtReweighter()->reWeight(b_GenTops.content()->at(0).pt(),b_GenTops.content()->at(1).pt() ,puweight);
 
-                    gentops.push_back(&pGenTops->at(0));
-                    gentops.push_back(&pGenTops->at(0));
+                    gentops.push_back(&b_GenTops.content()->at(0));
+                    gentops.push_back(&b_GenTops.content()->at(0));
                     evt.gentops=&gentops;
 
-                    for(size_t i=0;i<pGenBs->size();i++)
-                        genbs.push_back(&pGenBs->at(i));
+                    for(size_t i=0;i<b_GenBs.content()->size();i++)
+                        genbs.push_back(&b_GenBs.content()->at(i));
                     evt.genbs=&genbs;
                 }
 
@@ -636,9 +586,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
 
                 //only format change
-                genleptons1=produceCollection<NTGenParticle>(pGenLeptons1);
-                genleptons3=produceCollection<NTGenParticle>(pGenLeptons3);
-                genjets=produceCollection<NTGenJet>(pGenJets);
+                genleptons1=produceCollection<NTGenParticle>(b_GenLeptons1.content());
+                genleptons3=produceCollection<NTGenParticle>(b_GenLeptons3.content());
+                genjets=produceCollection<NTGenJet>(b_GenJets.content());
 
 
                 //define visible phase space
@@ -670,8 +620,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
                 //the mothers are only filled if b hadrons originate from a b that itself originates from a top,
                 //so its sufficient to check whether there is any mother iterator
                 std::vector<int> bhadids;
-                for(size_t i=0;i<pGenBHadrons->size();i++){
-                    NTGenParticle * bhad=&pGenBHadrons->at(i);
+                for(size_t i=0;i<b_GenBHadrons.content()->size();i++){
+                    NTGenParticle * bhad=&b_GenBHadrons.content()->at(i);
                     if(bhad->motherIts().size()>0)
                         bhadids<<bhad->genId();
 
@@ -707,6 +657,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
                  * fill gen info here
                  */
                 jansplots_step8.fillPlotsGen();
+                anyasplots_step8.fillPlotsGen();
             }
         } /// isMC ends
 
@@ -721,16 +672,16 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
         /*
          *  Trigger
          */
-        b_TriggerBools->GetEntry(entry);
+        b_TriggerBools.getEntry(entry);
         if(testmode_ && entry==0)
             std::cout << "testmode("<< anaid << "): got trigger boolians" << std::endl;
-        if(!checkTrigger(p_TriggerBools,pEvent, isMC,anaid)) continue;
+        if(!checkTrigger(b_TriggerBools.content(),b_Event.content(), isMC,anaid)) continue;
 
 
         /*
          * Muons
          */
-        b_Muons->GetEntry(entry);
+        b_Muons.getEntry(entry);
 
 
         vector<NTLepton *> allleps;
@@ -745,8 +696,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
         evt.isomuons=&isomuons;
 
         bool gotfirst=false;
-        for(size_t i=0;i<pMuons->size();i++){
-            NTMuon* muon = & pMuons->at(i);
+        for(size_t i=0;i<b_Muons.content()->size();i++){
+            NTMuon* muon = & b_Muons.content()->at(i);
             if(isMC)
                 muon->setP4(muon->p4() * getMuonEnergySF()->getScalefactor(muon->eta()));
             allleps << muon;
@@ -754,7 +705,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
             if(doLargeAcceptance) gotfirst=true;
             if(muon->pt() < 10) continue;
             if(fabs(muon->eta())>2.4) continue;
-            kinmuons << &(pMuons->at(i));
+            kinmuons << &(b_Muons.content()->at(i));
             ///select id muons
             if(!(muon->isGlobal() || muon->isTracker()) ) continue;
             //try with tight muons
@@ -768,13 +719,13 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
                     && fabs(muon->dzV())<0.2
                     && muon->pixHits()>0
                     && muon->trkHits()>5){
-                idmuons <<  &(pMuons->at(i));
+                idmuons <<  &(b_Muons.content()->at(i));
                 continue; //no double counting
             }
             //usetight=false;
 
             ///end tight
-            //  loosemuons <<  &(pMuons->at(i));
+            //  loosemuons <<  &(b_Muons.content()->at(i));
         }
 
 
@@ -791,15 +742,15 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
          * Electrons
          */
 
-        b_Electrons->GetEntry(entry);
+        b_Electrons.getEntry(entry);
 
         vector<NTElectron *> kinelectrons,idelectrons,isoelectrons;
         evt.kinelectrons=&kinelectrons;
         evt.idelectrons=&idelectrons;
         evt.isoelectrons=&isoelectrons;
         gotfirst=false;
-        for(size_t i=0;i<pElectrons->size();i++){
-            NTElectron * elec=&(pElectrons->at(i));
+        for(size_t i=0;i<b_Electrons.content()->size();i++){
+            NTElectron * elec=&(b_Electrons.content()->at(i));
             float ensf=1;
             if(isMC)
                 ensf=getElecEnergySF()->getScalefactor(elec->eta());
@@ -972,14 +923,14 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
         // create jec jets for met and ID jets
         // create ID Jets and correct JER
-        b_Jets->GetEntry(entry);
+        b_Jets.getEntry(entry);
 
         vector<NTJet *> treejets,idjets,medjets,hardjets;
         evt.idjets=&idjets;
         evt.medjets=&medjets;
         evt.hardjets=&hardjets;
-        for(size_t i=0;i<pJets->size();i++){
-            treejets << &(pJets->at(i));
+        for(size_t i=0;i<b_Jets.content()->size();i++){
+            treejets << &(b_Jets.content()->at(i));
         }
 
         double dpx=0;
@@ -1020,13 +971,13 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
 
 
-        b_Met->GetEntry(entry);
+        b_Met.getEntry(entry);
 
-        NTMet adjustedmet = *pMet;
-        evt.simplemet=pMet;
+        NTMet adjustedmet = *b_Met.content();
+        evt.simplemet=b_Met.content();
         evt.adjustedmet=&adjustedmet;
-        double nmpx=pMet->p4().Px() + dpx;
-        double nmpy=pMet->p4().Py() + dpy;
+        double nmpx=b_Met.content()->p4().Px() + dpx;
+        double nmpy=b_Met.content()->p4().Py() + dpy;
         if(!usemvamet)
             adjustedmet.setP4(D_LorentzVector(nmpx,nmpy,0,sqrt(nmpx*nmpx+nmpy*nmpy))); //COMMENTED FOR MVA MET
 
@@ -1372,6 +1323,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
             sel_step[8]+=puweight;
 
             jansplots_step8.fillPlotsReco();
+            anyasplots_step8.fillPlotsReco();
 
         }
         if(isZrange){

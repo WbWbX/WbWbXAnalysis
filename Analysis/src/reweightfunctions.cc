@@ -12,13 +12,13 @@
 
 namespace ztop{
 
-float reweightfunctions::reWeight(const float& in, float previousweight) {
+void reweightfunctions::reWeight(const float& in, float& previousweight) {
 
     if(switchedoff_)
-        return previousweight;
+        return ;
 
     if(type_==flat){
-        return previousweight;
+        return ;
     }
 
     float newweight=1;
@@ -32,18 +32,18 @@ float reweightfunctions::reWeight(const float& in, float previousweight) {
             newweight= previousweight;
     }
 
-    unwcounter_+=previousweight;
-    wcounter_+=newweight*previousweight;
 
-    return newweight*previousweight;
+    //base class calls
+    setNewWeight(newweight);
+    reWeight(previousweight);
 }
 
-float reweightfunctions::reWeight(const float& in1,const float& in2, float previousweight) {
+void reweightfunctions::reWeight(const float& in1,const float& in2, float& previousweight) {
     if(switchedoff_)
-        return previousweight;
+        return;
 
     if(type_==flat){
-        return previousweight;
+        return;
     }
     float newweight=1;
 
@@ -57,10 +57,11 @@ float reweightfunctions::reWeight(const float& in1,const float& in2, float previ
             newweight= previousweight;
     }
 
-    unwcounter_+=previousweight;
-    wcounter_+=newweight*previousweight;
 
-    return newweight*previousweight;
+
+    //base class calls
+    setNewWeight(newweight);
+    reWeight(previousweight);
 }
 
 

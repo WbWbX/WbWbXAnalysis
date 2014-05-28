@@ -16,13 +16,10 @@
 #include "eventLoop.h"
 #include <algorithm>
 
-namespace ztop{
-typedef std::vector<ztop::NTElectron>::iterator NTElectronIt;
-typedef std::vector<ztop::NTMuon>::iterator NTMuonIt;
-typedef std::vector<ztop::NTJet>::iterator NTJetIt;
-typedef std::vector<ztop::NTTrack>::iterator NTTrackIt;
-typedef std::vector<ztop::NTSuClu>::iterator NTSuCluIt;
-}
+
+#include <sys/stat.h>
+
+
 
 void MainAnalyzer::reportError(int errorno, size_t anaid){
     if(errorno >0) errorno=-errorno;
@@ -60,6 +57,11 @@ MainAnalyzer::MainAnalyzer(){
     topmass_="mt172.5";
     usepdfw_=-1;
     usediscr_=false;
+    eventbranch_="NTEvent";
+
+    ///set defaults for SF
+    pdfweighter_.switchOff(true); //switch off as default
+
 }
 /**
  * takes care of not already deleted containers etc
@@ -426,7 +428,6 @@ float MainAnalyzer::createNormalizationInfo(TFile *f, bool isMC,size_t anaid){
         TTree * tnorm = (TTree*) f->Get("preCutPUInfo/preCutPUInfo");
         genentries=tnorm->GetEntries();
 
-        delete tnorm;
         norm = lumi_   / genentries;
         for(size_t i=1;i<=generated->getNBins();i++){
             generated->setBinContent(i, (float)genentries);
@@ -455,20 +456,21 @@ float MainAnalyzer::createNormalizationInfo(TFile *f, bool isMC,size_t anaid){
                     << "   which pdf set is used to produce the MC sample and which to reweight.\n"
                     << "   CHECKCHECKCHECK!!! TBI properly" ;
 
-            size_t pdfw=usepdfw_;
+            size_t pdfw=0;//usepdfw_;
+            //use central weight to renormalize
             float wgenentries=0;
             TBranch * b_Event=0;
             NTEvent * pEvent = 0;
-            tfgen->SetBranchAddress("NTEvent",&pEvent,&b_Event);
+            tnorm->SetBranchAddress(eventbranch_,&pEvent,&b_Event);
 
-            Long64_t nEntries=tfgen->GetEntries();
+            Long64_t nEntries=tnorm->GetEntries();
             for(Long64_t entry=0;entry<nEntries;entry++){
                 b_Event->GetEntry(entry);
                 if(pdfw < pEvent->PDFWeightsSize()){
                     wgenentries+=pEvent->PDFWeight(pdfw);
                 }
                 else{
-                    throw std::out_of_range("PDF weight index not found");
+                    throw std::out_of_range("PDF weight index not found for at least one event. Check input!");
                 }
             }
             for(size_t i=1;i<=generated->getNBins();i++){
@@ -496,4 +498,21 @@ float MainAnalyzer::createNormalizationInfo(TFile *f, bool isMC,size_t anaid){
     return norm;
 }
 
+
+
+
+void MainAnalyzer::setCacheProperties(TTree * t,const TString& inputtree)const{
+    struct stat filestatus;
+        stat(inputtree.Data(), &filestatus );
+
+        if(!testmode_){
+            t->SetCacheSize(filestatus.st_size/10);
+            if(t->GetCacheSize() > 100e6)
+                t->SetCacheSize(100e6);
+            // t->AddBranchToCache("*");
+            t->SetCacheLearnEntries(1000);
+        }
+
+
+}
 
