@@ -163,7 +163,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
     }
     if(mode_.Contains("Zerojet")){
         zerojet=true;
-        std::cout << "entering Onejet mode" <<std::endl;
+        std::cout << "entering Zerojet mode" <<std::endl;
     }
 
     if(mode_.Contains("Topdiscr")){
