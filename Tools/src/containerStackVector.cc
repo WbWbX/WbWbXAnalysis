@@ -654,7 +654,7 @@ void containerStackVector::writeAllToTFile(TFile * f, TString treename){
 }
 
 
-void containerStackVector::loadFromTree(TTree * t, TString name){
+void containerStackVector::loadFromTree(TTree * t, const TString& name){
     AutoLibraryLoader::enable();
     containerStackVector csv;
     containerStackVector * pcsv=csv.getFromTree(t,name);
@@ -666,7 +666,7 @@ void containerStackVector::loadFromTree(TTree * t, TString name){
 
 }
 
-containerStackVector * containerStackVector::getFromTree(TTree * t, TString name){
+containerStackVector * containerStackVector::getFromTree(TTree * t, const TString& name){
     AutoLibraryLoader::enable();
     if(!t || t->IsZombie()){
         throw std::runtime_error("containerStackVector::loadFromTree: tree not ok");
@@ -678,10 +678,12 @@ containerStackVector * containerStackVector::getFromTree(TTree * t, TString name
     bool found=false;
     size_t count=0;
     t->SetBranchAddress("containerStackVectors", &cuftemp);
+    if(name == "*" && t->GetEntries()>1){
+        throw std::runtime_error("containerStackVector::getFromTree: No csv name specified but more than one object in file");
+    }
     for(float n=0;n<t->GetEntries();n++){
         t->GetEntry(n);
-        std::cout << cuftemp->getName() << std::endl;
-        if(cuftemp->getName()==(name)){
+        if(name == "*" || cuftemp->getName()==(name)){
             found=true;
             count++;
             *this=*cuftemp;
@@ -695,31 +697,7 @@ containerStackVector * containerStackVector::getFromTree(TTree * t, TString name
                 << getName() << ", took the first one." << std::endl;
     }
     return cuftemp;
-    /*   containerStackVector * csv=0;
-    bool found=false;
-    if(!t)
-        return 0;
-    if(!t->GetBranch("containerStackVectors"))
-        return 0;
-    t->SetBranchAddress("containerStackVectors", &csv);
-    for(float n=0;n<t->GetEntries();n++){
-        t->GetEntry(n);
-        TString vname=toTString(csv->getName());
-        // std::cout << "check name: (" << vname << ") searching for: ("<< name<< ")"<<std::endl;
-        //  vname=name;
-        //std::cout << name.CompareTo(toTString(vname)) << std::endl;
-        if(vname == name){
-            //this=csv;
-            //	std::cout << "found " << name << std::endl;
-            return csv;
-            found=true;
-            break;
-        }
-    }
-    if(!found){
-        std::cout << "containerStackVector::getFromTree: " << name << " not found in tree " << t->GetName() << "\nreturning 0 pointer!" <<std::endl;
-    }
-    return 0; */
+
 }
 void containerStackVector::loadFromTFile(TFile * f,const TString& csvname,TString treename){
     if(!f || f->IsZombie()){

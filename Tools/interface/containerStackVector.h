@@ -15,9 +15,9 @@
 namespace ztop{
 
 
-  class containerStackVector:public taggedObject{
+class containerStackVector:public taggedObject{
 
-  public:
+public:
     containerStackVector();
     containerStackVector(TString);
     ~containerStackVector();
@@ -64,11 +64,13 @@ namespace ztop{
     void writeAllToTFile(TString, bool recreate=false, bool onlydata=false, TString treename="containerStackVectors");
     void printAll(TString,TString,TString);
     void writeAllToTFile(TFile * , TString treename="containerStackVectors");
-    void loadFromTree(TTree *, TString);
-    containerStackVector* getFromTree(TTree *, TString);
+    void loadFromTree(TTree * t,const TString& csvname="*");
+    containerStackVector* getFromTree(TTree *t ,const TString& csvname="*");
     void listAllInTree(TTree *);
-    void loadFromTFile(TFile * ,const TString& csvname, TString treename="containerStackVectors");
-    void loadFromTFile(const TString& filename ,const TString& csvname, TString treename="containerStackVectors");
+
+    void loadFromTFile(TFile * ,const TString& csvname="*", TString treename="containerStackVectors");
+
+    void loadFromTFile(const TString& filename ,const TString& csvname="*", TString treename="containerStackVectors");
 
     void clear(){stacks_.clear();name_="";}
     static std::vector<containerStackVector*> csv_list;
@@ -78,17 +80,17 @@ namespace ztop{
 
     static bool fastadd;
 
-  private:
+private:
     TString name_;
     TString isSyst_;
     std::vector<ztop::containerStack> stacks_;
     TString tempsig_;
 
 
-  };
+};
 
 
-  typedef  containerStackVector container1DStackVector;
+typedef  containerStackVector container1DStackVector;
 
 }
 
