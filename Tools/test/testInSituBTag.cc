@@ -58,7 +58,7 @@ int main(){
     container1D background=bjetmultistack.getBackgroundContainer(); //this might come handy at some point
     container1D signal=bjetmultistack.getSignalContainer(); //this might come handy at some point
     container1D data=bjetmultistack.getContribution("data");
-    container1D dyll=bjetmultistack.getContainer("DY#rightarrowll");
+    container1D dyll=bjetmultistack.getContribution("DY#rightarrowll");
 
     // -----> Epsilon_emu
     containerStack genstack = csv_in.getStack("generated events");
