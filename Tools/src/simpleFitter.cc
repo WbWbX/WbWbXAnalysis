@@ -9,10 +9,12 @@
 #include <TROOT.h>
 #include <TMinuit.h>
 #include "Math/Minimizer.h"
+#include "Minuit2/MnStrategy.h"
 #include <iostream>
 #include "Math/Functor.h"
 #include "Math/Factory.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
+#include <Minuit2/MnMachinePrecision.h>
 
 #include <stdexcept>
 
@@ -25,45 +27,60 @@
 
 namespace ztop{
 
-simpleFitter * currentfitter=0;
-
 namespace chi2defs{
-void chisq(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag){
-    if(!currentfitter)
-        return;
 
-    //calculate chisquare
-    double chisq = 0;
-    for (size_t i=0;i<currentfitter->getNomPoints()->size(); i++) {
-        // chi square is the quadratic sum of the distance from the point to the function weighted by its error
-        double delta  = (currentfitter->getNomPoints()->at(i).y
-                -currentfitter->fitfunction(currentfitter->getNomPoints()->at(i).x,par));
-        //   std::cout << currentfitter->getErrsUp()->at(i).y <<std::endl;
-        double err=1;
-        if(delta>0)
-            err=currentfitter->getErrsUp()->at(i).y;
-        else
-            err=currentfitter->getErrsDown()->at(i).y;
 
-        if(err!=0)
-            delta/=err;
-        else
-            delta*=1e6;
-        chisq += delta*delta;
+class simpleChi2 {
+
+public:
+
+    simpleChi2(simpleFitter * fp):fp_(fp) {npars_=fp_->getParameters()->size();}
+
+
+    double operator() (const double* par) const {
+        if(!fp_)
+            throw std::out_of_range("simpleChi2: no fitter associated");
+
+
+        double chisq = 0;
+        for (size_t i=0;i<fp_->getNomPoints()->size(); i++) {
+            // chi square is the quadratic sum of the distance from the point to the function weighted by its error
+            double delta  = (fp_->getNomPoints()->at(i).y
+                    -fp_->fitfunction(fp_->getNomPoints()->at(i).x,par));
+            double err=1;
+            if(delta>0)
+                err=fp_->getErrsUp()->at(i).y;
+            else
+                err=fp_->getErrsDown()->at(i).y;
+
+            if(err!=0)
+                delta/=err;
+            else
+                delta*=1e6;
+            chisq += delta*delta;
+        }
+        return chisq;
+
+
     }
 
-    f = chisq;
-    return;
-}
-}
+    double Up() const { return 1.; }
+
+private:
+    simpleFitter* fp_;
+    size_t npars_;
+
+};
+
+}//ns
 
 int simpleFitter::printlevel=0;
 
-simpleFitter::simpleFitter():fitmode_(fm_pol0),maxcalls_(50000),requirefitfunction_(true){
+simpleFitter::simpleFitter():fitmode_(fm_pol0),minimizer_(mm_minuitMinos),maxcalls_(50000),
+        requirefitfunction_(true),minsuccessful_(false),tolerance_(0.1),functobemin_(0),algorithm_(""),minimizerstr_("Minuit2"){
 
     setFitMode(fitmode_);
 
-    std::cout << "simpleFitter::simpleFitter: WARNING! This fitter is still in test mode! " <<std::endl;
 
 }
 
@@ -86,42 +103,14 @@ void simpleFitter::setParameters(const std::vector<double>& inpars,const std::ve
     paracorrs_.resize(paras_.size(),std::vector<double>(paras_.size()));
 }
 
-float simpleFitter::getFitOutput(const float& xin)const{
-
-    return (float)fitfunction(xin,&(paras_.at(0)));
-
-
+double simpleFitter::getFitOutput(const double& xin)const{
+    return fitfunction(xin,&(paras_.at(0)));
 }
 
 
 void simpleFitter::fit(){
-    fit(chi2defs::chisq);
-}
-void simpleFitter::fit(void (*chi2function)(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)){
 
     if(!checkSizes()){
-
-        /*
-         *  if(paras_.size() != stepsizes_.size())
-        return false;
-    if(paras_.size() != paraerrsup_.size())
-        return false;
-    if(paras_.size() != paraerrsdown_.size())
-        return false;
-
-    if(requirefitfunction_){
-        if(paras_.size() != (size_t)fitmode_+1)
-            return false;
-        if(nompoints_.size()<(size_t)fitmode_+1)
-            return false;
-        if(nompoints_.size() != errsup_.size())
-            return false;
-        if(nompoints_.size() != errsdown_.size())
-            return false;
-        if(nompoints_.size() != errsup_.size())
-            return false;
-         */
-
         std::cout << "EROR IN simpleFitter::fit" <<std::endl;
 
         std::cout << "parameter:             " << paras_.size() << std::endl;
@@ -133,103 +122,82 @@ void simpleFitter::fit(void (*chi2function)(Int_t &npar, Double_t *gin, Double_t
         std::cout << "point errors up:   " << errsup_.size() << std::endl;
         std::cout << "point errors down: " << errsdown_.size() << std::endl;
 
-
-
         throw std::runtime_error("simpleFitter::fit: number of parameters<->stepsizes or parameters<->fitfunction ");
         //  return;
     }
 
-    //this kills parallelization
-    currentfitter=this;
+    minsuccessful_=false;
+
+    //  if(functobemin_)
+
+    if(minimizer_==mm_minuit2){
+
+        chi2defs::simpleChi2 fcn(this);
+
+        ROOT::Math::Minimizer* min =
+                ROOT::Math::Factory::CreateMinimizer(minimizerstr_.Data(), algorithm_.Data());
+
+        ROOT::Math::Functor f(fcn,paras_.size());
+
+        if(!functobemin_){
+            min->SetFunction(f);
+        }
+        else{
+            min->SetFunction(*functobemin_);
+
+        }
 
 
-    TMinuit *ptMinuit = new TMinuit((Int_t)paras_.size());
-    ptMinuit->SetPrintLevel(printlevel); //be quiet
+        min->SetMaxFunctionCalls(maxcalls_); // for Minuit/Minuit2
+        min->SetMaxIterations(maxcalls_);  // for GSL
+        min->SetTolerance(tolerance_);
+        min->SetPrintLevel(printlevel);
 
 
-    //  if(!chi2function)
-    ptMinuit->SetFCN(chi2function);
-
-    Int_t ierflg = 0;
-    std::vector<Double_t> arglist;
-    arglist.resize(paras_.size()+1);
-
-    arglist[0] = 1;
-    ptMinuit->mnexcm("SET ERR", &(arglist.at(0)) ,1,ierflg);
+        ROOT::Minuit2::MnMachinePrecision prec;
+        min->SetPrecision(1e-6);
 
 
-    for(size_t i=0;i<paras_.size();i++){
-        TString paraname="";
-        if(paranames_.size()>i)
-            paraname=paranames_.at(i);
-        else
-            paraname=(TString)"par"+toTString(i);
+        for(size_t i=0;i<paras_.size();i++){
+            TString paraname="";
+            if(paranames_.size()>i)
+                paraname=paranames_.at(i);
+            else
+                paraname=(TString)"par"+toTString(i);
+            min->SetVariable((unsigned int)i,paraname.Data(),paras_.at(i), stepsizes_.at(i));
+        }
+
+        ROOT::Minuit2::MnStrategy strat;
+        strat.SetHighStrategy();
+        min->SetStrategy(strat.Strategy());
+        minsuccessful_=min->Minimize();
+
+        const double *xs = min->X();
+        //feed back
+        for(size_t i=0;i<paras_.size();i++){
+            paras_.at(i)=xs[i];
+
+            TString paraname="";
+            if(paranames_.size()>i)
+                paraname=paranames_.at(i);
+            else
+                paraname=(TString)"par"+toTString(i);
+
+            if(printlevel>0)
+                std::cout << paraname+" " << paras_.at(i) << std::endl;
+            if(minospars_.size()==0 || std::find(minospars_.begin(),minospars_.end(),i) != minospars_.end()){
 
 
-        ptMinuit->mnparm(i, paraname.Data(),
-                paras_.at(i), stepsizes_.at(i), 0,0,ierflg);
+                min->GetMinosError(i, paraerrsdown_.at(i), paraerrsup_.at(i));
+            }
+
+        }
+        chi2min_=min->MinValue();
+
+        delete min;
+
 
     }
-
-
-    arglist.at(0)=1;
-    ptMinuit->mnexcm("SET ERR", &(arglist.at(0)) ,1,ierflg);
-
-    arglist.at(0)=1;
-    ptMinuit->mnexcm("SET STR", &(arglist.at(0)), 1, ierflg);
-/*
-    arglist[0] = maxcalls_;
-    arglist[1] = 0.01;
-    ptMinuit->mnexcm("MIGRAD", &(arglist.at(0)) ,2,ierflg);
-*/
-
-    //  arglist[0] = 500;
-    //    arglist[1] = 1.;
- /*
-
-    arglist[0] = maxcalls_;
-    arglist[1] = 1.;
-    ptMinuit->mnexcm("MIGRAD", &(arglist.at(0)) ,2,ierflg);
-
-
-    //ptMinuit->Migrad();
-    //  [maxcalls]  [parno] [parno]
-
-*/
-
-    arglist[0]=maxcalls_;
-    for(size_t i=0;i<minospars_.size();i++)
-        arglist.at(i+1)=minospars_.at(i)+1;
-
-    ptMinuit->mnexcm("MINOS", &(arglist.at(0)) ,minospars_.size()+1,ierflg);
-
-
-    // std::cout << "\nPrint results from minuit\n";tesla
-    //fill results from minuit
-    for(size_t i=0;i<paras_.size();i++){
-        double eparb=0,gcc=0,dummyerr=0;
-
-        ptMinuit->GetParameter(i, paras_.at(i),dummyerr);
-        ptMinuit->mnerrs(i, paraerrsup_.at(i), paraerrsdown_.at(i),eparb,gcc);// Double_t &eparab, Double_t &gcc
-
-        TString paraname="";
-        if(paranames_.size()>i)
-            paraname=paranames_.at(i);
-        else
-            paraname=(TString)"par"+toTString(i);
-
-        if(printlevel>=0)
-        std::cout << paraname+" " << paras_.at(i) << "\n + " << paraerrsup_.at(i)
-                                                        <<" -  " << paraerrsdown_.at(i)<< "\n symm: " << dummyerr << "\n";
-    }
-    std::cout << std::endl;
-
-
-    Double_t amin,edm,errdef;
-    Int_t nvpar,nparx,icstat;
-    ptMinuit->mnstat(amin,edm,errdef,nvpar,nparx,icstat);
-
-    delete ptMinuit;
 
 }
 
@@ -243,26 +211,41 @@ size_t simpleFitter::findParameterIdx(const TString& paraname)const{
 /*
  * all function definitions are placed here
  */
-Double_t simpleFitter::fitfunction(float x,const double *par)const{
+double simpleFitter::fitfunction(const double& x,const double *par)const{
     //needs some safety
+    double value=1;
     if(fitmode_==fm_pol0){
-        ++x;
-        double value=par[0];
-        return value;
+
+        value=par[0];
+        if(value!=value){
+            std::cout << "simpleFitter::fitfunction: NAN!: " <<x << " pars: "<< par[0]  << std::endl;
+        }
+
     }
     if(fitmode_==fm_pol1){
 
-        double value=par[0] + x* par[1];
-        return value;
+        value=par[0] + x* par[1];
+        if(value!=value){
+            std::cout << "simpleFitter::fitfunction: NAN!: " <<x << " pars: "<< par[0] << "  " << par[1]  << std::endl;
+        }
+
     }
     if(fitmode_==fm_pol2){
 
-        double value=par[0] + x* par[1] + x*x*par[2];
-        return value;
+        value=par[0] + x* par[1] + x*x*par[2];
+        if(value!=value){
+            std::cout << "simpleFitter::fitfunction: NAN!: " <<x << " pars: "<< par[0] << "  " << par[1] << "  " <<par[2] << std::endl;
+        }
+
+    }
+    if(value!=value){
+
+        throw std::runtime_error("simpleFitter::fitfunction: NAN produced");
     }
 
-    return 0;
+    return value;
 }
+
 
 void simpleFitter::clearPoints(){
     nompoints_.clear();

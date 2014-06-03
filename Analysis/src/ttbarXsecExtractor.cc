@@ -10,11 +10,13 @@
 #include "TtZAnalysis/Tools/interface/container.h"
 
 #include "TtZAnalysis/Tools/interface/simpleFitter.h"
+#include "Math/Functor.h"
 
 namespace ztop{
 
 ttbarXsecExtractor::ttbarXsecExtractor():setup_(false),done_(false),lumi_(19741),
-        lumierr_(0.025),ngenevents_(1),xsec_(1),xsecerrup_(1),xsecerrdown_(1),xsecidx_(0),eps_bidx_(0),xsecoffset_(250){
+        lumierr_(0.025),ngenevents_(1),xsec_(1),xsecerrup_(1),xsecerrdown_(1),xsecidx_(0),eps_bidx_(0),xsecoffset_(250),
+        minchi2_(1e9),pseudodata_(false),mainminimzstr_("Minuit2"),mainminmzalgo_("Migrad"){
     fitter_.setRequireFitFunction(false);
 
 }
@@ -38,7 +40,10 @@ void ttbarXsecExtractor::readInput(const containerStackVector & csv, const TStri
     float genscaled=gensignal.getBinContent(binno);
 
 
-    ngenevents_=genscaled*(1/(nsigsamples * 1/(0.1049/0.1111202)));
+    ngenevents_=genscaled*(1/(nsigsamples* (0.1049/0.1111202)));
+
+    if(pseudodata_)
+        ngenevents_*=0.9;
 
     containerStack stack=csv.getStack(plotname);
 
@@ -47,14 +52,16 @@ void ttbarXsecExtractor::readInput(const containerStackVector & csv, const TStri
     std::vector<size_t> nobgidxs=stack.getSignalIdxs();
     nobgidxs.push_back(stack.getDataIdx());
 
+    float bkgvar=0.3;
+
     for(size_t i=0;i<stack.size();i++){
         if(std::find(nobgidxs.begin(),nobgidxs.end(),i) != nobgidxs.end()) continue;
 
         containerStack copy=stack;
-        copy.multiplyNorm(i,1.3);
+        copy.multiplyNorm(i,1+bkgvar);
         stack.addErrorStack(stack.getLegend(i)+"_var_up",copy);
         copy=stack;
-        copy.multiplyNorm(i,0.7);
+        copy.multiplyNorm(i,1-bkgvar);
         stack.addErrorStack(stack.getLegend(i)+"_var_down",copy);
 
     }
@@ -91,14 +98,22 @@ void ttbarXsecExtractor::readInput(const containerStackVector & csv, const TStri
      */
 
     //clear all
+    Lumi_.setName("Lumi");
     Lumi_.clear();
     eps_emu_.clear();
+    eps_emu_ .setName("eps_emu");
     eps_b_.clear();
+    eps_b_.setName("eps_b");
     C_b_.clear();
+    C_b_.setName("C_b");
     N_bkg1_.clear();
+    N_bkg1_.setName("N_bkg1");
     N_bkg2_.clear();
+    N_bkg2_.setName("N_bkg2");
     n_data1_.clear();
+    n_data1_.setName("n_data1");
     n_data2_.clear();
+    n_data2_.setName("n_data2");
 
 
 
@@ -114,20 +129,28 @@ void ttbarXsecExtractor::readInput(const containerStackVector & csv, const TStri
 
 
 
-    ///stat errors here are just polishing th eplots in first order
-    // for the moment they are just approximated
+    ///stat errors here are just polishing the plots.
+    // (for the moment) they are just approximated
 
     std::vector<TString> paranames;
 
-    simpleFitter::printlevel=-1;
+    simpleFitter::printlevel=0;
 
     for(size_t i=0;i<varnames.size();i++){
+
+        const TString & thissys=varnames.at(i);
+        std::cout << thissys <<std::endl;
+        /*
+       if(thissys == "ELECES"||
+               thissys == "ELECSF"||
+               thissys == "MUONES"||
+               thissys == "MUONSF"||
+               thissys == "TRIGGER"        ) continue; */
 
         varpointers_.clear();
 
         std::vector<graph> tempgvec;
 
-        const TString & thissys=varnames.at(i);
         sysnames_.push_back(thissys);
 
         //calc all variables wrt to THIS syst variation
@@ -198,10 +221,25 @@ void ttbarXsecExtractor::readInput(const containerStackVector & csv, const TStri
         varpointers_.push_back(&eps_emu_);
 
         //////////eps_b_ from MC as starting point//////////
+        //needs C_b as input
+        float C_bdown= 4 * signalintegraldown * signal.getBinContent(signal.getBinNo(2),sysidxdown) /
+                sq( signal.getBinContent(signal.getBinNo(1),sysidxdown) + 2* signal.getBinContent(signal.getBinNo(2),sysidxdown));
+        float C_b=  4 * signalintegral * signal.getBinContent(signal.getBinNo(2))/
+                sq( signal.getBinContent(signal.getBinNo(1)) + 2* signal.getBinContent(signal.getBinNo(2)));
+        float C_bup= 4 * signalintegralup * signal.getBinContent(signal.getBinNo(2),sysidxup) /
+                sq( signal.getBinContent(signal.getBinNo(1),sysidxup) + 2* signal.getBinContent(signal.getBinNo(2),sysidxup));
 
-        float eps_bdown=signal.getBinContent(signal.getBinNo(1),sysidxdown) / signalintegraldown;
-        float eps_b=signal.getBinContent(signal.getBinNo(1)) / signalintegral;
-        float eps_bup=signal.getBinContent(signal.getBinNo(1),sysidxup) / signalintegralup;
+
+        //  float eps_bdown=(signal.getBinContent(signal.getBinNo(1),sysidxdown) + signal.getBinContent(signal.getBinNo(2),sysidxdown))/(2 *signalintegraldown);
+        //  float eps_b=(signal.getBinContent(signal.getBinNo(1))+signal.getBinContent(signal.getBinNo(2))) /(2* signalintegral);
+        //  float eps_bup=(signal.getBinContent(signal.getBinNo(1),sysidxup) *signal.getBinContent(signal.getBinNo(2),sysidxup)) /( 2*signalintegralup);
+
+        float eps_bdown = 1
+                /((1+ signal.getBinContent(signal.getBinNo(1),sysidxdown)/(2*signal.getBinContent(signal.getBinNo(2),sysidxdown)))  *C_bdown);
+        float eps_b =1
+                /((1+ signal.getBinContent(signal.getBinNo(1))/(2*signal.getBinContent(signal.getBinNo(2))))  *C_b);
+        float eps_bup =1
+                /((1+ signal.getBinContent(signal.getBinNo(1),sysidxup)/(2*signal.getBinContent(signal.getBinNo(2),sysidxup)))  *C_bup);
 
         tmpg.setPointYContent(0,eps_bdown);
         tmpg.setPointYContent(1,eps_b);
@@ -217,12 +255,6 @@ void ttbarXsecExtractor::readInput(const containerStackVector & csv, const TStri
 
 
         //////////C_b_ /////////
-        float C_bdown= 4 * signalintegraldown * signal.getBinContent(signal.getBinNo(2),sysidxdown) /
-                sq( signal.getBinContent(signal.getBinNo(1),sysidxdown) + 2* signal.getBinContent(signal.getBinNo(2),sysidxdown));
-        float C_b=  4 * signalintegral * signal.getBinContent(signal.getBinNo(2))/
-                sq( signal.getBinContent(signal.getBinNo(1)) + 2* signal.getBinContent(signal.getBinNo(2)));
-        float C_bup= 4 * signalintegralup * signal.getBinContent(signal.getBinNo(2),sysidxup) /
-                sq( signal.getBinContent(signal.getBinNo(1),sysidxup) + 2* signal.getBinContent(signal.getBinNo(2),sysidxup));
         //just approximate
         float C_bstat = 4* sqrt( sq(signalintegral * signal.getBinStat(signal.getBinNo(2))) + sq(sqrt(eps_emu*ngenevents_)/lumi_ *  signal.getBinContent(signal.getBinNo(2))))
         / sq( signal.getBinContent(signal.getBinNo(1)) + 2* signal.getBinContent(signal.getBinNo(2)));;
@@ -296,40 +328,40 @@ void ttbarXsecExtractor::readInput(const containerStackVector & csv, const TStri
         systdeps_.push_back(tempgvec);
         paranames.push_back(thissys);
 
+        //   std::cout << "ndata2: " << n_data2_.getNominal() <<std::endl;
+
     }
 
 
     //set starting parameters
-    std::vector<double> startparas(systdeps_.size()); //includes xsec as
+    std::vector<double> startparas(systdeps_.size(),0); //includes xsec as
     xsecoffset_= ngenevents_/(Lumi_.getNominal());
-
+    // xsecoffset_=250;
     //add eps_b
-    startparas.push_back(0.372802);//eps_b_.getNominal()); //from MC
-    paranames.push_back("eps_b");
+    //  startparas.push_back(0.372802);//eps_b_.getNominal()); //from MC
+    //  paranames.push_back("eps_b");
 
     std::vector<double> stepwidths;
-    stepwidths.resize(startparas.size(),1e-20);
+    stepwidths.resize(startparas.size(),1e-5);
 
-
-
-    fitter_.setMaxCalls(1e18);
-    fitter_.setParameters(startparas,stepwidths);
     fitter_.setParameterNames(paranames);
     fitter_.setRequireFitFunction(false);
     xsecidx_=fitter_.findParameterIdx("XSec");
-    eps_bidx_=fitter_.findParameterIdx("eps_b");
-   // fitter_.addMinosParameter(xsecidx_);
+    stepwidths.at(xsecidx_) = 0.01;
+    fitter_.setParameters(startparas,stepwidths);
+
+
 
     std::cout <<"\n\n\n\n\n\n\n\n\n\n\n\n\n*********************************************************************" <<std::endl;
 
     std::cout << "starting values for variables: \n"
-            << "eps_b " << startparas.at(eps_bidx_) << "\n"
+            << "eps_b " << eps_b_.getNominal() << "\n"
             << "xsec " << startparas.at(xsecidx_)+xsecoffset_ << "\n";
     std::cout << "variables start values" <<std::endl;
     std::cout << "\nLumi_.getValue(fitter_.getParameters()) " << Lumi_.getValue(&(fitter_.getParameters()->at(0)))<< std::endl;
     std::cout << "eps_emu_.getValue(fitter_.getParameters()) " <<eps_emu_.getValue(&(fitter_.getParameters()->at(0))) << std::endl;
     std::cout << "eps_b_.getValue(fitter_.getParameters()) " <<eps_b_.getValue(&(fitter_.getParameters()->at(0))) << std::endl;
-    std::cout << "fitter_.getParameters()->at(eps_bidx_) " << fitter_.getParameters()->at(eps_bidx_) << std::endl;
+    //  std::cout << "fitter_.getParameters()->at(eps_bidx_) " << fitter_.getParameters()->at(eps_bidx_) << std::endl;
     std::cout << "fitter_.getParameters()[xsecidx_]+xsecoffset_ " <<fitter_.getParameters()->at(xsecidx_)+xsecoffset_ << std::endl;
     std::cout << "n_data1_.getValue(fitter_.getParameters()) " << n_data1_.getValue(&(fitter_.getParameters()->at(0)))<< std::endl;
     std::cout << "n_data2_.getValue(fitter_.getParameters()) " << n_data2_.getValue(&(fitter_.getParameters()->at(0)))<< std::endl;
@@ -337,7 +369,7 @@ void ttbarXsecExtractor::readInput(const containerStackVector & csv, const TStri
     std::cout << "N_bkg2_.getValue(fitter_.getParameters()) " << N_bkg2_.getValue(&(fitter_.getParameters()->at(0)))<< std::endl;
 
 
-
+    //   throw std::runtime_error("");
 
     std::cout << std::endl;
 
@@ -352,31 +384,33 @@ void ttbarXsecExtractor::readInput(const containerStackVector & csv, const TStri
 ///////////////////////////////////////////////// chi2 global WA definition ////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ttbarXsecExtractor * currentextractor=0;
-
-
-namespace chi2defs{
-void chisqttbarxsec(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag){
-
-    if(!currentextractor)
-        return;
-    float chi2=currentextractor->getChi2(par);
-    f=chi2;
-    return;
-}
-}
-
-
-
 void ttbarXsecExtractor::extract(){
     if(!setup_){
         throw std::logic_error("ttbarXsecExtractor::extract: first read input");
     }
-    currentextractor=this;
 
-    simpleFitter::printlevel=0;
-    //fitter_.
-    fitter_.fit(chi2defs::chisqttbarxsec);
+
+
+    fitter_.setMinimizer(simpleFitter::mm_minuit2);
+    fitter_.setMaxCalls(4e6);
+    //fitter_.setTolerance(0.5);//0.1);
+    //first do a simple scan
+
+
+    ROOT::Math::Functor f(this,&ttbarXsecExtractor::getChi2,fitter_.getParameters()->size());
+
+    fitter_.setMinFunction(&f);
+
+    simpleFitter::printlevel=1;
+
+
+    fitter_.setMinimizer(mainminimzstr_);
+    fitter_.setAlgorithm(mainminmzalgo_);
+    //get better starting values
+    fitter_.setTolerance(0.1);
+    fitter_.addMinosParameter(xsecidx_);
+    fitter_.fit();
+
 
     xsec_ = fitter_.getParameters()->at(xsecidx_)+xsecoffset_;
     xsecerrup_=fitter_.getParameterErrUp()->at(xsecidx_);
@@ -386,15 +420,19 @@ void ttbarXsecExtractor::extract(){
     std::cout << "\nLumi_.getValue(fitter_.getParameters()) " << Lumi_.getValue(&(fitter_.getParameters()->at(0)))<< "  " << Lumi_.getNominal() << std::endl;
     std::cout << "eps_emu_.getValue(fitter_.getParameters()) " <<eps_emu_.getValue(&(fitter_.getParameters()->at(0))) << "  " << eps_emu_.getNominal() << std::endl;
     std::cout << "eps_b_.getValue(fitter_.getParameters()) " <<eps_b_.getValue(&(fitter_.getParameters()->at(0))) << "  " << eps_b_.getNominal() << std::endl;
-    std::cout << "fitter_.getParameters()->at(eps_bidx_) " << fitter_.getParameters()->at(eps_bidx_) << std::endl;
+    //  std::cout << "fitter_.getParameters()->at(eps_bidx_) " << fitter_.getParameters()->at(eps_bidx_) << std::endl;
     std::cout << "fitter_.getParameters()[xsecidx_]+xsecoffset_ " <<fitter_.getParameters()->at(xsecidx_)+xsecoffset_ << std::endl;
     std::cout << "n_data1_.getValue(fitter_.getParameters()) " << n_data1_.getValue(&(fitter_.getParameters()->at(0)))<< "  " << n_data1_.getNominal() << std::endl;
     std::cout << "n_data2_.getValue(fitter_.getParameters()) " << n_data2_.getValue(&(fitter_.getParameters()->at(0)))<< "  " << n_data2_.getNominal() << std::endl;
     std::cout << "N_bkg1_.getValue(fitter_.getParameters()) " << N_bkg1_.getValue(&(fitter_.getParameters()->at(0)))<< "  " << N_bkg1_.getNominal() << std::endl;
     std::cout << "N_bkg2_.getValue(fitter_.getParameters()) " << N_bkg2_.getValue(&(fitter_.getParameters()->at(0)))<< "  " << N_bkg2_.getNominal() << std::endl;
 
+    std::cout << "\nbest chi2 / ndof: " << minchi2_ << "/" << fitter_.getParameters()->size()-1 << "=" << minchi2_/(fitter_.getParameters()->size()-1) <<  std::endl;
 
-
+    if(!fitter_.wasSuccess()){
+        std::cout << "\n\n********************************\nFit was not successful! result should not be trusted.\n********************************" <<std::endl;
+        throw std::runtime_error("Fit was not successful!");
+    }
 
     done_=true;
 }
@@ -430,40 +468,65 @@ float ttbarXsecExtractor::getXsecErrDown()const{
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////chi 2 implementation//////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-double ttbarXsecExtractor::getChi2(double * variations)const{
 
+//work with doubles here to have larger precision (2nd derivatives in hesse)
+double ttbarXsecExtractor::getChi2(const double * variations){
 
+    //   std::vector<double> variations(variationsp,fitter_.getParameters()->size()-1);
 
-    //  float eps_bvar=eps_b_.getValue(variations);
-    float eps_bvar=variations[eps_bidx_];
-    float C_bvar  =C_b_.getValue(variations);
-    float lumitimesxsectimesepsemuvar=Lumi_.getValue(variations) * (variations[xsecidx_]+xsecoffset_) * eps_emu_.getValue(variations);
+    double eps_bvar=eps_b_.getValue(variations);
+    //  double eps_bvar=variations[eps_bidx_];
+    double C_bvar  =C_b_.getValue(variations);
+    double lumitimesxsectimesepsemuvar=Lumi_.getValue(variations) * (variations[xsecidx_]+xsecoffset_) * eps_emu_.getValue(variations);
 
-    float N_1 = lumitimesxsectimesepsemuvar * 2 * eps_bvar  * (1 - C_bvar*eps_bvar) + N_bkg1_.getValue(variations);
+    double N_1 = lumitimesxsectimesepsemuvar * 2 * eps_bvar  * (1 - C_bvar*eps_bvar) + N_bkg1_.getValue(variations);
 
-    float N_2 = lumitimesxsectimesepsemuvar * C_bvar *eps_bvar*eps_bvar  + N_bkg2_.getValue(variations);
+    double N_2 = lumitimesxsectimesepsemuvar * C_bvar *eps_bvar*eps_bvar  + N_bkg2_.getValue(variations);
 
-    float nuisancesum=0;
+    double nuisancesum=0;
+    bool coutall=false;
     for(size_t i=0;i<fitter_.getParameters()->size();i++){
 
-        if(i==xsecidx_ || i==eps_bidx_) continue; //don't put xsec/eps_b (last para ) here!!!
+        if(i==xsecidx_) continue; // || i==eps_bidx_) continue; //don't put xsec/eps_b (last para ) here!!!
 
         //remember all are defined in terms of sigma
         // so (val - def) / sigma = val - def
         // and default is defined as 0 so
-
-        float delta=variations[i];
+        if(variations[i]!=variations[i] || variations[i] >40 || variations[i] < -40){
+            coutall=true;
+        }
+        double delta=variations[i];
         nuisancesum += delta*delta;
     }
-    float ndata1var=n_data1_.getValue(variations);
-    float ndata2var=n_data2_.getValue(variations);
 
-    float delta1 = (ndata1var - N_1);
-    float delta2 = (ndata2var - N_2);
+
+    double ndata1var=n_data1_.getValue(variations);
+    double ndata2var=n_data2_.getValue(variations);
+
+    double delta1 = (ndata1var - N_1);
+    double delta2 = (ndata2var - N_2);
 
     double chi2= delta1*delta1/ndata1var  + delta2* delta2/ndata2var + nuisancesum;
+    if(chi2 < 0)
+        throw std::logic_error("ttbarXsecExtractor::getChi2: chi2 value became <0 !! serious error");
+
 
     bool verbose=false;
+    if(chi2 != chi2){
+        verbose=true; //this is a nan case
+        std::cout << "warning NAN produced in chi2..." <<std::endl;
+        chi2=ndata1var;
+    }
+
+    if(coutall){
+        std::cout <<std::endl;
+        for(size_t i=0;i<fitter_.getParameters()->size();i++){
+            std::cout << variations[i] << std::endl;
+        }
+        std::cout <<std::endl;
+        verbose=true;
+    }
+
     if(verbose){
         std::cout << "\nLumi_.getValue(variations) " << Lumi_.getValue(variations)<< std::endl;
         std::cout << "eps_emu_.getValue(variations) " <<eps_emu_.getValue(variations) << std::endl;
@@ -479,8 +542,13 @@ double ttbarXsecExtractor::getChi2(double * variations)const{
         std::cout << "chi2: " << chi2 <<std::endl;
     }
     //   throw std::runtime_error("");
-    //std::cout << "chi2: " << chi2 <<std::endl;
+    // std::cout << "chi2: " << chi2 << "  "  <<variations[xsecidx_]+xsecoffset_<< std::endl;
     // throw std::runtime_error("");
+
+
+    if(minchi2_>chi2)
+        minchi2_=chi2;
+
     return chi2;
 
     // return fabs(nuisancesum-1);

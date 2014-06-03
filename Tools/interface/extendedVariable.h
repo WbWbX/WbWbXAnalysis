@@ -21,10 +21,11 @@ namespace ztop{
  */
 class extendedVariable{
 public:
-    extendedVariable():nominal_(-100000){}
+    extendedVariable():nominal_(-100000),name_(""){}
+    extendedVariable(const TString & name):nominal_(-100000),name_(name){}
     ~extendedVariable(){}
 
-
+    void setName(const TString & name){name_=name;}
 
     /**
      * just put (non shifted) graph here
@@ -35,22 +36,25 @@ public:
 
     size_t getNDependencies(){return dependences_.size();}
 
-    float getValue(const std::vector<float> & variations)const;
-    float getValue(const std::vector<float> * variations)const;
-    float getValue(const std::vector<double> & variations)const;
-    float getValue(const std::vector<double> * variations)const;
+    double getValue(const double * variations)const;
+    double getValue(const float * variations)const;
 
-    float getValue(const double * variations)const;
+    double getValue(const std::vector<float> & variations)const;
+    double getValue(const std::vector<float> * variations)const;
+    double getValue(const std::vector<double> & variations)const;
+    double getValue(const std::vector<double> * variations)const;
 
-    float getValue(size_t idx,float variation)const;
 
-    const float & getNominal()const{return nominal_;}
+    double getValue(size_t idx,float variation)const;
+
+    const double & getNominal()const{return nominal_;}
 
     void clear();
 
 private:
 
-    float nominal_;
+    double nominal_;
+    TString name_;
     std::vector<graphFitter> dependences_; //one for each syst
     std::vector<TString> sysnames_; //only for later reference
 

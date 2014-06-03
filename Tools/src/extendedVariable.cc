@@ -40,61 +40,73 @@ void extendedVariable::addDependence(const graph & g, size_t nompoint, const TSt
 
     graphFitter fitter;
     fitter.setFitMode(graphFitter::fm_pol2);
+    fitter.setMinimizer(graphFitter::mm_minuit2);
     fitter.readGraph(&gcopy);
     fitter.fit();
+
+    if(!fitter.wasSuccess()){
+        std::cout << "extendedVariable::addDependence: failed to fit " << sysname << " (" << name_<< ") " << std::endl;
+        throw std::runtime_error("extendedVariable::addDependence: failed to fit");
+    }
+
     dependences_.push_back(fitter);
     sysnames_.push_back(sysname);
 
 }
 
+double extendedVariable::getValue(const double * variations)const{
 
-float extendedVariable::getValue(const std::vector<float> * variations)const{
+    double out=0;
+    for(size_t i=0;i<dependences_.size();i++){
+        out+=dependences_.at(i).getFitOutput(variations[i]);
+        if(out!=out){
+            std::cout << "extendedVariable::getValue: nan produced for " << sysnames_.at(i) << " (" << name_<< ") "<<std::endl;
+            throw std::runtime_error("extendedVariable::getValue: nan produced");
+        }
+    }
+    return out+nominal_;
+}
+double extendedVariable::getValue(const float * variations)const{
+    double out=0;
+    for(size_t i=0;i<dependences_.size();i++){
+        out+=dependences_.at(i).getFitOutput(variations[i]);
+        if(out!=out){
+            std::cout << "extendedVariable::getValue: nan produced for " << sysnames_.at(i) << " (" << name_<< ") "<<std::endl;
+            throw std::runtime_error("extendedVariable::getValue: nan produced");
+        }
+    }
+    return out+nominal_;
+}
+
+double extendedVariable::getValue(const std::vector<float> * variations)const{
 
     if(variations->size()!=dependences_.size()){
         throw std::out_of_range("extendedVariable::getValue: number of variations and dependencies don't match");
     }
 
-    ///////MAYBE BIG FIXME
-
-    float out=0;
-    for(size_t i=0;i<variations->size();i++){
-        out+=dependences_.at(i).getFitOutput(variations->at(i));
-    }
-    return out+nominal_;
+    return getValue(&variations->at(0));
 
 }
 
-float extendedVariable::getValue(const std::vector<float> & variations)const{
+double extendedVariable::getValue(const std::vector<float> & variations)const{
 
     if(variations.size()!=dependences_.size()){
         throw std::out_of_range("extendedVariable::getValue: number of variations and dependencies don't match");
     }
 
-    ///////MAYBE BIG FIXME
-
-    float out=0;
-    for(size_t i=0;i<variations.size();i++){
-        out+=dependences_.at(i).getFitOutput(variations.at(i));
-    }
-    return out+nominal_;
+    return getValue(&variations);
 
 }
-float extendedVariable::getValue(const std::vector<double> * variations)const{
+double extendedVariable::getValue(const std::vector<double> * variations)const{
 
     if(variations->size()!=dependences_.size()){
         throw std::out_of_range("extendedVariable::getValue: number of variations and dependencies don't match");
     }
 
-    ///////MAYBE BIG FIXME
-
-    double out=0;
-    for(size_t i=0;i<variations->size();i++){
-        out+=dependences_.at(i).getFitOutput(variations->at(i));
-    }
-    return out+nominal_;
+    return getValue(&variations->at(0));
 
 }
-float extendedVariable::getValue(size_t idx,float variation)const{
+double extendedVariable::getValue(size_t idx,float variation)const{
     if(idx >= dependences_.size()){
         throw std::out_of_range("extendedVariable::getValue: index out of range");
     }
@@ -102,32 +114,16 @@ float extendedVariable::getValue(size_t idx,float variation)const{
 
 }
 
-float extendedVariable::getValue(const std::vector<double> & variations)const{
+double extendedVariable::getValue(const std::vector<double> & variations)const{
 
     if(variations.size()!=dependences_.size()){
         throw std::out_of_range("extendedVariable::getValue: number of variations and dependencies don't match");
     }
 
-    ///////MAYBE BIG FIXME
-
-    double out=0;
-    for(size_t i=0;i<variations.size();i++){
-        out+=dependences_.at(i).getFitOutput(variations.at(i));
-    }
-    return out+nominal_;
+    return getValue(&variations.at(0));
 
 }
-float extendedVariable::getValue(const double * variations)const{
 
-    ///////MAYBE BIG FIXME
-
-    double out=0;
-    for(size_t i=0;i<dependences_.size();i++){
-        out+=dependences_.at(i).getFitOutput(variations[i]);
-    }
-    return out+nominal_;
-
-}
 
 void extendedVariable::clear(){
     dependences_.clear();

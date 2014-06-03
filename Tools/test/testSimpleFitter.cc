@@ -27,9 +27,10 @@ int main(){
     testfitter.addYError(0.1);
     testfitter.addYError(0.1);
 
-
+    simpleFitter::printlevel=1;
 
     testfitter.setFitMode(simpleFitter::fm_pol2);
+    testfitter.setMinimizer(simpleFitter::mm_minuit2);
 
     testfitter.fit();
 

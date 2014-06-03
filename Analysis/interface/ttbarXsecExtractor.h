@@ -40,6 +40,11 @@ public:
      */
     void setLumiError(float lumerr){done_=false;lumierr_=lumerr/100;}
 
+    void setIsPseudoData(bool is){pseudodata_=is;}
+
+    void setMinimizerStr(TString min){mainminimzstr_=min;}
+    void setMinimizerAlgoStr(TString algo){mainminmzalgo_=algo;}
+
   //  void setNGenerated(const float & ngen){done_=false;ngenevents_=ngen;}
 
     /**
@@ -58,7 +63,7 @@ public:
 
      const simpleFitter* getFitter()const{return &fitter_;}
 
-    double getChi2(double *)const;
+    double getChi2(const double *);
 
 private:
     bool setup_,done_;
@@ -91,6 +96,12 @@ private:
     size_t xsecidx_,eps_bidx_;
 
     float xsecoffset_;
+
+    float minchi2_;
+
+    bool pseudodata_;
+
+    TString mainminimzstr_,mainminmzalgo_;
 
     //helper functions
     float sq(const float& a)const{return a*a;}

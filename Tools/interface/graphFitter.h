@@ -29,10 +29,10 @@ public:
 private:
 
     //shadow some to be not used
-    void addPoint(const float & px, const float & py){simpleFitter::addPoint(px,py);}
+    void addPoint(const double & px, const double & py){simpleFitter::addPoint(px,py);}
     void setPoints(const std::vector<point2D> inp){simpleFitter::setPoints(inp);}
 
-    void addYError(const float & err){simpleFitter::addYError(err);}
+    void addYError(const double & err){simpleFitter::addYError(err);}
     void setErrorsUp(const std::vector<point2D> inp){simpleFitter::setErrorsUp(inp);}
     void setErrorsDown(const std::vector<point2D> inp){simpleFitter::setErrorsDown(inp);}
 
