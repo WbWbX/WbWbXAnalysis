@@ -34,12 +34,12 @@ TString stripStuff(TString s){      /// needs rewriting for "/" part
 	return s;
 }
 
-ztop::container1DStackVector getFromFile(TString filename, TString cname)
+ztop::container1DStackVector getFromFile(TString filename)
 {
 	TFile * ftemp=new TFile(filename,"read");
 	TTree * ttemp = (TTree*)ftemp->Get("containerStackVectors");
 	ztop::container1DStackVector vtemp;
-	vtemp.loadFromTree(ttemp,cname);
+	vtemp.loadFromTree(ttemp);
 	delete ttemp;
 	delete ftemp;
 	return vtemp;
@@ -55,9 +55,8 @@ int main(int argc, char* argv[]){
 		//  std::cout << argv[i] << std::endl;;
 		TString filename=(TString)argv[i];
 		//filenames.push_back(filename);
-		TString cname=stripStuff((TString)argv[i]);
 		//containerNames.push_back(cname);
-		containerStackVector c=getFromFile(filename,cname);
+		containerStackVector c=getFromFile(filename);
 		c.writeAllToTFile(filename.ReplaceAll(".root","_plots.root"),true);
 	}
 
