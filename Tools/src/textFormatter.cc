@@ -101,6 +101,26 @@ std::vector<std::string> textFormatter::getFormatted(const std::string& in)const
     return out;
 }
 
+std::string textFormatter::getFilename(const std::string& pathtofile)const{
+    std::string out;
+    using namespace std;
+    string s=pathtofile;
+    trimcomments(s);
+    trim(s);
+    istringstream ss(s);
+    while (ss)
+    {
+        string s2;
+        if (!getline( ss, s2, *"/" )) break;
+        if(debug)
+            std::cout << "got \"" << s2 << "\""<<std::endl;
+        trim(s2);
+        if(s2.size()>0)
+            out = s2;
+    } //just keep last
+
+    return out;
+}
 
 
 }//ns

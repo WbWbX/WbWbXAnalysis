@@ -32,6 +32,9 @@ public:
 
     std::vector<std::string> getFormatted(const std::string& in)const;
 
+
+    std::string getFilename(const std::string& pathtofile)const;
+
     static bool debug;
 
 protected:
