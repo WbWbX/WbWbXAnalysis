@@ -1,4 +1,0 @@
-
-200  /METBTag/Run2011A-08Nov2011-v1/AOD      tree_7TeV_MET_runA_08Nov   isMC=false globalTag=FT44_V11_AN1 is2011=true     ReRecoNov2011.json
-
-200  /MET/Run2011B-03Feb2012-v1/AOD    tree_7TeV_MET_runB_03Feb   isMC=false globalTag=FT44_V11_AN1 is2011=true     ReRecoNov2011.json
