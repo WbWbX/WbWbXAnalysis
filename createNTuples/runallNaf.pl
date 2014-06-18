@@ -10,6 +10,10 @@ use POSIX;
 my %arg;
 getopts('d:c:r:sj:m:f:R:q', \%arg);
 
+unless($ENV{CMSSW_BASE}){
+    die "needs to be run from a CMSSW environment\n";
+}
+
 unless ( $arg{d} && $arg{c} && -f $arg{c}) {
     print <<'USAGE';
 Syntax:
@@ -75,7 +79,7 @@ my $fullCMSSWcfpath=File::Spec->rel2abs($arg{c});
 my $cfgfilename = ( split m{/}, $arg{c} )[-1];
 my $nafJobSplitter="$ENV{CMSSW_BASE}/src/TopAnalysis/TopUtils/scripts/nafJobSplitter.pl";
 
-my $startstring="#!/bin/sh\nexport SCRAM_ARCH=$ENV{SCRAM_ARCH}\nexport VO_CMS_SW_DIR=$ENV{VO_CMS_SW_DIR}\nsource $ENV{VO_CMS_SW_DIR}/cmsset_default.sh\n\necho \"using CMSSW located here: $ENV{CMSSW_BASE}\"\ncd $ENV{CMSSW_BASE}\neval `scramv1 runtime -sh`\ncd -\n\nexport PYTHONPATH=/nfs/dust/cms/user/\$USER/.nafJobSplitter/python:\$PYTHONPATH\nexport NJS_MEM=1999\n";
+my $startstring="#!/bin/sh\nexport SCRAM_ARCH=$ENV{SCRAM_ARCH}\nmodulecmd sh use -a /afs/desy.de/group/cms/modulefiles/\nmodulecmd sh load cmssw\necho \"using CMSSW located here: $ENV{CMSSW_BASE}\"\ncd $ENV{CMSSW_BASE}\neval `scramv1 runtime -sh`\ncd -\n\nexport PYTHONPATH=/nfs/dust/cms/user/\$USER/.nafJobSplitter/python:\$PYTHONPATH\nexport NJS_MEM=1999\n";
 
 push @run, $startstring;
 push @check, $startstring;
