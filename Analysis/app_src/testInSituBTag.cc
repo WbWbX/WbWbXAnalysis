@@ -1,0 +1,243 @@
+/*
+ * testInSituBTag.cc
+ *
+ *  Created on: Apr 17, 2014
+ *      Author: kiesej
+ */
+#include "TtZAnalysis/Tools/interface/containerStackVector.h"
+#include "TString.h"
+#include <iostream>
+
+/*
+ * skeleton program to test in situ b-tag calibrations etc.
+ *
+ * if you have set up your environment (ini cmssw; cmsenv; anenv),
+ * you can easily compile and run this program in one go with the command
+ *
+ * fastCompile.sh testInSituBTag.cc
+ *
+ * (run in the same directory testInSituBTag.cc is located in)
+ *
+ *
+ * Here, you will mostly deal with the containerStack and container1D classes
+ * these containers are essentially histograms! Just the naming is (historically) different
+ * Remember, they already incorporate systematic uncertainties etc.
+ * For reference check the include files below
+ *
+ */
+#include "TtZAnalysis/Tools/interface/containerStack.h"
+#include "TtZAnalysis/Tools/interface/container.h"
+
+/*
+ * the input file is located in /nfs/dust/cms/user/kiesej/testtemp/emu_8TeV_172.5_nominal_syst.root
+ *  you can check control plots etc. by opening this file with root
+ *
+*/
+#include "TtZAnalysis/Tools/interface/optParser.h"
+
+int main(int argc, char* argv[]){
+
+    using namespace ztop;
+
+    optParser parser(argc,argv);
+
+    double syst = parser.getOpt<float>("s",0,"if 1 - run the systematics. 0 by default");            //-s , default 0
+    double pseu = parser.getOpt<float>("p",0,"if 1 - run on pseudodata. 0 by default");            //-s , default 0
+
+    std::vector<std::string> allfiles=parser.getRest<std::string>();
+
+    if(allfiles.size() != 1){
+        std::cout << "needs exactly 1 input file" << std::endl;
+        parser.coutHelp();
+    }
+
+    parser.doneParsing();
+
+
+
+   // TString infilelocation="/nfs/dust/cms/user/kiesej/testtemp/emu_8TeV_172.5_nominal_syst.root";
+    TString infilelocation=allfiles.at(0);
+    TString btagmultiplot="selected b jet multi step 4"; //we use step 7 here, one ONE jet is required
+    TString jetmultiplot="hard jet multi step 4";
+
+    /*
+     * prepare the input
+     */
+
+    containerStackVector csv_in;
+    csv_in.loadFromTFile(infilelocation);//,"emu_8TeV_172.5_nominal_pseudodata230");//_syst");
+
+    containerStack bjetmultistack=csv_in.getStack(btagmultiplot);
+    containerStack jetmultistack =csv_in.getStack(jetmultiplot);
+
+
+    std::cout << bjetmultistack.listContributions() <<std::endl; //just such that you know what you can get here
+
+    container1D background=bjetmultistack.getBackgroundContainer(); //this might come handy at some point
+    container1D signal=bjetmultistack.getSignalContainer(); //this might come handy at some point
+    container1D data=bjetmultistack.getContribution("data");
+    container1D dyll=bjetmultistack.getContainer("DY#rightarrowll");
+
+    float eps_emu = 0;
+    float ps_coef = 1;
+    
+    if(pseu) ps_coef = 0.9;
+
+    if (!syst)
+    {
+         // -----> Epsilon_emu
+     containerStack genstack = csv_in.getStack("generated events");
+     container1D signalgen = genstack.getSignalContainer();
+     size_t genevtbin=signalgen.getBinNo(1);
+     float genttbarevents= ps_coef*signalgen.getBinContent(genevtbin)/(0.1049/0.1111202);
+
+     eps_emu=2*signal.integral(true)/(genttbarevents*ps_coef); 
+     //-------> end epsilon_emu
+    }
+
+
+    //which systematics are available??
+    for(size_t i=0;i<signal.getSystSize();i++){
+        std::cout << i << ": " << signal.getSystErrorName(i) <<std::endl;
+    }
+ 
+    if(syst)
+    {
+    for (size_t i=0;i<=signal.getSystSize();i++){
+     int somesystindex=i-1;
+    //get a specific systematic:
+     container1D onlysystematics= signal.getSystContainer(somesystindex);
+     container1D bgsystematics= background.getSystContainer(somesystindex);
+     container1D onlynominal=signal.getSystContainer(-1); // -1 is the index of nominal
+
+     // -----> Epsilon_emu
+     containerStack genstack = csv_in.getStack("generated events");
+     container1D signalgen = genstack.getSignalContainer();
+     size_t genevtbin=signalgen.getBinNo(1);
+     float genttbarevents=ps_coef*signalgen.getBinContent(genevtbin)/(0.1049/0.1111202);
+
+     eps_emu=2*onlysystematics.integral(true)/genttbarevents; 
+     //-------> end epsilon_emu
+
+    // ------> get a bin
+     size_t onejetbin=onlysystematics.getBinNo(1);
+     size_t twojetbin=onlysystematics.getBinNo(2);
+     float N1_tt = onlysystematics.getBinContent(onejetbin);
+     float N2_tt = onlysystematics.getBinContent(twojetbin);
+
+     size_t onejetbinBg=bgsystematics.getBinNo(1);
+     size_t twojetbinBg=bgsystematics.getBinNo(2);
+     float nominal1jetcontentbackground = bgsystematics.getBinContent(onejetbin);
+     float nominal2jetcontentbackground = bgsystematics.getBinContent(twojetbin);
+
+     size_t onejetbinData=data.getBinNo(1);
+     size_t twojetbinData=data.getBinNo(2);
+     float nominal1jetcontentdata = data.getBinContent(onejetbinData);
+     float nominal2jetcontentdata = data.getBinContent(twojetbinData);
+    // -------> end get bin
+
+    // if you want to look at ratios, you might consider using the built-in
+    // operators that account for systematics
+    // e.g. put all systematic variations, etc in one bin of a new container
+    // and then just divide it by another one
+    // please check the test programs here and the container.h headers
+    // there is already a lot of built-in functionality
+
+     ///////////////// CROSS SECTION /////////////////////
+     float L = 19.741; //fb^-1
+
+     float N1_ = nominal1jetcontentdata - nominal1jetcontentbackground;
+     float N2_ = nominal2jetcontentdata - nominal2jetcontentbackground;
+
+     float Ntt_emu = onlysystematics.integral(true);
+
+     float Cb = 4*Ntt_emu*N2_tt/(N1_tt+2*N2_tt)/(N1_tt+2*N2_tt);
+
+     float Cross_Section;
+     Cross_Section = (N1_ + 2*N2_)*(N1_ + 2*N2_)*Cb/4/L/eps_emu/N2_;
+     /////////END CROSS SECTION///////////////////////////
+
+     std::cout << " " << std::endl;
+     std::cout << "eps_emu = " << eps_emu << std::endl;
+     std::cout << "Cb = " << Cb << std::endl;
+     std::cout << signal.getSystErrorName(i-1) << ": Cross section = " << Cross_Section/1000.0 << "pb,  (" << 100*(238.845 - Cross_Section/1000.0)/225.475 << "% )" << std::endl;
+//      std::cout << " Epsilon_b = " << Epsilon_b << std::endl;
+//      std::cout << " Cross section = " << Cross_Section/1000.0 << "pb" << std::endl;
+//      std::cout << " ----------ERROR PROPAGATION----------" << std::endl;
+//      std::cout << "Cross section error: " << dSigma/1000.0 << " pb" << std::endl;
+//      std::cout << "Epsilon_b error: " << dEps_b << std::endl;
+//      std::cout << "Covariance: " << covar/1000.0 << " pb" << std::endl;
+//      std::cout << " --------END ERROR PROPAGATION--------" << std::endl;
+     std::cout << std::endl;
+     std::cout << "DONE" <<std::endl;
+    }
+    }
+
+    if(!syst)
+    {
+     // ------> get a bin
+     size_t onejetbin=signal.getBinNo(1);
+     size_t twojetbin=signal.getBinNo(2);
+     float N1_tt = signal.getBinContent(onejetbin);
+     float N2_tt = signal.getBinContent(twojetbin);
+
+     size_t onejetbinBg=background.getBinNo(1);
+     size_t twojetbinBg=background.getBinNo(2);
+     float nominal1jetcontentbackground = background.getBinContent(onejetbin);
+     float nominal2jetcontentbackground = background.getBinContent(twojetbin);
+
+     size_t onejetbinData=data.getBinNo(1);
+     size_t twojetbinData=data.getBinNo(2);
+     float nominal1jetcontentdata = data.getBinContent(onejetbinData);
+     float nominal2jetcontentdata = data.getBinContent(twojetbinData);
+     // -------> end get bin
+
+     // if you want to look at ratios, you might consider using the built-in
+     // operators that account for systematics
+     // e.g. put all systematic variations, etc in one bin of a new container
+     // and then just divide it by another one
+     // please check the test programs here and the container.h headers
+     // there is already a lot of built-in functionality
+
+     ///////////////// CROSS SECTION /////////////////////
+     float L = 19.741; //fb^-1
+
+     float N1_ = nominal1jetcontentdata - nominal1jetcontentbackground;
+     float N2_ = nominal2jetcontentdata - nominal2jetcontentbackground;
+
+     float Ntt_emu = signal.integral(true);
+
+     float Cb = 4*Ntt_emu*N2_tt/(N1_tt+2*N2_tt)/(N1_tt+2*N2_tt);
+
+     float Cross_Section;
+     Cross_Section = (N1_ + 2*N2_)*(N1_ + 2*N2_)*Cb/4/L/eps_emu/N2_;
+
+     float Epsilon_b;
+     Epsilon_b = 2*N2_ / (N1_+2*N2_);
+     /////////END CROSS SECTION///////////////////////////
+
+     //////////////// ERROR PROPAGATION //////////////////
+     float dSigma;
+     dSigma = 1/(4*L*eps_emu) * (N1_+2*N2_)/N2_ * sqrt((N1_*N1_+4*N2_*N2_)/N2_);
+
+     float dEps_b;
+     dEps_b = 2/((N1_+2*N2_)*(N1_+2*N2_)) * sqrt(N1_*N1_*N2_+N1_*N2_*N2_);
+
+     float covar;
+     covar = - N1_*N1_/(2*N2_*(N1_+2*N2_)*L*eps_emu);
+     ///////////// END OF ERROR PROPAGATION //////////////
+
+     std::cout << " " << std::endl;
+     std::cout << "eps_emu = " << eps_emu << std::endl;
+     std::cout << "Cb = " << Cb << std::endl;
+     std::cout << " Epsilon_b = " << Epsilon_b << std::endl;
+     std::cout << " Cross section = " << Cross_Section/1000.0 << "pb" << std::endl;
+     std::cout << " ----------ERROR PROPAGATION----------" << std::endl;
+     std::cout << "Cross section error: " << dSigma/1000.0 << " pb" << std::endl;
+     std::cout << "Epsilon_b error: " << dEps_b << std::endl;
+     std::cout << "Covariance: " << covar/1000.0 << " pb" << std::endl;
+     std::cout << " --------END ERROR PROPAGATION--------" << std::endl;
+     std::cout << std::endl;
+     std::cout << "DONE" <<std::endl;
+    }
+}
