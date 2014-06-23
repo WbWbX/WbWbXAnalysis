@@ -85,7 +85,27 @@ void NTBTagSF::setWorkingPoint(const TString& wpstring){
     else{
         throw std::logic_error(("NTBTagSF::setWorkingPoint: doesn't exist"));
     }
+    wpval_=bTagBase::getWPDiscrValue();
 }
+
+
+void NTBTagSF::setWorkingPointValue(const float &val){
+
+    if(mode_==shapereweighting_mode)
+        wpval_=val;
+    else
+        throw std::logic_error("NTBTagSF::setWorkingPointValue: only possible in shapereweighting_mode");
+
+}
+
+const float & NTBTagSF::getWPDiscrValue()const{
+    if(mode_==shapereweighting_mode)
+        return wpval_;
+    else
+        return bTagBase::getWPDiscrValue();
+}
+
+
 
 /*
 void  NTBTagSF::setSystematic(const TString &sys=""){
@@ -108,6 +128,9 @@ void  NTBTagSF::setSystematic(const TString &sys=""){
 
 NTBTagSF  NTBTagSF::operator + (NTBTagSF  second){
     std::map<std::string,std::vector<TH2D> >::iterator sampleit,sampleit2;//=histos_.find(samplename);
+
+    std::vector<size_t > tobeskipped;
+    size_t i=0;
     for(sampleit=histos_.begin();sampleit!=histos_.end();++sampleit){
         std::string samplename1=sampleit->first;
         for(sampleit2=second.histos_.begin();sampleit2!=second.histos_.end();++sampleit2){
@@ -115,14 +138,34 @@ NTBTagSF  NTBTagSF::operator + (NTBTagSF  second){
             if(samplename1 == samplename2){
                 std::cout << "NTBTagSF::operator +: adding efficiencies with same samplename not supported! \ncheck unique naming\nwill just use old one"
                         << " "<<samplename2 << std::endl;
-                return *this;
+                tobeskipped.push_back(i);
             }
         }
+        i++;
     }
-    //none of the samples are the same
-    second.histos_.insert(histos_.begin(),histos_.end()); // samplename vec<hist>
-    second.effhistos_.insert(effhistos_.begin(),effhistos_.end()); // samplename vec<hist>
-    second.medianMap_.insert(medianMap_.begin(),medianMap_.end()); // median map
+    if(tobeskipped.size()<1){
+        //none of the samples are the same
+        second.histos_.insert(histos_.begin(),histos_.end()); // samplename vec<hist>
+        second.effhistos_.insert(effhistos_.begin(),effhistos_.end()); // samplename vec<hist>
+        second.medianMap_.insert(medianMap_.begin(),medianMap_.end()); // median map
+    }
+    sampleit2=effhistos_.begin();
+    std::map<std::string,std::vector<float> >::iterator  mmapit=medianMap_.begin();
+    sampleit=histos_.begin();
+
+    for(size_t i=0;i<histos_.size();i++){
+        if(std::find(tobeskipped.begin(),tobeskipped.end(),i) == tobeskipped.end() ){ //unique
+            second.histos_.insert(sampleit,++sampleit);
+            second.effhistos_.insert(sampleit2,++sampleit2);
+            second.medianMap_.insert(mmapit,++mmapit);
+        }
+        else{
+            sampleit++;
+            sampleit2++;
+            mmapit++;
+        }
+    }
+
     return second;
 }
 
@@ -190,6 +233,53 @@ void NTBTagSF::readFromTFile(TString filename){
     f->Close();
     delete f;
 
+}
+
+void NTBTagSF::listAllSampleNames()const{
+    std::map<std::string,std::vector<TH2D> >::const_iterator sampleit;
+    for(sampleit=histos_.begin();sampleit!=histos_.end();++sampleit){
+        std::cout << sampleit->first << std::endl;
+    }
+
+
+}
+
+bool NTBTagSF::isRealSyst()const{
+    //some hardcoded stuff
+    if(getSystematic()  == bTagBase::nominal)
+        return false;
+
+    if(mode_ != shapereweighting_mode){
+        if(getSystematic() == bTagBase::jesup)
+            return false;
+        if(getSystematic()  == bTagBase::jesdown)
+            return false;
+        if(getSystematic()  == bTagBase::hfstat1up)
+            return false;
+        if(getSystematic()  == bTagBase::hfstat1down)
+            return false;
+        if(getSystematic()  == bTagBase::hfstat2up)
+            return false;
+        if(getSystematic()  == bTagBase::hfstat2down)
+            return false;
+        if(getSystematic()  == bTagBase::lfstat1up)
+            return false;
+        if(getSystematic()  == bTagBase::lfstat1down)
+            return false;
+        if(getSystematic()  == bTagBase::lfstat2up)
+            return false;
+        if(getSystematic()  == bTagBase::lfstat2down)
+            return false;
+        if(getSystematic()  == bTagBase::cerr1up)
+            return false;
+        if(getSystematic()  == bTagBase::cerr1down)
+            return false;
+        if(getSystematic()  == bTagBase::cerr2up)
+            return false;
+        if(getSystematic()  == bTagBase::cerr2down)
+            return false;
+    }
+    return true;
 }
 
 }//namespace

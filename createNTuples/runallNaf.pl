@@ -27,13 +27,14 @@ be created to contain working directories and output.
 
 -q      run in queue (default 48h) does not work right now
 
+-M     set memory limit (default 1999 MB)
+
 -r regexp
 If a regexp is given only jobs matching regexp will be submitted (case sensitive).
 
 -R regexp
 If a regexp is given only jobs NOT matching the regexp will be submitted (case sensitive).
 
--s                    really submit jobs using GridControl
 -j NJobs              submit NJobs for each dataset. 
 //-m maxEventsPerJob    Overwrites default value from files.txt
 

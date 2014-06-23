@@ -10,7 +10,7 @@ infile=$1
 export CPLUS_INCLUDE_PATH=$CMSSW_BASE/src
 ROOTFLAGS=`root-config --cflags`
 ROOTLIBS=`root-config --libs`
-ROOTLIBS="${ROOTLIBS} -L/afs/naf.desy.de/group/cms/sw/slc5_amd64_gcc462/cms/cmssw/CMSSW_5_3_11/external/slc5_amd64_gcc462/bin/../../../../../../lcg/root/5.32.00-cms21/lib -lGenVector"
+#ROOTLIBS="${ROOTLIBS} -L/afs/naf.desy.de/group/cms/sw/slc5_amd64_gcc462/cms/cmssw/CMSSW_5_3_11/external/slc5_amd64_gcc462/bin/../../../../../../lcg/root/5.32.00-cms21/lib -lGenVector"
 
 CMSLIBS=$CMSSW_BASE/lib/$SCRAM_ARCH/
 EXTLIBS=${CMSSW_BASE}/external/${SCRAM_ARCH}/lib/

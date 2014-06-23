@@ -12,6 +12,7 @@
 #include "scalefactors.h"
 #include "reweightfunctions.h"
 #include <cstdlib>
+#include "AnalysisUtils.h"
 
 namespace ztop{class NTEvent;}
 
@@ -247,6 +248,7 @@ private:
         std::vector<T*> out;
         for(size_t i=0;i<t->size();i++)
             out.push_back(&(t->at(i)));
+        std::sort(out.begin(),out.end(), ztop::comparePt<T*> );
         return out;
     }
 

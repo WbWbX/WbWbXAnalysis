@@ -10,7 +10,7 @@ namespace ztop{
 
 class NTBTagSF : public bTagBase{
 public:
-    NTBTagSF():bTagBase(),isMC_(true),mode_(randomtagging_mode){}
+    NTBTagSF():bTagBase(),isMC_(true),mode_(randomtagging_mode),wpval_(0){}
     ~NTBTagSF(){}
 
     enum modes{eventsf_mode, randomtagging_mode,shapereweighting_mode};
@@ -18,6 +18,9 @@ public:
     modes getMode()const{return mode_;}
 
     void setWorkingPoint(const TString &);
+    void setWorkingPointValue(const float &);
+
+    const float & getWPDiscrValue()const;
 
     void fillEff(ztop::NTJet * jet, double puweight){ //!overload: jet, puweight
         if(mode_==shapereweighting_mode)
@@ -53,10 +56,18 @@ public:
     void writeToTFile(TString); //! writes whole class to TFile
     void readFromTFile(TString);  //! reads whole class from TFile
 
+    void listAllSampleNames()const;
+
+    /**
+     * returns - depending on the mode whether the variation is a "real" one depending on the mode
+     */
+    bool isRealSyst()const;
+
 private:
 
     bool isMC_;
     modes mode_;
+    float wpval_;
 };
 }
 
