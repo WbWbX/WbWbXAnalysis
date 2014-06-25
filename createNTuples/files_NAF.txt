@@ -104,7 +104,7 @@
 
 80   /TTZJets_8TeV-madgraph_v2/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM         tree_ttbarz
 80   /TTWJets_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM            tree_ttbarw
-10   /TTGJets_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM            tree_ttbarg
+80   /TTGJets_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM            tree_ttbarg
 
 
 
