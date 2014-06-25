@@ -129,9 +129,22 @@ void  NTBTagSF::setSystematic(const TString &sys=""){
 NTBTagSF  NTBTagSF::operator + (NTBTagSF  second){
     std::map<std::string,std::vector<TH2D> >::iterator sampleit,sampleit2;//=histos_.find(samplename);
 
+
+    //check further
+    if(effhistos_.size()<1 || (effhistos_.begin()->first.length()<1 && effhistos_.begin()->second.at(0).GetEntries() <1)){ //no name
+
+        return second;
+    }
+
+
+
+    NTBTagSF thiscopy=*this;
+
+
+
     std::vector<size_t > tobeskipped;
     size_t i=0;
-    for(sampleit=histos_.begin();sampleit!=histos_.end();++sampleit){
+    for(sampleit=thiscopy.histos_.begin();sampleit!=thiscopy.histos_.end();++sampleit){
         std::string samplename1=sampleit->first;
         for(sampleit2=second.histos_.begin();sampleit2!=second.histos_.end();++sampleit2){
             std::string samplename2=sampleit2->first;
@@ -145,19 +158,19 @@ NTBTagSF  NTBTagSF::operator + (NTBTagSF  second){
     }
     if(tobeskipped.size()<1){
         //none of the samples are the same
-        second.histos_.insert(histos_.begin(),histos_.end()); // samplename vec<hist>
-        second.effhistos_.insert(effhistos_.begin(),effhistos_.end()); // samplename vec<hist>
-        second.medianMap_.insert(medianMap_.begin(),medianMap_.end()); // median map
+        thiscopy.histos_.insert(second.histos_.begin(),second.histos_.end()); // samplename vec<hist>
+        thiscopy.effhistos_.insert(second.effhistos_.begin(),second.effhistos_.end()); // samplename vec<hist>
+        thiscopy.medianMap_.insert(second.medianMap_.begin(),second.medianMap_.end()); // median map
     }
-    sampleit2=effhistos_.begin();
-    std::map<std::string,std::vector<float> >::iterator  mmapit=medianMap_.begin();
-    sampleit=histos_.begin();
+    sampleit2=second.effhistos_.begin();
+    std::map<std::string,std::vector<float> >::iterator  mmapit=second.medianMap_.begin();
+    sampleit=second.histos_.begin();
 
-    for(size_t i=0;i<histos_.size();i++){
+    for(size_t i=0;i<second.histos_.size();i++){
         if(std::find(tobeskipped.begin(),tobeskipped.end(),i) == tobeskipped.end() ){ //unique
-            second.histos_.insert(sampleit,++sampleit);
-            second.effhistos_.insert(sampleit2,++sampleit2);
-            second.medianMap_.insert(mmapit,++mmapit);
+            thiscopy.histos_.insert(sampleit,++sampleit);
+            thiscopy.effhistos_.insert(sampleit2,++sampleit2);
+            thiscopy.medianMap_.insert(mmapit,++mmapit);
         }
         else{
             sampleit++;
@@ -166,7 +179,7 @@ NTBTagSF  NTBTagSF::operator + (NTBTagSF  second){
         }
     }
 
-    return second;
+    return thiscopy;
 }
 
 
