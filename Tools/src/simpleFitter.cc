@@ -75,6 +75,7 @@ private:
 }//ns
 
 int simpleFitter::printlevel=0;
+bool simpleFitter::debug=false;
 
 simpleFitter::simpleFitter():fitmode_(fm_pol0),minimizer_(mm_minuitMinos),maxcalls_(50000),
         requirefitfunction_(true),minsuccessful_(false),tolerance_(0.1),functobemin_(0),algorithm_(""),minimizerstr_("Minuit2"){
@@ -92,7 +93,10 @@ void simpleFitter::setFitMode(fitmodes fitmode){
     stepsizes_.resize(fitmode_+1,0.001);
     paraerrsup_.resize(fitmode_+1,0);
     paraerrsdown_.resize(fitmode_+1,0);
-    paracorrs_.resize(fitmode_+1,std::vector<double>(fitmode_+1));
+    std::vector<double> dummy;
+    dummy.resize(paras_.size(),0);
+    paracorrs_.clear();
+    paracorrs_.resize(paras_.size(),dummy);
 
 }
 
@@ -100,7 +104,10 @@ void simpleFitter::setParameters(const std::vector<double>& inpars,const std::ve
     paras_=inpars;stepsizes_=steps;
     paraerrsup_.resize(paras_.size(),0);
     paraerrsdown_.resize(paras_.size(),0);
-    paracorrs_.resize(paras_.size(),std::vector<double>(paras_.size()));
+    std::vector<double> dummy;
+    dummy.resize(paras_.size(),0);
+    paracorrs_.clear();
+    paracorrs_.resize(paras_.size(),dummy);
 }
 
 double simpleFitter::getFitOutput(const double& xin)const{
@@ -155,7 +162,7 @@ void simpleFitter::fit(){
 
 
         ROOT::Minuit2::MnMachinePrecision prec;
-        min->SetPrecision(1e-6);
+      //  min->SetPrecision(1e-6);
 
 
         for(size_t i=0;i<paras_.size();i++){
@@ -194,10 +201,44 @@ void simpleFitter::fit(){
         }
         chi2min_=min->MinValue();
 
+        std::vector<double> dummy;
+        dummy.resize(paras_.size(),0);
+        paracorrs_.clear();
+        paracorrs_.resize(paras_.size(),dummy);
+        for(size_t i=0;i<paras_.size();i++){
+            for(size_t j=0;j<paras_.size();j++){
+                paracorrs_.at(i).at(j)=min->Correlation(i,j);
+              //  std::cout << i << " " <<j << paracorrs_.at(i).at(j) <<std::endl;
+            }
+        }
+
+
         delete min;
 
 
     }
+
+}
+double simpleFitter::getParameterErr(size_t idx)const{
+    if(idx>=paraerrsup_.size())
+        throw std::out_of_range("simpleFitter::getParameterErr: index out of range");
+    if(paraerrsdown_.size()!=paraerrsup_.size())
+        throw std::out_of_range("simpleFitter::getParameterErr: serious problem errors up/down not of same size");
+
+    double err=fabs(paraerrsup_.at(idx));
+    if(err<fabs(paraerrsdown_.at(idx)))err=fabs(paraerrsdown_.at(idx));
+    return err;
+
+}
+
+
+const double& simpleFitter::getCorrelationCoefficient(size_t i, size_t j)const{
+    if(i>=paracorrs_.size())
+        throw std::out_of_range("simpleFitter::getCorrelationCoefficient: first index out of range");
+    if(j>=paracorrs_.at(i).size())
+        throw std::out_of_range("simpleFitter::getCorrelationCoefficient: second index out of range");
+
+    return paracorrs_.at(i).at(j);
 
 }
 

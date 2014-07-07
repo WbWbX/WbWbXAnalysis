@@ -82,6 +82,13 @@ void containerTest(){
 	cont2.getTH1D("",false,true)->Draw("e1");
 	cont2.getTGraph("",false,false)->Draw("same,P");
 
+	cont2.append(cont1);
+	float var=0;
+	std::cin >> var;
+
+    cont2.getTH1D("",false,true)->Draw("e1");
+    cont2.getTGraph("",false,false)->Draw("same,P");
+
 }
 int main(){
     containerTest();

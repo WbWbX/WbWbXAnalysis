@@ -111,6 +111,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
     bool onejet=false;
     bool zerojet=false;
     bool usetopdiscr=false;
+    bool nometcut=false;
+    bool nozcut=false;
 
     float normmultiplier=1; //use in case modes need to change norm
 
@@ -165,7 +167,14 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
         zerojet=true;
         std::cout << "entering Zerojet mode" <<std::endl;
     }
-
+    if(mode_.Contains("Nometcut")){
+        nometcut=true;
+        std::cout << "entering Nometcut mode" <<std::endl;
+    }
+    if(mode_.Contains("Nozcut")){
+        nozcut=true;
+        std::cout << "entering Nometcut mode" <<std::endl;
+    }
     if(mode_.Contains("Topdiscr")){
         usetopdiscr=true;
         std::cout << "entering Topdiscr mode" <<std::endl;
@@ -209,7 +218,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
     /*
      * end of mode switches
      */
-
+    bool wasbtagsys=false;
     //fake data configuration
     if(fakedata){
         //this whole section is bad style because the configuration should be done from the outside
@@ -228,6 +237,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
 
         // getPUReweighter()-> //setSystematics("nom");
+        wasbtagsys=getBTagSF()->isRealSyst();
         getBTagSF()->setSystematic(NTBTagSF::nominal);
         getJECUncertainties()->setSystematics("no");
         getJERAdjuster()->setSystematics("def");
@@ -316,11 +326,11 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
 
 
-    toplikelihood.addVariable(&evt.lhi_cosllvsetafirstlep,"cos#theta vs #eta_{l1}",-4,2);
-    toplikelihood.addVariable(&evt.lhi_etafirstvsetaseclep,"#eta_{l1} vs #eta_{l2}",-3,3);
-    toplikelihood.addVariable(&evt.lhi_deltaphileps,"#Delta#phi(l_{1},l_{2})",-2*M_PI,2*M_PI);
-    toplikelihood.addVariable(&evt.lhi_coslepanglevsmll,"cos#theta vs m_{ll}",-1,1);
-    toplikelihood.addVariable(&evt.lhi_mllvssumdphimetl,"m_{ll} vs #Delta#phi(met,l_{1})+#Delta#phi(met,l_{2})",-10,0.5);
+    //   toplikelihood.addVariable(&evt.lhi_cosllvsetafirstlep,"cos#theta vs #eta_{l1}",-4,2);
+    //   toplikelihood.addVariable(&evt.lhi_etafirstvsetaseclep,"#eta_{l1} vs #eta_{l2}",-3,3);
+    //  toplikelihood.addVariable(&evt.lhi_deltaphileps,"#Delta#phi(l_{1},l_{2})",-2*M_PI,2*M_PI);
+    //  toplikelihood.addVariable(&evt.lhi_coslepanglevsmll,"cos#theta vs m_{ll}",-1,1);
+    //  toplikelihood.addVariable(&evt.lhi_mllvssumdphimetl,"m_{ll} vs #Delta#phi(met,l_{1})+#Delta#phi(met,l_{2})",-10,0.5);
 
 
     if(usediscr_){
@@ -383,18 +393,19 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
     //make sure the nominal scale factors are used for varations of the SF
     TString btagSysAdd=topmass_+"_"+getSyst();
-    if(getBTagSF()->getSystematic() != bTagBase::nominal)
+    if(getBTagSF()->isRealSyst() || wasbtagsys)
         btagSysAdd=topmass_+"_nominal";
 
     if(fakedata) //always use nominal
-        btagSysAdd=topmass_+"_nominal"+"_fakedata";
+        btagSysAdd+="_fakedata";
 
     if(getBTagSF()->setSampleName((channel_+"_"+btagSysAdd+"_"+toString(inputfile)).Data()) < 0){
         reportError(-3,anaid);
         return;
     }
     getBTagSF()->setIsMC(isMC);
-
+    //  if(testmode_)
+    //    std::cout << "testmode(" <<anaid << ") setBtagSmaplename " <<channel_+"_"+btagSysAdd+"_"+toString(inputfile)).Data() <<std::endl;
 
     //range check switched off because of different ranges in bins compared to diff Xsec (leps)
     getTriggerSF()->setRangeCheck(false);
@@ -538,7 +549,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
         vector<NTGenJet *> genvisjets;
         vector<NTGenJet *> genvisbjetsfromtop;
 
-
+        evt.genbs=&genbs;
         evt.genleptons1=&genleptons1;
         evt.genleptons3=&genleptons3;
         evt.genjets=&genjets;
@@ -575,9 +586,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
                     gentops.push_back(&b_GenTops.content()->at(0));
                     evt.gentops=&gentops;
 
-                    for(size_t i=0;i<b_GenBs.content()->size();i++)
-                        genbs.push_back(&b_GenBs.content()->at(i));
-                    evt.genbs=&genbs;
+
                 }
 
                 if(testmode_ && entry==0){
@@ -589,7 +598,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
                 genleptons1=produceCollection<NTGenParticle>(b_GenLeptons1.content());
                 genleptons3=produceCollection<NTGenParticle>(b_GenLeptons3.content());
                 genjets=produceCollection<NTGenJet>(b_GenJets.content());
-
+                genbs=produceCollection<NTGenParticle>(b_GenBs.content());
 
                 //define visible phase space
                 float ps_ptlepmin=20;
@@ -1203,7 +1212,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
         bool analysisMllRange=!isZrange;
         if(b_emu_) analysisMllRange=true; //no z veto on emu
-
+        if(nozcut) analysisMllRange=true;
         ////////////////////Z Veto Cut STEP 4 (incl. hard jets)////////////////////////////////////
 
 
@@ -1281,7 +1290,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
         //////////////////// MET cut STEP 7//////////////////////////////////
         step++;
-        if(!b_emu_ && adjustedmet.met() < 40) continue;
+        if(!nometcut && !b_emu_ && adjustedmet.met() < 40) continue;
 
 
 

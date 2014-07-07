@@ -105,8 +105,6 @@ std::string textFormatter::getFilename(const std::string& pathtofile)const{
     std::string out;
     using namespace std;
     string s=pathtofile;
-    trimcomments(s);
-    trim(s);
     istringstream ss(s);
     while (ss)
     {
@@ -114,12 +112,65 @@ std::string textFormatter::getFilename(const std::string& pathtofile)const{
         if (!getline( ss, s2, *"/" )) break;
         if(debug)
             std::cout << "got \"" << s2 << "\""<<std::endl;
-        trim(s2);
         if(s2.size()>0)
             out = s2;
     } //just keep last
 
     return out;
+}
+
+
+std::string textFormatter::getFileExtension(const std::string& pathtofile)const{
+    std::string out=getFilename(pathtofile);
+    using namespace std;
+    string s=out;
+    istringstream ss(s);
+    while (ss)
+    {
+        string s2;
+        if (!getline( ss, s2, *"." )) break;
+        if(debug)
+            std::cout << "got \"" << s2 << "\""<<std::endl;
+        if(s2.size()>0)
+            out = s2;
+    } //just keep last
+
+    //in case no extension
+    if(out==s)
+        return "";
+    return out;
+}
+std::string textFormatter::stripFileExtension(const std::string& pathtofile)const{
+    std::string temp=getFilename(pathtofile);
+    using namespace std;
+    string s=temp;
+    string out;
+    istringstream ss(s);
+    while (ss)
+    {
+        out=temp;
+        string s2;
+        if (!getline( ss, s2, *"." )) break;
+        if(debug)
+            std::cout << "got \"" << s2 << "\""<<std::endl;
+        if(s2.size()>0)
+            temp = s2;
+    } //just keep last
+
+    //in case no extension
+
+    return out;
+}
+std::string textFormatter::getFileDir(const std::string& pathtofile)const{
+    using namespace std;
+    string str=pathtofile;
+    size_t endpos = str.find_last_of("/");
+    if( std::string::npos != endpos )
+    {
+        str = str.substr( 0, endpos+1 );
+    }
+    return str;
+
 }
 
 

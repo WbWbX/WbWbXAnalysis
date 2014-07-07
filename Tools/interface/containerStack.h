@@ -48,7 +48,11 @@ public:
 
     void setLegendOrder(const TString &leg, const size_t& no);
 
-    void mergeSameLegends();       //! shouldn't be necessary
+   // void mergeSameLegends();       //! shouldn't be necessary
+
+    void mergeLegends(const std::vector<TString>& tobemerged,const TString & mergedname, bool allowsignals=false);
+    void mergeLegends(const TString& tobemergeda,const TString & tobemergedb,const TString & mergedname, bool allowsignals=false);
+
     ztop::container1D getContribution(TString)const;   //! does not ignore data; makes copy, doesn't change member containers!
     ztop::container1D getContributionsBut(TString)const;  //!does not ignore data; makes copy, doesn't change member containers!
     ztop::container1D getContributionsBut(std::vector<TString>)const;  //!does not ignore data; makes copy, doesn't change member containers!
@@ -61,7 +65,7 @@ public:
     ztop::container1DUnfold getContributions1DUnfoldBut(TString)const;  //!does not ignore data; makes copy, doesn't change member containers!
     ztop::container1DUnfold getContributions1DUnfoldBut(std::vector<TString>)const;  //!does not ignore data; makes copy, doesn't change member containers!
 
-    const TString & getName() const{return name_;}
+
     size_t size() const{return colors_.size();}
     TString & getLegend(unsigned int i){return legends_.at(i);}
     const TString & getLegend(unsigned int i)const{return legends_.at(i);}
@@ -100,7 +104,6 @@ public:
 
     void clear(){containers_.clear();legends_.clear();colors_.clear();norms_.clear();}
 
-    void setName(TString name){name_=name;}
 
     THStack * makeTHStack(TString stackname = "");
     TLegend * makeTLegend(bool inverse=true);
@@ -114,7 +117,7 @@ public:
     //TCanvas * makeTCanvas(bool drawratioplot=true);
     TCanvas * makeTCanvas(plotmode plotMode=ratio);
 
-    std::map<TString, float>  getAllContentsInBin(size_t bin,bool print=false)const;
+    std::map<TString, histoBin>  getAllContentsInBin(size_t bin,int syst=-1,bool print=false)const;
 
     containerStack rebinXToBinning(const std::vector<float> &)const;
     containerStack rebinYToBinning(const std::vector<float> &)const;
@@ -133,6 +136,8 @@ public:
     bool setsignals(const std::vector<TString> &);// (just return whether successful)
     std::vector<size_t> getSignalIdxs() const;
     std::vector<size_t> getSortedIdxs(bool inverse) const;
+
+    float getYMax(bool dividebybinwidth=true)const;
 
     size_t getDataIdx()const;
 
@@ -182,7 +187,7 @@ public:
     bool checknorms() const;
 
 private:
-    TString name_;
+
     std::vector<ztop::container1D> containers_;
     std::vector<ztop::container2D> containers2D_;
     std::vector<ztop::container1DUnfold> containers1DUnfold_;

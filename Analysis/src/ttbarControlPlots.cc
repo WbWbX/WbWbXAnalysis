@@ -135,24 +135,32 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
     FILLFOREACH(isomuons,eta());
 
     SETBINS << 0 << 10 << 20 << 25 << 30 << 35 << 40 << 45 << 50 << 60 << 70 << 100 << 200;
-    addPlot( "muon pt", "p_{T} [GeV]", "N_{#mu}");
+    addPlot( "muon pt", "p_{T} [GeV]", "N_{#mu}/bw");
     FILLFOREACH(isomuons,pt());
 
     SETBINSRANGE(50,0,1);
-    addPlot("muon isolation", "Iso", "N_{#mu}");
+    addPlot("muon isolation", "Iso", "N_{#mu}/bw");
     FILLFOREACH(idmuons,isoVal());
 
     SETBINS << 0 << 10 << 20 << 25 << 30 << 35 << 40 << 45 << 50 << 60 << 70 << 100 << 200;
-    addPlot("leadOppoQLep pt", "p_{T} [GeV]", "N_{l}");
+    addPlot("lead lepton pt", "p_{T,l1} [GeV]", "N_{evt}/GeV");
     FILL(leadinglep,pt());
 
-    addPlot("secLeadOppoQLep pt", "p_{T} [GeV]", "N_{l}");
+    addPlot("seclead lepton pt", "p_{T,l2} [GeV]", "N_{evt}/GeV");
     FILL(secleadinglep,pt());
 
-    addPlot("leadAllLep pt", "p_{T} [GeV]", "N_{l}");
+    SETBINSRANGE(20,-2.5,2.5);
+    addPlot("lead lepton eta", "#eta_{l1}", "N_{evt}/0.25");
+    FILL(leadinglep,eta());
+
+    addPlot("seclead lepton eta", "#eta_{l2}", "N_{evt}/0.25");
+    FILL(secleadinglep,eta());
+
+
+    addPlot("leadAllLep pt", "p_{T} [GeV]", "N_{l}/GeV");
     if(event()->allleptons && event()->allleptons->size()>0)
         FILL(allleptons->at(0),pt());
-    addPlot("secLeadAllLep pt", "p_{T} [GeV]", "N_{l}");
+    addPlot("secLeadAllLep pt", "p_{T} [GeV]", "N_{l}/GeV");
     if(event()->allleptons && event()->allleptons->size()>1)
         FILL(allleptons->at(1),pt());
 
@@ -183,17 +191,24 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
     addPlot("idjets pt","p_{T} [GeV]", "N_{j}/GeV");
     FILLFOREACH(idjets,pt());
 
+
+    addPlot("leading b-jet pt","p_{T,b} [GeV]", "N_{evt}/GeV");
+    if(event()->selectedbjets && event()->selectedbjets->size()>0)
+        FILL(selectedbjets->at(0),pt());
+
     SETBINSRANGE(10,-0.5,9.5);
-    addPlot("hard jet multi", "N_{jet}","N_{evt}");
-    FILL(hardjets,size());
-    addPlot("med jet multi", "N_{jet}", "N_{evt}");
+    addPlot("selected jets multi", "N_{jet}","N_{evt}");
+    FILL(selectedjets,size());
+  /*  addPlot("med jet multi", "N_{jet}", "N_{evt}");
     FILL(medjets,size());
     addPlot("dphillj jets multi", "N_{jet}", "N_{evt}");
     FILL(dphilljjets,size());
     addPlot("dphiplushard jets multi", "N_{jet}", "N_{evt}");
-    FILL(dphiplushardjets,size());
-    addPlot("selected b jet multi","N{bjet}","N_{evt}",true);
+    FILL(dphiplushardjets,size()); */
+    SETBINSRANGE(6,-0.5,5.5);
+    addPlot("selected b-jet multi","N_{b}","N_{evt}",true);
     FILL(selectedbjets,size());
+
 
 
     SETBINSRANGE(40,-1.2,1.2);
@@ -215,6 +230,12 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
     addPlot("leading jet eta","#eta_{1^{st}jet}","evt/bw");
     if(event()->selectedjets && event()->selectedjets->size()>0)
         FILL(selectedjets->at(0),eta()) ;
+
+    SETBINSRANGE(20,-2.5,2.5);
+    addPlot("leading b-jet eta","#eta_{b}","N_{evt}/0.25");
+    if(event()->selectedbjets && event()->selectedbjets->size()>0)
+        FILL(selectedbjets->at(0),eta()) ;
+
 
     SETBINSRANGE(20,-2.5,2.5);
     addPlot("secleading jet eta","#eta_{1^{st}jet}","evt/bw");
@@ -254,8 +275,8 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
 
     //Combined vars
 
-    SETBINSRANGE(120,0,240);
-    addPlot("mll Range","m_{ll}[GeV]","N_{evt}/GeV");
+    SETBINSRANGE(150,0,300);
+    addPlot("mll Range","m_{ll} [GeV]","N_{evt}/GeV");
     FILLSINGLE(mll);
 
     SETBINSRANGE(40,0,300);
@@ -467,7 +488,7 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
     ///EVT VARS
      */
 
-    SETBINSRANGE(50,0,50);
+    SETBINSRANGE(35,0,35);
     addPlot("vertex multiplicity", "n_{vtx}", "N_{evt}");
     FILL(event,vertexMulti());
 
@@ -482,15 +503,10 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
     addPlot("top likelihood output","D","N_{evt}/bw");
     FILLSINGLE(lh_toplh);
 
-    SETBINSRANGE(60,0,1);
-    addPlot("top likelihood output 1 b-jet","D","N_{evt}/bw");
-    if(event()->selectedbjets && event()->selectedbjets->size()==1)
-        FILLSINGLE(lh_toplh);
 
-    SETBINSRANGE(60,0,1);
-    addPlot("top likelihood output 2 b-jets","D","N_{evt}/bw");
-    if(event()->selectedbjets && event()->selectedbjets->size()==2)
-        FILLSINGLE(lh_toplh);
+
+
+
 
     SETBINSRANGE(40,0,1);
     addPlot("top likelihood output less bins","D","N_{evt}/bw");
@@ -514,6 +530,171 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
         last()->fill(dxi,*event()->puweight);
 
     }
+
+
+    ///FOR EXTRACTION!! DO NOT CHANGE THESE NAMES!
+
+    SETBINSRANGE(15,0,1);
+    addPlot("top likelihood output 0 b-jets","D","N_{evt}/bw");
+    if(event()->selectedbjets && event()->selectedbjets->size()==0)
+        FILLSINGLE(lh_toplh);
+
+    SETBINSRANGE(15,0,1);
+    addPlot("top likelihood output 1 b-jets","D","N_{evt}/bw");
+    if(event()->selectedbjets && event()->selectedbjets->size()==1)
+        FILLSINGLE(lh_toplh);
+
+    SETBINSRANGE(15,0,1);
+    addPlot("top likelihood output 2 b-jets","D","N_{evt}/bw");
+    if(event()->selectedbjets && event()->selectedbjets->size()==2)
+        FILLSINGLE(lh_toplh);
+
+    SETBINSRANGE(15,0,1);
+    addPlot("top likelihood output 3+ b-jets","D","N_{evt}/bw");
+    if(event()->selectedbjets && event()->selectedbjets->size()>2)
+        FILLSINGLE(lh_toplh);
+
+
+
+
+
+    SETBINSRANGE(15,20,300);
+    addPlot("mll 0 b-jets","m_{ll} [GeV]","N_{evt}/GeV");
+    if(event()->selectedbjets && event()->selectedbjets->size()==0)
+        FILLSINGLE(mll);
+
+    SETBINSRANGE(15,20,300);
+    addPlot("mll 1 b-jets","m_{ll} [GeV]","N_{evt}/GeV");
+    if(event()->selectedbjets && event()->selectedbjets->size()==1)
+        FILLSINGLE(mll);
+
+    SETBINSRANGE(15,20,300);
+    addPlot("mll 2 b-jets","m_{ll} [GeV]","N_{evt}/GeV");
+    if(event()->selectedbjets && event()->selectedbjets->size()==2)
+        FILLSINGLE(mll);
+
+    SETBINSRANGE(15,20,300);
+    addPlot("mll 3+ b-jets","m_{ll} [GeV]","N_{evt}/GeV");
+    if(event()->selectedbjets && event()->selectedbjets->size()>2)
+        FILLSINGLE(mll);
+
+
+
+
+
+    SETBINS << 20 << 30 << 40 << 50 << 60 << 70 << 90 << 120 << 200;
+    addPlot("lead lep pt 0 b-jets","p_{t}^{l1} [GeV]","N_{evt}/GeV");
+    if(event()->selectedbjets && event()->selectedbjets->size()==0)
+        FILL(leadinglep,pt());
+
+
+    SETBINS << 20 << 30 << 40 << 50 << 60 << 70 << 90 << 120 << 200;
+    addPlot("lead lep pt 1 b-jets","p_{t}^{l1} [GeV]","N_{evt}/GeV");
+    if(event()->selectedbjets && event()->selectedbjets->size()==1)
+        FILL(leadinglep,pt());
+
+    SETBINS << 20 << 30 << 40 << 50 << 60 << 70 << 90 << 120 << 200;
+    addPlot("lead lep pt 2 b-jets","p_{t}^{l1} [GeV]","N_{evt}/GeV");
+    if(event()->selectedbjets && event()->selectedbjets->size()==2)
+        FILL(leadinglep,pt());
+
+    SETBINS << 20 << 30 << 40 << 50 << 60 << 70 << 90 << 120 << 200;
+    addPlot("lead lep pt 3+ b-jets","p_{t}^{l1} [GeV]","N_{evt}/GeV");
+    if(event()->selectedbjets && event()->selectedbjets->size()>2)
+        FILL(leadinglep,pt());
+
+
+
+
+    SETBINS << 20 << 25 << 30 << 35 << 40 << 50 << 60  << 80 << 200;
+    addPlot("sec lep pt 0 b-jets","p_{t}^{l2} [GeV]","N_{evt}/GeV");
+    if(event()->selectedbjets && event()->selectedbjets->size()==0)
+        FILL(secleadinglep,pt());
+
+    SETBINS << 20 << 25 << 30 << 35 << 40 << 50 << 60  << 80 << 200;
+    addPlot("sec lep pt 1 b-jets","p_{t}^{l2} [GeV]","N_{evt}/GeV");
+    if(event()->selectedbjets && event()->selectedbjets->size()==1)
+        FILL(secleadinglep,pt());
+
+    SETBINS << 20 << 25 << 30 << 35 << 40 << 50 << 60  << 80 << 200;
+    addPlot("sec lep pt 2 b-jets","p_{t}^{l2} [GeV]","N_{evt}/GeV");
+    if(event()->selectedbjets && event()->selectedbjets->size()==2)
+        FILL(secleadinglep,pt());
+
+    SETBINS << 20 << 25 << 30 << 35 << 40 << 50 << 60  << 80 << 200;
+    addPlot("sec lep pt 3+ b-jets","p_{t}^{l2} [GeV]","N_{evt}/GeV");
+    if(event()->selectedbjets && event()->selectedbjets->size()>2)
+        FILL(secleadinglep,pt());
+
+
+
+
+
+
+    SETBINS << 0 << 1 << 1.5 << 2 << 2.25 << 2.5 <<2.75 << 3 << 3.2 << 3.4 << 3.6 <<3.8 << 4 <<4.5 << 5<<6;
+    addPlot("dRll 0 b-jets","#Delta R(ll)","N_{evt}/GeV");
+    if(event()->selectedbjets && event()->selectedbjets->size()==0)
+        FILLSINGLE(leplepdr);
+
+    SETBINS << 0 << 1 << 1.5 << 2 << 2.25 << 2.5 <<2.75 << 3 << 3.2 << 3.4 << 3.6 <<3.8 << 4 <<4.5 << 5<<6;
+    addPlot("dRll 1 b-jets","#Delta R(ll)","N_{evt}/GeV");
+    if(event()->selectedbjets && event()->selectedbjets->size()==1)
+        FILLSINGLE(leplepdr);
+
+    SETBINS << 0 << 1 << 1.5 << 2 << 2.25 << 2.5 <<2.75 << 3 << 3.2 << 3.4 << 3.6 <<3.8 << 4 <<4.5 << 5<<6;
+    addPlot("dRll 2 b-jets","#Delta R(ll)","N_{evt}/GeV");
+    if(event()->selectedbjets && event()->selectedbjets->size()==2)
+        FILLSINGLE(leplepdr);
+
+    SETBINS << 0 << 1 << 1.5 << 2 << 2.25 << 2.5 <<2.75 << 3 << 3.2 << 3.4 << 3.6 <<3.8 << 4 <<4.5 << 5<<6;
+    addPlot("dRll 3+ b-jets","#Delta R(ll)","N_{evt}/GeV");
+    if(event()->selectedbjets && event()->selectedbjets->size()>2)
+        FILLSINGLE(leplepdr);
+
+
+
+    SETBINSRANGE(1,0,1);
+    addPlot("total 0 b-jets","","N_{evt}");
+    if(event()->selectedbjets && event()->selectedbjets->size()==0)
+        last()->fill(1,*event()->puweight);
+
+    SETBINSRANGE(1,0,1);
+    addPlot("total 1 b-jets","","N_{evt}");
+    if(event()->selectedbjets && event()->selectedbjets->size()==1)
+        last()->fill(1,*event()->puweight);
+
+    SETBINSRANGE(1,0,1);
+    addPlot("total 2 b-jets","","N_{evt}");
+    if(event()->selectedbjets && event()->selectedbjets->size()==2)
+        last()->fill(1,*event()->puweight);
+
+    SETBINSRANGE(1,0,1);
+    addPlot("total 3+ b-jets","","N_{evt}");
+    if(event()->selectedbjets && event()->selectedbjets->size()>2)
+        last()->fill(1,*event()->puweight);
+
+
+
+    SETBINSRANGE(7,-0.5,6.5);
+    addPlot("Njets 0 b-jets","","N_{evt}");
+    if(event()->selectedbjets && event()->selectedbjets->size()==0)
+        FILL(selectedjets,size());
+
+    SETBINSRANGE(7,-0.5,6.5);
+    addPlot("Njets 1 b-jets","","N_{evt}");
+    if(event()->selectedbjets && event()->selectedbjets->size()==1)
+        FILL(selectedjets,size());
+
+    SETBINSRANGE(7,-0.5,6.5);
+    addPlot("Njets 2 b-jets","","N_{evt}");
+    if(event()->selectedbjets && event()->selectedbjets->size()==2)
+        FILL(selectedjets,size());
+
+    SETBINSRANGE(7,-0.5,6.5);
+    addPlot("Njets 3+ b-jets","","N_{evt}");
+    if(event()->selectedbjets && event()->selectedbjets->size()>2)
+        FILL(selectedjets,size());
+
 
 
 

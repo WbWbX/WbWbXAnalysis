@@ -9,6 +9,7 @@
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
+#include <cstdio>
 
 namespace ztop{
 
@@ -88,7 +89,7 @@ void fileReader::readFile(const std::string &filename){
                     if(start_.size() >0){
                         if(debug)
                             std::cout << s2 << " is start marker, begin reading" << std::endl;
-                        continue; //dont read start marker itself
+                        continue; //dont read start marker line itself
                     }
                 }
                 if(end_.size() >0 && s2 == end_){
@@ -116,10 +117,78 @@ void fileReader::readFile(const std::string &filename){
         myfile.close();
     }
     else{
-        cout << "fileReader::readFile: could not read file" <<std::endl;
+        cout << "fileReader::readFile: could not read file "<< filename <<std::endl;
         return;
     }
 }
+
+std::string fileReader::getReJoinedLine(size_t line) const{
+    if(line>=lines_.size()){
+        throw std::out_of_range("fileReader::getReJoinedLine");
+    }
+    std::string out;
+    for(size_t i=0;i<lines_.at(line).size();i++){
+        out+=lines_.at(line).at(i);
+        if(i<lines_.at(line).size()-1)
+            out+= delimiter_;
+    }
+    return out;
+}
+
+
+std::vector<std::string> fileReader::getMarkerValues(const std::string& markername)const{
+
+    std::vector<std::string> out;
+    for(size_t i=0;i<nLines();i++){
+        std::string fullmarker;
+        std::vector<std::string> formattedentries;
+        if(delimiter_ == " " || delimiter_ == "-" || delimiter_ == "]" ||delimiter_ == "["  ){
+            fullmarker=getReJoinedLine(i);
+            textFormatter tf;
+            fullmarker=getReJoinedLine(i);
+            tf.setComment(comment_);
+            tf.setDelimiter(",");
+            tf.setTrim(trim_);
+            formattedentries=tf.getFormatted(fullmarker);
+        }
+        else{
+            formattedentries=lines_.at(i);
+        }
+        for(size_t entr=0;entr<formattedentries.size();entr++){
+
+            textFormatter tfentr;
+            tfentr.setDelimiter("-");
+            tfentr.setComment(comment_);
+            tfentr.setTrim(trim_);
+            std::vector<std::string> varsandvals=tfentr.getFormatted(formattedentries.at(entr));
+
+            if(varsandvals.size()<1)
+                continue;
+            tfentr.setTrim("[");
+            tfentr.ltrim(varsandvals.at(0));
+            tfentr.setTrim(" ");
+            tfentr.trim(varsandvals.at(0));
+            if(varsandvals.at(0) == markername){
+
+                tfentr.setTrim("[]");
+                tfentr.trim(formattedentries.at(entr));
+                tfentr.setTrim(markername);
+                tfentr.trim(formattedentries.at(entr));
+                tfentr.setTrim("- ");
+                tfentr.trim(formattedentries.at(entr));
+
+                out.push_back( formattedentries.at(entr));
+            }
+
+        }
+
+    }
+
+    return out;
+}
+
+
+
 std::vector<std::string> fileReader::getData(const size_t &line) const{
     if(line>=lines_.size()){
         std::cout << "fileReader::getData: line out of range" <<std::endl;
@@ -136,33 +205,70 @@ std::vector<std::string> fileReader::getData(const size_t &line) const{
  * then last value is returned
  *
  * if value is not found empty string will be returned
+ *
+ *
+ * fixed format: commas as separators (if any)
  */
 std::string fileReader::getValueString(const std::string & val, bool checkdoubles){
-    std::string out;
+    std::string out="";
     size_t count=0;
     //search all entries:
     for(size_t line=0;line<nLines();line++){
-        for(size_t entr=0;entr<nEntries(line);entr++){
-            std::string & s=lines_.at(line).at(entr);
-            size_t pos=s.find(val);
-            if(pos != std::string::npos){ //found
+        std::string thisline;
+        textFormatter tf;
+        std::vector<std::string> formattedentries;
+        if(delimiter_!=","){
+            thisline=getReJoinedLine(line);
+            tf.setComment(comment_);
+            tf.setDelimiter(",");
+            tf.setTrim(trim_);
+            formattedentries=tf.getFormatted(thisline);
+        }
+        else{
+            formattedentries=lines_.at(line);
+        }
+        //split according to format, allow for commas as separators and spaces in names
+
+        for(size_t entr=0;entr<formattedentries.size();entr++){
+            textFormatter tfentr;
+            tfentr.setDelimiter("=");
+            tfentr.setComment(comment_);
+            tfentr.setTrim(trim_);
+            std::vector<std::string> varsandvals=tfentr.getFormatted(formattedentries.at(entr));
+            if(varsandvals.size() < 2) continue;
+
+
+            if(varsandvals.at(0) == val){ //found
                 if(checkdoubles && count > 0){//except
+                    std::cout << "fileReader::getValue: value " << val<<  " defined twice! Source of errors!" <<std::endl;
                     throw std::logic_error("fileReader::getValue: value defined twice! Source of errors!");
                 }
-                pos=s.find("=");
-                if(pos!= std::string::npos){
-                    if(pos+1 >= s.size())
-                        return std::string("");
-                    std::string s2(s.begin()+pos+1,s.end());
-                    trim(s2);
-                    if(s2.size()<1)
-                        return std::string("");
-                    out=s2;
-                    count++;
-                }
+
+                out=varsandvals.at(1);
+                count++;
             }
         }
     }
+
     return out;
 }
+
+
+
+std::string fileReader::dumpFormattedToTmp()const{
+    char buffer [256]="/tmp/tmpfileXXXXXX";
+    mkstemp (buffer);
+    std::string filename(buffer);
+    std::ofstream ofs (filename, std::ofstream::out);
+    for(size_t i=0;i<nLines();i++){
+        for(size_t entr=0;entr<lines_.at(i).size();entr++){
+            ofs << lines_.at(i).at(entr) << delimiter_;
+        }
+        ofs << std::endl;
+    }
+
+    ofs.close();
+    return filename;
+}
+
 }//ztop

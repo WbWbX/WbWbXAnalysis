@@ -9,6 +9,7 @@
 #define TAGGEDOBJECT_H_
 
 #include <vector>
+#include "TString.h"
 
 namespace ztop{
 
@@ -21,7 +22,27 @@ namespace ztop{
 
 class taggedObject{
 public:
-    taggedObject():sorted_(false){}
+    /**
+     * types that can be used for plotting or similar
+     * add to the end
+     */
+    enum objTypes{
+        type_default,
+        type_container1D,
+        type_container2D,
+        type_container1DUnfold,
+        type_containerStack,
+        type_graph
+    };
+
+    const objTypes& type(){return type_;}
+
+    taggedObject():
+        type_(type_default),
+        sorted_(false){}
+    taggedObject(objTypes type):
+        type_(type),
+        sorted_(false){}
     ~taggedObject(){}
     /*
      * If you need to add a tag to any object, use these here
@@ -36,8 +57,6 @@ public:
 
     ////////access functions
 
-
-
     void addTag(const ztop::taggedObject::tags &tag);
     void removeTag(const ztop::taggedObject::tags &tag);
 
@@ -49,6 +68,19 @@ public:
     bool hasTag()const;
 
     bool tagsAreEqual(const taggedObject*)const;
+
+    ///////
+
+    void setName(const TString & name) {name_=name;}
+    const TString & getName()const {return name_;}
+
+    ///////////// types
+
+
+
+protected:
+    TString name_;
+    objTypes type_;
 
 private:
 

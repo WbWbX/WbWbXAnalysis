@@ -26,7 +26,7 @@ void plotStyle::readFromFile(const std::string & filename,const std::string  sty
     fr.setStartMarker("[plotStyle - "+stylename+']');
     fr.setEndMarker("[end plotStyle]");
     fr.readFile(filename);
-    if(fr.nLines()<1){
+    if(fr.nLines()<1 && requireall){
         std::cout << "plotStyle::readFromFile: did not find style "  << stylename <<std::endl;
         throw std::runtime_error("plotStyle::readFromFile: no plotStyle found");
     }
@@ -62,6 +62,10 @@ void plotStyle::readFromFile(const std::string & filename,const std::string  sty
     yaxis_.min         = fr.getValue<float>("yaxis.min",yaxis_.min);
     yaxis_.log         = fr.getValue<bool> ("yaxis.log",yaxis_.log);
     yaxis_.name         = fr.getValue<TString> ("yaxis.name",yaxis_.name);
+
+
+    fr.setRequireValues(false);
+    yaxis_.forcezero   = fr.getValue<bool> ("yaxis.forcezero",yaxis_.forcezero);
 
 }
 

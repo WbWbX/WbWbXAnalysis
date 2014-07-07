@@ -14,7 +14,18 @@
 namespace ztop{
 
 class NTEvent;
-
+/**
+ * different modes:
+ * - total variation (also reweights the 0 eigenvector)
+ * - only difference wrt to 0 eigenvector:
+ *   (weight = ev(X,event)/ev(0, sameevent))
+ *
+ * - for both call getRenormalization() at the end to only evaluate
+ *   shape differences in initial generated events
+ *
+ *   needs: to be renormalized to all processed events, not only the ones
+ *   in event loop... implement and make safe wrt base class
+ */
 class pdfReweighter: public simpleReweighter{
 public:
     pdfReweighter();
@@ -24,6 +35,8 @@ public:
     void setNTEvent(NTEvent * evt){ntevent_=evt;}
 
     void reWeight( float &oldweight);
+
+
 
 private:
 

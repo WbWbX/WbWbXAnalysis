@@ -12,13 +12,17 @@
 
 #include "TString.h"
 #include "TtZAnalysis/Tools/interface/container.h"
+#include "TtZAnalysis/Tools/interface/containerStackVector.h"
 #include "TtZAnalysis/Tools/interface/graph.h"
 #include "TtZAnalysis/Tools/interface/plotterBase.h"
 #include "TtZAnalysis/Tools/interface/parameterExtractor.h"
 #include "TtZAnalysis/Tools/interface/tObjectList.h"
+#include "TtZAnalysis/Tools/interface/texTabler.h"
+#include "TtZAnalysis/Tools/interface/resultsSummary.h"
 
 #include "TF1.h"
 #include "TFile.h"
+#include <stdexcept>
 
 namespace ztop{
 
@@ -43,7 +47,8 @@ public:
      * define nominal id nominalId
      * define if its divided by binwidth inputIsDividedByBinWidth = true/false
      */
-    void setExternalGenInputFilesFormat(const TString& pl);
+    void setConfigFile(const TString& pl);
+    void setExternalPrefix(const TString& prefix){extfilepreamble_=prefix;}
     void setExternalGenInputPDF(const TString& pl){extfilepdf_=pl;setup_=false;}
     void setRescaleNLOPred(const bool& doit){rescalepreds_=doit;}
     void setInputFiles(const std::vector<TString>& pl);
@@ -64,19 +69,22 @@ public:
      * style file should incorporate styles for plotterCompare (MC/data dependence)
      * and styles for plotterSimple for chi2 plots
      */
-    void setComparePlotterStyleFileMC(const std::string& f){compplotsstylefilemc_=f;}
+    /*   void setComparePlotterStyleFileMC(const std::string& f){compplotsstylefilemc_=f;}
     void setComparePlotterStyleFileData(const std::string& f){compplotsstylefiledata_=f;}
     void setBinsPlotterStyleFile(const std::string& f){binsplotsstylefile_=f;}
     void setBinsChi2PlotterStyleFile(const std::string& f){binschi2plotsstylefile_=f;}
     void setAllSystStyleFile(const std::string & in){allsyststylefile_=in;}
 
     void setBinsPlusFitPlotterStyleFile(const std::string& f){binsplusfitsstylefile_=f;}
+     */
     void setFitMode(const TString& m){fitmode_=m;}
 
     void drawXsecDependence(TCanvas *c, bool fordata);
     void drawIndivBins(TCanvas *c,int syst=-2);
 
-
+    std::vector<TString> getSystNameList()const{if(mccont_.size()<1) return std::vector<TString>(); return mccont_.at(0).getSystNameList();}
+    //in extra loop!
+    void drawSystVariation(TCanvas *c,const TString & sys);
 
     /**
      * syslayer from -1 (nominal) to systSize of data!
@@ -96,19 +104,30 @@ public:
      */
     void createGlobalLikelihood();
     void fitGlobalLikelihood();
-    void drawGlobalLikelihood(TCanvas *c,bool zoom=false);
+    /**
+     * returns the minimum Y value
+     */
+    float drawGlobalLikelihood(TCanvas *c,bool zoom=false);
 
 
     int getDataSystSize(){if(databingraphs_.size()>0) return (int)databingraphs_.at(0).getSystSize(); else return -3;}
     int getMCSystSize(){if(mcbingraphs_.size()>0) return (int)mcbingraphs_.at(0).getSystSize(); else return -3;}
+    const TString & getSystName(size_t idx)const {
+        if(databingraphs_.size()>0) return databingraphs_.at(0).getSystErrorName(idx);
+        throw std::logic_error("mtExtractor::getSystName: no graphs");}
+    size_t getNDof()const{if(datagraphs_.size()>0) return datagraphs_.at(0).getNPoints()-1; else return 0;}
 
     parameterExtractor * getExtractor(){return &paraExtr_;}
 
     /**
      * can write back nominal out with stat uncert. (for calib mode)
      */
-    void drawResultGraph(TCanvas *c, float * nom=0, float * errd=0, float * erru=0);
+    void drawResultGraph(TCanvas *c, float * nom=0, float * errd=0, float * erru=0,float * syserrdp=0, float * syserrup=0);
     graph * getResultGraph(){return &allsyst_;}
+
+    texTabler makeSystBreakdown(bool rel=false)const;
+
+    void drawSpreadWithInlay(TCanvas *c);
 
     void setup(); //just  runs private functions
 
@@ -121,11 +140,17 @@ public:
     TString printConfig()const;
 
     std::vector<float> getMtValues();
+    const TString & getDefMtopDataFile()
+    {
+        if(mtvals_.size()<1) getMtValues();
+        return cufinputfiles_.at(defmtidx_);
+    }
 
 private:
 
     void setAxisLikelihoodVsMt(graph & g)const;
     void setAxisXsecVsMt(graph & g)const;
+    void setAxisXsecRatio(graph & g)const;
 
     double getNewNorm(double deltam,bool eighttev=true)const;
 
@@ -144,10 +169,11 @@ private:
     // here for each mt a fully equipped distr is present
     void makeBinGraphs(); //still including all systematics use getBin()
 
+    bool isEmptyForAnyMass(size_t bin)const;
 
 
-
-
+    //same ordering as mtvals
+    // std::vector< containerStackVector> allanalysisplots_;
 
     TString plotnamedata_;
     TString plotnamemc_; //ff
@@ -159,6 +185,7 @@ private:
     std::vector<TString> extgenfiles_;
     TString extfileformatfile_,extfilepdf_;
     TString extfilepreamble_;
+
 
     std::vector<container1D > datacont_;
     std::vector<container1D > mccont_;
@@ -185,12 +212,19 @@ private:
     std::string binsplotsstylefile_;
     std::string binschi2plotsstylefile_;
     std::string binsplusfitsstylefile_;
+    std::string chi2plotsstylefile_;
+    std::string allsyststylefile_;
+    std::string sysvariationsfile_;
+    std::string spreadwithinlaystylefile_;
     std::vector<plotterBase *> pltrptrs_;
+    std::string textboxesfile_,textboxesmarker_;
+
+
+    graph globalnominal_;
 
     parameterExtractor paraExtr_;
 
     graph allsyst_,allsystsl_,allsystsh_;
-    std::string allsyststylefile_;
     float syspidx_;
 
     TString fitmode_;
@@ -201,6 +235,10 @@ private:
     bool rescalepreds_;
 
     bool usenormalized_;
+
+    size_t defmtidx_;
+
+    resultsSummary results_;
 
     template<class T>
     T tryToGet(TFile * f,const TString& name)const{

@@ -26,6 +26,7 @@ public:
     plotterControlPlot(): plotterBase(), divideat_(0), stackp_(0),templegp_(0),tempdataentry_(0),invertplots_(false){}
     ~plotterControlPlot(){plotterControlPlot::cleanMem();}
 
+    void addStyleFromFile(const std::string& );
     void readStyleFromFile(const std::string& );
     /*
      * expects entries:
@@ -76,6 +77,8 @@ private:
 
     void drawControlPlot();
     void drawRatioPlot();
+
+    void readStylePriv(const std::string & file, bool requireall);
 
 };
 

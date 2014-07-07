@@ -22,7 +22,11 @@
 #include "TIterator.h"
 #include "TKey.h"
 #include "TtZAnalysis/Tools/interface/fileReader.h"
+#include "TLatex.h"
+#include "TtZAnalysis/Tools/interface/textFormatter.h"
+#include "TtZAnalysis/Tools/interface/formatter.h"
 
+#include "TtZAnalysis/Tools/interface/plotterInlay.h"
 
 namespace ztop{
 
@@ -31,13 +35,13 @@ bool mtExtractor::debug=false;
 
 mtExtractor::mtExtractor():plotnamedata_(""),plotnamemc_(""),plottypemc_("cuf"),
         minbin_(-1),maxbin_(-1),excludebin_(-1),tmpglgraph_(0),tfitf_(0),
-        iseighttev_(true),defmtop_(172.5),setup_(false),syspidx_(1),
-        dofolding_(false),isexternalgen_(false),rescalepreds_(false),usenormalized_(false)
+        iseighttev_(true),defmtop_(172.5),setup_(false),textboxesmarker_("CMS"),syspidx_(1),
+        dofolding_(false),isexternalgen_(false),rescalepreds_(false),usenormalized_(false),defmtidx_(0)
 {
     reset();
 }
 
-void mtExtractor::setExternalGenInputFilesFormat(const TString& pl){
+void mtExtractor::setConfigFile(const TString& pl){
     if(debug)
         std::cout << "mtExtractor::setExternalGenInputFilesFormat" <<std::endl;
     setup_=false;
@@ -62,19 +66,22 @@ void mtExtractor::setInputFiles(const std::vector<TString>& pl){
     fr.setStartMarker("[naming scheme]");
     fr.setEndMarker("[end naming scheme]");
     fr.readFile(extfileformatfile_.Data());
-    extfilepreamble_ = fr.getValue<TString>("filepreamble");
+    //extfilepreamble_ = fr.getValue<TString>("filepreamble");
     TString extfileendpattern = fr.getValue<TString>("fileendpattern");
-
+    ztop::textFormatter tf;
+    isexternalgen_=false;
     extgenfiles_.clear();cufinputfiles_.clear();
     for(size_t i=0;i<pl.size();i++){
-        if(pl.at(i).BeginsWith(extfilepreamble_) && pl.at(i).EndsWith(extfileendpattern)){ //this is external gen input
+        TString filename=tf.getFilename(pl.at(i).Data());
+        if(filename.BeginsWith(extfilepreamble_) && filename.EndsWith(extfileendpattern)){ //this is external gen input
+            if(debug) std::cout << "mtExtractor::setInputFiles: part of input is external" <<std::endl;
             plottypemc_="ext"; //at least one external!
             extgenfiles_.push_back(pl.at(i));
             isexternalgen_=true;
         }
         else{
             cufinputfiles_.push_back(pl.at(i));
-            isexternalgen_=false;
+
         }
 
     }
@@ -88,6 +95,10 @@ void mtExtractor::setup(){
         std::cout << "mtExtractor::setup" <<std::endl;
     std::cout << "containerUnfold inputfiles: " << cufinputfiles_.size() << std::endl;
     std::cout << "External generated inputfiles: " << extgenfiles_.size() << std::endl;
+
+
+
+
     getMtValues();
     readFiles();
     renormalize();
@@ -125,7 +136,7 @@ void mtExtractor::drawXsecDependence(TCanvas *c, bool fordata){
     pltrptr = new plotterCompare();
     pltrptrs_.push_back(pltrptr);
     std::vector<std::string> cids_;
-
+    pltrptr->readTextBoxesInCMSSW(textboxesfile_,textboxesmarker_);
     std::vector<graph> * graphs=&mcgraphs_;
     if(fordata) graphs=&datagraphs_;
 
@@ -139,14 +150,15 @@ void mtExtractor::drawXsecDependence(TCanvas *c, bool fordata){
     }
     //read style
     if(fordata)
-        pltrptr->readStyleFromFile(compplotsstylefiledata_);
+        pltrptr->readStyleFromFileInCMSSW(compplotsstylefiledata_);
     else
-        pltrptr->readStyleFromFile(compplotsstylefilemc_);
+        pltrptr->readStyleFromFileInCMSSW(compplotsstylefilemc_);
     //next loop set plots!
     size_t newidx=0;
     for(size_t i=0;i<mtvals_.size();i++){
         if(fabs(defmtop_ - mtvals_.at(i))<0.1){
             pltrptr->setNominalPlot(&graphs->at(i));
+
         }
         else{
             pltrptr->setComparePlot(&graphs->at(i),newidx);
@@ -171,9 +183,11 @@ void mtExtractor::drawIndivBins(TCanvas *c,int syst){
     }
     //read style file here
     plotterMultiplePlots plotterdef;
-    plotterdef.readStyleFromFile(binsplotsstylefile_);
+    plotterdef.readStyleFromFileInCMSSW(binsplotsstylefile_);
+    plotterdef.readTextBoxesInCMSSW(textboxesfile_,textboxesmarker_);
 
-
+    if(databingraphs_.size()>1)
+        plotterdef.removeTextBoxes();
 
     c->SetName("cross section per bin");
     c->SetTitle("cross section per bin");
@@ -182,7 +196,10 @@ void mtExtractor::drawIndivBins(TCanvas *c,int syst){
     //make pads
     int vdivs=((int)(sqrt(databingraphs_.size())-0.0001))+1;//+1;
     int hdivs=(int)((float)databingraphs_.size()/(float)vdivs)+1;
-    c->Divide(vdivs,hdivs);
+    if(databingraphs_.size()>1){
+        c->Divide(vdivs,hdivs);
+    }
+
     gStyle->SetOptTitle(1);
     for(size_t i=0;i<databingraphs_.size();i++){
         plotterMultiplePlots * pl=new plotterMultiplePlots(plotterdef);
@@ -238,6 +255,47 @@ void mtExtractor::reset(){
     //  allsyst_.addErrorGraph("systatup",graph(1,""));
 }
 
+
+void mtExtractor::drawSystVariation(TCanvas *c,const TString & sys){
+    if(debug)
+        std::cout << "mtExtractor::drawSystVariation " << sys <<std::endl;
+    if(!c){
+        throw std::runtime_error("mtExtractor::drawSystVariation: no canvas!");
+    }
+    //get right plot
+    container1D cont=mccont_.at(defmtidx_);
+    cont.setYAxisName(datacont_.at(0).getYAxisName());
+    size_t idxup,idxdown;
+    idxup=cont.getSystErrorIndex(sys+"_up");
+    idxdown=cont.getSystErrorIndex(sys+"_down");
+    container1D up = cont.getSystContainer(idxup);
+    up.setName(sys+" up");
+    up.setAllErrorsZero();
+    container1D down = cont.getSystContainer(idxdown);
+    down.setName(sys+" down");
+    down.setAllErrorsZero();
+    container1D nominal=cont;
+    nominal.setName("nominal");
+    nominal.setAllErrorsZero();
+
+
+    plotterCompare * pl=0;
+    pl=new plotterCompare();
+    pltrptrs_.push_back(pl);
+    pl->usePad(c);
+    pl->compareIds().push_back("SysUp");
+    pl->compareIds().push_back("SysDown");
+    pl->readStyleFromFileInCMSSW(sysvariationsfile_);
+    pl->readTextBoxesInCMSSW(textboxesfile_,textboxesmarker_);
+    pl->setNominalPlot(&nominal,true);
+    pl->setComparePlot(&up,0,true);
+    pl->setComparePlot(&down,1,true);
+
+    pl->draw();
+
+
+
+}
 
 ///private functions
 double mtExtractor::getNewNorm(double deltam,bool eighttev)const{ //following  NNLO paper arXiv:1303.6254
@@ -299,6 +357,11 @@ std::vector<float>  mtExtractor::getMtValues(){
             std::cout << notfoundinext.at(i)<<" ";
         std::cout << std::endl;
     }
+    for(size_t i=0;i<mtvals_.size();i++){
+        if(fabs(mtvals_.at(i)-defmtop_)<0.1)
+            defmtidx_=i;
+    }
+
     return mtvals_;
 }
 
@@ -314,6 +377,27 @@ void mtExtractor::readFiles(){
 
     bool unfoldfolded=false;
 
+    //read config
+    fileReader fr;
+    fr.setComment("$");
+    fr.setStartMarker("[plotter styles]");
+    fr.setEndMarker("[end plotter styles]");
+    fr.readFile(extfileformatfile_.Data());
+
+    compplotsstylefilemc_ = fr.getValue<std::string>("compareAllMassesMC");
+    compplotsstylefiledata_ = fr.getValue<std::string>("compareAllMassesData");
+    binsplotsstylefile_ = fr.getValue<std::string>("binDependencies");
+    binschi2plotsstylefile_ = fr.getValue<std::string>("chi2PerBin");
+    binsplusfitsstylefile_ = fr.getValue<std::string>("binDependenciesPlusFits");
+    chi2plotsstylefile_ = fr.getValue<std::string>("chi2total");
+    sysvariationsfile_ = fr.getValue<std::string>("systematicsVariations");
+    allsyststylefile_ = fr.getValue<std::string>("results");
+    spreadwithinlaystylefile_ = fr.getValue<std::string>("spreadWithInlay");
+    textboxesfile_= fr.getValue<std::string>("textBoxesFile");
+
+
+
+
     TString extfileendpattern;
     TString histpreamble;
     TString sysupid,sysdownid,nomid;
@@ -322,7 +406,10 @@ void mtExtractor::readFiles(){
     float multiplygennorm=1;
     TString previousxsecunits,newxsecunits;
     if(!mciscuf){//read in external file format
-        fileReader fr;
+
+        fr.clear();
+        fr.setStartMarker("[naming scheme]");
+        fr.setEndMarker("[end naming scheme]");
         fr.readFile(extfileformatfile_.Data());
         extfileendpattern = fr.getValue<TString>("fileendpattern");
         TString plotnamerepl=plotnamedata_;
@@ -338,25 +425,38 @@ void mtExtractor::readFiles(){
         newxsecunits=fr.getValue<TString>("newXSecUnits");
     }
 
+    if(!dofolding_){
+        throw std::runtime_error("using unfolded data not supported anymore!! exit");
+    }
 
     datacont_.clear();
     mccont_.clear();
 
     for(size_t i=0;i<cufinputfiles_.size();i++){
-        container1DUnfold tempcuf;
-        tempcuf.loadFromTFile(cufinputfiles_.at(i),plotnamedata_);
+
+        containerStackVector * csv=new containerStackVector();
+        csv->loadFromTFile(cufinputfiles_.at(i));
+        //  allanalysisplots_.push_back(*csv);
+        containerStack stack=csv->getStack(plotnamedata_);
+        container1DUnfold tempcuf=stack.produceUnfoldingContainer();
+
+        delete csv;
+
+        // tempcuf.loadFromTFile(cufinputfiles_.at(i),plotnamedata_);
         if(debug) std::cout << "mtExtractor::readFiles: read " << tempcuf.getName() <<std::endl;
         if(tempcuf.isDummy())
             throw std::runtime_error("mtExtractor::readFiles: at least one file without container1DUnfold");
 
         container1D datareference;
 
-        if(!dofolding_){
+        if(!dofolding_){ //FIXME
             datareference=tempcuf.getUnfolded();
         }
         else{
             container1D temp=tempcuf.getRecoContainer();
             datareference=temp-tempcuf.getBackground();
+            if(usenormalized_)
+                datareference.setYAxisName("1/N_{tot} "+datareference.getYAxisName());
             //rebin at first to gen
             if(!mciscuf)
                 datareference=datareference.rebinToBinning(tempcuf.getUnfolded());
@@ -375,10 +475,14 @@ void mtExtractor::readFiles(){
             else{
                 gen=tempcuf.getVisibleSignal();
                 if(unfoldfolded){
-                gen=tempcuf.getGenContainer(); //
-                //gen*= (1/tempcuf.getLumi());
-                gen=tempcuf.fold(gen); //
+                    gen=tempcuf.getGenContainer(); //
+                    //gen*= (1/tempcuf.getLumi());
+                    gen=tempcuf.fold(gen); //
                 }
+                TString oldaxisname=gen.getXAxisName();
+                oldaxisname.ReplaceAll("_gen","");
+                gen.setXAxisName(oldaxisname);
+                gen.setYAxisName(datareference.getYAxisName());
                 gen=gen.rebinToBinning(datareference);
             }
             mccont_.push_back(gen);
@@ -544,7 +648,16 @@ void mtExtractor::renormalize(){
             datacont_.at(i).normalize(false,true,1);
         }
     }
-
+    //but rescale all csvs
+    /*    for(size_t i=0;i<allanalysisplots_.size();i++){
+        for(size_t j=0;j<allanalysisplots_.at(i).size();j++){
+            std::vector<size_t> sigidx=allanalysisplots_.at(i).getStack(j).getSignalIdxs();
+            for(size_t k=0;k<sigidx.size();k++)
+                allanalysisplots_.at(i).getStack(j).multiplyNorm(sigidx.at(k),
+                        getNewNorm(mtvals_.at(i)-DEFTOPMASSFORNNLOMASSDEP,iseighttev_));
+        }
+    }
+     */
 
 }
 void mtExtractor::mergeSyst(){
@@ -588,7 +701,7 @@ void mtExtractor::makeGraphs(){
         tempgraph.sortPointsByX();
         mcgraphs_.push_back(tempgraph);
     }
-    mccont_.clear();
+    // mccont_.clear();
     if(debug) std::cout << "mtExtractor::makeGraphs: created "<< mcgraphs_.size() << " MC graphs" << std::endl;
     for(size_t i=0;i<datacont_.size();i++){
         graph tempgraph;
@@ -597,7 +710,7 @@ void mtExtractor::makeGraphs(){
         tempgraph.sortPointsByX();
         datagraphs_.push_back(tempgraph);
     }
-    datacont_.clear();
+    // datacont_.clear();
     if(debug) std::cout << "mtExtractor::makeGraphs: created "<< datagraphs_.size() << " data graphs" << std::endl;
 
 }
@@ -651,11 +764,13 @@ void mtExtractor::makeBinGraphs(){
 
     for(size_t bin=0;bin<datagraphs_.at(0).getNPoints();bin++){
         if((maxbin_>=0 && (int)bin>maxbin_) || (minbin_>=0 && (int)bin<minbin_) || (int)bin==excludebin_) continue;
+        if(isEmptyForAnyMass( bin)) continue;
         databingraphs_.push_back(makeDepInBin(datagraphs_,bin));
     }
     if(debug) std::cout << "mtExtractor::makeBinGraphs: created "<< databingraphs_.size()<< " data graphs" << std::endl;
     for(size_t bin=0;bin<mcgraphs_.at(0).getNPoints();bin++){
         if((maxbin_>=0 && (int)bin>maxbin_) || (minbin_>=0 && (int)bin<minbin_) || (int)bin==excludebin_) continue;
+        if(isEmptyForAnyMass( bin)) continue;
         mcbingraphs_.push_back(makeDepInBin(mcgraphs_,bin));
     }
     if(debug) std::cout << "mtExtractor::makeBinGraphs: created "<< mcbingraphs_.size() << "  mc graphs" << std::endl;
@@ -713,9 +828,38 @@ void mtExtractor::createBinLikelihoods(int syslayer,bool includesyst,bool datasy
 
 
 }
+
+bool mtExtractor::isEmptyForAnyMass(size_t bin)const{
+    if(datagraphs_.size()<1){
+        throw std::logic_error("mtExtractor::isEmptyForAnyMass: first fill graphs");
+    }
+    if(bin>=datagraphs_.at(0).getNPoints()){
+        throw std::out_of_range("mtExtractor::isEmptyForAnyMass: bin out of range");
+    }
+
+    for(size_t i=0;i<mtvals_.size();i++){
+        for(int sys=-1;sys<(int)datagraphs_.at(0).getSystSize();sys++){
+            if(datagraphs_.at(i).getPointYContent(bin,sys) == 0)
+                return true;
+            if(mcgraphs_.at(i).getPointYContent(bin,sys) == 0)
+                return true;
+        }
+    }
+    return false;
+
+}
+
+
 void mtExtractor::drawBinLikelihoods(TCanvas *c){
     plotterMultiplePlots plotterdef;
-    plotterdef.readStyleFromFile(binschi2plotsstylefile_);if(getExtractor()->getLikelihoodMode()!= parameterExtractor::lh_fit
+    plotterdef.readStyleFromFileInCMSSW(binschi2plotsstylefile_);
+    plotterdef.readTextBoxesInCMSSW(textboxesfile_,textboxesmarker_);
+
+
+    if(databingraphs_.size()>1)
+        plotterdef.removeTextBoxes();
+
+    if(getExtractor()->getLikelihoodMode()!= parameterExtractor::lh_fit
             || getExtractor()->getLikelihoodMode()!= parameterExtractor::lh_fitintersect){
         c->SetName("-2*log likelihood per bin "+tmpSysName_);
         c->SetTitle("-2*log likelihood per bin "+tmpSysName_);
@@ -727,7 +871,9 @@ void mtExtractor::drawBinLikelihoods(TCanvas *c){
     //make pads
     int vdivs=((int)(sqrt(tmpbinlhds_.size())-0.0001))+1;//+1;
     int hdivs=(int)((float)tmpbinlhds_.size()/(float)vdivs)+1;
-    c->Divide(vdivs,hdivs);
+    if(databingraphs_.size()>1){
+        c->Divide(vdivs,hdivs);
+    }
     gStyle->SetOptTitle(1);
     for(size_t i=0;i<tmpbinlhds_.size();i++){
         plotterMultiplePlots * pl=new plotterMultiplePlots(plotterdef);
@@ -770,16 +916,21 @@ void mtExtractor::drawBinsPlusFits(TCanvas *c,int syst){
     }
     //read style file here
     plotterMultiplePlots plotterdef;
-    plotterdef.readStyleFromFile(binsplusfitsstylefile_);
-
+    plotterdef.readStyleFromFileInCMSSW(binsplusfitsstylefile_);
+    plotterdef.readTextBoxesInCMSSW(textboxesfile_,textboxesmarker_);
     c->SetName("cross section per bin with fits");
     c->SetTitle("cross section per bin with fits");
 
+    if(databingraphs_.size()>1)
+        plotterdef.removeTextBoxes();
 
     //make pads
     int vdivs=((int)(sqrt(databingraphs_.size())-0.0001))+1;//+1;
     int hdivs=(int)((float)databingraphs_.size()/(float)vdivs)+1;
-    c->Divide(vdivs,hdivs);
+
+    if(databingraphs_.size()>1){
+        c->Divide(vdivs,hdivs);
+    }
     gStyle->SetOptTitle(1);
     for(size_t i=0;i<databingraphs_.size();i++){
         plotterMultiplePlots * pl=new plotterMultiplePlots(plotterdef);
@@ -836,6 +987,9 @@ void mtExtractor::createGlobalLikelihood(){
 
         if(tmpglgraph_)  {delete tmpglgraph_;tmpglgraph_=0;}
         tmpglgraph_=(tmpgllhd_.getTGraph());
+
+        if(tmpSysName_ == "nominal" || tmpSysName_=="")
+            globalnominal_=tmpgllhd_;
     }
     /*
     else if(paraExtr_.getLikelihoodMode() == parameterExtractor::lh_fitintersect){
@@ -876,7 +1030,8 @@ void mtExtractor::createGlobalLikelihood(){
      */
 
 }
-void mtExtractor::drawGlobalLikelihood(TCanvas *c,bool zoom){
+float mtExtractor::drawGlobalLikelihood(TCanvas *c,bool zoom){
+    float centralYValue=0;
     if(paraExtr_.getLikelihoodMode() == parameterExtractor::lh_chi2
             || paraExtr_.getLikelihoodMode() == parameterExtractor::lh_chi2Swapped
             || (paraExtr_.getLikelihoodMode() == parameterExtractor::lh_fit  && tmpbinlhds_.at(0).getNPoints() > 1)){
@@ -893,14 +1048,15 @@ void mtExtractor::drawGlobalLikelihood(TCanvas *c,bool zoom){
 
         plotterMultiplePlots * pl=new plotterMultiplePlots;
         pltrptrs_.push_back(pl);
-        pl->readStyleFromFile(binschi2plotsstylefile_);
+        pl->readStyleFromFileInCMSSW(binschi2plotsstylefile_);
+        pl->readTextBoxesInCMSSW(textboxesfile_,textboxesmarker_);
         pl->usePad(c);
         pl->setTitle("global "+tmpSysName_);
         pl->addPlot(&tmpgllhd_);
         pl->draw();
 
 
-        float centralYValue=0;
+
 
         float plotmin=0;
 
@@ -966,6 +1122,8 @@ void mtExtractor::drawGlobalLikelihood(TCanvas *c,bool zoom){
         TString pointname=tmpSysName_;
         if(tmpSysName_=="") pointname="nominal";
 
+        results_.addEntry(tmpSysName_,cetralXValue,xpright-cetralXValue,xpleft-cetralXValue);
+
         allsyst_.addPoint(cetralXValue,syspidx_,pointname);
         allsystsl_.addPoint(xpleft,syspidx_,pointname);
         allsystsh_.addPoint(xpright,syspidx_,pointname);
@@ -974,6 +1132,8 @@ void mtExtractor::drawGlobalLikelihood(TCanvas *c,bool zoom){
             syspidx_++;
 
     }
+
+    return centralYValue;
     /*
     else if(paraExtr_.getLikelihoodMode() == parameterExtractor::lh_fitintersect){
 
@@ -984,7 +1144,7 @@ void mtExtractor::drawGlobalLikelihood(TCanvas *c,bool zoom){
 
         plotterMultiplePlots * pl=new plotterMultiplePlots;
         pltrptrs_.push_back(pl);
-        pl->readStyleFromFile(binschi2plotsstylefile_);
+        pl->readStyleFromFileInCMSSW(binschi2plotsstylefile_);
         pl->usePad(c);
         pl->setTitle("global "+tmpSysName_);
         pl->addPlot(&tmpgllhd_);
@@ -1024,7 +1184,7 @@ void mtExtractor::fitGlobalLikelihood(){
 
 }
 
-void mtExtractor::drawResultGraph(TCanvas *c, float * nomp, float * errdp, float * errup){
+void mtExtractor::drawResultGraph(TCanvas *c, float * nomp, float * errdp, float * errup,float * syserrdp, float * syserrup){
 
 
     if(debug) std::cout << " mtExtractor::drawResultGraph " <<std::endl;
@@ -1090,6 +1250,13 @@ void mtExtractor::drawResultGraph(TCanvas *c, float * nomp, float * errdp, float
         /* size_t newsys= */
     }
 
+    if(syserrdp){
+        *syserrdp=allsystcombined.getPointXErrorDown(0,false);
+    }
+
+    if(syserrup){
+        *syserrup=allsystcombined.getPointXErrorUp(0,false);
+    }
 
     setAxisXsecVsMt(allsystcombined);
 
@@ -1097,77 +1264,35 @@ void mtExtractor::drawResultGraph(TCanvas *c, float * nomp, float * errdp, float
 
     plotterMultiplePlots * plotter=new plotterMultiplePlots();
     pltrptrs_.push_back(plotter);
-    plotter->readStyleFromFile(allsyststylefile_);
+    plotter->readStyleFromFileInCMSSW(allsyststylefile_);
+    plotter->readTextBoxesInCMSSW(textboxesfile_,textboxesmarker_);
     plotter->setDrawLegend(false);
     plotter->addPlot(&allsystcombined);
     plotter->addPlot(&allsyst_);
     textBoxes tbxs=allsyst_.getTextBoxesFromPoints();
     plotter->setTextBoxes(tbxs);
-    plotterBase::debug=true;
+    // plotterBase::debug=true;
+    //  plotter->addTextBox(allsyst_.getPointXContent(nompoint),fakeycontent+fakeystat,"#chi^[2}_{min}");
     plotter->usePad(c);
     plotter->setTextBoxNDC(false);
+
     plotter->draw();
+
+
 
     float nominalmass=allsyst_.getPointXContent(nompoint);
     TLine * xlinel=addObject(new TLine(nominalmass,fakeycontent-fakeystat,nominalmass,fakeycontent+fakeystat));
 
     xlinel->Draw("same");
 
+
+
+
 }
 
 
 TString mtExtractor::printConfig()const{
-    /* TString plotnamedata_;
-    TString plotnamemc_; //ff
-    TString plottypemc_; //ff
-    int minbin_;
-    int maxbin_;
-    int excludebin_;
-    std::vector<TString> cufinputfiles_;
-    std::vector<TString> extgenfiles_;
-    TString extfileformatfile_,extfilepdf_;
-    TString extfilepreamble_;
 
-    std::vector<container1D > datacont_;
-    std::vector<container1D > mccont_;
-    std::vector<graph > datagraphs_;
-    std::vector<graph > mcgraphs_;
-    std::vector<float> mtvals_;
-
-
-    std::vector<graph > databingraphs_;
-    std::vector<graph > mcbingraphs_;
-
-    TString tmpSysName_;
-    std::vector<graph > tmpbinchi2_;
-    std::vector<std::vector<TF1* > > tmpbinfitsdata_,tmpbinfitsmc_;
-    graph               tmpglchi2_;
-    TGraphAsymmErrors * tmpglgraph_;
-    TF1 * tfitf_;
-
-    bool iseighttev_;
-    float defmtop_;
-    bool setup_;
-
-    std::string compplotsstylefile_;
-    std::string binsplotsstylefile_;
-    std::string binschi2plotsstylefile_;
-    std::string binsplusfitsstylefile_;
-    std::vector<plotterBase *> pltrptrs_;
-
-    parameterExtractor paraExtr_;
-
-    graph allsyst_,allsystsl_,allsystsh_;
-    std::string allsyststylefile_;
-    float syspidx_;
-
-    TString fitmode_;
-    bool dofolding_;
-    bool isexternalgen_;
-
-    std::vector<float> predrescalers_;
-    bool rescalepreds_;
-     */
 
     TString out;
     out+="plotname: " + plotnamedata_ + " / " + plotnamemc_+ " (data/MC)\n";
@@ -1189,6 +1314,86 @@ TString mtExtractor::printConfig()const{
     return out;
 }
 
+texTabler  mtExtractor::makeSystBreakdown(bool rel)const{
+
+    if(results_.nEntries()<1){
+        throw std::runtime_error("mtExtractor::makeSystBreakdown: first create syst vars");
+    }
+
+    resultsSummary cp=results_;
+    cp.setSystBreakRelative(rel);
+    cp=cp.createTotalError();
+
+
+    texTabler out("l | c");
+    if(rel)
+        out << "Source" << "$\\Delta m_{t}$  [\\%]";
+    else
+        out << "Source" << "$\\Delta m_{t}$ [GeV]";
+    out << texLine(1);
+
+    for(size_t i=0;i<cp.nEntries();i++){
+        TString entryname=cp.getEntryName(i);
+        entryname.ReplaceAll("_"," ");
+        if(entryname=="total")
+            out << texLine(1);
+        out << entryname << cp.getValueString(i,0.01);
+    }
+
+    // out << texLine(1);
+    return out;
+}
+
+//can be done for each syst.
+
+void mtExtractor::drawSpreadWithInlay(TCanvas *c){
+
+    if(!setup_) return;
+
+
+    plotterInlay *pl = new plotterInlay();
+    pltrptrs_.push_back(pl);
+
+    pl->readStyleFromFileInCMSSW(spreadwithinlaystylefile_);
+    pl->readTextBoxesInCMSSW(textboxesfile_,textboxesmarker_);
+    pl->usePad(c);
+
+    graph nomdata=datagraphs_.at(defmtidx_);
+    nomdata.setName("data (background subtracted)");
+
+    pl->addPlot(&nomdata);
+
+    //get max spread indices
+    size_t maxidx=std::max_element(mtvals_.begin(),mtvals_.end())-mtvals_.begin();
+    size_t minidx=std::min_element(mtvals_.begin(),mtvals_.end())-mtvals_.begin();
+
+    formatter fmt;
+
+    graph mtmaxup=mcgraphs_.at(maxidx);
+    graph defmtmc=mcgraphs_.at(defmtidx_);
+    graph mtmaxdown=mcgraphs_.at(minidx);
+    if(isexternalgen_){
+        mtmaxup.setName("MCFM (m_{t}="+fmt.toTString(mtvals_.at(maxidx))+" GeV)");
+        defmtmc.setName("MCFM (m_{t}="+fmt.toTString(mtvals_.at(defmtidx_))+" GeV)");
+        mtmaxdown.setName("MCFM (m_{t}="+fmt.toTString(mtvals_.at(minidx))+" GeV)");
+    }
+    else{
+        mtmaxup.setName("MG+PY (m_{t}="+fmt.toTString(mtvals_.at(maxidx))+" GeV)");
+        defmtmc.setName("MG+PY (m_{t}="+fmt.toTString(mtvals_.at(defmtidx_))+" GeV)");
+        mtmaxdown.setName("MG+PY (m_{t}="+fmt.toTString(mtvals_.at(minidx))+" GeV)");
+    }
+
+    pl->addPlot(&mtmaxup);
+    pl->addPlot(&defmtmc);
+    pl->addPlot(&mtmaxdown);
+
+    pl->addInlayPlot(&globalnominal_);
+
+    pl->draw();
+
+
+}
+
 
 void mtExtractor::setAxisLikelihoodVsMt(graph & g)const{
 
@@ -1199,9 +1404,11 @@ void mtExtractor::setAxisLikelihoodVsMt(graph & g)const{
 void mtExtractor::setAxisXsecVsMt(graph & g)const{
 
     g.setXAxisName("m_{t} [GeV]");
-    g.setYAxisName("d#sigma_{t#bar{T}}/dm_{lb} [pb/GeV]");
+    if(dofolding_)
+        g.setYAxisName("N/GeV");
+    else
+        g.setYAxisName("d#sigma_{t#bar{T}}/dm_{lb} [pb/GeV]");
 }
-
 
 
 }

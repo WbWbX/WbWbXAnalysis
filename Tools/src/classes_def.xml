@@ -56,7 +56,12 @@
 	<class name="ztop::taggedObject"/>
 	<class name="std::vector<ztop::taggedObject::tags>"/>
 	<class name="std::vector<ztop::taggedObject>"/>
+	
+	<class name="ztop::textFormatter"/>
         
+        <class name="ztop::plotterCompare"/>
+        <class name="ztop::plotterControlPlot"/>
+        <class name="ztop::plotterMultiplePlots"/>
 	
 </lcgdict>
  

@@ -24,6 +24,9 @@ plotterBase::plotterBase(const plotterBase& rhs): tObjectList(rhs){
     pad_ = rhs.pad_;
     tbndc_=rhs.tbndc_;
     drawlegend_=rhs.drawlegend_;
+    legstyle_=rhs.legstyle_;
+    textboxes_ = rhs.textboxes_;
+    intstyle_ = rhs.intstyle_; //start with env style
 }
 
 TVirtualPad* plotterBase::getPad()const{
@@ -75,7 +78,7 @@ float plotterBase::getSubPadYScale(int idx){
 void plotterBase::drawTextBoxes(){
     if(debug) std::cout << "plotterBase::drawTextBoxes: " << textboxes_.size() << std::endl;
 
-        getPad()->cd();
+    getPad()->cd();
 
     TLatex * tb=0;
 
@@ -85,11 +88,58 @@ void plotterBase::drawTextBoxes(){
         else
             tb=addObject(new TLatex(textboxes_.at(i).getX(), textboxes_.at(i).getY(), title_));
         tb->SetTextSize(textboxes_.at(i).getTextSize());
-        if(tbndc_)
-            tb->SetNDC(true);
+        tb->SetTextFont(textboxes_.at(i).getFont());
+        tb->SetTextAlign(textboxes_.at(i).getAlign());
+        //if(tbndc_)
+        tb->SetNDC(tbndc_);
         tb->Draw("same");
     }
 
+}
+
+
+void plotterBase::addTextBox(float x,float y,const TString & text,float textsize){
+
+    textboxes_.add(x,y,text,textsize);
+
+}
+void plotterBase::readTextBoxesInCMSSW(const std::string& pathtofile,const std::string& marker){
+    std::string path=getenv("CMSSW_BASE");
+    path+="/";
+    path+=pathtofile;
+    textboxes_.readFromFile(path,marker);
+}
+void plotterBase::readTextBoxes(const std::string& pathtofile,const std::string& marker){
+
+
+    textboxes_.readFromFile(pathtofile,marker);
+
+
+}
+
+void plotterBase::readStyleFromFileInCMSSW(const std::string&pathtofile){
+    std::string path=getenv("CMSSW_BASE");
+    path+="/";
+    path+=pathtofile;
+    readStyleFromFile(path);
+}
+
+void plotterBase::readTStyleFromFile(const std::string& pathtofile){
+    std::cout << "TBI " <<pathtofile.length() <<std::endl;
+}
+
+
+void plotterBase::printToPdf(const std::string& outname){
+    TCanvas c;
+    usePad(&c);
+    draw();
+    TString outnameeps=outname;
+    outnameeps+=".eps";
+    c.Print(outnameeps);
+    TString syscall="epstopdf --outfile="+outname+".pdf " + outnameeps;
+    system(syscall);
+    TString delcall="rm -f "+outnameeps;
+    system(delcall);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

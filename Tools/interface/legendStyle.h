@@ -8,6 +8,8 @@
 #ifndef LEGENDSTYLE_H_
 #define LEGENDSTYLE_H_
 
+#include <string>
+
 class TLegend;
 namespace ztop{
 /**
@@ -15,12 +17,19 @@ namespace ztop{
  */
 class legendStyle{
 public:
-    legendStyle(){}
+    legendStyle():x0_(0.65),y0_(0.50),x1_(0.95),y1_(0.90),ncolumns_(1),columnsep_(.1){}
     ~legendStyle(){}
 
-    void applyLegendStyle(TLegend* leg){}
-private:
 
+
+    void readFromFile(const std::string & filename, const std::string& stylename="", bool requireall=true);
+
+
+    void applyLegendStyle(TLegend* leg)const;
+private:
+    float x0_,y0_,x1_,y1_;
+    int ncolumns_;
+    float columnsep_;
 
 };
 

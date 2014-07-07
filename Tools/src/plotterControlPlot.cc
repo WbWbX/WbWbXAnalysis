@@ -25,8 +25,15 @@ namespace ztop{
  * [plotStyle - Upper]
  * [plotStyle - Ratio]
  */
+void plotterControlPlot::addStyleFromFile(const std::string& infile){
+    readStylePriv(infile,false);
+}
 void plotterControlPlot::readStyleFromFile(const std::string& infile){
+    readStylePriv(infile,true);
+}
+void plotterControlPlot::readStylePriv(const std::string& infile,bool requireall){
 
+    if(debug) std::cout <<"plotterControlPlot::readStyleFromFile" << std::endl;
 
     fileReader fr;
     fr.setComment("$");
@@ -34,26 +41,36 @@ void plotterControlPlot::readStyleFromFile(const std::string& infile){
     fr.setStartMarker("[plotterControlPlot]");
     fr.setEndMarker("[end plotterControlPlot]");
     fr.readFile(infile);
-    if(fr.nLines()<1){
-        throw std::runtime_error("plotterControlPlot::readStyleFromFile: no [plotterControlPlot] found");
+    fr.setRequireValues(false);
+
+    if(requireall){
+        if(fr.nLines()<1){
+            std::cout << "plotterControlPlot::readStyleFromFile: no [plotterControlPlot] found in " << infile  <<std::endl;
+            throw std::runtime_error("plotterControlPlot::readStyleFromFile: no [plotterControlPlot] found");
+        }
+
+        divideat_  = fr.getValue<float>("divideat");
+        invertplots_  = fr.getValue<bool>("invertplots");
+    }
+    else{
+        divideat_  = fr.getValue<float>("divideat",divideat_);
+        invertplots_  = fr.getValue<bool>("invertplots",invertplots_);
     }
 
-    divideat_  = fr.getValue<float>("divideat");
-    invertplots_  = fr.getValue<bool>("invertplots");
-    if(debug) std::cout <<"plotterControlPlot::readStyleFromFile" << std::endl;
 
-    upperstyle_.readFromFile(infile, "Upper");
-    ratiostyle_.readFromFile(infile, "Ratio");
-    datastyleupper_.readFromFile(infile, "DataUpper");
-    datastyleratio_.readFromFile(infile, "DataRatio");
-    mcstyleupper_.readFromFile(infile, "MCUpper");
-    mcstyleratio_.readFromFile(infile, "MCRatio");
+    upperstyle_.readFromFile(infile, "Upper",requireall);
+    ratiostyle_.readFromFile(infile, "Ratio",requireall);
+    datastyleupper_.readFromFile(infile, "DataUpper",requireall);
+    datastyleratio_.readFromFile(infile, "DataRatio",requireall);
+    mcstyleupper_.readFromFile(infile, "MCUpper",requireall);
+    mcstyleratio_.readFromFile(infile, "MCRatio",requireall);
     //FIXME
     mcstylepsmig_=mcstyleupper_;
     mcstylepsmig_.readFromFile(infile, "MCUpperMigrations",false);
     //text boxes
 
     textboxes_.readFromFile(infile,"boxes");
+    legstyle_.readFromFile(infile,"",requireall);
 
 }
 
@@ -141,6 +158,7 @@ void plotterControlPlot::drawControlPlot(){
     TH1 * axish=addObject(stackp_->getContainer(dataentry).getTH1D("",divbbw,false,false));
     plotStyle upperstyle=upperstyle_;
     upperstyle.absorbYScaling(getSubPadYScale(1));
+    axish->GetYaxis()->SetRangeUser(0.0001,stackp_->getYMax()*1.2);
     upperstyle.applyAxisStyle(axish);
     axish->Draw("AXIS");
 

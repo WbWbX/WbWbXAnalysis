@@ -48,6 +48,7 @@ public:
 	void applyAxisStyle(TH1*)const;
     void applyPadStyle(TVirtualPad*)const;
 
+    bool forceYAxisZero()const {return yaxis_.forcezero;}
 
 	float bottomMargin;
 	float topMargin;

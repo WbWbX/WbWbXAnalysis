@@ -16,6 +16,7 @@
 #include "TFitResult.h"
 #include <cmath>
 #include <algorithm>
+#include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 
 namespace ztop{
 
@@ -333,10 +334,10 @@ graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const gr
     //dont get too nummerical, because:
     //int_-inf^inf ( normgaus(x,mu1,s1) * normgaus(x,mu2,s2) ) = normgaus(mu1,mu2,s1+s2)
 
-  /*  float maxconfa=*std::max_element(confintva.begin(),confintva.end());
+    /*  float maxconfa=*std::max_element(confintva.begin(),confintva.end());
     float maxconfb=*std::max_element(confintvb.begin(),confintvb.end());
     float integralwidth2=maxconfa*maxconfa+maxconfb*maxconfb;
-*/
+     */
 
     //get average stat uncertainty
     float minstata=10000;
@@ -357,8 +358,8 @@ graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const gr
             }
         }
     }
-   // minstatb*=minstatcontentb; //avoid bias towards low values
-   // minstata*=minstatcontenta;
+    // minstatb*=minstatcontentb; //avoid bias towards low values
+    // minstata*=minstatcontenta;
 
 
     // evaluate for each scan point
@@ -377,13 +378,11 @@ graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const gr
             float widtha=confintva.at(i);
             float widthb=confintvb.at(i);
 
-            //  float integral=lnNormedGaus(aval,widtha*widtha+widthb*widthb,bval);//);
+            float chi2=chi_square(aval,widtha*widtha+widthb*widthb,bval);//);
 
-            float integral=lnNormedGaus(aval,widtha*widtha+widthb*widthb,bval);//);
+            // integral*=-2; //chi2 definition log(L) -> -2*log(L)
 
-            integral*=-2; //chi2 definition log(L) -> -2*log(L)
-
-            multiplied.setPointContents(i,true,xpoints.at(i),integral);
+            multiplied.setPointContents(i,true,xpoints.at(i),chi2);
 
         }
     }
@@ -438,7 +437,7 @@ graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const gr
             }
         }
     }
-/*
+    /*
     //get mean central value
     float meancentral=(xmax-xmin)/2+xmin;
     if(setleft&&setright&&setcentral){
@@ -471,7 +470,7 @@ graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const gr
 
     //shift back
     output.shiftAllXCoordinates(xshift);
-*/
+     */
     fitteda.shiftAllXCoordinates(xshift);
     fittedb.shiftAllXCoordinates(xshift);
 
@@ -485,7 +484,7 @@ graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const gr
     //////////////////////////////////////////////////////   END  //////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        return multiplied;
+    return multiplied;
 
 
 
@@ -501,6 +500,9 @@ double parameterExtractor::lnNormedGaus(const float & centre, const float& width
     }
 
 
+}
+double parameterExtractor::chi_square(const float & centre, const float& widthsquared, const float& evalpoint) const{
+    return (double) (((long double)(evalpoint-centre)*(long double)(evalpoint-centre))/((long double)(widthsquared)));
 }
 
 

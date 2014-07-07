@@ -1,16 +1,16 @@
 
-[plotterCompareStyle]
+[plotterCompare]
 
-    divideat = 0.4   $ will affect margins, text box coords etc
+    divideat = 0.3   $ will affect margins, text box coords etc
     size = 6         $ size of additional plots to be compared to nominal
 
-[end plotterCompareStyle]
+[end plotterCompare]
  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  
-[textBoxes - boxes]
-   0.25,   0.95,   DEFTITLE,            0.05
-  $ 0.5,   0.95,   some text for box,   0.05
-   0.78,   0.95,   L=19.8 fb^{-1},   0.04
 
+[textBoxes - boxes]
+
+externalFile = CMSSW_BASE/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt
+externalMarker = CMSSplit03LeftSim
 
 [end textBoxes]
 
@@ -255,7 +255,7 @@
   $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 [plotStyle - Ratio]
     
-    bottomMargin  = 0.3
+    bottomMargin  = 0.45
     topMargin     = 0.01
     leftMargin    = 0.15
     rightMargin   = 0.1

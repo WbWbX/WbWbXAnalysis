@@ -92,6 +92,10 @@ public:
     const std::vector<double> *getParameters()const{return &paras_;}
     const std::vector<double> *getParameterErrUp()const{return &paraerrsup_;}
     const std::vector<double> *getParameterErrDown()const{return &paraerrsdown_;}
+    double getParameterErr(size_t idx)const;
+    const std::vector<TString> *getParameterNames()const {return &paranames_;}
+
+    const double& getCorrelationCoefficient(size_t i, size_t j)const;
 
     size_t findParameterIdx(const TString& paraname)const;
 
@@ -104,6 +108,8 @@ public:
      * clears all input points
      */
     void clearPoints();
+
+    static bool debug;
 
 private: //set some to protected if inheritance is needed
     fitmodes fitmode_;

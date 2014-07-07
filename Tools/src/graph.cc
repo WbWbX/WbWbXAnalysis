@@ -29,11 +29,13 @@ std::vector<ztop::graph *> graph::g_list;
 bool graph::g_makelist=false;
 bool graph::debug=false;
 
-graph::graph(const TString &name):chi2definition(symmetrize),name_(name),labelmultiplier_(1){
+graph::graph(const TString &name):chi2definition(symmetrize),labelmultiplier_(1){
+    setName(name);
     if(g_makelist) addToList();
 }
 
-graph::graph(const size_t & npoints,const TString &name):chi2definition(symmetrize),name_(name), xcoords_(npoints),ycoords_(npoints),labelmultiplier_(1){
+graph::graph(const size_t & npoints,const TString &name):chi2definition(symmetrize), xcoords_(npoints),ycoords_(npoints),labelmultiplier_(1){
+    setName(name);
     if(g_makelist) addToList();
 }
 
@@ -435,16 +437,17 @@ TGraphAsymmErrors * graph::getTGraph(TString name,bool onlystat) const{
 
 TH1 * graph::getAxisTH1(bool tighty,bool tightx)const{
     size_t point=0;
-    float xmin=getXMin(point);
-    xmin-=getPointXErrorDown(point,false);
-    float xmax=getXMax(point);
-    xmax+=getPointXErrorUp(point,false);
-    float ymin=getYMin(point);
-    ymin-=getPointYErrorDown(point,false);
-    float ymax=getYMax(point);
-    ymax+=getPointYErrorUp(point,false);
+    float xmin=getXMin(point,true);
+
+    float xmax=getXMax(point,true);
+
+    float ymin=getYMin(point,true);
+
+    float ymax=getYMax(point,true);
+
 
     float oldymin=ymin;
+
     if(!tighty){
         ymin-=(0.05* (ymax-ymin));
         ymax+=(0.05* (ymax-ymin));

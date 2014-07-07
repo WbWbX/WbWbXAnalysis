@@ -10,14 +10,23 @@ bool containerStack::batchmode=true;
 bool containerStack::debug=false;
 bool containerStack::addErrorsStrict=true;
 
-containerStack::containerStack() : name_(""), dataleg_("data"), mode(notset){
+containerStack::containerStack() : taggedObject(taggedObject::type_containerStack), dataleg_("data"), mode(notset){
+    setName("");
     if(cs_makelist)cs_list.push_back(this);
 }
-containerStack::containerStack(TString name) : name_(name), dataleg_("data"), mode(notset) {
+containerStack::containerStack(TString name) : taggedObject(taggedObject::type_containerStack), dataleg_("data"), mode(notset) {
     mode=notset;
+    setName(name);
     if(cs_makelist) cs_list.push_back(this);
 }
 containerStack::~containerStack(){
+
+    containers_.clear();
+    containers2D_.clear();
+    containers1DUnfold_.clear();
+    legends_.clear();
+    colors_.clear();
+    norms_.clear();
     for(unsigned int i=0;i<cs_list.size();i++){
         if(cs_list[i] == this) cs_list.erase(cs_list.begin()+i);
         break;
@@ -27,7 +36,7 @@ void containerStack::push_back(ztop::container1D cont, TString legend, int color
     if(mode==notset)
         mode=dim1;
     else if(mode!=dim1){
-        std::cout << "containerStack::push_back: trying to add 1D container to non-1D stack!" << std::endl;
+        std::cout << "containerStack::push_back: trying to add 1D container to non-1D stack! ("<<name_<<")" << std::endl;
         return;
     }
     if(cont.hasTag()){
@@ -64,7 +73,7 @@ void containerStack::push_back(ztop::container2D cont, TString legend, int color
     if(mode==notset)
         mode=dim2;
     else if(mode!=dim2){
-        std::cout << "containerStack::push_back(2D): trying to add 2D container to non-2D stack!" << std::endl;
+        std::cout << "containerStack::push_back(2D): trying to add 2D container to non-2D stack!  ("<<name_<<")" << std::endl;
         return;
     }
     bool wasthere=false;
@@ -98,7 +107,7 @@ void containerStack::push_back(ztop::container1DUnfold cont, TString legend, int
     if(mode==notset)
         mode=unfolddim1;
     else if(mode!=unfolddim1){
-        std::cout << "containerStack::push_back: trying to add 1DUnfold container to non-1DUnfold stack!" << std::endl;
+        std::cout << "containerStack::push_back: trying to add 1DUnfold container to non-1DUnfold stack!  ("<<name_<<")"<<  std::endl;
         return;
     }
     if(cont.hasTag()){
@@ -150,6 +159,99 @@ void containerStack::setLegendOrder(const TString &leg, const size_t& no){
     }
 }
 
+
+void containerStack::mergeLegends(const std::vector<TString>& tobemerged,const TString & mergedname, bool allowsignals){
+    std::vector<size_t> idxstbm;
+    for(size_t i=0;i<tobemerged.size();i++){
+        idxstbm.push_back(getContributionIdx(tobemerged.at(i)));
+        std::cout << i << std::endl;
+    }
+
+    if(idxstbm.size()<1) return;
+    size_t inidx=idxstbm.at(0);
+
+    std::vector<TString> newsignals;
+    bool newsignentry=false;
+    for(size_t i=0;i<signals_.size();i++){
+        const TString & signname=signals_.at(i);
+        if(std::find(tobemerged.begin(),tobemerged.end(),signname) != tobemerged.end()){
+            newsignentry=true;
+        }
+        else{
+            newsignals.push_back(signname);
+        }
+    }if(newsignentry){
+        if(!allowsignals)
+            throw std::runtime_error("containerStack::mergeLegends: try to merge signals without allowing explicitely for it");
+        newsignals.push_back(mergedname);
+    }
+
+        std::vector<TString> legs;
+    std::vector<int> cols;
+    std::vector<int> legos;
+    std::vector<double>  norms;
+    std::vector<container1D> newconts;
+    std::vector<container1DUnfold> newcontsuf;
+    std::vector<container2D> newconts2d;
+
+    size_t newidx=0;
+
+    for(size_t i=0;i<legends_.size();i++){
+        if(std::find(idxstbm.begin(),idxstbm.end(),i) == idxstbm.end() || i==inidx){ // use lateron
+            if(is1D()){
+                newconts.push_back(containers_.at(i) *norms_.at(i));
+                if(i==inidx)newidx=newconts.size()-1;
+            }
+            if(is1DUnfold()){
+                newcontsuf.push_back(containers1DUnfold_.at(i)*norms_.at(i));
+                if(i==inidx)newidx=newcontsuf.size()-1;
+            }
+            if(is2D()){
+                newconts2d.push_back( containers2D_.at(i)*norms_.at(i));
+                if(i==inidx)newidx=newconts2d.size()-1;
+            }
+            std::cout << "reusing " << legends_.at(i) <<std::endl;
+            legs.push_back(legends_.at(i));
+            cols.push_back(colors_.at(i));
+            legos.push_back(legorder_.at(i));
+            norms.push_back(1);
+        }
+    }
+    for(size_t i=0;i<legends_.size();i++){
+        if(std::find(idxstbm.begin(),idxstbm.end(),i) != idxstbm.end() && i!=inidx){
+            if(is1D()){
+                std::cout << "adding  " << legends_.at(i) << " to " << legends_.at(newidx)<<std::endl;
+                newconts.at(newidx)+=(containers_.at(i) *norms_.at(i));
+            }
+            if(is1DUnfold()){
+                std::cout << "adding  " << legends_.at(i) << " to " << legends_.at(newidx)<<std::endl;
+                newcontsuf.at(newidx)+=(containers1DUnfold_.at(i)*norms_.at(i));
+            }
+            if(is2D()){
+                newconts2d.at(newidx)+=( containers2D_.at(i)*norms_.at(i));
+            }
+        }
+    }
+    //remove
+
+    legends_=legs;
+    legends_.at(newidx) = mergedname;
+    colors_=cols;
+    legorder_=legos;
+    norms_=norms;
+    containers_=newconts;
+    containers1DUnfold_=newcontsuf;
+    containers2D_=newconts2d;
+
+
+}
+void containerStack::mergeLegends(const TString& tobemergeda,const TString & tobemergedb,const TString & mergedname, bool allowsignal){
+    std::vector<TString> tbm;
+    tbm.push_back(tobemergeda);
+    tbm.push_back(tobemergedb);
+    mergeLegends(tbm,mergedname,allowsignal);
+}
+
 void containerStack::removeContribution(TString legendname){
     bool found=false;
     std::vector<TString>::iterator leg=legends_.begin();
@@ -181,9 +283,7 @@ void containerStack::removeContribution(TString legendname){
 
 }
 
-void containerStack::mergeSameLegends(){
-    //redundant
-}
+
 int containerStack::getContributionIdx(TString legname) const{
     for(size_t i=0;i<legends_.size();i++){
         if(legname == legends_.at(i))
@@ -1195,17 +1295,55 @@ TCanvas * containerStack::makeTCanvas(plotmode plotMode){
     return c;
 }
 
-std::map<TString, float> containerStack::getAllContentsInBin(size_t bin,bool print)const{
-    if(containers_.size() < 1 || bin >= containers_.at(0).getBins().size()){
-        throw std::out_of_range("containerStack::coutAllInBin: bin out of range (getNBins()) or no 1D content");
+std::map<TString, histoBin> containerStack::getAllContentsInBin(size_t bin,int syst,bool print)const{
+
+
+    if(is1D()){
+
+        if(containers_.size() < 1 || bin >= containers_.at(0).getBins().size()){
+            throw std::out_of_range("containerStack::coutAllInBin: bin out of range (getNBins()) or no 1D content");
+        }
+        if(syst>=(int)containers_.at(0).getSystSize()){
+            throw std::out_of_range("containerStack::coutAllInBin: syst index out of range");
+        }
+        std::map<TString, histoBin>  out;
+        if(print) std::cout << "Content of bin " << bin << " for containerStack " << name_ << std::endl;
+        for(size_t i=0;i<legends_.size();i++){
+            if(legends_.at(i)==dataleg_) continue;
+            if(print) std::cout <<legends_.at(i) << ": " << containers_.at(i).getBinContent(bin) << std::endl;
+            out[legends_.at(i)] = containers_.at(i).getBin(bin,syst);
+        }
+
+        out["total MC"]=getFullMCContainer().getBin(bin,syst);
+        out[dataleg_]=containers_.at(getDataIdx()).getBin(bin,syst);
+
+
+        return out;
     }
-    std::map<TString, float>  out;
-    if(print) std::cout << "Content of bin " << bin << " for containerStack " << name_ << std::endl;
-    for(size_t i=0;i<legends_.size();i++){
-        if(print) std::cout <<legends_.at(i) << ": " << containers_.at(i).getBinContent(bin) << std::endl;
-        out[legends_.at(i)] = containers_.at(i).getBinContent(bin);
+    else if(is1DUnfold()){
+        if(containers1DUnfold_.size() < 1 || bin >= containers1DUnfold_.at(0).getRecoContainer().getBins().size()){
+            throw std::out_of_range("containerStack::coutAllInBin: bin out of range (getNBins()) or no 1D content");
+        }
+        if(syst>=(int)containers1DUnfold_.at(0).getSystSize()){
+            throw std::out_of_range("containerStack::coutAllInBin: syst index out of range");
+        }
+        std::map<TString, histoBin>  out;
+        if(print) std::cout << "Content of bin " << bin << " for containerStack " << name_ << std::endl;
+        for(size_t i=0;i<legends_.size();i++){
+            if(legends_.at(i)==dataleg_) continue;
+            if(print) std::cout <<legends_.at(i) << ": " << containers1DUnfold_.at(i).getRecoContainer().getBinContent(bin) << std::endl;
+            out[legends_.at(i)] = containers1DUnfold_.at(i).getRecoContainer().getBin(bin,syst);
+        }
+
+        out["total MC"]=getFullMCContainer1DUnfold().getRecoContainer().getBin(bin,syst);
+        out[dataleg_]=containers1DUnfold_.at(getDataIdx()).getRecoContainer().getBin(bin,syst);
+
+        return out;
+
     }
-    return out;
+
+
+    throw std::runtime_error("containerStack::getAllContentsInBin: only available for 1dim stacks");
 }
 
 
@@ -1408,6 +1546,29 @@ size_t containerStack::getDataIdx()const{
         }
     }
     throw std::runtime_error("containerStack::getDataIdx: no data index!");
+}
+
+
+float containerStack::getYMax(bool dividebybinwidth)const{
+    float max=-99999;
+    if(mode == dim1){
+        if(containers_.size()<1) return 0;
+        for(size_t i=0;i<containers_.size();i++){
+            float temp=containers_.at(i).getYMax(dividebybinwidth);
+            if(max<temp)max=temp;
+        }
+    }
+    else if(mode == dim2){
+        return 0;
+    }
+    else if(mode == unfolddim1){
+        if(containers1DUnfold_.size()<1) return 0;
+        for(size_t i=0;i<containers1DUnfold_.size();i++){
+            float temp=containers1DUnfold_.at(i).getRecoContainer().getYMax(dividebybinwidth);
+            if(max<temp)max=temp;
+        }
+    }
+    return max;
 }
 
 container1D containerStack::getSignalContainer()const{

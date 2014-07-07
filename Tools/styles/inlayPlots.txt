@@ -2,15 +2,19 @@ $$[textBoxes - boxes]
 $$ no internal
 $$[end textBoxes]
  
+[plotterInlay]
+  drawLegend = true
+  inlayX0 = 0.55
+  inlayY0 = 0.55
+  inlayX1 = 0.85
+  inlayY1 = 0.85
  
- drawLegend = true
- inlayX0 = 0.55
- inlayY0 = 0.55
- inlayX1 = 0.85
- inlayY1 = 0.85
+  tightXaxis = true
+  
  
- tightXaxis = true
- 
+[end - plotterInlay]
+
+
  [plotStyle - MainPlots]
 
     bottomMargin  = 0.15

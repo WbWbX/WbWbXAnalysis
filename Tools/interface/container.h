@@ -38,8 +38,6 @@ public:
 
     bool isDummy()const{return bins_.size()<=2;}
 
-    const TString & getName()const{return name_;}
-    void setName(TString Name){name_=Name;}
     void setNames(TString name, TString xaxis, TString yaxis){if(name!="")name_=name;if(xaxis!="")xname_=xaxis;if(yaxis!="")yname_=yaxis;}
     void setShowWarnings(bool show){showwarnings_=show;}
 
@@ -198,6 +196,10 @@ public:
     void renameSyst(const TString &,const  TString&); //! old, new
 
     void transformStatToSyst(const TString&);
+    /**
+     * uses stat errors on nominal, transforms them into syst and cuts at 1 and 0
+     */
+    void transformToEfficiency();
     void setAllErrorsZero(){contents_.removeAdditionalLayers();contents_.clearLayerStat(-1);} //! sets all errors zero
     void removeAllSystematics(){contents_.removeAdditionalLayers();}
 
@@ -250,6 +252,11 @@ public:
     ztop::graph getDependenceOnSystematic(const size_t& bin, TString  sys,float offset=0,TString replacename="")const;
 
 
+    /**
+     * appends a container to the last bin
+     * will screw up real binning!
+     */
+    void append(const container1D&);
     ///IO
     void loadFromTree(TTree *, const TString & plotname);
     void loadFromTFile(TFile *, const TString & plotname);
@@ -258,6 +265,7 @@ public:
     void writeToTree(TTree *);
     void writeToTFile(TFile *);
     void writeToTFile(const TString& filename);
+
 
 protected:
     //whenever you add a member, make sure it turns up in at least the copy and == operator
@@ -278,7 +286,7 @@ protected:
     bool wasoverflow_;
 
 
-    TString name_, xname_, yname_;
+    TString  xname_, yname_;
 
     float labelmultiplier_;
 

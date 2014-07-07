@@ -24,6 +24,14 @@
 #include "../interface/plot.h"
 #include "../interface/tObjectList.h"
 
+#include "../interface/textFormatter.h"
+
+#include "../interface/plotterBase.h"
+#include "../interface/plotterControlPlot.h"
+#include "../interface/plotterMultiplePlots.h"
+#include "../interface/plotterCompare.h"
+
+
 namespace
 {
 struct dictionary {
@@ -96,6 +104,15 @@ struct dictionary {
 	std::vector<ztop::taggedObject> taggedobjectsoijdof;
 
 	ztop::plot pltggg;
+
+
+	ztop::textFormatter dfewr23rewf;
+
+	ztop::plotterControlPlot sdfewrewrwf;
+	ztop::plotterMultiplePlots sdfdfewewrw;
+	ztop::plotterCompare ewwefevrefwefewf;
+
+
 };
 }
 

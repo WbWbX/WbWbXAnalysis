@@ -30,7 +30,13 @@ void plotterMultiplePlots::removePlot(size_t idx){
     plots_.erase(plots_.begin()+idx);
 }
 
+void plotterMultiplePlots::addStyleFromFile(const std::string& infile){
+    readStylePriv(infile,false);
+}
 void plotterMultiplePlots::readStyleFromFile(const std::string& infile){
+    readStylePriv(infile,true);
+}
+void plotterMultiplePlots::readStylePriv(const std::string& infile,bool requireall){
     /*
      * style format:
      * expects entries:
@@ -42,17 +48,25 @@ void plotterMultiplePlots::readStyleFromFile(const std::string& infile){
     containerStyle defaults;
     //read required part
 
-    pstyle_.readFromFile(infile,"MultiPlots",true);
-    defaults.readFromFile(infile,"Default",true);
+    pstyle_.readFromFile(infile,"MultiPlots",requireall);
+    defaults.readFromFile(infile,"Default",requireall);
 
     fileReader fr;
     fr.setDelimiter(",");
+    fr.setStartMarker("[plotterMultiplePlots]");
+    fr.setEndMarker("[end plotterMultiplePlots]");
     fr.setComment("$");
-    bool prevdrawleg=drawlegend_;
+
     fr.setRequireValues(false);
     fr.readFile(infile);
-    drawlegend_ = fr.getValue<bool>("drawLegend", prevdrawleg);
+    drawlegend_ = fr.getValue<bool>("drawLegend", drawlegend_);
+    tightxaxis_ = fr.getValue<bool>("tightXaxis",tightxaxis_);
+    tightyaxis_ = fr.getValue<bool>("tightYaxis",tightyaxis_);
 
+
+    fr.setStartMarker("");
+    fr.setEndMarker("");
+    fr.readFile(infile);
     //count number of available containerStyles
     size_t ncstyles=0;
     for(size_t i=0;i<fr.nLines();i++){
@@ -78,7 +92,9 @@ void plotterMultiplePlots::readStyleFromFile(const std::string& infile){
         cstyles_.push_back(temp);
     }
 
+
     textboxes_.readFromFile(infile,"boxes");
+    legstyle_.readFromFile(infile,"",true);
 
 
 
@@ -117,43 +133,51 @@ void plotterMultiplePlots::drawPlots(){
     if(!tempstyle.yAxisStyle()->applyAxisRange()){ //recompute range, otherwise take from input style
         float min=getMinimum();
         float max=getMaximum();
+
         max=max+(fabs(max-min)*0.05);
-        if(min>0 && min/(fabs(max-min)) < 0.05) //minimum is  close enough to 0 and positive
-            min=0-(fabs(max-min)*0.000001);
-        else //is close enough to 0
+        if(fabs(min)/(fabs(max-min)) < 0.01) //minimum is  close enough to 0
+            min=0+(fabs(max-min)*0.000001);
+        else //is far away from 0
             min=min-(fabs(max-min)*0.05);
 
+        if(tempstyle.forceYAxisZero())
+            min=0+0.00000001;
 
         tempstyle.yAxisStyle()->max=max;
         tempstyle.yAxisStyle()->min=min;
     }
     TH1 * axish=0;
-    axish=addObject(plots_.at(0).getInputGraph().getAxisTH1(false,false));
+
+    axish=addObject(plots_.at(0).getInputGraph().getAxisTH1(tightyaxis_,tightxaxis_));
+  //  axish->GetYaxis() -> SetRangeUser(ymin,axish->GetYaxis() -> GetXmax()));
     tempstyle.applyAxisStyle(axish);
     axish->Draw("AXIS");
     TG * g=0,*gs=0;
-    for(size_t i=0;i<plots_.size();i++){
+    for(size_t inv=plots_.size();inv>0;inv--){ //draw from bottom to top
+        size_t i=inv-1;
         g=plots_.at(i).getStatGraph();
         gs=plots_.at(i).getSystGraph();
         cstyles_.at(i).applyContainerStyle(g,false);
         cstyles_.at(i).applyContainerStyle(gs,true);
-        gs->Draw(cstyles_.at(i).sysRootDrawOpt+"same");
+        if(cstyles_.at(i).sysRootDrawOpt != "none")
+            gs->Draw(cstyles_.at(i).sysRootDrawOpt+"same");
         g->Draw(cstyles_.at(i).rootDrawOpt+"same");
     }
 
+    getPad()->RedrawAxis();
 
 }
 void plotterMultiplePlots::drawLegends(){
     if(!drawlegend_)  return;
+    getPad()->cd(1);
     TLegend *leg = addObject(new TLegend((Double_t)0.65,(Double_t)0.50,(Double_t)0.95,(Double_t)0.90));
     leg->Clear();
     leg->SetFillStyle(0);
     leg->SetBorderSize(0);
-    legstyle_.applyLegendStyle(leg);
     for(size_t i=0;i<plots_.size() ; i++){
         leg->AddEntry(plots_.at(i).getStatGraph(),plots_.at(i).getName(),"pel");
     }
-    getPad()->cd();
+    legstyle_.applyLegendStyle(leg);
     leg->Draw("same");
     getPad()->RedrawAxis();
 }

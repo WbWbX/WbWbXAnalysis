@@ -30,8 +30,9 @@ public:
     enum fituncertaintyModes{fitunc_statcorr, fitunc_statuncorr};
 
 
-    parameterExtractor(): LHMode_(lh_chi2),tmpfa_(0),tmpfb_(0),granularity_(300),clfit_(0.68),fituncmodea_(fitunc_statuncorr),fituncmodeb_(fitunc_statuncorr){}
-    ~parameterExtractor(){}//FIXME}
+    parameterExtractor(): LHMode_(lh_chi2),tmpfa_(0),tmpfb_(0),granularity_(300),clfit_(0.68),
+            fituncmodea_(fitunc_statuncorr),fituncmodeb_(fitunc_statuncorr),poisson_(false){}
+    ~parameterExtractor(){}
 
     // defaults should suffice
 
@@ -67,6 +68,7 @@ public:
 
     std::vector<graph> createLikelihoods();
 
+    void setUsePoisson(bool use){poisson_=use;}
 
 
     void setFitFunctionA(const TString& ffc){fitfunctiona_=ffc;}
@@ -137,6 +139,8 @@ private:
 
     fituncertaintyModes fituncmodea_,fituncmodeb_;
 
+    bool poisson_;
+
     double findintersect(TF1* a, TF1* b,float min, float max);
 
     /* ..... */
@@ -145,6 +149,8 @@ private:
      * extnorm is the integral (not the inverse integral) of the distribution you want to get
      */
     double lnNormedGaus(const float & centre, const float& width, const float& evalpoint, const float& extnorm=0)const;
+    double chi_square(const float & centre, const float& widthsquared, const float& evalpoint) const;
+   // double mcLnPoisson(const float & centreN, const float & mcstat2, const float& evalpoint)const;
 
 
 };

@@ -36,8 +36,6 @@ public:
     void setBinning(const std::vector<float> &xbins, std::vector<float> ybins);
     //setaxis etc still missing. should be ok as long as default constr. is protected
 
-    void setName(TString name){name_=name;}
-    const TString &getName() const {return name_;}
 
 
     void setXAxisName(const TString& name){xaxisname_=name;}
@@ -153,7 +151,7 @@ protected:
 
     TString xaxisname_;
     TString yaxisname_;
-    TString name_;
+
 
 };
 

@@ -31,18 +31,21 @@ bool container1DUnfold::c_makelist=false;
    bool isMC_;
  */
 
-container1DUnfold::container1DUnfold(): container2D(), xaxis1Dname_(""), yaxis1Dname_(""),
+container1DUnfold::container1DUnfold(): container2D(),xaxis1Dname_(""), yaxis1Dname_(""),
         tempgen_(0),tempreco_(0),tempgenweight_(1),tempweight_(1),recofill_(false),
         genfill_(false),isMC_(false),flushed_(true),binbybin_(false),lumi_(1),congruentbins_(false),allowmultirecofill_(false){
     if(c_makelist){
         c_list.push_back(this);
     }
+    type_=type_container1DUnfold;
 }
 container1DUnfold::container1DUnfold( std::vector<float> genbins, std::vector<float> recobins, TString name,TString xaxisname,TString yaxisname, bool mergeufof)
-:container2D( recobins /*genbins*/ , recobins , name,xaxisname+"_reco",xaxisname+"_gen",mergeufof), xaxis1Dname_(xaxisname),
+:container2D( recobins /*genbins*/ , recobins , name,xaxisname+" (pred)",xaxisname+" (reco)",mergeufof), xaxis1Dname_(xaxisname),
  yaxis1Dname_(yaxisname),tempgen_(0),tempreco_(0),tempgenweight_(1),tempweight_(1),recofill_(false),genfill_(false),
  isMC_(false),flushed_(true),binbybin_(false),lumi_(1),congruentbins_(false),allowmultirecofill_(false){
     //bins are set, containers created, at least conts_[0] exists with all options (binomial, mergeufof etc)
+
+
 
     genbins_=genbins; //can be changed and rebinned afterwards
 
@@ -58,6 +61,7 @@ container1DUnfold::container1DUnfold( std::vector<float> genbins, std::vector<fl
     if(c_makelist){
         c_list.push_back(this);
     }
+    type_=type_container1DUnfold;
 }
 container1DUnfold::container1DUnfold( std::vector<float> genbins, TString name,TString xaxisname,TString yaxisname, bool mergeufof){
     std::vector<float> recobins=subdivide(genbins,10);
@@ -77,6 +81,7 @@ void container1DUnfold::setBinning(const std::vector<float> & genbins,const std:
     container2D::setBinning(recobins,recobins);
     gencont_=conts_.at(0);
     gencont_.clear();
+    gencont_.setXAxisName(xaxis1Dname_+"(pred)");
     std::vector<float> databins=ybins_;
     databins.erase(databins.begin());
     recocont_ = container1D(databins,name_+"_data",xaxis1Dname_,yaxis1Dname_,mergeufof_);
@@ -156,47 +161,64 @@ container1D container1DUnfold::getBackground() const{
         std::cout << "container1DUnfold::getBackground: No bins!" << std::endl;
         throw std::logic_error("container1DUnfold::getBackground: no bins");
     }
-    return getXSlice(0);
+    container1D out=getXSlice(0);
+    out.setXAxisName(xaxis1Dname_);
+    out.setYAxisName(yaxis1Dname_);
+    return out;
 }
 container1D container1DUnfold::getVisibleSignal() const{
     if(xbins_.size()<1){
         std::cout << "container1DUnfold::getVisibleSignal: No bins!" << std::endl;
         throw std::logic_error("container1DUnfold::getVisibleSignal: no bins");
     }
-    return projectToY(false); //no underflow included -> only visible part of response matrix -> generated and reconstructed in visible PS
+    container1D out=projectToY(false);
+    out.setXAxisName(xaxis1Dname_);
+    out.setYAxisName(yaxis1Dname_);
+    return  out;//no underflow included -> only visible part of response matrix -> generated and reconstructed in visible PS
+}
+container1DUnfold& container1DUnfold::operator += (const container1DUnfold & second){
+    if(second.xbins_ != xbins_ || second.ybins_ != ybins_){
+        std::cout << "container1DUnfold::operator +=: "<< name_ << " and " << second.name_<<" must have same binning! returning *this" << std::endl;
+        return *this;
+    }
+    for(size_t i=0;i<conts_.size();i++){
+        conts_.at(i) += second.conts_.at(i);
+    }
+    gencont_+=second.gencont_;
+    recocont_+=second.recocont_;
+    unfolded_+=second.unfolded_;
+    refolded_+=second.refolded_;
+    return *this;
 }
 
 container1DUnfold container1DUnfold::operator + (const container1DUnfold & second){
+    container1DUnfold out=*this;
+    out+=second;
+    return out;
+}
+container1DUnfold& container1DUnfold::operator -= (const container1DUnfold & second){
     if(second.xbins_ != xbins_ || second.ybins_ != ybins_){
-        std::cout << "container1DUnfold::operator +: "<< name_ << " and " << second.name_<<" must have same binning! returning *this" << std::endl;
+        std::cout << "container1DUnfold::operator -=: "<< name_ << " and " << second.name_<<" must have same binning! returning *this"  << std::endl;
         return *this;
     }
-    container1DUnfold out=second;
+
     for(size_t i=0;i<conts_.size();i++){
-        out.conts_.at(i) = conts_.at(i) + second.conts_.at(i);
+        conts_.at(i) -= second.conts_.at(i);
     }
-    out.gencont_=gencont_+second.gencont_;
-    out.recocont_=recocont_+second.recocont_;
-    out.unfolded_=unfolded_+second.unfolded_;
-    out.refolded_=refolded_+second.refolded_;
-    return out;
+    gencont_-=second.gencont_;
+    recocont_-=second.recocont_;
+    unfolded_-=second.unfolded_;
+    refolded_-=second.refolded_;
+
+    return *this;
 }
 container1DUnfold container1DUnfold::operator - (const container1DUnfold & second){
-    if(second.xbins_ != xbins_ || second.ybins_ != ybins_){
-        std::cout << "container1DUnfold::operator -: "<< name_ << " and " << second.name_<<" must have same binning! returning *this"  << std::endl;
-        return *this;
-    }
-    container1DUnfold out=second;
-    for(size_t i=0;i<conts_.size();i++){
-        out.conts_.at(i) = conts_.at(i) - second.conts_.at(i);
-    }
-    out.gencont_=gencont_-second.gencont_;
-    out.recocont_=recocont_-second.recocont_;
-    out.unfolded_=unfolded_-second.unfolded_;
-    out.refolded_=refolded_-second.refolded_;
+    container1DUnfold out=*this;
+    out-=second;
     return out;
 }
-container1DUnfold container1DUnfold::operator / (const container1DUnfold & second){
+
+container1DUnfold& container1DUnfold::operator /= (const container1DUnfold & second){
     if(second.xbins_ != xbins_ || second.ybins_ != ybins_){
         std::cout << "container1DUnfold::operator /: "<< name_ << " and " << second.name_<<" must have same binning! returning *this"  << std::endl;
         return *this;
@@ -205,31 +227,46 @@ container1DUnfold container1DUnfold::operator / (const container1DUnfold & secon
         std::cout << "container1DUnfold::operator /: "<< name_ << " and " << second.name_<<" must have same divide option (divideBinomial). returning *this" <<  std::endl;
         return *this;
     }
-    container1DUnfold out=second;
     for(size_t i=0;i<conts_.size();i++){
-        out.conts_.at(i) = conts_.at(i) / second.conts_.at(i);
+        conts_.at(i) /= second.conts_.at(i);
     }
-    out.gencont_=gencont_/second.gencont_;
-    out.recocont_=recocont_/second.recocont_;
-    out.unfolded_=unfolded_/second.unfolded_;
-    out.refolded_=refolded_/second.refolded_;
+    gencont_/=second.gencont_;
+    recocont_/=second.recocont_;
+    unfolded_/=second.unfolded_;
+    refolded_/=second.refolded_;
+
+    return *this;
+}
+container1DUnfold container1DUnfold::operator / (const container1DUnfold & second){
+    container1DUnfold out=*this;
+    out/=second;
     return out;
 }
-container1DUnfold container1DUnfold::operator * (const container1DUnfold & second){
+
+
+container1DUnfold &container1DUnfold::operator *= (const container1DUnfold & second){
     if(second.xbins_ != xbins_ || second.ybins_ != ybins_){
         std::cout << "container1DUnfold::operator *: "<< name_ << " and " << second.name_<<" must have same binning! returning *this"  << std::endl;
         return *this;
     }
-    container1DUnfold out=second;
+
     for(size_t i=0;i<conts_.size();i++){
-        out.conts_.at(i) = conts_.at(i) * second.conts_.at(i);
+        conts_.at(i) *= second.conts_.at(i);
     }
-    out.gencont_=gencont_*second.gencont_;
-    out.recocont_=recocont_*second.recocont_;
-    out.unfolded_=unfolded_*second.unfolded_;
-    out.refolded_=refolded_*second.refolded_;
+    gencont_*=second.gencont_;
+    recocont_*=second.recocont_;
+    unfolded_*=second.unfolded_;
+    refolded_*=second.refolded_;
+
+    return *this;
+}
+
+container1DUnfold container1DUnfold::operator * (const container1DUnfold & second){
+    container1DUnfold out=*this;
+    out*=second;
     return out;
 }
+
 container1DUnfold container1DUnfold::operator * (float val){
     container1DUnfold out=*this;
     for(size_t i=0;i<conts_.size();i++){
@@ -435,6 +472,8 @@ container1D container1DUnfold::fold(const container1D& input) const{
         }
     }
     out.setName(input.getName()+"_folded");
+    out.setXAxisName(xaxis1Dname_);
+    out.setYAxisName(yaxis1Dname_);
     return out;
 }
 
@@ -468,6 +507,7 @@ container1D container1DUnfold::getPurity() const{
     container1D purity=recgen/rec;
     histoContent::divideStatCorrelated=temp;
     container1D::c_makelist=mklist;
+    purity.setXAxisName(xaxis1Dname_);
     return purity;
 
 
@@ -498,9 +538,24 @@ container1D container1DUnfold::getStability(bool includeeff) const{
     histoContent::divideStatCorrelated=temp;
 
     container1D::c_makelist=mklist;
+    stability.setXAxisName(xaxis1Dname_);
     return stability;
 
 }
+
+container1D container1DUnfold::getEfficiency()const{
+    container1D xprojection=projectToX(true);
+    container1D xprojectionwouf=projectToX(false);
+    bool tmp=histoContent::divideStatCorrelated;
+    histoContent::divideStatCorrelated=true;
+    xprojectionwouf =xprojectionwouf/ xprojection;
+    xprojectionwouf.setYAxisName("#epsilon");
+    xprojectionwouf.transformToEfficiency();
+    xprojectionwouf.setXAxisName(xaxis1Dname_);
+    histoContent::divideStatCorrelated=tmp;
+    return xprojectionwouf;
+}
+
 container2D container1DUnfold::getResponseMatrix()const{
     container2D out;
 
@@ -510,8 +565,8 @@ container2D container1DUnfold::getResponseMatrix()const{
     out.divideBinomial_=divideBinomial_;
     out.mergeufof_=mergeufof_;
 
-    out.xaxisname_=xaxis1Dname_ + " - gen";
-    out.yaxisname_=xaxis1Dname_ + " - reco";
+    out.xaxisname_=xaxis1Dname_ + " (pred)";
+    out.yaxisname_=xaxis1Dname_ + " (reco)";
     out.name_=name_+"_respMatrix";
     return out;
 }
@@ -527,8 +582,8 @@ container2D container1DUnfold::getNormResponseMatrix()const{
     out.divideBinomial_=divideBinomial_;
     out.mergeufof_=mergeufof_;
 
-    out.xaxisname_=xaxis1Dname_ + " - gen";
-    out.yaxisname_=xaxis1Dname_ + " - reco";
+    out.xaxisname_=xaxis1Dname_ + " (pred)";
+    out.yaxisname_=xaxis1Dname_ + " (reco)";
     out.name_=name_+"_normrespMatrix";
     return out;
 }

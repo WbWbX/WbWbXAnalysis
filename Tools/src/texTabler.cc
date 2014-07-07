@@ -12,7 +12,10 @@
 
 #include "../interface/textFormatter.h"
 #include <algorithm>
-#include <stdexcept>
+#include "TString.h"
+#include <fstream>
+
+
 
 namespace ztop{
 
@@ -25,24 +28,26 @@ TString texLine::getTex()const{
 }
 
 
-texTabler::texTabler(){
-    throw std::runtime_error("texTabler::texTabler: don't use default constr");
+texTabler::texTabler():columns_(0),texformat_(""),linecount_(0){
+
 }
 
-texTabler::texTabler(const TString& format):columns_(0),texformat_(format),linecount_(0){
+texTabler::texTabler(const TString& formats):columns_(0),texformat_(formats),linecount_(0){
 
+    format(formats);
 
-    TString fc=format;
+}
+
+void texTabler::format(const TString& str){
+
+    TString fc=str;
     fc.ReplaceAll("r","#");
     fc.ReplaceAll("l","#");
     fc.ReplaceAll("c","#");
 
     std::string fs(fc.Data());
     columns_ = std::count(fs.begin(), fs.end(), '#');
-
 }
-
-
 
 texTabler& texTabler::operator << (const texLine&tl){
 
@@ -50,7 +55,14 @@ texTabler& texTabler::operator << (const texLine&tl){
     return *this;
 
 }
+void texTabler::newLine(){
 
+    while(entries_.size() % columns_ !=0)
+        entries_.push_back("$\\$SKIPENTRY$\\$");
+    linecount_++;
+    rowboundaries_.push_back(texLine(0));
+
+}
 
 TString texTabler::getTable()const{
 
@@ -60,8 +72,10 @@ TString texTabler::getTable()const{
     for(size_t i=0;i<linecount_;i++){
         out+="\n";
         for(size_t j=0;j<columns_;j++){
-            out+=entries_.at( i * columns_ +j);
-            if(j<columns_-1)
+            bool skip=entries_.at( i * columns_ +j) == "$\\$SKIPENTRY$\\$";
+            if(!skip)
+                out+=entries_.at( i * columns_ +j);
+            if(j<columns_-1 && entries_.at( i * columns_ +j +1) != "$\\$SKIPENTRY$\\$")
                 out+=" & ";
             else
                 out+=" ";
@@ -75,6 +89,20 @@ TString texTabler::getTable()const{
 
     return out;
 
+}
+
+
+void texTabler::writeToFile(const TString& filename)const{
+    TString string=getTable();
+
+
+
+    ofstream outs;
+    outs.open(filename.Data());
+
+    outs << string;
+
+    outs.close();
 }
 
 void texTabler::clear(){

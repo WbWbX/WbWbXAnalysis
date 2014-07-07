@@ -21,7 +21,7 @@ namespace ztop{
  */
 class plotterMultiplePlots : public plotterBase{
 public:
-    plotterMultiplePlots():plotterBase(),drawlegend_(true){}
+    plotterMultiplePlots():plotterBase(),drawlegend_(true),tightyaxis_(false),tightxaxis_(true){}
 
     void addPlot(const graph *c);
     void addPlot(const container1D *c,bool divbw=true);
@@ -30,7 +30,7 @@ public:
     /**
      * returns number of plots added
      */
-    size_t size(){return plots_.size();}
+    size_t size()const{return plots_.size();}
 
     /**
      * style format:
@@ -41,25 +41,31 @@ public:
      * TBI:!! instead of N it is possible to use identifiers (e.g. MC, data)
      */
     void readStyleFromFile(const std::string&);
+    void addStyleFromFile(const std::string&);
 
     /**
      * cleans mem and deletes plots.
      * Doesn't change styles
      */
     void clear();
-
-private:
-    plotStyle pstyle_;
-    std::vector<containerStyle> cstyles_;
-    std::vector<plot> plots_;
-    bool drawlegend_;
+protected:
 
     void preparePad();
     void drawPlots();
     void drawLegends();
+    plotStyle pstyle_;
+    std::vector<containerStyle> cstyles_;
+    std::vector<plot> plots_;
+    bool drawlegend_,tightyaxis_,tightxaxis_;
+
+private:
+
 
     float getMaximum()const;
     float getMinimum()const;
+
+
+    void readStylePriv(const std::string & file, bool requireall);
 };
 
 }

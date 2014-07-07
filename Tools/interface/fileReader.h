@@ -54,6 +54,15 @@ public:
         return out;
     }
 
+    std::string getReJoinedLine(size_t line) const;
+    /**
+     * returns additional information connected to a marker formatted:
+     *
+     * [<markername> - <markervalue>] // additional spaces are allowed everywhere
+     *
+     */
+    std::vector<std::string> getMarkerValues(const std::string& markername)const;
+
     std::string getValueString(const std::string &str, bool checkdoubles=true);
 
     template<class T>
@@ -69,7 +78,7 @@ public:
         return out;
     }
     template<class T>
-    T getValue(const std::string & str,const T &def_val){
+    T getValue(const std::string & str, T def_val){
         if(requirevalues_)
             return getValue<T>(str);
         T out;
@@ -86,6 +95,11 @@ public:
 
     void clear(){lines_.clear();}
     static bool debug;
+
+    /**
+     * returns path to file
+     */
+    std::string dumpFormattedToTmp()const;
 
 private:
     std::string /*trim_,comment_,delimiter_,*/start_,end_;
@@ -122,7 +136,7 @@ inline bool fileReader::getValue<bool>(const std::string & str){
     return out;
 }
 template<>
-inline bool fileReader::getValue<bool>(const std::string & str,const bool& def_val){
+inline bool fileReader::getValue<bool>(const std::string & str, bool def_val){
     if(requirevalues_)
         return getValue<bool>(str);
     bool out;
@@ -150,7 +164,7 @@ inline std::string fileReader::getValue<std::string>(const std::string & str){
     return s;
 }
 template<>
-inline std::string fileReader::getValue<std::string>(const std::string & str, const std::string &  def_val){
+inline std::string fileReader::getValue<std::string>(const std::string & str,  std::string   def_val){
     if(requirevalues_)
         return getValue<std::string>(str);
     std::string s(getValueString(str));
@@ -172,7 +186,7 @@ inline TString fileReader::getValue<TString>(const std::string & str){
     return (TString)s;
 }
 template<>
-inline TString fileReader::getValue<TString>(const std::string & str, const TString & def_val){
+inline TString fileReader::getValue<TString>(const std::string & str,  TString  def_val){
     if(requirevalues_)
         return getValue<TString>(str);
     std::string s(getValueString(str));

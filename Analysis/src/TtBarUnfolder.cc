@@ -97,6 +97,7 @@ TString TtBarUnfolder::unfold(TString out,TString in)const{
     //parallel for?!?
     //  TFile* f = new TFile(outdir+outfile,"RECREATE");
     TFile* f = new TFile(outfile,"RECREATE");
+    csv.writeAllToTFile(f); //write back to have full info
     f->cd();
     TDirectory * d=0;
     for(size_t i=0;i<ufsize;i++){
@@ -131,7 +132,7 @@ TString TtBarUnfolder::unfold(TString out,TString in)const{
         unfolder.unfold(data);
 
         if(correctbr)
-                   data*=1/brcorr_;
+            data*=1/brcorr_;
 
 
         ztop::container1D unfolded=data.getUnfolded();
@@ -149,6 +150,8 @@ TString TtBarUnfolder::unfold(TString out,TString in)const{
         d->cd();
         TCanvas * c = new TCanvas(name+"_unfolded",name+"_unfolded");
         c->Draw();
+        c->cd(1)->SetBottomMargin(0.15);
+        c->cd(1)->SetLeftMargin(0.15);
         unfolded.drawFullPlot();
         if(unfolded.getNBins() < 6){
             std::cout << "\n\n" << name << std::endl;
@@ -168,7 +171,25 @@ TString TtBarUnfolder::unfold(TString out,TString in)const{
         pdfname.ReplaceAll(" ","_");
         if(printpdfs) c->Print(pdfname);
         c->Clear();
+        delete c;
 
+
+        container1D unfoldednormd=unfolded;
+        unfoldednormd.normalize(true,true);
+        unfoldednormd.setYAxisName("1/#sigma "+unfoldednormd.getYAxisName());
+        c=new TCanvas();
+        c->cd(1)->SetBottomMargin(0.15);
+        c->cd(1)->SetLeftMargin(0.15);
+        setNameAndTitle(c,name+"_unfolded_norm");
+        unfoldednormd.drawFullPlot("",true,"");
+        d->cd();
+        //c->Write();
+        d->WriteTObject(c,c->GetName());
+
+
+
+
+        c->Clear();
         TDirectory * histdir=d->mkdir("hists","hists");
         TGraphAsymmErrors * singleg=unfolded.getTGraph();
         histdir->WriteTObject(singleg,singleg->GetName());
@@ -196,6 +217,31 @@ TString TtBarUnfolder::unfold(TString out,TString in)const{
         d->WriteTObject(c,((TString)c->GetName()+"_cplot").Data());
         delete c;
 
+        if(moreoutput)
+            std::cout << "making data-bg plot" << std::endl;
+        container1D dminusBG=data.getRecoContainer();
+        dminusBG-=data.getBackground();
+        c=new TCanvas();
+        c->cd(1)->SetBottomMargin(0.15);
+        c->cd(1)->SetLeftMargin(0.15);
+        setNameAndTitle(c,name+"_data-BG");
+        dminusBG.drawFullPlot("",true,"");
+        d->cd();
+        //c->Write();
+        d->WriteTObject(c,c->GetName());
+        delete c;
+
+        c=new TCanvas();
+        c->cd(1)->SetBottomMargin(0.15);
+        c->cd(1)->SetLeftMargin(0.15);
+        setNameAndTitle(c,name+"_data-BG_norm");
+        dminusBG.normalize(true,true);
+        dminusBG.setYAxisName("1/N_{tot} "+dminusBG.getYAxisName());
+        dminusBG.drawFullPlot("",true,"");
+        d->cd();
+        //c->Write();
+        d->WriteTObject(c,c->GetName());
+        delete c;
 
         if(moreoutput)
             std::cout << "making stab/pur plot" << std::endl;
@@ -289,6 +335,34 @@ TString TtBarUnfolder::unfold(TString out,TString in)const{
         d->cd();
         //c->Write();
         d->WriteTObject(c,c->GetName());
+
+
+        delete c;
+        container1D refoldedgen=check.getBinnedGenContainer();;
+        data.fold(refoldedgen);
+        c=new TCanvas();
+        c->cd(1)->SetBottomMargin(0.15);
+        c->cd(1)->SetLeftMargin(0.15);
+        setNameAndTitle(c,name+"_genrefolded");
+        refoldedgen.drawFullPlot("",true,"");
+        d->cd();
+        //c->Write();
+        d->WriteTObject(c,c->GetName());
+        delete c;
+
+
+        refoldedgen.normalize(true,true);
+        refoldedgen.setYAxisName("1/N_{tot} "+unfoldednormd.getYAxisName());
+        c=new TCanvas();
+        c->cd(1)->SetBottomMargin(0.15);
+        c->cd(1)->SetLeftMargin(0.15);
+        setNameAndTitle(c,name+"_genrefolded_norm");
+        refoldedgen.drawFullPlot("",true,"");
+        d->cd();
+        //c->Write();
+        d->WriteTObject(c,c->GetName());
+
+
         d->Close();
         delete d;
         delete ufgen;

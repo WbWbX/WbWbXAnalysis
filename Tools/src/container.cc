@@ -29,9 +29,12 @@ std::vector<container1D*> container1D::c_list;
 bool container1D::c_makelist=false;
 
 ///////function definitions
-container1D::container1D(){
+container1D::container1D():
+                                        taggedObject(taggedObject::type_container1D)
+{
     canfilldyn_=false;
     //divideBinomial_=true;
+
     manualerror_=false;
     labelmultiplier_=1;
     showwarnings_=true;
@@ -39,17 +42,19 @@ container1D::container1D(){
     wasunderflow_=false;
     wasoverflow_=false;
     plottag=none;
+    binwidth_=0;
     gp_=0;
     hp_=0;
     if(c_makelist)c_list.push_back(this);
 }
-container1D::container1D(float binwidth, TString name,TString xaxisname,TString yaxisname, bool mergeufof){ //currently not used
+container1D::container1D(float binwidth, TString name,TString xaxisname,TString yaxisname, bool mergeufof):
+                                        taggedObject(taggedObject::type_container1D){ //currently not used
     plottag=none;
     binwidth_=binwidth;
     canfilldyn_=true;
     //divideBinomial_=true;
     manualerror_=false;
-    name_=name;
+    setName(name);
     xname_=xaxisname;
     yname_=yaxisname;
     labelmultiplier_=1;
@@ -61,12 +66,13 @@ container1D::container1D(float binwidth, TString name,TString xaxisname,TString 
     gp_=0;
     hp_=0;
 }
-container1D::container1D(std::vector<float> bins, TString name,TString xaxisname,TString yaxisname, bool mergeufof){
+container1D::container1D(std::vector<float> bins, TString name,TString xaxisname,TString yaxisname, bool mergeufof):
+                                        taggedObject(taggedObject::type_container1D){
     plottag=none;
     setBins(bins);
     //divideBinomial_=true;
     manualerror_=false;
-    name_=name;
+    setName(name);
     xname_=xaxisname;
     yname_=yaxisname;
     labelmultiplier_=1;
@@ -947,11 +953,16 @@ void container1D::setDivideBinomial(bool divideBinomial){
 ///////////////OPERATORS//////////////
 
 container1D & container1D::operator += (const container1D & second){
-    if(bins_ != second.bins_){
+    if(bins_ != second.bins_ && !isDummy()){
         if(showwarnings_) std::cout << "container1D::operator +=: not same binning for " << name_ << " return this" << std::endl;
         return *this;
     }
-    contents_ += second.contents_;
+    if(!isDummy()){
+        contents_ += second.contents_;
+    }
+    else{
+        *this=second;
+    }
     return *this;
 }
 
@@ -1227,7 +1238,7 @@ void container1D::removeError(const size_t &idx){
 
 void container1D::transformStatToSyst(const TString &sysname){
     size_t layers=contents_.layerSize();
-    if(contents_.getLayerIndex(sysname+"_up") < layers || contents_.getLayerIndex(sysname+"_down")){
+    if(contents_.getLayerIndex(sysname+"_up") < layers || contents_.getLayerIndex(sysname+"_down") < layers){
         std::cout << "container1D::transformStatToSyst: Syst name already used. doing nothing " <<std::endl;
         return;
     }
@@ -1242,10 +1253,23 @@ void container1D::transformStatToSyst(const TString &sysname){
         up.getBin(bin).setStat(0);
         down.getBin(bin).setContent(nom-stat);
         down.getBin(bin).setStat(0);
+        contents_.setBinStat(bin,0);
     }
     const TString ups=sysname+"_up",downs=sysname+"_down";
     contents_.addLayerFromNominal(ups,up);
     contents_.addLayerFromNominal(downs,down);
+
+}
+
+void container1D::transformToEfficiency(){
+    transformStatToSyst("binom_error");
+    for(int sys=-1;sys<(int)getSystSize();sys++){
+        for(size_t bin=0;bin<bins_.size();bin++){
+            if(getBinContent(bin,sys) > 1) setBinContent(bin,1,sys);
+            if(getBinContent(bin,sys) < 0) setBinContent(bin,0,sys);
+        }
+    }
+
 }
 
 void container1D::renameSyst(const TString &old, const TString &New){
@@ -1572,10 +1596,18 @@ graph container1D::getDependenceOnSystematic(const size_t & bin, TString sys,flo
 //protected
 
 TString container1D::stripVariation(const TString &in) const{
-    TString out=in;
+    TString out;
     //out.Resize(in.Last('_'));
-    out.ReplaceAll("_up","");
-    out.ReplaceAll("_down","");
+    if(in.EndsWith("_up")){
+        out=TString(in,in.Last('_'));
+    }
+    else if(in.EndsWith("_down")){
+        out=TString(in,in.Last('_'));
+    }
+    else{
+        throw std::runtime_error("container1D::stripVariation: must be <>_down or <>_up");
+    }
+
     return out;
 }
 /**
@@ -1662,6 +1694,59 @@ void container1D::copyFrom(const container1D& c){
 
 
 
+}
+
+void container1D::append(const container1D& rhs){
+    container1D rhsc=rhs;
+    equalizeSystematicsIdxs(rhsc);
+
+    std::vector<float> newbins(bins_.begin()+1,bins_.end()); //no UF
+    float maxbinb=newbins.at(newbins.size()-1);
+    float relOF=0;
+    if(wasoverflow_){
+        relOF=fabs(maxbinb-newbins.at(0))/100;
+        newbins.push_back(maxbinb+relOF);
+    }
+    if(rhsc.wasunderflow_){
+        relOF*=2;
+        newbins.push_back(maxbinb+relOF);
+    }
+    for(size_t i=1;i<rhsc.bins_.size();i++){ //no UF
+        newbins.push_back(maxbinb +relOF+ rhsc.bins_.at(i));
+    }
+
+
+    container1D out=*this;
+    out.setBins(newbins);
+    //add layers
+    for(size_t i=0;i<getSystSize();i++)
+        out.contents_.addLayer(getSystErrorName(i));
+
+    size_t maxlhsbin=bins_.size()-2;
+    if(wasoverflow_){
+        maxlhsbin=bins_.size()-1;
+    }
+    size_t minrhsbin=maxlhsbin+1;
+    if(rhsc.wasunderflow_){
+        minrhsbin++;
+    }
+    std::cout << "was lhs overflow: " << wasoverflow_ << " was rhs underflow: "<<rhsc.wasunderflow_<<std::endl;
+
+    for(int sys=-1;sys<(int)out.getSystSize();sys++){
+        for(size_t i=0;i<out.bins_.size();i++){
+            std::cout << i << std::endl;
+            if(i<=maxlhsbin){ //this container
+                std::cout <<"first"<<std::endl;
+                out.setBinContent(i,getBinContent(i,sys));
+            }
+            else{
+                std::cout <<"second"<<std::endl;
+                out.setBinContent(i,rhsc.getBinContent(i-minrhsbin,sys));
+            }
+
+        }
+    }
+    *this=out;
 }
 
 

@@ -17,7 +17,8 @@ bool container2D::debug=false;
 std::vector<container2D*> container2D::c_list;
 bool container2D::c_makelist=false;
 
-container2D::container2D(): divideBinomial_(true),mergeufof_(false),xaxisname_(""),yaxisname_(""),name_("") {
+container2D::container2D():taggedObject(taggedObject::type_container2D), divideBinomial_(true),mergeufof_(false),xaxisname_(""),yaxisname_("") {
+    setName("");
     std::vector<float> nobins;
     nobins.push_back(1);
     setBinning(nobins,nobins);
@@ -34,8 +35,10 @@ container2D::~container2D(){
     }
 }
 
-container2D::container2D(const std::vector<float> &xbins,const std::vector<float> &ybins, TString name,TString xaxisname,TString yaxisname, bool mergeufof) : mergeufof_(mergeufof), xaxisname_(xaxisname), yaxisname_(yaxisname), name_(name)
+container2D::container2D(const std::vector<float> &xbins,const std::vector<float> &ybins, TString name,TString xaxisname,TString yaxisname, bool mergeufof) :
+        taggedObject(taggedObject::type_container2D),mergeufof_(mergeufof), xaxisname_(xaxisname), yaxisname_(yaxisname)
 {
+    setName(name);
     //create for each ybin (plus UF OF) a container1D
     setBinning(xbins,ybins);
     if(container2D::c_makelist)
@@ -271,6 +274,8 @@ container1D container2D::projectToX(bool includeUFOF) const{
         out += conts_[i];
     histoContent::addStatCorrelated=temp;
     container1D::c_makelist=tempc_makelist;
+
+    out.setXAxisName(xaxisname_);
     return out;
 }
 /**

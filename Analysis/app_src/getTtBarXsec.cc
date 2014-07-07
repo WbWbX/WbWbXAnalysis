@@ -13,9 +13,11 @@
 #include "TtZAnalysis/Tools/interface/graph.h"
 #include "TtZAnalysis/Tools/interface/extendedVariable.h"
 #include "TtZAnalysis/Tools/interface/plotterMultiplePlots.h"
+#include "TtZAnalysis/Tools/interface/textFormatter.h"
 #include "TCanvas.h"
 #include <string>
 #include "TError.h"
+#include "TPavesText.h"
 
 #include "TtZAnalysis/Tools/interface/optParser.h"
 
@@ -28,6 +30,15 @@ int main(int argc, char* argv[]){
     bool ispseudodata=parse.getOpt<bool>("PD",false,"switch on if input is pseudo data (ngenevents*=0.9)");
     TString minstr = parse.getOpt<TString>("m","Minuit2","Minimizer to be used");
     TString minalgostr = parse.getOpt<TString>("a","Migrad","Minimizer algo to be used");
+    TString plotname=parse.getOpt<TString>("p","top likelihood output <N> b-jets step 7","Plots to be used (default: top likelihood output <N> b-jets step 7)");
+    bool usepoisson =  parse.getOpt<bool>("-poisson",false,"Use poisson statistics");
+    TString outname=parse.getOpt<TString>("o","","output add");
+
+    if(outname.Length()<1)
+        outname="ttbarXsecOut";
+    else
+        outname="ttbarXsecOut_"+outname;
+    outname+=".pdf";
 
     std::vector<TString> inputfiles=parse.getRest<TString>();
     if(inputfiles.size()>1){
@@ -40,7 +51,7 @@ int main(int argc, char* argv[]){
     if(inputfiles.size()>0)
         infilelocation=inputfiles.at(0);
 
-    TString btagmultiplot="selected b jet multi step 7"; //we use step 4 here, No jet required
+    //   TString btagmultiplot="top likelihood output <N> b-jets step 7"; //we use step 4 here, No jet required
     // TString jetmultiplot="hard jet multi step 7";
 
     /*
@@ -55,72 +66,129 @@ int main(int argc, char* argv[]){
     ttbarXsecExtractor extractor;
     extractor.setIsPseudoData(ispseudodata);
     extractor.setLumi(19741);
- //   extractor.setNGenerated(45096.8 + 116346);
-    extractor.readInput(csv_in,btagmultiplot);
+    extractor.setUsePoisson(usepoisson);
+
+    extractor.readInput(csv_in,plotname);
+
     extractor.setMinimizerStr(minstr);
     extractor.setMinimizerAlgoStr(minalgostr);
+    extractor.coutOutStream();
+    extractor.clearOutStream();
 
     extractor.extract();
 
-    std::cout <<  extractor.getXsec() << " + "
-            << extractor.getXsecErrUp()
-            << " - " <<  extractor.getXsecErrDown() << " ("
-            << " + " << extractor.getXsecErrUp()/extractor.getXsec()*100
-            << " - " << extractor.getXsecErrDown()/extractor.getXsec()*100
-            << " %)\n" <<std::endl;
 
+    TString out=toTString(extractor.getXsec())  + " + "
+            + toTString(extractor.getXsecErrUp())
+            + " - "  + toTString( extractor.getXsecErrDown())  + " ("
+            + " +"  + toTString(extractor.getXsecErrUp()/extractor.getXsec()*100)
+            + " "  + toTString(extractor.getXsecErrDown()/extractor.getXsec()*100)
+            + " %)";
 
-    ////////////do some plotting
+    //////////// do some plotting
 
     std::vector< TString > sysnames=extractor.getSystNames();
-    std::vector<std::vector<graph> > graphs=extractor.getSystGraphs();
+    std::vector<graph>  graphs=extractor.getAllGraphs();
     std::vector< extendedVariable* > vars = extractor.getAllExtendedVars();
     std::vector< double>  extrparas=*extractor.getFitter()->getParameters();
-    extrparas.resize(sysnames.size());
+    // extrparas.resize(sysnames.size());
 
 
     plotterMultiplePlots plotter;
-    plotter.readStyleFromFile((std::string)getenv("CMSSW_BASE")+(std::string)"/src/TtZAnalysis/Tools/styles/multiplePlots_sysdependencies.txt");
+    plotter.readStyleFromFileInCMSSW("/src/TtZAnalysis/Tools/styles/multiplePlots_sysdependencies.txt");
 
     //switch off nasty root info output
     gErrorIgnoreLevel = kWarning;
+
+    TPavesText * configurationtext= new TPavesText(0.1,0.1,0.9,0.9);//;extractor.printConfig();
+
+    configurationtext->AddText(out.Data());
+    configurationtext->AddText(plotname);
+    configurationtext->AddText(minstr);
+    configurationtext->AddText(minalgostr);
+
     TCanvas * c= new TCanvas();
-    plotter.usePad(c);
-    plotter.setDrawLegend(false);
-    c->Print("ttbarXsecOut.pdf[");
-    size_t fitcounter=0;
-    for(size_t sys=0;sys<sysnames.size();sys++){
-        //  std::cout << extrparas.at(sys) << std::endl;
-        for(size_t var=0;var<vars.size();var++){
-            plotter.clear();
+    configurationtext->Draw();
+    c->SetName("result");
+    c->Print(outname+"(");
 
-            graph sysg=graphs.at(sys).at(var);
-            sysg.setXAxisName(sysnames.at(sys)+"[#sigma_{"+sysnames.at(sys)+"}]");
-            sysg.setYAxisName(sysg.getName());
+    c->Clear();
+    c->SetName("by bins");
+    configurationtext->Clear();
+    textFormatter tf;
+    tf.setDelimiter("\n");
+    std::vector<std::string> lines = tf.getFormatted(extractor.dumpOutStream().Data());
 
-            graph fittedpoint;
-            fittedpoint.addPoint(extrparas.at(sys),vars.at(var)->getValue(extrparas));
-
-            graph function(200);
-
-            for(size_t xpoint=0;xpoint<200;xpoint++){
-                float xval=((float)xpoint-100)/20;
-                function.setPointContents(xpoint,true,xval,vars.at(var)->getValue(sys,xval));
-
-            }
-
-            plotter.addPlot(&sysg);
-            plotter.addPlot(&function);
-        //    plotter.addPlot(&fittedpoint);
-
-            plotter.draw();
-            c->Print("ttbarXsecOut.pdf");
-            fitcounter++;
+    size_t count=1;
+    for(size_t line=0;line<lines.size();line++){
+        configurationtext->AddText(lines.at(line).data());
+        if(line>count*40){
+            configurationtext->Draw();
+            c->Print(outname);
+            configurationtext->Clear();
+            c->Clear();
+            count++;
         }
     }
-    c->Print("ttbarXsecOut.pdf]");
-    std::cout << "performed " <<fitcounter << " fits on variations" <<std::endl;
+    configurationtext->Draw();
+    c->Print(outname);
+   // c->Print(outname+")");
+    c->Clear();
 
-    // std::cout << "xsec / BR: " <<  extractor.getXsec() / 0.03284 <<std::endl;
+
+    plotter.usePad(c);
+    plotter.setDrawLegend(false);
+    c->Print(outname);
+    size_t fitcounter=0;
+
+
+
+    for(size_t gidx=0;gidx<graphs.size();gidx++){
+
+        size_t var=gidx;
+        if(!extractor.fitWasUsed(gidx)) continue;
+
+        plotter.clear();
+
+        graph sysg=graphs.at(gidx);
+
+        //  std::cout << sysg.getName() <<std::endl;
+
+
+        //   graph fittedpoint;
+        //    fittedpoint.addPoint(extrparas.at(gidx),vars.at(var)->getValue(extrparas));
+
+        graph function(200);
+        size_t varidx=10000;
+        for(size_t sys=0;sys<sysnames.size();sys++){
+            if(sysg.getName().Contains(sysnames.at(sys))){
+                varidx=sys; break;
+            }
+        }
+        for(size_t xpoint=0;xpoint<200;xpoint++){
+            float xval=((float)xpoint-100)/50;
+
+            function.setPointContents(xpoint,true,xval,vars.at(var)->getValue(varidx,xval));
+
+        }
+
+        plotter.addPlot(&sysg);
+        plotter.addPlot(&function);
+        //    plotter.addPlot(&fittedpoint);
+
+        plotter.draw();
+        c->Print(outname);
+        fitcounter++;
+
+    }
+
+
+
+    c->Print(outname+")");
+    std::cout << "performed " <<fitcounter << " fits on variations" <<std::endl;
+    extractor.coutOutStream();
+
+
+    std::cout  << out   <<std::endl;
 
 }

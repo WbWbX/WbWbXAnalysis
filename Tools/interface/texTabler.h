@@ -10,6 +10,7 @@
 
 #include <sstream>
 #include "TString.h"
+#include <stdexcept>
 
 namespace ztop{
 
@@ -19,6 +20,8 @@ public:
     texLine(size_t multi):multi_(multi){}
 
     size_t getMulti(){return multi_;}
+
+
 
     TString getTex()const;
 
@@ -47,6 +50,7 @@ public:
     texTabler(const TString& rowformat);
     ~texTabler(){}
 
+    void format(const TString& str);
 
     void setTopLine(const texLine &tl){toplines_=tl;}
     void setBottomLine(const texLine &tl){bottomlines_=tl;}
@@ -60,8 +64,14 @@ public:
 
     texTabler& operator << (const texLine&);
 
+    /**
+     * to be used e.g. after multicolumn; Dont use otherwise!
+     */
+    void newLine();
 
     TString getTable()const;
+
+    void writeToFile(const TString& )const;
 
     /**
      * resets entries, not format
@@ -90,6 +100,8 @@ private:
 
 template <class T>
 texTabler& texTabler::operator << (T in){
+    if(columns_<1)
+        throw std::logic_error("texTabler::operator <<: you cannot fill a table without defining columns first");
     std::ostringstream s;
     s << in;
     TString out(s.str());

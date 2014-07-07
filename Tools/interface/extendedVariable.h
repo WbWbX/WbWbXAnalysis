@@ -33,6 +33,16 @@ public:
      * performs 2nd order fit and makes
      */
     void addDependence(const graph & , size_t nompoint, const TString& sysname);
+    /**
+     * add dependence
+     * performs 2nd order "fit"
+     * errors will be arbitrary
+     *
+     * will have scaling in terms of sigma (low = -sigma, high=sigma), sigma=1
+     *
+     */
+    graph addDependence(const float & low, const float& nominal, const float& high , const TString& sysname);
+
 
     size_t getNDependencies(){return dependences_.size();}
 
@@ -51,6 +61,7 @@ public:
 
     void clear();
 
+    static bool debug;
 private:
 
     double nominal_;

@@ -100,6 +100,7 @@ void plotterCompare::clearPlots(){
     }
 }
 
+
 /**
  * expects entries:
  * [containerStyle - NominalUpper]
@@ -114,33 +115,44 @@ void plotterCompare::clearPlots(){
  * nominal upper and nominal ratio
  *
  */
-void plotterCompare::readStyleFromFile(const std::string& infile,const std::string& marker){
+void plotterCompare::addStyleFromFile(const std::string& infile){
+    readStylePriv(infile,false);
+}
+void plotterCompare::readStyleFromFile(const std::string& infile){
+    readStylePriv(infile,true);
+}
+void plotterCompare::readStylePriv(const std::string& infile, bool requireall){
 
 
     fileReader fr;
     fr.setComment("$");
     fr.setDelimiter(",");
-    if(marker.length()<1)
-        fr.setStartMarker("[plotterCompareStyle]");
-    else
-        fr.setStartMarker("[plotterCompareStyle "+ marker +"]");
-    fr.setEndMarker("[end plotterCompareStyle]");
+    fr.setStartMarker("[plotterCompare]");
+    fr.setEndMarker("[end plotterCompare]");
     fr.readFile(infile);
-    if(fr.nLines()<1){
-        throw std::runtime_error("plotterCompare::readStyleFromFile: no [plotterCompareStyle] found");
+    fr.setRequireValues(false);
+    if(fr.nLines()<1 && requireall){
+        std::cout << "plotterCompare::readStyleFromFile: no [plotterCompare] found in " << infile<<std::endl;
+        throw std::runtime_error("plotterCompare::readStyleFromFile: no [plotterCompare] found");
     }
 
-    divideat_  = fr.getValue<float>("divideat");
-    size_      = fr.getValue<size_t>("size");
+    if(requireall){
+        divideat_  = fr.getValue<float>("divideat");
+        size_      = fr.getValue<size_t>("size");
+    }
+    else{
+        divideat_  = fr.getValue<float>("divideat",divideat_);
+        size_      = fr.getValue<size_t>("size",size_);
 
+    }
     if(compids_.size()>1 && compids_.size()<size())
         throw std::runtime_error("plotterCompare::readStyleFromFile: compare plot ids set but trying to plot more plots than ids set");
 
     if(debug) std::cout <<"plotterCompare::readStyleFromFile: reading plot styles" << std::endl;
-    upperstyle_.readFromFile(infile, "Upper");
-    ratiostyle_.readFromFile(infile, "Ratio");
+    upperstyle_.readFromFile(infile, "Upper",requireall);
+    ratiostyle_.readFromFile(infile, "Ratio",requireall);
     if(debug) std::cout <<"plotterCompare::readStyleFromFile: reading nominal styles" << std::endl;
-    nomstyleupper_.readFromFile(infile, "NominalUpper"+nominalid_,true);
+    nomstyleupper_.readFromFile(infile, "NominalUpper"+nominalid_,requireall);
     nomstyleratio_=nomstyleupper_;
     nomstyleratio_.readFromFile(infile, "NominalRatio"+nominalid_,false);
 
@@ -150,8 +162,8 @@ void plotterCompare::readStyleFromFile(const std::string& infile,const std::stri
     compstylesupper_.clear();
     compstylesratio_.clear();
     containerStyle compareupperDefault,compareRatioDefault;
-    compareupperDefault.readFromFile(infile,"CompareUpperDefault");
-    compareRatioDefault.readFromFile(infile,"CompareRatioDefault");
+    compareupperDefault.readFromFile(infile,"CompareUpperDefault",requireall);
+    compareRatioDefault.readFromFile(infile,"CompareRatioDefault",requireall);
     for(size_t i=0;i<size_;i++){
         containerStyle temps;
         std::string add;
@@ -175,7 +187,7 @@ void plotterCompare::readStyleFromFile(const std::string& infile,const std::stri
     //text boxes
 
     textboxes_.readFromFile(infile,"boxes");
-
+    legstyle_.readFromFile(infile,"",false);
 
 }
 
@@ -186,6 +198,12 @@ void plotterCompare::readStyleFromFile(const std::string& infile,const std::stri
 
 void plotterCompare::preparePad(){
     if(debug) std::cout <<"plotterCompare::preparePad" << std::endl;
+    //check
+    if(compareplots_.size()>compstylesupper_.size()){
+        throw std::runtime_error("plotterCompare: too many plots for given number of styles");
+    }
+
+
     cleanMem();
     TVirtualPad * c = getPad();
     gStyle->SetOptStat(0);
@@ -258,24 +276,28 @@ void plotterCompare::drawAllPlots(const plotStyle* ps, const containerStyle * cs
         gs=nompl->getSystGraph();
         cs->applyContainerStyle(g,false);
         cs->applyContainerStyle(gs,true);
-        gs->Draw(cs->sysRootDrawOpt+"same");
+        if(cs->sysRootDrawOpt != "none")
+            gs->Draw(cs->sysRootDrawOpt+"same");
         g->Draw(cs->rootDrawOpt+"same");
     }
-    for(size_t i=0;i<vcpl->size();i++){
-        if(debug) std::cout << i << " " << vcpl->at(i).getName() << std::endl;
-        g=vcpl->at(i).getStatGraph();
-        gs=vcpl->at(i).getSystGraph();
-        vcs->at(i).applyContainerStyle(g,false);
-        vcs->at(i).applyContainerStyle(gs,true);
-        gs->Draw(vcs->at(i).sysRootDrawOpt+"same");
-        g->Draw(vcs->at(i).rootDrawOpt+"same");
+    for(size_t i=vcpl->size();i>0;i--){
+        size_t it=i-1;
+        if(debug) std::cout << it << " " << vcpl->at(it).getName() << std::endl;
+        g=vcpl->at(it).getStatGraph();
+        gs=vcpl->at(it).getSystGraph();
+        vcs->at(it).applyContainerStyle(g,false);
+        vcs->at(it).applyContainerStyle(gs,true);
+        if(vcs->at(it).sysRootDrawOpt != "none")
+            gs->Draw(vcs->at(it).sysRootDrawOpt+"same");
+        g->Draw(vcs->at(it).rootDrawOpt+"same");
     }
     if(nomlast){
         g=nompl->getStatGraph();
         gs=nompl->getSystGraph();
         cs->applyContainerStyle(g,false);
         cs->applyContainerStyle(gs,true);
-        gs->Draw(cs->sysRootDrawOpt+"same");
+        if(cs->sysRootDrawOpt != "none")
+            gs->Draw(cs->sysRootDrawOpt+"same");
         g->Draw(cs->rootDrawOpt+"same");
     }
 }
@@ -313,9 +335,9 @@ float plotterCompare::getMaximumUpper(){
     float max=-1e20,min=1e20;
     for(size_t i=0;i<compareplots_.size();i++){
         if(compareplots_.at(i).getInputGraph().getYMax() > max)
-                   max=compareplots_.at(i).getInputGraph().getYMax();
+            max=compareplots_.at(i).getInputGraph().getYMax();
         if(compareplots_.at(i).getInputGraph().getYMin() < min)
-                   min=compareplots_.at(i).getInputGraph().getYMin();
+            min=compareplots_.at(i).getInputGraph().getYMin();
 
     }
     if(nominalplot_.getInputGraph().getYMax() > max)

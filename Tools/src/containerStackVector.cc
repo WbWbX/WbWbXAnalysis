@@ -26,6 +26,7 @@ containerStackVector::containerStackVector(TString Name){
     if(csv_makelist)csv_list.push_back(this);
 }
 containerStackVector::~containerStackVector(){
+    stacks_.clear();
     for(unsigned int i=0;i<csv_list.size();i++){
         if(csv_list[i] == this) csv_list.erase(csv_list.begin()+i);
         break;
@@ -711,6 +712,7 @@ void containerStackVector::loadFromTFile(const TString& filename,const TString& 
     AutoLibraryLoader::enable(); //to avoid warnings
     TFile * ftemp=new TFile(filename,"read");
     loadFromTFile(ftemp,csvname,treename);
+    ftemp->Close();
     delete ftemp;
 }
 

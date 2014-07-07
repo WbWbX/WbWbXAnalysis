@@ -19,21 +19,23 @@ void analysisPlotsJan::bookPlots(){
     using namespace ztop;
 
     vector<float> genmlb_bins;
-    genmlb_bins  << 0 << 50 << 90 << 120 << 140 << 160 << 230  << 350;
+    for(float i=0;i<=350;i+=10)
+        genmlb_bins << i;
+
     vector<float> ivangen_mlbbins;
     ivangen_mlbbins << 0 << 70 << 116 << 150 <<400;
-    vector<float> mlb_bins=ztop::subdivide<float>(genmlb_bins,5);
+    vector<float> mlb_bins=ztop::subdivide<float>(genmlb_bins,2);
     vector<float> ivan_mlbbins=subdivide<float>(ivangen_mlbbins,5);
 
-    Mlb=addPlot(genmlb_bins,mlb_bins,"m_lb unfold","M_{lb} [GeV]", "N/GeV");
+    Mlb=addPlot(genmlb_bins,mlb_bins,"m_lb leading unfold","M_{lb} [GeV]", "N_{evt}/GeV");
 
     mlbcombthresh_=165;
 
-    mlb=addPlot(genmlb_bins,mlb_bins,"m_lb pair comb unfold","m_{lb}* [GeV]", "N/GeV");
+    mlb=addPlot(genmlb_bins,mlb_bins,"m_lb","m_{lb}* [GeV]", "N_{evt}/GeV");
 
-    mlbmin=addPlot(genmlb_bins,mlb_bins,"m_lb pair min unfold","m_{lb} [GeV]", "N/GeV");
+    mlbmin=addPlot(genmlb_bins,mlb_bins,"m_lb min","m_{lb}^{min} [GeV]", "N_{evt}/GeV");
 
-    mlbivansbins=addPlot(ivangen_mlbbins,ivan_mlbbins,"m_lb ivansbins unfold","m_{lb} [GeV]", "N/GeV");
+    mlbivansbins=addPlot(ivangen_mlbbins,ivan_mlbbins,"m_lb ivansbins","m_{lb}^{ivan} [GeV]", "N_{evt}/GeV");
 
     vector<float> inclbins; inclbins << 0.5 << 1.5; //vis PS, fullPS
 
@@ -64,24 +66,29 @@ void analysisPlotsJan::fillPlotsGen(){
     }
 
     //calculate mlbs based on ME leptons
-    if(event()->genvisleptons3 && event()->genvisbjetsfromtop){
-        if(event()->genvisleptons3->size()>1 && event()->genvisbjetsfromtop->size()>0 ){
-            NTLorentzVector<float> bjetp4=event()->genvisbjetsfromtop->at(0)->p4();
-            NTLorentzVector<float> llepp4=event()->genvisleptons3->at(0)->p4();
-            NTLorentzVector<float> slepp4=event()->genvisleptons3->at(1)->p4();
+    if(event()->genvisleptons3 && event()->genbs){
+        if(event()->genvisleptons3->size()>1 && event()->genbs->size()>0 ){
 
-            float fMlb=(bjetp4+llepp4).m();
-            float fm2lb=(bjetp4+slepp4).m();
-            float fmlb=fMlb;
-            float fmlbmin=fMlb;
-            if(fMlb>mlbcombthresh_ && fm2lb<mlbcombthresh_)  fmlb=fm2lb;
-            if(fMlb>fm2lb) fmlbmin=fm2lb;
+            //vis ps cuts on b-jets
+            if(event()->genbs->at(0)->pt()>30){
 
-            Mlb->fillGen(fMlb,puweight());
-            mlb->fillGen(fmlb,puweight());
-            mlbmin->fillGen(fmlbmin,puweight());
+                NTLorentzVector<float> bjetp4=event()->genbs->at(0)->p4();
+                NTLorentzVector<float> llepp4=event()->genvisleptons3->at(0)->p4();
+                NTLorentzVector<float> slepp4=event()->genvisleptons3->at(1)->p4();
 
-            mlbivansbins->fillGen(fmlb,puweight());
+                float fMlb=(bjetp4+llepp4).m();
+                float fm2lb=(bjetp4+slepp4).m();
+                float fmlb=fMlb;
+                float fmlbmin=fMlb;
+                if(fMlb>mlbcombthresh_ && fm2lb<mlbcombthresh_)  fmlb=fm2lb;
+                if(fMlb>fm2lb) fmlbmin=fm2lb;
+
+                Mlb->fillGen(fMlb,puweight());
+                mlb->fillGen(fmlb,puweight());
+                mlbmin->fillGen(fmlbmin,puweight());
+
+                mlbivansbins->fillGen(fmlb,puweight());
+            }
         }
     }
 

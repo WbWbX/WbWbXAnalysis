@@ -52,7 +52,8 @@ public:
 
     //void setComparePlotStyles();
     //void setNominalPlotStyle();
-    void readStyleFromFile(const std::string&,const std::string& marker="" );
+    void readStyleFromFile(const std::string&);
+    void addStyleFromFile(const std::string&);
     /*
      * expects entries:
      * [plotterCompareStyle] defines size N>0
@@ -107,6 +108,7 @@ private:
 
     float getMaximumUpper();
 
+    void readStylePriv(const std::string & file, bool requireall);
 
 };
 

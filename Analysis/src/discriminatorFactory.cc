@@ -255,10 +255,12 @@ float discriminatorFactory::getCombinedLikelihood()const{ //a plot needs to be a
         if(!vars_.at(i) || !*vars_.at(i)) continue;
         // float tofill=( **vars_.at(i) + offsets_.at(i) )/ranges_.at(i);
         size_t bin=histpointers_.at(i)->getBinNo(**vars_.at(i) );
-        combLH *= histpointers_.at(i)->getBinContent(bin,systidx_);
-        if(combLH/maxcomb_ < 0.0001){
-            std::cout << "discriminatorFactory::getCombinedLikelihood: returned 0 for " << histpointers_.at(i)->getName() << " input: " << **vars_.at(i)  <<std::endl;
-            return 0;
+        if(histpointers_.at(i)->getBinContent(bin,systidx_)/maxcomb_ < 0.0001){
+            std::cout << "discriminatorFactory::getCombinedLikelihood: returned 0 for " << histpointers_.at(i)->getName() << " input: " << **vars_.at(i)
+                    << " skip value "<<std::endl;
+        }
+        else{
+            combLH *= histpointers_.at(i)->getBinContent(bin,systidx_);
         }
     }
     return combLH/maxcomb_;

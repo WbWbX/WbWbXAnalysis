@@ -10,6 +10,7 @@
 
 #include "histoContent.h"
 #include "containerStyle.h"
+#include "taggedObject.h"
 #include "TString.h"
 #include <vector>
 
@@ -26,7 +27,7 @@ class container1D;
  * Be careful! X points contain Y variations and Y points contain X variations!
  *
  */
-class graph{
+class graph : public taggedObject{
     friend class container1D;
 public:
     graph(const TString &name="");
@@ -35,8 +36,7 @@ public:
 
     bool isEmpty()const{return getNPoints()<1;}
 
-    void setName(const TString& name){name_=name;}
-    const TString& getName()const {return name_;}
+
 
     void setXAxisName(const TString& name){xname_=name;}
     const TString& getXAxisName()const {return xname_;}
@@ -160,7 +160,7 @@ public:
 
 private:
 
-    TString name_;
+
 
     /*
      * point names are always stored in nominal of x coordinate!

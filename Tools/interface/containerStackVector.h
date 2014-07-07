@@ -21,8 +21,7 @@ public:
     containerStackVector();
     containerStackVector(TString);
     ~containerStackVector();
-    void setName(TString Name){name_=Name;}
-    TString getName(){return name_;}
+
     void setSyst(TString sys){isSyst_=sys;}
     TString getSyst(){return isSyst_;}
 
@@ -71,6 +70,8 @@ public:
     void loadFromTFile(TFile * ,const TString& csvname="*", TString treename="containerStackVectors");
 
     void loadFromTFile(const TString& filename ,const TString& csvname="*", TString treename="containerStackVectors");
+
+    size_t size(){return stacks_.size();}
 
     void clear(){stacks_.clear();name_="";}
     static std::vector<containerStackVector*> csv_list;

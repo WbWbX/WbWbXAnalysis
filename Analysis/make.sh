@@ -1,5 +1,11 @@
 #!/bin/sh
 
+if [[ $CMSSW_BASE == "" ]]
+then
+echo "please run in CMSSW environment"
+exit
+fi
+
 cd $CMSSW_BASE/src/TtZAnalysis/Analysis
 
 

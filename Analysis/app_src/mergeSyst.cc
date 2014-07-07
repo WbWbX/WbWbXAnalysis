@@ -27,4 +27,6 @@ int main(int argc, char* argv[]){
     merger.setInputStrings(allfiles);
     merger.start();
 
+
+
 }

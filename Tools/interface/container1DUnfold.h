@@ -96,12 +96,16 @@ public:
      * only container1DUnfold operator * (float) operates on the unfolded distribution.. let's see for the others
      */
 
+    container1DUnfold& operator += (const container1DUnfold &);       //! adds stat errors in squares; treats same named systematics as correlated!!
     container1DUnfold operator + (const container1DUnfold &);       //! adds stat errors in squares; treats same named systematics as correlated!!
+    container1DUnfold& operator -= (const container1DUnfold &);       //! adds errors in squares; treats same named systematics as correlated!!
     container1DUnfold operator - (const container1DUnfold &);       //! adds errors in squares; treats same named systematics as correlated!!
+    container1DUnfold& operator /= (const container1DUnfold &);       //! binomial stat error or uncorr error (depends on setDivideBinomial()); treats same named systematics as correlated
     container1DUnfold operator / (const container1DUnfold &);       //! binomial stat error or uncorr error (depends on setDivideBinomial()); treats same named systematics as correlated
+    container1DUnfold& operator *= (const container1DUnfold &);       //! adds stat errors in squares; treats same named systematics as correlated!!
     container1DUnfold operator * (const container1DUnfold &);       //! adds stat errors in squares; treats same named systematics as correlated!!
     container1DUnfold operator * (float);            //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
-    container1DUnfold operator *= (float val){*this=*this*val;return *this;}            //! simple scalar multiplication. stat and syst errors are scaled accordingly!! room for performance improvement
+    container1DUnfold& operator *= (float val){*this=*this*val;return *this;}            //! simple scalar multiplication. stat and syst errors are scaled accordingly!! room for performance improvement
 
     void setDivideBinomial(bool);
 
@@ -152,6 +156,7 @@ public:
 
     container1D getPurity() const;
     container1D getStability(bool includeeff=true) const;
+    container1D getEfficiency()const;
 
     /**
      * should be obsolete now since 2D matrix anyway constructed as N x N (check) ?!
@@ -163,6 +168,7 @@ public:
     container2D getResponseMatrix()const;
     container2D getNormResponseMatrix()const;
     TH2D * prepareRespMatrix(bool nominal=true,unsigned int systNumber=0) const;
+
 
     // someformat getCovarianceMatrix(size_t syst) { // M_ij = d_i * d_j, d_i= nominal_i-sys_i, i=bin}
 

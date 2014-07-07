@@ -124,7 +124,10 @@ int MainAnalyzer::start(){
             return -3;
         }
 
+        //only a workaround
+        TString  btagwps=getBTagSF()->getWorkingPointString();
         getBTagSF()->readFromTFile(btagsffile_);
+        getBTagSF()->setWorkingPoint(btagwps);
         getBTagSF()->bTagBase::setSystematic(btagsyst);
     }
 

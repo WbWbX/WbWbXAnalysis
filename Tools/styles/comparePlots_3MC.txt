@@ -1,10 +1,10 @@
 
-[plotterCompareStyle]
+[plotterCompare]
 
     divideat = 0.4   $ will affect margins, text box coords etc
     size = 3         $ size of additional plots to be compared to nominal
 
-[end plotterCompareStyle]
+[end plotterCompare]
  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  
 [textBoxes - boxes]
    0.25,   0.95,   DEFTITLE,            0.05

@@ -10,6 +10,8 @@
 
 namespace ztop{
 
+bool extendedVariable::debug=false;
+
 void extendedVariable::addDependence(const graph & g, size_t nompoint, const TString& sysname){
 
     if(nompoint>=g.getNPoints()){
@@ -48,11 +50,43 @@ void extendedVariable::addDependence(const graph & g, size_t nompoint, const TSt
         std::cout << "extendedVariable::addDependence: failed to fit " << sysname << " (" << name_<< ") " << std::endl;
         throw std::runtime_error("extendedVariable::addDependence: failed to fit");
     }
-
+    if(debug){
+        std::cout << "extendedVariable::addDependence(graph): fit successful"<< std::endl;
+    }
     dependences_.push_back(fitter);
     sysnames_.push_back(sysname);
 
 }
+
+graph extendedVariable::addDependence(const float & low, const float& nominal, const float& high , const TString& sysname){
+    graph tmpg(3);
+    tmpg.setPointXContent(0,-1);
+    tmpg.setPointXContent(1, 0);
+    tmpg.setPointXContent(2, 1);
+
+    tmpg.setPointYContent(0,low);
+    tmpg.setPointYContent(1,nominal);
+    tmpg.setPointYContent(2,high);
+
+
+    tmpg.setPointYStat(0,low/100);
+    tmpg.setPointYStat(1,nominal/100);
+    tmpg.setPointYStat(2,high/100);
+
+    tmpg.setName(name_+"_"+sysname);
+    tmpg.setXAxisName(sysname+"[#sigma_{"+sysname+"}]");
+    tmpg.setYAxisName(name_);
+
+    if(debug){
+        std::cout << "extendedVariable::addDependence("<< low << "," << nominal <<","<<high << "," << sysname<< ")  "<<name_<< std::endl;
+    }
+
+    addDependence(tmpg,1,sysname);
+    return tmpg;
+}
+
+
+
 
 double extendedVariable::getValue(const double * variations)const{
 
