@@ -125,7 +125,7 @@ while(my $line = <$IN>) {
 #run script, killall script should be sufficient
     
     push @run, "echo submitting $outputFile with $cfgfilename for $dataset\n";
-    push @run, "$nafJobSplitter -C -c $allOptions -d $outputFile -D $dataset -o $path -W 0 $numJobs $cfgfilename\n";
+    push @run, "$nafJobSplitter -J -C -c $allOptions -d $outputFile -D $dataset -o $path -W 0 $numJobs $cfgfilename\n";
 
     push @check, "naf_$outputFile ";
 
