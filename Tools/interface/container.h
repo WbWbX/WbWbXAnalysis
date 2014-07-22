@@ -127,6 +127,12 @@ public:
      */
     void clear();
 
+    /**
+     * sets all eintries to zero and all stat to zero
+     * all syst layers as well as the binning is kept
+     */
+    void setAllZero();
+
     void setLabelSize(float size){labelmultiplier_=size;}       //! 1 for default
     TH1D * getTH1D(TString name="", bool dividebybinwidth=true, bool onlystat=false, bool nostat=false) const; //! returns a TH1D pointer with symmetrized errors (TString name); small bug with content(bin)=0 and error(bin)=0
     TH1D * getTH1DSyst(TString name, size_t systNo, bool dividebybinwidth=true, bool statErrors=false) const;
@@ -150,7 +156,7 @@ public:
     void drawFullPlot(TString name="", bool dividebybinwidth=true,const TString &extraoptions="");
 
     void setDivideBinomial(bool);                                   //! default true
-    void setMergeUnderFlowOverFlow(bool merge){mergeufof_=merge;}   //! merges underflow/overflow in first or last bin, respectively
+    void setMergeUnderFlowOverFlow(bool merge){mergeufof_=merge;}   //! merges underflow/overflow in first or last bin, respectively has to be executed before filling to have effect
 
     container1D & operator += (const container1D &);       //! adds stat errors in squares; treats same named systematics as correlated!!
     container1D operator + (const container1D &);       //! adds stat errors in squares; treats same named systematics as correlated!!
@@ -254,9 +260,10 @@ public:
 
     /**
      * appends a container to the last bin
-     * will screw up real binning!
+     * will screw up real binning, but might come handy
+     * overflow and underflow bins will be represented by intermediate bins
      */
-    void append(const container1D&);
+    container1D append(const container1D&)const;
     ///IO
     void loadFromTree(TTree *, const TString & plotname);
     void loadFromTFile(TFile *, const TString & plotname);

@@ -272,8 +272,6 @@ graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const gr
     xmin=std::min(a.getXMin()*(1.15),b.getXMin()*(1.15));
     xmax=std::max(a.getXMax()*(1.15),b.getXMax()*(1.15));
 
-
-
     TGraphAsymmErrors * agraph=a.getTGraph("a",false);
     TGraphAsymmErrors * bgraph=b.getTGraph("b",false);
     if(!agraph || !bgraph){
@@ -281,22 +279,15 @@ graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const gr
 
     }
 
-
-
     std::vector<TF1* >  funcsa,funcsb;
 
     tmpfa_ = new TF1("fita",fitfunctiona_,xmin,xmax);
-
     tmpfa_->SetLineColor(kBlack);
     funcsa.push_back(tmpfa_);
-
-
-
 
     tmpfb_ = new TF1("fitb",fitfunctionb_,xmin,xmax);
     tmpfb_->SetLineColor(kRed);
     funcsb.push_back(tmpfb_);
-
 
     size_t nxpoints=granularity_+1;
 
@@ -305,7 +296,6 @@ graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const gr
     std::vector<double> xpoints(nxpoints);
 
     double interval=((xmax-xmin)/((double)(granularity_)));
-
 
     //xpoints.at(0)=xmin;
 
@@ -342,44 +332,97 @@ graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const gr
     //get average stat uncertainty
     float minstata=10000;
     float minstatb=10000;
-    if(fituncmodea_ == fitunc_statcorr){
+    float shiftbyscalea=1;
+    float shiftbyscaleb=1;
+    if(fituncmodea_ == fitunc_statcorrgaus){
         for(size_t i=0;i<aIn.getNPoints();i++){
             float tmpmin=aIn.getPointYStat(i);///aIn.getPointYContent(i);
             if(minstata > tmpmin){
                 minstata=tmpmin;
+                shiftbyscalea=minstata*minstata/(aIn.getPointYContent(i)+yshift);
             }
         }
     }
-    if(fituncmodeb_ == fitunc_statcorr){
+    if(fituncmodeb_ == fitunc_statcorrgaus){
         for(size_t i=0;i<bIn.getNPoints();i++){
             float tmpmin=bIn.getPointYStat(i);///bIn.getPointYContent(i);
             if(minstatb > tmpmin){
                 minstatb=tmpmin;
+                shiftbyscaleb=minstatb*minstatb/(bIn.getPointYContent(i)+yshift);
             }
         }
     }
     // minstatb*=minstatcontentb; //avoid bias towards low values
     // minstata*=minstatcontenta;
 
+    std::cout << shiftbyscalea << std::endl;
 
     // evaluate for each scan point
     if(LHMode_ == lh_fit){
         for(size_t i=0;i<xpoints.size();i++){
             float aval=tmpfa_->EvalPar(&xpoints.at(i),0);
             float bval=tmpfb_->EvalPar(&xpoints.at(i),0);
+            //in case of normalized, scaled... distr.
 
             //for drawing
-            if(fituncmodea_ == fitunc_statcorr){
+            if(fituncmodea_ == fitunc_statcorrgaus){
                 confintva.at(i)=minstata;
             }
-            if(fituncmodeb_ == fitunc_statcorr){
+            if(fituncmodeb_ == fitunc_statcorrgaus){
                 confintvb.at(i)=minstatb;
             }
-            float widtha=confintva.at(i);
-            float widthb=confintvb.at(i);
 
-            float chi2=chi_square(aval,widtha*widtha+widthb*widthb,bval);//);
+            bool usechi2=true;
+            float chi2=0;
 
+            if(fituncmodeb_ == fitunc_statuncorrpoisson){
+                if(fituncmodea_ == fitunc_statuncorrpoisson){
+                    throw std::logic_error("parameterExtractor::createIntersectionLikelihood: \
+                            can only define one of the inputs as prior (fitunc_statuncorrpossion)");
+                }
+                //later confintvb.at(i)=
+                chi2 = -2* (shiftedLnPoissonMCStat(bval,shiftbyscaleb*bval,
+                        shiftbyscaleb*confintvb.at(i) * confintvb.at(i),aval)
+
+                             -   shiftedLnPoissonMCStat(bval,shiftbyscaleb*bval,
+                                        shiftbyscaleb*confintvb.at(i) * confintvb.at(i),bval) )    ;
+
+                chi2 = -2 * logPoisson(aval,bval);
+                float widtha=confintva.at(i);
+                float widthb=confintvb.at(i);
+                float scale=widtha*widtha / (aval+yshift);
+                chi2 =  -2* lnNormedGaus(bval+yshift,scale * (bval+yshift),aval+yshift,1);
+                chi2 = -2 * shiftedLnPoisson(bval+yshift,shiftbyscalea * (bval+yshift),aval+yshift);
+
+                confintvb.at(i)=sqrt(scale * (bval+yshift) + confintvb.at(i)*confintvb.at(i));
+                confintva.at(i)=0;
+                usechi2=false;
+
+            }
+            if(fituncmodea_ == fitunc_statuncorrpoisson){
+                if(fituncmodeb_ == fitunc_statuncorrpoisson){
+                    throw std::logic_error("parameterExtractor::createIntersectionLikelihood: \
+                                       can only define one of the inputs as prior (fitunc_statuncorrpossion)");
+                }
+                //later confintvb.at(i)=
+          /*      chi2 = -2* (shiftedLnPoissonMCStat(aval,shiftbyscalea*aval,
+                        shiftbyscalea*confintva.at(i) * confintva.at(i),bval)
+                              -  shiftedLnPoissonMCStat(aval,shiftbyscalea*aval,
+                                        shiftbyscalea*confintva.at(i) * confintva.at(i),aval))  ;
+             */   usechi2=false;
+            }
+
+
+            //else
+            if(usechi2){
+
+                float widtha=confintva.at(i);
+                float widthb=confintvb.at(i);
+                chi2=chi_square(aval,widtha*widtha+widthb*widthb,bval);//);
+            }
+            else{
+
+            }
             // integral*=-2; //chi2 definition log(L) -> -2*log(L)
 
             multiplied.setPointContents(i,true,xpoints.at(i),chi2);

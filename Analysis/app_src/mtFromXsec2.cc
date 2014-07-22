@@ -131,8 +131,10 @@ int main(int argc, char* argv[]){
     else if(mode=="fit")
         extractor.getExtractor()->setLikelihoodMode(parameterExtractor::lh_fit);
 
-    extractor.setFitUncertaintyModeData(parameterExtractor::fitunc_statcorr);
-    extractor.setFitUncertaintyModeMC(parameterExtractor::fitunc_statuncorr);
+
+
+    extractor.setFitUncertaintyModeData(parameterExtractor::fitunc_statcorrgaus);
+    extractor.setFitUncertaintyModeMC(parameterExtractor::fitunc_statuncorrpoisson);
 
     extractor.getExtractor()->setFitFunctions("pol2");
     extractor.getExtractor()->setConfidenceLevelFitInterval(0.68);

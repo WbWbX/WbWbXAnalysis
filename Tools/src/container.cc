@@ -30,7 +30,7 @@ bool container1D::c_makelist=false;
 
 ///////function definitions
 container1D::container1D():
-                                        taggedObject(taggedObject::type_container1D)
+                                                        taggedObject(taggedObject::type_container1D)
 {
     canfilldyn_=false;
     //divideBinomial_=true;
@@ -48,7 +48,7 @@ container1D::container1D():
     if(c_makelist)c_list.push_back(this);
 }
 container1D::container1D(float binwidth, TString name,TString xaxisname,TString yaxisname, bool mergeufof):
-                                        taggedObject(taggedObject::type_container1D){ //currently not used
+                                                        taggedObject(taggedObject::type_container1D){ //currently not used
     plottag=none;
     binwidth_=binwidth;
     canfilldyn_=true;
@@ -67,7 +67,7 @@ container1D::container1D(float binwidth, TString name,TString xaxisname,TString 
     hp_=0;
 }
 container1D::container1D(std::vector<float> bins, TString name,TString xaxisname,TString yaxisname, bool mergeufof):
-                                        taggedObject(taggedObject::type_container1D){
+                                                        taggedObject(taggedObject::type_container1D){
     plottag=none;
     setBins(bins);
     //divideBinomial_=true;
@@ -693,6 +693,14 @@ void container1D::clear(){
     contents_.clear();
     manualerror_=false;
 }
+void container1D::setAllZero(){
+    for(size_t i=0;i<getSystSize();i++){
+        contents_.getLayer(i).multiply(0);
+    }
+    contents_.getNominal().multiply(0);
+
+}
+
 /**
  * creates new TH1D and returns pointer to it
  *  getTH1D(TString name="", bool dividebybinwidth=true, bool onlystat=false)
@@ -1696,57 +1704,47 @@ void container1D::copyFrom(const container1D& c){
 
 }
 
-void container1D::append(const container1D& rhs){
+container1D container1D::append(const container1D& rhs)const{
     container1D rhsc=rhs;
-    equalizeSystematicsIdxs(rhsc);
+    container1D out=*this;
+    out.equalizeSystematicsIdxs(rhsc);
+    container1D equlsdoutcp=out;
 
-    std::vector<float> newbins(bins_.begin()+1,bins_.end()); //no UF
+    std::vector<float> newbins(out.bins_.begin()+1,out.bins_.end()); //no UF
     float maxbinb=newbins.at(newbins.size()-1);
     float relOF=0;
-    if(wasoverflow_){
-        relOF=fabs(maxbinb-newbins.at(0))/100;
-        newbins.push_back(maxbinb+relOF);
-    }
-    if(rhsc.wasunderflow_){
-        relOF*=2;
-        newbins.push_back(maxbinb+relOF);
-    }
+
+    relOF=fabs(maxbinb-newbins.at(0))/100;
+    newbins.push_back(maxbinb+relOF);
+
+
     for(size_t i=1;i<rhsc.bins_.size();i++){ //no UF
-        newbins.push_back(maxbinb +relOF+ rhsc.bins_.at(i));
+        newbins.push_back(maxbinb +2*relOF+ rhsc.bins_.at(i));
     }
 
 
-    container1D out=*this;
+
     out.setBins(newbins);
     //add layers
-    for(size_t i=0;i<getSystSize();i++)
-        out.contents_.addLayer(getSystErrorName(i));
+    for(size_t i=0;i<equlsdoutcp.getSystSize();i++)
+        out.contents_.addLayer(equlsdoutcp.getSystErrorName(i));
 
-    size_t maxlhsbin=bins_.size()-2;
-    if(wasoverflow_){
-        maxlhsbin=bins_.size()-1;
-    }
-    size_t minrhsbin=maxlhsbin+1;
-    if(rhsc.wasunderflow_){
-        minrhsbin++;
-    }
-    std::cout << "was lhs overflow: " << wasoverflow_ << " was rhs underflow: "<<rhsc.wasunderflow_<<std::endl;
+
+
+    if(debug)    std::cout << "container1D::append: was lhs overflow: " << wasoverflow_ << " was rhs underflow: "<<rhsc.wasunderflow_<<std::endl;
 
     for(int sys=-1;sys<(int)out.getSystSize();sys++){
-        for(size_t i=0;i<out.bins_.size();i++){
-            std::cout << i << std::endl;
-            if(i<=maxlhsbin){ //this container
-                std::cout <<"first"<<std::endl;
-                out.setBinContent(i,getBinContent(i,sys));
-            }
-            else{
-                std::cout <<"second"<<std::endl;
-                out.setBinContent(i,rhsc.getBinContent(i-minrhsbin,sys));
-            }
-
+        for(size_t i=0;i<bins_.size();i++){
+            if(debug)    std::cout <<"container1D::append:  first"<<std::endl;
+            out.getBin(i,sys) = equlsdoutcp.getBin(i,sys);
         }
+        //rest from rhs
+        for(size_t i=0;i<rhsc.bins_.size();i++){
+            out.getBin(i+bins_.size(),sys) = rhsc.getBin(i,sys);
+        }
+
     }
-    *this=out;
+    return out;
 }
 
 

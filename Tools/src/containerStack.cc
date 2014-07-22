@@ -50,7 +50,7 @@ void containerStack::push_back(ztop::container1D cont, TString legend, int color
             if(containerStack::debug)
                 std::cout << "containerStack::push_back(1D): found same legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
             containers_[i] = containers_[i] * norms_[i] + cont * norm;
-            containers_[i].setName(getName());
+            containers_[i].setName(legend);
             norms_[i]=1;
             legorder_[i]=legord;
             wasthere=true;
@@ -60,7 +60,7 @@ void containerStack::push_back(ztop::container1D cont, TString legend, int color
     if(!wasthere){
         if(containerStack::debug)
             std::cout << "containerStack::push_back (1D): new legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
-        cont.setName(getName());
+        cont.setName(legend);
         containers_.push_back(cont*norm);
         legends_.push_back(legend);
         colors_.push_back(color);
@@ -85,7 +85,7 @@ void containerStack::push_back(ztop::container2D cont, TString legend, int color
             if(containerStack::debug)
                 std::cout << "containerStack::push_back(2D): found same legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
             containers2D_[i] = containers2D_[i] * norms_[i] + cont * norm;
-            containers2D_[i].setName(getName());
+            containers2D_[i].setName(legend);
             norms_[i]=1;
             legorder_[i]=legord;
             wasthere=true;
@@ -95,7 +95,7 @@ void containerStack::push_back(ztop::container2D cont, TString legend, int color
     if(!wasthere){
         if(containerStack::debug)
             std::cout << "containerStack::push_back (2D): new legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
-        cont.setName(getName());
+        cont.setName(legend);
         containers2D_.push_back(cont*norm);
         legends_.push_back(legend);
         colors_.push_back(color);
@@ -120,7 +120,7 @@ void containerStack::push_back(ztop::container1DUnfold cont, TString legend, int
             if(containerStack::debug)
                 std::cout << "containerStack::push_back(1DUF): found same legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
             containers1DUnfold_[i] = containers1DUnfold_[i] * norms_[i]  + cont * norm;
-            containers1DUnfold_[i].setName(getName());
+            containers1DUnfold_[i].setName(legend);
             containers_[i] = containers_[i] * norms_[i] + cont1d * norm;
             containers_[i].setName(getName());
             norms_[i]=1;
@@ -132,7 +132,7 @@ void containerStack::push_back(ztop::container1DUnfold cont, TString legend, int
     if(!wasthere){
         if(containerStack::debug)
             std::cout << "containerStack::push_back (1DUF): new legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
-        cont.setName(getName());
+        cont.setName(legend);
         containers1DUnfold_.push_back(cont * norm);
         cont1d.setName(getName());
         containers_.push_back(cont1d * norm);
@@ -186,7 +186,7 @@ void containerStack::mergeLegends(const std::vector<TString>& tobemerged,const T
         newsignals.push_back(mergedname);
     }
 
-        std::vector<TString> legs;
+    std::vector<TString> legs;
     std::vector<int> cols;
     std::vector<int> legos;
     std::vector<double>  norms;
@@ -1497,6 +1497,45 @@ ztop::containerStack containerStack::operator * (float scalar){
 ztop::containerStack containerStack::operator * (int scalar){
     return *this * (double)scalar;
 }
+
+
+containerStack containerStack::append(const containerStack& rhs)const{
+
+    if(rhs.containers_.size() <1){
+        throw std::logic_error("containerStack::append: only works for 1D stacks");
+    }
+
+    containerStack out=*this;
+    std::vector<size_t> rhsused;
+
+    for(size_t leg=0;leg<out.legends_.size();leg++){
+        size_t rhspos=std::find(rhs.legends_.begin(), rhs.legends_.end(), out.legends_.at(leg)) - rhs.legends_.begin();
+        container1D temp;
+        if(rhspos < rhs.legends_.size()){ //found same entry
+            temp=rhs.containers_.at(rhspos);
+            temp*=rhs.norms_.at(rhspos);
+            rhsused.push_back(leg);
+        }
+        else{
+            temp=rhs.containers_.at(0);
+            temp.setAllErrorsZero();
+        }
+        out.containers_.at(leg) *= out.norms_.at(leg);
+        out.containers_.at(leg) = out.containers_.at(leg).append(temp);
+    }
+
+    for(size_t leg=0;leg<rhs.legends_.size();leg++){
+        if(std::find(rhsused.begin(), rhsused.end(),leg) != rhsused.end()) continue;
+        container1D temp=out.containers_.at(0);
+        temp.setAllZero();
+        temp.append(rhs.containers_.at(leg));
+        out.push_back(temp,rhs.legends_.at(leg),rhs.colors_.at(leg),rhs.norms_.at(leg),rhs.legorder_.at(leg));
+
+    }
+
+    return out;
+}
+
 
 
 bool containerStack::setsignal(const TString& sign){

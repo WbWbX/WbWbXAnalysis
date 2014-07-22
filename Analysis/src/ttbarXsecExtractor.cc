@@ -16,16 +16,18 @@ namespace ztop{
 
 ttbarXsecExtractor::ttbarXsecExtractor():setup_(false),done_(false),lumi_(19741),
         lumierr_(0.025),ngenevents_(1),xsec_(1),xsecerrup_(1),xsecerrdown_(1),xsecidx_(0),eps_bidx_(0),xsecoffset_(250),
-        minchi2_(1e9),pseudodata_(false),mainminimzstr_("Minuit2"),mainminmzalgo_("Migrad"),binssize_(0),usepoisson_(true){
+        minchi2_(1e9),pseudodata_(false),mainminimzstr_("Minuit2"),mainminmzalgo_("Migrad"),binssize_(0),usepoisson_(true),usezerojet_(false){
     fitter_.setRequireFitFunction(false);
 
 }
 
-void ttbarXsecExtractor::readInput(const containerStackVector & csv, const TString& plotname, const TString& plotnameprofile){
+void ttbarXsecExtractor::readInput(const std::vector< containerStackVector*> & csv, const TString& plotname, const TString& plotnameprofile){
     done_=false;
 
     //get gen events (fast)
-    containerStack gen=csv.getStack("generated events");//this one is normalized.. no chance of getting genevents back
+
+
+    containerStack gen=csv.at(0)->getStack("generated events");//this one is normalized.. no chance of getting genevents back
 
     container1D gensignal=gen.getSignalContainer();
     float nsigsamples=(float) gen.getSignalIdxs().size();
@@ -61,9 +63,12 @@ void ttbarXsecExtractor::readInput(const containerStackVector & csv, const TStri
     float bkgvar=0.3;
     binssize_=0;
     std::vector<container1D> signals,backgrounds,datas;
-    for(size_t i=0;i<plotnames.size();i++){
-
-        containerStack stack=csv.getStack(plotnames.at(i));
+    for(size_t plotit=0;plotit<plotnames.size();plotit++){
+        containerStack stack=csv.at(0)->getStack(plotnames.at(plotit));
+        for(size_t csvit=1;csvit<csv.size();csvit++){
+            containerStack tmpstack=csv.at(csvit)->getStack(plotnames.at(plotit));
+            stack= stack.append(tmpstack);
+        }
 
         std::vector<size_t> nobgidxs=stack.getSignalIdxs();
         nobgidxs.push_back(stack.getDataIdx());
@@ -88,6 +93,7 @@ void ttbarXsecExtractor::readInput(const containerStackVector & csv, const TStri
         container1D bkg=stack.getBackgroundContainer();
         container1D data=stack.getContribution("data");
 
+
         //add lumi uncertainty
         signal.addGlobalRelError("Lumi",lumierr_);
         bkg.addGlobalRelError("Lumi",lumierr_);
@@ -101,16 +107,7 @@ void ttbarXsecExtractor::readInput(const containerStackVector & csv, const TStri
         bkg.addGlobalRelError("XSec",0);
         data.addGlobalRelError("XSec",0);
 
-        //tesing reasons
-        /*
-        std::vector<float> newbins;
-        newbins.push_back(signal.getBins().at(1));
-         newbins.push_back(signal.getBins().at(signal.getBins().size()-1));
 
-        signal.rebinToBinning(newbins);
-        bkg.rebinToBinning(newbins);
-        data.rebinToBinning(newbins);
-         */
 
         if(binssize_>0 && signal.getBins().size()!=binssize_){
             throw std::runtime_error("not all plots read in have same binning!!");
@@ -118,10 +115,18 @@ void ttbarXsecExtractor::readInput(const containerStackVector & csv, const TStri
         else{
             binssize_=signal.getBins().size();
         }
+        signal.setName(plotnames.at(plotit));
+        bkg.setName(plotnames.at(plotit));
+        data.setName(plotnames.at(plotit));
 
+        usedplots_.add(data,"data",1,1,99);
+        usedplots_.add(signal,"signal",632,1,1);
+        usedplots_.add(bkg,"background",600,1,2);
+      //  container1D::c_makelist =true;
         signals.push_back(signal);
         backgrounds.push_back(bkg);
         datas.push_back(data);
+      //  container1D::c_makelist =false;
     }
 
 
@@ -208,12 +213,12 @@ void ttbarXsecExtractor::readInput(const containerStackVector & csv, const TStri
 
 
             ///////////lumi//////////
-            if(thissys != "Lumi"){
+        //    if(thissys != "Lumi"){
                 alldepsgraphs_.push_back(Lumi_.at(bin).addDependence(lumi_,lumi_,lumi_,thissys));
-            }
-            else{
-                alldepsgraphs_.push_back(Lumi_.at(bin).addDependence(lumi_-lumi_*lumierr_,lumi_,lumi_+lumi_*lumierr_,thissys));
-            }
+        //    }
+        //    else{
+        //        alldepsgraphs_.push_back(Lumi_.at(bin).addDependence(lumi_-lumi_*lumierr_,lumi_,lumi_+lumi_*lumierr_,thissys));
+        //    }
 
             varpointers_.push_back(&Lumi_.at(bin));
             combused_.push_back(!emptybin);
@@ -238,12 +243,12 @@ void ttbarXsecExtractor::readInput(const containerStackVector & csv, const TStri
             float eps_emuup=signalintegralup /ngenevents_;
 
 
-            if(thissys != "Lumi"){
+          //  if(thissys != "Lumi"){
                 alldepsgraphs_.push_back(eps_emu_.at(bin).addDependence(eps_emudown,eps_emu,eps_emuup,thissys));
-            }
-            else{
-                alldepsgraphs_.push_back(eps_emu_.at(bin).addDependence(eps_emu,eps_emu,eps_emu,thissys));
-            }
+          //  }
+          //  else{
+             //   alldepsgraphs_.push_back(eps_emu_.at(bin).addDependence(eps_emu,eps_emu,eps_emu,thissys));
+          //  }
             varpointers_.push_back(&eps_emu_.at(bin));
             combused_.push_back(!emptybin);
 
@@ -283,7 +288,11 @@ void ttbarXsecExtractor::readInput(const containerStackVector & csv, const TStri
             varpointers_.push_back(&C_b_.at(bin));
             combused_.push_back(!emptybin);
 
-            alldepsgraphs_.push_back(N_bkg0_.at(bin).addDependence(backgrounds.at(0).getBinContent(bin,sysidxdown),backgrounds.at(0).getBinContent(bin),backgrounds.at(0).getBinContent(bin,sysidxup),thissys));
+            alldepsgraphs_.push_back(N_bkg0_.at(bin).addDependence(
+                    backgrounds.at(0).getBinContent(bin,sysidxdown)+backgrounds.at(3).getBinContent(bin,sysidxdown),
+                    backgrounds.at(0).getBinContent(bin)+backgrounds.at(3).getBinContent(bin),
+                    backgrounds.at(0).getBinContent(bin,sysidxup)+backgrounds.at(3).getBinContent(bin,sysidxup),
+                    thissys));
             varpointers_.push_back(&N_bkg0_.at(bin));
             combused_.push_back(!emptybin);
 
@@ -295,7 +304,13 @@ void ttbarXsecExtractor::readInput(const containerStackVector & csv, const TStri
             varpointers_.push_back(&N_bkg2_.at(bin));
             combused_.push_back(!emptybin);
 
-            alldepsgraphs_.push_back(n_data0_.at(bin).addDependence(datas.at(0).getBinContent(bin,sysidxdown),datas.at(0).getBinContent(bin),datas.at(0).getBinContent(bin,sysidxup),thissys));
+
+            //combined 0 and 3+ jet bin
+            alldepsgraphs_.push_back(n_data0_.at(bin).addDependence(
+                    datas.at(0).getBinContent(bin,sysidxdown)+datas.at(3).getBinContent(bin,sysidxdown),
+                    datas.at(0).getBinContent(bin)+datas.at(3).getBinContent(bin),
+                    datas.at(0).getBinContent(bin,sysidxup)+datas.at(3).getBinContent(bin,sysidxup),
+                    thissys));
             varpointers_.push_back(&n_data0_.at(bin));
             combused_.push_back(!emptybin);
 
@@ -367,7 +382,7 @@ void ttbarXsecExtractor::readInput(const containerStackVector & csv, const TStri
         setup_=true;
         return;
     }
-/*
+    /*
     ////process profiled input
     containerStack profile=csv.getStack(plotnameprofile);
     if(profile.size()<1)
@@ -383,7 +398,7 @@ container1D data=profile.getContainer( profile.getDataIdx());
         }
     }
 
-*/
+     */
     setup_=true;
 }
 
@@ -463,7 +478,8 @@ void ttbarXsecExtractor::extract(){
 
     }
     outstream_ << "\nfitter_.getParameters()[xsecidx_]+xsecoffset_ " <<fitter_.getParameters()->at(xsecidx_)+xsecoffset_ << std::endl;
-    outstream_ << "best chi2 / ndof: " << minchi2_ << "/" << fitter_.getParameters()->size()-1 << "=" << minchi2_/(fitter_.getParameters()->size()-1) <<  std::endl;
+    if(!usepoisson_)
+        outstream_ << "best chi2 / ndof: " << minchi2_ << "/" << fitter_.getParameters()->size()-1 << "=" << minchi2_/(fitter_.getParameters()->size()-1) <<  std::endl;
 
 
     done_=true;
@@ -551,7 +567,7 @@ double ttbarXsecExtractor::getChi2(const double * variations){
 
         double N_2 = lumitimesxsectimesepsemuvar * prob2jet  + N_bkg2_.at(i).getValue(variations);
 
-        double N_0 = lumitimesxsectimesepsemuvar * (1- prob1jet) * (1-prob2jet) + N_bkg0_.at(i).getValue(variations);
+        double N_0 =  lumitimesxsectimesepsemuvar * (1- prob1jet) * (1-prob2jet)  + N_bkg0_.at(i).getValue(variations);
 
         double delta0 = (ndata0var - N_0);
         double delta1 = (ndata1var - N_1);
@@ -560,12 +576,14 @@ double ttbarXsecExtractor::getChi2(const double * variations){
 
         //poisson implementation!
         if(usepoisson){
-            datasum+= -2 * logPoisson(ndata0var,N_0);
+            if(usezerojet_)
+                datasum+= -2 * logPoisson(ndata0var,N_0);
             datasum+= -2 * logPoisson(ndata1var,N_1);
             datasum+= -2 * logPoisson(ndata2var,N_2);
         }
         else{//gaussian approx
-            datasum+=delta0*delta0/ndata0var;
+            if(usezerojet_)
+                datasum+=delta0*delta0/ndata0var;
             datasum+=delta1*delta1/ndata1var;
             datasum+=delta2* delta2/ndata2var;
         }

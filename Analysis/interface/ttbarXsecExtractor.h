@@ -14,6 +14,7 @@
 #include "TString.h"
 #include <sstream>
 
+
 namespace ztop{
 
 class graph;
@@ -43,7 +44,7 @@ public:
     /**
      * This assumes that ALL syst uncertainties except for lumi are already present
      */
-    void readInput(const containerStackVector & csv, const TString& stackname, const TString& stacknameprofile="");
+    void readInput(const std::vector< containerStackVector*> & csv, const TString& stackname, const TString& stacknameprofile="");
     void setLumi(float lum){done_=false;lumi_=lum;}
     /**
      * input error in %, e.g. 2.5
@@ -56,6 +57,7 @@ public:
     void setMinimizerAlgoStr(TString algo){mainminmzalgo_=algo;}
 
     void setUsePoisson(bool use){usepoisson_=use;}
+    void setUseZeroJet(bool use){usezerojet_=use;}
 
   //  void setNGenerated(const float & ngen){done_=false;ngenevents_=ngen;}
 
@@ -85,6 +87,8 @@ public:
     void coutOutStream()const;
     TString dumpOutStream()const;
     void clearOutStream();
+
+    containerStackVector & getPlots(){return usedplots_;}
 
 private:
     bool setup_,done_;
@@ -138,7 +142,9 @@ private:
 
     std::stringstream outstream_;
 
-    bool usepoisson_;
+    bool usepoisson_,usezerojet_;
+
+    containerStackVector usedplots_;
 
     //helper functions
     float sq(const float& a)const{return a*a;}

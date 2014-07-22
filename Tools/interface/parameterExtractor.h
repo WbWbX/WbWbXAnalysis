@@ -26,12 +26,17 @@ class parameterExtractor {
 public:
 
     enum likelihoodModes{lh_chi2,lh_chi2Swapped,lh_fit,lh_fitintersect};
-
-    enum fituncertaintyModes{fitunc_statcorr, fitunc_statuncorr};
+    /**
+     * fitunc_stat(un)corrpossion uses the expected statistics as poisson and folds it with uncertainties from the fit
+     * These are also assumed poissonian
+     * all distributions are generalized to continuity
+     * only apply this mode to ONE of the distributions (the one that is your prediction ~ prior)
+     */
+    enum fituncertaintyModes{fitunc_statcorrgaus, fitunc_statuncorrgaus, fitunc_statcorrpoisson,fitunc_statuncorrpoisson};
 
 
     parameterExtractor(): LHMode_(lh_chi2),tmpfa_(0),tmpfb_(0),granularity_(300),clfit_(0.68),
-            fituncmodea_(fitunc_statuncorr),fituncmodeb_(fitunc_statuncorr),poisson_(false){}
+            fituncmodea_(fitunc_statuncorrgaus),fituncmodeb_(fitunc_statuncorrgaus),poisson_(false){}
     ~parameterExtractor(){}
 
     // defaults should suffice
@@ -75,10 +80,10 @@ public:
     void setFitFunctionB(const TString& ffc){fitfunctionb_=ffc;}
     void setFitFunctions(const TString& ffc){fitfunctionb_=ffc;fitfunctiona_=ffc;}
 
-/*
+    /*
     const std::vector<std::vector<TF1* > >&  getFitFunctionA()const{return fittedFunctionsa_;}
     const std::vector<std::vector<TF1* > >&  getFitFunctionB()const{return fittedFunctionsb_;}
-*/
+     */
 
     const std::vector<graph> & getFittedGraphsA()const{return fittedgraphsa_;}
     const std::vector<graph> & getFittedGraphsB()const{return fittedgraphsb_;}
@@ -129,7 +134,7 @@ private:
     /*
     std::vector<std::vector<TF1* > > fittedFunctionsa_;
     std::vector<std::vector<TF1* > > fittedFunctionsb_;
-    */
+     */
     std::vector<graph> fittedgraphsa_,fittedgraphsb_;
 
     TString fitfunctiona_,fitfunctionb_;
@@ -150,7 +155,7 @@ private:
      */
     double lnNormedGaus(const float & centre, const float& width, const float& evalpoint, const float& extnorm=0)const;
     double chi_square(const float & centre, const float& widthsquared, const float& evalpoint) const;
-   // double mcLnPoisson(const float & centreN, const float & mcstat2, const float& evalpoint)const;
+    // double mcLnPoisson(const float & centreN, const float & mcstat2, const float& evalpoint)const;
 
 
 };

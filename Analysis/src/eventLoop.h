@@ -710,7 +710,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
             if(isMC)
                 muon->setP4(muon->p4() * getMuonEnergySF()->getScalefactor(muon->eta()));
             allleps << muon;
-            if(!gotfirst && muon->pt() < 20)       continue;
+            if(!gotfirst && muon->pt() < 40)       continue;
             if(doLargeAcceptance) gotfirst=true;
             if(muon->pt() < 10) continue;
             if(fabs(muon->eta())>2.4) continue;
@@ -767,7 +767,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
             elec->setECalP4(elec->ECalP4() * ensf);
             elec->setP4(elec->ECalP4() * ensf); //both the same now!!
             allleps << elec;
-            if(!gotfirst && elec->pt() < 20)  continue;
+            if(!gotfirst && elec->pt() < 40)  continue;
             if(doLargeAcceptance) gotfirst=true;
             if( elec->pt() < 10) continue;
             float abseta=fabs(elec->eta());

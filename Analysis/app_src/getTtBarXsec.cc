@@ -26,12 +26,13 @@ int main(int argc, char* argv[]){
     using namespace ztop;
 
     optParser parse(argc,argv);
-    parse.setAdditionalDesciption("program to determine the ttbar cross section using a likelihood approach with the b-jet multi\n parse input file (standard plots should be present)");
+    parse.setAdditionalDesciption("program to determine the ttbar cross section using a likelihood approach with the b-jet multi\n parse one input file for each channel  (standard plots should be present)");
     bool ispseudodata=parse.getOpt<bool>("PD",false,"switch on if input is pseudo data (ngenevents*=0.9)");
     TString minstr = parse.getOpt<TString>("m","Minuit2","Minimizer to be used");
     TString minalgostr = parse.getOpt<TString>("a","Migrad","Minimizer algo to be used");
     TString plotname=parse.getOpt<TString>("p","top likelihood output <N> b-jets step 7","Plots to be used (default: top likelihood output <N> b-jets step 7)");
-    bool usepoisson =  parse.getOpt<bool>("-poisson",false,"Use poisson statistics");
+    bool usepoisson =  !parse.getOpt<bool>("-gaus",false,"Not use poisson statistics and gaus instead");
+    bool zerojet =  parse.getOpt<bool>("-zerojet",false,"use zero b-jet bin info");
     TString outname=parse.getOpt<TString>("o","","output add");
 
     if(outname.Length()<1)
@@ -41,15 +42,15 @@ int main(int argc, char* argv[]){
     outname+=".pdf";
 
     std::vector<TString> inputfiles=parse.getRest<TString>();
-    if(inputfiles.size()>1){
+    if(inputfiles.size()<1){
         parse.coutHelp();
         return -1;
     }
     parse.doneParsing();
 
-    TString infilelocation="/nfs/dust/cms/user/kiesej/testtemp/emu_8TeV_172.5_nominal_syst.root";
-    if(inputfiles.size()>0)
-        infilelocation=inputfiles.at(0);
+ //   TString infilelocation;//="/nfs/dust/cms/user/kiesej/testtemp/emu_8TeV_172.5_nominal_syst.root";
+  //  if(inputfiles.size()>0)
+//        infilelocation=inputfiles.at(0);
 
     //   TString btagmultiplot="top likelihood output <N> b-jets step 7"; //we use step 4 here, No jet required
     // TString jetmultiplot="hard jet multi step 7";
@@ -58,17 +59,24 @@ int main(int argc, char* argv[]){
      * prepare the input
      */
 
-    containerStackVector csv_in;
-    csv_in.loadFromTFile(infilelocation);
 
-
+    std::vector<containerStackVector*> allincsvs;
+    for(size_t i=0;i<inputfiles.size();i++){
+        containerStackVector *csv_in=new containerStackVector();
+        csv_in->loadFromTFile(inputfiles.at(i));
+        allincsvs.push_back(csv_in);
+    }
 
     ttbarXsecExtractor extractor;
     extractor.setIsPseudoData(ispseudodata);
     extractor.setLumi(19741);
     extractor.setUsePoisson(usepoisson);
+    extractor.setUseZeroJet(zerojet);
 
-    extractor.readInput(csv_in,plotname);
+    extractor.readInput(allincsvs,plotname);
+
+    for(size_t i=0;i<allincsvs.size();i++)
+        delete allincsvs.at(i);
 
     extractor.setMinimizerStr(minstr);
     extractor.setMinimizerAlgoStr(minalgostr);
@@ -77,6 +85,9 @@ int main(int argc, char* argv[]){
 
     extractor.extract();
 
+    containerStackVector& csvout=extractor.getPlots();
+
+    csvout.writeAllToTFile(outname+".root",true,false);
 
     TString out=toTString(extractor.getXsec())  + " + "
             + toTString(extractor.getXsecErrUp())
@@ -95,7 +106,7 @@ int main(int argc, char* argv[]){
 
 
     plotterMultiplePlots plotter;
-    plotter.readStyleFromFileInCMSSW("/src/TtZAnalysis/Tools/styles/multiplePlots_sysdependencies.txt");
+    plotter.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/xsecs/multiplePlots_sysdependencies.txt");
 
     //switch off nasty root info output
     gErrorIgnoreLevel = kWarning;
@@ -132,7 +143,7 @@ int main(int argc, char* argv[]){
     }
     configurationtext->Draw();
     c->Print(outname);
-   // c->Print(outname+")");
+    // c->Print(outname+")");
     c->Clear();
 
 

@@ -131,6 +131,8 @@ public:
     containerStack operator * (float);
     containerStack operator * (int);
 
+    containerStack append(const containerStack&)const;
+
     bool setsignal(const TString&);
     bool addSignal(const TString&);
     bool setsignals(const std::vector<TString> &);// (just return whether successful)
