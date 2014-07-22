@@ -52,12 +52,14 @@ echo "copying from ${sourcedir} to ${targetdir}"
 
 cp -r $sourcedir/* $targetdir/
 
-echo "doing TtZAnalysis specific adjustments (library symlinks)... "
-
-ln -s $targetdir/TtZAnalysis/Tools/TUnfold/libunfold.so $targetdir/../lib/$SCRAM_ARCH/libunfold.so 
 
 cd $targetdir
 eval `scramv1 runtime -sh`
+
+
+echo "doing TtZAnalysis specific adjustments (library symlinks)... "
+
+$CMSSW_BASE/src/TtZAnalysis/prepareEnv.sh
 
 scram setup lhapdffull
 
