@@ -88,7 +88,7 @@ push @kill, $startstring;
 
 push @run, "cd $path\n";
 push @check, "cd $path\n";
-push @check, "$nafJobSplitter check ";
+push @check, "$nafJobSplitter -j check ";
 
 while(my $line = <$IN>) {
     chomp $line;
