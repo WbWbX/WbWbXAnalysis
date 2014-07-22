@@ -18,7 +18,7 @@ echo "Eclipse will use a copy of the CMSSW release that needs to be located at ~
 echo "If it does not exist, please create it, otherwise come parts of the completion will not work"
 
 
-allpaths="\${CWD}:~/CMSSW/$CMSSW_VERSION/src:${1}:\${ROOTSYS}/include"
+allpaths="\${CWD}:\${HOME}/CMSSW/$CMSSW_VERSION/src:${1}:\${ROOTSYS}/include"
 
 cd $CMSSW_BASE
 
