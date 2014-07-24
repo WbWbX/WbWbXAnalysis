@@ -80,7 +80,7 @@ my $fullCMSSWcfpath=File::Spec->rel2abs($arg{c});
 my $cfgfilename = ( split m{/}, $arg{c} )[-1];
 my $nafJobSplitter="$ENV{CMSSW_BASE}/src/TopAnalysis/TopUtils/scripts/nafJobSplitter.pl";
 
-my $startstring="#!/bin/sh\nexport SCRAM_ARCH=$ENV{SCRAM_ARCH}\nmodulecmd sh use -a /afs/desy.de/group/cms/modulefiles/\nmodulecmd sh load cmssw\necho \"using CMSSW located here: $ENV{CMSSW_BASE}\"\ncd $ENV{CMSSW_BASE}\neval `scramv1 runtime -sh`\ncd -\n\nexport PYTHONPATH=/nfs/dust/cms/user/\$USER/.nafJobSplitter/python:\$PYTHONPATH\nexport NJS_MEM=1999\n";
+my $startstring="#!/bin/sh\nexport SCRAM_ARCH=$ENV{SCRAM_ARCH}\nmodulecmd sh use -a /afs/desy.de/group/cms/modulefiles/\nmodulecmd sh load cmssw\necho \"using CMSSW located here: $ENV{CMSSW_BASE}\"\ncd $ENV{CMSSW_BASE}\neval `scramv1 runtime -sh`\ncd -\n\nexport PYTHONPATH=/nfs/dust/cms/user/\$USER/.nafJobSplitter/python:\$PYTHONPATH\nexport NJS_FSIZE=3\nexport NJS_MEM=1999\n";
 
 push @run, $startstring;
 push @check, $startstring;
@@ -125,7 +125,7 @@ while(my $line = <$IN>) {
 #run script, killall script should be sufficient
     
     push @run, "echo submitting $outputFile with $cfgfilename for $dataset\n";
-    push @run, "$nafJobSplitter -J -C -c $allOptions -d $outputFile -D $dataset -o $path -W 0 $numJobs $cfgfilename\n";
+    push @run, "$nafJobSplitter -J -C -c $allOptions -d $outputFile -D $dataset -o data -W 0 $numJobs $cfgfilename\n";
 
     push @check, "naf_$outputFile ";
 
