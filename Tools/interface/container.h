@@ -19,6 +19,8 @@
 class TFile;
 class TTree;
 
+#define container1D_partialvariationIDString "pvar_"
+
 namespace ztop{
 class container2D;
 class containerStyle;
@@ -28,6 +30,7 @@ class container1D:public taggedObject{
 public:
 
     enum plotTag{none,topdf};
+
 
     container1D();
     container1D(float , TString name="",TString xaxisname="",TString yaxisname="", bool mergeufof=false);              //! construct with bin width (for dynamic filling - not yet implemented)
@@ -96,6 +99,14 @@ public:
     container1D sortByBinNames(const container1D & ) const;
     container1D getSystContainer(const int &syslayer)const;
     container1D getRelErrorsContainer()const;
+
+    /**
+     * merges partial variations. only the ones corresponding to the identifier are merged
+     * hint: do this step at the latest stage you can do it to still keep track of all correlations
+     * If you know its a global variation its ok to do it earlier
+     */
+    void mergePartialVariations(const TString& identifier,bool strictpartialID=true);
+    void mergeAllErrors(const TString & mergedname);
 
     float getOverflow(const int& systLayer=-1) const;                              //!returns -1 if overflow was merged with last bin
     float getUnderflow(const int& systLayer=-1) const;                             //!returns -1 if underflow was merged with last bin
@@ -178,12 +189,16 @@ public:
 
     //void mergeBins(size_t ,size_t );
     std::vector<float> getCongruentBinBoundaries(const container1D &) const;
-    container1D rebinToBinning(const std::vector<float> & newbins) const;
+    /**
+     * no UF OF in input binning here
+     */
+    container1D rebinToBinning( std::vector<float>  newbins) const;
     container1D rebinToBinning(const container1D &) const;
     container1D rebin(size_t merge) const;
 
     void addErrorContainer(const TString &,const container1D&, float);  //! adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down"
     void addErrorContainer(const TString &,const container1D&);        //! adds deviation to (this) as systematic uncertianty with name. name must be ".._up" or ".._down"
+
     /**
      * deletes the systematics and adds relative contributions from input
      */

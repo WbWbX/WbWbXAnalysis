@@ -18,22 +18,28 @@ void analysisPlotsJan::bookPlots(){
     using namespace std;
     using namespace ztop;
 
-    vector<float> genmlb_bins;
-    for(float i=0;i<=350;i+=10)
+    vector<float> genmlbmin_bins,genmlb_bins;
+    genmlbmin_bins<<0 ;
+    genmlb_bins<<0;
+    for(float i=20;i<=165;i+=5){
+    	genmlbmin_bins <<i;
         genmlb_bins << i;
+    }
+    genmlb_bins <<350;
+    genmlbmin_bins << 180 << 200 << 350;
 
     vector<float> ivangen_mlbbins;
     ivangen_mlbbins << 0 << 70 << 116 << 150 <<400;
-    vector<float> mlb_bins=ztop::subdivide<float>(genmlb_bins,2);
+    //vector<float> mlb_bins=ztop::subdivide<float>(genmlb_bins,2);
     vector<float> ivan_mlbbins=subdivide<float>(ivangen_mlbbins,5);
 
-    Mlb=addPlot(genmlb_bins,mlb_bins,"m_lb leading unfold","M_{lb} [GeV]", "N_{evt}/GeV");
+    Mlb=addPlot(genmlb_bins,genmlb_bins,"m_lb leading unfold","M_{lb} [GeV]", "N_{evt}/GeV");
 
     mlbcombthresh_=165;
 
-    mlb=addPlot(genmlb_bins,mlb_bins,"m_lb","m_{lb}* [GeV]", "N_{evt}/GeV");
+    mlb=addPlot(genmlb_bins,genmlb_bins,"m_lb","m_{lb}* [GeV]", "N_{evt}/GeV");
 
-    mlbmin=addPlot(genmlb_bins,mlb_bins,"m_lb min","m_{lb}^{min} [GeV]", "N_{evt}/GeV");
+    mlbmin=addPlot(genmlb_bins,genmlbmin_bins,"m_lb min","m_{lb}^{min} [GeV]", "N_{evt}/GeV");
 
     mlbivansbins=addPlot(ivangen_mlbbins,ivan_mlbbins,"m_lb ivansbins","m_{lb}^{ivan} [GeV]", "N_{evt}/GeV");
 

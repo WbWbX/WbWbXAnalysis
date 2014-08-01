@@ -26,7 +26,7 @@ namespace ztop{
  */
 class plotterBase :protected tObjectList{
 public:
-    plotterBase():tObjectList(), title_(""),tbndc_(true),pad_(0),drawlegend_(true){}
+    plotterBase():tObjectList(), title_(""),tbndc_(true),lastplotidx_(0),pad_(0),drawlegend_(true){}
     virtual ~plotterBase(){}
 
     plotterBase(const plotterBase&);
@@ -34,6 +34,8 @@ public:
     void setTitle(TString t){title_=t;}
 
     void setDrawLegend(bool dl){drawlegend_=dl;}
+
+    void setLastNoLegend(){nolegendidx_.push_back(lastplotidx_);}
 
     void usePad(TVirtualPad* pad){pad_=pad;}
     TVirtualPad* getPad()const; //throws if 0
@@ -86,7 +88,8 @@ protected:
     bool tbndc_; //used for drawing text boxes if defined
 
     TStyle intstyle_;
-
+    std::vector<size_t> nolegendidx_;
+    size_t lastplotidx_;
     virtual void readStylePriv(const std::string & , bool )=0;
 
 private:

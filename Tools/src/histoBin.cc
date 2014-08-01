@@ -19,6 +19,12 @@ void histoBin::clear(){
     stat2_=0;
 }
 
+void  histoBin::add(const histoBin&rhs){
+	content_+=rhs.content_;
+	stat2_+=rhs.stat2_;
+	entries_+=rhs.entries_;
+}
+
 void histoBin::multiply(const float&val){
     content_*=val;
     stat2_=stat2_*val*val;

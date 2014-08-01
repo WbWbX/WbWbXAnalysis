@@ -21,6 +21,7 @@ int main(int argc, char* argv[]){
     TString out   = parse.getOpt<TString>("o","","string to add to outfile");
     bool moreoutput=parse.getOpt<bool>   ("v",false,"switches on verbose mode for unfolding");
     bool printpdfs=parse.getOpt<bool>   ("P",false,"print unfolding output as pdfs (switch)");
+    bool bbb=parse.getOpt<bool>   ("BBB",false,"set all to bin-by-bin unfolding");
     std::vector<TString> allin = parse.getRest<TString>();
 
     parse.doneParsing();
@@ -34,6 +35,7 @@ int main(int argc, char* argv[]){
         unf.verbose=moreoutput;
         unf.printpdfs=printpdfs;
         unf.setUnits("pb");
+        unf.setBinByBin(bbb);
         //get channel
         unf.addToBeCorrectedPlotID("total step");
         if(allin.at(i).BeginsWith("emu_")){

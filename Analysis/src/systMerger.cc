@@ -206,7 +206,7 @@ void systMerger::mergeBTags()const{
 
         std::ifstream OutFileTest((instrings_.at(0)+"_btags.root").Data());
         if(OutFileTest) { //btags were created
-            cout << "systMerger: merging btag SF" <<endl;
+            cout << "systMerger: merging btag SFs to "<<outfileadd_+"all_btags.root" <<endl;
 
             for(size_t i=0;i<instrings_.size();i++){
                 TString filename=instrings_.at(i);

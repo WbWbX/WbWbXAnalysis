@@ -28,6 +28,7 @@ public:
 	histoContent(size_t nbins);
 	~histoContent(){}
 
+
 	size_t size() const {return nominal_.size();}
 	size_t layerSize() const {return additionalbins_.size();}
 	bool resizeBins(const size_t & newsize);
@@ -153,6 +154,8 @@ private:
 	std::map<size_t,size_t> addLayers(const histoContent & rhs);
 
 };
+
+
 /**
  * not protected wrt to no range and layer range
  */

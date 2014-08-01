@@ -20,6 +20,7 @@ namespace ztop{
 void plotterCompare::setNominalPlot(const container1D *c,bool divbw){
     if(debug) std::cout <<"plotterCompare::setNominalPlot" << std::endl;
     nominalplot_.createFrom(c,divbw);
+    lastplotidx_=0;
 }
 void plotterCompare::setComparePlot(const container1D *c,size_t idx,bool divbw){
     if(debug) std::cout <<"plotterCompare::setComparePlot" << std::endl;
@@ -32,11 +33,13 @@ void plotterCompare::setComparePlot(const container1D *c,size_t idx,bool divbw){
     }
     if(debug) std::cout <<"plotterCompare::setComparePlot: setting plot" << std::endl;
     compareplots_.at(idx).createFrom(c,divbw);
+    lastplotidx_=compareplots_.size();
 }
 
 void plotterCompare::setNominalPlot(const graph *c){
     if(debug) std::cout <<"plotterCompare::setNominalPlot" << std::endl;
     nominalplot_.createFrom(c);
+    lastplotidx_=0;
 }
 void plotterCompare::setComparePlot(const graph *c,size_t idx){
     if(debug) std::cout <<"plotterCompare::setComparePlot" << std::endl;
@@ -49,6 +52,7 @@ void plotterCompare::setComparePlot(const graph *c,size_t idx){
     }
     if(debug) std::cout <<"plotterCompare::setComparePlot: setting plot" << std::endl;
     compareplots_.at(idx).createFrom(c);
+    lastplotidx_=compareplots_.size();
 }
 
 /**
@@ -251,8 +255,10 @@ void  plotterCompare::drawLegends(){
     leg->SetBorderSize(0);
     legstyle_.applyLegendStyle(leg);
 
-    leg->AddEntry(nominalplot_.getStatGraph(),nominalplot_.getName(),"pel");
+    if(std::find(nolegendidx_.begin(),nolegendidx_.end(),0) == nolegendidx_.end())
+    	leg->AddEntry(nominalplot_.getStatGraph(),nominalplot_.getName(),"pel");
     for(size_t i=0;i<compareplots_.size() ; i++){
+    	if(std::find(nolegendidx_.begin(),nolegendidx_.end(),i+1) != nolegendidx_.end()) continue;
         leg->AddEntry(compareplots_.at(i).getStatGraph(),compareplots_.at(i).getName(),"pel");
     }
     leg->Draw("same");

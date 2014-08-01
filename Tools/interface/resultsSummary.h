@@ -28,7 +28,7 @@ public:
    // texTabler getTexTable(const float & prec=2)const;
 
     const TString& getEntryName(size_t entr)const;
-    TString getValueString(size_t entr, const float & prec=0.01)const;
+    TString getValueString(size_t entr, bool& isNeglegible, const float & prec=0.01)const;
 
     void setSystBreakRelative(bool rel){sysrelout_=rel;}
 
@@ -76,6 +76,7 @@ private:
     std::vector< std::pair<size_t,size_t> > getVariations()const;
 
     bool sysrelout_;
+
 };
 
 

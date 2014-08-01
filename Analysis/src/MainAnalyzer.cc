@@ -61,6 +61,7 @@ MainAnalyzer::MainAnalyzer(){
 
     ///set defaults for SF
     pdfweighter_.switchOff(true); //switch off as default
+    fakedata_startentries_=0.9;
 
 }
 /**

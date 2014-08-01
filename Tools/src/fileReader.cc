@@ -27,7 +27,7 @@ void fileReader::readFile(const std::string &filename){
 
     using namespace std;
     lines_.clear();
-    ifstream myfile (filename.data());
+    ifstream myfile (filename.data(), ios::in);
     if (myfile.is_open())
     {
         tempinfilename_=filename;

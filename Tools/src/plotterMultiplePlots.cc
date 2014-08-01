@@ -19,15 +19,20 @@ namespace ztop{
 
 void plotterMultiplePlots::addPlot(const graph *c){
     plots_.push_back(plot(c));
+    lastplotidx_=plots_.size()-1;
 }
 void plotterMultiplePlots::addPlot(const container1D *c,bool divbw){
     plots_.push_back(plot(c,divbw));
+    lastplotidx_=plots_.size()-1;
 }
 void plotterMultiplePlots::removePlot(size_t idx){
     if(idx>=size()){
         throw std::out_of_range("plotterMultiplePlots::removePlot index out of range");
     }
     plots_.erase(plots_.begin()+idx);
+    std::vector<size_t>::iterator it=std::find(nolegendidx_.begin(),nolegendidx_.end(),idx);
+    if(it != nolegendidx_.end())
+    	nolegendidx_.erase(it);
 }
 
 void plotterMultiplePlots::addStyleFromFile(const std::string& infile){
@@ -175,6 +180,7 @@ void plotterMultiplePlots::drawLegends(){
     leg->SetFillStyle(0);
     leg->SetBorderSize(0);
     for(size_t i=0;i<plots_.size() ; i++){
+    	if(std::find(nolegendidx_.begin(),nolegendidx_.end(),i)!=nolegendidx_.end()) continue;
         leg->AddEntry(plots_.at(i).getStatGraph(),plots_.at(i).getName(),"pel");
     }
     legstyle_.applyLegendStyle(leg);

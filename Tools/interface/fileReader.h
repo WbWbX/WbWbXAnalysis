@@ -102,7 +102,7 @@ public:
     std::string dumpFormattedToTmp()const;
 
 private:
-    std::string /*trim_,comment_,delimiter_,*/start_,end_;
+    std::string start_,end_;
     std::vector<std::vector<std::string> > lines_;
     bool blindmode_;
     bool requirevalues_;

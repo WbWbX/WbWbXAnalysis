@@ -21,7 +21,7 @@ public:
 
     void setSystematics(systematics insys){syst_=insys;}
     void setFunction(functiontype func){type_=func;}
-
+    systematics getSystematic(){return syst_;}
 
     /**
      * reweights the input weight.

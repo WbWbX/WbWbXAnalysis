@@ -33,6 +33,7 @@ bool histoContent::multiplyStatCorrelated=true;
 
 bool histoContent::debug=false;
 
+
 void histoContent::setOperatorDefaults(){
 	addStatCorrelated=false;
 	subtractStatCorrelated=false;
@@ -411,7 +412,7 @@ std::vector<TString> histoContent::getVariations()const{
 std::map<size_t,size_t> histoContent::addLayers(const histoContent & rhs){
 	std::map<size_t,size_t> outmapping;
 	for(size_t i=0;i<rhs.layermap_.size();i++){
-		size_t oldsize=layerSize();
+		//size_t oldsize=layerSize();
 		size_t lhsidx=addLayer(rhs.layermap_.getData(i));
 
 		outmapping[lhsidx]=i;

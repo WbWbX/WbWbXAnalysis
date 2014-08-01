@@ -38,6 +38,8 @@ public:
 	void addToStat(const float &);
 	void addEntry();
 
+	void add(const histoBin&);
+
 	void setName(const TString & name){name_=name;}
 	const TString & getName() const {return name_;}
 

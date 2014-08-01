@@ -19,7 +19,34 @@ tree_8TeV_emuttbar.root,       t#bar{t},		633,	  251.7,	  0, true
 tree_8TeV_emuttbarviatau.root, t#bar{t}(#tau), 	632,	  251.7,	  1, true
 
 
-[inputfiles-end]
+tree_8TeV_dyee60120.root,          data, 	1,	  3532.8, 99
+tree_8TeV_dymumu60120.root,        data,	1,	  3532.8, 99
+tree_8TeV_emuttbarbg.root,         data,	1,	  251.7,  99
+tree_8TeV_tW.root,                 data,	1,	  11.1,	  99
+tree_8TeV_tbarW.root,		   data,	1,	  11.1,	  99
+tree_8TeV_wwp.root,		   data,	1,	  54.8,	  99
+tree_8TeV_zz.root,		   data,	1,	  17.7,	  99
+tree_8TeV_wz.root,		   data,	1,	  33.2,	  99
+tree_8TeV_wjets.root,		   data,	1,	  36257,  99
+tree_8TeV_dytautau1050.root,	   data,	1,	  860,	  99
+tree_8TeV_dytautau50inf.root,	   data,	1,	  3532.8, 99
+tree_8TeV_dyee1050.root,	   data,	1,	  860,	  99
+tree_8TeV_dyee5060.root,	   data,	1,	  3532.8, 99
+tree_8TeV_dyee120inf.root,	   data,	1,	  3532.8, 99
+tree_8TeV_dymumu1050.root,	   data,	1,	  860,	  99
+tree_8TeV_dymumu5060.root,	   data,	1,	  3532.8, 99
+tree_8TeV_dymumu120inf.root,	   data,	1,	  3532.8, 99
+tree_8TeV_qcdem2030.root,	   data,	1,	  2914860,99
+tree_8TeV_qcdem3080.root,	   data,	1,	  4615893,99
+tree_8TeV_qcdem80170.root,	   data,	1,	  183294, 99
+tree_8TeV_qcdmu15.root,		   data,	1,	  134680, 99
+
+$ rare tt processes
+
+tree_ttbarg.root,                  data,    1,      1.8,   99
+tree_ttbarw.root,                  data,    1,      0.232, 99
+tree_ttbarz.root,                  data,    1,      0.2057,99
+
 
 tree_8TeV_dyee60120.root,          Z#rightarrowll, 	852,	  3532.8, 2
 tree_8TeV_dymumu60120.root,        Z#rightarrowll,	852,	  3532.8, 2
@@ -50,21 +77,22 @@ tree_ttbarw.root,                  t#bar{t}V/#gamma,    798,      0.232, 10
 tree_ttbarz.root,                  t#bar{t}V/#gamma,    798,      0.2057,10
 
 
+[inputfiles-end]
 
 
 [parameters-begin] 
 $$ all directories except for inputfiles are relative to $CMSSW_BASE
 
-inputFilesDir = /nfs/dust/cms/user/kiesej/trees_Feb14/ $for naf
+inputFilesDir = /nfs/dust/cms/user/kiesej/trees_Jul14/ $for naf
 $inputFilesDir = /data/user/kiesej/Analysis2012/trees/trees_Jun13_03/ $for desy-cms012
 
 Lumi           = 19741
 
-JECFile        = /src/TtZAnalysis/Data/Summer13_V4_DATA_UncertaintySources_AK5PFchs.txt
+JECFile        = /src/TtZAnalysis/Data/Summer13_V5_DATA_UncertaintySources_AK5PFchs.txt
 $JECFile        = /src/TtZAnalysis/Data/Fall12_V7_DATA_UncertaintySources_AK5PF.txt
 
-MuonSFFile     = /src/TopAnalysis/Configuration/analysis/common/data/MuonSF_198fbReReco.root
-MuonSFHisto    = MuonIdIsoSF
+MuonSFFile     = /src/TtZAnalysis/Data/MuonEfficiencies_Run2012ReReco_53X.root
+MuonSFHisto    = DATA_over_MC_Tight_eta_pt20-500
 
 ElecSFFile     = /src/TopAnalysis/Configuration/analysis/common/data/ElectronSF_198fbReReco.root
 ElecSFHisto    = ElectronIdIsoSF

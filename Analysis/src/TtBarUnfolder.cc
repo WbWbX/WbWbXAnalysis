@@ -114,6 +114,8 @@ TString TtBarUnfolder::unfold(TString out,TString in)const{
         if(printpdfs) system(("mkdir -p "+outdirin).Data());
 
         ztop::container1DUnfold  data=stack->produceUnfoldingContainer();
+        if(bbb_)
+        	data.setBinByBin(true);
 
         bool correctbr=false;
         if(brcorr_>0){
@@ -313,6 +315,9 @@ TString TtBarUnfolder::unfold(TString out,TString in)const{
         setNameAndTitle(c,name+"_checkUnfoldGen.pdf");
 
         ztop::container1DUnfold  check=stack->produceXCheckUnfoldingContainer();
+        if(bbb_)
+        	check.setBinByBin(true);
+
         check.setName(check.getName()+"_genToGen");
         unfolder.unfold(check);
         ztop::container1D checkunfolded=check.getUnfolded();

@@ -8,6 +8,11 @@
 #ifndef FORMATTER_H_
 #define FORMATTER_H_
 #include <cmath>
+#include <map>
+#include <string>
+#include <sstream>
+
+#include "TString.h"
 
 namespace ztop{
 /**
@@ -18,6 +23,7 @@ class formatter{
 
 
 public:
+	formatter(): rootlatex_(false){}
 
     template <class T>
     T round(T f,float pres)
@@ -25,7 +31,7 @@ public:
         return (T) (floor(f*(1.0f/pres) + 0.5)/(1.0f/pres));
     }
 
-
+    void setRootLatex(bool doit){rootlatex_=doit;}
     template<class t>
     TString toTString(t in) {
         std::ostringstream s;
@@ -33,6 +39,25 @@ public:
         TString out = s.str();
         return out;
     }
+
+    //name formatting
+    /**
+     * reads in format file and ADDS information or overwrites existing one
+     * Format:
+     * Comments: #
+     * Entries separated by commas
+     * <techname>, <realname>, TBI
+     */
+    void readInNameTranslateFile(const std::string & pathtofile);
+     TString translateName(const TString & techname)const;
+    void clearTranslateRules(){cachedNames_.clear();}
+
+
+    static bool debug;
+
+private:
+    std::map<TString,TString> cachedNames_;
+    bool rootlatex_;
 
 };
 

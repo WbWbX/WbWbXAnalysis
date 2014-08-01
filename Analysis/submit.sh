@@ -1,48 +1,63 @@
 #!/bin/sh
 
 
-channels=( "ee"
+channels=( #"ee"
     "emu"
-    "mumu"
+    #"mumu"
 );
 ## scale and match variations will be ignored for other top masses then 172.5.. (hardcoded below)
 topmasses=( "172.5"
 
-    #"171.5"
-    #"173.5"
+    "171.5"
+    "173.5"
 
-    #"175.5"
-    #"169.5"
+    "175.5"
+    "169.5"
 
-    #"178.5"
-    #"166.5"
+    "178.5"
+    "166.5"
 );
 systs=("nominal"
 
-    "TRIGGER_up"
-    "TRIGGER_down"
-    "ELECSF_up"
-    "ELECSF_down"
-    "MUONSF_up"
-    "MUONSF_down"
+    #"TRIGGER_up"
+    #"TRIGGER_down"
+    #"ELECSF_up"
+    #"ELECSF_down"
+    #"MUONSF_up"
+    #"MUONSF_down"
 
-   "ELECES_up"
-   "ELECES_down"
-   "MUONES_up"
-   "MUONES_down"
+   #"ELECES_up"
+   #"ELECES_down"
+   #"MUONES_up"
+   #"MUONES_down"
 
-   "PU_up"
-   "PU_down"
+   #"PU_up"
+   #"PU_down"
 
-   "JER_up"
-   "JER_down"
+   #"JER_up"
+   #"JER_down"
+
    "JES_up"
    "JES_down"
 
-   "BTAGH_up"
-   "BTAGH_down"
-   "BTAGL_up"
-   "BTAGL_down"
+#######JES groups according to toplhcwg use INSTEAD of global JES_up/down
+
+    #"JES_MPFInSitu_down"
+    #"JES_MPFInSitu_up"
+    #"JES_Intercalibration_down"
+    #"JES_Intercalibration_up"
+    #"JES_bJES_down"
+    #"JES_bJES_up"
+    #"JES_Flavor_down"
+    #"JES_Flavor_up"
+    #"JES_Uncorrelated_down"
+    #"JES_Uncorrelated_up"
+
+
+   #"BTAGH_up"
+   #"BTAGH_down"
+   #"BTAGL_up"
+   #"BTAGL_down"
    
 #####csv rew section
    #"BTAGHFS1_up"
@@ -62,10 +77,10 @@ systs=("nominal"
    "TOPPT_up"
    "TOPPT_down"
 
-   "TT_MATCH_down"
-   "TT_MATCH_up"
-   "TT_SCALE_down"
-   "TT_SCALE_up"
+   #"TT_MATCH_down"
+   #"TT_MATCH_up"
+   #"TT_SCALE_down"
+   #"TT_SCALE_up"
 
 
    #"Z_MATCH_down"
@@ -174,8 +189,8 @@ for (( i=0;i<${#channels[@]};i++)); do
 		syst=${systs[${j}]}
 		energy=${energies[${k}]}
 
-##dont run on scale and matching syst with other top mass
-		if [[ "${syst}" == *"SCALE"* ]] ||  [[ "${syst}" == *"MATCH"* ]]
+##dont run on scale,top pt and matching syst with other top mass
+		if [[ "${syst}" == *"SCALE"* ]] ||  [[ "${syst}" == *"MATCH"* ]] || [[ "${syst}" == *"TOPPT"* ]] 
 		then
 		    if [[ "${topmass}" != "172.5" ]] 
 		    then

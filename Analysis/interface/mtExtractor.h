@@ -156,7 +156,8 @@ private:
 
     //init and read in
 
-    void readFiles(); //type specific stuff here
+    void readFiles(); //type specific stuff here background uncertainties are added here!
+    void addLumiUncert();
     void renormalize();
     void mergeSyst();
     void makeGraphs(); //at this step the systematics should be ordered in the same way (use first and copy!),

@@ -1,28 +1,30 @@
+
 [plotterMultiplePlots]
+
+tightXaxis = false
+drawLegend = false
 
 [end plotterMultiplePlots]
 
 [textBoxes - boxes]
-  $ 0.25,   0.95,   DEFTITLE,            0.05
-  $ 0.5,   0.95,   some text for box,   0.05
-  $ 0.78,   0.95,   L=19.8 fb^{-1},   0.04
+
+
+externalFile = CMSSW_BASE/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt
+externalMarker = CMSnoSplitLeftSim
+
 [end textBoxes]
 
+[legendStyle]
 
- [legendStyle]
-
-        x0  =  0.55
-	y0  =  0.30
-	x1  =  0.9
+    x0  =  0.2
+	y0  =  0.7
+	x1  =  0.85
 	y1  =  0.88
-
 	
 	nColumns        = 1
 	columnSeparator = 0.1
-
-[end legendStyle]
-
- 
+	
+ [end legendStyle]
  
  [plotStyle - MultiPlots]
 
@@ -56,8 +58,8 @@
     yaxis.labelOffset = 0.005
     yaxis.tickLength  = 0.03
     yaxis.ndiv        = 510
-    yaxis.max         = -1
-    yaxis.min         = 0 
+    yaxis.max         = 1.5
+    yaxis.min         = -1.5
     yaxis.log         = false
     yaxis.name        = USEDEF
     
@@ -68,7 +70,7 @@
  
 [containerStyle - Default]
  
-    markerSize   = 0.5
+    markerSize   = 1
     markerStyle  = 20
     markerColor  = 632
  
@@ -79,11 +81,11 @@
     fillStyle    = 1001
     fillColor    = 1 
 
-    sysFillStyle = 3005
-    sysFillColor = 632
+    sysFillStyle = 1001
+    sysFillColor = 1
 
     rootDrawOpt  = Pe1 
-    sysRootDrawOpt  = e2
+    sysRootDrawOpt  = e1
     drawStyle    = normal $ can be other options (TBI)
     
  [end containerStyle]  

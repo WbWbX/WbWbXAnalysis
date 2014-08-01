@@ -82,7 +82,8 @@ namespace ztop{
       temp.setFormatInfo(formatinfo);
       hists_.push_back(temp);
     }
-    bool justAPlaceholderIgnoreWarning=mergeufof; //to avoid warning !IMPLEMENT! later (or remove switch) 
+    mergeufof=false; //to avoid warning !IMPLEMENT! later (or remove switch)
+
     addToList();
   }
 
@@ -122,7 +123,7 @@ namespace ztop{
       temp.setFormatInfo(formatinfo);
       hists_.push_back(temp);
     }
-    bool justAPlaceholderIgnoreWarning=mergeufof; //to avoid warning !IMPLEMENT! later (or remove switch)
+    mergeufof=false; //to avoid warning !IMPLEMENT! later (or remove switch)
     addToList();
   }
 

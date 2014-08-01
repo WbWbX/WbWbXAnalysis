@@ -16,12 +16,13 @@ namespace ztop{
 
 class TtBarUnfolder{
 public:
-    TtBarUnfolder():verbose(false),printpdfs(false),brcorr_(-1){}
+    TtBarUnfolder():verbose(false),printpdfs(false),brcorr_(-1),bbb_(false){}
     ~TtBarUnfolder(){}
     void setBRCorr(const float& br){brcorr_=br;}
     void addToBeCorrectedPlotID(const TString & pl){plotids_.push_back(pl);}
     void clearToBeCorrectedPlotIDs(){plotids_.clear();}
     void setUnits(const TString & un){units_=un;}
+    void setBinByBin(bool setbbb){bbb_=setbbb;}
 
     TString unfold(TString out,TString in)const;
 
@@ -33,6 +34,7 @@ private:
     float brcorr_;
     std::vector<TString> plotids_;
     TString units_;
+    bool bbb_;
 };
 
 }

@@ -128,7 +128,7 @@ public:
 
     MainAnalyzer & operator= (const MainAnalyzer &);
 
-
+    void setFakeDataStartNEntries(float startdiv){fakedata_startentries_=startdiv;}
 
     ///analysis helper functions
 
@@ -242,6 +242,8 @@ private:
 
     /////path to initial configuration file (in case adjustments are being made afterwards)
     TString pathtoconffile_;
+
+    float fakedata_startentries_;
 
     template <class T>
     std::vector<T*> produceCollection(std::vector<T> * t){

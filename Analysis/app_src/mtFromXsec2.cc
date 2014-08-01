@@ -29,11 +29,21 @@
 #include <iomanip>
 std::vector<TString> filelist;
 
-void WriteAndPrint(TCanvas*c, TFile &f,const TString& outputpdf,const TString& outdir){
+void WriteAndPrint(TCanvas*c, TFile &f,TString outputpdf, TString outdir){
+	outdir.ReplaceAll(" ","_");
+	outdir.ReplaceAll("\\","_");
+	outdir.ReplaceAll("#","_");
+	outputpdf.ReplaceAll(" ","_");
+	outputpdf.ReplaceAll("\\","_");
+	outputpdf.ReplaceAll("#","_");
+	TString outname=c->GetName();
+	outname.ReplaceAll(" ","_");
+	outname.ReplaceAll("\\","_");
+	outname.ReplaceAll("#","_");
     c->Print(outputpdf+".pdf");
     f.WriteTObject(c);
-    c->Print(outdir+"/" + c->GetName()+".eps");
-    filelist.push_back(outdir+"/" + c->GetName());
+    c->Print(outdir+"/" + outname+".eps");
+    filelist.push_back(outdir+"/" + outname);
     //  TString syscall="epstopdf --outfile="+outdir+"/" + c->GetName()+".pdf " +outdir+"/" + c->GetName()+".eps";
 
     //  system(syscall.Data());
@@ -324,8 +334,11 @@ int main(int argc, char* argv[]){
         std::cout<< /*std::setprecision(2) << */"\n\nextracted nominal mass: " << nom << " +" << errup << " -" <<errdown << " (stat)  "
                 <<  " +" << totup << " -" << totdown<< " (total)\n\n"<<std::endl;
 
-
-
+        std::cout << "[Mtop feedback]" << std::endl;
+        std::cout << "__MTOP__ = " << nom <<std::endl;
+        std::cout << "__MStatUp__ = " << errup <<std::endl;
+        std::cout << "__MStatDown__ = " << errdown <<std::endl;
+        std::cout << "[end Mtop feedback]" << std::endl;
 
     }
     /////////////syst variations
@@ -416,7 +429,7 @@ int main(int argc, char* argv[]){
     yieldtable << "Process" << "\\multicolumn{3}{c}{Events} ";
     yieldtable.newLine();
     yieldtable << texLine(1);
-    std::map<TString,histoBin> yields= stack.getAllContentsInBin(1,false);
+    std::map<TString,histoBin> yields= stack.getAllContentsInBin(1,-1,false);
     for(std::map<TString,histoBin>::iterator contrib=yields.begin();contrib!=yields.end();++contrib){
         if(contrib->first == "total MC" || contrib->first == "data"){
             continue;

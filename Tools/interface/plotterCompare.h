@@ -39,6 +39,7 @@ public:
     void setNominalPlot(const graph *c);
     void setComparePlot(const graph *c,size_t idx);
 
+
     //set ids before reading style file!
     /**
      * If ids are not set they are assumed to be NominalUpper, NominalRatio

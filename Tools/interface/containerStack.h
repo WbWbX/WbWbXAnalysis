@@ -95,7 +95,15 @@ public:
     void multiplyNorm(TString , double);
     void multiplyNorm(size_t , double);
     void multiplyAllMCNorms(double);
-    void addGlobalRelMCError(TString,double);   //! adds a global systematic variation to the systematics stored (e.g. lumi)
+    void addGlobalRelMCError(TString,double);   //! adds a global systematic variation to the systematics stored (e.g. lumi) is o+err
+    /**
+     * adds error to all backgrounds (not signal nor data) that are not excluded by excludeidxs
+     * error is 0+error
+     * if aspartials is true, the errors will be merged to one error afterwards
+     */
+    void addRelErrorToBackgrounds(double err ,bool aspartials=false, TString nameprefix="BG",const std::vector<size_t> excludeidxs=std::vector<size_t>());
+    void mergePartialVariations(const TString& identifier, bool strictpartialID=true);
+
     void addMCErrorStack(const TString&,const containerStack &) ; //only for comp reasons
     void addErrorStack(const TString& , containerStack ); //! calls container1D::addErrorContainer for each same named member container
     void getRelSystematicsFrom(ztop::containerStack);
@@ -150,6 +158,18 @@ public:
     container2D getBackgroundContainer2D()const;
 
 
+
+    /**
+     * Warning! Member functions will return different things than usual for
+     * the output container1DUnfold
+     * Prepares to be ready for unfolding in the following scheme:
+     * All MCs marked as signal (if no input given, the internal info will be used) will be added
+     * container1DUnfold::getRecoContainer will return DATA!
+     * container1DUnfold::getBackgroundContainer will return ALL backgrounds added
+     * if you need all MC (so summed reco MC), use:
+     * container1DUnfold::getVisibleSignal() + container1DUnfold::getBackground()
+     *
+     */
     container1DUnfold produceUnfoldingContainer(const std::vector<TString> &sign=std::vector<TString>()) const;// if sign empty use "setsignal"
 
 
