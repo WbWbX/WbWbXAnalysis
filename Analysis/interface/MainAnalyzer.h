@@ -118,6 +118,7 @@ public:
     ztop::scalefactors * getMuonSF(){return &muonsf_;}
     ztop::scalefactors * getElecSF(){return &elecsf_;}
     ztop::scalefactors * getTriggerSF(){return &triggersf_;}
+    ztop::scalefactors * getTrackingSF(){return &trackingsf_;}
 
     ztop::scalefactors * getElecEnergySF(){return &elecenergysf_;}
     ztop::scalefactors * getMuonEnergySF(){return &muonenergysf_;}
@@ -199,7 +200,7 @@ private:
     TString btagsffile_;
 
     //for scalefactors provided in THXX format:
-    ztop::scalefactors elecsf_,muonsf_,triggersf_,elecenergysf_,muonenergysf_;
+    ztop::scalefactors elecsf_,muonsf_,triggersf_,elecenergysf_,muonenergysf_,trackingsf_;
     ztop::reweightfunctions topptReweighter_;
 
     //for parallel stuff

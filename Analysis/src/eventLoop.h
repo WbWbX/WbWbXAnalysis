@@ -228,12 +228,12 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
 		getTriggerSF()->setSystematics("nom");
 
-
 		getElecEnergySF()->setSystematics("nom");
 		getElecSF()->setSystematics("nom");
 		getMuonEnergySF()->setSystematics("nom");
 		getMuonSF()->setSystematics("nom");
 
+		getTrackingSF()->setSystematics("nom");
 
 		// getPUReweighter()-> //setSystematics("nom");
 		wasbtagsys=getBTagSF()->isRealSyst();
@@ -410,10 +410,12 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 	getTriggerSF()->setRangeCheck(false);
 	getElecSF()->setRangeCheck(false);
 	getMuonSF()->setRangeCheck(false);
+	getTrackingSF()->setRangeCheck(false);
 
 	getElecSF()->setIsMC(isMC);
 	getMuonSF()->setIsMC(isMC);
 	getTriggerSF()->setIsMC(isMC);
+	getTrackingSF()->setIsMC(isMC);
 
 	//some global checks
 	getElecEnergySF()->setRangeCheck(false);
@@ -916,6 +918,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 			seclep=leppair->second[1];
 			lepweight*=getMuonSF()->getScalefactor(fabs(firstlep->eta()),firstlep->pt());
 			lepweight*=getMuonSF()->getScalefactor(fabs(seclep->eta()),seclep->pt());
+			lepweight*=getTrackingSF()->getScalefactor(firstlep->pt(),fabs(firstlep->eta()));
+			lepweight*=getTrackingSF()->getScalefactor(seclep->pt(),fabs(seclep->eta()));
 			lepweight*=getTriggerSF()->getScalefactor(fabs(firstlep->eta()),fabs(seclep->eta()));
 		}
 		else if(b_emu_){
@@ -926,6 +930,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 			seclep=leppair->second[0];
 			lepweight*=getElecSF()->getScalefactor(fabs(firstlep->eta()),firstlep->pt());
 			lepweight*=getMuonSF()->getScalefactor(fabs(seclep->eta()),seclep->pt());
+			lepweight*=getTrackingSF()->getScalefactor(seclep->pt(),fabs(seclep->eta()));
 			lepweight*=getTriggerSF()->getScalefactor(fabs(firstlep->eta()),fabs(seclep->eta()));
 		}
 		//channel defined

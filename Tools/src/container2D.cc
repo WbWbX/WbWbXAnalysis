@@ -36,7 +36,7 @@ container2D::~container2D(){
 }
 
 container2D::container2D(const std::vector<float> &xbins,const std::vector<float> &ybins, TString name,TString xaxisname,TString yaxisname, bool mergeufof) :
-        				taggedObject(taggedObject::type_container2D),mergeufof_(mergeufof), xaxisname_(xaxisname), yaxisname_(yaxisname)
+        												taggedObject(taggedObject::type_container2D),mergeufof_(mergeufof), xaxisname_(xaxisname), yaxisname_(yaxisname)
 {
 	setName(name);
 	//create for each ybin (plus UF OF) a container1D
@@ -453,13 +453,15 @@ TH2D * container2D::getTH2D(TString name, bool dividebybinarea, bool onlystat) c
 			h->SetBinContent(xbin,ybin,cont*multi);
 			float err=getBinError(xbin,ybin,onlystat);
 			h->SetBinError(xbin,ybin,err*multi);
+
 		}
 	}
 	h->GetXaxis()->SetTitle(xaxisname_);
 	h->GetYaxis()->SetTitle(yaxisname_);
-
+	if(entries>0)
 	h->SetEntries(entries);
-
+	else
+		h->SetEntries(getNBinsX()*getNBinsY());
 	return h;
 }
 /**
@@ -487,6 +489,60 @@ TH2D * container2D::getTH2DSyst(TString name, unsigned int systNo, bool divideby
 	return h;
 
 }
+
+/**
+ * imports TGraphAsymmErrors. Only works if the x-axis errors indicate the bin boundaries,
+ * the graph binning corresponds to X axis binning, and all bins are the same size
+ * Y errors will be represented as new systematic layers, the stat error will be set to 0.
+ * The new systematic layers can be named- if not, default is Graphimp_<up/down>
+ */
+container2D & container2D::import(std::vector<TGraphAsymmErrors *> gs,bool isbinwidthdivided, const TString & newsystname){
+	//check stuff
+	bool includeofuf=true;
+	if(gs.size()!= ybins_.size()){
+		//can be without of/uf
+		if(gs.size()== ybins_.size()-2){
+			//special case, also allowed
+			includeofuf=false;
+		}
+		else{
+			throw std::logic_error("container2D::import: number of graphs need to be:\n -number of visible bins\n - number of total bins (1 UF, 1 OF)");
+		}
+	}
+	//first check
+	for(size_t i=0;i<gs.size()-1;i++){
+		if(gs.at(i)->GetN() == gs.at(i+1)->GetN()){
+	//		if(std::equal(gs.at(i)->GetEX(), &gs.at(i)->GetEX()[gs.at(i)->GetN()-1], gs.at(i+1)->GetEX())) continue;
+		}
+		//error here
+	}
+	std::cout << "herea"<< std::endl;
+
+	for(size_t i=0;i<gs.size();i++){
+		size_t cit=i;
+		if(!includeofuf) cit++;
+		conts_.at(cit).import(gs.at(i),isbinwidthdivided,newsystname);
+	}
+	std::cout << "hereb"<< std::endl;
+
+
+	xbins_=conts_.at(1).getBins();
+	if(!includeofuf){
+		//set the rest
+		container1D tmp=conts_.at(1);
+		tmp.setAllZero();
+		conts_.at(0)=tmp;
+		conts_.at(conts_.size()-1)=tmp;
+	}
+
+	std::cout << "herec"<< std::endl;
+	return *this;
+
+}
+
+
+
+
 void container2D::setDivideBinomial(bool binomial){
 	std::cout << "container2D::setDivideBinomial: obsolete / switch on static histoContent options" <<std::endl;
 	/*for(size_t i=0;i<conts_.size();i++)

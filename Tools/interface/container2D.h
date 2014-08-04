@@ -92,6 +92,15 @@ public:
 	TH2D * getTH2D(TString name="", bool dividebybinarea=false, bool onlystat=false) const;
 	TH2D * getTH2DSyst(TString name, unsigned int systNo, bool dividebybinarea=false, bool statErrors=false) const;
 
+	/**
+	 * imports TGraphAsymmErrors. Only works if the x-axis errors indicate the bin boundaries,
+	 * the graph binning corresponds to X axis binning, and all bins are the same size
+	 * Y errors will be represented as new systematic layers, the stat error will be set to 0.
+	 * The new systematic layers can be named- if not, default is Graphimp_<up/down>
+	 */
+	container2D & import(std::vector<TGraphAsymmErrors *>,bool isbinwidthdivided=false, const TString & newsystname="Graphimp");
+
+
 	void setDivideBinomial(bool);
 
 	container2D & operator += (const container2D &);       //! adds stat errors in squares; treats same named systematics as correlated!!
@@ -188,15 +197,15 @@ inline void ztop::container2D::fill(const float & xval, const float & yval, cons
 /**
  * not protected
  */
- inline const histoBin & ztop::container2D::getBin(const size_t &xbinno,const size_t &ybinno,const int &layer) const{
-	 return conts_[ybinno].getBin(xbinno,layer);
- }
- /**
-  * not protected
-  */
- inline histoBin & ztop::container2D::getBin(const size_t &xbinno,const size_t& ybinno,const int &layer){
-	 return conts_[ybinno].getBin(xbinno,layer);
- }
+inline const histoBin & ztop::container2D::getBin(const size_t &xbinno,const size_t &ybinno,const int &layer) const{
+	return conts_[ybinno].getBin(xbinno,layer);
+}
+/**
+ * not protected
+ */
+inline histoBin & ztop::container2D::getBin(const size_t &xbinno,const size_t& ybinno,const int &layer){
+	return conts_[ybinno].getBin(xbinno,layer);
+}
 
 }
 #endif /* CONTAINER2D_H_ */

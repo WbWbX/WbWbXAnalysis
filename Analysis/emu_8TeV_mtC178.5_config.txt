@@ -90,8 +90,12 @@ Lumi           = 19741
 JECFile        = /src/TtZAnalysis/Data/Summer13_V5_DATA_UncertaintySources_AK5PFchs.txt
 $JECFile        = /src/TtZAnalysis/Data/Fall12_V7_DATA_UncertaintySources_AK5PF.txt
 
-MuonSFFile     = /src/TtZAnalysis/Data/MuonEfficiencies_Run2012ReReco_53X.root
-MuonSFHisto    = DATA_over_MC_Tight_eta_pt20-500
+MuonSFFile     = /src/TtZAnalysis/Data/muonEffTop2D.root
+MuonSFHisto    = eff_pt_eta_fullwithtrackerr
+TrackingSFFile = /src/TtZAnalysis/Data/muon_tracking_eff.root
+TrackingSFHisto = tracking_eff
+
+
 
 ElecSFFile     = /src/TopAnalysis/Configuration/analysis/common/data/ElectronSF_198fbReReco.root
 ElecSFHisto    = ElectronIdIsoSF

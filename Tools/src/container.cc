@@ -30,7 +30,7 @@ bool container1D::c_makelist=false;
 
 ///////function definitions
 container1D::container1D():
-                                                        								taggedObject(taggedObject::type_container1D)
+                                                        												taggedObject(taggedObject::type_container1D)
 {
 	canfilldyn_=false;
 	//divideBinomial_=true;
@@ -48,7 +48,7 @@ container1D::container1D():
 	if(c_makelist)c_list.push_back(this);
 }
 container1D::container1D(float binwidth, TString name,TString xaxisname,TString yaxisname, bool mergeufof):
-                                                        								taggedObject(taggedObject::type_container1D){ //currently not used
+                                                        												taggedObject(taggedObject::type_container1D){ //currently not used
 	plottag=none;
 	binwidth_=binwidth;
 	canfilldyn_=true;
@@ -67,7 +67,7 @@ container1D::container1D(float binwidth, TString name,TString xaxisname,TString 
 	hp_=0;
 }
 container1D::container1D(std::vector<float> bins, TString name,TString xaxisname,TString yaxisname, bool mergeufof):
-                                                        								taggedObject(taggedObject::type_container1D){
+                                                        												taggedObject(taggedObject::type_container1D){
 	plottag=none;
 	setBins(bins);
 	//divideBinomial_=true;
@@ -839,6 +839,67 @@ container1D & container1D::import(TH1 * h,bool isbinwidthdivided){
 		setBinStat(bin,err);
 		setBinEntries(bin,cont/err);
 	}
+	return *this;
+}
+
+/**
+ * imports TGraphAsymmErrors. Only works if the x-axis errors indicate the bin boundaries.
+ * Y errors will be represented as new systematic layers, the stat error will be set to 0.
+ * The new systematic layers can be named- if not, default is Graphimp_<up/down>
+ */
+container1D & container1D::import(TGraphAsymmErrors *g,bool isbinwidthdivided, const TString & newsystname){
+
+	//create bins
+	std::vector<float> bins;
+	//sort points
+	std::vector<double> xpoints;
+	for(int i=0;i<g->GetN();i++)
+		xpoints.push_back(g->GetX()[i]);
+
+	std::vector<size_t> sortlist=retsort(xpoints.begin(),xpoints.end());
+	for(size_t i=0;i<sortlist.size();i++){
+		size_t realit=sortlist.at(i);
+		//std::cout << "getting: "<< i << "->" << realit << std::endl;
+		double x=0;
+		double xnext=0;
+		double y=0;
+		g->GetPoint(realit,x,y);
+		if(realit<(size_t)g->GetN()-1){
+			g->GetPoint(realit+1,xnext,y);
+			g->GetErrorXhigh(realit);
+			g->GetErrorXlow(realit);
+			g->GetErrorXlow(realit+1);
+			if(fabs( x+ g->GetErrorXhigh(realit)-(xnext-g->GetErrorXlow(realit+1))) > 0.01*(xnext-x)){
+				throw std::runtime_error("container1D::import: cannot find valid bin indications in input graph");
+			}
+			bins.push_back(x-g->GetErrorXlow(realit));
+		}
+		else{//last boundary
+			bins.push_back(x-g->GetErrorXlow(realit));
+			bins.push_back(x+g->GetErrorXhigh(realit));
+		}
+	}
+	reset();
+	setBins(bins);
+	contents_.addLayer(newsystname+"_up");
+	contents_.addLayer(newsystname+"_down");
+	for(size_t i=0;i<sortlist.size();i++){
+		size_t realit=sortlist.at(i);
+		double x=0;
+		double y=0;
+		g->GetPoint(i,x,y);
+		setBinContent(realit+1,y);
+		setBinContent(realit+1,y+g->GetErrorYhigh(i),0);
+		setBinContent(realit+1,y-g->GetErrorYlow(i),1);
+
+		if(isbinwidthdivided){
+			contents_.getBin(realit+1).multiply(getBinWidth(realit+1));
+			contents_.getBin(realit+1,0).multiply(getBinWidth(realit+1));
+			contents_.getBin(realit+1,1).multiply(getBinWidth(realit+1));
+		}
+	}
+
+
 	return *this;
 }
 

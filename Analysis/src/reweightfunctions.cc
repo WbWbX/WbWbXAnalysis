@@ -12,6 +12,21 @@
 
 namespace ztop{
 
+void reweightfunctions::setFunction(functiontype func){
+
+   	type_=func;
+   	if(type_==toppt){
+   		std::cout << "reweightfunctions::setFunction: set to top pt" <<std::endl;
+   	}
+   	else if(type_==flat){
+   		std::cout << "reweightfunctions::setFunction: set to flat (==1)" <<std::endl;
+   	}
+
+
+}
+
+
+
 void reweightfunctions::reWeight(const float& in, float& previousweight) {
 
     if(switchedoff_)

@@ -40,7 +40,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	fr.readFile(inputfile.Data());
 
 
-	TString treedir,jecfile,pufile,muonsffile,muonsfhisto,elecsffile,elecsfhisto,trigsffile,elecensffile,muonensffile; //...
+	TString treedir,jecfile,pufile,muonsffile,muonsfhisto,elecsffile,elecsfhisto,trigsffile,elecensffile,muonensffile,trackingsffile,trackingsfhisto; //...
 	TString btagWP,btagshapehffile,btagshapelffile;
 
 	if(lumi<0)
@@ -49,6 +49,8 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	jecfile=   cmssw_base+fr.getValue<TString>("JECFile");
 	muonsffile=cmssw_base+fr.getValue<TString>("MuonSFFile");
 	muonsfhisto=          fr.getValue<TString>("MuonSFHisto");
+	trackingsffile=cmssw_base+fr.getValue<TString>("TrackingSFFile");
+	trackingsfhisto=          fr.getValue<TString>("TrackingSFHisto");
 	elecsffile=cmssw_base+fr.getValue<TString>("ElecSFFile");
 	elecsfhisto=          fr.getValue<TString>("ElecSFHisto");
 	trigsffile=cmssw_base+fr.getValue<TString>("TriggerSFFile");
@@ -125,6 +127,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	}
 	ana.getElecSF()->setInput(elecsffile,elecsfhisto);
 	ana.getMuonSF()->setInput(muonsffile,muonsfhisto);
+	ana.getTrackingSF()->setInput(trackingsffile,trackingsfhisto);
 	ana.getTriggerSF()->setInput(trigsffile,trigsfhisto);
 
 	ana.getElecEnergySF()->setGlobal(1,0.15,0.15);

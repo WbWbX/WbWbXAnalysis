@@ -99,7 +99,7 @@ int scalefactors::setInput(TString filename, TString histname, TString histnamee
 			double x=0;
 			double xnext=0;
 			double y=0;
-			g->GetPoint(i,x,y);
+			g->GetPoint(realit,x,y);
 			if(realit<(size_t)g->GetN()-1){
 				g->GetPoint(realit+1,xnext,y);
 				g->GetErrorXhigh(realit);

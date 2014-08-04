@@ -154,6 +154,12 @@ public:
      * defined according to stat^2
      */
     container1D & import(TH1 *,bool isbinwidthdivided=false);
+    /**
+     * imports TGraphAsymmErrors. Only works if the x-axis errors indicate the bin boundaries.
+     * Y errors will be represented as new systematic layers, the stat error will be set to 0.
+     * The new systematic layers can be named- if not, default is Graphimp_<up/down>
+     */
+    container1D & import(TGraphAsymmErrors *,bool isbinwidthdivided=false, const TString & newsystname="Graphimp");
     void writeTH1D(TString name="",bool dividebybinwidth=true, bool onlystat=false, bool nostat=false) const; //! writes TH1D->Write() with symmetrized errors (TString name)
 
     TGraphAsymmErrors * getTGraph(TString name="", bool dividebybinwidth=true,bool onlystat=false,bool noXErrors=false, bool nostat=false) const;
