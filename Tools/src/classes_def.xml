@@ -62,6 +62,8 @@
         <class name="ztop::plotterCompare"/>
         <class name="ztop::plotterControlPlot"/>
         <class name="ztop::plotterMultiplePlots"/>
+        
+        <class name="ztop::infoCreater"/>
 	
 </lcgdict>
  

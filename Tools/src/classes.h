@@ -31,6 +31,8 @@
 #include "../interface/plotterMultiplePlots.h"
 #include "../interface/plotterCompare.h"
 
+#include "../interface/infoCreater.h"
+
 
 namespace
 {
@@ -112,6 +114,8 @@ struct dictionary {
 	ztop::plotterMultiplePlots sdfdfewewrw;
 	ztop::plotterCompare ewwefevrefwefewf;
 
+
+	ztop::infoCreater weoirgjerowijgre;
 
 };
 }
