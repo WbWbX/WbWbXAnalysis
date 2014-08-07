@@ -9,6 +9,7 @@
 #include "../interface/reweightfunctions.h"
 #include <stdexcept>
 #include <algorithm>
+#include <iostream>
 
 namespace ztop{
 
