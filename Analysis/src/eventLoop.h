@@ -179,12 +179,10 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 		if(inputfile.Contains("ttbar.root")){
 			inputfile.ReplaceAll("ttbar.root", "ttbar_mgdecays.root");
 			// infiles_.at(anaid).ReplaceAll("ttbar.root", "ttbar_mgdecays.root");
-			normmultiplier=0.1049; //fully leptonic branching fraction
 		}
 		else if(inputfile.Contains("ttbarviatau.root")){
 			inputfile.ReplaceAll("ttbarviatau.root", "ttbarviatau_mgdecays.root");
 			// infiles_.at(anaid).ReplaceAll("ttbar.root", "ttbar_mgdecays.root");
-			normmultiplier=0.1049;
 		}
 	}
 	else{
@@ -195,13 +193,11 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 			normmultiplier=0.1049/0.1111202;
 		}
 	}
-
-	if(mode_.Contains("Notoppt")){
-		if(getTopPtReweighter()->getSystematic() != reweightfunctions::up)
-			getTopPtReweighter()->setFunction(reweightfunctions::flat);
-		else
-			getTopPtReweighter()->setSystematics(reweightfunctions::nominal);
+	if(inputfile.Contains("_mgdecays_")){
+		normmultiplier=0.1049; //fully leptonic branching fraction
 	}
+
+
 	bool fakedata=false,isfakedatarun=false;
 	if(mode_.Contains("Fakedata")){
 		if(legendname ==  dataname_)
@@ -211,8 +207,23 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 		std::cout << "THIS IS A PSEUDO-DATA RUN:" <<std::endl;// all samples MC samples will be used without weights!" << std::endl;
 
 	}
+	if(mode_.Contains("Notoppt")){
+		/*	if(getTopPtReweighter()->getSystematic() != reweightfunctions::up
+				|| fakedata)
+			getTopPtReweighter()->setFunction(reweightfunctions::flat);
+		else if(getTopPtReweighter()->getSystematic() == reweightfunctions::up)
+			getTopPtReweighter()->setSystematics(reweightfunctions::nominal);
+		 */
+		if(getTopPtReweighter()->getSystematic() != reweightfunctions::up)
+			getTopPtReweighter()->switchOff(true);
+		else
+			getTopPtReweighter()->setSystematics(reweightfunctions::nominal);
 
-
+	}
+	bool apllweightsone=false;
+	if(mode_.Contains("Noweights")){
+		apllweightsone=true;
+	}
 
 	/*
 	 * end of mode switches
@@ -256,10 +267,12 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 		getPUReweighter()->setDataTruePUInput(((std::string)getenv("CMSSW_BASE")+fr.getValue<string>("PUFile") +".root").data());
 
 
+		// not needed anymore
 		//re-adjust systematic filenames
 		for(size_t i=0;i<ftorepl_.size();i++){
 			if(inputfile.EndsWith(ftorepl_.at(i))){
-				inputfile.ReplaceAll(fwithfix_.at(i),ftorepl_.at(i));
+				std::cout << "replacing fakedata syst names " << fwithfix_.at(i) << " with " << ftorepl_.at(i) << std::endl;
+				//	inputfile.ReplaceAll(fwithfix_.at(i),ftorepl_.at(i));
 			}
 		}
 
@@ -381,7 +394,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
 	//get normalization
 	double norm=createNormalizationInfo(f,isMC,anaid);
-
+	if(testmode_)
+		std::cout << "testmode("<< anaid << "): multiplying norm with "<< normmultiplier <<" file: " << inputfile<< std::endl;
 	norm*= normmultiplier;
 	/////////////////////////// configure scalefactors ////
 
@@ -476,29 +490,39 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 	if(isfakedatarun){
 		float splitfractionMC=0.9;
 		float subsetstarts=fakedata_startentries_;
-		if(issignal || fakedata){
+		//if(!fakedata){//issignal || fakedata){
+		skipregion=true;
+		regionlowerbound=nEntries*subsetstarts;
+		regionupperbound=nEntries*(subsetstarts+(1-splitfractionMC));
+		if(!fakedata){//issignal){
+			//   nEntries*=splitfractionMC;
+			//invert
 			skipregion=true;
-			regionlowerbound=nEntries*subsetstarts;
-			regionupperbound=nEntries*(subsetstarts+(1-splitfractionMC));
-			if(issignal){
-				//   nEntries*=splitfractionMC;
-				//invert
-				skipregion=true;
-				norm*= 1/splitfractionMC;
-			}
-			else if(fakedata){
-				skipregion=false;
-				norm*=1/(1-splitfractionMC);
+			float normmultif=1/splitfractionMC;
 
-			}
+			if(testmode_)
+				std::cout << "testmode("<< anaid << "):\t splitted MC fraction off for MC          "<< splitfractionMC
+				<< " old norm: " << norm << " to " << norm*normmultif << " file: " << inputfile<< std::endl;
+			norm*= normmultif;
+		}
+		else{// if(){
+			skipregion=false;
 
-			//readapt norm to right mtop value
-
-			//also skip QCD here FIXME (for marker-> better not)
-			//if(legendname == "QCD") nEntries=0;
+			float normmultif=1/(1-splitfractionMC);
+			if(testmode_)
+				std::cout << "testmode("<< anaid << "):\t splitted MC fraction off for pseudo data "<< 1-splitfractionMC
+				<< " old norm: " << norm << " to " << norm*normmultif << " file: " << inputfile<< std::endl;
+			norm*=normmultif;
 
 		}
+
+		//readapt norm to right mtop value
+
+		//also skip QCD here FIXME (for marker-> better not)
+		//if(legendname == "QCD") nEntries=0;
+
 	}
+
 
 	///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
@@ -511,7 +535,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 	///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
 
 	if(testmode_)
-		std::cout << "testmode("<< anaid << "): starting main loop" << std::endl;
+		std::cout << "testmode("<< anaid << "): starting mainloop with file "<< inputfile << " norm " << norm << " entries: "<<nEntries << " fakedata: " <<  fakedata<<std::endl;
 
 
 	for(Long64_t entry=firstentry;entry<nEntries;entry++){
@@ -548,6 +572,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 		b_Event.getEntry(entry);
 		float puweight=1;
 		if (isMC) puweight = getPUReweighter()->getPUweight(b_Event.content()->truePU());
+		if(apllweightsone) puweight=1;
 		if(testmode_ && entry==0)
 			std::cout << "testmode("<< anaid << "): got first event entry" << std::endl;
 
@@ -555,7 +580,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
 		getPdfReweighter()->setNTEvent(b_Event.content());
 		getPdfReweighter()->reWeight(puweight);
-
+		if(apllweightsone) puweight=1;
 
 		/////////////////////////////////////////////////////////////
 		/////////////////////////////////////////////////////////////
@@ -607,7 +632,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 				if(b_GenTops.content()->size()>1){ //ttbar sample
 
 					getTopPtReweighter()->reWeight(b_GenTops.content()->at(0).pt(),b_GenTops.content()->at(1).pt() ,puweight);
-
+					if(apllweightsone) puweight=1;
 					gentops.push_back(&b_GenTops.content()->at(0));
 					gentops.push_back(&b_GenTops.content()->at(0));
 					evt.gentops=&gentops;
@@ -764,7 +789,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
 		for(size_t i=0;i<idmuons.size();i++){
 			NTMuon * muon =  idmuons.at(i);
-			if(!mode_invertiso && muon->isoVal() > 0.12) continue;
+			if(!mode_invertiso && fabs(muon->isoVal()) > 0.12) continue;
 			if(mode_invertiso && muon->isoVal() < 0.12) continue;
 			isomuons <<  muon;
 			isoleptons << muon;
@@ -807,7 +832,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 					&& elec->mHits() <= 0){
 
 				idelectrons <<  elec;
-				if(elec->rhoIso()<0.1){
+				if(fabs(elec->rhoIso())<0.1){
 					isoelectrons <<  elec;
 					isoleptons << elec;
 				}
@@ -916,10 +941,10 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 			mll=dilp4.M();
 			firstlep=leppair->second[0];
 			seclep=leppair->second[1];
-			lepweight*=getMuonSF()->getScalefactor(fabs(firstlep->eta()),firstlep->pt());
-			lepweight*=getMuonSF()->getScalefactor(fabs(seclep->eta()),seclep->pt());
-			lepweight*=getTrackingSF()->getScalefactor(firstlep->pt(),fabs(firstlep->eta()));
-			lepweight*=getTrackingSF()->getScalefactor(seclep->pt(),fabs(seclep->eta()));
+			lepweight*=getMuonSF()->getScalefactor(firstlep->pt(),fabs(firstlep->eta()));
+			lepweight*=getMuonSF()->getScalefactor(seclep->pt(),fabs(seclep->eta()));
+			lepweight*=getTrackingSF()->getScalefactor((firstlep->eta()));
+			lepweight*=getTrackingSF()->getScalefactor((seclep->eta()));
 			lepweight*=getTriggerSF()->getScalefactor(fabs(firstlep->eta()),fabs(seclep->eta()));
 		}
 		else if(b_emu_){
@@ -929,8 +954,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 			firstlep=leppair->first[0];
 			seclep=leppair->second[0];
 			lepweight*=getElecSF()->getScalefactor(fabs(firstlep->eta()),firstlep->pt());
-			lepweight*=getMuonSF()->getScalefactor(fabs(seclep->eta()),seclep->pt());
-			lepweight*=getTrackingSF()->getScalefactor(seclep->pt(),fabs(seclep->eta()));
+			lepweight*=getMuonSF()->getScalefactor(seclep->pt(),fabs(seclep->eta()));
+			lepweight*=getTrackingSF()->getScalefactor((seclep->eta()));
 			lepweight*=getTriggerSF()->getScalefactor(fabs(firstlep->eta()),fabs(seclep->eta()));
 		}
 		//channel defined
@@ -954,7 +979,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 		evt.cosleplepangle=&cosleplepangle;
 
 		puweight*=lepweight;
-
+		if(apllweightsone) puweight=1;
 		//just a quick faety net against very weird weights
 		if(isMC && fabs(puweight) > 99999){
 			reportError(-88,anaid);
@@ -1284,7 +1309,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 			else
 				puweight*=getBTagSF()->getNTEventWeight(*selectedjets);
 		}
-
+		if(apllweightsone) puweight=1;
 		//ht+=adjustedmet.met();
 		//double mllj=0;
 		//double phijl=0;
@@ -1364,7 +1389,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 		if(getBTagSF()->getMode() != NTBTagSF::shapereweighting_mode){
 			puweight*=getBTagSF()->getNTEventWeight(*selectedjets);
 		}
-
+		if(apllweightsone) puweight=1;
 
 
 		if(analysisMllRange){
@@ -1394,12 +1419,13 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 	///////////////////////////////////////////////////////////////////////
 
 	//renorm for topptreweighting
-	norm *= getTopPtReweighter()->getRenormalization();
+	double renormfact=getTopPtReweighter()->getRenormalization();
+	norm *= renormfact;
 
 	container1DUnfold::flushAllListed(); // call once again after last event processed
 
 	if(testmode_ )
-		std::cout << "testmode("<< anaid << "): finished main loop" << std::endl;
+		std::cout << "testmode("<< anaid << "): finished main loop, renorm factor: " <<renormfact  << std::endl;
 
 
 	// Fill all containers in the stackVector
@@ -1547,7 +1573,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 		std::cout << "\nEvents in defined visible phase space (normalized): "
 				<< genvisPScounter*norm << "\n" << std::endl;
 		std::cout << "\nEvents total (normalized): "
-				<< nEntries*norm << "\n" << std::endl;
+				<< nEntries*norm << "\n"
+				"nEvents_selected normd: "<< sel_step[8]*norm<< " " << inputfile<< std::endl;
 
 
 		if(singlefile_) return;
