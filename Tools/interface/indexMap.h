@@ -13,12 +13,20 @@
 #include <iostream>
 
 namespace ztop{
+
+/**
+ * This class acts like a vector, map hybrid.
+ * It allows to get data by an index (like a vector).
+ * At the same time it allows access to an index that corresponds to a data member.
+ */
 template<class T>
 class indexMap {
 public:
 	indexMap():size_(0){}
 	~indexMap(){}
-
+	/**
+	 * returns the size of the indexMap
+	 */
 	const size_t &size() const{return size_;}
 	/**
 	 * returns index associated to data
@@ -42,11 +50,16 @@ public:
 		throw std::out_of_range("indexMap::getData: out of range");
 		return map_.begin()->second; //just to avoid warnings
 	}
-
+	/**
+	 * pushes back  new data
+	 */
 	indexMap & operator << (const T& t){
 		push_back(t);
 		return *this;
 	}
+	/**
+	 * appends a whole indexMap
+	 */
 	indexMap & operator << (const indexMap& m){
 		for(size_t i=0;i<m.size_;i++){
 			size_t idx=push_back(m.getData(i));
@@ -55,7 +68,8 @@ public:
 	}
 
 	/**
-	 * costs performance
+	 * erases by index.
+	 * This procedure is expensive in terms of performance.
 	 */
 	void eraseByIdx(const size_t &idx){
 		if(idx>=size_){
@@ -70,7 +84,8 @@ public:
 		*this=newmap;
 	}
 	/**
-	 * costs performance
+	 * erases by data
+	 * This procedure is expensive in terms of performance.
 	 */
 	void eraseByData(const T &t){
 		typename std::map<T,size_t>::iterator imit=imap_.find(t);
@@ -81,15 +96,7 @@ public:
 		size_t eraseindex=imit->second;
 		eraseByIdx(eraseindex);
 	}
-	/**
-	 * not protected! idx not allowed to exceed size
-	 * does not work due to iterator->first = permissions
-	 */
-	/*
-	void setData(const size_t & idx, const T& t ){
-	////
-	}
-	 */
+
 	/**
 	 * returns index of newly added data
 	 * if data already exists, it returns its iterator position
@@ -111,13 +118,14 @@ public:
 	const T & at(const size_t index) const{
 		return getData(index);
 	}
-
+	/**
+	 * clears full content
+	 */
 	void clear(){
 		map_.clear();
 		imap_.clear();
 		size_=0;
 	}
-
 	bool operator==(const indexMap & rhs) const{
 		if(map_ != rhs.map_)
 			return false;

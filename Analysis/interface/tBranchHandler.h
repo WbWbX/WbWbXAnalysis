@@ -27,7 +27,7 @@ public:
     tBranchHandler(TTree * t, const TString& branchname):content_(0),branch_(0),branchname_(branchname){
         t->SetBranchAddress(branchname_,&content_,&branch_);
     }
-    ~tBranchHandler(){}
+    ~tBranchHandler(){if(content_) delete content_;}
 
     void getEntry(const Long64_t& entry){
         branch_->GetEntry(entry);

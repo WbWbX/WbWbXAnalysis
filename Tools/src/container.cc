@@ -30,7 +30,7 @@ bool container1D::c_makelist=false;
 
 ///////function definitions
 container1D::container1D():
-                                                        												taggedObject(taggedObject::type_container1D)
+                                                        																taggedObject(taggedObject::type_container1D)
 {
 	canfilldyn_=false;
 	//divideBinomial_=true;
@@ -48,7 +48,7 @@ container1D::container1D():
 	if(c_makelist)c_list.push_back(this);
 }
 container1D::container1D(float binwidth, TString name,TString xaxisname,TString yaxisname, bool mergeufof):
-                                                        												taggedObject(taggedObject::type_container1D){ //currently not used
+                                                        																taggedObject(taggedObject::type_container1D){ //currently not used
 	plottag=none;
 	binwidth_=binwidth;
 	canfilldyn_=true;
@@ -67,7 +67,7 @@ container1D::container1D(float binwidth, TString name,TString xaxisname,TString 
 	hp_=0;
 }
 container1D::container1D(std::vector<float> bins, TString name,TString xaxisname,TString yaxisname, bool mergeufof):
-                                                        												taggedObject(taggedObject::type_container1D){
+                                                        																taggedObject(taggedObject::type_container1D){
 	plottag=none;
 	setBins(bins);
 	//divideBinomial_=true;
@@ -725,6 +725,28 @@ void container1D::normalizeToContainer(const container1D & cont){
 	container1D tcont=cont;
 	tcont.setAllErrorsZero();
 	//when dividing all systematics will be recreated from nominal (now with 0 stat error)
+	int syssize=(int)getSystSize();
+
+	//new: do by hand
+	/*
+	for(size_t i=0;i<bins_.size();++i){
+		float nomcont=cont.getBinContent(i);
+
+		for(int sys=-1;sys<syssize;++sys){
+			if(nomcont!=0){
+				setBinContent(i, getBinContent(i,sys)/nomcont);
+				setBinStat(i, getBinStat(i,sys)/nomcont);
+
+			}
+			else{
+				setBinContent(i, 0);
+				setBinStat(i, 0);
+			}
+		}
+	}
+
+	return; */
+	//old impl
 	bool temp=histoContent::divideStatCorrelated;
 	histoContent::divideStatCorrelated=false;
 	*this/=tcont;
@@ -1057,6 +1079,8 @@ graph container1D::convertToGraph(bool dividebybinwidth)const{
  * just for quick plotting nothing particularly good....
  */
 void container1D::drawFullPlot(TString name, bool dividebybinwidth,const TString &extraoptions){
+	if(hp_) delete hp_;
+	if(gp_) delete gp_;
 	hp_=getTH1D(name,dividebybinwidth,true);
 	gp_=getTGraph(name,dividebybinwidth,false,false);
 	hp_->Draw("e1,"+extraoptions);
@@ -1284,6 +1308,7 @@ void container1D::addErrorContainer(const TString & sysname,const container1D & 
 		return;
 	}
 	//add layer with name and fill with content..
+	manualerror_=false;
 	if(debug)
 		std::cout << "container1D::addErrorContainer: " << name_ << std::endl;
 	contents_.addLayerFromNominal(sysname,deviatingContainer.contents_);
@@ -1315,9 +1340,10 @@ void container1D::getRelSystematicsFrom(const ztop::container1D & rhs){
 	*this*=relerrs;
 	std::cout << "container1D::getRelSystematicsFrom: carefully check the output of this function! not well tested" <<std::endl;
 	c_makelist=tempmakelist;
+	manualerror_=false;
 	return;
 }
-void container1D::addRelSystematicsFrom(const ztop::container1D & rhs){
+void container1D::addRelSystematicsFrom(const ztop::container1D & rhs,bool strict){
 	size_t nsysrhs=rhs.contents_.layerSize();
 	container1D relerr=rhs.getRelErrorsContainer();
 	for(size_t i=0;i<nsysrhs;i++){
@@ -1325,13 +1351,19 @@ void container1D::addRelSystematicsFrom(const ztop::container1D & rhs){
 		size_t newlayerit=contents_.addLayer(relerr.getSystErrorName(i));
 		if(oldlayersize<getSystSize()){ //new one
 			if(debug) std::cout << "container1D::addRelSystematicsFrom: adding new syst "<< relerr.getSystErrorName(i)<< " to container " <<name_ <<std::endl;
+			//contents_.getLayer(newlayerit).removeStat();
+			//stat are definitely not correlated
+			if(!strict && rhs.contents_.getNominal() == rhs.contents_.getLayer(i)){ //this is just a copy leave it and add no variation
+				//contents_.getLayer(newlayerit).removeStat();
+				continue;
+			}
 			contents_.getLayer(newlayerit).multiply(relerr.contents_.getLayer(i),false);
 		}
 		else{
 			if(debug) std::cout << "container1D::addRelSystematicsFrom: syst "<< relerr.getSystErrorName(i)<< " already existing in " <<name_ <<std::endl;
 		}
 	}
-
+	manualerror_=false;
 }
 
 void container1D::addGlobalRelErrorUp(const TString & sysname,const float &relerr){
@@ -1396,6 +1428,7 @@ void container1D::transformToEfficiency(){
 	}
 
 }
+
 
 void container1D::renameSyst(const TString &old, const TString &New){
 	histoBins oldsysup=contents_.copyLayer(old+"_up");
@@ -1891,6 +1924,7 @@ void container1D::loadFromTree(TTree *t, const TString & plotname){
 			*this=*cuftemp;
 		}
 	}
+	delete cuftemp;
 	if(!found){
 		std::cout << "searching for: " << plotname << "... error!" << std::endl;
 		throw std::runtime_error("container1D::loadFromTree: no container with name not found");

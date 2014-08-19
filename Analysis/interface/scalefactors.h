@@ -82,6 +82,9 @@ inline double scalefactors::getScalefactor(double xval,double yval)const{
 		std::cout << "scalefactors::getScalefactor: input has not been set! returning -999999" << std::endl;
 		return -999999;
 	}
+	if(!isth2d_ && yval!=0){
+		throw std::logic_error("scalefactors::getScalefactor: trying to give a y value to 1D scale factor!");
+	}
 
 	if(!isglobal_){
 		double content=0;
@@ -104,11 +107,11 @@ inline double scalefactors::getScalefactor(double xval,double yval)const{
 			return 0; //never reached */
 	}
 	else{ //global sf
-		if(syst_>99)
+		if(syst_==sys_nominal)
 			return glsf_;
-		else if(syst_<0) //down
+		else if(syst_==sys_down) //down
 			return glsfd_;
-		else if(syst_>0) //up
+		else if(syst_==sys_up) //up
 			return glsfup_;
 		else return 0; //never reached
 	}

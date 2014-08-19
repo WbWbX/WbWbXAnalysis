@@ -19,45 +19,53 @@ topmasses=( "172.5"
 );
 systs=("nominal"
 
-    #"TRIGGER_up"
-    #"TRIGGER_down"
-    #"ELECSF_up"
-    #"ELECSF_down"
-    #"MUONSF_up"
-    #"MUONSF_down"
 
-   #"ELECES_up"
-   #"ELECES_down"
-   #"MUONES_up"
-   #"MUONES_down"
 
-   #"PU_up"
-   #"PU_down"
+    "P11_sysnominal"
+    "P11_sysnominal_CR_up"
+    "P11_sysnominal_CR_down"
+    "P11_sysnominal_UE_up"
+    "P11_sysnominal_UE_down"
 
-   #"JER_up"
-   #"JER_down"
+    "TRIGGER_up"
+    "TRIGGER_down"
+    "ELECSF_up"
+    "ELECSF_down"
+    "MUONSF_up"
+    "MUONSF_down"
 
-   "JES_up"
-   "JES_down"
+   "ELECES_up"
+   "ELECES_down"
+   "MUONES_up"
+   "MUONES_down"
+
+   "PU_up"
+   "PU_down"
+
+   "JER_up"
+   "JER_down"
+
+   #"JES_up"
+   #"JES_down"
 
 #######JES groups according to toplhcwg use INSTEAD of global JES_up/down
 
-    #"JES_MPFInSitu_down"
-    #"JES_MPFInSitu_up"
-    #"JES_Intercalibration_down"
-    #"JES_Intercalibration_up"
-    #"JES_bJES_down"
-    #"JES_bJES_up"
-    #"JES_Flavor_down"
-    #"JES_Flavor_up"
-    #"JES_Uncorrelated_down"
-    #"JES_Uncorrelated_up"
+    "JES_MPFInSitu_down"
+    "JES_MPFInSitu_up"
+    "JES_Intercalibration_down"
+    "JES_Intercalibration_up"
+    "JES_bJES_down"
+    "JES_bJES_up"
+    "JES_Flavor_down"
+    "JES_Flavor_up"
+    "JES_Uncorrelated_down"
+    "JES_Uncorrelated_up"
 
 
-   #"BTAGH_up"
-   #"BTAGH_down"
-   #"BTAGL_up"
-   #"BTAGL_down"
+   "BTAGH_up"
+   "BTAGH_down"
+   "BTAGL_up"
+   "BTAGL_down"
    
 #####csv rew section
    #"BTAGHFS1_up"
@@ -77,10 +85,10 @@ systs=("nominal"
    "TOPPT_up"
    "TOPPT_down"
 
-   #"TT_MATCH_down"
-   #"TT_MATCH_up"
-   #"TT_SCALE_down"
-   #"TT_SCALE_up"
+   "TT_MATCH_down"
+   "TT_MATCH_up"
+   "TT_SCALE_down"
+   "TT_SCALE_up"
 
 
    #"Z_MATCH_down"
@@ -190,7 +198,7 @@ for (( i=0;i<${#channels[@]};i++)); do
 		energy=${energies[${k}]}
 
 ##dont run on scale,top pt and matching syst with other top mass
-		if [[ "${syst}" == *"SCALE"* ]] ||  [[ "${syst}" == *"MATCH"* ]] || [[ "${syst}" == *"TOPPT"* ]] 
+		if [[ "${syst}" == *"SCALE"* ]] ||  [[ "${syst}" == *"MATCH"* ]] || [[ "${syst}" == *"TOPPT"* ]] ||  [[ "${syst}" == *"_sysnominal"* ]]
 		then
 		    if [[ "${topmass}" != "172.5" ]] 
 		    then
@@ -198,6 +206,13 @@ for (( i=0;i<${#channels[@]};i++)); do
 		    fi
 		fi
 
+#### dont submit b variations if effieicnes are derived
+		if [[ "${addParameters}" == *"-B"* ]] && [[ "${syst}" == *"BTAG"* ]]
+		    then
+		    echo "not running btag systematics when btag SF are derived"
+		    continue
+		fi
+		
 ##here do qsub or dirty &
 		outname=${channel}_${energy}_${topmass}_${syst};
 	   # array=( "${array[@]}" "jack" )

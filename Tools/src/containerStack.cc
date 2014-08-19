@@ -631,8 +631,8 @@ void containerStack::addErrorStack(const TString & sysname, containerStack error
 	}
 }
 
-void containerStack::getRelSystematicsFrom(ztop::containerStack stack){
-	for(std::vector<ztop::container1D>::iterator cont=stack.containers_.begin();cont<stack.containers_.end();++cont){
+void containerStack::getRelSystematicsFrom(const ztop::containerStack & stack){
+	for(std::vector<ztop::container1D>::const_iterator cont=stack.containers_.begin();cont<stack.containers_.end();++cont){
 		TString name=cont->getName();
 		for(unsigned int i=0;i<containers_.size();i++){
 			if(containers_[i].getName() == name){
@@ -641,7 +641,7 @@ void containerStack::getRelSystematicsFrom(ztop::containerStack stack){
 			}
 		}
 	}
-	for(std::vector<ztop::container2D>::iterator cont=stack.containers2D_.begin();cont<stack.containers2D_.end();++cont){
+	for(std::vector<ztop::container2D>::const_iterator cont=stack.containers2D_.begin();cont<stack.containers2D_.end();++cont){
 		TString name=cont->getName();
 		for(unsigned int i=0;i<containers2D_.size();i++){
 			if(containers2D_[i].getName() == name){
@@ -651,11 +651,41 @@ void containerStack::getRelSystematicsFrom(ztop::containerStack stack){
 		}
 	}
 
-	for(std::vector<ztop::container1DUnfold>::iterator cont=stack.containers1DUnfold_.begin();cont<stack.containers1DUnfold_.end();++cont){
+	for(std::vector<ztop::container1DUnfold>::const_iterator cont=stack.containers1DUnfold_.begin();cont<stack.containers1DUnfold_.end();++cont){
 		TString name=cont->getName();
 		for(unsigned int i=0;i<containers1DUnfold_.size();i++){
 			if(containers1DUnfold_[i].getName() == name){
 				containers1DUnfold_[i].getRelSystematicsFrom(*cont);
+				break;
+			}
+		}
+	}
+}
+void containerStack::addRelSystematicsFrom(const ztop::containerStack & stack){
+	for(std::vector<ztop::container1D>::const_iterator cont=stack.containers_.begin();cont<stack.containers_.end();++cont){
+		TString name=cont->getName();
+		for(unsigned int i=0;i<containers_.size();i++){
+			if(containers_[i].getName() == name){
+				containers_[i].addRelSystematicsFrom(*cont);
+				break;
+			}
+		}
+	}
+	for(std::vector<ztop::container2D>::const_iterator cont=stack.containers2D_.begin();cont<stack.containers2D_.end();++cont){
+		TString name=cont->getName();
+		for(unsigned int i=0;i<containers2D_.size();i++){
+			if(containers2D_[i].getName() == name){
+				containers2D_[i].addRelSystematicsFrom(*cont);
+				break;
+			}
+		}
+	}
+
+	for(std::vector<ztop::container1DUnfold>::const_iterator cont=stack.containers1DUnfold_.begin();cont<stack.containers1DUnfold_.end();++cont){
+		TString name=cont->getName();
+		for(unsigned int i=0;i<containers1DUnfold_.size();i++){
+			if(containers1DUnfold_[i].getName() == name){
+				containers1DUnfold_[i].addRelSystematicsFrom(*cont);
 				break;
 			}
 		}
@@ -684,7 +714,26 @@ void containerStack::renameSyst(TString old, TString New){
 	for(unsigned int i=0; i<containers1DUnfold_.size();i++){
 		containers1DUnfold_[i].renameSyst(old,New);
 	}
+
 }
+std::vector<size_t> containerStack::removeSystematicsSpikes(bool inclUFOF,int limittoindex,
+		float strength,float sign,float threshold){
+
+	//not defined for container1D
+	std::vector<size_t> out,temp;
+
+	for(unsigned int i=0; i<containers2D_.size();i++){
+		temp=containers2D_[i].removeSystematicsSpikes(inclUFOF,limittoindex,strength,sign,threshold);
+		out.insert(out.end(),temp.begin(),temp.end());
+	}
+	for(unsigned int i=0; i<containers1DUnfold_.size();i++){
+		temp=containers1DUnfold_[i].removeSystematicsSpikes(inclUFOF,limittoindex,strength,sign,threshold);
+		out.insert(out.end(),temp.begin(),temp.end());
+	}
+	return out;
+}
+
+
 ztop::container1D & containerStack::getContainer(TString name){
 
 	bool found=false;

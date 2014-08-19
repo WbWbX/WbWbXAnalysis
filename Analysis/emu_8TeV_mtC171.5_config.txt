@@ -129,10 +129,10 @@ TrackingSFHisto = tracking_eff
 
 
 
-ElecSFFile     = /src/TopAnalysis/Configuration/analysis/common/data/ElectronSF_198fbReReco.root
-ElecSFHisto    = ElectronIdIsoSF
+ElecSFFile     = /src/TtZAnalysis/Data/elec_tight_SF.root
+ElecSFHisto    = GlobalSF
 
-TriggerSFFile  = /src/TopAnalysis/Configuration/analysis/common/data/triggerSummary_emu_19fb.root
+TriggerSFFile  = /src/TopAnalysis/Configuration/analysis/common/data/triggerSummary_emu_tightleps.root
 
 PUFile         = /src/TtZAnalysis/Data/ReRecoJan13.json.txt_PU $without .root
 

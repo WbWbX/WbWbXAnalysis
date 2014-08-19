@@ -44,7 +44,7 @@ public:
     graph addDependence(const float & low, const float& nominal, const float& high , const TString& sysname);
 
 
-    size_t getNDependencies(){return dependences_.size();}
+    size_t getNDependencies()const{return dependences_.size();}
 
     double getValue(const double * variations)const;
     double getValue(const float * variations)const;
@@ -58,6 +58,8 @@ public:
     double getValue(size_t idx,float variation)const;
 
     const double & getNominal()const{return nominal_;}
+
+    const std::vector<TString>& getSystNames(){return sysnames_;}
 
     void clear();
 

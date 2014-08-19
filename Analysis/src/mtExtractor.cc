@@ -36,7 +36,8 @@ bool mtExtractor::debug=false;
 mtExtractor::mtExtractor():plotnamedata_(""),plotnamemc_(""),plottypemc_("cuf"),
 		minbin_(-1),maxbin_(-1),excludebin_(-1),tmpglgraph_(0),tfitf_(0),
 		iseighttev_(true),defmtop_(172.5),setup_(false),textboxesmarker_("CMS"),syspidx_(1),
-		dofolding_(false),isexternalgen_(false),rescalepreds_(false),usenormalized_(false),defmtidx_(0)
+		dofolding_(false),isexternalgen_(false),rescalepreds_(false),usenormalized_(false),defmtidx_(0),
+		mcgraphsoutfile_(0)
 {
 	reset();
 }
@@ -139,8 +140,8 @@ void mtExtractor::drawXsecDependence(TCanvas *c, bool fordata){
 	pltrptrs_.push_back(pltrptr);
 	std::vector<std::string> cids_;
 	pltrptr->readTextBoxesInCMSSW(textboxesfile_,textboxesmarker_);
-	std::vector<graph> * graphs=&mcgraphs_;
-	if(fordata) graphs=&datagraphs_;
+	std::vector<container1D> * conts=&mccont_;
+	if(fordata) conts=&datacont_;
 
 	for(size_t i=0;i<mtvals_.size();i++){
 		//if(fabs(DEFTOPMASSFORNNLOMASSDEP - mtvals_.at(i))<0.1) continue;
@@ -159,11 +160,11 @@ void mtExtractor::drawXsecDependence(TCanvas *c, bool fordata){
 	size_t newidx=0;
 	for(size_t i=0;i<mtvals_.size();i++){
 		if(fabs(defmtop_ - mtvals_.at(i))<0.1){
-			pltrptr->setNominalPlot(&graphs->at(i));
+			pltrptr->setNominalPlot(&conts->at(i),true);
 
 		}
 		else{
-			pltrptr->setComparePlot(&graphs->at(i),newidx);
+			pltrptr->setComparePlot(&conts->at(i),newidx,true);
 			newidx++;
 		}
 	}
@@ -307,11 +308,22 @@ void mtExtractor::drawSystVariation(TCanvas *c,const TString & sys){
 }
 
 ///private functions
-double mtExtractor::getNewNorm(double deltam,bool eighttev)const{ //following  NNLO paper arXiv:1303.6254
+double mtExtractor::getNewNorm(double mass,bool eighttev)const{ //following  NNLO paper arXiv:1303.6254
+
 
 
 	if(debug)
 		std::cout << "mtExtractor::getNewNorm" <<std::endl;
+
+	if(!eighttev)
+		throw std::runtime_error("mtExtractor::getNewNorm: 7 TeV not supported, yet!");
+
+	float newxsec=getTtbarXsec(mass);
+	const float refxsec=251.6779; //xsec at 172.5GeV as used for default normalization
+	float out=newxsec/refxsec;
+	if(debug) std::cout << "sigmtopmulti mass: " << mass << "\tmulti="<< out << " xsec="<< newxsec<<std::endl;
+	return out;
+/*
 	double a1=0;
 	double a2=0;
 
@@ -332,6 +344,7 @@ double mtExtractor::getNewNorm(double deltam,bool eighttev)const{ //following  N
 	double out= (reldm*reldm*reldm*reldm) * (1+ a1*(deltam)/mref + a2*(deltam/mref)*(deltam/mref));
 	if(debug) std::cout << "sigmtopmulti deltam: " << deltam << "\tmulti="<< out <<std::endl;
 	return out;
+	*/
 }
 
 std::vector<float>  mtExtractor::getMtValues(){
@@ -671,7 +684,7 @@ void mtExtractor::renormalize(){
 		for(size_t i=0;i<mccont_.size();i++){
 			float renorm= 1;
 			if(usecuf){
-				renorm= getNewNorm(mtvals_.at(i)-DEFTOPMASSFORNNLOMASSDEP,iseighttev_);
+			//	renorm= getNewNorm(mtvals_.at(i),iseighttev_);
 				//add NNLO uncertainties
 
 				mccont_.at(i).addGlobalRelError("scale (NNLO norm)",0.034);
@@ -744,12 +757,13 @@ void mtExtractor::mergeSyst(){
 	}
 
 }
-//just transforms to graph
+//just transforms to graph and change names
 void mtExtractor::makeGraphs(){
 	for(size_t i=0;i<mccont_.size();i++){
 		graph tempgraph;
-		tempgraph.import(&mccont_.at(i),true);
-		tempgraph.setName("m_{t}="+toTString(mtvals_.at(i)));
+		tempgraph.import(&mccont_.at(i),false);
+		tempgraph.setName("m_{t}="+toTString(mtvals_.at(i))+ " GeV");
+		mccont_.at(i).setName("m_{t}="+toTString(mtvals_.at(i))+ " GeV");
 		tempgraph.sortPointsByX();
 		mcgraphs_.push_back(tempgraph);
 	}
@@ -757,8 +771,9 @@ void mtExtractor::makeGraphs(){
 	if(debug) std::cout << "mtExtractor::makeGraphs: created "<< mcgraphs_.size() << " MC graphs" << std::endl;
 	for(size_t i=0;i<datacont_.size();i++){
 		graph tempgraph;
-		tempgraph.import(&datacont_.at(i),true);
-		tempgraph.setName("m_{t}="+toTString(mtvals_.at(i)));
+		tempgraph.import(&datacont_.at(i),false);
+		tempgraph.setName("m_{t}="+toTString(mtvals_.at(i))+ " GeV");
+		datacont_.at(i).setName("m_{t}="+toTString(mtvals_.at(i))+ " GeV");
 		tempgraph.sortPointsByX();
 		datagraphs_.push_back(tempgraph);
 	}
@@ -1007,6 +1022,7 @@ void mtExtractor::drawBinsPlusFits(TCanvas *c,int syst){
 		}
 		td.setName("data");
 		tmc.setName("prediction");
+
 		pl->setTitle(databingraphs_.at(i).getName());
 		graph datafc=getExtractor()->getFittedGraphsA().at(i);
 		graph mcfitc=getExtractor()->getFittedGraphsB().at(i);
@@ -1019,6 +1035,14 @@ void mtExtractor::drawBinsPlusFits(TCanvas *c,int syst){
 		pl->setLastNoLegend();
 		pl->addPlot(&td);
 		pl->addPlot(&tmc);
+
+		if(mcgraphsoutfile_ && syst<0){
+			td.setName("data_bin_"+toTString(i));
+			tmc.setName("mc_bin_"+toTString(i));
+
+			td.writeToTFile(mcgraphsoutfile_);
+			tmc.writeToTFile(mcgraphsoutfile_);
+		}
 
 		pl->draw();
 	}
@@ -1035,7 +1059,7 @@ void mtExtractor::createGlobalLikelihood(){
 
 		//just add upp everything
 		tmpgllhd_=tmpbinlhds_.at(0);
-		gStyle->SetOptTitle(1);
+
 		for(size_t i=1;i<tmpbinlhds_.size();i++)
 			tmpgllhd_=tmpgllhd_.addY(tmpbinlhds_.at(i));
 
@@ -1117,7 +1141,7 @@ float mtExtractor::drawGlobalLikelihood(TCanvas *c,bool zoom){
 
 		float cetralXValue=0;
 		float xpleft=0;
-		float xpright=0;
+		float xpright=100000;
 		float intersecty=0;
 
 		if(paraExtr_.getLikelihoodMode() == parameterExtractor::lh_fit){
@@ -1421,10 +1445,12 @@ void mtExtractor::drawSpreadWithInlay(TCanvas *c){
 	pl->readTextBoxesInCMSSW(textboxesfile_,textboxesmarker_);
 	pl->usePad(c);
 
-	graph nomdata=datagraphs_.at(defmtidx_);
-	nomdata.setName("data");
+	container1D nomdata=datacont_.at(defmtidx_);
 
-	pl->addPlot(&nomdata);
+	nomdata.setName("data");
+	nomdata.removeAllSystematics();
+
+	pl->addPlot(&nomdata,true);
 
 	//get max spread indices
 	size_t maxidx=std::max_element(mtvals_.begin(),mtvals_.end())-mtvals_.begin();
@@ -1432,9 +1458,13 @@ void mtExtractor::drawSpreadWithInlay(TCanvas *c){
 
 	formatter fmt;
 
-	graph mtmaxup=mcgraphs_.at(maxidx);
-	graph defmtmc=mcgraphs_.at(defmtidx_);
-	graph mtmaxdown=mcgraphs_.at(minidx);
+	container1D mtmaxup=mccont_.at(maxidx);
+	container1D defmtmc=mccont_.at(defmtidx_);
+	container1D mtmaxdown=mccont_.at(minidx);
+	mtmaxup.removeAllSystematics();
+	defmtmc.removeAllSystematics();
+	mtmaxdown.removeAllSystematics();
+
 	if(isexternalgen_){
 		mtmaxup.setName("MCFM (m_{t}="+fmt.toTString(mtvals_.at(maxidx))+" GeV) + BG");
 		defmtmc.setName("MCFM (m_{t}="+fmt.toTString(mtvals_.at(defmtidx_))+" GeV) + BG");
@@ -1446,9 +1476,9 @@ void mtExtractor::drawSpreadWithInlay(TCanvas *c){
 		mtmaxdown.setName("MG+PY (m_{t}="+fmt.toTString(mtvals_.at(minidx))+" GeV) + BG");
 	}
 
-	pl->addPlot(&mtmaxup);
-	pl->addPlot(&defmtmc);
-	pl->addPlot(&mtmaxdown);
+	pl->addPlot(&mtmaxup,true);
+	pl->addPlot(&defmtmc,true);
+	pl->addPlot(&mtmaxdown,true);
 
 	pl->addInlayPlot(&globalnominal_);
 

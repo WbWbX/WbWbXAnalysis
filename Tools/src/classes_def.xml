@@ -16,7 +16,6 @@
       <class name="ztop::histoContent"/>
       <class name="std::vector<ztop::histoContent>"/>
   <class name="ztop::container1D"/>
-  <class name="ztop::container1DUF2"/>
   <class name="ztop::container1DUnfold"/>
   <class name="TUnfoldV17"/>
 	<class name="TUnfoldBinningV17"/>
@@ -64,6 +63,7 @@
         <class name="ztop::plotterMultiplePlots"/>
         
         <class name="ztop::infoCreater"/>
+        
 	
 </lcgdict>
  

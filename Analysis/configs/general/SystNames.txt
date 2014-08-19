@@ -28,3 +28,6 @@ JES_Intercalibration, 	JES: Intercalibration
 JES_bJES,				JES: b-JES
 JES_Flavor,				JES: Flavor
 JES_Uncorrelated,		JES: Uncorrelated
+
+UE, 	Underlying event
+CR,		Color reconnection

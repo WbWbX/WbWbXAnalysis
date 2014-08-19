@@ -14,7 +14,9 @@ class TCanvas;
 
 namespace ztop{
 
-
+/**
+ * small class to write out info strings to files
+ */
 class infoCreater: tObjectList{
 public:
 

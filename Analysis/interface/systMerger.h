@@ -18,7 +18,8 @@ class containerStackVector;
 
 class systMerger{
 public:
-    systMerger():infileadd_(""),outfileadd_(""),indir_(""){}
+    systMerger():infileadd_(""),outfileadd_(""),indir_(""),nominalid_("_nominal")
+,standardnominal_("_nominal"),drawcanv_(true),ignorestring_("_sysnominal"),mergerel_(false){}
     ~systMerger(){}
 
     void setInputStrings(const std::vector<std::string>& instrings);
@@ -28,7 +29,22 @@ public:
 
     void setOutFileAdd(const TString & ofa){outfileadd_=ofa;}
 
+    void setNominalID(const TString & nomid){nominalid_=nomid;}
+
+    void setDrawCanvases(bool set){drawcanv_=set;}
+
+    void setIgnoreName(const TString &str){ignorestring_=str;}
+
+    void setMergeRelative(bool set){mergerel_=set;}
+
     std::vector<TString>  start();
+    /**
+     * returns list of indicies of files that have been merged to output files
+     */
+    std::vector<size_t> getMergedFiles()const;
+
+   // std::vector<TString> getNominalStartstrings()const;
+
 
     static bool debug;
 
@@ -52,6 +68,16 @@ private:
 
     std::vector<size_t> nominals_;
     std::vector< std::vector<size_t> > syst_;
+
+    TString nominalid_;
+    TString standardnominal_;
+
+    bool drawcanv_;
+
+    std::vector<std::string> addrelative_;
+    std::string ignorestring_;
+
+    bool mergerel_;
 
 };
 

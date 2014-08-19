@@ -146,6 +146,11 @@ public:
         return cufinputfiles_.at(defmtidx_);
     }
 
+    void setBinGraphOutFile(TFile * f){mcgraphsoutfile_=f;}
+
+    const std::vector<graph > & getDataBingraphs(){return databingraphs_;}
+    const std::vector<graph > & getMCBingraphs(){return mcbingraphs_;}
+
 private:
 
     void setAxisLikelihoodVsMt(graph & g)const;
@@ -240,6 +245,8 @@ private:
     size_t defmtidx_;
 
     resultsSummary results_;
+
+    TFile * mcgraphsoutfile_;
 
     template<class T>
     T tryToGet(TFile * f,const TString& name)const{

@@ -32,6 +32,7 @@ int main(int argc, char* argv[]){
 	optParser parse(argc,argv);
 	bool makecalib = parse.getOpt<bool>("c",false,"enables calibration plot");
 	TString opts = parse.getOpt<TString>("o","","specify additional options parsed to each mtFromXSec2");
+	float mtopin = parse.getOpt<float>("mt",172.5,"specify reference top mass (only for pulls)");
 	std::vector<std::string> dirnames = parse.getRest<std::string>();
 
 
@@ -61,7 +62,7 @@ int main(int argc, char* argv[]){
 		float mtop=fr.getValue<float>("__MTOP__");
 		float stup=fr.getValue<float>("__MStatUp__");
 		float stdown=fr.getValue<float>("__MStatDown__");
-		float mtopin=172.5;
+
 		if(makecalib){
 			fmt.setDelimiter("_");
 			fmt.setTrim("/");
@@ -74,7 +75,7 @@ int main(int argc, char* argv[]){
 
 		}
 
-		std::cout << "top mass: " << mtop << "\n"<<std::endl;
+		std::cout << "top mass: " << mtop << " vs "<<mtopin << "\n"<<std::endl;
 		float xpoint=i;
 		if(makecalib)
 			xpoint=mtopin;
@@ -92,7 +93,7 @@ int main(int argc, char* argv[]){
 
 	plotterMultiplePlots pl;
 
-	sumgraph.setYAxisName("m_{t}^{in}-m_{t}^{out} [GeV]");
+	sumgraph.setYAxisName("m_{t}^{out}-m_{t}^{in} [GeV]");
 	if(!makecalib){
 		sumgraph.setXAxisName("Subset");
 		pl.readStyleFromFileInCMSSW("src/TtZAnalysis/Analysis/configs/topmass/multiplePlots_pull.txt");
@@ -121,9 +122,14 @@ int main(int argc, char* argv[]){
 	float chi2ndof=chi2sum/(sumgraph.getNPoints());
 	if(!makecalib)
 		pl.addTextBox(0.1,0.055,"#Deltam_{t}^{avg} = "+formt.toTString(formt.round(mean,0.01))+ ",  #chi^{2}/N_{dof} = "+formt.toTString(formt.round(chi2ndof,0.01)));
-		//pl.addTextBox(0.1,0.055,"#chi^{2}/N_{dof}="+formt.toTString(formt.round(chi2ndof,0.01)));
+	//pl.addTextBox(0.1,0.055,"#chi^{2}/N_{dof}="+formt.toTString(formt.round(chi2ndof,0.01)));
 
 	pl.draw();
+	if(fabs(mtopin-172.5)>0.1 && !makecalib){
+		TString tmpstr=toTString(mtopin);
+		tmpstr.ReplaceAll(".","_");
+		opts+=tmpstr;
+	}
 	if(!makecalib){
 		TLine line(-1,0,10,0);
 		line.Draw("same");

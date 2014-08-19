@@ -35,7 +35,7 @@ public:
     ~graph();
 
     bool isEmpty()const{return getNPoints()<1;}
-
+    bool hasNans()const;
 
 
     void setXAxisName(const TString& name){xname_=name;}
@@ -106,6 +106,7 @@ public:
 
     void removeYErrors(); //comes handy
     void removeXErrors(); //comes handy
+    void removeAllXYSyst();
 
     void sortPointsByX();
 
@@ -142,6 +143,7 @@ public:
 
     void shiftAllXCoordinates(const float& value);
     void shiftAllYCoordinates(const float& value);
+
 
 
     static std::vector<ztop::graph *> g_list;

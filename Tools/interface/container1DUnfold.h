@@ -121,6 +121,7 @@ public:
 	void addErrorContainer(const TString & ,const container1DUnfold &,float weight);  //! adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down"
 	void addErrorContainer(const TString & ,const container1DUnfold &);  //! adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down"
 	void getRelSystematicsFrom(const container1DUnfold &);
+	void addRelSystematicsFrom(const container1DUnfold &);
 	void addGlobalRelError(TString,float);
 
 	static std::vector<container1DUnfold *> c_list;

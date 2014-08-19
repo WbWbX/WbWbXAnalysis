@@ -13,6 +13,11 @@
 #include <stdexcept>
 
 namespace ztop{
+/**
+ * class to handle memory
+ * should be used as base class for everything that deals with
+ * tobjects on the heap
+ */
 class tObjectList{
 public:
     tObjectList(){TH1::AddDirectory(false);}

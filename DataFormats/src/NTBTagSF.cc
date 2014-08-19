@@ -243,6 +243,7 @@ void NTBTagSF::readFromTFile(TString filename){
             break;
         }
     }
+    if(bt) delete bt;
     f->Close();
     delete f;
 

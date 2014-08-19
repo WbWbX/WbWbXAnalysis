@@ -120,8 +120,21 @@ public:
 	void addErrorContainer(const TString & ,const container2D &,float);  //! adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down"
 	void addErrorContainer(const TString &,const container2D & );        //! adds deviation to (this) as systematic uncertianty with name. name must be ".._up" or ".._down"
 	void getRelSystematicsFrom(const container2D &);
+	void addRelSystematicsFrom(const container2D &);
 	void addGlobalRelError(TString,float);
 
+	/**
+	 * smoothens large unphysical variations that can occour in case of
+	 * some combinations of stat uncertainties when adding relative
+	 * systematics
+	 * - the strength parameter defines the strength the fluctuation is damped
+	 * - the sign parameter gives the maximum significance (1/sigma) of the stat fluctuation
+	 *   to be smoothed out
+	 * - the threshold parameter defines what to consider a fluctuation. the bin content
+	 *   must be <threshold> times higher than the average of the neighboring bins
+	 * returns list of syst indicies that were changed
+	 */
+	std::vector<size_t> removeSystematicsSpikes(bool inclUFOF=false,int limittoindex=-1,float strength=100000,float sign=0.3,float threshold=8);
 
 	/**
 	 * merges partial variations. only the ones corresponding to the identifier are merged

@@ -350,6 +350,17 @@ void container1DUnfold::getRelSystematicsFrom(const container1DUnfold & cont){
 	unfolded_.getRelSystematicsFrom(cont.unfolded_);
 	refolded_.getRelSystematicsFrom(cont.refolded_);
 }
+void container1DUnfold::addRelSystematicsFrom(const container1DUnfold & cont){
+	if(xbins_ != cont.xbins_ || ybins_ != cont.ybins_){
+		std::cout << "container1DUnfold::addRelSystematicsFrom: " << name_ << " and " << cont.name_ << " must have same x and y axis!" << std::endl;
+	}
+	for(size_t i=0;i<conts_.size();i++)
+		conts_.at(i).addRelSystematicsFrom(cont.conts_.at(i));
+	gencont_.addRelSystematicsFrom(cont.gencont_);
+	recocont_.addRelSystematicsFrom(cont.recocont_);
+	unfolded_.addRelSystematicsFrom(cont.unfolded_);
+	refolded_.addRelSystematicsFrom(cont.refolded_);
+}
 bool container1DUnfold::checkCongruentBinBoundariesXY() const{
 	if(xbins_.size() <2|| ybins_.size() <2)
 		return false; //emtpy

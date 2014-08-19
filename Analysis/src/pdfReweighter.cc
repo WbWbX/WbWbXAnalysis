@@ -17,6 +17,7 @@ pdfReweighter::pdfReweighter():simpleReweighter(),ntevent_(0),pdfidx_(0){}
 pdfReweighter::~pdfReweighter(){}
 
 void pdfReweighter::reWeight( float &oldweight){
+	return;
     if(switchedoff_){
         setNewWeight(1);
     }

@@ -71,7 +71,7 @@ TString TtBarUnfolder::unfold(TString out,TString in)const{
     csvname.ReplaceAll(".root","");
 
     ztop::containerStackVector csv;
-    csv.loadFromTFile(in,csvname);
+    csv.loadFromTFile(in);
 
 
     //get right stacks and set signal

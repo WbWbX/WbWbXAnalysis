@@ -66,7 +66,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	fr.setRequireValues(false);
 	mode                 += fr.getValue<TString>("modeOptions",TString(mode));
 
-	TString trigsfhisto="scalefactor eta2d with syst";
+	TString trigsfhisto="scalefactor_eta2d_with_syst";
 
 
 	std::cout << "inputfile read" << std::endl;
@@ -158,6 +158,43 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	if(Syst=="nominal"){
 		//all already defined
 	}
+	///sys nominals...
+
+	//using the sys nominal
+	//btag efficiencies are NOT required here
+	else if(Syst=="P11_sysnominal"){
+		ana.setFilePostfixReplace("ttbar.root","ttbar_mgdecays_p11.root");
+		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mgdecays_p11.root");
+		ana.getBTagSF()->setMakeEff(true);
+		ana.setBTagSFFile(btagfile+Syst+"_dummy");
+	}
+	else if(Syst=="P11_sysnominal_CR_up"){ //do nothing
+		ana.setFilePostfixReplace("ttbar.root","ttbar_mgdecays_p11.root");
+		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mgdecays_p11.root");
+		ana.getBTagSF()->setMakeEff(true);
+		ana.setBTagSFFile(btagfile+Syst+"_dummy");
+	}
+	else if(Syst=="P11_sysnominal_CR_down"){ //do nothing
+		ana.setFilePostfixReplace("ttbar.root","ttbar_mgdecays_p11nocr.root");
+		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mgdecays_p11nocr.root");
+		ana.getBTagSF()->setMakeEff(true);
+		ana.setBTagSFFile(btagfile+Syst+"_dummy");
+	}
+	else if(Syst=="P11_sysnominal_UE_up"){
+		ana.setFilePostfixReplace("ttbar.root","ttbar_mgdecays_p11mpihi.root");
+		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mgdecays_p11mpihi.root");
+		ana.getBTagSF()->setMakeEff(true);
+		ana.setBTagSFFile(btagfile+Syst+"_dummy");
+	}
+	else if(Syst=="P11_sysnominal_UE_down"){
+		ana.setFilePostfixReplace("ttbar.root","ttbar_mgdecays_p11tev.root");
+		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mgdecays_p11tev.root");
+		ana.getBTagSF()->setMakeEff(true);
+		ana.setBTagSFFile(btagfile+Syst+"_dummy");
+	}
+
+
+
 	else if(Syst=="TRIGGER_down"){
 		ana.getTriggerSF()->setSystematics("down");
 	}
@@ -334,6 +371,12 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 		ana.setFilePostfixReplace("ttbar.root","ttbar_ttscaledown.root");
 		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_ttscaledown.root");
 	}
+	/////////
+	else if(Syst=="TT_SCALE_down"){
+		ana.setFilePostfixReplace("ttbar.root","ttbar_ttscaledown.root");
+		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_ttscaledown.root");
+	}
+	////////////
 	else if(Syst=="Z_MATCH_up"){
 		ana.setFilePostfixReplace("60120.root","60120_Zmup.root");
 	}

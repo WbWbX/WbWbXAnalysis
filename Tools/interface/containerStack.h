@@ -48,6 +48,13 @@ public:
 
     void setLegendOrder(const TString &leg, const size_t& no);
 
+    size_t getSystSize()const{
+    	if(is1D() && containers_.size()>0) return containers_.at(0).getSystSize();
+    	else if(is2D() && containers2D_.size()>0) return containers2D_.at(0).getSystSize();
+    	else if(is1DUnfold() && containers1DUnfold_.size()>0) return containers1DUnfold_.at(0).getSystSize();
+    	else return 0;
+    }
+
    // void mergeSameLegends();       //! shouldn't be necessary
 
     void mergeLegends(const std::vector<TString>& tobemerged,const TString & mergedname, bool allowsignals=false);
@@ -106,9 +113,12 @@ public:
 
     void addMCErrorStack(const TString&,const containerStack &) ; //only for comp reasons
     void addErrorStack(const TString& , containerStack ); //! calls container1D::addErrorContainer for each same named member container
-    void getRelSystematicsFrom(ztop::containerStack);
+    void getRelSystematicsFrom(const ztop::containerStack&);
+    void addRelSystematicsFrom(const ztop::containerStack&);
     void removeError(TString);
     void renameSyst(TString, TString); //! old, new
+
+    std::vector<size_t> removeSystematicsSpikes(bool inclUFOF=false,int limittoindex=-1,float strength=100000,float sign=0.3,float threshold=8);
 
     void clear(){containers_.clear();legends_.clear();colors_.clear();norms_.clear();}
 

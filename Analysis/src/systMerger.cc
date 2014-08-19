@@ -34,7 +34,7 @@ void systMerger::setInputStrings(const std::vector<std::string>& instrings){
     size_t ignorecount=0;
     for(size_t i=0;i<instrings.size();i++){
         const std::string& instring=instrings.at(i);
-        if(infileadd_.Length()>0 && !hasEnding(instring,addstr)){
+        if((infileadd_.Length()>0 && !hasEnding(instring,addstr)) || instring.find(ignorestring_)!=std::string::npos){
             ignorecount++;
             if(debug) std::cout << "systMerger::setInputStrings: ignored " << instring <<std::endl;
             continue; //wrong add
@@ -80,10 +80,13 @@ std::vector<TString>  systMerger::start(){
 ///sort inputs
 void systMerger::searchNominals(){
     if(debug) std::cout << "systMerger::searchNominals" <<std::endl;
-    TString check="_nominal";
+    TString check=nominalid_;
     nominals_.clear();
     for(size_t i=0;i<instrings_.size();i++){
-        if(instrings_.at(i).Contains(check) && (infileadd_.Length() < 1 || instrings_.at(i).EndsWith("_"+infileadd_))){
+
+        if(instrings_.at(i).Contains(check)
+        		&& (infileadd_.Length() < 1 || instrings_.at(i).EndsWith("_"+infileadd_))
+        		&& !(instrings_.at(i).EndsWith("_up") || instrings_.at(i).EndsWith("_down")) ){
             if(debug) std::cout << "systMerger::searchNominals: identified " << instrings_.at(i) <<std::endl;
             nominals_.push_back(i);
         }
@@ -105,7 +108,9 @@ void systMerger::searchSystematics(){
         TString startstring=instrings_.at(nominals_.at(nom));
         if(debug) std::cout << "systMerger::searchSystematics: for nominal "<< startstring<<std::endl;
 
-        startstring.ReplaceAll("_nominal","");
+        if(nominalid_ == standardnominal_)
+        	startstring.ReplaceAll(nominalid_,"");
+
         for(size_t sys=0;sys<instrings_.size();sys++){
             if(sys==nominals_.at(nom)) continue; //is nominal
             if(instrings_.at(sys).BeginsWith(startstring) && (infileadd_.Length() < 1 ||  instrings_.at(sys).EndsWith("_"+infileadd_))){
@@ -165,9 +170,21 @@ std::vector<TString>  systMerger::mergeAndSafe(){
         for(size_t sys=0;sys<syst_.at(nom).size();sys++){
             containerStackVector * sysvec=getFromFileToMem(dir,instrings_.at(syst_.at(nom).at(sys)));
             if(debug) std::cout << "systMerger::mergeAndSafe: adding "<< sysvec->getName() << " to " << nominal->getName()<< std::endl;
-            nominal->addMCErrorStackVector(*sysvec);
+            if(nominalid_ == standardnominal_){
+            	nominal->addMCErrorStackVector(*sysvec);
+            }
+            else{
+            	TString sysname=sysvec->getSyst();
+            	if(debug)std::cout << "replacing name " << sysname << " by ";
+            	sysname.ReplaceAll(nominalid_+"_","");
+            	sysname.ReplaceAll(nominalid_,"");
+            	if(debug)std::cout << sysname << " removed "<< nominalid_<< std::endl;
+            	nominal->addMCErrorStackVector(sysname,*sysvec);
+            }
             delete sysvec;
         }
+
+
         nominal->setName(nominal->getName()+outadd+"_syst");
         std::cout << "systMerger: writing "<< nominal->getName() << std::endl;
         outputfilenames << nominal->getName()+".root";
@@ -177,7 +194,14 @@ std::vector<TString>  systMerger::mergeAndSafe(){
         }
         alldisc << disc;
         //remove old
-        nominal->writeAllToTFile(nominal->getName()+".root",true);
+      /*  std::vector<size_t> syssmoothened=nominal->removeSystematicsSpikes();
+        std::cout << "smoothened syst for: ";
+        for(size_t i=0;i<syssmoothened.size();i++){
+        	std::cout << "  " << syssmoothened.at(i) ;
+
+        } */
+        std::cout <<std::endl;
+        nominal->writeAllToTFile(nominal->getName()+".root",true,!drawcanv_);
 
         //clear discr factory mem
 
@@ -236,7 +260,13 @@ void systMerger::mergeBTags()const{
     }
 }
 
+std::vector<size_t> systMerger::getMergedFiles()const{
+	std::vector<size_t> out=nominals_;
+	for(size_t i=0;i<syst_.size();i++)
+		out.insert(out.end(),syst_.at(i).begin(),syst_.at(i).end());
 
+	return out;
+}
 
 
 

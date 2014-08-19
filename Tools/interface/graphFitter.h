@@ -24,9 +24,20 @@ public:
  */
     void readGraph(const graph* );
 
+    /**
+     * this allows the fit to shift the graph in x and y to approx 0
+     * and makes fits converge easier.
+     * shifts will be corrected when using the getFitOutput(const double& xin)const;
+     * function. parameters should NOT be fed to other functions!!
+     */
+    void setDoXYShift(bool dos){shiftxy_=dos;}
 
+    double getFitOutput(const double& xin)const;
 
 private:
+
+    bool shiftxy_;
+    float shiftx_,shifty_;
 
     //shadow some to be not used
     void addPoint(const double & px, const double & py){simpleFitter::addPoint(px,py);}

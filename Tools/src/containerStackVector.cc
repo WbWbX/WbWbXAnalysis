@@ -17,6 +17,7 @@ std::vector<containerStackVector*> containerStackVector::csv_list;
 bool containerStackVector::csv_makelist=false;
 bool containerStackVector::debug=false;
 bool containerStackVector::fastadd=false;
+int containerStackVector::treesplitlevel=99;
 
 containerStackVector::containerStackVector(){
 	if(csv_makelist)csv_list.push_back(this);
@@ -214,7 +215,7 @@ void containerStackVector::addErrorStackVector(const TString &sysname,const  zto
 			stacks_.at(i).addMCErrorStack(sysname,stackvec.stacks_.at(i));
 	}
 }
-void containerStackVector::addMCErrorStackVector(ztop::containerStackVector stackvec){
+void containerStackVector::addMCErrorStackVector(const ztop::containerStackVector& stackvec){
 	addMCErrorStackVector(stackvec.getSyst(), stackvec);
 }
 void containerStackVector::addGlobalRelMCError(TString sysname,double error){
@@ -222,10 +223,10 @@ void containerStackVector::addGlobalRelMCError(TString sysname,double error){
 		stack->addGlobalRelMCError(sysname,error);
 	}
 }
-void containerStackVector::getRelSystematicsFrom(ztop::containerStackVector stackvec){
+void containerStackVector::getRelSystematicsFrom(const ztop::containerStackVector& stackvec){
 	if(!fastadd){
 		for(std::vector<containerStack>::iterator istack=stacks_.begin();istack<stacks_.end(); ++istack){
-			for(std::vector<containerStack>::iterator estack=stackvec.stacks_.begin();estack<stackvec.stacks_.end(); ++estack){
+			for(std::vector<containerStack>::const_iterator estack=stackvec.stacks_.begin();estack<stackvec.stacks_.end(); ++estack){
 				if(istack->getName() == estack->getName()){
 					istack->getRelSystematicsFrom(*estack);
 					break;
@@ -234,8 +235,24 @@ void containerStackVector::getRelSystematicsFrom(ztop::containerStackVector stac
 		}
 	}
 	else{//fastadd requires same ordering of all stacks (usually the case)
-	for(size_t i=0;i<stacks_.size();i++)
-		stacks_.at(i).getRelSystematicsFrom(stackvec.stacks_.at(i));
+		for(size_t i=0;i<stacks_.size();i++)
+			stacks_.at(i).getRelSystematicsFrom(stackvec.stacks_.at(i));
+	}
+}
+void containerStackVector::addRelSystematicsFrom(const ztop::containerStackVector& stackvec){
+	if(!fastadd){
+		for(std::vector<containerStack>::iterator istack=stacks_.begin();istack<stacks_.end(); ++istack){
+			for(std::vector<containerStack>::const_iterator estack=stackvec.stacks_.begin();estack<stackvec.stacks_.end(); ++estack){
+				if(istack->getName() == estack->getName()){
+					istack->addRelSystematicsFrom(*estack);
+					break;
+				}
+			}
+		}
+	}
+	else{//fastadd requires same ordering of all stacks (usually the case)
+		for(size_t i=0;i<stacks_.size();i++)
+			stacks_.at(i).addRelSystematicsFrom(stackvec.stacks_.at(i));
 	}
 }
 
@@ -249,6 +266,17 @@ void containerStackVector::renameSyst(TString old, TString New){
 		stack->renameSyst(old,New);
 	}
 }
+
+std::vector<size_t> containerStackVector::removeSystematicsSpikes(bool inclUFOF,
+		int limittoindex,float strength,float sign,float threshold){
+	std::vector<size_t> out,temp;
+	for(std::vector<containerStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
+		temp=stack->removeSystematicsSpikes(inclUFOF,limittoindex,strength,sign,threshold);
+		out.insert(out.end(),temp.begin(),temp.end());
+	}
+	return out;
+}
+
 
 void containerStackVector::multiplyNorm(TString legendname, double multi, TString step){
 	for(std::vector<containerStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
@@ -309,7 +337,7 @@ void containerStackVector::writeAllToTFile(TString filename, bool recreate, bool
 			t = (TTree*) f->Get(treename);
 		}
 		else{
-			t = new TTree(treename,treename);
+			t = new TTree(treename,treename,treesplitlevel);
 		}
 		if(t){
 			if(debug)
@@ -385,66 +413,66 @@ void containerStackVector::writeAllToTFile(TString filename, bool recreate, bool
 					/* old impl
                         TCanvas * c=stack->makeTCanvas();
 					 */
-					 if(c){
-						 //tdir->WriteObject(c,c->GetName());
-						 c->Write();
-						 // stack->cleanMem();
-						 delete c;
-					 }
-					 pl.cleanMem();
-					 container1DUnfold cuf=stack->getSignalContainer1DUnfold();
-					 containerStack rebinned=stack->rebinXToBinning(cuf.getGenBins());
-					 rebinned.setName(stack->getName()+"_genbins");
-					 c = new TCanvas(rebinned.getName());
-					 pl.setTitle(rebinned.getName());
-					 pl.usePad(c);
-					 pl.setStack(&rebinned);
-					 pl.draw();
+					if(c){
+						//tdir->WriteObject(c,c->GetName());
+						c->Write();
+						// stack->cleanMem();
+						delete c;
+					}
+					pl.cleanMem();
+					container1DUnfold cuf=stack->getSignalContainer1DUnfold();
+					containerStack rebinned=stack->rebinXToBinning(cuf.getGenBins());
+					rebinned.setName(stack->getName()+"_genbins");
+					c = new TCanvas(rebinned.getName());
+					pl.setTitle(rebinned.getName());
+					pl.usePad(c);
+					pl.setStack(&rebinned);
+					pl.draw();
 
-					 /* old impl
+					/* old impl
                        TCanvas * c=stack->makeTCanvas();
-					  */
-					 if(c){
-						 //tdir->WriteObject(c,c->GetName());
-						 c->Write();
-						 // stack->cleanMem();
-						 delete c;
-					 }
-					 pl.cleanMem();
+					 */
+					if(c){
+						//tdir->WriteObject(c,c->GetName());
+						c->Write();
+						// stack->cleanMem();
+						delete c;
+					}
+					pl.cleanMem();
 
-					 cuf.checkCongruentBinBoundariesXY();
-					 TH1D * pur=cuf.getPurity().getTH1D("purity",false,false,false);
-					 TH1D * stab=cuf.getStability().getTH1D("stability",false,false,false);
-					 if(pur){
-						 c =new TCanvas("purity_stab","purity_stab");
-						 pur->SetMarkerColor(kBlue);
-						 stab->SetMarkerColor(kRed); //put to plotter after testing
-						 pur->GetYaxis()->SetRangeUser(0,1);
-						 pur->Draw();
-						 stab->Draw("same");
-						 c->Write();
-						 delete c;
-						 delete pur;
-						 delete stab;
-					 }
-					 c =new TCanvas("MResp","MResp");
-					 TH2D * resp=cuf.getResponseMatrix().getTH2D("respMatrix_nominal",false,true);
-					 resp->Draw("colz");
-					 c->Write();
-					 delete c;
-					 delete resp;
-					 TDirectory * dsys=din->mkdir("sys","sys");
-					 dsys->cd();
-					 for(size_t i=0;i<cuf.getSystSize();i++){
-						 c =new TCanvas("MResp_"+cuf.getSystErrorName(i),"MResp_"+cuf.getSystErrorName(i));
-						 resp=cuf.getResponseMatrix().getTH2DSyst("respMatrix_"+cuf.getSystErrorName(i),i,false,true);;
-						 resp->Draw("colz");
-						 c->Write();
-						 stack->cleanMem();
-						 delete c;
-						 delete resp;
-					 }
-					 d->cd();
+					cuf.checkCongruentBinBoundariesXY();
+					TH1D * pur=cuf.getPurity().getTH1D("purity",false,false,false);
+					TH1D * stab=cuf.getStability().getTH1D("stability",false,false,false);
+					if(pur){
+						c =new TCanvas("purity_stab","purity_stab");
+						pur->SetMarkerColor(kBlue);
+						stab->SetMarkerColor(kRed); //put to plotter after testing
+						pur->GetYaxis()->SetRangeUser(0,1);
+						pur->Draw();
+						stab->Draw("same");
+						c->Write();
+						delete c;
+						delete pur;
+						delete stab;
+					}
+					c =new TCanvas("MResp","MResp");
+					TH2D * resp=cuf.getResponseMatrix().getTH2D("respMatrix_nominal",false,true);
+					resp->Draw("colz");
+					c->Write();
+					delete c;
+					delete resp;
+					TDirectory * dsys=din->mkdir("sys","sys");
+					dsys->cd();
+					for(size_t i=0;i<cuf.getSystSize();i++){
+						c =new TCanvas("MResp_"+cuf.getSystErrorName(i),"MResp_"+cuf.getSystErrorName(i));
+						resp=cuf.getResponseMatrix().getTH2DSyst("respMatrix_"+cuf.getSystErrorName(i),i,false,true);;
+						resp->Draw("colz");
+						c->Write();
+						stack->cleanMem();
+						delete c;
+						delete resp;
+					}
+					d->cd();
 				}
 				else if(stack->is1D()){
 					std::string dirname=stack->getName().Data();
@@ -606,7 +634,7 @@ void containerStackVector::writeAllToTFile(TFile * f, TString treename){
 		t = (TTree*) f->Get(treename);
 	}
 	else{
-		t = new TTree(treename,treename);
+		t = new TTree(treename,treename,treesplitlevel);
 	}
 	if(t->GetBranch("containerStackVectors")){ //branch does exist
 		bool temp=csv_makelist;
@@ -654,18 +682,11 @@ void containerStackVector::writeAllToTFile(TFile * f, TString treename){
 
 }
 
-
+//only for compat reasons
 void containerStackVector::loadFromTree(TTree * t, const TString& name){
 	AutoLibraryLoader::enable();
-	containerStackVector csv;
-	containerStackVector * pcsv=csv.getFromTree(t,name);
-	if(pcsv){
-		*this=*pcsv;//copy
-		//delete pcsv; //?
-	}
-	else{
-		throw std::runtime_error("containerStackVector::loadFromTree: no CSV found in tree");
-	}
+	getFromTree(t,name);
+
 }
 
 containerStackVector * containerStackVector::getFromTree(TTree * t, const TString& name){
@@ -673,7 +694,7 @@ containerStackVector * containerStackVector::getFromTree(TTree * t, const TStrin
 	if(!t || t->IsZombie()){
 		throw std::runtime_error("containerStackVector::loadFromTree: tree not ok");
 	}
-	ztop::containerStackVector * cuftemp=0;
+	ztop::containerStackVector * cuftemp=0; //new containerStackVector(); //shouldn't make sense.. but seems to decrease TBasket memleaks
 	if(!t->GetBranch("containerStackVectors")){
 		throw std::runtime_error("containerStackVector::loadFromTree: branch containerStackVectors not found");
 	}
@@ -691,6 +712,7 @@ containerStackVector * containerStackVector::getFromTree(TTree * t, const TStrin
 			*this=*cuftemp;
 		}
 	}
+	delete cuftemp;
 	if(!found){
 		throw std::runtime_error("containerStackVector::loadFromTree: no containerStackVector with name not found");
 	}
@@ -705,6 +727,7 @@ void containerStackVector::loadFromTFile(TFile * f,const TString& csvname,TStrin
 	if(!f || f->IsZombie()){
 		throw std::runtime_error("containerStackVector::loadFromTFile: file not ok.");
 	}
+	f->cd();
 	TTree * ttemp = (TTree*)f->Get(treename);
 	loadFromTree(ttemp,csvname);
 	delete ttemp;
@@ -726,6 +749,7 @@ void containerStackVector::listAllInTree(TTree * t){
 		t->GetEntry(n);
 		std::cout << csv->getName() << std::endl;
 	}
+	delete csv;
 }
 
 

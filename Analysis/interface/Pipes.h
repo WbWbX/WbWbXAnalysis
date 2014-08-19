@@ -19,6 +19,11 @@
 
 #define IPC_BUFFERSIZE 128
 
+/**
+ * class to enable communation between programs through pipes
+ * it can only pass simple and basic data formats
+ * the buffer size is limited to 128
+ */
 template<class T>
 class IPCPipe{
 public:
@@ -56,6 +61,11 @@ private:
 
 };
 
+/**
+ * class to enable communation between programs through a set of pipes
+ * it can only pass simple and basic data formats
+ * the buffer size of each pipe limited to 128
+ */
 template<class T>
 class IPCPipes{
 public:

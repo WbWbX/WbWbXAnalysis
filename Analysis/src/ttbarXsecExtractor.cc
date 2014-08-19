@@ -548,6 +548,29 @@ double ttbarXsecExtractor::getChi2(const double * variations){
             continue;
 
 
+        //just add N_evts with extra jet (extra jet multi)
+        //and reuse lumitimesxsectimesepsemuvar * prob1jet as scaler
+
+        //all starts at MC values, so it should work
+        //should be implemented in a way such that it can handle 1 bjet+ n jets and 2 bjet+m
+        // jets with m not necessarily equals n
+
+        // just compare:
+        // - lumitimesxsectimesepsemuvar * prob1jet * frac0addjet + corr_bg to corr in data etc..
+        // - fix FIRST fraction to (1-sumOtherFractions) - it should be largest and therefore
+        // - (1-sumOtherFractions) shouldn't fluctuate below 0 (just for stability)
+        // - also makes it directly applicable to no additional jet differentiation case, ehen sumOtherFraction wil become 0
+
+        //needs: additional dimension (* njetdim) in:
+        // - ndata_0/1/2
+        // - N_bkg0/1/2_
+        // add the following (nbins * njetdim)
+        // - nmc_0/1/2
+        //
+        // then do poissonian in all bins
+        //so place the new loop here: NEWLOOP
+
+
         //////space for additional constraints
 
         double ndata0var=n_data0_.at(i).getValue(variations);
@@ -569,6 +592,8 @@ double ttbarXsecExtractor::getChi2(const double * variations){
 
         double N_0 =  lumitimesxsectimesepsemuvar * (1- prob1jet) * (1-prob2jet)  + N_bkg0_.at(i).getValue(variations);
 
+
+
         double delta0 = (ndata0var - N_0);
         double delta1 = (ndata1var - N_1);
         double delta2 = (ndata2var - N_2);
@@ -587,6 +612,8 @@ double ttbarXsecExtractor::getChi2(const double * variations){
             datasum+=delta1*delta1/ndata1var;
             datasum+=delta2* delta2/ndata2var;
         }
+
+        //NEWLOOP END
 
     }
     ///////nuisance part

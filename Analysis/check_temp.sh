@@ -148,7 +148,10 @@ then
 
 
 else
-
+    if [[ "${option}" == "nomerge" ]]
+	then
+	exit 0
+    fi
     echo "all your jobs have finished, trying to merge systematics...."
     cd $workdir/output
 

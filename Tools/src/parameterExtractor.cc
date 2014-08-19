@@ -45,11 +45,147 @@ std::vector<graph> parameterExtractor::createLikelihoods(){
 	std::vector<graph> out;
 	size_t size=getSize();
 	for(size_t i=0;i<size;i++){
+		if(selfheal_
+				&& std::find(nangraphs_.begin(),nangraphs_.end(),i) != nangraphs_.end())
+			continue; //self healing
+
 		out.push_back(createLikelihood(i));
 	}
 	return out;
 }
+float parameterExtractor::getLikelihoodMinimum(size_t idx, float * statlow, float*stathigh,bool global, graph* graphLH, TF1* togetFunc){
+	if(debug)
+		std::cout << "parameterExtractor::getLikelihoodMinimum" << std::endl;
+	if(idx>=getSize() && ! global)
+		throw std::out_of_range("parameterExtractor::getLikelihoodMinimum index out of range");
+	graph temp(1);
+	if(!global){
+		temp=createLikelihood(idx);}
+	else{
+		std::vector<graph> binnedlh=createLikelihoods();
+		if(binnedlh.size()>0)
+			temp=binnedlh.at(0);
+		for(size_t i=1;i<binnedlh.size();i++){
+			temp=temp.addY(binnedlh.at(i));
+		}
+	}
+	if(graphLH)
+		*graphLH=temp;
 
+	/*
+	TCanvas ct;
+	temp.getTGraph("",true)->Draw("AP");
+	ct.Print("gllh.pdf");
+	exit(EXIT_FAILURE);
+	 */
+	//fit a function here! polN with N being high. enough points so as high as possible
+
+
+
+	//TGraphAsymmErrors * gtofit=temp.getTGraph("tmp",true);
+	/* later
+	    ROOT::Math::Functor f(this,&ttbarXsecExtractor::getChi2,fitter_.getParameters()->size());
+
+	    fitter_.setMinFunction(&f);
+
+	 */
+	//debug using TF1
+
+	//	std::cout << "hello " << temp.getNPoints()<<std::endl; //DEBUG
+	graph shifted=temp;
+	size_t minpointidx=0;
+	temp.getYMin(minpointidx,false);
+
+	if(minpointidx<1 || temp.hasNans()){ //problem with minimum, wrong likelihood or something. let the main program handle that!
+		if(stathigh)
+			*stathigh=-1;
+		if(statlow)
+			*statlow=-1;
+		return 0;
+	}
+
+	//	std::cout << "minp idx "<<minpointidx; //DEBUG
+	float shift=temp.getPointXContent(minpointidx);
+	//	std::cout << "shift: " << shift<<std::endl; //DEBUG
+	shifted.shiftAllXCoordinates(- shift);
+	double sxmin=shifted.getPointXContent(0);
+	double sxmax=shifted.getPointXContent(shifted.getNPoints()-1);
+	//	std::cout << "min max: " << sxmin << " " <<sxmax <<std::endl; //DEBUG
+
+	TGraphAsymmErrors * gtofit=shifted.getTGraph("tmp",true);
+	TF1* ffunc = new TF1("fita","pol4",sxmin,sxmax);
+
+	ffunc->SetParameter(0,shifted.getYMin());
+	ffunc->SetLineColor(kRed);
+	gtofit->Fit(ffunc,"VRQ");
+	delete TVirtualFitter::GetFitter();
+
+	size_t searchinterval= shifted.getNPoints()*0.05;
+	//	std::cout << "searchint: " << searchinterval <<std::endl; //DEBUG
+	if(searchinterval<5){
+		searchinterval=5;
+		if(searchinterval + minpointidx >= shifted.getNPoints()) searchinterval=shifted.getNPoints()-minpointidx-1;
+		if(searchinterval + granularity_ - minpointidx <= granularity_)searchinterval=minpointidx-1;
+	}
+
+
+	size_t searchintleft=shifted.getPointXContent(minpointidx-searchinterval);
+	size_t searchintright=shifted.getPointXContent(minpointidx+searchinterval);
+
+	//this may all be done algebraically!
+
+	float ymin =ffunc->GetMinimum(searchintleft,searchintright);
+	// EvalPar(&x,0)
+	float Xminimum=ffunc->GetX(ymin,searchintleft,searchintright);
+	if(statlow){
+		float xpleft=ffunc->GetX(ymin+1,sxmin,Xminimum);
+		*statlow=fabs(Xminimum-xpleft);
+	}
+	if(stathigh){
+		float xpright=ffunc->GetX(ymin+1,Xminimum,sxmax);
+		*stathigh=fabs(xpright-Xminimum);
+	}
+
+	/*
+	TCanvas ct;
+	gtofit->Draw("AP");
+	ffunc->Draw("same");
+	ct.Print("debug_globalLH.pdf");
+	exit(EXIT_FAILURE);
+	 */
+	if(togetFunc)
+		togetFunc=ffunc;
+	else
+		delete ffunc;
+	return Xminimum+shift;
+
+
+	/*
+		size_t difftog=0,leftpointn=0,rightpointn=0;;
+		size_t coordssize=temp.getNPoints();
+		while(difftog<g){
+			if(!leftpointn && g-difftog>0){
+				float yleft=temp.getPointYContent(g-difftog);
+				if(yleft>yminimum+1){
+					leftpointn=g-difftog;
+	 *statlow=fabs(temp.getPointXContent(leftpointn) - xatymin);
+				}
+			}
+			if(!rightpointn && g+difftog<coordssize){
+				float yright=temp.getPointYContent(g+difftog);
+				if(yright>yminimum+1){
+					rightpointn=g+difftog;
+	 *stathigh=fabs(temp.getPointXContent(rightpointn) - xatymin);
+
+				}
+			}
+			if(rightpointn && leftpointn) break;
+			++difftog;
+		}
+
+	 */
+
+}
 
 //////////protected member funcs
 
@@ -58,20 +194,44 @@ graph parameterExtractor::createLikelihood(size_t idx){
 	if(debug)
 		std::cout << "parameterExtractor::createLikelihood "<< idx << std::endl;
 
+	if(fittedgraphsa_.size() != agraphs_.size()){
+		fittedgraphsa_.resize(agraphs_.size());
+	}
+	if(fittedgraphsb_.size() != bgraphs_.size()){
+		fittedgraphsb_.resize(bgraphs_.size());
+	}
+
 	if(LHMode_==lh_chi2){
-		return createChi2Likelihood(agraphs_.at(idx),bgraphs_.at(idx));
+		graph out= createChi2Likelihood(agraphs_.at(idx),bgraphs_.at(idx));
+		if(std::find(nangraphs_.begin(),nangraphs_.end(),idx) == nangraphs_.end()
+				&& out.hasNans())
+			nangraphs_.push_back(idx);
+		return out;
 	}
 	else if(LHMode_==lh_chi2Swapped){
-		return createChi2SwappedLikelihood(agraphs_.at(idx),bgraphs_.at(idx));
+		graph out=createChi2SwappedLikelihood(agraphs_.at(idx),bgraphs_.at(idx));
+		if(std::find(nangraphs_.begin(),nangraphs_.end(),idx) == nangraphs_.end()
+				&& out.hasNans())
+			nangraphs_.push_back(idx);
+		return out;
 	}
 	else if(LHMode_==lh_fit){
-		graph out=createIntersectionLikelihood(agraphs_.at(idx),bgraphs_.at(idx),fittedgraphsa_.at(idx),fittedgraphsb_.at(idx));
-
+		bool hasnan=false;
+		graph out=createIntersectionLikelihood(agraphs_.at(idx),bgraphs_.at(idx),
+				fittedgraphsa_.at(idx),fittedgraphsb_.at(idx),hasnan);
+		if(std::find(nangraphs_.begin(),nangraphs_.end(),idx) == nangraphs_.end()
+				&& hasnan){
+			nangraphs_.push_back(idx);
+		}
 		return out;
 	}
 	else if(LHMode_==lh_fitintersect){
-		graph out=createIntersectionLikelihood(agraphs_.at(idx),bgraphs_.at(idx),fittedgraphsa_.at(idx),fittedgraphsb_.at(idx));
-
+		bool hasnan=false;
+		graph out=createIntersectionLikelihood(agraphs_.at(idx),bgraphs_.at(idx)
+				,fittedgraphsa_.at(idx),fittedgraphsb_.at(idx),hasnan);
+		if(hasnan&& std::find(nangraphs_.begin(),nangraphs_.end(),idx) == nangraphs_.end()){
+			nangraphs_.push_back(idx);
+		}
 		return out;
 	}
 
@@ -233,7 +393,7 @@ double parameterExtractor::findintersect(TF1* a, TF1* b,float min, float max){//
 	return out;
 }
 
-graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const graph& bIn,graph& fitteda,graph& fittedb){
+graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const graph& bIn,graph& fitteda,graph& fittedb,bool & hasnan){
 	if(debug)
 		std::cout << "createIntersectionLikelihood" <<std::endl;
 	if(fitfunctiona_=="" || fitfunctionb_=="" ){
@@ -269,8 +429,8 @@ graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const gr
 	//mean y should be around 0
 	meanya=0;
 	meanyb=0;
-	xmin=std::min(a.getXMin()*(1.15),b.getXMin()*(1.15));
-	xmax=std::max(a.getXMax()*(1.15),b.getXMax()*(1.15));
+	xmin=std::min(a.getXMin()*(1.5),b.getXMin()*(1.5)); //some extrapolation
+	xmax=std::max(a.getXMax()*(1.5),b.getXMax()*(1.5));
 
 	TGraphAsymmErrors * agraph=a.getTGraph("a",false);
 	TGraphAsymmErrors * bgraph=b.getTGraph("b",false);
@@ -308,17 +468,47 @@ graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const gr
 
 	std::cout << "GetConfidenceIntervals" <<std::endl; //DEBUG
 
-	agraph->Fit(tmpfa_,"VR");
+	bool afitsucc=agraph->Fit(tmpfa_,"VRQS")->IsValid();
 
 	(TVirtualFitter::GetFitter())->GetConfidenceIntervals(nxpoints,1,&xpoints.at(0),&confintva.at(0),clfit_);
+	//sotre fit parameter for 2nd pol
+	if(fitfunctiona_=="pol2"){
+		std::vector<double> paras(5);
+		paras.at(0) = tmpfa_->GetParameter(0);
+		paras.at(1) = tmpfa_->GetParameter(1);
+		paras.at(2) = tmpfa_->GetParameter(2);
+		paras.at(3) = xshift;
+		paras.at(4) = yshift;
+		fittedparasa_.push_back(paras);
+	}
 
-	bgraph->Fit(tmpfb_,"VR");
+	delete TVirtualFitter::GetFitter();
+	bool bfitsucc=bgraph->Fit(tmpfb_,"VRQS")->IsValid();
+	if(fitfunctiona_=="pol2"){
+		std::vector<double> paras(5);
+		paras.at(0) = tmpfb_->GetParameter(0);
+		paras.at(1) = tmpfb_->GetParameter(1);
+		paras.at(2) = tmpfb_->GetParameter(2);
+		paras.at(3) = xshift;
+		paras.at(4) = yshift;
+		fittedparasb_.push_back(paras);
+	}
+
+
 
 	(TVirtualFitter::GetFitter())->GetConfidenceIntervals(nxpoints,1,&xpoints.at(0),&confintvb.at(0),clfit_);
-
+	delete TVirtualFitter::GetFitter();
 	graph fita(nxpoints);
 	graph fitb(nxpoints);
 	graph multiplied(nxpoints);
+
+	for(size_t it=0;it<xpoints.size();it++){
+		float aval=tmpfa_->EvalPar(&xpoints.at(it),0);
+		float bval=tmpfb_->EvalPar(&xpoints.at(it),0);
+		fita.setPointContents(it,true,xpoints.at(it),aval);
+		fitb.setPointContents(it,true,xpoints.at(it),bval);
+	}
+
 	//start of new implementation
 
 	//dont get too nummerical, because:
@@ -332,17 +522,20 @@ graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const gr
 	//get average stat uncertainty
 	float minstata=10000;
 	float minstatb=10000;
-	double shiftbyscalea=1;
-	double shiftbyscaleb=1;
+	double shiftbyscalea=-1;
+	double shiftbyscaleb=-1;
 	float minpointa=0;
 	float minpointb=0;
+
 	//  if(fituncmodea_ == fitunc_statcorrgaus){
 	for(size_t i=0;i<aIn.getNPoints();i++){
 		float tmpmin=aIn.getPointYStat(i);///aIn.getPointYContent(i);
 		if(minstata > tmpmin){
+			if(aIn.getPointYContent(i)==0) continue;
 			minstata=tmpmin;
 			shiftbyscalea=minstata*minstata/(aIn.getPointYContent(i));
 			minpointa=aIn.getPointYContent(i);
+
 		}
 	}
 	// }
@@ -350,9 +543,11 @@ graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const gr
 	for(size_t i=0;i<bIn.getNPoints();i++){
 		float tmpmin=bIn.getPointYStat(i);///bIn.getPointYContent(i);
 		if(minstatb > tmpmin){
+			if(bIn.getPointYContent(i)==0) continue;
 			minstatb=tmpmin;
 			shiftbyscaleb=minstatb*minstatb/(bIn.getPointYContent(i));
 			minpointb=bIn.getPointYContent(i);
+
 		}
 	}
 	//}
@@ -362,12 +557,38 @@ graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const gr
 	std::cout << "\n\n scale a: " << shiftbyscalea << std::endl;
 	std::cout << "\n\n scale b: " << shiftbyscaleb << std::endl;
 
+	if( !afitsucc || !bfitsucc){//something is wrong! just return flat likelihood
+		for(size_t i=0;i<xpoints.size();i++){
+			multiplied.setPointContents(i,true,xpoints.at(i),1);
+			multiplied.shiftAllXCoordinates(xshift);
+
+
+		}
+		std::cout << "parameterExtractor::createIntersectionLikelihood: something went wrong. returning flat likelihood!" <<std::endl;
+
+		return multiplied;
+	}
+	if(shiftbyscalea<0){
+		shiftbyscalea=fallbackscalea_;
+		std::cout << "WARNING: was not able to extract scale for A, probably a 0 entry! fall back to fallBackScale "
+				<< fallbackscalea_<<std::endl;
+		minstata=1;
+		minpointa=1;
+	}
+	if(shiftbyscaleb<0){
+		shiftbyscaleb=fallbackscaleb_;
+		std::cout << "WARNING: was not able to extract scale for B, probably a 0 entry! fall back to fallBackScale "
+				<< fallbackscaleb_<<std::endl;
+		minstatb=1;
+		minpointb=1;
+	}
+
 	// evaluate for each scan point
 	//points are rescaled to "normal" statistics
 	if(LHMode_ == lh_fit){
 		for(size_t i=0;i<xpoints.size();i++){
-			float aval=tmpfa_->EvalPar(&xpoints.at(i),0) +yshift;
-			float bval=tmpfb_->EvalPar(&xpoints.at(i),0) +yshift;
+			float aval=fita.getPointYContent(i)+yshift;//tmpfa_->EvalPar(&xpoints.at(i),0) +yshift;
+			float bval=fitb.getPointYContent(i)+yshift;//tmpfb_->EvalPar(&xpoints.at(i),0) +yshift;
 			//in case of normalized, scaled... distr.
 
 			//for drawing
@@ -379,7 +600,7 @@ graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const gr
 			}
 
 			bool usechi2=true;
-			float chi2=0;
+			float chi2=1;
 
 			if(fituncmodeb_ == fitunc_statuncorrpoisson){
 				if(fituncmodea_ == fitunc_statuncorrpoisson){
@@ -402,10 +623,15 @@ graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const gr
 				//do a scaling here to stay in parameter range. scale is of the order of normalization
 				//the scaling does not affect the outcome and is a purely technical step
 
-				const float realbval=bval                            ;// / shiftbyscalea;
-				const float equivbstat=(bval * minstata/minpointa)   ;// / shiftbyscalea;
-				const float intrinsicbstat=(bval* minstatb/minpointb);// / shiftbyscalea;
-				const float realaval=aval                            ;// / shiftbyscalea;
+				//in case the fit goes below 0, a cutoff is introduced
+				if(bval<0) bval=0;
+				if(aval<0) aval=0;
+				//bval=0;//DEBUG
+
+				const float realbval=bval                             / shiftbyscalea;
+				const float equivbstat=(bval * minstata/minpointa)    / shiftbyscalea;
+				const float intrinsicbstat=(bval* minstatb/minpointb) / shiftbyscalea;
+				const float realaval=aval                             / shiftbyscalea;
 
 				chi2 = -2* shiftedLnPoissonMCStat(realbval,
 						equivbstat,
@@ -414,7 +640,7 @@ graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const gr
 				//scale back for graph
 
 				confintvb.at(i)=sqrt(equivbstat*equivbstat
-						+ intrinsicbstat*intrinsicbstat);// * shiftbyscalea;//+intrinsicbstat2);
+						+ intrinsicbstat*intrinsicbstat) * shiftbyscalea;//+intrinsicbstat2);
 				confintva.at(i)=0;
 				usechi2=false;
 
@@ -430,6 +656,13 @@ graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const gr
 				}
 				//scale everything to real number of events level
 				//prevents stat function to run out of range (it can only do small shifts)
+
+				//in case the fit goes below 0, a cutoff is introduced
+				if(bval<0) bval=0;
+				if(aval<0) aval=0;
+
+				throw std::logic_error("TBI!!!");
+
 				const float realaval=aval/shiftbyscaleb;
 				const float equivastat2=aval /shiftbyscaleb;
 				const float intrinsicastat2=aval/shiftbyscalea;
@@ -443,6 +676,7 @@ graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const gr
 				confintva.at(i)=sqrt(equivastat2*shiftbyscaleb*shiftbyscaleb + intrinsicastat2*shiftbyscalea*shiftbyscalea);//+intrinsicbstat2);
 				confintvb.at(i)=0;
 				usechi2=false;
+
 			}
 
 
@@ -452,15 +686,29 @@ graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const gr
 				float widtha=confintva.at(i);
 				float widthb=confintvb.at(i);
 				chi2=chi_square(aval,widtha*widtha+widthb*widthb,bval);//);
-			}
-			else{
+				if(chi2!=chi2 && ! selfheal_){
+					std::cout << "Nan produced! aval(reshifted): "<< aval
+							<< " bval(reshifted): " <<bval <<std::endl;
+					throw std::runtime_error("NAN! in fit");
 
+				}
 			}
-			// integral*=-2; //chi2 definition log(L) -> -2*log(L)
+			if(chi2!=chi2){
+				hasnan=true;
+				break;
+			}
+
+			fita.setPointYStat(i,confintva.at(i));
+			fitb.setPointYStat(i,confintvb.at(i));
 
 
 			multiplied.setPointContents(i,true,xpoints.at(i),chi2);
 
+		}
+		if(hasnan)
+		{
+			for(size_t p=0;p<xpoints.size();p++)
+				multiplied.setPointContents(p,true,xpoints.at(p),1);
 		}
 	}
 
@@ -469,20 +717,13 @@ graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const gr
 
 	std::vector<float> centralpoints;
 
-	for(size_t it=0;it<xpoints.size();it++){
-		float aval=tmpfa_->EvalPar(&xpoints.at(it),0);
-		float bval=tmpfb_->EvalPar(&xpoints.at(it),0);
-		fita.setPointContents(it,true,xpoints.at(it),aval);
-		fita.setPointYStat(it,confintva.at(it));
-		fitb.setPointContents(it,true,xpoints.at(it),bval);
-		fitb.setPointYStat(it,confintvb.at(it));
-	}
+
 
 	//reduce number in representation graphs if granularity is high
 
 	float maxgran=20;
 
-	if(granularity_ < maxgran){
+	if(granularity_ < maxgran || fastmode_){
 		fitteda=(fita);
 		fittedb=(fitb);
 	}
@@ -514,40 +755,7 @@ graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const gr
 			}
 		}
 	}
-	/*
-    //get mean central value
-    float meancentral=(xmax-xmin)/2+xmin;
-    if(setleft&&setright&&setcentral){
-        meancentral=0;
-        for(size_t i=0;i<centralpoints.size();i++){
-            meancentral+=centralpoints.at(i);
-        }
-        meancentral/=(float)centralpoints.size();
-    }
-    else{ //no intersection found, add extremely large error
-        xleft = meancentral - fabs(xmax-xmin)*100;
-        xright= meancentral + fabs(xmax-xmin)*100;
-    }
 
-
-    graph output(1); //one point output graph
-    output.setPointXContent(0,meancentral);
-    output.setPointYContent(0,1);
-    output.setPointXStat(0,0);
-    output.setPointYStat(0,0);
-    output.addErrorGraph("variation_up",output);
-    output.addErrorGraph("variation_down",output);
-    output.setPointXContent(0,xleft,0);
-    output.setPointXContent(0,xright,1);
-
-    if(debug)
-        std::cout << "parameterExtractor::createIntersectionLikelihood: intersection (shift "<<xshift <<"): "<< meancentral
-        << " right: " << xright << " left: " << xleft << std::endl;;
-
-
-    //shift back
-    output.shiftAllXCoordinates(xshift);
-	 */
 	fitteda.shiftAllXCoordinates(xshift);
 	fittedb.shiftAllXCoordinates(xshift);
 
@@ -560,7 +768,7 @@ graph parameterExtractor::createIntersectionLikelihood(const graph& aIn,const gr
 	//////////////////////////////////////////////// SHIFTED COORDINATES ///////////////////////////////////////////
 	//////////////////////////////////////////////////////   END  //////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+	delete tmpfa_;delete tmpfb_;
 	return multiplied;
 
 

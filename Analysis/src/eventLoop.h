@@ -207,6 +207,11 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 		std::cout << "THIS IS A PSEUDO-DATA RUN:" <<std::endl;// all samples MC samples will be used without weights!" << std::endl;
 
 	}
+	bool nosplitforfakedata=false;
+	if(mode_.Contains("Nosplit")){
+		nosplitforfakedata=true;
+	}
+
 	if(mode_.Contains("Notoppt")){
 		/*	if(getTopPtReweighter()->getSystematic() != reweightfunctions::up
 				|| fakedata)
@@ -494,32 +499,32 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 		skipregion=true;
 		regionlowerbound=nEntries*subsetstarts;
 		regionupperbound=nEntries*(subsetstarts+(1-splitfractionMC));
-		if(!fakedata){//issignal){
-			//   nEntries*=splitfractionMC;
-			//invert
+		if(nosplitforfakedata){
+			regionlowerbound=-1;
+			regionupperbound=-1;
 			skipregion=true;
-			float normmultif=1/splitfractionMC;
-
-			if(testmode_)
-				std::cout << "testmode("<< anaid << "):\t splitted MC fraction off for MC          "<< splitfractionMC
-				<< " old norm: " << norm << " to " << norm*normmultif << " file: " << inputfile<< std::endl;
-			norm*= normmultif;
 		}
-		else{// if(){
-			skipregion=false;
+		else{
+			if(!fakedata){
+				skipregion=true;
+				float normmultif=1/splitfractionMC;
 
-			float normmultif=1/(1-splitfractionMC);
-			if(testmode_)
-				std::cout << "testmode("<< anaid << "):\t splitted MC fraction off for pseudo data "<< 1-splitfractionMC
-				<< " old norm: " << norm << " to " << norm*normmultif << " file: " << inputfile<< std::endl;
-			norm*=normmultif;
+				if(testmode_)
+					std::cout << "testmode("<< anaid << "):\t splitted MC fraction off for MC          "<< splitfractionMC
+					<< " old norm: " << norm << " to " << norm*normmultif << " file: " << inputfile<< std::endl;
+				norm*= normmultif;
+			}
+			else{// if(){
+				skipregion=false;
 
+				float normmultif=1/(1-splitfractionMC);
+				if(testmode_)
+					std::cout << "testmode("<< anaid << "):\t splitted MC fraction off for pseudo data "<< 1-splitfractionMC
+					<< " old norm: " << norm << " to " << norm*normmultif << " file: " << inputfile<< std::endl;
+				norm*=normmultif;
+
+			}
 		}
-
-		//readapt norm to right mtop value
-
-		//also skip QCD here FIXME (for marker-> better not)
-		//if(legendname == "QCD") nEntries=0;
 
 	}
 
@@ -931,8 +936,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 			mll=dilp4.M();
 			firstlep=leppair->first[0];
 			seclep=leppair->first[1];
-			lepweight*=getElecSF()->getScalefactor(fabs(firstlep->eta()),firstlep->pt());
-			lepweight*=getElecSF()->getScalefactor(fabs(seclep->eta()),seclep->pt());
+			lepweight*=getElecSF()->getScalefactor((firstlep->eta()),firstlep->pt());
+			lepweight*=getElecSF()->getScalefactor((seclep->eta()),seclep->pt());
 			lepweight*=getTriggerSF()->getScalefactor(fabs(firstlep->eta()),fabs(seclep->eta()));
 		}
 		else if(b_mumu_){
@@ -953,7 +958,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 			mll=dilp4.M();
 			firstlep=leppair->first[0];
 			seclep=leppair->second[0];
-			lepweight*=getElecSF()->getScalefactor(fabs(firstlep->eta()),firstlep->pt());
+			lepweight*=getElecSF()->getScalefactor((firstlep->eta()),firstlep->pt());
 			lepweight*=getMuonSF()->getScalefactor(seclep->pt(),fabs(seclep->eta()));
 			lepweight*=getTrackingSF()->getScalefactor((seclep->eta()));
 			lepweight*=getTriggerSF()->getScalefactor(fabs(firstlep->eta()),fabs(seclep->eta()));

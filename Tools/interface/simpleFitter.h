@@ -41,7 +41,7 @@ public:
 class simpleFitter{
 public:
 
-    enum fitmodes{fm_pol0,fm_pol1,fm_pol2,fm_pol3};
+    enum fitmodes{fm_pol0,fm_pol1,fm_pol2,fm_pol3,fm_pol4};
     enum printlevels{pl_silent,pl_normal,pl_verb}; //TBI
     enum minimizers{mm_minuitMinos,mm_minuit2};
 
@@ -119,8 +119,9 @@ private: //set some to protected if inheritance is needed
     std::vector<point2D> nompoints_;
     std::vector<point2D> errsup_;
     std::vector<point2D> errsdown_;
-
+protected:
     std::vector<double> paras_;
+private:
     std::vector<double> stepsizes_;
     std::vector<double> paraerrsup_,paraerrsdown_;
     std::vector<TString> paranames_;
