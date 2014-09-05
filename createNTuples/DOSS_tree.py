@@ -37,7 +37,7 @@ options.register ('muCone03',False,VarParsing.VarParsing.multiplicity.singleton,
 options.register ('wantSummary',True,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"prints trigger summary")
 options.register ('ttH',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"writes the ttH tree")
 options.register ('susy',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"writes the Susy tree")
-options.register ('isPrompt',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"loads extra filters etc for prompt")
+options.register ('extraJetCorrections',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"loads extra L2L3 residuals")
 
 
 
@@ -82,7 +82,7 @@ ttH=options.ttH
 isFastSim=options.isFastSim
 
 debug=options.debug
-isPrompt=options.isPrompt
+isPrompt=False #options.isPrompt
 
 
 useBHadrons=False #will be changes for top filter sequence!
@@ -477,6 +477,25 @@ process.load("PhysicsTools.PatAlgos.patSequences_cff")
 #process.kt6PFJets.voronoiRfact = 0.9
 #process.kt6PFJets.Rho_EtaMax   = cms.double( 4.4)
 
+
+if options.extraJetCorrections:
+    import os
+    jecFile=os.path.relpath( os.environ['CMSSW_BASE']+'/src/TtZAnalysis/Data/PTFIXV2_FT_53_V21_AN5_private.db') 
+    jecEra= 'FT_53_V21_AN5' #'Summer13_PTFIXV2_DATA'
+    process.jec = cms.ESSource( "PoolDBESSource"
+                                , DBParameters = cms.PSet(messageLevel = cms.untracked.int32(0))
+                                , timetype = cms.string('runnumber')
+                                , toGet = cms.VPSet(cms.PSet( record = cms.string('JetCorrectionsRecord')
+                                                              , tag    = cms.string('JetCorrectorParametersCollection_'+jecEra+'_AK5PFchs')
+                                                              , label  = cms.untracked.string('AK5PFchs')
+                                                              )
+                                                    ## here you add as many jet types as you need
+                                                    ## note that the tag name is specific for the particular sqlite file 
+                                                    )
+                                , connect = cms.string('sqlite:'+jecFile)
+                                )
+            ## add an es_prefer statement to resolve a possible conflict from simultaneous connection to a global tag
+    process.es_prefer_jec = cms.ESPrefer('PoolDBESSource','jec')
 
 
 
@@ -1037,7 +1056,7 @@ process.path = cms.Path(
     )
 
 #if susy:
-#    process.path.replace(getattr(process,'patPF2PATSequence'+pfpostfix),
+#    process.path.replace(getattr(process,'patP2PATSequence'+pfpostfix),
 #                 process.patDefaultSequence)
 
 if isFastSim:
