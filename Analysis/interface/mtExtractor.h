@@ -79,6 +79,9 @@ public:
      */
     void setFitMode(const TString& m){fitmode_=m;}
 
+    void setIgnoreDataStat(bool ignore){ignoredatastat_=ignore;}
+    void setIgnoreBGStat(bool ignore){ignorebgstat_=ignore;}
+
     void drawXsecDependence(TCanvas *c, bool fordata);
     void drawIndivBins(TCanvas *c,int syst=-2);
 
@@ -125,7 +128,7 @@ public:
     void drawResultGraph(TCanvas *c, float * nom=0, float * errd=0, float * erru=0,float * syserrdp=0, float * syserrup=0);
     graph * getResultGraph(){return &allsyst_;}
 
-    texTabler makeSystBreakdown(bool rel=false)const;
+    texTabler makeSystBreakdown(bool merge=true,bool removeneg=true,float prec=0.01,bool rel=false,bool includesystat=false)const;
 
     void drawSpreadWithInlay(TCanvas *c);
 
@@ -151,6 +154,15 @@ public:
     const std::vector<graph > & getDataBingraphs(){return databingraphs_;}
     const std::vector<graph > & getMCBingraphs(){return mcbingraphs_;}
 
+    /**
+     * This returns a graph without systematics
+     */
+    std::vector<graph > makeBGBinGraphs()const;
+    /**
+     * This returns a graph without systematics
+     */
+    std::vector<graph > makeSignalBinGraphs()const;
+
 private:
 
     void setAxisLikelihoodVsMt(graph & g)const;
@@ -162,10 +174,10 @@ private:
     //init and read in
 
     void readFiles(); //type specific stuff here background uncertainties are added here!
-    void addLumiUncert();
+    void addLumiUncert(std::vector<container1D> & mc,std::vector<container1D> & data)const;
     void renormalize();
-    void mergeSyst();
-    void makeGraphs(); //at this step the systematics should be ordered in the same way (use first and copy!),
+    void mergeSyst(std::vector<container1D> & a, std::vector<container1D> & b)const;
+    std::vector<graph > makeGraphs( std::vector<container1D > & in)const; //at this step the systematics should be ordered in the same way (use first and copy!),
     // delete input conts
 
     //helper
@@ -173,7 +185,7 @@ private:
 
     //---a plotting step?---//
     // here for each mt a fully equipped distr is present
-    void makeBinGraphs(); //still including all systematics use getBin()
+    std::vector<graph >  makeBinGraphs(std::vector<graph > &)const; //still including all systematics use getBin()
 
     bool isEmptyForAnyMass(size_t bin)const;
 
@@ -192,7 +204,7 @@ private:
     TString extfileformatfile_,extfilepdf_;
     TString extfilepreamble_;
 
-
+    std::vector<containerStack> savedinputstacks_;
     std::vector<container1D > datacont_;
     std::vector<container1D > mccont_;
     std::vector<graph > datagraphs_;
@@ -247,6 +259,10 @@ private:
     resultsSummary results_;
 
     TFile * mcgraphsoutfile_;
+
+    std::vector<TString> systidentifiers_tobeaddedWithoutstat;
+
+    bool ignoredatastat_,ignorebgstat_;
 
     template<class T>
     T tryToGet(TFile * f,const TString& name)const{

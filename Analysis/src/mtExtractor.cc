@@ -37,7 +37,7 @@ mtExtractor::mtExtractor():plotnamedata_(""),plotnamemc_(""),plottypemc_("cuf"),
 		minbin_(-1),maxbin_(-1),excludebin_(-1),tmpglgraph_(0),tfitf_(0),
 		iseighttev_(true),defmtop_(172.5),setup_(false),textboxesmarker_("CMS"),syspidx_(1),
 		dofolding_(false),isexternalgen_(false),rescalepreds_(false),usenormalized_(false),defmtidx_(0),
-		mcgraphsoutfile_(0)
+		mcgraphsoutfile_(0),ignoredatastat_(false),ignorebgstat_(false)
 {
 	reset();
 }
@@ -102,14 +102,24 @@ void mtExtractor::setup(){
 
 	getMtValues();
 	readFiles();
-	if(!usenormalized_)
-		addLumiUncert();
+	//reorganize
+    if(!usenormalized_)
+		addLumiUncert(mccont_,datacont_);
 	renormalize();
-	mergeSyst();
 
 
-	makeGraphs();
-	makeBinGraphs();
+	mergeSyst(mccont_,datacont_); //MUST BE DONE FOR BG AND SIGNAL DIFFERENTLY! (ignorestat false/true)
+
+	//mergeSyst(mccont_,datacont_);//signal
+	//mergeSyst(mccont_,datacont_);background
+	//add both
+	//add()
+	//continue as before
+
+	datagraphs_=makeGraphs(datacont_);
+	mcgraphs_=makeGraphs(mccont_);
+	databingraphs_=makeBinGraphs(datagraphs_);
+	mcbingraphs_=makeBinGraphs(mcgraphs_);
 	setup_=true;
 }
 void  mtExtractor::cleanMem(){
@@ -323,7 +333,7 @@ double mtExtractor::getNewNorm(double mass,bool eighttev)const{ //following  NNL
 	float out=newxsec/refxsec;
 	if(debug) std::cout << "sigmtopmulti mass: " << mass << "\tmulti="<< out << " xsec="<< newxsec<<std::endl;
 	return out;
-/*
+	/*
 	double a1=0;
 	double a2=0;
 
@@ -344,7 +354,7 @@ double mtExtractor::getNewNorm(double mass,bool eighttev)const{ //following  NNL
 	double out= (reldm*reldm*reldm*reldm) * (1+ a1*(deltam)/mref + a2*(deltam/mref)*(deltam/mref));
 	if(debug) std::cout << "sigmtopmulti deltam: " << deltam << "\tmulti="<< out <<std::endl;
 	return out;
-	*/
+	 */
 }
 
 std::vector<float>  mtExtractor::getMtValues(){
@@ -461,6 +471,7 @@ void mtExtractor::readFiles(){
 		//  allanalysisplots_.push_back(*csv);
 		containerStack stack=csv->getStack(plotnamedata_);
 		delete csv;
+		savedinputstacks_.push_back(stack);
 		//BACKGROUND background uncertainties here
 		stack.addRelErrorToBackgrounds(0.3,true,"BG");
 		stack.mergePartialVariations("BG"); //-> no data containers>!
@@ -468,6 +479,18 @@ void mtExtractor::readFiles(){
 
 
 		container1DUnfold tempcuf=stack.produceUnfoldingContainer();
+
+
+		if(ignorebgstat_){
+			container1D background=tempcuf.getBackground();
+			background.removeStatFromAll();
+			tempcuf.setBackground(background);
+		}
+		if(ignoredatastat_){
+			container1D tmpdata=tempcuf.getRecoContainer();
+			tmpdata.removeStatFromAll();
+			tempcuf.setRecoContainer(tmpdata);
+		}
 
 
 		// tempcuf.loadFromTFile(cufinputfiles_.at(i),plotnamedata_);
@@ -490,12 +513,13 @@ void mtExtractor::readFiles(){
 		}
 		else{
 			container1D temp=tempcuf.getRecoContainer();
+
 			datareference=temp; // NEW POISSON NO BG SUBTRACTION! -tempcuf.getBackground();
 			if(usenormalized_)
 				datareference.setYAxisName("1/N_{tot} "+datareference.getYAxisName());
 			//rebin at first to gen
-			if(!mciscuf) //rebin to generator binning
-				datareference=datareference.rebinToBinning(tempcuf.getBinnedGenContainer());
+		//	if(!mciscuf) //rebin to generator binning - not needed for folding!!
+		//		datareference=datareference.rebinToBinning(tempcuf.getBinnedGenContainer());
 		}
 
 		datacont_.push_back(datareference);
@@ -645,11 +669,11 @@ void mtExtractor::readFiles(){
 
 
 
-void mtExtractor::addLumiUncert(){
+void mtExtractor::addLumiUncert(std::vector<container1D> & mc,std::vector<container1D> & data)const{
 
 	for(size_t i=0;i<mccont_.size();i++){
-		mccont_.at(i).addGlobalRelError("LUMI",0.026);
-		datacont_.at(i).addGlobalRelError("LUMI",0.);
+		mc.at(i).addGlobalRelError("LUMI",0.026);
+		data.at(i).addGlobalRelError("LUMI",0.);
 	}
 
 
@@ -684,7 +708,7 @@ void mtExtractor::renormalize(){
 		for(size_t i=0;i<mccont_.size();i++){
 			float renorm= 1;
 			if(usecuf){
-			//	renorm= getNewNorm(mtvals_.at(i),iseighttev_);
+				//	renorm= getNewNorm(mtvals_.at(i),iseighttev_);
 				//add NNLO uncertainties
 
 				mccont_.at(i).addGlobalRelError("scale (NNLO norm)",0.034);
@@ -725,48 +749,59 @@ void mtExtractor::renormalize(){
 	 */
 
 }
-void mtExtractor::mergeSyst(){
-
+void mtExtractor::mergeSyst(std::vector<container1D> & a, std::vector<container1D> & b)const{
+	bool ignorestat=true;
+	//container1D::debug=true;
 	//add from all
-	if(debug) std::cout <<"mtExtractor::mergeSyst: MC" << std::endl;
-	for(size_t i=0;i<mccont_.size();i++){
-		for(size_t j=0;j<mccont_.size();j++){
+	if(debug) std::cout <<"mtExtractor::mergeSyst: a" << std::endl;
+	for(size_t i=0;i<a.size();i++){
+		for(size_t j=0;j<a.size();j++){
 			if(i==j) continue;
-			mccont_.at(i).addRelSystematicsFrom(mccont_.at(j));
+
+
+			a.at(i).addRelSystematicsFrom(a.at(j),ignorestat);
 		}
 	}
-	if(debug) std::cout <<"mtExtractor::mergeSyst: data" << std::endl;
-	for(size_t i=0;i<datacont_.size();i++){
-		for(size_t j=0;j<datacont_.size();j++){
+	if(debug) std::cout <<"mtExtractor::mergeSyst: b" << std::endl;
+	for(size_t i=0;i<b.size();i++){
+		for(size_t j=0;j<b.size();j++){
 			if(i==j) continue;
-			datacont_.at(i).addRelSystematicsFrom(datacont_.at(j));
+
+
+			b.at(i).addRelSystematicsFrom(b.at(j),ignorestat);
 
 		}
 	}
 	//merge data and MC syst (beware of naming because of correllations!)
-	if(datacont_.size()>0){
-		for(size_t id=1;id<datacont_.size();id++){//equalize data
-			datacont_.at(id).equalizeSystematicsIdxs(datacont_.at(0));
+	if(b.size()>0){
+		for(size_t id=1;id<b.size();id++){//equalize data
+			b.at(id).equalizeSystematicsIdxs(b.at(0));
 		}
-		for(size_t imc=0;imc<mccont_.size();imc++){//data to mc
-			mccont_.at(imc).equalizeSystematicsIdxs(datacont_.at(0));
+		for(size_t imc=0;imc<a.size();imc++){//data to mc
+			a.at(imc).equalizeSystematicsIdxs(b.at(0));
 		}
-		for(size_t id=1;id<datacont_.size();id++){//the ones added from mc back to data
-			datacont_.at(id).equalizeSystematicsIdxs(datacont_.at(0));
+		for(size_t id=1;id<b.size();id++){//the ones added from mc back to data
+			b.at(id).equalizeSystematicsIdxs(b.at(0));
 		}
 	}
-
+	//container1D::debug=false;
+	//exit(0);
 }
 //just transforms to graph and change names
-void mtExtractor::makeGraphs(){
-	for(size_t i=0;i<mccont_.size();i++){
+std::vector<graph > mtExtractor::makeGraphs( std::vector<container1D > & in)const{
+
+	std::vector<graph > out;
+
+	for(size_t i=0;i<in.size();i++){
 		graph tempgraph;
-		tempgraph.import(&mccont_.at(i),false);
+		tempgraph.import(&in.at(i),false);
 		tempgraph.setName("m_{t}="+toTString(mtvals_.at(i))+ " GeV");
-		mccont_.at(i).setName("m_{t}="+toTString(mtvals_.at(i))+ " GeV");
+		in.at(i).setName("m_{t}="+toTString(mtvals_.at(i))+ " GeV");
 		tempgraph.sortPointsByX();
-		mcgraphs_.push_back(tempgraph);
+		out.push_back(tempgraph);
 	}
+	return out;
+	/*
 	// mccont_.clear();
 	if(debug) std::cout << "mtExtractor::makeGraphs: created "<< mcgraphs_.size() << " MC graphs" << std::endl;
 	for(size_t i=0;i<datacont_.size();i++){
@@ -779,7 +814,7 @@ void mtExtractor::makeGraphs(){
 	}
 	// datacont_.clear();
 	if(debug) std::cout << "mtExtractor::makeGraphs: created "<< datagraphs_.size() << " data graphs" << std::endl;
-
+	 */
 }
 
 graph mtExtractor::makeDepInBin(const std::vector<graph> & graphs, size_t bin)const{
@@ -821,27 +856,31 @@ graph mtExtractor::makeDepInBin(const std::vector<graph> & graphs, size_t bin)co
 }
 
 
-void mtExtractor::makeBinGraphs(){
+std::vector<graph > mtExtractor::makeBinGraphs(std::vector<graph > & in)const{
 	//keep in mind: The points of each graph are properly sorted by X
 	//So no fancy extra bin finding anymore!
 	// But be careful aith the ordering of systematics in graphs
 
 	//create graph with right amount of points, assume same for MC and data
 
+	std::vector<graph > out;
 
-	for(size_t bin=0;bin<datagraphs_.at(0).getNPoints();bin++){
+	for(size_t bin=0;bin<in.at(0).getNPoints();bin++){
 		if((maxbin_>=0 && (int)bin>maxbin_) || (minbin_>=0 && (int)bin<minbin_) || (int)bin==excludebin_) continue;
 		if(isEmptyForAnyMass( bin)) continue;
-		databingraphs_.push_back(makeDepInBin(datagraphs_,bin));
+		out.push_back(makeDepInBin(in,bin));
 	}
-	if(debug) std::cout << "mtExtractor::makeBinGraphs: created "<< databingraphs_.size()<< " data graphs" << std::endl;
+
+	return out;
+
+	/*	if(debug) std::cout << "mtExtractor::makeBinGraphs: created "<< databingraphs_.size()<< " data graphs" << std::endl;
 	for(size_t bin=0;bin<mcgraphs_.at(0).getNPoints();bin++){
 		if((maxbin_>=0 && (int)bin>maxbin_) || (minbin_>=0 && (int)bin<minbin_) || (int)bin==excludebin_) continue;
 		if(isEmptyForAnyMass( bin)) continue;
 		mcbingraphs_.push_back(makeDepInBin(mcgraphs_,bin));
 	}
 	if(debug) std::cout << "mtExtractor::makeBinGraphs: created "<< mcbingraphs_.size() << "  mc graphs" << std::endl;
-
+	 */
 }
 void mtExtractor::createBinLikelihoods(int syslayer,bool includesyst,bool datasyst){
 	//get graphs for syst.
@@ -1368,6 +1407,51 @@ void mtExtractor::drawResultGraph(TCanvas *c, float * nomp, float * errdp, float
 
 }
 
+std::vector<graph > mtExtractor::makeSignalBinGraphs()const{
+
+	std::vector<container1D> mtconts;
+	for(size_t i=0;i<savedinputstacks_.size();i++){
+
+		container1DUnfold tmpcuf=savedinputstacks_.at(i).produceUnfoldingContainer();
+		container1D tmpcont=tmpcuf.getVisibleSignal();
+		tmpcont.removeAllSystematics();
+		if(usenormalized_){
+			//get correct norm
+			container1D all = tmpcuf.getVisibleSignal()+ tmpcuf.getBackground();
+			all.removeAllSystematics(); //make faster
+			float signcontr = tmpcont.integral(true)/all.integral(true);
+			tmpcont.normalize(true,true,signcontr);
+		}
+		tmpcont.removeAllSystematics();
+		mtconts.push_back(tmpcont);
+	}
+	std::vector<graph > tmp=makeGraphs(mtconts);
+
+	std::vector<graph >out=makeBinGraphs(tmp);
+	return out;
+}
+
+std::vector<graph > mtExtractor::makeBGBinGraphs()const{
+
+	std::vector<container1D> mtconts;
+	for(size_t i=0;i<savedinputstacks_.size();i++){
+		container1DUnfold tmpcuf=savedinputstacks_.at(i).produceUnfoldingContainer();
+		container1D tmpcont=tmpcuf.getBackground();
+		if(usenormalized_){
+			//get correct norm
+			container1D all = tmpcuf.getVisibleSignal()+ tmpcuf.getBackground();
+			all.removeAllSystematics(); //make faster
+			float signcontr = tmpcont.integral(true)/all.integral(true);
+			tmpcont.normalize(true,true,signcontr);
+		}
+		tmpcont.removeAllSystematics();
+		mtconts.push_back(tmpcont);
+	}
+	std::vector<graph > tmp=makeGraphs(mtconts);
+
+	std::vector<graph >out=makeBinGraphs(tmp);
+	return out;
+}
 
 TString mtExtractor::printConfig()const{
 
@@ -1392,39 +1476,50 @@ TString mtExtractor::printConfig()const{
 	return out;
 }
 
-texTabler  mtExtractor::makeSystBreakdown(bool rel)const{
+texTabler  mtExtractor::makeSystBreakdown(bool merge,bool removeneg,float prec,bool rel,bool includesystat)const{
 
 	if(results_.nEntries()<1){
 		throw std::runtime_error("mtExtractor::makeSystBreakdown: first create syst vars");
 	}
-
+	std::string sysnamesfile=(std::string)getenv("CMSSW_BASE") + (std::string)"/src/TtZAnalysis/Analysis/configs/general/SystNames.txt";
 	resultsSummary cp=results_;
+
+	if(merge)
+		cp.mergeVariationsFromFile("nominal",sysnamesfile);
 	cp.setSystBreakRelative(rel);
-	cp=cp.createTotalError();
+	cp=cp.createTotalError("nominal");
 
 	formatter fmt;
-	std::string sysnamesfile=(std::string)getenv("CMSSW_BASE") + (std::string)"/src/TtZAnalysis/Analysis/configs/general/SystNames.txt";
+
 	fmt.readInNameTranslateFile(sysnamesfile);
-	formatter::debug=true;
+	//formatter::debug=true;
 
 
 	texTabler out("l | c");
+	if(includesystat)
+		out=texTabler("l | c | c");
+
 	if(rel)
 		out << "Source" << "$\\Delta m_{t}$  [\\%]";
 	else
 		out << "Source" << "$\\Delta m_{t}$ [GeV]";
+	if(includesystat)
+		out << "$\\Delta_{stat}^{syst}$ [GeV]";
 	out << texLine(1);
 
 	for(size_t i=0;i<cp.nEntries();i++){
 		TString entryname=cp.getEntryName(i);
 		bool isneg=false;
-		TString valuestr=cp.getValueString(i,isneg,0.01);
-		if(isneg) continue;
+		TString valuestr=cp.getValueString(i,isneg,prec);
+		if(removeneg && isneg) continue;
 		entryname=fmt.translateName(entryname);
 		//  entryname.ReplaceAll("_"," ");
 		if(entryname=="total")
 			out << texLine(1);
 		out << entryname << valuestr;
+		if(includesystat)
+			out << cp.getStatString(i,isneg,prec);
+
 	}
 
 	// out << texLine(1);
@@ -1491,7 +1586,7 @@ void mtExtractor::drawSpreadWithInlay(TCanvas *c){
 void mtExtractor::setAxisLikelihoodVsMt(graph & g)const{
 
 	g.setXAxisName("m_{t} [GeV]");
-	g.setYAxisName("-2log(L(m_{t}))");
+	g.setYAxisName("#chi^{2}_{m_{t}}");
 
 }
 void mtExtractor::setAxisXsecVsMt(graph & g)const{
