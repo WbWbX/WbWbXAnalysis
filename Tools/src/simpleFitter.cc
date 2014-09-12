@@ -56,7 +56,7 @@ public:
 			if(err!=0)
 				delta/=err;
 			else
-				delta*=1e6;
+				continue;
 			chisq += delta*delta;
 		}
 		return chisq;
@@ -87,17 +87,31 @@ simpleFitter::simpleFitter():fitmode_(fm_pol0),minimizer_(mm_minuitMinos),maxcal
 
 simpleFitter::~simpleFitter(){}
 
+
+size_t simpleFitter::hasNParameters(fitmodes mode)const{
+	size_t npars=0;
+	if(mode==fm_pol0)
+		npars=1;
+	if(mode==fm_pol1)
+		npars=2;
+	if(mode==fm_pol2)
+		npars=3;
+	if(mode==fm_pol3)
+		npars=4;
+
+
+	if(mode==fm_gaus)
+		npars=3;
+	if(mode==fm_offgaus)
+		npars=4;
+
+	return npars;
+
+}
+
 void simpleFitter::setFitMode(fitmodes fitmode){
 	fitmode_=fitmode;
-	size_t npars=0;
-	if(fitmode_==fm_pol0)
-		npars=1;
-	if(fitmode_==fm_pol1)
-		npars=2;
-	if(fitmode_==fm_pol2)
-		npars=3;
-	if(fitmode_==fm_pol3)
-		npars=4;
+	size_t npars=hasNParameters(fitmode);
 
 	paras_.resize(npars,0);
 	stepsizes_.resize(npars,0.001);
@@ -119,6 +133,15 @@ void simpleFitter::setParameters(const std::vector<double>& inpars,const std::ve
 	paracorrs_.clear();
 	paracorrs_.resize(paras_.size(),dummy);
 }
+
+void simpleFitter::setParameter(size_t idx,double value){
+	if(idx >= paras_.size())
+		throw std::out_of_range("simpleFitter::setParameter: index out of range");
+
+	paras_.at(idx)=value;
+
+}
+
 
 double simpleFitter::getFitOutput(const double& xin)const{
 	return fitfunction(xin,&(paras_.at(0)));
@@ -143,11 +166,14 @@ void simpleFitter::fit(){
 		//  return;
 	}
 
+	if(printlevel>0)
+		std::cout << "simpleFitter::fit(): fitting " << hasNParameters(fitmode_) << "/" << paras_.size() <<  " parameters." <<std::endl;
+
 	minsuccessful_=false;
 
 	//  if(functobemin_)
 
-	if(minimizer_==mm_minuit2){
+	if(minimizer_==mm_minuit2 || minimizer_==mm_minuitMinos){
 
 		chi2defs::simpleChi2 fcn(this);
 
@@ -229,6 +255,14 @@ void simpleFitter::fit(){
 	}
 
 }
+
+double simpleFitter::getParameter(size_t idx)const{
+	if(idx>=paras_.size())
+		throw std::out_of_range("simpleFitter::getParameter: index out of range");
+
+	return paras_.at(idx);
+}
+
 double simpleFitter::getParameterErr(size_t idx)const{
 	if(idx>=paraerrsup_.size())
 		throw std::out_of_range("simpleFitter::getParameterErr: index out of range");
@@ -299,6 +333,19 @@ double simpleFitter::fitfunction(const double& x,const double *par)const{
 		value=par[0] + x* par[1] + x*x*par[2]  + x*x*x*par[3]  + x*x*x*x*par[4];
 
 	}
+	else if(fitmode_==fm_gaus){
+
+		value =  par[0] * exp(- (x-par[1])*(x-par[1]) / (2* par[2]*par[2]) ) ;
+
+	}
+
+	else if(fitmode_==fm_offgaus){
+
+		value = par[0]+ par[1] * exp(- (x-par[2])*(x-par[2]) / (2* par[3]*par[3]) ) ;
+
+	}
+
+
 	if(value!=value){
 
 		throw std::runtime_error("simpleFitter::fitfunction: NAN produced");
@@ -326,9 +373,9 @@ bool simpleFitter::checkSizes()const{
 		return false;
 
 	if(requirefitfunction_){
-		if(paras_.size() != (size_t)fitmode_+1)
+		if(paras_.size() != hasNParameters(fitmode_))
 			return false;
-		if(nompoints_.size()<(size_t)fitmode_+1)
+		if(nompoints_.size()< hasNParameters(fitmode_))
 			return false;
 		if(nompoints_.size() != errsup_.size())
 			return false;

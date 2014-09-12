@@ -57,8 +57,8 @@ public:
 
    // void mergeSameLegends();       //! shouldn't be necessary
 
-    void mergeLegends(const std::vector<TString>& tobemerged,const TString & mergedname, bool allowsignals=false);
-    void mergeLegends(const TString& tobemergeda,const TString & tobemergedb,const TString & mergedname, bool allowsignals=false);
+    void mergeLegends(const std::vector<TString>& tobemerged,const TString & mergedname, int mergedColor, bool allowsignals=false);
+    void mergeLegends(const TString& tobemergeda,const TString & tobemergedb,const TString & mergedname, int mergedColor, bool allowsignals=false);
 
     ztop::container1D getContribution(TString)const;   //! does not ignore data; makes copy, doesn't change member containers!
     ztop::container1D getContributionsBut(TString)const;  //!does not ignore data; makes copy, doesn't change member containers!
@@ -114,11 +114,11 @@ public:
     void addMCErrorStack(const TString&,const containerStack &) ; //only for comp reasons
     void addErrorStack(const TString& , containerStack ); //! calls container1D::addErrorContainer for each same named member container
     void getRelSystematicsFrom(const ztop::containerStack&);
-    void addRelSystematicsFrom(const ztop::containerStack&);
+    void addRelSystematicsFrom(const ztop::containerStack&,bool ignorestat=false,bool strict=false);
     void removeError(TString);
     void renameSyst(TString, TString); //! old, new
 
-    std::vector<size_t> removeSystematicsSpikes(bool inclUFOF=false,int limittoindex=-1,float strength=100000,float sign=0.3,float threshold=8);
+    std::vector<size_t> removeSpikes(bool inclUFOF=false,int limittoindex=-1,float strength=100000,float sign=0.3,float threshold=8);
 
     void clear(){containers_.clear();legends_.clear();colors_.clear();norms_.clear();}
 
@@ -218,6 +218,19 @@ public:
     //debugging functions
     bool checknorms() const;
 
+    ///stat test functions
+
+    /**
+     * calls TH1::Chi2Test on full MC histo and data hist
+     */
+    double chi2Test(Option_t* option = "WW", Double_t* res = 0) const;
+
+    /**
+     * calls TH1::KolmogorovTest on full MC histo and data hist
+     */
+    double kolmogorovTest(Option_t* option = "") const;
+
+
 private:
 
     std::vector<ztop::container1D> containers_;
@@ -243,6 +256,8 @@ private:
     int getContributionIdx(TString) const;
     bool checkDrawDimension() const;
     bool checkSignals(const std::vector<TString> &) const;
+
+
 
 
 

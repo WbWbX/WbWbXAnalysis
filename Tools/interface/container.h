@@ -14,7 +14,10 @@
 #include "histoContent.h"
 #include "graph.h"
 #include "taggedObject.h"
+
 ////////bins include their border on the right side!!
+
+#define MAKECOMPWITHOLD
 
 class TFile;
 class TTree;
@@ -29,7 +32,9 @@ class containerStyle;
  * etc etc.
  * Try not to use the getTH1D... member functions and use classes inheriting from ztop::plotterBase instead
  */
-class container1D:public taggedObject{
+class container1D:public taggedObject
+
+{
 	friend class container2D;
 public:
 
@@ -104,13 +109,21 @@ public:
 	container1D getSystContainer(const int &syslayer)const;
 	container1D getRelErrorsContainer()const;
 
+	void removeStatFromAll();
+
 	/**
 	 * merges partial variations. only the ones corresponding to the identifier are merged
 	 * hint: do this step at the latest stage you can do it to still keep track of all correlations
 	 * If you know its a global variation its ok to do it earlier
 	 */
-	void mergePartialVariations(const TString& identifier,bool strictpartialID=true);
-	void mergeAllErrors(const TString & mergedname);
+	void mergePartialVariations(const TString& identifier,bool linearly=false,bool strictpartialID=true);
+	void mergeAllErrors(const TString & mergedname,bool linearly=false);
+	/**
+	 * names without "up" and "down"
+	 */
+	void mergeVariations(const std::vector<TString>& names, const TString & outname,bool linearly=false);
+
+	void mergeVariationsFromFileInCMSSW(const std::string& filename);
 
 	float getOverflow(const int& systLayer=-1) const;                              //!returns -1 if overflow was merged with last bin
 	float getUnderflow(const int& systLayer=-1) const;                             //!returns -1 if underflow was merged with last bin
@@ -220,8 +233,8 @@ public:
 	 */
 	container1D rebin(size_t merge) const;
 
-	void addErrorContainer(const TString &,const container1D&, float);  //!< adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down"
-	void addErrorContainer(const TString &,const container1D&);        //!< adds deviation to (this) as systematic uncertianty with name. name must be ".._up" or ".._down"
+	int addErrorContainer(const TString &, container1D, float);  //!< adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down"
+	int addErrorContainer(const TString &,const container1D&);        //!< adds deviation to (this) as systematic uncertianty with name. name must be ".._up" or ".._down"
 
 	/**
 	 * deletes the systematics and adds relative contributions from input
@@ -231,9 +244,9 @@ public:
 	 * adds relative systematics from input to the set of systematics if they don't exist
 	 * if they already exist, they are left untouched
 	 * In case <strict> is false and the systematic variation is de facto 0, only a new layer is added
-	 * as a plain copy (without stat uncertainties) of the nominal layer
+	 * as a plain copy of the nominal layer
 	 */
-	void addRelSystematicsFrom(const container1D &,bool strict=false);
+	void addRelSystematicsFrom(const container1D &,bool ignorestat=false,bool strict=false);
 	void addGlobalRelErrorUp(const TString &,const float &);    //!< adds a global relative uncertainty with name; "..up" automatically added
 	void addGlobalRelErrorDown(const TString &,const float &);  //!< adds a global relative uncertainty with name; "..down" automatically added
 	void addGlobalRelError(const TString &,const float &);      //!< adds a global relative symmetric uncertainty with name; creates ".._up" and ".._down" variation names

@@ -18,6 +18,7 @@
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 
 #include <sys/stat.h>
+#include "../interface/tBranchHandler.h"
 
 
 
@@ -54,7 +55,7 @@ MainAnalyzer::MainAnalyzer(){
 	mode_="";
 	singlefile_=false;
 	maxchilds_=8;
-	topmass_="mt172.5";
+	topmass_="172.5";
 	usepdfw_=-1;
 	usediscr_=false;
 	eventbranch_="NTEvent";
@@ -106,6 +107,9 @@ int MainAnalyzer::start(){
 
 	readFileList();
 
+
+
+
 	//TString name=channel_+"_"+energy_+"_"+syst_;
 
 	if(channel_=="" || energy_=="" || syst_ == ""){
@@ -113,8 +117,19 @@ int MainAnalyzer::start(){
 		return -1;
 	}
 
+
+
+
 	allplotsstackvector_.setName(getOutFileName());
 	allplotsstackvector_.setSyst(getSyst());
+
+	//further SF configuration
+
+	if(! getPdfReweighter()->switchedOff()){
+		usepdfw_ = getPdfReweighter()->getConfIndex();
+	}
+
+
 	bTagBase::systematics btagsyst=getBTagSF()->getSystematic();
 	//load btag:
 	if(!(getBTagSF()->makesEff()) && getBTagSF()->getMode() != NTBTagSF::shapereweighting_mode){ //no input needed
@@ -156,6 +171,9 @@ int MainAnalyzer::start(){
 	size_t running=0;
 
 	size_t done=0,failed=0;
+
+	//for graphics output:
+	size_t nsamplechars=50;
 
 	////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////
@@ -226,8 +244,15 @@ int MainAnalyzer::start(){
 						failed=0;
 						std::cout << "\n\n" << std::endl;
 						for(size_t j=0;j<filenumber;j++){
-							if(succ.at(j) == 0)
-								std::cout <<  "running "<< status.at(j) << "%:" << "\t" <<infiles_.at(j) << "\t" << legentries_.at(j) << std::endl;
+							if(succ.at(j) == 0){
+								size_t lengthname=infiles_.at(j).Length();
+								size_t addblanks=nsamplechars-lengthname;
+								std::cout <<  "running "<< status.at(j) << "%:" << "\t" <<infiles_.at(j);
+								for(size_t iblnk=0;iblnk<addblanks;iblnk++)
+									std::cout << " ";
+								std::cout  << legentries_.at(j) << std::endl;
+
+							}
 							if(succ.at(j) >0)
 								sdone++;
 							if(succ.at(j) <0)
@@ -235,13 +260,26 @@ int MainAnalyzer::start(){
 						}
 						std::cout << "-----------------" << std::endl;
 						for(size_t j=0;j<filenumber;j++){
-							if(succ.at(j) <0)
-								std::cout  << "failed(" << succ.at(j)<<"):   \t"<< infiles_.at(j)<< "\t" << legentries_.at(j)  << std::endl;
+							if(succ.at(j) <0){
+								size_t lengthname=infiles_.at(j).Length();
+								size_t addblanks=nsamplechars-lengthname;
+								std::cout  << "failed(" << succ.at(j)<<"):   \t"<< infiles_.at(j);
+								for(size_t iblnk=0;iblnk<addblanks;iblnk++)
+									std::cout << " ";
+								std::cout << legentries_.at(j)  << std::endl;
+							}
 						}
 
 						for(size_t j=0;j<filenumber;j++){
-							if(succ.at(j) >0)
-								std::cout  << " done:      \t" << infiles_.at(j) << "\t" << legentries_.at(j)  << std::endl;
+							if(succ.at(j) >0){
+								size_t lengthname=infiles_.at(j).Length();
+								size_t addblanks=nsamplechars-lengthname;
+								std::cout  << " done:      \t" << infiles_.at(j);
+								for(size_t iblnk=0;iblnk<addblanks;iblnk++)
+									std::cout << " ";
+								std::cout  << legentries_.at(j)  << std::endl;
+
+							}
 						}
 						std::cout << "\n\n" << done << "(" << failed << " failed) / " << filenumber << " done\n\n"<< std::endl;
 					}
@@ -253,10 +291,33 @@ int MainAnalyzer::start(){
 		//daughters never reach here
 		//wait until all childs are initialised and screen output is done
 		if(!testmode_)
-			sleep(10);
+			sleep(1);
 
 		bool nonefailed=true;
+		containerStackVector *csv = new containerStackVector();
+		try{
+			csv->loadFromTFile(getOutPath()+".root");
+			for(size_t i=0;i<legentries_.size();i++){
+				bool legentryfound=false;
+				for(size_t j=0;j<csv->getStack(0).size();j++){
+					if(csv->getStack(0).getLegend(j) == legentries_.at(i)){
+						legentryfound=true;
+						break;
+					}
+				}
+				if(!legentryfound)
+					succ.at(i)=-2000;
+			}
+		}
+		catch(...){
+			for(size_t i=0;i<succ.size();i++){
+				succ.at(i)=-1000;
+			}
+		}
+		delete csv;
+
 		for(size_t i=0;i<succ.size();i++){
+			//check if everything went fine
 			std::cout << succ.at(i) << "\t" << infiles_.at(i) << std::endl;
 			if(succ.at(i) < 0)
 				nonefailed=false;
@@ -332,9 +393,16 @@ void MainAnalyzer::readFileList(){
 			issignal_.push_back(false);
 	}
 	for(size_t i=0;i<infiles_.size();i++){
-		if(legentries_.at(i) == dataname_)
-			continue;
+		//if(legentries_.at(i) == dataname_)
+		//	continue;
 		infiles_.at(i) =   replaceExtension(infiles_.at(i));
+		///load pdf files
+		if(issignal_.at(i)  && !getPdfReweighter()->switchedOff()){
+			textFormatter ftm;
+			std::string filename= ftm.addFilenameSuffix(infiles_.at(i).Data(), "_pdf");
+			infiles_.at(i) = filename;
+
+		}
 	}
 
 
@@ -453,7 +521,11 @@ float MainAnalyzer::createNormalizationInfo(TFile *f, bool isMC,size_t anaid){
 			}
 		}
 		//for PDF weights to keep normalization the same
-		if(usepdfw_>-1){
+
+		/*
+		if(usepdfw_>-1
+				&& ! getPdfReweighter()->switchedOff()
+				&& ! getPdfReweighter()->getReweightToNominalEigenvector()){
 
 			std::cout << "warning: using pdf weights is implemented, but there are pitfalls:\n"
 					<< " - the nominal pdf weight (idx 0) can be different from 1 depending on\n"
@@ -463,15 +535,13 @@ float MainAnalyzer::createNormalizationInfo(TFile *f, bool isMC,size_t anaid){
 			size_t pdfw=0;//usepdfw_;
 			//use central weight to renormalize
 			float wgenentries=0;
-			TBranch * b_Event=0;
-			NTEvent * pEvent = 0;
-			tnorm->SetBranchAddress(eventbranch_,&pEvent,&b_Event);
 
+			tBranchHandler<NTEvent> b_Event(tnorm,eventbranch_);
 			Long64_t nEntries=tnorm->GetEntries();
 			for(Long64_t entry=0;entry<nEntries;entry++){
-				b_Event->GetEntry(entry);
-				if(pdfw < pEvent->PDFWeightsSize()){
-					wgenentries+=pEvent->PDFWeight(pdfw);
+				b_Event.getEntry(entry);
+				if(pdfw < b_Event.content()->PDFWeightsSize()){
+					wgenentries+=b_Event.content()->PDFWeight(pdfw);
 				}
 				else{
 					throw std::out_of_range("PDF weight index not found for at least one event. Check input!");
@@ -481,9 +551,9 @@ float MainAnalyzer::createNormalizationInfo(TFile *f, bool isMC,size_t anaid){
 				generated->setBinContent(i, (float)wgenentries);
 				generated->setBinStat(i,sqrt(wgenentries));
 			}
-			norm = lumi_   / wgenentries;
+			norm = lumi_  * wgenentries;
 
-		}
+		} */
 
 	}
 	else{//not mc
@@ -497,27 +567,24 @@ float MainAnalyzer::createNormalizationInfo(TFile *f, bool isMC,size_t anaid){
 		}
 		norm=1;
 	}
-	//check whether sample is ttbar
-	if(infiles_.at(anaid).Contains("ttbar") && ! infiles_.at(anaid).Contains("_ttbar")){ //selects all ttbar samples but not ttbarg/w/z
-		textFormatter tf;
-		tf.setDelimiter("_");
-		tf.setComment(".root");
-		std::vector<std::string> fmt=tf.getFormatted(infiles_.at(anaid).Data());
-		float sampletopmass=172.5;
-		for(size_t i=0;i<fmt.size();i++){
-			std::string mtstring="mt";
-			size_t pos=fmt.at(i).find(mtstring);
-			if(pos!=std::string::npos){
-				mtstring=fmt.at(i).substr(pos+mtstring.length());
-				sampletopmass=atof(mtstring.data());
-			}
-		}
+	//check for top mass scaling
+	//if(infiles_.at(anaid).Contains("ttbar") && ! infiles_.at(anaid).Contains("_ttbar")){ //selects all ttbar samples but not ttbarg/w/z
+	float sampletopmass = atof(topmass_.Data());
+	if(infiles_.at(anaid).Contains("ttbar") &&  !infiles_.at(anaid).Contains("_ttbar")){
+
 		float xsec=getTtbarXsec(sampletopmass);
 		std::cout << "GetNorm: File " << infiles_.at(anaid) << "\tis a ttbar sample , top mass is "
 				<< sampletopmass << " xsec: " << xsec <<std::endl;
 		norms_.at(anaid)=xsec;
-
 	}
+	//tW
+	if(infiles_.at(anaid).Contains("_tW.root") || infiles_.at(anaid).Contains("_tbarW.root")
+			|| infiles_.at(anaid).Contains("_tbarWtoLL")|| infiles_.at(anaid).Contains("_tWtoLL")){
+
+		float xsec=getTWXsec(sampletopmass);
+		norms_.at(anaid)=xsec;
+	}
+	//}
 
 
 	norm*=norms_.at(anaid);

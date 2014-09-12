@@ -101,20 +101,35 @@ void mtExtractor::setup(){
 
 
 	getMtValues();
-	readFiles();
-	//reorganize
-    if(!usenormalized_)
+	readFiles(); //now we have mcsig and mcbg sep
+	//add sys for signal UNCORRELATED!!
+	for(size_t i=0;i<mcsignalcont_.size();i++){
+		for(size_t j=0;j<mcsignalcont_.size();j++){
+			if(i==j) continue;
+			mcsignalcont_.at(i).addRelSystematicsFrom(mcsignalcont_.at(j),false);
+		}
+	}
+	//remove PDF
+	for(size_t i=0;i<mcsignalcont_.size();i++){
+		if(i==defmtidx_) continue;
+		for(size_t sys=0;sys<mcsignalcont_.at(i).getSystSize();sys++){
+			if(mcsignalcont_.at(i).getSystErrorName(sys).BeginsWith("PDF"))
+				mcsignalcont_.at(i).removeError(sys);
+		}
+	}
+	// add back stat correlated later in mergeSyst function, because variations are
+	// stat significant
+	//now add to total mc
+	addSignalAndBackground();
+
+	//proceed as before
+	if(!usenormalized_)
 		addLumiUncert(mccont_,datacont_);
 	renormalize();
 
 
 	mergeSyst(mccont_,datacont_); //MUST BE DONE FOR BG AND SIGNAL DIFFERENTLY! (ignorestat false/true)
 
-	//mergeSyst(mccont_,datacont_);//signal
-	//mergeSyst(mccont_,datacont_);background
-	//add both
-	//add()
-	//continue as before
 
 	datagraphs_=makeGraphs(datacont_);
 	mcgraphs_=makeGraphs(mccont_);
@@ -253,6 +268,8 @@ void mtExtractor::reset(){
 	cleanMem();
 	datacont_.clear();
 	mccont_.clear();
+	mcsignalcont_.clear();
+	mcbgcont_.clear();
 	datagraphs_.clear();
 	mcgraphs_.clear();
 	mtvals_.clear();
@@ -525,7 +542,7 @@ void mtExtractor::readFiles(){
 		datacont_.push_back(datareference);
 
 		TString extfilename;
-		container1D gen;
+		container1D gen,genbg;
 		if(mciscuf){
 			isexternalgen_=false;
 			if(!dofolding_){
@@ -537,18 +554,17 @@ void mtExtractor::readFiles(){
 				if(unfoldfolded){
 					gen=tempcuf.getGenContainer(); //
 					//gen*= (1/tempcuf.getLumi());
-					gen=tempcuf.fold(gen); //
+					gen=tempcuf.fold(gen,false); //!!!FIXME
 				}
-				else{
-					gen+=tempcuf.getBackground();
-				}
+				genbg=tempcuf.getBackground();
 				TString oldaxisname=gen.getXAxisName();
 				oldaxisname.ReplaceAll("_gen","");
 				gen.setXAxisName(oldaxisname);
 				gen.setYAxisName(datareference.getYAxisName());
 				gen=gen.rebinToBinning(datareference);
 			}
-			mccont_.push_back(gen);
+			mcsignalcont_.push_back(gen);
+			mcbgcont_.push_back(genbg);
 		}
 		else{ //external input for gen
 			//find right file
@@ -644,23 +660,24 @@ void mtExtractor::readFiles(){
 			}
 			if(dofolding_){
 				nominal*=tempcuf.getLumi();
-				nominal=tempcuf.fold(nominal);
+				nominal=tempcuf.fold(nominal,false);
 				nominal=nominal.rebinToBinning(datareference);
 			}
-			mccont_.push_back(nominal);
+			mcsignalcont_.push_back(nominal);
+			mcbgcont_.push_back(tempcuf.getBackground() );
 			delete fin;
 		} //external
 		if(debug){
 			std::cout << "mtExtractor::readFiles: added " << datacont_.at(i).getName() << " ("<< cufinputfiles_.at(i)<<"), "
-					<< mccont_.at(i).getName() << " (" << extfilename << ")" <<std::endl;
+					<< mcsignalcont_.at(i).getName() << " (" << extfilename << ")" <<std::endl;
 		}
 	}
 
 
-	if(datacont_.size() <1 || mccont_.size() < 1){
+	if(datacont_.size() <1 || mcsignalcont_.size() < 1){
 		throw std::runtime_error("mtExtractor::readFiles: no input distributions found");
 	}
-	if(datacont_.size() != mccont_.size()){
+	if(datacont_.size() != mcsignalcont_.size()){
 		std::cout << "mtExtractor::readFiles: data ("<<datacont_.size() << ") and MC ("<< mccont_.size() <<") input size don't match" <<std::endl;
 		throw std::runtime_error("mtExtractor::readFiles: data and MC  input size don't match");
 	}
@@ -1509,6 +1526,9 @@ texTabler  mtExtractor::makeSystBreakdown(bool merge,bool removeneg,float prec,b
 
 	for(size_t i=0;i<cp.nEntries();i++){
 		TString entryname=cp.getEntryName(i);
+		//ugly hack
+
+
 		bool isneg=false;
 		TString valuestr=cp.getValueString(i,isneg,prec);
 		if(removeneg && isneg) continue;
@@ -1596,6 +1616,12 @@ void mtExtractor::setAxisXsecVsMt(graph & g)const{
 		g.setYAxisName("N/GeV");
 	else
 		g.setYAxisName("d#sigma_{t#bar{T}}/dm_{lb} [pb/GeV]");
+}
+
+void mtExtractor::addSignalAndBackground(){
+	mccont_.resize(mcsignalcont_.size());
+	for(size_t i=0;i<mcsignalcont_.size();i++)
+		mccont_.at(i) = mcsignalcont_.at(i) + mcbgcont_.at(i);
 }
 
 

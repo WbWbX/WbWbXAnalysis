@@ -160,14 +160,14 @@ void containerStack::setLegendOrder(const TString &leg, const size_t& no){
 }
 
 
-void containerStack::mergeLegends(const std::vector<TString>& tobemerged,const TString & mergedname, bool allowsignals){
+void containerStack::mergeLegends(const std::vector<TString>& tobemerged,const TString & mergedname, int mergedColor, bool allowsignals){
 	std::vector<size_t> idxstbm;
 	for(size_t i=0;i<tobemerged.size();i++){
 		idxstbm.push_back(getContributionIdx(tobemerged.at(i)));
-		std::cout << i << std::endl;
+		if(debug)	std::cout << i << std::endl;
 	}
 
-	if(idxstbm.size()<1) return;
+	if(idxstbm.size()<2) return;
 	size_t inidx=idxstbm.at(0);
 
 	std::vector<TString> newsignals;
@@ -198,7 +198,7 @@ void containerStack::mergeLegends(const std::vector<TString>& tobemerged,const T
 
 	for(size_t i=0;i<legends_.size();i++){
 		if(std::find(idxstbm.begin(),idxstbm.end(),i) == idxstbm.end() || i==inidx){ // use lateron
-			if(is1D()){
+			if(is1D()||is1DUnfold()){
 				newconts.push_back(containers_.at(i) *norms_.at(i));
 				if(i==inidx)newidx=newconts.size()-1;
 			}
@@ -210,7 +210,7 @@ void containerStack::mergeLegends(const std::vector<TString>& tobemerged,const T
 				newconts2d.push_back( containers2D_.at(i)*norms_.at(i));
 				if(i==inidx)newidx=newconts2d.size()-1;
 			}
-			std::cout << "reusing " << legends_.at(i) <<std::endl;
+			if(debug)std::cout << "reusing " << legends_.at(i) <<std::endl;
 			legs.push_back(legends_.at(i));
 			cols.push_back(colors_.at(i));
 			legos.push_back(legorder_.at(i));
@@ -219,12 +219,12 @@ void containerStack::mergeLegends(const std::vector<TString>& tobemerged,const T
 	}
 	for(size_t i=0;i<legends_.size();i++){
 		if(std::find(idxstbm.begin(),idxstbm.end(),i) != idxstbm.end() && i!=inidx){
-			if(is1D()){
-				std::cout << "adding  " << legends_.at(i) << " to " << legends_.at(newidx)<<std::endl;
+			if(is1D()||is1DUnfold()){
+				if(debug)std::cout << "adding  " << legends_.at(i) << " to " << legs.at(newidx)<<std::endl;
 				newconts.at(newidx)+=(containers_.at(i) *norms_.at(i));
 			}
 			if(is1DUnfold()){
-				std::cout << "adding  " << legends_.at(i) << " to " << legends_.at(newidx)<<std::endl;
+				if(debug)std::cout << "adding  " << legends_.at(i) << " to " << legs.at(newidx)<<std::endl;
 				newcontsuf.at(newidx)+=(containers1DUnfold_.at(i)*norms_.at(i));
 			}
 			if(is2D()){
@@ -234,22 +234,42 @@ void containerStack::mergeLegends(const std::vector<TString>& tobemerged,const T
 	}
 	//remove
 
+	if(debug){
+		//debug
+		if(legs.size() != cols.size())
+			throw std::logic_error("legs colz");
+		if(cols.size() != legos.size())
+			throw std::logic_error("legos colz");
+		if(norms.size() != cols.size())
+			throw std::logic_error("norms colz");
+
+		std::cout << "cols: " << cols.size() << " \n"
+				<< "legs: " << legs.size() << " \n"
+				<< "legos: " << legos.size() << " \n"
+				<< "norms: " << norms.size() << " \n"
+				<< "newconts: " << newconts.size() << " \n"
+				<< "newcontsuf: " << newcontsuf.size() << " \n"
+				<< "newconts2d: " << newconts2d.size() << " \n"
+				<< "newsignals: " << newsignals.size() << " \n" <<std::endl;
+	}
 	legends_=legs;
 	legends_.at(newidx) = mergedname;
 	colors_=cols;
+	colors_.at(newidx) = mergedColor;
 	legorder_=legos;
 	norms_=norms;
 	containers_=newconts;
 	containers1DUnfold_=newcontsuf;
 	containers2D_=newconts2d;
+	signals_=newsignals;
 
 
 }
-void containerStack::mergeLegends(const TString& tobemergeda,const TString & tobemergedb,const TString & mergedname, bool allowsignal){
+void containerStack::mergeLegends(const TString& tobemergeda,const TString & tobemergedb,const TString & mergedname, int mergedColor, bool allowsignal){
 	std::vector<TString> tbm;
 	tbm.push_back(tobemergeda);
 	tbm.push_back(tobemergedb);
-	mergeLegends(tbm,mergedname,allowsignal);
+	mergeLegends(tbm,mergedname,mergedColor,allowsignal);
 }
 
 void containerStack::removeContribution(TString legendname){
@@ -594,21 +614,27 @@ void containerStack::addErrorStack(const TString & sysname, containerStack error
 				errorstack.norms_[j]=1;
 				containers_[i] = containers_[i] * norms_[i];
 				norms_[i]=1;
-				containers_[i].addErrorContainer(sysname,errorstack.containers_[j]);
+				if(containers_[i].addErrorContainer(sysname,errorstack.containers_[j])<0){
+					std::cout << "containerStack::addErrorStack: Problem in " << name_ <<std::endl;
+				}
 			}
 			if(mode==dim2){
 				errorstack.containers2D_[j] = errorstack.containers2D_[j] * errorstack.norms_[j]; //normalize (in case there is any remultiplication done or something)
 				errorstack.norms_[j]=1;
 				containers2D_[i] = containers2D_[i] * norms_[i];
 				norms_[i]=1;
-				containers2D_[i].addErrorContainer(sysname,errorstack.containers2D_[j]);
+				if(containers2D_[i].addErrorContainer(sysname,errorstack.containers2D_[j])<0){
+					std::cout << "containerStack::addErrorStack: Problem in " << name_ <<std::endl;
+				}
 			}
 			if(mode==unfolddim1){
 				errorstack.containers1DUnfold_[j] = errorstack.containers1DUnfold_[j] * errorstack.norms_[j]; //normalize (in case there is any remultiplication done or something)
 				errorstack.norms_[j]=1;
 				containers1DUnfold_[i] = containers1DUnfold_[i] * norms_[i];
 				norms_[i]=1;
-				containers1DUnfold_[i].addErrorContainer(sysname,errorstack.containers1DUnfold_[j]);
+				if(containers1DUnfold_[i].addErrorContainer(sysname,errorstack.containers1DUnfold_[j])<0){
+					std::cout << "containerStack::addErrorStack: Problem in " << name_ <<std::endl;
+				}
 			}
 		}//legfound
 		/*} */
@@ -661,31 +687,37 @@ void containerStack::getRelSystematicsFrom(const ztop::containerStack & stack){
 		}
 	}
 }
-void containerStack::addRelSystematicsFrom(const ztop::containerStack & stack){
+void containerStack::addRelSystematicsFrom(const ztop::containerStack & stack,bool ignorestat,bool strict){
 	for(std::vector<ztop::container1D>::const_iterator cont=stack.containers_.begin();cont<stack.containers_.end();++cont){
-		TString name=cont->getName();
+		const TString& name=cont->getName();
 		for(unsigned int i=0;i<containers_.size();i++){
 			if(containers_[i].getName() == name){
-				containers_[i].addRelSystematicsFrom(*cont);
+				if(debug)
+					std::cout << "containerStack::addRelSystematicsFrom: adding to stack " << name_ << std::endl;
+				containers_[i].addRelSystematicsFrom(*cont,ignorestat,strict);
 				break;
 			}
 		}
 	}
 	for(std::vector<ztop::container2D>::const_iterator cont=stack.containers2D_.begin();cont<stack.containers2D_.end();++cont){
-		TString name=cont->getName();
+		const TString& name=cont->getName();
 		for(unsigned int i=0;i<containers2D_.size();i++){
 			if(containers2D_[i].getName() == name){
-				containers2D_[i].addRelSystematicsFrom(*cont);
+				if(debug)
+					std::cout << "containerStack::addRelSystematicsFrom: adding to stack " << name_ << std::endl;
+				containers2D_[i].addRelSystematicsFrom(*cont,ignorestat,strict);
 				break;
 			}
 		}
 	}
 
 	for(std::vector<ztop::container1DUnfold>::const_iterator cont=stack.containers1DUnfold_.begin();cont<stack.containers1DUnfold_.end();++cont){
-		TString name=cont->getName();
+		const TString& name=cont->getName();
 		for(unsigned int i=0;i<containers1DUnfold_.size();i++){
 			if(containers1DUnfold_[i].getName() == name){
-				containers1DUnfold_[i].addRelSystematicsFrom(*cont);
+				if(debug)
+					std::cout << "containerStack::addRelSystematicsFrom: adding to stack " << name_ << std::endl;
+				containers1DUnfold_[i].addRelSystematicsFrom(*cont,ignorestat,strict);
 				break;
 			}
 		}
@@ -716,18 +748,18 @@ void containerStack::renameSyst(TString old, TString New){
 	}
 
 }
-std::vector<size_t> containerStack::removeSystematicsSpikes(bool inclUFOF,int limittoindex,
+std::vector<size_t> containerStack::removeSpikes(bool inclUFOF,int limittoindex,
 		float strength,float sign,float threshold){
 
 	//not defined for container1D
 	std::vector<size_t> out,temp;
 
 	for(unsigned int i=0; i<containers2D_.size();i++){
-		temp=containers2D_[i].removeSystematicsSpikes(inclUFOF,limittoindex,strength,sign,threshold);
+		temp=containers2D_[i].removeSpikes(inclUFOF,limittoindex,strength,sign,threshold);
 		out.insert(out.end(),temp.begin(),temp.end());
 	}
 	for(unsigned int i=0; i<containers1DUnfold_.size();i++){
-		temp=containers1DUnfold_[i].removeSystematicsSpikes(inclUFOF,limittoindex,strength,sign,threshold);
+		temp=containers1DUnfold_[i].removeSpikes(inclUFOF,limittoindex,strength,sign,threshold);
 		out.insert(out.end(),temp.begin(),temp.end());
 	}
 	return out;
@@ -1975,6 +2007,40 @@ TString containerStack::listContributions()const{
 	}
 	return out;
 }
+
+
+/**
+ * calls TH1::Chi2Test on full MC histo and data hist
+ */
+double containerStack::chi2Test(Option_t* option, Double_t* res) const{
+	if(!(is1D() || is1DUnfold()))
+		return 0;
+
+	TH1D * data = getContainer(getDataIdx()).getTH1D();
+	TH1D * mc= getFullMCContainer().getTH1D();
+
+	double out=data->Chi2Test(mc,option,res);
+	delete data;
+	delete mc;
+	return out;
+}
+
+/**
+ * calls TH1::KolmogorovTest on full MC histo and data hist
+ */
+double containerStack::kolmogorovTest(Option_t* option) const{
+	if(!(is1D() || is1DUnfold()))
+		return 0;
+
+	TH1D * data = getContainer(getDataIdx()).getTH1D();
+	TH1D * mc= getFullMCContainer().getTH1D();
+
+	double out=data->KolmogorovTest(mc,option);
+	delete data;
+	delete mc;
+	return out;
+}
+
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////

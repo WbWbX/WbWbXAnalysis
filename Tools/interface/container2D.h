@@ -117,10 +117,10 @@ public:
 
 
 
-	void addErrorContainer(const TString & ,const container2D &,float);  //! adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down"
-	void addErrorContainer(const TString &,const container2D & );        //! adds deviation to (this) as systematic uncertianty with name. name must be ".._up" or ".._down"
+	int addErrorContainer(const TString & ,const container2D &,float);  //! adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down"
+	int addErrorContainer(const TString &,const container2D & );        //! adds deviation to (this) as systematic uncertianty with name. name must be ".._up" or ".._down"
 	void getRelSystematicsFrom(const container2D &);
-	void addRelSystematicsFrom(const container2D &);
+	void addRelSystematicsFrom(const container2D &,bool ignorestat=false, bool strict=false);
 	void addGlobalRelError(TString,float);
 
 	/**
@@ -134,7 +134,7 @@ public:
 	 *   must be <threshold> times higher than the average of the neighboring bins
 	 * returns list of syst indicies that were changed
 	 */
-	std::vector<size_t> removeSystematicsSpikes(bool inclUFOF=false,int limittoindex=-1,float strength=100000,float sign=0.3,float threshold=8);
+	std::vector<size_t> removeSpikes(bool inclUFOF=false,int limittoindex=-1,float strength=100000,float sign=0.3,float threshold=8);
 
 	/**
 	 * merges partial variations. only the ones corresponding to the identifier are merged

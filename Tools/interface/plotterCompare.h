@@ -79,7 +79,7 @@ protected:
     void drawPlots();
     // void drawTextBoxes();
     void drawLegends();
-
+    void refreshPad(){};
 
 
 private:

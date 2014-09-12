@@ -141,8 +141,11 @@ void plotStyle::applyPadStyle(TVirtualPad*c)const{
     c->SetTopMargin(topMargin);
     c->SetLeftMargin(leftMargin);
     c->SetRightMargin(rightMargin);
-    if(yaxis_.log)  c->SetLogy();
-    if(xaxis_.log)  c->SetLogx();
+    int number=c->GetNumber();
+    // Apparently this is necessary in glorious root
+    if(yaxis_.log){
+    	c->GetMother()->cd(number);  gPad->SetLogy();}
+    if(xaxis_.log){c->GetMother()->cd(number);   gPad->SetLogx();}
 }
 
 

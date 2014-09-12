@@ -36,13 +36,13 @@ void HistoContent(){
 	//hist2.cout();
 
 	histoContent added = hist1+hist2;
-	hist1.addLayerFromNominal("sys4",hist2);
+	hist1.setLayerFromNominal("sys4",hist2);
 
 
 	hist1.cout();
 
-	added.addLayerFromNominal("sys",hist1);
-	added.addLayerFromNominal("sys2",hist2);
+	added.setLayerFromNominal("sys",hist1);
+	added.setLayerFromNominal("sys2",hist2);
 	std::cout << "\n---" << std::endl;
 	added.cout();
 

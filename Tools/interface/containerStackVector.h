@@ -53,13 +53,13 @@ public:
     void addMCErrorStackVector(const ztop::containerStackVector&);
     void addGlobalRelMCError(TString,double);
     void getRelSystematicsFrom(const ztop::containerStackVector&);
-    void addRelSystematicsFrom(const ztop::containerStackVector&);
+    void addRelSystematicsFrom(const ztop::containerStackVector&,bool ignorestat=false,bool strict=false);
     void removeError(TString);
     void renameSyst(TString,TString); //! old new
 
     size_t getNSyst()const{if(stacks_.size()>0)return stacks_.at(0).getSystSize(); else return 0;}
 
-    std::vector<size_t> removeSystematicsSpikes(bool inclUFOF=false,int limittoindex=-1,float strength=100000,float sign=0.3,float threshold=8);
+    std::vector<size_t> removeSpikes(bool inclUFOF=false,int limittoindex=-1,float strength=100000,float sign=0.3,float threshold=8);
 
     void multiplyNorm(TString, double, TString); //! legendname, multiplier, stepID
     void multiplyNorms(TString, std::vector<double>, std::vector<TString>, bool showmessages=false);   //! multiplies norm of all MC with legendname  ,  with factor  ,  for step identifier string (step_string contains the id string)

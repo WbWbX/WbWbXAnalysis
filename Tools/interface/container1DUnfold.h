@@ -118,10 +118,10 @@ public:
 
 	void setDivideBinomial(bool);
 
-	void addErrorContainer(const TString & ,const container1DUnfold &,float weight);  //! adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down"
-	void addErrorContainer(const TString & ,const container1DUnfold &);  //! adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down"
+	int addErrorContainer(const TString & ,const container1DUnfold &,float weight);  //! adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down"
+	int addErrorContainer(const TString & ,const container1DUnfold &);  //! adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down"
 	void getRelSystematicsFrom(const container1DUnfold &);
-	void addRelSystematicsFrom(const container1DUnfold &);
+	void addRelSystematicsFrom(const container1DUnfold &,bool ignorestat=false,bool strict=false);
 	void addGlobalRelError(TString,float);
 
 	static std::vector<container1DUnfold *> c_list;
@@ -156,7 +156,7 @@ public:
 	 * HINT: the whole preparation is automatically done by containerStack::produceUnfoldingContainer
 	 * Statistical uncertainties of response matrix and input container will be treated as uncorrelated!
 	 */
-	container1D fold(const container1D& input) const;
+	container1D fold(const container1D& input,bool includebackgrounds=true) const;
 
 	const container1D & getControlPlot() const{return recocont_;}
 

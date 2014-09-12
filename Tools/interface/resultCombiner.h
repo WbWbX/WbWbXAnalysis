@@ -13,6 +13,26 @@
 #include "simpleFitter.h"
 
 namespace ztop{
+
+//small helper
+class matrix{
+public:
+	matrix(size_t sizei, size_t sizej){
+		std::vector<double> tmp(sizei,0);
+		matrix_ = std::vector<std::vector<double> > (sizej, tmp);
+	}
+
+	const double& getEntry(size_t i,size_t j)const{return matrix_.at(i).at(j);}
+	void setEntry(const double& content, size_t i,size_t j){matrix_.at(i).at(j)=content;}
+
+	void setDiagonal(){ if(matrix_.size()>0 && matrix_.size() == matrix_.at(0).size()) for(size_t i=0;i<matrix_.size();i++) setEntry(1,i,i);}
+
+private:
+	std::vector<std::vector<double> > matrix_;
+
+};
+
+
 /**
  * class to combine results
  * the input should be in form of container1Ds
@@ -44,6 +64,8 @@ public:
 
 	void addInput(const container1D& ); //reset success here, check binning
 
+	void setLastCorrMatrix(double content, size_t i,size_t j);
+
 	bool minimize();
 	/* invoke a fitter temporarily? -> no access to correlations etc */
 
@@ -62,10 +84,11 @@ private:
 	double getChi2(const double * variations); //main functione
 
 	std::vector<variateContainer1D> distributions_;
+	std::vector<matrix>  statcorrelations_;
 
 	bool success_;
 	container1D combined_,temp_;
-	std::vector<double> workingentries_;
+	//std::vector<double> workingentries_;
 
 	rc_add_constraints additionalconstraint_;
 	double forcednorm_;
@@ -76,6 +99,7 @@ private:
 	//nuisance functions - all assume central @ 0
 	double getNuisanceLogGaus(const double & )const;
 	double getNuisanceLogBox(const double & )const;
+	double getNuisanceLogNormal(const double & )const;
 
 	double sq(const double&)const;
 

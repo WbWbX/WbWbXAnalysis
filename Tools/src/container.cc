@@ -4,6 +4,7 @@
 #include <parallel/algorithm>
 #include "TTree.h"
 #include "TFile.h"
+#include "../interface/systAdder.h"
 //#include <omp.h>
 
 //some more operators
@@ -30,7 +31,9 @@ bool container1D::c_makelist=false;
 
 ///////function definitions
 container1D::container1D():
-                                                        																taggedObject(taggedObject::type_container1D)
+
+								taggedObject(taggedObject::type_container1D)
+
 {
 	canfilldyn_=false;
 	//divideBinomial_=true;
@@ -48,7 +51,10 @@ container1D::container1D():
 	if(c_makelist)c_list.push_back(this);
 }
 container1D::container1D(float binwidth, TString name,TString xaxisname,TString yaxisname, bool mergeufof):
-                                                        																taggedObject(taggedObject::type_container1D){ //currently not used
+
+				taggedObject(taggedObject::type_container1D)
+
+{ //currently not used
 	plottag=none;
 	binwidth_=binwidth;
 	canfilldyn_=true;
@@ -67,7 +73,9 @@ container1D::container1D(float binwidth, TString name,TString xaxisname,TString 
 	hp_=0;
 }
 container1D::container1D(std::vector<float> bins, TString name,TString xaxisname,TString yaxisname, bool mergeufof):
-                                                        																taggedObject(taggedObject::type_container1D){
+				taggedObject(taggedObject::type_container1D)
+
+{
 	plottag=none;
 	setBins(bins);
 	//divideBinomial_=true;
@@ -92,7 +100,9 @@ container1D::~container1D(){
 	if(gp_) delete gp_;
 	if(hp_) delete hp_;
 }
-container1D::container1D(const container1D &c): taggedObject(c){
+container1D::container1D(const container1D &c): taggedObject(c)
+
+{
 	copyFrom(c);
 }
 container1D& container1D::operator=(const container1D& c) {
@@ -476,7 +486,14 @@ container1D container1D::getRelErrorsContainer()const{
 	return out;
 }
 
-void container1D::mergePartialVariations(const TString & identifier,bool strictpartialID){
+void container1D::removeStatFromAll(){
+	for(size_t i=0;i<contents_.layerSize();i++){
+		contents_.getLayer(i).removeStat();
+	}
+	contents_.getNominal().removeStat();
+}
+
+void container1D::mergePartialVariations(const TString & identifier,bool linearly, bool strictpartialID){
 	//search for partial variations
 	// <somename>_container1D_partialvariationIDString_<somepartialname>_up/down
 	container1D cp=*this;
@@ -502,14 +519,61 @@ void container1D::mergePartialVariations(const TString & identifier,bool strictp
 		}
 	}
 	if(mergedvars.getSystSize()>1){
-		mergedvars.mergeAllErrors(identifier);
+		mergedvars.mergeAllErrors(identifier,linearly);
 		cp.addErrorContainer(identifier+"_up",mergedvars.getSystContainer(0));
 		cp.addErrorContainer(identifier+"_down",mergedvars.getSystContainer(1));
 	}
 	*this=cp;
 }
 
-void container1D::mergeAllErrors(const TString & mergedname){
+/**
+ * names without "up" and "down"
+ */
+void container1D::mergeVariations(const std::vector<TString>& names, const TString & outname,bool linearly){
+	container1D cp=*this;
+	cp.removeAllSystematics();
+	//container1D mergedvarsdown=cp;
+
+	cp.contents_.getNominal()=contents_.getNominal(); //copy nominal layer
+	container1D mergedvars=cp;
+
+	for(size_t i=0;i<getSystSize();i++){
+		if(std::find(names.begin(),names.end(), getSystErrorName(i)+"_up") != names.end()
+				|| std::find(names.begin(),names.end(), getSystErrorName(i)+"_down") != names.end()){
+			mergedvars.contents_.addLayer(getSystErrorName(i),contents_.getLayer(i));
+		}
+	}
+
+
+	if(mergedvars.getSystSize() < names.size()*2){
+		throw std::runtime_error("container1D::mergeVariations: at least one variation now found");
+	}
+	mergedvars.mergeAllErrors(outname,linearly);
+	cp.addErrorContainer(outname+"_up",mergedvars.getSystContainer(0));
+	cp.addErrorContainer(outname+"_down",mergedvars.getSystContainer(1));
+	*this=cp;
+
+}
+
+
+void container1D::mergeVariationsFromFileInCMSSW(const std::string& filename){
+
+	systAdder adder;
+	adder.readMergeVariationsFileInCMSSW(filename);
+	size_t ntobemerged=adder.mergeVariationsSize();
+	for(size_t i=0;i<ntobemerged;i++){
+
+		TString mergedname=adder.getMergedName(i);
+		std::vector<TString> tobemerged=adder.getToBeMergedName(i);
+		bool linearly=adder.getToBeMergedLinearly(i);
+
+		mergeVariations(tobemerged,mergedname,linearly);
+	}
+
+}
+
+
+void container1D::mergeAllErrors(const TString & mergedname,bool linearly){
 	container1D cp=*this;
 	cp.removeAllSystematics();
 	cp.addGlobalRelErrorUp(mergedname,0);
@@ -517,10 +581,22 @@ void container1D::mergeAllErrors(const TString & mergedname){
 	for(size_t i=0;i<bins_.size();i++){
 		//for(size_t sys=0;sys<getSystSize();sys++){
 		float stat=getBinStat(i);
-		float cup=getBinErrorUp(i,false);
-		float cdown=getBinErrorDown(i,false);
-		cp.setBinContent(i,getBinContent(i)+sqrt(cup*cup-stat*stat) ,0);
-		cp.setBinContent(i,getBinContent(i)-sqrt(cdown*cdown-stat*stat) ,1);
+		if(!linearly){
+			float cup=getBinErrorUp(i,false);
+			float cdown=getBinErrorDown(i,false);
+			cp.setBinContent(i,getBinContent(i)+sqrt(cup*cup-stat*stat) ,0);
+			cp.setBinContent(i,getBinContent(i)-sqrt(cdown*cdown-stat*stat) ,1);
+		}
+		else{
+			float cup=0,cdown=0;
+			std::vector<TString> vars=contents_.getVariations();
+			for(size_t var=0;var<vars.size();var++){
+				cup  +=getBinContent(i,getSystErrorIndex(vars.at(var)+"_up"))   - getBinContent(i);
+				cdown+=getBinContent(i,getSystErrorIndex(vars.at(var)+"_down")) - getBinContent(i);
+			}
+			cp.setBinContent(i,getBinContent(i) + cup ,0);
+			cp.setBinContent(i,getBinContent(i) + cdown,1);
+		}
 		//}
 	}
 	*this=cp;
@@ -725,7 +801,7 @@ void container1D::normalizeToContainer(const container1D & cont){
 	container1D tcont=cont;
 	tcont.setAllErrorsZero();
 	//when dividing all systematics will be recreated from nominal (now with 0 stat error)
-	int syssize=(int)getSystSize();
+	//int syssize=(int)getSystSize();
 
 	//new: do by hand
 	/*
@@ -1288,34 +1364,40 @@ container1D container1D::rebin(size_t merge) const{
  * container1D::addErrorContainer(TString sysname,container1D deviatingContainer, float weight)
  * same named systematics do not exist by construction, makes all <>StatCorrelated options obsolete
  */
-void container1D::addErrorContainer(const TString & sysname,const container1D & deviatingContainer, float weight){
+int container1D::addErrorContainer(const TString & sysname, container1D  deviatingContainer, float weight){
 	if(hasTag(taggedObject::dontAddSyst_tag)){
 		if(showwarnings_) std::cout << "container1D::addErrorContainer: not adding syst because container has tag \"dontAddSyst_tag\": " << getName()<<std::endl;
-		return;
+		return 0;
 	}
 	if(bins_!=deviatingContainer.bins_){
-		std::cout << "container1D::addErrorContainer(): not same binning! doing nothing for "<<name_ << " " << sysname << std::endl;
-		return;
+		if(deviatingContainer.isDummy()){
+			deviatingContainer=*this;
+		}
+		else{
+			std::cout << "container1D::addErrorContainer(): not same binning! doing nothing for "<<name_ << " " << sysname << std::endl;
+
+			return -11;
+		}
 	}
 	if(! (sysname.Contains("_up") || sysname.Contains("_down"))){
 		std::cout << "container1D::addErrorContainer: systematic variation must be named \".._up\"  or \".._down\"! for consistent treatment. doing nothing for "
 				<<name_ << " " << sysname  << std::endl;
-		return;
+		return -1;
 	}
 	if(contents_.getLayerIndex(sysname) < contents_.layerSize()){
 		std::cout << "container1D::addErrorContainer: systematic variation already added. doing nothing for "
 				<<name_ << " " << sysname  << std::endl;
-		return;
+		return -2;
 	}
 	//add layer with name and fill with content..
 	manualerror_=false;
 	if(debug)
 		std::cout << "container1D::addErrorContainer: " << name_ << std::endl;
-	contents_.addLayerFromNominal(sysname,deviatingContainer.contents_);
-
+	contents_.setLayerFromNominal(sysname,deviatingContainer.contents_);
+	return 0;
 }
-void container1D::addErrorContainer(const TString & sysname,const container1D  &deviatingContainer){
-	addErrorContainer(sysname,deviatingContainer,1);
+int container1D::addErrorContainer(const TString & sysname,const container1D  &deviatingContainer){
+	return addErrorContainer(sysname,deviatingContainer,1);
 }
 void container1D::getRelSystematicsFrom(const ztop::container1D & rhs){
 	if(bins_!=rhs.bins_){
@@ -1343,7 +1425,7 @@ void container1D::getRelSystematicsFrom(const ztop::container1D & rhs){
 	manualerror_=false;
 	return;
 }
-void container1D::addRelSystematicsFrom(const ztop::container1D & rhs,bool strict){
+void container1D::addRelSystematicsFrom(const ztop::container1D & rhs,bool ignorestat,bool strict){
 	size_t nsysrhs=rhs.contents_.layerSize();
 	container1D relerr=rhs.getRelErrorsContainer();
 	for(size_t i=0;i<nsysrhs;i++){
@@ -1353,10 +1435,17 @@ void container1D::addRelSystematicsFrom(const ztop::container1D & rhs,bool stric
 			if(debug) std::cout << "container1D::addRelSystematicsFrom: adding new syst "<< relerr.getSystErrorName(i)<< " to container " <<name_ <<std::endl;
 			//contents_.getLayer(newlayerit).removeStat();
 			//stat are definitely not correlated
-			if(!strict && rhs.contents_.getNominal() == rhs.contents_.getLayer(i)){ //this is just a copy leave it and add no variation
+			bool isnominalequal=(!strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i),1e-2))
+																	|| (strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i))) ;
+
+			if(isnominalequal){ //this is just a copy leave it and add no variation
 				//contents_.getLayer(newlayerit).removeStat();
+				if(debug) std::cout << "container1D::addRelSystematicsFrom: " << relerr.getSystErrorName(i) << " is not a real variation "
+						<< " only a duplicate of the nominal, skipping" <<std::endl;
 				continue;
 			}
+			if(ignorestat)
+				relerr.contents_.getLayer(i).removeStat();
 			contents_.getLayer(newlayerit).multiply(relerr.contents_.getLayer(i),false);
 		}
 		else{
@@ -1413,8 +1502,8 @@ void container1D::transformStatToSyst(const TString &sysname){
 		contents_.setBinStat(bin,0);
 	}
 	const TString ups=sysname+"_up",downs=sysname+"_down";
-	contents_.addLayerFromNominal(ups,up);
-	contents_.addLayerFromNominal(downs,down);
+	contents_.setLayerFromNominal(ups,up);
+	contents_.setLayerFromNominal(downs,down);
 
 }
 

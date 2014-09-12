@@ -12,12 +12,14 @@
 
 namespace ztop{
 
-pdfReweighter::pdfReweighter():simpleReweighter(),ntevent_(0),pdfidx_(0){}
+pdfReweighter::pdfReweighter():simpleReweighter(),ntevent_(0),pdfidx_(0),rewtonomev_(false){
+	switchOff(true);
+}
 
 pdfReweighter::~pdfReweighter(){}
 
 void pdfReweighter::reWeight( float &oldweight){
-	return;
+
     if(switchedoff_){
         setNewWeight(1);
     }
@@ -26,6 +28,10 @@ void pdfReweighter::reWeight( float &oldweight){
             throw std::out_of_range("pdfReweighter::reWeight: pdf index out of range");
         }
         float newweight = ntevent_->PDFWeight(pdfidx_);
+        if(rewtonomev_){
+        	newweight /= ntevent_->PDFWeight(0);
+        }
+
         setNewWeight(newweight);
     }
     simpleReweighter::reWeight(oldweight);

@@ -85,6 +85,9 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 	if(legendname==dataname_) isMC=false;
 
 
+	if(!isMC || !issignal)
+		getPdfReweighter()->switchOff(true);
+
 	//some mode options
 	/* implement here not to overload MainAnalyzer class with private members
 	 *  they are even allowed to overwrite existing configuration
@@ -193,9 +196,10 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 			normmultiplier=0.1049/0.1111202;
 		}
 	}
-	if(inputfile.Contains("_mgdecays_")){
+	if(inputfile.Contains("_mgdecays_") || inputfile.Contains("_tbarWtoLL")|| inputfile.Contains("_tWtoLL")){
 		normmultiplier=0.1049; //fully leptonic branching fraction
 	}
+
 
 
 	bool fakedata=false,isfakedatarun=false;
@@ -259,7 +263,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
 		getTopPtReweighter()->setSystematics(reweightfunctions::nominal); //setSystematics("nom");
 
-		getPdfReweighter()->setPdfIndex(0);
+		getPdfReweighter()->switchOff(true);
 
 		//for other parameters reread config
 		fileReader fr;
@@ -357,6 +361,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 		toplikelihood.setSystematics("nominal");
 	}
 
+
+
 	/////////////////////////////////////////////////////////////////////////////////
 
 	//just a test
@@ -388,6 +394,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 	//setup everything for control plots
 
 	ttbarControlPlots plots;//for the Z part just make another class (or add a boolian)..
+	////FIX!!
+	plots.limitToStep(8);
 	ZControlPlots zplots;
 	plots.linkEvent(evt);
 	zplots.linkEvent(evt);
@@ -397,7 +405,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 	anyasplots_step8.setEvent(evt);
 
 
-	//get normalization
+	//get normalization - switch on or off pdf weighter before!!!
 	double norm=createNormalizationInfo(f,isMC,anaid);
 	if(testmode_)
 		std::cout << "testmode("<< anaid << "): multiplying norm with "<< normmultiplier <<" file: " << inputfile<< std::endl;
@@ -416,8 +424,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
 	if(fakedata) //always use nominal
 		btagSysAdd+="_fakedata";
-
-	if(getBTagSF()->setSampleName((channel_+"_"+btagSysAdd+"_"+toString(inputfile)).Data()) < 0){
+	std::string btagsamplename=(channel_+"_"+btagSysAdd+"_"+toString(inputfile)).Data();
+	if(getBTagSF()->setSampleName(btagsamplename) < 0){
 		reportError(-3,anaid);
 		return;
 	}
@@ -442,8 +450,6 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 	getElecEnergySF()->setIsMC(isMC);
 	getMuonEnergySF()->setIsMC(isMC);
 
-	if(!isMC)
-		getPdfReweighter()->switchOff(true);
 
 
 
@@ -834,7 +840,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 			if(fabs(elec->d0V()) < 0.02
 					&& elec->isNotConv()
 					&& elec->mvaId() > 0.9
-					&& elec->mHits() <= 0){
+					&& elec->mHits() <= 0
+					&& elec->isPf()){
 
 				idelectrons <<  elec;
 				if(fabs(elec->rhoIso())<0.1){
@@ -1426,11 +1433,17 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 	//renorm for topptreweighting
 	double renormfact=getTopPtReweighter()->getRenormalization();
 	norm *= renormfact;
+	if(testmode_ )
+		std::cout << "testmode("<< anaid << "): finished main loop, renorm factor top pt: " <<renormfact  << std::endl;
+
+	//renorm after pdf reweighting (only acceptance effects!
+	renormfact=getPdfReweighter()->getRenormalization();
+	norm *= renormfact;
+	if(testmode_ )
+		std::cout << "testmode("<< anaid << "): finished main loop, renorm factor pdf weights: " <<renormfact  << std::endl;
 
 	container1DUnfold::flushAllListed(); // call once again after last event processed
 
-	if(testmode_ )
-		std::cout << "testmode("<< anaid << "): finished main loop, renorm factor: " <<renormfact  << std::endl;
 
 
 	// Fill all containers in the stackVector
@@ -1585,7 +1598,42 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 		if(singlefile_) return;
 
 		//all operations done
-		p_finished.get(anaid)->pwrite(1); //turns of write blocking, too
+		//check if everything was written correctly
+		bool outputok=true;
+		if(btagsf_.makesEff()){
+			ztop::NTBTagSF btsf;
+			btsf.readFromTFile(btagsffile_);
+			if(btsf.setSampleName(btagsamplename)<0){
+				p_finished.get(anaid)->pwrite(-2003);
+				outputok=false;
+			}
+			else{
+				outputok=true;
+			}
+		}
+
+		//throws if something is not ok
+		if(outputok){
+			try{
+				csv->loadFromTFile(getOutPath()+".root");
+				for(size_t i=0;i<csv->getStack(0).size();i++){
+					outputok=false;
+					if(csv->getStack(0).getLegend(i) == legendname){
+						outputok=true;
+						break;
+					}
+				}
+			//	if(csv) delete csv;
+			}
+			catch(...){
+				outputok=false;
+				p_finished.get(anaid)->pwrite(-2001);
+			}
+		}
+
+
+		if(outputok)
+			p_finished.get(anaid)->pwrite(1); //turns of write blocking, too
 	}
 	else{
 		std::cout << "testmode("<< anaid << "): failed to write to file " << getOutPath()+".root"<< std::endl;

@@ -14,11 +14,13 @@
 #include "graph.h"
 #include "legendStyle.h"
 #include "TStyle.h"
+//#include "TGaxis.h"
 
 class TH1D;
 class TGraphAsymmErrors;
 class TCanvas;
 class TVirtualPad;
+
 
 namespace ztop{
 /**
@@ -26,7 +28,9 @@ namespace ztop{
  */
 class plotterBase :protected tObjectList{
 public:
-    plotterBase():tObjectList(), title_(""),tbndc_(true),lastplotidx_(0),pad_(0),drawlegend_(true){}
+    plotterBase():tObjectList(), title_(""),tbndc_(true),lastplotidx_(0),pad_(0),drawlegend_(true){
+    	//TGaxis::SetMaxDigits();
+    }
     virtual ~plotterBase(){}
 
     plotterBase(const plotterBase&);
@@ -79,6 +83,7 @@ protected:
     virtual void drawPlots()=0; //object handling by plot class
     void drawTextBoxes(); //adds new objects to list
     virtual void drawLegends()=0;//adds new objects to list
+    virtual void refreshPad()=0;
 
     float getSubPadYScale(int padidx);
     float getSubPadXScale(int padidx);

@@ -9,9 +9,10 @@
 #define GRAPHFITTER_H_
 
 #include "simpleFitter.h"
+#include "../interface/graph.h"
 
 namespace ztop{
-class graph;
+
 
 class graphFitter: public simpleFitter{
 public:
@@ -31,6 +32,8 @@ public:
      * function. parameters should NOT be fed to other functions!!
      */
     void setDoXYShift(bool dos){shiftxy_=dos;}
+
+    graph exportFittedCurve(size_t npoints=100) const;
 
     double getFitOutput(const double& xin)const;
 
@@ -52,6 +55,8 @@ private:
     const std::vector<point2D> * getNomPoints()const{return simpleFitter::getNomPoints();}
     const std::vector<point2D> * getErrsUp()const{return simpleFitter::getErrsUp();}
     const std::vector<point2D> * getErrsDown()const{return simpleFitter::getErrsDown();}
+
+    graph savedinput_;
 
 };
 

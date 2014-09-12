@@ -32,103 +32,145 @@
 
 #include "../interface/paraExtrPull.h"
 #include "TRandom3.h"
+#include "TtZAnalysis/Tools/interface/systAdder.h"
 
-std::vector<TString> filelist;
 //very ugly function
 
-void makePseudoExperiments(ztop::parameterExtractor* ex,size_t niter,float evalpoint,const TString output,
-		const std::vector<ztop::graph>& mcbingraphs, const std::vector<ztop::graph>& databingraphs){
+void makePseudoExperiments(ztop::mtExtractor* ex,size_t niter,float evalpoint, TString output){
 	using namespace ztop;
 
-	std::vector<float> binning;
-	for(float i=-5;i<=5;i+=0.25) binning<<i;
 
-	size_t npulls=4;
-	std::vector<container1D *> pulls;
+	//one could make this a loop for calibration
+
+	std::vector<float> binning;
+	for(float i=-6;i<=6;i+=0.25) binning<<i;
+
 	TRandom3* random=new TRandom3();
+
+
+
 
 	//hopefully this hack disables all that unnecessary utput of tfitter....
 	gErrorIgnoreLevel = kWarning;
+	output.ReplaceAll("summary.pdf","");
 
 	TFile * f  = new TFile(output+".root","RECREATE");
 	TCanvas cv1;
 
 	//for a straight line
 
-	ex->setFastMode(true); //we dont need graphical output for each pull
+	ex->getExtractor()->setFastMode(true); //we dont need graphical output for each pull
 
 	parameterExtractor::debug=false;
 	//
 	//get functional form -> later you might want to fit some TBI inputs here
 	//now just dummys
 
-	std::cout << "creating pull " <<std::endl;
-	container1D * ctemp= new container1D(binning);
-	ctemp->setName("pull");
-	ctemp->setXAxisName("m_{t,out}-m_{t,in} / #Delta_{stat}");
-	//do stuff
 	paraExtrPull pex;
-	pex.setExtractor(ex);
+	pex.setExtractor(ex->getExtractor());
 
-	pex.setFillContainer1D(ctemp);
 	pex.setRandom(random);
 	pex.setNIterations(niter);
 	//pex.setFunctionalForm(-243.761,-614.668,5.90438);
 	//overwrites func form
 
-	std::cout << "external parameters or " << ex->getFittedParasB().size() << " bins" <<std::endl;
+	std::cout << "external parameters or " << ex->getExtractor()->getFittedParasB().size() << " bins" <<std::endl;
 
+
+	std::vector<ztop::graph> mcuncorr=ex->makeSignalBinGraphs();
+	std::vector<ztop::graph> mccorr=ex->makeBGBinGraphs();
+	const std::vector<ztop::graph>& databingraphs=ex->getDataBingraphs();
 	pex.setDataGraphInput(databingraphs);
-	pex.setTrueInput(mcbingraphs);
-	pex.setFitParasTrue(ex->getFittedParasB());
+	pex.setUncorrelatedMCInput(mcuncorr);
+	pex.setCorrelatedMCInput(mccorr);
+	pex.setFitParasTrue(ex->getExtractor()->getFittedParasB());
 	//pex.setFunctionalForm(offsetatdefmtop,slope,0.0001);
 
-	pex.setEvalPoint(evalpoint);
 
-	/*		    graph data=pex.generateDataPoints();
-		    data.getTGraph()->Draw("AP");
+	std::cout << "creating pull " <<std::endl;
 
-		    cv1.Print(output+"data.pdf");
-		    graph mc=pex.generateMCPoints();
-		    mc.getTGraph()->Draw("AP");
+	std::vector<container1D > allpulls;
+	size_t npulls=3;
+	std::vector<float> evalpoints;
 
-		    cv1.Print(output+"mc.pdf");
-	break;*/
-	pex.fill();
+	evalpoints << 169.5 << 172.5 << 175.5;
 
+	for(size_t i=0;i<npulls;i++){
 
-	pulls.push_back(ctemp);
+		pex.setEvalPoint(evalpoints.at(i));
+		container1D  ctemp(binning);
+		ctemp.setName("pull"+i);
+		ctemp.setXAxisName("m_{t,out}-m_{t,in} / #Delta_{stat}");
+		//do stuff
+		pex.setFillContainer1D(&ctemp);
 
+		pex.fill();
+
+		ctemp.writeToTFile(f);
+
+		allpulls.push_back(ctemp);
+
+	}
 
 
 	plotterMultiplePlots plotterm;
-	plotterm.readStyleFromFileInCMSSW("src/TtZAnalysis/Tools/styles/multiplePlots.txt");
+	plotterm.readStyleFromFileInCMSSW("src/TtZAnalysis/Analysis/configs/topmass/multiplePlots_pulls.txt");
 	plotterm.usePad(&cv1);
+	plotterm.cleanMem();
+	plotterm.clear();
 
-	for(size_t i=0;i<pulls.size();i++){
+	for(size_t i=0;i<allpulls.size();i++){
 
-		plotterm.addPlot(pulls.at(i),false);
+		//Fit the stuff
+		container1D & ctemp= allpulls.at(i);
+
+		ctemp *= (((float)i+1)/2);
+
+		graph tofit; tofit.import(&ctemp,true);
+
+		graphFitter fitter;
+		fitter.readGraph(&tofit);
+		fitter.setFitMode(graphFitter::fm_gaus);
+		fitter.setParameter(0,0.4*ctemp.integral(false)); //norm
+		fitter.setParameter(1,0); //xshift
+		fitter.setParameter(2,1); //width
+		//fitter.printlevel =2;
+		//graphFitter::debug=true;
+
+		fitter.fit();
+		bool succ=	fitter.wasSuccess();
+
+		if(!succ){
+			std::cout << "Fit was not successful, ignore results!" <<std::endl;
+		}
+
+		std::cout << "peak:  " << fitter.getParameter(1) <<std::endl;
+		std::cout << "width: " << fitter.getParameter(2) <<std::endl;
+
+		formatter fmt;
+		float roundpeak=fmt.round(fitter.getParameter(1),0.01);
+		float roundwidth=fmt.round(fitter.getParameter(2),0.01);
+
+
+		graph fitted=fitter.exportFittedCurve(500);
+
+		plotterm.addPlot(&tofit);
 		plotterm.setLastNoLegend();
-
+		fitted.setName("#splitline{m_{t}=" + toTString(evalpoints.at(i)) + " GeV}{peak: "+toTString(roundpeak) + ", width: " +toTString(roundwidth)+"}");
+		plotterm.addPlot(&fitted);
+		//plotterm.setLastNoLegend();
 	}
+
+	cv1.Clear();
+	cv1.SetName("withfit");
 	plotterm.draw();
-	for(size_t i=0;i<pulls.size();i++){
-
-		pulls.at(i)->writeToTFile(f);
-	}
-
 	cv1.Write();
 
-	cv1.Print(output+".pdf");
+	cv1.Print(output+"_fit.pdf");
+
 	f->Close();
 	//last
-	for(size_t i=0;i<pulls.size();i++)
-		if(pulls.at(i)) delete pulls.at(i);
-
-
-
-
-
+	//delete ctemp;
 }
 TString replaceAllExtraChars(const TString & in){
 	TString out=in;
@@ -144,13 +186,24 @@ TString replaceAllExtraChars(const TString & in){
 }
 
 
+ std::vector<TString> filelist;
 
 void WriteAndPrint(TCanvas*c, TFile &f,TString outputpdf, TString outdir){
 	outdir=replaceAllExtraChars(outdir); //ReplaceAll(" ","_");
 	outputpdf=replaceAllExtraChars(outputpdf);
 
+	static std::vector<size_t> doublecount;
+	if(doublecount.size() != filelist.size())
+		doublecount.resize(filelist.size(),0);
+
 	TString outname=c->GetName();
 	outname=replaceAllExtraChars(outname);
+	std::vector<TString>::iterator flit=std::find(filelist.begin(),filelist.end(),outdir+"/" + outname);
+	if(flit != filelist.end()){
+		size_t prevpos = flit-filelist.begin();
+		doublecount.at(prevpos) ++;
+		outname+="_"+ztop::toTString(doublecount.at(prevpos));
+	}
 
 	c->Print(outputpdf+".pdf");
 	f.WriteTObject(c);
@@ -167,6 +220,7 @@ void WriteAndPrint(TCanvas*c, TFile &f,TString outputpdf, TString outdir){
 
 int main(int argc, char* argv[]){
 	using namespace ztop;
+
 	//get options
 	//plotname, (fitmode), minbin, maxbin, excludebin
 	std::string cmsswbase=getenv("CMSSW_BASE");
@@ -186,6 +240,7 @@ int main(int argc, char* argv[]){
 	const int excludebin      =  parse.getOpt<int>    ("-excludebin",-1,"exclude bin from fit");
 	const bool usefolding     = ! parse.getOpt<bool>   ("-nofold",false,"dont! use folding of genertor input");
 	const bool nosyst     =  parse.getOpt<bool>   ("-nosyst",false,"skip systematics");
+	const bool onlysignalstat     =  parse.getOpt<bool>   ("-onlysignalstat",false,"skip systematics");
 	std::string extconfigfile      =  parse.getOpt<std::string>    ("-config",
 			((TString)cmsswbase+"/src/TtZAnalysis/Analysis/configs/mtExtractor_config.txt").Data(),
 			"specify config file for external gen input");
@@ -242,7 +297,12 @@ int main(int argc, char* argv[]){
 	extractor.setDefMTop(defmtop);
 	extractor.setUseNormalized(normalize);
 
-	mtExtractor::debug=true;
+	if(onlysignalstat){
+		extractor.setIgnoreBGStat(true);
+		extractor.setIgnoreDataStat(true);
+	}
+
+	//mtExtractor::debug=true;
 	// histoContent::debug=true;
 
 	// parameterExtractor::debug=true;
@@ -258,11 +318,11 @@ int main(int argc, char* argv[]){
 
 
 	extractor.setFitUncertaintyModeData(parameterExtractor::fitunc_statcorrgaus);
-	extractor.setFitUncertaintyModeMC(parameterExtractor::fitunc_statuncorrpoisson);
+	extractor.setFitUncertaintyModeMC(parameterExtractor::fitunc_statcorrgaus);
 
-	extractor.getExtractor()->setFitFunctions("pol2");
+	extractor.getExtractor()->setFitFunctions(fitmode);
 	extractor.getExtractor()->setConfidenceLevelFitInterval(0.68);
-	extractor.getExtractor()->setIntersectionGranularity(500);
+	extractor.getExtractor()->setIntersectionGranularity(2500);
 
 	extractor.setPlot(plotname);
 	extractor.setExcludeBin(excludebin);
@@ -354,8 +414,7 @@ int main(int argc, char* argv[]){
 			extractor.createBinLikelihoods(-1,false);
 			std::cout << "entered creation of toys mode\nthis will create toys and pulls and will then exit" <<std::endl;
 
-			makePseudoExperiments(extractor.getExtractor(),(size_t)createpseudoexp,defmtop,output+"_pulls",
-					extractor.getMCBingraphs(),extractor.getDataBingraphs());
+			makePseudoExperiments(&extractor,(size_t)createpseudoexp,defmtop,output+"pulls");
 			return 1;
 		}
 
@@ -383,6 +442,15 @@ int main(int argc, char* argv[]){
 
 		//for all systematics
 		for(int i=-1;i<extractor.getDataSystSize();i++){
+
+			//dirty hack
+			if(i>-1 && extractor.getIsExternalGen()
+					&& (extractor.getSystName((size_t)i).BeginsWith("CR")
+							|| extractor.getSystName((size_t)i).BeginsWith("UE"))){
+				std::cout << "!!!!!!!!!!!skipping CR or UE syst: "<< extractor.getSystName((size_t)i) << std::endl;
+				continue;
+
+			}
 
 			extractor.createBinLikelihoods(i,false);
 
@@ -449,9 +517,18 @@ int main(int argc, char* argv[]){
 
 
 		//results table
-
+		resultsSummary::debug=true;
+		systAdder::debug=true;
 		texTabler table=extractor.makeSystBreakdown();
 		table.writeToFile(outdirectory+"/sys_breakdown.tex");
+
+		table=extractor.makeSystBreakdown(false,false,0.00001);
+		table.writeToFile(outdirectory+"/sys_breakdown_detailed.tex");
+
+		table=extractor.makeSystBreakdown(false,false,0.00001,false,true);
+		table.writeToFile(outdirectory+"/sys_breakdown_stat.tex");
+
+
 
 		c->SetName("spread_inlay");
 		extractor.drawSpreadWithInlay(c);
@@ -504,12 +581,9 @@ int main(int argc, char* argv[]){
 	containerStackVector defmtvec;
 	defmtvec.loadFromTFile(defmtfile);
 	gStyle->SetOptStat(0);
-	containerStack stack=defmtvec.getStack("total step 8");
 	if(onlyCP){
 		for(size_t i=0;i<plotnames.size();i++){
-
 			std::cout << plotnames.at(i)<<std::endl;;
-
 		}
 		system(((TString)"mkdir -p controlPlots").Data());
 
@@ -519,31 +593,44 @@ int main(int argc, char* argv[]){
 			extraconfig.setDelimiter(",");
 			extraconfig.setStartMarker("[plot - " + plotnames.at(i) +"]");
 			if(i<plotnames.size()-1)
-				extraconfig.setEndMarker("[plot - "+ plotnames.at(i+1) +"]");
+				extraconfig.setEndMarker("[plot - ");
 			extraconfig.readFile(extconfigfile);
 			std::string tmpfile=extraconfig.dumpFormattedToTmp();
-			containerStack stack=defmtvec.getStack(plotnames.at(i));
+			containerStack stack2=defmtvec.getStack(plotnames.at(i));
 
 
-			TString name=stack.getName();
+			TString name=stack2.getName();
+			///////definitions for backgrounds to be merged:
+			std::vector<TString> dyvv; dyvv << "Z#rightarrowll" << "DY#rightarrow#tau#tau" << "DY#rightarrowll" << "VV";
+			std::vector<TString> signals; signals << "t#bar{t}" << "t#bar{t}(#tau)";
+			std::vector<TString> fakes; fakes << "QCD" << "t#bar{t}bg";
+
+
+			stack2.mergeLegends(dyvv,"DY/VV",868);
+			stack2.mergeLegends(signals,"t#bar{t} signal",633,true);
+			stack2.mergeLegends(fakes,"non-W/Z",400);
+
+
+
+			std::cout << "plotting: " <<name <<std::endl;
 			name.ReplaceAll(" ","_");
 			TCanvas cv(name);
-			if(stack.is1D() || stack.is1DUnfold()){
+			if(stack2.is1D() || stack2.is1DUnfold()){
 				plotterControlPlot pl;
-				textBoxes::debug=true;
+				//textBoxes::debug=true;
 				pl.setTextBoxNDC(true);
 				pl.readStyleFromFileInCMSSW("/src/TtZAnalysis/Tools/styles/controlPlots_standard.txt");
 				pl.addStyleFromFile(tmpfile);
 				pl.readTextBoxesInCMSSW("/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt","CMSSplit03Left");
-				pl.setStack(&stack);
+				pl.setStack(&stack2);
 				pl.usePad(&cv);
 				pl.draw();
 				WriteAndPrint(&cv,f,output,"controlPlots/");
 			}
-
-			else if(stack.is2D()){//TBI
+			else if(stack2.is2D()){//TBI
 
 			}
+			std::cout << "done plotting " << name << std::endl;
 			TString syscall="rm -f "+tmpfile;
 			system(syscall.Data());
 
@@ -552,8 +639,9 @@ int main(int argc, char* argv[]){
 
 
 		//make yield table
+		std::cout << "making yields table" <<std::endl;
 
-
+		containerStack stack=defmtvec.getStack("total step 8");
 		texTabler yieldtable("l | rcr");
 		yieldtable << "Process" << "\\multicolumn{3}{c}{Events} ";
 		yieldtable.newLine();
@@ -602,10 +690,14 @@ int main(int argc, char* argv[]){
 	}
 
 
+	std::cout << "making response matrix" <<std::endl;
+
 	///make response matrices
-	stack=defmtvec.getStack(plotname);
+	containerStack stack=defmtvec.getStack(plotname);
 	container1DUnfold signcuf=stack.produceUnfoldingContainer();
 	container2D mresp=signcuf.getNormResponseMatrix();
+
+
 
 	//fast print
 	c->Clear();

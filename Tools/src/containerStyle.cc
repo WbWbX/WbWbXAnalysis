@@ -22,7 +22,7 @@ axisStyle::~axisStyle(){}
 
 bool axisStyle::applyAxisRange() const{
     if(max<=min) return false;
-    return true;
+    else return true;
 }
 
 

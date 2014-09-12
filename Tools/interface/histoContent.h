@@ -35,7 +35,7 @@ public:
 
 	size_t addLayer(const TString &); //pushes back
 	size_t addLayer(const TString &, const histoBins & ); //pushes back
-	size_t addLayerFromNominal(const TString &, const histoContent &); //pushes back
+	size_t setLayerFromNominal(const TString &, const histoContent &); //pushes back
 	const TString & getLayerName(const size_t &) const;
 	const size_t & getLayerIndex(const TString&) const;
 

@@ -28,23 +28,30 @@ class NTEvent;
  */
 class pdfReweighter: public simpleReweighter{
 public:
-    pdfReweighter();
-    ~pdfReweighter();
+	pdfReweighter();
+	~pdfReweighter();
 
-    void setPdfIndex(size_t idx){pdfidx_=idx;}
-    void setNTEvent(NTEvent * evt){ntevent_=evt;}
+	void setPdfIndex(size_t idx){
+		pdfidx_=idx;
+		switchOff(false);
+	}
+	void setNTEvent(NTEvent * evt){ntevent_=evt;}
 
-    void reWeight( float &oldweight);
+	void reWeight( float &oldweight);
 
+	void setReweightToNominalEigenvector(bool set){rewtonomev_=set;}
 
+	bool getReweightToNominalEigenvector(){return rewtonomev_;}
+
+	const size_t& getConfIndex(){return pdfidx_;}
 
 private:
 
-    void setNewWeight(const float &w){simpleReweighter::setNewWeight(w);}
+	void setNewWeight(const float &w){simpleReweighter::setNewWeight(w);}
 
-    NTEvent * ntevent_;
-    size_t pdfidx_;
-
+	NTEvent * ntevent_;
+	size_t pdfidx_;
+	bool rewtonomev_;
 };
 
 

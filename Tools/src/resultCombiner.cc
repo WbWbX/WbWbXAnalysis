@@ -28,6 +28,9 @@ void resultCombiner::addInput(const container1D& cont){
 	temp.import(cont);
 	distributions_.push_back(temp);
 	sysforms_.resize(distributions_.at(0).getNDependencies(), rc_sysf_gaus);
+	matrix m(distributions_.at(0).bins().size(),distributions_.at(0).bins().size());
+	m.setDiagonal();
+	statcorrelations_.push_back(m);
 }
 
 void resultCombiner::setSystForm(const TString& sys,rc_sys_forms form){
@@ -77,7 +80,7 @@ bool resultCombiner::minimize(){
 	forcednorm_=integral;
 
 	std::vector<double> stepwidths;
-	stepwidths.resize(startparas.size(),1e-10);
+	stepwidths.resize(startparas.size(),1e-19);
 	std::vector<TString> paranames=distributions_.at(0).getSystNames();
 
 	fitter_.setParameterNames(paranames);
@@ -159,6 +162,11 @@ double resultCombiner::getNuisanceLogBox(const double & in)const{
 	double disttoone=1-fabs(in);
 	if(disttoone>0) return 0;
 	return (1e3*disttoone*disttoone);
+}
+//is it ok to scale the errors here?
+double resultCombiner::getNuisanceLogNormal(const double & in)const{
+	double alph=in+1;
+	return log(alph * (3+ log(alph)/0.693147180559945) ) ;
 }
 
 

@@ -127,6 +127,18 @@ public:
 	bool operator == (const histoBins&) const;
 	bool operator != (const histoBins&) const;
 
+	/**
+	 * compares the content, ignores names
+	 */
+	bool equalContent(const histoBins&,float epsilon=0) const;
+
+	/**
+	 * compares two histoContent objects.
+	 * returns true if the relative difference in all bins
+	 * is below epsilon * stat.
+	 */
+//TBI	bool isApproxEqual(const histoBins&,double epsilon=1e-6) const;
+
 	static bool showwarnings;
 
 private:

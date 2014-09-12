@@ -36,7 +36,7 @@ container2D::~container2D(){
 }
 
 container2D::container2D(const std::vector<float> &xbins,const std::vector<float> &ybins, TString name,TString xaxisname,TString yaxisname, bool mergeufof) :
-        																																														taggedObject(taggedObject::type_container2D),mergeufof_(mergeufof), xaxisname_(xaxisname), yaxisname_(yaxisname)
+        																																																taggedObject(taggedObject::type_container2D),mergeufof_(mergeufof), xaxisname_(xaxisname), yaxisname_(yaxisname)
 {
 	setName(name);
 	//create for each ybin (plus UF OF) a container1D
@@ -616,17 +616,20 @@ container2D container2D::operator * (float val){
 container2D container2D::operator * (int val){
 	return *this * (float) val;
 }
-void container2D::addErrorContainer(const TString & sysname,const container2D & second ,float weight){
+int container2D::addErrorContainer(const TString & sysname,const container2D & second ,float weight){
 	if(second.xbins_ != xbins_ || second.ybins_ != ybins_){
 		std::cout << "container2D::addErrorContainer "<< name_ << " and " << second.name_<<" must have same binning!"  << std::endl;
-		return;
+		return -1;
 	}
+	int out=0;
 	for(size_t i=0;i<conts_.size();i++){
-		conts_.at(i).addErrorContainer(sysname, second.conts_.at(i),weight);
+		int tmp=conts_.at(i).addErrorContainer(sysname, second.conts_.at(i),weight);
+		if(tmp<0)out=tmp;
 	}
+	return out;
 }
-void container2D::addErrorContainer(const TString & sysname,const container2D & second ){
-	addErrorContainer(sysname,second , 1);
+int container2D::addErrorContainer(const TString & sysname,const container2D & second ){
+	return addErrorContainer(sysname,second , 1);
 }
 void container2D::getRelSystematicsFrom(const container2D & second){
 	if(second.xbins_ != xbins_ || second.ybins_ != ybins_){
@@ -637,13 +640,13 @@ void container2D::getRelSystematicsFrom(const container2D & second){
 		conts_.at(i).getRelSystematicsFrom(second.conts_.at(i));
 	}
 }
-void container2D::addRelSystematicsFrom(const container2D & second){
+void container2D::addRelSystematicsFrom(const container2D & second,bool ignorestat, bool strict){
 	if(second.xbins_ != xbins_ || second.ybins_ != ybins_){
 		std::cout << "container2D::addRelSystematicsFrom "<< name_ << " and " << second.name_<<" must have same binning!"  << std::endl;
 		return;
 	}
 	for(size_t i=0;i<conts_.size();i++){
-		conts_.at(i).addRelSystematicsFrom(second.conts_.at(i));
+		conts_.at(i).addRelSystematicsFrom(second.conts_.at(i),ignorestat,strict);
 	}
 }
 
@@ -677,9 +680,17 @@ void container2D::addGlobalRelError(TString errname,float val){
 		conts_.at(i).addGlobalRelError(errname,val);
 	}
 }
-std::vector<size_t> container2D::removeSystematicsSpikes(bool inclUFOF,int limittoindex ,float strength,float sign,float threshold){
+std::vector<size_t> container2D::removeSpikes(bool inclUFOF,int limittoindex ,float strength,float sign,float threshold){
 	//scan for bins
-	size_t syssize=getSystSize();
+
+	if(ybins_.size() < 6 || xbins_.size() < 6){
+		if(debug)
+			std::cout << "container2D::removeSpikes: skipping due to less than 3 x or y bins" <<std::endl;
+		return std::vector<size_t>();
+
+	}
+
+	int syssize=getSystSize();
 	size_t minbiny=0,minbinx=0,maxbiny=ybins_.size(),maxbinx=xbins_.size();
 	if(!inclUFOF){
 		minbiny++;minbinx++;
@@ -692,7 +703,7 @@ std::vector<size_t> container2D::removeSystematicsSpikes(bool inclUFOF,int limit
 			//bool reltonom=true;
 			//const float& nominal=getBinContent(i,j);
 			//if(nominal==0)reltonom=false;
-			for(size_t sys=0;sys<syssize;sys++){
+			for(int sys=-1;sys<syssize;sys++){
 
 				if(limittoindex>=0)
 					if(limittoindex!=(int)sys) continue;
@@ -710,6 +721,12 @@ std::vector<size_t> container2D::removeSystematicsSpikes(bool inclUFOF,int limit
 				if(i+1<maxbiny) maxy=i+1;
 				if(j+1<maxbinx) maxx=j+1;
 
+
+				size_t adjacentbins=(maxy+1-miny)* (maxx+1-minx);
+				if(adjacentbins!=0)adjacentbins--;
+				 //require at least 5 surrounding bins (this excludes corner bins)
+				if(adjacentbins<5) continue;
+
 				float bindiffval=syscontent*100000000,nextbinval=0;
 
 				for(size_t checky=miny;checky<=maxy;checky++){
@@ -724,23 +741,18 @@ std::vector<size_t> container2D::removeSystematicsSpikes(bool inclUFOF,int limit
 					}
 				}
 
-				size_t adjacentbins=(maxy+1-miny)* (maxx+1-minx);
-				if(adjacentbins!=0)adjacentbins--;
-
-				if(adjacentbins<5) continue; //require at least 5 surrounding bins (this excludes corner bins)
-
 				areaaverage/=(float)(adjacentbins);
-				float deltaavg=fabs((areaaverage-syscontent));
-				float reldeltaavg=0;
+				//float deltaavg=fabs((areaaverage-syscontent));
+			//	float reldeltaavg=0;
 
 
 				if(syscontent==0) //DEBUG dont change zeros right now
 					continue;
 
-				float scaletorealstat=syscontent/(sysstat*sysstat);
+			//	float scaletorealstat=syscontent/(sysstat*sysstat);
 
-				if(areaaverage!=0){
-					reldeltaavg=deltaavg/areaaverage;}
+			//	if(areaaverage!=0){
+			//		reldeltaavg=deltaavg/areaaverage;}
 
 				float reldiff=0;
 				if(nextbinval)
@@ -750,17 +762,17 @@ std::vector<size_t> container2D::removeSystematicsSpikes(bool inclUFOF,int limit
 
 				bool resetcontent=// (reldeltaavg!=0
 						//&& reldeltaavg/threshold >= 1
-						 bindiffval - (sysstat) / sign <0
+						bindiffval - (sysstat) / sign <0
 						&& (reldiff /threshold>1);//);//||	(reldeltaavg==0
-							//	&& scaletorealstat*syscontent > threshold
-							//	&& syscontent - (sysstat) / sign <0);
+				//	&& scaletorealstat*syscontent > threshold
+				//	&& syscontent - (sysstat) / sign <0);
 
 
 
 
 				if(resetcontent){
-					float direction=1;//
-					if(syscontent-areaaverage <0) direction=-1;
+			//		float direction=1;//
+					//if(syscontent-areaaverage <0) direction=-1;
 
 					//still allow a bit of old fluctuation:
 					float newcontent=areaaverage;// + deltaavg*direction * 1/strength;
@@ -768,15 +780,16 @@ std::vector<size_t> container2D::removeSystematicsSpikes(bool inclUFOF,int limit
 					if(std::find(out.begin(),out.end(),sys) == out.end())
 						out.push_back(sys);
 
-					if(debug)
-						std::cout << "container2D::smoothSystematics: found bin over threshold: "<<i <<" " << j
-						<< "\nsystematics: " << getSystErrorName(sys)
-						<< "\ndelta to next bin: " << bindiffval//* getBinArea(i,j)
-						<< "\nrelative difference to next bin/avg: " << reldiff
-						<< "\nscaled to threshold: " << reldiff /threshold
-						<< "\noldcontent: " <<syscontent* getBinArea(i,j)
-					<< "\nre-setting content to: " << newcontent* getBinArea(i,j);
-
+					if(debug){
+						std::cout << "container2D::smoothSystematics: found bin over threshold: "<<i <<" " << j;
+						if(sys>-1)
+							std::cout << "\nsystematics: " << getSystErrorName(sys);
+						std::cout << "\ndelta to next bin: " << bindiffval//* getBinArea(i,j)
+								<< "\nrelative difference to next bin/avg: " << reldiff
+								<< "\nscaled to threshold: " << reldiff /threshold
+								<< "\noldcontent: " <<syscontent* getBinArea(i,j)
+						<< "\nre-setting content to: " << newcontent* getBinArea(i,j);
+					}
 
 					//leave old stat error, only scale
 

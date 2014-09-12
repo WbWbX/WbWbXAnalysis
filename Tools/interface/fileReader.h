@@ -149,7 +149,7 @@ inline bool fileReader::getValue<bool>(const std::string & str, bool def_val){
 	std::string s(getValueString(str,true));
 	if(s.length()>0){
 		std::stringstream ss(s);
-		ss >> out;
+		ss >> std::boolalpha >>out;
 		return out;
 	}
 	else{

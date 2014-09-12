@@ -71,6 +71,7 @@ private:
     TVirtualPad * getInlayPad()const; //throws
     TVirtualPad * getInlayPad();
     void drawPlots();
+    void refreshPad(){};
 
     plotStyle pstyleinlay_;
     std::vector<containerStyle> cstylesinlay_;

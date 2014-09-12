@@ -206,7 +206,7 @@ private:
 
     std::vector<containerStack> savedinputstacks_;
     std::vector<container1D > datacont_;
-    std::vector<container1D > mccont_;
+    std::vector<container1D > mcsignalcont_,mcbgcont_,mccont_;
     std::vector<graph > datagraphs_;
     std::vector<graph > mcgraphs_;
     std::vector<float> mtvals_;
@@ -275,6 +275,8 @@ private:
         delete h;
         return out;
     }
+
+    void addSignalAndBackground();
 
 };
 

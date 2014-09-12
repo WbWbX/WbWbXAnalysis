@@ -53,6 +53,7 @@ protected:
     void preparePad();
     void drawPlots();
     void drawLegends();
+    void refreshPad(){};
     plotStyle pstyle_;
     std::vector<containerStyle> cstyles_;
     std::vector<plot> plots_;

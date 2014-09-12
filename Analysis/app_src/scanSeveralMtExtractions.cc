@@ -35,7 +35,7 @@ int main(int argc, char* argv[]){
 	float mtopin = parse.getOpt<float>("mt",172.5,"specify reference top mass (only for pulls)");
 	std::vector<std::string> dirnames = parse.getRest<std::string>();
 
-
+	parse.doneParsing();
 	graph sumgraph;//(dirnames.size());
 	graph zerograph;
 	graph gstatup=sumgraph;

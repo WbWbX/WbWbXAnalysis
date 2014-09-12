@@ -7,6 +7,17 @@ workdir=`pwd`
 
 option=$1
 
+if [ $option ]
+then
+    if [[ $option != "nomerge" ]] && [[ $option != "resubmit" ]];
+    then
+	echo "option \"${option}\" not known. Available options are:"
+	echo "\"nomerge\", \"resubmit\" or no option"
+	exit
+    fi
+
+fi
+
 cd jobscripts
 
 

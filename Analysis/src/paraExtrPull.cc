@@ -11,6 +11,9 @@
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 #include "TtZAnalysis/Tools/interface/graphFitter.h"
 #include "TCanvas.h"
+#include "TFile.h"
+
+
 namespace ztop{
 
 void paraExtrPull::fill(){
@@ -22,36 +25,63 @@ void paraExtrPull::fill(){
 
 
 	//create functional forms
-	if(trueinput_.size()>0){
+	if(corrtrueinput_.size()>0){
 
-		if(trueinput_.size() != datatrueinput_.size()){
+		if(corrtrueinput_.size() != datatrueinput_.size() || uncorrtrueinput_.size() != datatrueinput_.size()){
 			throw std::out_of_range("paraExtrPull::fill: datatrueinput_ and trueinput_ must be same size");
 
 		}
 
 		fits_.clear();
-		mcscale_.clear();
+		corrmcscale_.clear();
+		uncorrmcscale_.clear();
 		datascale_.clear();
+		reluncorrcontr_.clear();
 
 		//	std::cout << "paraExtrPull::fill: reading " << trueinput_.size() << " input graphs " <<std::endl;
 
-		for(size_t gidx=0;gidx<trueinput_.size();gidx++){
+		for(size_t gidx=0;gidx<corrtrueinput_.size();gidx++){
 
 			//std::cout << "input graph " << gidx<< " has " << trueinput_.at(gidx).getNPoints() << " points " <<std::endl;
 
-			if(trueinput_.at(gidx).getNPoints()>1){
+			if(corrtrueinput_.at(gidx).getNPoints()>1){
 
 				///very specifc......
-				if(trueinput_.at(gidx).getNPoints()>3){
-					float contentmc=trueinput_.at(gidx).getPointYContent(4);
-					float statmc=trueinput_.at(gidx).getPointYStat(4);
-					float scalemc=statmc*statmc/contentmc;
-					mcscale_.push_back(scalemc);
-					std::cout << "automatically setting MC scale "<< gidx <<" to "<<scalemc << std::endl;
+
+				float contentmccorr=0,contentmcuncorr=0;
+				if(corrtrueinput_.at(gidx).getNPoints()>3){
+					float contentmc=corrtrueinput_.at(gidx).getPointYContent(3);
+					contentmccorr=contentmc;
+					float scalemc=0;
+					if(contentmc!=0){
+
+						float statmc=corrtrueinput_.at(gidx).getPointYStat(3);
+						scalemc=statmc*statmc/contentmc;
+					}
+					corrmcscale_.push_back(scalemc);
+					std::cout << "automatically setting corr MC scale "<< gidx <<" to "<<scalemc << std::endl;
 				}
 				else{
-					mcscale_.push_back(1);
+					corrmcscale_.push_back(1);
 				}
+				if(uncorrtrueinput_.at(gidx).getNPoints()>3){
+					float contentmc=uncorrtrueinput_.at(gidx).getPointYContent(3);
+					contentmcuncorr=contentmc;
+					float scalemc=0;
+					if(contentmc!=0){
+
+						float statmc=uncorrtrueinput_.at(gidx).getPointYStat(3);
+						scalemc=statmc*statmc/contentmc;
+					}
+					uncorrmcscale_.push_back(scalemc);
+
+					std::cout << "automatically setting uncorr MC scale "<< gidx <<" to "<<scalemc << std::endl;
+				}
+				else{
+					uncorrmcscale_.push_back(1);
+				}
+
+				reluncorrcontr_.push_back(contentmccorr/(contentmccorr+contentmcuncorr));
 
 				if(datatrueinput_.at(gidx).getNPoints()>1){
 					//just get the scaling
@@ -73,7 +103,7 @@ void paraExtrPull::fill(){
 	std::cout << "paraExtrPull::fill: ready" <<std::endl;
 
 
-	size_t nNanchecks_=0;
+	size_t nNanchecks_=100;
 	ex_->setSelfHeal(true);
 
 	ex_->setAllowExternalScaleA(true);
@@ -97,7 +127,7 @@ void paraExtrPull::fill(){
 		ex_->setInputB(mcintoex);
 
 		ex_->setFallBackScaleA(datascale_.at(0));
-		ex_->setFallBackScaleB(mcscale_.at(0));
+		ex_->setFallBackScaleB(corrmcscale_.at(0));
 
 
 		graph lho;
@@ -125,7 +155,7 @@ void paraExtrPull::fill(){
 
 
 			throw std::runtime_error("paraExtrPull::fill: stat estimation failed");
-*/
+			 */
 
 
 			failcount_++;
@@ -177,36 +207,62 @@ graph paraExtrPull::generateMCPoints(size_t idx)const{
 	graph g(points_.size());
 
 	//generate correlated MC statistics
+	float corrfluct=0;
+	float corrstaterr=0;
+	if(corrmcscale_.at(idx)!=0){
+		float mean=reluncorrcontr_.at(idx)*getFunctionout(evalpoint_,idx)/corrmcscale_.at(idx);
+		//	float seed=(idx+1)*(idx+1);
+		//seed+=random_->GetSeed();
+		//random_->SetSeed(seed);
+		if(poisson)
+			corrfluct=random_->Poisson(mean);
+		else
+			corrfluct=random_->Gaus(mean,sqrt(mean));
+		//mcpoint=mean;
+		corrstaterr=sqrt(corrfluct)*corrmcscale_.at(idx);
 
-	float mean=getFunctionout(evalpoint_,idx)/mcscale_.at(idx);
-	float mcpoint=0;
-//	float seed=(idx+1)*(idx+1);
-	//seed+=random_->GetSeed();
-	//random_->SetSeed(seed);
-	if(poisson)
-		mcpoint=random_->Poisson(mean);
-	else
-		mcpoint=random_->Gaus(mean,sqrt(mean));
-	//mcpoint=mean;
-	float fakestat=sqrt(mcpoint)*mcscale_.at(idx);
-	mcpoint-=mean;
-	mcpoint*=mcscale_.at(idx);
-	if(mcpoint<0)mcpoint=0;
+		corrfluct-=mean;
+		corrfluct*=corrmcscale_.at(idx);
+	}
 
 	//add small variation due to signal mc stat ( 3 times more - will be fitted away)
 	for(size_t i=0;i<points_.size();i++){
-		float funcpoint=getFunctionout(points_.at(i),idx);
-	//	seed+=random_->GetSeed();
-	//	random_->SetSeed(seed);
-		if(poisson)
-			mcpoint=random_->Poisson(funcpoint/mcscale_.at(idx) * 3) * mcscale_.at(idx)/3;
-		else
-			mcpoint=mcpoint+ funcpoint;
-		if(mcpoint<0) mcpoint=0;
-		g.setPointContents(i,true,points_.at(i),mcpoint);
-		g.setPointContents(i,false,0,fakestat);
-	}
+		float uncorrfluct=0,uncorrstaterr=0;
+		const float funcpoint=(1-reluncorrcontr_.at(idx))*getFunctionout(points_.at(i),idx);
+		//	seed+=random_->GetSeed();
+		//	random_->SetSeed(seed);
+		if(uncorrmcscale_.at(idx)!=0){
+			float uncorrmean=funcpoint/uncorrmcscale_.at(idx);
 
+			if(poisson)
+				uncorrfluct=random_->Poisson(uncorrmean);
+			else
+				uncorrfluct=random_->Gaus(uncorrmean,sqrt(uncorrmean));
+
+			uncorrstaterr=sqrt(uncorrfluct)* uncorrmcscale_.at(idx);
+			uncorrfluct-=uncorrmean;
+			uncorrfluct*= uncorrmcscale_.at(idx);
+		}
+		float fillpoint=corrfluct+uncorrfluct+getFunctionout(points_.at(i),idx);
+		if(fillpoint<0)fillpoint=0;
+
+		g.setPointContents(i,true,points_.at(i),fillpoint);
+		g.setPointContents(i,false,0,sqrt(uncorrstaterr*uncorrstaterr + corrstaterr*corrstaterr));
+	}
+	if(g.isEmpty())throw std::runtime_error("paraExtrPull::generateMCPoints generated graph empty");
+
+	//debug
+	/*
+	std::cout << "graph for index: " << idx;
+	TCanvas c;
+
+	TFile f("tmp.root","RECREATE");
+	g.getTGraph()->Draw("AP");
+	c.Print("temp.pdf");
+	c.Write();
+	f.Close();
+	throw std::runtime_error("paraExtrPull::begug point reached");
+*/
 	return g;
 }
 

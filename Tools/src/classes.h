@@ -33,6 +33,7 @@
 
 #include "../interface/infoCreater.h"
 
+#include "../interface/fileReader.h"
 
 namespace
 {
@@ -117,7 +118,7 @@ struct dictionary {
 
 	ztop::infoCreater weoirgjerowijgre;
 
-
+	ztop::fileReader readanicefileityoulikeininteractiverootmode;
 
 
 

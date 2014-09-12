@@ -48,6 +48,9 @@ public:
     size_t size()const{return allobj_.size();}
 
 protected:
+    /**
+     * Throws if object is 0
+     */
     template<class obj>
     obj * addObject( obj *o){
         if(!o){

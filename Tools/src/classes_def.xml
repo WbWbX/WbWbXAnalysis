@@ -63,6 +63,7 @@
         <class name="ztop::plotterMultiplePlots"/>
         
         <class name="ztop::infoCreater"/>
+        <class name="ztop::fileReader"/>
         
 	
 </lcgdict>

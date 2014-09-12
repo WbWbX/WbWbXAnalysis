@@ -81,6 +81,12 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 		btagfile=outdir+"/"+ channel+"_"+energy+"_"+topmass+"_"+Syst+"_btags.root";
 		system(("rm -f "+btagfile).Data());
 	}
+	else if(Syst.BeginsWith("BTAG")){
+		btagfile=btagfile+"/"+ channel+"_"+energy+"_"+topmass+"_"+"nominal"+"_btags.root";
+	}
+	else{
+		btagfile=btagfile+"/"+ channel+"_"+energy+"_"+topmass+"_"+Syst+"_btags.root";
+	}
 
 
 	///set input files list etc (common)
@@ -155,42 +161,58 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 
 	//although it produces overhead, add background rescaling here?
 
+	//using the sys nominal
+	//btag efficiencies are NOT required here
+
+	if(Syst.Contains("_sysnominal")){
+		ana.getBTagSF()->setMakeEff(true);
+		ana.setBTagSFFile(btagfile+Syst+"_dummy");
+	}
+
 	if(Syst=="nominal"){
 		//all already defined
 	}
 	///sys nominals...
-
-	//using the sys nominal
-	//btag efficiencies are NOT required here
 	else if(Syst=="P11_sysnominal"){
 		ana.setFilePostfixReplace("ttbar.root","ttbar_mgdecays_p11.root");
 		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mgdecays_p11.root");
-		ana.getBTagSF()->setMakeEff(true);
-		ana.setBTagSFFile(btagfile+Syst+"_dummy");
 	}
 	else if(Syst=="P11_sysnominal_CR_up"){ //do nothing
 		ana.setFilePostfixReplace("ttbar.root","ttbar_mgdecays_p11.root");
 		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mgdecays_p11.root");
-		ana.getBTagSF()->setMakeEff(true);
-		ana.setBTagSFFile(btagfile+Syst+"_dummy");
 	}
-	else if(Syst=="P11_sysnominal_CR_down"){ //do nothing
+	else if(Syst=="P11_sysnominal_CR_down"){ //no CR
 		ana.setFilePostfixReplace("ttbar.root","ttbar_mgdecays_p11nocr.root");
 		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mgdecays_p11nocr.root");
-		ana.getBTagSF()->setMakeEff(true);
-		ana.setBTagSFFile(btagfile+Syst+"_dummy");
 	}
 	else if(Syst=="P11_sysnominal_UE_up"){
 		ana.setFilePostfixReplace("ttbar.root","ttbar_mgdecays_p11mpihi.root");
 		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mgdecays_p11mpihi.root");
-		ana.getBTagSF()->setMakeEff(true);
-		ana.setBTagSFFile(btagfile+Syst+"_dummy");
 	}
 	else if(Syst=="P11_sysnominal_UE_down"){
 		ana.setFilePostfixReplace("ttbar.root","ttbar_mgdecays_p11tev.root");
 		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mgdecays_p11tev.root");
-		ana.getBTagSF()->setMakeEff(true);
-		ana.setBTagSFFile(btagfile+Syst+"_dummy");
+	}
+	else if(Syst=="PDF_sysnominal"){
+		ana.getPdfReweighter()->setPdfIndex(0);
+	}
+	else if(Syst.Contains("PDF_sysnominal_")){
+		size_t pdfindex=0;
+		for(size_t i=1;i<10000;i++){
+			pdfindex++;
+			if(Syst == "PDF_sysnominal_PDF" + toTString(i) + "_down"){
+				ana.getPdfReweighter()->setPdfIndex(pdfindex);
+				std::cout << "setting index to " << pdfindex << " for " << Syst << std::endl;
+				break;
+			}
+			pdfindex++;
+			if(Syst == "PDF_sysnominal_PDF" + toTString(i) + "_up"){
+				ana.getPdfReweighter()->setPdfIndex(pdfindex);
+				std::cout << "setting index to " << pdfindex << " for " << Syst << std::endl;
+				break;
+			}
+
+		}
 	}
 
 
@@ -233,54 +255,73 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 		ana.getJECUncertainties()->setSystematics("down");
 		ana.getBTagSF()->setSystematic(bTagBase::jesdown);
 	}
-	else if(Syst=="JES_MPFInSitu_down"){
-		ana.getJECUncertainties()->sources() << 36;
-		ana.getJECUncertainties()->setSystematics("down");
-	}
-	else if(Syst=="JES_MPFInSitu_up"){
-		ana.getJECUncertainties()->sources() << 36;
-		ana.getJECUncertainties()->setSystematics("up");
-	}
-	else if(Syst=="JES_Intercalibration_down"){
-		ana.getJECUncertainties()->sources() << 37;
-		ana.getJECUncertainties()->setSystematics("down");
-	}
-	else if(Syst=="JES_Intercalibration_up"){
-		ana.getJECUncertainties()->sources() << 37;
-		ana.getJECUncertainties()->setSystematics("up");
-	}
-	else if(Syst=="JES_bJES_down"){
-		ana.getJECUncertainties()->sources() << 38;
-		ana.getJECUncertainties()->setSystematics("down");
-	}
-	else if(Syst=="JES_bJES_up"){
-		ana.getJECUncertainties()->sources() << 38;
-		ana.getJECUncertainties()->setSystematics("up");
-	}
-	else if(Syst=="JES_Flavor_down"){
-		ana.getJECUncertainties()->sources() << 39;
-		ana.getJECUncertainties()->setSystematics("down");
-	}
-	else if(Syst=="JES_Flavor_up"){
-		ana.getJECUncertainties()->sources() << 39;
-		ana.getJECUncertainties()->setSystematics("up");
-	}
-	else if(Syst=="JES_Uncorrelated_down"){
-		ana.getJECUncertainties()->sources() << 40;
-		ana.getJECUncertainties()->setSystematics("down");
-	}
-	else if(Syst=="JES_Uncorrelated_up"){
-		ana.getJECUncertainties()->sources() << 40;
-		ana.getJECUncertainties()->setSystematics("up");
-	}
+
+
 	/*
-  else if(Syst=="7TeV_JES_up"){
-    ana.getJECUncertainties()->setSystematics("up");
-  }
-  else if(Syst=="7TeV_JES_down"){
-    ana.getJECUncertainties()->setSystematics("down");
-  }
-	 */ // etc
+	 * Individual JES sources block!
+	 *
+	 */
+	else if(Syst.BeginsWith("JES_")){
+		std::vector<std::string> sources;
+
+		sources = ana.getJECUncertainties()->getSourceNames();
+
+		for(size_t i=0;i<=sources.size();i++){
+			std::cout << sources.at(i) <<std::endl;
+			if(i==sources.size())
+				throw std::runtime_error("JES source not found! exit!");
+
+			//jes systematics
+			if("JES_"+(TString)sources.at(i)+"_down" == Syst || "JES_"+sources.at(i)+"_up" == Syst){
+				ana.getJECUncertainties()->setSource(sources.at(i));
+				//some specials
+
+				if(sources.at(i) == "FlavorPureGluon"){
+					ana.getJECUncertainties()->restrictToFlavour(23);
+					ana.getJECUncertainties()->restrictToFlavour(0);
+				}
+				else if(sources.at(i) == "FlavorPureQuark"){
+					ana.getJECUncertainties()->restrictToFlavour (1);
+					ana.getJECUncertainties()->restrictToFlavour(-1);
+					ana.getJECUncertainties()->restrictToFlavour (2);
+					ana.getJECUncertainties()->restrictToFlavour(-2);
+					ana.getJECUncertainties()->restrictToFlavour (3);
+					ana.getJECUncertainties()->restrictToFlavour(-3);
+				}
+				else if(sources.at(i) == "FlavorPureCharm"){
+					ana.getJECUncertainties()->restrictToFlavour(4);
+					ana.getJECUncertainties()->restrictToFlavour(-4);
+				}
+				else if(sources.at(i) == "FlavorPureBottom"){
+					ana.getJECUncertainties()->restrictToFlavour(5);
+					ana.getJECUncertainties()->restrictToFlavour(-5);
+				}
+
+				if("JES_"+(TString)sources.at(i)+"_down" == Syst){
+					ana.getJECUncertainties()->setSystematics("down");
+					break;
+				}
+				else if("JES_"+sources.at(i)+"_up" == Syst){
+					ana.getJECUncertainties()->setSystematics("up");
+					break;
+				}
+			}
+		}
+	}
+
+
+
+	/*
+	 * END INDIVI JES SOURCES BLOCK
+	 */
+
+
+	else if(Syst=="JEC_residuals_up"){
+		ana.setFilePostfixReplace("_22Jan.root","_22Jan_ptres.root");
+	}
+	else if(Syst=="JEC_residuals_down"){
+		//use default
+	}
 
 	else if(Syst=="JER_up"){
 		ana.getJERAdjuster()->setSystematics("up");
@@ -389,34 +430,9 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	else if(Syst=="Z_SCALE_down"){
 		ana.setFilePostfixReplace("60120.root","60120_Zscaledown.root");
 	}
-	/* THIS WILL BE REPLACED AT A CERTAIN POINT */
-	/*
-    else if(Syst=="MT_6_down"){
-        ana.setFilePostfixReplace("ttbar.root","ttbar_mt166.5.root");
-        ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mt166.5.root");
-    }
-    else if(Syst=="MT_3_down"){
-        ana.setFilePostfixReplace("ttbar.root","ttbar_mt169.5.root");
-        ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mt169.5.root");
-    }
-    else if(Syst=="MT_1_down"){
-        ana.setFilePostfixReplace("ttbar.root","ttbar_mt171.5.root");
-        ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mt171.5.root");
-    }
-    else if(Syst=="MT_1_up"){
-        ana.setFilePostfixReplace("ttbar.root","ttbar_mt173.5.root");
-        ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mt173.5.root");
-    }
-    else if(Syst=="MT_3_up"){
-        ana.setFilePostfixReplace("ttbar.root","ttbar_mt175.5.root");
-        ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mt175.5.root");
-    }
-    else if(Syst=="MT_6_up"){
-        ana.setFilePostfixReplace("ttbar.root","ttbar_mt178.5.root");
-        ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mt178.5.root");
-    }
-	 */
-	//......
+
+
+
 	else{
 		didnothing=true;
 	}
@@ -427,6 +443,11 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 		std::cout << "replacing top mass value of 172.5 with "<< topmass << std::endl;
 		ana.setFilePostfixReplace("ttbar.root","ttbar_mt"+topmass+ ".root");
 		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mt"+topmass+ ".root");
+
+		if(topmass == "178.5" || topmass == "166.5"){
+			//	ana.setFilePostfixReplace("_tWtoLL.root","_tWtoLL_mt"+topmass+ ".root");
+			//	ana.setFilePostfixReplace("_tbarWtoLL.root","_tbarWtoLL_mt"+topmass+ ".root");
+		}
 
 	}
 
@@ -467,7 +488,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 
 		if(fullsucc>=0){
 
-			csv.loadFromTFile(ana.getOutPath()+".root",ana.getPlots()->getName());
+			csv.loadFromTFile(fulloutfilepath);
 			vector<TString> dycontributions;
 			dycontributions << "Z#rightarrowll" << "DY#rightarrowll";
 			if(!channel.Contains("emu")){
@@ -479,7 +500,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 				for(size_t i=0;i<disc.size();i++){
 					disc.at(i).extractLikelihoods(csv);
 				}
-				csv.writeAllToTFile(ana.getOutPath()+".root",true,!testmode); //recreates file
+				csv.writeAllToTFile(fulloutfilepath,true,!testmode); //recreates file
 				system(("rm -f "+ana.getOutPath()+"_discr.root").Data());
 				discriminatorFactory::writeAllToTFile(ana.getOutPath()+"_discr.root",disc);
 
@@ -492,7 +513,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 					disc.at(i).extractLikelihoods(csv);
 				}
 				if(testmode)
-					csv.writeAllToTFile(ana.getOutPath()+".root",true,!testmode);
+					csv.writeAllToTFile(fulloutfilepath,true,!testmode);
 				system(("rm -f "+ana.getOutPath()+"_discr.root").Data());
 				discriminatorFactory::writeAllToTFile(ana.getOutPath()+"_discr.root",disc);
 			}
@@ -513,11 +534,12 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 		else{
 			std::cout << "at least one job failed!\n"
 					<< "error code meaning: \n"
-					<< "-99: std::exception thrown somewhere (see output)\n"
-					<< "-88: a suspiciously high weight was assigned to a MC event\n"
-					<< "-3 : problems finding b-tagging efficiencies (file/file format) \n"
-					<< "-2 : write to output file failed\n"
-					<< "-1 : input file not found\n"
+					<< "-99    : std::exception thrown somewhere (see output)\n"
+					<< "-88    : a suspiciously high weight was assigned to a MC event\n"
+					<< "-3     : problems finding b-tagging efficiencies (file/file format) \n"
+					<< "-2     : write to output file failed\n"
+					<< "-1     : input file not found\n"
+					<< "<-1000 : problems with output file\n"
 					<< std::endl;
 			//put more once you introduce one
 			if(!testmode){

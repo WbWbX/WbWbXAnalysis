@@ -239,12 +239,12 @@ void containerStackVector::getRelSystematicsFrom(const ztop::containerStackVecto
 			stacks_.at(i).getRelSystematicsFrom(stackvec.stacks_.at(i));
 	}
 }
-void containerStackVector::addRelSystematicsFrom(const ztop::containerStackVector& stackvec){
+void containerStackVector::addRelSystematicsFrom(const ztop::containerStackVector& stackvec,bool ignorestat,bool strict){
 	if(!fastadd){
 		for(std::vector<containerStack>::iterator istack=stacks_.begin();istack<stacks_.end(); ++istack){
 			for(std::vector<containerStack>::const_iterator estack=stackvec.stacks_.begin();estack<stackvec.stacks_.end(); ++estack){
 				if(istack->getName() == estack->getName()){
-					istack->addRelSystematicsFrom(*estack);
+					istack->addRelSystematicsFrom(*estack,ignorestat,strict);
 					break;
 				}
 			}
@@ -252,7 +252,7 @@ void containerStackVector::addRelSystematicsFrom(const ztop::containerStackVecto
 	}
 	else{//fastadd requires same ordering of all stacks (usually the case)
 		for(size_t i=0;i<stacks_.size();i++)
-			stacks_.at(i).addRelSystematicsFrom(stackvec.stacks_.at(i));
+			stacks_.at(i).addRelSystematicsFrom(stackvec.stacks_.at(i),ignorestat);
 	}
 }
 
@@ -267,11 +267,11 @@ void containerStackVector::renameSyst(TString old, TString New){
 	}
 }
 
-std::vector<size_t> containerStackVector::removeSystematicsSpikes(bool inclUFOF,
+std::vector<size_t> containerStackVector::removeSpikes(bool inclUFOF,
 		int limittoindex,float strength,float sign,float threshold){
 	std::vector<size_t> out,temp;
 	for(std::vector<containerStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
-		temp=stack->removeSystematicsSpikes(inclUFOF,limittoindex,strength,sign,threshold);
+		temp=stack->removeSpikes(inclUFOF,limittoindex,strength,sign,threshold);
 		out.insert(out.end(),temp.begin(),temp.end());
 	}
 	return out;

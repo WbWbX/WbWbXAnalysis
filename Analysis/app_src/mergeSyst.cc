@@ -96,11 +96,27 @@ int main(int argc, char* argv[]){
 					//syssmoothened=csvpart->removeSystematicsSpikes(false,-1,100,0.333,15);
 
 					size_t oldsyssize=nom->getNSyst();
-					nom->addRelSystematicsFrom(*csvpart);
-					size_t newsystsize=nom->getNSyst();
-					for(size_t addsys=oldsyssize;addsys<newsystsize;addsys++)
-						nom->removeSystematicsSpikes(false,addsys,100,0.333,15);
+
+
+					bool arestatcorr=false,strictadd=false;
+					////FIXME hardcoded
+					if(partialout.at(pit).Contains("PDF_sysnominal")){ ////FIXME hardcoded
+						arestatcorr=true; ////FIXME hardcoded
+						strictadd=true;
+					}
+					////FIXME hardcoded
+					else{
+						csvpart->removeSpikes(false,-1,100,0.333,15);
+					}
+
 					container2D::debug=false;
+					//containerStack::debug=true;
+					nom->addRelSystematicsFrom(*csvpart,arestatcorr,strictadd);
+					size_t newsystsize=nom->getNSyst();
+					std::cout << "added " << newsystsize-oldsyssize << " systematic variations" <<std::endl;
+				//	for(size_t addsys=oldsyssize;addsys<newsystsize;addsys++)
+				//		nom->removeSystematicsSpikes(false,addsys,100,0.333,15);
+
 
 					delete csvpart;
 				}

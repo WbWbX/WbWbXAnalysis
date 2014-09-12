@@ -25,6 +25,8 @@ public:
 
     void switchOff(bool switchoff){switchedoff_=switchoff;}
 
+    bool switchedOff(){return switchedoff_;}
+
 private:
     float tmpweight_;
     float unwcounter_,wcounter_;

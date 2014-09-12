@@ -30,7 +30,7 @@ class NTFullEvent;
  */
 class controlPlotBasket{
 public:
-    controlPlotBasket():switchedon_(true),tmpidx_(0),tmpstep_(0),tmpnewstep_(true),evt_(0),lcont_(0),size_(0),initphase_(false){}
+    controlPlotBasket():switchedon_(true),limittostep_(-1),tmpidx_(0),tmpstep_(0),tmpnewstep_(true),evt_(0),lcont_(0),size_(0),initphase_(false){}
     virtual ~controlPlotBasket();
 
     void linkEvent(const NTFullEvent & evt){evt_=&evt;}
@@ -43,6 +43,8 @@ public:
     void initSteps(size_t no);
 
     void switchOn(bool swon){switchedon_=swon;}
+
+    void limitToStep(int step){limittostep_=step;}
 
 protected:
     const NTFullEvent * event(){return evt_;}
@@ -57,6 +59,8 @@ protected:
     const bool & isNewStep()const{return tmpnewstep_;}
 
     bool switchedon_;
+
+    int limittostep_;
 
 private:
 

@@ -253,3 +253,13 @@
 300  /TTJets_MSDecays_mass166_5_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM     tree_8TeV_emuttbarviatau_mt166.5             genFilter=Top isSignal=true genFilterString=ElectronMuonViaTau
 
 
+
+
+//tW mass samples
+
+800   /TToDilepton_tW-channel-DR_8TeV-powheg-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM                                  tree_8TeV_tWtoLL
+800   /TBarToDilepton_tW-channel-DR_8TeV-powheg-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM                               tree_8TeV_tbarWtoLL
+500   /TToDilepton_tW-channel-DR_mass178_5_8TeV-powheg-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM                        tree_8TeV_tWtoLL_mt178.5
+500   /TBarToDilepton_tW-channel-DR_mass166_5_8TeV-powheg-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM                     tree_8TeV_tbarWtoLL_mt166.5
+500   /TToDilepton_tW-channel-DR_mass166_5_8TeV-powheg-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM                        tree_8TeV_tWtoLL_mt166.5
+500   /TBarToDilepton_tW-channel-DR_mass178_5_8TeV-powheg-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM                     tree_8TeV_tbarWtoLL_mt178.5

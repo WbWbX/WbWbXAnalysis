@@ -17,6 +17,8 @@ void formatter::readInNameTranslateFile(const std::string & pathtofile){
 	fileReader fr;
 	fr.setComment("#");
 	fr.setDelimiter(",");
+	fr.setStartMarker("[syst names]");
+	fr.setEndMarker("[end-syst names]");
 
 	fr.readFile(pathtofile);
 

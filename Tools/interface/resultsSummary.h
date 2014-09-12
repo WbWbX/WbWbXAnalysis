@@ -12,7 +12,6 @@
 #include "../interface/texTabler.h"
 #include <utility>
 
-
 namespace ztop{
 
 /**
@@ -29,6 +28,7 @@ public:
 
     const TString& getEntryName(size_t entr)const;
     TString getValueString(size_t entr, bool& isNeglegible, const float & prec=0.01)const;
+    TString getStatString(size_t entr, bool& isNeglegible, const float & prec=0.01)const;
 
     void setSystBreakRelative(bool rel){sysrelout_=rel;}
 
@@ -52,7 +52,16 @@ public:
      */
     resultsSummary createTotalError(const TString nomentry="nominal")const;
 
+    void mergeVariations(const TString &nomentry,const std::vector<TString>& names,
+    		const TString & outname,bool linearly=false);
+
+    void mergeVariationsFromFile(const TString &nomentry,const std::string& filename);
+    void mergeVariationsFromFileInCMSSW(const TString &nomentry,const std::string& filename);
+
+
     size_t nEntries()const{return entries_.size();}
+
+    static bool debug;
 
 private:
 

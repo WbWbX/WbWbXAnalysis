@@ -4,6 +4,7 @@
 
     divideat = 0.3
     invertplots = false
+    PSMigThreshold =  0.01   $this is not %!
 
 [end - plotterControlPlot]
  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  
@@ -116,7 +117,7 @@
     lineStyle    = 1 
     lineColor    = 632 
 
-    fillStyle    = 3001
+    fillStyle    = 1001 $3004
     fillColor    = 432 
 
     sysFillStyle = 3005
@@ -207,6 +208,6 @@
     yaxis.max         = 1.5
     yaxis.log         = false
     yaxis.min         = 0.5
-    yaxis.name        = #frac{data}{MC}
+    yaxis.name        = #frac{obs}{pred}
     
 [end plotStyle]

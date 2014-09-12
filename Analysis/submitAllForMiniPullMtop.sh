@@ -3,7 +3,7 @@
 #psuedodatafile="emu_8TeV_pseudodata251.7_config.txt"
 pseudodatafile="emu_8TeV_mtC172.5_config.txt"
 #pseudodatafile="emu_8TeV_mtC166.5_config.txt"
-outdir="pull_172.5_calib_newNormNew_mlbPD"
+outdir="gaus_pull_172.5_calib_newNormNew_mlbPD"
 
 ./submit.sh ${outdir}09 "-B -m Notoppt -i ${pseudodatafile} --startdiv 0.9"
 ./submit.sh ${outdir}08 "-B -m Notoppt -i ${pseudodatafile} --startdiv 0.8"

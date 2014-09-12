@@ -172,6 +172,10 @@ void container1DUnfold::setBackground(const container1D & cont){
 		std::cout << "container1DUnfold::setBackground: No X bins!" << std::endl;
 	}
 	setXSlice(0,cont,false);
+	//remove gen  OF
+	for(int  sys=-1;sys<(int)getSystSize();sys++){
+		getBin(xbins_.size()-1,0,sys).multiply(0);
+	}
 
 }
 container1D container1DUnfold::getBackground() const{
@@ -181,8 +185,10 @@ container1D container1DUnfold::getBackground() const{
 	}
 	container1D out=getXSlice(0);
 	//add generator overflow
-	for(int  sys=-1;sys<(int)getSystSize();sys++)
-		out.getBin(out.getBins().size()-1,sys).add( getBin(xbins_.size()-1,0,sys));
+//	for(int  sys=-1;sys<(int)getSystSize();sys++)
+	//	out.getBin(out.getBins().size()-1,sys).add( getBin(xbins_.size()-1,0,sys));
+
+	out+=getXSlice(xbins_.size()-1);
 	out.setXAxisName(xaxis1Dname_);
 	out.setYAxisName(yaxis1Dname_);
 	return out;
@@ -308,26 +314,35 @@ void container1DUnfold::setDivideBinomial(bool binomial){
 	refolded_.setDivideBinomial(binomial);
 	divideBinomial_=binomial;
 }
-void container1DUnfold::addErrorContainer(const TString & sysname,const container1DUnfold & cont,float weight){
+int container1DUnfold::addErrorContainer(const TString & sysname,const container1DUnfold & cont,float weight){
 	if(xbins_ != cont.xbins_ || ybins_ != cont.ybins_){
 		std::cout << "container1DUnfold::addErrorContainer: " << name_ << " and " << cont.name_ << " must have same x and y axis!" << std::endl;
 	}
 	if(debug)
 		std::cout << "container1DUnfold::addErrorContainer: adding for all 2d bins" <<std::endl;
-
-	for(size_t i=0;i<conts_.size();i++)
-		conts_.at(i).addErrorContainer(sysname,cont.conts_.at(i),weight);
+	int out=0;
+	int tmp=0;
+	for(size_t i=0;i<conts_.size();i++){
+		tmp=conts_.at(i).addErrorContainer(sysname,cont.conts_.at(i),weight);
+		if(tmp<0) out=tmp;
+	}
 	if(debug)
 		std::cout << "container1DUnfold::addErrorContainer: adding for gen and data distr" <<std::endl;
-	gencont_.addErrorContainer(sysname,cont.gencont_,weight);
-	recocont_.addErrorContainer(sysname,cont.recocont_,weight);
+
+	tmp=gencont_.addErrorContainer(sysname,cont.gencont_,weight);
+	if(tmp<0) out=tmp;
+	tmp=recocont_.addErrorContainer(sysname,cont.recocont_,weight);
+	if(tmp<0) out=tmp;
 	if(debug)
 		std::cout << "container1DUnfold::addErrorContainer: adding for unfolded and refolded distr" <<std::endl;
-	unfolded_.addErrorContainer(sysname,cont.unfolded_,weight);
-	refolded_.addErrorContainer(sysname,cont.refolded_,weight);
+	tmp=unfolded_.addErrorContainer(sysname,cont.unfolded_,weight);
+	if(tmp<0) out=tmp;
+	tmp=refolded_.addErrorContainer(sysname,cont.refolded_,weight);
+	if(tmp<0) out=tmp;
+	return out;
 }
-void container1DUnfold::addErrorContainer(const TString & sysname,const container1DUnfold & cont){
-	addErrorContainer(sysname,cont,1);
+int container1DUnfold::addErrorContainer(const TString & sysname,const container1DUnfold & cont){
+	return addErrorContainer(sysname,cont,1);
 }
 
 void container1DUnfold::addGlobalRelError(TString name,float relerr){
@@ -350,16 +365,16 @@ void container1DUnfold::getRelSystematicsFrom(const container1DUnfold & cont){
 	unfolded_.getRelSystematicsFrom(cont.unfolded_);
 	refolded_.getRelSystematicsFrom(cont.refolded_);
 }
-void container1DUnfold::addRelSystematicsFrom(const container1DUnfold & cont){
+void container1DUnfold::addRelSystematicsFrom(const container1DUnfold & cont,bool ignorestat,bool strict){
 	if(xbins_ != cont.xbins_ || ybins_ != cont.ybins_){
 		std::cout << "container1DUnfold::addRelSystematicsFrom: " << name_ << " and " << cont.name_ << " must have same x and y axis!" << std::endl;
 	}
 	for(size_t i=0;i<conts_.size();i++)
-		conts_.at(i).addRelSystematicsFrom(cont.conts_.at(i));
-	gencont_.addRelSystematicsFrom(cont.gencont_);
-	recocont_.addRelSystematicsFrom(cont.recocont_);
-	unfolded_.addRelSystematicsFrom(cont.unfolded_);
-	refolded_.addRelSystematicsFrom(cont.refolded_);
+		conts_.at(i).addRelSystematicsFrom(cont.conts_.at(i),ignorestat,strict);
+	gencont_.addRelSystematicsFrom(cont.gencont_,ignorestat,strict);
+	recocont_.addRelSystematicsFrom(cont.recocont_,ignorestat,strict);
+	unfolded_.addRelSystematicsFrom(cont.unfolded_,ignorestat,strict);
+	refolded_.addRelSystematicsFrom(cont.refolded_,ignorestat,strict);
 }
 bool container1DUnfold::checkCongruentBinBoundariesXY() const{
 	if(xbins_.size() <2|| ybins_.size() <2)
@@ -418,7 +433,7 @@ bool container1DUnfold::check(){ ///NEW
 	return true;
 }
 
-container1D container1DUnfold::fold(const container1D& input) const{
+container1D container1DUnfold::fold(const container1D& input,bool addbackground) const{
 	if(debug) std::cout << "container1DUnfold::fold" <<std::endl;
 
 
@@ -488,7 +503,12 @@ container1D container1DUnfold::fold(const container1D& input) const{
 					std::cout << "container1DUnfold::fold: folding for systematic var " <<  copies.at(row).getSystErrorName(sys)
 					<< " >> " <<  preparedinput.getSystErrorName(inputsys) << std::endl;
 			}
-			for(size_t bin=0;bin<copies.at(row).getBins().size();bin++){ // include UF OF (visPS migrations + all backgrounds)
+			size_t minbin=0,maxbin=copies.at(row).getBins().size();
+			if(true){ //add background later!
+				minbin=1;// dont include UF  (visPS migrations + all backgrounds)
+				maxbin--;//dont include gen OF (also PS migrations)
+			}
+			for(size_t bin=minbin;bin<maxbin;bin++){
 				sum+= copies.at(row).getBinContent(bin,sys)*preparedinput.getBinContent(bin,inputsys);
 				//assume no stat correlation between resp matrix and input
 				sumstat2+=copies.at(row).getBin(bin,sys).getStat2() * preparedinput.getBinContent(bin,inputsys) * preparedinput.getBinContent(bin,inputsys);
@@ -500,6 +520,10 @@ container1D container1DUnfold::fold(const container1D& input) const{
 			out.getBin(row,sys).setEntries(fakeentries);
 		}
 	}
+
+	if(addbackground)
+		out+=getBackground();
+
 	out.setName(input.getName()+"_folded");
 	out.setXAxisName(xaxis1Dname_);
 	out.setYAxisName(yaxis1Dname_);

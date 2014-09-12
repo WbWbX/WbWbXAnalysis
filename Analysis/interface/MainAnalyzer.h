@@ -89,7 +89,6 @@ public:
         ftorepl_=files;fwithfix_=pf;
     }
 
-    void usePDFWeights(int which){usepdfw_=which;}
 
     void setDataSetDirectory(TString dir){datasetdirectory_=dir;}
     void setShowStatus(bool show){showstatus_=show;}

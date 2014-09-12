@@ -55,6 +55,7 @@ public:
 
     void writeToTFile(TString); //! writes whole class to TFile
     void readFromTFile(TString);  //! reads whole class from TFile
+   // void readPartFromTFile(TString ident,TString file);  //! reads whole class from TFile
 
     void listAllSampleNames()const;
 
@@ -62,6 +63,8 @@ public:
      * returns - depending on the mode whether the variation is a "real" one depending on the mode
      */
     bool isRealSyst()const;
+
+    void clear(){histos_.clear();effhistos_.clear();}
 
 private:
 

@@ -27,6 +27,7 @@ plotterBase::plotterBase(const plotterBase& rhs): tObjectList(rhs){
     legstyle_=rhs.legstyle_;
     textboxes_ = rhs.textboxes_;
     intstyle_ = rhs.intstyle_; //start with env style
+    lastplotidx_ = rhs.lastplotidx_;
 }
 
 TVirtualPad* plotterBase::getPad()const{
@@ -48,6 +49,7 @@ void plotterBase::draw(){
     drawTextBoxes(); //adds new objects to list
     if(drawlegend_)
         drawLegends();//adds new objects to list
+    refreshPad();
 }
 /**
  * returns >1

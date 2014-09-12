@@ -17,9 +17,9 @@ topmasses=( "172.5"
     "178.5"
     "166.5"
 );
+pdfeigenvectors=26 # if set to 0, no variation
+
 systs=("nominal"
-
-
 
     "P11_sysnominal"
     "P11_sysnominal_CR_up"
@@ -34,39 +34,99 @@ systs=("nominal"
     "MUONSF_up"
     "MUONSF_down"
 
-   "ELECES_up"
-   "ELECES_down"
-   "MUONES_up"
-   "MUONES_down"
+    "ELECES_up"
+    "ELECES_down"
+    "MUONES_up"
+    "MUONES_down"
 
-   "PU_up"
-   "PU_down"
+    "PU_up"
+    "PU_down"
 
-   "JER_up"
-   "JER_down"
+    "JER_up"
+    "JER_down"
 
    #"JES_up"
    #"JES_down"
 
 #######JES groups according to toplhcwg use INSTEAD of global JES_up/down
 
-    "JES_MPFInSitu_down"
-    "JES_MPFInSitu_up"
-    "JES_Intercalibration_down"
-    "JES_Intercalibration_up"
-    "JES_bJES_down"
-    "JES_bJES_up"
-    "JES_Flavor_down"
-    "JES_Flavor_up"
-    "JES_Uncorrelated_down"
-    "JES_Uncorrelated_up"
+     "JES_AbsoluteMPFBias_up"   
+
+    "JES_FlavorPureGluon_up"
+    "JES_FlavorPureQuark_up"
+    "JES_FlavorPureCharm_up"
+    "JES_FlavorPureBottom_up"
+
+    "JES_RelativeFSR_up"
+
+    "JES_AbsoluteScale_up"
+    "JES_HighPtExtra_up"
+    "JES_SinglePionECAL_up"
+    "JES_SinglePionHCAL_up"
+    "JES_Time_up"
+    "JES_RelativeJEREC1_up"
+    "JES_RelativeJEREC2_up"
+    "JES_RelativeJERHF_up"
+    "JES_RelativePtBB_up"
+    "JES_RelativePtEC1_up"
+    "JES_RelativePtEC2_up"
+    "JES_RelativePtHF_up"
+    "JES_RelativeStatEC2_up"
+    "JES_RelativeStatHF_up"
+    "JES_PileUpDataMC_up"
+    "JES_PileUpBias_up"
+
+    "JES_PileUpPtBB_up"
+    "JES_PileUpPtEC_up"
+    "JES_PileUpPtHF_up"
+
+    "JES_CorrelationGroupbJES_up"
+
+##down
+
+     "JES_AbsoluteMPFBias_down"	
+
+    "JES_FlavorPureGluon_down"
+    "JES_FlavorPureQuark_down"
+    "JES_FlavorPureCharm_down"
+    "JES_FlavorPureBottom_down"
+
+    "JES_RelativeFSR_down"
+
+    "JES_AbsoluteScale_down"
+    "JES_HighPtExtra_down"
+    "JES_SinglePionECAL_down"
+    "JES_SinglePionHCAL_down"
+    "JES_Time_down"
+    "JES_RelativeJEREC1_down"
+    "JES_RelativeJEREC2_down"
+    "JES_RelativeJERHF_down"
+    "JES_RelativePtBB_down"
+    "JES_RelativePtEC1_down"
+    "JES_RelativePtEC2_down"
+    "JES_RelativePtHF_down"
+    "JES_RelativeStatEC2_down"
+    "JES_RelativeStatHF_down"
+    "JES_PileUpDataMC_down"
+    "JES_PileUpBias_down"
+
+    "JES_PileUpPtBB_down"
+    "JES_PileUpPtEC_down"
+    "JES_PileUpPtHF_down"
+
+    "JES_CorrelationGroupbJES_down"
+
+    "JEC_residuals_up"
+    "JEC_residuals_down"
+
+########
 
 
-   "BTAGH_up"
-   "BTAGH_down"
-   "BTAGL_up"
-   "BTAGL_down"
-   
+    "BTAGH_up"
+    "BTAGH_down"
+    "BTAGL_up"
+    "BTAGL_down"
+    
 #####csv rew section
    #"BTAGHFS1_up"
    #"BTAGHFS1_down"
@@ -82,13 +142,13 @@ systs=("nominal"
    #"BTAGC2_down"
 
 
-   "TOPPT_up"
-   "TOPPT_down"
+    "TOPPT_up"
+    "TOPPT_down"
 
-   "TT_MATCH_down"
-   "TT_MATCH_up"
-   "TT_SCALE_down"
-   "TT_SCALE_up"
+    "TT_MATCH_down"
+    "TT_MATCH_up"
+    "TT_SCALE_down"
+    "TT_SCALE_up"
 
 
    #"Z_MATCH_down"
@@ -99,7 +159,7 @@ systs=("nominal"
 energies=("8TeV"
 #"7TeV"
 );
-
+#systs=("nominal")
 
 #creates new subdir (analysis_timestamp) , copy source there and make dir inside (output).
 # adds script there to get plots, merge etc as independent as possible from rest (will need container classes at least)
@@ -124,6 +184,22 @@ addParameters=$2
 ####
 
 
+
+
+########add pdf variations#######
+
+if [[ $pdfeigenvectors != "0" ]] && [[ $pdfeigenvectors ]]
+then
+    systs=( "${systs[@]}" "PDF_sysnominal" );
+    for ((i = 1; i <= $pdfeigenvectors; i++));
+    do
+	systs=( "${systs[@]}" "PDF_sysnominal_PDF${i}_down" )
+	systs=( "${systs[@]}" "PDF_sysnominal_PDF${i}_up" )
+    done
+fi
+echo running on systematics: 
+echo ${systs[@]}
+echo 
 
 dir=$(date +"%Y%m%d_%H%M")_${dirname} 
 
@@ -151,7 +227,7 @@ else
 fi
 if [[ -L "last" ]]
 then
-rm last
+    rm last
 fi
 ln -s $dir last
 cd $dir
@@ -161,7 +237,8 @@ cp $analysisDir/bin/analyse .
 cp -r $analysisDir/lib .
 cp $analysisDir/*config.txt .
 
-cp $analysisDir/*btags.root .
+cp -r $analysisDir/*_btags .
+#cp $analysisDir/*_btags.root .
 cp $analysisDir/*discr.root .
 
 mkdir source
@@ -185,6 +262,8 @@ fi
 
 sed -e 's;##WORKDIR##;'${workdir}';g' < $analysisDir/check_temp.sh > check.sh
 chmod +x check.sh
+sed -e 's;##WORKDIR##;'${workdir}';g' < $analysisDir/reset_job_temp.sh > reset_job.sh
+chmod +x reset_job.sh
 
 #check wheter running on naf or wgs and do qsub or dirty "&"
 for (( i=0;i<${#channels[@]};i++)); do
@@ -208,7 +287,7 @@ for (( i=0;i<${#channels[@]};i++)); do
 
 #### dont submit b variations if effieicnes are derived
 		if [[ "${addParameters}" == *"-B"* ]] && [[ "${syst}" == *"BTAG"* ]]
-		    then
+		then
 		    echo "not running btag systematics when btag SF are derived"
 		    continue
 		fi
@@ -249,14 +328,14 @@ done
 
 function contcheck(){
 
-$workdir/check.sh
-while [ $? -ne 0 ]; 
-do
-    sleep 150
-    echo
-    echo time: $(date +"%H:%M")
     $workdir/check.sh
-done
+    while [ $? -ne 0 ]; 
+    do
+	sleep 150
+	echo
+	echo time: $(date +"%H:%M")
+	$workdir/check.sh
+    done
 
 }
 

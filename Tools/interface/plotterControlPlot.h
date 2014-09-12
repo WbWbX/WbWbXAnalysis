@@ -23,14 +23,14 @@ class containerStack;
 class plotterControlPlot: public plotterBase{
 public:
 
-    plotterControlPlot(): plotterBase(), divideat_(0), stackp_(0),templegp_(0),tempdataentry_(0),invertplots_(false){}
+    plotterControlPlot(): plotterBase(), divideat_(0), stackp_(0),templegp_(0),tempdataentry_(0),invertplots_(false),psmigthresh_(0){}
     ~plotterControlPlot(){plotterControlPlot::cleanMem();}
 
     void addStyleFromFile(const std::string& );
     void readStyleFromFile(const std::string& );
     /*
      * expects entries:
-     * [plotterControlPlot] defines divideat
+     * [plotterControlPlot] defines divideat, threshold for showing PS migrations
      * [textBoxes - boxes]
      * [containerStyle - DataUpper]
      * [containerStyle - MCUpper]
@@ -51,6 +51,7 @@ protected:
     void drawPlots();
     // void drawTextBoxes();
     void drawLegends();
+    void refreshPad();
 
 
 private:
@@ -74,6 +75,8 @@ private:
     std::vector<plot *> tempplots_;
 
     bool invertplots_;
+
+    float psmigthresh_;
 
     void drawControlPlot();
     void drawRatioPlot();

@@ -39,7 +39,7 @@ void analysisPlotsJan::bookPlots(){
 
     mlb=addPlot(genmlb_bins,genmlb_bins,"m_lb","m_{lb}* [GeV]", "N_{evt}/GeV");
 
-    mlbmin=addPlot(genmlb_bins,genmlbmin_bins,"m_lb min","m_{lb}^{min} [GeV]", "N_{evt}/GeV");
+    mlbmin=addPlot(genmlbmin_bins,genmlbmin_bins,"m_lb min","m_{lb}^{min} [GeV]", "N_{evt}/GeV");
 
     mlbivansbins=addPlot(ivangen_mlbbins,ivan_mlbbins,"m_lb ivansbins","m_{lb}^{ivan} [GeV]", "N_{evt}/GeV");
 

@@ -150,9 +150,8 @@ size_t histoContent::addLayer(const TString & name, const histoBins & histbins){
 
 /**
  * adds layer from nominal of external with name.
- * if layer already exists, content gets added according to correlation settings
  */
-size_t histoContent::addLayerFromNominal(const TString & name, const histoContent & external){
+size_t histoContent::setLayerFromNominal(const TString & name, const histoContent & external){
 	if(nominal_.size() < 1){
 		std::cout << "histoContent::addLayerFromNominal: first construct! default constructor is not supposed to be used" <<std::endl;
 		return 999999999999;
@@ -170,9 +169,10 @@ size_t histoContent::addLayerFromNominal(const TString & name, const histoConten
 		if(debug)
 			std::cout << " at idx: " << idx <<std::endl;
 	}
-	int err=additionalbins_[idx].add(external.nominal_,addStatCorrelated);
-	if(err<0)
-		std::cout << "histoContent::addLayerFromNominal: binning does not match" <<std::endl;
+	if(external.nominal_.size() != additionalbins_[idx].size())
+		throw std::out_of_range("histoContent::addLayerFromNominal: binning does not match");
+	additionalbins_[idx] = external.nominal_;
+
 	return idx;
 }
 

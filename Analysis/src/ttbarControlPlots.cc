@@ -26,8 +26,9 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
 
 	if(!switchedon_) return;
 
-
 	initStep(step);
+	if(limittostep_>-1 && (size_t)limittostep_!=step)
+		return;
 	using namespace std;
 
 	bool middphi=false;
@@ -44,11 +45,11 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
 
 	///LEPTONS
 
-	SETBINS << -2.5 << -2.1 << -1.47 << -0.8 << 0.8 << 1.47 << 2.1 << 2.5;
+	SETBINS << -2.4 << -2.1 << -1.47 << -0.8 << 0.8 << 1.47 << 2.1 << 2.4;
 	addPlot("electron eta", "#eta_{l}","N_{e}");
 	FILLFOREACH(isoelectrons,eta());
 
-	SETBINS << -2.5 << -2.1 << -1.47 << -0.8 << 0.8 << 1.47 << 2.1 << 2.5;
+	SETBINS << -2.4 << -2.1 << -1.47 << -0.8 << 0.8 << 1.47 << 2.1 << 2.4;
 	addPlot("kin electron eta pt 20-30", "#eta_{l}","N_{e}");
 	if(event()->kinelectrons && event()->kinelectrons->size()>0 && event()->kinelectrons->at(0)
 			&& event()->kinelectrons->at(0)->pt()<30)
@@ -172,14 +173,22 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
 	addPlot("seclead lepton pt", "p_{T,l2} [GeV]", "N_{evt}/GeV");
 	FILL(secleadinglep,pt());
 
-	SETBINSRANGE(20,-2.5,2.5);
+	SETBINSRANGE(20,-2.4,2.4);
 	addPlot("lead lepton eta", "#eta_{l1}", "N_{evt}/0.25");
 	FILL(leadinglep,eta());
 
 	addPlot("seclead lepton eta", "#eta_{l2}", "N_{evt}/0.25");
 	FILL(secleadinglep,eta());
 
+	SETBINS << -2.4 << -1.5 << -0.5 << 0.5 << 1.5 << 2.4;
+	addPlot("lead lepton eta coarse", "#eta_{l1}", "N_{evt}/1");
+	FILL(leadinglep,eta());
 
+	addPlot("seclead lepton eta coarse", "#eta_{l2}", "N_{evt}/1");
+	FILL(secleadinglep,eta());
+
+
+	SETBINS << 0 << 10 << 20 << 25 << 30 << 35 << 40 << 45 << 50 << 60 << 70 << 100 << 200;
 	addPlot("leadAllLep pt", "p_{T} [GeV]", "N_{l}/GeV");
 	if(event()->allleptons && event()->allleptons->size()>0)
 		FILL(allleptons->at(0),pt());
@@ -249,18 +258,23 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
 	FILLFOREACH(selectedjets,btag());
 
 
-	SETBINSRANGE(20,-2.5,2.5);
+	SETBINSRANGE(20,-2.4,2.4);
 	addPlot("leading jet eta","#eta_{1^{st}jet}","evt/bw");
 	if(event()->selectedjets && event()->selectedjets->size()>0)
 		FILL(selectedjets->at(0),eta()) ;
 
-	SETBINSRANGE(20,-2.5,2.5);
+	SETBINSRANGE(20,-2.4,2.4);
 	addPlot("leading b-jet eta","#eta_{b}","N_{evt}/0.25");
 	if(event()->selectedbjets && event()->selectedbjets->size()>0)
 		FILL(selectedbjets->at(0),eta()) ;
 
+	SETBINSRANGE(5,-2.4,2.4);
+		addPlot("leading b-jet eta coarse","#eta_{b}","N_{evt}/1");
+		if(event()->selectedbjets && event()->selectedbjets->size()>0)
+			FILL(selectedbjets->at(0),eta()) ;
 
-	SETBINSRANGE(20,-2.5,2.5);
+
+	SETBINSRANGE(20,-2.4,2.4);
 	addPlot("secleading jet eta","#eta_{1^{st}jet}","evt/bw");
 	if(event()->selectedjets && event()->selectedjets->size()>1)
 		FILL(selectedjets->at(1),eta()) ;
@@ -797,7 +811,6 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
 	addPlot("sec lep pt 3+ b-jets","p_{t}^{l2} [GeV]","N_{evt}/GeV");
 	if(event()->selectedbjets && event()->selectedbjets->size()>2)
 		FILL(secleadinglep,pt());
-
 
 
 
