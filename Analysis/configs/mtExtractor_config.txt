@@ -163,6 +163,7 @@ $$no specific end markers per plot to keep overview
  [plotStyle - Upper]
 		 yaxis.min        = 0
 		 yaxis.max      = 29000
+		 yaxis.log = false
       [end plotStyle]
 
 [plot - selected b-jet multi step 8]
@@ -283,18 +284,6 @@ $       [legendStyle]
       [end plotStyle]
 
 
-[plot - m_lb min step 8] $never reaches
-
-	[plotterControlPlot]
- 	   PSMigThreshold =  0.00   $this is not %!
-
-	[end - plotterControlPlot]
-	
-	
-    [plotStyle - Upper]
-    	yaxis.log         = true
-    [end plotStyle]
-
 
 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 [end additional plots]
@@ -304,11 +293,13 @@ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 $$ paths wrt CMSSW_BASE
 
-compareAllMassesMC   =  /src/TtZAnalysis/Analysis/configs/topmass/comparePlots_mlbMCvsmt_fold.txt       
+compareAllMassesMC   =  /src/TtZAnalysis/Analysis/configs/topmass/comparePlots_mlbMCvsmt_fold.txt   
+compareAllMassesMCnormd   =  /src/TtZAnalysis/Analysis/configs/topmass/comparePlots_mlbMCvsmt_fold_norm.txt       
 compareAllMassesData =  /src/TtZAnalysis/Analysis/configs/topmass/comparePlots_mlbDatavsmt_fold.txt 
 
 binDependencies         =  /src/TtZAnalysis/Analysis/configs/topmass/multiplePlots_mlbbins.txt          
-binDependenciesPlusFits =  /src/TtZAnalysis/Analysis/configs/topmass/multiplePlots_mlbbinsPlusFit.txt  
+binDependenciesPlusFits =  /src/TtZAnalysis/Analysis/configs/topmass/multiplePlots_mlbbinsPlusFit.txt   
+totalDependencePlusFit  =  /src/TtZAnalysis/Analysis/configs/topmass/multiplePlots_totalPlusFit.txt  
 chi2PerBin             =  /src/TtZAnalysis/Analysis/configs/topmass/multiplePlots_mlbbinsChi2.txt      
 chi2total              =  /src/TtZAnalysis/Analysis/configs/topmass/multiplePlots_mlbbinsChi2.txt
 systematicsVariations  =  /src/TtZAnalysis/Analysis/configs/topmass/comparePlots_systVar.txt

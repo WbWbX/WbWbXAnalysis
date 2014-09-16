@@ -2,7 +2,7 @@
 [plotterCompare]
 
     divideat = 0.3   $ will affect margins, text box coords etc
-    size = 6         $ size of additional plots to be compared to nominal
+    size = 4        $ size of additional plots to be compared to nominal
 
 [end plotterCompare]
  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  

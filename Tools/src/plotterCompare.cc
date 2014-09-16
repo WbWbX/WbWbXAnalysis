@@ -14,6 +14,7 @@
 #include <iostream>
 #include "TLegend.h"
 #include "TStyle.h"
+#include "TLine.h"
 
 namespace ztop{
 
@@ -168,6 +169,14 @@ void plotterCompare::readStylePriv(const std::string& infile, bool requireall){
     containerStyle compareupperDefault,compareRatioDefault;
     compareupperDefault.readFromFile(infile,"CompareUpperDefault",requireall);
     compareRatioDefault.readFromFile(infile,"CompareRatioDefault",requireall);
+
+
+    if(compids_.size()>0 && compids_.size()!=size_){
+    	std::cout << "plotterCompare::readStyle: size of compare ids (" <<compids_.size()
+    			<< ") must match number of plots to be compared to nominal.(" << size_ << ")"<<std::endl;
+    	throw std::out_of_range("plotterCompare::readStyle: size of compare ids must match number of plots to be compared to nominal.");
+    }
+
     for(size_t i=0;i<size_;i++){
         containerStyle temps;
         std::string add;
@@ -229,9 +238,10 @@ void  plotterCompare::drawPlots(){
     ratiostyle.absorbYScaling(getSubPadYScale(2));
 
     c->cd(1);
-    upperstyle.yAxisStyle()->max=getMaximumUpper();
+    if(! upperstyle.yAxisStyle()->applyAxisRange())
+       upperstyle.yAxisStyle()->max=getMaximumUpper();
 
-    drawAllPlots(&upperstyle,&nomstyleupper_,&compstylesupper_,&nominalplot_,&compareplots_,true);
+    drawAllPlots(&upperstyle,&nomstyleupper_,&compstylesupper_,&nominalplot_,&compareplots_,true,false);
     //return;
     //make ratio plots
 
@@ -241,7 +251,7 @@ void  plotterCompare::drawPlots(){
     graph nomgr=nominalplot_.getInputGraph().getRelYErrorsGraph();
     memnom_= new plot(&nomgr);
     if(debug) std::cout <<"plotterCompare::drawPlots: draw ratio plots" << std::endl;
-    drawAllPlots(&ratiostyle,&nomstyleratio_,&compstylesratio_,memnom_,memratio_,false);
+    drawAllPlots(&ratiostyle,&nomstyleratio_,&compstylesratio_,memnom_,memratio_,false,true);
 
 
 }
@@ -262,11 +272,11 @@ void  plotterCompare::drawLegends(){
         leg->AddEntry(compareplots_.at(i).getStatGraph(),compareplots_.at(i).getName(),"pel");
     }
     leg->Draw("same");
-
+    tmplegp_=leg;
 }
 
 void plotterCompare::drawAllPlots(const plotStyle* ps, const containerStyle * cs, const std::vector<containerStyle>* vcs,
-        const plot * nompl, const std::vector<plot>* vcpl, bool nomlast){
+        const plot * nompl, const std::vector<plot>* vcpl, bool nomlast,bool isratio){
     if(debug) std::cout <<"plotterCompare::drawAllPlots" << std::endl;
     //draw axis
     TG * g=0,*gs=0;
@@ -277,6 +287,11 @@ void plotterCompare::drawAllPlots(const plotStyle* ps, const containerStyle * cs
 
     ps->applyAxisStyle(axish);
     axish->Draw("AXIS");
+
+    if(isratio){
+    	TLine *line=addObject(new TLine(axish->GetXaxis()->GetBinLowEdge(1), 1, axish->GetXaxis()->GetBinLowEdge(axish->GetNbinsX()),1));
+    	line->Draw("same");
+    }
     if(!nomlast){
         g=nompl->getStatGraph();
         gs=nompl->getSystGraph();

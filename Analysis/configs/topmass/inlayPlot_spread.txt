@@ -202,6 +202,7 @@ externalMarker = CMSnoSplitLeft
  $$$$$$$ INLAY
  
  [containerStyle - Inlay0]
+    markerSize   = 0.25
   markerColor  = 1
   lineColor    = 1 
  [end containerStyle]  

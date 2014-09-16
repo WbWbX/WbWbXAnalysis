@@ -2,11 +2,26 @@
 [plotterCompare]
 
     divideat = 0.3   $ will affect margins, text box coords etc
-    size = 6         $ size of additional plots to be compared to nominal
+    size = 4         $ size of additional plots to be compared to nominal
 
 [end plotterCompare]
  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  
 
+
+
+ [legendStyle]
+
+     
+        x0  =  0.55
+	y0  =  0.30
+	x1  =  0.9
+	y1  =  0.83
+
+	
+	nColumns        = 1
+	columnSeparator = 0.1
+
+[end legendStyle]
 
 [textBoxes - boxes]
 
@@ -50,13 +65,13 @@ externalMarker = CMSSplit03LeftSim
    
     lineSize     = 1
 
-    fillStyle    = 3001
-    fillColor    = 432
-    sysFillStyle = 3001
-    sysFillColor = 920
+    fillStyle    = 1001 $3001
+    fillColor    = 1 $432
+    sysFillStyle = 1001
+    sysFillColor = 1
 
-    rootDrawOpt  = e2 
-    sysRootDrawOpt  = e2
+    rootDrawOpt  = X
+    sysRootDrawOpt  = X
     
     drawStyle    = normal $ can be other options (TBI)
     
@@ -82,7 +97,7 @@ externalMarker = CMSSplit03LeftSim
     sysFillColor = 632
 
     rootDrawOpt  = Pe1 
-    sysRootDrawOpt  = e2
+    sysRootDrawOpt  = none
     drawStyle    = normal $ can be other options (TBI)
     
     
@@ -91,7 +106,7 @@ externalMarker = CMSSplit03LeftSim
  [containerStyle - CompareRatioDefault]
     
     
-   markerSize   = 0
+    markerSize   = 0
     markerStyle  = 26
     markerColor  = 632
  
@@ -102,11 +117,11 @@ externalMarker = CMSSplit03LeftSim
     fillStyle    = 1001
     fillColor    = 1 
 
-    sysFillStyle = 3005
-    sysFillColor = 632
+    sysFillStyle = 1001 $3005
+    sysFillColor = 1 $632
 
-    rootDrawOpt  = Pe1 
-    sysRootDrawOpt  = e2
+    rootDrawOpt  = L3 $e1P 
+    sysRootDrawOpt  = none
     drawStyle    = normal $ can be other options (TBI)
     
     
@@ -117,27 +132,29 @@ externalMarker = CMSSplit03LeftSim
  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  $$$$$ from now on only define differences wrt to defaults
  
- [containerStyle - CompareUpper_mt172.5]  
  
- [end containerStyle]
  
- [containerStyle - CompareRatio_mt172.5]
  
- [end containerStyle]
  
- [containerStyle - CompareUpper_mt173.5]  
- 
+ [containerStyle - CompareUpper_mt173.5] 
+  
     $markerColor  = 632  
     lineColor    = 632 
     sysFillColor = 632
     
  [end containerStyle]
+ 
  [containerStyle - CompareRatio_mt173.5]
  
     lineColor    = 632
     sysFillColor = 632
+    fillColor = 632
     
  [end containerStyle]
+ 
+ 
+ 
+ 
  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  
  
  [containerStyle - CompareUpper_mt171.5]
@@ -152,62 +169,67 @@ externalMarker = CMSSplit03LeftSim
     
     lineColor    = 600
     sysFillColor = 600
+    fillColor = 600
 
  [end containerStyle]
  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 
  
  [containerStyle - CompareUpper_mt175.5]
    
-    lineColor    = 629 
-    sysFillColor = 629
+    lineColor    = 624 
+    sysFillColor = 624
 
  [end containerStyle]
  
  [containerStyle - CompareRatio_mt175.5]
    
-    lineColor    = 629
-    sysFillColor = 629
+    lineColor    = 624
+    sysFillColor = 624
+    fillColor = 624
 
  [end containerStyle]
  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 
  [containerStyle - CompareUpper_mt169.5]
    
-    lineColor    = 596 
-    sysFillColor = 596
+    lineColor    = 591 
+    sysFillColor = 591
 
  [end containerStyle]
  [containerStyle - CompareRatio_mt169.5]
    
-    lineColor    = 596
-    sysFillColor = 596
+    lineColor    = 591
+    sysFillColor = 591
+    fillColor = 591
 
  [end containerStyle]
  
  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 
  [containerStyle - CompareUpper_mt178.5]
    
-    lineColor    = 624 
-    sysFillColor = 624
+    lineColor    = 629 
+    sysFillColor = 629
 
  [end containerStyle]
  [containerStyle - CompareRatio_mt178.5]
    
-    lineColor    = 624
-    sysFillColor = 624
+    lineColor    = 629
+    sysFillColor = 629
+    fillColor = 629
 
  [end containerStyle]
  
  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 
  [containerStyle - CompareUpper_mt166.5]
    
-    lineColor    = 593 
-    sysFillColor = 593
+    lineColor    = 596 
+    sysFillColor = 596
 
  [end containerStyle]
  [containerStyle - CompareRatio_mt166.5]
    
-    lineColor    = 593
-    sysFillColor = 593
+    lineColor    = 596
+    sysFillColor = 596
+    fillColor = 596
 
  [end containerStyle]
  
@@ -243,11 +265,11 @@ externalMarker = CMSSplit03LeftSim
     
     yaxis.titleSize   = 0.06
     yaxis.labelSize   = 0.05
-    yaxis.titleOffset = 0.85
+    yaxis.titleOffset = 0.95
     yaxis.labelOffset = 0.005
     yaxis.tickLength  = 0.03
     yaxis.ndiv        = 510
-    yaxis.max         = -1
+    yaxis.max         = 650
     yaxis.min         = 0 $use this one
     yaxis.log         = false
     yaxis.name        = USEDEF
@@ -270,7 +292,7 @@ externalMarker = CMSSplit03LeftSim
     
     xaxis.titleSize   = 0.06
     xaxis.labelSize   = 0.05
-    xaxis.titleOffset = 0.8
+    xaxis.titleOffset = 0.95
     xaxis.labelOffset = 0.005
     xaxis.tickLength  = 0.03
     xaxis.ndiv        = 510
@@ -281,13 +303,13 @@ externalMarker = CMSSplit03LeftSim
     
     yaxis.titleSize   = 0.06
     yaxis.labelSize   = 0.05
-    yaxis.titleOffset = 0.85
+    yaxis.titleOffset = 0.95
     yaxis.labelOffset = 0.005
     yaxis.tickLength  = 0.03
     yaxis.ndiv        = 505
     yaxis.max         = 1.5
     yaxis.min         = 0.5
     yaxis.log         = false
-    yaxis.name        = #frac{N(m_{t})}{N(172.5 GeV)}
+    yaxis.name        = N_{m_{t}}/N_{m_{t}^{0}} $#frac{N^{m_{t}}}{N^{m_{t}^{0}}}
     
 [end plotStyle]

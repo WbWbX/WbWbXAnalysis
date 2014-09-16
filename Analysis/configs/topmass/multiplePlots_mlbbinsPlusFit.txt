@@ -1,8 +1,8 @@
 
 [legendStyle]
 
-    x0  =  0.6
-	y0  =  0.65
+    x0  =  0.1
+	y0  =  0.1
 	x1  =  0.85
 	y1  =  0.88
 	
@@ -15,6 +15,7 @@
 [plotterMultiplePlots]
 
 tightXaxis = false
+drawLegend = false
 
 
 [end plotterMultiplePlots]
@@ -22,10 +23,10 @@ tightXaxis = false
 [textBoxes - boxes]
 
 
-externalFile = CMSSW_BASE/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt
-externalMarker = CMSnoSplitLeft
+$externalFile = CMSSW_BASE/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt
+$externalMarker = CMSnoSplitLeft
 
-$0.25,   0.95,   DEFTITLE,            0.05
+0.25,   0.95,   DEFTITLE,            0.05
 
 [end textBoxes]
 
@@ -33,9 +34,9 @@ $0.25,   0.95,   DEFTITLE,            0.05
  
  [plotStyle - MultiPlots]
 
-    bottomMargin  = 0.15
+    bottomMargin  = 0.2
     topMargin     = 0.1
-    leftMargin    = 0.15
+    leftMargin    = 0.2
     rightMargin   = 0.1
     
     $both not used right now
@@ -45,10 +46,10 @@ $0.25,   0.95,   DEFTITLE,            0.05
     
     $$ axis styles
     
-    xaxis.titleSize   = 0.06
-    xaxis.labelSize   = 0.05
-    xaxis.titleOffset = 0.8
-    xaxis.labelOffset = 0.005
+    xaxis.titleSize   = 0.11
+    xaxis.labelSize   = 0.08
+    xaxis.titleOffset = 0.82
+    xaxis.labelOffset = 0.008
     xaxis.tickLength  = 0.03
     xaxis.ndiv        = 510
     xaxis.max         = 180
@@ -57,10 +58,10 @@ $0.25,   0.95,   DEFTITLE,            0.05
     xaxis.name        = USEDEF
     
     
-    yaxis.titleSize   = 0.06
-    yaxis.labelSize   = 0.05
-    yaxis.titleOffset = 0.85
-    yaxis.labelOffset = 0.005
+    yaxis.titleSize   = 0.11
+    yaxis.labelSize   = 0.08
+    yaxis.titleOffset = 0.87
+    yaxis.labelOffset = 0.008
     yaxis.tickLength  = 0.03
     yaxis.ndiv        = 510
     yaxis.max         = -1
@@ -75,11 +76,11 @@ $0.25,   0.95,   DEFTITLE,            0.05
  
 [containerStyle - Default]
  
-    markerSize   = 1
+    markerSize   = 0.5
     markerStyle  = 20
     markerColor  = 632
  
-    lineSize     = 2
+    lineSize     = 1
     lineStyle    = 1 
     lineColor    = 632 
 
@@ -100,7 +101,6 @@ $0.25,   0.95,   DEFTITLE,            0.05
   markerSize   = 0
   markerColor  = 1
   lineColor    = 1
-   lineSize     = 2
   fillStyle    = 3003
   fillColor    = 1 
   sysFillStyle    = 3003
@@ -114,7 +114,6 @@ $0.25,   0.95,   DEFTITLE,            0.05
   markerSize   = 0
   markerColor  = 632
   lineColor    = 632 
-    lineSize     = 2
   fillStyle    = 3003
   fillColor    = 632  
   sysFillStyle    = 3003
@@ -123,14 +122,20 @@ $0.25,   0.95,   DEFTITLE,            0.05
   sysRootDrawOpt  = 3
  [end containerStyle] 
   
-  $$points data
+  $$points data $$ dont draw points at all
  [containerStyle - 2]
+   lineSize     = 1
+  markerSize   = 0
   markerColor  = 1
   lineColor    = 1 
+    rootDrawOpt  = X 
+    sysRootDrawOpt  = X
+  
  [end containerStyle]  
  
  $$points MC
  [containerStyle - 3]
+    markerStyle  = 23
   markerColor  = 632
   lineColor    = 632 
  [end containerStyle]  

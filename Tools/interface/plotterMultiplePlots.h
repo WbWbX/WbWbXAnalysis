@@ -61,7 +61,6 @@ protected:
 
 private:
 
-
     float getMaximum()const;
     float getMinimum()const;
 

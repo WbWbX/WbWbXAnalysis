@@ -142,8 +142,8 @@ void plotterControlPlot::drawPlots(){
 void plotterControlPlot::drawLegends(){
 	if(debug) std::cout <<"plotterCompare::drawLegends" << std::endl;
 	getPad()->cd(1);
-	legstyle_.applyLegendStyle(templegp_);
-	templegp_->Draw("same");
+	legstyle_.applyLegendStyle(tmplegp_);
+	tmplegp_->Draw("same");
 	//use templegps_
 
 	/* ... */
@@ -170,6 +170,7 @@ void plotterControlPlot::drawControlPlot(){
 	TH1 * axish=addObject(stackp_->getContainer(dataentry).getTH1D("",divbbw,false,false));
 	plotStyle upperstyle=upperstyle_;
 	upperstyle.absorbYScaling(getSubPadYScale(1));
+	axish->Draw("AXIS");
 	axish->GetYaxis()->SetRangeUser(0.0001,stackp_->getYMax()*1.2);
 	upperstyle.applyAxisStyle(axish);
 	axish->Draw("AXIS");
@@ -181,12 +182,12 @@ void plotterControlPlot::drawControlPlot(){
 	datastyleupper_.applyContainerStyle(dataplottemp);
 
 	//set up legend here....
-	templegp_=addObject(new TLegend((Double_t)0.65,(Double_t)0.50,(Double_t)0.95,(Double_t)0.90));
-	templegp_->Clear();
-	templegp_->SetFillStyle(0);
-	templegp_->SetBorderSize(0);
+	tmplegp_=addObject(new TLegend((Double_t)0.65,(Double_t)0.50,(Double_t)0.95,(Double_t)0.90));
+	tmplegp_->Clear();
+	tmplegp_->SetFillStyle(0);
+	tmplegp_->SetBorderSize(0);
 
-	templegp_->AddEntry(dataplottemp->getSystGraph(),stackp_->getLegend(dataentry),"ep");
+	tmplegp_->AddEntry(dataplottemp->getSystGraph(),stackp_->getLegend(dataentry),"ep");
 
 	std::vector<size_t> signalidxs=stackp_->getSignalIdxs();
 
@@ -279,7 +280,7 @@ void plotterControlPlot::drawControlPlot(){
 
 				stackedhistos.at(i)->Draw(mcstyleupper_.rootDrawOpt+"same");
 				if(legendentries.at(i)!="")
-					templegp_->AddEntry(stackedhistos.at(i),legendentries.at(i),"f");
+					tmplegp_->AddEntry(stackedhistos.at(i),legendentries.at(i),"f");
 			}
 
 		}
@@ -287,12 +288,12 @@ void plotterControlPlot::drawControlPlot(){
 		TG * mcerr=addObject(sumcont.getTGraph(stackp_->getName()+"mcerr_cp",divbbw,false,false,false));
 		mcstyleupper_.applyContainerStyle(mcerr,true);
 
-		templegp_->AddEntry(mcerr,"MC syst+stat","f");
+		tmplegp_->AddEntry(mcerr,"MC syst+stat","f");
 		if(stackp_->is1DUnfold() && foundPSmig){ //
 			TH1D * dummy=addObject(new TH1D());
 			mcstylepsmig_.applyContainerStyle(dummy,false);
 			dummy->SetFillColor(1);
-			templegp_->AddEntry(dummy,"PS migrations","f");
+			tmplegp_->AddEntry(dummy,"PS migrations","f");
 		}
 		mcerr->Draw("same"+mcstyleupper_.sysRootDrawOpt);
 
@@ -301,8 +302,6 @@ void plotterControlPlot::drawControlPlot(){
 	//plot data now
 	dataplottemp->getSystGraph()->Draw(datastyleupper_.sysRootDrawOpt+"same");
 	dataplottemp->getStatGraph()->Draw(datastyleupper_.rootDrawOpt+"same");
-
-
 
 }
 void plotterControlPlot::drawRatioPlot(){
@@ -318,6 +317,7 @@ void plotterControlPlot::drawRatioPlot(){
 	TH1* axish=addObject(stackp_->getContainer(tempdataentry_).convertToGraph(false).getAxisTH1(false,true));
 	plotStyle ratiostyle=ratiostyle_;
 	ratiostyle.absorbYScaling(getSubPadYScale(2));
+	axish->Draw("AXIS");
 	ratiostyle.applyAxisStyle(axish);
 	axish->Draw("AXIS");
 

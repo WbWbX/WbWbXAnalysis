@@ -20,7 +20,7 @@ class TH1D;
 class TGraphAsymmErrors;
 class TCanvas;
 class TVirtualPad;
-
+class TLegend;
 
 namespace ztop{
 /**
@@ -28,7 +28,7 @@ namespace ztop{
  */
 class plotterBase :protected tObjectList{
 public:
-    plotterBase():tObjectList(), title_(""),tbndc_(true),lastplotidx_(0),pad_(0),drawlegend_(true){
+    plotterBase():tObjectList(), title_(""),tbndc_(true),lastplotidx_(0),tmplegp_(0),pad_(0),drawlegend_(true){
     	//TGaxis::SetMaxDigits();
     }
     virtual ~plotterBase(){}
@@ -44,6 +44,8 @@ public:
     void usePad(TVirtualPad* pad){pad_=pad;}
     TVirtualPad* getPad()const; //throws if 0
     bool padAssociated()const{return pad_;}
+
+    TLegend* getLegend()const {return tmplegp_;}
 
      void draw();
      void cleanMem(){tObjectList::cleanMem();}
@@ -96,6 +98,8 @@ protected:
     std::vector<size_t> nolegendidx_;
     size_t lastplotidx_;
     virtual void readStylePriv(const std::string & , bool )=0;
+
+    TLegend * tmplegp_;
 
 private:
     TVirtualPad * pad_;

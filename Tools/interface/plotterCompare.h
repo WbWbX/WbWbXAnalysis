@@ -102,7 +102,7 @@ private:
 
 
     void drawAllPlots(const plotStyle* ps, const containerStyle * cs, const std::vector<containerStyle>* vcs,
-            const plot * nompl, const std::vector<plot>* vcpl, bool nomlast);
+            const plot * nompl, const std::vector<plot>* vcpl, bool nomlast,bool isratio);
 
     plot plotterCompareStyle(const plot&);
     void makeRatioPlots(); //sets mem*
@@ -110,6 +110,7 @@ private:
     float getMaximumUpper();
 
     void readStylePriv(const std::string & file, bool requireall);
+
 
 };
 

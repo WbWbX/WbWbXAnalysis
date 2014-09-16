@@ -209,11 +209,6 @@ void WriteAndPrint(TCanvas*c, TFile &f,TString outputpdf, TString outdir){
 	f.WriteTObject(c);
 	c->Print(outdir+"/" + outname+".eps");
 	filelist.push_back(outdir+"/" + outname);
-	//  TString syscall="epstopdf --outfile="+outdir+"/" + c->GetName()+".pdf " +outdir+"/" + c->GetName()+".eps";
-
-	//  system(syscall.Data());
-	//  TString delcall="rm -f "+outdir+"/" + c->GetName()+".eps";
-	//  system(delcall.Data());
 
 }
 
@@ -593,7 +588,9 @@ int main(int argc, char* argv[]){
 			extraconfig.setDelimiter(",");
 			extraconfig.setStartMarker("[plot - " + plotnames.at(i) +"]");
 			if(i<plotnames.size()-1)
-				extraconfig.setEndMarker("[plot - ");
+				extraconfig.setEndMarker("[plot - "+ plotnames.at(i+1) +"]");
+			else
+				extraconfig.setEndMarker("[end additional plots]");
 			extraconfig.readFile(extconfigfile);
 			std::string tmpfile=extraconfig.dumpFormattedToTmp();
 			containerStack stack2=defmtvec.getStack(plotnames.at(i));
@@ -630,7 +627,7 @@ int main(int argc, char* argv[]){
 			else if(stack2.is2D()){//TBI
 
 			}
-			std::cout << "done plotting " << name << std::endl;
+			std::cout << "done plotting " << name << "   " << tmpfile << std::endl;
 			TString syscall="rm -f "+tmpfile;
 			system(syscall.Data());
 
@@ -694,13 +691,14 @@ int main(int argc, char* argv[]){
 
 	///make response matrices
 	containerStack stack=defmtvec.getStack(plotname);
-	container1DUnfold signcuf=stack.produceUnfoldingContainer();
+	const container1DUnfold signcuf=stack.produceUnfoldingContainer();
 	container2D mresp=signcuf.getNormResponseMatrix();
 
 
 
 	//fast print
 	c->Clear();
+	c->SetLogy(0);
 	c->SetName("response_matrix");
 	c->SetBottomMargin(0.15);
 	c->SetLeftMargin(0.15);
@@ -743,8 +741,8 @@ int main(int argc, char* argv[]){
 	container1D ineff=mresp.projectToX(true)-efficiency;
 	efficiency.removeAllSystematics();
 	efficiency.transformToEfficiency();
-	TString tmp=efficiency.getName();
-	efficiency.setXAxisName(tmp.ReplaceAll("reco","gen"));
+	//TString tmp=efficiency.getName();
+	//efficiency.setXAxisName(tmp.ReplaceAll("reco","gen"));
 	ineff.setAllErrorsZero();
 	plotterMultiplePlots effplotter;
 	effplotter.readStyleFromFileInCMSSW("src/TtZAnalysis/Analysis/configs/topmass/multiplePlots_efficiency.txt");

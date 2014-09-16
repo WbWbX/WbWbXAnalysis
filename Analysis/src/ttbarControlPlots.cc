@@ -312,7 +312,7 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
 
 	//Combined vars
 
-	SETBINSRANGE(150,0,300);
+	SETBINSRANGE(50,0,300);
 	addPlot("mll Range","m_{ll} [GeV]","N_{evt}/GeV");
 	FILLSINGLE(mll);
 

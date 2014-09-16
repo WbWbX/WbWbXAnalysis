@@ -173,7 +173,7 @@ void plotterMultiplePlots::drawPlots(){
 
 }
 void plotterMultiplePlots::drawLegends(){
-    if(!drawlegend_)  return;
+
     getPad()->cd(1);
     TLegend *leg = addObject(new TLegend((Double_t)0.65,(Double_t)0.50,(Double_t)0.95,(Double_t)0.90));
     leg->Clear();
@@ -184,8 +184,10 @@ void plotterMultiplePlots::drawLegends(){
         leg->AddEntry(plots_.at(i).getStatGraph(),plots_.at(i).getName(),"pel");
     }
     legstyle_.applyLegendStyle(leg);
-    leg->Draw("same");
+    if(drawlegend_)
+    	leg->Draw("same");
     getPad()->RedrawAxis();
+    tmplegp_=leg;
 }
 
 float plotterMultiplePlots::getMaximum()const{

@@ -170,8 +170,15 @@ void mtExtractor::drawXsecDependence(TCanvas *c, bool fordata){
 
 	for(size_t i=0;i<mtvals_.size();i++){
 		//if(fabs(DEFTOPMASSFORNNLOMASSDEP - mtvals_.at(i))<0.1) continue;
-		std::string mt=toString(mtvals_.at(i));
+		formatter ftm;
+		if(fabs(defmtop_ - mtvals_.at(i))<0.1){
+			continue;
+		}
+		if((fabs(1-fabs(defmtop_ - mtvals_.at(i))))<0.1)
+			continue;
+		std::string mt=toString(ftm.round(mtvals_.at(i),0.1));
 		mt="_mt"+mt;
+
 		pltrptr->compareIds().push_back(mt);
 		if(debug) std::cout << "mtExtractor::drawMCXsecDependence: added mt: " <<mt<<std::endl;
 
@@ -184,12 +191,20 @@ void mtExtractor::drawXsecDependence(TCanvas *c, bool fordata){
 	//next loop set plots!
 	size_t newidx=0;
 	for(size_t i=0;i<mtvals_.size();i++){
+		container1D tmp=conts->at(i);
+		tmp.removeAllSystematics();
+
+		if((fabs(1-fabs(defmtop_ - mtvals_.at(i))))<0.1)
+			continue;
+
 		if(fabs(defmtop_ - mtvals_.at(i))<0.1){
-			pltrptr->setNominalPlot(&conts->at(i),true);
+			TString newname=tmp.getName();
+			tmp.setName( newname.ReplaceAll("m_{t}","m_{t}^{0}") );
+			pltrptr->setNominalPlot(&tmp,true);
 
 		}
 		else{
-			pltrptr->setComparePlot(&conts->at(i),newidx,true);
+			pltrptr->setComparePlot(&tmp,newidx,true);
 			newidx++;
 		}
 	}
@@ -434,10 +449,16 @@ void mtExtractor::readFiles(){
 	fr.readFile(extfileformatfile_.Data());
 
 	compplotsstylefilemc_ = fr.getValue<std::string>("compareAllMassesMC");
+	if(usenormalized_ )
+		compplotsstylefilemc_ = fr.getValue<std::string>("compareAllMassesMCnormd");
+
 	compplotsstylefiledata_ = fr.getValue<std::string>("compareAllMassesData");
 	binsplotsstylefile_ = fr.getValue<std::string>("binDependencies");
 	binschi2plotsstylefile_ = fr.getValue<std::string>("chi2PerBin");
 	binsplusfitsstylefile_ = fr.getValue<std::string>("binDependenciesPlusFits");
+	if(plotnamedata_.Contains("total step 8"))
+		binsplusfitsstylefile_ = fr.getValue<std::string>("totalDependencePlusFit");
+
 	chi2plotsstylefile_ = fr.getValue<std::string>("chi2total");
 	sysvariationsfile_ = fr.getValue<std::string>("systematicsVariations");
 	allsyststylefile_ = fr.getValue<std::string>("results");
@@ -535,8 +556,8 @@ void mtExtractor::readFiles(){
 			if(usenormalized_)
 				datareference.setYAxisName("1/N_{tot} "+datareference.getYAxisName());
 			//rebin at first to gen
-		//	if(!mciscuf) //rebin to generator binning - not needed for folding!!
-		//		datareference=datareference.rebinToBinning(tempcuf.getBinnedGenContainer());
+			//	if(!mciscuf) //rebin to generator binning - not needed for folding!!
+			//		datareference=datareference.rebinToBinning(tempcuf.getBinnedGenContainer());
 		}
 
 		datacont_.push_back(datareference);
@@ -1055,6 +1076,7 @@ void mtExtractor::drawBinsPlusFits(TCanvas *c,int syst){
 		c->Divide(vdivs,hdivs);
 	}
 	gStyle->SetOptTitle(1);
+	TLegend * newleg=0;
 	for(size_t i=0;i<databingraphs_.size();i++){
 		plotterMultiplePlots * pl=new plotterMultiplePlots(plotterdef);
 		pltrptrs_.push_back(pl);
@@ -1101,6 +1123,15 @@ void mtExtractor::drawBinsPlusFits(TCanvas *c,int syst){
 		}
 
 		pl->draw();
+		if(i && i==databingraphs_.size()-1){
+			newleg=addObject((TLegend*)(pl->getLegend()->Clone()));
+		}
+
+	}
+	//add legend
+	if(newleg){
+		c->cd(databingraphs_.size()+1);
+		newleg->Draw();
 	}
 
 }
@@ -1234,7 +1265,7 @@ float mtExtractor::drawGlobalLikelihood(TCanvas *c,bool zoom){
 			tfitf_->Draw("same");
 			centralYValue=tfitf_->GetMinimum(tmpgllhd_.getXMin(),tmpgllhd_.getXMax());
 			std::cout << "minimum: " << centralYValue <<std::endl;
-			plotmin=centralYValue-1;
+			plotmin=centralYValue+1;
 			intersecty=centralYValue+1;
 
 			cetralXValue=tfitf_->GetX(centralYValue,tmpgllhd_.getXMin(),tmpgllhd_.getXMax());
@@ -1245,13 +1276,16 @@ float mtExtractor::drawGlobalLikelihood(TCanvas *c,bool zoom){
 		TLine * xlinel=addObject(new TLine(xpleft,plotmin,xpleft,intersecty));
 		TLine * xliner=addObject(new TLine(xpright,plotmin,xpright,intersecty));
 		TLine * xlinec=addObject(new TLine(cetralXValue,plotmin,cetralXValue,centralYValue));
-		TLine * yline=addObject(new TLine(tmpgllhd_.getXMin(),intersecty,xpleft,intersecty));
-		TLine * yline2=addObject(new TLine(tmpgllhd_.getXMin(),centralYValue,cetralXValue,centralYValue));
-		yline->Draw("same");
-		yline2->Draw("same");
+		TLine * yline=addObject(new TLine(tmpgllhd_.getXMin(false),intersecty,xpleft,intersecty));
+		TLine * yline2=addObject(new TLine(tmpgllhd_.getXMin(false),centralYValue,cetralXValue,centralYValue));
+		//yline->Draw("same");
+		//yline2->Draw("same");
+		xlinel->SetLineStyle(2);
+		xliner->SetLineStyle(2);
+
 		xlinel->Draw("same");
 		xliner->Draw("same");
-		xlinec->Draw("same");
+		//xlinec->Draw("same");
 
 		TString pointname=tmpSysName_;
 		if(tmpSysName_=="") pointname="nominal";

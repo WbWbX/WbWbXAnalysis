@@ -39,7 +39,7 @@ externalMarker = CMSnoSplitLeft
     
     xaxis.titleSize   = 0.06
     xaxis.labelSize   = 0.05
-    xaxis.titleOffset = 0.8
+    xaxis.titleOffset = 0.95
     xaxis.labelOffset = 0.005
     xaxis.tickLength  = 0.03
     xaxis.ndiv        = 510
@@ -51,13 +51,13 @@ externalMarker = CMSnoSplitLeft
     
     yaxis.titleSize   = 0.06
     yaxis.labelSize   = 0.05
-    yaxis.titleOffset = 0.85
+    yaxis.titleOffset = 0.95
     yaxis.labelOffset = 0.005
     yaxis.tickLength  = 0.03
     yaxis.ndiv        = 510
-    yaxis.max         = -1
-    yaxis.min         = -1 $use this one
-    yaxis.log         = false
+    yaxis.max         = 1e5
+    yaxis.min         = 0.00001 $use this one
+    yaxis.log         = true
     yaxis.name        = USEDEF
     
 [end plotStyle]
@@ -67,7 +67,7 @@ externalMarker = CMSnoSplitLeft
  
 [containerStyle - Default]
  
-    markerSize   = 1
+    markerSize   = 0.5
     markerStyle  = 20
     markerColor  = 632
  
@@ -81,7 +81,7 @@ externalMarker = CMSnoSplitLeft
     sysFillStyle = 1001
     sysFillColor = 1
 
-    rootDrawOpt  = Pe1 
+    rootDrawOpt  = Le1 
     sysRootDrawOpt  = e1
     drawStyle    = normal $ can be other options (TBI)
     

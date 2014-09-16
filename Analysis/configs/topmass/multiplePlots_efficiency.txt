@@ -42,7 +42,7 @@ externalMarker = CMSnoSplitLeftSim
     
     xaxis.titleSize   = 0.06
     xaxis.labelSize   = 0.05
-    xaxis.titleOffset = 0.8
+    xaxis.titleOffset = 0.95
     xaxis.labelOffset = 0.005
     xaxis.tickLength  = 0.03
     xaxis.ndiv        = 510
@@ -71,7 +71,7 @@ externalMarker = CMSnoSplitLeftSim
 [containerStyle - Default]
  
     markerSize   = 1
-    markerStyle  = 20
+    markerStyle  = 23
     markerColor  = 632
  
     lineSize     = 2

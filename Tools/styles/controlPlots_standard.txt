@@ -4,7 +4,7 @@
 
     divideat = 0.3
     invertplots = false
-    PSMigThreshold =  0.01   $this is not %!
+    PSMigThreshold =  0.04   $this is not %!
 
 [end - plotterControlPlot]
  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  
@@ -48,8 +48,8 @@
     sysFillStyle = 1001
     sysFillColor = 1
 
-    rootDrawOpt  = P,e1,0 
-    sysRootDrawOpt  = e1,0
+    rootDrawOpt  = P,0e1 
+    sysRootDrawOpt  = 0e1
     drawStyle    = normal $ can be other options (TBI)
     
     
@@ -72,8 +72,8 @@
     sysFillStyle = 1001
     sysFillColor = 1
 
-    rootDrawOpt  = Pe1,0  
-    sysRootDrawOpt  = e1,0 
+    rootDrawOpt  = 0Pe1  
+    sysRootDrawOpt  = 0e1 
     
     drawStyle    = normal $ can be other options (TBI)
     
@@ -205,9 +205,9 @@
     yaxis.labelOffset = 0.005
     yaxis.tickLength  = 0.03
     yaxis.ndiv        = 505
-    yaxis.max         = 1.5
+    yaxis.max         = 1.65
     yaxis.log         = false
-    yaxis.min         = 0.5
+    yaxis.min         = 0.35
     yaxis.name        = #frac{obs}{pred}
     
 [end plotStyle]
