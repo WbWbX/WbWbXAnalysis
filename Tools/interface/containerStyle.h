@@ -19,85 +19,97 @@
 class TVirtualPad;
 class TH1;
 class TGraphAsymmErrors;
+class TGAxis;
 
 namespace ztop{
 class containerStyle;
 class plot;
 //helper classes
 class axisStyle{
-    friend class containerStyle;
+	friend class containerStyle;
 
 public:
-    axisStyle();
-    ~axisStyle();
-    axisStyle(float titlesize,float labelsize,float titleoffset, float labeloffset, float ticklength,int ndivisions,float Max, float Min):
-        titleSize(titlesize),labelSize(labelsize),titleOffset(titleoffset),labelOffset(labeloffset),tickLength(ticklength),ndiv(ndivisions),max(Max),min(Min),log(false),forcezero(false),name("USEDEF"){}
+	axisStyle();
+	~axisStyle();
+	axisStyle(float titlesize,float labelsize,float titleoffset, float labeloffset, float ticklength,int ndivisions,float Max, float Min):
+		titleSize(titlesize),labelSize(labelsize),titleOffset(titleoffset),labelOffset(labeloffset),tickLength(ticklength),ndiv(ndivisions),max(Max),min(Min),
+		log(false),forcezero(false),name("USEDEF"),posx(0),posy(0),posz(0){}
 
-    bool applyAxisRange() const; //if min>max false (default)
+	bool applyAxisRange() const; //if min>max false (default)
 
-    float titleSize;
-    float labelSize;
-    float titleOffset;
-    float labelOffset;
-    float tickLength;
-    int ndiv;
+	/**
+	 * creates new object (handle memory!)
+	 */
+	TGAxis * makeTGAxis()const;
 
-    float max,min; //if min > max, don't apply
-    bool log;
+	float titleSize;
+	float labelSize;
+	float titleOffset;
+	float labelOffset;
+	float tickLength;
+	int ndiv;
 
-    bool forcezero;
+	float max,min; //if min > max, don't apply
+	bool log;
 
-    TString name;
+	bool forcezero;
+
+	TString name;
+
+	//new
+
+	TString title;
+	float posx,posy,posz;
 
 };
 class containerStyle;
 class textBox{
-    friend class containerStyle;
+	friend class containerStyle;
 public:
-    textBox();
-    textBox(float,float,const TString &,float textsize=0.05,int font=62,int align=11);
-    ~textBox();
-    void setText(const TString &);
-    void setTextSize(float);
-    void setCoords(float,float);
-    void setFont(int);
-    void setAlign(int);
-    const TString & getText() const;
-    const float & getTextSize() const;
-    const float & getX() const;
-    const float &  getY() const;
-    const int& getFont()const;
-    const int& getAlign()const;
+	textBox();
+	textBox(float,float,const TString &,float textsize=0.05,int font=62,int align=11);
+	~textBox();
+	void setText(const TString &);
+	void setTextSize(float);
+	void setCoords(float,float);
+	void setFont(int);
+	void setAlign(int);
+	const TString & getText() const;
+	const float & getTextSize() const;
+	const float & getX() const;
+	const float &  getY() const;
+	const int& getFont()const;
+	const int& getAlign()const;
 
 private:
-    float x_,y_;
-    TString text_;
-    float textsize_;
-    int align_,font_;
+	float x_,y_;
+	TString text_;
+	float textsize_;
+	int align_,font_;
 
 };
 
 class textBoxes: tObjectList{
 public:
-    textBoxes(){}
-    ~textBoxes(){}
+	textBoxes(){}
+	~textBoxes(){}
 
-    textBox & at(size_t idx){return boxes_.at(idx);}
-    const textBox & at(size_t idx)const{return boxes_.at(idx);}
+	textBox & at(size_t idx){return boxes_.at(idx);}
+	const textBox & at(size_t idx)const{return boxes_.at(idx);}
 
-    void clear(){boxes_.clear();}
-    void add(float x,float y,const TString & text,float textsize=0.05,int font=62,int align=11){
-        boxes_.push_back(textBox(x,y,text,textsize,font,align));
-    }
-    size_t size(){return boxes_.size();}
-    void readFromFileInCMSSW(const std::string & filename, const std::string & markername);
-    void readFromFile(const std::string & filename, const std::string& markername);
+	void clear(){boxes_.clear();}
+	void add(float x,float y,const TString & text,float textsize=0.05,int font=62,int align=11){
+		boxes_.push_back(textBox(x,y,text,textsize,font,align));
+	}
+	size_t size(){return boxes_.size();}
+	void readFromFileInCMSSW(const std::string & filename, const std::string & markername);
+	void readFromFile(const std::string & filename, const std::string& markername);
 
-    void drawToPad(TVirtualPad * p,bool NDC=true);
+	void drawToPad(TVirtualPad * p,bool NDC=true);
 
-    static bool debug;
+	static bool debug;
 private:
-    std::vector<textBox> boxes_;
+	std::vector<textBox> boxes_;
 
 };
 
@@ -105,37 +117,37 @@ class containerStyle{
 public:
 
 
-    containerStyle();
-    ~containerStyle();
-    containerStyle(float markersize, int markerstyle,int markercolor, float linesize, int linestyle, int linecolor,
-            int fillstyle, int fillcolor):
-                markerSize(markersize),markerStyle(markerstyle),markerColor(markercolor),lineSize(linesize),lineStyle(linestyle),lineColor(linecolor),
-                fillStyle(fillstyle),fillColor(fillcolor),sysFillStyle(1001),sysFillColor(1){}
+	containerStyle();
+	~containerStyle();
+	containerStyle(float markersize, int markerstyle,int markercolor, float linesize, int linestyle, int linecolor,
+			int fillstyle, int fillcolor):
+				markerSize(markersize),markerStyle(markerstyle),markerColor(markercolor),lineSize(linesize),lineStyle(linestyle),lineColor(linecolor),
+				fillStyle(fillstyle),fillColor(fillcolor),sysFillStyle(1001),sysFillColor(1),legendDrawStyle("lpe"){}
 
 
-    void readFromFile(const std::string & filename, const std::string& stylename, bool requireall=true);
+	void readFromFile(const std::string & filename, const std::string& stylename, bool requireall=true);
 
-    void multiplySymbols(float val);
+	void multiplySymbols(float val);
 
-    void applyContainerStyle(TH1*,bool sys)const;
-    void applyContainerStyle(TGraphAsymmErrors*,bool sys)const;
-    void applyContainerStyle(plot *)const;
+	void applyContainerStyle(TH1*,bool sys)const;
+	void applyContainerStyle(TGraphAsymmErrors*,bool sys)const;
+	void applyContainerStyle(plot *)const;
 
-    float markerSize;
-    int markerStyle;
-    int markerColor;
+	float markerSize;
+	int markerStyle;
+	int markerColor;
 
-    float lineSize;
-    int lineStyle;
-    int lineColor;
+	float lineSize;
+	int lineStyle;
+	int lineColor;
 
-    int fillStyle;
-    int fillColor;
+	int fillStyle;
+	int fillColor;
 
-    int sysFillStyle;
-    int sysFillColor;
+	int sysFillStyle;
+	int sysFillColor;
 
-    TString drawStyle,rootDrawOpt,sysRootDrawOpt;
+	TString drawStyle,rootDrawOpt,sysRootDrawOpt,legendDrawStyle;
 
 };
 

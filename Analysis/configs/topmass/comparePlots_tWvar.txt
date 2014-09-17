@@ -38,6 +38,7 @@ externalMarker = CMSSplit03Left
     drawStyle    = normal $ can be other options (TBI)
     
     
+    legendDrawStyle = lp
     
  [end containerStyle]
  $sufficient to define differences with respect to NominalUpper
@@ -60,6 +61,7 @@ externalMarker = CMSSplit03Left
     
     drawStyle    = normal $ can be other options (TBI)
     
+    legendDrawStyle = lp $ not used
     
  [end containerStyle]
  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
@@ -85,6 +87,7 @@ externalMarker = CMSSplit03Left
     sysRootDrawOpt  = e2
     drawStyle    = normal $ can be other options (TBI)
     
+    legendDrawStyle = lp
     
     
  [end containerStyle]  
@@ -110,6 +113,7 @@ externalMarker = CMSSplit03Left
     drawStyle    = normal $ can be other options (TBI)
     
     
+    legendDrawStyle = lp $ not used
     
     
  [end containerStyle]
@@ -243,7 +247,7 @@ externalMarker = CMSSplit03Left
     
     yaxis.titleSize   = 0.06
     yaxis.labelSize   = 0.05
-    yaxis.titleOffset = 0.85
+    yaxis.titleOffset = 1.18
     yaxis.labelOffset = 0.005
     yaxis.tickLength  = 0.03
     yaxis.ndiv        = 510

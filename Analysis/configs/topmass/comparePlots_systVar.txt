@@ -9,10 +9,10 @@
 
  [legendStyle]
 
-    x0  =  0.65
-	y0  =  0.30
-	x1  =  0.9
-	y1  =  0.88
+   x0  =  0.6
+	y0  =  0.1
+	x1  =  0.87
+	y1  =  0.58
 
 	
 	nColumns        = 1
@@ -24,7 +24,7 @@
 [textBoxes - boxes]
 
 externalFile = CMSSW_BASE/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt
-externalMarker = CMSSplit03LeftSim
+externalMarker = CMSSplit03RightSim
 
 [end textBoxes]
 
@@ -51,7 +51,7 @@ externalMarker = CMSSplit03LeftSim
     sysRootDrawOpt  = none
     drawStyle    = normal $ can be other options (TBI)
     
-    
+    legendDrawStyle = lp
     
  [end containerStyle]
  $sufficient to define differences with respect to NominalUpper
@@ -74,6 +74,7 @@ externalMarker = CMSSplit03LeftSim
     
     drawStyle    = normal $ can be other options (TBI)
     
+    legendDrawStyle=lp $not used
     
  [end containerStyle]
  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
@@ -99,7 +100,7 @@ externalMarker = CMSSplit03LeftSim
     sysRootDrawOpt  = none
     drawStyle    = normal $ can be other options (TBI)
     
-    
+    legendDrawStyle = lp
     
  [end containerStyle]  
  [containerStyle - CompareRatioDefault]
@@ -124,7 +125,7 @@ externalMarker = CMSSplit03LeftSim
     drawStyle    = normal $ can be other options (TBI)
     
     
-    
+    legendDrawStyle = lp $not used
     
  [end containerStyle]
  
@@ -192,7 +193,7 @@ externalMarker = CMSSplit03LeftSim
     
     yaxis.titleSize   = 0.06
     yaxis.labelSize   = 0.05
-    yaxis.titleOffset = 0.85
+    yaxis.titleOffset = 1.18
     yaxis.labelOffset = 0.005
     yaxis.tickLength  = 0.03
     yaxis.ndiv        = 510
@@ -219,7 +220,7 @@ externalMarker = CMSSplit03LeftSim
     
     xaxis.titleSize   = 0.06
     xaxis.labelSize   = 0.05
-    xaxis.titleOffset = 0.8
+    xaxis.titleOffset = 0.95
     xaxis.labelOffset = 0.005
     xaxis.tickLength  = 0.03
     xaxis.ndiv        = 510
@@ -230,13 +231,13 @@ externalMarker = CMSSplit03LeftSim
     
     yaxis.titleSize   = 0.06
     yaxis.labelSize   = 0.05
-    yaxis.titleOffset = 0.85
+    yaxis.titleOffset = 1
     yaxis.labelOffset = 0.005
     yaxis.tickLength  = 0.03
     yaxis.ndiv        = 505
-    yaxis.max         = 1.2
-    yaxis.min         = 0.8
+    yaxis.max         = 1.19
+    yaxis.min         = 0.81
     yaxis.log         = false
-    yaxis.name        = #frac{N_{syst}}{N_{nominal}}
+    yaxis.name        = #frac{N_{syst}}{N_{nom}}
     
 [end plotStyle]

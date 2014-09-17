@@ -1,10 +1,10 @@
 
 [plotterInlay]
   drawLegend = true
-  inlayX0 = 0.58
-  inlayY0 = 0.55
-  inlayX1 = 0.88
-  inlayY1 = 0.85
+  inlayX0 = 0.5
+  inlayY0 = 0.5
+  inlayX1 = 0.895
+  inlayY1 = 0.865
  
   tightXaxis = true
   
@@ -22,10 +22,10 @@ externalMarker = CMSnoSplitLeft
 
  [legendStyle]
 
-    x0  =  0.58
-	y0  =  0.2
+    x0  =  0.55
+	y0  =  0.17
 	x1  =  0.88
-	y1  =  0.55
+	y1  =  0.54
 
 	
 	nColumns        = 1
@@ -51,7 +51,7 @@ externalMarker = CMSnoSplitLeft
     
     xaxis.titleSize   = 0.06
     xaxis.labelSize   = 0.05
-    xaxis.titleOffset = 0.8
+    xaxis.titleOffset = 0.9
     xaxis.labelOffset = 0.005
     xaxis.tickLength  = 0.03
     xaxis.ndiv        = 510
@@ -63,11 +63,11 @@ externalMarker = CMSnoSplitLeft
     
     yaxis.titleSize   = 0.06
     yaxis.labelSize   = 0.05
-    yaxis.titleOffset = 0.85
+    yaxis.titleOffset = 1.18
     yaxis.labelOffset = 0.005
     yaxis.tickLength  = 0.03
     yaxis.ndiv        = 510
-    yaxis.max         = -1
+    yaxis.max         = 610
     yaxis.min         = 0 
     yaxis.log         = false
     yaxis.name        = USEDEF
@@ -76,11 +76,11 @@ externalMarker = CMSnoSplitLeft
     
 [end plotStyle]
  
-  [plotStyle - InlayPlots]
+ [plotStyle - InlayPlots]
 
-    bottomMargin  = 0.15
+    bottomMargin  = 0.2
     topMargin     = 0.05
-    leftMargin    = 0.18
+    leftMargin    = 0.2
     rightMargin   = 0.05
     
     $both not used right now
@@ -90,21 +90,21 @@ externalMarker = CMSnoSplitLeft
     
     $$ axis styles
     
-    xaxis.titleSize   = 0.09
-    xaxis.labelSize   = 0.07
+    xaxis.titleSize   = 0.095
+    xaxis.labelSize   = 0.08
     xaxis.titleOffset = 0.8
     xaxis.labelOffset = 0.005
     xaxis.tickLength  = 0.03
-    xaxis.ndiv        = 510
+    xaxis.ndiv        = 505
     xaxis.max         = -1
     xaxis.min         = 0
     xaxis.log         = false
     xaxis.name        = USEDEF
     
     
-    yaxis.titleSize   = 0.09
-    yaxis.labelSize   = 0.07
-    yaxis.titleOffset = 0.85
+    yaxis.titleSize   = 0.095
+    yaxis.labelSize   = 0.08
+    yaxis.titleOffset = 1.05
     yaxis.labelOffset = 0.005
     yaxis.tickLength  = 0.03
     yaxis.ndiv        = 510
@@ -136,6 +136,8 @@ externalMarker = CMSnoSplitLeft
     sysRootDrawOpt  = none
     drawStyle    = normal $ can be other options (TBI)
     
+    legendDrawStyle = lp
+    
  [end containerStyle]  
  
  [containerStyle - InlayDefault]
@@ -158,6 +160,8 @@ externalMarker = CMSnoSplitLeft
     sysRootDrawOpt  = e2
     drawStyle    = normal $ can be other options (TBI)
     
+    legendDrawStyle = lp
+    
  [end containerStyle] 
  
  
@@ -165,13 +169,14 @@ externalMarker = CMSnoSplitLeft
   markerSize   = 1
   markerColor  = 1
   lineColor    = 1
+    legendDrawStyle = pe
  [end containerStyle]  
  
   
  [containerStyle - Main1]
   markerColor  = 632
   lineColor    = 632 
-    fillStyle    = 3002
+    fillStyle    = 1001
     fillColor    = 632
     rootDrawOpt  = e3
     sysRootDrawOpt  = none
@@ -180,10 +185,10 @@ externalMarker = CMSnoSplitLeft
  [containerStyle - Main2]
   markerColor  = 416
   lineColor    = 416 
-    fillStyle    = 3002
+    fillStyle    = 1001
     fillColor    = 416
     rootDrawOpt  = e3
-    sysRootDrawOpt  = none
+    sysRootDrawOpt  = none 
  [end containerStyle] 
   
   
@@ -192,7 +197,7 @@ externalMarker = CMSnoSplitLeft
  [containerStyle - Main3]
   markerColor  = 600
   lineColor    = 600 
-    fillStyle    = 3002
+    fillStyle    = 1001
     fillColor    = 600
     rootDrawOpt  = e3
     sysRootDrawOpt  = none

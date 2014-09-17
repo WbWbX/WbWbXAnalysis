@@ -302,9 +302,11 @@ binDependenciesPlusFits =  /src/TtZAnalysis/Analysis/configs/topmass/multiplePlo
 totalDependencePlusFit  =  /src/TtZAnalysis/Analysis/configs/topmass/multiplePlots_totalPlusFit.txt  
 chi2PerBin             =  /src/TtZAnalysis/Analysis/configs/topmass/multiplePlots_mlbbinsChi2.txt      
 chi2total              =  /src/TtZAnalysis/Analysis/configs/topmass/multiplePlots_mlbbinsChi2.txt
-systematicsVariations  =  /src/TtZAnalysis/Analysis/configs/topmass/comparePlots_systVar.txt
+systematicsVariations       =  /src/TtZAnalysis/Analysis/configs/topmass/comparePlots_systVar.txt
+systematicsVariationsnormd  =  /src/TtZAnalysis/Analysis/configs/topmass/comparePlots_systVar.txt $$$ same
 
 spreadWithInlay        =  /src/TtZAnalysis/Analysis/configs/topmass/inlayPlot_spread.txt
+spreadWithInlaynormd   =  /src/TtZAnalysis/Analysis/configs/topmass/inlayPlot_spread_norm.txt
 results                =  /src/TtZAnalysis/Analysis/configs/topmass/multiplePlots_mlbbinsTotalSyst.txt
 
 textBoxesFile          = none $ /src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt

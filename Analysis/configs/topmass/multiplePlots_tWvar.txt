@@ -86,6 +86,8 @@
     sysRootDrawOpt  = none
     drawStyle    = normal $ can be other options (TBI)
     
+    legendDrawStyle = lp
+    
  [end containerStyle]  
  
  [containerStyle - 0]

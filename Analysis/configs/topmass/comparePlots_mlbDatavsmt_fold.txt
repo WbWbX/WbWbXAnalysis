@@ -38,6 +38,7 @@ externalMarker = CMSSplit03Left
     drawStyle    = normal $ can be other options (TBI)
     
     
+    legendDrawStyle = lp
     
  [end containerStyle]
  $sufficient to define differences with respect to NominalUpper
@@ -60,6 +61,7 @@ externalMarker = CMSSplit03Left
     
     drawStyle    = normal $ can be other options (TBI)
     
+    legendDrawStyle = lp
     
  [end containerStyle]
  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
@@ -86,6 +88,7 @@ externalMarker = CMSSplit03Left
     drawStyle    = normal $ can be other options (TBI)
     
     
+    legendDrawStyle = lp
     
  [end containerStyle]  
  [containerStyle - CompareRatioDefault]
@@ -109,8 +112,7 @@ externalMarker = CMSSplit03Left
     sysRootDrawOpt  = e2
     drawStyle    = normal $ can be other options (TBI)
     
-    
-    
+    legendDrawStyle = lp
     
  [end containerStyle]
  

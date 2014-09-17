@@ -47,7 +47,7 @@ $0.25,   0.95,   DEFTITLE,            0.05
     
     xaxis.titleSize   = 0.06
     xaxis.labelSize   = 0.05
-    xaxis.titleOffset = 0.85
+    xaxis.titleOffset = 0.75
     xaxis.labelOffset = 0.005
     xaxis.tickLength  = 0.03
     xaxis.ndiv        = 510
@@ -93,6 +93,8 @@ $0.25,   0.95,   DEFTITLE,            0.05
     sysRootDrawOpt  = e1
     drawStyle    = normal $ can be other options (TBI)
     
+    legendDrawStyle = lp
+    
  [end containerStyle]  
  
  $$Fit data
@@ -107,6 +109,9 @@ $0.25,   0.95,   DEFTITLE,            0.05
   sysFillColor    = 1 
   rootDrawOpt  = L3 
   sysRootDrawOpt  = 3
+  
+  legendDrawStyle = none
+  
  [end containerStyle]  
  
  $$$Fit MC
@@ -121,6 +126,9 @@ $0.25,   0.95,   DEFTITLE,            0.05
   sysFillColor    = 632 
   rootDrawOpt  = L3
   sysRootDrawOpt  = 3
+  
+  legendDrawStyle=none
+  
  [end containerStyle] 
   
   $$points data $$ dont draw points at all
@@ -129,9 +137,12 @@ $0.25,   0.95,   DEFTITLE,            0.05
   markerSize   = 0
   markerColor  = 1
   lineColor    = 1 
+  fillStyle    = 3003
     rootDrawOpt  = X 
     sysRootDrawOpt  = X
-  
+    
+    legendDrawStyle = plf 
+    
  [end containerStyle]  
  
  $$points MC
@@ -139,5 +150,10 @@ $0.25,   0.95,   DEFTITLE,            0.05
     markerStyle  = 23
   markerColor  = 632
   lineColor    = 632 
+  fillStyle    = 3003
+  fillColor    = 632 
+  
+  legendDrawStyle = lpef
+  
  [end containerStyle]  
  

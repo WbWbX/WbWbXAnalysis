@@ -84,6 +84,8 @@ void plotterBase::drawTextBoxes(){
 
     TLatex * tb=0;
 
+ //if NDC   getPad()->GetPadPar(Double_t& xlow, Double_t& ylow, Double_t& xup, Double_t& yup)
+
     for(size_t i=0;i<textboxes_.size();i++){
         if(textboxes_.at(i).getText() != "DEFTITLE")
             tb=addObject(new TLatex(textboxes_.at(i).getX(), textboxes_.at(i).getY(), textboxes_.at(i).getText()));

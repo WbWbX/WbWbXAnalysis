@@ -40,7 +40,7 @@ container1DUnfold::container1DUnfold(): container2D(),xaxis1Dname_(""), yaxis1Dn
 	type_=type_container1DUnfold;
 }
 container1DUnfold::container1DUnfold( std::vector<float> genbins, std::vector<float> recobins, TString name,TString xaxisname,TString yaxisname, bool mergeufof)
-:container2D( recobins /*genbins*/ , recobins , name,xaxisname+" (pred)",xaxisname+" (reco)",mergeufof), xaxis1Dname_(xaxisname),
+:container2D( recobins /*genbins*/ , recobins , name,xaxisname+" (gen)",xaxisname+" (reco)",mergeufof), xaxis1Dname_(xaxisname),
  yaxis1Dname_(yaxisname),tempgen_(0),tempreco_(0),tempgenweight_(1),tempweight_(1),recofill_(false),genfill_(false),
  isMC_(false),flushed_(true),binbybin_(false),lumi_(1),congruentbins_(false),allowmultirecofill_(false){
 	//bins are set, containers created, at least conts_[0] exists with all options (binomial, mergeufof etc)
@@ -80,7 +80,7 @@ void container1DUnfold::setBinning(const std::vector<float> & genbins,const std:
 	container2D::setBinning(recobins,recobins);
 	gencont_=conts_.at(0);
 	gencont_.clear();
-	gencont_.setXAxisName(xaxis1Dname_+"(pred)");
+	gencont_.setXAxisName(xaxis1Dname_+"(gen)");
 	std::vector<float> databins=ybins_;
 	databins.erase(databins.begin());
 	recocont_ = container1D(databins,name_+"_data",xaxis1Dname_,yaxis1Dname_,mergeufof_);
@@ -618,7 +618,7 @@ container2D container1DUnfold::getResponseMatrix()const{
 	out.divideBinomial_=divideBinomial_;
 	out.mergeufof_=mergeufof_;
 
-	out.xaxisname_=xaxis1Dname_ + " (pred)";
+	out.xaxisname_=xaxis1Dname_ + " (gen)";
 	out.yaxisname_=xaxis1Dname_ + " (reco)";
 	out.name_=name_+"_respMatrix";
 	return out;
@@ -635,7 +635,7 @@ container2D container1DUnfold::getNormResponseMatrix()const{
 	out.divideBinomial_=divideBinomial_;
 	out.mergeufof_=mergeufof_;
 
-	out.xaxisname_=xaxis1Dname_ + " (pred)";
+	out.xaxisname_=xaxis1Dname_ + " (gen)";
 	out.yaxisname_=xaxis1Dname_ + " (reco)";
 	out.name_=name_+"_normrespMatrix";
 	return out;

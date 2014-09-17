@@ -187,7 +187,8 @@ void plotterControlPlot::drawControlPlot(){
 	tmplegp_->SetFillStyle(0);
 	tmplegp_->SetBorderSize(0);
 
-	tmplegp_->AddEntry(dataplottemp->getSystGraph(),stackp_->getLegend(dataentry),"ep");
+	if(datastyleupper_.legendDrawStyle != "none")
+		tmplegp_->AddEntry(dataplottemp->getSystGraph(),stackp_->getLegend(dataentry),datastyleupper_.legendDrawStyle);
 
 	std::vector<size_t> signalidxs=stackp_->getSignalIdxs();
 
@@ -279,8 +280,8 @@ void plotterControlPlot::drawControlPlot(){
 			if(stackedhistos.at(i)){ //not data
 
 				stackedhistos.at(i)->Draw(mcstyleupper_.rootDrawOpt+"same");
-				if(legendentries.at(i)!="")
-					tmplegp_->AddEntry(stackedhistos.at(i),legendentries.at(i),"f");
+				if(legendentries.at(i)!="" && mcstyleupper_.legendDrawStyle != "none")
+					tmplegp_->AddEntry(stackedhistos.at(i),legendentries.at(i),mcstyleupper_.legendDrawStyle);
 			}
 
 		}
@@ -293,7 +294,7 @@ void plotterControlPlot::drawControlPlot(){
 			TH1D * dummy=addObject(new TH1D());
 			mcstylepsmig_.applyContainerStyle(dummy,false);
 			dummy->SetFillColor(1);
-			tmplegp_->AddEntry(dummy,"PS migrations","f");
+			tmplegp_->AddEntry(dummy,"PS migrations",mcstylepsmig_.legendDrawStyle);
 		}
 		mcerr->Draw("same"+mcstyleupper_.sysRootDrawOpt);
 
@@ -319,6 +320,7 @@ void plotterControlPlot::drawRatioPlot(){
 	ratiostyle.absorbYScaling(getSubPadYScale(2));
 	axish->Draw("AXIS");
 	ratiostyle.applyAxisStyle(axish);
+	axish->GetYaxis()->CenterTitle(true);
 	axish->Draw("AXIS");
 
 	mcstyleratio_.applyContainerStyle(mcerr);

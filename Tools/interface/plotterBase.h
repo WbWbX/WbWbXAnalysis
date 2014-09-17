@@ -14,7 +14,7 @@
 #include "graph.h"
 #include "legendStyle.h"
 #include "TStyle.h"
-//#include "TGaxis.h"
+#include "TGaxis.h"
 
 class TH1D;
 class TGraphAsymmErrors;
@@ -29,7 +29,7 @@ namespace ztop{
 class plotterBase :protected tObjectList{
 public:
     plotterBase():tObjectList(), title_(""),tbndc_(true),lastplotidx_(0),tmplegp_(0),pad_(0),drawlegend_(true){
-    	//TGaxis::SetMaxDigits();
+    	TGaxis::SetMaxDigits(4);
     }
     virtual ~plotterBase(){}
 

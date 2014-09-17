@@ -265,11 +265,12 @@ void  plotterCompare::drawLegends(){
     leg->SetBorderSize(0);
     legstyle_.applyLegendStyle(leg);
 
-    if(std::find(nolegendidx_.begin(),nolegendidx_.end(),0) == nolegendidx_.end())
-    	leg->AddEntry(nominalplot_.getStatGraph(),nominalplot_.getName(),"pel");
+    if(std::find(nolegendidx_.begin(),nolegendidx_.end(),0) == nolegendidx_.end() && nomstyleupper_.legendDrawStyle!="none")
+    	leg->AddEntry(nominalplot_.getStatGraph(),nominalplot_.getName(), nomstyleupper_.legendDrawStyle);
     for(size_t i=0;i<compareplots_.size() ; i++){
-    	if(std::find(nolegendidx_.begin(),nolegendidx_.end(),i+1) != nolegendidx_.end()) continue;
-        leg->AddEntry(compareplots_.at(i).getStatGraph(),compareplots_.at(i).getName(),"pel");
+    	if(std::find(nolegendidx_.begin(),nolegendidx_.end(),i+1) != nolegendidx_.end()
+    			|| compstylesupper_.at(i).legendDrawStyle =="none") continue;
+        leg->AddEntry(compareplots_.at(i).getStatGraph(),compareplots_.at(i).getName(),compstylesupper_.at(i).legendDrawStyle);
     }
     leg->Draw("same");
     tmplegp_=leg;
@@ -289,6 +290,8 @@ void plotterCompare::drawAllPlots(const plotStyle* ps, const containerStyle * cs
     axish->Draw("AXIS");
 
     if(isratio){
+    	axish->GetYaxis()->CenterTitle(true);
+    	axish->Draw("AXIS");
     	TLine *line=addObject(new TLine(axish->GetXaxis()->GetBinLowEdge(1), 1, axish->GetXaxis()->GetBinLowEdge(axish->GetNbinsX()),1));
     	line->Draw("same");
     }

@@ -88,6 +88,8 @@ externalMarker = CMSnoSplitLeft
     sysRootDrawOpt  = e1
     drawStyle    = normal $ can be other options (TBI)
     
+    legendDrawStyle = lp
+    
  [end containerStyle]  
  
  $$$$all syst background hatched

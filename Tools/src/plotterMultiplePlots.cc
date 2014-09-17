@@ -180,8 +180,9 @@ void plotterMultiplePlots::drawLegends(){
     leg->SetFillStyle(0);
     leg->SetBorderSize(0);
     for(size_t i=0;i<plots_.size() ; i++){
-    	if(std::find(nolegendidx_.begin(),nolegendidx_.end(),i)!=nolegendidx_.end()) continue;
-        leg->AddEntry(plots_.at(i).getStatGraph(),plots_.at(i).getName(),"pel");
+    	if(std::find(nolegendidx_.begin(),nolegendidx_.end(),i)!=nolegendidx_.end()
+    			|| cstyles_.at(i).legendDrawStyle == "none") continue;
+        leg->AddEntry(plots_.at(i).getStatGraph(),plots_.at(i).getName(),cstyles_.at(i).legendDrawStyle);
     }
     legstyle_.applyLegendStyle(leg);
     if(drawlegend_)

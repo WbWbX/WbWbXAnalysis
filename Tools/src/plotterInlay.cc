@@ -66,6 +66,7 @@ void plotterInlay::drawPlots(){
         tempstyle.yAxisStyle()->min=min;
     }
 
+
     setInlayPad(inlayx0_,inlayy0_,inlayx1_,inlayx1_);
     pstyleinlay_.applyPadStyle(inlaypad_);
     inlaypad_->Draw();
@@ -170,10 +171,8 @@ void plotterInlay::readStylePriv(const std::string& infile,bool requireall){
     }
 
     ///inlay plots
-
     pstyleinlay_.readFromFile(infile,"InlayPlots",requireall);
     defaults.readFromFile(infile,"InlayDefault",requireall);
-
     //count number of available containerStyles and check for textboxes
 
     ncstyles=0;
@@ -206,7 +205,7 @@ void plotterInlay::readStylePriv(const std::string& infile,bool requireall){
 void plotterInlay::setInlayPad(float x0, float y0, float x1, float y1){
     if(inlaypad_) delete inlaypad_;
     getPad()->cd();
-    inlaypad_ = new TPad("inlay_"+title_,"inlay_"+title_,x0,y0,x1,y1);
+    inlaypad_ = addObject(new TPad("inlay_"+title_,"inlay_"+title_,x0,y0,x1,y1));
 
 }
 

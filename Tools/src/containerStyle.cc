@@ -17,7 +17,7 @@
 namespace ztop{
 
 ///////HELPER CLASS//////
-axisStyle::axisStyle(): titleSize(0), labelSize(0), titleOffset(0), labelOffset(0), tickLength(0), ndiv(0), max(-1), min(1),log(false),forcezero(false){}
+axisStyle::axisStyle(): titleSize(0), labelSize(0), titleOffset(0), labelOffset(0), tickLength(0), ndiv(0), max(-1), min(1),log(false),forcezero(false),posx(0),posy(0),posz(0){}
 axisStyle::~axisStyle(){}
 
 bool axisStyle::applyAxisRange() const{
@@ -180,6 +180,8 @@ void containerStyle::readFromFile(const std::string & filename, const std::strin
     rootDrawOpt   = fr.getValue<TString>("rootDrawOpt",rootDrawOpt);
     sysRootDrawOpt   = fr.getValue<TString>("sysRootDrawOpt",sysRootDrawOpt);
     drawStyle     = fr.getValue<TString>("drawStyle",drawStyle);
+
+    legendDrawStyle  = fr.getValue<TString>("legendDrawStyle",legendDrawStyle);
 
 }
 /**

@@ -24,8 +24,8 @@ mtFromXsec2 *_nominal_syst.root mcfm_todk*.root --prefix mcfm_todk_ --extract --
 
 
 
-mtFromXsec2 *_nominal_syst.root mcfm_tota*.root --prefix mcfm_tota_ --extract --makepdfs --normalize -p "m_lb min step 8" -o tota&
-mtFromXsec2 *_nominal_syst.root mcfm_tota*.root --prefix mcfm_tota_ --extract --makepdfs --normalize -p "m_lb step 8" -o tota&
+mtFromXsec2 *_nominal_syst.root mcfm_tota*.root --prefix mcfm_tota_ --extract --makepdfs --normalize -p "m_lb min step 8"&
+mtFromXsec2 *_nominal_syst.root mcfm_tota*.root --prefix mcfm_tota_ --extract --makepdfs --normalize -p "m_lb step 8"&
 
 
 
@@ -42,7 +42,7 @@ wait
 #put everything in a tar
 
 rm -f mtextract_*/summary.pdf*
-rm -f tota_mtextract_*/tota_summary.pdf*
+#rm -f tota_mtextract_*/tota_summary.pdf*
 
 tar cf fullMtopSet.tar mtextract_* controlPlots tota_mtextract_*
 

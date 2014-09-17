@@ -27,6 +27,7 @@
 [containerStyle - MCUpperMigrations]
 	 
 	fillStyle    = 3002
+	$legendDrawStyle implicit
  
 [end containerStyle]
 
@@ -52,7 +53,7 @@
     sysRootDrawOpt  = 0e1
     drawStyle    = normal $ can be other options (TBI)
     
-    
+    legendDrawStyle = pe
     
  [end containerStyle]
  [containerStyle - DataRatio]
@@ -77,6 +78,7 @@
     
     drawStyle    = normal $ can be other options (TBI)
     
+    legendDrawStyle = pe $not used
     
     
  [end containerStyle]
@@ -103,7 +105,7 @@
     sysRootDrawOpt  = e2
     drawStyle    = normal $ can be other options (TBI)
     
-    
+    legendDrawStyle = f
     
  [end containerStyle]
  [containerStyle - MCRatio]
@@ -128,7 +130,7 @@
     drawStyle    = normal $ can be other options (TBI)
     
     
-    
+    legendDrawStyle = f $not used
     
  [end containerStyle]
  
@@ -163,7 +165,7 @@
     
     yaxis.titleSize   = 0.06
     yaxis.labelSize   = 0.05
-    yaxis.titleOffset = 0.9
+    yaxis.titleOffset = 1
     yaxis.labelOffset = 0.005
     yaxis.tickLength  = 0.03
     yaxis.ndiv        = 510
@@ -201,7 +203,7 @@
     
     yaxis.titleSize   = 0.06
     yaxis.labelSize   = 0.05
-    yaxis.titleOffset = 0.9
+    yaxis.titleOffset = 0.95
     yaxis.labelOffset = 0.005
     yaxis.tickLength  = 0.03
     yaxis.ndiv        = 505

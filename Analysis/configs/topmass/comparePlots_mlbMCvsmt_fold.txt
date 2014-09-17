@@ -11,12 +11,10 @@
 
  [legendStyle]
 
-     
-        x0  =  0.55
-	y0  =  0.30
-	x1  =  0.9
-	y1  =  0.83
-
+    x0  =  0.6
+	y0  =  0.1
+	x1  =  0.87
+	y1  =  0.58
 	
 	nColumns        = 1
 	columnSeparator = 0.1
@@ -26,7 +24,7 @@
 [textBoxes - boxes]
 
 externalFile = CMSSW_BASE/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt
-externalMarker = CMSSplit03LeftSim
+externalMarker = CMSSplit03RightSim
 
 [end textBoxes]
 
@@ -52,6 +50,7 @@ externalMarker = CMSSplit03LeftSim
     sysRootDrawOpt  = e1
     drawStyle    = normal $ can be other options (TBI)
     
+    legendDrawStyle = lp
     
     
  [end containerStyle]
@@ -75,6 +74,7 @@ externalMarker = CMSSplit03LeftSim
     
     drawStyle    = normal $ can be other options (TBI)
     
+    legendDrawStyle = lp
     
  [end containerStyle]
  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
@@ -101,6 +101,7 @@ externalMarker = CMSSplit03LeftSim
     drawStyle    = normal $ can be other options (TBI)
     
     
+    legendDrawStyle = l
     
  [end containerStyle]  
  [containerStyle - CompareRatioDefault]
@@ -125,6 +126,7 @@ externalMarker = CMSSplit03LeftSim
     drawStyle    = normal $ can be other options (TBI)
     
     
+    legendDrawStyle = l $not used
     
     
  [end containerStyle]
@@ -265,11 +267,11 @@ externalMarker = CMSSplit03LeftSim
     
     yaxis.titleSize   = 0.06
     yaxis.labelSize   = 0.05
-    yaxis.titleOffset = 0.95
+    yaxis.titleOffset = 1.18
     yaxis.labelOffset = 0.005
     yaxis.tickLength  = 0.03
     yaxis.ndiv        = 510
-    yaxis.max         = 650
+    yaxis.max         = 460
     yaxis.min         = 0 $use this one
     yaxis.log         = false
     yaxis.name        = USEDEF
@@ -307,8 +309,8 @@ externalMarker = CMSSplit03LeftSim
     yaxis.labelOffset = 0.005
     yaxis.tickLength  = 0.03
     yaxis.ndiv        = 505
-    yaxis.max         = 1.5
-    yaxis.min         = 0.5
+    yaxis.max         = 1.75
+    yaxis.min         = 0.25
     yaxis.log         = false
     yaxis.name        = N_{m_{t}}/N_{m_{t}^{0}} $#frac{N^{m_{t}}}{N^{m_{t}^{0}}}
     

@@ -10,7 +10,7 @@ drawLegend = false
 
 
 externalFile = CMSSW_BASE/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt
-externalMarker = CMSnoSplitLeftSim
+externalMarker = CMSnoSplitRightSim
 
 [end textBoxes]
 
@@ -58,7 +58,7 @@ externalMarker = CMSnoSplitLeftSim
     yaxis.labelOffset = 0.005
     yaxis.tickLength  = 0.03
     yaxis.ndiv        = 510
-    yaxis.max         = 1
+    yaxis.max         = 0.5
     yaxis.min         = 0 
     yaxis.log         = false
     yaxis.name        = USEDEF
@@ -88,11 +88,13 @@ externalMarker = CMSnoSplitLeftSim
     sysRootDrawOpt  = e1
     drawStyle    = normal $ can be other options (TBI)
     
+    legendDrawStyle = lp
+    
  [end containerStyle]  
  
  [containerStyle - 0]
-  markerColor  = 1
-  lineColor    = 1
+  markerColor  = 632
+  lineColor    = 632
  [end containerStyle]  
  
  [containerStyle - 1]

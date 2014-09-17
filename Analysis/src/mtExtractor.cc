@@ -461,8 +461,12 @@ void mtExtractor::readFiles(){
 
 	chi2plotsstylefile_ = fr.getValue<std::string>("chi2total");
 	sysvariationsfile_ = fr.getValue<std::string>("systematicsVariations");
+	if(usenormalized_ )
+		sysvariationsfile_ = fr.getValue<std::string>("systematicsVariationsnormd");
 	allsyststylefile_ = fr.getValue<std::string>("results");
 	spreadwithinlaystylefile_ = fr.getValue<std::string>("spreadWithInlay");
+	if(usenormalized_ )
+		spreadwithinlaystylefile_ = fr.getValue<std::string>("spreadWithInlaynormd");
 	textboxesfile_= fr.getValue<std::string>("textBoxesFile");
 
 
@@ -1615,14 +1619,15 @@ void mtExtractor::drawSpreadWithInlay(TCanvas *c){
 	mtmaxdown.removeAllSystematics();
 
 	if(isexternalgen_){
-		mtmaxup.setName("MCFM (m_{t}="+fmt.toTString(mtvals_.at(maxidx))+" GeV) + BG");
-		defmtmc.setName("MCFM (m_{t}="+fmt.toTString(mtvals_.at(defmtidx_))+" GeV) + BG");
-		mtmaxdown.setName("MCFM (m_{t}="+fmt.toTString(mtvals_.at(minidx))+" GeV) + BG");
+		mtmaxup.setName("#splitline{MCFM + BG}{m_{t}="+fmt.toTString(mtvals_.at(maxidx))+" GeV}");
+		defmtmc.setName("#splitline{MCFM + BG}{m_{t}="+fmt.toTString(mtvals_.at(defmtidx_))+" GeV}");
+		mtmaxdown.setName("#splitline{MCFM + BG}{m_{t}="+fmt.toTString(mtvals_.at(minidx))+" GeV}");
 	}
 	else{
-		mtmaxup.setName("MG+PY (m_{t}="+fmt.toTString(mtvals_.at(maxidx))+" GeV) + BG");
-		defmtmc.setName("MG+PY (m_{t}="+fmt.toTString(mtvals_.at(defmtidx_))+" GeV) + BG");
-		mtmaxdown.setName("MG+PY (m_{t}="+fmt.toTString(mtvals_.at(minidx))+" GeV) + BG");
+		mtmaxup.setName("#splitline{Madgraph+Pythia + BG}{m_{t}="+fmt.toTString(mtvals_.at(maxidx))+" GeV}");
+		//defmtmc.setName("MG+PY (m_{t}="+fmt.toTString(mtvals_.at(defmtidx_))+" GeV) + BG");
+		defmtmc.setName("#splitline{Madgraph+Pythia + BG}{m_{t}="+fmt.toTString(mtvals_.at(defmtidx_))+" GeV}");
+		mtmaxdown.setName("#splitline{Madgraph+Pythia + BG}{m_{t}="+fmt.toTString(mtvals_.at(minidx))+" GeV}");
 	}
 
 	pl->addPlot(&mtmaxup,true);
