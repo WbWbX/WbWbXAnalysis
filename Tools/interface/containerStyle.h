@@ -67,25 +67,28 @@ class textBox{
 	friend class containerStyle;
 public:
 	textBox();
-	textBox(float,float,const TString &,float textsize=0.05,int font=62,int align=11);
+	textBox(float,float,const TString &,float textsize=0.05,int font=62,int align=11,int color=1);
 	~textBox();
 	void setText(const TString &);
 	void setTextSize(float);
 	void setCoords(float,float);
 	void setFont(int);
 	void setAlign(int);
+	void setColor(int);
 	const TString & getText() const;
 	const float & getTextSize() const;
 	const float & getX() const;
 	const float &  getY() const;
 	const int& getFont()const;
 	const int& getAlign()const;
+	const int& getColor()const;
 
 private:
 	float x_,y_;
 	TString text_;
 	float textsize_;
 	int align_,font_;
+	int color_;
 
 };
 
@@ -98,8 +101,8 @@ public:
 	const textBox & at(size_t idx)const{return boxes_.at(idx);}
 
 	void clear(){boxes_.clear();}
-	void add(float x,float y,const TString & text,float textsize=0.05,int font=62,int align=11){
-		boxes_.push_back(textBox(x,y,text,textsize,font,align));
+	void add(float x,float y,const TString & text,float textsize=0.05,int font=62,int align=11,int color=1){
+		boxes_.push_back(textBox(x,y,text,textsize,font,align,color));
 	}
 	size_t size(){return boxes_.size();}
 	void readFromFileInCMSSW(const std::string & filename, const std::string & markername);

@@ -1619,14 +1619,14 @@ void mtExtractor::drawSpreadWithInlay(TCanvas *c){
 	mtmaxdown.removeAllSystematics();
 
 	if(isexternalgen_){
-		mtmaxup.setName("#splitline{MCFM + BG}{m_{t}="+fmt.toTString(mtvals_.at(maxidx))+" GeV}");
-		defmtmc.setName("#splitline{MCFM + BG}{m_{t}="+fmt.toTString(mtvals_.at(defmtidx_))+" GeV}");
-		mtmaxdown.setName("#splitline{MCFM + BG}{m_{t}="+fmt.toTString(mtvals_.at(minidx))+" GeV}");
+		mtmaxup.setName(  "#splitline{MCFM + BG                   }{m_{t}="+fmt.toTString(mtvals_.at(maxidx))+" GeV}");
+		defmtmc.setName(  "#splitline{MCFM + BG                   }{m_{t}="+fmt.toTString(mtvals_.at(defmtidx_))+" GeV}");
+		mtmaxdown.setName("#splitline{MCFM + BG                   }{m_{t}="+fmt.toTString(mtvals_.at(minidx))+" GeV}");
 	}
 	else{
-		mtmaxup.setName("#splitline{Madgraph+Pythia + BG}{m_{t}="+fmt.toTString(mtvals_.at(maxidx))+" GeV}");
+		mtmaxup.setName(  "#splitline{Madgraph+Pythia + BG}{m_{t}="+fmt.toTString(mtvals_.at(maxidx))+" GeV}");
 		//defmtmc.setName("MG+PY (m_{t}="+fmt.toTString(mtvals_.at(defmtidx_))+" GeV) + BG");
-		defmtmc.setName("#splitline{Madgraph+Pythia + BG}{m_{t}="+fmt.toTString(mtvals_.at(defmtidx_))+" GeV}");
+		defmtmc.setName(  "#splitline{Madgraph+Pythia + BG}{m_{t}="+fmt.toTString(mtvals_.at(defmtidx_))+" GeV}");
 		mtmaxdown.setName("#splitline{Madgraph+Pythia + BG}{m_{t}="+fmt.toTString(mtvals_.at(minidx))+" GeV}");
 	}
 
@@ -1645,7 +1645,7 @@ void mtExtractor::drawSpreadWithInlay(TCanvas *c){
 void mtExtractor::setAxisLikelihoodVsMt(graph & g)const{
 
 	g.setXAxisName("m_{t} [GeV]");
-	g.setYAxisName("#chi^{2}_{m_{t}}");
+	g.setYAxisName("#chi^{2}");
 
 }
 void mtExtractor::setAxisXsecVsMt(graph & g)const{

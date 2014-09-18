@@ -36,7 +36,7 @@ container2D::~container2D(){
 }
 
 container2D::container2D(const std::vector<float> &xbins,const std::vector<float> &ybins, TString name,TString xaxisname,TString yaxisname, bool mergeufof) :
-        																																																taggedObject(taggedObject::type_container2D),mergeufof_(mergeufof), xaxisname_(xaxisname), yaxisname_(yaxisname)
+        																																																		taggedObject(taggedObject::type_container2D),mergeufof_(mergeufof), xaxisname_(xaxisname), yaxisname_(yaxisname)
 {
 	setName(name);
 	//create for each ybin (plus UF OF) a container1D
@@ -616,6 +616,25 @@ container2D container2D::operator * (float val){
 container2D container2D::operator * (int val){
 	return *this * (float) val;
 }
+
+
+container2D container2D::cutRightX(const float & val)const{
+	if(conts_.size()<1)
+		return container2D();
+	size_t binno=getBinNoX(val);
+	if(binno<1){
+		throw std::out_of_range("container2D::cutRightX: would cut full content. Probably not intended!?");
+	}
+	container2D out=*this;
+	for(size_t i=0;i<conts_.size();i++){
+		out.conts_.at(i) = conts_.at(i).cutRight(val);
+		if(i==0){
+			out.xbins_=out.conts_.at(i).bins_;
+		}
+	}
+	return out;
+}
+
 int container2D::addErrorContainer(const TString & sysname,const container2D & second ,float weight){
 	if(second.xbins_ != xbins_ || second.ybins_ != ybins_){
 		std::cout << "container2D::addErrorContainer "<< name_ << " and " << second.name_<<" must have same binning!"  << std::endl;
@@ -724,7 +743,7 @@ std::vector<size_t> container2D::removeSpikes(bool inclUFOF,int limittoindex ,fl
 
 				size_t adjacentbins=(maxy+1-miny)* (maxx+1-minx);
 				if(adjacentbins!=0)adjacentbins--;
-				 //require at least 5 surrounding bins (this excludes corner bins)
+				//require at least 5 surrounding bins (this excludes corner bins)
 				if(adjacentbins<5) continue;
 
 				float bindiffval=syscontent*100000000,nextbinval=0;
@@ -743,16 +762,16 @@ std::vector<size_t> container2D::removeSpikes(bool inclUFOF,int limittoindex ,fl
 
 				areaaverage/=(float)(adjacentbins);
 				//float deltaavg=fabs((areaaverage-syscontent));
-			//	float reldeltaavg=0;
+				//	float reldeltaavg=0;
 
 
 				if(syscontent==0) //DEBUG dont change zeros right now
 					continue;
 
-			//	float scaletorealstat=syscontent/(sysstat*sysstat);
+				//	float scaletorealstat=syscontent/(sysstat*sysstat);
 
-			//	if(areaaverage!=0){
-			//		reldeltaavg=deltaavg/areaaverage;}
+				//	if(areaaverage!=0){
+				//		reldeltaavg=deltaavg/areaaverage;}
 
 				float reldiff=0;
 				if(nextbinval)
@@ -771,7 +790,7 @@ std::vector<size_t> container2D::removeSpikes(bool inclUFOF,int limittoindex ,fl
 
 
 				if(resetcontent){
-			//		float direction=1;//
+					//		float direction=1;//
 					//if(syscontent-areaaverage <0) direction=-1;
 
 					//still allow a bit of old fluctuation:

@@ -32,7 +32,7 @@ bool container1D::c_makelist=false;
 ///////function definitions
 container1D::container1D():
 
-								taggedObject(taggedObject::type_container1D)
+										taggedObject(taggedObject::type_container1D)
 
 {
 	canfilldyn_=false;
@@ -52,7 +52,7 @@ container1D::container1D():
 }
 container1D::container1D(float binwidth, TString name,TString xaxisname,TString yaxisname, bool mergeufof):
 
-				taggedObject(taggedObject::type_container1D)
+						taggedObject(taggedObject::type_container1D)
 
 { //currently not used
 	plottag=none;
@@ -73,7 +73,7 @@ container1D::container1D(float binwidth, TString name,TString xaxisname,TString 
 	hp_=0;
 }
 container1D::container1D(std::vector<float> bins, TString name,TString xaxisname,TString yaxisname, bool mergeufof):
-				taggedObject(taggedObject::type_container1D)
+						taggedObject(taggedObject::type_container1D)
 
 {
 	plottag=none;
@@ -1243,6 +1243,32 @@ container1D container1D::operator * (float scalar){
 	return out;
 }
 
+container1D container1D::cutRight(const float & val)const{
+	size_t binno=getBinNo(val);
+	if(binno<1){
+		throw std::out_of_range("container1D::cutRight: would cut full content. Probably not intended!?");
+	}
+	std::vector<float> newbins;
+	newbins.insert(newbins.end(),bins_.begin()+1,bins_.begin()+binno+1);
+	container1D out=*this;
+	out.setBins(newbins);
+
+	for(int i=-1;i<(int)getSystSize();i++){
+		container1D tmp(newbins);
+		for(size_t bin=0;bin<out.bins_.size();bin++){
+			tmp.getBin(bin) = getBin(bin,i);
+		}
+
+		if(i>=0){
+			out.addErrorContainer(getSystErrorName(i),tmp);
+		}
+		else{ //only first time
+			out.contents_ = tmp.contents_;
+		}
+	}
+	return out;
+}
+
 bool container1D::operator == (const container1D & rhs)const{
 	return showwarnings_==rhs.showwarnings_
 			&& binwidth_==rhs.binwidth_
@@ -1436,7 +1462,7 @@ void container1D::addRelSystematicsFrom(const ztop::container1D & rhs,bool ignor
 			//contents_.getLayer(newlayerit).removeStat();
 			//stat are definitely not correlated
 			bool isnominalequal=(!strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i),1e-2))
-																	|| (strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i))) ;
+																			|| (strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i))) ;
 
 			if(isnominalequal){ //this is just a copy leave it and add no variation
 				//contents_.getLayer(newlayerit).removeStat();

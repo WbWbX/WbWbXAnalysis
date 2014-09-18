@@ -25,7 +25,7 @@ void analysisPlotsJan::bookPlots(){
     	genmlbmin_bins <<i;
         genmlb_bins << i;
     }
-    genmlb_bins <<350;
+    genmlb_bins << 180 <<350;
     genmlbmin_bins << 180 << 200 << 350;
 
     vector<float> ivangen_mlbbins;

@@ -193,15 +193,15 @@ externalMarker = CMSSplit03RightSim
  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 
  [containerStyle - CompareUpper_mt169.5]
    
-    lineColor    = 591 
-    sysFillColor = 591
+    lineColor    = 590 
+    sysFillColor = 590
 
  [end containerStyle]
  [containerStyle - CompareRatio_mt169.5]
    
-    lineColor    = 591
-    sysFillColor = 591
-    fillColor = 591
+    lineColor    = 590
+    sysFillColor = 590
+    fillColor = 590
 
  [end containerStyle]
  

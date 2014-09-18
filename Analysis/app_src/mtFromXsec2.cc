@@ -34,6 +34,8 @@
 #include "TRandom3.h"
 #include "TtZAnalysis/Tools/interface/systAdder.h"
 
+#include <omp.h>
+
 //very ugly function
 
 void makePseudoExperiments(ztop::mtExtractor* ex,size_t niter,float evalpoint, TString output){
@@ -706,6 +708,7 @@ int main(int argc, char* argv[]){
 	TString xaxisnamenew= mresp.getXAxisName();
 	xaxisnamenew.ReplaceAll("reco","gen");
 	mresp.setXAxisName(xaxisnamenew);
+	mresp=mresp.cutRightX(200);
 	TH2D * mrespth2d=mresp.getTH2D("",false,true);
 	c->cd();
 	////
@@ -729,8 +732,12 @@ int main(int argc, char* argv[]){
 	mrespth2d->GetXaxis()->SetLabelSize(0.05);
 	mrespth2d->Draw("colz");
 	textBoxes tb2d;
-	tb2d.readFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt","CMSnoSplitRight2DSim");
+	tb2d.readFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt","CMSnoSplitLeft2DSim");
+	for(size_t i=0;i<tb2d.size();i++)
+			tb2d.at(i).setColor(0);
 	tb2d.drawToPad(c);
+
+
 	WriteAndPrint(c,f,output,outdirectory);
 	delete mrespth2d;
 
@@ -738,6 +745,7 @@ int main(int argc, char* argv[]){
 	////efficiency
 
 	container1D efficiency =signcuf.getEfficiency();// mresp.projectToX(false);
+	efficiency=efficiency.cutRight(200);
 	container1D ineff=mresp.projectToX(true)-efficiency;
 	efficiency.removeAllSystematics();
 	efficiency.transformToEfficiency();
@@ -765,7 +773,8 @@ int main(int argc, char* argv[]){
 	delete fforgraphs;
 	textFormatter tf;
 	if(makepdfs){
-		//for debugging
+		//lets see..
+#pragma omp parallel for
 		for(size_t i=0;i<filelist.size();i++){
 			TString syscall="epstopdf --outfile="+filelist.at(i)+".pdf "+ filelist.at(i) +".eps";
 			system(syscall.Data());

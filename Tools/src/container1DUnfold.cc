@@ -604,7 +604,7 @@ container1D container1DUnfold::getEfficiency()const{
 	xprojectionwouf =xprojectionwouf/ xprojection;
 	xprojectionwouf.setYAxisName("#epsilon");
 	xprojectionwouf.transformToEfficiency();
-	xprojectionwouf.setXAxisName(xaxis1Dname_);
+	xprojectionwouf.setXAxisName(xaxis1Dname_ +" (gen)");
 	histoContent::divideStatCorrelated=tmp;
 	return xprojectionwouf;
 }

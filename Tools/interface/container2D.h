@@ -115,7 +115,11 @@ public:
 	container2D operator * (double val){return *this*(float)val;}             //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
 	container2D operator * (int);               //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
 
-
+	/**
+	 * cuts everything on the right of the input value (bin boundary chosen accorind to getBinNo())
+	 * and returns new container.
+	 */
+	container2D cutRightX(const float & )const;
 
 	int addErrorContainer(const TString & ,const container2D &,float);  //! adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down"
 	int addErrorContainer(const TString &,const container2D & );        //! adds deviation to (this) as systematic uncertianty with name. name must be ".._up" or ".._down"

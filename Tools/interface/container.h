@@ -206,6 +206,12 @@ public:
 	container1D operator * (double val){return *this*(float)val;}           //!< simple scalar multiplication. stat and syst errors are scaled accordingly!!
 
 	/**
+	 * cuts everything on the right of the input value (bin boundary chosen accorind to getBinNo())
+	 * and returns new container.
+	 */
+	container1D cutRight(const float & )const;
+
+	/**
 	 * compares bins, bin contents and all uncertainties
 	 */
 	bool operator == (const container1D &)const;

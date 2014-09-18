@@ -10,7 +10,7 @@ drawLegend = false
 
 
 externalFile = CMSSW_BASE/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt
-externalMarker = CMSnoSplitRightSim
+externalMarker = CMSnoSplitLeftSim
 
 [end textBoxes]
 

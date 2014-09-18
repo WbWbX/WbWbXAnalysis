@@ -26,8 +26,8 @@ bool axisStyle::applyAxisRange() const{
 }
 
 
-textBox::textBox(): x_(0),y_(0),text_(""),textsize_(0),align_(11),font_(62){}
-textBox::textBox(float x,float y,const TString &text,float textsize,int font,int align):  x_(x),y_(y),text_(text),textsize_(textsize),align_(align),font_(font){}
+textBox::textBox(): x_(0),y_(0),text_(""),textsize_(0),align_(11),font_(62),color_(1){}
+textBox::textBox(float x,float y,const TString &text,float textsize,int font,int align,int color):  x_(x),y_(y),text_(text),textsize_(textsize),align_(align),font_(font),color_(1){}
 textBox::~textBox(){}
 void textBox::setText(const TString & text){text_=text;}
 void textBox::setTextSize(float textsize){textsize_=textsize;}
@@ -41,12 +41,16 @@ void textBox::setFont(int f){
 void textBox::setAlign(int a){
     align_=a;
 }
+void textBox::setColor(int a){
+    color_=a;
+}
 const TString & textBox::getText() const{return text_;}
 const float &textBox::getTextSize() const{return textsize_;}
 const float &textBox::getX() const{return x_;}
 const float &textBox::getY() const{return y_;}
 const int& textBox::getFont()const{return font_;}
 const int& textBox::getAlign()const{return align_;}
+const int& textBox::getColor()const{return color_;}
 
 //////////////////////////
 
@@ -116,6 +120,8 @@ void textBoxes::readFromFile(const std::string & filename, const std::string & m
             add(fr.getData<float>(i,0),fr.getData<float>(i,1),fr.getData<std::string>(i,2),fr.getData<float>(i,3),fr.getData<int>(i,4));
         else if(fr.nEntries(i)==(size_t)6)
             add(fr.getData<float>(i,0),fr.getData<float>(i,1),fr.getData<std::string>(i,2),fr.getData<float>(i,3),fr.getData<int>(i,4),fr.getData<int>(i,5));
+        else if(fr.nEntries(i)==(size_t)7)
+            add(fr.getData<float>(i,0),fr.getData<float>(i,1),fr.getData<std::string>(i,2),fr.getData<float>(i,3),fr.getData<int>(i,4),fr.getData<int>(i,5),fr.getData<int>(i,6));
     }
 
 }
@@ -129,6 +135,7 @@ void textBoxes::drawToPad(TVirtualPad * p,bool NDC){
         tb->SetTextSize(at(i).getTextSize());
         tb->SetTextFont(at(i).getFont());
         tb->SetTextAlign(at(i).getAlign());
+        tb->SetTextColor(at(i).getColor());
         //if(tbndc_)
         tb->SetNDC(NDC);
         tb->Draw("same");

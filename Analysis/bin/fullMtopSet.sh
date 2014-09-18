@@ -3,6 +3,9 @@
 
 mtFromXsec2 *_nominal_syst.root --makepdfs -p "total step 8" # for controlPlots
 
+#dont overthread
+export OMP_NUM_THREADS=12
+
 mtFromXsec2 *_nominal_syst.root --extract --makepdfs -p "total step 8"&
 mtFromXsec2 *_nominal_syst.root --extract --makepdfs -p "m_lb min step 8"&
 mtFromXsec2 *_nominal_syst.root --extract --makepdfs --normalize -p "m_lb min step 8"&
@@ -43,7 +46,7 @@ wait
 
 rm -f mtextract_*/summary.pdf*
 #rm -f tota_mtextract_*/tota_summary.pdf*
-
-tar cf fullMtopSet.tar mtextract_* controlPlots tota_mtextract_*
+rm -f fullMtopSet.tar
+tar cf fullMtopSet.tar mtextract_* controlPlots
 
 echo "done with fullMtopSet.sh, tar created"

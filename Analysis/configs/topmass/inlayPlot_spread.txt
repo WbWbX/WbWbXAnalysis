@@ -104,7 +104,7 @@ externalMarker = CMSnoSplitLeft
     
     yaxis.titleSize   = 0.095
     yaxis.labelSize   = 0.08
-    yaxis.titleOffset = 1.05
+    yaxis.titleOffset = 1.0
     yaxis.labelOffset = 0.005
     yaxis.tickLength  = 0.03
     yaxis.ndiv        = 510
