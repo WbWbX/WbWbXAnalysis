@@ -43,27 +43,31 @@ PFTree   = cms.EDAnalyzer('TreeWriterTtZ',
                           debugmode = cms.bool(False),
 
 #produceGenLevelBJetsPlusHadron matchGenHFHadronJets
-                          BJetIndex     = cms.InputTag("matchGenHFHadronJets", "BJetIndex"),
-                          AntiBJetIndex = cms.InputTag("matchGenHFHadronJets", "AntiBJetIndex"),
-                          BHadJetIndex = cms.InputTag("matchGenHFHadronJets", "BHadJetIndex"),
-                          AntiBHadJetIndex = cms.InputTag("matchGenHFHadronJets", "AntiBHadJetIndex"),
-                          BHadrons = cms.InputTag("matchGenHFHadronJets", "BHadrons"),
-                          AntiBHadrons = cms.InputTag("matchGenHFHadronJets", "AntiBHadrons"),
-                          BHadronFromTopB = cms.InputTag("matchGenHFHadronJets", "BHadronFromTopB"),
-                          AntiBHadronFromTopB = cms.InputTag("matchGenHFHadronJets", "AntiBHadronFromTopB"),
-                          BHadronVsJet = cms.InputTag("matchGenHFHadronJets", "BHadronVsJet"),
-                          AntiBHadronVsJet = cms.InputTag("matchGenHFHadronJets", "AntiBHadronVsJet"),
-                          genBHadPlusMothers = cms.InputTag("matchGenHFHadronJets","genBHadPlusMothers"),
-                          genBHadPlusMothersIndices = cms.InputTag("matchGenHFHadronJets","genBHadPlusMothersIndices"),
-                          genBHadIndex = cms.InputTag("matchGenHFHadronJets","genBHadIndex"),
-                          genBHadFlavour = cms.InputTag("matchGenHFHadronJets","genBHadFlavour"),
-                          genBHadJetIndex = cms.InputTag("matchGenHFHadronJets","genBHadJetIndex"),
+                          BHadronVsJet = cms.InputTag("matchGenBCHadronB", "BHadronVsJet"),
+                          AntiBHadronVsJet = cms.InputTag("matchGenBCHadronB", "AntiBHadronVsJet"),
+
+                          BJetIndex     = cms.InputTag("matchGenBCHadronB", "BJetIndex"),
+                          AntiBJetIndex = cms.InputTag("matchGenBCHadronB", "AntiBJetIndex"),
+                          BHadJetIndex = cms.InputTag("matchGenBCHadronB", "BHadJetIndex"),
+                          AntiBHadJetIndex = cms.InputTag("matchGenBCHadronB", "AntiBHadJetIndex"),
+                          BHadrons = cms.InputTag("matchGenBCHadronB", "BHadrons"),
+                          AntiBHadrons = cms.InputTag("matchGenBCHadronB", "AntiBHadrons"),
+                          BHadronFromTopB = cms.InputTag("matchGenBCHadronB", "BHadronFromTopB"),
+                          AntiBHadronFromTopB = cms.InputTag("matchGenBCHadronB", "AntiBHadronFromTopB"),
+                          genBHadPlusMothers = cms.InputTag("matchGenBCHadronB","genBHadPlusMothers"),
+                          genBHadPlusMothersIndices = cms.InputTag("matchGenBCHadronB","genBHadPlusMothersIndices"),
+                          genBHadIndex = cms.InputTag("matchGenBCHadronB","genBHadIndex"),
+                          genBHadFlavour = cms.InputTag("matchGenBCHadronB","genBHadFlavour"),
+                          genBHadJetIndex = cms.InputTag("matchGenBCHadronB","genBHadJetIndex"),
 
                           isSusy =  cms.bool(False),
                           isJPsi = cms.bool(False),
 
                           useBHadrons = cms.bool(False),
                           
-                          triggerObjects = cms.vstring("")
+                          triggerObjects = cms.vstring(""),
+
+
+                          additionalWeights = cms.vstring("")
 
                           )

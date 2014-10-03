@@ -62,5 +62,7 @@ PFTree   = cms.EDAnalyzer('TreeWriterTtH',
                           isJPsi = cms.bool(False),
 
                           debugmode = cms.bool(False),
-                          triggerObjects = cms.vstring("")
+                          triggerObjects = cms.vstring(""),
+
+                          additionalWeights = cms.vstring("")
                           )

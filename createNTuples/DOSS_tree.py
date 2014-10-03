@@ -307,26 +307,31 @@ if isMC:
 
 ########b-hadron stuff 1st part
 
-        process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi") # supplies PDG ID to real name resolution of MC particles, necessary for GenLevelBJetProducer
-        process.load("TopAnalysis.TopUtils.GenLevelBJetProducer_cff")
-        process.produceGenLevelBJetsPlusHadron.deltaR = 5.0
-        process.produceGenLevelBJetsPlusHadron.noBBbarResonances = True
-        #process.produceGenLevelBJetsPlusHadron.doImprovedHadronMatching = True
-        # process.produceGenLevelBJetsPlusHadron.doValidationPlotsForImprovedHadronMatching = False
-        process.load("TopAnalysis.TopUtils.sequences.improvedJetHadronQuarkMatching_cff")
-        process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
+        # process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi") # supplies PDG ID to real name resolution of MC particles, necessary for GenLevelBJetProducer
+        # process.load("TopAnalysis.TopUtils.GenLevelBJetProducer_cff")
+        # process.produceGenLevelBJetsPlusHadron.deltaR = 5.0
+        # process.produceGenLevelBJetsPlusHadron.noBBbarResonances = True
+        # #process.produceGenLevelBJetsPlusHadron.doImprovedHadronMatching = True
+        # # process.produceGenLevelBJetsPlusHadron.doValidationPlotsForImprovedHadronMatching = False
+        # process.load("TopAnalysis.TopUtils.sequences.improvedJetHadronQuarkMatching_cff")
+        # process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
     
 
         
-        process.load("TopAnalysis.TopUtils.GenLevelBJetProducer_cfi")
-        process.produceGenLevelBJets.deltaR = 5.0
-        process.produceGenLevelBJets.noBBbarResonances = True
+        # process.load("TopAnalysis.TopUtils.GenLevelBJetProducer_cfi")
+        # process.produceGenLevelBJets.deltaR = 5.0
+        # process.produceGenLevelBJets.noBBbarResonances = True
         
-        process.load("TopAnalysis.TopUtils.GenHFHadronMatcher_cff")
-        process.matchGenHFHadronJets.flavour = 5
-        process.matchGenHFHadronJets.noBBbarResonances = True
+        # process.load("TopAnalysis.TopUtils.GenHFHadronMatcher_cff")
+        # process.matchGenHFHadronJets.flavour = 5
+        # process.matchGenHFHadronJets.noBBbarResonances = True
         
-        process.load("TopAnalysis.TopUtils.sequences.improvedJetHadronQuarkMatching_cff")
+        # process.load("TopAnalysis.TopUtils.sequences.improvedJetHadronQuarkMatching_cff")
+
+        process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi") # Supplies PDG ID to real name resolution of MC particles, necessary for GenLevelBJetProducer
+        process.load("TopAnalysis.TopUtils.sequences.GenHFHadronMatching_cff")
+
+
 
         useBHadrons=True
 # process.produceGenLevelBJetsPlusHadron = process.matchGenHFHadronJets.clone()
@@ -334,9 +339,7 @@ if isMC:
             process.preFilterSequence = cms.Sequence(process.preCutPUInfo * 
                                                  process.topsequence *
                                                  process.postCutPUInfo *
-                                                 process.improvedJetHadronQuarkMatchingSequence *
-                                                 process.produceGenLevelBJets *
-                                                 process.matchGenHFHadronJets
+                                                 process.genBCHadronMatchingSequence
                                                  )
         else:
             process.preFilterSequence = cms.Sequence(process.preCutPUInfo * 
@@ -992,7 +995,7 @@ process.PFTree.useBHadrons       = useBHadrons
 process.PFTree.isJPsi            = jpsi
 
 if isSignal and genFilter=="Top":
-    process.PFTree.genJets           = 'ak5GenJetsPlusHadron'
+    process.PFTree.genJets           = 'ak5GenJetsPlusBCHadron'
 
 
 if not includereco:
@@ -1021,6 +1024,27 @@ if includetrigger: #lower pfMuon threshold
 
 
 
+# weights
+
+process.bJesSequence = cms.Sequence()
+
+if isSignal:
+
+    process.load("TopAnalysis.TopUtils.EventWeightBJES_cfi")
+    process.bJesweightNuUp = process.EventWeightBJES.clone()
+    process.bJesweightNuUp.nuDecayFractionTarget = 0.268
+    process.bJesweightNuDown = process.EventWeightBJES.clone()
+    process.bJesweightNuDown.nuDecayFractionTarget = 0.239
+    process.bJesweightRetune = process.EventWeightBJES.clone()
+    process.bJesweightRetune.fragTargetFile = "TopAnalysis/TopUtils/data/MC_BJES_TuneZ2star_rbLEP.root"
+
+
+    process.PFTree.additionalWeights = cms.vstring("bJesweightNuUp","bJesweightNuDown","bJesweightRetune")
+
+    process.bJesSequence = cms.Sequence(process.bJesweightNuUp *
+                                    process.bJesweightNuDown *
+                                    process.bJesweightRetune )
+
 process.PFTree.debugmode= debug
 
 
@@ -1035,7 +1059,7 @@ if "ttbarbg" in outputFile:
 process.treeSequence = cms.Sequence(process.patTriggerSequence *
                                     process.superClusters *
                                     process.treeJets *
-                                    
+                                    process.bJesSequence *
                                     process.PFTree)
 
 

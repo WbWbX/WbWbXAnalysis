@@ -31,7 +31,7 @@ public:
 ztop::NTMuon TreeWriterTtZ::makeNTMuon(const pat::Muon & muon){
 
 
-	bool compatmode=true;
+	bool compatmode=false;
 
 	ztop::NTLorentzVector<float> p4zero(0,0,0,0);
 	ztop::NTMuon tempmuon;

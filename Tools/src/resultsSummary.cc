@@ -114,6 +114,8 @@ void resultsSummary::removeEntry(const TString& name){
 }
 
 void resultsSummary::mergeVariations(const TString &nomentry,const std::vector<TString>& names, const TString & outname,bool linearly){
+	if(debug) std::cout << "resultsSummary::mergeVariations("<< nomentry << ",...," << outname <<std::endl;
+
 	std::vector<TString> sysnames;
 	std::vector< std::pair<size_t,size_t> > asso=resultsSummary::getVariations(sysnames);
 	// sysnames.at( asso.at(bla).second )
@@ -187,15 +189,19 @@ void resultsSummary::mergeVariations(const TString &nomentry,const std::vector<T
 		upmerged=sqrt(upmerged);
 		downmerged=-sqrt(downmerged);
 	}
-	cp.entries_.at(newfidx).entry = upmerged       + nominal;
-	cp.entries_.at(newfidx).name = outname+"_up"   ;
-	cp.entries_.at(newsidx).entry = downmerged     + nominal;
-	cp.entries_.at(newsidx).name = outname+"_down" ;
+	if(newfidx>0){ //the zero entry is nominal - dont overwrite in case no merging was done
+		cp.entries_.at(newfidx).entry = upmerged       + nominal;
+		cp.entries_.at(newfidx).name = outname+"_up"   ;
+		cp.entries_.at(newsidx).entry = downmerged     + nominal;
+		cp.entries_.at(newsidx).name = outname+"_down" ;
+	}
 	*this=cp;
 
 
 }
 void resultsSummary::mergeVariationsFromFile(const TString &nomentry,const std::string& filename){
+	if(debug) std::cout << "resultsSummary::mergeVariationsFromFile("<< nomentry << "," << filename <<std::endl;
+
 	systAdder adder;
 	adder.readMergeVariationsFile(filename);
 	size_t ntobemerged=adder.mergeVariationsSize();
@@ -214,6 +220,7 @@ void resultsSummary::mergeVariationsFromFile(const TString &nomentry,const std::
 
 
 void resultsSummary::mergeVariationsFromFileInCMSSW(const TString &nomentry,const std::string& filename){
+	if(debug) std::cout << "resultsSummary::mergeVariationsFromFileInCMSSW("<< nomentry << "," << filename <<std::endl;
 	systAdder adder;
 	adder.readMergeVariationsFileInCMSSW(filename);
 	size_t ntobemerged=adder.mergeVariationsSize();
@@ -229,6 +236,7 @@ void resultsSummary::mergeVariationsFromFileInCMSSW(const TString &nomentry,cons
 }
 
 resultsSummary resultsSummary::createTotalError(const TString nomentry)const{
+	if(debug) std::cout << "resultsSummary::createTotalError("<< nomentry << ")" <<std::endl;
 
 	resultsSummary out;
 
@@ -297,6 +305,11 @@ resultsSummary::summaryEntry& resultsSummary::getEntry(const TString & name){
 			return entries_.at(i);
 		}
 	}
+	std::cout << "resultsSummary::getEntry " << name << " not found" <<std::endl;
+	std::cout << "available entries: ";
+	for(size_t i=0;i<entries_.size();i++)
+		std::cout <<entries_.at(i).name << ", ";
+	std::cout << std::endl;
 	throw std::out_of_range("resultsSummary::getEntry not found");
 }
 

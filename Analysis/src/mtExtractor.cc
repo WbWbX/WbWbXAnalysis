@@ -109,11 +109,13 @@ void mtExtractor::setup(){
 			mcsignalcont_.at(i).addRelSystematicsFrom(mcsignalcont_.at(j),false);
 		}
 	}
-	//remove PDF
+	//remove stat correlated
 	for(size_t i=0;i<mcsignalcont_.size();i++){
 		if(i==defmtidx_) continue;
 		for(size_t sys=0;sys<mcsignalcont_.at(i).getSystSize();sys++){
-			if(mcsignalcont_.at(i).getSystErrorName(sys).BeginsWith("PDF"))
+			if(mcsignalcont_.at(i).getSystErrorName(sys).BeginsWith("PDF")
+					|| mcsignalcont_.at(i).getSystErrorName(sys).BeginsWith("TT_BJESNUDEC")
+					|| mcsignalcont_.at(i).getSystErrorName(sys).BeginsWith("TT_BJESRETUNE") )
 				mcsignalcont_.at(i).removeError(sys);
 		}
 	}

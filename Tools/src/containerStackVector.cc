@@ -317,7 +317,7 @@ void containerStackVector::multiplyAllMCNorms(double multiplier){
 void containerStackVector::writeAllToTFile(TString filename, bool recreate, bool onlydata,TString treename){
 	if(debug)
 		std::cout << "containerStackVector::writeAllToTFile(TString filename, bool recreate, TString treename)" << std::endl;
-#pragma omp critical
+#pragma omp critical (containerStackVector_writeAllToTFile)
 	{
 		AutoLibraryLoader::enable();
 		TH1::AddDirectory(false);
@@ -607,7 +607,7 @@ void containerStackVector::printAll(TString namestartswith,TString directory,TSt
 				if(c){
 					TString newname=stack->getName();
 					newname.ReplaceAll(" ","_");
-#pragma omp critical
+#pragma omp critical (containerStackVector_printAll)
 					{
 						c->Print(directory+newname+extension);
 						stack->cleanMem();
@@ -690,35 +690,38 @@ void containerStackVector::loadFromTree(TTree * t, const TString& name){
 }
 
 containerStackVector * containerStackVector::getFromTree(TTree * t, const TString& name){
-	AutoLibraryLoader::enable();
-	if(!t || t->IsZombie()){
-		throw std::runtime_error("containerStackVector::loadFromTree: tree not ok");
-	}
-	ztop::containerStackVector * cuftemp=0; //new containerStackVector(); //shouldn't make sense.. but seems to decrease TBasket memleaks
-	if(!t->GetBranch("containerStackVectors")){
-		throw std::runtime_error("containerStackVector::loadFromTree: branch containerStackVectors not found");
-	}
-	bool found=false;
-	size_t count=0;
-	t->SetBranchAddress("containerStackVectors", &cuftemp);
-	if(name == "*" && t->GetEntries()>1){
-		throw std::runtime_error("containerStackVector::getFromTree: No csv name specified but more than one object in file");
-	}
-	for(float n=0;n<t->GetEntries();n++){
-		t->GetEntry(n);
-		if(name == "*" || cuftemp->getName()==(name)){
-			found=true;
-			count++;
-			*this=*cuftemp;
+#pragma omp critical (containerStackVector_getFromTree)
+	{
+		AutoLibraryLoader::enable();
+		if(!t || t->IsZombie()){
+			throw std::runtime_error("containerStackVector::loadFromTree: tree not ok");
 		}
-	}
-	delete cuftemp;
-	if(!found){
-		throw std::runtime_error("containerStackVector::loadFromTree: no containerStackVector with name not found");
-	}
-	if(count>1){
-		std::cout << "containerStackVector::loadFromTree: found more than one object with name "
-				<< getName() << ", took the first one." << std::endl;
+		ztop::containerStackVector * cuftemp=0; //new containerStackVector(); //shouldn't make sense.. but seems to decrease TBasket memleaks
+		if(!t->GetBranch("containerStackVectors")){
+			throw std::runtime_error("containerStackVector::loadFromTree: branch containerStackVectors not found");
+		}
+		bool found=false;
+		size_t count=0;
+		t->SetBranchAddress("containerStackVectors", &cuftemp);
+		if(name == "*" && t->GetEntries()>1){
+			throw std::runtime_error("containerStackVector::getFromTree: No csv name specified but more than one object in file");
+		}
+		for(float n=0;n<t->GetEntries();n++){
+			t->GetEntry(n);
+			if(name == "*" || cuftemp->getName()==(name)){
+				found=true;
+				count++;
+				*this=*cuftemp;
+			}
+		}
+		delete cuftemp;
+		if(!found){
+			throw std::runtime_error("containerStackVector::loadFromTree: no containerStackVector with name not found");
+		}
+		if(count>1){
+			std::cout << "containerStackVector::loadFromTree: found more than one object with name "
+					<< getName() << ", took the first one." << std::endl;
+		}
 	}
 	return this;
 
@@ -733,11 +736,14 @@ void containerStackVector::loadFromTFile(TFile * f,const TString& csvname,TStrin
 	delete ttemp;
 }
 void containerStackVector::loadFromTFile(const TString& filename,const TString& csvname,TString treename){
-	AutoLibraryLoader::enable(); //to avoid warnings
-	TFile * ftemp=new TFile(filename,"read");
-	loadFromTFile(ftemp,csvname,treename);
-	ftemp->Close();
-	delete ftemp;
+#pragma omp critical (containerStackVector_loadFromTFile)
+	{
+		AutoLibraryLoader::enable(); //to avoid warnings
+		TFile * ftemp=new TFile(filename,"read");
+		loadFromTFile(ftemp,csvname,treename);
+		ftemp->Close();
+		delete ftemp;
+	}
 }
 
 

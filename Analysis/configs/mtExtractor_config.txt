@@ -261,17 +261,13 @@ $$no specific end markers per plot to keep overview
  
 [plot - mll Range step 8]
 
-$       [legendStyle]
-
-        x0  =  0.3
-	y0  =  0.6
-	x1  =  0.7
-	y1  =  0.9
-
-	nColumns=2
-	columnSeparator = 0.05
-
-   $    [end legendStyle]
+  
+   
+   [plotStyle - Upper]
+		 yaxis.min        = 0
+		 yaxis.max      = 350
+    [end plotStyle]
+ 
 
 [plot - m_lb step 8]
 

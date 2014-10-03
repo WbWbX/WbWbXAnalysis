@@ -69,7 +69,7 @@ public:
 		binspt_ << 20 << 25 << 30 << 35 << 40 << 50 << 60 << 100 << 200;
 		binseta2dx_ << 0 << 0.9 << 1.2 << 2.1 << 2.4; //mu standard
 		binseta2dy_=binseta2dx_;
-		whichelectrons_="NTPFElectrons";
+		whichelectrons_="NTElectrons";
 
 		checktriggerpaths_=false;
 		coutalltriggerpaths_=false;
@@ -284,6 +284,27 @@ public:
 		effTriple t_allpt   (binsallpt               , "all_lepton_pt"  , "p_{T,l} [GeV]"            , "evts"   );
 		effTriple t_eta     (binseta_                , "lepton_eta"     , "#eta_{l}"           , "evts"   );
 		effTriple t_eta2d   (binseta2dx_, binseta2dy_, "lepton_eta2d"   , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
+
+		///leading lep pt
+
+		effTriple t_eta2dpt2030_2030   (binseta2dx_, binseta2dy_, "lepton_eta2d_pt2030_2030"   , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
+		effTriple t_eta2dpt2030_3040   (binseta2dx_, binseta2dy_, "lepton_eta2d_pt2030_3040"   , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
+		effTriple t_eta2dpt2030_4060   (binseta2dx_, binseta2dy_, "lepton_eta2d_pt2030_4060"   , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
+		effTriple t_eta2dpt2030_60     (binseta2dx_, binseta2dy_, "lepton_eta2d_pt2030_60"     , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
+		effTriple t_eta2dpt3040_2030   (binseta2dx_, binseta2dy_, "lepton_eta2d_pt3040_2030"   , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
+		effTriple t_eta2dpt3040_3040   (binseta2dx_, binseta2dy_, "lepton_eta2d_pt3040_3040"   , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
+		effTriple t_eta2dpt3040_4060   (binseta2dx_, binseta2dy_, "lepton_eta2d_pt3040_4060"   , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
+		effTriple t_eta2dpt3040_60     (binseta2dx_, binseta2dy_, "lepton_eta2d_pt3040_60"     , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
+		effTriple t_eta2dpt4060_2030   (binseta2dx_, binseta2dy_, "lepton_eta2d_pt4060_2030"   , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
+		effTriple t_eta2dpt4060_3040   (binseta2dx_, binseta2dy_, "lepton_eta2d_pt4060_3040"   , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
+		effTriple t_eta2dpt4060_4060   (binseta2dx_, binseta2dy_, "lepton_eta2d_pt4060_4060"   , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
+		effTriple t_eta2dpt4060_60     (binseta2dx_, binseta2dy_, "lepton_eta2d_pt4060_60"     , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
+		effTriple t_eta2dpt60_2030     (binseta2dx_, binseta2dy_, "lepton_eta2d_pt60_2030"     , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
+		effTriple t_eta2dpt60_3040     (binseta2dx_, binseta2dy_, "lepton_eta2d_pt60_3040"     , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
+		effTriple t_eta2dpt60_4060     (binseta2dx_, binseta2dy_, "lepton_eta2d_pt60_4060"     , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
+		effTriple t_eta2dpt60_60       (binseta2dx_, binseta2dy_, "lepton_eta2d_pt60_60"       , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
+
+
 		effTriple t_dphi    (binsdphi                , "leptonmet_dphi" , "#Delta#phi_{l,MET}" , "evts"   );
 		effTriple t_vmulti  (binsvmulti              , "vertex_multi"   , "n_{vtx}"            , "evts"   );
 		effTriple t_drll    (binsdrll                , "leptons_dR"     , "#Delta R_{l,l}"     , "evts"   );
@@ -403,7 +424,7 @@ public:
 			}
 			else{
 				cout << "Branch " << "NTTriggerObjects_"+(TString)trigsObj_.at(i) 
-				    				 << " not found\n    will be ignored" << endl;
+				    														 << " not found\n    will be ignored" << endl;
 				invalidbranches << i;
 			}
 		}
@@ -735,7 +756,7 @@ public:
 				dzbs2=selectedMuons_[0]->dZBs();
 			}
 
-			if(b_dilepton){
+			if(b_dilepton){// && b_twoJets){
 				sel_woTrig[0].second      +=puweight; //global
 				t_global.fillDen(0,puweight);
 
@@ -744,6 +765,49 @@ public:
 
 				//	t_allpt.fillDen();
 				//	t_allpt.fillDen();
+
+
+				if(pt1 <30){
+					if(pt2<30)
+						t_eta2dpt2030_2030.fillDen(fabs(eta1),fabs(eta2),puweight);
+					else if(pt2<40)
+						t_eta2dpt2030_3040.fillDen(fabs(eta1),fabs(eta2),puweight);
+					else if(pt2<60)
+						t_eta2dpt2030_4060.fillDen(fabs(eta1),fabs(eta2),puweight);
+					else
+						t_eta2dpt2030_60.fillDen(fabs(eta1),fabs(eta2),puweight);
+				}
+				else if(pt1<40){
+					if(pt2<30)
+						t_eta2dpt3040_2030.fillDen(fabs(eta1),fabs(eta2),puweight);
+					else if(pt2<40)
+						t_eta2dpt3040_3040.fillDen(fabs(eta1),fabs(eta2),puweight);
+					else if(pt2<60)
+						t_eta2dpt3040_4060.fillDen(fabs(eta1),fabs(eta2),puweight);
+					else
+						t_eta2dpt3040_60.fillDen(fabs(eta1),fabs(eta2),puweight);
+				}
+				else if(pt1<60){
+					if(pt2<30)
+						t_eta2dpt4060_2030.fillDen(fabs(eta1),fabs(eta2),puweight);
+					else if(pt2<40)
+						t_eta2dpt4060_3040.fillDen(fabs(eta1),fabs(eta2),puweight);
+					else if(pt2<60)
+						t_eta2dpt4060_4060.fillDen(fabs(eta1),fabs(eta2),puweight);
+					else
+						t_eta2dpt4060_60.fillDen(fabs(eta1),fabs(eta2),puweight);
+				}
+				else{
+					if(pt2<30)
+						t_eta2dpt60_2030.fillDen(fabs(eta1),fabs(eta2),puweight);
+					else if(pt2<40)
+						t_eta2dpt60_3040.fillDen(fabs(eta1),fabs(eta2),puweight);
+					else if(pt2<60)
+						t_eta2dpt60_4060.fillDen(fabs(eta1),fabs(eta2),puweight);
+					else
+						t_eta2dpt60_60.fillDen(fabs(eta1),fabs(eta2),puweight);
+				}
+
 
 				t_eta .fillDen(eta1,puweight);
 				t_eta .fillDen(eta2,puweight);
@@ -790,7 +854,7 @@ public:
 			if(b_dilepton && b_ZVeto && b_oneJet && b_twoJets && b_met) {sel_woTrig[4].second      +=puweight; t_global.fillDen(4,puweight);}
 
 			if(firedDilepTrigger){
-				if(b_dilepton){
+				if(b_dilepton){// && b_twoJets){
 					sel_Trig[0].second  +=puweight;
 					t_global.fillNum(0,puweight);
 
@@ -799,6 +863,48 @@ public:
 
 					//	t_allpt.fillNum();
 					//	t_allpt.fillNum();
+
+					if(pt1 <30){
+						if(pt2<30)
+							t_eta2dpt2030_2030.fillNum(fabs(eta1),fabs(eta2),puweight);
+						else if(pt2<40)
+							t_eta2dpt2030_3040.fillNum(fabs(eta1),fabs(eta2),puweight);
+						else if(pt2<60)
+							t_eta2dpt2030_4060.fillNum(fabs(eta1),fabs(eta2),puweight);
+						else
+							t_eta2dpt2030_60.fillNum(fabs(eta1),fabs(eta2),puweight);
+					}
+					else if(pt1<40){
+						if(pt2<30)
+							t_eta2dpt3040_2030.fillNum(fabs(eta1),fabs(eta2),puweight);
+						else if(pt2<40)
+							t_eta2dpt3040_3040.fillNum(fabs(eta1),fabs(eta2),puweight);
+						else if(pt2<60)
+							t_eta2dpt3040_4060.fillNum(fabs(eta1),fabs(eta2),puweight);
+						else
+							t_eta2dpt3040_60.fillNum(fabs(eta1),fabs(eta2),puweight);
+					}
+					else if(pt1<60){
+						if(pt2<30)
+							t_eta2dpt4060_2030.fillNum(fabs(eta1),fabs(eta2),puweight);
+						else if(pt2<40)
+							t_eta2dpt4060_3040.fillNum(fabs(eta1),fabs(eta2),puweight);
+						else if(pt2<60)
+							t_eta2dpt4060_4060.fillNum(fabs(eta1),fabs(eta2),puweight);
+						else
+							t_eta2dpt4060_60.fillNum(fabs(eta1),fabs(eta2),puweight);
+					}
+					else{
+						if(pt2<30)
+							t_eta2dpt60_2030.fillNum(fabs(eta1),fabs(eta2),puweight);
+						else if(pt2<40)
+							t_eta2dpt60_3040.fillNum(fabs(eta1),fabs(eta2),puweight);
+						else if(pt2<60)
+							t_eta2dpt60_4060.fillNum(fabs(eta1),fabs(eta2),puweight);
+						else
+							t_eta2dpt60_60.fillNum(fabs(eta1),fabs(eta2),puweight);
+					}
+
 
 					t_eta .fillNum(eta1,puweight);
 					t_eta .fillNum(eta2,puweight);

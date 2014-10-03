@@ -1,10 +1,10 @@
 <lcgdict>
 
-    <class name="ztop::NTLorentzVector<float>"/> 
-    <class name="std::vector<ztop::NTLorentzVector<float> >"/> 
-    <class name="std::vector<float>"/> 
+  <class name="ztop::NTLorentzVector<float>"/> 
+  <class name="std::vector<ztop::NTLorentzVector<float> >"/> 
+  <class name="std::vector<float>"/> 
     
-<class name="std::vector<std::string>"/>
+  <class name="std::vector<std::string>"/>
   <class name="std::vector<std::vector<std::string> >"/>
   <class name="ztop::NTLepton"/>
   <class name="std::vector<ztop::NTLepton>"/>
@@ -50,7 +50,8 @@
   <class name="std::map<int,float>"/>
   <class name="std::vector<std::pair<std::string,float> >"/>
 
-
+  <class name="ztop::NTWeight"/>
+  <class name="std::vector<ztop::NTWeight>"/>
  
 
 

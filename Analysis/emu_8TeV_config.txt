@@ -69,8 +69,8 @@ TrackingSFHisto = tracking_eff
 
 
 
-ElecSFFile     = /src/TtZAnalysis/Data/elec_tight_SF_new.root
-ElecSFHisto    = GlobalSF
+ElecSFFile     = /src/TtZAnalysis/Data/elec_tight_SF.root
+ElecSFHisto    = GlobalSF_err_err_err
 
 TriggerSFFile  = /src/TopAnalysis/Configuration/analysis/common/data/triggerSummary_emu_tightleps.root
 

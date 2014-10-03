@@ -130,6 +130,8 @@ public:
 
     void setFakeDataStartNEntries(float startdiv){fakedata_startentries_=startdiv;}
 
+    void addWeightBranch(const TString & name){additionalweights_.push_back(name);}
+
     ///analysis helper functions
 
     bool checkTrigger(std::vector<bool> * ,ztop::NTEvent * , bool , size_t);
@@ -238,7 +240,7 @@ private:
     std::string discrInput_;
     bool usediscr_;
 
-
+    std::vector<TString> additionalweights_;
 
     /////path to initial configuration file (in case adjustments are being made afterwards)
     TString pathtoconffile_;

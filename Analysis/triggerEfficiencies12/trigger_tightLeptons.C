@@ -41,7 +41,7 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
 
 	for(size_t i=0;i<inputElectrons->size();i++){
 		ztop::NTElectron * elec = &inputElectrons->at(i);
-		if(elec->pt() < 20)  continue;
+		/*	if(elec->pt() < 20)  continue;
 		float abseta=fabs(elec->eta());
 		float suclueta = fabs(elec->ECalP4().eta());
 		if(abseta > 2.4) continue;
@@ -54,7 +54,31 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
 				tempelecs << elec;
 
 			}
+		} */
+		//
+		if(elec->pt() < 20)  continue;
+		float abseta=fabs(elec->eta());
+
+		float suclueta = fabs(elec->ECalP4().eta());
+		if(abseta > 2.4) continue;
+		if(suclueta > 1.4442 && suclueta < 1.5660) continue; //transistion region
+		//kinelectrons  << elec;
+
+		if(fabs(elec->d0V()) < 0.02
+				&& elec->isNotConv()
+				&& elec->mvaId() > 0.9
+				&& elec->mHits() <= 0
+				&& elec->isPf()){
+
+		//	idelectrons <<  elec;
+			if(fabs(elec->rhoIso())<0.1){
+				//isoelectrons <<  elec;
+				tempelecs << elec;
+			}
+
 		}
+
+
 	}
 
 	double mass=0;

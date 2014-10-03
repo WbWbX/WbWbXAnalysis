@@ -48,6 +48,8 @@
 
 #include "../interface/tBranchHandler.h"
 
+#include "TtZAnalysis/DataFormats/interface/NTSystWeight.h"
+
 #include <sys/types.h>
 
 /*
@@ -193,7 +195,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 		if(inputfile.Contains("ttbar.root") || inputfile.Contains("ttbarviatau.root")
 				|| inputfile.Contains("ttbar_") ||
 				inputfile.Contains("ttbarviatau_") ){
-			normmultiplier=0.1049/0.1111202;
+			if(  ! (syst_.BeginsWith("TT_GEN") && syst_.EndsWith("_up"))  ) //other generator
+				normmultiplier=0.1049/0.1111202;
 		}
 	}
 	if(inputfile.Contains("_mgdecays_") || inputfile.Contains("_tbarWtoLL")|| inputfile.Contains("_tWtoLL")){
@@ -476,6 +479,16 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 	tBranchHandler<vector<NTGenJet> >      b_GenJets(t,"NTGenJets");
 	tBranchHandler<vector<NTGenParticle> > b_GenNeutrinos(t,"NTGenNeutrinos");
 
+	//additional weights
+	std::vector<tBranchHandler<NTWeight>*> weightbranches;
+	tBranchHandler<NTWeight>::allow_missing =true;
+	for(size_t i=0;i<additionalweights_.size();i++){
+		std::cout << "adding weight " << additionalweights_.at(i) << std::endl;
+		tBranchHandler<NTWeight> * weight = new tBranchHandler<NTWeight>(t,additionalweights_.at(i));
+		weightbranches.push_back(weight);
+
+	}
+
 	//some helpers
 	double sel_step[]={0,0,0,0,0,0,0,0,0};
 	float count_samesign=0;
@@ -592,6 +605,11 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 		getPdfReweighter()->setNTEvent(b_Event.content());
 		getPdfReweighter()->reWeight(puweight);
 		if(apllweightsone) puweight=1;
+
+		for(size_t i=0;i<weightbranches.size();i++){
+			weightbranches.at(i)->getEntry(entry);
+			puweight*=weightbranches.at(i)->content()->getWeight();
+		}
 
 		/////////////////////////////////////////////////////////////
 		/////////////////////////////////////////////////////////////
@@ -1623,7 +1641,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 						break;
 					}
 				}
-			//	if(csv) delete csv;
+				//	if(csv) delete csv;
 			}
 			catch(...){
 				outputok=false;

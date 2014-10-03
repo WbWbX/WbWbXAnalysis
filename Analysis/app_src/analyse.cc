@@ -317,10 +317,11 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 
 
 	else if(Syst=="JEC_residuals_up"){
-		ana.setFilePostfixReplace("_22Jan.root","_22Jan_ptres.root");
+		//use default
+		//	ana.setFilePostfixReplace("_22Jan.root","_22Jan_ptres.root");
 	}
 	else if(Syst=="JEC_residuals_down"){
-		//use default
+		ana.setFilePostfixReplace("_22Jan.root","_22Jan_noptres.root");
 	}
 
 	else if(Syst=="JER_up"){
@@ -430,9 +431,39 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	else if(Syst=="Z_SCALE_down"){
 		ana.setFilePostfixReplace("60120.root","60120_Zscaledown.root");
 	}
-
-
-
+	else if(Syst=="TT_GENPOWPY_down"){
+		//nothing
+	}
+	else if(Syst=="TT_GENPOWPY_up"){
+		ana.setFilePostfixReplace("ttbar.root","ttbar_powpy.root");
+		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_powpy.root");
+	}
+	else if(Syst=="TT_GENPOWHERW_down"){
+		//nothing
+	}
+	else if(Syst=="TT_GENPOWHERW_up"){
+		ana.setFilePostfixReplace("ttbar.root","ttbar_powherw.root");
+		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_powherw.root");
+	}
+	else if(Syst=="TT_GENMCATNLO_down"){
+		//nothing
+	}
+	else if(Syst=="TT_GENMCATNLO_up"){
+		ana.setFilePostfixReplace("ttbar.root","ttbar_mcatnlo.root");
+		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mcatnlo.root");
+	}
+	else if(Syst=="TT_BJESNUDEC_down"){
+		ana.addWeightBranch("NTWeight_bJesweightNuDown");
+	}
+	else if(Syst=="TT_BJESNUDEC_up"){
+		ana.addWeightBranch("NTWeight_bJesweightNuUp");
+	}
+	else if(Syst=="TT_BJESRETUNE_up"){
+		ana.addWeightBranch("NTWeight_bJesweightRetune");
+	}
+	else if(Syst=="TT_BJESRETUNE_down"){
+		//default
+	}
 	else{
 		didnothing=true;
 	}

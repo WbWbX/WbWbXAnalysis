@@ -31,5 +31,7 @@ PFTree   = cms.EDAnalyzer('SusyTreeWriter',
                           includePDFWeights = cms.bool(False),
                           pdfWeights = cms.InputTag(''),
 
-                          includeGen = cms.bool(False)
+                          includeGen = cms.bool(False),
+
+                          additionalWeights = cms.vstring()
                           )

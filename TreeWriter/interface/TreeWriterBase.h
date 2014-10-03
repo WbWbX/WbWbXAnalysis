@@ -66,6 +66,7 @@
 #include "../../DataFormats/interface/NTTriggerObject.h"
 #include "../../DataFormats/interface/mathdefs.h"
 #include "../../DataFormats/interface/NTVertex.h"
+#include "../../DataFormats/interface/NTSystWeight.h"
 
 
 #include "DataFormats/Candidate/interface/CompositeCandidate.h"
@@ -168,6 +169,8 @@ public:
   std::vector<std::vector<ztop::NTTriggerObject> > trigObjVec;
   //HLTConfigProvider hltConfig_;
   
+  std::vector<std::string> weightnames_;
+  std::vector<ztop::NTWeight> weights_;
 
   bool pfElecCands_;
   bool pfMuonCands_;
@@ -195,7 +198,7 @@ public:
 
   std::vector<ztop::NTVertex> goodvtx,jetvtx,dimuonvtx;
 
-  std::vector<ztop::NTGenParticle> nttops,ntws,ntzs,ntbs,ntbhadrons,ntnus,ntleps3,ntleps1,ntallnus,ntpart;
+  std::vector<ztop::NTGenParticle> nttops,ntws,ntzs,ntbs,ntradbs,ntbhadrons,ntnus,ntleps3,ntleps1,ntallnus,ntpart;
   std::vector<ztop::NTGenJet> ntgenjets;
   int channel_; // 11 for ee 13 for mumu 1113 for emu 151113 etc for via tau
 

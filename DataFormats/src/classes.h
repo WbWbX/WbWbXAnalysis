@@ -25,6 +25,8 @@
 #include "../interface/mathdefs.h"
 #include "../interface/NTLorentzVector.h"
 
+#include "../interface/NTSystWeight.h"
+
 //backward comp
 
 namespace top{using namespace ztop;}
@@ -87,6 +89,8 @@ namespace
     std::vector<ztop::NTJERAdjuster> ksdskV;
     std::vector<TObject*> kjnfjkefrerfe;
     
+    ztop::NTWeight hdiufhiuhfierf;
+    std::vector<ztop::NTWeight> hdiufhiuhfierfv;
 
   };
 

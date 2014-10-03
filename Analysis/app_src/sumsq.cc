@@ -11,15 +11,19 @@
 #include <iostream>
 
 int main(int argc, char* argv[]){
-    using namespace ztop;
-    optParser parser(argc,argv);
-    std::vector<float> nums=parser.getRest<float>();
+	using namespace ztop;
+	optParser parser(argc,argv);
+	parser.bepicky=false;
+	std::vector<float> nums=parser.getRest<float>();
 
-    float sum2=0;
-    for(size_t i=0;i<nums.size();i++)
-        sum2+=nums.at(i)*nums.at(i);
+	float sum2=0;
+	for(size_t i=0;i<nums.size();i++)
+		if(nums.at(i)>0)
+			sum2+=nums.at(i)*nums.at(i);
+		else
+			sum2-=nums.at(i)*nums.at(i);
 
-    std::cout <<  sqrt(sum2) <<std::endl;
+	std::cout <<  sqrt(sum2) <<std::endl;
 
-    return 0;
+	return 0;
 }
