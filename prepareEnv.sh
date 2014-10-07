@@ -3,7 +3,7 @@
 mkdir -p ${CMSSW_BASE}/external/${SCRAM_ARCH}/lib
 cd ${CMSSW_BASE}/src/TtZAnalysis
 
-if [[ -a ${CMSSW_BASE}/external/${SCRAM_ARCH}/lib/libunfold.so && -a ../TopAnalysis/ZTopUtils/BuildFile.xml &&  -a ../FWCore/FWLite/BuildFile.xml ]]
+if [[ -a ${CMSSW_BASE}/external/${SCRAM_ARCH}/lib/libunfold.so && -a ../TopAnalysis/ZTopUtils/BuildFile.xml &&  -a ../FWCore/FWLite/BuildFile.xml && -a ${CMSSW_BASE}/src/TtZAnalysis/Tools/TUnfold/libunfold.so  ]]
 then
     echo "CMSSW release already prepared for TtZAnalysis Framework"
 else
@@ -17,7 +17,9 @@ else
 	cd ${CMSSW_BASE}/src/TtZAnalysis/Tools/TUnfold
 	make lib
 	cd -
+	echo "***********************"
 	echo "TUnfold library created"
+	echo "***********************"
     fi
     if  [[ ! -a ${CMSSW_BASE}/external/${SCRAM_ARCH}/lib/libunfold.so ]]
     then
