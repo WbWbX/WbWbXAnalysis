@@ -24,13 +24,20 @@ else
     if  [[ ! -a ${CMSSW_BASE}/external/${SCRAM_ARCH}/lib/libunfold.so ]]
     then
 	ln -s ${CMSSW_BASE}/src/TtZAnalysis/Tools/TUnfold/libunfold.so ${CMSSW_BASE}/external/${SCRAM_ARCH}/lib/libunfold.so
+
+	echo "*******************"
 	echo "library symlink set"
+	echo "*******************"
     fi
     if [[ !  -a ../FWCore/FWLite/BuildFile.xml  ]]
     then
 	mkdir -p ../FWCore
 	ln -s $CMSSW_RELEASE_BASE/src/FWCore/FWLite ../FWCore/FWLite
-	echo "set up link to  FWCore/FWLite"
+
+	echo "************************"
+	echo "linked to  FWCore/FWLite"
+	echo "************************"
     fi
+     echo "CMSSW release prepared for TtZAnalysis Framework"
 
 fi
