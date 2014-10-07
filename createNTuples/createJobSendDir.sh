@@ -12,6 +12,7 @@ then
     echo has to be run on from a source CMSSW environment
 exit
 fi
+dir=$(date +"%Y%m%d_%H%M")_$1
 
 echo "************************************************"
 echo "* This script will setup a copy of your CMSSW- *"
@@ -19,8 +20,9 @@ echo "* installation that can be used to submit      *"
 echo "* ntuple production jobs without interfering   *"
 echo "* with your current setup. This might take a   *"
 echo "* while...                                     *"
-echo "* to continue type \"yes\"                       *"
-echo "************************************************\n"
+echo "************************************************"
+echo " Its name will be ${dir}" 
+echo " to continue type \"yes\"  "
 
 read input
 if [[ $input != "yes" ]] ;
@@ -33,7 +35,7 @@ mkdir -p /nfs/dust/cms/user/$USER/JobSend
 
 cd /nfs/dust/cms/user/$USER/JobSend
 
-dir=$(date +"%Y%m%d_%H%M")
+
 mkdir $dir
 cd $dir
 
