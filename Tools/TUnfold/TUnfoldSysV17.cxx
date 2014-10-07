@@ -1,9 +1,11 @@
 // Author: Stefan Schmitt
 // DESY, 23/01/09
 
-//  Version 17.1, bug fix with background uncertainty
+//  Version 17.3, in parallel to changes in TUnfoldBinning
 //
 //  History:
+//    Version 17.2, add methods to find back systematic and background sources
+//    Version 17.1, bug fix with background uncertainty
 //    Version 17.0, possibility to specify an error matrix with SetInput
 //    Version 16.1, parallel to changes in TUnfold
 //    Version 16.0, parallel to changes in TUnfold
@@ -134,6 +136,7 @@
 #include <TMap.h>
 #include <TMath.h>
 #include <TObjString.h>
+#include <TSortedList.h>
 #include <RVersion.h>
 #include <cmath>
 
@@ -1126,7 +1129,9 @@ TMatrixDSparse *TUnfoldSysV17::GetSummedErrorMatrixYY(void)
    TMatrixDSparse *emat_sum=new TMatrixDSparse(*fVyy);
 
    // uncorrelated systematic error
-   AddMSparse(emat_sum,1.0,fEmatUncorrAx);
+   if(fEmatUncorrAx) {
+      AddMSparse(emat_sum,1.0,fEmatUncorrAx);
+   }
    TMapIter sysErrPtr(fDeltaCorrAx);
    const TObject *key;
 
@@ -1164,7 +1169,9 @@ TMatrixDSparse *TUnfoldSysV17::GetSummedErrorMatrixXX(void)
    TMatrixDSparse *emat_sum=new TMatrixDSparse(*GetVxx());
 
    // uncorrelated systematic error
-   AddMSparse(emat_sum,1.0,fEmatUncorrX);
+   if(fEmatUncorrX) {
+      AddMSparse(emat_sum,1.0,fEmatUncorrX);
+   }
    TMapIter sysErrPtr(fDeltaCorrX);
    const TObject *key;
 
@@ -1302,4 +1309,24 @@ void TUnfoldSysV17::VectorMapToHist
       hist_delta->SetBinError(i,0.0);
    }
    delete[] c;
+}
+
+TSortedList *TUnfoldSysV17::GetSysSources(void) const {
+   // get list of names of systematic sources
+   TSortedList *r=new TSortedList(); 
+   TMapIter i(fSysIn);
+   for(const TObject *key=i.Next();key;key=i.Next()) {
+      r->Add(((TObjString *)key)->Clone());
+   }
+   return r;
+}
+
+TSortedList *TUnfoldSysV17::GetBgrSources(void) const {
+   // get list of name of background sources
+   TSortedList *r=new TSortedList(); 
+   TMapIter i(fBgrIn);
+   for(const TObject *key=i.Next();key;key=i.Next()) {
+      r->Add(((TObjString *)key)->Clone());
+   }
+   return r;
 }

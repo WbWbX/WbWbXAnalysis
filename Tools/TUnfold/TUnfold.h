@@ -1,9 +1,11 @@
 // Author: Stefan Schmitt
 // DESY, 13/10/08
 
-//  Version 17.1, bug fixes in GetFoldedOutput, GetOutput
+//  Version 17.3, in parallel to changes in TUnfoldBinning
 //
 //  History:
+//    Version 17.2, in parallel to changes in TUnfoldBinning
+//    Version 17.1, bug fixes in GetFoldedOutput, GetOutput
 //    Version 17.0, error matrix with SetInput, store fL not fLSquared
 //    Version 16.2, in parallel to bug-fix in TUnfoldSys
 //    Version 16.1, in parallel to bug-fix in TUnfold.C
@@ -92,7 +94,7 @@
 #include <TObjArray.h>
 #include <TString.h>
 
-#define TUnfold_VERSION "V17.1"
+#define TUnfold_VERSION "V17.3"
 #define TUnfold_CLASS_VERSION 17
 
 #define TUnfold TUnfoldV17

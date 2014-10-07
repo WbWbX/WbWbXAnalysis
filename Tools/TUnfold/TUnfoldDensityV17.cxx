@@ -1,9 +1,11 @@
 // Author: Stefan Schmitt, Amnon Harel
 // DESY and CERN, 11/08/11
 
-//  Version 17.1, add scan type RhoSquare, small bug fixes with useAxisBinning
+//  Version 17.3, in parallel to changes in TUnfoldBinning
 //
 //  History:
+//    Version 17.2, with new options 'N' and 'c' for axis regularisation steering
+//    Version 17.1, add scan type RhoSquare, small bug fixes with useAxisBinning
 //    Version 17.0, support for density regularisation, complex binning schemes, tau scan
 
 //////////////////////////////////////////////////////////////////////////
@@ -135,7 +137,11 @@
 #include <iostream>
 #include <map>
 
-// #define DEBUG
+//#define DEBUG
+
+#ifdef DEBUG
+using namespace std;
+#endif
 
 ClassImp(TUnfoldDensityV17)
 
@@ -287,13 +293,17 @@ void TUnfoldDensityV17::RegularizeDistribution
    //             axisName:[options]
    //          axisName: the name of an axis where "options" applies
    //                    the special name * matches all axes
-   //          options: one of several character as follows
+   //          options: one or several character as follows
    //             u : exclude underflow bin from derivatives along this axis
    //             o : exclude overflow bin from derivatives along this axis
    //             U : exclude underflow bin
    //             O : exclude overflow bin
    //             b : use bin width for derivative calculation
-   //             B : same as 'b' but in addition normalize to average bin width
+   //             B : same as 'b', in addition normalize to average bin width
+   //             N : completely exclude derivatives along this axis
+   //             p : axis is periodic (e.g. azimuthal angle)
+   //                 include corresponding derivatives built from
+   //                 combinations involving bins at both ends of the axis
    //
    //          example:  "*[UOB]" uses bin widths for derivatives and
    //                             underflow/overflow bins are not regularized
@@ -335,6 +345,11 @@ void TUnfoldDensityV17::RegularizeOneDistribution
    //              (normalisation to bin withd or user factor)
    //     axisSteering: regularisation steering specific to the axes
    //              (see method RegularizeDistribution()) 
+#ifdef DEBUG
+   cout<<"TUnfoldDensityV17::RegularizeOneDistribution node="
+       <<binning->GetName()<<" "<<regmode<<" "<<densityMode
+       <<" "<<(axisSteering ? axisSteering : "")<<"\n";
+#endif
    if(!fRegularisationConditions)
       fRegularisationConditions=new TUnfoldBinning("regularisation");
 
@@ -342,14 +357,23 @@ void TUnfoldDensityV17::RegularizeOneDistribution
       fRegularisationConditions->AddBinning(binning->GetName());
 
    // decode steering
-   Int_t isOptionGiven[6];
-   binning->DecodeAxisSteering(axisSteering,"uUoObB",isOptionGiven);
+   Int_t isOptionGiven[8];
+   binning->DecodeAxisSteering(axisSteering,"uUoObBpN",isOptionGiven);
    // U implies u
    isOptionGiven[0] |= isOptionGiven[1];
    // O implies o
    isOptionGiven[2] |= isOptionGiven[3];
    // B implies b
    isOptionGiven[4] |= isOptionGiven[5];
+   // option N is removed if any other option is on
+   for(Int_t i=0;i<7;i++) {
+      isOptionGiven[7] &= ~isOptionGiven[i];
+   }
+   // option "c" does not work with options UuOo
+   if(isOptionGiven[6] & (isOptionGiven[0]|isOptionGiven[2]) ) {
+      Error("RegularizeOneDistribution",
+            "axis steering %s is not valid",axisSteering);
+   }
 #ifdef DEBUG
    cout<<" "<<isOptionGiven[0]
        <<" "<<isOptionGiven[1]
@@ -357,6 +381,8 @@ void TUnfoldDensityV17::RegularizeOneDistribution
        <<" "<<isOptionGiven[3]
        <<" "<<isOptionGiven[4]
        <<" "<<isOptionGiven[5]
+       <<" "<<isOptionGiven[6]
+       <<" "<<isOptionGiven[7]
        <<"\n";
 #endif
    Info("RegularizeOneDistribution","regularizing %s regMode=%d"
@@ -406,6 +432,12 @@ void TUnfoldDensityV17::RegularizeOneDistribution
          // for each direction
          Int_t nRegBins=0;
          Int_t directionMask=(1<<direction);
+         if(isOptionGiven[7] & directionMask) {
+#ifdef DEBUG
+            cout<<"skip direction "<<direction<<"\n"; 
+#endif
+            continue;
+         }
          Double_t binDistanceNormalisation=
             (isOptionGiven[5] & directionMask)  ?
             binning->GetDistributionAverageBinSize
@@ -417,8 +449,15 @@ void TUnfoldDensityV17::RegularizeOneDistribution
             // for each bin, find the neighbour bins
             Int_t iPrev,iNext;
             Double_t distPrev,distNext;
-            binning->GetBinNeighbours
-               (bin,direction,&iPrev,&distPrev,&iNext,&distNext);
+            Int_t error=binning->GetBinNeighbours
+               (bin,direction,&iPrev,&distPrev,&iNext,&distNext,
+                isOptionGiven[6] & directionMask);
+            if(error) {
+               Error("RegularizeOneDistribution",
+                     "invalid option %s (isPeriodic) for axis %s"
+                     " (has underflow or overflow)",axisSteering,
+                     binning->GetDistributionAxisLabel(direction).Data());
+            }
             if((regmode==kRegModeDerivative)&&(iNext>=0)) {
                Double_t f0 = -factor[bin-startBin];
                Double_t f1 = factor[iNext-startBin];

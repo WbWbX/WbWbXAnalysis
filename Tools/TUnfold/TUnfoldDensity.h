@@ -1,9 +1,11 @@
 // Author: Stefan Schmitt
 // DESY, 11/08/11
 
-//  Version 17.1, add scan type RhoSquare
+//  Version 17.3, in parallel to changes in TUnfoldBinning
 //
 //  History:
+//     Version 17.2, in parallel to changes in TUnfoldBinning
+//     Version 17.1, add scan type RhoSquare
 //     Version 17.0, support for density regularisation and complex binning schemes
 
 #ifndef ROOT_TUnfoldDensity
@@ -52,7 +54,7 @@ class TUnfoldDensityV17 : public TUnfoldSysV17 {
 
  public:
    enum EDensityMode {
-     kDensityModeeNone=0,
+     kDensityModeNone=0,
      kDensityModeBinWidth=1,
      kDensityModeUser=2,
      kDensityModeBinWidthAndUser=3
