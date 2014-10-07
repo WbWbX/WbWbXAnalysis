@@ -1,5 +1,19 @@
 #!/bin/zsh
 
+if [[ $CMSSW_VERSION == "" ]]
+then
+echo "Must be run in CMSSW environment"
+exit -2
+fi
+
+
+if [[ `cat /proc/version` == *"el6"* && $CMSSW_VERSION == "CMSSW_5_3_14"* ]]
+then
+echo "Wrong CMSSW version for SL6!"
+exit -2
+fi
+
+
 mkdir -p ${CMSSW_BASE}/external/${SCRAM_ARCH}/lib
 cd ${CMSSW_BASE}/src/TtZAnalysis
 
