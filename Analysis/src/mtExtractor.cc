@@ -1279,9 +1279,9 @@ float mtExtractor::drawGlobalLikelihood(TCanvas *c,bool zoom){
 
 		TLine * xlinel=addObject(new TLine(xpleft,plotmin,xpleft,intersecty));
 		TLine * xliner=addObject(new TLine(xpright,plotmin,xpright,intersecty));
-		TLine * xlinec=addObject(new TLine(cetralXValue,plotmin,cetralXValue,centralYValue));
-		TLine * yline=addObject(new TLine(tmpgllhd_.getXMin(false),intersecty,xpleft,intersecty));
-		TLine * yline2=addObject(new TLine(tmpgllhd_.getXMin(false),centralYValue,cetralXValue,centralYValue));
+		//	TLine * xlinec=addObject(new TLine(cetralXValue,plotmin,cetralXValue,centralYValue));
+		//	TLine * yline=addObject(new TLine(tmpgllhd_.getXMin(false),intersecty,xpleft,intersecty));
+		//	TLine * yline2=addObject(new TLine(tmpgllhd_.getXMin(false),centralYValue,cetralXValue,centralYValue));
 		//yline->Draw("same");
 		//yline2->Draw("same");
 		xlinel->SetLineStyle(2);
