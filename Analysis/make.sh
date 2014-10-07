@@ -12,6 +12,7 @@ cd $CMSSW_BASE/src/TtZAnalysis/Analysis
 export CPLUS_INCLUDE_PATH=$CMSSW_BASE/src:$CMSSW_RELEASE_BASE/src
 ROOTFLAGS=`root-config --cflags`
 ROOTLIBS=`root-config --libs`
+ROOTLIBS="${ROOTLIBS} -lXMLParser" #for TUnfold
 #ROOTLIBS="${ROOTLIBS} -L/afs/naf.desy.de/group/cms/sw/slc5_amd64_gcc462/cms/cmssw/CMSSW_5_3_11/external/slc5_amd64_gcc462/bin/../../../../../../lcg/root/5.32.00-cms21/lib -lGenVector"
 #naf afs switched off
 
