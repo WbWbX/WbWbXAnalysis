@@ -1,9 +1,12 @@
 // Author: Stefan Schmitt
 // DESY, 10/08/11
 
-//  Version 17.1, in parallel to changes in TUnfold
+//  Version 17.3, bug fix with underflow/overflow bins
 //
 //  History:
+//    Version 17.2, with XML support, bug fix with bin map creation,
+//                isPeriodic option for neighbour bins
+//    Version 17.1, in parallel to changes in TUnfold
 //    Version 17.0, initial version, numbered in parallel to TUnfold
 
 //////////////////////////////////////////////////////////////////////////
@@ -56,19 +59,17 @@
 */
 
 
-#include "TUnfoldBinning.h"
+#include "TUnfoldBinningXML.h"
 #include <TVectorD.h>
 #include <TAxis.h>
 #include <TString.h>
-#include <iostream>
-#include <fstream>
 #include <TMath.h>
 #include <TF1.h>
 #include <TH1D.h>
 #include <TH2D.h>
 #include <TH3D.h>
-#include <TList.h>
 #include <TIterator.h>
+#include <iomanip>
 
 // #define DEBUG
 
@@ -174,6 +175,10 @@ TUnfoldBinningV17::~TUnfoldBinningV17(void)
    if(GetNextNode()) nextNode->prevNode=prevNode;
    delete fAxisList; 
    delete fAxisLabelList; 
+   if(fBinFactorFunction) {
+      if(!dynamic_cast<TF1 *>(fBinFactorFunction)) 
+         delete fBinFactorFunction;
+   }
 }
 
 TUnfoldBinningV17 *TUnfoldBinningV17::AddBinning
@@ -194,17 +199,20 @@ TUnfoldBinningV17 *TUnfoldBinningV17::AddBinning(TUnfoldBinningV17 *binning)
   //               otherwise return 0
   TUnfoldBinning *r=0;
   if(binning->GetParentNode()) {
-    Error("binning \"%s\" already has parent \"%s\", can not be added to %s",
+     Error("AddBinning",
+           "binning \"%s\" already has parent \"%s\", can not be added to %s",
 	  (char *)binning->GetName(),
 	  (char *)binning->GetParentNode()->GetName(),
 	  (char *)GetName());
   } else if(binning->GetPrevNode()) {
-    Error("binning \"%s\" has previous node \"%s\", can not be added to %s",
+    Error("AddBinning",
+          "binning \"%s\" has previous node \"%s\", can not be added to %s",
 	  (char *)binning->GetName(),
 	  (char *)binning->GetPrevNode()->GetName(),
 	  (char *)GetName());
   } else if(binning->GetNextNode()) {
-    Error("binning \"%s\" has next node \"%s\", can not be added to %s",
+    Error("AddBinning",
+          "binning \"%s\" has next node \"%s\", can not be added to %s",
 	  (char *)binning->GetName(),
 	  (char *)binning->GetNextNode()->GetName(),
 	  (char *)GetName());
@@ -340,8 +348,8 @@ Bool_t TUnfoldBinningV17::AddAxis
   return r;
 }
 
-void TUnfoldBinningV17::PrintStream(ostream &out,Int_t indent) const
-{
+void TUnfoldBinningV17::PrintStream(ostream &out,Int_t indent,int debug)
+   const {
   // print some information about this binning tree
   //    out: stream to write to
   //    indent: initial indentation (sub-trees have indent+1)
@@ -368,8 +376,8 @@ void TUnfoldBinningV17::PrintStream(ostream &out,Int_t indent) const
              out<<"  \""
                  <<GetDistributionAxisLabel(axis)
                  <<"\" nbin="<<GetDistributionBinning(axis)->GetNrows()-1;
-             if(fHasUnderflow & (1<<axis)) out<<" plus underflow";
-             if(fHasOverflow & (1<<axis)) out<<" plus overflow";
+             if(HasUnderflow(axis)) out<<" plus underflow";
+             if(HasOverflow(axis)) out<<" plus overflow";
              out<<"\n";
           }
       } else {
@@ -386,14 +394,39 @@ void TUnfoldBinningV17::PrintStream(ostream &out,Int_t indent) const
          }
          out<<"\n";
       }
+      if(debug>0) {
+         // print all bins with full name, size, status, user factor
+         for(int iBin=GetStartBin();iBin<GetEndBin();iBin++) {
+            for(Int_t i=0;i<indent;i++) out<<"  ";
+            out<<GetBinName(iBin)
+               <<" size="<<GetBinSize(iBin)
+               <<" factor="<<GetBinFactor(iBin);
+            out<<"\n";
+         }
+      }
    }
    TUnfoldBinningV17 const *child=GetChildNode();
    if(child) {
       while(child) {
-         child->PrintStream(out,indent+1);
+         child->PrintStream(out,indent+1,debug);
          child=child->GetNextNode();
       }
    }
+}
+
+void TUnfoldBinningV17::SetBinFactor
+(Double_t normalisation,TObject *binfactor) {
+   fBinFactorConstant=normalisation;
+   if(fBinFactorFunction) {
+      if(!dynamic_cast<TF1 *>(fBinFactorFunction)) 
+         delete fBinFactorFunction;
+   }
+   fBinFactorFunction=binfactor;
+}
+
+void TUnfoldBinningV17::SetBinFactorFunction
+(Double_t normalisation,TF1 *userFunc) {
+   SetBinFactor(normalisation,userFunc);
 }
 
 /********************* Navigation **********************/
@@ -512,8 +545,8 @@ Int_t TUnfoldBinningV17::GetTH1xNumberOfBins
   //       axis = name or *
   //       mode = C|U|O 
   //        C: collapse axis into one bin
-  //        U: discarde underflow bin
-  //        O: discarde overflow bin
+  //        U: discard underflow bin
+  //        O: discard overflow bin
   //  return: number of bins of the TH1 (underflow/overflow are not counted)
    Int_t axisBins[3],axisList[3];
    GetTHxxBinning(originalAxisBinning ? 1 : 0,axisBins,axisList,
@@ -546,8 +579,8 @@ TH1 *TUnfoldBinningV17::CreateHistogram
   //       axis = name or *
   //       mode = C|U|O 
   //        C: collapse axis into one bin
-  //        U: discarde underflow bin
-  //        O: discarde overflow bin
+  //        U: discard underflow bin
+  //        O: discard overflow bin
   // returns: a new histogram (TH1D, TH2D or TH3D)
    Int_t nBin[3],axisList[3];
    Int_t nDim=GetTHxxBinning(originalAxisBinning ? 3 : 0,nBin,axisList,
@@ -614,8 +647,8 @@ TH2D *TUnfoldBinningV17::CreateErrorMatrixHistogram
   //       axis = name or *
   //       mode = C|U|O 
   //        C: collapse axis into one bin
-  //        U: discarde underflow bin
-  //        O: discarde overflow bin
+  //        U: discard underflow bin
+  //        O: discard overflow bin
   // returns: a new TH2D
 
    Int_t nBin[3],axisList[3];
@@ -713,8 +746,8 @@ Int_t TUnfoldBinningV17::GetTHxxBinning
    //       axis = name or *
    //       mode = C|U|O 
    //        C: collapse axis into one bin
-   //        U: discarde underflow bin
-   //        O: discarde overflow bin
+   //        U: discard underflow bin
+   //        O: discard overflow bin
    // output;
    //   axisBins[0..2] : number of bins on the THxx axes [0]:x [1]:y [2]:z
    //   axisList[0..2] : TUnfoldBinning axis number corresponding to TH1 axis
@@ -727,8 +760,9 @@ Int_t TUnfoldBinningV17::GetTHxxBinning
    }
    const TUnfoldBinningV17 *theNode=GetNonemptyNode();
    if(theNode) {
-      return theNode->GetTHxxBinningSingleNode
+      Int_t r=theNode->GetTHxxBinningSingleNode
          (maxDim,axisBins,axisList,axisSteering);
+      return r;
    } else {
       axisBins[0]=GetTHxxBinsRecursive(axisSteering);
       return 0;
@@ -770,10 +804,10 @@ Int_t TUnfoldBinningV17::GetTHxxBinningSingleNode
    //       "pattern1;pattern2;...;patternN"
    //       patternI = axis[mode]
    //       axis = name or *
-   //       mode = C|U|O 
+   //       mode = C|U|O
    //        C: collapse axis into one bin
-   //        U: discarde underflow bin
-   //        O: discarde overflow bin
+   //        U: discard underflow bin
+   //        O: discard overflow bin
    //   input/output:
    //    axisBins[0..2] : cumulated number of bins on the THxx axes
    //                         [0]:x [1]:y [2]:z
@@ -785,8 +819,8 @@ Int_t TUnfoldBinningV17::GetTHxxBinningSingleNode
 
    // decode axisSteering
    //   isOptionGiven[0] ('C'): bit vector which axes to collapse
-   //   isOptionGiven[1] ('U'): bit vector to discarde underflow bins
-   //   isOptionGiven[2] ('U'): bit vector to discarde overflow bins
+   //   isOptionGiven[1] ('U'): bit vector to discard underflow bins
+   //   isOptionGiven[2] ('O'): bit vector to discard overflow bins
    Int_t isOptionGiven[3];
    DecodeAxisSteering(axisSteering,"CUO",isOptionGiven);
    // count number of axes after projecting
@@ -839,8 +873,8 @@ Int_t TUnfoldBinningV17::GetTHxxBinsRecursive(const char *axisSteering) const
    //       axis = name or *
    //       mode = C|U|O 
    //        C: collapse axis into one bin
-   //        U: discarde underflow bin
-   //        O: discarde overflow bin
+   //        U: discard underflow bin
+   //        O: discard overflow bin
    // output:
    //   binMap[] : map global bin numbers to histogram bins
    // return value :  number of bins
@@ -854,6 +888,71 @@ Int_t TUnfoldBinningV17::GetTHxxBinsRecursive(const char *axisSteering) const
    Int_t axisBins[3],axisList[3];
    GetTHxxBinningSingleNode(0,axisBins,axisList,axisSteering);
    r += axisBins[0];
+   return r;
+}
+
+Int_t *TUnfoldBinningV17::CreateEmptyBinMap(void) const {
+   // create empty bin map which can be manipulated by
+   //  MapGlobalBin()
+   Int_t nMax=GetRootNode()->GetEndBin()+1;
+   Int_t *r=new Int_t[nMax];
+   for(Int_t i=0;i<nMax;i++) {
+         r[i]=-1;
+   }
+   return r;
+}
+
+void TUnfoldBinningV17::SetBinMapEntry
+(Int_t *binMap,Int_t globalBin,Int_t destBin) const {
+   // set one entry in the bin map
+   //   binMap : bin map, to be used with TUnfoldSys::GetOutput() etc
+   //   globalBin : source bin, global bin number in this binning scheme
+   //   destBin : destination bin.
+   //        global bins with the same destination bin will be added
+   //        if GetOutput is called with a bin map set up this way
+   Int_t nMax=GetRootNode()->GetEndBin()+1;
+   if((globalBin<0)||(globalBin>=nMax)) {
+      Error("SetBinMapEntry","global bin number %d outside range (max=%d)",
+            globalBin,nMax);
+   } else {
+      binMap[globalBin]=destBin;
+   }
+}
+
+Int_t TUnfoldBinningV17::FillBinMap1D
+(Int_t *binMap,const char *axisSteering,TH1 *destHist,
+ Int_t firstBinX) const {
+   // map all global bins referenced by this node to the one-dimensional
+   // histogram destHist, starting with bin firstBinX
+   //   binMap : the bin map to be filled
+   //  axisSteering:
+   //       "pattern1;pattern2;...;patternN"
+   //       patternI = axis[mode]
+   //       axis = name or *
+   //       mode = C|U|O 
+   //        C: collapse axis into one bin
+   //        U: discard underflow bin
+   //        O: discard overflow bin
+   //  destHist: destination histogram
+   //  firstBinX: first bin in destination histogram which should be filled
+   // returns: first bin number of destHist which has not been mapped
+   if(destHist->GetDimension()!=1) {
+      Error("FillBinMap1D","histogram %s is not 1D",
+            (char *)destHist->GetName());
+   }
+   Int_t r=firstBinX;
+   Int_t axisBins[3],axisList[3];
+   Int_t nDim=GetTHxxBinningSingleNode(3,axisBins,axisList,axisSteering);
+   if((nDim==1)|| !GetDistributionDimension()) {
+      r+=FillBinMapSingleNode(0,r,0,0,axisSteering,binMap);
+   } else {
+      Error("FillBinMap1D","distribution %s with steering=%s is not 1D",
+            (char *)GetName(),axisSteering);
+   }
+   for(TUnfoldBinningV17 const *child=GetChildNode();child;
+       child=child->GetNextNode()) {
+      r =child->FillBinMap1D(binMap,axisSteering,destHist,r);
+   }
    return r;
 }
 
@@ -881,8 +980,8 @@ Int_t *TUnfoldBinningV17::CreateBinMap
    //       axis = name or *
    //       mode = C|U|O 
    //        C: collapse axis into one bin
-   //        U: discarde underflow bin
-   //        O: discarde overflow bin
+   //        U: discard underflow bin
+   //        O: discard overflow bin
    //
    // input used only if nDim>0:
    //    axisList : for each THxx axis give the TUnfoldBinning axis number
@@ -894,16 +993,13 @@ Int_t *TUnfoldBinningV17::CreateBinMap
    //      ...
    //    r[nmax]
    //  where nmax=GetRootNode()->GetEndBin()+1
-   Int_t nMax=GetRootNode()->GetEndBin()+1;
-   Int_t *r=new Int_t[nMax];
-   for(Int_t i=0;i<nMax;i++) {
-         r[i]=-1;
-   }
+   Int_t *r=CreateEmptyBinMap();
    Int_t startBin=GetRootNode()->GetStartBin();
    if(nDim>0) {
      const TUnfoldBinning *nonemptyNode=GetNonemptyNode();
      if(nonemptyNode) {
-       FillBinMapSingleNode(hist,startBin,nDim,axisList,axisSteering,r);
+       nonemptyNode->
+          FillBinMapSingleNode(hist,startBin,nDim,axisList,axisSteering,r);
      } else {
        Fatal("CreateBinMap","called with nDim=%d but GetNonemptyNode()=0",
 	     nDim);
@@ -944,7 +1040,7 @@ Int_t TUnfoldBinningV17::FillBinMapSingleNode
 {
   // fill bin map for a single node
   //  input:
-  //     hist: the histogram represeinthing this node (used if nDim>0)
+  //     hist: the histogram representing this node (used if nDim>0)
   //     startBin: start bin in the bin map
   //     nDim:
   //        0: bins are mapped in linear order, ignore hist and axisList
@@ -961,20 +1057,28 @@ Int_t TUnfoldBinningV17::FillBinMapSingleNode
   //       "pattern1;pattern2;...;patternN"
   //       patternI = axis[mode]
   //       axis = name or *
-  //       mode = C|U|O 
+  //       mode = C|U|O|0..9
   //        C: collapse axis into one bin
-  //        U: discarde underflow bin
-  //        O: discarde overflow bin
+  //        U: discard underflow bin
+  //        O: discard overflow bin
+  //        0,1,2,3,4,5,6,7,8,9: define which bins
+  //                             of the collapsed axis to include
+  //                             only works for axes with up to 10 bins
   //     binMap: the bin map to fill
   // return value: 
   //     the number of bins mapped
   //     (only relevant if nDim==0)
    // first, decode axisSteering
    //   isOptionGiven[0] ('C'): bit vector which axes to collapse
-   //   isOptionGiven[1] ('U'): bit vector to discarde underflow bins
-   //   isOptionGiven[2] ('U'): bit vector to discarde overflow bins
-   Int_t isOptionGiven[3];
-   DecodeAxisSteering(axisSteering,"CUO",isOptionGiven);
+   //   isOptionGiven[1] ('U'): bit vector to discard underflow bins
+   //   isOptionGiven[2] ('O'): bit vector to discard overflow bins
+   Int_t isOptionGiven[3+10];
+   DecodeAxisSteering(axisSteering,"CUO0123456789",isOptionGiven);
+   Int_t haveSelectedBin=0; 
+   for(Int_t i=3;i<3+10;i++) {
+      haveSelectedBin |= isOptionGiven[i];
+   }
+
    Int_t axisBins[MAXDIM];
    Int_t dimension=GetDistributionDimension();
    Int_t axisNbin[MAXDIM];
@@ -998,15 +1102,23 @@ Int_t TUnfoldBinningV17::FillBinMapSingleNode
                   (const char *)GetName(),GetStartBin(),GetEndBin());
          }
       }
-      // check whether this bin has to be skipped (underflow/overflow excluded)
+      // check whether this bin has to be skipped
       Bool_t skip=kFALSE;
       for(Int_t axis=0;axis<dimension;axis++) {
          Int_t mask=(1<<axis);
+         // underflow/overflow excluded by steering
          if(((axisBins[axis]<0)&&(isOptionGiven[1] & mask))||
             ((axisBins[axis]>=axisNbin[axis])&&(isOptionGiven[2] & mask)))
             skip=kTRUE;
+         // only certain bins selected by steering
+         if((axisBins[axis]>=0)&&(axisBins[axis]<axisNbin[axis])&&
+            (haveSelectedBin & mask)) {
+            if(!(isOptionGiven[3+axisBins[axis]] & mask)) skip=kTRUE;
+         }
       }
-      if(skip) continue;
+      if(skip) {
+         continue;
+      }
 
       if(nDim>0) {
          // get bin number from THxx function(s)
@@ -1019,17 +1131,19 @@ Int_t TUnfoldBinningV17::FillBinMapSingleNode
             }
             binMap[globalBin]=hist->GetBin(ibin[0],ibin[1],ibin[2]);
          } else if(nDim==1) {
-	   // histogram has more dimensions than the binning scheme
-	   // and the binning scheme has one axis only
-	   // -> use the first valid axis only
-	   for(Int_t ii=0;ii<hist->GetDimension();ii++) {
-	     if(axisList[ii]>=0) {
-	       binMap[globalBin]=axisBins[axisList[ii]]+1;
-	       break;
-	     }
-	   }
+            // histogram has more dimensions than the binning scheme
+            // and the binning scheme has one axis only
+            // -> use the first valid axis only
+            Error("FillBinMapSingleNode","inconsistent dimensions %d %d",nDim,
+                  hist->GetDimension());
+            for(Int_t ii=0;ii<hist->GetDimension();ii++) {
+               if(axisList[ii]>=0) {
+                  binMap[globalBin]=axisBins[axisList[ii]]+1;
+                  break;
+               }
+            }
          } else {
-            Fatal("FillBinMapSingleNode","unexpected bin mapping %d %d",nDim,
+            Fatal("FillBinMapSingleNode","inconsistent dimensions %d %d",nDim,
                   hist->GetDimension());
          }
       } else {
@@ -1106,40 +1220,48 @@ TH1 *TUnfoldBinningV17::ExtractHistogram
    //       axis = name or *
    //       mode = C|U|O 
    //        C: collapse axis into one bin
-   //        U: discarde underflow bin
-   //        O: discarde overflow bin
+   //        U: discard underflow bin
+   //        O: discard overflow bin
    Int_t *binMap=0;
    TH1 *r=CreateHistogram(histogramName,originalAxisBinning,&binMap,0,
                           axisSteering);
+   if(!r) return 0;
    TUnfoldBinningV17 const *root=GetRootNode();
-   Int_t nMax=0;
+   Int_t nMax=-1;
    for(Int_t iSrc=root->GetStartBin();iSrc<root->GetEndBin();iSrc++) {
       if(binMap[iSrc]>nMax) nMax=binMap[iSrc];
    }
-   TVectorD eSquared(nMax+1);
-   for(Int_t iSrc=root->GetStartBin();iSrc<root->GetEndBin();iSrc++) {
-      Int_t iDest=binMap[iSrc];
-      if(iDest>=0) {
-         Double_t c=r->GetBinContent(iDest);
-         r->SetBinContent(iDest,c+globalBins->GetBinContent(iSrc));
-         if(!globalBinsEmatrix) {
-            eSquared(iDest) += TMath::Power(globalBins->GetBinError(iSrc),2.);
-         } else {
-            for(Int_t jSrc=root->GetStartBin();jSrc<root->GetEndBin();jSrc++) {
-               if(binMap[jSrc]==iDest) {
-                   eSquared(iDest) += 
-                      TMath::Power(globalBins->GetBinError(jSrc),2.);
+   if(nMax<0) {
+      delete r;
+      r=0;
+   } else {
+      TVectorD eSquared(nMax+1);
+      for(Int_t iSrc=root->GetStartBin();iSrc<root->GetEndBin();iSrc++) {
+         Int_t iDest=binMap[iSrc];
+         if(iDest>=0) {
+            Double_t c=r->GetBinContent(iDest);
+            r->SetBinContent(iDest,c+globalBins->GetBinContent(iSrc));
+            if(!globalBinsEmatrix) {
+               eSquared(iDest)+=TMath::Power(globalBins->GetBinError(iSrc),2.);
+            } else {
+               for(Int_t jSrc=root->GetStartBin();jSrc<root->GetEndBin();
+                   jSrc++) {
+                  if(binMap[jSrc]==iDest) {
+                     eSquared(iDest) += 
+                        TMath::Power(globalBins->GetBinError(jSrc),2.);
+                  }
                }
             }
          }
       }
-   }
-   for(Int_t i=0;i<nMax;i++) {
-      Double_t e2=eSquared(i);
-      if(e2>0.0) {
-         r->SetBinError(i,TMath::Sqrt(e2));
+      for(Int_t i=0;i<nMax;i++) {
+         Double_t e2=eSquared(i);
+         if(e2>0.0) {
+            r->SetBinError(i,TMath::Sqrt(e2));
+         }
       }
    }
+   delete binMap;
    return r;
 }
 
@@ -1211,11 +1333,56 @@ Int_t TUnfoldBinningV17::GetGlobalBinNumber
    return GetGlobalBinNumber(xx);
 }
 
-Int_t TUnfoldBinningV17::GetGlobalBinNumber(const Double_t *x) const
+Int_t TUnfoldBinningV17::GetGlobalBinNumber
+(Double_t x0,Double_t x1,Double_t x2,Double_t x3,Double_t x4) const
 {
-  // locate bin on a n-dimensional distribution
+  // locate bin on a five-dimensional distribution
   // input
-  //    x[]: coordinates to locate
+  //    x0,x1,x2,x3,x4: coordinates to locate
+   if(GetDistributionDimension()!=5) {
+      Fatal("GetBinNumber",
+            "called with 5 arguments for %d dimensional distribution",
+            GetDistributionDimension());
+   }
+   Double_t xx[5];
+   xx[0]=x0;
+   xx[1]=x1;
+   xx[2]=x2;
+   xx[3]=x3;
+   xx[4]=x4;
+   return GetGlobalBinNumber(xx);
+}
+
+Int_t TUnfoldBinningV17::GetGlobalBinNumber
+(Double_t x0,Double_t x1,Double_t x2,Double_t x3,Double_t x4,Double_t x5) const
+{
+  // locate bin on a five-dimensional distribution
+  // input
+  //    x0,x1,x2,x3,x4,x5: coordinates to locate
+   if(GetDistributionDimension()!=6) {
+      Fatal("GetBinNumber",
+            "called with 5 arguments for %d dimensional distribution",
+            GetDistributionDimension());
+   }
+   Double_t xx[6];
+   xx[0]=x0;
+   xx[1]=x1;
+   xx[2]=x2;
+   xx[3]=x3;
+   xx[4]=x4;
+   xx[5]=x5;
+   return GetGlobalBinNumber(xx);
+}
+
+Int_t TUnfoldBinningV17::GetGlobalBinNumber
+(const Double_t *x,Int_t *isBelow,Int_t *isAbove) const
+{
+   // locate bin on a n-dimensional distribution
+   // input
+   //    x[]: coordinates to locate
+   // output:
+   //    isBelow,isAbove: bit vectors,
+   //       indicating which cut on which axis failed
    if(!GetDistributionDimension()) {
       Fatal("GetBinNumber",
             "no axes are defined for node %s",
@@ -1246,7 +1413,7 @@ Int_t TUnfoldBinningV17::GetGlobalBinNumber(const Double_t *x) const
       }
       iAxisBins[dim]=iBin;
    }
-   Int_t r=ToGlobalBin(iAxisBins);
+   Int_t r=ToGlobalBin(iAxisBins,isBelow,isAbove);
    if(r<0) r=0;
    return r;
 }
@@ -1321,6 +1488,14 @@ Double_t TUnfoldBinningV17::GetBinSize(Int_t iBin) const
    return r;
 }
 
+Bool_t TUnfoldBinningV17::IsBinFactorGlobal(void) const {
+   return fBinFactorFunction ? kFALSE : kTRUE;
+}
+
+Double_t TUnfoldBinningV17::GetGlobalFactor(void) const {
+   return fBinFactorConstant;
+}
+
 Double_t TUnfoldBinningV17::GetBinFactor(Int_t iBin) const
 {
   // return user factor for a bin
@@ -1329,36 +1504,53 @@ Double_t TUnfoldBinningV17::GetBinFactor(Int_t iBin) const
    TUnfoldBinningV17 const *distribution=ToAxisBins(iBin,axisBins);   
    Double_t r=distribution->fBinFactorConstant;
    if((r!=0.0) && distribution->fBinFactorFunction) {
-      Double_t x[MAXDIM];
-      Int_t dimension=distribution->GetDistributionDimension();
-      if(dimension>0) {
-         for(Int_t  axis=0;axis<dimension;axis++) {
-            x[axis]=distribution->GetDistributionBinCenter
-               (axis,axisBins[axis]);
+      TF1 *function=dynamic_cast<TF1 *>(distribution->fBinFactorFunction);
+      if(function) {
+         Double_t x[MAXDIM];
+         Int_t dimension=distribution->GetDistributionDimension();
+         if(dimension>0) {
+            for(Int_t  axis=0;axis<dimension;axis++) {
+               x[axis]=distribution->GetDistributionBinCenter
+                  (axis,axisBins[axis]);
+            }
+            r *= function->EvalPar(x,function->GetParameters());
+         } else {
+            x[0]=axisBins[0];
+            r *= function->Eval(x[0]);
          }
-         r *= distribution->fBinFactorFunction->EvalPar
-            (x,distribution->fBinFactorFunction->GetParameters());
       } else {
-         x[0]=axisBins[0];
-         r *= distribution->fBinFactorFunction->Eval(x[0]);
+         TVectorD *vect=dynamic_cast<TVectorD *>
+            (distribution->fBinFactorFunction);
+         if(vect) {
+            r=(*vect)[iBin-GetStartBin()];
+         } else {
+            Error("GetBinFactor",
+                  "internal error: user function is neiter TF1 or TVectorD");
+         }
       }
-     
    }
    return r;
 }
 
-void TUnfoldBinningV17::GetBinNeighbours
+Int_t TUnfoldBinningV17::GetBinNeighbours
 (Int_t bin,Int_t axis,Int_t *prev,Double_t *distPrev,
- Int_t *next,Double_t *distNext) const
+ Int_t *next,Double_t *distNext,Bool_t isPeriodic) const
 {
    // get neighbour bins along the specified axis
    // input:
    //    bin,axis : bin number and axis number
+   //    isPeriodic : the first bin is a neighbour of the last bin
    // output:
    //    prev: bin number of previous bin (or -1 if not existing)
    //    distPrev: distance to previous bin
    //    next: bin number of next bin (or -1 if not existing)
    //    distNext: distance to next bin
+   // return code:
+   //    0: everything is fine
+   //   >0: isPeriodic option was ignored
+   //   +1: isPeriodic option was specified with underflow bin
+   //   +2: isPeriodic option was specified with overflow bin
+
    Int_t axisBins[MAXDIM];
    TUnfoldBinningV17 const *distribution=ToAxisBins(bin,axisBins);
    Int_t dimension=distribution->GetDistributionDimension();
@@ -1366,23 +1558,40 @@ void TUnfoldBinningV17::GetBinNeighbours
    *next=-1;
    *distPrev=0.;
    *distNext=0.;
+   Int_t r=0;
    if((axis>=0)&&(axis<dimension)) {
      //TVectorD const *bins=distribution->GetDistributionBinning(axis);
       //Int_t nBin=bins->GetNrows()-1;
+      Int_t nMax=GetDistributionBinning(axis)->GetNrows()-1;
       Int_t centerBin= axisBins[axis];
       axisBins[axis] =centerBin-1;
+      if(isPeriodic) {
+         if(HasUnderflow(axis)) {
+            r +=1;
+         } else if((axisBins[axis]<0)&&(nMax>=3)) {
+            axisBins[axis]=nMax-1;
+         }
+      }
       *prev=ToGlobalBin(axisBins);
       if(*prev>=0) {
 	*distPrev=distribution->GetDistributionBinCenter(axis,axisBins[axis])-
 	  distribution->GetDistributionBinCenter(axis,centerBin);
       }
       axisBins[axis] =centerBin+1;
+      if(isPeriodic) {
+         if(HasOverflow(axis)) {
+            r +=2;
+         } else if((axisBins[axis]==nMax)&&(nMax>=3)) {
+            axisBins[axis]=0;
+         }
+      }
       *next=ToGlobalBin(axisBins);
       if(*next>=0) {
 	*distNext=distribution->GetDistributionBinCenter(axis,axisBins[axis])-
 	  distribution->GetDistributionBinCenter(axis,centerBin);
       }
    }
+   return r;
 }
 
 void TUnfoldBinningV17::GetBinUnderflowOverflowStatus
@@ -1406,125 +1615,22 @@ void TUnfoldBinningV17::GetBinUnderflowOverflowStatus
   }
 }
 
-/********************* access by bin number, given a projection mode ******/
-const TUnfoldBinningV17 *TUnfoldBinningV17::GetBinLocation
-(Int_t binTHxx,const char *axisSteering,Int_t axisBins[MAXDIM]) const
-{
-   // locate the node corresponding to
-   //   a given THxx bin for a given projection mode
-   // input:
-   //    binTHxx : bin in histogram
-   //    axisSteering :
-   //       "pattern1;pattern2;...;patternN"
-   //       patternI = axis[mode]
-   //       axis = name or *
-   //       mode = C|U|O 
-   //        C: collapse axis into one bin
-   //        U: discarde underflow bin
-   //        O: discarde overflow bin
-   // output:
-   //    axisBins[]
-   //      for each axis of the identified binning node give the bin number
-   //            -1 underflow bin
-   //            >=0 inside distribution or overflow bin
-   //        special bin numbers
-   //            -2 : axis collapsed
-   //            -3 : axis collapsed and underflow bin excluded
-   //            -4 : axis collapsed and overflow bin excluded
-   //            -5 : axis collapsed and underflow+overflow bin excluded
-   // return value:
-   //    the binning node or 0 if not found
-   Int_t offset=binTHxx-GetStartBin();
-   return GetBinLocationRecursive(offset,axisSteering,axisBins);
-}
-
-const TUnfoldBinningV17 *TUnfoldBinningV17::GetBinLocationRecursive
-(Int_t &offset,const char *axisSteering,Int_t axisBins[MAXDIM]) const
-{
-   // recursively locate the node corresponding to
-   //   a given THxx bin for a given projection mode
-   // input:
-   //    offset : start bin of this nodes in the histogram
-   //    axisSteering :
-   //       "pattern1;pattern2;...;patternN"
-   //       patternI = axis[mode]
-   //       axis = name or *
-   //       mode = C|U|O 
-   //        C: collapse axis into one bin
-   //        U: discarde underflow bin
-   //        O: discarde overflow bin
-   // output:
-   //    axisBins[]
-   //      for each axis of the identified binning node give the bin number
-   //            -1 underflow bin
-   //            >=0 inside distribution or overflow bin
-   //        special bin numbers
-   //            -2 : axis collapsed
-   //            -3 : axis collapsed and underflow bin excluded
-   //            -4 : axis collapsed and overflow bin excluded
-   //            -5 : axis collapsed and underflow+overflow bin excluded
-   // return value:
-   //    the binning node or 0 if not found
- 
-   // decode axisSteering
-   //   isOptionGiven[0] ('C'): bit vector which axes to collapse
-   //   isOptionGiven[1] ('U'): bit vector to discarde underflow bins
-   //   isOptionGiven[2] ('U'): bit vector to discarde overflow bins
-   Int_t isOptionGiven[3];
-   DecodeAxisSteering(axisSteering,"CUO",isOptionGiven);
-   const TUnfoldBinningV17 *r=0;
-   if(offset>=0) {
-      if(GetDistributionDimension()>0) {
-         Int_t nBinsTotal=1;
-         Int_t i=offset;
-         for(Int_t axis=0;axis<GetDistributionDimension();axis++) {
-            Int_t mask=1<<axis;
-            if(isOptionGiven[0] & mask) {
-               axisBins[axis]=-2;
-               if((isOptionGiven[1] & mask)&&
-                  (fHasUnderflow & mask)) axisBins[axis] -= 1;
-               if((isOptionGiven[2] & mask)&&
-                  (fHasOverflow & mask)) axisBins[axis] -= 2;
-            } else {
-               Int_t nBin=GetDistributionBinning(axis)->GetNrows()-1;
-               axisBins[axis]=0;
-               if((fHasUnderflow & mask) && !(isOptionGiven[1] & mask)) {
-                  nBin++;
-                  axisBins[axis]=-1;
-               }
-               if((fHasOverflow & mask) && !(isOptionGiven[2] & mask)) {
-                  nBin++;
-               }
-               axisBins[axis] += i % nBin;
-               i /= nBin;
-               nBinsTotal *= nBin;
-            }
-         }
-         offset -= nBinsTotal;
-         if(offset<0) {
-            r=this;
-         }
-      } else {
-         axisBins[0]=offset;
-         offset -= GetDistributionNumberOfBins();
-         if(offset<0) r=this;
-      }
-   }
-   if(!r) {
-      for(TUnfoldBinningV17 const *child=GetChildNode();child;
-          child=child->GetNextNode()) {
-         r=child->GetBinLocationRecursive(offset,axisSteering,axisBins);
-         if(r) break;
-      }
-   }
-   return r;
-}
-
 Bool_t TUnfoldBinningV17::HasUnconnectedBins(void) const
 {
    // check whether there are bins but no axis
    return (!GetDistributionDimension())&&(GetDistributionNumberOfBins()>0);
 }
+
+const TObjString *TUnfoldBinningV17::GetUnconnectedBinName(Int_t bin) const {
+   TObjString *r=0;
+   if(HasUnconnectedBins()) {
+      if(bin<fAxisLabelList->GetEntriesFast()) {
+         r=((TObjString * const)fAxisLabelList->At(bin));
+      }
+   }
+   return r;
+}
+
 
 Double_t TUnfoldBinningV17::GetDistributionAverageBinSize
 (Int_t axis,Bool_t includeUnderflow,Bool_t includeOverflow) const
@@ -1538,14 +1644,14 @@ Double_t TUnfoldBinningV17::GetDistributionAverageBinSize
       TVectorD const *bins=GetDistributionBinning(axis);
       Double_t d=(*bins)[bins->GetNrows()-1]-(*bins)[0];
       Double_t nBins=bins->GetNrows()-1;
-      if(includeUnderflow && (fHasUnderflow & (1<<axis))) {
+      if(includeUnderflow && HasUnderflow(axis)) {
          Double_t w=GetDistributionUnderflowBinWidth(axis);
          if(w>0) {
             nBins++;
             d += w;
          }
       }
-      if(includeOverflow && (fHasOverflow & (1<<axis))) {
+      if(includeOverflow && HasOverflow(axis)) {
          Double_t w=GetDistributionOverflowBinWidth(axis);
          if(w>0.0) {
             nBins++;
@@ -1598,27 +1704,33 @@ Double_t TUnfoldBinningV17::GetDistributionBinCenter
    return r;
 }
 
-Int_t TUnfoldBinningV17::ToGlobalBin(Int_t const *axisBins) const
+Int_t TUnfoldBinningV17::ToGlobalBin
+(Int_t const *axisBins,Int_t *isBelow,Int_t *isAbove) const
 {
   // get global bin number, given axis bin numbers
   //   axisBins[]: bin numbers on each axis
   // return: global bin nmber or -1 if not inside distribution
+   //  isBelow: bit vector indicating axes below lowest bin
+   //  isAbove: bit vector indicating axes above highest bin
   Int_t dimension=GetDistributionDimension();
   Int_t r=0;
+  if(isBelow) *isBelow=0;
+  if(isAbove) *isAbove=0;
   if(dimension>0) {
     for(Int_t axis=dimension-1;axis>=0;axis--) {
       Int_t nMax=GetDistributionBinning(axis)->GetNrows()-1;
       Int_t i=axisBins[axis];
-      if(fHasUnderflow & (1<<axis)) {
+      if(HasUnderflow(axis)) {
 	nMax +=1;
 	i +=1;
       }
-      if(fHasOverflow & (1<<axis)) nMax +=1;
+      if(HasOverflow(axis)) nMax +=1;
       if((i>=0)&&(i<nMax)) {
-	r = r*nMax +i;
+         if(r>=0) r = r*nMax +i;
       } else {
-	r=-1;
-	break;
+         r=-1;
+         if((i<0)&&(isBelow)) *isBelow |= 1<<axis;
+         if((i>=nMax)&&(isAbove)) *isAbove |= 1<<axis;
       }
     }
     if(r>=0) {
@@ -1627,6 +1739,10 @@ Int_t TUnfoldBinningV17::ToGlobalBin(Int_t const *axisBins) const
   } else {
     if((axisBins[0]>=0)&&(axisBins[0]<GetDistributionNumberOfBins()))
       r=GetStartBin()+axisBins[0];
+    else
+       Fatal("ToGlobalBin","bad input %d for dimensionless binning %s %d",
+             axisBins[0],(const char *)GetName(),
+             GetDistributionNumberOfBins());
   }
   return r;
 }
@@ -1661,11 +1777,11 @@ TUnfoldBinningV17 const *TUnfoldBinningV17::ToAxisBins
             for(int axis=0;axis<dimension;axis++) {
                Int_t nMax=GetDistributionBinning(axis)->GetNrows()-1;
                axisBins[axis]=0;
-               if(fHasUnderflow & (1<<axis)) {
+               if(HasUnderflow(axis)) {
                   axisBins[axis] =-1;
                   nMax += 1;
                }
-               if(fHasOverflow & (1<<axis)) nMax +=1;
+               if(HasOverflow(axis)) nMax +=1;
                axisBins[axis] += i % nMax;
                i /= nMax;
             }
@@ -1702,12 +1818,12 @@ void TUnfoldBinningV17::DecodeAxisSteering
   // example:
   //   imagine this node has two axes, named "xgen" and "ygen"
   //  then
-  //   DecodeAxisSteering("*[u];xgen[c]","cuo",options);
+  //   DecodeAxisSteering("*[U];xgen[C]","CUO",options);
   //  will set the "U" option for all axes and the "C" option for the "xgen"
   //  axis, so:
-  //    options[0]=0x1; // option 'c' is true for axis 0 (bit #0 is set)
-  //    options[1]=0x3; // option 'u' is true for both axes (bit #0,#1 are set)
-  //    options[2]=0x0; // option 'o' is not given (no bits are set)
+  //    options[0]=0x1; // option 'C' is true for axis 0 (bit #0 is set)
+  //    options[1]=0x3; // option 'U' is true for both axes (bit #0,#1 are set)
+  //    options[2]=0x0; // option 'O' is not given (no bits are set)
   Int_t nOpt=TString(options).Length();
   for(Int_t i=0;i<nOpt;i++) isOptionGiven[i]=0;
   if(axisSteering) {

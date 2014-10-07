@@ -1,9 +1,11 @@
 // Author: Stefan Schmitt
 // DESY, 13/10/08
 
-//  Version 17.1, bug fixes in GetFoldedOutput, GetOutput
+//  Version 17.3, in parallel to changes in TUnfoldBinning
 //
 //  History:
+//    Version 17.2, bug fix with GetProbabilityMatrix
+//    Version 17.1, bug fixes in GetFoldedOutput, GetOutput
 //    Version 17.0, option to specify an error matrix with SetInput(), new ScanRho() method
 //    Version 16.2, in parallel to bug-fix in TUnfoldSys
 //    Version 16.1, fix bug with error matrix in case kEConstraintArea is used
@@ -2264,7 +2266,8 @@ Int_t TUnfoldV17::SetInput(const TH1 *input, Double_t scaleBias,
   Double_t *dataVyy1=new Double_t[GetNy()];
   Double_t *dataVyyDiag=new Double_t[GetNy()];
 
-  Int_t nError=0;
+  Int_t nVarianceZero=0;
+  Int_t nVarianceForced=0;
   Int_t nVyyN=0;
   Int_t nVyy1=0;
   for (Int_t iy = 0; iy < GetNy(); iy++) {
@@ -2274,13 +2277,18 @@ Int_t TUnfoldV17::SetInput(const TH1 *input, Double_t scaleBias,
         Double_t dy = input->GetBinError(iy + 1);
         dy2=dy*dy;
         if (dy2 <= 0.0) {
-           nError++;
            if(oneOverZeroError>0.0) {
               dy2 = 1./ ( oneOverZeroError*oneOverZeroError);
+              nVarianceForced++;
+           } else {
+              nVarianceZero++;
            }
         }
      } else {
         dy2 = hist_vyy->GetBinContent(iy+1,iy+1);
+        if (dy2 <= 0.0) {
+           nVarianceZero++;
+        }
      }
      rowVyyN[nVyyN] = iy;
      colVyyN[nVyyN] = iy;
@@ -2294,9 +2302,17 @@ Int_t TUnfoldV17::SetInput(const TH1 *input, Double_t scaleBias,
   }
   if(hist_vyy) {
      // non-diagonal elements
+     Int_t nOffDiagNonzero=0;
      for (Int_t iy = 0; iy < GetNy(); iy++) {
         // ignore rows where the diagonal is zero
-        if(dataVyyDiag[iy]<=0.0) continue;
+        if(dataVyyDiag[iy]<=0.0) {
+           for (Int_t jy = 0; jy < GetNy(); jy++) {
+              if(hist_vyy->GetBinContent(iy+1,jy+1)!=0.0) {
+                 nOffDiagNonzero++;
+              }
+           }
+           continue;
+        }
         for (Int_t jy = 0; jy < GetNy(); jy++) {
            // skip diagonal elements
            if(iy==jy) continue;
@@ -2331,6 +2347,11 @@ Int_t TUnfoldV17::SetInput(const TH1 *input, Double_t scaleBias,
         delete [] rowVyyInv;
         delete [] colVyyInv;
         delete [] dataVyyInv;
+     } else {
+        if(nOffDiagNonzero) {
+           Error("SetInput",
+                 "input covariance has elements C(X,Y)!=0 where V(X)==0");
+        }
      }
   }
   DeleteMatrix(&fVyy);
@@ -2365,25 +2386,25 @@ Int_t TUnfoldV17::SetInput(const TH1 *input, Double_t scaleBias,
         nError2 ++;
      }
   }
-  if(nError>0) {
-     if(oneOverZeroError !=0.0) {
-        if(nError>1) {
-           Warning("SetInput","%d/%d input bins have zero error,"
-                   " 1/error set to %lf.",nError,GetNy(),oneOverZeroError);
-        } else {
-           Warning("SetInput","One input bin has zero error,"
-                   " 1/error set to %lf.",oneOverZeroError);
-        }
+  if(nVarianceForced) {
+     if(nVarianceForced>1) {
+        Warning("SetInput","%d/%d input bins have zero error,"
+                " 1/error set to %lf.",
+                nVarianceForced,GetNy(),oneOverZeroError);
      } else {
-        if(nError>1) {
-           Warning("SetInput","%d/%d input bins have zero error,"
-                   " and are ignored.",nError,GetNy());
-        } else {
-           Warning("SetInput","One input bin has zero error,"
-                   " and is ignored.");
-        }
+        Warning("SetInput","One input bin has zero error,"
+                " 1/error set to %lf.",oneOverZeroError);
      }
-     fIgnoredBins=nError;
+  }
+  if(nVarianceZero) {
+     if(nVarianceZero>1) {
+        Warning("SetInput","%d/%d input bins have zero error,"
+                " and are ignored.",nVarianceZero,GetNy());
+     } else {
+        Warning("SetInput","One input bin has zero error,"
+                " and is ignored.");
+     }
+     fIgnoredBins=nVarianceZero;
   }
   if(nError2>0) {
      // check whether data points with zero error are responsible
@@ -2419,7 +2440,7 @@ Int_t TUnfoldV17::SetInput(const TH1 *input, Double_t scaleBias,
 
   delete[] dataVyyDiag;
 
-  return nError+10000*nError2;
+  return nVarianceForced+nVarianceZero+10000*nError2;
 }
 
 Double_t TUnfoldV17::DoUnfold(Double_t tau)
@@ -2891,9 +2912,9 @@ void TUnfoldV17::GetProbabilityMatrix(TH2 *A,EHistMap histmap) const
          Int_t ix = cols_A[indexA];
          Int_t ih=fXToHist[ix];
          if (histmap == kHistMapOutputHoriz) {
-            A->SetBinContent(ih, iy,data_A[indexA]);
+            A->SetBinContent(ih, iy+1,data_A[indexA]);
          } else {
-            A->SetBinContent(iy, ih,data_A[indexA]);
+            A->SetBinContent(iy+1, ih,data_A[indexA]);
          }
       }
    }

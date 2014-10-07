@@ -1,9 +1,11 @@
 // Author: Stefan Schmitt
 // DESY, 23/01/09
 
-//  Version 17.1, bug fix with background uncertainty
+//  Version 17.3, in parallel to changes in TUnfoldBinning
 //
 //  History:
+//     Version 17.2, add methods to find back systematic and background sources
+//     Version 17.1, bug fix with background uncertainty
 //     Version 17.0, possibility to specify an error matrix with SetInput
 //     Version 16.2, bug-fix with the calculation of background errors
 //     Version 16.1, parallel to changes in TUnfold
@@ -46,6 +48,7 @@
 #include "TUnfold.h"
 
 class TMap;
+class TSortedList;
 
 #define TUnfoldSys TUnfoldSysV17
 
@@ -93,6 +96,7 @@ class TUnfoldSysV17 : public TUnfoldV17 {
                     ESysErrMode mode); // add a systematic error source
    Bool_t GetDeltaSysSource(TH1 *hist_delta,const char *source,
                           const Int_t *binMap=0); // get systematic shifts from one systematic source
+   TSortedList *GetSysSources(void) const; // get names of systematic sources
    void SubtractBackground(const TH1 *hist_bgr,const char *name,
                            Double_t scale=1.0,
                            Double_t scale_error=0.0); // subtract background prior to unfolding
@@ -100,6 +104,7 @@ class TUnfoldSysV17 : public TUnfoldV17 {
    virtual Int_t SetInput(const TH1 *hist_y,Double_t scaleBias=0.0,Double_t oneOverZeroError=0.0,const TH2 *hist_vyy=0,const TH2 *hist_vyy_inv=0); // define input consistently in case of background subtraction
    Bool_t GetDeltaSysBackgroundScale(TH1 *delta,const char *source,
                                 const Int_t *binMap=0); // get correlated uncertainty induced by the scale uncertainty of a background source
+   TSortedList *GetBgrSources(void) const; // get names of background sources
    void SetTauError(Double_t delta_tau); // set uncertainty on tau
    Bool_t GetDeltaSysTau(TH1 *delta,const Int_t *binMap=0); // get correlated uncertainty from varying tau
    void GetEmatrixSysUncorr(TH2 *ematrix,const Int_t *binMap=0,Bool_t clearEmat=kTRUE); // get error matrix contribution from uncorrelated errors on the matrix A

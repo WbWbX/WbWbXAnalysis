@@ -1,4 +1,4 @@
-TUnfold version 17.1, readme file as of Nov 15, 2012
+TUnfold version 17.2, README file as of Jan 4, 2013
 
   This file is part of TUnfold.
 
@@ -62,9 +62,13 @@ Compiling:
      make bin
  * for compiling the library, type
      make lib
+ * for compiling the manual "tunfold_manual.pdf", type
+     make manual
 
-how to use this TUnfold version in parallel to the existing (possibly
-outdated) version of TUnfold which is shipped with your root version
+Use of this TUnfold version
+===========================
+... in parallel to the existing (possibly outdated) version of TUnfold
+which is shipped with your root version
 
  * make sure the header files
     TUnfold.h TUnfoldBinning.h TUnfoldDensity.h TUnfoldSys.h
@@ -73,12 +77,17 @@ outdated) version of TUnfold which is shipped with your root version
  * make sure the library "libunfold.so" is linked to your code 
 
 how it works:
-  the "original" classes of the TUnfold package are named
+ * the "original" classes of the TUnfold package which come with your
+   root version, are named
     TUnfold TUnfoldBinning TUnfoldDensity TUnfoldSys 
 
-  the classes shipped with this package are named
+ * the classes shipped with this package are named
     TUnfoldV17 TUnfoldBinningV17 TUnfoldDensityV17 TUnfoldSysV17
 
-  in the header file there are statements
+ * in the header files shipped with this package there are statements like
+     #define TUnfold TUnfoldV17
+       ...
+     #define TUnfoldDensity TUnfoldDensityV17
 
-   #define TUnfold TUnfoldV17
+ * in your code, use e.g. the class TUnfoldDensity. The #define statement
+    translates this to TUnfoldDensityV17, so the new class is used.
