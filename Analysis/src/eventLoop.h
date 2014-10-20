@@ -812,7 +812,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 			if(isMC)
 				muon->setP4(muon->p4() * getMuonEnergySF()->getScalefactor(muon->eta()));
 			allleps << muon;
-			if(muon->pt() < 30)       continue;
+			if(muon->pt() < 20)       continue;
 			if(fabs(muon->eta())>2.4) continue;
 			kinmuons << &(b_Muons.content()->at(i));
 
@@ -869,7 +869,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 			//selection fully following https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopEGM l+jets except for pt cut
 
 			allleps << elec;
-			if(elec->pt() < 30)  continue;
+			if(elec->pt() < 20)  continue;
 			float abseta=fabs(elec->eta());
 
 			float suclueta = fabs(elec->ECalP4().eta());
