@@ -137,7 +137,7 @@ public:
 	 * 	-----------> maybe better in container1D....
 	 */
 
-
+	void sqrt();
 
 	/*
 	 *
@@ -154,6 +154,8 @@ private:
 	std::map<size_t,size_t> addLayers(const histoContent & rhs);
 
 };
+
+
 
 
 /**

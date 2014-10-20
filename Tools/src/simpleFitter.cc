@@ -226,14 +226,21 @@ void simpleFitter::fit(){
 			else
 				paraname=(TString)"par"+toTString(i);
 
-			if(printlevel>0)
-				std::cout << paraname+" " << paras_.at(i) << std::endl;
 			if(minospars_.size()==0 || std::find(minospars_.begin(),minospars_.end(),i) != minospars_.end()){
-
-
 				min->GetMinosError(i, paraerrsdown_.at(i), paraerrsup_.at(i));
 			}
 
+			if(printlevel>0){
+				TString someblanks;
+				if(paraname.Length()<20){
+					size_t add=20-paraname.Length();
+					for(size_t k=0;k<add;k++)
+						someblanks+=" ";
+				}
+				if(paras_.at(i)>0)
+					someblanks+=" ";
+				std::cout << paraname+" "  << someblanks << paras_.at(i)<< " +"<< paraerrsup_.at(i) << " " << paraerrsdown_.at(i)<< std::endl;
+			}
 		}
 		chi2min_=min->MinValue();
 
@@ -390,6 +397,21 @@ bool simpleFitter::checkSizes()const{
 	return true;
 }
 
+
+double simpleFitter::nuisanceGaus(const double & in){
+	return in*in;
+}
+double simpleFitter::nuisanceBox(const double & in){
+	double disttoone=fabs(in)-1;
+	if(disttoone<0) return 0;
+	return (1e5*disttoone*disttoone*disttoone*disttoone);
+}
+double simpleFitter::nuisanceLogNormal(const double & in){
+	throw std::logic_error("simpleFitter::nuisanceLogNormal: nor properly implemented");
+
+	double alph=in+1;
+	return log(alph * (3+ log(alph)/0.693147180559945) ) ;
+}
 
 }
 

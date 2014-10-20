@@ -10,132 +10,222 @@
 #include "../interface/AnalysisUtils.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 #include "TtZAnalysis/DataFormats/src/classes.h"
+#include "TtZAnalysis/DataFormats/interface/dataFormatHelpers.h"
 
 namespace ztop{
 
 void analysisPlotsJan::bookPlots(){
-    if(!use()) return;
-    using namespace std;
-    using namespace ztop;
+	if(!use()) return;
+	using namespace std;
+	using namespace ztop;
 
-    vector<float> genmlbmin_bins,genmlb_bins;
-    genmlbmin_bins<<0 ;
-    genmlb_bins<<0;
-    for(float i=20;i<=165;i+=5){
-    	genmlbmin_bins <<i;
-        genmlb_bins << i;
-    }
-    genmlb_bins << 180 <<350;
-    genmlbmin_bins << 180 << 200 << 350;
-
-    vector<float> ivangen_mlbbins;
-    ivangen_mlbbins << 0 << 70 << 116 << 150 <<400;
-    //vector<float> mlb_bins=ztop::subdivide<float>(genmlb_bins,2);
-    vector<float> ivan_mlbbins=subdivide<float>(ivangen_mlbbins,5);
-
-    Mlb=addPlot(genmlb_bins,genmlb_bins,"m_lb leading unfold","M_{lb} [GeV]", "N_{evt}/GeV");
-
-    mlbcombthresh_=165;
-
-    mlb=addPlot(genmlb_bins,genmlb_bins,"m_lb","m_{lb}* [GeV]", "N_{evt}/GeV");
-
-    mlbmin=addPlot(genmlbmin_bins,genmlbmin_bins,"m_lb min","m_{lb}^{min} [GeV]", "N_{evt}/GeV");
-
-    mlbivansbins=addPlot(ivangen_mlbbins,ivan_mlbbins,"m_lb ivansbins","m_{lb}^{ivan} [GeV]", "N_{evt}/GeV");
-
-    vector<float> inclbins; inclbins << 0.5 << 1.5; //vis PS, fullPS
-
-    total=addPlot(inclbins,inclbins,"total","bin","N_{evt}");
-    total->setBinByBin(true); //independent bins
-    total->addTag(taggedObject::dontDivByBW_tag);
+	//define vis ps etc
+	lep_visphasespace_pt_    =20;
+	lep_visphasespace_eta_   =2.4;
+	bquark_visphasespace_pt_ =30;
+	bquark_visphasespace_eta_=2.4;
 
 
-    vistotal=addPlot(inclbins,inclbins,"vis total","bin","N_{evt}");
-    vistotal->setBinByBin(true); //independent bins
-    vistotal->addTag(taggedObject::dontDivByBW_tag);
+	vector<float> genmlbmin_bins,genmlb_bins;
+	genmlbmin_bins<<0 ;
+	genmlb_bins<<0;
+	for(float i=20;i<=165;i+=5){
+		genmlbmin_bins <<i;
+		genmlb_bins << i;
+	}
+	genmlb_bins << 180 <<350;
+	genmlbmin_bins << 180 << 200 << 350;
+
+	vector<float> ivangen_mlbbins;
+	ivangen_mlbbins << 0 << 70 << 116 << 150 <<400;
+	//vector<float> mlb_bins=ztop::subdivide<float>(genmlb_bins,2);
+	vector<float> ivan_mlbbins=subdivide<float>(ivangen_mlbbins,5);
+
+	Mlb=addPlot(genmlb_bins,genmlb_bins,"m_lb leading unfold","M_{lb} [GeV]", "N_{evt}/GeV");
+
+	mlbcombthresh_=165;
+
+	mlb=addPlot(genmlb_bins,genmlb_bins,"m_lb","m_{lb}* [GeV]", "N_{evt}/GeV");
+
+	mlbmin=addPlot(genmlbmin_bins,genmlbmin_bins,"m_lb min","m_{lb}^{min} [GeV]", "N_{evt}/GeV");
+
+	mlbivansbins=addPlot(ivangen_mlbbins,ivan_mlbbins,"m_lb ivansbins","m_{lb}^{ivan} [GeV]", "N_{evt}/GeV");
+
+	mlbminbsrad=addPlot(genmlbmin_bins,genmlbmin_bins,"m_lb min bsrad","m_{lb}^{min} [GeV]", "N_{evt}/GeV");
+
+	vector<float> tmpbins=makebins(40,20,200);
+
+	leadleppt = addPlot(tmpbins,tmpbins,"leading top-lepton pt","p_{t}^{l} [GeV]", "N_{evt}/GeV");
+	tmpbins=makebins(40,30,200);
+	benergy  = addPlot(tmpbins,tmpbins,"leading top-lepton pt","p_{t}^{l} [GeV]", "N_{evt}/GeV");
+	tmpbins=makebins(40,20,350);
+	mll  = addPlot(tmpbins,tmpbins,"leading top-lepton pt","p_{t}^{l} [GeV]", "N_{evt}/GeV");
+
+
+
+	vector<float> inclbins; inclbins << 0.5 << 1.5; //vis PS, fullPS
+
+
+	total=addPlot(inclbins,inclbins,"total","bin","N_{evt}");
+	total->setBinByBin(true); //independent bins
+	total->addTag(taggedObject::dontDivByBW_tag);
+
+
+	vistotal=addPlot(inclbins,inclbins,"vis total","bin","N_{evt}");
+	vistotal->setBinByBin(true); //independent bins
+	vistotal->addTag(taggedObject::dontDivByBW_tag);
 }
 
 
 void analysisPlotsJan::fillPlotsGen(){
-    if(!use()) return;
-    if(!event()) return;
-    using namespace std;
-    using namespace ztop;
+	if(!use()) return;
+	if(!event()) return;
+	using namespace std;
+	using namespace ztop;
 
-    if(event()->gentops && event()->gentops->size()>0)
-        total->fillGen(1.,puweight());
+	if(event()->gentops && event()->gentops->size()>0)
+		total->fillGen(1.,puweight());
 
-    if(event()->genvisleptons3 && event()->genvisjets){
-        if(event()->genvisleptons3->size() > 1 && event()->genvisjets->size()>1){ //vis PS
-            vistotal->fillGen(1.,puweight());
-        }
-    }
+	if(event()->genvisleptons3 && event()->genvisjets){
+		if(event()->genvisleptons3->size() > 1 && event()->genvisjets->size()>1){ //vis PS
+			vistotal->fillGen(1.,puweight());
+		}
+	}
 
-    //calculate mlbs based on ME leptons
-    if(event()->genvisleptons3 && event()->genbs){
-        if(event()->genvisleptons3->size()>1 && event()->genbs->size()>0 ){
+	//calculate mlbs based on ME lepton
 
-            //vis ps cuts on b-jets
-            if(event()->genbs->at(0)->pt()>30){
+	if(event()->genvisleptons3 && event()->genbs){
+		if(event()->genvisleptons3->size()>1 && event()->genbs->size()>0 ){
 
-                NTLorentzVector<float> bjetp4=event()->genbs->at(0)->p4();
-                NTLorentzVector<float> llepp4=event()->genvisleptons3->at(0)->p4();
-                NTLorentzVector<float> slepp4=event()->genvisleptons3->at(1)->p4();
+			//vis ps cuts on b-jets
+			NTGenParticle* leadvisb=0;
+			for(size_t i=0;i<event()->genbs->size();i++){
+				if(event()->genbs->at(i)->pt()>bquark_visphasespace_pt_
+						&& fabs(event()->genbs->at(i)->eta())<bquark_visphasespace_eta_){
+					leadvisb=event()->genbs->at(i);
+					break;
+				}
+			}
 
-                float fMlb=(bjetp4+llepp4).m();
-                float fm2lb=(bjetp4+slepp4).m();
-                float fmlb=fMlb;
-                float fmlbmin=fMlb;
-                if(fMlb>mlbcombthresh_ && fm2lb<mlbcombthresh_)  fmlb=fm2lb;
-                if(fMlb>fm2lb) fmlbmin=fm2lb;
+			//old
+			//	leadvisb=0;
+			//	if(event()->genbs->at(0)->pt()>30)
+			//		leadvisb=event()->genbs->at(0);
 
-                Mlb->fillGen(fMlb,puweight());
-                mlb->fillGen(fmlb,puweight());
-                mlbmin->fillGen(fmlbmin,puweight());
+			if(leadvisb){
+				//	if(event()->genbs->at(0)->pt()>30){
+				//	leadvisb=event()->genbs->at(0);
 
-                mlbivansbins->fillGen(fmlb,puweight());
-            }
-        }
-    }
+				NTLorentzVector<float> bjetp4=leadvisb->p4();
+				NTLorentzVector<float> llepp4=event()->genvisleptons3->at(0)->p4();
+				NTLorentzVector<float> slepp4=event()->genvisleptons3->at(1)->p4();
 
+				float fMlb=(bjetp4+llepp4).m();
+				float fm2lb=(bjetp4+slepp4).m();
+				float fmlb=fMlb;
+				float fmlbmin=fMlb;
+				if(fMlb>mlbcombthresh_ && fm2lb<mlbcombthresh_)  fmlb=fm2lb;
+				if(fMlb>fm2lb) fmlbmin=fm2lb;
+
+				Mlb->fillGen(fMlb,puweight());
+				mlb->fillGen(fmlb,puweight());
+				mlbmin->fillGen(fmlbmin,puweight());
+
+				mlbivansbins->fillGen(fmlb,puweight());
+			}
+		}
+
+
+	}
+
+	if(event()->genvisleptons3 && event()->genbsrad){
+		if(event()->genvisleptons3->size()>1 && event()->genbsrad->size()>0 ){
+			NTGenParticle* leadvisb=0;
+			for(size_t i=0;i<event()->genbsrad->size();i++){
+				if(event()->genbsrad->at(i)->pt()>bquark_visphasespace_pt_
+						&& fabs(event()->genbsrad->at(i)->eta())<bquark_visphasespace_eta_){
+					leadvisb=event()->genbsrad->at(i);
+					break;
+				}
+			}
+			if(leadvisb){
+
+				NTLorentzVector<float> bjetp4=leadvisb->p4();
+				NTLorentzVector<float> llepp4=event()->genvisleptons3->at(0)->p4();
+				NTLorentzVector<float> slepp4=event()->genvisleptons3->at(1)->p4();
+
+				float fMlb=(bjetp4+llepp4).m();
+				float fm2lb=(bjetp4+slepp4).m();
+
+				float fmlbmin=fMlb;
+				if(fMlb>fm2lb) fmlbmin=fm2lb;
+
+				mlbminbsrad->fillGen(fmlbmin,puweight());
+			}
+		}
+	}
+	//new implementation
+
+	if(event()->genvisleptons3){
+		if(event()->genvisleptons3->size()>0)
+			leadleppt->fillGen(event()->genvisleptons3->at(0)->pt(),puweight());
+	}
+	if(event()->genbs){
+		if(event()->genbs->size()>0)
+			benergy->fillGen(event()->genbs->at(0)->pt(),puweight());
+	}
+	if(event()->genvisleptons3){
+		if(event()->genvisleptons3->size()>1){
+			NTLorentzVector<float> mllgen = event()->genvisleptons3->at(0)->p4() + event()->genvisleptons3->at(1)->p4();
+			mll->fillGen(mllgen.m(),puweight());
+		}
+	}
 
 }
 
 void analysisPlotsJan::fillPlotsReco(){
-    if(!use()) return;
-    if(!event()) return;
-    using namespace std;
-    using namespace ztop;
+	if(!use()) return;
+	if(!event()) return;
+	using namespace std;
+	using namespace ztop;
 
-    total->fillReco(1,puweight());
+	total->fillReco(1,puweight());
 
-    vistotal->fillReco(1,puweight());
+	vistotal->fillReco(1,puweight());
 
 
-    /*
-     * this is not an event selection. just safety measures
-     */
-    if(event()->leadinglep && event()->secleadinglep && event()->selectedbjets ){
-        if(event()->selectedbjets->size()>0 ){
-            NTLorentzVector<float> bjetp4=event()->selectedbjets->at(0)->p4();
-            NTLorentzVector<float> llepp4=event()->leadinglep->p4();
-            NTLorentzVector<float> slepp4=event()->secleadinglep->p4();
+	/*
+	 * this is not an event selection. just safety measures
+	 */
+	if(event()->leadinglep && event()->secleadinglep && event()->selectedbjets ){
+		if(event()->selectedbjets->size()>0 ){
+			NTLorentzVector<float> bjetp4=event()->selectedbjets->at(0)->p4();
+			NTLorentzVector<float> llepp4=event()->leadinglep->p4();
+			NTLorentzVector<float> slepp4=event()->secleadinglep->p4();
 
-            float fMlb=(bjetp4+llepp4).m();
-            float fm2lb=(bjetp4+slepp4).m();
-            float fmlb=fMlb;
-            float fmlbmin=fMlb;
-            if(fMlb>mlbcombthresh_ && fm2lb<mlbcombthresh_)  fmlb=fm2lb;
-            if(fMlb>fm2lb) fmlbmin=fm2lb;
+			float fMlb=(bjetp4+llepp4).m();
+			float fm2lb=(bjetp4+slepp4).m();
+			float fmlb=fMlb;
+			float fmlbmin=fMlb;
+			if(fMlb>mlbcombthresh_ && fm2lb<mlbcombthresh_)  fmlb=fm2lb;
+			if(fMlb>fm2lb) fmlbmin=fm2lb;
 
-            Mlb->fillReco(fMlb,puweight());
-            mlb->fillReco(fmlb,puweight());
-            mlbmin->fillReco(fmlbmin,puweight());
+			Mlb->fillReco(fMlb,puweight());
+			mlb->fillReco(fmlb,puweight());
+			mlbmin->fillReco(fmlbmin,puweight());
+			mlbminbsrad->fillReco(fmlbmin,puweight());
 
-            mlbivansbins->fillReco(fmlb,puweight());
-        }
-    }
+			mlbivansbins->fillReco(fmlb,puweight());
+		}
+	}
+	if(event()->leadinglep)
+		leadleppt->fillReco(event()->leadinglep->pt(),puweight());
 
+	if(event()->selectedbjets && event()->selectedbjets->size()>0)
+		benergy->fillReco(event()->selectedbjets->at(0)->p4().e(),puweight());
+
+	if(event()->mll)
+		mll->fillReco(*event()->mll,puweight());
 
 }
 

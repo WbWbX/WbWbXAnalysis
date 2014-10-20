@@ -26,6 +26,7 @@ public:
     NTFullEvent(): event(0),
     gentops(0),
     genbs(0),
+    genbsrad(0),
     genleptons1(0),
     genleptons3(0),
     genvisleptons1(0),
@@ -35,7 +36,7 @@ public:
     genbjetsfromtop(0),
     genvisbjetsfromtop(0),
     idjets(0),medjets(0),hardjets(0),medbjets(0),hardbjets(0),dphilljjets(0),dphiplushardjets(0),
-    selectedjets(0),selectedbjets(0),
+    selectedjets(0),selectedbjets(0),selectednonbjets(0),
     allmuons(0),kinmuons(0),idmuons(0),isomuons(0),
     allelectrons(0),kinelectrons(0),idelectrons(0),isoelectrons(0),
     allleptons(0),kinleptons(0),idleptons(0),isoleptons(0),
@@ -82,6 +83,7 @@ public:
 
         gentops=0;
         genbs=0;
+        genbsrad=0;
         genleptons1=0;
         genleptons3=0;
         genvisleptons1=0;
@@ -92,7 +94,7 @@ public:
         genvisbjetsfromtop=0;
 
         idjets=0;medjets=0;hardjets=0;medbjets=0;hardbjets=0;dphilljjets=0;dphiplushardjets=0;
-        selectedjets=0;selectedbjets=0;
+        selectedjets=0;selectedbjets=0,selectednonbjets=0;
         allmuons=0;kinmuons=0;idmuons=0;isomuons=0;
         allelectrons=0;kinelectrons=0;idelectrons=0;isoelectrons=0;
         allleptons=0;kinleptons=0;idleptons=0;isoleptons=0;
@@ -136,7 +138,10 @@ public:
     ztop::NTEvent * event;
     ///generator info
     std::vector<ztop::NTGenParticle *> * gentops;
+    // ONLY contains bs before possible radiation from top! ordered by pt
     std::vector<ztop::NTGenParticle *> * genbs;
+    // ONLY contain bs after possible radiation from top! ordered by pt
+    std::vector<ztop::NTGenParticle *> * genbsrad;
     std::vector<ztop::NTGenParticle *> * genleptons1;
     std::vector<ztop::NTGenParticle *> * genleptons3;
     std::vector<ztop::NTGenParticle *> * genvisleptons1;
@@ -159,6 +164,7 @@ public:
     std::vector<ztop::NTJet*> * dphiplushardjets;
     std::vector<ztop::NTJet*> * selectedjets;
     std::vector<ztop::NTJet*> * selectedbjets;
+    std::vector<ztop::NTJet*> * selectednonbjets;
 
 
     std::vector<ztop::NTMuon*> * allmuons;
@@ -232,8 +238,18 @@ public:
     NTLorentzVector<float> * S4;
     NTLorentzVector<float>  * allobjects4;
 
+
+
     float * puweight;
 
 };
+//just a playground
+
+#define ADDTOEVENT(classname,object) _ADDTOCONSTR_(classname,object) _ADDTORESET_(classname,object) _ADDMEMBER_(classname,object)
+
+
+
+
+
 }//namespace
 #endif /* NTFULLEVENT_H_ */

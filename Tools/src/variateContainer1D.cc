@@ -26,6 +26,10 @@ private:
 bool variateContainer1D::debug=false;
 
 void variateContainer1D::import(const container1D& cont){
+
+	if(debug)
+		std::cout << "variateContainer1D::import" <<std::endl;
+
 	contents_.clear();errsup_.clear(),errsdown_.clear();
 	contents_.resize(cont.getBins().size());
 	errsup_.resize(cont.getBins().size());
@@ -69,19 +73,32 @@ void variateContainer1D::import(const container1D& cont){
 
 
 void variateContainer1D::setBinErrUp(size_t bin,const float& err){
+	if(debug)
+		std::cout << "variateContainer1D::setBinErrUp" <<std::endl;
 	if(bin<=bins_.size())
 		throw std::out_of_range("variateContainer1D::setBinErrUp: bin out of range");
 	errsup_.at(bin)=err;
 }
 void variateContainer1D::setBinErrDown(size_t bin,const float& err){
+	if(debug)
+		std::cout << "variateContainer1D::setBinErrDown" <<std::endl;
 	if(bin<=bins_.size())
 		throw std::out_of_range("variateContainer1D::setBinErrDown: bin out of range");
 	errsdown_.at(bin)=err;
 }
+container1D variateContainer1D::exportContainer()const{
+	if(contents_.size()<1){
+		throw std::out_of_range("variateContainer1D::exportContainer: cannot export without input!");
+	}
+	std::vector<double> var;
+	var.resize(contents_.at(0).getNDependencies(),0.);
+	return exportContainer(var);
 
+}
 
-container1D variateContainer1D::exportContainer(const std::vector<float> & variations){
-
+container1D variateContainer1D::exportContainer(const std::vector<double> & variations)const{
+	if(debug)
+		std::cout << "variateContainer1D::exportContainer" <<std::endl;
 	if(contents_.size()<1){
 		throw std::out_of_range("variateContainer1D::exportContainer: cannot export without input!");
 	}

@@ -23,7 +23,7 @@ class containerStack;
 class plotterControlPlot: public plotterBase{
 public:
 
-    plotterControlPlot(): plotterBase(), divideat_(0), stackp_(0),tempdataentry_(0),invertplots_(false),psmigthresh_(0){}
+    plotterControlPlot();
     ~plotterControlPlot(){plotterControlPlot::cleanMem();}
 
     void addStyleFromFile(const std::string& );

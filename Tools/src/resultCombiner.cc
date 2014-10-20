@@ -156,17 +156,14 @@ void resultCombiner::coutSystBreakDownInBin(size_t idx)const{
 
 
 double resultCombiner::getNuisanceLogGaus(const double & in)const{
-	return in*in;
+	return fitter_.nuisanceGaus(in);
 }
 double resultCombiner::getNuisanceLogBox(const double & in)const{
-	double disttoone=1-fabs(in);
-	if(disttoone>0) return 0;
-	return (1e3*disttoone*disttoone);
+	return fitter_.nuisanceBox(in);
 }
 //is it ok to scale the errors here?
 double resultCombiner::getNuisanceLogNormal(const double & in)const{
-	double alph=in+1;
-	return log(alph * (3+ log(alph)/0.693147180559945) ) ;
+	return fitter_.nuisanceLogNormal(in);
 }
 
 

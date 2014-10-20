@@ -14,6 +14,18 @@
 
 [end textBoxes]
 
+
+ [legendStyle]
+
+    x0  =  0.65
+	y0  =  0.65
+	x1  =  0.9
+	y1  =  0.88
+	
+	nColumns        = 1
+	columnSeparator = 0.1
+ [end legendStyle]
+
  [containerStyle - NominalUpper]
     
     $same for ratio plot and control plot
@@ -37,9 +49,11 @@
     drawStyle    = normal $ can be other options (TBI)
     
     
+    legendDrawStyle = lp
     
  [end containerStyle]
  $sufficient to define differences with respect to NominalUpper
+ 
  [containerStyle - NominalRatio]
     
     $same for ratio plot and control plot
@@ -85,6 +99,7 @@
     drawStyle    = normal $ can be other options (TBI)
     
     
+    legendDrawStyle = lp
     
  [end containerStyle]  
  [containerStyle - CompareRatioDefault]
@@ -109,6 +124,7 @@
     drawStyle    = normal $ can be other options (TBI)
     
     
+    legendDrawStyle = lp
     
     
  [end containerStyle]

@@ -23,7 +23,7 @@ public:
 	~histoBin(){}
 
 	const float & getContent() const {return content_;}
-	float getStat()            const {return sqrt(stat2_);}
+	float getStat()            const {return std::sqrt(stat2_);}
 	const size_t & getEntries() const {return entries_;}
 	const float & getStat2()   const {return stat2_;}
 
@@ -44,7 +44,7 @@ public:
 	const TString & getName() const {return name_;}
 
 	void multiply(const float&);
-
+	void sqrt();
 
 
 	bool operator == (const histoBin&) const;
@@ -120,6 +120,9 @@ public:
 	int subtract(const histoBins&,bool statCorr);
 	int divide(const histoBins&,bool statCorr);
 	int multiply(const histoBins&,bool statCorr);
+
+	//get sqrt of everything
+	void sqrt();
 
 	void multiply(const float& );
 	void removeStat();

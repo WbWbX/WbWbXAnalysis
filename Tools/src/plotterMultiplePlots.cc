@@ -17,6 +17,13 @@
 
 namespace ztop{
 
+plotterMultiplePlots::plotterMultiplePlots():plotterBase(),drawlegend_(true),tightyaxis_(false),tightxaxis_(true){
+
+	readStyleFromFileInCMSSW("/src/TtZAnalysis/Tools/styles/multiplePlots.txt");
+
+}
+
+
 void plotterMultiplePlots::addPlot(const graph *c){
     plots_.push_back(plot(c));
     lastplotidx_=plots_.size()-1;

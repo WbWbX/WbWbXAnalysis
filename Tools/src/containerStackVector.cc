@@ -5,6 +5,7 @@
 
 #include "FWCore/FWLite/interface/AutoLibraryLoader.h"
 #include "../interface/plotterControlPlot.h"
+#include "../interface/plotterMultiplePlots.h"
 #include "TStyle.h"
 
 bool ztop::container1D::debug =false;
@@ -461,6 +462,15 @@ void containerStackVector::writeAllToTFile(TString filename, bool recreate, bool
 					c->Write();
 					delete c;
 					delete resp;
+					c =new TCanvas("Gen","Gen");
+					container1D gen= cuf.getGenContainer();
+					plotterMultiplePlots plgen;
+					plgen.readStyleFromFileInCMSSW("/src/TtZAnalysis/Tools/styles/multiplePlots.txt");
+					plgen.usePad(c);
+					plgen.addPlot(&gen,true);
+					plgen.draw();
+					c->Write();
+					delete c;
 					TDirectory * dsys=din->mkdir("sys","sys");
 					dsys->cd();
 					for(size_t i=0;i<cuf.getSystSize();i++){

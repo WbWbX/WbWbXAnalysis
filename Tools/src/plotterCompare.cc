@@ -18,6 +18,11 @@
 
 namespace ztop{
 
+plotterCompare::plotterCompare(): plotterBase(),
+divideat_(0.5),memnom_(0),memratio_(0),size_(0){
+	readStyleFromFileInCMSSW("/src/TtZAnalysis/Tools/styles/comparePlots_3MC.txt");
+}
+
 void plotterCompare::setNominalPlot(const container1D *c,bool divbw){
     if(debug) std::cout <<"plotterCompare::setNominalPlot" << std::endl;
     nominalplot_.createFrom(c,divbw);

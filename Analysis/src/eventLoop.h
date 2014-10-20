@@ -18,6 +18,7 @@
 #include "../interface/AnalysisUtils.h"
 #include "../interface/NTFullEvent.h"
 #include "../interface/ttbarControlPlots.h"
+#include "../interface/ttXsecPlots.h"
 #include "../interface/ZControlPlots.h"
 #include "TtZAnalysis/plugins/leptonSelector2.h"
 
@@ -40,6 +41,9 @@
 #include "TtZAnalysis/DataFormats/interface/NTGenParticle.h"
 #include "TtZAnalysis/DataFormats/interface/NTGenJet.h"
 #include "TtZAnalysis/DataFormats/interface/NTLorentzVector.h"
+
+
+#include "TtZAnalysis/DataFormats/interface/dataFormatHelpers.h"
 
 #include "../interface/analysisPlotsJan.h"
 #include "../interface/analysisPlotsAnya.h"
@@ -112,8 +116,10 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 	bool usetopdiscr=false;
 	bool nometcut=false;
 	bool nozcut=false;
+	bool nobcut=false;
 
 	float normmultiplier=1; //use in case modes need to change norm
+
 
 	if(mode_.Contains("Samesign")){
 		mode_samesign=true;
@@ -173,6 +179,10 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 	if(mode_.Contains("Nozcut")){
 		nozcut=true;
 		std::cout << "entering Nometcut mode" <<std::endl;
+	}
+	if(mode_.Contains("Nobcut")){
+		nobcut=true;
+		std::cout << "entering Nobcut mode" <<std::endl;
 	}
 	if(mode_.Contains("Topdiscr")){
 		usetopdiscr=true;
@@ -402,6 +412,10 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 	ZControlPlots zplots;
 	plots.linkEvent(evt);
 	zplots.linkEvent(evt);
+	ttXsecPlots xsecplots;
+	xsecplots.linkEvent(evt);
+	xsecplots.limitToStep(8);
+	xsecplots.initSteps(8);
 	plots.initSteps(8);
 	zplots.initSteps(8);
 	jansplots_step8.setEvent(evt);
@@ -482,6 +496,11 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 	//additional weights
 	std::vector<tBranchHandler<NTWeight>*> weightbranches;
 	tBranchHandler<NTWeight>::allow_missing =true;
+	tBranchHandler<vector<NTGenParticle> >::allow_missing =true;
+
+	tBranchHandler<vector<NTGenParticle> > b_GenBsRad(t,"NTGenBsRad");
+
+
 	for(size_t i=0;i<additionalweights_.size();i++){
 		std::cout << "adding weight " << additionalweights_.at(i) << std::endl;
 		tBranchHandler<NTWeight> * weight = new tBranchHandler<NTWeight>(t,additionalweights_.at(i));
@@ -620,16 +639,17 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 		////define all collections
 		// do not move somewhere else!
 
-		vector<NTGenParticle*> gentops,genbs;
+		vector<NTGenParticle*>  gentops,genbs,genbsrad;
 		vector<NTGenParticle *> genleptons1,genleptons3;
-		vector<NTGenJet *> genjets;
+		vector<NTGenJet *>      genjets;
 		vector<NTGenParticle *> genbhadrons;
-		vector<NTGenJet *> genbjetsfromtop;
+		vector<NTGenJet *>      genbjetsfromtop;
 		vector<NTGenParticle *> genvisleptons1,genvisleptons3;
-		vector<NTGenJet *> genvisjets;
-		vector<NTGenJet *> genvisbjetsfromtop;
+		vector<NTGenJet *>      genvisjets;
+		vector<NTGenJet *>      genvisbjetsfromtop;
 
 		evt.genbs=&genbs;
+		evt.genbsrad=&genbsrad;
 		evt.genleptons1=&genleptons1;
 		evt.genleptons3=&genleptons3;
 		evt.genjets=&genjets;
@@ -653,6 +673,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 				//recreate mother daughter relations?!
 				b_GenBHadrons.getEntry(entry);
 				b_GenBs.getEntry(entry);
+				b_GenBsRad.getEntry(entry);
 				b_GenJets.getEntry(entry);
 				b_GenLeptons1.getEntry(entry);
 				///////////////TOPPT REWEIGHTING////////
@@ -665,20 +686,22 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 					gentops.push_back(&b_GenTops.content()->at(0));
 					gentops.push_back(&b_GenTops.content()->at(0));
 					evt.gentops=&gentops;
-
-
 				}
 
 				if(testmode_ && entry==0){
 					std::cout << "testmode("<< anaid << "): entered signal genInfo part" << std::endl;
 				}
 
-
 				//only format change
 				genleptons1=produceCollection<NTGenParticle>(b_GenLeptons1.content());
 				genleptons3=produceCollection<NTGenParticle>(b_GenLeptons3.content());
 				genjets=produceCollection<NTGenJet>(b_GenJets.content());
-				genbs=produceCollection<NTGenParticle>(b_GenBs.content());
+				//no phase space cuts here on the bs
+				genbs=produceCollection<NTGenParticle>(b_GenBs.content());//,-1,-1,&gentops);
+				if(b_GenBsRad.content())
+					genbsrad=produceCollection<NTGenParticle>(b_GenBsRad.content());//,-1,-1,&genbs);
+
+
 
 				//define visible phase space
 				float ps_ptlepmin=20;
@@ -713,7 +736,6 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 					NTGenParticle * bhad=&b_GenBHadrons.content()->at(i);
 					if(bhad->motherIts().size()>0)
 						bhadids<<bhad->genId();
-
 				}
 
 
@@ -790,7 +812,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 			if(isMC)
 				muon->setP4(muon->p4() * getMuonEnergySF()->getScalefactor(muon->eta()));
 			allleps << muon;
-			if(muon->pt() < 20)       continue;
+			if(muon->pt() < 30)       continue;
 			if(fabs(muon->eta())>2.4) continue;
 			kinmuons << &(b_Muons.content()->at(i));
 
@@ -847,7 +869,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 			//selection fully following https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopEGM l+jets except for pt cut
 
 			allleps << elec;
-			if(elec->pt() < 20)  continue;
+			if(elec->pt() < 30)  continue;
 			float abseta=fabs(elec->eta());
 
 			float suclueta = fabs(elec->ECalP4().eta());
@@ -1170,14 +1192,17 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 		evt.allobjects4=&allobjects4;
 
 
-		vector<NTJet*>  selectedbjets;
+		vector<NTJet*>  selectedbjets,selectednonbjets;
 		evt.selectedbjets=&selectedbjets;
+		evt.selectednonbjets=&selectednonbjets;
 
 
 		getBTagSF()->changeNTJetTags(selectedjets);
 		for(size_t i=0;i<selectedjets->size();i++){
-			if(selectedjets->at(i)->btag() < getBTagSF()->getWPDiscrValue())
+			if(selectedjets->at(i)->btag() < getBTagSF()->getWPDiscrValue()){
+				selectednonbjets.push_back(selectedjets->at(i));
 				continue;
+			}
 			selectedbjets.push_back(selectedjets->at(i));
 		}
 
@@ -1413,7 +1438,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 		///////////////////// btag cut STEP 8 //////////////////////////
 		step++;
 
-		if(!usetopdiscr && selectedbjets.size() < 1) continue;
+		if(!usetopdiscr && !nobcut && selectedbjets.size() < 1) continue;
 		// if(usetopdiscr && topdiscr3<0.9) continue;
 		if(usetopdiscr && lh_toplh<0.3) continue;
 		if(getBTagSF()->getMode() != NTBTagSF::shapereweighting_mode){
@@ -1425,6 +1450,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 		if(analysisMllRange){
 
 			// std::cout << selectedjets->at(0)->pt() << std::endl;
+
+			xsecplots.makeControlPlots(step);
 
 			plots.makeControlPlots(step);
 			sel_step[8]+=puweight;

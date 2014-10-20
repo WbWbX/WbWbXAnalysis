@@ -8,64 +8,64 @@ channels=( #"ee"
 ## scale and match variations will be ignored for other top masses then 172.5.. (hardcoded below)
 topmasses=( "172.5"
 
-    "171.5"
-    "173.5"
+    # "171.5"
+    # "173.5"
 
-    "175.5"
-    "169.5"
+    # "175.5"
+    # "169.5"
 
-    "178.5"
-    "166.5"
+    # "178.5"
+    # "166.5"
 );
-pdfeigenvectors=0 # 26 # if set to 0, no variation
+pdfeigenvectors=0  # 26 # if set to 0, no variation
 
 systs=("nominal"
 
-    # "P11_sysnominal"
-    # "P11_sysnominal_CR_up"
-    # "P11_sysnominal_CR_down"
-    # "P11_sysnominal_UE_up"
-    # "P11_sysnominal_UE_down"
+   #  "P11_sysnominal"
+   #  "P11_sysnominal_CR_up"
+   #  "P11_sysnominal_CR_down"
+   #  "P11_sysnominal_UE_up"
+   #  "P11_sysnominal_UE_down"
 
-    "TT_GENPOWPY_up"
-    "TT_GENPOWPY_down"
-
-
-    "TT_GENPOWHERW_up"
-    "TT_GENPOWHERW_down"
+   # "TT_GENPOWPY_up"
+   # "TT_GENPOWPY_down"
 
 
-    "TT_GENMCATNLO_up"
-    "TT_GENMCATNLO_down"
+   # "TT_GENPOWHERW_up"
+   # "TT_GENPOWHERW_down"
+
+
+   #  "TT_GENMCATNLO_up"
+   #  "TT_GENMCATNLO_down"
 
     "TT_BJESNUDEC_down"
     "TT_BJESNUDEC_up"
 
-    "TT_BJESRETUNE_down"
-    "TT_BJESRETUNE_up"
+    # "TT_BJESRETUNE_down"
+    # "TT_BJESRETUNE_up"
 
 
 
-    # "TRIGGER_up"
-    # "TRIGGER_down"
-    # "ELECSF_up"
-    # "ELECSF_down"
-    # "MUONSF_up"
-    # "MUONSF_down"
+    "TRIGGER_up"
+    "TRIGGER_down"
+    "ELECSF_up"
+    "ELECSF_down"
+    "MUONSF_up"
+    "MUONSF_down"
 
-    # "ELECES_up"
-    # "ELECES_down"
-    # "MUONES_up"
-    # "MUONES_down"
+    "ELECES_up"
+    "ELECES_down"
+    "MUONES_up"
+    "MUONES_down"
 
-    # "PU_up"
-    # "PU_down"
+    "PU_up"
+    "PU_down"
 
-    # "JER_up"
-    # "JER_down"
+    "JER_up"
+    "JER_down"
 
-   #"JES_up"
-   #"JES_down"
+   "JES_up"
+   "JES_down"
 
 #######JES groups according to toplhcwg use INSTEAD of global JES_up/down
 
@@ -141,10 +141,10 @@ systs=("nominal"
 ########
 
 
-    # "BTAGH_up"
-    # "BTAGH_down"
-    # "BTAGL_up"
-    # "BTAGL_down"
+    "BTAGH_up"
+    "BTAGH_down"
+    "BTAGL_up"
+    "BTAGL_down"
     
 #####csv rew section
    #"BTAGHFS1_up"
@@ -161,13 +161,13 @@ systs=("nominal"
    #"BTAGC2_down"
 
 
-    # "TOPPT_up"
-    # "TOPPT_down"
+    "TOPPT_up"
+    "TOPPT_down"
 
-    # "TT_MATCH_down"
-    # "TT_MATCH_up"
-    # "TT_SCALE_down"
-    # "TT_SCALE_up"
+    "TT_MATCH_down"
+    "TT_MATCH_up"
+    "TT_SCALE_down"
+    "TT_SCALE_up"
 
 
    #"Z_MATCH_down"

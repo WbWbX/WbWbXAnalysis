@@ -32,7 +32,7 @@ bool container1D::c_makelist=false;
 ///////function definitions
 container1D::container1D():
 
-										taggedObject(taggedObject::type_container1D)
+																taggedObject(taggedObject::type_container1D)
 
 {
 	canfilldyn_=false;
@@ -52,7 +52,7 @@ container1D::container1D():
 }
 container1D::container1D(float binwidth, TString name,TString xaxisname,TString yaxisname, bool mergeufof):
 
-						taggedObject(taggedObject::type_container1D)
+												taggedObject(taggedObject::type_container1D)
 
 { //currently not used
 	plottag=none;
@@ -73,7 +73,7 @@ container1D::container1D(float binwidth, TString name,TString xaxisname,TString 
 	hp_=0;
 }
 container1D::container1D(std::vector<float> bins, TString name,TString xaxisname,TString yaxisname, bool mergeufof):
-						taggedObject(taggedObject::type_container1D)
+												taggedObject(taggedObject::type_container1D)
 
 {
 	plottag=none;
@@ -109,6 +109,16 @@ container1D& container1D::operator=(const container1D& c) {
 	copyFrom(c);
 	taggedObject::operator = (c);
 	return *this;
+}
+
+container1D container1D::createOne()const{
+	container1D out=*this;
+	out.setAllZero(); //sets all stat to 0
+
+	for(int sys=-1;sys<(int)getSystSize();sys++)
+		for(size_t bin=0;bin<bins_.size();bin++)
+			out.getBin(bin,sys).setContent(1);
+	return out;
 }
 
 void container1D::setBins(std::vector<float> bins){
@@ -278,7 +288,7 @@ float container1D::getBinErrorUp(const size_t & bin, bool onlystat,const TString
 	if(bin<bins_.size()){
 		fullerr2=contents_.getBin(bin).getStat2(); //stat
 		if(onlystat)
-			return sqrt(fullerr2);
+			return std::sqrt(fullerr2);
 		if(limittosys==""){
 			// make vector of all sys stripped
 			std::vector<TString> sources;
@@ -297,7 +307,7 @@ float container1D::getBinErrorUp(const size_t & bin, bool onlystat,const TString
 		else{
 			fullerr2 += sq(getDominantVariationUp(limittosys,bin));
 		}
-		return sqrt(fullerr2);
+		return std::sqrt(fullerr2);
 	}
 	else{
 		if(showwarnings_)std::cout << "container1D::getBinErrorUp: bin not existent!" << std::endl;
@@ -315,7 +325,7 @@ float container1D::getBinErrorDown(const size_t & bin,bool onlystat,const TStrin
 	if(bin<bins_.size()){
 		fullerr2=contents_.getBin(bin).getStat2(); //stat
 		if(onlystat)
-			return sqrt(fullerr2);
+			return std::sqrt(fullerr2);
 		if(limittosys==""){
 			// make vector of all sys stripped
 			std::vector<TString> sources;
@@ -334,7 +344,7 @@ float container1D::getBinErrorDown(const size_t & bin,bool onlystat,const TStrin
 		else{
 			fullerr2 += sq(getDominantVariationDown(limittosys,bin));
 		}
-		return sqrt(fullerr2);
+		return std::sqrt(fullerr2);
 	}
 	else{
 		if(showwarnings_)std::cout << "container1D::getBinErrorDown: bin not existent!" << std::endl;
@@ -584,8 +594,8 @@ void container1D::mergeAllErrors(const TString & mergedname,bool linearly){
 		if(!linearly){
 			float cup=getBinErrorUp(i,false);
 			float cdown=getBinErrorDown(i,false);
-			cp.setBinContent(i,getBinContent(i)+sqrt(cup*cup-stat*stat) ,0);
-			cp.setBinContent(i,getBinContent(i)-sqrt(cdown*cdown-stat*stat) ,1);
+			cp.setBinContent(i,getBinContent(i)+std::sqrt(cup*cup-stat*stat) ,0);
+			cp.setBinContent(i,getBinContent(i)-std::sqrt(cdown*cdown-stat*stat) ,1);
 		}
 		else{
 			float cup=0,cdown=0;
@@ -688,7 +698,7 @@ float container1D::integralStat(bool includeUFOF,const int& systLayer) const{
 	for(unsigned int i=minbin;i<maxbin;i++){
 		integr2+=contents_.getBin(i,systLayer).getStat2();
 	}
-	return sqrt(integr2);
+	return std::sqrt(integr2);
 }
 /**
  * get the integral. default: nominal (systLayer=-1)
@@ -704,7 +714,7 @@ float container1D::cIntegralStat(float from, float to,const int& systLayer) cons
 	for(size_t i=minbin;i<=maxbin;i++){
 		integr2+=contents_.getBin(i,systLayer).getStat2();
 	}
-	return sqrt(integr2);
+	return std::sqrt(integr2);
 }
 /**
  * get the integral. default: nominal (systLayer=-1)
@@ -746,6 +756,25 @@ size_t container1D::cIntegralEntries(float from, float to,const int& systLayer) 
 	}
 	return integr;
 }
+
+container1D container1D::getIntegralBin()const{
+	if(bins_.size()<2)
+		throw std::out_of_range("container1D::getIntegralBin: no bins!");
+
+	size_t maxbin=bins_.size()-1;
+	std::vector<float> onebin;
+	onebin.push_back(bins_.at(1));
+	onebin.push_back(bins_.at(maxbin));
+
+	container1D out= rebinToBinning(onebin);
+	//now has 3 bins: UF, bin, OF
+	out.bins_.at(0)=0;
+	out.bins_.at(1)=0; //real bin is from 0 to 1
+	out.bins_.at(2)=1;
+
+	return out;
+}
+
 /**
  * only for visible bins
  */
@@ -1041,8 +1070,8 @@ TGraphAsymmErrors * container1D::getTGraph(TString name, bool dividebybinwidth, 
 			yel[i-1]=getBinErrorDown(i,onlystat)*scale;
 		}
 		else{
-			yeh[i-1]=sqrt(sq(getBinErrorUp(i,onlystat)) - sq(getBinErrorUp(i,true)) )*scale;
-			yel[i-1]=sqrt(sq(getBinErrorDown(i,onlystat)) - sq(getBinErrorDown(i,true)))*scale;
+			yeh[i-1]=std::sqrt(sq(getBinErrorUp(i,onlystat)) - sq(getBinErrorUp(i,true)) )*scale;
+			yel[i-1]=std::sqrt(sq(getBinErrorDown(i,onlystat)) - sq(getBinErrorDown(i,true)))*scale;
 		}
 
 	}
@@ -1242,6 +1271,12 @@ container1D container1D::operator * (float scalar){
 	out*=scalar;
 	return out;
 }
+
+
+void container1D::sqrt(){
+	contents_.sqrt();
+}
+
 
 container1D container1D::cutRight(const float & val)const{
 	size_t binno=getBinNo(val);
@@ -1462,7 +1497,7 @@ void container1D::addRelSystematicsFrom(const ztop::container1D & rhs,bool ignor
 			//contents_.getLayer(newlayerit).removeStat();
 			//stat are definitely not correlated
 			bool isnominalequal=(!strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i),1e-2))
-																			|| (strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i))) ;
+																									|| (strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i))) ;
 
 			if(isnominalequal){ //this is just a copy leave it and add no variation
 				//contents_.getLayer(newlayerit).removeStat();
@@ -1970,6 +2005,8 @@ void container1D::copyFrom(const container1D& c){
 }
 
 container1D container1D::append(const container1D& rhs)const{
+	if(bins_.size()<2) //there is nothing in this
+		return rhs;
 	container1D rhsc=rhs;
 	container1D out=*this;
 	out.equalizeSystematicsIdxs(rhsc);

@@ -22,5 +22,16 @@ container1DUnfold* analysisPlots::addPlot(const std::vector<float>&genbins, cons
     return newplot;
 }
 
+std::vector<float> analysisPlots::makebins(size_t nbins,float min,float max)const{
+	std::vector<float> out;
+	float step=(max-min) / (float)nbins;
+	float last=min;
+	for(size_t i=0;i<=nbins;i++){
+		out.push_back(last);
+		last+=step;
+	}
+	return out;
+}
+
 
 }//ns

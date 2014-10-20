@@ -62,6 +62,7 @@ protected:
     const bool & use()const{return use_;}
     container1DUnfold* addPlot(const std::vector<float>&, const std::vector<float>&, const TString&, const TString &, const TString &);
 
+    std::vector<float> makebins(size_t nbins,float min,float max)const;
 
 private:
 

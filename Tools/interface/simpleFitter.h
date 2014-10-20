@@ -131,6 +131,17 @@ public:
 
 	static bool debug;
 
+
+	///some handy functions that can be used
+
+	static double nuisanceGaus(const double & in);
+	static double nuisanceBox(const double & in);
+	//for sure not ok!
+	static double nuisanceLogNormal(const double & in);
+
+
+
+
 private: //set some to protected if inheritance is needed
 	fitmodes fitmode_;
 	minimizers minimizer_;

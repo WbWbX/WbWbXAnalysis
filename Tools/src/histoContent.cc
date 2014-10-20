@@ -50,9 +50,9 @@ void histoContent::clear(){
  * sets all entries,content,stat in each bin for all layers to zero. Does not remove layers, not change bin names
  */
 void histoContent::setAllZero(){
-    nominal_.multiply(0);
-    for(size_t i=0;i<additionalbins_.size();i++)
-        additionalbins_.at(i).multiply(0);
+	nominal_.multiply(0);
+	for(size_t i=0;i<additionalbins_.size();i++)
+		additionalbins_.at(i).multiply(0);
 }
 
 histoContent::histoContent(size_t nbins){
@@ -354,7 +354,7 @@ histoContent histoContent::operator * (const float & val){
 }
 
 bool histoContent::operator != (const histoContent& rhs)const{
-/*histoBins nominal_;
+	/*histoBins nominal_;
 	std::vector<histoBins> additionalbins_;
 	indexMap<TString> layermap_; */
 	if(nominal_!=rhs.nominal_) return true;
@@ -381,19 +381,19 @@ void histoContent::cout() const{
 }
 
 std::vector<TString> histoContent::getVariations()const{
-    std::vector<TString> out;
-    TString upv="_up";
-    TString dnv="_down";
-    for(size_t layer=0;layer<layermap_.size();layer++){
-         TString  layername=layermap_.getData(layer);
-         if(layername.EndsWith(upv))
-             layername.Replace(layername.Length()-upv.Length(),upv.Length(),"");
-         else if(layername.EndsWith(dnv))
-             layername.Replace(layername.Length()-dnv.Length(),dnv.Length(),"");
-        if(std::find(out.begin(),out.end(),layername) == out.end())//new one
-            out.push_back(layername);
-    }
-    return out;
+	std::vector<TString> out;
+	TString upv="_up";
+	TString dnv="_down";
+	for(size_t layer=0;layer<layermap_.size();layer++){
+		TString  layername=layermap_.getData(layer);
+		if(layername.EndsWith(upv))
+			layername.Replace(layername.Length()-upv.Length(),upv.Length(),"");
+		else if(layername.EndsWith(dnv))
+			layername.Replace(layername.Length()-dnv.Length(),dnv.Length(),"");
+		if(std::find(out.begin(),out.end(),layername) == out.end())//new one
+			out.push_back(layername);
+	}
+	return out;
 }
 
 /////////////////////////////////////////////
@@ -418,6 +418,23 @@ std::map<size_t,size_t> histoContent::addLayers(const histoContent & rhs){
 		outmapping[lhsidx]=i;
 	}
 	return outmapping;
+}
+
+
+
+
+void histoContent::sqrt(){
+	try{
+		nominal_.sqrt();
+	}catch(...){
+		throw std::logic_error("histoContent::sqrt: nominal has negative content or stat.");
+	}
+	try{
+		for(size_t i=0;i<additionalbins_.size();i++)
+			additionalbins_.at(i).sqrt();
+	}catch(...){
+		throw std::logic_error("histoContent::sqrt: at least one additional layer has negative content or stat.");
+	}
 }
 
 }//namespace

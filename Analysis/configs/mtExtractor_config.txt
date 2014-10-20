@@ -338,6 +338,8 @@ $$$ map histogram names $$$
 
 m_lb_step_8 = hist24_
 m_lb_min_step_8 = hist23_
+m_lb_min_bsrad_step_8 = hist23_
+
 
 
 useKeyNames = true

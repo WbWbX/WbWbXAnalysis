@@ -7,6 +7,7 @@
 #include "../interface/histoBin.h"
 #include <iostream>
 #include <omp.h>
+#include <stdexcept>
 namespace ztop{
 
 /**
@@ -29,6 +30,17 @@ void histoBin::multiply(const float&val){
 	content_*=val;
 	stat2_=stat2_*val*val;
 	entries_*=val;
+}
+void histoBin::sqrt(){
+	if(content_ < 0){
+		throw std::logic_error("histoBin::sqrt: content < 0");
+	}
+	if(stat2_ < 0){
+		throw std::logic_error("histoBin::sqrt: stat2_ < 0 !!! also check for other bugs!");
+	}
+	content_ = std::sqrt(content_);
+	stat2_   = std::sqrt(stat2_);
+	//entries unchanged
 }
 
 bool histoBin::operator != (const histoBin& rhs)const{
@@ -141,6 +153,17 @@ int histoBins::divide(const histoBins& rhs,bool statCorr){
 	}
 	return 0;
 }
+
+void histoBins::sqrt(){
+	for(size_t i=0;i<size();i++){
+		try{
+			getBin(i).sqrt();
+		}catch(...){
+			throw std::logic_error("histoBins::sqrt: contents or stat with negative values");
+		}
+	}
+}
+
 /**
  * histoBins::multiply(const histoBins& rhl,bool statCorr)
  * warning: no warnings here!
@@ -158,8 +181,8 @@ int histoBins::multiply(const histoBins& rhs,bool statCorr){
 		float mult=ca*cb;
 		float staterr2=0;
 		if(statCorr){
-			float ea=sqrt(ea2);
-			float eb=sqrt(eb2);
+			float ea=std::sqrt(ea2);
+			float eb=std::sqrt(eb2);
 			staterr2=((ca+ea)*(cb+eb) - mult)*((ca+ea)*(cb+eb) - mult);
 		}
 		else{

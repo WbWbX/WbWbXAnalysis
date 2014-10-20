@@ -14,6 +14,42 @@
 #include <math.h>
 
 namespace ztop{
+
+
+
+void ttbarControlPlots::setJetCategory(size_t nbjets,size_t njets){
+	if(nbjets < 1 || nbjets>2){
+		if(njets<1)
+			jetcategory=cat_0bjet0jet;
+		else if(njets<2)
+			jetcategory=cat_0bjet1jet;
+		else if(njets<3)
+			jetcategory=cat_0bjet2jet;
+		else if(njets>2)
+			jetcategory=cat_0bjet3jet;
+	}
+	else if(nbjets < 2){
+		if(njets<1)
+			jetcategory=cat_1bjet0jet;
+		else if(njets<2)
+			jetcategory=cat_1bjet1jet;
+		else if(njets<3)
+			jetcategory=cat_1bjet2jet;
+		else if(njets>2)
+			jetcategory=cat_1bjet3jet;
+	}
+	else if(nbjets < 3){
+		if(njets<1)
+			jetcategory=cat_2bjet0jet;
+		else if(njets<2)
+			jetcategory=cat_2bjet1jet;
+		else if(njets<3)
+			jetcategory=cat_2bjet2jet;
+		else if(njets>2)
+			jetcategory=cat_2bjet3jet;
+	}
+}
+
 /**
  * setbins, addplot, FILL
  *
@@ -269,9 +305,9 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
 		FILL(selectedbjets->at(0),eta()) ;
 
 	SETBINSRANGE(5,-2.4,2.4);
-		addPlot("leading b-jet eta coarse","#eta_{b}","N_{evt}/1");
-		if(event()->selectedbjets && event()->selectedbjets->size()>0)
-			FILL(selectedbjets->at(0),eta()) ;
+	addPlot("leading b-jet eta coarse","#eta_{b}","N_{evt}/1");
+	if(event()->selectedbjets && event()->selectedbjets->size()>0)
+		FILL(selectedbjets->at(0),eta()) ;
 
 
 	SETBINSRANGE(20,-2.4,2.4);
@@ -591,99 +627,38 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
 	if(event()->selectedbjets && event()->selectedbjets->size()>2)
 		FILLSINGLE(lh_toplh);
 
+	////////top xsec
+	size_t nbjets=0;
+	size_t naddjets=0;
+	if(event()->selectedbjets && event()->selectedjets){
+		nbjets=event()->selectedbjets->size();
+		naddjets=event()->selectedjets->size() - nbjets;
+	}
 
-
+	setJetCategory(nbjets,naddjets);
 
 
 	SETBINSRANGE(15,20,300);
 	addPlot("mll 0 b-jets","m_{ll} [GeV]","N_{evt}/GeV");
-	if(event()->selectedbjets && event()->selectedbjets->size()==0)
+	if(nbjets==0)
 		FILLSINGLE(mll);
 
 	SETBINSRANGE(15,20,300);
 	addPlot("mll 1 b-jets","m_{ll} [GeV]","N_{evt}/GeV");
-	if(event()->selectedbjets && event()->selectedbjets->size()==1)
+	if(nbjets==1)
 		FILLSINGLE(mll);
 
 	SETBINSRANGE(15,20,300);
 	addPlot("mll 2 b-jets","m_{ll} [GeV]","N_{evt}/GeV");
-	if(event()->selectedbjets && event()->selectedbjets->size()==2)
+	if(nbjets==2)
 		FILLSINGLE(mll);
 
 	SETBINSRANGE(15,20,300);
 	addPlot("mll 3+ b-jets","m_{ll} [GeV]","N_{evt}/GeV");
-	if(event()->selectedbjets && event()->selectedbjets->size()>2)
+	if(nbjets>2)
 		FILLSINGLE(mll);
 
-	///and more dimensions
-	SETBINSRANGE(15,20,300);
-	addPlot("mll 0,0 b-jets","m_{ll} [GeV]","N_{evt}/GeV");
-	if(event()->selectedbjets && event()->selectedbjets->size()==0
-			&& event()->selectedjets && event()->selectedjets->size()==0)
-		FILLSINGLE(mll);
-	addPlot("mll 0,1 b-jets","m_{ll} [GeV]","N_{evt}/GeV");
-	if(event()->selectedbjets && event()->selectedbjets->size()==0
-			&& event()->selectedjets && event()->selectedjets->size()==1)
-		FILLSINGLE(mll);
-	addPlot("mll 0,2 b-jets","m_{ll} [GeV]","N_{evt}/GeV");
-	if(event()->selectedbjets && event()->selectedbjets->size()==0
-			&& event()->selectedjets && event()->selectedjets->size()==2)
-		FILLSINGLE(mll);
-	addPlot("mll 0,3 b-jets","m_{ll} [GeV]","N_{evt}/GeV");
-	if(event()->selectedbjets && event()->selectedbjets->size()==0
-			&& event()->selectedjets && event()->selectedjets->size()==3)
-		FILLSINGLE(mll);
 
-	addPlot("mll 1,0 b-jets","m_{ll} [GeV]","N_{evt}/GeV");
-	if(event()->selectedbjets && event()->selectedbjets->size()==1
-			&& event()->selectedjets && event()->selectedjets->size()==0)
-		FILLSINGLE(mll);
-	addPlot("mll 1,1 b-jets","m_{ll} [GeV]","N_{evt}/GeV");
-	if(event()->selectedbjets && event()->selectedbjets->size()==1
-			&& event()->selectedjets && event()->selectedjets->size()==1)
-		FILLSINGLE(mll);
-	addPlot("mll 1,2 b-jets","m_{ll} [GeV]","N_{evt}/GeV");
-	if(event()->selectedbjets && event()->selectedbjets->size()==1
-			&& event()->selectedjets && event()->selectedjets->size()==2)
-		FILLSINGLE(mll);
-	addPlot("mll 1,3 b-jets","m_{ll} [GeV]","N_{evt}/GeV");
-	if(event()->selectedbjets && event()->selectedbjets->size()==1
-			&& event()->selectedjets && event()->selectedjets->size()==3)
-		FILLSINGLE(mll);
-
-	addPlot("mll 2,0 b-jets","m_{ll} [GeV]","N_{evt}/GeV");
-	if(event()->selectedbjets && event()->selectedbjets->size()==2
-			&& event()->selectedjets && event()->selectedjets->size()==0)
-		FILLSINGLE(mll);
-	addPlot("mll 2,1 b-jets","m_{ll} [GeV]","N_{evt}/GeV");
-	if(event()->selectedbjets && event()->selectedbjets->size()==2
-			&& event()->selectedjets && event()->selectedjets->size()==1)
-		FILLSINGLE(mll);
-	addPlot("mll 2,2 b-jets","m_{ll} [GeV]","N_{evt}/GeV");
-	if(event()->selectedbjets && event()->selectedbjets->size()==2
-			&& event()->selectedjets && event()->selectedjets->size()==2)
-		FILLSINGLE(mll);
-	addPlot("mll 2,3 b-jets","m_{ll} [GeV]","N_{evt}/GeV");
-	if(event()->selectedbjets && event()->selectedbjets->size()==2
-			&& event()->selectedjets && event()->selectedjets->size()==3)
-		FILLSINGLE(mll);
-
-	addPlot("mll 3+,0 b-jets","m_{ll} [GeV]","N_{evt}/GeV");
-	if(event()->selectedbjets && event()->selectedbjets->size()>2
-			&& event()->selectedjets && event()->selectedjets->size()==0)
-		FILLSINGLE(mll);
-	addPlot("mll 3+,1 b-jets","m_{ll} [GeV]","N_{evt}/GeV");
-	if(event()->selectedbjets && event()->selectedbjets->size()>2
-			&& event()->selectedjets && event()->selectedjets->size()==1)
-		FILLSINGLE(mll);
-	addPlot("mll 3+,2 b-jets","m_{ll} [GeV]","N_{evt}/GeV");
-	if(event()->selectedbjets && event()->selectedbjets->size()>2
-			&& event()->selectedjets && event()->selectedjets->size()==2)
-		FILLSINGLE(mll);
-	addPlot("mll 3+,3 b-jets","m_{ll} [GeV]","N_{evt}/GeV");
-	if(event()->selectedbjets && event()->selectedbjets->size()>2
-			&& event()->selectedjets && event()->selectedjets->size()==3)
-		FILLSINGLE(mll);
 
 	//end more dimensions
 
@@ -706,87 +681,6 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
 		FILL(leadinglep,pt());
 
 
-	/////////and more dimensions.....
-	SETBINS << 20 << 30 << 40 << 50 << 60 << 70 << 90 << 120 << 200;
-	addPlot("lead lep pt 0,0 b-jets","p_{t}^{l1} [GeV]","N_{evt}/GeV");
-	if(event()->selectedbjets && event()->selectedbjets->size()==0
-			&& event()->selectedjets && event()->selectedjets->size()==0)
-		FILL(leadinglep,pt());
-
-	addPlot("lead lep pt 0,1 b-jets","p_{t}^{l1} [GeV]","N_{evt}/GeV");
-	if(event()->selectedbjets && event()->selectedbjets->size()==0
-			&& event()->selectedjets && event()->selectedjets->size()==1)
-		FILL(leadinglep,pt());
-
-	addPlot("lead lep pt 0,2 b-jets","p_{t}^{l1} [GeV]","N_{evt}/GeV");
-	if(event()->selectedbjets && event()->selectedbjets->size()==0
-			&& event()->selectedjets && event()->selectedjets->size()==2)
-		FILL(leadinglep,pt());
-
-	addPlot("lead lep pt 0,3 b-jets","p_{t}^{l1} [GeV]","N_{evt}/GeV");
-	if(event()->selectedbjets && event()->selectedbjets->size()==0
-			&& event()->selectedjets && event()->selectedjets->size()==3)
-		FILL(leadinglep,pt());
-
-	addPlot("lead lep pt 1,0 b-jets","p_{t}^{l1} [GeV]","N_{evt}/GeV");
-	if(event()->selectedbjets && event()->selectedbjets->size()==1
-			&& event()->selectedjets && event()->selectedjets->size()==0)
-		FILL(leadinglep,pt());
-
-	addPlot("lead lep pt 1,1 b-jets","p_{t}^{l1} [GeV]","N_{evt}/GeV");
-	if(event()->selectedbjets && event()->selectedbjets->size()==1
-			&& event()->selectedjets && event()->selectedjets->size()==1)
-		FILL(leadinglep,pt());
-
-	addPlot("lead lep pt 1,2 b-jets","p_{t}^{l1} [GeV]","N_{evt}/GeV");
-	if(event()->selectedbjets && event()->selectedbjets->size()==1
-			&& event()->selectedjets && event()->selectedjets->size()==2)
-		FILL(leadinglep,pt());
-
-	addPlot("lead lep pt 1,3 b-jets","p_{t}^{l1} [GeV]","N_{evt}/GeV");
-	if(event()->selectedbjets && event()->selectedbjets->size()==1
-			&& event()->selectedjets && event()->selectedjets->size()==3)
-		FILL(leadinglep,pt());
-
-	addPlot("lead lep pt 2,0 b-jets","p_{t}^{l1} [GeV]","N_{evt}/GeV");
-	if(event()->selectedbjets && event()->selectedbjets->size()==2
-			&& event()->selectedjets && event()->selectedjets->size()==0)
-		FILL(leadinglep,pt());
-
-	addPlot("lead lep pt 2,1 b-jets","p_{t}^{l1} [GeV]","N_{evt}/GeV");
-	if(event()->selectedbjets && event()->selectedbjets->size()==2
-			&& event()->selectedjets && event()->selectedjets->size()==1)
-		FILL(leadinglep,pt());
-
-	addPlot("lead lep pt 2,2 b-jets","p_{t}^{l1} [GeV]","N_{evt}/GeV");
-	if(event()->selectedbjets && event()->selectedbjets->size()==2
-			&& event()->selectedjets && event()->selectedjets->size()==2)
-		FILL(leadinglep,pt());
-
-	addPlot("lead lep pt 2,3 b-jets","p_{t}^{l1} [GeV]","N_{evt}/GeV");
-	if(event()->selectedbjets && event()->selectedbjets->size()==2
-			&& event()->selectedjets && event()->selectedjets->size()==3)
-		FILL(leadinglep,pt());
-
-	addPlot("lead lep pt 3+,0 b-jets","p_{t}^{l1} [GeV]","N_{evt}/GeV");
-	if(event()->selectedbjets && event()->selectedbjets->size()>2
-			&& event()->selectedjets && event()->selectedjets->size()==0)
-		FILL(leadinglep,pt());
-
-	addPlot("lead lep pt 3+,1 b-jets","p_{t}^{l1} [GeV]","N_{evt}/GeV");
-	if(event()->selectedbjets && event()->selectedbjets->size()>2
-			&& event()->selectedjets && event()->selectedjets->size()==1)
-		FILL(leadinglep,pt());
-
-	addPlot("lead lep pt 3+,2 b-jets","p_{t}^{l1} [GeV]","N_{evt}/GeV");
-	if(event()->selectedbjets && event()->selectedbjets->size()>2
-			&& event()->selectedjets && event()->selectedjets->size()==2)
-		FILL(leadinglep,pt());
-
-	addPlot("lead lep pt 3+,3 b-jets","p_{t}^{l1} [GeV]","N_{evt}/GeV");
-	if(event()->selectedbjets && event()->selectedbjets->size()>2
-			&& event()->selectedjets && event()->selectedjets->size()==3)
-		FILL(leadinglep,pt());
 
 
 
@@ -854,10 +748,6 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
 	addPlot("total 3+ b-jets","","N_{evt}");
 	if(event()->selectedbjets && event()->selectedbjets->size()>2)
 		last()->fill(1,*event()->puweight);
-
-
-
-
 
 
 	SETBINSRANGE(7,-0.5,6.5);

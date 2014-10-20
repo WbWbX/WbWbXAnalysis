@@ -45,6 +45,12 @@ void containerStack::push_back(ztop::container1D cont, TString legend, int color
 	}
 
 	bool wasthere=false;
+	if(legends_.size()>0){
+		//quick binning check
+		if(cont.getBins() != containers_.at(0).getBins())
+			throw std::logic_error("containerStack::push_back: binning has to be the same");
+	}
+
 	for(unsigned int i=0;i<legends_.size();i++){
 		if(legend == legends_[i]){
 			if(containerStack::debug)
@@ -310,6 +316,7 @@ int containerStack::getContributionIdx(TString legname) const{
 			return i;
 	}
 	std::cout << "containerStack::getContributionIdx: " << legname << " not found!" <<std::endl;
+	throw std::out_of_range("containerStack::getContributionIdx: contribution does not exists");
 	return -1;
 }
 
@@ -516,6 +523,28 @@ void containerStack::addGlobalRelMCError(TString sysname,double error){
 	for(unsigned int i=0;i<containers1DUnfold_.size();i++){
 		if(legends_[i]!=dataleg_) containers1DUnfold_[i].addGlobalRelError(sysname,error);
 	}
+}
+void containerStack::addRelErrorToContribution(double err, const TString& contributionname, TString nameprefix){
+	size_t idx=getContributionIdx(contributionname);
+	TString sysname=nameprefix+"_"+contributionname;
+	containerStack tmp=*this;
+	tmp.multiplyNorm(idx,(1+err));
+	addErrorStack(sysname+"_up",tmp);
+	tmp=*this;
+	tmp.multiplyNorm(idx,(1-err));
+	addErrorStack(sysname+"_down",tmp);
+}
+
+void containerStack::addRelErrorToBackgrounds(double err ,bool aspartials , TString nameprefix,const TString& excludecontr){
+	std::vector<TString> vec;
+	vec.push_back(excludecontr);
+	addRelErrorToBackgrounds(err,aspartials,nameprefix,vec);
+}
+void containerStack::addRelErrorToBackgrounds(double err ,bool aspartials , TString nameprefix,const std::vector<TString> excludecontr){
+	std::vector<size_t> excludeidxs;
+	for(size_t i=0;i<excludecontr.size();i++)
+		excludeidxs.push_back(getContributionIdx(excludecontr.at(i)));
+	addRelErrorToBackgrounds(err,aspartials,nameprefix,excludeidxs);
 }
 
 void containerStack::addRelErrorToBackgrounds(double err ,bool aspartials , TString nameprefix,const std::vector<size_t> excludeidxs){
@@ -1647,6 +1676,8 @@ containerStack containerStack::append(const containerStack& rhs)const{
 	if(rhs.containers_.size() <1){
 		throw std::logic_error("containerStack::append: only works for 1D stacks");
 	}
+	if(containers_.size()<1) //empty stack
+		return rhs;
 
 	containerStack out=*this;
 	std::vector<size_t> rhsused;
@@ -1671,7 +1702,7 @@ containerStack containerStack::append(const containerStack& rhs)const{
 		if(std::find(rhsused.begin(), rhsused.end(),leg) != rhsused.end()) continue;
 		container1D temp=out.containers_.at(0);
 		temp.setAllZero();
-		temp.append(rhs.containers_.at(leg));
+		temp=temp.append(rhs.containers_.at(leg));
 		out.push_back(temp,rhs.legends_.at(leg),rhs.colors_.at(leg),rhs.norms_.at(leg),rhs.legorder_.at(leg));
 
 	}
@@ -1680,6 +1711,23 @@ containerStack containerStack::append(const containerStack& rhs)const{
 }
 
 
+void containerStack::equalizeSystematicsIdxs(containerStack& rhs){
+
+	//no need to look at legends, syst are the same in stack by construction
+	if(rhs.size() < 1 || size() <1)
+		throw std::logic_error("containerStack::equalizeSystematicsIdxs: one is empty");
+
+	for(size_t i=0;i<containers_.size();i++){
+		containers_.at(i).equalizeSystematicsIdxs(rhs.containers_.at(0));
+	}
+	// after this->containers_.at(0) now has a superset of syst,
+	// it will drive the new ordering of rhs
+	for(size_t i=0;i<rhs.containers_.size();i++){
+		rhs.containers_.at(i).equalizeSystematicsIdxs(containers_.at(0));
+	}
+	if(!is1D()) //FIXME
+		throw std::runtime_error("containerStack::equalizeSystematicsIdxs: only implemented for 1D stacks (FIXME)");
+}
 
 bool containerStack::setsignal(const TString& sign){
 	for(size_t i=0;i<legends_.size();i++){

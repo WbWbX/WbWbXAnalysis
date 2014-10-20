@@ -24,7 +24,11 @@ public:
 
 	//exports for a certain set of variations
 	//no syst for now!
-	container1D exportContainer(const std::vector<float> & variations);
+	container1D exportContainer(const std::vector<double> & variations)const;
+	/**
+	 * exports with 0 variation
+	 */
+	container1D exportContainer()const;
 
 	float getBinErrUp(size_t idx){return errsup_.at(idx);}
 	float getBinErrDown(size_t idx){return errsdown_.at(idx);}
@@ -36,10 +40,16 @@ public:
 	const std::vector<float>& bins(){return bins_;}
 
 	size_t getNDependencies()const{if(contents_.size()>0) return contents_.at(0).getNDependencies();else return 0;}
+	/**
+	 * returns full size including possible UF, OF
+	 */
+	size_t getNBins()const{return contents_.size();}
+	const std::vector<float>& getBins()const{return bins_;}
 
 	std::vector<TString> getSystNames(){if(contents_.size()>0) return contents_.at(0).getSystNames();else return std::vector<TString>();}
 
 	extendedVariable * getBin(size_t idx){if(contents_.size()>0) return &contents_.at(idx);else return 0;}
+
 
 	static bool debug;
 

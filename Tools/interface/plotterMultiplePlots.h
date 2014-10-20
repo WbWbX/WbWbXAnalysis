@@ -21,7 +21,7 @@ namespace ztop{
  */
 class plotterMultiplePlots : public plotterBase{
 public:
-    plotterMultiplePlots():plotterBase(),drawlegend_(true),tightyaxis_(false),tightxaxis_(true){}
+    plotterMultiplePlots();
 
     void addPlot(const graph *c);
     void addPlot(const container1D *c,bool divbw=true);

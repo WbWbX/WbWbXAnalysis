@@ -30,8 +30,7 @@ namespace ztop{
  */
 class plotterCompare : public plotterBase{
 public:
-    plotterCompare(): plotterBase(),
-    divideat_(0.5),memnom_(0),memratio_(0),size_(0){}
+    plotterCompare();
     ~plotterCompare(){cleanMem();}
 
     void setNominalPlot(const container1D *c,bool divbw=true);

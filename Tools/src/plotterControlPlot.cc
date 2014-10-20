@@ -14,6 +14,11 @@
 
 namespace ztop{
 
+plotterControlPlot::plotterControlPlot(): plotterBase(), divideat_(0), stackp_(0),tempdataentry_(0),invertplots_(false),psmigthresh_(0){
+	readStyleFromFileInCMSSW("/src/TtZAnalysis/Tools/styles/controlPlots_standard.txt");
+	gStyle->SetOptStat(0);
+}
+
 /**
  * expects entries:
  * [plotterControlPlot] defines divideat
@@ -209,6 +214,8 @@ void plotterControlPlot::drawControlPlot(){
 
 		std::vector<TString> legendentries;
 		bool foundPSmig=false;
+		if(sorted.size() != stackp_->size())
+			throw std::out_of_range("plotterControlPlot::drawControlPlot: serious: sorted.size() != stackp_->size()");
 
 		for(size_t it=0;it<stackp_->size();it++){ //it is the right ordering
 			size_t i=sorted.at(it);

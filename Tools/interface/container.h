@@ -14,6 +14,7 @@
 #include "histoContent.h"
 #include "graph.h"
 #include "taggedObject.h"
+#include "extendedVariable.h"
 
 ////////bins include their border on the right side!!
 
@@ -47,6 +48,12 @@ public:
 	~container1D();
 	container1D(const container1D&);
 	container1D& operator=(const container1D&);
+
+	/**
+	 * creates a container with same syst, bin-boundaries
+	 * all entries are 1, with 0 stat (useful algebraic for operations)
+	 */
+	container1D createOne()const;
 
 	bool isDummy()const{return bins_.size()<=2;}
 
@@ -137,6 +144,14 @@ public:
 	size_t integralEntries(bool includeUFOF=false,const int& systLayer=-1) const;
 	size_t cIntegralEntries(float from=0, float to=0,const int& systLayer=-1) const;       //! includes the full bin "from" or "to" is in
 
+
+	/**
+	 * creates container1D with one bin holding the integral
+	 * including syst
+	 * UF and OF will be kept
+	 */
+	container1D getIntegralBin()const;
+
 	float getYMax(bool dividebybinwidth ,const int& systLayer=-1) const;
 	float getYMin(bool dividebybinwidth, const int& systLayer=-1) const;
 
@@ -205,6 +220,8 @@ public:
 	container1D & operator *= (double val){return *this *=(float)val;}           //!< simple scalar multiplication. stat and syst errors are scaled accordingly!!
 	container1D operator * (double val){return *this*(float)val;}           //!< simple scalar multiplication. stat and syst errors are scaled accordingly!!
 
+	void sqrt();
+
 	/**
 	 * cuts everything on the right of the input value (bin boundary chosen accorind to getBinNo())
 	 * and returns new container.
@@ -238,6 +255,7 @@ public:
 	 *
 	 */
 	container1D rebin(size_t merge) const;
+
 
 	int addErrorContainer(const TString &, container1D, float);  //!< adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down"
 	int addErrorContainer(const TString &,const container1D&);        //!< adds deviation to (this) as systematic uncertianty with name. name must be ".._up" or ".._down"
@@ -310,6 +328,8 @@ public:
 	 */
 	static void setOperatorDefaults();
 
+
+
 	/**
 	 * prints the full content in each bin
 	 */
@@ -333,7 +353,8 @@ public:
 	/**
 	 * This function equalizes the association of systematic indices between rhs and *this
 	 * if an uncertainty does not exist, it is copied from nominal
-	 * The new ordering will be derived mostly from rhs
+	 * The new ordering will be derived  from rhs mostly, fully if rhs has a superset of
+	 * systematics
 	 */
 	void equalizeSystematicsIdxs(container1D &rhs);
 
