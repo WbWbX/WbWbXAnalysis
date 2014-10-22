@@ -56,6 +56,10 @@ public:
 	void mergePartialVariations(const TString& identifier,bool strictpartialID=true);
 	void mergeAllErrors(const TString & mergedname);
 
+
+	void mergeVariations(const std::vector<TString>& names, const TString & outname,bool linearly=false);
+	void mergeVariationsFromFileInCMSSW(const std::string& filename);
+
 	void fillGen(const float & val, const float & weight=1); //if isMC false only fill one specific container - which one?? 0<->underflow? or first one...?
 	void fillReco(const float & yval, const float & weight=1);
 

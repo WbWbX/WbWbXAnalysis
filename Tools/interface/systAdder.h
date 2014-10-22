@@ -43,9 +43,10 @@ public:
 
 	size_t mergeVariationsSize(){return tomerge.size();}
 
-	TString              getMergedName(size_t idx){return tomerge.at(idx).mergename;}
-	std::vector<TString> getToBeMergedName(size_t idx){return tomerge.at(idx).tobemerged;}
-	bool                 getToBeMergedLinearly(size_t idx){return tomerge.at(idx).linearly;}
+	TString              getMergedName(size_t idx)const;
+	std::vector<TString> getToBeMergedName(size_t idx)const;
+
+	bool                 getToBeMergedLinearly(size_t idx)const;
 
 
 	static bool debug;

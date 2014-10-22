@@ -110,6 +110,8 @@ public:
 
     void sortPointsByX();
 
+    bool pointsYIdentical(size_t , size_t)const;
+
     /*
      * operators... define carefully based on histocontent. Not too much overlap with container1D
      */

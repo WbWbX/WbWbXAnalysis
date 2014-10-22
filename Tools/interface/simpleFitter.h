@@ -93,7 +93,7 @@ public:
 
 	void setRequireFitFunction(bool req){requirefitfunction_=req;}
 
-	void setMaxCalls(unsigned int calls){maxcalls_=calls;}
+	void setMaxCalls(unsigned  int calls){maxcalls_=calls;}
 
 	void addMinosParameter(size_t parnumber){minospars_.push_back(parnumber);}
 	void setTolerance(double tol){tolerance_=tol;}
@@ -116,6 +116,7 @@ public:
 	const std::vector<TString> *getParameterNames()const {return &paranames_;}
 
 	const double& getCorrelationCoefficient(size_t i, size_t j)const;
+//	container2D getCorrelationCoefficients()const;
 
 	size_t findParameterIdx(const TString& paraname)const;
 
@@ -147,10 +148,10 @@ private: //set some to protected if inheritance is needed
 	minimizers minimizer_;
 	double chi2min_;
 
+protected:
 	std::vector<point2D> nompoints_;
 	std::vector<point2D> errsup_;
 	std::vector<point2D> errsdown_;
-protected:
 	std::vector<double> paras_;
 private:
 	std::vector<double> stepsizes_;
@@ -161,7 +162,7 @@ private:
 
 	std::vector<int> minospars_;
 
-	unsigned int maxcalls_;
+	unsigned int  maxcalls_;
 
 	//definitely privateL
 
@@ -173,8 +174,9 @@ private:
 	bool checkSizes()const;
 
 	bool requirefitfunction_;
+protected:
 	bool minsuccessful_;
-
+private:
 	double tolerance_;
 	ROOT::Math::Functor* functobemin_;
 	TString algorithm_;

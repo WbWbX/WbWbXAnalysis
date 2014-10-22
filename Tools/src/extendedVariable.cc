@@ -15,7 +15,7 @@ bool extendedVariable::debug=false;
 
 void extendedVariable::addDependence(const graph & g, size_t nompoint, const TString& sysname){
 	if(debug)
-			std::cout << "extendedVariable::addDependence" <<std::endl;
+		std::cout << "extendedVariable::addDependence" <<std::endl;
 
 	if(nompoint>=g.getNPoints()){
 		throw std::out_of_range("extendedVariable::addDependence: nompoint is out of range");
@@ -47,6 +47,20 @@ void extendedVariable::addDependence(const graph & g, size_t nompoint, const TSt
 	fitter.setFitMode(graphFitter::fm_pol2);
 	fitter.setMinimizer(graphFitter::mm_minuit2);
 	fitter.readGraph(&gcopy);
+
+	//in case of const variation on one side
+	if(g.getNPoints() == 3){
+		gcopy.sortPointsByX();
+		if(gcopy.pointsYIdentical(0,1) || gcopy.pointsYIdentical(1,2)){
+		fitter.setInterpolate(true);
+		if(debug)
+			std::cout << "extendedVariable::addDependence: detected const variation for "<< sysname<< " on one side, switch to interpolate mode." <<std::endl;
+		}
+		else if(debug){
+			std::cout << "extendedVariable::addDependence: detected non-const variation for "<<sysname<< std::endl;
+		}
+	}
+
 	fitter.fit();
 
 	if(!fitter.wasSuccess()){
@@ -79,6 +93,7 @@ graph extendedVariable::addDependence(const float & low, const float& nominal, c
 		float maxi=std::max(fabs(low),fabs(high));
 		maxi=std::max(fabs(maxi),fabs(nominal));
 		if(maxi==0) min=1e-3; //will be solved instead of fitted anyway
+		else min=1e-3*maxi;
 
 		tmpg.setPointYStat(0,min);
 		tmpg.setPointYStat(1,min);
@@ -107,7 +122,7 @@ graph extendedVariable::addDependence(const float & low, const float& nominal, c
 
 double extendedVariable::getValue(const double * variations)const{
 	if(debug)
-			std::cout << "extendedVariable::getValue" <<std::endl;
+		std::cout << "extendedVariable::getValue" <<std::endl;
 
 	double out=0;
 	for(size_t i=0;i<dependences_.size();i++){
@@ -121,7 +136,7 @@ double extendedVariable::getValue(const double * variations)const{
 }
 double extendedVariable::getValue(const float * variations)const{
 	if(debug)
-			std::cout << "extendedVariable::getValue" <<std::endl;
+		std::cout << "extendedVariable::getValue" <<std::endl;
 	double out=0;
 	for(size_t i=0;i<dependences_.size();i++){
 		out+=dependences_.at(i).getFitOutput(variations[i]);
@@ -135,7 +150,7 @@ double extendedVariable::getValue(const float * variations)const{
 
 double extendedVariable::getValue(const std::vector<float> * variations)const{
 	if(debug)
-			std::cout << "extendedVariable::getValue" <<std::endl;
+		std::cout << "extendedVariable::getValue" <<std::endl;
 
 	if(variations->size()!=dependences_.size()){
 		throw std::out_of_range("extendedVariable::getValue: number of variations and dependencies don't match");
@@ -147,7 +162,7 @@ double extendedVariable::getValue(const std::vector<float> * variations)const{
 
 double extendedVariable::getValue(const std::vector<float> & variations)const{
 	if(debug)
-			std::cout << "extendedVariable::getValue" <<std::endl;
+		std::cout << "extendedVariable::getValue" <<std::endl;
 
 	if(variations.size()!=dependences_.size()){
 		throw std::out_of_range("extendedVariable::getValue: number of variations and dependencies don't match");
@@ -158,7 +173,7 @@ double extendedVariable::getValue(const std::vector<float> & variations)const{
 }
 double extendedVariable::getValue(const std::vector<double> * variations)const{
 	if(debug)
-			std::cout << "extendedVariable::getValue" <<std::endl;
+		std::cout << "extendedVariable::getValue" <<std::endl;
 
 	if(variations->size()!=dependences_.size()){
 		throw std::out_of_range("extendedVariable::getValue: number of variations and dependencies don't match");
@@ -169,7 +184,7 @@ double extendedVariable::getValue(const std::vector<double> * variations)const{
 }
 double extendedVariable::getValue(size_t idx,float variation)const{
 	if(debug)
-			std::cout << "extendedVariable::getValue" <<std::endl;
+		std::cout << "extendedVariable::getValue" <<std::endl;
 	if(idx >= dependences_.size()){
 		throw std::out_of_range("extendedVariable::getValue: index out of range");
 	}
@@ -179,7 +194,7 @@ double extendedVariable::getValue(size_t idx,float variation)const{
 
 double extendedVariable::getValue(const std::vector<double> & variations)const{
 	if(debug)
-			std::cout << "extendedVariable::getValue" <<std::endl;
+		std::cout << "extendedVariable::getValue" <<std::endl;
 
 	if(variations.size()!=dependences_.size()){
 		throw std::out_of_range("extendedVariable::getValue: number of variations and dependencies don't match");
@@ -192,7 +207,7 @@ double extendedVariable::getValue(const std::vector<double> & variations)const{
 
 void extendedVariable::clear(){
 	if(debug)
-			std::cout << "extendedVariable::clear" <<std::endl;
+		std::cout << "extendedVariable::clear" <<std::endl;
 	dependences_.clear();
 	sysnames_.clear();
 	nominal_=-100000;

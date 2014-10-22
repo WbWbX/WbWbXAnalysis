@@ -60,6 +60,14 @@ public:
 	void mergeLegends(const std::vector<TString>& tobemerged,const TString & mergedname, int mergedColor, bool allowsignals=false);
 	void mergeLegends(const TString& tobemergeda,const TString & tobemergedb,const TString & mergedname, int mergedColor, bool allowsignals=false);
 
+
+	/**
+	 * names without "up" and "down"
+	 */
+	void mergeVariations(const std::vector<TString>& names, const TString & outname,bool linearly=false);
+
+	void mergeVariationsFromFileInCMSSW(const std::string& filename);
+
 	ztop::container1D getContribution(TString)const;   //! does not ignore data; makes copy, doesn't change member containers!
 	ztop::container1D getContributionsBut(TString)const;  //!does not ignore data; makes copy, doesn't change member containers!
 	ztop::container1D getContributionsBut(std::vector<TString>)const;  //!does not ignore data; makes copy, doesn't change member containers!

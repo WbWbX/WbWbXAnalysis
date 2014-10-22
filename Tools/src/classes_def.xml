@@ -46,6 +46,8 @@
 	<class name="std::vector<ztop::containerStyle>"/> 
 	<class name="std::vector<ztop::plotStyle>"/>
 		<class name="ztop::graph"/>
+		<class name="ztop::simpleFitter"/>
+		<class name="ztop::graphFitter"/>
 		<class name="std::vector<ztop::graph>"/>
         <class name="ztop::plot"/>
         <class name="ztop::tObjectList"/>

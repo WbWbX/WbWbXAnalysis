@@ -284,13 +284,9 @@ bool NTBTagSF::isRealSyst()const{
             return false;
         if(getSystematic()  == bTagBase::lfstat2down)
             return false;
-        if(getSystematic()  == bTagBase::cerr1up)
+        if(getSystematic()  == bTagBase::puritydown)
             return false;
-        if(getSystematic()  == bTagBase::cerr1down)
-            return false;
-        if(getSystematic()  == bTagBase::cerr2up)
-            return false;
-        if(getSystematic()  == bTagBase::cerr2down)
+        if(getSystematic()  == bTagBase::purityup)
             return false;
     }
     return true;

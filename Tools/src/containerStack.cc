@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <vector>
 
+#include "../interface/systAdder.h"
+
 namespace ztop{
 
 std::vector<ztop::containerStack*> containerStack::cs_list;
@@ -277,6 +279,35 @@ void containerStack::mergeLegends(const TString& tobemergeda,const TString & tob
 	tbm.push_back(tobemergedb);
 	mergeLegends(tbm,mergedname,mergedColor,allowsignal);
 }
+
+/**
+ * names without "up" and "down"
+ */
+void containerStack::mergeVariations(const std::vector<TString>& names, const TString & outname,bool linearly){
+	for(size_t i=0;i<containers_.size();i++)
+		containers_.at(i).mergeVariations(names,outname,linearly);
+	for(size_t i=0;i<containers2D_.size();i++)
+		containers2D_.at(i).mergeVariations(names,outname,linearly);
+	for(size_t i=0;i<containers1DUnfold_.size();i++)
+		containers1DUnfold_.at(i).mergeVariations(names,outname,linearly);
+
+
+}
+
+void containerStack::mergeVariationsFromFileInCMSSW(const std::string& filename){
+	systAdder adder;
+	adder.readMergeVariationsFileInCMSSW(filename);
+	size_t ntobemerged=adder.mergeVariationsSize();
+	for(size_t i=0;i<ntobemerged;i++){
+
+		TString mergedname=adder.getMergedName(i);
+		std::vector<TString> tobemerged=adder.getToBeMergedName(i);
+		bool linearly=adder.getToBeMergedLinearly(i);
+
+		mergeVariations(tobemerged,mergedname,linearly);
+	}
+}
+
 
 void containerStack::removeContribution(TString legendname){
 	bool found=false;

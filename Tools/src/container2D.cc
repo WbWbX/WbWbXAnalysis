@@ -9,7 +9,7 @@
 
 #include "../interface/container2D.h"
 #include <algorithm>
-
+#include "../interface/systAdder.h"
 
 namespace ztop{
 
@@ -36,7 +36,7 @@ container2D::~container2D(){
 }
 
 container2D::container2D(const std::vector<float> &xbins,const std::vector<float> &ybins, TString name,TString xaxisname,TString yaxisname, bool mergeufof) :
-        																																																		taggedObject(taggedObject::type_container2D),mergeufof_(mergeufof), xaxisname_(xaxisname), yaxisname_(yaxisname)
+        																																																				taggedObject(taggedObject::type_container2D),mergeufof_(mergeufof), xaxisname_(xaxisname), yaxisname_(yaxisname)
 {
 	setName(name);
 	//create for each ybin (plus UF OF) a container1D
@@ -221,6 +221,27 @@ const TString & container2D::getSystErrorName(const size_t & number) const{
 	}
 	return conts_.at(0).getSystErrorName(number);
 }
+
+
+void container2D::mergeVariations(const std::vector<TString>& names, const TString & outname,bool linearly){
+	for(size_t i=0;i<conts_.size();i++)
+		conts_.at(i).mergeVariations(names,outname,linearly);
+}
+void container2D::mergeVariationsFromFileInCMSSW(const std::string& filename){
+	systAdder adder;
+	adder.readMergeVariationsFileInCMSSW(filename);
+	size_t ntobemerged=adder.mergeVariationsSize();
+	for(size_t i=0;i<ntobemerged;i++){
+
+		TString mergedname=adder.getMergedName(i);
+		std::vector<TString> tobemerged=adder.getToBeMergedName(i);
+		bool linearly=adder.getToBeMergedLinearly(i);
+
+		mergeVariations(tobemerged,mergedname,linearly);
+	}
+}
+
+
 /*
  float container2D::projectBinContentToY(const size_t & ybin,bool includeUFOF) const{
 	if((size_t)ybin >= ybins_.size()){

@@ -292,6 +292,21 @@ const double& simpleFitter::getCorrelationCoefficient(size_t i, size_t j)const{
 	return paracorrs_.at(i).at(j);
 
 }
+/*
+container2D simpleFitter::getCorrelationCoefficients()const{
+	std::vector<float> bins;
+	for(size_t i=0;i<paracorrs_.size()+1;i++)
+		bins.push_back(i);
+	container2D out(bins,bins,"Correlations","","",false);
+	for(size_t i=0;i<paracorrs_.size();i++){
+		size_t binnox=out.getBinNoX((float)i+0.5);
+		for(size_t j=0;j<paracorrs_.at(i).size();j++){
+			size_t binnoy=out.getBinNoY((float)j+0.5);
+			out.getBin(binnox,binnoy).setContent(paracorrs_.at(i).at(j));
+		}
+	}
+	return out;
+}*/
 
 size_t simpleFitter::findParameterIdx(const TString& paraname)const{
 	size_t idx=std::find(paranames_.begin(), paranames_.end(),paraname) - paranames_.begin();

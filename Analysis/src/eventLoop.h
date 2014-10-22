@@ -236,15 +236,20 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 		else if(getTopPtReweighter()->getSystematic() == reweightfunctions::up)
 			getTopPtReweighter()->setSystematics(reweightfunctions::nominal);
 		 */
-		if(getTopPtReweighter()->getSystematic() != reweightfunctions::up)
+		if(getTopPtReweighter()->getSystematic() != reweightfunctions::up) //switch off for all BUT...
 			getTopPtReweighter()->switchOff(true);
-		else
+		else //...for "up" set "nominal" variation to data
 			getTopPtReweighter()->setSystematics(reweightfunctions::nominal);
 
 	}
 	bool apllweightsone=false;
 	if(mode_.Contains("Noweights")){
 		apllweightsone=true;
+	}
+
+	bool leppt30=false;
+	if(mode_.Contains("Leppt30")){
+		leppt30=true;
 	}
 
 	/*
@@ -813,6 +818,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 				muon->setP4(muon->p4() * getMuonEnergySF()->getScalefactor(muon->eta()));
 			allleps << muon;
 			if(muon->pt() < 20)       continue;
+			if(leppt30 && muon->pt() < 30)       continue;
 			if(fabs(muon->eta())>2.4) continue;
 			kinmuons << &(b_Muons.content()->at(i));
 
@@ -870,6 +876,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
 			allleps << elec;
 			if(elec->pt() < 20)  continue;
+			if(leppt30 && elec->pt() < 30)       continue;
 			float abseta=fabs(elec->eta());
 
 			float suclueta = fabs(elec->ECalP4().eta());

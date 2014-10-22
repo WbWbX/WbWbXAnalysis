@@ -26,6 +26,7 @@ class TTree;
 #define container1D_partialvariationIDString "pvar_"
 
 namespace ztop{
+
 class container2D;
 class containerStyle;
 /**
@@ -292,8 +293,11 @@ public:
 	void transformToEfficiency();
 	/**
 	 * sets all errors (sys and stat) to 0
+	 * but doesn't remove layers
+	 * if nominalstat=false, it keeps stat of nominal
+	 * syst will be exact copies of nominal
 	 */
-	void setAllErrorsZero(){contents_.removeAdditionalLayers();contents_.clearLayerStat(-1);} //! sets all errors zero
+	void setAllErrorsZero(bool nominalstat=true); //! sets all errors zero
 	/**
 	 * removes all syst uncertainties, but leaves stat uncertainties of nominal untouched
 	 */

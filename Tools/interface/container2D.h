@@ -73,6 +73,9 @@ public:
 	float getSystError(unsigned int number, const size_t & xbin, const size_t & ybin) const;
 	float getSystErrorStat(unsigned int number, const size_t & xbin, const size_t & ybin) const;
 	const TString & getSystErrorName(const size_t & number) const;
+
+	void mergeVariations(const std::vector<TString>& names, const TString & outname,bool linearly=false);
+	void mergeVariationsFromFileInCMSSW(const std::string& filename);
 	/*
      float projectBinContentToY(const size_t & ybin,bool includeUFOF=false) const;
      float projectBinContentToX(const size_t & xbin,bool includeUFOF=false) const;
@@ -193,7 +196,7 @@ inline size_t ztop::container2D::getBinNoX(const float & var) const{
 	if(conts_.size()>0)
 		return conts_.at(0).getBinNo(var);
 	else
-		return -1;
+		return 1e9;
 }
 inline size_t ztop::container2D::getBinNoY(const float & var) const {
 

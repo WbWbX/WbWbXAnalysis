@@ -7,6 +7,8 @@
 
 #include "../interface/container1DUnfold.h"
 #include "FWCore/FWLite/interface/AutoLibraryLoader.h"
+#include "../interface/systAdder.h"
+
 
 /*
  * multicore usage for unfolding to be implemented
@@ -144,6 +146,30 @@ void container1DUnfold::mergeAllErrors(const TString & mergedname){
 	gencont_.mergeAllErrors(mergedname);
 	refolded_.mergeAllErrors(mergedname);
 }
+
+
+void container1DUnfold::mergeVariations(const std::vector<TString>& names, const TString & outname,bool linearly){
+	container2D::mergeVariations(names,outname,linearly);
+
+	recocont_.mergeVariations(names,outname,linearly);
+	unfolded_.mergeVariations(names,outname,linearly);
+	gencont_.mergeVariations(names,outname,linearly);
+	refolded_.mergeVariations(names,outname,linearly);
+}
+void container1DUnfold::mergeVariationsFromFileInCMSSW(const std::string& filename){
+	systAdder adder;
+	adder.readMergeVariationsFileInCMSSW(filename);
+	size_t ntobemerged=adder.mergeVariationsSize();
+	for(size_t i=0;i<ntobemerged;i++){
+
+		TString mergedname=adder.getMergedName(i);
+		std::vector<TString> tobemerged=adder.getToBeMergedName(i);
+		bool linearly=adder.getToBeMergedLinearly(i);
+
+		mergeVariations(tobemerged,mergedname,linearly);
+	}
+}
+
 
 void container1DUnfold::setBinByBin(bool bbb){
 	if(!congruentbins_){

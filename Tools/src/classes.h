@@ -21,6 +21,7 @@
 
 #include "../interface/containerUnfolder.h"
 #include "../interface/graph.h"
+#include "../interface/graphFitter.h"
 #include "../interface/plot.h"
 #include "../interface/tObjectList.h"
 
@@ -98,6 +99,9 @@ struct dictionary {
 
 	ztop::graph weewrefd;
 	std::vector<ztop::graph> vweewrefd;
+
+	ztop::simpleFitter weewrefdsad;
+	ztop::graphFitter weewrefdsaasdsad;
 
 	ztop::tObjectList jhwefiuhwefjn;
 	std::vector<ztop::tObjectList> sdwefwerewfds;

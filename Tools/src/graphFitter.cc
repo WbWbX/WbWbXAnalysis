@@ -13,15 +13,28 @@
 
 namespace ztop{
 
-graphFitter::graphFitter():simpleFitter(),shiftxy_(false),shiftx_(0),shifty_(0){}
+graphFitter::graphFitter():simpleFitter(),shiftxy_(false),shiftx_(0),shifty_(0),interpolate_(false){}
 
 
 double graphFitter::getFitOutput(const double& xin)const{
-	if(shiftxy_){
-		return simpleFitter::getFitOutput(xin-shiftx_) + shifty_;
+	if(!interpolate_){
+		if(shiftxy_){
+			return simpleFitter::getFitOutput(xin-shiftx_) + shifty_;
+		}
+		else{
+			return simpleFitter::getFitOutput(xin);
+		}
 	}
 	else{
-		return simpleFitter::getFitOutput(xin);
+		if(interpolateparas_a_.size() < 2)
+			throw std::logic_error("graphFitter::getFitOutput: in interpolate mode requires \"fit()\" in interpolate mode first");
+
+		//find appropriate range
+		size_t idx=std::lower_bound(interpolateparas_a_.begin(), interpolateparas_a_.end(), xin) - interpolateparas_a_.begin();
+		if(idx!=0)
+			--idx;
+
+		return (xin-interpolateparas_a_.at(idx)) * interpolateparas_b_.at(idx) + interpolateparas_c_.at(idx);
 	}
 }
 
@@ -35,11 +48,10 @@ void graphFitter::readGraph(const graph* g){
 	std::vector<point2D> errsdown;
 	//translate
 	graph temp;
+	temp=*g;
+	g=&temp;
+	temp.sortPointsByX();
 	if(shiftxy_){
-
-
-		temp=*g;
-		g=&temp;
 
 		double meanya=(g->getYMax()+g->getYMin())/2;
 		double xmin=g->getXMin();
@@ -79,6 +91,23 @@ void graphFitter::readGraph(const graph* g){
 
 	savedinput_=*g;
 
+}
+
+void graphFitter::fit(){
+	if(!interpolate_)
+		simpleFitter::fit();
+	else{
+		interpolateparas_a_.clear();
+		interpolateparas_b_.clear();
+		interpolateparas_c_.clear();
+		for(size_t i=0;i<nompoints_.size()-1;i++){
+			interpolateparas_a_.push_back(nompoints_.at(i).x);
+			double b=(nompoints_.at(i+1).y - nompoints_.at(i).y) / (nompoints_.at(i+1).x - nompoints_.at(i).x);
+			interpolateparas_b_.push_back(b);
+			interpolateparas_c_.push_back(nompoints_.at(i).y);
+		}
+		minsuccessful_=true;
+	}
 }
 
 graph graphFitter::exportFittedCurve(size_t npoints) const{

@@ -378,18 +378,13 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	else if(Syst=="BTAGLFS2_down"){
 		ana.getBTagSF()->setSystematic(bTagBase::lfstat2down);
 	}
-	else if(Syst=="BTAGC1_up"){
-		ana.getBTagSF()->setSystematic(bTagBase::cerr1up);
+	else if(Syst=="BTAGPUR_up"){
+		ana.getBTagSF()->setSystematic(bTagBase::purityup);
 	}
-	else if(Syst=="BTAGC1_down"){
-		ana.getBTagSF()->setSystematic(bTagBase::cerr1down);
+	else if(Syst=="BTAGPUR_down"){
+		ana.getBTagSF()->setSystematic(bTagBase::puritydown);
 	}
-	else if(Syst=="BTAGC2_up"){
-		ana.getBTagSF()->setSystematic(bTagBase::cerr2up);
-	}
-	else if(Syst=="BTAGC2_down"){
-		ana.getBTagSF()->setSystematic(bTagBase::cerr2down);
-	}
+
 
 	/////////top pt
 

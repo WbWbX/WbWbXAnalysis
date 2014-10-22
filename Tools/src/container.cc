@@ -32,7 +32,7 @@ bool container1D::c_makelist=false;
 ///////function definitions
 container1D::container1D():
 
-																taggedObject(taggedObject::type_container1D)
+																				taggedObject(taggedObject::type_container1D)
 
 {
 	canfilldyn_=false;
@@ -52,7 +52,7 @@ container1D::container1D():
 }
 container1D::container1D(float binwidth, TString name,TString xaxisname,TString yaxisname, bool mergeufof):
 
-												taggedObject(taggedObject::type_container1D)
+																taggedObject(taggedObject::type_container1D)
 
 { //currently not used
 	plottag=none;
@@ -73,7 +73,7 @@ container1D::container1D(float binwidth, TString name,TString xaxisname,TString 
 	hp_=0;
 }
 container1D::container1D(std::vector<float> bins, TString name,TString xaxisname,TString yaxisname, bool mergeufof):
-												taggedObject(taggedObject::type_container1D)
+																taggedObject(taggedObject::type_container1D)
 
 {
 	plottag=none;
@@ -546,19 +546,46 @@ void container1D::mergeVariations(const std::vector<TString>& names, const TStri
 
 	cp.contents_.getNominal()=contents_.getNominal(); //copy nominal layer
 	container1D mergedvars=cp;
+	std::vector<size_t> usedidcs;
 
 	for(size_t i=0;i<getSystSize();i++){
-		if(std::find(names.begin(),names.end(), getSystErrorName(i)+"_up") != names.end()
-				|| std::find(names.begin(),names.end(), getSystErrorName(i)+"_down") != names.end()){
+		TString namewithoutupdown=getSystErrorName(i);
+		if(namewithoutupdown.EndsWith("_up"))
+			namewithoutupdown.Remove(namewithoutupdown.Length()-3);
+		else if(namewithoutupdown.EndsWith("_down"))
+			namewithoutupdown.Remove(namewithoutupdown.Length()-5);
+
+		if(std::find(names.begin(),names.end(), namewithoutupdown) != names.end()){
 			mergedvars.contents_.addLayer(getSystErrorName(i),contents_.getLayer(i));
+			usedidcs.push_back(i);
 		}
 	}
 
 
 	if(mergedvars.getSystSize() < names.size()*2){
+		std::cout << "container1D::mergeVariations: tried to merge: " ;
+		for(size_t i=0;i<names.size();i++)
+			std::cout << names.at(i) << " ";
+		std::cout << "\nmerged: ";
+		for(size_t i=0;i<usedidcs.size();i++)
+			std::cout << getSystErrorName(usedidcs.at(i)) << " ";
+		std::cout << std::endl;
+		std::cout << "avail: ";
+		for(size_t i=0;i<getSystSize();i++)
+			std::cout << getSystErrorName(i)<< " ";
+		std::cout << std::endl;
+
 		throw std::runtime_error("container1D::mergeVariations: at least one variation now found");
 	}
 	mergedvars.mergeAllErrors(outname,linearly);
+
+	//add remaining syst
+	for(size_t i=0;i<getSystSize();i++){
+		if(std::find(usedidcs.begin(),usedidcs.end(),i) == usedidcs.end()){ //not used
+			cp.contents_.addLayer(getSystErrorName(i),contents_.getLayer(i));
+		}
+	}
+	//add merged ones
 	cp.addErrorContainer(outname+"_up",mergedvars.getSystContainer(0));
 	cp.addErrorContainer(outname+"_down",mergedvars.getSystContainer(1));
 	*this=cp;
@@ -1497,7 +1524,7 @@ void container1D::addRelSystematicsFrom(const ztop::container1D & rhs,bool ignor
 			//contents_.getLayer(newlayerit).removeStat();
 			//stat are definitely not correlated
 			bool isnominalequal=(!strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i),1e-2))
-																									|| (strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i))) ;
+																													|| (strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i))) ;
 
 			if(isnominalequal){ //this is just a copy leave it and add no variation
 				//contents_.getLayer(newlayerit).removeStat();
@@ -1578,7 +1605,13 @@ void container1D::transformToEfficiency(){
 	}
 
 }
+void container1D::setAllErrorsZero(bool nominalstat){
+	if(nominalstat)
+		contents_.clearLayerStat(-1);
+	for(size_t i=0;i<contents_.layerSize();i++)
+		contents_.getLayer(i) = contents_.getNominal();
 
+}
 
 void container1D::renameSyst(const TString &old, const TString &New){
 	histoBins oldsysup=contents_.copyLayer(old+"_up");
@@ -2019,9 +2052,11 @@ container1D container1D::append(const container1D& rhs)const{
 	relOF=fabs(maxbinb-newbins.at(0))/100;
 	newbins.push_back(maxbinb+relOF);
 
+	float minrhs=*std::min_element(rhsc.bins_.begin(),rhsc.bins_.end());
 
 	for(size_t i=1;i<rhsc.bins_.size();i++){ //no UF
-		newbins.push_back(maxbinb +2*relOF+ rhsc.bins_.at(i));
+
+		newbins.push_back(maxbinb +2*relOF+ rhsc.bins_.at(i)-minrhs);
 	}
 
 

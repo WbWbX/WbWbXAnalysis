@@ -255,6 +255,17 @@ void graph::sortPointsByX(){
 	xcoords_=newxcoords;
 	ycoords_=newycoords;
 }
+bool graph::pointsYIdentical(size_t a, size_t b)const{
+	if(a >= ycoords_.size() || b>=ycoords_.size())
+		throw std::out_of_range("graph::pointsYIdentical: one index out of range");
+	if(ycoords_.getBin(a) != ycoords_.getBin(b))
+		return false;
+	for(size_t i=0;i<ycoords_.layerSize();i++){
+		if(ycoords_.getBin(a,i) != ycoords_.getBin(b,i) )
+			return false;
+	}
+	return true;
+}
 graph graph::addY(const graph & rhs) const{
 	if(rhs.getNPoints() != getNPoints()){
 		std::cout << "graph::addY: number of points does not match" <<std::endl;

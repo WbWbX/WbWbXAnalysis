@@ -69,6 +69,23 @@ void systAdder::readMergeVariationsFile(const std::string&filename){
 
 }
 
+TString              systAdder::getMergedName(size_t idx)const{
+		if(idx>=tomerge.size())
+			throw std::out_of_range("systAdder::getMergedName");
+		return tomerge.at(idx).mergename;
+	}
+	std::vector<TString> systAdder::getToBeMergedName(size_t idx)const{
+		if(idx>=tomerge.size())
+			throw std::out_of_range("systAdder::getToBeMergedName");
+		return tomerge.at(idx).tobemerged;
+	}
+
+	bool                 systAdder::getToBeMergedLinearly(size_t idx)const{
+		if(idx>=tomerge.size())
+			throw std::out_of_range("systAdder::getToBeMergedLinearly");
+		return tomerge.at(idx).linearly;
+	}
+
 
 
 

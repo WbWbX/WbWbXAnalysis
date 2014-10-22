@@ -191,36 +191,89 @@ void ttXsecPlots::makeControlPlots(const size_t& step){
 	addPlot("second jet eta 0,3 b-jets", "#eta_{j}","N_{j}");
 	if(jetcategory == cat_0bjet3jet)
 		FILL(selectednonbjets->at(1),eta());
-	addPlot("second jet eta 1,1 b-jets", "#eta_{j}","N_{j}");
-	if(jetcategory == cat_1bjet1jet)
-		FILL(selectednonbjets->at(0),eta());
 	addPlot("second jet eta 1,2 b-jets", "#eta_{j}","N_{j}");
 	if(jetcategory == cat_1bjet2jet)
-		FILL(selectednonbjets->at(0),eta());
+		FILL(selectednonbjets->at(1),eta());
 	addPlot("second jet eta 1,3 b-jets", "#eta_{j}","N_{j}");
 	if(jetcategory == cat_1bjet3jet)
-		FILL(selectednonbjets->at(0),eta());
+		FILL(selectednonbjets->at(1),eta());
+	addPlot("second jet eta 2,2 b-jets", "#eta_{j}","N_{j}");
+	if(jetcategory == cat_2bjet2jet)
+		FILL(selectednonbjets->at(1),eta());
+	addPlot("second jet eta 2,3 b-jets", "#eta_{j}","N_{j}");
+	if(jetcategory == cat_2bjet3jet)
+		FILL(selectednonbjets->at(1),eta());
 
 
-	SETBINS << 20 << 25 << 30 << 35  << 40 << 50 << 60 << 70 << 90 << 120 << 200;
+	SETBINS << 20 << 25 << 30 << 35  << 40 << 50 << 60 << 70 << 80 << 90 << 100 << 120 << 140 << 160 << 200;
+	addPlot("lead jet pt 0,1 b-jets", "p_{t}^{j}","N_{j}");
+	if(jetcategory == cat_0bjet1jet)
+		FILL(selectednonbjets->at(0),pt());
+	addPlot("lead jet pt 0,2 b-jets", "p_{t}^{j}","N_{j}");
+	if(jetcategory == cat_0bjet2jet)
+		FILL(selectednonbjets->at(0),pt());
+	addPlot("lead jet pt 0,3 b-jets", "p_{t}^{j}","N_{j}");
+	if(jetcategory == cat_0bjet3jet)
+		FILL(selectednonbjets->at(0),pt());
+	addPlot("lead jet pt 1,1 b-jets", "p_{t}^{j}","N_{j}");
+	if(jetcategory == cat_1bjet1jet)
+		FILL(selectednonbjets->at(0),pt());
+	addPlot("lead jet pt 1,2 b-jets", "p_{t}^{j}","N_{j}");
+	if(jetcategory == cat_1bjet2jet)
+		FILL(selectednonbjets->at(0),pt());
+	addPlot("lead jet pt 1,3 b-jets", "p_{t}^{j}","N_{j}");
+	if(jetcategory == cat_1bjet3jet)
+		FILL(selectednonbjets->at(0),pt());
+	SETBINS << 20  << 30  << 40 << 50 << 60 << 70 << 80 << 90 << 100 << 160 << 200;
+	addPlot("lead jet pt 2,1 b-jets", "p_{t}^{j}","N_{j}");
+	if(jetcategory == cat_2bjet1jet)
+		FILL(selectednonbjets->at(0),pt());
+	addPlot("lead jet pt 2,2 b-jets", "p_{t}^{j}","N_{j}");
+	if(jetcategory == cat_2bjet2jet)
+		FILL(selectednonbjets->at(0),pt());
+	addPlot("lead jet pt 2,3 b-jets", "p_{t}^{j}","N_{j}");
+	if(jetcategory == cat_2bjet3jet)
+		FILL(selectednonbjets->at(0),pt());
+
+
+
+	SETBINS << 20 << 25 << 30 << 35  << 40 << 50 << 60 << 70 << 80 << 90 << 100 << 120 << 140 << 160 << 200;
 	addPlot("second jet pt 0,2 b-jets", "p_{t}^{j}","N_{j}");
 	if(jetcategory == cat_0bjet2jet)
 		FILL(selectednonbjets->at(1),pt());
 	addPlot("second jet pt 0,3 b-jets", "p_{t}^{j}","N_{j}");
 	if(jetcategory == cat_0bjet3jet)
 		FILL(selectednonbjets->at(1),pt());
-	addPlot("second jet pt 1,1 b-jets", "p_{t}^{j}","N_{j}");
-	if(jetcategory == cat_1bjet1jet)
-		FILL(selectednonbjets->at(0),pt());
 	addPlot("second jet pt 1,2 b-jets", "p_{t}^{j}","N_{j}");
 	if(jetcategory == cat_1bjet2jet)
-		FILL(selectednonbjets->at(0),pt());
+		FILL(selectednonbjets->at(1),pt());
 	addPlot("second jet pt 1,3 b-jets", "p_{t}^{j}","N_{j}");
 	if(jetcategory == cat_1bjet3jet)
-		FILL(selectednonbjets->at(0),pt());
+		FILL(selectednonbjets->at(1),pt());
+	SETBINS << 20  << 30  << 40 << 50 << 60 << 70 << 80 << 90 << 100 << 160 << 200;
+	addPlot("second jet pt 2,2 b-jets", "p_{t}^{j}","N_{j}");
+	if(jetcategory == cat_2bjet2jet)
+		FILL(selectednonbjets->at(1),pt());
+	addPlot("second jet pt 2,3 b-jets", "p_{t}^{j}","N_{j}");
+	if(jetcategory == cat_2bjet3jet)
+		FILL(selectednonbjets->at(1),pt());
 
 
-	SETBINS << 20 << 25 << 30 << 35  << 40 << 50 << 60 << 70 << 90 << 120 << 200;
+	SETBINS << 20 << 25 << 30 << 35  << 40 << 50 << 60 << 70 << 80 << 90 << 100 << 120 << 140 << 160 << 200;
+	addPlot("third jet pt 0,3 b-jets", "p_{t}^{j}","N_{j}");
+	if(jetcategory == cat_0bjet3jet)
+		FILL(selectednonbjets->at(2),pt());
+	addPlot("third jet pt 1,3 b-jets", "p_{t}^{j}","N_{j}");
+	if(jetcategory == cat_1bjet3jet)
+		FILL(selectednonbjets->at(2),pt());
+	SETBINS << 20  << 30  << 40 << 50 << 60 << 70 << 80 << 90 << 100 << 160 << 200;
+	addPlot("third jet pt 2,3 b-jets", "p_{t}^{j}","N_{j}");
+	if(jetcategory == cat_2bjet3jet)
+		FILL(selectednonbjets->at(2),pt());
+
+
+
+	SETBINS << 20 << 25 << 30 << 35  << 40 << 50 << 60 << 70 << 80 << 90 << 100 << 120 << 140 << 160 << 200;
 	addPlot("lead b-jet pt 1,0 b-jets","p_{t}^{l1} [GeV]","N_{evt}/GeV");
 	if(jetcategory == cat_1bjet0jet)
 		FILL(selectedbjets->at(0),pt());
@@ -236,17 +289,32 @@ void ttXsecPlots::makeControlPlots(const size_t& step){
 	addPlot("lead b-jet pt 2,0 b-jets","p_{t}^{l1} [GeV]","N_{evt}/GeV");
 	if(jetcategory == cat_2bjet0jet)
 		FILL(selectedbjets->at(0),pt());
+	SETBINS << 20  << 30  << 40 << 50 << 60 << 70 << 80 << 90 << 100 << 160 << 200;
 	addPlot("lead b-jet pt 2,1 b-jets","p_{t}^{l1} [GeV]","N_{evt}/GeV");
 	if(jetcategory == cat_2bjet1jet)
 		FILL(selectedbjets->at(0),pt());
-	SETBINS << 20  << 30   << 40 << 50 << 60 << 70 << 90 << 120 << 200;
 	addPlot("lead b-jet pt 2,2 b-jets","p_{t}^{l1} [GeV]","N_{evt}/GeV");
 	if(jetcategory == cat_2bjet2jet)
 		FILL(selectedbjets->at(0),pt());
-	SETBINS << 20 << 35 << 50 << 60  << 90 << 120 << 200;
 	addPlot("lead b-jet pt 2,3 b-jets","p_{t}^{l1} [GeV]","N_{evt}/GeV");
 	if(jetcategory == cat_2bjet3jet)
 		FILL(selectedbjets->at(0),pt());
+
+
+	SETBINS << 20 << 25 << 30 << 35  << 40 << 50 << 60 << 70 << 80 << 90 << 100 << 120 << 140 << 160 << 200;
+	addPlot("second b-jet pt 2,0 b-jets","p_{t}^{l1} [GeV]","N_{evt}/GeV");
+	if(jetcategory == cat_2bjet0jet)
+		FILL(selectedbjets->at(1),pt());
+	SETBINS << 20  << 30  << 40 << 50 << 60 << 70 << 80 << 90 << 100 << 160 << 200;
+	addPlot("second b-jet pt 2,1 b-jets","p_{t}^{l1} [GeV]","N_{evt}/GeV");
+	if(jetcategory == cat_2bjet1jet)
+		FILL(selectedbjets->at(1),pt());
+	addPlot("second b-jet pt 2,2 b-jets","p_{t}^{l1} [GeV]","N_{evt}/GeV");
+	if(jetcategory == cat_2bjet2jet)
+		FILL(selectedbjets->at(1),pt());
+	addPlot("second b-jet pt 2,3 b-jets","p_{t}^{l1} [GeV]","N_{evt}/GeV");
+	if(jetcategory == cat_2bjet3jet)
+		FILL(selectedbjets->at(1),pt());
 
 
 }
