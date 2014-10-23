@@ -1517,6 +1517,38 @@ void TreeWriterBase::setTriggers(){
 
 	triggers_.push_back("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v"); //10
 	triggers_.push_back("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v"); //11
+
+
+	// more 2011 triggers - some might be repeated! leave it as it is!
+	// according to http://cms.cern.ch/iCMS/jsp/db_notes/noteInfo.jsp?cmsnoteid=CMS%20AN-2012/065
+
+	//mumu
+
+	triggers_.push_back("HLT_DoubleMu7_"); //12
+	triggers_.push_back("HLT_Mu13_Mu8_v"); //13
+	triggers_.push_back("HLT_Mu17_Mu8_v"); //14
+	triggers_.push_back("HLT_DoubleMu6_"); //15
+	triggers_.push_back("HLT_DoubleMu45_"); //16
+
+	//ee
+
+	triggers_.push_back("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v"); //17
+	triggers_.push_back("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v"); //18
+	triggers_.push_back("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v"); //19
+	triggers_.push_back("HLT_DoubleEle45_CaloIdL_v");
+
+	//emu
+
+	triggers_.push_back("HLT_Mu10_Ele10_CaloIdL_"); //20
+	triggers_.push_back("HLT_Mu8_Ele17_CaloIdL_"); //21
+	triggers_.push_back("HLT_Mu17_Ele8_CaloIdL_"); //22
+	triggers_.push_back("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v"); //23
+	triggers_.push_back("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v"); //24
+	triggers_.push_back("HLT_Mu10_Ele10_CaloIdL_v"); //25
+
+	/// 7TeV single lep go here!!! only append - DONT change order (kills compat inbetween ntuples!)
+
+
 	/*
 
   triggers_.push_back();
