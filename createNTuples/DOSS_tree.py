@@ -5,7 +5,6 @@ import FWCore.ParameterSet.VarParsing as VarParsing
 
 options = VarParsing.VarParsing()
 
-options.register ('is2011',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"is 2011 data/MC")
 options.register ('crab',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"uses crab")
 options.register ('globalTag','START53_V27',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"global tag")
 options.register ('reportEvery',1000,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.int,"report every")
@@ -54,7 +53,6 @@ import sys
 if hasattr(sys, "argv"):
     options.parseArguments()
 
-is2011=options.is2011                    # def false
 crab=options.crab                        # False   OBSOLETE!!!!!
 globalTag=options.globalTag              # START53_V11
 reportEvery=options.reportEvery          # 1000
@@ -69,6 +67,12 @@ includetrigger=options.includetrigger    # True
 includePDFWeights=options.includePDF     # False
 PDF=options.PDF                          # cteq65
 inputScript=options.inputScript          # TtZAnalysis.Configuration.samples.mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12-PU_S7_START52_V9-v2_cff
+is2011=False
+if "_7TeV_" in outputFile:
+    is2011=True
+    print 'running on 7TeV'
+if is2011:
+    inputScript='TtZAnalysis.Configuration.samples.mc.TTJets_MSDecays_central_TuneZ2_7TeV-madgraph-tauola_Summer11LegDR_PU_S13_START53_LV6_v1_cff'
 json=options.json                        # give full path!!json files in TtZAnalysis/Data/data ONLY needed with nafjobsplitter
 laseroff=options.laseroff
 susy=options.susy
@@ -132,7 +136,7 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.load('Configuration.EventContent.EventContent_cff')
 
 
-if isMC:
+if isMC and (not is2011):
     process.GlobalTag.toGet = cms.VPSet(
         cms.PSet(record = cms.string("BTagTrackProbability2DRcd"),
                  tag = cms.string("TrackProbabilityCalibration_2D_MC53X_v2"),
@@ -145,6 +149,7 @@ if isMC:
 #Options
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(wantSummary))
 process.GlobalTag.globaltag = globalTag + '::All'
+
 
 
 
@@ -441,13 +446,13 @@ if isMC:
 else:
     process.filtersSeq = cms.Sequence(process.noscraping * process.metFilters)
 
-if is2011:
-    process.filtersSeq = cms.Sequence(
-        process.primaryVertexFilter *
-        #process.goodVertices *
-        process.noscraping *
-        process.HBHENoiseFilter 
-        )
+    if is2011:
+        process.filtersSeq = cms.Sequence(process.noscraping * process.ignoreMetFilters)
+#            process.primaryVertexFilter *
+#            #process.goodVertices *
+#            process.noscraping *
+#            process.HBHENoiseFilter 
+#            )
 
 
     
@@ -481,7 +486,7 @@ process.load("PhysicsTools.PatAlgos.patSequences_cff")
 #process.kt6PFJets.Rho_EtaMax   = cms.double( 4.4)
 
 
-if options.extraJetCorrections:
+if options.extraJetCorrections and not is2011:
     import os
     jecFile=os.path.relpath( os.environ['CMSSW_BASE']+'/src/TtZAnalysis/Data/PTFIXV2_FT_53_V21_AN5_private.db') 
     jecEra= 'FT_53_V21_AN5' #'Summer13_PTFIXV2_DATA'
@@ -513,8 +518,7 @@ from PhysicsTools.PatAlgos.tools.pfTools import *
 usePF2PAT(process, runPF2PAT=True, jetAlgo='AK5', runOnMC=isMC, postfix=pfpostfix, jetCorrections=jetCorr, pvCollection=cms.InputTag('goodOfflinePrimaryVertices'),typeIMetCorrections=True) 
 
 
-if not is2011:
-    getattr(process,'patJetCorrFactors'+pfpostfix).rho=cms.InputTag("kt6PFJets","rho","RECO")
+getattr(process,'patJetCorrFactors'+pfpostfix).rho=cms.InputTag("kt6PFJets","rho","RECO")
 
 #for JEC
 getattr(process,'pfPileUp'+pfpostfix).checkClosestZVertex = False
