@@ -27,7 +27,7 @@ void systAdder::readMergeVariationsFileInCMSSW(const std::string&filename){
  */
 void systAdder::readMergeVariationsFile(const std::string&filename){
 	fileReader fr;
-	fr.setComment("#");
+	fr.setComment("%");
 	fr.setDelimiter(" ");
 	//fileReader::debug=true;
 	fr.setStartMarker("[merge_syst]");

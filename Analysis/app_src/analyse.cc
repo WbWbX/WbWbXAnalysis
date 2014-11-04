@@ -9,7 +9,7 @@
 
 void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 		double lumi, bool dobtag, bool status,bool testmode,TString maninputfile,
-		TString mode,TString topmass,TString btagfile,bool createLH, std::string discrfile,float fakedatastartentries){ //options like syst..
+		TString mode,TString topmass,TString btagfile,bool createLH, std::string discrfile,float fakedatastartentries,bool interactive){ //options like syst..
 
 	bool didnothing=false;
 	//some env variables
@@ -114,7 +114,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	}
 
 	ana.setMaxChilds(6);
-	if(testmode)
+	if(testmode || interactive)
 		ana.setMaxChilds(20);
 	ana.setMode(mode);
 	ana.setShowStatus(status);
@@ -132,7 +132,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 		ana.getPUReweighter()->setMCDistrSum12();
 	}
 	else if(energy == "7TeV"){
-		ana.getPUReweighter()->setMCDistrFall11();
+		ana.getPUReweighter()->setMCDistrSummer11Leg();
 	}
 	ana.getElecSF()->setInput(elecsffile,elecsfhisto);
 	ana.getMuonSF()->setInput(muonsffile,muonsfhisto);
@@ -592,20 +592,22 @@ int main(int argc, char* argv[]){
 	using namespace ztop;
 
 	optParser parse(argc,argv);
-	TString channel= parse.getOpt<TString>  ("c","emu","channel (ee, emu, mumu), default: emu\n");         //-c channel
-	TString syst   = parse.getOpt<TString>  ("s","nominal","systematic variation <var>_<up/down>, default: nominal");     //-s <syst>
-	TString energy = parse.getOpt<TString>  ("e","8TeV","energy (8TeV, 7 TeV), default: 8TeV");        //-e default 8TeV
-	double lumi    = parse.getOpt<float>    ("l",-1,"luminosity, default -1 (= read from config file)");            //-l default -1
-	bool dobtag    = parse.getOpt<bool>     ("B",false,"produce b-tag efficiencies (switch)");         //-B switches on default false
-	TString btagfile = parse.getOpt<TString>  ("b","all_btags.root","use btagfile (default all_btags.root)");        //-b btagfile default all_btags.root
+	TString channel= parse.getOpt<TString>   ("c","emu","channel (ee, emu, mumu), default: emu\n");         //-c channel
+	TString syst   = parse.getOpt<TString>   ("s","nominal","systematic variation <var>_<up/down>, default: nominal");     //-s <syst>
+	TString energy = parse.getOpt<TString>   ("e","8TeV","energy (8TeV, 7 TeV), default: 8TeV");        //-e default 8TeV
+	double lumi    = parse.getOpt<float>     ("l",-1,"luminosity, default -1 (= read from config file)");            //-l default -1
+	bool dobtag    = parse.getOpt<bool>      ("B",false,"produce b-tag efficiencies (switch)");         //-B switches on default false
+	TString btagfile = parse.getOpt<TString> ("b","all_btags.root","use btagfile (default all_btags.root)");        //-b btagfile default all_btags.root
 
-	TString outfile= parse.getOpt<TString>  ("o","","additional output id");            //-o <outfile> should be something like channel_energy_syst.root // only for plots
-	bool status    = parse.getOpt<bool>     ("S",false,"show regular status update (switch)");         //-S enables default false
-	bool testmode  = parse.getOpt<bool>     ("T",false,"enable testmode: 8% of stat, more printout");         //-T enables default false
-	TString mode   = parse.getOpt<TString>  ("m","xsec","additional mode options");        //-m (xsec,....) default xsec changes legends? to some extend
-	TString inputfile= parse.getOpt<TString>  ("i","","specify configuration file input manually");          //-i empty will use automatic
-	TString topmass  = parse.getOpt<TString>  ("mt","172.5","top mass value to be used, default: 172.5");          //-i empty will use automatic
+	TString outfile= parse.getOpt<TString>   ("o","","additional output id");            //-o <outfile> should be something like channel_energy_syst.root // only for plots
+	bool status    = parse.getOpt<bool>      ("S",false,"show regular status update (switch)");         //-S enables default false
+	bool testmode  = parse.getOpt<bool>      ("T",false,"enable testmode: 8% of stat, more printout");         //-T enables default false
+	TString mode   = parse.getOpt<TString>   ("m","xsec","additional mode options");        //-m (xsec,....) default xsec changes legends? to some extend
+	TString inputfile= parse.getOpt<TString> ("i","","specify configuration file input manually");          //-i empty will use automatic
+	TString topmass  = parse.getOpt<TString> ("mt","172.5","top mass value to be used, default: 172.5");          //-i empty will use automatic
 	TString discrFile=parse.getOpt<TString>  ("lh","" , "specify discriminator input file. If not specified, likelihoods are created");          //-i empty will use automatic
+
+	const bool interactive = parse.getOpt<bool>      ("I",testmode,"enable interactive mode: no fork limit");
 
 	float fakedatastartentries = parse.getOpt<float>    ("-startdiv",0.9,"point to start fake data entries wrt to to evts");
 
@@ -622,6 +624,6 @@ int main(int argc, char* argv[]){
 		//do the merging with filestomerge
 	}
 	else{
-		analyse(channel, syst, energy, outfile, lumi,dobtag , status, testmode,inputfile,mode,topmass,btagfile,createLH,discrFile.Data(),fakedatastartentries);
+		analyse(channel, syst, energy, outfile, lumi,dobtag , status, testmode,inputfile,mode,topmass,btagfile,createLH,discrFile.Data(),fakedatastartentries,interactive);
 	}
 }

@@ -86,6 +86,16 @@ void variateContainer1D::setBinErrDown(size_t bin,const float& err){
 		throw std::out_of_range("variateContainer1D::setBinErrDown: bin out of range");
 	errsdown_.at(bin)=err;
 }
+
+double variateContainer1D::getIntegral(const double * vars)const{
+	double out=0;
+
+	for(size_t i=0;i<bins_.size();i++)
+		out+=getBin(i)->getValue(vars);
+	return out;
+}
+
+
 container1D variateContainer1D::exportContainer()const{
 	if(contents_.size()<1){
 		throw std::out_of_range("variateContainer1D::exportContainer: cannot export without input!");

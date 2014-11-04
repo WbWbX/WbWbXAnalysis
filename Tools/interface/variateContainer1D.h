@@ -49,7 +49,9 @@ public:
 	std::vector<TString> getSystNames(){if(contents_.size()>0) return contents_.at(0).getSystNames();else return std::vector<TString>();}
 
 	extendedVariable * getBin(size_t idx){if(contents_.size()>0) return &contents_.at(idx);else return 0;}
+	const extendedVariable * getBin(size_t idx)const{if(contents_.size()>0) return &contents_.at(idx);else return 0;}
 
+	double getIntegral(const double * vars)const;
 
 	static bool debug;
 

@@ -15,7 +15,7 @@ bool  formatter::debug;
 
 void formatter::readInNameTranslateFile(const std::string & pathtofile){
 	fileReader fr;
-	fr.setComment("#");
+	fr.setComment("%");
 	fr.setDelimiter(",");
 	fr.setStartMarker("[syst names]");
 	fr.setEndMarker("[end-syst names]");
@@ -39,6 +39,9 @@ void formatter::readInNameTranslateFile(const std::string & pathtofile){
 	if(rootlatex_){
 		retname.ReplaceAll("$","");
 		retname.ReplaceAll("\\","#");
+	}
+	if(invertrootlatex_){
+		retname.ReplaceAll("#","\\");
 	}
 	if(retname.Length()>0)
 		return retname;

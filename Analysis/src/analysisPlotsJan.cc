@@ -57,9 +57,9 @@ void analysisPlotsJan::bookPlots(){
 
 	leadleppt = addPlot(tmpbins,tmpbins,"leading top-lepton pt","p_{t}^{l} [GeV]", "N_{evt}/GeV");
 	tmpbins=makebins(40,30,200);
-	benergy  = addPlot(tmpbins,tmpbins,"leading top-lepton pt","p_{t}^{l} [GeV]", "N_{evt}/GeV");
+	benergy  = addPlot(tmpbins,tmpbins,"leading b pt","p_{t}^{l} [GeV]", "N_{evt}/GeV");
 	tmpbins=makebins(40,20,350);
-	mll  = addPlot(tmpbins,tmpbins,"leading top-lepton pt","p_{t}^{l} [GeV]", "N_{evt}/GeV");
+	mll  = addPlot(tmpbins,tmpbins,"dilepton mass","m_{ll} [GeV]", "N_{evt}/GeV");
 
 
 

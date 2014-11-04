@@ -62,11 +62,13 @@ std::string & textFormatter::ltrim(std::string & str) const{
  */
 std::string & textFormatter::trimcomments(std::string & str) const{
 	if(comment_.length()<1) return str;
+	if(str.length() <2 && str==comment_) str="";
 	size_t endpos = str.find(comment_);
 	if( std::string::npos != endpos)
 	{
 		str = str.substr( 0, endpos);
 	}
+
 	return str;
 }
 

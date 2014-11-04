@@ -23,7 +23,7 @@ class formatter{
 
 
 public:
-	formatter(): rootlatex_(false){}
+	formatter(): rootlatex_(false),invertrootlatex_(false){}
 
     template <class T>
     T round(T f,float pres)
@@ -58,6 +58,7 @@ public:
 private:
     std::map<TString,TString> cachedNames_;
     bool rootlatex_;
+    bool invertrootlatex_;
 
 };
 

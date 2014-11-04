@@ -14,6 +14,7 @@
 
 
 namespace ztop{
+class container2D;
 
 /**
  * small 2d point helper
@@ -112,11 +113,11 @@ public:
 	const std::vector<double> *getParameterErrUp()const{return &paraerrsup_;}
 	const std::vector<double> *getParameterErrDown()const{return &paraerrsdown_;}
 	double getParameterErr(size_t idx)const;
-	double getParameter(size_t idx)const;
+	const double&  getParameter(size_t idx)const;
 	const std::vector<TString> *getParameterNames()const {return &paranames_;}
 
 	const double& getCorrelationCoefficient(size_t i, size_t j)const;
-//	container2D getCorrelationCoefficients()const;
+	void  fillCorrelationCoefficients(container2D *)const;
 
 	size_t findParameterIdx(const TString& paraname)const;
 

@@ -570,9 +570,12 @@ float MainAnalyzer::createNormalizationInfo(TFile *f, bool isMC,size_t anaid){
 	//check for top mass scaling
 	//if(infiles_.at(anaid).Contains("ttbar") && ! infiles_.at(anaid).Contains("_ttbar")){ //selects all ttbar samples but not ttbarg/w/z
 	float sampletopmass = atof(topmass_.Data());
+	float energy=8;
+	if(energy_ == "7TeV")
+		energy=7;
 	if(infiles_.at(anaid).Contains("ttbar") &&  !infiles_.at(anaid).Contains("_ttbar")){
 
-		float xsec=getTtbarXsec(sampletopmass);
+		float xsec=getTtbarXsec(sampletopmass,energy);
 		std::cout << "GetNorm: File " << infiles_.at(anaid) << "\tis a ttbar sample , top mass is "
 				<< sampletopmass << " xsec: " << xsec <<std::endl;
 		norms_.at(anaid)=xsec;
@@ -581,7 +584,7 @@ float MainAnalyzer::createNormalizationInfo(TFile *f, bool isMC,size_t anaid){
 	if(infiles_.at(anaid).Contains("_tW.root") || infiles_.at(anaid).Contains("_tbarW.root")
 			|| infiles_.at(anaid).Contains("_tbarWtoLL")|| infiles_.at(anaid).Contains("_tWtoLL")){
 
-		float xsec=getTWXsec(sampletopmass);
+		float xsec=getTWXsec(sampletopmass,energy);
 		norms_.at(anaid)=xsec;
 	}
 	//}

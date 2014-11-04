@@ -15,6 +15,7 @@
 #include "Math/Factory.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 #include <Minuit2/MnMachinePrecision.h>
+#include "TtZAnalysis/Tools/interface/container2D.h"
 
 #include <stdexcept>
 
@@ -167,7 +168,7 @@ void simpleFitter::fit(){
 	}
 
 	if(printlevel>0)
-		std::cout << "simpleFitter::fit(): fitting " << hasNParameters(fitmode_) << "/" << paras_.size() <<  " parameters." <<std::endl;
+		std::cout << "simpleFitter::fit(): fitting "  << paras_.size() <<  " parameters." <<std::endl;
 
 	minsuccessful_=false;
 
@@ -216,6 +217,7 @@ void simpleFitter::fit(){
 		minsuccessful_=min->Minimize();
 
 		const double *xs = min->X();
+		const double * errs=min->Errors();
 		//feed back
 		for(size_t i=0;i<paras_.size();i++){
 			paras_.at(i)=xs[i];
@@ -228,6 +230,10 @@ void simpleFitter::fit(){
 
 			if(minospars_.size()==0 || std::find(minospars_.begin(),minospars_.end(),i) != minospars_.end()){
 				min->GetMinosError(i, paraerrsdown_.at(i), paraerrsup_.at(i));
+			}
+			else{
+				paraerrsdown_.at(i)=errs[i];
+				paraerrsup_.at(i)=errs[i];
 			}
 
 			if(printlevel>0){
@@ -263,7 +269,7 @@ void simpleFitter::fit(){
 
 }
 
-double simpleFitter::getParameter(size_t idx)const{
+const double& simpleFitter::getParameter(size_t idx)const{
 	if(idx>=paras_.size())
 		throw std::out_of_range("simpleFitter::getParameter: index out of range");
 
@@ -292,21 +298,26 @@ const double& simpleFitter::getCorrelationCoefficient(size_t i, size_t j)const{
 	return paracorrs_.at(i).at(j);
 
 }
-/*
-container2D simpleFitter::getCorrelationCoefficients()const{
+
+
+void simpleFitter::fillCorrelationCoefficients(container2D * c)const{
+	if(!c)
+		return;
 	std::vector<float> bins;
 	for(size_t i=0;i<paracorrs_.size()+1;i++)
 		bins.push_back(i);
-	container2D out(bins,bins,"Correlations","","",false);
+	c->setBinning(bins,bins);
+	c->setName("Correlations");
+	c->setXAxisName("");
+	c->setYAxisName("");
 	for(size_t i=0;i<paracorrs_.size();i++){
-		size_t binnox=out.getBinNoX((float)i+0.5);
+		size_t binnox=c->getBinNoX((float)i+0.5);
 		for(size_t j=0;j<paracorrs_.at(i).size();j++){
-			size_t binnoy=out.getBinNoY((float)j+0.5);
-			out.getBin(binnox,binnoy).setContent(paracorrs_.at(i).at(j));
+			size_t binnoy=c->getBinNoY((float)j+0.5);
+			c->getBin(binnox,binnoy).setContent(paracorrs_.at(i).at(j));
 		}
 	}
-	return out;
-}*/
+}
 
 size_t simpleFitter::findParameterIdx(const TString& paraname)const{
 	size_t idx=std::find(paranames_.begin(), paranames_.end(),paraname) - paranames_.begin();

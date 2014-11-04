@@ -413,7 +413,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
 	ttbarControlPlots plots;//for the Z part just make another class (or add a boolian)..
 	////FIX!!
-	plots.limitToStep(8);
+	//plots.limitToStep(8);
 	ZControlPlots zplots;
 	plots.linkEvent(evt);
 	zplots.linkEvent(evt);
@@ -1747,16 +1747,20 @@ bool MainAnalyzer::checkTrigger(std::vector<bool> * p_TriggerBools,ztop::NTEvent
 				return false;
 		}
 		else if(b_emu_){
-			std::cout << "emu channel at 7TeV not supported yet (triggers missing)" << std::endl;
-			// p_finished.get(anaid)->pwrite(-4);
-			return false;
 
-			if(p_TriggerBools->size()<10){
-				// p_finished.get(anaid)->pwrite(-3);
-				return false;
+			if(p_TriggerBools->size()<26){ //emu are 20 - 25
+				 throw std::out_of_range("TriggerBools too small in size for 7 TeV trees");
 			}
-			if(!(p_TriggerBools->at(10) || p_TriggerBools->at(11)))
+			if(!(p_TriggerBools->at(20)
+					|| p_TriggerBools->at(21)
+					|| p_TriggerBools->at(22)
+					|| p_TriggerBools->at(23)
+					|| p_TriggerBools->at(24)
+					|| p_TriggerBools->at(25)
+					))
 				return false;
+			else
+				return true;
 		}
 	}
 	return true;
