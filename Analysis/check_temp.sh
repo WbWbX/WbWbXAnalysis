@@ -19,9 +19,13 @@ then
 fi
 
 cd jobscripts
+JOBSONBATCH=$SGE_CELL
+if [ ${JOBSONBATCH} ]
+then
+##JOBSNOTONBATCH##JOBSONBATCH=""
+fi
 
-
-if [ ${SGE_CELL} ]
+if [ ${JOBSONBATCH} ]
 then
     joblist=`qstat -u ${USER} 2>/dev/null`
     qwjobs=`echo ${joblist} | awk '{for (i=1; i<=NF; i++){ if($i=="qw") print $(i-4) }}'`
@@ -42,7 +46,7 @@ do
     jobname=$file
     jobid=""
     allj=( "${allj[@]}" "${file}" );
-    if [ ${SGE_CELL} ]
+    if [ ${JOBSONBATCH} ]
     then
 	if [ -e "../stdout/${file}.txt" ];
 	then
@@ -78,9 +82,14 @@ do
 		    rmfiles=( "${rmfiles[@]}" "rm -f ../batch/${file}.o${jobid}; rm -f ../output/${file}.root;rm -f ../stdout/${file}.txt;" );
 		fi
 	    else
-		echo "${jobname} \e[1;31m  partially done but without ID \e[0m"
-		tresubmit=( "${tresubmit[@]}" "../jobscripts/${jobname}" );
-		rmfiles=( "${rmfiles[@]}" "rm -f ../batch/${file}.o${jobid}; rm -f ../output/${file}.root;rm -f ../stdout/${file}.txt;" );
+		if [ $JOBSONBATCH ]
+		then
+		    echo "${jobname} \e[1;31m  partially done but without ID \e[0m"
+		    tresubmit=( "${tresubmit[@]}" "../jobscripts/${jobname}" );
+		    rmfiles=( "${rmfiles[@]}" "rm -f ../batch/${file}.o${jobid}; rm -f ../output/${file}.root;rm -f ../stdout/${file}.txt;" );
+		else
+		    echo "${jobname} \e[1;32m partially done (${jobid})\e[0m"
+		fi
 	    fi
 	fi
     elif [ -e "${fullcheckpath}_failed" ];
@@ -99,9 +108,14 @@ do
 		rmfiles=( "${rmfiles[@]}" "rm -f ../batch/${file}.o${jobid}; rm -f ../output/${file}.root;rm -f ../stdout/${file}.txt;" );
 	    fi
 	else
-	    echo "${jobname} \e[1;31m  partially done but without ID \e[0m"
-	    tresubmit=( "${tresubmit[@]}" "../jobscripts/${jobname}" );
-	    rmfiles=( "${rmfiles[@]}" "rm -f ../batch/${file}.o${jobid}; rm -f ../output/${file}.root;rm -f ../stdout/${file}.txt;" );
+	    if [ $JOBSONBATCH ]
+	    then
+		echo "${jobname} \e[1;31m  partially done but without ID \e[0m"
+		tresubmit=( "${tresubmit[@]}" "../jobscripts/${jobname}" );
+		rmfiles=( "${rmfiles[@]}" "rm -f ../batch/${file}.o${jobid}; rm -f ../output/${file}.root;rm -f ../stdout/${file}.txt;" );
+	    else
+		echo "${jobname} \e[1;32m partially done (${jobid})\e[0m"
+	    fi
 	fi
     else
 	if [ $jobid ]
@@ -125,7 +139,7 @@ done
 #echo "for merging of systematics of successful jobs do (in output dir):"
 #echo "mergeSyst ${jdone[@]}"
 
-if [ ${SGE_CELL} ]
+if [ ${JOBSONBATCH} ]
 then
     if [[ "${option}" == "resubmit" ]]
     then
