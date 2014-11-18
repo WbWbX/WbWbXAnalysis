@@ -6,8 +6,6 @@ echo "which eclipse did not return anything - exit"
 exit 1
 fi
 
-TEMPLATES_DIR=/afs/desy.de/user/k/kiesej/public/tools    # This contains the template .project and .cproject files.
- 
 TEMP_FILE=/tmp/asdf1234edd.txt
  
 DIR=`pwd`

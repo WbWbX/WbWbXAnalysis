@@ -1,0 +1,10 @@
+.?*
+*.pyc
+*.root
+*.txt
+*.dat
+*.edmplugin
+*.so
+*.a
+*.o
+
