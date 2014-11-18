@@ -70,3 +70,5 @@ scram b -j16
 echo "to create ntuples, go to ${targetdir}/TtZAnalysis/createNTuples"
 echo "and set the environment. Don't pull anything or push anything, this"
 echo "is just a plain copy"
+echo "!!!!! please do cmsenv and compile (scram b)  again in ${targetdir}!!"
+echo "!!!!!       automatic compilation doesn't work reliably            !!"
