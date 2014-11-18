@@ -1,3 +1,5 @@
+#!/bin/bash
+
 ECLIPSE_PATH=`which eclipse`
 
 if [ ! $ECLIPSE_PATH ]
