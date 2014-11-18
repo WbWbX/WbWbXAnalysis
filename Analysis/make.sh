@@ -73,7 +73,8 @@ function compile(){
 	    echo "Compilation of ${infile} not successful"
 	    exit 6
 	fi
-	g++ -o $LOCBIN/$outfile -fopenmp -Wall $ROOTLIBS -L$libdir $linklibs -l${CMSSW_BASE}/src/TtZAnalysis/Tools/TUnfold/libunfold.so $BUILDDIR/$infile.o
+	g++ -o $LOCBIN/$outfile -fopenmp -Wall $ROOTLIBS -L$libdir $linklibs  $BUILDDIR/$infile.o
+ #	g++ -o $LOCBIN/$outfile -fopenmp -Wall $ROOTLIBS -L$libdir $linklibs -l${CMSSW_BASE}/src/TtZAnalysis/Tools/TUnfold/libunfold.so $BUILDDIR/$infile.o
 	if [ $? -ne 0 ]; 
 	then
 	    echo "Compilation of ${infile} not successful"
