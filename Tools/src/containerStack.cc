@@ -2124,7 +2124,7 @@ double containerStack::chi2Test(Option_t* option, Double_t* res) const{
 double containerStack::chi2()const{
 	if(!(is1D() || is1DUnfold()))
 		return 0;
-	double out;
+	//double out;
 	container1D data=getDataContainer();
 	container1D mc=getFullMCContainer();
 	return data.chi2(mc);

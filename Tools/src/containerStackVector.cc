@@ -219,7 +219,7 @@ void containerStackVector::addMCErrorStackVector(const TString &sysname, const z
 void containerStackVector::addErrorStackVector(const TString &sysname,const  ztop::containerStackVector & stackvec){
 	if(!fastadd){
 		//#pragma omp parallel for
-		size_t position=0; //faster. probably both are at the same position, but not guaranteed
+		//size_t position=0; //faster. probably both are at the same position, but not guaranteed
 		for(std::vector<containerStack>::iterator istack=stacks_.begin();istack<stacks_.end(); ++istack){
 			/*	size_t safecounter=0;
 			for(std::vector<containerStack>::const_iterator estack=stackvec.stacks_.begin()+position;1; ++estack){
