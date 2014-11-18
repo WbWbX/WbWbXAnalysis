@@ -138,6 +138,7 @@ public:
 	void getRelSystematicsFrom(const ztop::containerStack&);
 	void addRelSystematicsFrom(const ztop::containerStack&,bool ignorestat=false,bool strict=false);
 	void removeError(TString);
+	void removeAllSystematics();
 	void renameSyst(TString, TString); //! old, new
 
 	void equalizeSystematicsIdxs(containerStack& rhs);
@@ -187,6 +188,8 @@ public:
 
 	container1D getSignalContainer()const;
 	container1D getBackgroundContainer()const;
+	container1D getDataContainer()const;
+
 
 	container2D getSignalContainer2D()const;
 	container2D getBackgroundContainer2D()const;
@@ -248,6 +251,11 @@ public:
 	 * calls TH1::Chi2Test on full MC histo and data hist
 	 */
 	double chi2Test(Option_t* option = "WW", Double_t* res = 0) const;
+
+	/**
+	 * double chi2
+	 */
+	double chi2()const;
 
 	/**
 	 * calls TH1::KolmogorovTest on full MC histo and data hist

@@ -8,7 +8,7 @@
 
 
 void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
-		double lumi, bool dobtag, bool status,bool testmode,TString maninputfile,
+		double lumi, bool dobtag, bool status,bool testmode,bool tickonce,TString maninputfile,
 		TString mode,TString topmass,TString btagfile,bool createLH, std::string discrfile,float fakedatastartentries,bool interactive){ //options like syst..
 
 	bool didnothing=false;
@@ -114,11 +114,12 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	}
 
 	ana.setMaxChilds(6);
-	if(testmode || interactive)
+	if(testmode || interactive || tickonce)
 		ana.setMaxChilds(20);
 	ana.setMode(mode);
 	ana.setShowStatus(status);
 	ana.setTestMode(testmode);
+	ana.setTickOnceMode(tickonce);
 	ana.setLumi(lumi);
 	ana.setDataSetDirectory(treedir);
 	ana.setUseDiscriminators(!createLH);
@@ -602,6 +603,7 @@ int main(int argc, char* argv[]){
 	TString outfile= parse.getOpt<TString>   ("o","","additional output id");            //-o <outfile> should be something like channel_energy_syst.root // only for plots
 	bool status    = parse.getOpt<bool>      ("S",false,"show regular status update (switch)");         //-S enables default false
 	bool testmode  = parse.getOpt<bool>      ("T",false,"enable testmode: 8% of stat, more printout");         //-T enables default false
+	bool tickonce  = parse.getOpt<bool>      ("TO",false,"enable tick once: breaks as soon as 1 event survived full selection (for software testing)");         //-T enables default false
 	TString mode   = parse.getOpt<TString>   ("m","xsec","additional mode options");        //-m (xsec,....) default xsec changes legends? to some extend
 	TString inputfile= parse.getOpt<TString> ("i","","specify configuration file input manually");          //-i empty will use automatic
 	TString topmass  = parse.getOpt<TString> ("mt","172.5","top mass value to be used, default: 172.5");          //-i empty will use automatic
@@ -624,6 +626,6 @@ int main(int argc, char* argv[]){
 		//do the merging with filestomerge
 	}
 	else{
-		analyse(channel, syst, energy, outfile, lumi,dobtag , status, testmode,inputfile,mode,topmass,btagfile,createLH,discrFile.Data(),fakedatastartentries,interactive);
+		analyse(channel, syst, energy, outfile, lumi,dobtag , status, testmode,tickonce,inputfile,mode,topmass,btagfile,createLH,discrFile.Data(),fakedatastartentries,interactive);
 	}
 }

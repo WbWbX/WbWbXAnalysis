@@ -34,9 +34,16 @@ container2D::~container2D(){
 		break;
 	}
 }
+container2D::container2D(const container2D&rhs){
+	copyFrom(rhs);
+}
+container2D& container2D::operator=(const container2D&rhs){
+	copyFrom(rhs);
+	return *this;
+}
 
 container2D::container2D(const std::vector<float> &xbins,const std::vector<float> &ybins, TString name,TString xaxisname,TString yaxisname, bool mergeufof) :
-        																																																				taggedObject(taggedObject::type_container2D),mergeufof_(mergeufof), xaxisname_(xaxisname), yaxisname_(yaxisname)
+        																																																						taggedObject(taggedObject::type_container2D),mergeufof_(mergeufof), xaxisname_(xaxisname), yaxisname_(yaxisname)
 {
 	setName(name);
 	//create for each ybin (plus UF OF) a container1D
@@ -582,7 +589,7 @@ container2D & container2D::operator += (const container2D & second){
 	}
 	return *this;
 }
-container2D container2D::operator + (const container2D & second){
+container2D container2D::operator + (const container2D & second)const{
 	container2D copy=*this;
 	return copy+=second;
 }
@@ -596,7 +603,7 @@ container2D & container2D::operator -= (const container2D & second){
 	}
 	return *this;
 }
-container2D container2D::operator - (const container2D & second){
+container2D container2D::operator - (const container2D & second)const{
 	container2D copy=*this;
 	return copy -= second;
 }
@@ -611,12 +618,17 @@ container2D & container2D::operator /= (const container2D & second){
 	}
 	return *this;
 }
-container2D  container2D::operator / (const container2D & second){
+container2D  container2D::operator / (const container2D & second)const{
 	container2D copy=*this;
 	return copy/=second;
 }
-
-container2D container2D::operator * (const container2D & second){
+container2D & container2D::operator *= (float val){
+	for(size_t i=0;i<conts_.size();i++){
+		conts_.at(i) *= val;
+	}
+	return *this;
+}
+container2D container2D::operator * (const container2D & second)const{
 	if(second.xbins_ != xbins_ || second.ybins_ != ybins_){
 		std::cout << "container2D::operator *: "<< name_ << " and " << second.name_<<" must have same binning! returning *this"  << std::endl;
 		return *this;
@@ -627,15 +639,20 @@ container2D container2D::operator * (const container2D & second){
 	}
 	return out;
 }
-container2D container2D::operator * (float val){
+container2D container2D::operator * (float val)const{
 	container2D out=*this;
-	for(size_t i=0;i<conts_.size();i++){
-		out.conts_.at(i) *= val;
-	}
+	out*=val;
 	return out;
 }
-container2D container2D::operator * (int val){
-	return *this * (float) val;
+container2D container2D::operator * (double val)const{
+	container2D out=*this;
+	out*=(float)val;
+	return out;
+}
+container2D container2D::operator * (int val)const{
+	container2D out=*this;
+	out*=(float)val;
+	return out;
 }
 
 
@@ -865,5 +882,17 @@ void container2D::mergeAllErrors(const TString & mergedname){
 		conts_.at(i).mergeAllErrors(mergedname);
 	}
 }
+
+
+void container2D::copyFrom(const container2D&rhs){
+	conts_=rhs.conts_;
+	xbins_=rhs.xbins_;
+	ybins_=rhs.ybins_;
+	divideBinomial_=rhs.divideBinomial_ ;
+	mergeufof_=rhs.mergeufof_ ;
+	xaxisname_=rhs.xaxisname_ ;
+	yaxisname_=rhs.yaxisname_ ;
+}
+
 
 }//namespace

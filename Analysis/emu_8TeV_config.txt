@@ -69,10 +69,10 @@ TrackingSFHisto = tracking_eff
 
 
 
-ElecSFFile     = /src/TtZAnalysis/Data/elec_tight_SF.root
-ElecSFHisto    = GlobalSF_err_err_err
+ElecSFFile     = /src/TtZAnalysis/Data/ElecSF_tight_inclerrs.root
+ElecSFHisto    = GlobalSF
 
-TriggerSFFile  = /src/TopAnalysis/Configuration/analysis/common/data/triggerSummary_emu_tightleps.root
+TriggerSFFile  = /src/TtZAnalysis/Data/triggerSummary_emu_tight_pt30.root
 
 PUFile         = /src/TtZAnalysis/Data/ReRecoJan13.json.txt_PU $without .root
 
@@ -82,5 +82,8 @@ btagFile       = all_btags.root
 
 btagShapeFileHF = /src/TopAnalysis/ZTopUtils/data/csv_rwt_hf.root
 btagShapeFileLF = /src/TopAnalysis/ZTopUtils/data/csv_rwt_lf.root
+
+
+modeOptions = GsfelectronsZerojetNozcutNometcutNobcutBtagcsvtLeppt30
 
 [parameters-end]

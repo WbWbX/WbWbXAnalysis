@@ -190,7 +190,7 @@ container1D containerUnfolder::unfold(/*const*/ container1DUnfold & cuf){
 	if(debug)
 		std::cout << "containerUnfolder::unfold: init systematics" << std::endl;
 	unfsyst_.resize(cuf.getSystSize(),0);
-#pragma omp parallel for
+
 	for(size_t sys=0;sys<cuf.getSystSize();sys++){
 		if(std::find(ignoresyst_.begin(),ignoresyst_.end(),cuf.getSystErrorName(sys)) != ignoresyst_.end())
 			continue;
@@ -213,7 +213,7 @@ container1D containerUnfolder::unfold(/*const*/ container1DUnfold & cuf){
 		    uf=new unfolder(cuf.getName()+"_"+cuf.getSystErrorName(sys));
 		}
 		catch(...){
-#pragma omp critical
+
 		    {
 		        std::cout << "containerUnfolder::unfold: bad memory alloc by new unfolder , try to switch of parallalization" << std::endl;
 
@@ -223,7 +223,7 @@ container1D containerUnfolder::unfold(/*const*/ container1DUnfold & cuf){
 		uf->setVerbose(printinfo);
 		int verb=uf->init(SysResponsematrix,SysDatahist);
 		if(verb>10000){
-#pragma omp critical
+
             {
 			std::cout << "containerUnfolder::unfold: init of unfolder for "<< cuf.getName()<< ": "
 					<< cuf.getSystErrorName(sys) << " not successful. Will not unfold distribution"<< std::endl;
@@ -246,7 +246,7 @@ container1D containerUnfolder::unfold(/*const*/ container1DUnfold & cuf){
 	 */
 	if(debug)
 		std::cout << "containerUnfolder::unfold: scanning L-Curve/Tau of systematics" << std::endl;
-#pragma omp parallel for
+//unfortunately not really thread safe..
 	for(size_t sys=0;sys<unfsyst_.size();sys++){
 		if(debug||printinfo)
 			std::cout << "containerUnfolder::unfold: scanning L-Curve/Tau of "<< cuf.getName() << ": " << cuf.getSystErrorName(sys) << std::endl;

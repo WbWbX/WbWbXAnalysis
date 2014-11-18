@@ -32,7 +32,7 @@ bool container1D::c_makelist=false;
 ///////function definitions
 container1D::container1D():
 
-																				taggedObject(taggedObject::type_container1D)
+																												taggedObject(taggedObject::type_container1D)
 
 {
 	canfilldyn_=false;
@@ -52,7 +52,7 @@ container1D::container1D():
 }
 container1D::container1D(float binwidth, TString name,TString xaxisname,TString yaxisname, bool mergeufof):
 
-																taggedObject(taggedObject::type_container1D)
+																								taggedObject(taggedObject::type_container1D)
 
 { //currently not used
 	plottag=none;
@@ -73,7 +73,7 @@ container1D::container1D(float binwidth, TString name,TString xaxisname,TString 
 	hp_=0;
 }
 container1D::container1D(std::vector<float> bins, TString name,TString xaxisname,TString yaxisname, bool mergeufof):
-																taggedObject(taggedObject::type_container1D)
+																								taggedObject(taggedObject::type_container1D)
 
 {
 	plottag=none;
@@ -145,14 +145,18 @@ void container1D::setBinWidth(float binwidth){
 	binwidth_=binwidth;
 	canfilldyn_=true;
 }
-
+void container1D::setBinsFrom(const container1D&c){
+	std::vector<float> bins=c.bins_;
+	bins.erase(bins.begin()); //get rid of underflow
+	setBins(bins);
+}
 
 /**
  * deletes all systematic entries and creates a new systematics! layer
  * named manually_set_(up/down)
  */
 void container1D::setBinErrorUp(const size_t& bin, const float &err){
-	if(!manualerror_){
+	if(!manualerror_ || contents_.layerSize() <2){
 		if(debug)
 			std::cout << "container1D::setBinErrorUp: creating manual error" <<std::endl;
 		createManualError();}
@@ -258,7 +262,8 @@ const float & container1D::getBinContent(const size_t &bin,const int &sysLayer) 
 	}
 	else{
 		if(showwarnings_)std::cout << "container1D::getBinContent: ("<< name_ <<") bin not existent!" << std::endl;
-		return contents_.getBin(0).getContent();
+		throw std::out_of_range("container1D::getBinContent: bin not existent!");
+		//return contents_.getBin(0).getContent();
 	}
 }
 const size_t & container1D::getBinEntries(const size_t& bin,const int &sysLayer) const{
@@ -294,13 +299,17 @@ float container1D::getBinErrorUp(const size_t & bin, bool onlystat,const TString
 			std::vector<TString> sources;
 			for(size_t i=0;i<contents_.layerSize();i++){ //there might be room for improvement here...
 				if(debug){
-					std::cout << "container1D::getBinErrorUp: checking variation with index: " <<i<< "("<< contents_.layerSize() << ")"<<std::endl;
-					std::cout << "container1D::getBinErrorUp: stripping variation with name: " <<contents_.getLayerName(i)<<std::endl;
+
+					{
+						std::cout << "container1D::getBinErrorUp: checking variation with index: " <<i<< "("<< contents_.layerSize() << ")"<<std::endl;
+						std::cout << "container1D::getBinErrorUp: stripping variation with name: " <<contents_.getLayerName(i)<<std::endl;
+					}
 				}
 				TString source=stripVariation(contents_.getLayerName(i));
 				if(-1==isIn(source,sources)){
 					sources.push_back(source);
-					fullerr2 += sq(getDominantVariationUp(source,bin));
+					float domvar=getDominantVariationUp(source,bin);
+					fullerr2 += sq(domvar);
 				}
 			}
 		}
@@ -1242,7 +1251,7 @@ container1D & container1D::operator += (const container1D & second){
 }
 
 
-container1D container1D::operator + (const container1D & second){
+container1D container1D::operator + (const container1D & second)const{
 	ztop::container1D out=*this;
 	out += second;
 	return out;
@@ -1256,7 +1265,7 @@ container1D & container1D::operator -= (const container1D & second){
 	contents_ -= second.contents_;
 	return *this;
 }
-container1D container1D::operator - (const container1D & second){
+container1D container1D::operator - (const container1D & second)const{
 	container1D out=*this;
 	out -= second;
 	return out;
@@ -1270,7 +1279,7 @@ container1D & container1D::operator /= (const container1D & denominator){
 	return *this;
 }
 
-container1D container1D::operator / (const container1D & denominator){
+container1D container1D::operator / (const container1D & denominator)const{
 	container1D out=*this;
 	out /= denominator;
 	return out;
@@ -1283,7 +1292,7 @@ container1D & container1D::operator *= (const container1D & rhs){
 	contents_ *= rhs.contents_;
 	return *this;
 }
-container1D container1D::operator * (const container1D & multiplier){
+container1D container1D::operator * (const container1D & multiplier)const{
 	container1D out = *this;
 	out *= multiplier;
 	return out;
@@ -1293,7 +1302,7 @@ container1D & container1D::operator *= (float scalar){
 	return *this;
 }
 
-container1D container1D::operator * (float scalar){
+container1D container1D::operator * (float scalar)const{
 	container1D out= * this;
 	out*=scalar;
 	return out;
@@ -1302,6 +1311,34 @@ container1D container1D::operator * (float scalar){
 
 void container1D::sqrt(){
 	contents_.sqrt();
+}
+container1D container1D::chi2container(const container1D&rhs)const{
+	if(bins_!=rhs.bins_)
+		throw std::out_of_range("container1D::chi2container: bins have to match!");
+	container1D out=*this;
+	out.removeAllSystematics();
+	out.removeStatFromAll();
+	out.setName(getName()+"_"+rhs.getName()+"_chi2");
+	for(size_t i=0;i<out.bins_.size();i++){
+		float chi2=getBinContent(i) - rhs.getBinContent(i);
+		float erra=getBinError(i,false);
+		float errb=rhs.getBinError(i,false);
+		chi2*=chi2;
+
+		if(erra*erra+errb*errb>0){
+			chi2/=(erra*erra+errb*errb);
+			out.setBinContent(i,chi2);
+		}
+		else{
+			out.setBinContent(i,0);
+			out.setBinStat(i,1);
+		}
+	}
+	return out;
+}
+float container1D::chi2(const container1D&rhs)const{
+	//return 0;
+	return chi2container(rhs).integral(true);
 }
 
 
@@ -1524,7 +1561,7 @@ void container1D::addRelSystematicsFrom(const ztop::container1D & rhs,bool ignor
 			//contents_.getLayer(newlayerit).removeStat();
 			//stat are definitely not correlated
 			bool isnominalequal=(!strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i),1e-2))
-																													|| (strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i))) ;
+																																					|| (strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i))) ;
 
 			if(isnominalequal){ //this is just a copy leave it and add no variation
 				//contents_.getLayer(newlayerit).removeStat();
@@ -1612,6 +1649,58 @@ void container1D::setAllErrorsZero(bool nominalstat){
 		contents_.getLayer(i) = contents_.getNominal();
 
 }
+container1D container1D::createPseudoExperiment(TRandom3* rand,const container1D* c, pseudodatamodes mode, int syst)const{
+	std::vector<float> stat2(bins_.size(),0);
+	if(c){
+		if(c->bins_ != bins_){
+			throw std::out_of_range("container1D::createPseudoExperiment: parsed container does not match binning");
+		}
+		for(size_t i=0;i<bins_.size();i++)
+			stat2.at(i)=c->getBin(i).getStat2();
+	}
+	else{
+		for(size_t i=0;i<bins_.size();i++)
+			stat2.at(i)=contents_.getBin(i,syst).getStat2();
+	}
+	container1D out=*this;
+	out.removeAllSystematics();
+	out.removeStatFromAll();
+	out.setName(getName()+"_pe");
+	for(size_t i=0;i<bins_.size();i++){
+		const float & nscaled=contents_.getBin(i,syst).getContent();
+		if(nscaled==0 || stat2.at(i)==0){
+			out.setBinContent(i,0);
+			out.setBinStat(i,0);
+			continue;
+		}
+		double nunscaled = sq(nscaled) / stat2.at(i);
+		float newpoint=0;
+		if(mode==pseudodata_poisson){
+			newpoint=rand->Poisson(nunscaled);}
+		else if(mode==pseudodata_gaus){
+			double stat=std::sqrt(nunscaled);
+			newpoint=rand->Gaus(nunscaled, stat);
+			if(newpoint<0) newpoint=0;
+		}
+		else{
+			throw std::runtime_error("container1D::createPseudoExperiment: mode not supported");
+		}
+		float scale= stat2.at(i) / contents_.getBin(i,syst).getContent() ;
+		float newstatorg=std::sqrt(newpoint);
+		newpoint *= scale;
+		newstatorg*=scale;
+		out.setBinContent(i,newpoint);
+		out.setBinStat(i,newstatorg);
+	}
+
+	//add the other layers as plain copies to maintain consistence
+	for(size_t i=0;i<getSystSize();i++)
+		out.contents_.addLayer(getSystErrorName(i),out.contents_.getNominal());
+
+
+	return out;
+
+}
 
 void container1D::renameSyst(const TString &old, const TString &New){
 	histoBins oldsysup=contents_.copyLayer(old+"_up");
@@ -1685,9 +1774,9 @@ TString container1D::coutBinContent(size_t bin,const TString& unit) const{
 	/*
 	 * \begin{tabular}{|c|c|}
 \hline
-¥ & ¥ \\
+ï¿½ & ï¿½ \\
 \hline
-¥ & ¥ \\
+ï¿½ & ï¿½ \\
 \hline
 \end{tabular}
 	 */
@@ -2014,6 +2103,35 @@ void container1D::setOperatorDefaults(){
 	histoContent::subtractStatCorrelated=false;
 	histoContent::divideStatCorrelated=true;
 	histoContent::multiplyStatCorrelated=true;
+}
+
+container1D container1D::createRandom(size_t nbins,size_t distr,size_t n,size_t seed){
+	std::vector<float> bins(nbins,0);
+	for(size_t i=0;i<nbins;i++)
+		bins.at(i)=i;
+	container1D out(bins);
+	TRandom3 *r = new TRandom3(seed);
+	double mean=nbins/2;
+	for(size_t i=0;i<n;i++){
+		float rand=0;
+		if(distr==0)
+			rand= r->Gaus(mean,mean/5);
+		else if(distr==1)
+			rand=r->BreitWigner(mean,mean/10);
+		else if(distr==2)
+			rand= r->Poisson(mean);
+		out.fill(rand);
+	}
+	delete r;
+	return out;
+}
+
+std::vector<float> container1D::createBinning(size_t nbins, float first, float last){
+	std::vector<float> out;
+	float div=(last-first)/(float)(nbins+1);
+	for(float i=first;i<=last;i+=div)
+		out.push_back(i);
+	return out;
 }
 
 void container1D::copyFrom(const container1D& c){

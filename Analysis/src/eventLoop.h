@@ -527,7 +527,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
 	Long64_t nEntries=t->GetEntries();
 	if(norm==0) nEntries=0; //skip for norm0
-	if(testmode_) nEntries*=0.08;
+	if(testmode_ && ! tickoncemode_) nEntries*=0.08;
+
 	Long64_t firstentry=0;
 	//for fake data all signal samples are assumed to be used as fake data
 	//split at 10%
@@ -983,6 +984,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 		 */
 
 		NTLepton * firstlep=0,*seclep=0, *leadingptlep=0, *secleadingptlep=0;
+
 		double lepweight=1;
 		if(b_ee_){
 			if(leppair->first.size() <2) continue;
@@ -1470,6 +1472,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 		if(isZrange){
 			zplots.makeControlPlots(step);
 		}
+
+		if(tickoncemode_) break; //one event survived, sufficient
 
 	}
 

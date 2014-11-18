@@ -30,6 +30,8 @@ public:
 	container2D();
 	container2D(const std::vector<float> & ,const std::vector<float> &, TString name="",TString xaxisname="",TString yaxisname="", bool mergeufof=false); //! construct with binning
 	~container2D();
+	container2D(const container2D&);
+	container2D& operator=(const container2D&);
 
 	bool isDummy()const{return xbins_.size()<=2;}
 
@@ -107,16 +109,16 @@ public:
 	void setDivideBinomial(bool);
 
 	container2D & operator += (const container2D &);       //! adds stat errors in squares; treats same named systematics as correlated!!
-	container2D operator + (const container2D &);       //! adds stat errors in squares; treats same named systematics as correlated!!
+	container2D operator + (const container2D &)const;       //! adds stat errors in squares; treats same named systematics as correlated!!
 	container2D & operator -= (const container2D &);       //! adds errors in squares; treats same named systematics as correlated!!
-	container2D operator - (const container2D &);       //! adds errors in squares; treats same named systematics as correlated!!
+	container2D operator - (const container2D &)const;       //! adds errors in squares; treats same named systematics as correlated!!
 	container2D & operator /= (const container2D &);       //! binomial stat error or uncorr error (depends on setDivideBinomial()); treats same named systematics as correlated
-	container2D operator / (const container2D &);       //! binomial stat error or uncorr error (depends on setDivideBinomial()); treats same named systematics as correlated
-	container2D operator * (const container2D &);       //! adds stat errors in squares; treats same named systematics as correlated!!
-	container2D & operator *= (float val){container2D copy=*this*val;*this=copy;return *this;} //fast hack!            //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
-	container2D operator * (float);            //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
-	container2D operator * (double val){return *this*(float)val;}             //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
-	container2D operator * (int);               //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
+	container2D operator / (const container2D &)const;       //! binomial stat error or uncorr error (depends on setDivideBinomial()); treats same named systematics as correlated
+	container2D operator * (const container2D &)const;       //! adds stat errors in squares; treats same named systematics as correlated!!
+	container2D & operator *= (float); //fast hack!            //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
+	container2D operator * (float)const;            //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
+	container2D operator * (double)const;             //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
+	container2D operator * (int)const;               //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
 
 	/**
 	 * cuts everything on the right of the input value (bin boundary chosen accorind to getBinNo())
@@ -188,8 +190,8 @@ protected:
 
 	TString xaxisname_;
 	TString yaxisname_;
-
-
+private:
+	void copyFrom(const container2D&);//!< helper
 };
 
 inline size_t ztop::container2D::getBinNoX(const float & var) const{

@@ -244,7 +244,7 @@ container1DUnfold& container1DUnfold::operator += (const container1DUnfold & sec
 	return *this;
 }
 
-container1DUnfold container1DUnfold::operator + (const container1DUnfold & second){
+container1DUnfold container1DUnfold::operator + (const container1DUnfold & second)const{
 	container1DUnfold out=*this;
 	out+=second;
 	return out;
@@ -265,7 +265,7 @@ container1DUnfold& container1DUnfold::operator -= (const container1DUnfold & sec
 
 	return *this;
 }
-container1DUnfold container1DUnfold::operator - (const container1DUnfold & second){
+container1DUnfold container1DUnfold::operator - (const container1DUnfold & second)const{
 	container1DUnfold out=*this;
 	out-=second;
 	return out;
@@ -290,7 +290,7 @@ container1DUnfold& container1DUnfold::operator /= (const container1DUnfold & sec
 
 	return *this;
 }
-container1DUnfold container1DUnfold::operator / (const container1DUnfold & second){
+container1DUnfold container1DUnfold::operator / (const container1DUnfold & second)const{
 	container1DUnfold out=*this;
 	out/=second;
 	return out;
@@ -314,23 +314,28 @@ container1DUnfold &container1DUnfold::operator *= (const container1DUnfold & sec
 	return *this;
 }
 
-container1DUnfold container1DUnfold::operator * (const container1DUnfold & second){
+container1DUnfold container1DUnfold::operator * (const container1DUnfold & second)const{
 	container1DUnfold out=*this;
 	out*=second;
 	return out;
 }
 
-container1DUnfold container1DUnfold::operator * (float val){
+container1DUnfold container1DUnfold::operator * (float val)const{
 	container1DUnfold out=*this;
-	for(size_t i=0;i<conts_.size();i++){
-		out.conts_.at(i) = conts_.at(i) * val;
-	}
-	out.gencont_=gencont_ * val;
-	out.recocont_=recocont_*val;
-	out.unfolded_=unfolded_*val;
-	out.refolded_=unfolded_*val;
+	out*=val;
 	return out;
 }
+container1DUnfold& container1DUnfold::operator *= (float val){
+	for(size_t i=0;i<conts_.size();i++){
+		conts_.at(i) *= val;
+	}
+	gencont_*= val;
+	recocont_*=val;
+	unfolded_*=val;
+	refolded_*=val;
+	return *this;
+}
+
 void container1DUnfold::setDivideBinomial(bool binomial){
 	for(size_t i=0;i<conts_.size();i++)
 		conts_.at(i).setDivideBinomial(binomial);

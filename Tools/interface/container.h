@@ -15,6 +15,7 @@
 #include "graph.h"
 #include "taggedObject.h"
 #include "extendedVariable.h"
+#include "TRandom3.h"
 
 ////////bins include their border on the right side!!
 
@@ -73,6 +74,7 @@ public:
 
 	void setBins(std::vector<float>);
 	void setBinWidth(float);            //! sets bin width; enables dynamic filling (not implemented yet)
+	void setBinsFrom(const container1D&);
 
 	void setBinErrorUp(const size_t&, const float&);    //! clears ALL systematics and adds a new one
 	void setBinErrorDown(const size_t&, const float&);  //! clears ALL systematics and adds a new one
@@ -209,19 +211,22 @@ public:
 	void setMergeUnderFlowOverFlow(bool merge){mergeufof_=merge;}   //! merges underflow/overflow in first or last bin, respectively has to be executed before filling to have effect
 
 	container1D & operator += (const container1D &);       //!< adds stat errors in squares; treats same named systematics as correlated!!
-	container1D operator + (const container1D &);       //!< adds stat errors in squares; treats same named systematics as correlated!!
+	container1D operator + (const container1D &)const;       //!< adds stat errors in squares; treats same named systematics as correlated!!
 	container1D & operator -= (const container1D &);       //!< adds stat errors in squares; treats same named systematics as correlated!!
-	container1D operator - (const container1D &);       //!< adds errors in squares; treats same named systematics as correlated!!
+	container1D operator - (const container1D &)const;       //!< adds errors in squares; treats same named systematics as correlated!!
 	container1D & operator /= (const container1D &);       //!< adds stat errors in squares; treats same named systematics as correlated!!
-	container1D operator / (const container1D &);       //!< binomial stat error or uncorr error (depends on setDivideBinomial()); treats same named systematics as correlated
+	container1D operator / (const container1D &)const;       //!< binomial stat error or uncorr error (depends on setDivideBinomial()); treats same named systematics as correlated
 	container1D & operator *= (const container1D &);       //!< adds stat errors in squares; treats same named systematics as correlated!!
-	container1D operator * (const container1D &);       //!< adds stat errors in squares; treats same named systematics as correlated!!
+	container1D operator * (const container1D &)const;       //!< adds stat errors in squares; treats same named systematics as correlated!!
 	container1D & operator *= (float);            //!< simple scalar multiplication. stat and syst errors are scaled accordingly!!
-	container1D operator * (float);            //!< simple scalar multiplication. stat and syst errors are scaled accordingly!!
+	container1D operator * (float)const;            //!< simple scalar multiplication. stat and syst errors are scaled accordingly!!
 	container1D & operator *= (double val){return *this *=(float)val;}           //!< simple scalar multiplication. stat and syst errors are scaled accordingly!!
-	container1D operator * (double val){return *this*(float)val;}           //!< simple scalar multiplication. stat and syst errors are scaled accordingly!!
+	container1D operator * (double val)const{return *this*(float)val;}           //!< simple scalar multiplication. stat and syst errors are scaled accordingly!!
 
 	void sqrt();
+
+	container1D chi2container(const container1D&)const;
+	float chi2(const container1D&)const;
 
 	/**
 	 * cuts everything on the right of the input value (bin boundary chosen accorind to getBinNo())
@@ -301,7 +306,19 @@ public:
 	/**
 	 * removes all syst uncertainties, but leaves stat uncertainties of nominal untouched
 	 */
-	void removeAllSystematics(){contents_.removeAdditionalLayers();}
+	void removeAllSystematics(){contents_.removeAdditionalLayers();manualerror_=false;}
+
+	enum pseudodatamodes{pseudodata_poisson,pseudodata_gaus};
+	/**
+	 * creates a new container. Based on the statistics of the initial (or given) container,
+	 * a new Random distribution is created. Please parse the random generator for this, to
+	 * assure proper seeds etc.
+	 * The syst. entry on applies to THIS container, not the parsed one
+	 *
+	 * Mode can be set to poisson (default) or gauss (mostly for checks)
+	 */
+	container1D createPseudoExperiment(TRandom3* rand,const container1D* c=0, pseudodatamodes mode=pseudodata_poisson,int syst=-1)const;
+
 
 	/**
 	 * bool whether a newly created container will be added to a static list of all containers
@@ -332,7 +349,15 @@ public:
 	 */
 	static void setOperatorDefaults();
 
+	/**
+	 * This is just for testing!!!
+	 */
+	static container1D createRandom(size_t nbins,size_t distr=0,size_t n=1000,size_t seed=12345);
 
+	/**
+	 * to make fast euql distant bins
+	 */
+	static std::vector<float> createBinning(size_t nbins, float first, float last);
 
 	/**
 	 * prints the full content in each bin

@@ -6,7 +6,6 @@
 
 namespace ztop{
 
-
 class NTLepton{
  public:
   explicit NTLepton(){q_=0;};

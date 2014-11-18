@@ -547,12 +547,15 @@ void containerStack::multiplyAllMCNorms(double multiplier){
 void containerStack::addGlobalRelMCError(TString sysname,double error){
 	for(unsigned int i=0;i<containers_.size();i++){
 		if(legends_[i]!=dataleg_) containers_[i].addGlobalRelError(sysname,error);
+		else containers_[i].addGlobalRelError(sysname,0);
 	}
 	for(unsigned int i=0;i<containers2D_.size();i++){
 		if(legends_[i]!=dataleg_) containers2D_[i].addGlobalRelError(sysname,error);
+		else containers2D_[i].addGlobalRelError(sysname,0);
 	}
 	for(unsigned int i=0;i<containers1DUnfold_.size();i++){
 		if(legends_[i]!=dataleg_) containers1DUnfold_[i].addGlobalRelError(sysname,error);
+		else containers1DUnfold_[i].addGlobalRelError(sysname,0);
 	}
 }
 void containerStack::addRelErrorToContribution(double err, const TString& contributionname, TString nameprefix){
@@ -793,6 +796,18 @@ void containerStack::removeError(TString sysname){
 	}
 	for(unsigned int i=0; i<containers1DUnfold_.size();i++){
 		containers1DUnfold_[i].removeError(sysname);
+	}
+}
+
+void containerStack::removeAllSystematics(){
+	for(unsigned int i=0; i<containers_.size();i++){
+		containers_[i].removeAllSystematics();
+	}
+	for(unsigned int i=0; i<containers2D_.size();i++){
+		containers2D_[i].removeAllSystematics();
+	}
+	for(unsigned int i=0; i<containers1DUnfold_.size();i++){
+		containers1DUnfold_[i].removeAllSystematics();
 	}
 }
 
@@ -1876,6 +1891,9 @@ container1D containerStack::getBackgroundContainer()const{
 	return out;
 
 }
+container1D containerStack::getDataContainer()const{
+	return getContainer(getDataIdx());
+}
 container2D containerStack::getSignalContainer2D()const{
 	if(mode != dim2){
 		if(debug) std::cout << "containerStack::getSignalContainer2D: return dummy" <<std::endl;
@@ -2102,6 +2120,14 @@ double containerStack::chi2Test(Option_t* option, Double_t* res) const{
 	delete data;
 	delete mc;
 	return out;
+}
+double containerStack::chi2()const{
+	if(!(is1D() || is1DUnfold()))
+		return 0;
+	double out;
+	container1D data=getDataContainer();
+	container1D mc=getFullMCContainer();
+	return data.chi2(mc);
 }
 
 /**

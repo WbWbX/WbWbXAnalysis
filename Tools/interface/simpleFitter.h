@@ -11,7 +11,7 @@
 #include <TROOT.h>
 #include <vector>
 #include "Math/Functor.h"
-
+#include "Math/Minimizer.h"
 
 namespace ztop{
 class container2D;
@@ -63,13 +63,15 @@ public:
 
 	simpleFitter();
 	~simpleFitter();
+	simpleFitter(const simpleFitter&);
+	simpleFitter& operator=(const simpleFitter&);
 	/**
 	 * Available fit modes:
 	 * <some docu>
 	 */
 	void setFitMode(fitmodes fitmode);
 	void setMinimizer(minimizers min){minimizer_=min;}
-	void setMinFunction( ROOT::Math::Functor* f){functobemin_= f;}
+	void setMinFunction( ROOT::Math::Functor* f);
 	void setAlgorithm(const TString& algo){algorithm_=algo;}
 	void setMinimizer(const TString& minmizer){minimizerstr_=minmizer;}
 
@@ -87,16 +89,17 @@ public:
 	 * if not defined, will assume 0 for all parameters
 	 * and step sizes of 0.01 for all parameters
 	 */
-	void setParameters(const std::vector<double>& inpars,const std::vector<double>& steps);
+	void setParameters(const std::vector<double>& inpars,const std::vector<double>& steps=std::vector<double>());
 	void setParameterNames(const std::vector<TString>& nms){paranames_=nms;}
 
 	void setParameter(size_t idx,double value);
+	void setParameterFixed(size_t idx,bool fixed=true);
 
 	void setRequireFitFunction(bool req){requirefitfunction_=req;}
 
 	void setMaxCalls(unsigned  int calls){maxcalls_=calls;}
 
-	void addMinosParameter(size_t parnumber){minospars_.push_back(parnumber);}
+	void setAsMinosParameter(size_t parnumber,bool set=true);
 	void setTolerance(double tol){tolerance_=tol;}
 
 	double getFitOutput(const double& xin)const;
@@ -116,8 +119,16 @@ public:
 	const double&  getParameter(size_t idx)const;
 	const std::vector<TString> *getParameterNames()const {return &paranames_;}
 
+
 	const double& getCorrelationCoefficient(size_t i, size_t j)const;
 	void  fillCorrelationCoefficients(container2D *)const;
+
+	/**
+	 * gets the contribution of a to b by fixing the parameter a, repeating minos and returning the changes in errup and errdown
+	 * failures are indicated by negative return values!
+	 * requires parameter b to be a minos parameter
+	 */
+	void getParameterErrorContribution(size_t a, size_t b,double & errup, double& errdown);
 
 	size_t findParameterIdx(const TString& paraname)const;
 
@@ -125,6 +136,7 @@ public:
 	// double fitfunction(const double& x,const std::vector<double> & par)const;
 
 	bool wasSuccess(){return minsuccessful_;}
+	bool minosWasSuccess(){return minossuccessful_;}
 
 	/**
 	 * clears all input points
@@ -158,6 +170,7 @@ private:
 	std::vector<double> stepsizes_;
 	std::vector<double> paraerrsup_,paraerrsdown_;
 	std::vector<TString> paranames_;
+	std::vector<bool> parafixed_;
 
 	std::vector< std::vector<double> > paracorrs_;
 
@@ -176,12 +189,32 @@ private:
 
 	bool requirefitfunction_;
 protected:
-	bool minsuccessful_;
+	bool minsuccessful_,minossuccessful_;
 private:
 	double tolerance_;
 	ROOT::Math::Functor* functobemin_;
 	TString algorithm_;
 	TString minimizerstr_;
+
+	ROOT::Math::Minimizer * pminimizer_;
+
+
+	void copyFrom(const simpleFitter&);
+
+
+	ROOT::Math::Minimizer * invokeMinimizer()const;
+
+
+	class simpleChi2 {
+	public:
+		simpleChi2();
+		simpleChi2(simpleFitter * fp);
+		double operator() (const double* par) const;
+		double Up() const;
+	private:
+		simpleFitter* fp_;
+		size_t npars_;
+	}chi2func_;
 
 };
 

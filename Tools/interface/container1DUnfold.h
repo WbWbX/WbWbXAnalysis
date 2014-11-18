@@ -110,15 +110,15 @@ public:
 	 */
 
 	container1DUnfold& operator += (const container1DUnfold &);       //! adds stat errors in squares; treats same named systematics as correlated!!
-	container1DUnfold operator + (const container1DUnfold &);       //! adds stat errors in squares; treats same named systematics as correlated!!
+	container1DUnfold operator + (const container1DUnfold &)const;       //! adds stat errors in squares; treats same named systematics as correlated!!
 	container1DUnfold& operator -= (const container1DUnfold &);       //! adds errors in squares; treats same named systematics as correlated!!
-	container1DUnfold operator - (const container1DUnfold &);       //! adds errors in squares; treats same named systematics as correlated!!
+	container1DUnfold operator - (const container1DUnfold &)const;       //! adds errors in squares; treats same named systematics as correlated!!
 	container1DUnfold& operator /= (const container1DUnfold &);       //! binomial stat error or uncorr error (depends on setDivideBinomial()); treats same named systematics as correlated
-	container1DUnfold operator / (const container1DUnfold &);       //! binomial stat error or uncorr error (depends on setDivideBinomial()); treats same named systematics as correlated
+	container1DUnfold operator / (const container1DUnfold &)const;       //! binomial stat error or uncorr error (depends on setDivideBinomial()); treats same named systematics as correlated
 	container1DUnfold& operator *= (const container1DUnfold &);       //! adds stat errors in squares; treats same named systematics as correlated!!
-	container1DUnfold operator * (const container1DUnfold &);       //! adds stat errors in squares; treats same named systematics as correlated!!
-	container1DUnfold operator * (float);            //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
-	container1DUnfold& operator *= (float val){*this=*this*val;return *this;}            //! simple scalar multiplication. stat and syst errors are scaled accordingly!! room for performance improvement
+	container1DUnfold operator * (const container1DUnfold &)const;       //! adds stat errors in squares; treats same named systematics as correlated!!
+	container1DUnfold operator * (float)const;            //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
+	container1DUnfold& operator *= (float);           //! simple scalar multiplication. stat and syst errors are scaled accordingly!! room for performance improvement
 
 	void setDivideBinomial(bool);
 

@@ -70,7 +70,7 @@ BG_VV, Diboson background
 BG_t#bar{t}bg, $t\bar{t}$ background
 BG_Wjets,  W+jets background
 BG_QCD, QCD background
-BG_t#bar{t}V/#gamma, $t\bar{t}+\gamma$ background
+BG_t#bar{t}V/#gamma, $t\bar{t}+V/\gamma$ background
 
 BG_0_bjets_DY, DY background (0 b-jets)
 BG_1_bjets_DY, DY background (1 b-jets)

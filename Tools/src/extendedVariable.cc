@@ -83,6 +83,9 @@ graph extendedVariable::addDependence(const float & low, const float& nominal, c
 	tmpg.setPointXContent(1, 0);
 	tmpg.setPointXContent(2, 1);
 
+	if(nominal!=nominal || high!=high || low!=low)
+		throw std::runtime_error("extendedVariable::addDependence: nan inserted!");
+
 	tmpg.setPointYContent(0,low);
 	tmpg.setPointYContent(1,nominal);
 	tmpg.setPointYContent(2,high);

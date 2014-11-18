@@ -3,6 +3,8 @@
 #include "TTreePerfStats.h"
 #include "FWCore/FWLite/interface/AutoLibraryLoader.h"
 
+#define DEF_ELEC_PT 30
+#define DEF_MUON_PT 30
 
 double 
 triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::vector<ztop::NTElectron> * inputElectrons){
@@ -17,7 +19,7 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
 		ztop::NTMuon * muon = &inputMuons->at(i);
 
 
-		if(muon->pt() < 20)       continue;
+		if(muon->pt() < DEF_ELEC_PT)       continue;
 		if(fabs(muon->eta())>2.4) continue;
 
 		//tight muon selection: https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideMuonId#Tight_Muon
@@ -56,7 +58,7 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
 			}
 		} */
 		//
-		if(elec->pt() < 20)  continue;
+		if(elec->pt() < DEF_ELEC_PT)  continue;
 		float abseta=fabs(elec->eta());
 
 		float suclueta = fabs(elec->ECalP4().eta());

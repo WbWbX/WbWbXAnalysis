@@ -30,7 +30,7 @@ void ttbarXsecFitter::readInput(const std::string & configfilename){
 	//size is exactly 3 and is required to be the same for 3 b-jet categories
 	if(TeV7Stacks.size() > 0 ){
 		for(size_t i=0;i<TeV8Stacks.size();i++){
-			for(size_t j=0;j<TeV7Stacks.at(i).size();j++){
+			for(size_t j=0;j<TeV7Stacks.size();j++){
 				TeV8Stacks.at(i).equalizeSystematicsIdxs(TeV7Stacks.at(j));
 			}
 		}
@@ -38,7 +38,8 @@ void ttbarXsecFitter::readInput(const std::string & configfilename){
 	//syst indicies are all the same. possibly zeros have been added
 
 	//just push back the 7 TeV entries in nbjets after the 8 TeV ones and set last8TeVentry_
-	last8TeVentry_=TeV8Stacks.size()-1;
+	if(TeV7Stacks.size()>0)
+		last8TeVentry_=TeV8Stacks.size()-1;
 	TeV8Stacks.insert(TeV8Stacks.end(),TeV7Stacks.begin(),TeV7Stacks.end());
 
 	//for debugging//
@@ -46,12 +47,14 @@ void ttbarXsecFitter::readInput(const std::string & configfilename){
 	TCanvas c;
 	pl.usePad(&c);
 
+	signalconts_nbjets_.resize(TeV8Stacks.size());
+	backgroundconts_nbjets_.resize(TeV8Stacks.size());
+	dataconts_nbjets_.resize(TeV8Stacks.size());
 
-	size_t bjetcount=0;
+	//create temps:
 	bool eighttev=true;
-	for(size_t it=0;it<TeV8Stacks.size();it++){
+	for(size_t it=0;it<TeV8Stacks.size();it++){ //print what you got
 		if(it == last8TeVentry_+1){
-			bjetcount=0;
 			eighttev=false;
 		}
 		pl.setStack(&TeV8Stacks.at(it));
@@ -61,35 +64,16 @@ void ttbarXsecFitter::readInput(const std::string & configfilename){
 		else name+="7TeV.pdf";
 		name.ReplaceAll(" ","_");
 		c.Print(name);
-		//	continue;
 
-		//create stuff here
-		//	variateContainer1D::debug=true;
-		//	extendedVariable::debug=true;
-		//	simpleFitter::printlevel=1;
-		signalshape_nbjet_.push_back(createLeptonJetAcceptance(&TeV8Stacks,bjetcount,eighttev));
+		signalconts_nbjets_.at(it) = TeV8Stacks.at(it).getSignalContainer();
+		backgroundconts_nbjets_.at(it) = TeV8Stacks.at(it).getBackgroundContainer();
+		dataconts_nbjets_.at(it)=TeV8Stacks.at(it).getDataContainer();
 
-		container1D temp=TeV8Stacks.at(it).getContainer( TeV8Stacks.at(it).getDataIdx());
-		if(useMConly_){
-			temp=TeV8Stacks.at(it).getFullMCContainer();
-			temp.setAllErrorsZero(false);
-		}
-		//its ok to do that several times, anyway fast
-
-
-		variateContainer1D tmpvarc;
-		tmpvarc.import(temp);
-		data_nbjet_.push_back(tmpvarc);
-
-		temp=TeV8Stacks.at(it).getBackgroundContainer();
-		tmpvarc.import(temp);
-		background_nbjet_.push_back(tmpvarc);
-
-		bjetcount++;
 	}
 
+	//done with input
 	//set some starting paras:
-	std::vector<TString> systs=signalshape_nbjet_.at(0).getSystNames();
+	std::vector<TString> systs=signalconts_nbjets_.at(0).getSystNameList();
 	lumiidx8_=std::find(systs.begin(),systs.end(),"Lumi8") - systs.begin();
 	lumiidx7_=std::find(systs.begin(),systs.end(),"Lumi7") - systs.begin();
 	xsecidx8_=std::find(systs.begin(),systs.end(),"Xsec8") - systs.begin();
@@ -101,26 +85,123 @@ void ttbarXsecFitter::readInput(const std::string & configfilename){
 	priors_.resize(ndependencies_,prior_gauss);
 	parameternames_=systs;
 
+	if(debug){
+		std::cout << "ttbarXsecFitter::readInput: done. Combined " << TeV8Stacks.size() << " stacks.\n";
+		std::cout << "7 TeV Stacks starting at >" << last8TeVentry_<<std::endl;
+	}
+}
 
+void ttbarXsecFitter::createPseudoDataFromMC(container1D::pseudodatamodes mode){
+	if(!random_){ //first call
+		random_ = new TRandom3();
+		datacontsorig_nbjets_=dataconts_nbjets_; //safe originals
+		backgroundcontsorig_nbjets_=backgroundconts_nbjets_; //safe originals
+		signalcontsorig_nbjets_=signalconts_nbjets_; //safe originals
+
+		//there are no syst anymore (only dummies)
+		for(size_t i=0;i<priors_.size();i++){
+			if(i!=xsecidx7_ && i != xsecidx8_)
+				setPrior(parameternames_.at(i),prior_parameterfixed);
+		}
+
+		//minimize output
+		std::cout << "Entering pseudo-experiments mode\n" <<std::endl;
+		if(!debug)simpleFitter::printlevel=-1;
+		//debug=false;
+	}
+	for(size_t i=0;i<dataconts_nbjets_.size();i++){
+		container1D tmpmc=backgroundcontsorig_nbjets_.at(i) + signalcontsorig_nbjets_.at(i);
+		dataconts_nbjets_.at(i)=tmpmc.createPseudoExperiment(random_,&datacontsorig_nbjets_.at(i),mode);
+		backgroundconts_nbjets_.at(i)=backgroundcontsorig_nbjets_.at(i).createPseudoExperiment(random_,0,mode);
+		signalconts_nbjets_.at(i)=signalcontsorig_nbjets_.at(i).createPseudoExperiment(random_,0,mode);
+	}
+}
+
+
+void ttbarXsecFitter::createContinuousDependencies(){
+	if(debug)
+		std::cout << "ttbarXsecFitter::createContinuousDependencies" <<std::endl;
+	if(last8TeVentry_<100 && lumi7_ <1){
+		throw std::logic_error("ttbarXsecFitter::createContinuousDependencies: using 7 TeV data but 7 TeV lumi not set!");
+	}
+	size_t bjetcount=0;
+	bool eighttev=true;
+	signalshape_nbjet_.clear();
+	data_nbjet_.clear();
+	background_nbjet_.clear();
+	for(size_t it=0;it<signalconts_nbjets_.size();it++){
+		if(it == last8TeVentry_+1){
+			bjetcount=0;
+			eighttev=false;
+			if(debug)
+				std::cout << "ttbarXsecFitter::createContinuousDependencies: started 7 TeV indicies" <<std::endl;
+		}
+
+		signalshape_nbjet_.push_back(createLeptonJetAcceptance(signalconts_nbjets_,bjetcount,eighttev));
+
+		container1D temp=dataconts_nbjets_.at(it);
+		if(useMConly_){
+			temp=signalconts_nbjets_.at(it) + backgroundconts_nbjets_.at(it);
+			temp.setAllErrorsZero(false);
+		}
+
+		variateContainer1D tmpvarc;
+		tmpvarc.import(temp);
+		data_nbjet_.push_back(tmpvarc);
+
+		tmpvarc.import(backgroundconts_nbjets_.at(it));
+		background_nbjet_.push_back(tmpvarc);
+
+		bjetcount++;
+	}
+
+
+
+
+}
+
+bool ttbarXsecFitter::includes7TeV()const{
+	if(last8TeVentry_ < signalshape_nbjet_.size()-1){ //7 TeV is also included
+		return true;
+	} //else just constrain it to its starting value
+	return false;
 }
 
 void ttbarXsecFitter::setPrior(const TString& sysname, priors prior){
 	if(debug)
 		std::cout << "ttbarXsecFitter::setPrior" <<std::endl;
 
-	if(signalshape_nbjet_.size()<1){
+	if(signalconts_nbjets_.size()<1){
 		throw std::logic_error("ttbarXsecFitter::setPrior: first read in plots");
 	}
-	std::vector<TString> systs=signalshape_nbjet_.at(0).getSystNames();
+	std::vector<TString> systs=signalconts_nbjets_.at(0).getSystNameList();
 	size_t idx=std::find(systs.begin(),systs.end(),sysname) - systs.begin();
 	if(idx == systs.size())
 		throw std::out_of_range("ttbarXsecFitter::setPrior: requested variation not found");
 
 	priors_.at(idx) = prior;
 
+
+}
+void ttbarXsecFitter::addFullExtrapolError(const TString& sysname){
+	if(debug)
+		std::cout << "ttbarXsecFitter::addFullError" <<std::endl;
+
+	if(signalconts_nbjets_.size()<1){
+		throw std::logic_error("ttbarXsecFitter::setPrior: first read in plots");
+	}
+	std::vector<TString> systs=signalconts_nbjets_.at(0).getSystNameList();
+	size_t idx=std::find(systs.begin(),systs.end(),sysname) - systs.begin();
+	if(idx == systs.size())
+		throw std::out_of_range("ttbarXsecFitter::addFullError: requested variation not found");
+	if(std::find(addfullerrors_.begin(),addfullerrors_.end(),idx) == addfullerrors_.end()){//new
+		addfullerrors_.push_back(idx);
+	}
+
+
 }
 
-containerStack ttbarXsecFitter::produceStack(bool fittedvalues,size_t bjetcat,bool eighttev)const{
+containerStack ttbarXsecFitter::produceStack(bool fittedvalues,size_t bjetcat,bool eighttev,double& chi2)const{
 	if(debug)
 		std::cout << "ttbarXsecFitter::produceStack" <<std::endl;
 	checkSizes();
@@ -142,17 +223,29 @@ containerStack ttbarXsecFitter::produceStack(bool fittedvalues,size_t bjetcat,bo
 	else
 		fittedparas.resize(fittedparas_.size(),0);
 
-	variateContainer1D::debug=true;
+
+	if(debug)
+		std::cout << "ttbarXsecFitter::produceStack: data: "<< data_nbjet_.at(nbjet).getNDependencies() << std::endl;
 	data=data_nbjet_.at(nbjet).exportContainer( fittedparas );
 
+	if(debug)
+		std::cout << "ttbarXsecFitter::produceStack: background" << std::endl;
 	background=background_nbjet_.at(nbjet).exportContainer( fittedparas );
 
+	if(debug)
+		std::cout << "ttbarXsecFitter::produceStack: normalization" << std::endl;
 	double multi = lumi8_ * (fittedparas[xsecidx8_] + xsecoff8_);
 	if(nbjet>last8TeVentry_)
 		multi = lumi7_ * (fittedparas[xsecidx7_]+ xsecoff7_);
 	if(norm_nbjet_global_)
 		multi*=normalization_nbjet_.at(nbjet).getValue(fittedparas);
+
+	if(debug)
+		std::cout << "ttbarXsecFitter::produceStack: normalization (2)" << std::endl;
 	multi/=signalshape_nbjet_.at(nbjet).getIntegral(&fittedparas[0]);
+
+	if(debug)
+		std::cout << "ttbarXsecFitter::produceStack: signalshape" << std::endl;
 	container1D exportc=signalshape_nbjet_.at(nbjet).exportContainer( fittedparas );
 	signal=  exportc * multi ;
 
@@ -161,13 +254,17 @@ containerStack ttbarXsecFitter::produceStack(bool fittedvalues,size_t bjetcat,bo
 	out.push_back(background,"background",601,1,2);
 	out.push_back(signal,"signal",633,1,1);
 
+	chi2=out.chi2();
+
 	return out;
 }
 
 
-int ttbarXsecFitter::fit(){
+int ttbarXsecFitter::fit(float& xsec8,float&errup8,float&errdown8,float& xsec7,float&errup7,float&errdown7){
 	if(debug)
 		std::cout << "ttbarXsecFitter::fit" <<std::endl;
+	if(signalshape_nbjet_.size()<1)
+		createContinuousDependencies();
 	checkSizes();
 	//no except: sizes ok
 	//	fittedparas_.at(xsecidx8_)=-10.; //other starting value
@@ -175,26 +272,47 @@ int ttbarXsecFitter::fit(){
 	fitter_.setParameterNames(parameternames_);
 	fitter_.setRequireFitFunction(false);
 	std::vector<double> stepwidths;
-	stepwidths.resize(fittedparas_.size(),1e-8);
+	stepwidths.resize(fittedparas_.size(),1e-2);
+	stepwidths.at(xsecidx8_)=0.1;
+	stepwidths.at(xsecidx7_)=0.1;
 	fitter_.setParameters(fittedparas_,stepwidths);
+	//set fixed paras
+	for(size_t i=0;i<priors_.size();i++){
+		if(priors_.at(i) == prior_parameterfixed)
+			fitter_.setParameterFixed(i,true);
+		else
+			fitter_.setParameterFixed(i,false);
+	}
 	fitter_.setMinimizer(simpleFitter::mm_minuit2);
-	fitter_.setMaxCalls(4e8);
-	ROOT::Math::Functor f(this,&ttbarXsecFitter::toBeMinimized,ndependencies_);
-	fitter_.setMinFunction(&f);
 
-	fitter_.setTolerance(0.1);
+	functor_ = ROOT::Math::Functor(this,&ttbarXsecFitter::toBeMinimized,ndependencies_);//ROOT::Math::Functor f(this,&ttbarXsecFitter::toBeMinimized,ndependencies_);
+	fitter_.setMinFunction(&functor_);
 
-	fitter_.addMinosParameter(xsecidx7_);
-	fitter_.addMinosParameter(xsecidx8_);
+	fitter_.setTolerance(0.01);
+	//fitter_.setParameterFixed(lumiidx7_);
 
-	simpleFitter::printlevel=1;
+	fitter_.setAsMinosParameter(xsecidx7_);
+	fitter_.setAsMinosParameter(xsecidx8_);
+
 
 	fitter_.fit();
 
 	if(fitter_.wasSuccess()){
-		fittedparas_ = *fitter_.getParameters();
-
 		fitsucc_=true;
+		if(parameterwriteback_){
+			fittedparas_ = *fitter_.getParameters();
+		}
+		xsec8=fittedparas_.at(xsecidx8_);
+		errup8=fitter_.getParameterErrUp()->at(xsecidx8_);
+		errdown8=fitter_.getParameterErrUp()->at(xsecidx8_);
+		xsec7=fittedparas_.at(xsecidx7_);
+		errup7=fitter_.getParameterErrUp()->at(xsecidx7_);
+		errdown7=fitter_.getParameterErrUp()->at(xsecidx7_);
+
+		if(!fitter_.minosWasSuccess()){
+			throw std::runtime_error("ttbarXsecFitter::fit(): Minos error failed!");
+		}
+
 		return 0;
 	}
 	//else
@@ -202,7 +320,10 @@ int ttbarXsecFitter::fit(){
 	throw std::runtime_error("ttbarXsecFitter::fit(): Fit failed");
 	return -1;
 }
-
+int ttbarXsecFitter::fit(){
+	float dummy;
+	return fit(dummy,dummy,dummy,dummy,dummy,dummy);
+}
 
 container1D ttbarXsecFitter::getCb (bool fittedvalues, bool eighttev)const{
 	//if(eighttev) return container_c_b_.at(0); else return container_c_b_.at(1);
@@ -247,27 +368,63 @@ TString ttbarXsecFitter::getParaName(size_t idx)const{
 		throw std::out_of_range("ttbarXsecFitter::getParaName");
 	return fitter_.getParameterNames()->at(idx);
 }
-double ttbarXsecFitter::getParaErrorContributionToXsec(size_t idx, double sevenoreight)const{
+void ttbarXsecFitter::getParaErrorContributionToXsec(size_t idx, double sevenoreight,double&up,double&down,bool& anticorr){
+
 	if(idx>=fitter_.getParameters()->size())
-		throw std::out_of_range("ttbarXsecFitter::getParaName");
+		throw std::out_of_range("ttbarXsecFitter::getParaErrorContributionToXsec: index out of range");
 	size_t xsecidx=getXsecIdx(sevenoreight);
 	double xsecoffset=xsecoff8_;
 	if(xsecidx==xsecidx7_)xsecoffset=xsecoff7_;
-	double errxsec=fitter_.getParameterErr(xsecidx);
-	double corr  =fitter_.getCorrelationCoefficient(xsecidx,idx);
-	double paraerr=fitter_.getParameterErr(idx);
-	if(idx == xsecidx)
-		return paraerr/(fitter_.getParameter(xsecidx) + xsecoffset);
-	return corr*paraerr*errxsec/(fitter_.getParameter(xsecidx) + xsecoffset);
+	double xsec=fitter_.getParameter(xsecidx)+xsecoffset;
+	anticorr=fitter_.getCorrelationCoefficient(xsecidx,idx)<0;
+	//simpleFitter::printlevel=2;
+	fitter_.getParameterErrorContribution(idx,xsecidx,up,down);
+	up/=xsec;
+	down/=xsec;
+	//up*=100;
+	//down*=100;
+	return;
+	///old impl
 
-	////new approach
 	/*
-	 * Fix parameter to para+paraerror -> get xsec and compare to nominal
-	 * same for para-paraerror
-	 * should take care of non-linearities
+	 * Right now only uses simple non-minos errs
 	 */
 
+	double errxsecup=fitter_.getParameterErrUp()->at(xsecidx);
+	double errxsecdown=fitter_.getParameterErrDown()->at(xsecidx);
+	simpleFitter saved=fitter_;
+	priors savedprior=priors_.at(idx);
+	parameterwriteback_=false;
+	setPrior(parameternames_.at(idx),prior_parameterfixed);
+	//fitter_.setAsMinosParameter(xsecidx,false);
+	//this does not work by logic - paras are set in fit()
+	fit();
+	double newerrup=fitter_.getParameterErrUp()->at(xsecidx);
+	double newerrdown=fitter_.getParameterErrDown()->at(xsecidx);
 
+	up=errxsecup*errxsecup-newerrup*newerrup;
+	if(up<0){
+		std::cout << "ttbarXsecFitter::getParaErrorContributionToXsec: Warning, error up increased by " << 100*sqrt(-up)/xsec
+				<< " % when fixing parameter "
+				<< parameternames_.at(idx) << std::endl;
+		up=0;
+	}
+	else up=std::sqrt(up);
+	down=errxsecdown*errxsecdown-newerrdown*newerrdown;
+	if(down<0){
+		std::cout << "ttbarXsecFitter::getParaErrorContributionToXsec: Warning, error down increased by " << 100*sqrt(-down)/xsec
+				<< " % when fixing parameter "
+				<< parameternames_.at(idx) << std::endl;
+		down=0;
+	}
+	else down=std::sqrt(down);
+
+
+	up/=xsec;
+	down/=xsec;
+	fitter_=saved;
+	setPrior(parameternames_.at(idx),savedprior);
+	parameterwriteback_=true;
 }
 size_t ttbarXsecFitter::getXsecIdx(double sevenoreight)const{
 	size_t xsecidx=xsecidx8_;
@@ -276,28 +433,101 @@ size_t ttbarXsecFitter::getXsecIdx(double sevenoreight)const{
 	return xsecidx;
 }
 
-texTabler ttbarXsecFitter::makeSystBreakdown(double sevenoreight)const{
+texTabler ttbarXsecFitter::makeSystBreakdown(double sevenoreight){
 	size_t xsecidx=getXsecIdx(sevenoreight);
 	formatter fmt;
-
+	bool eighttev=true;
 	TString cmsswbase=getenv("CMSSW_BASE");
 	fmt.readInNameTranslateFile((cmsswbase+"/src/TtZAnalysis/Analysis/configs/general/SystNames.txt").Data());
 	texTabler table(" l | c | c | c ");
 	table << "Name" << "Pull" << "Constr / $\\sigma$" << "Contribution [\\%]";
 	table << texLine();
+	if(xsecidx==xsecidx7_){
+		std::cout << "Evaluating systematic uncertainties for 7 TeV (breakdown)... " <<std::endl;
+		eighttev=false;
+	}
+	if(xsecidx==xsecidx8_)
+		std::cout << "Evaluating systematic uncertainties for 8 TeV (breakdown)... " <<std::endl;
 	for(size_t i=0;i<getNParameters();i++){
 		if(i==xsecidx7_) continue;
 		if(i==xsecidx8_) continue;
-		TString name=getParaName(i);
-		table << fmt.translateName( getParaName(i) )<< fmt.round( fitter_.getParameters()->at(i), 0.01)
-								<< fmt.round(getParaError(i),0.01) << fmt.round(100*getParaErrorContributionToXsec(i,xsecidx),0.01);
+		TString name=fmt.translateName( getParaName(i));
+		double errup,errdown;
+		bool anitcorr;
+		getParaErrorContributionToXsec(i,sevenoreight,errup,errdown,anitcorr);
+		TString errstr;
+		if(anitcorr)
+			errstr="$\\mp{"+fmt.toTString(fmt.round(100*errdown,0.1))+"}$";
+		else
+			errstr="$\\pm{"+fmt.toTString(fmt.round(100*errup,0.1))+ "}$";
+
+
+		if(std::find(addfullerrors_.begin(),addfullerrors_.end(),i)!=addfullerrors_.end())
+			name+=" (vis)";
+		std::cout <<name<< " +" << errup*100 << "% -" << errdown*100 << "% "<<std::endl;
+
+		table << name << fmt.round( fitter_.getParameters()->at(i), 0.1)<<
+				fmt.round( fitter_.getParameterErr(i), 0.1)	<< errstr;
 
 	}
+	table <<texLine(1);
+	///add extrapolation in addition:
+	double addtoerrup2=0,addtoerrdown2=0;
+	for(size_t i=0;i<addfullerrors_.size();i++){
+		bool anticorr=false;
+		size_t idx=addfullerrors_.at(i);
+		TString name=fmt.translateName( getParaName(idx) );
+		name+=" (extr)";
+		extendedVariable * var=&eps_emu_.at(0);
+		if(!eighttev)
+			var=&eps_emu_.at(1);
+		std::vector<double> paracopy=fittedparas_;
+		float nom=var->getValue(paracopy);
+		paracopy.at(idx)=1;
+		float up=var->getValue(paracopy);
+		paracopy.at(idx)=-1;
+		float down=var->getValue(paracopy);
+		if(nom==0){
+			if(up!=0 || down!=0)
+				throw std::runtime_error("ttbarXsecFitter::makeSystBreakdown: variable is zero but variations not");
+		}
+		float relup=(up-nom)/nom;
+		float reldown=(down-nom)/nom;
+		if(relup>0){
+			addtoerrup2+=relup*relup;
+			addtoerrdown2+=reldown*reldown;
+		}
+		else{
+			addtoerrdown2+=relup*relup;
+			addtoerrup2+=reldown*reldown;
+			anticorr=true;
+		}
+		TString errstr;
+		if(anticorr)
+			errstr="$\\mp^{"+fmt.toTString(fmt.round(100*sqrt(addtoerrdown2),0.1))
+			+"}_{"+fmt.toTString(fmt.round(100*sqrt(addtoerrup2),0.1)) +"}$";
+		else
+			errstr="$\\pm^{"+fmt.toTString(fmt.round(100*sqrt(addtoerrup2),0.1))
+			+"}_{"+fmt.toTString(fmt.round(100*sqrt(addtoerrdown2),0.1)) +"}$";
+		table << name << "-" <<
+				"-"	<< errstr;
+	}
+
+
 	//add total
-	table << texLine();
+	table << texLine(2);
 	double xsecoffset=xsecoff8_;
 	if(xsecidx==xsecidx7_)xsecoffset=xsecoff7_;
-	table << "Total" << " " << " " << fmt.round(100*getParaErrorContributionToXsec(xsecidx,xsecidx),0.01);
+
+	double fullrelxsecerrup=fitter_.getParameterErrUp()->at(xsecidx)/(fitter_.getParameter(xsecidx) + xsecoffset);
+	fullrelxsecerrup=sqrt(fullrelxsecerrup*fullrelxsecerrup+addtoerrup2);
+	double fullrelxsecerrdown=fitter_.getParameterErrDown()->at(xsecidx)/(fitter_.getParameter(xsecidx) + xsecoffset);
+	fullrelxsecerrdown=sqrt(fullrelxsecerrdown*fullrelxsecerrdown+addtoerrdown2);
+
+	TString errstrxsec="$\\pm^{"+ fmt.toTString(fmt.round(100*fullrelxsecerrup,0.1)) +
+			"}_{"+ fmt.toTString(fmt.round(100*fullrelxsecerrdown,0.1))+"}$";
+	table << "Total" << " " << " "
+			<< errstrxsec;
 	table << texLine(2);
 	table <<"$\\sigma_{t \\bar{t}}$" << " " << " " << fmt.toTString(fmt.round((fitter_.getParameter(xsecidx) + xsecoffset),0.1))+" pb";
 	table << texLine();
@@ -333,15 +563,26 @@ double ttbarXsecFitter::toBeMinimized(const double * variations){
 			double backgroundstat=background_nbjet_.at(nbjet).getBinErr(bin);
 
 			double data = data_nbjet_.at(nbjet).getBin(bin)->getValue(variations);
-
-			if(data<=0) continue;
+			//this is obsolete, strictly speaking, but safer in case somethin is normalized or weighted events are used
+			double datastat = data_nbjet_.at(nbjet).getBinErr(bin);
 
 			double predicted = signal+nbackground;
 
-			if(lhmode_ == lhm_poissondatastat)   out+=-2*logPoisson(data, format_.round(predicted,1)); //doesn't (yet) work
+			if(lhmode_ == lhm_poissondatastat)   {
+				double roundpred=predicted;//format_.round(predicted,1);
+				if(roundpred<=0)continue;
+				if(data<0)continue; //safety
+				out+=-2*logPoisson(data, roundpred); //doesn't (yet) work
+			}
 
-			else if(lhmode_ ==lhm_chi2datastat)   out+= (data-predicted)*(data-predicted) / (data); //chi2 approach
-			else if(lhmode_ ==lhm_chi2datamcstat)	out+= (data-predicted)*(data-predicted) / (data + backgroundstat*backgroundstat); //chi2 approach with bg errors
+			else if(lhmode_ ==lhm_chi2datastat)   {
+				if(datastat<=0) continue;
+				out+= (data-predicted)*(data-predicted) / (datastat*datastat); //chi2 approach
+			}
+			else if(lhmode_ ==lhm_chi2datamcstat)	{
+				if((datastat*datastat + backgroundstat*backgroundstat)<=0) continue;
+				out+= (data-predicted)*(data-predicted) / (datastat*datastat + backgroundstat*backgroundstat); //chi2 approach with bg errors
+			}
 		}
 	}
 
@@ -350,9 +591,9 @@ double ttbarXsecFitter::toBeMinimized(const double * variations){
 
 		if(sys == xsecidx8_) continue;
 		if(sys == xsecidx7_){
-			if(last8TeVentry_ < signalshape_nbjet_.size()-1){ //7 TeV is also included
+			if(includes7TeV()) //7 TeV is also included
 				continue;
-			} //else just constrain it to its starting value
+			//else just constrain it to its starting value
 		}
 		if(sys == lumiidx8_ || sys == lumiidx7_) {
 			//here you could do something special
@@ -376,10 +617,11 @@ double ttbarXsecFitter::toBeMinimized(const double * variations){
 			if(var<0) var-=1;
 			out+= simpleFitter::nuisanceBox(var);
 		}
-		else if(priors_[sys] == prior_parameterfixed){
-			double deltafixed=variations[sys]-fitter_.getParameter(sys);
-			out+=fabs(deltafixed)*1e5; //make it a bit smooth
-		}
+		//the fitter will handle this case, delta should be zero in all cases
+		//	else if(priors_[sys] == prior_parameterfixed){
+		//		double deltafixed=variations[sys]-fitter_.getParameter(sys);
+		//		out+=deltafixed*deltafixed*1e9; //make it a bit smooth
+		//	}
 
 	}
 
@@ -406,17 +648,23 @@ void ttbarXsecFitter::checkSizes()const{
 		if(signalshape_nbjet_.at(i).getBins() != data_nbjet_.at(i).getBins())
 			throw std::logic_error("leptonacceptance_nbjet_.at(i).getBins() != data_nbjet.at(i).getBins()");
 	}
+	if(signalshape_nbjet_.at(0).getNDependencies() != background_nbjet_.at(0).getNDependencies())
+		throw  std::logic_error("ttbarXsecFitter::checkSizes: ndep broken");
+	if(signalshape_nbjet_.at(0).getNDependencies() != data_nbjet_.at(0).getNDependencies())
+		throw  std::logic_error("ttbarXsecFitter::checkSizes: ndep broken");
+	if(signalshape_nbjet_.at(0).getNDependencies() != normalization_nbjet_.at(0).getNDependencies())
+		throw  std::logic_error("ttbarXsecFitter::checkSizes: ndep broken");
 
 
 }//ttbarXsecFitter::checkSizes()
 
 
-variateContainer1D ttbarXsecFitter::createLeptonJetAcceptance(const std::vector<containerStack> *stack, size_t bjetcategory, bool eighttev){
+variateContainer1D ttbarXsecFitter::createLeptonJetAcceptance(const std::vector<container1D>& signals, size_t bjetcategory, bool eighttev){
 	// this one can use container1D operators!
 	if(debug)
-		std::cout << "ttbarXsecFitter::createLeptonJetAcceptance" <<std::endl;
+		std::cout << "ttbarXsecFitter::createLeptonJetAcceptance: "<< bjetcategory <<", "<< eighttev<<std::endl;
 
-	if(stack->size()<1)
+	if(signals.size()<1)
 		throw std::logic_error("ttbarXsecFitter::createLeptonJetAcceptance  stack vector empty.");
 
 	size_t bjetbin=bjetcategory;
@@ -429,18 +677,25 @@ variateContainer1D ttbarXsecFitter::createLeptonJetAcceptance(const std::vector<
 		gennorm = 1/(lumi7_*xsecoff7_);
 		bjetbin += last8TeVentry_ +1;
 		minbjetbin = last8TeVentry_ +1;
-		maxbjetbin = stack->size();
+		maxbjetbin = signals.size();//stack->size();
+		if(debug){
+			std::cout << "ttbarXsecFitter::createLeptonJetAcceptance: 7TeV: set: " <<std::endl;
+			std::cout << "bjetbin: " << bjetbin<<std::endl;
+			std::cout << "minbjetbin: " << minbjetbin<<std::endl;
+			std::cout << "maxbjetbin: " << maxbjetbin<<std::endl;
+		}
+
 	}
 	//unused	size_t bjet0bin=minbjetbin;
 	size_t bjet1bin=minbjetbin+1;
 	size_t bjet2bin=minbjetbin+2;
 
-	container1D signal=stack->at(bjetbin).getSignalContainer();
+	container1D signal=signals.at(bjetbin);//.getSignalContainer();
 	if(norm_nbjet_global_) signal=signal.getIntegralBin();
-	container1D signalintegral=stack->at(minbjetbin).getSignalContainer();
+	container1D signalintegral=signals.at(minbjetbin); //stack->at(minbjetbin).getSignalContainer();
 	if(norm_nbjet_global_) signalintegral=signalintegral.getIntegralBin();
 	for(size_t i=minbjetbin+1;i<maxbjetbin;i++){
-		container1D tmpsig=stack->at(i).getSignalContainer();
+		container1D tmpsig=signals.at(i); //stack->at(i).getSignalContainer();
 		if(norm_nbjet_global_) tmpsig=tmpsig.getIntegralBin();
 		signalintegral += tmpsig;
 	}
@@ -453,13 +708,15 @@ variateContainer1D ttbarXsecFitter::createLeptonJetAcceptance(const std::vector<
 
 	container1D one=signal.createOne();
 	container1D leptonacceptance = signalintegral * gennorm; //this includes lumi unc but cancels the xsec and lumi abs value!
-	container1D onebjetsignal = stack->at(bjet1bin).getSignalContainer();
+
+
+	container1D onebjetsignal = signals.at(bjet1bin);//stack->at(bjet1bin).getSignalContainer();
 	if(norm_nbjet_global_) onebjetsignal=onebjetsignal.getIntegralBin();
-	container1D twobjetsignal = stack->at(bjet2bin).getSignalContainer();
+	container1D twobjetsignal = signals.at(bjet2bin);//stack->at(bjet2bin).getSignalContainer();
 	if(norm_nbjet_global_) twobjetsignal=twobjetsignal.getIntegralBin();
 
 	container1D correction_b =  ((signalintegral * twobjetsignal) * 4.)
-																				/ ( (onebjetsignal + (twobjetsignal * 2.)) * (onebjetsignal + (twobjetsignal * 2.)));
+																																																																						/ ( (onebjetsignal + (twobjetsignal * 2.)) * (onebjetsignal + (twobjetsignal * 2.)));
 
 	correction_b.removeStatFromAll();
 
@@ -488,13 +745,23 @@ variateContainer1D ttbarXsecFitter::createLeptonJetAcceptance(const std::vector<
 	lepjetcont2bjets*= leptonacceptance;
 	lepjetcont2bjets.removeStatFromAll();
 
+	//epsemu (extrapolation)
+	variateContainer1D tmp;
+	tmp.import(leptonacceptance);
+	if(eighttev)
+		eps_emu_.at(0)=*tmp.getBin(1);
+	else
+		eps_emu_.at(1)=*tmp.getBin(1);
+
 
 	//the stat uncertainties will be screwed up, but they are not used anyway
-
+	bool tmpvarcdebug=variateContainer1D::debug;
+	//	if(debug)
+	//		variateContainer1D::debug=true;
 	variateContainer1D out;
 	if(norm_nbjet_global_){
 		// disentangle shape and global norm here
-		container1D normedsignal = stack->at(bjetbin).getSignalContainer(); //for shape
+		container1D normedsignal = signals.at(bjetbin);//stack->at(bjetbin).getSignalContainer(); //for shape
 		normedsignal.normalize(true,true); //normalize to 1 incl syst
 		out.import(normedsignal);
 
@@ -529,6 +796,7 @@ variateContainer1D ttbarXsecFitter::createLeptonJetAcceptance(const std::vector<
 		}
 
 	}
+	variateContainer1D::debug=tmpvarcdebug;
 	return out;
 }
 
@@ -552,6 +820,8 @@ std::vector<containerStack>   ttbarXsecFitter::readStacks(const std::string conf
 	containerStack stack;
 	std::cout << "reading and preparing " << energy << " TeV stacks..." <<std::endl;
 	size_t bjetcount=0,jetcount=0,oldbjetcount=0;
+	TString oldfilename="";
+	containerStackVector csv;
 	for(size_t line=0;line<fr.nLines();line++){
 		displayStatusBar(line,fr.nLines());
 		if(fr.nEntries(line) < 1) continue;
@@ -568,13 +838,15 @@ std::vector<containerStack>   ttbarXsecFitter::readStacks(const std::string conf
 			oldbjetcount=bjetcount;
 			stack = containerStack(); //clear
 		}
-
 		for(size_t entry=0;entry<fr.nEntries(line);entry++){
 			TString filename=fr.getData<TString>(line,entry);
 			entry++;
 			TString plotname=fr.getData<TString>(line,entry);
-			containerStackVector csv;
-			csv.loadFromTFile(filename);
+			bool newcsv=oldfilename!=filename;
+			oldfilename=filename;
+			if(newcsv)
+				csv.loadFromTFile(filename); //new file
+
 			//csv.listStacks();
 			containerStack tmpstack;
 			try{
@@ -586,10 +858,10 @@ std::vector<containerStack>   ttbarXsecFitter::readStacks(const std::string conf
 				throw std::runtime_error("stack not found");
 			}
 			addUncertainties(&tmpstack,bjetcount,eighttev);
-
-			for(size_t i=0;i<out.size();i++){
-				tmpstack.equalizeSystematicsIdxs(out.at(i));
-			}
+			if(newcsv) //not necessary if same csv where everything is ordered in the same manner
+				for(size_t i=0;i<out.size();i++){
+					tmpstack.equalizeSystematicsIdxs(out.at(i));
+				}
 			stack=stack.append(tmpstack);
 			//	std::cout << "ttbarXsecFitter::readStacks: added "
 			//			<< " stack(s) for nbjets: " << bjetcount << " njets: " << jetcount <<std::endl;
@@ -624,9 +896,10 @@ void ttbarXsecFitter::addUncertainties(containerStack * stack,size_t nbjets,bool
 	if(debug)
 		std::cout << "ttbarXsecFitter::addUncertainties: merged DY" <<std::endl;
 
-
-	stack->mergeVariationsFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/general/SystNames.txt");
-
+	try{
+		stack->mergeVariationsFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/general/SystNames.txt");
+	}
+	catch(...){}
 	if(debug)
 		std::cout << "ttbarXsecFitter::addUncertainties: merged variations" <<std::endl;
 
@@ -647,14 +920,21 @@ void ttbarXsecFitter::addUncertainties(containerStack * stack,size_t nbjets,bool
 	float addlumiunc8=0;
 	float addlumiunc7=0;
 
-	if(eighttev)
+	//energy specific
+	if(eighttev){
 		addlumiunc8=unclumi8_/100;
-	else
+
+	}
+	else{
 		addlumiunc7=unclumi7_/100;
+
+	}
+
+	if(removesyst_)
+		stack->removeAllSystematics();
 
 	stack->addGlobalRelMCError("Lumi8",addlumiunc8);
 	stack->addGlobalRelMCError("Lumi7",addlumiunc7);
-
 
 	///fake uncertainty
 	stack->addGlobalRelMCError("Xsec8",0);
