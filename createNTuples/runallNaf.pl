@@ -151,4 +151,5 @@ my $fullSource=File::Spec->rel2abs($source);
 
 system("cp ${fullCMSSWcfpath} $path");
 system("cp $fullSource $path");
+system("cp $ENV{CMSSW_BASE}/src/TtZAnalysis/createNTuples/somehelpers/* $path");
 system("ln -s $ENV{CMSSW_BASE} $path/CMSSW_BASE");

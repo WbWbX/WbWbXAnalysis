@@ -1,4 +1,10 @@
 #!/bin/zsh
+if [ ! $CMSSW_BASE ]
+then
+echo "Needs to be executed with a CMSSW environment set up"
+exit -1
+fi
+
 mkdir -p haddlog
 for f in naf_*; do; 
     if [[ "${f}" == *"run"* ]]; then  
