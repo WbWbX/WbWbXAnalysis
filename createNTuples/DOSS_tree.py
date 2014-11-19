@@ -334,7 +334,7 @@ if isMC:
         # process.load("TopAnalysis.TopUtils.sequences.improvedJetHadronQuarkMatching_cff")
 
         process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi") # Supplies PDG ID to real name resolution of MC particles, necessary for GenLevelBJetProducer
-        process.load("TopAnalysis.TopUtils.sequences.GenHFHadronMatching_cff")
+        process.load("TopAnalysis.TopUtils.sequences.GenHFHadronMatchingLocal_cff")
 
 
 
