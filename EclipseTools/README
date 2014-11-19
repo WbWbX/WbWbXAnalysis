@@ -1,50 +1,5 @@
 
 
----------on your MAC----------
+For more information of how to use the scripts here, please refer to:
 
-You need access to the CMSSW installation on the machine you are running it on!
-(AFS token, mount...)
-
-
----INSTALL ECLIPSE---
-
-download eclipse
-
-http://www.eclipse.org/downloads/download.php?file=/technology/epp/downloads/release/kepler/R/eclipse-cpp-kepler-R-macosx-cocoa-x86_64.tar.gz
-
-put into some temp folder and untar
-
-(sudo) mkdir /Applications/eclipse
-
-(sudo) move content of untared package there
-
-sudo ln -s /Applications/eclipse/eclipse /usr/bin/eclipse
-
-
----eclipse is installed; test if it works
-
-
-
-set the cmssw environment
-
-Find out which is the standard c++ include path ON YOUR LOCAL MACHINE e.g. with
-`gcc -print-prog-name=cc1plus` -v
-
-On the working node:
-run the script 'prepareEclipseProject.sh <your c++ include path on local machine>' 
-
-
----------on your MAC----------
-
-once run (in your CMSSW area acessed via afs or sshfs or something):
-
-<...>/CMSSW_X_Y_Z/importEclipseProject.sh
-
-..wait a minute
-
------everything is set up
-
-to run Eclipse in the project, run
-<...>/CMSSW_X_Y_Z/runEclipse.sh
-
-This will not interfere with your local workspace!
+https://twiki.cern.ch/twiki/bin/viewauth/CMS/DesyTtZAnalysisFramework#Set_up_Eclipse_IDE
