@@ -1,0 +1,243 @@
+
+[plotterCompare]
+
+    divideat = 0.3   $ will affect margins, text box coords etc
+    size = 2         $ size of additional plots to be compared to nominal
+
+[end plotterCompare]
+ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  
+
+ [legendStyle]
+
+   x0  =  0.6
+	y0  =  0.1
+	x1  =  0.87
+	y1  =  0.58
+
+	
+	nColumns        = 1
+	columnSeparator = 0.1
+
+[end legendStyle]
+
+
+[textBoxes - boxes]
+
+externalFile = CMSSW_BASE/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt
+externalMarker = CMSSplit03RightSim
+
+[end textBoxes]
+
+
+ [containerStyle - NominalUpper]
+    
+    $same for ratio plot and control plot
+    
+    markerSize   = 0
+    markerStyle  = 20
+    markerColor  = 1
+ 
+    lineSize     = 2
+    lineStyle    = 1 
+    lineColor    = 1 
+
+    fillStyle    = 1001
+    fillColor    = 1 
+    
+    sysFillStyle = 1001
+    sysFillColor = 1
+
+    rootDrawOpt  = e 
+    sysRootDrawOpt  = none
+    drawStyle    = normal $ can be other options (TBI)
+    
+    legendDrawStyle = lp
+    
+ [end containerStyle]
+ $sufficient to define differences with respect to NominalUpper
+ [containerStyle - NominalRatio]
+    
+    $same for ratio plot and control plot
+    
+    markerSize   = 0
+    markerStyle  = 23
+   
+    lineSize     = 2
+
+    fillStyle    = 1001
+    fillColor    = 1
+    sysFillStyle = 1001
+    sysFillColor = 1
+
+    rootDrawOpt  = e 
+    sysRootDrawOpt  = none
+    
+    drawStyle    = normal $ can be other options (TBI)
+    
+    legendDrawStyle=lp $not used
+    
+ [end containerStyle]
+ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ $$$$$$$$$    defaults 
+  [containerStyle - CompareUpperDefault]
+    
+    
+    markerSize   = 0
+    markerStyle  = 26
+    markerColor  = 632
+ 
+    lineSize     = 2
+    lineStyle    = 1 
+    lineColor    = 1 
+
+    fillStyle    = 1001
+    fillColor    = 1 
+
+    sysFillStyle = 1001
+    sysFillColor = 1
+
+    rootDrawOpt  = e 
+    sysRootDrawOpt  = none
+    drawStyle    = normal $ can be other options (TBI)
+    
+    legendDrawStyle = lp
+    
+ [end containerStyle]  
+ [containerStyle - CompareRatioDefault]
+    
+    
+   markerSize   = 0
+    markerStyle  = 26
+    markerColor  = 632
+ 
+    lineSize     = 2
+    lineStyle    = 1 
+    lineColor    = 1 
+
+    fillStyle    = 1001
+    fillColor    = 1 
+
+    sysFillStyle = 1001
+    sysFillColor = 1
+
+    rootDrawOpt  = e 
+    sysRootDrawOpt  = none
+    drawStyle    = normal $ can be other options (TBI)
+    
+    
+    legendDrawStyle = lp $not used
+    
+ [end containerStyle]
+ 
+ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ $$$$$ from now on only define differences wrt to defaults
+ 
+ [containerStyle - CompareUpperSysUp]  
+   $markerColor  = 632  
+    lineColor    = 632 
+    sysFillColor = 632
+ [end containerStyle]
+ 
+ [containerStyle - CompareRatioSysUp]
+   $markerColor  = 632  
+    lineColor    = 632 
+    sysFillColor = 632
+ [end containerStyle]
+ 
+ [containerStyle - CompareUpperSysDown]  
+ 
+   
+    $markerColor  = 600  
+    lineColor    = 600 
+    sysFillColor = 600
+    
+ [end containerStyle]
+ [containerStyle - CompareRatioSysDown]
+ 
+   
+    $markerColor  = 600  
+    lineColor    = 600 
+    sysFillColor = 600
+    
+ [end containerStyle]
+ 
+ 
+  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+[plotStyle - Upper]
+
+    bottomMargin  = 0.03
+    topMargin     = 0.1
+    leftMargin    = 0.15
+    rightMargin   = 0.1
+    
+    $both not used right now
+    
+    divideByBinWidth  = true
+    horizontal        = false
+    
+    $$ axis styles
+    
+    xaxis.titleSize   = 0.06
+    xaxis.labelSize   = 0.0
+    xaxis.titleOffset = 0.8
+    xaxis.labelOffset = 0.005
+    xaxis.tickLength  = 0.03
+    xaxis.ndiv        = 510
+    xaxis.max         = -1
+    xaxis.min         = 1
+    xaxis.log         = false
+    xaxis.name        = USEDEF
+    
+    
+    yaxis.titleSize   = 0.06
+    yaxis.labelSize   = 0.05
+    yaxis.titleOffset = 1.18
+    yaxis.labelOffset = 0.005
+    yaxis.tickLength  = 0.03
+    yaxis.ndiv        = 510
+    yaxis.max         = -1
+    yaxis.min         = 0 $use this one
+    yaxis.log         = false
+    yaxis.name        = USEDEF
+    
+[end plotStyle]
+  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+[plotStyle - Ratio]
+    
+    bottomMargin  = 0.45
+    topMargin     = 0.01
+    leftMargin    = 0.15
+    rightMargin   = 0.1
+    
+    $both not used right now
+    
+    divideByBinWidth  = false
+    horizontal        = false
+    
+    $$ axis styles
+    
+    xaxis.titleSize   = 0.06
+    xaxis.labelSize   = 0.05
+    xaxis.titleOffset = 0.95
+    xaxis.labelOffset = 0.005
+    xaxis.tickLength  = 0.03
+    xaxis.ndiv        = 510
+    xaxis.max         = -1
+    xaxis.min         = 1
+    xaxis.log         = false
+    xaxis.name        = USEDEF
+    
+    yaxis.titleSize   = 0.06
+    yaxis.labelSize   = 0.05
+    yaxis.titleOffset = 1
+    yaxis.labelOffset = 0.005
+    yaxis.tickLength  = 0.03
+    yaxis.ndiv        = 505
+    yaxis.max         = 1.19
+    yaxis.min         = 0.81
+    yaxis.log         = false
+    yaxis.name        = #frac{N_{syst}}{N_{nom}}
+    
+[end plotStyle]

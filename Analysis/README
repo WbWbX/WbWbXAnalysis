@@ -1,3 +1,9 @@
+This subpackage includes more analysis specific code, e.g. how to run on ntuples,
+scale factor classes, and doing the end-level plotting (with the tools available in
+TtZAnalysis/Tools!)
+
+
+
 To create the analysis executables, run the make.sh script.
 This will compile all dependencies and the executables.
 
@@ -35,8 +41,3 @@ For reference, see analysisPlotsJan and jansplots_step8
 
 
 
-/////// some naming conventions /////////
-
-all btag SF.efficiency files should be named <name>_btags.root
-all discriminator input files should be named <name>_discr.root
-all config files that are to be used with analyse should be named <name>_config.txt

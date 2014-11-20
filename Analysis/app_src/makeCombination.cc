@@ -17,17 +17,18 @@ double sq(const double & in){
 }
 
 
-int main(int argc, char* argv[]){
+#include "mainMacro.h"
+
+invokeApplication(){
 
 	using namespace ztop;
 
-	optParser parse(argc,argv);
-	parse.bepicky=true;
-	TString inputfile= parse.getOpt<TString>  ("i","","specify input file");
+	parser->bepicky=true;
+	TString inputfile= parser->getOpt<TString>  ("i","","specify input file");
 
-	parse.doneParsing();
+	parser->doneParsing();
 	if(inputfile.Length()<1){
-		parse.coutHelp();
+		parser->coutHelp();
 	}
 
 	fileReader fr;

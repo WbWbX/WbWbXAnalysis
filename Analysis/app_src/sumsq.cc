@@ -10,11 +10,13 @@
 #include <vector>
 #include <iostream>
 
-int main(int argc, char* argv[]){
+#include "mainMacro.h"
+
+invokeApplication(){
 	using namespace ztop;
-	optParser parser(argc,argv);
-	parser.bepicky=false;
-	std::vector<float> nums=parser.getRest<float>();
+
+	parser->bepicky=false;
+	std::vector<float> nums=parser->getRest<float>();
 
 	float sum2=0;
 	for(size_t i=0;i<nums.size();i++)

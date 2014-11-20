@@ -26,16 +26,17 @@
  *
  */
 
-int main(int argc, char* argv[]){
+#include "mainMacro.h"
+
+invokeApplication(){
 	using namespace ztop;
 
-	optParser parse(argc,argv);
-	bool makecalib = parse.getOpt<bool>("c",false,"enables calibration plot");
-	TString opts = parse.getOpt<TString>("o","","specify additional options parsed to each mtFromXSec2");
-	float mtopin = parse.getOpt<float>("mt",172.5,"specify reference top mass (only for pulls)");
-	std::vector<std::string> dirnames = parse.getRest<std::string>();
+	bool makecalib = parser->getOpt<bool>("c",false,"enables calibration plot");
+	TString opts = parser->getOpt<TString>("o","","specify additional options parsed to each mtFromXSec2");
+	float mtopin = parser->getOpt<float>("mt",172.5,"specify reference top mass (only for pulls)");
+	std::vector<std::string> dirnames = parser->getRest<std::string>();
 
-	parse.doneParsing();
+	parser->doneParsing();
 	graph sumgraph;//(dirnames.size());
 	graph zerograph;
 	graph gstatup=sumgraph;

@@ -7,25 +7,24 @@
 
 #include <vector>
 #include "TString.h"
-#include "TtZAnalysis/Tools/interface/optParser.h"
 #include "TtZAnalysis/DataFormats/interface/NTBTagSF.h"
 
+#include "mainMacro.h"
 
-int main(int argc, char* argv[]){
+invokeApplication(){
     using namespace ztop;
     using namespace std;
 
     bool debug=true;
 
-    optParser parser(argc,argv);
-    parser.bepicky=true;
-    TString outname  = parser.getOpt<TString>("o","out","output file name <name>_btags.root (default out)");
-    std::vector<TString> instrings_=parser.getRest<TString>();
+    parser->bepicky=true;
+    TString outname  = parser->getOpt<TString>("o","out","output file name <name>_btags.root (default out)");
+    std::vector<TString> instrings_=parser->getRest<TString>();
 
-    parser.doneParsing();
+    parser->doneParsing();
     if(instrings_.size()<2){
         std::cout << "need minimum 2 input files to merge" <<std::endl;
-        parser.coutHelp();
+        parser->coutHelp();
     }
     NTBTagSF btags;
 

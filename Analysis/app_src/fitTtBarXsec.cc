@@ -72,7 +72,7 @@ invokeApplication(){
 
     if(npseudoexp>0)
         mainfitter.setRemoveSyst(true);
-    mainfitter.readInput((cmsswbase+"/src/TtZAnalysis/Analysis/configs/"+inputconfig).Data());
+    mainfitter.readInput((cmsswbase+"/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/"+inputconfig).Data());
     extendedVariable::debug=false;
 
 
@@ -104,7 +104,7 @@ invokeApplication(){
 
         container1D pseudoout7(container1D::createBinning(40,-8,8)), pseudoout8(container1D::createBinning(40,-8,8));
         plotterControlPlot pl;
-        pl.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/topXsec/controlPlots_combined.txt");
+        pl.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/controlPlots_combined.txt");
         TCanvas cvv;
 
         cvv.Print(outfile+"_pd0_7.pdf(");
@@ -193,7 +193,7 @@ invokeApplication(){
 
             TCanvas * cv=new TCanvas();
             plotterMultiplePlots plm;
-            plm.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/topXsec/multiplePlots_pulls.txt");
+            plm.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/multiplePlots_pulls.txt");
             plm.usePad(cv);
             plm.addPlot(c);
             plm.setLastNoLegend();
@@ -226,7 +226,7 @@ invokeApplication(){
 
         containerStack stack;
         plotterControlPlot pl;
-        pl.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/topXsec/controlPlots_combined.txt");
+        pl.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/controlPlots_combined.txt");
         TCanvas c;
         c.Print(outfile+".pdf(");
         pl.usePad(&c);
@@ -252,7 +252,7 @@ invokeApplication(){
             }
             plotterCompare plc;
             plc.usePad(&c);
-            plc.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/topXsec/comparePlots_Cb.txt");
+            plc.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/comparePlots_Cb.txt");
             c.SetName("c_b");
             container1D ctmp=mainfitter.getCb(false,seveneight);
             ctmp.setName("C_{b}  pre-fit");
@@ -268,7 +268,7 @@ invokeApplication(){
             c.SetName("eps_b");
             ctmp=mainfitter.getEps(false,seveneight);
             ctmp.setName("#epsilon_{b}  pre-fit");
-            plc.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/topXsec/comparePlots_epsb.txt");
+            plc.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/comparePlots_epsb.txt");
             plc.setNominalPlot(&ctmp);
             ctmp=mainfitter.getEps(true,true);
             ctmp.setName("#epsilon_{b} post-fit");

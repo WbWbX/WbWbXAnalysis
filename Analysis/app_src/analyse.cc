@@ -30,7 +30,8 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	// TString
 	if(maninputfile!="")
 		inputfile=maninputfile;
-	//do not prepend path (batch submission)
+	//do not prepend absolute path (batch submission)
+	inputfile="configs/analyse/"+inputfile;
 
 	fileReader fr;
 	fr.setComment("$");
@@ -587,39 +588,38 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 
 
 //////////////////
-#include "TtZAnalysis/Tools/interface/optParser.h"
+#include "mainMacro.h"
 
-int main(int argc, char* argv[]){
+invokeApplication(){
 
 	using namespace ztop;
 
-	optParser parse(argc,argv);
-	TString channel= parse.getOpt<TString>   ("c","emu","channel (ee, emu, mumu), default: emu\n");         //-c channel
-	TString syst   = parse.getOpt<TString>   ("s","nominal","systematic variation <var>_<up/down>, default: nominal");     //-s <syst>
-	TString energy = parse.getOpt<TString>   ("e","8TeV","energy (8TeV, 7 TeV), default: 8TeV");        //-e default 8TeV
-	double lumi    = parse.getOpt<float>     ("l",-1,"luminosity, default -1 (= read from config file)");            //-l default -1
-	bool dobtag    = parse.getOpt<bool>      ("B",false,"produce b-tag efficiencies (switch)");         //-B switches on default false
-	TString btagfile = parse.getOpt<TString> ("b","all_btags.root","use btagfile (default all_btags.root)");        //-b btagfile default all_btags.root
-	const float wpval = parse.getOpt<float>     ("bwp",-100,"btag discriminator cut value (default: not use)");            //-l default -1
+	TString channel= parser->getOpt<TString>   ("c","emu","channel (ee, emu, mumu), default: emu\n");         //-c channel
+	TString syst   = parser->getOpt<TString>   ("s","nominal","systematic variation <var>_<up/down>, default: nominal");     //-s <syst>
+	TString energy = parser->getOpt<TString>   ("e","8TeV","energy (8TeV, 7 TeV), default: 8TeV");        //-e default 8TeV
+	double lumi    = parser->getOpt<float>     ("l",-1,"luminosity, default -1 (= read from config file)");            //-l default -1
+	bool dobtag    = parser->getOpt<bool>      ("B",false,"produce b-tag efficiencies (switch)");         //-B switches on default false
+	TString btagfile = parser->getOpt<TString> ("b","all_btags.root","use btagfile (default all_btags.root)");        //-b btagfile default all_btags.root
+	const float wpval = parser->getOpt<float>     ("bwp",-100,"btag discriminator cut value (default: not use)");            //-l default -1
 
-	TString outfile= parse.getOpt<TString>   ("o","","additional output id");            //-o <outfile> should be something like channel_energy_syst.root // only for plots
-	bool status    = parse.getOpt<bool>      ("S",false,"show regular status update (switch)");         //-S enables default false
-	bool testmode  = parse.getOpt<bool>      ("T",false,"enable testmode: 8% of stat, more printout");         //-T enables default false
-	bool tickonce  = parse.getOpt<bool>      ("TO",false,"enable tick once: breaks as soon as 1 event survived full selection (for software testing)");         //-T enables default false
-	TString mode   = parse.getOpt<TString>   ("m","xsec","additional mode options");        //-m (xsec,....) default xsec changes legends? to some extend
-	TString inputfile= parse.getOpt<TString> ("i","","specify configuration file input manually");          //-i empty will use automatic
-	TString topmass  = parse.getOpt<TString> ("mt","172.5","top mass value to be used, default: 172.5");          //-i empty will use automatic
-	TString discrFile=parse.getOpt<TString>  ("lh","" , "specify discriminator input file. If not specified, likelihoods are created");          //-i empty will use automatic
+	TString outfile= parser->getOpt<TString>   ("o","","additional output id");            //-o <outfile> should be something like channel_energy_syst.root // only for plots
+	bool status    = parser->getOpt<bool>      ("S",false,"show regular status update (switch)");         //-S enables default false
+	bool testmode  = parser->getOpt<bool>      ("T",false,"enable testmode: 8% of stat, more printout");         //-T enables default false
+	bool tickonce  = parser->getOpt<bool>      ("TO",false,"enable tick once: breaks as soon as 1 event survived full selection (for software testing)");         //-T enables default false
+	TString mode   = parser->getOpt<TString>   ("m","xsec","additional mode options");        //-m (xsec,....) default xsec changes legends? to some extend
+	TString inputfile= parser->getOpt<TString> ("i","","specify configuration file input manually (default is configs/analyse/<channel>_<energy>_config.txt");          //-i empty will use automatic
+	TString topmass  = parser->getOpt<TString> ("mt","172.5","top mass value to be used, default: 172.5");          //-i empty will use automatic
+	TString discrFile=parser->getOpt<TString>  ("lh","" , "specify discriminator input file. If not specified, likelihoods are created");          //-i empty will use automatic
 
-	const bool interactive = parse.getOpt<bool>      ("I",testmode,"enable interactive mode: no fork limit");
+	const bool interactive = parser->getOpt<bool>      ("I",testmode,"enable interactive mode: no fork limit");
 
-	float fakedatastartentries = parse.getOpt<float>    ("-startdiv",0.9,"point to start fake data entries wrt to to evts");
+	float fakedatastartentries = parser->getOpt<float>    ("-startdiv",0.9,"point to start fake data entries wrt to to evts");
 
 	bool createLH=false;
 	if(discrFile.Length()<1)
 		createLH=true;
 
-	parse.doneParsing();
+	parser->doneParsing();
 
 	bool mergefiles=false;
 	std::vector<TString> filestomerge;
@@ -630,4 +630,5 @@ int main(int argc, char* argv[]){
 	else{
 		analyse(channel, syst, energy, outfile, lumi,dobtag , status, testmode,tickonce,inputfile,mode,topmass,btagfile,createLH,discrFile.Data(),fakedatastartentries,interactive,wpval);
 	}
+	return 0;
 }

@@ -116,7 +116,7 @@ void makePseudoExperiments(ztop::mtExtractor* ex,size_t niter,float evalpoint, T
 
 
 	plotterMultiplePlots plotterm;
-	plotterm.readStyleFromFileInCMSSW("src/TtZAnalysis/Analysis/configs/topmass/multiplePlots_pulls.txt");
+	plotterm.readStyleFromFileInCMSSW("src/TtZAnalysis/Analysis/configs/mtFromXsec2/multiplePlots_pulls.txt");
 	plotterm.usePad(&cv1);
 	plotterm.cleanMem();
 	plotterm.clear();
@@ -239,7 +239,7 @@ int main(int argc, char* argv[]){
 	const bool nosyst     =  parse.getOpt<bool>   ("-nosyst",false,"skip systematics");
 	const bool onlysignalstat     =  parse.getOpt<bool>   ("-onlysignalstat",false,"skip systematics");
 	std::string extconfigfile      =  parse.getOpt<std::string>    ("-config",
-			((TString)cmsswbase+"/src/TtZAnalysis/Analysis/configs/mtExtractor_config.txt").Data(),
+			((TString)cmsswbase+"/src/TtZAnalysis/Analysis/configs/mtFromXsec2/mtExtractor_config.txt").Data(),
 			"specify config file for external gen input");
 	const bool normalize  = parse.getOpt<bool>   ("-normalize",false,"normalize all distributions");
 	const bool makepdfs   =  parse.getOpt<bool>   ("-makepdfs",false,"converts output from eps to pdf");
@@ -753,7 +753,7 @@ int main(int argc, char* argv[]){
 	//efficiency.setXAxisName(tmp.ReplaceAll("reco","gen"));
 	ineff.setAllErrorsZero();
 	plotterMultiplePlots effplotter;
-	effplotter.readStyleFromFileInCMSSW("src/TtZAnalysis/Analysis/configs/topmass/multiplePlots_efficiency.txt");
+	effplotter.readStyleFromFileInCMSSW("src/TtZAnalysis/Analysis/configs/mtFromXsec2/multiplePlots_efficiency.txt");
 	c->SetName("efficiency");
 	effplotter.usePad(c);
 	effplotter.addPlot(&efficiency,false);

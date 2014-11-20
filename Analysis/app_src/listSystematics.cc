@@ -11,16 +11,16 @@
 #include "TtZAnalysis/Tools/interface/containerStackVector.h"
 #include "TtZAnalysis/Tools/interface/optParser.h"
 
+#include "mainMacro.h"
 
-int main(int argc, char* argv[]){
+invokeApplication(){
 	using namespace ztop;
 	using namespace std;
 
 	bool debug=true;
 
-	optParser parser(argc,argv);
 	// TString namescontain = parser.getOpt<TString>("-s","","");
-	std::vector<TString> instrings=parser.getRest<TString>();
+	std::vector<TString> instrings=parser->getRest<TString>();
 
 	if(instrings.size()!=1)
 		return -1;
@@ -45,4 +45,5 @@ int main(int argc, char* argv[]){
 
 	}
 	}
+	return 0;
 }

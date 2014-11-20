@@ -1,3 +1,0 @@
-#for 2012
-
-pileupCalc.py -i MyAnalysisJSON.txt --inputLumiJSON pileup_JSON_2011_4_2_validation.txt --calcMode true --minBiasXsec 69300 --maxPileupBin 50 --numPileupBins 50  MyDataPileupHistogram.root

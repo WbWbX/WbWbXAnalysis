@@ -16,21 +16,22 @@
 #include "TtZAnalysis/DataFormats/src/classes.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 
+#include "mainMacro.h"
 
-int main(int argc, char* argv[]){
+invokeApplication(){
+
     using namespace ztop;
     using namespace std;
 
-    optParser parser(argc,argv);
-    parser.setAdditionalDesciption("just compares the content of two ntuples. \
+    parser->setAdditionalDesciption("just compares the content of two ntuples. \
              Processed events and events in ntuple\n \
             needs two input files");
-    //  TString outputadd=parser.getOpt<TString>("o","","additional string to be added to output file names");
-    // TString inputadd =parser.getOpt<TString>("i","","additional string to be added to input file names");
-    std::vector<TString> files = parser.getRest<TString>();
+    //  TString outputadd=parser->getOpt<TString>("o","","additional string to be added to output file names");
+    // TString inputadd =parser->getOpt<TString>("i","","additional string to be added to input file names");
+    std::vector<TString> files = parser->getRest<TString>();
 
     if(files.size()<2){
-        parser.coutHelp();
+        parser->coutHelp();
     }
 
 
@@ -116,5 +117,6 @@ int main(int argc, char* argv[]){
         fa->Close();
         fb->Close();
     }
+    return 0;
 }
 

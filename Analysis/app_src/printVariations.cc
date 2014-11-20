@@ -206,6 +206,9 @@ ztop::container1DUnfold getCUFFromFile(TString filename,TString plotname)
  *  -s: signal (list in "") not implmented yet!
  */
 int main(int argc, char* argv[]){
+
+	throw std::runtime_error("printVariations: not used anymore!");
+
     using namespace ztop;
     using namespace std;
     AutoLibraryLoader::enable();

@@ -14,20 +14,21 @@
  * output option: -o, otherwise <input>_unfolded
  */
 //////////////for compling////////
-int main(int argc, char* argv[]){
-    using namespace ztop;
-    optParser parse(argc,argv);
-    parse.bepicky=true;
-    TString out   = parse.getOpt<TString>("o","","string to add to outfile");
-    bool moreoutput=parse.getOpt<bool>   ("v",false,"switches on verbose mode for unfolding");
-    bool printpdfs=parse.getOpt<bool>   ("P",false,"print unfolding output as pdfs (switch)");
-    bool bbb=parse.getOpt<bool>   ("BBB",false,"set all to bin-by-bin unfolding");
-    std::vector<TString> allin = parse.getRest<TString>();
+#include "mainMacro.h"
 
-    parse.doneParsing();
+invokeApplication(){
+    using namespace ztop;
+    parser->bepicky=true;
+    TString out   = parser->getOpt<TString>("o","","string to add to outfile");
+    bool moreoutput=parser->getOpt<bool>   ("v",false,"switches on verbose mode for unfolding");
+    bool printpdfs=parser->getOpt<bool>   ("P",false,"print unfolding output as pdfs (switch)");
+    bool bbb=parser->getOpt<bool>   ("BBB",false,"set all to bin-by-bin unfolding");
+    std::vector<TString> allin = parser->getRest<TString>();
+
+    parser->doneParsing();
     if(allin.size()<1){
         std::cout << "specify at leaste one input file" <<std::endl;
-        parse.coutHelp();
+        parser->coutHelp();
     }
     TString outputstring;
     for(size_t i=0;i<allin.size();i++){
