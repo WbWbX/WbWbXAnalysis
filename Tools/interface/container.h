@@ -225,8 +225,8 @@ public:
 
 	void sqrt();
 
-	container1D chi2container(const container1D&)const;
-	float chi2(const container1D&)const;
+	container1D chi2container(const container1D&,size_t * ndof=0)const;
+	float chi2(const container1D&,size_t * ndof=0)const;
 
 	/**
 	 * cuts everything on the right of the input value (bin boundary chosen accorind to getBinNo())

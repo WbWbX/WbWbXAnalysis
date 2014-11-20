@@ -21,13 +21,14 @@ namespace ztop{
  * class to parse options in a handy way. Not much of error checking etc.
  * that would have to be done in main code
  *
- * CAUTION does not handle the following in a proper way:
- * program -<somebool> <this is an input file>
- * getInput() would not return anything here, because there is a switch right before the input
  *
  * change to "getreset" or something (safe full strings in vector or something when setIn()
  *
  * The options -h and --help are reserved and will display a help message!
+ *
+ * Combining switch options can not be handled.
+ *  E.g. executable -f -g would work,
+ *  whereas executable -fg wouldn't give the same result
  *
  */
 class optParser{

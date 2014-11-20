@@ -126,8 +126,8 @@ public:
 				if(fabs(elec->eta())>2.5 ) continue;
 				if(fabs(elec->d0V()) >0.04 ) continue;
 				if(!(elec->isNotConv()) ) continue;
-				if(useRhoIso && elec->rhoIso()>0.15 ) continue;
-				if(!useRhoIso) continue;
+				if(elec->rhoIso()>0.15 ) continue;
+				//if(!useRhoIso) continue;
 				//  if(CiCId && (0x00 == (0x01 & (int) elec->id("cicTightMC"))) ) continue; //for CiC bit test
 				if(elec->mvaId() < -0.1) continue;
 				//if(!noOverlap(elec,*pMuons,0.1)) continue;
@@ -171,16 +171,24 @@ public:
 
 			for(std::map<std::string, unsigned int>::iterator trigP=pTriggersWithPrescales->begin();trigP!=pTriggersWithPrescales->end();++trigP){
 				const string * name= &(trigP->first);
+
 				for(unsigned int dtrigit=0;dtrigit<checkdiltriggers_.size();dtrigit++){
 					if(((TString)*name).Contains(checkdiltriggers_.at(dtrigit))){
+
 						dilfired_b=true;
 						break;
 					}
 				}
-
-				for(unsigned int ctrigit=0;ctrigit<checkmettriggers_.size();ctrigit++){
+				if(dilfired_b)break;
+			}
+			for(unsigned int ctrigit=0;ctrigit<checkmettriggers_.size();ctrigit++){
+				if(dilfired_b)
+					dilfired.at(ctrigit)+= puweight;
+				for(std::map<std::string, unsigned int>::iterator trigP=pTriggersWithPrescales->begin();trigP!=pTriggersWithPrescales->end();++trigP){
+					const string * name= &(trigP->first);
 					if(((TString)*name).Contains(checkmettriggers_.at(ctrigit))){
 						metfired.at(ctrigit) += puweight;
+
 						anymetfired_b=true;
 						// cout << "bla" << endl;
 						if(dilfired_b) bothfired.at(ctrigit) += puweight;
@@ -223,20 +231,22 @@ public:
 		cout.precision(4);
 		for(unsigned int i=0;i<order.size();i++){
 			unsigned int it=order.at(i);
-			cout << "sig: " << signif.at(it)
-	    														 << "\tR: " << ratios.at(it)
-	    														 << "\tRerr: " << ratioerrs.at(it)
-	    														 << "\t" << checkmettriggers_.at(it) << endl;
+			cout << "sig: " << signif.at(it)<<
+					"\tR: " << ratios.at(it) <<
+					"\tRerr: " << ratioerrs.at(it)<<
+					"\t" << checkmettriggers_.at(it) << endl;
 
 		}
 		for(unsigned int i=0;i<order.size();i++){
 			unsigned int it=order.at(i);
-			cout << " << " <<  checkmettriggers_.at(it);
+			cout << " << \"" <<  checkmettriggers_.at(it) <<"\""<< endl;
 		}
 		double totalratio = totalmet * totaldil/(totalboth * dileptonevents);
 		double totalerr=sqrt(totalboth/dileptonevents * ( 1- totalboth/dileptonevents) / dileptonevents) * totalratio / (totalboth/dileptonevents);
-
-		cout  << "\n\ntotal ratio: " << totalratio << " +- "<< totalerr << endl;
+		cout << "total dilepton events: " << dileptonevents<< endl;
+		cout << "total met:             " <<  totalmet<< endl;
+		cout << "total both:            " << totalboth<< endl;
+		cout  << "\n\ntotal ratio:      " << totalratio << " +- "<< totalerr << endl;
 
 
 
@@ -358,6 +368,7 @@ public:
 			}
 
 		}//
+		cout <<endl;
 		vector<TString> trigs;
 		vector<double> trigcontr;
 		for(map<TString,double>::iterator it=triggerlist.begin();it!=triggerlist.end();++it){
@@ -368,14 +379,14 @@ public:
 		for(unsigned int i=order.size(); i>0 ;i--){
 			unsigned int it=order.at(i-1);
 			cout << trigcontr.at(it)
-	    														 << "\t"
-	    														 << trigs.at(it)
-	    														 << endl;
+	    																								 << "\t"
+	    																								 << trigs.at(it)
+	    																								 << endl;
 		}
 
 		for(unsigned int i=order.size(); i>0 ;i--){
 			unsigned int it=order.at(i-1);
-			cout << " << \"" << trigs.at(it) << "\"";
+			cout << " << \"" << trigs.at(it) << "\""<<endl;
 		}
 		cout << endl;
 

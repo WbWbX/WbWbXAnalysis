@@ -80,8 +80,8 @@ btagWP         = csvl
 btagFile       = all_btags.root
 
 
-btagShapeFileHF = /src/TopAnalysis/ZTopUtils/data/csv_rwt_hf.root
-btagShapeFileLF = /src/TopAnalysis/ZTopUtils/data/csv_rwt_lf.root
+btagShapeFileHF = /src/TopAnalysis/Configuration/analysis/common/data/csv_rwt_hf_20pt_8_20_14.root
+btagShapeFileLF = /src/TopAnalysis/Configuration/analysis/common/data/csv_rwt_lf_20pt_8_20_14.root
 
 
 modeOptions = GsfelectronsZerojetNozcutNometcutNobcutBtagcsvtLeppt30

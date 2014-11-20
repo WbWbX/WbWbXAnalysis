@@ -1,0 +1,273 @@
+
+[plotterCompare]
+
+    divideat = 0.4   $ will affect margins, text box coords etc
+    size = 3         $ size of additional plots to be compared to nominal
+
+[end plotterCompare]
+ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  
+[textBoxes - boxes]
+   0.25,   0.95,   DEFTITLE,            0.05
+  $ 0.5,   0.95,   some text for box,   0.05
+   0.78,   0.95,   L=19.8 fb^{-1},   0.04
+
+
+[end textBoxes]
+
+
+ [legendStyle]
+
+    x0  =  0.65
+	y0  =  0.65
+	x1  =  0.9
+	y1  =  0.88
+	
+	nColumns        = 1
+	columnSeparator = 0.1
+ [end legendStyle]
+
+ [containerStyle - NominalUpper]
+    
+    $same for ratio plot and control plot
+    
+    markerSize   = 1
+    markerStyle  = 20
+    markerColor  = 1
+ 
+    lineSize     = 2
+    lineStyle    = 1 
+    lineColor    = 1 
+
+    fillStyle    = 1001
+    fillColor    = 1 
+    
+    sysFillStyle = 1001
+    sysFillColor = 1
+
+    rootDrawOpt  = Pe1 
+    sysRootDrawOpt  = e1
+    drawStyle    = normal $ can be other options (TBI)
+    
+    
+    legendDrawStyle = lp
+    
+ [end containerStyle]
+ $sufficient to define differences with respect to NominalUpper
+ 
+ [containerStyle - NominalRatio]
+    
+    $same for ratio plot and control plot
+    
+    markerSize   = 0
+    markerStyle  = 23
+   
+    lineSize     = 1
+
+    fillStyle    = 3001
+    fillColor    = 432
+    sysFillStyle = 3001
+    sysFillColor = 920
+
+    rootDrawOpt  = e2 
+    sysRootDrawOpt  = e2
+    
+    drawStyle    = normal $ can be other options (TBI)
+    
+    
+ [end containerStyle]
+ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ $$$$$$$$$    defaults 
+  [containerStyle - CompareUpperDefault]
+    
+    
+    markerSize   = 0
+    markerStyle  = 26
+    markerColor  = 632
+ 
+    lineSize     = 2
+    lineStyle    = 1 
+    lineColor    = 632 
+
+    fillStyle    = 1001
+    fillColor    = 1 
+
+    sysFillStyle = 3005
+    sysFillColor = 632
+
+    rootDrawOpt  = Pe1 
+    sysRootDrawOpt  = e1
+    drawStyle    = normal $ can be other options (TBI)
+    
+    
+    legendDrawStyle = lp
+    
+ [end containerStyle]  
+ [containerStyle - CompareRatioDefault]
+    
+    
+   markerSize   = 0
+    markerStyle  = 26
+    markerColor  = 632
+ 
+    lineSize     = 2
+    lineStyle    = 1 
+    lineColor    = 632 
+
+    fillStyle    = 1001
+    fillColor    = 1 
+
+    sysFillStyle = 3005
+    sysFillColor = 632
+
+    rootDrawOpt  = Pe1 
+    sysRootDrawOpt  = e1
+    drawStyle    = normal $ can be other options (TBI)
+    
+    
+    legendDrawStyle = lp
+    
+    
+ [end containerStyle]
+ 
+ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ $$$$$ from now on only define differences wrt to defaults
+ 
+ [containerStyle - CompareUpper0]  
+ 
+    $markerColor  = 632  
+    lineColor    = 632 
+    sysFillColor = 632
+    
+ [end containerStyle]
+ [containerStyle - CompareRatio0]
+ 
+    lineColor    = 632
+    sysFillColor = 632
+    
+ [end containerStyle]
+ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  
+ 
+ [containerStyle - CompareUpper1]
+    
+    $markerColor  = 600  
+    lineColor    = 600 
+    sysFillColor = 600
+
+ [end containerStyle]
+ 
+ [containerStyle - CompareRatio1]
+    
+    lineColor    = 600
+    sysFillColor = 600
+
+ [end containerStyle]
+ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 
+ 
+ [containerStyle - CompareUpper2]
+   
+    lineColor    = 416 
+    sysFillColor = 416
+
+ [end containerStyle]
+ 
+ [containerStyle - CompareRatio2]
+   
+    lineColor    = 416
+    sysFillColor = 416
+
+ [end containerStyle]
+ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 
+ [containerStyle - CompareUpper3]
+   
+    lineColor    = 619 
+    sysFillColor = 619
+
+ [end containerStyle]
+ [containerStyle - CompareRatio3]
+   
+    lineColor    = 619
+    sysFillColor = 619
+
+ [end containerStyle]
+ 
+ 
+ 
+  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+[plotStyle - Upper]
+
+    bottomMargin  = 0.03
+    topMargin     = 0.1
+    leftMargin    = 0.15
+    rightMargin   = 0.1
+    
+    $both not used right now
+    
+    divideByBinWidth  = true
+    horizontal        = false
+    
+    $$ axis styles
+    
+    xaxis.titleSize   = 0.06
+    xaxis.labelSize   = 0.0
+    xaxis.titleOffset = 0.8
+    xaxis.labelOffset = 0.005
+    xaxis.tickLength  = 0.03
+    xaxis.ndiv        = 510
+    xaxis.max         = -2
+    xaxis.min         = -1
+    xaxis.log         = false
+    xaxis.name        = USEDEF
+    
+    
+    yaxis.titleSize   = 0.06
+    yaxis.labelSize   = 0.05
+    yaxis.titleOffset = 0.85
+    yaxis.labelOffset = 0.005
+    yaxis.tickLength  = 0.03
+    yaxis.ndiv        = 510
+    yaxis.max         = 0.4
+    yaxis.min         = 0.3
+    yaxis.log         = false
+    yaxis.name        = USEDEF
+    
+[end plotStyle]
+  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+[plotStyle - Ratio]
+    
+    bottomMargin  = 0.3
+    topMargin     = 0.01
+    leftMargin    = 0.15
+    rightMargin   = 0.1
+    
+    $both not used right now
+    
+    divideByBinWidth  = false
+    horizontal        = false
+    
+    $$ axis styles
+    
+    xaxis.titleSize   = 0.06
+    xaxis.labelSize   = 0.05
+    xaxis.titleOffset = 0.8
+    xaxis.labelOffset = 0.005
+    xaxis.tickLength  = 0.03
+    xaxis.ndiv        = 510
+    xaxis.max         = -1
+    xaxis.min         = 1
+    xaxis.log         = false
+    xaxis.name        = USEDEF
+    
+    yaxis.titleSize   = 0.06
+    yaxis.labelSize   = 0.05
+    yaxis.titleOffset = 0.85
+    yaxis.labelOffset = 0.005
+    yaxis.tickLength  = 0.03
+    yaxis.ndiv        = 505
+    yaxis.max         = 1.05
+    yaxis.min         = 0.95
+    yaxis.log         = false
+    yaxis.name        = #frac{post-fit}{pre-fit}
+    
+[end plotStyle]

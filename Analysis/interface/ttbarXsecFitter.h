@@ -38,7 +38,7 @@ public:
 		lhmode_(lhm_chi2datamcstat),
 		fitsucc_(false),norm_nbjet_global_(true),
 		xsecoff8_(251.7),xsecoff7_(170),
-		useMConly_(false),removesyst_(false),
+		useMConly_(false),removesyst_(false),nominos_(false),
 		random_(0),parameterwriteback_(true)
 	{container_c_b_.resize(2);container_eps_b_.resize(2);eps_emu_.resize(2);} //one for each energy
 
@@ -92,6 +92,8 @@ public:
 	void addFullExtrapolError(const TString& systname);
 
 	void setUseMCOnly(bool set){useMConly_=set;}
+
+	void setNoMinos(bool nomin){nominos_=nomin;}
 
 	/**
 	 * removes systematics already at read-in
@@ -245,7 +247,7 @@ private:
 	//might come handy in some cases
 	formatter format_;
 
-	bool useMConly_,removesyst_;
+	bool useMConly_,removesyst_,nominos_;
 
 	TRandom3 * random_;
 	bool parameterwriteback_;

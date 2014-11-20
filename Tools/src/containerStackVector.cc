@@ -160,7 +160,14 @@ void containerStackVector::addSignal(const TString & signame){
 
 
 
-const ztop::containerStack& containerStackVector::getStack(const TString& name)const{
+const ztop::containerStack& containerStackVector::getStack(const TString& name,size_t startidx)const{
+	//try same index first
+	if(startidx<stacks_.size()){
+		if(name == stacks_.at(startidx).getName()){
+			return stacks_.at(startidx);
+		}
+	}
+
 	std::vector<ztop::containerStack>::const_iterator it=stacks_.end();
 	bool abort = false;
 #pragma omp parallel for
@@ -183,7 +190,12 @@ const ztop::containerStack& containerStackVector::getStack(const TString& name)c
 	return *it;
 }
 
-ztop::containerStack& containerStackVector::getStack(const TString& name){
+ztop::containerStack& containerStackVector::getStack(const TString& name,size_t startidx){
+	if(startidx<stacks_.size()){
+		if(name == stacks_.at(startidx).getName()){
+			return stacks_.at(startidx);
+		}
+	}
 	std::vector<ztop::containerStack>::iterator it=stacks_.end();
 	bool abort = false;
 #pragma omp parallel for
@@ -238,7 +250,7 @@ void containerStackVector::addErrorStackVector(const TString &sysname,const  zto
 			position++;
 			 */
 			try{
-				istack->addMCErrorStack(sysname,stackvec.getStack(istack->getName()));
+				istack->addMCErrorStack(sysname,stackvec.getStack(istack->getName(),istack-stacks_.begin()));
 			}catch(...){}
 		}
 	}
@@ -265,7 +277,7 @@ void containerStackVector::getRelSystematicsFrom(const ztop::containerStackVecto
 				}
 			}*/
 			try{
-				const containerStack & stack=stackvec.getStack(istack->getName());
+				const containerStack & stack=stackvec.getStack(istack->getName(),istack-stacks_.begin());
 				istack->getRelSystematicsFrom(stack);
 			}catch(...){}
 		}
@@ -286,7 +298,7 @@ void containerStackVector::addRelSystematicsFrom(const ztop::containerStackVecto
 				}
 			}*/
 			try{
-				const containerStack & stack=stackvec.getStack(istack->getName());
+				const containerStack & stack=stackvec.getStack(istack->getName(),istack-stacks_.begin());
 				istack->addRelSystematicsFrom(stack);
 			}catch(...){}
 		}

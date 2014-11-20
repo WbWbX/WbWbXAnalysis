@@ -15,6 +15,8 @@ JES_Uncorrelated  squared        JES_AbsoluteStat  JES_AbsoluteScale   JES_HighP
 
 PDF               squared     PDF1   PDF2   PDF3   PDF4   PDF5   PDF6   PDF7   PDF8   PDF9   PDF10   PDF11   PDF12   PDF13   PDF14   PDF15    PDF16    PDF17    PDF18   PDF19    PDF20   PDF21   PDF22   PDF23   PDF24 PDF25 PDF26
 
+BTAGSTAT           squared     BTAGHFS1 BTAGHFS2 BTAGLFS1 BTAGLFS2
+
 %LES               squared     MUONES ELECES
 
 %LEPIDISO          squared     ELECSF  MUONSF

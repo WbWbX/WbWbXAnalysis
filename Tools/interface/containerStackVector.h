@@ -42,8 +42,8 @@ public:
 
     const std::vector<ztop::containerStack>& getVector()const{return stacks_;}
     std::vector<ztop::containerStack>& getVector(){return stacks_;}
-    const ztop::containerStack & getStack(const TString&)const;
-    ztop::containerStack & getStack(const TString&);
+    const ztop::containerStack & getStack(const TString&,size_t startidx=0)const;
+    ztop::containerStack & getStack(const TString&,size_t startidx=0);
     const ztop::containerStack & getStack(unsigned int n)const{return stacks_.at(n);}
     ztop::containerStack & getStack(unsigned int n){return stacks_.at(n);}
     void removeContribution(TString);

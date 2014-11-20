@@ -141,22 +141,22 @@ systs=("nominal"
 ########
 
 
-    "BTAGH_up"
-    "BTAGH_down"
-    "BTAGL_up"
-    "BTAGL_down"
+    # "BTAGH_up"
+    # "BTAGH_down"
+    # "BTAGL_up"
+    # "BTAGL_down"
     
 #####csv rew section
-   #"BTAGHFS1_up"
-   #"BTAGHFS1_down"
-   #"BTAGHFS2_up"
-   #"BTAGHFS2_down"
-   #"BTAGLFS1_up"
-   #"BTAGLFS1_down"
-   #"BTAGLFS2_up"
-   #"BTAGLFS2_down"
-   #"BTAGPUR_up"
-   #"BTAGPUR_down"
+   "BTAGHFS1_up"
+   "BTAGHFS1_down"
+   "BTAGHFS2_up"
+   "BTAGHFS2_down"
+   "BTAGLFS1_up"
+   "BTAGLFS1_down"
+   "BTAGLFS2_up"
+   "BTAGLFS2_down"
+   "BTAGPUR_up"
+   "BTAGPUR_down"
 
 
     "TOPPT_up"

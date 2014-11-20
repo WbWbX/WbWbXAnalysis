@@ -106,6 +106,9 @@ public:
 
 	static int printlevel;
 
+	void setStrategy(int str){strategy_=str;}
+	void feedErrorsToSteps();
+
 	//void fit(void (*chi2function)(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag) );
 	void fit();
 
@@ -215,6 +218,8 @@ private:
 		simpleFitter* fp_;
 		size_t npars_;
 	}chi2func_;
+
+	int strategy_;
 
 };
 

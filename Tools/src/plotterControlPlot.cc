@@ -170,7 +170,7 @@ void plotterControlPlot::drawControlPlot(){
 		std::cout <<  "plotterControlPlot::drawControlPlot: no data entry found for " << stackp_->getName() <<std::endl;
 		throw std::runtime_error("plotterControlPlot::drawControlPlot: no data entry found");
 	}
-	bool divbbw=true;
+	bool divbbw= upperstyle_.divideByBinWidth;
 	if(stackp_->hasTag(taggedObject::dontDivByBW_tag)) divbbw=false;
 	TH1 * axish=addObject(stackp_->getContainer(dataentry).getTH1D("",divbbw,false,false));
 	plotStyle upperstyle=upperstyle_;

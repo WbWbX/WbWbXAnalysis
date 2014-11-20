@@ -65,7 +65,7 @@ bool simpleFitter::debug=false;
 
 simpleFitter::simpleFitter():fitmode_(fm_pol0),minimizer_(mm_minuitMinos),maxcalls_(4e8),
 		requirefitfunction_(true),minsuccessful_(false),minossuccessful_(false),tolerance_(0.1),functobemin_(0),
-		algorithm_(""),minimizerstr_("Minuit2"),pminimizer_(0),chi2func_(this){
+		algorithm_(""),minimizerstr_("Minuit2"),pminimizer_(0),chi2func_(this),strategy_(2){
 
 	setFitMode(fitmode_);
 }
@@ -172,7 +172,10 @@ void simpleFitter::setAsMinosParameter(size_t parnumber,bool set){
 double simpleFitter::getFitOutput(const double& xin)const{
 	return fitfunction(xin,&(paras_.at(0)));
 }
-
+void simpleFitter::feedErrorsToSteps(){
+    for(size_t i=0;i<stepsizes_.size();i++)
+        stepsizes_.at(i)=paraerrsup_.at(i)*0.01; //good enough
+}
 
 void simpleFitter::fit(){
 
@@ -536,7 +539,8 @@ ROOT::Math::Minimizer * simpleFitter::invokeMinimizer()const{
 
 	//std::numeric_limits<double> lim;
 	min->SetPrecision(1e-16);
-	min->SetStrategy(2);
+	min->SetStrategy(strategy_);
+
 	return min;
 }
 

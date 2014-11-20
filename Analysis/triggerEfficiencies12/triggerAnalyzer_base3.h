@@ -144,6 +144,7 @@ public:
 	void setRunCutHigh(double cut){runcuthigh_=cut;}
 
 	void setDileptonTriggers(std::vector<std::string> trigs){trigs_=trigs;}
+	void setDileptonTriggersMC(std::vector<std::string> trigs){trigsMC_=trigs;}
 	void setDileptonTrigger(string trig){trigs_.clear(); trigs_.push_back(trig);}
 
 	void setTriggerObjects(std::vector<std::string> trigobjs){trigsObj_=trigobjs;}
@@ -186,15 +187,20 @@ public:
 
 	//////////////////////
 
-
-
+private:
+	std::vector<string> mettriggers_;
+public:
+	void setMetTriggers(std::vector<string>  in){mettriggers_=in;}
 
 	std::vector<double> Eff(){
 
 		using namespace ztop;
 		using namespace std;
-
-		std::vector<string> mettriggers=initTriggers();
+		std::vector<string> mettriggers;
+		if(mettriggers_.size()<1)
+			mettriggers=initTriggers();
+		else
+			mettriggers=mettriggers_;
 
 		TString MCadd="";
 		if(isMC_) MCadd="MC";
@@ -336,50 +342,54 @@ public:
 		vector<string> dileptriggers;
 
 		//make triggers switchable from the outside in next iteration. leave right now as it is
+		if(trigs_.size()<1){
+			if(mode_<-0.1){
+				//  pair<string, double> trig2("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999.);
+				dileptriggers.push_back("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
 
-		if(mode_<-0.1){
-			//  pair<string, double> trig2("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999.);
-			dileptriggers.push_back("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
-
-		}
-		if(mode_>0.1){
-			//   pair<string, double> trig3("HLT_Mu17_Mu8_v",999999);
-			dileptriggers.push_back("HLT_Mu17_Mu8_v");
-			// pair<string, double> trig4("HLT_Mu17_TkMu8_v",999999);
-			dileptriggers.push_back("HLT_Mu17_TkMu8_v");
-		}
-
-		if(mode_==0){
-			//  pair<string, double> trig3("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999);
-			dileptriggers.push_back("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
-			//  pair<string, double> trig4("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999);
-			dileptriggers.push_back("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
-		}
-
-		if(trigs_.size()>0){   //manually set
-			dileptriggers.clear();
-			for(size_t i=0;i<trigs_.size();i++){
-				dileptriggers.push_back(trigs_.at(i));
 			}
+			if(mode_>0.1){
+				//   pair<string, double> trig3("HLT_Mu17_Mu8_v",999999);
+				dileptriggers.push_back("HLT_Mu17_Mu8_v");
+				// pair<string, double> trig4("HLT_Mu17_TkMu8_v",999999);
+				dileptriggers.push_back("HLT_Mu17_TkMu8_v");
+			}
+
+			if(mode_==0){
+				//  pair<string, double> trig3("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999);
+				dileptriggers.push_back("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
+				//  pair<string, double> trig4("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999);
+				dileptriggers.push_back("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
+			}
+
+			if(trigs_.size()>0){   //manually set
+				dileptriggers.clear();
+				for(size_t i=0;i<trigs_.size();i++){
+					dileptriggers.push_back(trigs_.at(i));
+				}
+			}
+		}
+		else{
+			dileptriggers=trigs_;
 		}
 
 		vector<string> dileptriggersMC; // the version numbers where set as wildcards, so if statement obsolete!
-		// if(!is52v9){
-		if(mode_<-0.1){
-			dileptriggersMC.push_back("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
+		if(trigsMC_.size()<1){
+			if(mode_<-0.1){
+				dileptriggersMC.push_back("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
+			}
+			if(mode_>0.1){
+				dileptriggersMC.push_back("HLT_Mu17_Mu8_v");
+				dileptriggersMC.push_back("HLT_Mu17_TkMu8_v");
+			}
+			if(mode_==0){
+				dileptriggersMC.push_back("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
+				dileptriggersMC.push_back("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
+			}
 		}
-		if(mode_>0.1){
-			dileptriggersMC.push_back("HLT_Mu17_Mu8_v");
-			dileptriggersMC.push_back("HLT_Mu17_TkMu8_v");
+		else{
+			dileptriggersMC=trigsMC_;
 		}
-		if(mode_==0){
-			dileptriggersMC.push_back("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
-			dileptriggersMC.push_back("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
-		}
-
-		if(trigs_.size()>0)
-			dileptriggersMC=dileptriggers;
-
 
 		///////////PU reweighting
 
@@ -424,7 +434,7 @@ public:
 			}
 			else{
 				cout << "Branch " << "NTTriggerObjects_"+(TString)trigsObj_.at(i) 
-				    														 << " not found\n    will be ignored" << endl;
+				    																		 << " not found\n    will be ignored" << endl;
 				invalidbranches << i;
 			}
 		}
@@ -1283,7 +1293,7 @@ protected:
 
 	bool statusbar_;
 
-	std::vector<string> trigs_,trigsObj_;
+	std::vector<string> trigs_,trigsMC_,trigsObj_;
 
 	TString whichelectrons_;
 	bool isMC_;

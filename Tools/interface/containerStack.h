@@ -39,9 +39,9 @@ public:
 	bool is1D()const{if(mode==dim1) return true; else return false;}
 	bool is1DUnfold()const{if(mode==unfolddim1) return true; else return false;}
 
-	void push_back(ztop::container1D, TString, int, double, int legord=-1); //! adds container with, name, colour, norm to stack
-	void push_back(ztop::container2D, TString, int, double, int legord=-1); //! adds container with, name, colour, norm to stack
-	void push_back(ztop::container1DUnfold, TString, int, double, int legord=-1); //! adds container with, name, colour, norm to stack
+	void push_back(const ztop::container1D&,const TString&, int, double, int legord=-1); //! adds container with, name, colour, norm to stack
+	void push_back(const ztop::container2D&,const TString&, int, double, int legord=-1); //! adds container with, name, colour, norm to stack
+	void push_back(const ztop::container1DUnfold&,const TString&, int, double, int legord=-1); //! adds container with, name, colour, norm to stack
 	void removeContribution(TString); //! removes contribution
 
 	void setDataLegend(TString leg="data"){dataleg_=leg;}
@@ -134,7 +134,7 @@ public:
 	void mergePartialVariations(const TString& identifier, bool strictpartialID=true);
 
 	void addMCErrorStack(const TString&,const containerStack &) ; //only for comp reasons
-	void addErrorStack(const TString& , containerStack ); //! calls container1D::addErrorContainer for each same named member container
+	void addErrorStack(const TString& ,const containerStack& ); //! calls container1D::addErrorContainer for each same named member container
 	void getRelSystematicsFrom(const ztop::containerStack&);
 	void addRelSystematicsFrom(const ztop::containerStack&,bool ignorestat=false,bool strict=false);
 	void removeError(TString);
@@ -255,7 +255,7 @@ public:
 	/**
 	 * double chi2
 	 */
-	double chi2()const;
+	double chi2(size_t * ndof=0)const;
 
 	/**
 	 * calls TH1::KolmogorovTest on full MC histo and data hist

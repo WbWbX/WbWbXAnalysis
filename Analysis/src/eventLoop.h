@@ -156,11 +156,11 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 		std::cout << "entering pfelectrons mode" <<std::endl;
 	}
 
-	if(mode_.Contains("Btagcsvt")){
+	if(mode_.Contains("Btagcsvt") && ! mode_.Contains("Btagshape")){
 		getBTagSF()->setWorkingPoint("csvt");
 		std::cout << "entering btagcsvt mode" <<std::endl;
 	}
-	if(mode_.Contains("Btagcsvm")){
+	if(mode_.Contains("Btagcsvm")&& ! mode_.Contains("Btagshape")){
 		getBTagSF()->setWorkingPoint("csvm");
 		std::cout << "entering btagcsvm mode" <<std::endl;
 	}
@@ -1209,6 +1209,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 		getBTagSF()->changeNTJetTags(selectedjets);
 		for(size_t i=0;i<selectedjets->size();i++){
 			if(selectedjets->at(i)->btag() < getBTagSF()->getWPDiscrValue()){
+
 				selectednonbjets.push_back(selectedjets->at(i));
 				continue;
 			}

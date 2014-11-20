@@ -28,6 +28,7 @@ plotterBase::plotterBase(const plotterBase& rhs): tObjectList(rhs){
     textboxes_ = rhs.textboxes_;
     intstyle_ = rhs.intstyle_; //start with env style
     lastplotidx_ = rhs.lastplotidx_;
+    tmplegp_=0;
 }
 
 TVirtualPad* plotterBase::getPad()const{

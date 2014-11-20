@@ -9,7 +9,7 @@
 
 void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 		double lumi, bool dobtag, bool status,bool testmode,bool tickonce,TString maninputfile,
-		TString mode,TString topmass,TString btagfile,bool createLH, std::string discrfile,float fakedatastartentries,bool interactive){ //options like syst..
+		TString mode,TString topmass,TString btagfile,bool createLH, std::string discrfile,float fakedatastartentries,bool interactive,float wpval){ //options like syst..
 
 	bool didnothing=false;
 	//some env variables
@@ -154,7 +154,8 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	ana.setBTagSFFile(btagfile);
 	ana.getBTagSF()->setMode(btagmode);
 	ana.getBTagSF()->setWorkingPoint(btagWP);
-
+	if(btagmode==NTBTagSF::shapereweighting_mode && wpval>-2)
+		ana.getBTagSF()->setWorkingPointValue(wpval);
 	ana.getJECUncertainties()->setFile((jecfile).Data());
 	ana.getJECUncertainties()->setSystematics("no");
 	if(testmode && dobtag){
@@ -599,6 +600,7 @@ int main(int argc, char* argv[]){
 	double lumi    = parse.getOpt<float>     ("l",-1,"luminosity, default -1 (= read from config file)");            //-l default -1
 	bool dobtag    = parse.getOpt<bool>      ("B",false,"produce b-tag efficiencies (switch)");         //-B switches on default false
 	TString btagfile = parse.getOpt<TString> ("b","all_btags.root","use btagfile (default all_btags.root)");        //-b btagfile default all_btags.root
+	const float wpval = parse.getOpt<float>     ("bwp",-100,"btag discriminator cut value (default: not use)");            //-l default -1
 
 	TString outfile= parse.getOpt<TString>   ("o","","additional output id");            //-o <outfile> should be something like channel_energy_syst.root // only for plots
 	bool status    = parse.getOpt<bool>      ("S",false,"show regular status update (switch)");         //-S enables default false
@@ -626,6 +628,6 @@ int main(int argc, char* argv[]){
 		//do the merging with filestomerge
 	}
 	else{
-		analyse(channel, syst, energy, outfile, lumi,dobtag , status, testmode,tickonce,inputfile,mode,topmass,btagfile,createLH,discrFile.Data(),fakedatastartentries,interactive);
+		analyse(channel, syst, energy, outfile, lumi,dobtag , status, testmode,tickonce,inputfile,mode,topmass,btagfile,createLH,discrFile.Data(),fakedatastartentries,interactive,wpval);
 	}
 }

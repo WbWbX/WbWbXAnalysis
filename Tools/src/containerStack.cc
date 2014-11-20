@@ -34,7 +34,7 @@ containerStack::~containerStack(){
 		break;
 	}
 }
-void containerStack::push_back(ztop::container1D cont, TString legend, int color, double norm, int legord){
+void containerStack::push_back(const ztop::container1D& cont,const TString& legend, int color, double norm, int legord){
 	if(mode==notset)
 		mode=dim1;
 	else if(mode!=dim1){
@@ -57,9 +57,9 @@ void containerStack::push_back(ztop::container1D cont, TString legend, int color
 		if(legend == legends_[i]){
 			if(containerStack::debug)
 				std::cout << "containerStack::push_back(1D): found same legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
-			containers_[i] = containers_[i] * norms_[i] + cont * norm;
+			containers_[i] += cont * norm;
 			containers_[i].setName(legend);
-			norms_[i]=1;
+			norms_[i]=1;//deprecated
 			legorder_[i]=legord;
 			wasthere=true;
 			break;
@@ -68,8 +68,9 @@ void containerStack::push_back(ztop::container1D cont, TString legend, int color
 	if(!wasthere){
 		if(containerStack::debug)
 			std::cout << "containerStack::push_back (1D): new legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
-		cont.setName(legend);
-		containers_.push_back(cont*norm);
+		container1D cp=cont;
+		cp.setName(legend);
+		containers_.push_back(cp*norm);
 		legends_.push_back(legend);
 		colors_.push_back(color);
 		norms_.push_back(1);
@@ -77,7 +78,7 @@ void containerStack::push_back(ztop::container1D cont, TString legend, int color
 	}
 }
 
-void containerStack::push_back(ztop::container2D cont, TString legend, int color, double norm, int legord){
+void containerStack::push_back(const ztop::container2D& cont,const TString& legend, int color, double norm, int legord){
 	if(mode==notset)
 		mode=dim2;
 	else if(mode!=dim2){
@@ -92,7 +93,7 @@ void containerStack::push_back(ztop::container2D cont, TString legend, int color
 		if(legend == legends_[i]){
 			if(containerStack::debug)
 				std::cout << "containerStack::push_back(2D): found same legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
-			containers2D_[i] = containers2D_[i] * norms_[i] + cont * norm;
+			containers2D_[i] +=  cont * norm;
 			containers2D_[i].setName(legend);
 			norms_[i]=1;
 			legorder_[i]=legord;
@@ -103,15 +104,16 @@ void containerStack::push_back(ztop::container2D cont, TString legend, int color
 	if(!wasthere){
 		if(containerStack::debug)
 			std::cout << "containerStack::push_back (2D): new legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
-		cont.setName(legend);
-		containers2D_.push_back(cont*norm);
+		container2D cp=cont;
+		cp.setName(legend);
+		containers2D_.push_back(cp*norm);
 		legends_.push_back(legend);
 		colors_.push_back(color);
 		norms_.push_back(1);
 		legorder_.push_back(legord);
 	}
 }
-void containerStack::push_back(ztop::container1DUnfold cont, TString legend, int color, double norm, int legord){
+void containerStack::push_back(const ztop::container1DUnfold& cont,const TString& legend, int color, double norm, int legord){
 	if(mode==notset)
 		mode=unfolddim1;
 	else if(mode!=unfolddim1){
@@ -127,9 +129,9 @@ void containerStack::push_back(ztop::container1DUnfold cont, TString legend, int
 		if(legend == legends_[i]){
 			if(containerStack::debug)
 				std::cout << "containerStack::push_back(1DUF): found same legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
-			containers1DUnfold_[i] = containers1DUnfold_[i] * norms_[i]  + cont * norm;
+			containers1DUnfold_[i] += cont * norm;
 			containers1DUnfold_[i].setName(legend);
-			containers_[i] = containers_[i] * norms_[i] + cont1d * norm;
+			containers_[i] += cont1d * norm;
 			containers_[i].setName(getName());
 			norms_[i]=1;
 			legorder_[i]=legord;
@@ -140,8 +142,9 @@ void containerStack::push_back(ztop::container1DUnfold cont, TString legend, int
 	if(!wasthere){
 		if(containerStack::debug)
 			std::cout << "containerStack::push_back (1DUF): new legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
-		cont.setName(legend);
-		containers1DUnfold_.push_back(cont * norm);
+		container1DUnfold cp=cont;
+		cp.setName(legend);
+		containers1DUnfold_.push_back(cp * norm);
 		cont1d.setName(getName());
 		containers_.push_back(cont1d * norm);
 		legends_.push_back(legend);
@@ -646,7 +649,7 @@ void containerStack::addMCErrorStack(const TString &sysname,const containerStack
 	addErrorStack( sysname, errorstack);
 }
 
-void containerStack::addErrorStack(const TString & sysname, containerStack errorstack){
+void containerStack::addErrorStack(const TString & sysname,const containerStack& errorstack){
 	if(mode!=errorstack.mode){
 		std::cout << "containerStack::addErrorStack: stacks must have same type" << std::endl;
 		return;
@@ -668,33 +671,28 @@ void containerStack::addErrorStack(const TString & sysname, containerStack error
 		for(unsigned int j=0;j<errorstack.size();j++){
 			if(legends_[i] == errorstack.legends_[j]){ //costs performance!
 		 */
-		std::vector<TString>::iterator it=std::find(errorstack.legends_.begin(),errorstack.legends_.end(),legends_[i]);
+		std::vector<TString>::const_iterator it=std::find(errorstack.legends_.begin(),errorstack.legends_.end(),legends_[i]);
 		if(it!=errorstack.legends_.end()){
 			size_t j=it-errorstack.legends_.begin();
 			//found=true;
 			if(mode==dim1 || mode==unfolddim1){
-				errorstack.containers_[j] = errorstack.containers_[j] * errorstack.norms_[j]; //normalize (in case there is any remultiplication done or something)
-				errorstack.norms_[j]=1;
-				containers_[i] = containers_[i] * norms_[i];
-				norms_[i]=1;
+				//errorstack.containers_[j] = errorstack.containers_[j] * errorstack.norms_[j]; //normalize (in case there is any remultiplication done or something)
+				if(errorstack.norms_[j]!=1 || norms_[i]!=1)
+					throw std::logic_error("containerStack: all entries in the (deprecated) norms_ vector need to be 1!!!");
 				if(containers_[i].addErrorContainer(sysname,errorstack.containers_[j])<0){
 					std::cout << "containerStack::addErrorStack: Problem in " << name_ <<std::endl;
 				}
 			}
 			if(mode==dim2){
-				errorstack.containers2D_[j] = errorstack.containers2D_[j] * errorstack.norms_[j]; //normalize (in case there is any remultiplication done or something)
-				errorstack.norms_[j]=1;
-				containers2D_[i] = containers2D_[i] * norms_[i];
-				norms_[i]=1;
+				if(errorstack.norms_[j]!=1 || norms_[i]!=1)
+					throw std::logic_error("containerStack: all entries in the (deprecated) norms_ vector need to be 1!!!");
 				if(containers2D_[i].addErrorContainer(sysname,errorstack.containers2D_[j])<0){
 					std::cout << "containerStack::addErrorStack: Problem in " << name_ <<std::endl;
 				}
 			}
 			if(mode==unfolddim1){
-				errorstack.containers1DUnfold_[j] = errorstack.containers1DUnfold_[j] * errorstack.norms_[j]; //normalize (in case there is any remultiplication done or something)
-				errorstack.norms_[j]=1;
-				containers1DUnfold_[i] = containers1DUnfold_[i] * norms_[i];
-				norms_[i]=1;
+				if(errorstack.norms_[j]!=1 || norms_[i]!=1)
+					throw std::logic_error("containerStack: all entries in the (deprecated) norms_ vector need to be 1!!!");
 				if(containers1DUnfold_[i].addErrorContainer(sysname,errorstack.containers1DUnfold_[j])<0){
 					std::cout << "containerStack::addErrorStack: Problem in " << name_ <<std::endl;
 				}
@@ -2062,9 +2060,8 @@ bool containerStack::checknorms() const{
 				std::cout << "containerStack::checknorms: Norm for " << legends_[i] << " is not 1; " << norms_[i] << std::endl;
 				out=false;
 			}
-			else{
-				return false;
-			}
+			out=false;
+			throw std::logic_error("containerStack: obsolete norms_ vector is supposed to have only 1 as entries");
 		}
 	}
 	return out;
@@ -2113,21 +2110,21 @@ double containerStack::chi2Test(Option_t* option, Double_t* res) const{
 	if(!(is1D() || is1DUnfold()))
 		return 0;
 
-	TH1D * data = getContainer(getDataIdx()).getTH1D();
-	TH1D * mc= getFullMCContainer().getTH1D();
+	TH1D * data = getContainer(getDataIdx()).getTH1D("",false);
+	TH1D * mc= getFullMCContainer().getTH1D("",false);
 
 	double out=data->Chi2Test(mc,option,res);
 	delete data;
 	delete mc;
 	return out;
 }
-double containerStack::chi2()const{
+double containerStack::chi2(size_t * ndof)const{
 	if(!(is1D() || is1DUnfold()))
 		return 0;
 	//double out;
 	container1D data=getDataContainer();
 	container1D mc=getFullMCContainer();
-	return data.chi2(mc);
+	return data.chi2(mc,ndof);
 }
 
 /**
