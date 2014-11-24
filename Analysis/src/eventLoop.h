@@ -252,6 +252,19 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 		leppt30=true;
 	}
 
+	 float jetptcut;
+	if(mode_.Contains("Jetpt40")){
+		jetptcut=40;
+	}
+	else if(mode_.Contains("Jetpt50")){
+		jetptcut=50;
+	}
+	else if(mode_.Contains("Jetpt60")){
+		jetptcut=60;
+	}
+	else{
+		jetptcut=30;
+	}
 	/*
 	 * end of mode switches
 	 */
@@ -1098,7 +1111,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
 			if(treejets.at(i)->pt() < 10) continue;
 			medjets << treejets.at(i);
-			if(treejets.at(i)->pt() < 30) continue;
+			if(treejets.at(i)->pt() < jetptcut) continue;
 			hardjets << treejets.at(i);
 		}
 		//jets
@@ -1754,7 +1767,7 @@ bool MainAnalyzer::checkTrigger(std::vector<bool> * p_TriggerBools,ztop::NTEvent
 		else if(b_emu_){
 
 			if(p_TriggerBools->size()<26){ //emu are 20 - 25
-				 throw std::out_of_range("TriggerBools too small in size for 7 TeV trees");
+				throw std::out_of_range("TriggerBools too small in size for 7 TeV trees");
 			}
 			if(!(p_TriggerBools->at(20)
 					|| p_TriggerBools->at(21)
@@ -1762,7 +1775,7 @@ bool MainAnalyzer::checkTrigger(std::vector<bool> * p_TriggerBools,ztop::NTEvent
 					|| p_TriggerBools->at(23)
 					|| p_TriggerBools->at(24)
 					|| p_TriggerBools->at(25)
-					))
+			))
 				return false;
 			else
 				return true;
