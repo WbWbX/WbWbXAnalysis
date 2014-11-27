@@ -16,6 +16,10 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	TString cmssw_base=getenv("CMSSW_BASE");
 	TString scram_arch=getenv("SCRAM_ARCH");
 
+	TString database="data/analyse/";
+	TString configbase="configs/analyse/";
+
+
 	using namespace std;
 	using namespace ztop;
 	if(testmode){
@@ -31,7 +35,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	if(maninputfile!="")
 		inputfile=maninputfile;
 	//do not prepend absolute path (batch submission)
-	inputfile="configs/analyse/"+inputfile;
+	inputfile=configbase+inputfile;
 
 	fileReader fr;
 	fr.setComment("$");
@@ -86,10 +90,10 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 		system(("rm -f "+btagfile).Data());
 	}
 	else if(Syst.BeginsWith("BTAG")){
-		btagfile=btagfile+"/"+ channel+"_"+energy+"_"+topmass+"_"+"nominal"+"_btags.root";
+		btagfile=database+btagfile+"/"+ channel+"_"+energy+"_"+topmass+"_"+"nominal"+"_btags.root";
 	}
 	else{
-		btagfile=btagfile+"/"+ channel+"_"+energy+"_"+topmass+"_"+Syst+"_btags.root";
+		btagfile=database+btagfile+"/"+ channel+"_"+energy+"_"+topmass+"_"+Syst+"_btags.root";
 	}
 
 
