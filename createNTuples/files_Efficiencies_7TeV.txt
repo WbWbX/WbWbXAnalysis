@@ -1,0 +1,12 @@
+
+100  /MET/Run2011A-12Oct2013-v1/AOD             tree_7TeV_MET_runA      includetrigger=true isMC=false globalTag=FT_53_LV5_AN1   jsonfiles/Legacy2011.json
+300  /MET/Run2011B-12Oct2013-v1/AOD             tree_7TeV_MET_runB      includetrigger=true isMC=false globalTag=FT_53_LV5_AN1   jsonfiles/Legacy2011.json
+
+
+
+900   /TTJets_MSDecays_central_TuneZ2_7TeV-madgraph-tauola/Summer11LegDR-PU_S13_START53_LV6-v1/AODSIM     tree_7TeV_eettbar_trig                   includetrigger=true genFilter=Top genFilterString=ElectronElectron isSignal=true
+900   /TTJets_MSDecays_central_TuneZ2_7TeV-madgraph-tauola/Summer11LegDR-PU_S13_START53_LV6-v1/AODSIM     tree_7TeV_mumuttbar_trig                 includetrigger=true genFilter=Top genFilterString=MuonMuon isSignal=true
+900   /TTJets_MSDecays_central_TuneZ2_7TeV-madgraph-tauola/Summer11LegDR-PU_S13_START53_LV6-v1/AODSIM     tree_7TeV_emuttbar_trig                  includetrigger=true genFilter=Top genFilterString=ElectronMuon isSignal=true
+300   /TTJets_MSDecays_central_TuneZ2_7TeV-madgraph-tauola/Summer11LegDR-PU_S13_START53_LV6-v1/AODSIM     tree_7TeV_eettbarviatau_trig              includetrigger=true genFilter=Top genFilterString=ElectronElectronViaTau isSignal=true
+300   /TTJets_MSDecays_central_TuneZ2_7TeV-madgraph-tauola/Summer11LegDR-PU_S13_START53_LV6-v1/AODSIM     tree_7TeV_mumuttbarviatau_trig            includetrigger=true genFilter=Top genFilterString=MuonMuonViaTau isSignal=true
+300   /TTJets_MSDecays_central_TuneZ2_7TeV-madgraph-tauola/Summer11LegDR-PU_S13_START53_LV6-v1/AODSIM     tree_7TeV_emuttbarviatau_trig             includetrigger=true genFilter=Top genFilterString=ElectronMuonViaTau isSignal=true
