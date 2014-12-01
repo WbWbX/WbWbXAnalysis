@@ -59,7 +59,7 @@ $$ all directories except for inputfiles are relative to $CMSSW_BASE
 
 inputFilesDir = /nfs/dust/cms/user/kiesej/trees_Oct14/
 
-Lumi           = 5100
+Lumi           = 5050
 
 JECFile        = /src/TtZAnalysis/Data/Legacy11_V1_DATA_UncertaintySources_AK5PFchs.txt
 
