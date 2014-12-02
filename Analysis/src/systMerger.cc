@@ -219,6 +219,7 @@ std::vector<TString>  systMerger::mergeAndSafe(){
 void systMerger::mergeBTags()const{
 	if(debug) std::cout << "systMerger::mergeBTags" <<std::endl;
 	std::cout << "systMerger::mergeBTags: not used anymore, single files should be provided to the analysis chain." <<std::endl;
+	return;
 	using namespace ztop;
 	using namespace std;
 	NTBTagSF btags;

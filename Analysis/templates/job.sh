@@ -25,11 +25,10 @@ workdir=##WORKDIR##
 
 cd $workdir
 
-exec > "stdout/##OUTNAME##.txt" 2>&1
+exec > "stdout/##OUTNAME##" 2>&1
 
-export LD_LIBRARY_PATH=./lib:$LD_LIBRARY_PATH
-#echo $LD_LIBRARY_PATH # obsolete by now
-#ldd $workdir/analyse
+export LD_LIBRARY_PATH=##WORKDIR##/lib:$LD_LIBRARY_PATH
+
 ./bin/analyse ##PARAMETERS##
 
 

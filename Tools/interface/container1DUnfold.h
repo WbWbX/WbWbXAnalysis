@@ -39,6 +39,8 @@ public:
 
 	void setBinning(const std::vector<float> & genbins,const std::vector<float> &recobins);
 	//void subdivideRecoBins(int div);
+	//can also be done afterwards, but BEFORE unfolding
+	void setGenBinning(const std::vector<float> & genbins);
 
 	container1DUnfold rebinToBinning(const std::vector<float> &)const;
 

@@ -532,26 +532,26 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 				if(testmode)
 					std::cout << "drawing plots..." <<std::endl;
 
-				std::vector<discriminatorFactory> disc=discriminatorFactory::readAllFromTFile(ana.getOutPath()+".root");
-				for(size_t i=0;i<disc.size();i++){
-					disc.at(i).extractLikelihoods(csv);
-				}
+			//	std::vector<discriminatorFactory> disc=discriminatorFactory::readAllFromTFile(ana.getOutPath()+".root");
+			//	for(size_t i=0;i<disc.size();i++){
+			//		disc.at(i).extractLikelihoods(csv);
+			//	}
 				csv.writeAllToTFile(fulloutfilepath,true,!testmode); //recreates file
 				system(("rm -f "+ana.getOutPath()+"_discr.root").Data());
-				discriminatorFactory::writeAllToTFile(ana.getOutPath()+"_discr.root",disc);
+			//	discriminatorFactory::writeAllToTFile(ana.getOutPath()+"_discr.root",disc);
 
 
 			}
 			else{
 				std::cout << "drawing plots..." <<std::endl;
-				std::vector<discriminatorFactory> disc=discriminatorFactory::readAllFromTFile(ana.getOutPath()+".root");
-				for(size_t i=0;i<disc.size();i++){
-					disc.at(i).extractLikelihoods(csv);
-				}
+			//	std::vector<discriminatorFactory> disc=discriminatorFactory::readAllFromTFile(ana.getOutPath()+".root");
+			//	for(size_t i=0;i<disc.size();i++){
+			//		disc.at(i).extractLikelihoods(csv);
+			//	}
 				if(testmode)
 					csv.writeAllToTFile(fulloutfilepath,true,!testmode);
 				system(("rm -f "+ana.getOutPath()+"_discr.root").Data());
-				discriminatorFactory::writeAllToTFile(ana.getOutPath()+"_discr.root",disc);
+			//	discriminatorFactory::writeAllToTFile(ana.getOutPath()+"_discr.root",disc);
 			}
 
 
@@ -594,8 +594,9 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 //////////////////
 #include "mainMacro.h"
 
-invokeApplication(){
-
+int main(int argc, char* argv[]){
+	ztop::optParser parserp(argc,argv);
+	ztop::optParser * parser=&parserp; //check
 	using namespace ztop;
 
 	TString channel= parser->getOpt<TString>   ("c","emu","channel (ee, emu, mumu), default: emu\n");         //-c channel

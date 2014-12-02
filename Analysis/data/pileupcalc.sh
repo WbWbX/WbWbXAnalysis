@@ -10,7 +10,7 @@ output=`echo ${analysisJson##*/}`
 
 
 pileupCalc.py --minBiasXsec 68000 --inputLumiJSON $pileupJson --maxPileupBin 70 --numPileupBins 70 --calcMode true -i $analysisJson ${output}_PU.root
-
+exit
 #up
 
 pileupCalc.py --minBiasXsec 71400 --inputLumiJSON $pileupJson --maxPileupBin 70 --numPileupBins 70 --calcMode true -i $analysisJson ${output}_PU_up.root

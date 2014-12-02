@@ -229,83 +229,41 @@ void containerStackVector::addMCErrorStackVector(const TString &sysname, const z
 	addErrorStackVector(sysname , stackvec);
 }
 void containerStackVector::addErrorStackVector(const TString &sysname,const  ztop::containerStackVector & stackvec){
-	if(!fastadd){
-		//#pragma omp parallel for
-		//size_t position=0; //faster. probably both are at the same position, but not guaranteed
-		for(std::vector<containerStack>::iterator istack=stacks_.begin();istack<stacks_.end(); ++istack){
-			/*	size_t safecounter=0;
-			for(std::vector<containerStack>::const_iterator estack=stackvec.stacks_.begin()+position;1; ++estack){
-				if(estack == stackvec.stacks_.end()) estack=stackvec.stacks_.begin();
-				if(istack->getName() == estack->getName()){
-					if(debug)
-						std::cout << "containerStackVector::addMCErrorStackVector: adding sys " << sysname
-						<< " to stack " << istack->getName() << std::endl;
-					istack->addMCErrorStack(sysname,*estack);
-					break;
-				}
-				safecounter++;
-				if(safecounter >= stackvec.stacks_.size()) break;
-
-			}
-			position++;
-			 */
-			try{
-				istack->addMCErrorStack(sysname,stackvec.getStack(istack->getName(),istack-stacks_.begin()));
-			}catch(...){}
-		}
-	}
-	else{//fastadd requires same ordering of all stacks (usually the case)
-		for(size_t i=0;i<stacks_.size();i++)
-			stacks_.at(i).addMCErrorStack(sysname,stackvec.stacks_.at(i));
+#pragma omp parallel for
+	for(std::vector<containerStack>::iterator istack=stacks_.begin();istack<stacks_.end(); ++istack){
+		try{
+			istack->addMCErrorStack(sysname,stackvec.getStack(istack->getName(),istack-stacks_.begin()));
+		}catch(...){}
 	}
 }
+
 void containerStackVector::addMCErrorStackVector(const ztop::containerStackVector& stackvec){
 	addMCErrorStackVector(stackvec.getSyst(), stackvec);
 }
 void containerStackVector::addGlobalRelMCError(TString sysname,double error){
+#pragma omp parallel for
 	for(std::vector<containerStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
 		stack->addGlobalRelMCError(sysname,error);
 	}
 }
 void containerStackVector::getRelSystematicsFrom(const ztop::containerStackVector& stackvec){
-	if(!fastadd){
-		for(std::vector<containerStack>::iterator istack=stacks_.begin();istack<stacks_.end(); ++istack){
-			/*	for(std::vector<containerStack>::const_iterator estack=stackvec.stacks_.begin();estack<stackvec.stacks_.end(); ++estack){
-				if(istack->getName() == estack->getName()){
-					istack->getRelSystematicsFrom(*estack);
-					break;
-				}
-			}*/
-			try{
-				const containerStack & stack=stackvec.getStack(istack->getName(),istack-stacks_.begin());
-				istack->getRelSystematicsFrom(stack);
-			}catch(...){}
-		}
-
-	}
-	else{//fastadd requires same ordering of all stacks (usually the case)
-		for(size_t i=0;i<stacks_.size();i++)
-			stacks_.at(i).getRelSystematicsFrom(stackvec.stacks_.at(i));
+#pragma omp parallel for
+	for(std::vector<containerStack>::iterator istack=stacks_.begin();istack<stacks_.end(); ++istack){
+		try{
+			const containerStack & stack=stackvec.getStack(istack->getName(),istack-stacks_.begin());
+			istack->getRelSystematicsFrom(stack);
+		}catch(...){}
 	}
 }
 void containerStackVector::addRelSystematicsFrom(const ztop::containerStackVector& stackvec,bool ignorestat,bool strict){
-	if(!fastadd){
-		for(std::vector<containerStack>::iterator istack=stacks_.begin();istack<stacks_.end(); ++istack){
-			/*for(std::vector<containerStack>::const_iterator estack=stackvec.stacks_.begin();estack<stackvec.stacks_.end(); ++estack){
-				if(istack->getName() == estack->getName()){
-					istack->addRelSystematicsFrom(*estack,ignorestat,strict);
-					break;
-				}
-			}*/
-			try{
-				const containerStack & stack=stackvec.getStack(istack->getName(),istack-stacks_.begin());
-				istack->addRelSystematicsFrom(stack);
-			}catch(...){}
+#pragma omp parallel for
+	for(std::vector<containerStack>::iterator istack=stacks_.begin();istack<stacks_.end(); ++istack){
+		try{
+			const containerStack & stack=stackvec.getStack(istack->getName(),istack-stacks_.begin());
+			istack->addRelSystematicsFrom(stack);
+		}catch(...){
+			std::cout << "containerStackVector::addRelSystematicsFrom: Stack " << istack->getName() << " not found." <<std::endl;
 		}
-	}
-	else{//fastadd requires same ordering of all stacks (usually the case)
-		for(size_t i=0;i<stacks_.size();i++)
-			stacks_.at(i).addRelSystematicsFrom(stackvec.stacks_.at(i),ignorestat);
 	}
 }
 

@@ -100,6 +100,7 @@ public:
 
 		mcpufile_="";
 		t_=0;
+		skip=false;
 		//  std::cout << "Don't forget to check if all trigger Prescales are 1. If they are its either MC or an error in prescaletable. then use the one from event before or skip event - maybe checking one known prescale is sufficient" << std::endl;
 
 	}
@@ -189,7 +190,9 @@ public:
 
 private:
 	std::vector<string> mettriggers_;
+
 public:
+	bool skip;
 	void setMetTriggers(std::vector<string>  in){mettriggers_=in;}
 
 	std::vector<double> Eff(){
@@ -342,53 +345,52 @@ public:
 		vector<string> dileptriggers;
 
 		//make triggers switchable from the outside in next iteration. leave right now as it is
-		if(trigs_.size()<1){
-			if(mode_<-0.1){
-				//  pair<string, double> trig2("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999.);
-				dileptriggers.push_back("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
 
-			}
-			if(mode_>0.1){
-				//   pair<string, double> trig3("HLT_Mu17_Mu8_v",999999);
-				dileptriggers.push_back("HLT_Mu17_Mu8_v");
-				// pair<string, double> trig4("HLT_Mu17_TkMu8_v",999999);
-				dileptriggers.push_back("HLT_Mu17_TkMu8_v");
-			}
+		if(mode_<-0.1){
+			//  pair<string, double> trig2("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999.);
+			dileptriggers.push_back("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
 
-			if(mode_==0){
-				//  pair<string, double> trig3("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999);
-				dileptriggers.push_back("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
-				//  pair<string, double> trig4("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999);
-				dileptriggers.push_back("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
-			}
+		}
+		if(mode_>0.1){
+			//   pair<string, double> trig3("HLT_Mu17_Mu8_v",999999);
+			dileptriggers.push_back("HLT_Mu17_Mu8_v");
+			// pair<string, double> trig4("HLT_Mu17_TkMu8_v",999999);
+			dileptriggers.push_back("HLT_Mu17_TkMu8_v");
+		}
 
-			if(trigs_.size()>0){   //manually set
-				dileptriggers.clear();
-				for(size_t i=0;i<trigs_.size();i++){
-					dileptriggers.push_back(trigs_.at(i));
-				}
+		if(mode_==0){
+			//  pair<string, double> trig3("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999);
+			dileptriggers.push_back("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
+			//  pair<string, double> trig4("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999);
+			dileptriggers.push_back("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
+		}
+
+		if(trigs_.size()>0){   //manually set
+			dileptriggers.clear();
+			for(size_t i=0;i<trigs_.size();i++){
+				dileptriggers.push_back(trigs_.at(i));
 			}
 		}
-		else{
-			dileptriggers=trigs_;
-		}
+
 
 		vector<string> dileptriggersMC; // the version numbers where set as wildcards, so if statement obsolete!
-		if(trigsMC_.size()<1){
-			if(mode_<-0.1){
-				dileptriggersMC.push_back("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
-			}
-			if(mode_>0.1){
-				dileptriggersMC.push_back("HLT_Mu17_Mu8_v");
-				dileptriggersMC.push_back("HLT_Mu17_TkMu8_v");
-			}
-			if(mode_==0){
-				dileptriggersMC.push_back("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
-				dileptriggersMC.push_back("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
-			}
+
+		if(mode_<-0.1){
+			dileptriggersMC.push_back("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
 		}
-		else{
-			dileptriggersMC=trigsMC_;
+		if(mode_>0.1){
+			dileptriggersMC.push_back("HLT_Mu17_Mu8_v");
+			dileptriggersMC.push_back("HLT_Mu17_TkMu8_v");
+		}
+		if(mode_==0){
+			dileptriggersMC.push_back("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
+			dileptriggersMC.push_back("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
+		}
+		if(trigsMC_.size()>0){   //manually set
+			dileptriggersMC.clear();
+			for(size_t i=0;i<trigsMC_.size();i++){
+				dileptriggersMC.push_back(trigsMC_.at(i));
+			}
 		}
 
 		///////////PU reweighting
@@ -399,7 +401,10 @@ public:
 			PUweight.setMCDistrSum12();
 		}
 		else if(isMC_ && mcpufile_!=""){
-			PUweight.setMCTruePUInput(mcpufile_.Data());
+			if(mcpufile_=="Summer11_Leg")
+				PUweight.setMCDistrSummer11Leg();
+			else
+				PUweight.setMCTruePUInput(mcpufile_.Data());
 		}
 
 		vector<NTMuon> * pMuons = 0;
@@ -434,7 +439,7 @@ public:
 			}
 			else{
 				cout << "Branch " << "NTTriggerObjects_"+(TString)trigsObj_.at(i) 
-				    																		 << " not found\n    will be ignored" << endl;
+				    																				 << " not found\n    will be ignored" << endl;
 				invalidbranches << i;
 			}
 		}
@@ -506,6 +511,8 @@ public:
 			cout  << " reduced to: " << n;
 		}
 		cout << std::endl;
+		if(skip)
+			n=1;
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		if(testmode) std::cout << "entering main loop" << std::endl;
 		for(Long64_t i=0;i<n;i++){  //main loop
@@ -996,11 +1003,15 @@ public:
 		if(isMC_) MCdata="MC";
 		cout << "\n\nIn channel " << mode_<< " (ee,emu,mumu)  " << MCdata << endl;
 		cout << "triggers: " <<endl;
-		//if(!isMC_){
+		if(!isMC_){
 		for(unsigned int i=0;i<dileptriggers.size();i++){
 			cout << dileptriggers[i] << endl;
 		}
-		//}
+		}
+		else{
+			for(unsigned int i=0;i<dileptriggersMC.size();i++)
+				cout << dileptriggersMC[i] << endl;
+		}
 		/*
     cout << "triggers MC: " <<endl;
     // if(!isMC_){
@@ -1505,9 +1516,9 @@ void analyzeAll(triggerAnalyzer &ta_eed, triggerAnalyzer &ta_eeMC, triggerAnalyz
 
 	cout << "Doing efficiencies for " << dir << " " << label << endl;
 
-	vector<double> eed=ta_eed.Eff();
-	vector<double> mumud=ta_mumud.Eff();
-	vector<double> emud= ta_emud.Eff();
+	vector<double> eed;eed=ta_eed.Eff();
+	vector<double> mumud;mumud=ta_mumud.Eff();
+	vector<double> emud;emud= ta_emud.Eff();
 
 
 	vector<double> eeMC=ta_eeMC.Eff();

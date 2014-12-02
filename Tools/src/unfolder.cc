@@ -12,6 +12,7 @@
 #include "TGraph.h"
 #include "TString.h"
 #include "TCanvas.h"
+#include <omp.h>
 
 /**
  * takes care that all output histograms are NOT divided by binwidth (what about UF/OF?)
@@ -106,8 +107,10 @@ int unfolder::scanLCurve(int nScan){
 
 	int oldInfoLevel=gErrorIgnoreLevel;
 	if(!verb_){
-		//switch off info stuff
-		gErrorIgnoreLevel = kWarning;
+#pragma omp critical (gErrorIgnoreLevel)
+		{
+			gErrorIgnoreLevel = kWarning;
+		}
 	}
 	ibest_=unfolder_->ScanLcurve(nScan,tauMin,tauMax,&lcurve_,&logTauX_,&logTauY_);
 
@@ -119,17 +122,23 @@ int unfolder::scanLCurve(int nScan){
 	Double_t t[1],x[1],y[1];
 	logTauX_->GetKnot(ibest_,t[0],x[0]);
 	logTauY_->GetKnot(ibest_,t[0],y[0]);
-	bestLcurve_=new TGraph(1,x,y);
-	bestLogTauLogChi2_=new TGraph(1,t,x);
+#pragma omp critical (unfold_news)
+	{
+		bestLcurve_=new TGraph(1,x,y);
+		bestLogTauLogChi2_=new TGraph(1,t,x);
+	}
 
 	if(!verb_){
 		//switch info stuff back to normal
-		gErrorIgnoreLevel = oldInfoLevel;
+#pragma omp critical (gErrorIgnoreLevel)
+		{
+			gErrorIgnoreLevel = oldInfoLevel;
+		}
 	}
 	float normchi2=(unfolder_->GetChi2A()+unfolder_->GetChi2L())/unfolder_->GetNdf();
 
-	std::cout<< name_ << ": chi**2="<<unfolder_->GetChi2A()<<"+"<<unfolder_->GetChi2L()
-		    								  <<" / "<<unfolder_->GetNdf()<<"\t=" << normchi2<<  std::endl;
+	if(verb_)	std::cout<< name_ << ": chi**2="<<unfolder_->GetChi2A()<<"+"<<unfolder_->GetChi2L()
+		    										  <<" / "<<unfolder_->GetNdf()<<"\t=" << normchi2<<  std::endl;
 
 
 	ready_=true;
@@ -151,7 +160,10 @@ int unfolder::scanTau(int nScan){
 	int oldInfoLevel=gErrorIgnoreLevel;
 	if(!verb_){
 		//switch off info stuff
-		gErrorIgnoreLevel = kWarning;
+#pragma omp critical (gErrorIgnoreLevel)
+		{
+			gErrorIgnoreLevel = kWarning;
+		}
 	}
 	ibest_=unfolder_->ScanTau(nScan,0.,0.,&rhoLogTau_,
 			TUnfoldDensity::kEScanTauRhoSquareAvg,
@@ -161,28 +173,43 @@ int unfolder::scanTau(int nScan){
 	Double_t t[1],rho[1],x[1],y[1];
 	rhoLogTau_->GetKnot(ibest_,t[0],rho[0]);
 	lcurve_->GetPoint(ibest_,x[0],y[0]);
-	bestRhoLogTau_=new TGraph(1,t,rho);
-	bestLcurve_=new TGraph(1,x,y);
-	Double_t *tAll=new Double_t[nScan],*rhoAll=new Double_t[nScan];
+	Double_t *tAll=0,*rhoAll=0;
+#pragma omp critical (unfold_news)
+	{
+		bestRhoLogTau_=new TGraph(1,t,rho);
+		bestLcurve_=new TGraph(1,x,y);
+		tAll=new Double_t[nScan];
+		rhoAll=new Double_t[nScan];
+	}
 	for(Int_t i=0;i<nScan;i++) {
 		rhoLogTau_->GetKnot(i,tAll[i],rhoAll[i]);
 	}
-	knots_=new TGraph(nScan,tAll,rhoAll);
-
+#pragma omp critical (unfold_news)
+	{
+		knots_=new TGraph(nScan,tAll,rhoAll);
+	}
 	float normchi2=(unfolder_->GetChi2A()+unfolder_->GetChi2L())/unfolder_->GetNdf();
 
-		std::cout<< name_ << ": chi**2="<<unfolder_->GetChi2A()<<"+"<<unfolder_->GetChi2L()
-			    								  <<" / "<<unfolder_->GetNdf()<<"\t=" << normchi2<<  std::endl;
-
-	histGlobalCorrScan_=unfolder_->GetRhoItotal("histGlobalCorrScan",0,0,0,kFALSE);
-
+	std::cout<< name_ << ": chi**2="<<unfolder_->GetChi2A()<<"+"<<unfolder_->GetChi2L()
+			    																  <<" / "<<unfolder_->GetNdf()<<"\t=" << normchi2<<  std::endl;
+#pragma omp critical (unfold_news)
+	{
+		histGlobalCorrScan_=unfolder_->GetRhoItotal("histGlobalCorrScan",0,0,0,kFALSE);
+	}
 	if(!verb_){
 		//switch info stuff back to normal
-		gErrorIgnoreLevel = oldInfoLevel;
+#pragma omp critical (gErrorIgnoreLevel)
+		{
+			gErrorIgnoreLevel = oldInfoLevel;
+		}
 	}
 	ready_=true;
-	delete [] rhoAll;
-	delete [] tAll;
+#pragma omp critical (unfold_news)
+	{
+		delete [] rhoAll;
+		delete [] tAll;
+
+	}
 	return 0;
 }
 

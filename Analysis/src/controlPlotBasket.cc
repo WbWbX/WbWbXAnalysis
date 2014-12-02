@@ -67,7 +67,8 @@ void controlPlotBasket::initStep(const size_t & step){
             throw std::logic_error("controlPlotBasket::initStep: Not linked to any NTFullEvent");
         }
         tmpnewstep_=true;
-        cplots_.push_back(std::vector<container1D *>());
+        std::vector<container1D *> tmp;
+        cplots_.push_back(tmp);
         //scplots_.push_back(std::vector<container1D >());
 
         size_=cplots_.size();

@@ -73,6 +73,13 @@ public:
 
     void setName(const TString & name) {name_=name;}
     const TString & getName()const {return name_;}
+    /**
+     * Returns the name formatted with:
+     * any space replaced by "_"
+     * any comma replaced by "_"
+     * any "/" replaced by "_"
+     */
+    TString getFormattedName()const;
 
     ///////////// types
 

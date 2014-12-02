@@ -9,13 +9,13 @@
 
 JES_Flavor        linear      JES_FlavorPureGluon  JES_FlavorPureQuark   JES_FlavorPureCharm  JES_FlavorPureBottom
 
-JES_PileupPt      squared     JES_PileUpPtBB   JES_PileUpPtEC   JES_PileUpPtHF
+%JES_PileupPt      squared     JES_PileUpPtBB   JES_PileUpPtEC   JES_PileUpPtHF
 
-JES_Uncorrelated  squared        JES_AbsoluteStat  JES_AbsoluteScale   JES_HighPtExtra   JES_SinglePionECAL  JES_SinglePionHCAL   JES_Time   JES_RelativeJEREC1   JES_RelativeJEREC2   JES_RelativeJERHF   JES_RelativePtBB   JES_RelativePtEC1      JES_RelativePtEC2      JES_RelativePtHF      JES_RelativeStatEC2      JES_RelativeStatHF  JES_PileUpDataMC   JES_PileUpBias
+%JES_Uncorrelated  squared        JES_AbsoluteStat  JES_AbsoluteScale   JES_HighPtExtra   JES_SinglePionECAL  JES_SinglePionHCAL   JES_Time   JES_RelativeJEREC1   JES_RelativeJEREC2   JES_RelativeJERHF   JES_RelativePtBB   JES_RelativePtEC1      JES_RelativePtEC2      JES_RelativePtHF      JES_RelativeStatEC2      JES_RelativeStatHF  JES_PileUpDataMC   JES_PileUpBias
 
-PDF               squared     PDF1   PDF2   PDF3   PDF4   PDF5   PDF6   PDF7   PDF8   PDF9   PDF10   PDF11   PDF12   PDF13   PDF14   PDF15    PDF16    PDF17    PDF18   PDF19    PDF20   PDF21   PDF22   PDF23   PDF24 PDF25 PDF26
+%PDF               squared     PDF1   PDF2   PDF3   PDF4   PDF5   PDF6   PDF7   PDF8   PDF9   PDF10   PDF11   PDF12   PDF13   PDF14   PDF15    PDF16    PDF17    PDF18   PDF19    PDF20   PDF21   PDF22   PDF23   PDF24 PDF25 PDF26
 
-BTAGSTAT           squared     BTAGHFS1 BTAGHFS2 BTAGLFS1 BTAGLFS2
+%BTAGSTAT           squared     BTAGHFS1 BTAGHFS2 BTAGLFS1 BTAGLFS2
 
 %LES               squared     MUONES ELECES
 

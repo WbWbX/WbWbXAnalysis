@@ -90,6 +90,14 @@ void container1DUnfold::setBinning(const std::vector<float> & genbins,const std:
 	refolded_ = container1D(databins,name_+"_refolded",xaxis1Dname_,yaxis1Dname_,mergeufof_);
 	congruentbins_=checkCongruentBinBoundariesXY();
 }
+void container1DUnfold::setGenBinning(const std::vector<float> & genbins){
+	if(checkCongruence(genbins,xbins_)){
+		genbins_=genbins;
+	}
+	else{
+		throw std::logic_error("container1DUnfold::setGenBinning: Binning does not match bin boundaries");
+	}
+}
 
 container1DUnfold container1DUnfold::rebinToBinning(const std::vector<float> & newbins)const{
 	size_t maxbinssize=xbins_.size();
@@ -117,6 +125,7 @@ container1DUnfold container1DUnfold::rebinToBinning(const std::vector<float> & n
 	return out;
 
 }
+
 
 void container1DUnfold::removeAllSystematics(){
 	for(size_t i=0;i<conts_.size();i++){
@@ -211,7 +220,7 @@ container1D container1DUnfold::getBackground() const{
 	}
 	container1D out=getXSlice(0);
 	//add generator overflow
-//	for(int  sys=-1;sys<(int)getSystSize();sys++)
+	//	for(int  sys=-1;sys<(int)getSystSize();sys++)
 	//	out.getBin(out.getBins().size()-1,sys).add( getBin(xbins_.size()-1,0,sys));
 
 	out+=getXSlice(xbins_.size()-1);
@@ -649,6 +658,7 @@ container2D container1DUnfold::getResponseMatrix()const{
 	out.divideBinomial_=divideBinomial_;
 	out.mergeufof_=mergeufof_;
 
+
 	out.xaxisname_=xaxis1Dname_ + " (gen)";
 	out.yaxisname_=xaxis1Dname_ + " (reco)";
 	out.name_=name_+"_respMatrix";
@@ -659,8 +669,10 @@ container2D container1DUnfold::getNormResponseMatrix()const{
 
 	out.conts_=conts_; //! for each y axis bin one container
 	container1D xprojection=projectToX(true);
-	for(size_t i=0;i<out.conts_.size();i++)
+
+	for(size_t i=0;i<out.conts_.size();i++){
 		out.conts_.at(i)/=xprojection;
+	}
 	out.xbins_=xbins_;
 	out.ybins_=ybins_;
 	out.divideBinomial_=divideBinomial_;

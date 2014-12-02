@@ -113,7 +113,7 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
 
 
 
-void trigger_tightLeptons_7TeV(){
+void trigger_tightLeptons(){
 
 	triggerAnalyzer::testmode=false;
 
@@ -132,25 +132,28 @@ void trigger_tightLeptons_7TeV(){
 	bool includecorr=true;
 
 	triggerAnalyzer ta_eed;
+	ta_eed.setPUFile("Summer11_Leg");
 	triggerAnalyzer ta_mumud;
+	ta_mumud.setPUFile("Summer11_Leg");
 	triggerAnalyzer ta_emud;
+	ta_emud.setPUFile("Summer11_Leg");
 
 
 	///7 TeV met triggers
 	std::vector<string> mettriggers;
-	mettriggers<< "HLT_CentralJet80_MET65_v11"
-			 << "HLT_DiJet60_MET45_v11"
-			 << "HLT_DiCentralJet20_MET80_v9"
-			 << "HLT_CentralJet80_MET80_v10"
-			 << "HLT_CentralJet80_MET95_v4"
-			 << "HLT_DiCentralJet20_BTagIP_MET65_v12"
-			 << "HLT_DiCentralJet20_MET100_HBHENoiseFiltered_v5"
-			 << "HLT_CentralJet80_MET110_v4"
-			 << "HLT_MET120_HBHENoiseFiltered_v7"
-			 << "HLT_MET120_HBHENoiseFiltered_v7"
-			 << "HLT_MET200_HBHENoiseFiltered_v7"
-			 << "HLT_MET200_HBHENoiseFiltered_v7"
-			 << "HLT_MET400_v3";
+	mettriggers<< "HLT_CentralJet80_MET65_v"
+			 << "HLT_DiJet60_MET45_v"
+			 << "HLT_DiCentralJet20_MET80_v"
+			 << "HLT_CentralJet80_MET80_v"
+			 << "HLT_CentralJet80_MET95_v"
+			 << "HLT_DiCentralJet20_BTagIP_MET65_v"
+			 << "HLT_DiCentralJet20_MET100_HBHENoiseFiltered_v"
+			 << "HLT_CentralJet80_MET110_v"
+			 << "HLT_MET120_HBHENoiseFiltered_v"
+			 << "HLT_MET120_HBHENoiseFiltered_v"
+			 << "HLT_MET200_HBHENoiseFiltered_v"
+			 << "HLT_MET200_HBHENoiseFiltered_v"
+			 << "HLT_MET400_v";
 
 
 
@@ -162,6 +165,8 @@ void trigger_tightLeptons_7TeV(){
 			("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v")<<
 			("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v")<<
 			("HLT_Mu10_Ele10_CaloIdL_v");
+
+	std::vector<string> empty;empty << " ";
 
 	ta_eed.setMetTriggers(mettriggers);
 	ta_mumud.setMetTriggers(mettriggers);
@@ -178,6 +183,12 @@ void trigger_tightLeptons_7TeV(){
 	ta_emud.setMassCutLow(20);
 	ta_emud.setIncludeCorr(includecorr);
 
+
+	ta_eed.setMode("ee");
+	ta_eed.skip=true;
+	ta_mumud.setMode("mumu");
+	ta_mumud.skip=true;
+
 	ta_emud.setBinsEta2dX(bins2dee);
 	ta_emud.setBinsEta2dY(bins2dmue);
 
@@ -192,36 +203,36 @@ void trigger_tightLeptons_7TeV(){
 
 
 
-	TString dir="/nfs/dust/cms/user/kiesej/trees_ES_Jul14/";
+	TString dir="/nfs/dust/cms/user/kiesej/trees_Oct14/";
 
 	TString cmssw_base=getenv("CMSSW_BASE");
 
 
-	TString PURunA = cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13RunA.json.txt_PU.root";
-	TString PURunB = cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13RunB.json.txt_PU.root";
+	TString PURunA = cmssw_base+"/src/TtZAnalysis/Data/Legacy2011_RunA.json_PU.root";
+	TString PURunB = cmssw_base+"/src/TtZAnalysis/Data/Legacy2011_RunB.json_PU.root";
 
 	TString pileuproot = cmssw_base+"/src/TtZAnalysis/Data/Legacy2011.json_PU.root";
 
 
 	std::vector<TString> mumumcfiles, eemcfiles, emumcfiles, datafilesFull,datafilesRunB, datafilesRunA;
 
-	mumumcfiles << dir+"tree_8TeV_mumuttbar_trig.root"
-			<< dir+"tree_8TeV_mumuttbarviatau_trig.root" ;
+	mumumcfiles << dir+"tree_7TeV_mumuttbar_trig.root"
+			<< dir+"tree_7TeV_mumuttbarviatau_trig.root" ;
 
-	eemcfiles << dir+"tree_8TeV_eettbar_trig.root"
-			<< dir+"tree_8TeV_eettbarviatau_trig.root" ;
+	eemcfiles << dir+"tree_7TeV_eettbar_trig.root"
+			<< dir+"tree_7TeV_eettbarviatau_trig.root" ;
 
-	emumcfiles << dir+"tree_8TeV_emuttbar_trig.root"
-			<< dir+"tree_8TeV_emuttbarviatau_trig.root" ;
+	emumcfiles << dir+"tree_7TeV_emuttbar_trig.root"
+			<< dir+"tree_7TeV_emuttbarviatau_trig.root" ;
 
 	datafilesFull
 
-	<< dir + "tree_8TeV_MET_runA_22Jan.root"
-	<< dir + "tree_8TeV_MET_runB_22Jan.root";
+	<< dir + "tree_7TeV_MET_runA.root"
+	<< dir + "tree_7TeV_MET_runB.root";
 
-	datafilesRunA  << dir + "tree_8TeV_MET_runA_22Jan.root";
+	datafilesRunA  << dir + "tree_7TeV_MET_runA.root";
 
-	datafilesRunB  <<  dir + "tree_8TeV_MET_runB_22Jan.root";
+	datafilesRunB  <<  dir + "tree_7TeV_MET_runB.root";
 
 	//for others just copy data and mc, change input and pu file
 
@@ -287,8 +298,8 @@ void trigger_tightLeptons_7TeV(){
 
 
 
-	double lumiA=0.890;
-	double lumiB=4.430;
+	double lumiA=2.311;
+	double lumiB=2.739;
 
 	double lumitotal=lumiA+lumiB;
 

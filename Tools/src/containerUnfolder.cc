@@ -39,7 +39,7 @@ bool containerUnfolder::debug=false;
 
 containerUnfolder::~containerUnfolder(){
 	clear();
-//delete option pointers?
+	//delete option pointers?
 }
 
 void containerUnfolder::clear(){//don't delete options
@@ -48,7 +48,7 @@ void containerUnfolder::clear(){//don't delete options
 		unfnominal_=0;
 	}
 	for(size_t i=0;i<unfsyst_.size();i++)
-		 delete unfsyst_.at(i);
+		delete unfsyst_.at(i);
 	unfsyst_.clear();
 }
 /**
@@ -120,8 +120,8 @@ container1D containerUnfolder::unfold(/*const*/ container1DUnfold & cuf){
 
 	if(cuf.getBackground().integral() > cuf.getRecoContainer().integral() * 0.55){
 		std::cout << "containerUnfolder::unfold: " << cuf.getName() <<  " has more background than signal ("
-		        <<cuf.getBackground().integral()/cuf.getRecoContainer().integral()
-		        << "%), skipping" <<std::endl;
+				<<cuf.getBackground().integral()/cuf.getRecoContainer().integral()
+				<< "%), skipping" <<std::endl;
 		return container1D();
 	}
 	if(cuf.getRecoContainer().integral() == 0){
@@ -133,8 +133,28 @@ container1D containerUnfolder::unfold(/*const*/ container1DUnfold & cuf){
 		container1D out=binbybinunfold(cuf);
 		return out;
 	}
-	clear();
+	if(cuf.getBinsX().size()<2){
+		std::cout << "containerUnfolder::unfold: " << cuf.getName() << " has no bins, skipping" <<std::endl;
+		return container1D();
 
+	}
+
+	if(cuf.getBinsX().size() >= cuf.getBinsY().size()){
+		std::vector<float> newbins;
+		for(size_t i=1;i<cuf.getBinsX().size();i++){
+			if(i%2)
+				newbins.push_back(cuf.getBinsX().at(i));
+		}
+		if(newbins.at(newbins.size()-1) != cuf.getBinsX().at(cuf.getBinsX().size()-1))
+			newbins.push_back(cuf.getBinsX().at(cuf.getBinsX().size()-1));
+		cuf.setGenBinning(newbins);
+		std::cout << "containerUnfolder::unfold: rebinned input!"<<std::endl;
+	}
+
+
+
+
+	clear();
 	TUnfold::ERegMode regmode=regmode_;
 
 	/*
@@ -198,7 +218,7 @@ container1D containerUnfolder::unfold(/*const*/ container1DUnfold & cuf){
 		TH2* SysResponsematrix=cuf.prepareRespMatrix(false,sys);
 		if(!SysResponsematrix){
 			std::cout << "containerUnfolder::unfold: Response matrix for " << cuf.getSystErrorName(sys)
-			        << " could not be created. stopping unfolding!" << std::endl;
+			        		<< " could not be created. stopping unfolding!" << std::endl;
 			throw std::runtime_error("");
 		}
 		//SysResponsematrix->Draw("COLZ");
@@ -206,28 +226,28 @@ container1D containerUnfolder::unfold(/*const*/ container1DUnfold & cuf){
 		if(dodatasyst)
 			SysDatahist=cuf.getRecoContainer().getTH1DSyst(cuf.getName()+"_datahist_"+cuf.getSystErrorName(sys),sys,false,true);
 		else
-		    SysDatahist=cuf.getRecoContainer().getTH1D(cuf.getName()+"_datahist_nominal_fake"+cuf.getSystErrorName(sys),false,true);
+			SysDatahist=cuf.getRecoContainer().getTH1D(cuf.getName()+"_datahist_nominal_fake"+cuf.getSystErrorName(sys),false,true);
 		unfolder * uf=0;
 
 		try{
-		    uf=new unfolder(cuf.getName()+"_"+cuf.getSystErrorName(sys));
+			uf=new unfolder(cuf.getName()+"_"+cuf.getSystErrorName(sys));
 		}
 		catch(...){
 
-		    {
-		        std::cout << "containerUnfolder::unfold: bad memory alloc by new unfolder , try to switch of parallalization" << std::endl;
+			{
+				std::cout << "containerUnfolder::unfold: bad memory alloc by new unfolder , try to switch of parallalization" << std::endl;
 
-		    }
-		    continue;
+			}
+			continue;
 		}
 		uf->setVerbose(printinfo);
 		int verb=uf->init(SysResponsematrix,SysDatahist);
 		if(verb>10000){
 
-            {
-			std::cout << "containerUnfolder::unfold: init of unfolder for "<< cuf.getName()<< ": "
-					<< cuf.getSystErrorName(sys) << " not successful. Will not unfold distribution"<< std::endl;
-            }
+			{
+				std::cout << "containerUnfolder::unfold: init of unfolder for "<< cuf.getName()<< ": "
+						<< cuf.getSystErrorName(sys) << " not successful. Will not unfold distribution"<< std::endl;
+			}
 			continue;
 		}
 		unfsyst_.at(sys)=uf;
@@ -246,7 +266,8 @@ container1D containerUnfolder::unfold(/*const*/ container1DUnfold & cuf){
 	 */
 	if(debug)
 		std::cout << "containerUnfolder::unfold: scanning L-Curve/Tau of systematics" << std::endl;
-//unfortunately not really thread safe..
+	//unfortunately not really thread safe..
+//#pragma omp parallel for
 	for(size_t sys=0;sys<unfsyst_.size();sys++){
 		if(debug||printinfo)
 			std::cout << "containerUnfolder::unfold: scanning L-Curve/Tau of "<< cuf.getName() << ": " << cuf.getSystErrorName(sys) << std::endl;
@@ -278,8 +299,8 @@ container1D containerUnfolder::unfold(/*const*/ container1DUnfold & cuf){
 	out=out*lumiinv;
 	TString xaxisname=out.getXAxisName();
 	xaxisname.ReplaceAll("_reco","");
-    xaxisname.ReplaceAll(" - gen","");
-    xaxisname.ReplaceAll("-gen","");
+	xaxisname.ReplaceAll(" - gen","");
+	xaxisname.ReplaceAll("-gen","");
 	out.setXAxisName(xaxisname);
 
 	xaxisname.ReplaceAll("[","[pb/");
