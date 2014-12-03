@@ -719,66 +719,37 @@ void containerStack::addErrorStack(const TString & sysname,const containerStack&
 }
 
 void containerStack::getRelSystematicsFrom(const ztop::containerStack & stack){
-	for(std::vector<ztop::container1D>::const_iterator cont=stack.containers_.begin();cont<stack.containers_.end();++cont){
-		TString name=cont->getName();
-		for(unsigned int i=0;i<containers_.size();i++){
-			if(containers_[i].getName() == name){
-				containers_[i].getRelSystematicsFrom(*cont);
-				break;
-			}
-		}
-	}
-	for(std::vector<ztop::container2D>::const_iterator cont=stack.containers2D_.begin();cont<stack.containers2D_.end();++cont){
-		TString name=cont->getName();
-		for(unsigned int i=0;i<containers2D_.size();i++){
-			if(containers2D_[i].getName() == name){
-				containers2D_[i].getRelSystematicsFrom(*cont);
-				break;
-			}
-		}
-	}
+	for(size_t j=0;j<stack.legends_.size();j++){
+		for(unsigned int i=0;i<legends_.size();i++){
+			if(legends_[i] == stack.legends_.at(j)){
+				if(debug)
+					std::cout << "containerStack::getRelSystematicsFrom: adding to stack " << name_ << std::endl;
+				if(i<containers_.size() && j<stack.containers_.size())
+					containers_[i].getRelSystematicsFrom(stack.containers_.at(j));
+				if(i<containers2D_.size() && j<stack.containers2D_.size())
+					containers2D_[i].getRelSystematicsFrom(stack.containers2D_.at(j));
+				if(i<containers1DUnfold_.size() && j<stack.containers1DUnfold_.size())
+					containers1DUnfold_[i].getRelSystematicsFrom(stack.containers1DUnfold_.at(j));
 
-	for(std::vector<ztop::container1DUnfold>::const_iterator cont=stack.containers1DUnfold_.begin();cont<stack.containers1DUnfold_.end();++cont){
-		TString name=cont->getName();
-		for(unsigned int i=0;i<containers1DUnfold_.size();i++){
-			if(containers1DUnfold_[i].getName() == name){
-				containers1DUnfold_[i].getRelSystematicsFrom(*cont);
 				break;
 			}
 		}
 	}
 }
 void containerStack::addRelSystematicsFrom(const ztop::containerStack & stack,bool ignorestat,bool strict){
-	for(std::vector<ztop::container1D>::const_iterator cont=stack.containers_.begin();cont<stack.containers_.end();++cont){
-		const TString& name=cont->getName();
-		for(unsigned int i=0;i<containers_.size();i++){
-			if(containers_[i].getName() == name){
-				if(debug)
-					std::cout << "containerStack::addRelSystematicsFrom: adding to stack " << name_ << std::endl;
-				containers_[i].addRelSystematicsFrom(*cont,ignorestat,strict);
-				break;
-			}
-		}
-	}
-	for(std::vector<ztop::container2D>::const_iterator cont=stack.containers2D_.begin();cont<stack.containers2D_.end();++cont){
-		const TString& name=cont->getName();
-		for(unsigned int i=0;i<containers2D_.size();i++){
-			if(containers2D_[i].getName() == name){
-				if(debug)
-					std::cout << "containerStack::addRelSystematicsFrom: adding to stack " << name_ << std::endl;
-				containers2D_[i].addRelSystematicsFrom(*cont,ignorestat,strict);
-				break;
-			}
-		}
-	}
 
-	for(std::vector<ztop::container1DUnfold>::const_iterator cont=stack.containers1DUnfold_.begin();cont<stack.containers1DUnfold_.end();++cont){
-		const TString& name=cont->getName();
-		for(unsigned int i=0;i<containers1DUnfold_.size();i++){
-			if(containers1DUnfold_[i].getName() == name){
+	for(size_t j=0;j<stack.legends_.size();j++){
+		for(unsigned int i=0;i<legends_.size();i++){
+			if(legends_[i] == stack.legends_.at(j)){
 				if(debug)
 					std::cout << "containerStack::addRelSystematicsFrom: adding to stack " << name_ << std::endl;
-				containers1DUnfold_[i].addRelSystematicsFrom(*cont,ignorestat,strict);
+				if(i<containers_.size() && j<stack.containers_.size())
+					containers_[i].addRelSystematicsFrom(stack.containers_.at(j),ignorestat,strict);
+				if(i<containers2D_.size() && j<stack.containers2D_.size())
+					containers2D_[i].addRelSystematicsFrom(stack.containers2D_.at(j),ignorestat,strict);
+				if(i<containers1DUnfold_.size() && j<stack.containers1DUnfold_.size())
+					containers1DUnfold_[i].addRelSystematicsFrom(stack.containers1DUnfold_.at(j),ignorestat,strict);
+
 				break;
 			}
 		}
@@ -839,89 +810,7 @@ std::vector<size_t> containerStack::removeSpikes(bool inclUFOF,int limittoindex,
 }
 
 
-ztop::container1D & containerStack::getContainer(TString name){
 
-	bool found=false;
-	for(unsigned int i=0;i<containers_.size();i++){
-		if(containers_[i].getName() == name){
-			containers_[i] = containers_[i] * norms_[i];
-			norms_[i] = 1.;
-			found=true;
-			return containers_[i];
-		}
-	}
-	if(!found) std::cout << "containerStack::getContainer: container with name " << name << " not found, returning first container! all names are formatted: c_legendentry" << std::endl;
-	return containers_.at(0);
-}
-ztop::container1D  containerStack::getContainer(TString name)const{
-	bool found=false;
-	container1D out;
-	for(unsigned int i=0;i<containers_.size();i++){
-		if(containers_[i].getName() == name){
-			out=containers_[i];
-			out *= norms_[i];
-			found=true;
-			return out;
-		}
-	}
-	if(!found) std::cout << "containerStack::getContainer: container with name " << name << " not found, returning first container! all names are formatted: c_legendentry" << std::endl;
-	return containers_.at(0);
-}
-
-ztop::container2D & containerStack::getContainer2D(TString name){
-	bool found=false;
-	for(unsigned int i=0;i<containers2D_.size();i++){
-		if(containers2D_[i].getName() == name){
-			containers2D_[i] = containers2D_[i] * norms_[i];
-			norms_[i] = 1.;
-			found=true;
-			return containers2D_[i];
-		}
-	}
-	if(!found) std::cout << "containerStack::getContainer2D: container with name " << name << " not found, returning first container! all names are formatted: c_legendentry" << std::endl;
-	return containers2D_.at(0);
-}
-ztop::container2D  containerStack::getContainer2D(TString name)const{
-	bool found=false;
-	container2D out;
-	for(unsigned int i=0;i<containers2D_.size();i++){
-		if(containers2D_[i].getName() == name){
-			out=containers2D_[i];
-			out *= norms_[i];
-			found=true;
-			return out;
-		}
-	}
-	if(!found) std::cout << "containerStack::getContainer2D: container with name " << name << " not found, returning first container! all names are formatted: c_legendentry" << std::endl;
-	return containers2D_.at(0);
-}
-ztop::container1DUnfold & containerStack::getContainer1DUnfold(TString name){
-	bool found=false;
-	for(unsigned int i=0;i<containers1DUnfold_.size();i++){
-		if(containers1DUnfold_[i].getName() == name){
-			containers1DUnfold_[i] = containers1DUnfold_[i] * norms_[i];
-			norms_[i] = 1.;
-			found=true;
-			return containers1DUnfold_[i];
-		}
-	}
-	if(!found) std::cout << "containerStack::getContainer1DUnfold: container with name " << name << " not found, returning first container! all names are formatted: c_legendentry" << std::endl;
-	return containers1DUnfold_.at(0);
-}
-ztop::container1DUnfold  containerStack::getContainer1DUnfold(TString name)const{
-	bool found=false;
-	container1DUnfold out;
-	for(unsigned int i=0;i<containers1DUnfold_.size();i++){
-		if(containers1DUnfold_[i].getName() == name){
-			out=containers1DUnfold_[i];
-			out *= norms_[i];
-			found=true;
-			return out;
-		}
-	}
-	if(!found) std::cout << "containerStack::getContainer1DUnfold: container with name " << name << " not found, returning first container! all names are formatted: c_legendentry" << std::endl;
-	return containers1DUnfold_.at(0);
-}
 ztop::container1D containerStack::getFullMCContainer()const{
 	container1D out;
 	if(containers_.size()<1)
@@ -1591,57 +1480,49 @@ containerStack containerStack::rebinYToBinning(const std::vector<float> & newbin
 ztop::containerStack containerStack::operator + (containerStack stack){
 	if(mode!=stack.mode){
 		std::cout << "containerStack::operator +: stacks must be of same dimension, returning input" << std::endl;
-		return stack;
+		return *this;
 	}
-	for(unsigned int i=0;i<containers_.size();i++){
-		for(unsigned int j=0;j<stack.containers_.size();j++){
-			if(containers_[i].getName() == stack.containers_[j].getName()){
-				stack.containers_[j] += containers_[i];
+	for(size_t j=0;j<stack.legends_.size();j++){
+		for(unsigned int i=0;i<legends_.size();i++){
+			if(legends_[i] == stack.legends_.at(j)){
+				if(debug)
+					std::cout << "containerStack::addRelSystematicsFrom: adding to stack " << name_ << std::endl;
+				if(i<containers_.size() && j<stack.containers_.size())
+					stack.containers_[j]+=containers_.at(i);
+				if(i<containers2D_.size() && j<stack.containers2D_.size())
+					stack.containers2D_[j]+=containers2D_.at(i);
+				if(i<containers1DUnfold_.size() && j<stack.containers1DUnfold_.size())
+					stack.containers1DUnfold_[j]+=containers1DUnfold_.at(i);
+
+				break;
 			}
 		}
 	}
-	for(unsigned int i=0;i<containers2D_.size();i++){
-		for(unsigned int j=0;j<stack.containers2D_.size();j++){
-			if(containers2D_[i].getName() == stack.containers2D_[j].getName()){
-				stack.containers2D_[j] = containers2D_[i] + stack.containers2D_[j];
-			}
-		}
-	}
-	for(unsigned int i=0;i<containers1DUnfold_.size();i++){
-		for(unsigned int j=0;j<stack.containers1DUnfold_.size();j++){
-			if(containers1DUnfold_[i].getName() == stack.containers1DUnfold_[j].getName()){
-				stack.containers1DUnfold_[j] = containers1DUnfold_[i] + stack.containers1DUnfold_[j];
-			}
-		}
-	}
+
 	return stack;
 }
 ztop::containerStack containerStack::operator - (containerStack stack){
 	if(mode!=stack.mode){
 		std::cout << "containerStack::operator -: stacks must be of same dimension, returning input" << std::endl;
-		return stack;
+		return *this;
 	}
-	for(unsigned int i=0;i<containers_.size();i++){
-		for(unsigned int j=0;j<stack.containers_.size();j++){
-			if(containers_[i].getName() == stack.containers_[j].getName()){
-				stack.containers_[j] = containers_[i] - stack.containers_[j];
+	for(size_t j=0;j<stack.legends_.size();j++){
+		for(unsigned int i=0;i<legends_.size();i++){
+			if(legends_[i] == stack.legends_.at(j)){
+				if(debug)
+					std::cout << "containerStack::addRelSystematicsFrom: adding to stack " << name_ << std::endl;
+				if(i<containers_.size() && j<stack.containers_.size())
+					stack.containers_[j]-=containers_.at(i);
+				if(i<containers2D_.size() && j<stack.containers2D_.size())
+					stack.containers2D_[j]-=containers2D_.at(i);
+				if(i<containers1DUnfold_.size() && j<stack.containers1DUnfold_.size())
+					stack.containers1DUnfold_[j]-=containers1DUnfold_.at(i);
+
+				break;
 			}
 		}
 	}
-	for(unsigned int i=0;i<containers2D_.size();i++){
-		for(unsigned int j=0;j<stack.containers2D_.size();j++){
-			if(containers2D_[i].getName() == stack.containers2D_[j].getName()){
-				stack.containers2D_[j] = containers2D_[i] - stack.containers2D_[j];
-			}
-		}
-	}
-	for(unsigned int i=0;i<containers1DUnfold_.size();i++){
-		for(unsigned int j=0;j<stack.containers1DUnfold_.size();j++){
-			if(containers1DUnfold_[i].getName() == stack.containers1DUnfold_[j].getName()){
-				stack.containers1DUnfold_[j] = containers1DUnfold_[i] - stack.containers1DUnfold_[j];
-			}
-		}
-	}
+
 	return stack;
 }
 ztop::containerStack containerStack::operator / (containerStack  stack){
@@ -1649,24 +1530,19 @@ ztop::containerStack containerStack::operator / (containerStack  stack){
 		std::cout << "containerStack::operator /: stacks must be of same dimension, returning input" << std::endl;
 		return stack;
 	}
-	for(unsigned int i=0;i<containers_.size();i++){
-		for(unsigned int j=0;j<stack.containers_.size();j++){
-			if(containers_[i].getName() == stack.containers_[j].getName()){
-				stack.containers_[j] = containers_[i] / stack.containers_[j];
-			}
-		}
-	}
-	for(unsigned int i=0;i<containers2D_.size();i++){
-		for(unsigned int j=0;j<stack.containers2D_.size();j++){
-			if(containers2D_[i].getName() == stack.containers2D_[j].getName()){
-				stack.containers2D_[j] = containers2D_[i] / stack.containers2D_[j];
-			}
-		}
-	}
-	for(unsigned int i=0;i<containers1DUnfold_.size();i++){
-		for(unsigned int j=0;j<stack.containers1DUnfold_.size();j++){
-			if(containers1DUnfold_[i].getName() == stack.containers1DUnfold_[j].getName()){
-				stack.containers1DUnfold_[j] = containers1DUnfold_[i] / stack.containers1DUnfold_[j];
+	for(size_t j=0;j<stack.legends_.size();j++){
+		for(unsigned int i=0;i<legends_.size();i++){
+			if(legends_[i] == stack.legends_.at(j)){
+				if(debug)
+					std::cout << "containerStack::addRelSystematicsFrom: adding to stack " << name_ << std::endl;
+				if(i<containers_.size() && j<stack.containers_.size())
+					stack.containers_[j]/=containers_.at(i);
+				if(i<containers2D_.size() && j<stack.containers2D_.size())
+					stack.containers2D_[j]/=containers2D_.at(i);
+				if(i<containers1DUnfold_.size() && j<stack.containers1DUnfold_.size())
+					stack.containers1DUnfold_[j]/=containers1DUnfold_.at(i);
+
+				break;
 			}
 		}
 	}
@@ -1675,26 +1551,21 @@ ztop::containerStack containerStack::operator / (containerStack  stack){
 ztop::containerStack containerStack::operator * (containerStack  stack){
 	if(mode!=stack.mode){
 		std::cout << "containerStack::operator /: stacks must be of same dimension, returning input" << std::endl;
-		return stack;
+		return *this;
 	}
-	for(unsigned int i=0;i<containers_.size();i++){
-		for(unsigned int j=0;j<stack.containers_.size();j++){
-			if(containers_[i].getName() == stack.containers_[j].getName()){
-				stack.containers_[j] = containers_[i] * stack.containers_[j];
-			}
-		}
-	}
-	for(unsigned int i=0;i<containers2D_.size();i++){
-		for(unsigned int j=0;j<stack.containers2D_.size();j++){
-			if(containers2D_[i].getName() == stack.containers2D_[j].getName()){
-				stack.containers2D_[j] = containers2D_[i] * stack.containers2D_[j];
-			}
-		}
-	}
-	for(unsigned int i=0;i<containers1DUnfold_.size();i++){
-		for(unsigned int j=0;j<stack.containers1DUnfold_.size();j++){
-			if(containers1DUnfold_[i].getName() == stack.containers1DUnfold_[j].getName()){
-				stack.containers1DUnfold_[j] = containers1DUnfold_[i] * stack.containers1DUnfold_[j];
+	for(size_t j=0;j<stack.legends_.size();j++){
+		for(unsigned int i=0;i<legends_.size();i++){
+			if(legends_[i] == stack.legends_.at(j)){
+				if(debug)
+					std::cout << "containerStack::addRelSystematicsFrom: adding to stack " << name_ << std::endl;
+				if(i<containers_.size() && j<stack.containers_.size())
+					stack.containers_[j]*=containers_.at(i);
+				if(i<containers2D_.size() && j<stack.containers2D_.size())
+					stack.containers2D_[j]*=containers2D_.at(i);
+				if(i<containers1DUnfold_.size() && j<stack.containers1DUnfold_.size())
+					stack.containers1DUnfold_[j]*=containers1DUnfold_.at(i);
+
+				break;
 			}
 		}
 	}
@@ -1702,9 +1573,9 @@ ztop::containerStack containerStack::operator * (containerStack  stack){
 }
 ztop::containerStack containerStack::operator * (double scalar){
 	ztop::containerStack out=*this;
-	for(unsigned int i=0;i<containers_.size();i++) out.containers_[i] = containers_[i] * scalar;
-	for(unsigned int i=0;i<containers2D_.size();i++) out.containers2D_[i] = containers2D_[i] * scalar;
-	for(unsigned int i=0;i<containers1DUnfold_.size();i++) out.containers1DUnfold_[i] = containers1DUnfold_[i] * scalar;
+	for(unsigned int i=0;i<containers_.size();i++) out.containers_[i] *=  scalar;
+	for(unsigned int i=0;i<containers2D_.size();i++) out.containers2D_[i] *=  scalar;
+	for(unsigned int i=0;i<containers1DUnfold_.size();i++) out.containers1DUnfold_[i] *= scalar;
 	return out;
 }
 ztop::containerStack containerStack::operator * (float scalar){

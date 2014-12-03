@@ -114,6 +114,7 @@ public:
 	container2D operator - (const container2D &)const;       //! adds errors in squares; treats same named systematics as correlated!!
 	container2D & operator /= (const container2D &);       //! binomial stat error or uncorr error (depends on setDivideBinomial()); treats same named systematics as correlated
 	container2D operator / (const container2D &)const;       //! binomial stat error or uncorr error (depends on setDivideBinomial()); treats same named systematics as correlated
+	container2D & operator *= (const container2D &);       //! adds stat errors in squares; treats same named systematics as correlated!!
 	container2D operator * (const container2D &)const;       //! adds stat errors in squares; treats same named systematics as correlated!!
 	container2D & operator *= (float); //fast hack!            //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
 	container2D operator * (float)const;            //! simple scalar multiplication. stat and syst errors are scaled accordingly!!

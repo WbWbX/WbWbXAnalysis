@@ -91,20 +91,20 @@ public:
 
 	container1D & getContainer(unsigned int i){return containers_.at(i);}
 	const container1D & getContainer(unsigned int i)const{return containers_.at(i);}
-	container1D & getContainer(TString);
-	container1D  getContainer(TString) const;
+	//container1D & getContainer(TString);
+	//container1D  getContainer(TString) const;
 	container1D getFullMCContainer()const;           //! gets the sum of all MC containers (normalized with their stored norm) including error handling
 
 	container2D & getContainer2D(unsigned int i){return containers2D_.at(i);}
 	const container2D & getContainer2D(unsigned int i)const{return containers2D_.at(i);}
-	container2D & getContainer2D(TString);
-	container2D  getContainer2D(TString)const;
+	//container2D & getContainer2D(TString);
+	//container2D  getContainer2D(TString)const;
 	container2D getFullMCContainer2D()const;           //! gets the sum of all MC containers (normalized with their stored norm) including error handling
 
 	container1DUnfold & getContainer1DUnfold(unsigned int i){return containers1DUnfold_.at(i);}
 	const container1DUnfold & getContainer1DUnfold(unsigned int i)const{return containers1DUnfold_.at(i);}
-	container1DUnfold & getContainer1DUnfold(TString);
-	container1DUnfold  getContainer1DUnfold(TString)const;
+	//container1DUnfold & getContainer1DUnfold(TString);
+	//container1DUnfold  getContainer1DUnfold(TString)const;
 	container1DUnfold getFullMCContainer1DUnfold()const;           //! gets the sum of all MC containers (normalized with their stored norm) including error handling
 
 	void multiplyNorm(TString , double);

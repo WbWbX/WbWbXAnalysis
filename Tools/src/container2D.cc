@@ -628,15 +628,23 @@ container2D & container2D::operator *= (float val){
 	}
 	return *this;
 }
+container2D & container2D::operator *= (const container2D & second){
+	if(second.xbins_ != xbins_ || second.ybins_ != ybins_){
+		std::cout << "container2D::operator *=: "<< name_ << " and " << second.name_<<" must have same binning! returning *this"  << std::endl;
+		return *this;
+	}
+	for(size_t i=0;i<conts_.size();i++){
+		conts_.at(i) *=  second.conts_.at(i);
+	}
+	return *this;
+}
 container2D container2D::operator * (const container2D & second)const{
 	if(second.xbins_ != xbins_ || second.ybins_ != ybins_){
 		std::cout << "container2D::operator *: "<< name_ << " and " << second.name_<<" must have same binning! returning *this"  << std::endl;
 		return *this;
 	}
-	container2D out=second;
-	for(size_t i=0;i<conts_.size();i++){
-		out.conts_.at(i) = conts_.at(i) * second.conts_.at(i);
-	}
+	container2D out=*this;
+	out*=second;
 	return out;
 }
 container2D container2D::operator * (float val)const{

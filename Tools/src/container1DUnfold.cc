@@ -419,7 +419,7 @@ void container1DUnfold::addRelSystematicsFrom(const container1DUnfold & cont,boo
 bool container1DUnfold::checkCongruentBinBoundariesXY() const{
 	if(xbins_.size() <2|| ybins_.size() <2)
 		return false; //emtpy
-	return checkCongruence(genbins_,ybins_);
+	return checkCongruence(xbins_,ybins_);
 }
 /**
  * assumes  ybins >= xbins. should be the case for container1DUnfold
