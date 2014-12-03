@@ -74,13 +74,14 @@ ElecSFFile     = /src/TtZAnalysis/Data/elec_tight_SF.root
 ElecSFHisto    = GlobalSF_err_err_err
 
 $ well this is wrong
-TriggerSFFile  = /src/TopAnalysis/Configuration/analysis/common/data/triggerSummary_emu_tightleps.root
+TriggerSFFile  = /src/TtZAnalysis/Analysis/data/analyse/triggerSummary_emu_7TeV_tight.root
 
 PUFile         = /src/TtZAnalysis/Data/Legacy2011.json_PU $without .root
 
-btagWP         = csvl
-btagFile       = all_btags.root
+btagWP         = csvt
+btagFile       = all_btags.root $$ doesn't matter
 
+modeOptions = GsfelectronsZerojetNozcutNometcutNobcutBtagcsvtLeppt30
 
 btagShapeFileHF = /src/TopAnalysis/ZTopUtils/data/csv_rwt_hf.root
 btagShapeFileLF = /src/TopAnalysis/ZTopUtils/data/csv_rwt_lf.root
