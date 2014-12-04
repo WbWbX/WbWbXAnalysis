@@ -10,3 +10,19 @@
 300   /TTJets_MSDecays_central_TuneZ2_7TeV-madgraph-tauola/Summer11LegDR-PU_S13_START53_LV6-v1/AODSIM     tree_7TeV_eettbarviatau_trig              includetrigger=true genFilter=Top genFilterString=ElectronElectronViaTau isSignal=true
 300   /TTJets_MSDecays_central_TuneZ2_7TeV-madgraph-tauola/Summer11LegDR-PU_S13_START53_LV6-v1/AODSIM     tree_7TeV_mumuttbarviatau_trig            includetrigger=true genFilter=Top genFilterString=MuonMuonViaTau isSignal=true
 300   /TTJets_MSDecays_central_TuneZ2_7TeV-madgraph-tauola/Summer11LegDR-PU_S13_START53_LV6-v1/AODSIM     tree_7TeV_emuttbarviatau_trig             includetrigger=true genFilter=Top genFilterString=ElectronMuonViaTau isSignal=true
+
+
+##DY MC
+
+700  /DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Summer11LegDR-PU_S13_START53_LV6-v1/AODSIM    tree_7TeV_dymumu60120_eff     includereco=true genFilter=Z genFilterString=MuonMuon genFilterMassLow=60 genFilterMassHigh=120 isSignal=true
+700  /DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Summer11LegDR-PU_S13_START53_LV6-v1/AODSIM     tree_7TeV_dyee60120_eff       includereco=true genFilter=Z genFilterString=ElectronElectron genFilterMassLow=60 genFilterMassHigh=120 isSignal=true
+
+
+### SINGLE LEPTON
+
+200  /SingleElectron/Run2011A-12Oct2013-v1/AOD     tree_7TeV_singlee_runA       isMC=false globalTag=FT_53_LV5_AN1 includereco=true   jsonfiles/Legacy2011.json
+300  /SingleElectron/Run2011B-12Oct2013-v1/AOD      tree_7TeV_singlee_runB       isMC=false globalTag=FT_53_LV5_AN1 includereco=true   jsonfiles/Legacy2011.json
+
+
+200  /SingleMu/Run2011A-12Oct2013-v1/AOD      tree_7TeV_singlemu_runA       isMC=false globalTag=FT_53_LV5_AN1 includereco=true   jsonfiles/Legacy2011.json
+300  /SingleMu/Run2011B-12Oct2013-v1/AOD      tree_7TeV_singlemu_runB       isMC=false globalTag=FT_53_LV5_AN1 includereco=true   jsonfiles/Legacy2011.json
