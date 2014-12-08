@@ -48,7 +48,7 @@ do
     allj=( "${allj[@]}" "${file}" );
     if [ ${JOBSONBATCH} ]
     then
-	if [ -e "../stdout/${file}.txt" ];
+	if [ -e "../stdout/${file}" ];
 	then
 	    jobid=`ls ../batch/${file}.o* 2>&1 | awk -F".o" '{print $NF}'`
 	fi
