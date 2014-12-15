@@ -84,6 +84,6 @@ btagShapeFileHF = /src/TopAnalysis/Configuration/analysis/common/data/csv_rwt_hf
 btagShapeFileLF = /src/TopAnalysis/Configuration/analysis/common/data/csv_rwt_lf_20pt_8_20_14.root
 
 
-modeOptions = GsfelectronsZerojetNozcutNometcutNobcutBtagcsvtLeppt30
+modeOptions = GsfelectronsZerojetNozcutNometcutNobcutBtagcsvtLeppt30Notoppt
 
 [parameters-end]

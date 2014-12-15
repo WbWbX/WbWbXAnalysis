@@ -24,6 +24,7 @@
 #include "Math/GSLNLSMinimizer.h"
 #include "Math/GSLSimAnMinimizer.h"
 #include <limits>
+#include <cfloat>
 //use TMinuit
 //define all the functions - nee dto be c-stylish
 
@@ -173,14 +174,14 @@ double simpleFitter::getFitOutput(const double& xin)const{
 	return fitfunction(xin,&(paras_.at(0)));
 }
 void simpleFitter::feedErrorsToSteps(){
-    for(size_t i=0;i<stepsizes_.size();i++)
-        stepsizes_.at(i)=paraerrsup_.at(i)*0.01; //good enough
+	for(size_t i=0;i<stepsizes_.size();i++)
+		stepsizes_.at(i)=paraerrsup_.at(i)*0.05; //good enough
 }
 
 void simpleFitter::fit(){
 
 	if(!checkSizes()){
-		std::cout << "EROR IN simpleFitter::fit" <<std::endl;
+		std::cout << "ERROR IN simpleFitter::fit" <<std::endl;
 
 		std::cout << "parameter:             " << paras_.size() << std::endl;
 		std::cout << "parameter errors up:   " << paraerrsup_.size() << std::endl;
@@ -342,18 +343,24 @@ void simpleFitter::getParameterErrorContribution(size_t a, size_t b,double & err
 	else{
 		min->SetFunction(fcn);
 	}
+
 	bool succ=min->Minimize();
 	if(succ){
 		errdown=min->Errors()[b];
 		//std::cout << "newerr: " << errdown<<std::endl;
+		double reldiff= (olderr-errdown)/olderr;
+		if(reldiff>=0){
+			errdown=sqrt(olderr*olderr-errdown*errdown);}
+		else{
+			if(reldiff>-0.001) //purely numerical difference
+				errdown=0;
+			else
+				errdown=-100;
+		}
 
-		if(errdown > olderr)
-			errdown=-100;
-		else
-			errdown=sqrt(olderr*olderr-errdown*errdown);
 	}
 	else{
-		errdown=-100;
+		errdown=-200;
 	}
 	errup=errdown;
 	delete min;
@@ -503,7 +510,7 @@ ROOT::Math::Minimizer * simpleFitter::invokeMinimizer()const{
 	else if (minimizerstr_ ==  "Fumili2")
 		min = new ROOT::Minuit2::Minuit2Minimizer("fumili");
 	else if (minimizerstr_ ==  "Minuit" || minimizerstr_ ==  "TMinuit")
-		min = new TMinuitMinimizer(algorithm_.Data());
+		min = new TMinuitMinimizer(algorithm_.Data(),paras_.size());
 	else if (minimizerstr_ ==  "GSL")
 		min = new ROOT::Math::GSLMinimizer(algorithm_.Data());
 	else if (minimizerstr_ ==  "GSL_NLS")
@@ -525,6 +532,7 @@ ROOT::Math::Minimizer * simpleFitter::invokeMinimizer()const{
 	else
 		min->SetPrintLevel(0);
 
+
 	for(size_t i=0;i<paras_.size();i++){
 		TString paraname="";
 		if(paranames_.size()>i)
@@ -536,9 +544,8 @@ ROOT::Math::Minimizer * simpleFitter::invokeMinimizer()const{
 		else
 			min->SetVariable((unsigned int)i,paraname.Data(),paras_.at(i), stepsizes_.at(i));
 	}
-
 	//std::numeric_limits<double> lim;
-	min->SetPrecision(1e-16);
+	min->SetPrecision(DBL_EPSILON); //16
 	min->SetStrategy(strategy_);
 
 	return min;

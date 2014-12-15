@@ -46,7 +46,7 @@ public:
 
 	container1D();
 	container1D(float , TString name="",TString xaxisname="",TString yaxisname="", bool mergeufof=false);              //! construct with bin width (for dynamic filling - not yet implemented)
-	container1D(std::vector<float> , TString name="",TString xaxisname="",TString yaxisname="", bool mergeufof=false); //! construct with binning
+	container1D(const std::vector<float>& ,const TString& name="",const TString& xaxisname="",const TString& yaxisname="", bool mergeufof=false); //! construct with binning
 	~container1D();
 	container1D(const container1D&);
 	container1D& operator=(const container1D&);

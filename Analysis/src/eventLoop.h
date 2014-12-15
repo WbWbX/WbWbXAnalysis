@@ -206,11 +206,11 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 				|| inputfile.Contains("ttbar_") ||
 				inputfile.Contains("ttbarviatau_") ){
 			if(  ! (syst_.BeginsWith("TT_GEN") && syst_.EndsWith("_up"))  ) //other generator
-				normmultiplier=0.1049/0.1111202;
+				normmultiplier=(0.1086/0.1111202)*(0.1086/0.1111202);//correct both W
 		}
 	}
 	if(inputfile.Contains("_mgdecays_") || inputfile.Contains("_tbarWtoLL")|| inputfile.Contains("_tWtoLL")){
-		normmultiplier=0.1049; //fully leptonic branching fraction
+		normmultiplier=0.1086; //fully leptonic branching fraction for W
 	}
 
 
@@ -1469,10 +1469,17 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 		}
 		if(apllweightsone) puweight=1;
 
+		float mlbmin=0;
+		evt.mlbmin=&mlbmin;
 
 		if(analysisMllRange){
 
 			// std::cout << selectedjets->at(0)->pt() << std::endl;
+			if(selectedbjets.size()>0){
+				mlbmin=(leadingptlep->p4()+selectedbjets.at(0)->p4()).m();
+				float tmp=(secleadingptlep->p4()+selectedbjets.at(0)->p4()).m();
+				if(mlbmin>tmp)mlbmin=tmp;
+			}
 
 			xsecplots.makeControlPlots(step);
 

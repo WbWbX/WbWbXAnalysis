@@ -17,7 +17,7 @@ topmasses=( "172.5"
      "178.5"
      "166.5"
 );
-pdfeigenvectors= #26  # 26 # if set to 0, no variation
+pdfeigenvectors=26  # 26 # if set to 0, no variation
 
 systs=("nominal"		
 
@@ -159,8 +159,8 @@ systs=("nominal"
    # "BTAGPUR_down"
 
 
-    "TOPPT_up"
-    "TOPPT_down"
+    # "TOPPT_up"
+    # "TOPPT_down"
 
     "TT_MATCH_down"
     "TT_MATCH_up"

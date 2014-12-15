@@ -43,7 +43,7 @@ public:
     leadinglep(0),secleadinglep(0),
     //leadingjetbtag(0),secleadingjetbtag(0),
     simplemet(0),adjustedmet(0),
-    mll(0),leplepdr(0),cosleplepangle(0),dphillj(0),dphilljj(0),detallj(0),detalljj(0),ht(0),ptllj(0),topdiscr(0),topdiscr2(0),topdiscr3(0),
+    mll(0),mlbmin(0),leplepdr(0),cosleplepangle(0),dphillj(0),dphilljj(0),detallj(0),detalljj(0),ht(0),ptllj(0),topdiscr(0),topdiscr2(0),topdiscr3(0),
 
     lhi_dphillj(0),
     lhi_cosleplepangle(0),
@@ -101,7 +101,7 @@ public:
         leadinglep=0;secleadinglep=0;
         //leadingjetbtag=0;secleadingjetbtag=0;
         simplemet=0;adjustedmet=0;
-        mll=0;leplepdr=0;cosleplepangle=0;dphillj=0;dphilljj=0;detallj=0;detalljj=0;ht=0;ptllj=0;topdiscr=0;topdiscr2=0;topdiscr3=0;
+        mll=0;mlbmin=0;leplepdr=0;cosleplepangle=0;dphillj=0;dphilljj=0;detallj=0;detalljj=0;ht=0;ptllj=0;topdiscr=0;topdiscr2=0;topdiscr3=0;
 
         lhi_dphillj=0;
         lhi_cosleplepangle=0;
@@ -190,6 +190,7 @@ public:
     ztop::NTMet * adjustedmet;
 
     float * mll;
+    float * mlbmin;
     float * leplepdr;
     float * cosleplepangle;
     float * dphillj;

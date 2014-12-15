@@ -18,6 +18,11 @@ invokeApplication(){
 	parser->doneParsing();
 	if(files.size()!=2){
 		parser->coutHelp();
+		return 0;
+	}
+	if(files.at(0)==files.at(1)){
+		std::cout << "same files, skip" <<std::endl;
+		return 0;
 	}
 	std::cout << "opening files..." <<std::endl;
 	containerStackVector *csv=new containerStackVector();
@@ -40,8 +45,9 @@ invokeApplication(){
 
 	std::cout << "adding systematics..." <<std::endl;
 	csv2->addRelSystematicsFrom(*csv,!arenotcorrelated);
-
-	csv2->writeAllToTFile(files.at(1)+"_added",true,!plotplots);
+	TString cmd="cp "+files.at(1)+" "+files.at(1)+".bu";
+	system(cmd.Data());
+	csv2->writeAllToTFile(files.at(1),true,!plotplots);
 	std::cout << "done." <<std::endl;
 
 	delete csv;

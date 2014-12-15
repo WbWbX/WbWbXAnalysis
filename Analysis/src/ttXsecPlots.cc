@@ -317,6 +317,36 @@ void ttXsecPlots::makeControlPlots(const size_t& step){
 		FILL(selectedbjets->at(1),pt());
 
 
+	SETBINS << 0 << 20 << 25 << 30 << 35  << 40 << 50 << 60 << 70 << 80 << 90 << 100 << 120 << 140 << 160 << 200;
+	addPlot("mlb 1,0 b-jets","m_{lb} [GeV]","N_{evt}/GeV");
+	if(jetcategory == cat_1bjet0jet)
+		FILLSINGLE(mlbmin);
+	addPlot("mlb 1,1 b-jets","m_{lb} [GeV]","N_{evt}/GeV");
+	if(jetcategory == cat_1bjet1jet)
+		FILLSINGLE(mlbmin);
+	addPlot("mlb 1,2 b-jets","m_{lb} [GeV]","N_{evt}/GeV");
+	if(jetcategory == cat_1bjet2jet)
+		FILLSINGLE(mlbmin);
+	addPlot("mlb 1,3 b-jets","m_{lb} [GeV]","N_{evt}/GeV");
+	if(jetcategory == cat_1bjet3jet)
+		FILLSINGLE(mlbmin);
+
+	addPlot("mlb 2,0 b-jets","m_{lb} [GeV]","N_{evt}/GeV");
+	if(jetcategory == cat_2bjet0jet)
+		FILLSINGLE(mlbmin);
+	addPlot("mlb 2,1 b-jets","m_{lb} [GeV]","N_{evt}/GeV");
+	if(jetcategory == cat_2bjet1jet)
+		FILLSINGLE(mlbmin);
+	SETBINSRANGE(10,0,300);
+	addPlot("mlb 2,2 b-jets","m_{lb} [GeV]","N_{evt}/GeV");
+	if(jetcategory == cat_2bjet2jet)
+		FILLSINGLE(mlbmin);
+	SETBINSRANGE(5,0,300);
+	addPlot("mlb 2,3 b-jets","m_{lb} [GeV]","N_{evt}/GeV");
+	if(jetcategory == cat_2bjet3jet)
+		FILLSINGLE(mlbmin);
+
+
 }
 
 }

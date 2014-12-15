@@ -132,6 +132,11 @@ double extendedVariable::getValue(const double * variations)const{
 		out+=dependences_.at(i).getFitOutput(variations[i]);
 		if(out!=out){
 			std::cout << "extendedVariable::getValue: nan produced for " << sysnames_.at(i) << " (" << name_<< ") "<<std::endl;
+			std::cout << "Variation input: " << variations[i] <<std::endl;
+			std::cout << "all variations input:";
+			for(size_t j=0;j<dependences_.size();j++)
+				std::cout<<" "<< variations[j];
+			std::cout<<std::endl;
 			throw std::runtime_error("extendedVariable::getValue: nan produced");
 		}
 	}
@@ -142,9 +147,11 @@ double extendedVariable::getValue(const float * variations)const{
 		std::cout << "extendedVariable::getValue" <<std::endl;
 	double out=0;
 	for(size_t i=0;i<dependences_.size();i++){
-		out+=dependences_.at(i).getFitOutput(variations[i]);
+		out+=dependences_.at(i).getFitOutput((double)variations[i]);
 		if(out!=out){
-			std::cout << "extendedVariable::getValue: nan produced for " << sysnames_.at(i) << " (" << name_<< ") "<<std::endl;
+			std::cout << "extendedVariable::getValue (float*): nan produced for " << sysnames_.at(i) << " (" << name_<< ") "<<std::endl;
+			std::cout << "Variation input: " << variations[i] <<std::endl;
+
 			throw std::runtime_error("extendedVariable::getValue: nan produced");
 		}
 	}

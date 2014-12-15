@@ -90,6 +90,15 @@ public:
 			if(debug) std::cout << "optparser::getRest: got "<< temp_.at(i) <<std::endl;
 			out.push_back((T)temp_.at(i));
 		}
+
+			return out;
+	}
+	template<class T>
+	T getRest(size_t idx){
+		T out;
+		std::vector<T> vec=getRest<T>();
+		if(idx<vec.size())
+			return vec.at(idx);
 		return out;
 	}
 

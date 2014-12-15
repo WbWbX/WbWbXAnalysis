@@ -39,7 +39,8 @@ public:
 		fitsucc_(false),norm_nbjet_global_(true),
 		xsecoff8_(251.7),xsecoff7_(170),
 		useMConly_(false),removesyst_(false),nominos_(false),
-		random_(0),parameterwriteback_(true)
+		random_(0),parameterwriteback_(true),
+		nosystbd_(false),silent_(false)
 	{container_c_b_.resize(2);container_eps_b_.resize(2);eps_emu_.resize(2);} //one for each energy
 
 	~ttbarXsecFitter(){
@@ -101,9 +102,24 @@ public:
 	void setRemoveSyst(bool remove){removesyst_=remove;}
 
 	/**
+	 *
+	 */
+	void setNoSystBreakdown(bool no){nosystbd_=no;}
+
+	/**
+	 * no fit output
+	 */
+	void setSilent(bool silent){silent_=silent;}
+
+	/**
 	 * just append all in one
 	 */
 	containerStack produceStack(bool fittedvalues,size_t bjetcat,bool eighttev,double& chi2)const;
+
+	/**
+	 *
+	 */
+	void setReplaceInInfile(const TString& repl,const TString& with){replaceininfiles_=std::pair<TString,TString>(repl,with);}
 
 	/**
 	 * Reads in the input from file
@@ -252,6 +268,11 @@ private:
 	TRandom3 * random_;
 	bool parameterwriteback_;
 	ROOT::Math::Functor functor_; //(this,&ttbarXsecFitter::toBeMinimized,ndependencies_);
+
+	std::pair<TString,TString> replaceininfiles_;
+
+	bool nosystbd_,silent_;
+
 };
 
 }

@@ -8,7 +8,7 @@
 
 #include "../interface/graphFitter.h"
 
-
+#include <cfloat>
 
 
 namespace ztop{

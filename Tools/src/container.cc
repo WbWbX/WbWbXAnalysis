@@ -31,9 +31,7 @@ bool container1D::c_makelist=false;
 
 ///////function definitions
 container1D::container1D():
-
-																												        taggedObject(taggedObject::type_container1D)
-
+taggedObject(taggedObject::type_container1D)
 {
     canfilldyn_=false;
     //divideBinomial_=true;
@@ -50,11 +48,11 @@ container1D::container1D():
     hp_=0;
     if(c_makelist)c_list.push_back(this);
 }
-container1D::container1D(float binwidth, TString name,TString xaxisname,TString yaxisname, bool mergeufof):
-
-																								        taggedObject(taggedObject::type_container1D)
+container1D::container1D(float binwidth, TString name,TString xaxisname,TString yaxisname, bool mergeufof): taggedObject(taggedObject::type_container1D)
 
 { //currently not used
+	throw std::logic_error("container1D(float binwidth,...) not implemented!");
+
     plottag=none;
     binwidth_=binwidth;
     canfilldyn_=true;
@@ -72,8 +70,8 @@ container1D::container1D(float binwidth, TString name,TString xaxisname,TString 
     gp_=0;
     hp_=0;
 }
-container1D::container1D(std::vector<float> bins, TString name,TString xaxisname,TString yaxisname, bool mergeufof):
-																								        taggedObject(taggedObject::type_container1D)
+container1D::container1D(const std::vector<float>& bins,const TString& name,const TString& xaxisname,const TString& yaxisname, bool mergeufof):
+	taggedObject(taggedObject::type_container1D)
 
 {
     plottag=none;
@@ -100,9 +98,7 @@ container1D::~container1D(){
     if(gp_) delete gp_;
     if(hp_) delete hp_;
 }
-container1D::container1D(const container1D &c): taggedObject(c)
-
-{
+container1D::container1D(const container1D &c): taggedObject(c){
     copyFrom(c);
 }
 container1D& container1D::operator=(const container1D& c) {
