@@ -825,7 +825,7 @@ process.patTrigger.onlyStandAlone = False
 #process.patTrigger.addL1Algos = True
 
 process.patGSFElectronsTriggerMatches = cms.EDProducer("PATTriggerMatcherDRDPtLessByR",
-                                                       matchedCuts = cms.string("path(\"HLT_Ele27_WP80_v*\")"),
+                                                       matchedCuts = cms.string("path(\"HLT_Ele*\")"),
                                                        src = cms.InputTag("patElectrons"+ pfpostfix),
                                                        maxDPtRel = cms.double(10),
                                                        resolveByMatchQuality = cms.bool(True),
@@ -840,7 +840,7 @@ process.patPFElectronsTriggerMatches.src = 'patPFElectrons'+pfpostfix
 
 process.patMuonsTriggerMatches = process.patGSFElectronsTriggerMatches.clone()
 process.patMuonsTriggerMatches.src = 'patMuons'+ pfpostfix
-process.patMuonsTriggerMatches.matchedCuts = cms.string("path(\"HLT_IsoMu24_v*\") || path(\"HLT_IsoMu24_eta2p1_v*\")")
+process.patMuonsTriggerMatches.matchedCuts = cms.string("path(\"HLT_IsoMu*\") || path(\"HLT_Mu*\")")
 process.patMuonsTriggerMatches.maxDeltaR = cms.double(0.1)
 
 
