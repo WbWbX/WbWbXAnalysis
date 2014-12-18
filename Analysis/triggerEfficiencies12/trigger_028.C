@@ -29,7 +29,7 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
     if(elec->ECalP4().Pt() < 20) continue;
     if(elec->isoVal()>0.15) continue;
     if(fabs(elec->eta()) > 2.4) continue;
-    if(elec->mvaId() < 0.5) continue;
+    if(elec->storedId() < 0.5) continue;
     if(!elec->isNotConv()) continue;
     if(fabs(elec->d0V()) > 0.04) continue;
     if(fabs(elec->mHits()) > 0) continue;

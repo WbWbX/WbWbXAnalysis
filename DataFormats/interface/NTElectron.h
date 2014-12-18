@@ -25,11 +25,11 @@ public:
     void setNotConv(bool IsNotConv){isNotConv_=IsNotConv;}
     void setECalP4(NTLorentzVector<float> ECalp4){ecalp4_=ECalp4;}
     void setECalP4(D_LorentzVector p4In){ecalp4_=NTLorentzVector<float>(p4In.pt(),p4In.Eta(),p4In.Phi(),p4In.M());}
-    void setId(std::vector<std::pair<std::string,float> > Ids , bool keepMvaOnly=true){
+    void setId(std::vector<std::pair<std::string,float> > Ids , std::string keeponly="mvaTrigV0"){
 
         ids_=Ids;
-        mvaId_=id("mvaTrigV0");
-        if(keepMvaOnly){
+        mvaId_=id(keeponly);
+        if(keeponly.length()>0){
             ids_.clear();
         }
     }
@@ -67,7 +67,7 @@ public:
     }
     //float rhoIso(){return rhoIso_;}
     const float & rhoIso() const {return rhoIso_;}
-    const float & mvaId() const{ return mvaId_;}
+    const float & storedId() const{ return mvaId_;}
 
     const std::vector<std::string> & matchedTrig() const {return matchedTrig_;}
     const NTSuClu & suClu()const{return suClu_;}

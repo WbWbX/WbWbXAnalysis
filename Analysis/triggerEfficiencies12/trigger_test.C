@@ -60,7 +60,7 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
     if(elec->pt() < 20) continue;
     if(elec->isoVal() > 0.1) continue;
     if(fabs(elec->eta()) > 2.5) continue;
-    if(elec->mvaId()<0) continue;
+    if(elec->storedId()<0) continue;
     if(!elec->isNotConv()) continue;
     if(fabs(elec->d0V()) > 0.02) continue;
     if(fabs(elec->dzV()) > 1) continue;
@@ -78,7 +78,7 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
     if(elec->pt() < 15) continue;
     if(elec->isoVal()>0.2) continue;
     if(fabs(elec->eta()) > 2.5) continue;
-    if(elec->mvaId() < 0) continue;
+    if(elec->storedId() < 0) continue;
     if(!elec->isNotConv()) continue;
 
     looseelecs << elec;

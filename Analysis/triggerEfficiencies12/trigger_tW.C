@@ -54,7 +54,7 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
     if(elec->rhoIso()>0.15 ) continue;
     if(elec->mHits() >0) continue;
       
-    if(elec->mvaId() < 0.5) continue;   
+    if(elec->storedId() < 0.5) continue;   
 
     used <<i;
     tempelecs << elec;
@@ -65,7 +65,7 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
     ztop::NTElectron * elec = &inputElectrons->at(i);
     if(elec->ECalP4().Pt()<10 ) continue;
    if(fabs(elec->eta())>2.5 ) continue;
-   if(elec->mvaId() < 0.5) continue;   
+   if(elec->storedId() < 0.5) continue;   
    if(elec->rhoIso()>0.15 ) continue;
 
    looseelecs << elec;

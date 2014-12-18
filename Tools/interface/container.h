@@ -121,6 +121,8 @@ public:
 
 	void removeStatFromAll();
 
+	void createStatFromContent();
+
 	/**
 	 * merges partial variations. only the ones corresponding to the identifier are merged
 	 * hint: do this step at the latest stage you can do it to still keep track of all correlations

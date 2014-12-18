@@ -7,7 +7,7 @@ public:
 	explicit TreeWriterTtZ(const edm::ParameterSet & ParSet) : TreeWriterBase(ParSet) {
 
 
-		std::cout << "old matching to triggers still in here for compatability reasons" << std::endl;
+		std::cout << "old matching to triggers still in here for compatibility reasons" << std::endl;
 
 	}
 	~TreeWriterTtZ(){}
@@ -217,7 +217,7 @@ ztop::NTElectron TreeWriterTtZ::makeNTElectron(const pat::Electron & electron){
 	tempelec.setD0Bs(d0Bs);
 
 	tempelec.setNotConv(electron.passConversionVeto());
-	tempelec.setId(electron.electronIDs());
+	tempelec.setId(electron.electronIDs(),keepelecidOnly_);
 	tempelec.setIso(Iso);                        //
 	tempelec.setMHits(mhits);
 

@@ -94,6 +94,8 @@ public:
 	void renameSyst(TString, TString);
 	void removeAllSystematics();
 
+	void createStatFromContent();
+
 	TH2D * getTH2D(TString name="", bool dividebybinarea=false, bool onlystat=false) const;
 	TH2D * getTH2DSyst(TString name, unsigned int systNo, bool dividebybinarea=false, bool statErrors=false) const;
 
@@ -145,6 +147,9 @@ public:
 	 * returns list of syst indicies that were changed
 	 */
 	std::vector<size_t> removeSpikes(bool inclUFOF=false,int limittoindex=-1,float strength=100000,float sign=0.3,float threshold=8);
+
+
+	container2D createPseudoExperiment(TRandom3* rand,const container2D* c=0, container1D::pseudodatamodes mode=container1D::pseudodata_poisson, int syst=-1)const;
 
 	/**
 	 * merges partial variations. only the ones corresponding to the identifier are merged

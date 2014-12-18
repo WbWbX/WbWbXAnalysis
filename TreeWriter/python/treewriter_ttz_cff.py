@@ -5,6 +5,7 @@ PFTree   = cms.EDAnalyzer('TreeWriterTtZ',
                           muonSrc = cms.InputTag('patMuonsWithTrigger'),
                           elecGSFSrc = cms.InputTag('patGSFElectronsWithTrigger'),
                           elecPFSrc = cms.InputTag('patPFElectronsWithTrigger'),
+                          keepElecIdOnly = cms.string("mvaTrigV0"),
                           jetSrc = cms.InputTag('treeJets'),
                           btagAlgo = cms.string('combinedSecondaryVertexBJetTags'),
                           metSrc = cms.InputTag('patMETs'), #

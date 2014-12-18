@@ -110,7 +110,7 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
 
 	SETBINSRANGE(50,0,1);
 	addPlot("electron mva id", "Id", "N_{e}");
-	FILLFOREACH(kinelectrons,mvaId());
+	FILLFOREACH(kinelectrons,storedId());
 
 	SETBINSRANGE(8,-0.5,7.5);
 	addPlot("iso lepton multi","N_{l,iso}","N_{evt}");

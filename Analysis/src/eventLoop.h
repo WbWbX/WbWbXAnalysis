@@ -906,7 +906,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
 			if(fabs(elec->d0V()) < 0.02
 					&& elec->isNotConv()
-					&& elec->mvaId() > 0.9
+					&& elec->storedId() > 0.9
 					&& elec->mHits() <= 0
 					&& elec->isPf()){
 

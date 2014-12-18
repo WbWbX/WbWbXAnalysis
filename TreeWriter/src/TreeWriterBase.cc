@@ -84,6 +84,9 @@ TreeWriterBase::TreeWriterBase(const edm::ParameterSet& iConfig)
 	triggerObjects_ = iConfig.getParameter<std::vector<std::string> > ("triggerObjects");
 
 
+	keepelecidOnly_ = iConfig.getParameter<std::string>        ("keepElecIdOnly");
+
+
 	std::cout << "n\n################## Tree writer ########################"
 			<<  "\n#" << treename_
 			<<  "\n#                                                     #"

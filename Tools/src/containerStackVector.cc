@@ -7,6 +7,7 @@
 #include "../interface/plotterControlPlot.h"
 #include "../interface/plotterMultiplePlots.h"
 #include "TStyle.h"
+#include "TRandom3.h"
 
 bool ztop::container1D::debug =false;
 
@@ -325,297 +326,353 @@ void containerStackVector::multiplyAllMCNorms(double multiplier){
 	}
 }
 
+void containerStackVector::addPseudoData(TRandom3 * rand){
+	if(stacks_.size()<1)
+		return;
+	bool hasdata=true;
+	try{
+		stacks_.at(0).getDataIdx();
+	}catch(...){
+		hasdata=false;
+	}
+	if(hasdata){
+		std::cout << "containerStackVector::addPseudoData: Warning: Trying to add pseudo data to already existing data." <<std::endl;
+	}
+	for(size_t i=0;i<stacks_.size();i++){
+
+		if(stacks_.at(i).is1D()){
+			container1D c=stacks_.at(i).getFullMCContainer();
+			c.createStatFromContent();
+			c=c.createPseudoExperiment(rand);
+			stacks_.at(i).push_back(c,"data",0,1,999);
+		}
+		if(stacks_.at(i).is1DUnfold()){ //no else here!
+			container1DUnfold c=stacks_.at(i).getFullMCContainer1DUnfold();
+			container1D c2=c.getRecoContainer();
+			c2.createStatFromContent();
+			c2=c2.createPseudoExperiment(rand);
+			c.setRecoContainer(c2);
+			stacks_.at(i).push_back(c,"data",0,1,999);
+		}
+		else if(stacks_.at(i).is2D()){
+			container2D c=stacks_.at(i).getFullMCContainer2D();
+			c.createStatFromContent();
+			c=c.createPseudoExperiment(rand);
+			stacks_.at(i).push_back(c,"data",0,1,999);
+		}
+	}
+}
+
 void containerStackVector::writeAllToTFile(TString filename, bool recreate, bool onlydata,TString treename){
 	if(debug)
 		std::cout << "containerStackVector::writeAllToTFile(TString filename, bool recreate, TString treename)" << std::endl;
-#pragma omp critical (containerStackVector_writeAllToTFile)
-	{
-		AutoLibraryLoader::enable();
-		TH1::AddDirectory(false);
-		TString name;
+
+	AutoLibraryLoader::enable();
+	TH1::AddDirectory(false);
+	TString name;
 
 
-		if(name_=="") name="no_name";
-		else name = name_;
+	if(name_=="") name="no_name";
+	else name = name_;
 
-		TString upre="UPDATE";
-		if(recreate == true) upre="RECREATE";
+	TString upre="UPDATE";
+	if(recreate == true) upre="RECREATE";
 
-		TFile *f = new TFile(filename,upre);
-		f->cd();
-		TTree * t=0;
-		if(f->Get(treename)){
-			t = (TTree*) f->Get(treename);
-		}
-		else{
-			t = new TTree(treename,treename,treesplitlevel);
-		}
-		if(t){
-			if(debug)
-				std::cout << "containerStackVector::writeAllToTFile: created/opened file and tree" << std::endl;
-		}
-		else{
-			std::cout << "containerStackVector::writeAllToTFile: creating/opening tree failed" << std::endl;
-		}
-
-
-		if(t->GetBranch("containerStackVectors")){ //branch does  exist
-			if(debug) std::cout << "containerStackVector::writeAllToTFile: opened branch" << std::endl;
-			bool temp=csv_makelist;
-			csv_makelist=false;
-			containerStackVector * csv = this;
-			t->SetBranchAddress("containerStackVectors",&csv);
-			csv_makelist=temp;
-		}
-		else{
-			t->Branch("containerStackVectors",this);
-			if(debug) std::cout << "containerStackVector::writeAllToTFile: added branch" << std::endl;
-		}
+	TFile *f = new TFile(filename,upre);
+	f->cd();
+	TTree * t=0;
+	if(f->Get(treename)){
+		t = (TTree*) f->Get(treename);
+	}
+	else{
+		t = new TTree(treename,treename,treesplitlevel);
+	}
+	if(t){
 		if(debug)
-			std::cout << "containerStackVector::writeAllToTFile: got branch" << std::endl;
+			std::cout << "containerStackVector::writeAllToTFile: created/opened file and tree" << std::endl;
+	}
+	else{
+		std::cout << "containerStackVector::writeAllToTFile: creating/opening tree failed" << std::endl;
+	}
 
-		t->Fill();
+
+	if(t->GetBranch("containerStackVectors")){ //branch does  exist
+		if(debug) std::cout << "containerStackVector::writeAllToTFile: opened branch" << std::endl;
+		bool temp=csv_makelist;
+		csv_makelist=false;
+		containerStackVector * csv = this;
+		t->SetBranchAddress("containerStackVectors",&csv);
+		csv_makelist=temp;
+	}
+	else{
+		t->Branch("containerStackVectors",this);
+		if(debug) std::cout << "containerStackVector::writeAllToTFile: added branch" << std::endl;
+	}
+	if(debug)
+		std::cout << "containerStackVector::writeAllToTFile: got branch" << std::endl;
+
+	t->Fill();
+	if(debug)
+		std::cout << "containerStackVector::writeAllToTFile: filled branch" << std::endl;
+
+	t->Write("",TObject::kOverwrite);
+	if(debug)
+		std::cout << "containerStackVector::writeAllToTFile: written branch" << std::endl;
+
+	delete t;
+
+	if(onlydata){
+		f->Close();
+		delete f;
+
+	}
+	else{
+		bool batch=containerStack::batchmode;
+		containerStack::batchmode=true;
 		if(debug)
-			std::cout << "containerStackVector::writeAllToTFile: filled branch" << std::endl;
+			std::cout << "containerStackVector::writeAllToTFile: preparing plots" << std::endl;
 
-		t->Write("",TObject::kOverwrite);
-		if(debug)
-			std::cout << "containerStackVector::writeAllToTFile: written branch" << std::endl;
+		TDirectory * d = f->mkdir(name + "_ratio",name + "_ratio");
+		d->cd();
 
-		delete t;
+		//use a file reader to strip stuff
+		fileReader fr;
+		fr.setComment(" step ");
+		indexMap<std::string> dirs;
+		std::vector<TDirectory *> dirpv;
 
-		if(onlydata){
-			f->Close();
-			delete f;
+		plotterControlPlot pl;
+		std::string cmsswbase=getenv("CMSSW_BASE");
+		pl.readStyleFromFile(cmsswbase+"/src/TtZAnalysis/Tools/styles/controlPlots_standard.txt");
 
-		}
-		else{
-			bool batch=containerStack::batchmode;
-			containerStack::batchmode=true;
-			if(debug)
-				std::cout << "containerStackVector::writeAllToTFile: preparing plots" << std::endl;
+		gStyle->SetOptStat(0);
 
-			TDirectory * d = f->mkdir(name + "_ratio",name + "_ratio");
-			d->cd();
+		for(std::vector<containerStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
 
-			//use a file reader to strip stuff
-			fileReader fr;
-			fr.setComment(" step ");
-			indexMap<std::string> dirs;
-			std::vector<TDirectory *> dirpv;
-
-			plotterControlPlot pl;
-			std::string cmsswbase=getenv("CMSSW_BASE");
-			pl.readStyleFromFile(cmsswbase+"/src/TtZAnalysis/Tools/styles/controlPlots_standard.txt");
-
-			gStyle->SetOptStat(0);
-
-			for(std::vector<containerStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
-
-				if(stack->is1DUnfold()){
-					TDirectory * din=d->mkdir(stack->getName(),stack->getName());
-					din->cd();
-					TCanvas *c = new TCanvas(stack->getName());
-					pl.setTitle(stack->getName());
-					pl.usePad(c);
-					pl.setStack(&*stack);
+			if(stack->is1DUnfold()){
+				TDirectory * din=d->mkdir(stack->getName(),stack->getName());
+				din->cd();
+				TCanvas *c = new TCanvas(stack->getName());
+				pl.setTitle(stack->getName());
+				pl.usePad(c);
+				pl.setStack(&*stack);
+				try{
 					pl.draw();
+				}catch(std::exception & e){
+					std::cout << e.what() << std::endl;
+					std::cout << "could not draw, clsoing file now"<<std::endl;
+					f->Close();
+					if(c)
+						delete c;
+					delete f;
+					return;
+				}
 
-					/* old impl
+				/* old impl
                         TCanvas * c=stack->makeTCanvas();
-					 */
-					if(c){
-						//tdir->WriteObject(c,c->GetName());
-						c->Write();
-						// stack->cleanMem();
-						delete c;
-					}
-					pl.cleanMem();
-					container1DUnfold cuf=stack->getSignalContainer1DUnfold();
-					containerStack rebinned=stack->rebinXToBinning(cuf.getGenBins());
-					rebinned.setName(stack->getName()+"_genbins");
-					c = new TCanvas(rebinned.getName());
-					pl.setTitle(rebinned.getName());
-					pl.usePad(c);
-					pl.setStack(&rebinned);
-					pl.draw();
+				 */
+				if(c){
+					//tdir->WriteObject(c,c->GetName());
+					c->Write();
+					// stack->cleanMem();
+					delete c;
+				}
+				pl.cleanMem();
+				container1DUnfold cuf=stack->getSignalContainer1DUnfold();
+				containerStack rebinned=stack->rebinXToBinning(cuf.getGenBins());
+				rebinned.setName(stack->getName()+"_genbins");
+				c = new TCanvas(rebinned.getName());
+				pl.setTitle(rebinned.getName());
+				pl.usePad(c);
+				pl.setStack(&rebinned);
+				pl.draw();
 
-					/* old impl
+				/* old impl
                        TCanvas * c=stack->makeTCanvas();
-					 */
-					if(c){
-						//tdir->WriteObject(c,c->GetName());
-						c->Write();
-						// stack->cleanMem();
-						delete c;
-					}
-					pl.cleanMem();
+				 */
+				if(c){
+					//tdir->WriteObject(c,c->GetName());
+					c->Write();
+					// stack->cleanMem();
+					delete c;
+				}
+				pl.cleanMem();
 
-					cuf.checkCongruentBinBoundariesXY();
-					TH1D * pur=cuf.getPurity().getTH1D("purity",false,false,false);
-					TH1D * stab=cuf.getStability().getTH1D("stability",false,false,false);
-					if(pur){
-						c =new TCanvas("purity_stab","purity_stab");
-						pur->SetMarkerColor(kBlue);
-						stab->SetMarkerColor(kRed); //put to plotter after testing
-						pur->GetYaxis()->SetRangeUser(0,1);
-						pur->Draw();
-						stab->Draw("same");
-						c->Write();
-						delete c;
-						delete pur;
-						delete stab;
-					}
-					c =new TCanvas("MResp","MResp");
-					TH2D * resp=cuf.getResponseMatrix().getTH2D("respMatrix_nominal",false,true);
+				cuf.checkCongruentBinBoundariesXY();
+				TH1D * pur=cuf.getPurity().getTH1D("purity",false,false,false);
+				TH1D * stab=cuf.getStability().getTH1D("stability",false,false,false);
+				if(pur){
+					c =new TCanvas("purity_stab","purity_stab");
+					pur->SetMarkerColor(kBlue);
+					stab->SetMarkerColor(kRed); //put to plotter after testing
+					pur->GetYaxis()->SetRangeUser(0,1);
+					pur->Draw();
+					stab->Draw("same");
+					c->Write();
+					delete c;
+					delete pur;
+					delete stab;
+				}
+				c =new TCanvas("MResp","MResp");
+				TH2D * resp=cuf.getResponseMatrix().getTH2D("respMatrix_nominal",false,true);
+				resp->Draw("colz");
+				c->Write();
+				delete c;
+				delete resp;
+				c =new TCanvas("Gen","Gen");
+				container1D gen= cuf.getGenContainer();
+				plotterMultiplePlots plgen;
+				plgen.readStyleFromFileInCMSSW("/src/TtZAnalysis/Tools/styles/multiplePlots.txt");
+				plgen.usePad(c);
+				plgen.addPlot(&gen,true);
+				plgen.draw();
+				c->Write();
+				delete c;
+				TDirectory * dsys=din->mkdir("sys","sys");
+				dsys->cd();
+				for(size_t i=0;i<cuf.getSystSize();i++){
+					c =new TCanvas("MResp_"+cuf.getSystErrorName(i),"MResp_"+cuf.getSystErrorName(i));
+					resp=cuf.getResponseMatrix().getTH2DSyst("respMatrix_"+cuf.getSystErrorName(i),i,false,true);;
 					resp->Draw("colz");
 					c->Write();
+					stack->cleanMem();
 					delete c;
 					delete resp;
-					c =new TCanvas("Gen","Gen");
-					container1D gen= cuf.getGenContainer();
-					plotterMultiplePlots plgen;
-					plgen.readStyleFromFileInCMSSW("/src/TtZAnalysis/Tools/styles/multiplePlots.txt");
-					plgen.usePad(c);
-					plgen.addPlot(&gen,true);
-					plgen.draw();
-					c->Write();
-					delete c;
-					TDirectory * dsys=din->mkdir("sys","sys");
-					dsys->cd();
-					for(size_t i=0;i<cuf.getSystSize();i++){
-						c =new TCanvas("MResp_"+cuf.getSystErrorName(i),"MResp_"+cuf.getSystErrorName(i));
-						resp=cuf.getResponseMatrix().getTH2DSyst("respMatrix_"+cuf.getSystErrorName(i),i,false,true);;
-						resp->Draw("colz");
-						c->Write();
-						stack->cleanMem();
-						delete c;
-						delete resp;
-					}
-					d->cd();
 				}
-				else if(stack->is1D()){
-					std::string dirname=stack->getName().Data();
-					fr.trimcomments(dirname);
-					size_t diridx=dirs.getIndex(dirname);
-					TDirectory * tdir=0;
-					if(diridx>=dirs.size()){ //new dir
-						tdir=d->mkdir(dirname.data(),dirname.data());
-						dirpv.push_back(tdir);
-						dirs.push_back(dirname);
-					}
-					//d->mkdir(); //cd dir with idx
-					tdir=dirpv.at(diridx);
-					tdir->cd();
-					//containerStack::debug=true;
-					// plotterControlPlot::debug=true;
-					TCanvas *c = new TCanvas(stack->getName());
-					pl.setTitle(stack->getName());
-					pl.usePad(c);
-					pl.setStack(&*stack);
-					pl.draw();
-
-					/* old impl
-            TCanvas * c=stack->makeTCanvas();
-					 */
-					if(c){
-						//tdir->WriteObject(c,c->GetName());
-						c->Write();
-						// stack->cleanMem();
-						delete c;
-					}
-					pl.cleanMem();
-					d->cd();
-				}
-				else if(stack->is2D()){
-					//make extra 2D directory
-					TDirectory * dir2d=0;
-					std::string dir2dname="2D_plots";
-					size_t dir2didx=dirs.getIndex(dir2dname);
-					if(dir2didx >= dirs.size()){
-						dir2d=d->mkdir(dir2dname.data(),dir2dname.data());
-						dirpv.push_back(dir2d);
-						dirs.push_back(dir2dname);
-					}
-					dir2d=dirpv.at(dir2didx);
-
-					//everything here is pretty bad style
-					std::string dirname=stack->getName().Data();
-
-					fr.trimcomments(dirname);
-
-					std::string stepname((std::string)stack->getName(),dirname.length());
-
-					size_t diridx=dirs.getIndex(dirname);
-					TDirectory * tdir=0;
-					if(diridx>=dirs.size()){ //new dir
-						tdir=dir2d->mkdir(dirname.data(),dirname.data());
-						dirpv.push_back(tdir);
-						dirs.push_back(dirname);
-					}
-					//d->mkdir(); //cd dir with idx
-					tdir=dirpv.at(diridx);
-					tdir->cd();
-					fr.trim(stepname);
-
-					TDirectory * stdir=tdir->mkdir(stepname.data(),stepname.data());
-					stdir->cd();
-
-					for(size_t plot=0;plot<stack->size();plot++){
-
-						///replace with proper plotting tool at some point
-						container2D  c2d= stack->getContainer2D(plot);
-
-						TH2D * th2d=c2d.getTH2D(stack->getLegend(plot),true,true);
-						if(th2d){
-
-							TString canvasname=stack->getLegend(plot);
-							canvasname+=+"_"+stack->getName();
-							TCanvas *  c= new TCanvas(canvasname);
-							th2d->Draw("colz");
-							c->Write(canvasname);
-
-							delete c;
-							delete th2d;
-						}
-					}
-
-					//in addition for signal and BG summed
-					container2D  c2d= stack->getSignalContainer2D();
-					TH2D * th2d=c2d.getTH2D("signal",true,true);
-					if(th2d){
-						TCanvas *  c= new TCanvas("signal_"+stack->getName());
-						th2d->Draw("colz");
-						c->Write("signal_"+stack->getName());
-
-						delete c;
-						delete th2d;
-					}
-					c2d= stack->getBackgroundContainer2D();
-					th2d=c2d.getTH2D("background",true,true);
-					if(th2d){
-						TCanvas *  c= new TCanvas("background_"+stack->getName());
-						th2d->Draw("colz");
-						c->Write("background_"+stack->getName());
-
-						delete c;
-						delete th2d;
-					}
-
-					d->cd();
-				}
+				d->cd();
 			}
-			if(debug)
-				std::cout << "containerStackVector::writeAllToTFile: ratio plots drawn" << std::endl;
+			else if(stack->is1D()){
+				std::string dirname=stack->getName().Data();
+				fr.trimcomments(dirname);
+				size_t diridx=dirs.getIndex(dirname);
+				TDirectory * tdir=0;
+				if(diridx>=dirs.size()){ //new dir
+					tdir=d->mkdir(dirname.data(),dirname.data());
+					dirpv.push_back(tdir);
+					dirs.push_back(dirname);
+				}
+				//d->mkdir(); //cd dir with idx
+				tdir=dirpv.at(diridx);
+				tdir->cd();
+				//containerStack::debug=true;
+				// plotterControlPlot::debug=true;
+				TCanvas *c = new TCanvas(stack->getName());
+				pl.setTitle(stack->getName());
+				pl.usePad(c);
+				pl.setStack(&*stack);
+				try{
+					pl.draw();
+				}catch(std::exception & e){
+					std::cout << e.what() << std::endl;
+					std::cout << "could not draw, clsoing file now"<<std::endl;
+					f->Close();
+					if(c)
+						delete c;
+					delete f;
+					return;
+				}
 
+				/* old impl
+            TCanvas * c=stack->makeTCanvas();
+				 */
+				if(c){
+					//tdir->WriteObject(c,c->GetName());
+					c->Write();
+					// stack->cleanMem();
+					delete c;
+				}
+				pl.cleanMem();
+				d->cd();
+			}
+			else if(stack->is2D()){
+				//make extra 2D directory
+				TDirectory * dir2d=0;
+				std::string dir2dname="2D_plots";
+				size_t dir2didx=dirs.getIndex(dir2dname);
+				if(dir2didx >= dirs.size()){
+					dir2d=d->mkdir(dir2dname.data(),dir2dname.data());
+					dirpv.push_back(dir2d);
+					dirs.push_back(dir2dname);
+				}
+				dir2d=dirpv.at(dir2didx);
 
-			f->Close();
-			delete f;
-			containerStack::batchmode=batch;
-		}//not onlydata done
+				//everything here is pretty bad style
+				std::string dirname=stack->getName().Data();
+
+				fr.trimcomments(dirname);
+
+				std::string stepname((std::string)stack->getName(),dirname.length());
+
+				size_t diridx=dirs.getIndex(dirname);
+				TDirectory * tdir=0;
+				if(diridx>=dirs.size()){ //new dir
+					tdir=dir2d->mkdir(dirname.data(),dirname.data());
+					dirpv.push_back(tdir);
+					dirs.push_back(dirname);
+				}
+				//d->mkdir(); //cd dir with idx
+				tdir=dirpv.at(diridx);
+				tdir->cd();
+				fr.trim(stepname);
+
+				TDirectory * stdir=tdir->mkdir(stepname.data(),stepname.data());
+				stdir->cd();
+
+				for(size_t plot=0;plot<stack->size();plot++){
+
+					///replace with proper plotting tool at some point
+					container2D  c2d= stack->getContainer2D(plot);
+
+					TH2D * th2d=c2d.getTH2D(stack->getLegend(plot),true,true);
+					if(th2d){
+
+						TString canvasname=stack->getLegend(plot);
+						canvasname+=+"_"+stack->getName();
+						TCanvas *  c= new TCanvas(canvasname);
+						th2d->Draw("colz");
+						c->Write(canvasname);
+
+						delete c;
+						delete th2d;
+					}
+				}
+
+				//in addition for signal and BG summed
+				container2D  c2d= stack->getSignalContainer2D();
+				TH2D * th2d=c2d.getTH2D("signal",true,true);
+				if(th2d){
+					TCanvas *  c= new TCanvas("signal_"+stack->getName());
+					th2d->Draw("colz");
+					c->Write("signal_"+stack->getName());
+
+					delete c;
+					delete th2d;
+				}
+				c2d= stack->getBackgroundContainer2D();
+				th2d=c2d.getTH2D("background",true,true);
+				if(th2d){
+					TCanvas *  c= new TCanvas("background_"+stack->getName());
+					th2d->Draw("colz");
+					c->Write("background_"+stack->getName());
+
+					delete c;
+					delete th2d;
+				}
+
+				d->cd();
+			}
+		}
 		if(debug)
-			std::cout << "containerStackVector::writeAllToTFile: finished" << std::endl;
-	}
+			std::cout << "containerStackVector::writeAllToTFile: ratio plots drawn" << std::endl;
+
+
+		f->Close();
+		delete f;
+		containerStack::batchmode=batch;
+	}//not onlydata done
+	if(debug)
+		std::cout << "containerStackVector::writeAllToTFile: finished" << std::endl;
+
 }
 
 

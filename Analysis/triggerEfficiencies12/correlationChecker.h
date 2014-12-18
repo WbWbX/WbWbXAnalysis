@@ -129,7 +129,7 @@ public:
 				if(elec->rhoIso()>0.15 ) continue;
 				//if(!useRhoIso) continue;
 				//  if(CiCId && (0x00 == (0x01 & (int) elec->id("cicTightMC"))) ) continue; //for CiC bit test
-				if(elec->mvaId() < -0.1) continue;
+				if(elec->storedId() < -0.1) continue;
 				//if(!noOverlap(elec,*pMuons,0.1)) continue;
 
 				selectedElecs.push_back(*elec);
@@ -327,7 +327,7 @@ public:
 				if(useRhoIso && elec->rhoIso()>0.15 ) continue;
 				//if(!useRhoIso && elec->isoVal03()>0.15) continue;
 				//  if(CiCId && (0x00 == (0x01 & (int) elec->id("cicTightMC"))) ) continue; //for CiC bit test
-				if(elec->mvaId() < 0.1) continue;
+				if(elec->storedId() < 0.1) continue;
 				//if(!noOverlap(elec,*pMuons,0.1)) continue;
 
 				selectedElecs.push_back(*elec);

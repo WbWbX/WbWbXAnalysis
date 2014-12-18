@@ -237,6 +237,7 @@ public:
   edm::Handle<std::vector<reco::Vertex> > vertices;
   edm::Handle<reco::ConversionCollection> conversions;
 
+  std::string keepelecidOnly_;
 
 };
 

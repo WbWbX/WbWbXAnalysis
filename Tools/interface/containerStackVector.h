@@ -10,7 +10,7 @@
 
 // class to handle containerstacks and to add systematics to the MC contributions etc.
 // writes plots with and without ratio to TFiles
-
+class TRandom3;
 
 namespace ztop{
 
@@ -64,6 +64,8 @@ public:
     void multiplyNorm(TString, double, TString); //! legendname, multiplier, stepID
     void multiplyNorms(TString, std::vector<double>, std::vector<TString>, bool showmessages=false);   //! multiplies norm of all MC with legendname  ,  with factor  ,  for step identifier string (step_string contains the id string)
     void multiplyAllMCNorms(double);
+
+    void addPseudoData(TRandom3 * rand);
 
     static int treesplitlevel;
 

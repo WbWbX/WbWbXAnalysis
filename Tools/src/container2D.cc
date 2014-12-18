@@ -43,7 +43,7 @@ container2D& container2D::operator=(const container2D&rhs){
 }
 
 container2D::container2D(const std::vector<float> &xbins,const std::vector<float> &ybins, TString name,TString xaxisname,TString yaxisname, bool mergeufof) :
-        																																																						taggedObject(taggedObject::type_container2D),mergeufof_(mergeufof), xaxisname_(xaxisname), yaxisname_(yaxisname)
+        																																																												taggedObject(taggedObject::type_container2D),mergeufof_(mergeufof), xaxisname_(xaxisname), yaxisname_(yaxisname)
 {
 	setName(name);
 	//create for each ybin (plus UF OF) a container1D
@@ -730,6 +730,11 @@ void container2D::removeAllSystematics(){
 		conts_.at(i).removeAllSystematics();
 	}
 }
+void container2D::createStatFromContent(){
+	for(size_t i=0;i<conts_.size();i++){
+		conts_.at(i).createStatFromContent();
+	}
+}
 void container2D::reset(){
 	for(size_t i=0;i<conts_.size();i++){
 		conts_.at(i).reset();
@@ -875,6 +880,21 @@ std::vector<size_t> container2D::removeSpikes(bool inclUFOF,int limittoindex ,fl
 				}
 			}
 		}
+	}
+	return out;
+}
+
+
+container2D container2D::createPseudoExperiment(TRandom3* rand,const container2D* c, container1D::pseudodatamodes mode, int syst)const{
+	container2D out=*this;
+	if((c) &&(c->getBinsX() != getBinsX() || c->getBinsY() != getBinsY())){
+		throw std::out_of_range("container2D::createPseudoExperiment: binning does not match!");
+	}
+	for(size_t i=0;i<conts_.size();i++){
+		if(c)
+			out.conts_.at(i)=conts_.at(i).createPseudoExperiment(rand,&c->conts_.at(i),mode,syst);
+		else
+			out.conts_.at(i)=conts_.at(i).createPseudoExperiment(rand,0,mode,syst);
 	}
 	return out;
 }
