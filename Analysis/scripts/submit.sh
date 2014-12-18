@@ -8,18 +8,22 @@ channels=( #"ee"
 ## scale and match variations will be ignored for other top masses then 172.5.. (hardcoded below)
 topmasses=( "172.5"
 
-     "171.5"
-     "173.5"
+     # "171.5"
+     # "173.5"
 
-     "175.5"
-     "169.5"
+     # "175.5"
+     # "169.5"
 
-     "178.5"
-     "166.5"
+     # "178.5"
+     # "166.5"
 );
 pdfeigenvectors=26  # 26 # if set to 0, no variation
 
-systs=("nominal"		
+systs=("nominal"
+
+	# for testing	
+    "TOPMASS_up"
+    "TOPMASS_down"
 
     "P11_sysnominal"
     "P11_sysnominal_CR_up"
@@ -159,8 +163,8 @@ systs=("nominal"
    # "BTAGPUR_down"
 
 
-    # "TOPPT_up"
-    # "TOPPT_down"
+     "TOPPT_up"
+     "TOPPT_down"
 
     "TT_MATCH_down"
     "TT_MATCH_up"

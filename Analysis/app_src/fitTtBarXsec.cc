@@ -85,14 +85,15 @@ invokeApplication(){
 	if(npseudoexp==0){
 		try{
 			mainfitter.setPrior("TT_SCALE",ttbarXsecFitter::prior_box);
-			mainfitter.setPrior("TOPPT",ttbarXsecFitter::prior_float);
+			//mainfitter.setPrior("TOPPT",ttbarXsecFitter::prior_float);
 			mainfitter.setPrior("TT_GENPOWPY",ttbarXsecFitter::prior_narrowboxright); //allow PH OR MG but nothing like PH++
 			mainfitter.setPrior("CR",ttbarXsecFitter::prior_narrowboxleft); //allow down but not up
 			mainfitter.setPrior("TT_MATCH",ttbarXsecFitter::prior_box);
-			mainfitter.setPrior("JES_Flavor",ttbarXsecFitter::prior_box);
+			//mainfitter.setPrior("JES_Flavor",ttbarXsecFitter::prior_box);
+			mainfitter.setPrior("TOPMASS",ttbarXsecFitter::prior_float);
 
-			mainfitter.setPrior("BTAGH",ttbarXsecFitter::prior_float);
-			mainfitter.setPrior("BTAGL",ttbarXsecFitter::prior_float);
+			//mainfitter.setPrior("BTAGH",ttbarXsecFitter::prior_float);
+			//mainfitter.setPrior("BTAGL",ttbarXsecFitter::prior_float);
 		}catch(...){
 			std::cout << "Some priors could not be set"<<std::endl;
 		}

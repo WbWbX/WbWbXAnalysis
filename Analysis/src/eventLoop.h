@@ -206,11 +206,17 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 				|| inputfile.Contains("ttbar_") ||
 				inputfile.Contains("ttbarviatau_") ){
 			if(  ! (syst_.BeginsWith("TT_GEN") && syst_.EndsWith("_up"))  ) //other generator
-				normmultiplier=(0.1086/0.1111202)*(0.1086/0.1111202);//correct both W
+				normmultiplier=(0.1062/0.11104);//correct both W
+			/*
+			 * BR W-> lnu: 0.1086
+			 * n_comb for leptonic: 1+1+1+2+2+2 (incl taus)
+			 * total lept branching fraction for WW: 0.1086^2 * 9 = 0.1062
+			 * In Madgraph: 0.11104
+			 */
 		}
 	}
 	if(inputfile.Contains("_mgdecays_") || inputfile.Contains("_tbarWtoLL")|| inputfile.Contains("_tWtoLL")){
-		normmultiplier=0.1086; //fully leptonic branching fraction for W
+		normmultiplier=0.1062; //fully leptonic branching fraction for both Ws
 	}
 
 

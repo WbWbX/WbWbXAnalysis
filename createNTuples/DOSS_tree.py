@@ -136,16 +136,6 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.load('Configuration.EventContent.EventContent_cff')
 
 
-if isMC and (not is2011):
-    process.GlobalTag.toGet = cms.VPSet(
-        cms.PSet(record = cms.string("BTagTrackProbability2DRcd"),
-                 tag = cms.string("TrackProbabilityCalibration_2D_MC53X_v2"),
-                 connect = cms.untracked.string("frontier://FrontierPrep/CMS_COND_BTAU")),
-        cms.PSet(record = cms.string("BTagTrackProbability3DRcd"),
-                 tag = cms.string("TrackProbabilityCalibration_3D_MC53X_v2"),
-                 connect = cms.untracked.string("frontier://FrontierPrep/CMS_COND_BTAU"))
-        )
-
 #Options
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(wantSummary))
 process.GlobalTag.globaltag = globalTag + '::All'

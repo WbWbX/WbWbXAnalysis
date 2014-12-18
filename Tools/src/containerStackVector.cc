@@ -731,6 +731,7 @@ containerStackVector * containerStackVector::getFromTree(TTree * t, const TStrin
 			if(name == "*" || cuftemp->getName()==(name)){
 				found=true;
 				count++;
+				clear();
 				*this=*cuftemp;
 			}
 		}

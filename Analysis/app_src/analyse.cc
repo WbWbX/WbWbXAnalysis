@@ -469,6 +469,16 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	else if(Syst=="TT_BJESRETUNE_down"){
 		//default
 	}
+	else if(Syst=="TOPMASS_up"){ //consider as systematic variation. for testing purp! leaves normalization fixed
+		//default
+		ana.setFilePostfixReplace("ttbar.root","ttbar_mt175.5.root");
+		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mt175.5.root");
+	}
+	else if(Syst=="TOPMASS_down"){
+		//default
+		ana.setFilePostfixReplace("ttbar.root","ttbar_mt169.5.root");
+		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mt169.5.root");
+	}
 	else{
 		didnothing=true;
 	}
@@ -532,26 +542,26 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 				if(testmode)
 					std::cout << "drawing plots..." <<std::endl;
 
-			//	std::vector<discriminatorFactory> disc=discriminatorFactory::readAllFromTFile(ana.getOutPath()+".root");
-			//	for(size_t i=0;i<disc.size();i++){
-			//		disc.at(i).extractLikelihoods(csv);
-			//	}
+				//	std::vector<discriminatorFactory> disc=discriminatorFactory::readAllFromTFile(ana.getOutPath()+".root");
+				//	for(size_t i=0;i<disc.size();i++){
+				//		disc.at(i).extractLikelihoods(csv);
+				//	}
 				csv.writeAllToTFile(fulloutfilepath,true,!testmode); //recreates file
 				system(("rm -f "+ana.getOutPath()+"_discr.root").Data());
-			//	discriminatorFactory::writeAllToTFile(ana.getOutPath()+"_discr.root",disc);
+				//	discriminatorFactory::writeAllToTFile(ana.getOutPath()+"_discr.root",disc);
 
 
 			}
 			else{
 				std::cout << "drawing plots..." <<std::endl;
-			//	std::vector<discriminatorFactory> disc=discriminatorFactory::readAllFromTFile(ana.getOutPath()+".root");
-			//	for(size_t i=0;i<disc.size();i++){
-			//		disc.at(i).extractLikelihoods(csv);
-			//	}
+				//	std::vector<discriminatorFactory> disc=discriminatorFactory::readAllFromTFile(ana.getOutPath()+".root");
+				//	for(size_t i=0;i<disc.size();i++){
+				//		disc.at(i).extractLikelihoods(csv);
+				//	}
 				if(testmode)
 					csv.writeAllToTFile(fulloutfilepath,true,!testmode);
 				system(("rm -f "+ana.getOutPath()+"_discr.root").Data());
-			//	discriminatorFactory::writeAllToTFile(ana.getOutPath()+"_discr.root",disc);
+				//	discriminatorFactory::writeAllToTFile(ana.getOutPath()+"_discr.root",disc);
 			}
 
 
