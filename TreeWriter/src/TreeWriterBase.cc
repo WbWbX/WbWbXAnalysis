@@ -5,86 +5,79 @@
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 #include "MagneticField/Engine/interface/MagneticField.h"
 
+
 TreeWriterBase::TreeWriterBase(const edm::ParameterSet& iConfig)
 {
 
-	debugmode  =iConfig.getParameter<bool>              ( "debugmode" );
+	debugmode                  =iConfig.getParameter<bool>                      ("debugmode");
 
-	//now do what ever initialization is needed
-	treename_    =iConfig.getParameter<std::string>        ("treeName");
-	muons_       =iConfig.getParameter<edm::InputTag>    ( "muonSrc" );
-	gsfelecs_       =iConfig.getParameter<edm::InputTag>    ( "elecGSFSrc" );
-	pfelecs_       =iConfig.getParameter<edm::InputTag>    ( "elecPFSrc" );
-	jets_        =iConfig.getParameter<edm::InputTag>    ( "jetSrc" );
-	btagalgo_    =iConfig.getParameter<std::string>       ("btagAlgo");
-	met_         =iConfig.getParameter<edm::InputTag>    ( "metSrc" );
-	mvamet_         =iConfig.getParameter<edm::InputTag>    ( "mvaMetSrc" );
-	t1met_         =iConfig.getParameter<edm::InputTag>    ( "metT1Src" );
-	t0t1txymet_         =iConfig.getParameter<edm::InputTag>    ( "metT0T1TxySrc" );
-	t0t1met_         =iConfig.getParameter<edm::InputTag>    ( "metT0T1Src" );
-	t1txymet_         =iConfig.getParameter<edm::InputTag>    ( "metT1TxySrc" );
+ 	//now do what ever initialization is needed
+	runonaod_                  =iConfig.getParameter<bool>                      ("runOnAOD");                
+	
+	treename_                  =iConfig.getParameter<std::string>               ("treeName");
+	muons_                     =iConfig.getParameter<edm::InputTag>             ("muonSrc");
+	gsfelecs_                  =iConfig.getParameter<edm::InputTag>             ("elecGSFSrc");
+	pfelecs_                   =iConfig.getParameter<edm::InputTag>             ("elecPFSrc");
+	jets_                      =iConfig.getParameter<edm::InputTag>             ("jetSrc");
+	btagalgo_                  =iConfig.getParameter<std::string>               ("btagAlgo");
+	met_                       =iConfig.getParameter<edm::InputTag>             ("metSrc");
+	mvamet_                    =iConfig.getParameter<edm::InputTag>             ("mvaMetSrc");
+	t1met_                     =iConfig.getParameter<edm::InputTag>             ("metT1Src");
+	t0t1txymet_                =iConfig.getParameter<edm::InputTag>             ("metT0T1TxySrc");
+	t0t1met_                   =iConfig.getParameter<edm::InputTag>             ("metT0T1Src");
+	t1txymet_                  =iConfig.getParameter<edm::InputTag>             ("metT1TxySrc");
 
+	vertices_                  =iConfig.getParameter<edm::InputTag>             ("vertexSrc");
 
-	vertices_    =iConfig.getParameter<edm::InputTag>    ( "vertexSrc" );
-
-	includereco_  =iConfig.getParameter<bool>              ( "includeReco" );
-	recomuons_    =iConfig.getParameter<edm::InputTag>    ( "recoMuonSrc" );
-	pfMuonCands_  =iConfig.getParameter<bool>             ( "isPFMuonCand" );
-	recoelecs_    =iConfig.getParameter<edm::InputTag>    ( "recoElecSrc" );
-	pfElecCands_  =iConfig.getParameter<bool>             ( "isPFElecCand" );
-	recotracks_  =iConfig.getParameter<edm::InputTag>             ( "recoTrackSrc" );
-	recosuclus_  =iConfig.getParameter<edm::InputTag>             ( "recoSuCluSrc" );
-
-
-	includetrigger_  =iConfig.getParameter<bool>               ( "includeTrigger" );
-	trigresults_     =iConfig.getParameter<edm::InputTag>    ( "triggerResults" );
-	pattriggerevent_     =iConfig.getParameter<edm::InputTag>    ( "triggerEvent" );
-
-	puinfo_          =iConfig.getParameter<edm::InputTag>         ( "PUInfo" );
+	includereco_               =iConfig.getParameter<bool>                      ("includeReco");
+	recomuons_                 =iConfig.getParameter<edm::InputTag>             ("recoMuonSrc");
+	pfMuonCands_               =iConfig.getParameter<bool>                      ("isPFMuonCand");
+	recoelecs_                 =iConfig.getParameter<edm::InputTag>             ("recoElecSrc");
+	pfElecCands_               =iConfig.getParameter<bool>                      ("isPFElecCand");
+	recotracks_                =iConfig.getParameter<edm::InputTag>             ("recoTrackSrc");
+	recosuclus_                =iConfig.getParameter<edm::InputTag>             ("recoSuCluSrc");
 
 
+	includetrigger_            =iConfig.getParameter<bool>                      ("includeTrigger");
+	trigresults_               =iConfig.getParameter<edm::InputTag>             ("triggerResults");
+	pattriggerevent_           =iConfig.getParameter<edm::InputTag>             ("triggerEvent");
+
+	puinfo_                    =iConfig.getParameter<edm::InputTag>             ("PUInfo");
+
+	rhoiso_                    =iConfig.getParameter<edm::InputTag>             ("rhoIso");
 
 
-	rhoiso_       =iConfig.getParameter<edm::InputTag>    ( "rhoIso" );
+	includepdfweights_         =iConfig.getParameter<bool>                      ("includePDFWeights");
+	pdfweights_                =iConfig.getParameter<edm::InputTag>             ("pdfWeights"          );
 
 
-	includepdfweights_ = iConfig.getParameter<bool>             ( "includePDFWeights" );
-	pdfweights_  =iConfig.getParameter<edm::InputTag>    ( "pdfWeights"          );
-
-
-	includegen_ = iConfig.getParameter<bool>             ( "includeGen" );
-	genparticles_ = iConfig.getParameter<edm::InputTag>             ( "genParticles" );
-	genjets_ = iConfig.getParameter<edm::InputTag>             ( "genJets" );
+	includegen_                =iConfig.getParameter<bool>                      ("includeGen");
+	genparticles_              =iConfig.getParameter<edm::InputTag>             ("genParticles");
+	genjets_                   =iConfig.getParameter<edm::InputTag>             ("genJets");
 
 
 
 
 	//Input from GenLevelBJetProducer
-	bHadJetIdx_ = iConfig.getParameter<edm::InputTag> ("BHadJetIndex");
-	antibHadJetIdx_= iConfig.getParameter<edm::InputTag> ("AntiBHadJetIndex");
-	BHadrons_= iConfig.getParameter<edm::InputTag> ("BHadrons");
-	AntiBHadrons_= iConfig.getParameter<edm::InputTag> ("AntiBHadrons");
-	BHadronFromTopB_ = iConfig.getParameter<edm::InputTag> ("BHadronFromTopB");
-	AntiBHadronFromTopB_= iConfig.getParameter<edm::InputTag> ("AntiBHadronFromTopB");
-	BHadronVsJet_= iConfig.getParameter<edm::InputTag> ("BHadronVsJet");
-	AntiBHadronVsJet_= iConfig.getParameter<edm::InputTag> ("AntiBHadronVsJet");
+	bHadJetIdx_                =iConfig.getParameter<edm::InputTag>             ("BHadJetIndex");
+	antibHadJetIdx_            =iConfig.getParameter<edm::InputTag>             ("AntiBHadJetIndex");
+	BHadrons_                  =iConfig.getParameter<edm::InputTag>             ("BHadrons");
+	AntiBHadrons_              =iConfig.getParameter<edm::InputTag>             ("AntiBHadrons");
+	BHadronFromTopB_           =iConfig.getParameter<edm::InputTag>             ("BHadronFromTopB");
+	AntiBHadronFromTopB_       =iConfig.getParameter<edm::InputTag>             ("AntiBHadronFromTopB");
+	BHadronVsJet_              =iConfig.getParameter<edm::InputTag>             ("BHadronVsJet");
+	AntiBHadronVsJet_          =iConfig.getParameter<edm::InputTag>             ("AntiBHadronVsJet");
 
-	genBHadPlusMothers_= iConfig.getParameter<edm::InputTag> ("genBHadPlusMothers");
-	genBHadPlusMothersIndices_= iConfig.getParameter<edm::InputTag> ("genBHadPlusMothersIndices");
-	genBHadIndex_= iConfig.getParameter<edm::InputTag> ("genBHadIndex");
-	genBHadFlavour_= iConfig.getParameter<edm::InputTag> ("genBHadFlavour");
-	genBHadJetIndex_= iConfig.getParameter<edm::InputTag> ("genBHadJetIndex");
+	genBHadPlusMothers_        =iConfig.getParameter<edm::InputTag>             ("genBHadPlusMothers");
+	genBHadPlusMothersIndices_ =iConfig.getParameter<edm::InputTag>             ("genBHadPlusMothersIndices");
+	genBHadIndex_              =iConfig.getParameter<edm::InputTag>             ("genBHadIndex");
+	genBHadFlavour_            =iConfig.getParameter<edm::InputTag>             ("genBHadFlavour");
+	genBHadJetIndex_           =iConfig.getParameter<edm::InputTag>             ("genBHadJetIndex");
+	useBHadrons_               =iConfig.getParameter<bool>                      ("useBHadrons");
 
+	triggerObjects_            =iConfig.getParameter<std::vector<std::string> > ("triggerObjects");
 
-	useBHadrons_ = iConfig.getParameter<bool> ("useBHadrons");
-
-	susy_= iConfig.getParameter<bool> ("isSusy");
-	jpsi_= iConfig.getParameter<bool> ("isJPsi");
-
-	triggerObjects_ = iConfig.getParameter<std::vector<std::string> > ("triggerObjects");
-
-
-	keepelecidOnly_ = iConfig.getParameter<std::string>        ("keepElecIdOnly");
+	keepelecidOnly_            =iConfig.getParameter<std::string>               ("keepElecIdOnly");
 
 
 	std::cout << "n\n################## Tree writer ########################"
@@ -154,13 +147,8 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	using namespace edm;
 	using namespace ztop;
 	using namespace std;
-	//using namespace zztop;
-
 
 	if(debugmode) std::cout << "event loop started" << std::endl;
-
-
-
 
 	std::string addForPF;
 	if(pfinput_) addForPF="bla";
@@ -198,7 +186,8 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	triggerBools_.clear();
 	alltriggerswithprescales_.clear();
 	triggerPrescales_.clear();
-
+	firedtriggers_.clear();
+	
 	for(size_t i=0;i<trigObjVec.size();i++)
 		trigObjVec.at(i).clear();
 
@@ -538,52 +527,6 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 			ntgenjets << tempjet;
 		}
 
-		//////susy
-
-		if(susy_){
-			for(size_t i=0;i<allgen.size();i++){
-				if(fabs(fabs(allgen.at(i)->pdgId()) -1000006) < 0.1){ // +-1000006
-					// ztop::NTGenParticle temp=makeNTGen(allgen.at(i));
-
-					vstopmass.push_back(allgen.at(i)->mass());
-
-					size_t ndau = allgen.at(i)->numberOfDaughters();
-					bool foundTop = false;
-
-					for( size_t j = 0; j < ndau; ++ j ) {
-
-						if( fabs( fabs(allgen.at(i)->daughter(j)->pdgId())-6 ) <0.1 ) { // if the i-th daughter is a top or an anti-top
-							foundTop = true;
-
-							D_LorentzVector LVstop( allgen.at(i)->px(), allgen.at(i)->py(), allgen.at(i)->pz(), allgen.at(i)->energy() );
-							D_LorentzVector LVtop( allgen.at(i)->daughter(j)->px(), allgen.at(i)->daughter(j)->py(), allgen.at(i)->daughter(j)->pz(), allgen.at(i)->daughter(j)->energy() );
-
-							vchimass.push_back( (LVstop-LVtop).M() );
-							//std::cout << "chi0 mass = " << (LVstop-LVtop).M() << endl;
-							break;
-						}
-					}
-					if( !foundTop )// stop/anti-stop has no top/anti-top daughter! m_chi0 set to an unphysical value
-						vchimass.push_back(-99999.);
-				} //if
-			}
-
-			//do gen selection on tree writer level
-			if(vstopmass.size() < 1)
-				return;
-			if(vstopmass.at(0) > 350)
-				return;
-			if(vstopmass.at(0) < 250)
-				return;
-			float diff=vstopmass.at(0) - vchimass.at(0);
-			if(diff > 250)
-				return;
-			if(diff < 200)
-				return;
-		}
-
-
-
 		if(debugmode) std::cout <<"includegen left" << std::endl;
 	}//isMC and includegen end
 
@@ -665,37 +608,11 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	iEvent.getByLabel(vertices_, vertices);
 	vtxs  = *(vertices.product());
 
-
-	if(susy_)
-		iEvent.getByLabel("allConversions", conversions);
-
-
 	if(vtxs.size()>0){
 		if(debugmode) std::cout << "vtxs.size()>0" << std::endl;
-		if(jpsi_){
-			if(debugmode) std::cout << "filling jpsi good vertices" << std::endl;
-			for(size_t i=0;i<vtxs.size();i++){
-				reco::Vertex * vtx=&vtxs.at(i);
-				math::XYZPoint vpoint=vtx->position();
-				float vchi2=vtx->chi2();
-				float vndof=vtx->ndof();
-				TVector3 vpos(vpoint.X(),vpoint.Y(),vpoint.Z());
-				TVector3 vposerr(vtx->covariance(0,0),vtx->covariance(1,1),vtx->covariance(2,2));
-				ztop::NTVertex tempvtx;
-				tempvtx.setPos(vpos);
-				tempvtx.setPosErr(vposerr);
-				tempvtx.setNDof(vndof);
-				tempvtx.setChi2(vchi2);
-				tempvtx.setIdx(i);
-				goodvtx.push_back(tempvtx);
-			}
-		}
-
-
-
+		
 		///////////////////////////////////////////////E L E C T R O N S//////////
 		//recent changes: stares two collections (gsf and pf), ecaldrivenmomentum in BOTH BE CAREFUL WHEN CHANGING
-
 
 		math::XYZPoint beamSpotPosition;
 		beamSpotPosition.SetCoordinates(0,0,0);
@@ -766,64 +683,10 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 		edm::ESHandle<TransientTrackBuilder> theTTBuilder;
 		KalmanVertexFitter vtxFitter;
-		if(jpsi_){
-			iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder",theTTBuilder);
-		}
 
 		for(size_t i=0;i<muons->size();i++){
-			const pat::Muon * patmuon=&muons->at(i);
 			ztop::NTMuon tempmuon;
 			tempmuon=makeNTMuon(muons->at(i));
-
-
-
-			////////JPSi specific///////
-			if(jpsi_ && theTTBuilder.isValid()){
-				reco::PFCandidateRef pfmuptr=patmuon->pfCandidateRef();
-				{
-					for(size_t j=i+1;j<muons->size();j++){
-						if(muons->size()<2)
-							break;
-						reco::PFCandidateRef pfmuptr2=muons->at(j).pfCandidateRef();
-						NTVertex tempvtx;
-						tempvtx.setChi2(999999); //default
-						int vtxid=1000*i + j;
-						tempvtx.setIdx(vtxid); //associate with first muon
-						//check for safety reasons
-						if(pfmuptr.isNonnull() && pfmuptr2.isNonnull() && pfmuptr->trackRef().isNonnull() && pfmuptr2->trackRef().isNonnull()){
-
-							vector<reco::TransientTrack> t_tks;
-							t_tks.push_back(theTTBuilder->build(*(pfmuptr->trackRef())));
-							t_tks.push_back(theTTBuilder->build(*(pfmuptr2->trackRef())));
-							TransientVertex myVertex = vtxFitter.vertex(t_tks);
-
-							if (myVertex.isValid()) {
-								tempvtx.setPos(TVector3(myVertex.position().x(),
-										myVertex.position().y(),
-										myVertex.position().z()));
-								tempvtx.setPosErr(TVector3(myVertex.positionError().cxx(),
-										myVertex.positionError().cyy(),
-										myVertex.positionError().czz()));
-								tempvtx.setChi2(myVertex.totalChiSquared());
-								tempvtx.setNDof(myVertex.degreesOfFreedom());
-							}
-						}
-						dimuonvtx << tempvtx;
-					}
-				}
-				if(pfmuptr.isNonnull() && pfmuptr->trackRef().isNonnull()){
-					ztop::NTLorentzVector<float> ptrack;
-					ptrack.setPxPyPzE(pfmuptr->trackRef()->px(),
-							pfmuptr->trackRef()->py(),
-							pfmuptr->trackRef()->pz(),
-							pfmuptr->trackRef()->p());
-
-					tempmuon.setTrackP4(ptrack);
-				}
-				else{
-					tempmuon.setTrackP4( ztop::NTLorentzVector<float>());
-				}
-			}
 
 			int genidx=-1;
 
@@ -944,7 +807,6 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		for(size_t i=0;i<jets->size();i++){
 
 			pat::Jet uncJet=jets->at(i).correctedJet("Uncorrected");
-			const pat::Jet * patjet=&jets->at(i);
 
 			if(uncJet.pt() < 10) continue;
 
@@ -953,38 +815,6 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 			int genidx=findGenMatchIdx((jets->at(i).genJet()),ntgenjets,0.1);
 			tempjet.setGenMatch(genidx);
-			if(jpsi_){ //add associated jet vertex
-				if(debugmode)
-					std::cout << "entering jpsi jet-vertex association" << std::endl;
-
-				const reco::SecondaryVertexTagInfo *svTagInfo = patjet->tagInfoSecondaryVertex();
-
-				float vchi2=99999;
-				float vndof=1;
-
-				math::XYZPoint vpoint;
-				const reco::Vertex * patjetvtx;
-				if(svTagInfo && svTagInfo->nVertices()>0){
-					patjetvtx=&svTagInfo->secondaryVertex(0);
-					vpoint=patjetvtx->position();
-					vchi2=patjetvtx->chi2();
-					vndof=patjetvtx->ndof();
-				}
-				if(debugmode)
-					std::cout << vpoint << std::endl;
-
-				TVector3 vpos(vpoint.X(),vpoint.Y(),vpoint.Z());
-				TVector3 vposerr;//(patjet->vertexCovariance(0,0),patjet->vertexCovariance(1,1),patjet->vertexCovariance(2,2));
-				ztop::NTVertex tempvtx;
-				tempvtx.setPos(vpos);
-				tempvtx.setPosErr(vposerr);
-				tempvtx.setNDof(vndof);
-				tempvtx.setChi2(vchi2);
-				tempvtx.setIdx(i);
-				jetvtx.push_back(tempvtx);
-				tempjet.setMember(99,i);
-			}
-
 
 			ntjets.push_back(tempjet);
 		}
@@ -1085,94 +915,32 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		}
 
 	} //end vtxs.size()>0
-
-	/////////triggers as boolians and if switched on as strings
-
-
-
-	std::vector<std::string> firedtriggers;
-	//leave for comparison!
-	if(includetrigger_){
-
-
-		if(debugmode) std::cout << "include trigger loop" << std::endl;
-
-		Handle<TriggerResults> trigresults;
-		iEvent.getByLabel(trigresults_, trigresults);
-
-		if(!trigresults.failedToGet()){
-			int n_Triggers = trigresults->size();
-			TriggerNames trigName = iEvent.triggerNames(*trigresults);
-
-			for(int i_Trig = 0; i_Trig<n_Triggers; ++i_Trig){
-				if(trigresults.product()->accept(i_Trig)){
-					firedtriggers.push_back(trigName.triggerName(i_Trig));
-
-					// if(((TString)trigName.triggerName(i_Trig)).Contains("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v")){
-					// std::cout << trigName.triggerName(i_Trig) << std::endl;
-					//}
-				}
-
-			}
-		}
-
-	}
-
-	/////all trigger stuffff/////new
-
-	// triggerBools_=checkTriggers(iEvent);
-
-
+	
+	/////process trigger info/////
 	triggerBools_.clear();
+	triggerBools_.resize(triggers_.size(),false);	
 	alltriggerswithprescales_.clear();
 	triggerPrescales_.clear();
-
+	firedtriggers_.clear();
+	
 	if(debugmode) std::cout << "new trigger filling loop" << std::endl;
-
-	edm::Handle< pat::TriggerEvent > triggerEvent;
-	iEvent.getByLabel(pattriggerevent_ , triggerEvent );
-
-	const std::vector< pat::TriggerPath > * paths=triggerEvent->paths();
-
-	if(!paths){
-		std::cout << "paths pointer=0; exit" << std::endl;
-		std::exit(EXIT_FAILURE);
+	
+	// run different trigger routines for AODs and MiniAODs 
+	if(runonaod_){
+	    runTriggerAOD(iEvent);
+	}else{
+	    runTriggerMiniAOD(iEvent);
 	}
-
-	std::vector<unsigned int> prescales;
-	std::vector<std::string> pathnames;
-	std::vector<bool> fireds;
-
-	triggerBools_.resize(triggers_.size(),false);
-
-	for(size_t i=0;i<paths->size();i++){
-		unsigned int prescale=paths->at(i).prescale();
-		std::string pathname= paths->at(i).name();
-		bool fired=           paths->at(i).wasAccept();
-		if(fired && includetrigger_){
-			alltriggerswithprescales_[pathname]=prescale;
-			if(debugmode) std::cout << "prescale "<< prescale << " trigger: " << pathname << std::endl;
-		}
-		for(size_t j=0;j<triggers_.size();j++){
-			if(pathname.find(triggers_[j]) != std::string::npos){
-				triggerBools_.at(j)=fired;
-				if(debugmode) std::cout << "fired trigger: " << pathname << std::endl;
-			}
-		}
-	}
-
-
-	////////end trigger stuff new
-
-
-
+	////////end process trigger info
+	
+	
 	if(debugmode) std::cout << "event info" << std::endl;
 
 	ntevent.setRunNo(iEvent.id().run());
 	ntevent.setLumiBlock(iEvent.id().luminosityBlock());
 	ntevent.setEventNo(iEvent.id().event());
 	ntevent.setVertexMulti(vertices->size());
-	//  ntevent.setFiredTriggers(firedtriggers);
+	//  ntevent.setFiredTriggers(firedtriggers_);
 
 	float BXminus=0;
 	float BXzero=0;
@@ -1192,26 +960,29 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	}catch(...){}
 
 	ntevent.setTruePU(BXminus,BXzero,BXplus);
-
+	
 	std::vector<float> temprhos;
-
-
-	//rhoiso,,rhojetsiso,,rhojetsisonopu
-	edm::Handle<double> rho;
-
-
-	if(debugmode) std::cout << "add rho iso" << std::endl;
-
-	iEvent.getByLabel(rhoiso_,rho);
-	temprhos.push_back(*rho);
-	ntevent.setIsoRho(temprhos);
-
-	//add rhoiso to electrons (uses 2011 corrections (second argument set to false));
-	ztop::elecRhoIsoAdder addrho(!IsRealData, true);
-	addrho.setRho(temprhos[0]);
-	addrho.addRhoIso(ntpfelectrons);
-	addrho.addRhoIso(ntgsfelectrons);
-
+	//agrohsje rho not available in mini aods, disable in aod corrections for 13 TeV (fixme!!!) 
+	if(runonaod_){
+	    //rhoiso,,rhojetsiso,,rhojetsisonopu
+	    edm::Handle<double> rho;
+	    
+	    if(debugmode) std::cout << "add rho iso" << std::endl;
+	    
+	    iEvent.getByLabel(rhoiso_,rho);
+	    temprhos.push_back(*rho);
+	    ntevent.setIsoRho(temprhos);
+	    
+	    //add rhoiso to electrons (uses 2011 corrections (second argument set to false));
+	    ztop::elecRhoIsoAdder addrho(!IsRealData, true);
+	    addrho.setRho(temprhos[0]);
+	    addrho.addRhoIso(ntpfelectrons);
+	    addrho.addRhoIso(ntgsfelectrons);
+	}else{
+	    temprhos.push_back(999.);
+	    ntevent.setIsoRho(temprhos);
+	}
+	
 	/////pdf weights///////
 	if(includepdfweights_ && !IsRealData){
 
@@ -1227,50 +998,6 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 	}
 
-	//////////////// TRIGGER OBJECTS!!!! ////////
-
-	if(includetrigger_){
-
-		std::string triggerProcess_="HLT";
-
-		if(debugmode) std::cout << "starting trigger object loops (HLT)" << std::endl;
-		edm::Handle<trigger::TriggerEvent> triggerEvent;
-		iEvent.getByLabel(edm::InputTag("hltTriggerSummaryAOD", "", triggerProcess_), triggerEvent);
-
-		if(!triggerEvent.isValid()) {
-			std::cout << "TriggerEvent not valid" << std::endl;
-			return;
-		}
-		const trigger::TriggerObjectCollection & toc = triggerEvent->getObjects();
-		unsigned int filterIndex = triggerEvent->sizeFilters();
-
-		//start loop over collections
-		for(size_t i=0;i<triggerObjects_.size();i++){
-			//might throw exception if not in right path
-			filterIndex = triggerEvent->filterIndex(edm::InputTag(triggerObjects_.at(i), "", triggerProcess_));
-			if(debugmode) std::cout << "filter index for " << triggerObjects_.at(i) << ": " << filterIndex <<std::endl;
-			if( filterIndex<triggerEvent->sizeFilters() ) { //just a safety net
-				//  const trigger::Vids & vids( triggerEvent->filterIds(filterIndex) );
-				const trigger::Keys & keys( triggerEvent->filterKeys(filterIndex) );
-
-				/*
-				 * module type not needed for L3 matching
-				 */
-
-				for(unsigned int k=0; k<keys.size(); ++k) {
-					const trigger::TriggerObject & to = toc[keys[k]];
-					NTTriggerObject tempobj;
-					NTLorentzVector<float> vec(to.pt(),to.eta(),to.phi(),to.mass());
-
-					tempobj.setP4(vec);
-					trigObjVec.at(i).push_back(tempobj);
-
-					if(debugmode) std::cout << "written triggerobject for id: " << triggerObjects_.at(i)  << std::endl;
-
-				}
-			}
-		}
-	}
 	if(weightnames_.size()>0){
 		if(debugmode) std::cout << "processing additional weights " << std::endl;
 		for(size_t i=0;i<weightnames_.size();i++){
@@ -1377,21 +1104,12 @@ TreeWriterBase::beginJob()
 	Ntuple->Branch("genMet",           &genmet_f);
 
 	Ntuple->Branch("NTGenParticles",      "std::vector<ztop::NTGenParticle>", &ntpart);
-	if(susy_){
-		Ntuple->Branch("StopMass", "std::vector<float>", &vstopmass);
-		Ntuple->Branch("ChiMass", "std::vector<float>", &vchimass);
-	}
-	if(jpsi_){
-		Ntuple->Branch("NTJetVtx", "std::vector<ztop::NTVertex>", &jetvtx);
-		Ntuple->Branch("NTDiMuonVtx", "std::vector<ztop::NTVertex>", &dimuonvtx);
-		Ntuple->Branch("NTGoodVtx", "std::vector<ztop::NTVertex>", &goodvtx);
-	}
-
+	
 	// Ntuple->Branch("NTGenMEMuons",     "std::vector<ztop::NTGenParticle>", &ntgenmuons3);
 	// Ntuple->Branch("NTGenElectrons", "std::vector<ztop::NTGenParticle>", &ntgenelecs1);
 	// Ntuple->Branch("NTGenMuons",     "std::vector<ztop::NTGenParticle>", &ntgenmuons1);
 	//  Ntuple->Branch("Channel",channel_);
-
+	
 
 	if(debugmode) std::cout <<"branches set" << std::endl;
 
@@ -1466,40 +1184,6 @@ bool TreeWriterBase::checkJetID(const pat::Jet & jet)
 	return hasjetID;
 }
 
-
-/*
- * makes a contains(bla)
- */
-std::vector<bool> TreeWriterBase::checkTriggers(const edm::Event& iEvent){
-	using namespace edm;
-
-	std::vector<bool> output;
-	output.resize(triggers_.size(),false);
-
-
-	Handle<TriggerResults> trigresults;
-	iEvent.getByLabel(trigresults_, trigresults);
-
-	if(!trigresults.failedToGet()){
-		int n_Triggers = trigresults->size();
-		TriggerNames trigName = iEvent.triggerNames(*trigresults);
-
-		for(int i_Trig = 0; i_Trig<n_Triggers; ++i_Trig){
-			if(trigresults.product()->accept(i_Trig)){
-				std::string firedtrig=trigName.triggerName(i_Trig);
-				for(size_t i=0;i<triggers_.size();i++){
-					if(firedtrig.find(triggers_[i]) != std::string::npos)
-						output[i]=true;
-				}
-			}
-		}
-	}
-	return output;
-}
-
-
-
-
 void TreeWriterBase::setTriggers(){
 
 	triggers_.push_back("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
@@ -1552,15 +1236,124 @@ void TreeWriterBase::setTriggers(){
 	/// 7TeV single lep go here!!! only append - DONT change order (kills compat inbetween ntuples!)
 
 
-	/*
-
-  triggers_.push_back();
-  triggers_.push_back();
-  triggers_.push_back();
-	 */
+	// agrohsje added triggers for upcoming 13 TeV run 
+	//mumu
+	triggers_.push_back("HLT_Mu17_Mu8_v"); //26
+	triggers_.push_back("HLT_Mu17_TkMu8_v"); //27
+	triggers_.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v"); //28
+	triggers_.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v"); //29
+	triggers_.push_back("HLT_DoubleMu33NoFiltersNoVtx_v"); //30
+	//ee 
+	triggers_.push_back("HLT_Ele23_Ele12_CaloId_TrackId_Iso_v"); //31
+	//emu
+	triggers_.push_back("HLT_Mu23_TrkIsoVVL_Ele12_Gsf_CaloId_TrackId_Iso_MediumWP_v"); //32
+	triggers_.push_back("HLT_Mu8_TrkIsoVVL_Ele23_Gsf_CaloId_TrackId_Iso_MediumWP_v"); //33
+	//triggers_.push_back("");
 
 }
 
+void TreeWriterBase::runTriggerAOD(const edm::Event& iEvent){
+
+    edm::Handle< pat::TriggerEvent > triggerEvent;
+    iEvent.getByLabel(pattriggerevent_ , triggerEvent );
+    const std::vector< pat::TriggerPath > * paths=triggerEvent->paths();
+    if(!paths){
+	std::cout << "paths pointer=0; exit" << std::endl;
+	std::exit(EXIT_FAILURE);
+    }
+    for(size_t i=0;i<paths->size();i++){
+	unsigned int prescale=paths->at(i).prescale();
+	std::string pathname= paths->at(i).name();
+	bool fired=           paths->at(i).wasAccept();
+	if(fired && includetrigger_){
+	    alltriggerswithprescales_[pathname]=prescale;
+	    if(debugmode) std::cout << "prescale "<< prescale << " trigger: " << pathname << std::endl;
+	}
+	for(size_t j=0;j<triggers_.size();j++){
+	    if(pathname.find(triggers_[j]) != std::string::npos){
+		triggerBools_.at(j)=fired;
+		if(debugmode) std::cout << "fired trigger: " << pathname << std::endl;
+	    }
+	}
+    }
+    //////////////// TRIGGER OBJECTS!!!! ////////
+    if(includetrigger_){
+	std::string triggerProcess_="HLT";
+	if(debugmode) std::cout << "starting trigger object loops (HLT)" << std::endl;
+	edm::Handle<trigger::TriggerEvent> triggerEvent;
+	iEvent.getByLabel(edm::InputTag("hltTriggerSummaryAOD", "", triggerProcess_), triggerEvent);
+	
+	if(!triggerEvent.isValid()) {
+	    std::cout << "TriggerEvent not valid" << std::endl;
+	    return;
+	}
+	const trigger::TriggerObjectCollection & toc = triggerEvent->getObjects();
+	unsigned int filterIndex = triggerEvent->sizeFilters();
+	
+	//start loop over collections
+	for(size_t i=0;i<triggerObjects_.size();i++){
+	    //might throw exception if not in right path
+	    filterIndex = triggerEvent->filterIndex(edm::InputTag(triggerObjects_.at(i), "", triggerProcess_));
+	    if(debugmode) std::cout << "filter index for " << triggerObjects_.at(i) << ": " << filterIndex <<std::endl;
+	    if( filterIndex<triggerEvent->sizeFilters() ) { //just a safety net
+		//  const trigger::Vids & vids( triggerEvent->filterIds(filterIndex) );
+		const trigger::Keys & keys( triggerEvent->filterKeys(filterIndex) );
+		
+		for(unsigned int k=0; k<keys.size(); ++k) {
+		    const trigger::TriggerObject & to = toc[keys[k]];
+		    ztop::NTTriggerObject tempobj;
+		    ztop::NTLorentzVector<float> vec(to.pt(),to.eta(),to.phi(),to.mass());
+		    
+		    tempobj.setP4(vec);
+		    trigObjVec.at(i).push_back(tempobj);
+		    
+		    if(debugmode) std::cout << "written triggerobject for id: " << triggerObjects_.at(i)  << std::endl;
+		}
+	    }
+	}
+	//firedtriggers: leave for comparison!
+	if(debugmode) std::cout << "include trigger loop" << std::endl;
+	
+	edm::Handle<edm::TriggerResults> trigresults;
+	iEvent.getByLabel(trigresults_, trigresults);
+	
+	if(!trigresults.failedToGet()){
+	    int n_Triggers = trigresults->size();
+	    edm::TriggerNames trigName = iEvent.triggerNames(*trigresults);
+	    
+	    for(int i_Trig = 0; i_Trig<n_Triggers; ++i_Trig){
+		if(trigresults.product()->accept(i_Trig)){
+		    firedtriggers_.push_back(trigName.triggerName(i_Trig));
+		}
+	    }
+	}
+    }	
+}
+
+void TreeWriterBase::runTriggerMiniAOD(const edm::Event& iEvent){
+
+    edm::Handle<edm::TriggerResults> trigresults;
+    iEvent.getByLabel(trigresults_, trigresults);
+    edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjects;
+    iEvent.getByLabel("selectedPatTrigger", triggerObjects);
+    //Handle<pat::PackedTriggerPrescales> triggerPrescales;
+    //iEvent.getByLabel("patTrigger", triggerPrescales);
+    const edm::TriggerNames &names = iEvent.triggerNames(*trigresults);
+    for (unsigned int i = 0, n = trigresults->size(); i < n; ++i) {
+	//unsigned int prescale=triggerPrescales->getPrescaleForIndex(i); 
+	std::string pathname=names.triggerName(i);
+	bool fired=trigresults->accept(i);
+	for(size_t j=0;j<triggers_.size();j++){
+	    if(pathname.find(triggers_[j]) != std::string::npos){
+		triggerBools_.at(j)=fired;
+		if(debugmode) std::cout << "fired trigger: " << pathname << std::endl;
+	    }
+	}
+    }
+    if(includetrigger_){
+	std::cout<<"Add specific infos for trigger studies here!!!"<<std::endl;
+    }
+}
 
 ztop::NTGenParticle TreeWriterBase::makeNTGen(const reco::GenParticle * p, const std::map<const reco::GenParticle * , int> & idmap){
 	ztop::NTGenParticle out;
@@ -1629,4 +1422,3 @@ int TreeWriterBase::findGenMatchIdx(t * patinput , std::vector<u> & gen, double 
 	else
 		return -1;
 }
-

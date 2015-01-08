@@ -104,6 +104,9 @@
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "DataFormats/HLTReco/interface/TriggerEvent.h"
 #include "DataFormats/HLTReco/interface/TriggerObject.h"
+//agrohsje added 
+#include "DataFormats/PatCandidates/interface/PackedTriggerPrescales.h"
+#include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
 
 #include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 #include "HLTrigger/HLTcore/interface/HLTEventAnalyzerAOD.h"
@@ -156,7 +159,12 @@ public:
   std::vector<bool> triggerBools_;
   std::vector<unsigned int> triggerPrescales_;
   std::map<std::string,unsigned int> alltriggerswithprescales_;
+  std::vector<std::string> firedtriggers_;//not used, but left for comparisons 
+
   void setTriggers();
+  void runTriggerAOD(const edm::Event&);
+  void runTriggerMiniAOD(const edm::Event&);
+    
   ztop::NTGenParticle makeNTGen(const reco::GenParticle *, const std::map<const reco::GenParticle*, int>&);
   ztop::NTGenParticle  makeNTGen(const reco::GenParticle * p);
   ztop::NTGenJet  makeNTGenJet(const reco::GenJet * p);
@@ -164,7 +172,7 @@ public:
   bool isInGenCollection(const reco::GenJet * , const std::vector<const reco::GenJet * > &);
   template<typename t,typename u>
   int findGenMatchIdx(t * , std::vector<u> & , double dR=0.4);
- 
+
   std::vector<std::string> triggerObjects_;
   std::vector<std::vector<ztop::NTTriggerObject> > trigObjVec;
   //HLTConfigProvider hltConfig_;
@@ -179,7 +187,6 @@ public:
 
   edm::InputTag muons_, recomuons_, pfelecs_, gsfelecs_,recoelecs_, jets_, met_, vertices_, trigresults_, puinfo_, recotracks_, recosuclus_,rhojetsiso_,rhojetsisonopu_,rhoiso_,pdfweights_, genparticles_, genjets_,mvamet_,pattriggerevent_;
   edm::InputTag  t1met_,t0t1txymet_,t0t1met_,t1txymet_;
-  //rhojets_,rhojetsiso_,rhojetsnopu_,rhojetsisonopu_,rhoiso_;
 
   bool includereco_, includetrigger_, pfinput_,includepdfweights_,includegen_,susy_,jpsi_;
   TTree * Ntuple;
@@ -215,6 +222,8 @@ public:
 
   bool debugmode;
 
+  bool runonaod_;
+    
   ///b-hardon stuff
 
   edm::InputTag bHadJetIdx_, antibHadJetIdx_;

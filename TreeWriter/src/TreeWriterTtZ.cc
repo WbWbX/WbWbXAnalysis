@@ -1,4 +1,6 @@
 #include "../interface/TreeWriterBase.h"
+//agrohsje 
+#include "../interface/trackTools.h"
 
 class TreeWriterTtZ : public TreeWriterBase{
 
@@ -200,8 +202,7 @@ ztop::NTElectron TreeWriterTtZ::makeNTElectron(const pat::Electron & electron){
 		vzerr=electron.gsfTrack()->dzError();
 		d0V=fabs(electron.gsfTrack()->dxy(vtxs[0].position()));
 		d0Bs=fabs(electron.gsfTrack()->dxy(beamSpotPosition));
-
-		mhits=electron.gsfTrack()->trackerExpectedHitsInner().numberOfHits();
+		mhits=getNHits(*electron.gsfTrack());
 	}              //
 	else if(!(electron.closestCtfTrackRef()).isNull()){
 		vz=electron.closestCtfTrackRef()->dz(vtxs[0].position());                   //
