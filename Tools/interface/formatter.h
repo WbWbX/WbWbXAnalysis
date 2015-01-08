@@ -52,6 +52,10 @@ public:
      TString translateName(const TString & techname)const;
     void clearTranslateRules(){cachedNames_.clear();}
 
+    /**
+     * makes "_" --> "\\_" if not in math mode ($ ... $)
+     */
+    TString makeTexCompatible(const TString& in)const;
 
     static bool debug;
 

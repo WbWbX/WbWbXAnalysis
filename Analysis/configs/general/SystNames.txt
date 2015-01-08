@@ -1,29 +1,8 @@
-%
-% comments as "%"
-%the first part describes how to merge systematic sources to one
-%first entry is the resulting merged name, the next the algorithm <linear> or <squared>
+%%% This file is referred to by many programs directly.
+%%  Please only change name and location if you really
+%%  know what you are doing
 
-[merge_syst]
 
-JES_Flavor        linear      JES_FlavorPureGluon  JES_FlavorPureQuark   JES_FlavorPureCharm  JES_FlavorPureBottom
-
-% JES_PileupPt      squared     JES_PileUpPtBB   JES_PileUpPtEC   JES_PileUpPtHF
-
-% JES_Uncorrelated  squared        JES_AbsoluteStat  JES_AbsoluteScale   JES_HighPtExtra   JES_SinglePionECAL  JES_SinglePionHCAL   JES_Time   JES_RelativeJEREC1   JES_RelativeJEREC2   JES_RelativeJERHF   JES_RelativePtBB   JES_RelativePtEC1      JES_RelativePtEC2      JES_RelativePtHF      JES_RelativeStatEC2      JES_RelativeStatHF  JES_PileUpDataMC   JES_PileUpBias
-
-%this will merge all JES
-
-% JES               squared     JES_Flavor JES_PileupPt  JES_Uncorrelated JES_RelativeFSR  JES_AbsoluteMPFBias
-
-PDF               squared     PDF1   PDF2   PDF3   PDF4   PDF5   PDF6   PDF7   PDF8   PDF9   PDF10   PDF11   PDF12   PDF13   PDF14   PDF15    PDF16    PDF17    PDF18   PDF19    PDF20   PDF21   PDF22   PDF23   PDF24 PDF25 PDF26
-
-%BTAGSTAT           squared     BTAGHFS1 BTAGHFS2 BTAGLFS1 BTAGLFS2
-
-%LES               squared     MUONES ELECES
-
-%LEPIDISO          squared     ELECSF  MUONSF
-
-[end-merge_syst]
 
 %
 % File to translate internal systematic names, eg "BTAGH" to names that can be printed in tables
@@ -62,6 +41,27 @@ JES_Flavor,				JES: Flavor
 JES_Uncorrelated,		JES: Uncorrelated
 JES_PileupPt,           JES: Pileup
 
+JES_AbsoluteScale , JES: Absolute Scale
+JES_AbsoluteStat , JES: Absolute Stat
+JES_HighPtExtra , JES: High $p_T$ Extra
+JES_PileUpBias , JES: Pileup Bias
+JES_PileUpDataMC , JES: Pileup Data/MC
+JES_PileUpPtBB , JES: Pileup $p_T$ BB
+JES_PileUpPtEC , JES: Pileup $p_T$ EC
+JES_PileUpPtHF , JES: Pileup $p_T$ HF
+JES_RelativeJEREC1 , JES: Relative JER EC1
+JES_RelativeJEREC2 , JES: Relative JER EC2
+JES_RelativeJERHF , JES: Relative JER HF
+JES_RelativePtBB , JES: Relative $p_T$ BB
+JES_RelativePtEC1 , JES: Relative $p_T$ EC1
+JES_RelativePtEC2 , JES: Relative $p_T$ EC2
+JES_RelativePtHF , JES: Relative $p_T$ HF
+JES_RelativeStatEC2 , JES: Relative Stat EC2
+JES_RelativeStatHF , JES: Relative Stat HF 
+JES_SinglePionECAL , JES: Single pion ECAL
+JES_SinglePionHCAL , JES: Single pion HCAL
+JES_Time , JES: Time
+
 UE, 	Underlying event
 CR,		Color reconnection 
 
@@ -82,5 +82,8 @@ BG_2_bjets_DY, DY background (2 b-jets)
 
 Lumi8, Luminosity (8 TeV)
 Lumi7, Luminosity (7 TeV)
+
+XSec8, $\sigma_{t\bar{t}}$(8 TeV)
+XSec7, $\sigma_{t\bar{t}}$(7 TeV)
 
 [end-syst names]

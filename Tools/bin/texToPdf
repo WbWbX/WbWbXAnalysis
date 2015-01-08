@@ -1,0 +1,32 @@
+#!/bin/zsh
+
+# needed to use pdflatex to directly print latex tables or other text
+# from tools.
+# creates a new pdf file with a small border
+
+if [ `which pdflatex` ]
+then
+    
+    tmpfile=$(date +%s%N)
+
+    export TEXINPUTS=/afs/desy.de/user/k/kiesej/latexPacks:$TEXINPUTS
+    
+    printf "\\\documentclass[11pt]{article}">>| $tmpfile
+#printf "\\\usepackage{blindtext}">>| $tmpfile
+    printf "\\\usepackage[active,tightpage]{preview}">>| $tmpfile
+    printf "\\\setlength\\\PreviewBorder{10pt}" >>| $tmpfile
+    printf "\\\usepackage[utf8]{inputenc} \\\usepackage{amsmath} \\\usepackage{amsfonts} \\\usepackage{amssymb} \\\usepackage{lmodern} \\\usepackage[T1]{fontenc} \\\usepackage{textcomp} \\\usepackage{underscore}  \\\usepackage{pdflscape}" >>| $tmpfile
+    
+    printf "\\\begin{document}\\\begin{preview}" >>| $tmpfile
+
+    cat $1 >> $tmpfile
+    
+    printf "\\\end{preview}\\\end{document}"  >>| $tmpfile
+    pdflatex -jobname=$1 $tmpfile
+    rm $tmpfile
+    rm $1.aux
+    rm $1.log
+
+else
+    echo "no pdflatex found" >>| $1.pdf
+fi

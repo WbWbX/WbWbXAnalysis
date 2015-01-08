@@ -365,6 +365,49 @@ void simpleFitter::getParameterErrorContribution(size_t a, size_t b,double & err
 	errup=errdown;
 	delete min;
 }
+void simpleFitter::getStatErrorContribution(size_t b,double & errup, double& errdown){
+
+	if(!wasSuccess())
+		throw std::logic_error("simpleFitter::getStatErrorContribution: can only be called after fit");
+	if(!pminimizer_)
+		throw std::logic_error("simpleFitter::getStatErrorContribution: can only be called after fit (minimizer pointer 0) IF YOU SEE THIS< SOMETHING IS SERIOUSLY WRONG");
+	if(b>=paras_.size())
+		throw std::out_of_range("simpleFitter::getStatErrorContribution:  index out of range");
+
+	//work on hesse errors
+	double olderr=pminimizer_->Errors()[b];
+	//std::cout << "olderr: " << olderr<<std::endl;
+	ROOT::Math::Minimizer *  min=invokeMinimizer();
+	for(size_t i=0;i<paranames_.size();i++){
+		if(i==b) continue;
+		min->SetFixedVariable(i,paranames_.at(i).Data(),paras_.at(i));
+	}
+	ROOT::Math::Functor fcn(chi2func_,paras_.size());
+	if(functobemin_){
+		min->SetFunction(*functobemin_);
+	}
+	else{
+		min->SetFunction(fcn);
+	}
+
+	bool succ=min->Minimize();
+	if(succ){
+		errdown=min->Errors()[b];
+		double reldiff= (olderr-errdown)/olderr;
+		if(reldiff<0){
+			if(reldiff>-0.001) //purely numerical difference
+				errdown=0;
+			else
+				errdown=-100;
+		}
+
+	}
+	else{
+		errdown=-200;
+	}
+	errup=errdown;
+	delete min;
+}
 
 
 

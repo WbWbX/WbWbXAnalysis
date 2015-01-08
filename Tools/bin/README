@@ -1,0 +1,3 @@
+Place for executables that interface with the Tools here by system calls.
+Try to avoid this.
+Executables here shouldn't be called by the user directly!

@@ -65,7 +65,7 @@ $CMSSW_BASE/src/TtZAnalysis/prepareEnv.sh
 
 scram setup lhapdffull
 
-scram b -j16
+scram b USER_CXXFLAGS="-Wno-delete-non-virtual-dtor" -j16
 
 echo "to create ntuples, go to ${targetdir}/TtZAnalysis/createNTuples"
 echo "and set the environment. Don't pull anything or push anything, this"

@@ -133,6 +133,12 @@ public:
 	 */
 	void getParameterErrorContribution(size_t a, size_t b,double & errup, double& errdown);
 
+	/**
+	 * Fixes all parameters and thereby determines the statistical component of the
+	 * error to parameter b only
+	 */
+	void getStatErrorContribution( size_t b,double & errup, double& errdown);
+
 	size_t findParameterIdx(const TString& paraname)const;
 
 	double fitfunction(const double& x,const Double_t *par)const;

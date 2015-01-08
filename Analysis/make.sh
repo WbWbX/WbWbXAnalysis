@@ -8,6 +8,10 @@ fi
 
 cd $CMSSW_BASE/src/TtZAnalysis/Analysis
 
+if [[ `cat /proc/version` == *"el6"* && $CMSSW_VERSION == "CMSSW_5_3_18"* ]]
+then
+    export USER_CXXFLAGS="-Wno-delete-non-virtual-dtor"
+fi
 
 export CPLUS_INCLUDE_PATH=$CMSSW_BASE/src:$CMSSW_RELEASE_BASE/src
 ROOTFLAGS=`root-config --cflags`

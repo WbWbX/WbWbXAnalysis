@@ -31,7 +31,7 @@ void formatter::readInNameTranslateFile(const std::string & pathtofile){
 	}
 
 }
- TString formatter::translateName(const TString& techname)const{
+TString formatter::translateName(const TString& techname)const{
 	std::map<TString,TString>::const_iterator mit=cachedNames_.find(techname);
 	TString retname;
 	if(mit!=cachedNames_.end())
@@ -48,6 +48,29 @@ void formatter::readInNameTranslateFile(const std::string & pathtofile){
 	if(debug)
 		std::cout << "formatter::translateSysName: " << techname<< " not found "<<std::endl;
 	return techname;
+}
+
+TString formatter::makeTexCompatible(const TString& in)const{
+	bool ismath=false;
+	TString out;
+	for(size_t i=0;i<(size_t)in.Length();i++){
+		if(in[i] == (TString)"$"){
+			if(ismath)ismath=false;
+			else ismath=true;
+		}
+		if(in[i] == (TString)"_"){
+			if(ismath)
+				out+="_";
+			else
+				out+="\\_";
+		}
+		else if(in[i] == (TString)"#"){
+			out+="";//ignore
+		}
+		else
+			out+=in[i];
+	}
+	return out;
 }
 
 

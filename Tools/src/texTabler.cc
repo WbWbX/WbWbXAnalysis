@@ -15,6 +15,8 @@
 #include "TString.h"
 #include <fstream>
 
+#include <iostream>
+#include <stdlib.h>
 
 
 namespace ztop{
@@ -28,11 +30,11 @@ TString texLine::getTex()const{
 }
 
 
-texTabler::texTabler():columns_(0),texformat_(""),linecount_(0){
+texTabler::texTabler():columns_(0),texformat_(""),linecount_(0),addnewrow_(false){
 
 }
 
-texTabler::texTabler(const TString& formats):columns_(0),texformat_(formats),linecount_(0){
+texTabler::texTabler(const TString& formats):columns_(0),texformat_(formats),linecount_(0),addnewrow_(false){
 
     format(formats);
 
@@ -91,18 +93,27 @@ TString texTabler::getTable()const{
 
 }
 
-
 void texTabler::writeToFile(const TString& filename)const{
     TString string=getTable();
-
-
-
     ofstream outs;
     outs.open(filename.Data());
-
     outs << string;
-
     outs.close();
+}
+
+void texTabler::writeToPdfFile(const TString& filename)const{
+	char tmpfilename[]={'X','X','X','X','X','X','\0'};
+	mkstemp(tmpfilename);
+	TString namestr(tmpfilename);
+	writeToFile(namestr);
+	char * cmsswbase=getenv("CMSSW_BASE");
+	TString syscall(cmsswbase);
+	syscall+="/src/TtZAnalysis/Tools/bin/texToPdf "+namestr+" > /dev/null";
+	system(syscall.Data());
+	syscall="mv "+namestr+".pdf "+filename;
+	system(syscall.Data());
+	syscall="rm "+namestr;
+	system(syscall.Data());
 }
 
 void texTabler::clear(){

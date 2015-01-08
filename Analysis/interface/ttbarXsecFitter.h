@@ -161,10 +161,15 @@ public:
 
 	double getParaError(size_t idx)const;
 	TString getParaName(size_t idx)const;
-	void getParaErrorContributionToXsec(size_t idx, double sevenoreight,double& up,double&down,bool& anticorr);
+	/**
+	 * if idx < 0 -> stat error
+	 */
+	void getParaErrorContributionToXsec(int idx, double sevenoreight,double& up,double&down,bool& anticorr);
 	size_t getXsecIdx(double sevenoreight)const;
 
 	texTabler makeSystBreakdown(double sevenoreight);
+
+	texTabler makeCorrTable() const;
 
 	void createPseudoDataFromMC(container1D::pseudodatamodes mode=container1D::pseudodata_poisson);
 

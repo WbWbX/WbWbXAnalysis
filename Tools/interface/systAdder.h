@@ -37,7 +37,15 @@ public:
 	 * expects the following format:
 	 * <mergedname> <mergeoption> <contribution1> <contribution2> ....
 	 * has to be in section[merge syst] -> [end-merge syst]
-	 *  Comments: #
+	 *  Comments: %
+	 *
+	 *  entries can refer to each other, e.g.
+	 *
+	 *  BLA   squared  subBla1 subBla2
+	 *  BLU   linear  subBLU1 subBLU2 subBLU3
+	 *
+	 *  ALL   squared BLA BLU
+	 *
 	 */
 	void readMergeVariationsFile(const std::string&);
 

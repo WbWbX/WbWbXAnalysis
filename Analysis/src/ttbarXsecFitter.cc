@@ -387,28 +387,37 @@ TString ttbarXsecFitter::getParaName(size_t idx)const{
 		throw std::out_of_range("ttbarXsecFitter::getParaName");
 	return fitter_.getParameterNames()->at(idx);
 }
-void ttbarXsecFitter::getParaErrorContributionToXsec(size_t idx, double sevenoreight,double&up,double&down,bool& anticorr){
-
-	if(idx>=fitter_.getParameters()->size())
+void ttbarXsecFitter::getParaErrorContributionToXsec(int idxin, double sevenoreight,double&up,double&down,bool& anticorr){
+	if(idxin>=(int)fitter_.getParameters()->size())
 		throw std::out_of_range("ttbarXsecFitter::getParaErrorContributionToXsec: index out of range");
+
 	size_t xsecidx=getXsecIdx(sevenoreight);
 	double xsecoffset=xsecoff8_;
 	if(xsecidx==xsecidx7_)xsecoffset=xsecoff7_;
 	double xsec=fitter_.getParameter(xsecidx)+xsecoffset;
-	anticorr=fitter_.getCorrelationCoefficient(xsecidx,idx)<0;
 	if(!nosystbd_){
-		fitter_.getParameterErrorContribution(idx,xsecidx,up,down);
-		up/=xsec;
-		down/=xsec;
-		return;
+		if(idxin>=0){
+
+			size_t idx=idxin;
+			anticorr=fitter_.getCorrelationCoefficient(xsecidx,idx)<0;
+
+			fitter_.getParameterErrorContribution(idx,xsecidx,up,down);
+			up/=xsec;
+			down/=xsec;
+			return;
+		}
+		else{ //stat
+			fitter_.getStatErrorContribution(xsecidx,up,down);
+			up/=xsec;
+			down/=xsec;
+			return;
+		}
 	}
 	else{
 		up=1;
 		down=1;
 		return;
 	}
-
-
 }
 size_t ttbarXsecFitter::getXsecIdx(double sevenoreight)const{
 	size_t xsecidx=xsecidx8_;
@@ -500,9 +509,16 @@ texTabler ttbarXsecFitter::makeSystBreakdown(double sevenoreight){
 				"-"	<< errstr;
 	}
 
+	//add stat
+	double errupstat,errdownstat;
+	bool anticorr=false;//dummy
+	getParaErrorContributionToXsec(-1,sevenoreight,errupstat,errdownstat,anticorr);
+	TString errstrstat="$\\pm{"+fmt.toTString(fmt.round(100*errdownstat,0.1))+ "}$";
+	table << texLine();
+	table << "Stat" << " " << " " << errstrstat;
 
 	//add total
-	table << texLine(2);
+	table << texLine();
 	double xsecoffset=xsecoff8_;
 	if(xsecidx==xsecidx7_)xsecoffset=xsecoff7_;
 
@@ -520,6 +536,41 @@ texTabler ttbarXsecFitter::makeSystBreakdown(double sevenoreight){
 	table << texLine();
 	return table;
 
+}
+
+texTabler ttbarXsecFitter::makeCorrTable() const{
+	TString format=" l ";
+	container2D corr=getCorrelations();
+	for(size_t i=1;i<corr.getBinsX().size()-1;i++)
+		format+=" | c ";
+	texTabler tab(format);
+
+	formatter Formatter;
+	TString cmsswbase=getenv("CMSSW_BASE");
+	Formatter.readInNameTranslateFile((cmsswbase+"/src/TtZAnalysis/Analysis/configs/general/SystNames.txt").Data());
+	for(size_t j=0;j<corr.getBinsY().size()-1;j++){
+		for(size_t i=0;i<corr.getBinsX().size()-1;i++){
+			//names
+			if(i && !j)
+				tab << "";//Formatter.translateName(parameternames_.at(i-1));
+			else if(j && !i)
+				tab << Formatter.translateName(parameternames_.at(j-1));
+			else if (!j && !i)
+				tab << "";
+			else if(i<=j){
+				float content=corr.getBinContent(i,j);
+				if(fabs(content)<0.3)
+					tab << Formatter.round(corr.getBinContent(i,j),0.01);
+				else
+					tab <<  "\\textbf{" +Formatter.toTString(Formatter.round(corr.getBinContent(i,j),0.01)) +"}";
+			}
+			else
+				tab << "";
+		}
+		tab<<texLine(); //row done
+	}
+
+	return tab;
 }
 
 // can not be const due to root limitations
@@ -745,7 +796,7 @@ variateContainer1D ttbarXsecFitter::createLeptonJetAcceptance(const std::vector<
 	if(norm_nbjet_global_) twobjetsignal=twobjetsignal.getIntegralBin();
 
 	container1D correction_b =  ((signalintegral * twobjetsignal) * 4.)
-																																																																						                																/ ( (onebjetsignal + (twobjetsignal * 2.)) * (onebjetsignal + (twobjetsignal * 2.)));
+																																																																						                																												/ ( (onebjetsignal + (twobjetsignal * 2.)) * (onebjetsignal + (twobjetsignal * 2.)));
 
 	correction_b.removeStatFromAll();
 
@@ -928,7 +979,7 @@ void ttbarXsecFitter::addUncertainties(containerStack * stack,size_t nbjets,bool
 		std::cout << "ttbarXsecFitter::addUncertainties: merged DY" <<std::endl;
 
 	try{
-		stack->mergeVariationsFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/general/SystNames.txt");
+		stack->mergeVariationsFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/combine_syst.txt");
 	}
 	catch(...){}
 	if(debug)

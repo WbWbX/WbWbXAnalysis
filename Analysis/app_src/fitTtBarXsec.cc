@@ -306,12 +306,20 @@ invokeApplication(){
 
 		texTabler tab8=mainfitter.makeSystBreakdown(8);
 		tab8.writeToFile(outfile+"_tab8.tex");
+		tab8.writeToPdfFile(outfile+"_tab8.pdf");
 		std::cout << tab8.getTable() <<std::endl;
 		if(mainfitter.has7TeV()){
 			texTabler tab7=mainfitter.makeSystBreakdown(7);
 			tab7.writeToFile(outfile+"_tab7.tex");
+			tab7.writeToPdfFile(outfile+"_tab7.pdf");
 			std::cout << tab7.getTable() <<std::endl;
 		}
+
+
+		texTabler corr=mainfitter.makeCorrTable();
+		corr.writeToFile(outfile+"_tabCorr.tex");
+		corr.writeToPdfFile(outfile+"_tabCorr.pdf");
+		//std::cout << corr.getTable() <<std::endl;
 
 		c.Print(outfile+".pdf)");
 		f->Close();
