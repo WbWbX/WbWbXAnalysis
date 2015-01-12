@@ -2,10 +2,10 @@
 
 namespace {
     template<typename T>
-    auto getNHits_impl(T const& t) -> decltype(t.trackerExpectedHitsInner().numberOfHits()) { return t.trackerExpectedHitsInner().numberOfHits();}
+    auto getMHits_impl(T const& t) -> decltype(t.trackerExpectedHitsInner().numberOfHits()) { return t.trackerExpectedHitsInner().numberOfHits();}
     template<typename T>
-    auto getNHits_impl(T const& t) -> decltype(t.hitPattern().numberOfHits(reco::HitPattern::TRACK_HITS)) { return t.hitPattern().numberOfHits(reco::HitPattern::TRACK_HITS);}
+    auto getMHits_impl(T const& t) -> decltype(t.hitPattern().numberOfLostHits(reco::HitPattern::MISSING_INNER_HITS)) { return t.hitPattern().numberOfLostHits(reco::HitPattern::MISSING_INNER_HITS);}
 }
 
-int getNHits(reco::Track const & t) { return getNHits_impl(t);}
+int getMHits(reco::Track const & t) { return getMHits_impl(t);}
 

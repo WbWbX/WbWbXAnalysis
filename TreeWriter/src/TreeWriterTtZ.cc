@@ -202,7 +202,7 @@ ztop::NTElectron TreeWriterTtZ::makeNTElectron(const pat::Electron & electron){
 		vzerr=electron.gsfTrack()->dzError();
 		d0V=fabs(electron.gsfTrack()->dxy(vtxs[0].position()));
 		d0Bs=fabs(electron.gsfTrack()->dxy(beamSpotPosition));
-		mhits=getNHits(*electron.gsfTrack());
+		mhits=getMHits(*electron.gsfTrack());
 	}              //
 	else if(!(electron.closestCtfTrackRef()).isNull()){
 		vz=electron.closestCtfTrackRef()->dz(vtxs[0].position());                   //

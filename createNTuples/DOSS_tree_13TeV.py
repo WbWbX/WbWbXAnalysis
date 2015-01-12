@@ -83,7 +83,7 @@ if includePDFWeights:
 process = cms.Process("Yield")
 process.options = cms.untracked.PSet( 
     wantSummary = cms.untracked.bool(wantSummary),
-    allowUnscheduled = cms.untracked.bool(True)
+    allowUnscheduled = cms.untracked.bool(True) 
     )
 
 
@@ -103,17 +103,12 @@ process.maxEvents = cms.untracked.PSet(
 if skipEvents > 0:
     process.source.skipEvents = cms.untracked.uint32(skipEvents)
 
-# limit to json file (if passed as parameter)                                                                                                                                                                   
 if not runOnMC and not (json=="nojson"):
     import FWCore.PythonUtilities.LumiList as LumiList
-    process.source.lumisToProcess = LumiList.LumiList(filename = json).getVLuminosityBlockRange()
-
-
-####################################################################
-## Define output
-
-
-process.out    = cms.OutputModule("PoolOutputModule", outputCommands =  cms.untracked.vstring(), fileName = cms.untracked.string( outputFile + '_PatTuple') )
+    import FWCore.ParameterSet.Types as CfgTypes
+    myLumis = LumiList.LumiList(filename = json).getCMSSWString().split(',')
+    process.source.lumisToProcess = CfgTypes.untracked(CfgTypes.VLuminosityBlockRange())
+    process.source.lumisToProcess.extend(myLumis)
 
 
 ####################################################################
@@ -127,7 +122,15 @@ process.MessageLogger.cerr.threshold = 'INFO'
 process.MessageLogger.cerr.FwkReport.reportEvery = reportEvery
 
 
-####################################################################                                                                                                                               
+####################################################################
+### define output (agrohsje: check why needed) 
+
+if runOnAOD:
+    process.out = cms.OutputModule("PoolOutputModule", 
+                                   outputCommands =  cms.untracked.vstring(), 
+                                   fileName = cms.untracked.string(outputFile+'_PatTuple'))
+
+####################################################################
 ### Geometry and Detector Conditions  
 
 
@@ -141,8 +144,8 @@ if globalTag != '':
 else:
     print "Determine global tag automatically"
     if options.runOnMC:
-        process.GlobalTag.globaltag = cms.string('PHYS14_25_V1::All')
-        #agrohsje process.GlobalTag.globaltag = cms.string('PHYS14_50_V1::All') 
+        process.GlobalTag.globaltag = cms.string('PHYS14_25_V2::All')
+        #agrohsje process.GlobalTag.globaltag = cms.string('PHYS14_50_V2::All') 
     else:
         process.GlobalTag.globaltag = cms.string('FT53_V21A_AN6::All')
         
@@ -163,10 +166,6 @@ process.TFileService = cms.Service("TFileService",
 ####################################################################
 ## Weights 
 
-## PDFs
-process.pdfWeights = cms.EDProducer("PdfWeightProducer",
-                                    PdfInfoTag = cms.untracked.InputTag("generator"),
-                                    PdfSetNames = cms.untracked.vstring(PDF+".LHgrid"))
                                     
 ## Infos for proper normalization
 process.load('TtZAnalysis.TreeWriter.puinfo_cff')
@@ -185,14 +184,12 @@ process.postCutPUInfo = process.PUInfo.clone()
 process.postCutPUInfo.treeName = 'PUTreePostCut'
 process.postCutPUInfo.includePDFWeights = False
 
-process.fsFilterSequence = cms.Sequence(process.preCutPUInfo)
-
 ## add PDF weights if required 
 if includePDFWeights:
-    getattr(process, 'fsFilterSequence').replace(process.preCutPUInfo,
-                                                  process.pdfWeights *
-                                                  process.preCutPUInfo)
-
+    process.pdfWeights = cms.EDProducer("PdfWeightProducer",
+                                        PdfInfoTag = cms.untracked.InputTag("generator"),
+                                        PdfSetNames = cms.untracked.vstring(PDF+".LHgrid"))
+    
 #################################################################### 
 ## Generator-level objects 
     
@@ -252,15 +249,7 @@ process.ak4GenJetFlavourPlusLeptonInfos = ak4JetFlavourInfos.clone(
 ## Generator-level selection 
 
 #agrohsje todo: add gen-level filters  
-#process.fsFilterSequence += process.topsequence check DOSTree for top filter
-#totalKinematicsFilter
-#generatorZFilter
-#process.requireRecoLeps
-#process.makeGenEvt * process.generatorTopFilter
-
-# add post generator cut infos (essential)
-process.fsFilterSequence += process.postCutPUInfo
-
+process.fsFilterSequence = cms.Sequence()
     
 ####################################################################
 ## Prefilter sequence
@@ -295,23 +284,28 @@ else:
 ####################################################################
 ## Primary vertex filtering
 
-
-selectedPrimaryVertices = ''
+#check why not applied in official analysis 
+#process.goodOfflinePrimaryVertices = cms.Sequence()
+#selectedPrimaryVertices = ''
+#if runOnAOD:
+selectedPrimaryVertices = 'goodOfflinePrimaryVertices'
+from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
+process.goodOfflinePrimaryVertices = cms.EDFilter( 
+    "PrimaryVertexObjectFilter", 
+    filterParams = pvSelector.clone(
+        minNdof = cms.double(4.0),
+        maxZ = cms.double(24.0), 
+        maxRho = cms.double(2.0)
+        ))
+#    src = cms.InputTag('offlinePrimaryVertices'))
 if runOnAOD:
-    selectedPrimaryVertices = 'goodOfflinePrimaryVertices'
-    from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
-    process.goodOfflinePrimaryVertices = cms.EDFilter( 
-        "PrimaryVertexObjectFilter", 
-        filterParams = pvSelector.clone(
-            minNdof = cms.double(4.0),
-            maxZ = cms.double(24.0), 
-            maxRho = cms.double(2.0)
-            ), 
-        src = cms.InputTag('offlinePrimaryVertices'))
-    if isSignal:
-        process.goodOfflinePrimaryVertices.filter = cms.bool(False)
+    process.goodOfflinePrimaryVertices.src = cms.InputTag('offlinePrimaryVertices')
 else:
-    selectedPrimaryVertices = 'offlineSlimmedPrimaryVertices'
+    process.goodOfflinePrimaryVertices.src = cms.InputTag('offlineSlimmedPrimaryVertices')
+if isSignal:
+    process.goodOfflinePrimaryVertices.filter = cms.bool(False)
+#else:
+#    selectedPrimaryVertices = 'offlineSlimmedPrimaryVertices'
 
 
 #################################################################### 
@@ -338,6 +332,8 @@ if runOnMC:
 else:
     jetCorr = ('AK4PFchs', ['L1FastJet','L2Relative','L3Absolute', 'L2L3Residual'])
 
+#process.userPatSequence = cms.Sequence() ;
+
 ## Create and define reco objects 
 if runOnAOD:
     jetTag = 'patJets' + pfpostfix 
@@ -358,6 +354,7 @@ if runOnAOD:
     from PhysicsTools.PatAlgos.tools.pfTools import usePF2PAT
     usePF2PAT(process, runPF2PAT=True, jetAlgo='AK4', runOnMC=runOnMC, postfix=pfpostfix, 
               jetCorrections=jetCorr, pvCollection=cms.InputTag(selectedPrimaryVertices),typeIMetCorrections=True) 
+
     getattr(process, 'pfPileUp'+pfpostfix).checkClosestZVertex = False
     
 ## Selections for PF2PAT objects: Electrons 
@@ -446,9 +443,7 @@ process.filterkinLeptons = cms.EDFilter("SimpleCounter",
 if isSignal:
     process.kinLeptonFilterSequence = cms.Sequence()
 else:
-    process.kinLeptonFilterSequence = cms.Sequence(process.kinMuons *
-                                                   process.kinElectrons *
-                                                   process.filterkinLeptons)
+    process.kinLeptonFilterSequence = cms.Sequence(process.filterkinLeptons)
 
 
 ####################################################################
@@ -484,14 +479,14 @@ if runOnAOD:
     pvSource = 'offlinePrimaryVertices'
     svSource = cms.InputTag('inclusiveSecondaryVertices')
 else:
-    jetSource = 'ak4PFJets'
+    jetSource = 'ak4PFJets' #ak4PFJetsCHS according to https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMiniAOD ???
     trackSource = 'unpackedTracksAndVertices'
     pvSource = 'unpackedTracksAndVertices'
     svSource = cms.InputTag('unpackedTracksAndVertices','secondary')
     
 from PhysicsTools.PatAlgos.tools.jetTools import switchJetCollection
-## Switch the default jet collection (done in order to use the above specified b-tag infos and discriminators)
 
+## Switch the default jet collection (done in order to use the above specified b-tag infos and discriminators)
 
 switchJetCollection(
     process,
@@ -527,7 +522,7 @@ process.PFTree   = cms.EDAnalyzer('TreeWriterTtZ',
                                   elecGSFSrc = cms.InputTag(electronTag), #just the same here to make it run. this can be prevented by a try{}catch(...){} in treewriter for getByLabel
                                   elecPFSrc = cms.InputTag(electronTag),
                                   jetSrc = cms.InputTag('treeJets'),  #jetTag), # ('treeJets'),
-                                  btagAlgo = cms.string('combinedSecondaryVertexBJetTags'),
+                                  btagAlgo = cms.string('combinedInclusiveSecondaryVertexV2BJetTags'), ###combinedSecondaryVertexBJetTags'),
                                   metSrc = cms.InputTag(metTag),  #here also try, catch statements
                                   mvaMetSrc = cms.InputTag(metTag), 
                                   metT1Src   =cms.InputTag(metTag),
@@ -554,7 +549,7 @@ process.PFTree   = cms.EDAnalyzer('TreeWriterTtZ',
                                   #block for event information.  Essential (PU)
                                   PUInfo = cms.InputTag('addPileupInfo'),
                                   includePDFWeights = cms.bool(includePDFWeights),
-                                  pdfWeights = cms.InputTag(''),
+                                  pdfWeights = cms.InputTag("pdfWeights:"+PDF),
                                   additionalWeights = cms.vstring(""), #can be any vectors of doubles
                                   #agrohsje fix  
                                   rhoIso = cms.InputTag("fixedGridRhoFastjetAll"), #dummy for 13 TeV AOD
@@ -563,7 +558,7 @@ process.PFTree   = cms.EDAnalyzer('TreeWriterTtZ',
                                   genParticles = cms.InputTag(genParticleCollection),
                                   # agrohsje fix later 
                                   genJets = cms.InputTag("ak4GenJetsNoNuNoLepton"), 
-                                  #cms.InputTag(""), # 'slimmedGenJets'), 
+                                  #cms.InputTag(""), # in miniaod:slimmedGenJets, in aod:ak4GenJets
                                   
 
                                   ##improved jet-hadron matching block. Not implemented in the configuration above!
@@ -587,36 +582,26 @@ process.PFTree   = cms.EDAnalyzer('TreeWriterTtZ',
                                   #old switches, can be removed at some point
                                   isSusy =  cms.bool(False),
                                   isJPsi = cms.bool(False),
-                                  
-                                  
                                   )
-
-## nice tool. It prints all collections that are available at a certain step. 
-#  Here, the most important one is the step before filling the ntuple. Just uncomment
-#  from the sequence if needed.
-process.dump=cms.EDAnalyzer('EventContentAnalyzer')
-
-## make tree sequence including trigger sequence 
-process.treeSequence = cms.Sequence(process.triggerSequence*
-#                                    process.dump *
-                                    process.treeJets * # some jet cuts to avoid too large files 
-                                    process.PFTree)
 
 
 ####################################################################
-## Path
+## Path (filter and analyzer only)
 
+process.dump=cms.EDAnalyzer('EventContentAnalyzer')
 
 process.path = cms.Path( 
-    process.fsFilterSequence *
-    #process.goodOfflinePrimaryVertices *  
-    process.prefilterSequence *
-#    getattr(process,'patPF2PATSequence'+pfpostfix) *
-    process.kinLeptonFilterSequence * # agrohsje added 
-    process.treeSequence
+    process.preCutPUInfo*
+    process.fsFilterSequence*
+    process.postCutPUInfo*
+    process.goodOfflinePrimaryVertices *   
+    process.prefilterSequence * #for data only 
+    #    process.dump *
+    process.kinLeptonFilterSequence * # agrohsje 
+    process.PFTree
     )
 
-process.outpath    = cms.EndPath()
+#process.outpath    = cms.EndPath()
 
 
 ####################################################################
@@ -626,9 +611,3 @@ process.outpath    = cms.EndPath()
 process.load("TopAnalysis.TopUtils.SignalCatcher_cfi")
 
 
-####################################################################
-# agrohsje process.load('Configuration.StandardSequences.Services_cff')
-# agrohsje process.load('Configuration.StandardSequences.Reconstruction_cff')
-# agrohsje process.load('Configuration.StandardSequences.EndOfProcess_cff')
-# agrohsje process.load('Configuration.EventContent.EventContent_cff')
-# agrohsje process.out    = cms.OutputModule("PoolOutputModule", outputCommands =  cms.untracked.vstring(), fileName = cms.untracked.string( outputFile + '_PatTuple') )
