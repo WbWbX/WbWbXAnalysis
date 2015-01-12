@@ -19,7 +19,7 @@ void make2dplots(TString inputfile, TString plot, TString output){
 
  std::vector<TString> plots; adds << plot+" eff" << plot+" effMC" << "scalefactor "+plot;
 
- for(unsgined int i=0;i<plots.size();i++){
+ for(unsigned int i=0;i<plots.size();i++){
 
    TH2D * h = (TH2D*)f->Get(plots.at(i));
    
