@@ -26,6 +26,6 @@ fi
 cd $CMSSW_RELEASE_BASE
 cd ..
 
-tar -X $excludefile -cvf $targetfile $CMSSW_VERSION
+tar -X $excludefile -chvf $targetfile $CMSSW_VERSION
 
 echo "Tarball for ${CMSSW_VERSION} created at ${targetfile}"
