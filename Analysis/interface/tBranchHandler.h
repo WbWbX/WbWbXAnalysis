@@ -13,21 +13,40 @@
 #include "TTree.h"
 #include <stdexcept>
 #include <iostream>
+#include <map>
 
 namespace ztop{
+
+
+class tBranchHandlerBase{
+public:
+	tBranchHandlerBase(){}
+	~tBranchHandlerBase(){}
+protected:
+	void addTreeAndBranch(TTree * t, const TString& branchname);
+	void removeTreeAndBranch(TTree * t, const TString& branchname);
+	//avoids double setting
+	static std::map< TTree* ,std::vector<TString> > branchesfortree_;
+};
+
+
 
 /**
  * This is just a small wrapper to make TBranch reading and access less ambiguous
  * and easier
  */
 template<class T>
-class tBranchHandler{
+class tBranchHandler : private tBranchHandlerBase{
 public:
-	tBranchHandler():content_(0),branch_(0),branchname_(""),missingbranch_(true){
+	tBranchHandler():t_(0),content_(0),branch_(0),branchname_(""),missingbranch_(true){
 		// doesn't do anything
 		throw std::logic_error("tBranchHandler: default constructor should not be used");
 	}
-	tBranchHandler(TTree * t, const TString& branchname):content_(0),branch_(0),branchname_(branchname),missingbranch_(false){
+	tBranchHandler(TTree * t, const TString& branchname):t_(t),content_(0),branch_(0),branchname_(branchname),missingbranch_(false){
+		if(!t){
+			throw std::runtime_error("tBranchHandler: tree pointer is NULL!");
+		}
+
 		int ret=t->SetBranchAddress(branchname_,&content_,&branch_);
 
 		// Error handling
@@ -53,9 +72,13 @@ public:
 				throw std::runtime_error("tBranchHandler: branch does not exists!");
 			}
 		}
+		addTreeAndBranch(t,branchname);
 
 	}
-	~tBranchHandler(){if(content_) delete content_;content_=0; /*obsolete but in case some sharing is done at some point*/ }
+	~tBranchHandler(){
+		if(content_) delete content_;content_=0; /*obsolete but in case some sharing is done at some point*/
+		removeTreeAndBranch(t_,branchname_);
+	}
 
 	void getEntry(const Long64_t& entry){
 		if(!missingbranch_)
@@ -73,6 +96,7 @@ public:
 	static bool allow_missing;
 
 private:
+	TTree *t_;
 	T* content_;
 	TBranch * branch_;
 	TString branchname_;
