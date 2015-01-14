@@ -1330,15 +1330,13 @@ void TreeWriterBase::runTriggerAOD(const edm::Event& iEvent){
 }
 
 void TreeWriterBase::runTriggerMiniAOD(const edm::Event& iEvent){
-
+    #ifndef CMSSW_LEQ_5
     edm::Handle<edm::TriggerResults> trigresults;
     iEvent.getByLabel(trigresults_, trigresults);
-    #ifndef CMSSW_LEQ_5
     edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjects;
     iEvent.getByLabel("selectedPatTrigger", triggerObjects);
     edm::Handle<pat::PackedTriggerPrescales> triggerPrescales;
     iEvent.getByLabel("patTrigger", triggerPrescales);
-    #endif
     const edm::TriggerNames &names = iEvent.triggerNames(*trigresults);
     for (unsigned int i = 0, n = trigresults->size(); i < n; ++i) {
 	unsigned int prescale=triggerPrescales->getPrescaleForIndex(i); 
@@ -1356,6 +1354,7 @@ void TreeWriterBase::runTriggerMiniAOD(const edm::Event& iEvent){
 	    }
 	}
     }
+    #endif
     //Needs to be fixed to check for the Triggers named in the Trigger Object string array. Otherwise it will crash
    /*if(includetrigger_){
         //Checks for All Triggerobjects, no further check, should propably be implemented
