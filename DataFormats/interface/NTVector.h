@@ -45,6 +45,12 @@ public:
     void norm();
 
 private:
+	////////////////////////
+	/*
+	 * Data members. changes here produce incompatibilities between ntuple versions!
+	 */
+	////////////////////////
+
     float x_, y_, z_;
 
 };

@@ -32,6 +32,12 @@ public:
 	int id(){return idx_;}
 
 private:
+	////////////////////////
+	/*
+	 * Data members. changes here produce incompatibilities between ntuple versions!
+	 */
+	////////////////////////
+
 	TVector3 pos_;
 	TVector3 poserr_;
 	float chi2_;

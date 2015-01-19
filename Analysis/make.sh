@@ -13,6 +13,12 @@ then
     export USER_CXXFLAGS="-Wno-delete-non-virtual-dtor"
 fi
 
+extraflags=""
+if [ "${1}" ==  "debug" ]
+    then
+    extraflags="-g"
+fi
+	
 export CPLUS_INCLUDE_PATH=$CMSSW_BASE/src:$CMSSW_RELEASE_BASE/src
 ROOTFLAGS=`root-config --cflags`
 ROOTLIBS=`root-config --libs`
@@ -68,16 +74,21 @@ function compile(){
     infile=$1
     if [ $infile ]
     then
-
+	
 	outfile=${infile%.cc}
-	echo compiling $infile to $outfile
-	g++ $ROOTFLAGS -fopenmp -I$CPLUS_INCLUDE_PATH -c -o $BUILDDIR/$infile.o $SRCDIR/$infile
+	if [ $extraflags ]
+	    then
+	    echo compiling $infile to $outfile with extra flags $extraflags
+	else
+	    echo compiling $infile to $outfile
+	fi
+	g++ $ROOTFLAGS -fopenmp $extraflags -I$CPLUS_INCLUDE_PATH -c -o $BUILDDIR/$infile.o $SRCDIR/$infile
 	if [ $? -ne 0 ]; 
 	then
 	    echo "Compilation of ${infile} not successful"
 	    exit 6
 	fi
-	g++ -o $LOCBIN/$outfile -fopenmp -Wall $ROOTLIBS -L$libdir $linklibs  $BUILDDIR/$infile.o
+	g++ -o $LOCBIN/$outfile -fopenmp $extraflags -Wall $ROOTLIBS -L$libdir $linklibs  $BUILDDIR/$infile.o
  #	g++ -o $LOCBIN/$outfile -fopenmp -Wall $ROOTLIBS -L$libdir $linklibs -l${CMSSW_BASE}/src/TtZAnalysis/Tools/TUnfold/libunfold.so $BUILDDIR/$infile.o
 	if [ $? -ne 0 ]; 
 	then

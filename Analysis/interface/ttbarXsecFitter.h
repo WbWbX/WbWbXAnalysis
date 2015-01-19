@@ -15,6 +15,7 @@
 #include "TtZAnalysis/Tools/interface/texTabler.h"
 #include "TString.h"
 #include "TRandom3.h"
+#include "TtZAnalysis/Configuration/interface/version.h"
 
 namespace ztop{
 class containerStack;
@@ -41,7 +42,8 @@ public:
 		useMConly_(false),removesyst_(false),nominos_(false),
 		random_(0),parameterwriteback_(true),
 		nosystbd_(false),silent_(false)
-	{container_c_b_.resize(2);container_eps_b_.resize(2);eps_emu_.resize(2);} //one for each energy
+	{container_c_b_.resize(2);container_eps_b_.resize(2);eps_emu_.resize(2);
+	} //one for each energy
 
 	~ttbarXsecFitter(){
 		if(random_) delete random_;

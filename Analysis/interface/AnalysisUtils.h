@@ -54,10 +54,7 @@ std::vector<T> subdivide(const std::vector<T> & bins, size_t div){
     return out;
 }
 
-template <class T>
-bool comparePt(T a, T b){
-    return (a->pt() > b->pt());
-}
+
 
 template <class T>
 std::vector<T> mergeVectors(const std::vector<T>& a, const std::vector<T> & b){

@@ -6,8 +6,13 @@ $  [parameters-begin] until [parameters-end]
 
 [inputfiles-begin]
 
-
-$ inputfile,                       legend entry,        color,   xsection,   legendNumber (for sorting,- allows for gaps),  (opt) isSignal
+$ format (in one line):
+$   inputfile, 
+$   legend entry, 
+$   color,   
+$   xsection, 
+$   legendNumber (for sorting,- allows for gaps),  
+$   (optional:bool) isSignal (for containerUnfold classes), 
 
 $data
 $

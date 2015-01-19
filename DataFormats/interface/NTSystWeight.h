@@ -23,6 +23,12 @@ public:
 	const float & getWeight()const{return weight_;}
 
 private:
+	////////////////////////
+	/*
+	 * Data members. changes here produce incompatibilities between ntuple versions!
+	 */
+	////////////////////////
+
 	float weight_;
 };
 }

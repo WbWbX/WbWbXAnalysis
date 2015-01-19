@@ -98,6 +98,12 @@ public:
 
 
 protected:
+	////////////////////////
+	/*
+	 * Data members. changes here produce incompatibilities between ntuple versions!
+	 */
+	////////////////////////
+
     float mvaId_;
     ztop::NTSuClu suClu_;
     bool isNotConv_,ispf_;

@@ -73,7 +73,6 @@ container1DUnfold::~container1DUnfold(){
 	for(size_t i=0;i<c_list.size();i++){
 		if(this==c_list.at(i))
 			c_list.erase(c_list.begin()+i);
-		break;
 	}
 }
 

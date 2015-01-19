@@ -176,7 +176,10 @@ void plotterControlPlot::drawControlPlot(){
 	plotStyle upperstyle=upperstyle_;
 	upperstyle.absorbYScaling(getSubPadYScale(1));
 	axish->Draw("AXIS");
-	axish->GetYaxis()->SetRangeUser(0.0001,stackp_->getYMax()*1.2);
+	float ymax=stackp_->getYMax();
+	if(ymax<=0)
+		ymax=1/1.2;
+	axish->GetYaxis()->SetRangeUser(0.0001,ymax*1.2);
 	upperstyle.applyAxisStyle(axish);
 	axish->Draw("AXIS");
 

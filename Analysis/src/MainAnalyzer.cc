@@ -70,9 +70,11 @@ MainAnalyzer::MainAnalyzer(){
  * takes care of not already deleted containers etc
  */
 MainAnalyzer::~MainAnalyzer(){
+	//delete any remaining containers on heap
 	ztop::container1D::c_deletelist();
 	ztop::container1DUnfold::c_deletelist();
 	ztop::container2D::c_deletelist();
+
 }
 
 
@@ -374,6 +376,7 @@ void MainAnalyzer::readFileList(){
 	norms_.clear();
 	legord_.clear();
 	issignal_.clear();
+	extraopts_.clear();
 
 	std::cout << "MainAnalyzer::readFileList: reading input file " << std::endl;
 
@@ -392,6 +395,11 @@ void MainAnalyzer::readFileList(){
 			issignal_.push_back(fr.getData<bool> (line,5));
 		else
 			issignal_.push_back(false);
+		if(fr.nEntries(line) > 6)
+			extraopts_.push_back(fr.getData<TString> (line,6));
+		else
+			extraopts_.push_back("");
+
 	}
 	for(size_t i=0;i<infiles_.size();i++){
 		//if(legentries_.at(i) == dataname_)
@@ -470,16 +478,6 @@ MainAnalyzer & MainAnalyzer::operator = (const MainAnalyzer & analyzer){
     return *this;
 }
  */
-
-/////////use default implementations! as long as there are not pointers or
-///other things in the member list, this is sufficient and bugs are less likely
-
-void MainAnalyzer::analyze(size_t i){
-
-	//  std::cout << " analyze " << i<< std::endl;
-	analyze(infiles_.at(i),legentries_.at(i),colz_.at(i),legord_.at(i),i);
-
-}
 
 
 float MainAnalyzer::createNormalizationInfo(TFile *f, bool isMC,size_t anaid){

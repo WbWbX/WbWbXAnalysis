@@ -31,7 +31,7 @@ bool container1D::c_makelist=false;
 
 ///////function definitions
 container1D::container1D():
-		taggedObject(taggedObject::type_container1D)
+				taggedObject(taggedObject::type_container1D)
 {
 	canfilldyn_=false;
 	//divideBinomial_=true;
@@ -71,7 +71,7 @@ container1D::container1D(float binwidth, TString name,TString xaxisname,TString 
 	hp_=0;
 }
 container1D::container1D(const std::vector<float>& bins,const TString& name,const TString& xaxisname,const TString& yaxisname, bool mergeufof):
-			taggedObject(taggedObject::type_container1D)
+					taggedObject(taggedObject::type_container1D)
 
 {
 	plottag=none;
@@ -93,7 +93,6 @@ container1D::container1D(const std::vector<float>& bins,const TString& name,cons
 container1D::~container1D(){
 	for(unsigned int i=0;i<c_list.size();i++){
 		if(c_list[i] == this) c_list.erase(c_list.begin()+i);
-		break;
 	}
 	if(gp_) delete gp_;
 	if(hp_) delete hp_;
@@ -510,7 +509,10 @@ void container1D::removeStatFromAll(){
 void container1D::createStatFromContent(){
 	for(int i=-1;i<(int)contents_.layerSize();i++){
 		for(size_t j=0;j<bins_.size();j++){
-			contents_.setBinStat(j,std::sqrt(contents_.getBinContent(j,i)),i);
+			if(contents_.getBinContent(j,i)>0)
+				contents_.setBinStat(j,std::sqrt(contents_.getBinContent(j,i)),i);
+			else
+				contents_.setBinStat(j,0,i);
 		}
 	}
 }
@@ -1109,8 +1111,10 @@ TGraphAsymmErrors * container1D::getTGraph(TString name, bool dividebybinwidth, 
 			yel[i-1]=getBinErrorDown(i,onlystat)*scale;
 		}
 		else{
-			yeh[i-1]=std::sqrt(sq(getBinErrorUp(i,onlystat)) - sq(getBinErrorUp(i,true)) )*scale;
-			yel[i-1]=std::sqrt(sq(getBinErrorDown(i,onlystat)) - sq(getBinErrorDown(i,true)))*scale;
+			float up=sq(getBinErrorUp(i,onlystat)) - sq(getBinErrorUp(i,true));
+			float down =sq(getBinErrorDown(i,onlystat)) - sq(getBinErrorDown(i,true));
+			yeh[i-1]=std::sqrt(fabs(up) )*scale;
+			yel[i-1]=std::sqrt(fabs(down))*scale;
 		}
 
 	}
@@ -1574,7 +1578,7 @@ void container1D::addRelSystematicsFrom(const ztop::container1D & rhs,bool ignor
 			//contents_.getLayer(newlayerit).removeStat();
 			//stat are definitely not correlated
 			bool isnominalequal=(!strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i),1e-2))
-																																					        		|| (strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i))) ;
+																																					        				|| (strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i))) ;
 
 			if(isnominalequal){ //this is just a copy leave it and add no variation
 				//contents_.getLayer(newlayerit).removeStat();
@@ -1676,12 +1680,17 @@ container1D container1D::createPseudoExperiment(TRandom3* rand,const container1D
 			stat2.at(i)=contents_.getBin(i,syst).getStat2();
 	}
 	container1D out=*this;
+	if(integral()<=0 && mode==pseudodata_poisson){ //at least one negative entry or all zero
+		out.setAllZero();
+		return out;
+	}
+
 	out.removeAllSystematics();
 	out.removeStatFromAll();
 	out.setName(getName()+"_pe");
 	for(size_t i=0;i<bins_.size();i++){
 		const float & nscaled=contents_.getBin(i,syst).getContent();
-		if(nscaled==0 || stat2.at(i)==0){
+		if((nscaled<0 && mode==pseudodata_poisson) || nscaled==0 || stat2.at(i)==0){
 			out.setBinContent(i,0);
 			out.setBinStat(i,0);
 			continue;
@@ -1702,6 +1711,9 @@ container1D container1D::createPseudoExperiment(TRandom3* rand,const container1D
 		float newstatorg=std::sqrt(newpoint);
 		newpoint *= scale;
 		newstatorg*=scale;
+		if(newpoint!=newpoint){
+			newpoint=0;newstatorg=0;
+		}
 		out.setBinContent(i,newpoint);
 		out.setBinStat(i,newstatorg);
 	}

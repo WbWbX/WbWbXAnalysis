@@ -163,6 +163,13 @@ public:
     static bool bepicky;
 
 private:
+	////////////////////////
+	/*
+	 * Data members. changes here produce incompatibilities between ntuple versions!
+	 */
+	////////////////////////
+
+
     T pt_,eta_,phi_,m_;
 
 

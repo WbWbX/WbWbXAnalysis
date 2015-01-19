@@ -31,7 +31,6 @@ containerStack::~containerStack(){
 	norms_.clear();
 	for(unsigned int i=0;i<cs_list.size();i++){
 		if(cs_list[i] == this) cs_list.erase(cs_list.begin()+i);
-		break;
 	}
 }
 void containerStack::push_back(const ztop::container1D& cont,const TString& legend, int color, double norm, int legord){

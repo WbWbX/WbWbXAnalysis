@@ -46,6 +46,11 @@ namespace ztop{
     static std::vector<std::string> & getMap(){return mapping_;}
 
   private:
+	////////////////////////
+	/*
+	 * Data members. changes here produce incompatibilities between ntuple versions!
+	 */
+	////////////////////////
 
     std::vector<bool> fired_;
 

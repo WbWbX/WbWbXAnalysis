@@ -32,7 +32,6 @@ containerStackVector::~containerStackVector(){
 	stacks_.clear();
 	for(unsigned int i=0;i<csv_list.size();i++){
 		if(csv_list[i] == this) csv_list.erase(csv_list.begin()+i);
-		break;
 	}
 }
 void containerStackVector::listStacks(){
@@ -342,6 +341,7 @@ void containerStackVector::addPseudoData(TRandom3 * rand){
 
 		if(stacks_.at(i).is1D()){
 			container1D c=stacks_.at(i).getFullMCContainer();
+			c.setAllErrorsZero(false);
 			c.createStatFromContent();
 			c=c.createPseudoExperiment(rand);
 			stacks_.at(i).push_back(c,"data",0,1,999);
@@ -349,6 +349,7 @@ void containerStackVector::addPseudoData(TRandom3 * rand){
 		if(stacks_.at(i).is1DUnfold()){ //no else here!
 			container1DUnfold c=stacks_.at(i).getFullMCContainer1DUnfold();
 			container1D c2=c.getRecoContainer();
+			c2.setAllErrorsZero(false);
 			c2.createStatFromContent();
 			c2=c2.createPseudoExperiment(rand);
 			c.setRecoContainer(c2);
@@ -356,6 +357,7 @@ void containerStackVector::addPseudoData(TRandom3 * rand){
 		}
 		else if(stacks_.at(i).is2D()){
 			container2D c=stacks_.at(i).getFullMCContainer2D();
+			c.setAllErrorsZero(false);
 			c.createStatFromContent();
 			c=c.createPseudoExperiment(rand);
 			stacks_.at(i).push_back(c,"data",0,1,999);

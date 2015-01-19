@@ -37,6 +37,12 @@ namespace ztop{
     unsigned int PDFWeightsSize(){return pdfweights_.size();}
 
   protected:
+	////////////////////////
+	/*
+	 * Data members. changes here produce incompatibilities between ntuple versions!
+	 */
+	////////////////////////
+
     float runNo_;
     float lumiBl_;
     float eventNo_;

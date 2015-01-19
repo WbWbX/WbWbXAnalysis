@@ -43,7 +43,7 @@
 #include "TtZAnalysis/DataFormats/interface/NTLorentzVector.h"
 
 
-#include "TtZAnalysis/DataFormats/interface/dataFormatHelpers.h"
+#include "TtZAnalysis/DataFormats/interface/helpers.h"
 
 #include "../interface/analysisPlotsJan.h"
 #include "../interface/analysisPlotsAnya.h"
@@ -78,12 +78,19 @@
  *
  * Please indicate the meaning of the error code in the cout at the end of ../app_src/analyse.cc
  */
-void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,size_t legord, size_t anaid){
-
-
+void  MainAnalyzer::analyze(size_t anaid){
 
 	using namespace std;
 	using namespace ztop;
+
+	TString inputfile=infiles_.at(anaid); //modified in some mode options
+	const TString& legendname=legentries_.at(anaid);
+	const int &    color=colz_.at(anaid);
+	const size_t & legord=legord_.at(anaid);
+	//const TString& extraopts=extraopts_.at(anaid); //not used right now
+
+
+
 
 	bool issignal=issignal_.at(anaid);
 
@@ -509,6 +516,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 	tBranchHandler<NTMet>                  b_Met(t,mettype);
 	tBranchHandler<NTEvent>                b_Event(t,eventbranch_);
 	tBranchHandler<vector<NTGenParticle> > b_GenTops(t,"NTGenTops");
+	tBranchHandler<vector<NTGenParticle> > b_GenWs(t,"NTGenWs");
 	tBranchHandler<vector<NTGenParticle> > b_GenZs(t,"NTGenZs");
 	tBranchHandler<vector<NTGenParticle> > b_GenBs(t,"NTGenBs");
 	tBranchHandler<vector<NTGenParticle> > b_GenBHadrons(t,"NTGenBHadrons");
@@ -535,8 +543,6 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 	//some helpers
 	double sel_step[]={0,0,0,0,0,0,0,0,0};
 	float count_samesign=0;
-
-	float genvisPScounter=0;
 
 	if(!testmode_){
 		// this enables some caching while reading the tree. Speeds up batch mode
@@ -665,135 +671,68 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 		// do not move somewhere else!
 
 		vector<NTGenParticle*>  gentops,genbs,genbsrad;
+		vector<NTGenParticle*>  genws;
 		vector<NTGenParticle *> genleptons1,genleptons3;
 		vector<NTGenJet *>      genjets;
 		vector<NTGenParticle *> genbhadrons;
-		vector<NTGenJet *>      genbjetsfromtop;
-		vector<NTGenParticle *> genvisleptons1,genvisleptons3;
-		vector<NTGenJet *>      genvisjets;
-		vector<NTGenJet *>      genvisbjetsfromtop;
 
+		evt.gentops=&gentops;
 		evt.genbs=&genbs;
 		evt.genbsrad=&genbsrad;
+		evt.genbhadrons=&genbhadrons;
 		evt.genleptons1=&genleptons1;
 		evt.genleptons3=&genleptons3;
 		evt.genjets=&genjets;
-		evt.genvisleptons1=&genvisleptons1;
-		evt.genvisleptons3=&genvisleptons3;
-		evt.genvisjets=&genvisjets;
-		evt.genvisbjetsfromtop=&genvisbjetsfromtop;
+
+
+		//move back to geninfo part, only here for testing
+		b_GenLeptons3.getEntry(entry);
+		b_GenTops.getEntry(entry);
+		b_GenWs.getEntry(entry);
+		b_GenBs.getEntry(entry);
+		b_GenBsRad.getEntry(entry);
+		b_GenBHadrons.getEntry(entry);
+		b_GenJets.getEntry(entry);
+		b_GenLeptons1.getEntry(entry);
+
 
 		if(isMC){
-
 			if(testmode_ && entry==0)
 				std::cout << "testmode("<< anaid << "): got first MC gen entry" << std::endl;
 
-			b_GenLeptons3.getEntry(entry);
-			if(b_GenLeptons3.content()->size()>1){ //gen info there
+			//if(b_GenLeptons3.content()->size()>1){ //gen info there
 
-				b_GenTops.getEntry(entry);
-				b_GenBHadrons.getEntry(entry);
-				b_GenJets.getEntry(entry);
-				b_GenLeptons1.getEntry(entry);
-				//recreate mother daughter relations?!
-				b_GenBHadrons.getEntry(entry);
-				b_GenBs.getEntry(entry);
-				b_GenBsRad.getEntry(entry);
-				b_GenJets.getEntry(entry);
-				b_GenLeptons1.getEntry(entry);
 				///////////////TOPPT REWEIGHTING////////
-
-
 				if(b_GenTops.content()->size()>1){ //ttbar sample
-
 					getTopPtReweighter()->reWeight(b_GenTops.content()->at(0).pt(),b_GenTops.content()->at(1).pt() ,puweight);
 					if(apllweightsone) puweight=1;
 					gentops.push_back(&b_GenTops.content()->at(0));
-					gentops.push_back(&b_GenTops.content()->at(0));
-					evt.gentops=&gentops;
+					gentops.push_back(&b_GenTops.content()->at(1));
 				}
 
-				if(testmode_ && entry==0){
-					std::cout << "testmode("<< anaid << "): entered signal genInfo part" << std::endl;
-				}
+				//recreate dependencies
+				genbs=produceCollection(b_GenBs.content(), &gentops);
+				genbsrad=produceCollection(b_GenBsRad.content(), &genbs);//,-1,-1,&genbs);
+				genws=produceCollection(b_GenWs.content(), &gentops);
 
-				//only format change
-				genleptons1=produceCollection<NTGenParticle>(b_GenLeptons1.content());
-				genleptons3=produceCollection<NTGenParticle>(b_GenLeptons3.content());
-				genjets=produceCollection<NTGenJet>(b_GenJets.content());
-				//no phase space cuts here on the bs
-				genbs=produceCollection<NTGenParticle>(b_GenBs.content());//,-1,-1,&gentops);
-				if(b_GenBsRad.content())
-					genbsrad=produceCollection<NTGenParticle>(b_GenBsRad.content());//,-1,-1,&genbs);
+				genleptons3=produceCollection(b_GenLeptons3.content(),&genws);
+				genleptons1=produceCollection(b_GenLeptons1.content(),&genleptons3);
 
+				//b-hadrons that stem from a b quark that itself originates in a top are
+				//assoziated to that top by the bhadronmatcher (Nazar)
+				//this logic is used and kept here
+				genbhadrons=produceCollection(b_GenBHadrons.content(), &gentops);
+				//try to associate the mothers. If successful, b-jet is matched to hadron -> to top
+				genjets=produceCollection(b_GenJets.content());//,&genbhadrons);
 
-
-				//define visible phase space
-				float ps_ptlepmin=20;
-				float ps_etalmax=2.4;
-
-				float ps_ptjetmin=30;
-				float ps_etajetmax=2.4;
-
-
-
-				for(size_t i=0;i<genleptons1.size();i++){
-					NTGenParticle * lep=(genleptons1.at(i));
-					if(lep->pt()>ps_ptlepmin && fabs(lep->eta())<ps_etalmax)
-						genvisleptons1.push_back(lep);
-				}
-				for(size_t i=0;i<genleptons3.size();i++){
-					NTGenParticle * lep=(genleptons3.at(i));
-					if(lep->pt()>ps_ptlepmin && fabs(lep->eta())<ps_etalmax)
-						genvisleptons3.push_back(lep);
-				}
-
-				for(size_t i=0;i<genjets.size();i++){
-					NTGenJet * genjet=(genjets.at(i));
-					if(genjet->pt()>ps_ptjetmin && fabs(genjet->eta())<ps_etajetmax)
-						genvisjets.push_back(genjet);
-				}
-
-				//the mothers are only filled if b hadrons originate from a b that itself originates from a top,
-				//so its sufficient to check whether there is any mother iterator
-				std::vector<int> bhadids;
-				for(size_t i=0;i<b_GenBHadrons.content()->size();i++){
-					NTGenParticle * bhad=&b_GenBHadrons.content()->at(i);
-					if(bhad->motherIts().size()>0)
-						bhadids<<bhad->genId();
-				}
-
-
-				NTLorentzVector<float>  p4genbjet;
-
-				for(size_t i=0;i<genjets.size();i++){
-					NTGenJet * genjet=genjets.at(i);
-					if(genjet->motherIts().size()>0){
-						int motherid=genjet->motherIts().at(0);
-						if(std::find(bhadids.begin(),bhadids.end(),motherid) != bhadids.end()){
-							genbjetsfromtop << genjet;
-						}
-					}
-				}
-
-				for(size_t i=0;i<genbjetsfromtop.size();i++){
-					NTGenJet * bjet=genbjetsfromtop.at(i);
-					if(bjet->pt()<30) continue;
-					if(fabs(bjet->eta()) >ps_etajetmax) continue;
-					genvisbjetsfromtop << bjet;
-				}
-				//gen acceptance counter
-				if(genvisjets.size()>1 && genvisleptons3.size()>1 && genvisbjetsfromtop.size()>0){
-					genvisPScounter+=puweight;
-				}
-
-			}
+			//}
 			if(!fakedata){
 				/*
 				 * fill gen info here
 				 */
 				jansplots_step8.fillPlotsGen();
 				anyasplots_step8.fillPlotsGen();
+
 			}
 		} /// isMC ends
 
@@ -854,12 +793,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 					&& muon->pixHits()>0
 					&& muon->trkHits()>5){
 				idmuons <<  &(b_Muons.content()->at(i));
-				continue; //no double counting
 			}
-			//usetight=false;
-
-			///end tight
-			//  loosemuons <<  &(b_Muons.content()->at(i));
 		}
 
 
@@ -877,6 +811,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 		 */
 
 		b_Electrons.getEntry(entry);
+
 
 		vector<NTElectron *> kinelectrons,idelectrons,isoelectrons;
 		evt.kinelectrons=&kinelectrons;
@@ -917,28 +852,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 				}
 
 			}
-			/*
-				if(fabs(elec->d0V()) >0.04 ) continue;
-			if(!(elec->isNotConv()) ) continue;
-			//
-			// from https://twiki.cern.ch/twiki/bin/viewauth/CMS/MultivariateElectronIdentification#Triggering_MVA
-			if(abseta < 0.8){
-				if(elec->mvaId() < 0.94) continue;}
-			else if(abseta < 1.479){
-				if(elec->mvaId() < 0.85) continue;}
-			else if(abseta < 2.5){
-				if(elec->mvaId() < 0.92) continue;}
 
-			if(elec->mHits() > 0) continue;
-
-
-
-			//select iso electrons
-			if(!mode_invertiso && elec->rhoIso()>0.15) continue;
-			if(mode_invertiso && elec->rhoIso()<0.15) continue;
-			isoelectrons <<  elec;
-			isoleptons << elec;
-			 */
 		}
 
 		/*
@@ -948,6 +862,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
 
 
+		if(testmode_ && entry==0)
+			std::cout << "testmode("<< anaid << "): first controlPlots" << std::endl;
 
 		/*
 		 * Step 0 after trigger and ntuple cuts on leptons
@@ -955,6 +871,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 		sel_step[0]+=puweight;
 		plots.makeControlPlots(step);
 		zplots.makeControlPlots(step);
+
 
 
 		//////////two ID leptons STEP 1///////////////////////////////
@@ -968,6 +885,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 		sel_step[1]+=puweight;
 		plots.makeControlPlots(step);
 		zplots.makeControlPlots(step);
+
 
 
 		//////// require two iso leptons  STEP 2  //////////////////////////
@@ -1072,6 +990,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
 
 
+
 		///////// 20 GeV cut /// STEP 3 ///////////////////////////////////////
 		step++;
 
@@ -1081,6 +1000,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 		// create jec jets for met and ID jets
 		// create ID Jets and correct JER
 		b_Jets.getEntry(entry);
+
+
 
 		vector<NTJet *> treejets,idjets,medjets,hardjets;
 		evt.idjets=&idjets;
@@ -1129,6 +1050,8 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 
 
 		b_Met.getEntry(entry);
+
+
 
 		NTMet adjustedmet = *b_Met.content();
 		evt.simplemet=b_Met.content();
@@ -1500,7 +1423,11 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 			zplots.makeControlPlots(step);
 		}
 
-		if(tickoncemode_) break; //one event survived, sufficient
+		if(tickoncemode_) {
+			std::cout << "tickOnce("<< anaid << "): finished main loop once. break"<<std::endl;
+			break; //one event survived, sufficient
+		}
+
 
 	}
 
@@ -1671,8 +1598,7 @@ void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color,siz
 			std::cout  << std::endl;
 		}
 
-		std::cout << "\nEvents in defined visible phase space (normalized): "
-				<< genvisPScounter*norm << "\n" << std::endl;
+
 		std::cout << "\nEvents total (normalized): "
 				<< nEntries*norm << "\n"
 				"nEvents_selected normd: "<< sel_step[8]*norm<< " " << inputfile<< std::endl;

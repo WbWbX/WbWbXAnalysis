@@ -31,7 +31,6 @@ container2D::~container2D(){
 	for(size_t i=0;i<c_list.size();i++){
 		if(this==c_list.at(i))
 			c_list.erase(c_list.begin()+i);
-		break;
 	}
 }
 container2D::container2D(const container2D&rhs){
@@ -730,6 +729,11 @@ void container2D::removeAllSystematics(){
 		conts_.at(i).removeAllSystematics();
 	}
 }
+void container2D::setAllErrorsZero(bool nominalstat){
+	for(size_t i=0;i<conts_.size();i++)
+		conts_.at(i).setAllErrorsZero(nominalstat);
+}
+
 void container2D::createStatFromContent(){
 	for(size_t i=0;i<conts_.size();i++){
 		conts_.at(i).createStatFromContent();

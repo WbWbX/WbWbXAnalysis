@@ -27,6 +27,12 @@ class NTTriggerObject{
   float m(){return p4_.M();}
 
  protected:
+	////////////////////////
+	/*
+	 * Data members. changes here produce incompatibilities between ntuple versions!
+	 */
+	////////////////////////
+
   NTLorentzVector<float> p4_;
 
 };

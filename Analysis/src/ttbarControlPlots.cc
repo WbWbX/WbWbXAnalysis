@@ -76,7 +76,7 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
 	///GEN
 	SETBINSRANGE(50,0,500);
 	addPlot("top pt", "p_{T}^{t}[GeV]","N_{t}/GeV");
-	FILLFOREACH(gentops,pt());
+//	FILLFOREACH(gentops,pt());
 
 
 	///LEPTONS

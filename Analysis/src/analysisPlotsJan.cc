@@ -10,7 +10,7 @@
 #include "../interface/AnalysisUtils.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 #include "TtZAnalysis/DataFormats/src/classes.h"
-#include "TtZAnalysis/DataFormats/interface/dataFormatHelpers.h"
+#include "TtZAnalysis/DataFormats/interface/helpers.h"
 
 namespace ztop{
 
@@ -18,12 +18,6 @@ void analysisPlotsJan::bookPlots(){
 	if(!use()) return;
 	using namespace std;
 	using namespace ztop;
-
-	//define vis ps etc
-	lep_visphasespace_pt_    =20;
-	lep_visphasespace_eta_   =2.4;
-	bquark_visphasespace_pt_ =30;
-	bquark_visphasespace_eta_=2.4;
 
 
 	vector<float> genmlbmin_bins,genmlb_bins;
@@ -43,8 +37,6 @@ void analysisPlotsJan::bookPlots(){
 
 	Mlb=addPlot(genmlb_bins,genmlb_bins,"m_lb leading unfold","M_{lb} [GeV]", "N_{evt}/GeV");
 
-	mlbcombthresh_=165;
-
 	mlb=addPlot(genmlb_bins,genmlb_bins,"m_lb","m_{lb}* [GeV]", "N_{evt}/GeV");
 
 	mlbmin=addPlot(genmlbmin_bins,genmlbmin_bins,"m_lb min","m_{lb}^{min} [GeV]", "N_{evt}/GeV");
@@ -56,8 +48,7 @@ void analysisPlotsJan::bookPlots(){
 	vector<float> tmpbins=makebins(40,20,200);
 
 	leadleppt = addPlot(tmpbins,tmpbins,"leading top-lepton pt","p_{t}^{l} [GeV]", "N_{evt}/GeV");
-	tmpbins=makebins(40,30,200);
-	benergy  = addPlot(tmpbins,tmpbins,"leading b pt","p_{t}^{l} [GeV]", "N_{evt}/GeV");
+
 	tmpbins=makebins(40,20,350);
 	mll  = addPlot(tmpbins,tmpbins,"dilepton mass","m_{ll} [GeV]", "N_{evt}/GeV");
 
@@ -86,39 +77,32 @@ void analysisPlotsJan::fillPlotsGen(){
 	if(event()->gentops && event()->gentops->size()>0)
 		total->fillGen(1.,puweight());
 
-	if(event()->genvisleptons3 && event()->genvisjets){
-		if(event()->genvisleptons3->size() > 1 && event()->genvisjets->size()>1){ //vis PS
-			vistotal->fillGen(1.,puweight());
-		}
+	//////////// mlb analysis //////////////
+
+	//produce visible phase space collections
+	std::vector<NTGenParticle*> genvisleptons3=produceCollection(event()->genleptons3,20,2.4);
+	std::vector<NTGenJet*> genvisjets=produceCollection(event()->genjets,30,2.4);
+	std::vector<NTGenParticle*> genvisbs=produceCollection(event()->genbs,30,2.4);
+
+	if(requireNumber(2,genvisleptons3) && requireNumber(2,genvisjets)){ //vis PS
+		vistotal->fillGen(1.,puweight());
 	}
 
+
 	//calculate mlbs based on ME lepton
-
-	if(event()->genvisleptons3 && event()->genbs){
-		if(event()->genvisleptons3->size()>1 && event()->genbs->size()>0 ){
-
+	if(requireNumber(2,genvisleptons3)){
+		// no check needed if from top because only those are stored!
+		if(requireNumber(1,genvisbs) ){
 			//vis ps cuts on b-jets
-			NTGenParticle* leadvisb=0;
-			for(size_t i=0;i<event()->genbs->size();i++){
-				if(event()->genbs->at(i)->pt()>bquark_visphasespace_pt_
-						&& fabs(event()->genbs->at(i)->eta())<bquark_visphasespace_eta_){
-					leadvisb=event()->genbs->at(i);
-					break;
-				}
-			}
-
-			//old
-			//	leadvisb=0;
-			//	if(event()->genbs->at(0)->pt()>30)
-			//		leadvisb=event()->genbs->at(0);
+			NTGenParticle* leadvisb=genvisbs.at(0);
 
 			if(leadvisb){
 				//	if(event()->genbs->at(0)->pt()>30){
 				//	leadvisb=event()->genbs->at(0);
 
 				NTLorentzVector<float> bjetp4=leadvisb->p4();
-				NTLorentzVector<float> llepp4=event()->genvisleptons3->at(0)->p4();
-				NTLorentzVector<float> slepp4=event()->genvisleptons3->at(1)->p4();
+				NTLorentzVector<float> llepp4=genvisleptons3.at(0)->p4();
+				NTLorentzVector<float> slepp4=genvisleptons3.at(1)->p4();
 
 				float fMlb=(bjetp4+llepp4).m();
 				float fm2lb=(bjetp4+slepp4).m();
@@ -133,26 +117,33 @@ void analysisPlotsJan::fillPlotsGen(){
 
 				mlbivansbins->fillGen(fmlb,puweight());
 			}
+
+
+
 		}
 
+		std::vector<NTGenParticle*> genvisbsrad=produceCollection(event()->genbsrad,30,2.4);
 
-	}
-
-	if(event()->genvisleptons3 && event()->genbsrad){
-		if(event()->genvisleptons3->size()>1 && event()->genbsrad->size()>0 ){
+		if(requireNumber(1,genvisbsrad) && event()->genbs){
+			//check if its the right one
+			//same charge as mother b-quark
+			//and highest pt (if more have same charge)
 			NTGenParticle* leadvisb=0;
-			for(size_t i=0;i<event()->genbsrad->size();i++){
-				if(event()->genbsrad->at(i)->pt()>bquark_visphasespace_pt_
-						&& fabs(event()->genbsrad->at(i)->eta())<bquark_visphasespace_eta_){
-					leadvisb=event()->genbsrad->at(i);
-					break;
+			for(size_t i=0;i<genvisbsrad.size();i++){
+				for(size_t j=0;j<genvisbsrad.at(i)->mothers().size();j++){
+					if(genvisbsrad.at(i)->mothers().at(j)->q() == genvisbsrad.at(i)->q()){
+						leadvisb=genvisbsrad.at(i);
+						break;
+					}
+					if(leadvisb)
+						break;
 				}
 			}
 			if(leadvisb){
 
 				NTLorentzVector<float> bjetp4=leadvisb->p4();
-				NTLorentzVector<float> llepp4=event()->genvisleptons3->at(0)->p4();
-				NTLorentzVector<float> slepp4=event()->genvisleptons3->at(1)->p4();
+				NTLorentzVector<float> llepp4=genvisleptons3.at(0)->p4();
+				NTLorentzVector<float> slepp4=genvisleptons3.at(1)->p4();
 
 				float fMlb=(bjetp4+llepp4).m();
 				float fm2lb=(bjetp4+slepp4).m();
@@ -164,22 +155,15 @@ void analysisPlotsJan::fillPlotsGen(){
 			}
 		}
 	}
-	//new implementation
 
-	if(event()->genvisleptons3){
-		if(event()->genvisleptons3->size()>0)
-			leadleppt->fillGen(event()->genvisleptons3->at(0)->pt(),puweight());
+	if(requireNumber(1,genvisleptons3))
+		leadleppt->fillGen(genvisleptons3.at(0)->pt(),puweight());
+
+	if(requireNumber(2,genvisleptons3)){
+		NTLorentzVector<float> mllgen = genvisleptons3.at(0)->p4() + genvisleptons3.at(1)->p4();
+		mll->fillGen(mllgen.m(),puweight());
 	}
-	if(event()->genbs){
-		if(event()->genbs->size()>0)
-			benergy->fillGen(event()->genbs->at(0)->pt(),puweight());
-	}
-	if(event()->genvisleptons3){
-		if(event()->genvisleptons3->size()>1){
-			NTLorentzVector<float> mllgen = event()->genvisleptons3->at(0)->p4() + event()->genvisleptons3->at(1)->p4();
-			mll->fillGen(mllgen.m(),puweight());
-		}
-	}
+
 
 }
 
@@ -220,9 +204,6 @@ void analysisPlotsJan::fillPlotsReco(){
 	}
 	if(event()->leadinglep)
 		leadleppt->fillReco(event()->leadinglep->pt(),puweight());
-
-	if(event()->selectedbjets && event()->selectedbjets->size()>0)
-		benergy->fillReco(event()->selectedbjets->at(0)->p4().e(),puweight());
 
 	if(event()->mll)
 		mll->fillReco(*event()->mll,puweight());

@@ -298,6 +298,7 @@ public:
 	 * the new systematic uncertainty will be named binom_error
 	 */
 	void transformToEfficiency();
+
 	/**
 	 * sets all errors (sys and stat) to 0
 	 * but doesn't remove layers

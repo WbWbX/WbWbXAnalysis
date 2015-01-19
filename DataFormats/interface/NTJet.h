@@ -75,6 +75,14 @@ namespace ztop{
 
 
   protected:
+
+	////////////////////////
+	/*
+	 * Data members. changes here produce incompatibilities between ntuple versions!
+	 */
+	////////////////////////
+
+
     int genid_;
     NTLorentzVector<float> p4_;
     NTLorentzVector<float> genP4_;

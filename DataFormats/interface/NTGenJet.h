@@ -20,6 +20,7 @@ namespace ztop{
     void setMotherIts(const std::vector<int> & its){motherits_=its;}
     void setMothers(const std::vector<ztop::NTGenParticle *> & p){motherPs_=p;}
     void addMotherIt(int it){motherits_.push_back(it);}
+    void addMother(ztop::NTGenParticle * it){motherPs_.push_back(it);}
 
     void setGenId(int genid){genid_=genid;}
 
@@ -58,6 +59,13 @@ namespace ztop{
 
 
   protected:
+
+	////////////////////////
+	/*
+	 * Data members. changes here produce incompatibilities between ntuple versions!
+	 */
+	////////////////////////
+
 
     NTLorentzVector<float>  p4_;
     std::vector<int> motherits_;

@@ -7,6 +7,7 @@
 //should be taken care of by the linker!
 
 
+
 void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 		double lumi, bool dobtag, bool status,bool testmode,bool tickonce,TString maninputfile,
 		TString mode,TString topmass,TString btagfile,bool createLH, std::string discrfile,float fakedatastartentries,bool interactive,float wpval){ //options like syst..
@@ -119,8 +120,10 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	}
 
 	ana.setMaxChilds(6);
-	if(testmode || interactive || tickonce)
+	if(interactive || tickonce)
 		ana.setMaxChilds(20);
+	if(testmode)
+		ana.setMaxChilds(1);
 	ana.setMode(mode);
 	ana.setShowStatus(status);
 	ana.setTestMode(testmode);
@@ -570,6 +573,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 			}
 			sleep(1);
 			now = time(0);
+			cout << "Started  analyse at: " << dt;// << endl;
 			dt = ctime(&now);
 			cout << "Finished analyse at: " << dt << endl;
 
@@ -604,9 +608,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 //////////////////
 #include "mainMacro.h"
 
-int main(int argc, char* argv[]){
-	ztop::optParser parserp(argc,argv);
-	ztop::optParser * parser=&parserp; //check
+invokeApplication(){
 	using namespace ztop;
 
 	TString channel= parser->getOpt<TString>   ("c","emu","channel (ee, emu, mumu), default: emu\n");         //-c channel

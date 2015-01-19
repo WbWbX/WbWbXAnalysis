@@ -23,7 +23,11 @@ namespace ztop{class NTEvent;}
 
 //maybe the container filling uses a lot of cpu time, check that! checked. inlined and pow->sq
 
-
+/*
+ *
+ * DONT'T add containers as members
+ *
+ */
 
 
 class MainAnalyzer{
@@ -75,7 +79,6 @@ public:
 	float createNormalizationInfo(TFile *f,bool isMC,size_t anaid);
 
 	void setMaxChilds(size_t childs){maxchilds_=childs;}
-	void analyze(TString, TString, int, size_t,size_t i=0);
 	void analyze(size_t i);
 
 	void setFileList(TString fl){filelist_=fl;}
@@ -212,6 +215,7 @@ private:
 	std::vector<double> norms_;
 	std::vector<size_t> legord_;
 	std::vector<bool> issignal_;
+	std::vector<TString> extraopts_;
 
 	///communication pipes
 

@@ -28,6 +28,12 @@ namespace ztop{
     float dzV(){return dzV_;}
     float dzVErr(){return dzVErr_;}
   protected:
+	////////////////////////
+	/*
+	 * Data members. changes here produce incompatibilities between ntuple versions!
+	 */
+	////////////////////////
+
     NTLorentzVector<float> p4_;
     int q_;
     float dzV_;

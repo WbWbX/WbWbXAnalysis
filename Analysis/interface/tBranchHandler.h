@@ -38,11 +38,11 @@ protected:
 template<class T>
 class tBranchHandler : private tBranchHandlerBase{
 public:
-	tBranchHandler():t_(0),content_(0),branch_(0),branchname_(""),missingbranch_(true){
+	tBranchHandler():t_(0),content_(0),copied_(false),branch_(0),branchname_(""),missingbranch_(true){
 		// doesn't do anything
 		throw std::logic_error("tBranchHandler: default constructor should not be used");
 	}
-	tBranchHandler(TTree * t, const TString& branchname):t_(t),content_(0),branch_(0),branchname_(branchname),missingbranch_(false){
+	tBranchHandler(TTree * t, const TString& branchname):t_(t),content_(0),copied_(false),branch_(0),branchname_(branchname),missingbranch_(false){
 		if(!t){
 			throw std::runtime_error("tBranchHandler: tree pointer is NULL!");
 		}
@@ -81,15 +81,27 @@ public:
 	}
 
 	void getEntry(const Long64_t& entry){
+		realcontent_=T();
+		copied_=false;
 		if(!missingbranch_)
 			branch_->GetEntry(entry);
 	}
-	T * content(){
+	const T  * content()const{
+		if(copied_) return &realcontent_;
 		if(content_) return content_;
 		else
 			throw std::runtime_error("tBranchHandler::content() pointer NULL!");
 	}
-
+	T  * content(){
+		if(content_){
+			if(!copied_){
+				realcontent_=*content_;
+				copied_=true;
+			}
+			return &realcontent_;
+		}
+		throw std::runtime_error("tBranchHandler::content() pointer NULL!");
+	}
 	/**
 	 * Allows missing and just returns an empty vector
 	 */
@@ -98,6 +110,8 @@ public:
 private:
 	TTree *t_;
 	T* content_;
+	T realcontent_;
+	bool copied_;
 	TBranch * branch_;
 	TString branchname_;
 	bool missingbranch_;

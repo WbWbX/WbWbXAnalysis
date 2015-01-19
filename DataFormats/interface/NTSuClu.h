@@ -16,6 +16,13 @@ public:
     float  eta()const{return P4_.Eta();}
     float pt() const{return P4_.Pt();}
 private:
+	////////////////////////
+	/*
+	 * Data members. changes here produce incompatibilities between ntuple versions!
+	 */
+	////////////////////////
+
+
     NTLorentzVector<float> P4_;
 };
 }

@@ -27,14 +27,10 @@ public:
     gentops(0),
     genbs(0),
     genbsrad(0),
+    genbhadrons(0),
     genleptons1(0),
     genleptons3(0),
-    genvisleptons1(0),
-    genvisleptons3(0),
     genjets(0),
-    genvisjets(0),
-    genbjetsfromtop(0),
-    genvisbjetsfromtop(0),
     idjets(0),medjets(0),hardjets(0),medbjets(0),hardbjets(0),dphilljjets(0),dphiplushardjets(0),
     selectedjets(0),selectedbjets(0),selectednonbjets(0),
     allmuons(0),kinmuons(0),idmuons(0),isomuons(0),
@@ -84,14 +80,10 @@ public:
         gentops=0;
         genbs=0;
         genbsrad=0;
+        genbhadrons=0;
         genleptons1=0;
         genleptons3=0;
-        genvisleptons1=0;
-        genvisleptons3=0;
         genjets=0;
-        genvisjets=0;
-        genbjetsfromtop=0;
-        genvisbjetsfromtop=0;
 
         idjets=0;medjets=0;hardjets=0;medbjets=0;hardbjets=0;dphilljjets=0;dphiplushardjets=0;
         selectedjets=0;selectedbjets=0,selectednonbjets=0;
@@ -142,14 +134,10 @@ public:
     std::vector<ztop::NTGenParticle *> * genbs;
     // ONLY contain bs after possible radiation from top! ordered by pt
     std::vector<ztop::NTGenParticle *> * genbsrad;
+    std::vector<ztop::NTGenParticle *> * genbhadrons;
     std::vector<ztop::NTGenParticle *> * genleptons1;
     std::vector<ztop::NTGenParticle *> * genleptons3;
-    std::vector<ztop::NTGenParticle *> * genvisleptons1;
-    std::vector<ztop::NTGenParticle *> * genvisleptons3;
     std::vector<ztop::NTGenJet *> * genjets;
-    std::vector<ztop::NTGenJet *> * genvisjets;
-    std::vector<ztop::NTGenJet *> * genbjetsfromtop;
-    std::vector<ztop::NTGenJet *> * genvisbjetsfromtop;
 
 
 

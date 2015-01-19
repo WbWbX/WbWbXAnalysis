@@ -94,6 +94,8 @@ public:
 	void renameSyst(TString, TString);
 	void removeAllSystematics();
 
+	void setAllErrorsZero(bool nominalstat);
+
 	void createStatFromContent();
 
 	TH2D * getTH2D(TString name="", bool dividebybinarea=false, bool onlystat=false) const;

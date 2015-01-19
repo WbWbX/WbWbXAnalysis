@@ -75,6 +75,13 @@ public:
 
 protected:
 
+	////////////////////////
+	/*
+	 * Data members. changes here produce incompatibilities between ntuple versions!
+	 */
+	////////////////////////
+
+
     bool isGlobal_;
     bool isTracker_;
     bool ispf_;
