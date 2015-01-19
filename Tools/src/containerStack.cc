@@ -173,7 +173,12 @@ void containerStack::setLegendOrder(const TString &leg, const size_t& no){
 void containerStack::mergeLegends(const std::vector<TString>& tobemerged,const TString & mergedname, int mergedColor, bool allowsignals){
 	std::vector<size_t> idxstbm;
 	for(size_t i=0;i<tobemerged.size();i++){
-		idxstbm.push_back(getContributionIdx(tobemerged.at(i)));
+		try{
+			idxstbm.push_back(getContributionIdx(tobemerged.at(i)));
+		}
+		catch(...){
+			std::cout << "containerStack::mergeLegends: contribution " << tobemerged.at(i) << " not found, skipping" <<std::endl;
+		}
 		if(debug)	std::cout << i << std::endl;
 	}
 
