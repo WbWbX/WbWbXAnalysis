@@ -847,26 +847,26 @@ float container1D::getYMin(bool dividebybinwidth,const int& systLayer) const{
  */
 float container1D::normalize(bool includeUFOF, bool normsyst, const float& normto){
 	if(!normsyst){
-		float integral=integral(includeUFOF);
+		float integralf=integral(includeUFOF);
 		float norm=0;
-		if(integral != 0)
-			norm=normto/integral(includeUFOF);
+		if(integralf != 0)
+			norm=normto/integralf;
 		*this *= norm;
 		return norm;
 	}
 	else{
 		//nominal
-		float integral=integral(includeUFOF);
+		float integralf=integral(includeUFOF);
 		float norm=0;
-		if(integral != 0)
-			norm=normto/integral(includeUFOF);
+		if(integralf != 0)
+			norm=normto/integralf;
 		contents_.getNominal().multiply(norm);
 
 		for(size_t layer=0;layer<getSystSize();layer++){
 			float sysintegral=integral(includeUFOF,layer);
 			float tmpnorm=0;
 			if(sysintegral != 0)
-				float tmpnorm=normto / sysintegral;
+				 tmpnorm=normto / sysintegral;
 			contents_.getLayer(layer).multiply(tmpnorm);
 		}
 		return norm;
