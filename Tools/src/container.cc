@@ -31,7 +31,7 @@ bool container1D::c_makelist=false;
 
 ///////function definitions
 container1D::container1D():
-				taggedObject(taggedObject::type_container1D)
+						taggedObject(taggedObject::type_container1D)
 {
 	canfilldyn_=false;
 	//divideBinomial_=true;
@@ -71,7 +71,7 @@ container1D::container1D(float binwidth, TString name,TString xaxisname,TString 
 	hp_=0;
 }
 container1D::container1D(const std::vector<float>& bins,const TString& name,const TString& xaxisname,const TString& yaxisname, bool mergeufof):
-					taggedObject(taggedObject::type_container1D)
+							taggedObject(taggedObject::type_container1D)
 
 {
 	plottag=none;
@@ -847,20 +847,29 @@ float container1D::getYMin(bool dividebybinwidth,const int& systLayer) const{
  */
 float container1D::normalize(bool includeUFOF, bool normsyst, const float& normto){
 	if(!normsyst){
-		float norm=normto/integral(includeUFOF);
+		float integral=integral(includeUFOF);
+		float norm=0;
+		if(integral != 0)
+			norm=normto/integral(includeUFOF);
 		*this *= norm;
 		return norm;
 	}
 	else{
 		//nominal
-		float outnorm=normto / integral(includeUFOF);
-		contents_.getNominal().multiply(outnorm);
+		float integral=integral(includeUFOF);
+		float norm=0;
+		if(integral != 0)
+			norm=normto/integral(includeUFOF);
+		contents_.getNominal().multiply(norm);
 
 		for(size_t layer=0;layer<getSystSize();layer++){
-			float tmpnorm=normto / integral(includeUFOF,layer);
+			float sysintegral=integral(includeUFOF,layer);
+			float tmpnorm=0;
+			if(sysintegral != 0)
+				float tmpnorm=normto / sysintegral;
 			contents_.getLayer(layer).multiply(tmpnorm);
 		}
-		return outnorm;
+		return norm;
 	}
 }
 /**
@@ -1578,7 +1587,7 @@ void container1D::addRelSystematicsFrom(const ztop::container1D & rhs,bool ignor
 			//contents_.getLayer(newlayerit).removeStat();
 			//stat are definitely not correlated
 			bool isnominalequal=(!strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i),1e-2))
-																																					        				|| (strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i))) ;
+																																					        						|| (strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i))) ;
 
 			if(isnominalequal){ //this is just a copy leave it and add no variation
 				//contents_.getLayer(newlayerit).removeStat();
