@@ -23,6 +23,8 @@
 #ifndef TREEWRITERBASE_H
 #define TREEWRITERBASE_H
 
+#include "TtZAnalysis/Configuration/interface/version.h"
+
 #include <memory>
 
 // user include files
@@ -104,8 +106,10 @@
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "DataFormats/HLTReco/interface/TriggerEvent.h"
 #include "DataFormats/HLTReco/interface/TriggerObject.h"
+#ifndef CMSSW_LEQ_5
 //agrohsje added 
 #include "DataFormats/PatCandidates/interface/PackedTriggerPrescales.h"
+#endif
 #include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
 
 #include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"

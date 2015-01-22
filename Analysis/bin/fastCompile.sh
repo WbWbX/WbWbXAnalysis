@@ -6,6 +6,7 @@
 
 
 infile=$1
+opts=$2
 
 export CPLUS_INCLUDE_PATH=$CMSSW_BASE/src
 ROOTFLAGS=`root-config --cflags`
@@ -40,6 +41,6 @@ done
 g++ $ROOTFLAGS -fopenmp -I$CPLUS_INCLUDE_PATH -c -o $infile.o $infile
 g++ -o $infile.exe -fopenmp -Wall $ROOTLIBS -L$CMSLIBS $linklibs $infile.o  
 chmod +x $infile.exe
-./$infile.exe
+./$infile.exe $opts
 rm -f $infile.exe
 rm -f $infile.o
