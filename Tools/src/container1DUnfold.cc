@@ -124,7 +124,27 @@ container1DUnfold container1DUnfold::rebinToBinning(const std::vector<float> & n
 	return out;
 
 }
+void container1DUnfold::clear(){
+	container2D::clear();
+	gencont_.clear();
+	recocont_.clear();
+	unfolded_.clear();
+	refolded_.clear();
+}
+void container1DUnfold::reset(){
+	container2D::reset();
+	gencont_.reset();
+	recocont_.reset();
+	unfolded_.reset();
+	refolded_.reset();
 
+}
+
+void container1DUnfold::setAllZero(){
+	container2D::setAllZero(); gencont_.setAllZero(); recocont_.setAllZero();
+	unfolded_.setAllZero();
+	refolded_.setAllZero();
+}
 
 void container1DUnfold::removeAllSystematics(){
 	for(size_t i=0;i<conts_.size();i++){
@@ -668,10 +688,12 @@ container2D container1DUnfold::getNormResponseMatrix()const{
 
 	out.conts_=conts_; //! for each y axis bin one container
 	container1D xprojection=projectToX(true);
-
+	bool tmp=histoContent::divideStatCorrelated;
+	histoContent::divideStatCorrelated=true;
 	for(size_t i=0;i<out.conts_.size();i++){
 		out.conts_.at(i)/=xprojection;
 	}
+	histoContent::divideStatCorrelated=tmp;
 	out.xbins_=xbins_;
 	out.ybins_=ybins_;
 	out.divideBinomial_=divideBinomial_;

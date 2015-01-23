@@ -44,8 +44,9 @@ public:
 
 	container1DUnfold rebinToBinning(const std::vector<float> &)const;
 
-	void clear(){container2D::clear(); gencont_.clear(); recocont_.clear();}
-	void reset(){container2D::reset(); gencont_.reset();recocont_.reset();}
+	void clear();
+	void reset();
+	void setAllZero();
 	void removeError(TString name){container2D::removeError(name); gencont_.removeError(name); recocont_.removeError(name);unfolded_.removeError(name);}
 	void renameSyst(TString old , TString New){container2D::renameSyst(old,New);gencont_.renameSyst(old,New);recocont_.renameSyst(old, New);}
 	void removeAllSystematics();

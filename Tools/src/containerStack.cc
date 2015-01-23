@@ -1729,11 +1729,13 @@ container1D containerStack::getSignalContainer()const{
 	container1D out;
 	if(containers_.size()>0){
 		out=containers_.at(0);
-		out.clear();
+		out.setAllZero();
 	}
 	if(sidx.size()>0) out=getContainer(sidx.at(0));
 	for(size_t i=1;i<sidx.size();i++)
 		out+=getContainer(sidx.at(i));
+	if(sidx.size()<1)
+		throw std::logic_error("containerStack::getSignalContainer: No signal defined!");
 	return out;
 }
 container1D containerStack::getBackgroundContainer()const{
@@ -1776,11 +1778,13 @@ container2D containerStack::getSignalContainer2D()const{
 	container2D out;
 	if(containers2D_.size()>0){
 		out=containers2D_.at(0);
-		out.clear();
+		out.setAllZero();
 	}
 	if(sidx.size()>0) out=getContainer2D(sidx.at(0));
 	for(size_t i=1;i<sidx.size();i++)
 		out+=getContainer2D(sidx.at(i));
+	if(sidx.size()<1)
+		throw std::logic_error("containerStack::getSignalContainer2D: No signal defined!");
 	return out;
 }
 
@@ -1958,12 +1962,13 @@ container1DUnfold containerStack::getSignalContainer1DUnfold(const std::vector<T
 	container1DUnfold out;
 	if(containers1DUnfold_.size()>0)
 		out=containers1DUnfold_.at(0);
-	out.clear();
+	out.setAllZero();
 	for(size_t i=0;i<signals.size();i++){
 		container1DUnfold ctemp=getContribution1DUnfold(signals.at(i));
 		out = out + ctemp;
 	}
-
+	if(signals.size()<1)
+		throw std::logic_error("containerStack::getSignalContainer1DUnfold: No signal defined!");
 	container1DUnfold::c_makelist=mklist;
 	return out;
 }

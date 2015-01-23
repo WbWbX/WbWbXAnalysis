@@ -60,6 +60,9 @@ public:
 
 	float getBinArea(const size_t&, const size_t&)const;
 
+	float getMax(int syslayer=-1)const;
+	float getMin(int syslayer=-1)const;
+
 	container2D rebinXToBinning(const std::vector<float>& )const;
 	container2D rebinXtoBinning(const container1D&)const;
 	container2D rebinYToBinning(const std::vector<float>& )const;
@@ -125,6 +128,11 @@ public:
 	container2D operator * (double)const;             //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
 	container2D operator * (int)const;               //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
 
+
+
+	container2D chi2container(const container2D&,size_t * ndof=0)const;
+	float chi2(const container2D&,size_t * ndof=0)const;
+
 	/**
 	 * cuts everything on the right of the input value (bin boundary chosen accorind to getBinNo())
 	 * and returns new container.
@@ -172,7 +180,7 @@ public:
 	 * keeps binning
 	 */
 	void clear();
-
+	void setAllZero();
 
 	static bool debug;
 	static std::vector<container2D*> c_list;
