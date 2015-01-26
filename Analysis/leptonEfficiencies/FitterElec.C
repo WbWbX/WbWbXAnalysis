@@ -9,6 +9,38 @@
 #include "TCanvas.h"
 #include "TROOT.h"
 #include "TF1.h"
+#include "RooWorkspace.h"
+#include "RooDataSet.h"
+#include "RooDataHist.h"
+#include "RooRealVar.h"
+#include "RooFormulaVar.h"
+#include "RooAddPdf.h"
+#include "RooGlobalFunc.h"
+#include "RooCategory.h"
+#include "RooSimultaneous.h"
+#include "RooPlot.h"
+#include "RooFitResult.h"
+#include "RooBinning.h"
+#include "RooBinningCategory.h"
+#include "RooMultiCategory.h"
+#include "RooMappedCategory.h"
+#include "RooThresholdCategory.h"
+#include "Roo1DTable.h"
+#include "RooMinuit.h"
+#include "RooNLLVar.h"
+#include "RooAbsDataStore.h"
+#include "RooEfficiency.h"
+#include "RooGaussian.h"
+#include "RooChebychev.h"
+#include "RooProdPdf.h"
+#include "RooGenericPdf.h"
+#include "RooExtendPdf.h"
+#include "RooTrace.h"
+#include "RooMsgService.h"
+#include "Math/QuantFuncMathCore.h"
+
+
+
 //#include "functions.h"
 #include "TFitter.h"
 struct t_probe{
@@ -185,4 +217,11 @@ void FitterElec(){
   frame2->Draw();
   c2->Print("pt20Failing0_08.eps");
 
+}
+
+#include "TtZAnalysis/Analysis/app_src/mainMacro.h"
+
+invokeApplication(){
+  FitterElec();
+  return 1;
 }

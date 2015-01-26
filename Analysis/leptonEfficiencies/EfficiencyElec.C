@@ -1,15 +1,15 @@
-#include "../TtZAnalysis/DataFormats/interface/NTEvent.h"
-#include "../TtZAnalysis/DataFormats/interface/NTMuon.h"
-#include "../TtZAnalysis/DataFormats/interface/NTElectron.h"
-#include "../TtZAnalysis/DataFormats/interface/NTSuClu.h"
-#include "../TtZAnalysis/DataFormats/interface/NTLepton.h"
-#include "../TtZAnalysis/DataFormats/interface/NTMet.h"
-#include "../TtZAnalysis/DataFormats/interface/NTJet.h"
-#include "../TtZAnalysis/DataFormats/interface/NTIsolation.h"
-#include "../TtZAnalysis/DataFormats/interface/elecRhoIsoAdder.h"
-#include "../TopAnalysis/ZTopUtils/interface/PUReweighter.h"
+#include "TtZAnalysis/DataFormats/interface/NTEvent.h"
+#include "TtZAnalysis/DataFormats/interface/NTMuon.h"
+#include "TtZAnalysis/DataFormats/interface/NTElectron.h"
+#include "TtZAnalysis/DataFormats/interface/NTSuClu.h"
+#include "TtZAnalysis/DataFormats/interface/NTLepton.h"
+#include "TtZAnalysis/DataFormats/interface/NTMet.h"
+#include "TtZAnalysis/DataFormats/interface/NTJet.h"
+#include "TtZAnalysis/DataFormats/interface/NTIsolation.h"
+#include "TtZAnalysis/DataFormats/interface/elecRhoIsoAdder.h"
+#include "TopAnalysis/ZTopUtils/interface/PUReweighter.h"
 
-
+#include "FWCore/FWLite/interface/AutoLibraryLoader.h"
 
 #include "TH1D.h"
 #include "TH2D.h"
@@ -67,6 +67,9 @@ namespace top{using namespace ztop;}
 using namespace std;
 
 void EfficiencyElec(){
+
+  AutoLibraryLoader::enable();
+
   bool doRhoIso = true;
   double mvaCut = 0.9;
   double EtaCut = 2.4;
@@ -149,7 +152,7 @@ void EfficiencyElec(){
     std::vector<bool> *trig=0;
     t1->SetBranchAddress("TriggerBools",&trig);
 
-    //n = 1000000;
+    //n = 1000;
     //"real" part starts here
     double EvWeight = 1.0;
     for (int i = 0; i < n; i++) {
@@ -172,7 +175,7 @@ void EfficiencyElec(){
       if(pMET->met() > 40 || pElecs->size()>2) continue;
       for(vector<ztop::NTElectron>::iterator Elec=pElecs->begin(); Elec != pElecs->end(); Elec++){
       
-	if(Elec->mHits() > maxmHits || !Elec->isNotConv() || fabs(Elec->d0V()) >= d0Cut || (doRhoIso && Elec->rhoIso()>= IsoCut) || (!doRhoIso && Elec->isoVal() >= IsoCut ) || Elec->pt() < 30.0 || fabs(Elec->eta()) > EtaCut || !Elec->isPf() || Elec->mvaId() <= mvaCut) continue; 
+	if(Elec->mHits() > maxmHits || !Elec->isNotConv() || fabs(Elec->d0V()) >= d0Cut || (doRhoIso && Elec->rhoIso()>= IsoCut) || (!doRhoIso && Elec->isoVal() >= IsoCut ) || Elec->pt() < 30.0 || fabs(Elec->eta()) > EtaCut || !Elec->isPf() || Elec->storedId() <= mvaCut) continue; 
 
 	int tag = 0;
 
@@ -194,7 +197,7 @@ void EfficiencyElec(){
 	  probeLeptonData.isPF = Elec2->isPf();
 	  probeLeptonData.mHits = Elec2->mHits();
 	  probeLeptonData.InvMass = (Elec->p4()+ Elec2->p4()).M();
-	  probeLeptonData.id = Elec2->mvaId();
+	  probeLeptonData.id = Elec2->storedId();
 	  probeLeptonData.iso = Elec2->rhoIso();
 	  probeLeptonData.isNotConv = Elec2->isNotConv();
 
@@ -203,7 +206,7 @@ void EfficiencyElec(){
 	  ++foundProbe;
 	  h2_DEN->Fill(Elec2->p4().eta(),Elec2->ECalP4().Pt(),EvWeight);
 
-	  if(Elec2->mvaId() > mvaCut && Elec2->isNotConv() && fabs(Elec2->d0V()) < d0Cut && Elec2->isPf() && Elec2->mHits() <= maxmHits ) { 
+	  if(Elec2->storedId() > mvaCut && Elec2->isNotConv() && fabs(Elec2->d0V()) < d0Cut && Elec2->isPf() && Elec2->mHits() <= maxmHits ) { 
 	    h2_NUMIdEff->Fill(Elec2->p4().eta(),Elec2->ECalP4().Pt(),EvWeight);
 	    //h_NUMJets->Fill(pNTEventData->vertexMulti(),EvWeight);
 	    h_NUMJets->Fill(numjet,EvWeight);
@@ -240,7 +243,7 @@ void EfficiencyElec(){
   int nMC = (int) tMC->GetEntries();
   std::cout << " MC Tree Entries " << nMC << std::endl;
 
-  //nMC = 100000;
+  //nMC = 1000;
   std::vector<top::NTJet> * pJetMC = 0;
   tMC->SetBranchAddress("NTJets",&pJetMC); //sets the pointer to the vector<NTElec>
 
@@ -271,7 +274,7 @@ void EfficiencyElec(){
 
 
     for(std::vector<top::NTElectron>::iterator Elec=pElecs2->begin(); Elec != pElecs2->end(); Elec++){
-      if(Elec->mHits() > maxmHits || !Elec->isNotConv() || fabs(Elec->d0V()) >= d0Cut || (doRhoIso && Elec->rhoIso()>= IsoCut) || (!doRhoIso && Elec->isoVal() >= IsoCut ) || Elec->pt() < 30.0 || fabs(Elec->eta()) > EtaCut || !Elec->isPf() || Elec->mvaId() <= mvaCut) continue; 
+      if(Elec->mHits() > maxmHits || !Elec->isNotConv() || fabs(Elec->d0V()) >= d0Cut || (doRhoIso && Elec->rhoIso()>= IsoCut) || (!doRhoIso && Elec->isoVal() >= IsoCut ) || Elec->pt() < 30.0 || fabs(Elec->eta()) > EtaCut || !Elec->isPf() || Elec->storedId() <= mvaCut) continue; 
  
       int tag = 0;
       for(size_t j=0; j<Elec->matchedTrig().size(); j++){
@@ -292,7 +295,7 @@ void EfficiencyElec(){
 	probeLeptonMC.isPF = Elec2->isPf();
 	probeLeptonMC.mHits = Elec2->mHits();
 	probeLeptonMC.InvMass = (Elec->p4()+ Elec2->p4()).M();
-	probeLeptonMC.id = Elec2->mvaId();
+	probeLeptonMC.id = Elec2->storedId();
 	probeLeptonMC.iso = Elec2->rhoIso();
 	probeLeptonMC.isNotConv = Elec2->isNotConv();
 
@@ -300,7 +303,7 @@ void EfficiencyElec(){
 	++foundProbe;
 
 	h2_DENMC->Fill(Elec2->p4().eta(),Elec2->ECalP4().Pt(),EvWeightMC);
-	if(Elec2->mvaId() > mvaCut && Elec2->isNotConv() && fabs(Elec2->d0V()) < d0Cut && Elec2->isPf() && Elec2->mHits() <= maxmHits ) {
+	if(Elec2->storedId() > mvaCut && Elec2->isNotConv() && fabs(Elec2->d0V()) < d0Cut && Elec2->isPf() && Elec2->mHits() <= maxmHits ) {
 	  h2_NUMIdEffMC->Fill(Elec2->p4().eta(),Elec2->ECalP4().Pt(),EvWeightMC);
 	  //                          h_NUMJetsMC->Fill(pJetMC->size(),EvWeightMC);
 	  h_NUMJetsMC->Fill(numjet,EvWeightMC);
@@ -375,10 +378,10 @@ void EfficiencyElec(){
   ofstream myfile;
 
   myfile.open(globalEffs);
-  myfile << "\t &Data \t& Simulation \t& Scale Factor \\\\ \\\hline" <<endl;
-  myfile << "Id Efficiency \t&"<< ideff <<"$\\\pm$"<< errideff  <<"\t&"<< ideffMC <<"$\\\pm$"<< errideffMC <<"\t&"<< idSF << "$\\\pm$"<< erridSF<<"\\\\ \\\hline" <<endl;
-  myfile << "Iso Efficiency \t&"<< isoeff <<"$\\\pm$"<< errisoeff  <<"\t&"<< isoeffMC <<"$\\\pm$"<< errisoeffMC <<"\t&"<< isoSF << "$\\\pm$"<< errisoSF<<"\\\\ \\\hline" <<endl;
-  myfile << "Global Efficiency \t&"<< isoeff*ideff <<"$\\\pm$"<< sqrt((1-isoeff*ideff)*isoeff*ideff/h2_DEN->Integral())  <<"\t&"<< isoeffMC*ideffMC <<"$\\\pm$"<< sqrt((1-isoeffMC*ideffMC)*isoeffMC*ideffMC/h2_DENMC->Integral()) <<"\t&"<< isoSF*idSF << "$\\\pm$"<< errisoSF<<"\\\\ \\\hline" <<endl;
+  myfile << "\t &Data \t& Simulation \t& Scale Factor \\\\ \\hline" <<endl;
+  myfile << "Id Efficiency \t&"<< ideff <<"$\\pm$"<< errideff  <<"\t&"<< ideffMC <<"$\\pm$"<< errideffMC <<"\t&"<< idSF << "$\\pm$"<< erridSF<<"\\\\ \\hline" <<endl;
+  myfile << "Iso Efficiency \t&"<< isoeff <<"$\\pm$"<< errisoeff  <<"\t&"<< isoeffMC <<"$\\pm$"<< errisoeffMC <<"\t&"<< isoSF << "$\\pm$"<< errisoSF<<"\\\\ \\hline" <<endl;
+  myfile << "Global Efficiency \t&"<< isoeff*ideff <<"$\\pm$"<< sqrt((1-isoeff*ideff)*isoeff*ideff/h2_DEN->Integral())  <<"\t&"<< isoeffMC*ideffMC <<"$\\pm$"<< sqrt((1-isoeffMC*ideffMC)*isoeffMC*ideffMC/h2_DENMC->Integral()) <<"\t&"<< isoSF*idSF << "$\\pm$"<< errisoSF<<"\\\\ \\hline" <<endl;
   myfile.close();
 
 }
@@ -386,3 +389,9 @@ void EfficiencyElec(){
 
 
 
+#include "TtZAnalysis/Analysis/app_src/mainMacro.h"
+
+invokeApplication(){
+  EfficiencyElec();
+  return 1;
+}
