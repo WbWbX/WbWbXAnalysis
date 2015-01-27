@@ -31,11 +31,18 @@
 #include "RooAbsDataStore.h"
 #include "RooEfficiency.h"
 #include "RooGaussian.h"
+#include "RooVoigtian.h"
 #include "RooChebychev.h"
 #include "RooProdPdf.h"
 #include "RooGenericPdf.h"
 #include "RooExtendPdf.h"
 #include "RooTrace.h"
+#include "RooCBShape.h"
+#include "RooBreitWigner.h"
+#include "RooFFTConvPdf.h"
+#include "RooExponential.h"
+#include "RooAbsArg.h"
+
 #include "RooMsgService.h"
 #include "Math/QuantFuncMathCore.h"
 
@@ -49,13 +56,16 @@ struct t_probe{
 };
 
 
-void FitterElec(){
+#include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
+
+invokeApplication(){
+
   using namespace std;	
   gSystem->Load("libRooFit");
   using namespace RooFit;
 
-  float etamin = 0.0; 
-  float etamax = 0.8;
+ // float etamin = 0.0;
+ // float etamax = 0.8;
 
 
   TFile * f1 = new TFile("ElecEff_gsfRho_eta24Tight76106MET402Elec.root");
@@ -217,11 +227,6 @@ void FitterElec(){
   frame2->Draw();
   c2->Print("pt20Failing0_08.eps");
 
-}
-
-#include "TtZAnalysis/Analysis/app_src/mainMacro.h"
-
-invokeApplication(){
-  FitterElec();
   return 1;
 }
+
