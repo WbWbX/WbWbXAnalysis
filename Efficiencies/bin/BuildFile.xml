@@ -1,0 +1,17 @@
+<use   name="DataFormats/Common"/>
+<use   name="DataFormats/Candidate"/>
+<use   name="TtZAnalysis/Tools"/>
+<use   name="TtZAnalysis/DataFormats"/>
+<use   name="TtZAnalysis/Analysis"/>
+<use   name="TopAnalysis/ZTopUtils"/>
+<use   name="root"/>
+<use   name="rootrflx"/>
+<use   name="FWCore/FWLite"/>
+<use   name="roofit"/>
+
+
+<bin name="EfficiencyElec" file="EfficiencyElec.cc" />
+<!--- bin name="FitterElec" file="FitterElec.cc" /--->
+
+
+<Flags CXXFLAGS="-lXMLParser -lunfold -fopenmp"/>

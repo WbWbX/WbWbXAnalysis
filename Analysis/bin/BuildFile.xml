@@ -11,10 +11,12 @@
 
 <bin name="analyse" file="analyse.cc" />
 <bin name="sumsq" file="sumsq.cc" />
+<bin name="plotCSV" file="plotCSV.cc" />
 <bin name="mergeSyst" file="mergeSyst.cc" />
 <bin name="fitTtBarXsec" file="fitTtBarXsec.cc" />
 <bin name="compareNTuples" file="compareNTuples.cc" />
 <bin name="addPseudodata" file="addPseudodata.cc" />
+<bin name="plotControlPlot" file="plotControlPlot.cc" />
 
 
 <Flags CXXFLAGS="-lXMLParser -lunfold -fopenmp"/>
