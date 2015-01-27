@@ -4,13 +4,13 @@ TtZAnalysis/Tools!)
 
 
 
-To create the analysis executables, run the make.sh script.
+To create the analysis executables, run scram b.
 This will compile all dependencies and the executables.
 
-The executables (in ./bin) have help messages (-h --help) that explain
+The executables  have help messages (-h --help) that explain
 their usage
 
-Their source code can be found in ./app_src
+Their source code can be found in ./bin
 
 Control plots can be added in ./src/ttBarControlPlots.cc (refer to already added ones)
 (Or -if you prefer- derive an own class from ./interface/controlPlotBasket.h. If you
