@@ -16,10 +16,20 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	//some env variables
 	TString cmssw_base=getenv("CMSSW_BASE");
 	TString scram_arch=getenv("SCRAM_ARCH");
+	TString batchbase = getenv("ANALYSE_BATCH_BASE");
 
 	TString database="data/analyse/";
 	TString configbase="configs/analyse/";
 
+	if(batchbase.Length()>0){
+		database=batchbase+"/"+database;
+		configbase=batchbase+"/"+configbase;
+		std::cout << "Batch run from " << batchbase << std::endl;
+	}
+	else{
+		database=cmssw_base+"/TtZAnalysis/Analysis/"+database;
+		configbase=cmssw_base+"/TtZAnalysis/Analysis/"+configbase;
+	}
 
 	using namespace std;
 	using namespace ztop;
@@ -605,7 +615,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 
 
 //////////////////
-#include "mainMacro.h"
+#include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
 
 invokeApplication(){
 	using namespace ztop;

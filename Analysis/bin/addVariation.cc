@@ -16,7 +16,7 @@
  * To execute: addVariation <var_name> <nominal file> <up_file> <down_file> (optional -o <output>)
  */
 
-#include "mainMacro.h"
+#include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
 #include <vector>
 #include "TString.h"
 #include "TtZAnalysis/Tools/interface/containerStackVector.h"

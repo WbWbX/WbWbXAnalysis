@@ -7,5 +7,5 @@ No other files should be placed here!
 
 Hints:
 There is an option parser in Tools/interface/optParser.h ;)
-It is automatically invoked by the invokeApplication() macro in mainMacro.h
+It is automatically invoked by the invokeApplication() macro in Tools/interface/applicationMainMacro.h
 Refer to mergeSyst.cc as a good example for code put here.

@@ -6,7 +6,7 @@
  */
 
 
-#include "mainMacro.h"
+#include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
 #include "../interface/ttbarXsecFitter.h"
 #include <iostream>
 #include <string>

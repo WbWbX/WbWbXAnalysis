@@ -10,7 +10,7 @@
 #include <vector>
 #include <iostream>
 
-#include "mainMacro.h"
+#include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
 
 invokeApplication(){
 	using namespace ztop;

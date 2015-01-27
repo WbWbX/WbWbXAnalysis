@@ -24,6 +24,7 @@ export OMP_NUM_THREADS=1
 workdir=##WORKDIR##
 
 cd $workdir
+export ANALYSE_BATCH_BASE=$workdir
 
 exec > "stdout/##OUTNAME##" 2>&1
 

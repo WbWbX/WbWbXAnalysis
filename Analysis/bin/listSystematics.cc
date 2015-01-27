@@ -11,7 +11,7 @@
 #include "TtZAnalysis/Tools/interface/containerStackVector.h"
 #include "TtZAnalysis/Tools/interface/optParser.h"
 
-#include "mainMacro.h"
+#include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
 
 invokeApplication(){
 	using namespace ztop;

@@ -5,7 +5,7 @@
  *      Author: kiesej
  */
 
-#include "mainMacro.h"
+#include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
 #include "TtZAnalysis/Tools/interface/containerStackVector.h"
 
 

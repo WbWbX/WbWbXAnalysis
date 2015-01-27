@@ -2,7 +2,7 @@
 #include "TtZAnalysis/Tools/interface/textFormatter.h"
 #include "TtZAnalysis/Tools/interface/containerStackVector.h"
 
-#include "mainMacro.h"
+#include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
 
 invokeApplication(){
 	using namespace ztop;

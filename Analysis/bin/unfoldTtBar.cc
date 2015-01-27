@@ -14,7 +14,7 @@
  * output option: -o, otherwise <input>_unfolded
  */
 //////////////for compling////////
-#include "mainMacro.h"
+#include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
 
 invokeApplication(){
     using namespace ztop;

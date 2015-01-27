@@ -4,6 +4,7 @@
 # script to do a quick check of test executables
 # it will link libabries etc and execute the executable. Intermediate build files will be removed
 
+echo "This script does not replace a proper compilation. It is just meant to quickly test small executables."
 
 infile=$1
 opts=$2

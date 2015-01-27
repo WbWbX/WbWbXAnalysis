@@ -262,24 +262,64 @@ cd $dir
 workdir=`pwd`
 mkdir scripts
 cp $analysisDir/scripts/submit.sh scripts/
-mkdir bin
-cp $analysisDir/bin/analyse bin/
-cp -r $analysisDir/lib .
+mkdir  $workdir/bin
+analysepath=`which analyse`
+cp $analysepath $workdir/bin/
+mkdir -p lib
+
+
+CMSLIBS=$CMSSW_BASE/lib/$SCRAM_ARCH/
+EXTLIBS=${CMSSW_BASE}/external/${SCRAM_ARCH}/lib/
+RELBASELIBS=$CMSSW_RELEASE_BASE/lib/$SCRAM_ARCH/
+
+#declare -a libs
+
+LOCLIB=$workdir/lib
+
+libs=("TopAnalysisZTopUtils" 
+    "TtZAnalysisDataFormats" 
+    "TtZAnalysisTools"
+    "TtZAnalysisAnalysis"
+    "FWCoreFWLite"
+);
+rellibs=(""
+);
+
+function copylibs(){
+
+    linklibs=""
+    libdir=$LOCLIB
+    mkdir -p $libdir
+
+    for (( i=0;i<${#libs[@]};i++)); do
+	linklibs="$linklibs -l${libs[${i}]}"
+	cp ${CMSLIBS}lib${libs[${i}]}.so $libdir
+    done
+    for (( i=0;i<${#libs[@]};i++)); do
+	if [[ ${rellibs[${i}]} ]]
+	then
+	linklibs="$linklibs -l${libs[${i}]}"
+	cp ${RELBASELIBS}lib${rellibs[${i}]}.so $libdir
+	fi
+    done
+    cp $EXTLIBS/libunfold.so $libdir 
+
+}
+
+copylibs
+
 mkdir data
 cp -r $analysisDir/data/analyse data/
 mkdir configs
 cp -r $analysisDir/configs/analyse configs/
 
-# cp -r $analysisDir/*_btags .
-# cp $analysisDir/*_btags.root .
-# cp $analysisDir/*discr.root .
 
 mkdir source
 cd source 
 cp $analysisDir/src/eventLoop.h .
 cp $analysisDir/src/MainAnalyzer.cc .
 cp $analysisDir/interface/MainAnalyzer.h .
-cp $analysisDir/app_src/analyse.cc .
+cp $analysisDir/bin/analyse.cc .
 
 cd $workdir
 mkdir jobscripts
@@ -300,6 +340,7 @@ chmod +x check.sh
 
 sed -e 's;##WORKDIR##;'${workdir}';g' < $templatesDir/reset_job.sh > reset_job.sh
 chmod +x reset_job.sh
+
 
 #check wheter running on naf or wgs and do qsub or dirty "&"
 for (( i=0;i<${#channels[@]};i++)); do

@@ -16,7 +16,7 @@
 #include "TtZAnalysis/DataFormats/src/classes.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 
-#include "mainMacro.h"
+#include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
 
 invokeApplication(){
 

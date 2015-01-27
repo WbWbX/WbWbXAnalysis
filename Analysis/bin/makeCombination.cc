@@ -17,7 +17,7 @@ double sq(const double & in){
 }
 
 
-#include "mainMacro.h"
+#include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
 
 invokeApplication(){
 
