@@ -108,7 +108,7 @@ void texTabler::writeToPdfFile(const TString& filename)const{
 	writeToFile(namestr);
 	char * cmsswbase=getenv("CMSSW_BASE");
 	TString syscall(cmsswbase);
-	syscall+="/src/TtZAnalysis/Tools/bin/texToPdf "+namestr+" > /dev/null";
+	syscall+="/src/TtZAnalysis/Tools/scripts/texToPdf "+namestr+" > /dev/null";
 	system(syscall.Data());
 	syscall="mv "+namestr+".pdf "+filename;
 	system(syscall.Data());
