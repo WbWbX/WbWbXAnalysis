@@ -28,7 +28,6 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 		ztop::containerStack::debug=false;
 		ztop::containerStackVector::debug=false;
 	}
-	bool userandomtagging=true;
 
 	TString inputfilewochannel="config.txt";
 	TString inputfile=channel+"_"+energy+"_"+inputfilewochannel;

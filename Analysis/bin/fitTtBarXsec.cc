@@ -198,7 +198,7 @@ invokeApplication(){
 			//graphFitter::debug=true;
 
 			fitter.fit();
-			bool succ=	fitter.wasSuccess();
+			//	bool succ=	fitter.wasSuccess();
 			graph fitted=fitter.exportFittedCurve(500);
 			formatter fmt;
 			float roundpeak=fmt.round(fitter.getParameter(1),0.01);
