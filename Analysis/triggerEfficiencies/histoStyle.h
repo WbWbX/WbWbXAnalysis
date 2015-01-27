@@ -198,13 +198,13 @@ void plotRaw(std::vector<ztop::effTriple> trips, TString add="", TString addlabe
 		num.write();
 		den.write();
 		if(den.isTH1D()){
-			TH1D * h1=divideByBinWidth(&(den.getTH1D()));
-			leg->AddEntry(h1,"denominator"  ,"pe");
+			TH1D * h1=divideByBinWidth(&(num.getTH1D()));
+			leg->AddEntry(h1,"numerator"  ,"pe");
 			if(num.getFormatInfo().Contains("smallmarkers"))
 				h1->SetMarkerSize(h1->GetMarkerSize()*0.5);
 			h1->Draw("e1");
-			TH1D * h=divideByBinWidth(&(num.getTH1D()));
-			leg->AddEntry(h,"numerator"  ,"pe");
+			TH1D * h=divideByBinWidth(&(den.getTH1D()));
+			leg->AddEntry(h,"denominator"  ,"pe");
 			h->Draw("e1,same");
 			leg->Draw("same");
 			label->Draw("same");

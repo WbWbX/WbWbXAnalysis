@@ -171,9 +171,9 @@ void trigger_tightLeptons(){
 	ta_mumuMC.setIsMC(true);
 	ta_emuMC.setIsMC(true);
         
-        ta_eeMC.setIncludeCorr(false);
-        ta_mumuMC.setIncludeCorr(false);
-        ta_emuMC.setIncludeCorr(false);
+        //ta_eeMC.setIncludeCorr(false);
+        //ta_mumuMC.setIncludeCorr(false);
+        //ta_emuMC.setIncludeCorr(false);
 
 	TString dir="/afs/desy.de/user/t/tarndt/xxl/TTZ/CMSSW_7_2_2_patch2/src/TtZAnalysis/createNTuples/";
 
@@ -190,7 +190,7 @@ void trigger_tightLeptons(){
 
 	emumcfiles <<dir+"def_out.root" ;
 
-	datafilesFull  << dir + "def_out.root";
+	datafilesFull  << dir + "dy.root";
 
 	TString pileuproot = cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13.json.txt_PU.root";
 
@@ -225,7 +225,7 @@ void trigger_tightLeptons(){
 
 	triggerAnalyzer emudFull = ta_emud;
 	triggerAnalyzer emumcFull = ta_emuMC;
-	TString emustring=makeFullOutput(emudFull, emumcFull, "emu_Full", "emu Full 19 fb^{-1}", 0.01);
+	TString emustring=makeFullOutput(emudFull, emumcFull, "emu_Full", "emu Full", 0.01);
         TString eestring=makeFullOutput(ta_eed,ta_eeMC,"ee_Full","ee Full",0.01);
         TString mumustring=makeFullOutput(ta_mumud,ta_mumuMC,"mumu_Full","mumu_Full",0.01);
 

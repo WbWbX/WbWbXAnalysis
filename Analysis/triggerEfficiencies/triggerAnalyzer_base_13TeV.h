@@ -266,6 +266,9 @@ public:
 		vector<float> binsdrtrig;
 		binsdrtrig << 0 << 0.05 << 0.1 << 0.15 << 0.2 << 0.3 << 0.4 << 0.6 << 1 << 2 << 5;
 
+                vector<float> binsmet;
+                for (float i=0;i<30;i++) binsmet<< i*10;
+
 		//pt
 		//eta
 		//et2d
@@ -313,7 +316,7 @@ public:
 		effTriple t_eta2dpt60_4060     (binseta2dx_, binseta2dy_, "lepton_eta2d_pt60_4060"     , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
 		effTriple t_eta2dpt60_60       (binseta2dx_, binseta2dy_, "lepton_eta2d_pt60_60"       , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
                 
-                effTriple t_met     (binspt_,"MET","MET","evts");
+                effTriple t_met     (binsmet,"MET","MET","evts");
 
 		effTriple t_dphi    (binsdphi                , "leptonmet_dphi" , "#Delta#phi_{l,MET}" , "evts"   );
 		effTriple t_vmulti  (binsvmulti              , "vertex_multi"   , "n_{vtx}"            , "evts"   );
