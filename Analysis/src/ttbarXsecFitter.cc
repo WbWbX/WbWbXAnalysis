@@ -796,7 +796,7 @@ variateContainer1D ttbarXsecFitter::createLeptonJetAcceptance(const std::vector<
 	if(norm_nbjet_global_) twobjetsignal=twobjetsignal.getIntegralBin();
 
 	container1D correction_b =  ((signalintegral * twobjetsignal) * 4.)
-																																																																						                																												/ ( (onebjetsignal + (twobjetsignal * 2.)) * (onebjetsignal + (twobjetsignal * 2.)));
+																																																																						                																														/ ( (onebjetsignal + (twobjetsignal * 2.)) * (onebjetsignal + (twobjetsignal * 2.)));
 
 	correction_b.removeStatFromAll();
 
@@ -939,6 +939,11 @@ std::vector<containerStack>   ttbarXsecFitter::readStacks(const std::string conf
 				ex.what();
 				throw std::runtime_error("stack not found");
 			}
+			if(tmpstack.getContribution("data").isDummy())
+				throw std::runtime_error("ttbarXsecFitter::readStacks: Stack has no data entry!");
+			if(tmpstack.getSignalIdxs().size() <1)
+				throw std::runtime_error("ttbarXsecFitter::readStacks: No signal defined!");
+
 			addUncertainties(&tmpstack,bjetcount,eighttev);
 			if(newcsv) //not necessary if same csv where everything is ordered in the same manner
 				for(size_t i=0;i<out.size();i++){

@@ -62,9 +62,14 @@ void plotter2D::drawPlots(){
 	h->GetYaxis()->SetLabelSize(0.05);
 	h->GetXaxis()->SetTitleSize(0.06);
 	h->GetXaxis()->SetLabelSize(0.05);
-	h->GetZaxis()->SetRangeUser(-1,1);
+	float max=plot_.getMax();
+	float min=plot_.getMin();
+	max=floor(max)+1;
+	min=floor(min)-1;
 
-	h->Draw("colz");
+	h->GetZaxis()->SetRangeUser(min,max);
+
+	h->Draw("colz, text");
 }
 // void drawTextBoxes();
 void plotter2D::drawLegends(){

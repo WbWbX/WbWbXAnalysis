@@ -42,7 +42,7 @@ container2D& container2D::operator=(const container2D&rhs){
 }
 
 container2D::container2D(const std::vector<float> &xbins,const std::vector<float> &ybins, TString name,TString xaxisname,TString yaxisname, bool mergeufof) :
-        																																																												taggedObject(taggedObject::type_container2D),mergeufof_(mergeufof), xaxisname_(xaxisname), yaxisname_(yaxisname)
+        																																																																taggedObject(taggedObject::type_container2D),mergeufof_(mergeufof), xaxisname_(xaxisname), yaxisname_(yaxisname)
 {
 	setName(name);
 	//create for each ybin (plus UF OF) a container1D
@@ -109,6 +109,24 @@ float container2D::getBinArea(const size_t& binx, const size_t& biny)const{
 	float yw= ybins_.at(biny+1)-ybins_.at(biny);
 	return xw*yw;
 
+}
+float container2D::getMax(int syslayer)const{
+	float max=-999999999;
+	for(size_t i=0;i<conts_.size();i++){
+		float tempmax=conts_.at(i).getYMax(false,syslayer);
+		if(tempmax > max)
+			max=tempmax;
+	}
+	return max;
+}
+float container2D::getMin(int syslayer)const{
+	float min=999999999;
+	for(size_t i=0;i<conts_.size();i++){
+		float tempmin=conts_.at(i).getYMin(false,syslayer);
+		if(tempmin < min)
+			min=tempmin;
+	}
+	return min;
 }
 
 container2D container2D::rebinXToBinning(const std::vector<float> & newbins)const{
@@ -662,6 +680,41 @@ container2D container2D::operator * (int val)const{
 	return out;
 }
 
+container2D container2D::chi2container(const container2D& rhs,size_t * ndof)const{
+	if(getBinsX() != rhs.getBinsX() || getBinsY() != rhs.getBinsY() ){
+		throw std::out_of_range("container2D::chi2container: bins don't match!");
+	}
+	container2D out=*this;
+	out.removeAllSystematics();
+	out.setAllErrorsZero(true);
+	out.setName(getName()+"_"+rhs.getName()+"_chi2");
+	size_t ndofsum=0;
+	for(size_t i=0;i<conts_.size();i++){
+		size_t ndoftmp=0;
+		out.conts_.at(i) = conts_.at(i).chi2container(rhs.conts_.at(i),&ndoftmp);
+		out.conts_.at(i).setName("");
+		ndofsum+=ndoftmp;
+	}
+	if(ndof)
+		*ndof=ndofsum;
+	return out;
+}
+float container2D::chi2(const container2D& rhs,size_t * ndof)const{
+	if(getBinsX() != rhs.getBinsX() || getBinsY() != rhs.getBinsY() ){
+		throw std::out_of_range("container2D::chi2container: bins don't match!");
+	}
+	size_t ndofsum=0;
+	float chi2=0;
+	for(size_t i=0;i<conts_.size();i++){
+		size_t ndoftmp=0;
+		chi2+=conts_.at(i).chi2(rhs.conts_.at(i),&ndoftmp);
+		ndofsum+=ndofsum;
+	}
+	if(ndof)
+		*ndof=ndofsum;
+	return chi2;
+}
+
 
 container2D container2D::cutRightX(const float & val)const{
 	if(conts_.size()<1)
@@ -749,6 +802,12 @@ void container2D::clear(){
 		conts_.at(i).clear();
 	}
 }
+void container2D::setAllZero(){
+	for(size_t i=0;i<conts_.size();i++){
+		conts_.at(i).setAllZero();
+	}
+}
+
 void container2D::addGlobalRelError(TString errname,float val){
 	for(size_t i=0;i<conts_.size();i++){
 		conts_.at(i).addGlobalRelError(errname,val);

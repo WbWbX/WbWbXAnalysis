@@ -10,7 +10,7 @@
 
 
 #define CMSSW_LEQ_5
-#if __GNUC__ && __GNUC__ > 3 && __GNUC_MINOR__ && __GNUC_MINOR__ > 6
+#if __GNUC__ && __GNUC__ > 3 && __GNUC_MINOR__ && __GNUC_MINOR__ > 7
 #undef CMSSW_LEQ_5
 #endif
 
