@@ -413,6 +413,30 @@ else :
     from RecoJets.JetProducers.ak4GenJets_cfi import ak4GenJets
     
     # Still needs modifications for the case of miniAOD in order to rerun the b tagging         
+    
+    ####################### Rerun Electron IDs   ###############
+    # See: https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2
+    from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
+    process.load("RecoEgamma.ElectronIdentification.egmGsfElectronIDs_cfi")
+    # overwrite a default parameter: for miniAOD, the collection name is a slimmed one
+    process.egmGsfElectronIDs.physicsObjectSrc = cms.InputTag('slimmedElectrons')
+    from PhysicsTools.SelectorUtils.centralIDRegistry import central_id_registry
+    process.egmGsfElectronIDSequence = cms.Sequence(process.egmGsfElectronIDs)
+    # Define which IDs we want to produce
+    # Each of these two example IDs contains all four standard
+    # cut-based ID working points (only two WP of the PU20bx25 are actually used here).
+    my_id_modules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_PHYS14_PU20bx25_V1_miniAOD_cff']
+    #Add them to the VID producer
+    for idmod in my_id_modules:
+        setupAllVIDIdsInModule(process,idmod,setupVIDElectronSelection)
+    process.load("TopAnalysis.TopUtils.ElectronIdProducer_cff")
+    process.ElectronIdProducer.electrons= cms.InputTag(electronTag)
+    # Name of the ID that is calculated
+    process.ElectronIdProducer.electronIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V1-miniAOD-standalone-tight")
+    # Name of the New Id in the Id Vector
+    process.ElectronIdProducer.idName = cms.string("Phys14-tight")
+    electronTag = 'ElectronIdProducer'
+
 
 
 ####################################################################
@@ -518,7 +542,7 @@ process.PFTree   = cms.EDAnalyzer('TreeWriterTtZ',
                                   #general input collections
                                   treeName = cms.string('pfTree'),
                                   muonSrc = cms.InputTag(muonTag),
-                                  keepElecIdOnly = cms.string("eidLoose"),
+                                  keepElecIdOnly = cms.string("Phys14-tight"),
                                   elecGSFSrc = cms.InputTag(electronTag), #just the same here to make it run. this can be prevented by a try{}catch(...){} in treewriter for getByLabel
                                   elecPFSrc = cms.InputTag(electronTag),
                                   jetSrc = cms.InputTag('treeJets'),  #jetTag), # ('treeJets'),
@@ -541,7 +565,7 @@ process.PFTree   = cms.EDAnalyzer('TreeWriterTtZ',
                                   recoSuCluSrc = cms.InputTag('superClusters'),
                                                                     
                                   #block for trigger information
-                                  includeTrigger = cms.bool(False),
+                                  includeTrigger = cms.bool(True),
                                   triggerResults = cms.InputTag('TriggerResults','','HLT'), #needed for both AOD and MiniAOD
                                   triggerEvent   = cms.InputTag('patTriggerEvent'), ### "selectedPatTrigger" for MiniAODs
                                   triggerObjects = cms.vstring(""),
