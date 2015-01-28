@@ -129,10 +129,10 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	}
 
 	ana.setMaxChilds(6);
-	if(interactive || tickonce)
-		ana.setMaxChilds(20);
 	if(testmode)
 		ana.setMaxChilds(1);
+	if(interactive || tickonce)
+		ana.setMaxChilds(20);
 	ana.setMode(mode);
 	ana.setShowStatus(status);
 	ana.setTestMode(testmode);
@@ -644,7 +644,7 @@ invokeApplication(){
 	TString topmass  = parser->getOpt<TString> ("mt","172.5","top mass value to be used, default: 172.5");          //-i empty will use automatic
 	TString discrFile=parser->getOpt<TString>  ("lh","" , "specify discriminator input file. If not specified, likelihoods are created");          //-i empty will use automatic
 
-	const bool interactive = parser->getOpt<bool>      ("I",testmode,"enable interactive mode: no fork limit");
+	const bool interactive = parser->getOpt<bool>      ("I",false,"enable interactive mode: no fork limit");
 
 	float fakedatastartentries = parser->getOpt<float>    ("-startdiv",0.9,"point to start fake data entries wrt to to evts");
 

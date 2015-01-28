@@ -22,19 +22,19 @@ namespace ztop{
     void setPDFWeights(std::vector<float> Weights){pdfweights_=Weights;}
 
     //gets
-    float runNo(){return runNo_;}
-    float lumiBlock(){return lumiBl_;}
-    float eventNo(){return eventNo_;}
+    const float& runNo()const{return runNo_;}
+    const float& lumiBlock()const{return lumiBl_;}
+    const float& eventNo()const{return eventNo_;}
 
-    float vertexMulti(){return vertexMulti_;}
+    const float& vertexMulti()const{return vertexMulti_;}
    const std::vector<std::string>& firedTriggers()const{return triggers_;}
 
     const float& truePU(int BX=0)const{return truePU_[1+BX];}
     float trueAvgPU()const{return (truePU_[0]+truePU_[1]+truePU_[2])/3;}
 
-    float isoRho(unsigned int identifier){return rhos_[identifier];}
+    const float& isoRho(unsigned int identifier)const{return rhos_[identifier];}
     const float& PDFWeight(unsigned int id)const{return pdfweights_[id];}
-    unsigned int PDFWeightsSize(){return pdfweights_.size();}
+      unsigned int PDFWeightsSize()const{return pdfweights_.size();}
 
   protected:
 	////////////////////////

@@ -18,6 +18,7 @@ invokeApplication(){
 \nusage: addPseudodata <inputfile>.\n will scan all control, 2d, unfold plots included and add pseudodata to it.\nOutput can be specified, otherwise input will be overwritten");
 	const TString output=parser->getOpt<TString>("o","","output file name. Default: Overwrite input file.");
 	const bool makecanvases=parser->getOpt<bool>("P",false,"plots canvases directly using default plotting style. (default false)");
+	const int randomseed=parser->getOpt<int>("r",1234,"Specify random seed. (default 1234)");
 	const TString infile=parser->getRest<TString>(0);
 	parser->doneParsing();
 	if(infile.Length()<1){
@@ -34,7 +35,7 @@ invokeApplication(){
 	}
 
 	//do adding
-	TRandom3 * rand=new TRandom3();
+	TRandom3 * rand=new TRandom3(randomseed);
 	csv->addPseudoData(rand);
 	delete rand;
 

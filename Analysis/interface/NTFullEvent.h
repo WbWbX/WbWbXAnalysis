@@ -127,7 +127,7 @@ public:
         puweight=0;
     }
 
-    ztop::NTEvent * event;
+   const ztop::NTEvent * event;
     ///generator info
     std::vector<ztop::NTGenParticle *> * gentops;
     // ONLY contains bs before possible radiation from top! ordered by pt

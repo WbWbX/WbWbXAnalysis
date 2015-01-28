@@ -43,7 +43,7 @@ public:
 
     void setEvent(const NTFullEvent&evt){eventp_=&evt;}
 
-    void enable(){use_=true;}
+    void enable(bool doit=true){use_=doit;}
     void disable(){use_=false;}
 
 protected:
