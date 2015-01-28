@@ -569,22 +569,23 @@ float MainAnalyzer::createNormalizationInfo(TFile *f, bool isMC,size_t anaid){
 	//check for top mass scaling
 	//if(infiles_.at(anaid).Contains("ttbar") && ! infiles_.at(anaid).Contains("_ttbar")){ //selects all ttbar samples but not ttbarg/w/z
 	if(legentries_.at(anaid) != dataname_){ //don't automatically rescale pseudodata
-		float sampletopmass = atof(topmass_.Data());
-		float energy=8;
-		if(energy_ == "7TeV")
-			energy=7;
+	        float sampletopmass = atof(topmass_.Data());
+		//subtract TeV in string and convert to float 
+		TString tmp(energy_);
+		tmp.ReplaceAll("TeV","");
+		if(!tmp.IsFloat()) throw std::runtime_error("MainAnalyzer::Can't convert energy string to float!");  
+		float energy = atof(tmp.Data());
+		
 		if(infiles_.at(anaid).Contains("ttbar") &&  !infiles_.at(anaid).Contains("_ttbar")){
-
-			float xsec=getTtbarXsec(sampletopmass,energy);
+		        float xsec=getTtbarXsec(sampletopmass,energy);
 			std::cout << "GetNorm: File " << infiles_.at(anaid) << "\tis a ttbar sample , top mass is "
 					<< sampletopmass << " xsec: " << xsec <<std::endl;
 			norms_.at(anaid)=xsec;
 		}
 		//tW
 		if(infiles_.at(anaid).Contains("_tW.root") || infiles_.at(anaid).Contains("_tbarW.root")
-				|| infiles_.at(anaid).Contains("_tbarWtoLL")|| infiles_.at(anaid).Contains("_tWtoLL")){
-
-			float xsec=getTWXsec(sampletopmass,energy);
+		   || infiles_.at(anaid).Contains("_tbarWtoLL")|| infiles_.at(anaid).Contains("_tWtoLL")){
+		        float xsec=getTWXsec(sampletopmass,energy);
 			norms_.at(anaid)=xsec;
 		}
 		//}

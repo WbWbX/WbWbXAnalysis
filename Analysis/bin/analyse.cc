@@ -27,8 +27,8 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 		std::cout << "Batch run from " << batchbase << std::endl;
 	}
 	else{
-		database=cmssw_base+"/TtZAnalysis/Analysis/"+database;
-		configbase=cmssw_base+"/TtZAnalysis/Analysis/"+configbase;
+		database=cmssw_base+"/src/TtZAnalysis/Analysis/"+database;
+		configbase=cmssw_base+"/src/TtZAnalysis/Analysis/"+configbase;
 	}
 
 	using namespace std;
@@ -146,11 +146,18 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	ana.setEnergy(energy);
 	ana.setSyst(Syst);
 	ana.setTopMass(topmass);
-	if(energy == "8TeV"){
-		ana.getPUReweighter()->setMCDistrSum12();
+	if(energy == "7TeV"){
+	    ana.getPUReweighter()->setMCDistrSummer11Leg();    
 	}
-	else if(energy == "7TeV"){
-		ana.getPUReweighter()->setMCDistrSummer11Leg();
+	else if(energy == "8TeV"){
+	    ana.getPUReweighter()->setMCDistrSum12();
+	}
+	else if(energy == "13TeV"){
+	    std::cout<<"FIXME: Still apply 8 TeV PU Reweighting"<<std::endl;
+	    ana.getPUReweighter()->setMCDistrSum12();
+	}	   
+	else{
+	    throw std::runtime_error("Undefined Energy! Exit!");
 	}
 	ana.getElecSF()->setInput(elecsffile,elecsfhisto);
 	ana.getMuonSF()->setInput(muonsffile,muonsfhisto);
