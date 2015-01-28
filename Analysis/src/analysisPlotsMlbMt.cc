@@ -6,7 +6,7 @@
  */
 
 
-#include "../interface/analysisPlotsJan.h"
+#include "../interface/analysisPlotsMlbMt.h"
 #include "../interface/AnalysisUtils.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 #include "TtZAnalysis/DataFormats/src/classes.h"
@@ -14,7 +14,7 @@
 
 namespace ztop{
 
-void analysisPlotsJan::bookPlots(){
+void analysisPlotsMlbMt::bookPlots(){
 	if(!use()) return;
 	using namespace std;
 	using namespace ztop;
@@ -68,7 +68,7 @@ void analysisPlotsJan::bookPlots(){
 }
 
 
-void analysisPlotsJan::fillPlotsGen(){
+void analysisPlotsMlbMt::fillPlotsGen(){
 	if(!use()) return;
 	if(!event()) return;
 	using namespace std;
@@ -167,7 +167,7 @@ void analysisPlotsJan::fillPlotsGen(){
 
 }
 
-void analysisPlotsJan::fillPlotsReco(){
+void analysisPlotsMlbMt::fillPlotsReco(){
 	if(!use()) return;
 	if(!event()) return;
 	using namespace std;

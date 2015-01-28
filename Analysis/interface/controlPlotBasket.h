@@ -42,7 +42,7 @@ public:
      */
     void initSteps(size_t no);
 
-    void switchOn(bool swon){switchedon_=swon;}
+    void enable(bool swon=true){switchedon_=swon;}
 
     void limitToStep(int step){limittostep_=step;}
 

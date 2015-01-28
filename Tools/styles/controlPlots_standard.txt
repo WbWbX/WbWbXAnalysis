@@ -4,7 +4,7 @@
 
     divideat = 0.3
     invertplots = false
-    PSMigThreshold =  0.04   $this is not %!
+    PSMigThreshold =  0.001   $this is not %!
 
 [end - plotterControlPlot]
  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  

@@ -45,8 +45,8 @@
 
 #include "TtZAnalysis/DataFormats/interface/helpers.h"
 
-#include "../interface/analysisPlotsJan.h"
-#include "../interface/analysisPlotsAnya.h"
+#include "../interface/analysisPlotsMlbMt.h"
+#include "../interface/analysisPlotsTtbarXsecFit.h"
 
 #include "../interface/discriminatorFactory.h"
 
@@ -417,17 +417,13 @@ void  MainAnalyzer::analyze(size_t anaid){
 	//////////////analysis plots/////////////
 
 
-	analysisPlotsJan jansplots_step8(8);
-	analysisPlotsAnya anyasplots_step8(8);
-	if((TString)getenv("USER") == (TString)"kiesej"){
-		jansplots_step8.enable();
-	}
-	if((TString)getenv("USER") == (TString)"dolinska"){
-		jansplots_step8.enable();
-	}
+	analysisPlotsMlbMt mlbmtplots_step8(8);
+	analysisPlotsTtbarXsecFit xsecfitplots_step8(8);
 
-	jansplots_step8.bookPlots();
-	anyasplots_step8.bookPlots();
+	//xsecfitplots_step8.enable();
+	mlbmtplots_step8.enable();
+	mlbmtplots_step8.bookPlots();
+	xsecfitplots_step8.bookPlots();
 
 	//global settings for analysis plots
 	container1DUnfold::setAllListedMC(isMC && !fakedata);
@@ -444,13 +440,14 @@ void  MainAnalyzer::analyze(size_t anaid){
 	plots.linkEvent(evt);
 	zplots.linkEvent(evt);
 	ttXsecPlots xsecplots;
+	//xsecplots.enable(false);
 	xsecplots.linkEvent(evt);
 	xsecplots.limitToStep(8);
 	xsecplots.initSteps(8);
 	plots.initSteps(8);
 	zplots.initSteps(8);
-	jansplots_step8.setEvent(evt);
-	anyasplots_step8.setEvent(evt);
+	mlbmtplots_step8.setEvent(evt);
+	xsecfitplots_step8.setEvent(evt);
 
 
 	//get normalization - switch on or off pdf weighter before!!!
@@ -730,9 +727,8 @@ void  MainAnalyzer::analyze(size_t anaid){
 				/*
 				 * fill gen info here
 				 */
-				jansplots_step8.fillPlotsGen();
-				anyasplots_step8.fillPlotsGen();
-
+				mlbmtplots_step8.fillPlotsGen();
+				xsecfitplots_step8.fillPlotsGen();
 			}
 		} /// isMC ends
 
@@ -1415,8 +1411,8 @@ void  MainAnalyzer::analyze(size_t anaid){
 			plots.makeControlPlots(step);
 			sel_step[8]+=puweight;
 
-			jansplots_step8.fillPlotsReco();
-			anyasplots_step8.fillPlotsReco();
+			mlbmtplots_step8.fillPlotsReco();
+			xsecfitplots_step8.fillPlotsReco();
 
 		}
 		if(isZrange){

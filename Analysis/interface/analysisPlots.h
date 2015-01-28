@@ -60,7 +60,7 @@ protected:
         throw std::runtime_error("analysisPlots: no puweight associated");
     }
     const bool & use()const{return use_;}
-    container1DUnfold* addPlot(const std::vector<float>&, const std::vector<float>&, const TString&, const TString &, const TString &);
+    container1DUnfold* addPlot(const std::vector<float>& genbins, const std::vector<float>& recobins, const TString& name, const TString &xname, const TString &yname);
 
     std::vector<float> makebins(size_t nbins,float min,float max)const;
 

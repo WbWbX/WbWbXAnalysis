@@ -5,16 +5,16 @@
  *      Author: kiesej
  */
 
-#ifndef ANALYSISPLOTSJAN_H_
-#define ANALYSISPLOTSJAN_H_
+#ifndef ANALYSISPLOTSMLBMT_H_
+#define ANALYSISPLOTSMLBMT_H_
 
 #include "analysisPlots.h"
 
 namespace ztop{
 
-class analysisPlotsJan : public analysisPlots{
+class analysisPlotsMlbMt : public analysisPlots{
 public:
-	analysisPlotsJan(size_t step):analysisPlots(step),
+	analysisPlotsMlbMt(size_t step):analysisPlots(step),
 	Mlb(0),
 	mlb(0),
 	mlbmin(0),
@@ -27,7 +27,7 @@ public:
 	mlbcombthresh_(165)
 {}
 
-	~analysisPlotsJan(){/* destruction is handled in base class! */}
+	~analysisPlotsMlbMt(){/* destruction is handled in base class! */}
 
 	void bookPlots();
 	void fillPlotsReco();
