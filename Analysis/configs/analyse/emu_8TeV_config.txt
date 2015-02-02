@@ -23,9 +23,9 @@ tree_8TeV_emu_runD_22Jan.root,data,1,1,99
 
 
 tree_8TeV_emuttbar.root,       t#bar{t},		633,	  251.7,	  0, true
-tree_8TeV_emuttbarviatau.root, t#bar{t}(#tau), 	632,	  251.7,	  1, true
-tree_8TeV_dyee60120.root,          Z#rightarrowll, 	852,	  3532.8, 2
-tree_8TeV_dymumu60120.root,        Z#rightarrowll,	852,	  3532.8, 2
+tree_8TeV_emuttbarviatau.root, t#bar{t},	 	632,	  251.7,	  1, true
+tree_8TeV_dyee60120.root,          DY#rightarrowll, 	852,	  3532.8, 2
+tree_8TeV_dymumu60120.root,        DY#rightarrowll,	852,	  3532.8, 2
 tree_8TeV_emuttbarbg.root,         t#bar{t}bg,	   	634,	  248.5,	  3
 tree_8TeV_tWtoLL.root,             tW/#bar{t}W#rightarrowll,	   		616,	  11.1,	  4
 tree_8TeV_tbarWtoLL.root,	   tW/#bar{t}W#rightarrowll,	   		616,	  11.1,	  4
@@ -79,7 +79,7 @@ ElecSFHisto    = GlobalSF
 
 TriggerSFFile  = /src/TtZAnalysis/Data/triggerSummary_emu_tight_pt30.root
 
-PUFile         = /src/TtZAnalysis/Data/ReRecoJan13.json.txt_PU $without .root
+PUFile         = /src/TtZAnalysis/Data/Legacy2012.json_PU $without .root
 
 btagWP         = csvl
 btagFile       = all_btags.root
