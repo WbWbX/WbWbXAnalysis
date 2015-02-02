@@ -20,6 +20,7 @@
 #include "../interface/ttbarControlPlots.h"
 #include "../interface/ttXsecPlots.h"
 #include "../interface/ZControlPlots.h"
+#include "../interface/MCReweighter.h"
 #include "TtZAnalysis/plugins/leptonSelector2.h"
 
 #include "TtZAnalysis/DataFormats/interface/NTLepton.h"
@@ -97,10 +98,9 @@ void  MainAnalyzer::analyze(size_t anaid){
 	bool isMC=true;
 	if(legendname==dataname_) isMC=false;
 
-
 	if(!isMC || !issignal)
-		getPdfReweighter()->switchOff(true);
-
+	    getPdfReweighter()->switchOff(true);
+	
 	//some mode options
 	/* implement here not to overload MainAnalyzer class with private members
 	 *  they are even allowed to overwrite existing configuration
@@ -526,15 +526,17 @@ void  MainAnalyzer::analyze(size_t anaid){
 	std::vector<tBranchHandler<NTWeight>*> weightbranches;
 	tBranchHandler<NTWeight>::allow_missing =true;
 	tBranchHandler<vector<NTGenParticle> >::allow_missing =true;
-
 	tBranchHandler<vector<NTGenParticle> > b_GenBsRad(t,"NTGenBsRad");
-
-
+	
+	std::vector<ztop::MCReweighter> mcreweighters;
+	
 	for(size_t i=0;i<additionalweights_.size();i++){
 		std::cout << "adding weight " << additionalweights_.at(i) << std::endl;
 		tBranchHandler<NTWeight> * weight = new tBranchHandler<NTWeight>(t,additionalweights_.at(i));
 		weightbranches.push_back(weight);
-
+		//agrohsje 
+		ztop::MCReweighter mcreweighter; 
+		mcreweighters.push_back(mcreweighter);
 	}
 
 	//some helpers
@@ -652,11 +654,14 @@ void  MainAnalyzer::analyze(size_t anaid){
 		getPdfReweighter()->setNTEvent(b_Event.content());
 		getPdfReweighter()->reWeight(puweight);
 		if(apllweightsone) puweight=1;
-
+		//agrohsje loop over additional weightbranches 
 		for(size_t i=0;i<weightbranches.size();i++){
-			weightbranches.at(i)->getEntry(entry);
-			puweight*=weightbranches.at(i)->content()->getWeight();
+		        weightbranches.at(i)->getEntry(entry);
+			mcreweighters.at(i).setMCWeight(weightbranches.at(i)->content()->getWeight());
+			mcreweighters.at(i).reWeight(puweight);
+			if(apllweightsone) puweight=1;		
 		}
+		
 
 		/////////////////////////////////////////////////////////////
 		/////////////////////////////////////////////////////////////
@@ -747,7 +752,7 @@ void  MainAnalyzer::analyze(size_t anaid){
 		if(testmode_ && entry==0)
 			std::cout << "testmode("<< anaid << "): got trigger boolians" << std::endl;
 		if(!checkTrigger(b_TriggerBools.content(),b_Event.content(), isMC,anaid)) continue;
-
+		
 
 		/*
 		 * Muons
@@ -837,7 +842,7 @@ void  MainAnalyzer::analyze(size_t anaid){
 
 			if(fabs(elec->d0V()) < 0.02
 					&& elec->isNotConv()
-					&& elec->storedId() > 0.9
+			                && elec->storedId() > 0.9
 					&& elec->mHits() <= 0
 					&& elec->isPf()){
 
@@ -1004,7 +1009,7 @@ void  MainAnalyzer::analyze(size_t anaid){
 		evt.medjets=&medjets;
 		evt.hardjets=&hardjets;
 		for(size_t i=0;i<b_Jets.content()->size();i++){
-			treejets << &(b_Jets.content()->at(i));
+		    treejets << &(b_Jets.content()->at(i));
 		}
 
 		double dpx=0;
@@ -1448,6 +1453,14 @@ void  MainAnalyzer::analyze(size_t anaid){
 	if(testmode_ )
 		std::cout << "testmode("<< anaid << "): finished main loop, renorm factor pdf weights: " <<renormfact  << std::endl;
 
+	//renorm all mc weights 
+	for(size_t i=0;i<weightbranches.size();i++){
+	    renormfact=mcreweighters.at(i).getRenormalization();
+	    norm *= renormfact;
+	    if(testmode_ )
+		std::cout << "testmode("<< anaid << "): finished main loop, renorm factor for mc reweighting["<<i<<"]: " <<renormfact  << std::endl;
+	}
+	
 	container1DUnfold::flushAllListed(); // call once again after last event processed
 
 
