@@ -679,10 +679,14 @@ void containerStackVector::writeAllToTFile(TString filename, bool recreate, bool
 
 
 void containerStackVector::printAll(TString namestartswith,TString directory,TString extension){
+	plotterControlPlot pl;
 	for(std::vector<containerStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
 		if(stack->is1D() || stack->is1DUnfold() ){
 			if(namestartswith=="" || stack->getName().BeginsWith(namestartswith)){
-				TCanvas * c=stack->makeTCanvas(containerStack::plotmode::ratio);
+				TCanvas * c=new TCanvas();
+				pl.usePad(c);
+				pl.setStack(&*stack);
+				pl.draw();
 				if(c){
 					TString newname=stack->getName();
 					newname.ReplaceAll(" ","_");
@@ -694,6 +698,7 @@ void containerStackVector::printAll(TString namestartswith,TString directory,TSt
 						delete c;
 					}
 				}
+				pl.cleanMem();
 			}
 		}
 	}
@@ -729,35 +734,6 @@ void containerStackVector::writeAllToTFile(TFile * f, TString treename){
 	t->Fill();
 	t->Write("",TObject::kOverwrite);
 	delete t;
-
-	bool batch=containerStack::batchmode;
-	containerStack::batchmode=true;
-
-
-	TDirectory * d = f->mkdir(name + "_ratio",name + "_ratio");
-	d->cd();
-	for(std::vector<containerStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
-		TCanvas * c=stack->makeTCanvas();
-		if(c){
-			c->Write();
-			stack->cleanMem();
-			delete c;
-		}
-	}
-	//d.Close();
-	// f.cd();
-	TDirectory * d2 = f->mkdir(name+ "_sgbg",name+ "_sgbg");
-	d2->cd();
-	for(std::vector<containerStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
-		TCanvas * c2=stack->makeTCanvas(containerStack::plotmode::sigbg);
-		if(c2){
-			c2->Write();
-			stack->cleanMem();
-			delete c2;
-		}
-	}
-
-	containerStack::batchmode=batch;
 
 }
 

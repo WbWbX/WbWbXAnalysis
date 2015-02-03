@@ -226,7 +226,6 @@ void plotterControlPlot::drawControlPlot(){
 				container1D tempcont;
 				if(stackp_->is1DUnfold()){ //special treatment
 					tempcont = stackp_->getContainer1DUnfold(i).getBackground();
-					tempcont *=stackp_->getNorm(i);
 					sumcont+=tempcont;
 					//is not signal
 
@@ -265,7 +264,6 @@ void plotterControlPlot::drawControlPlot(){
 				}
 				else{
 					tempcont = stackp_->getContainer(i);
-					tempcont *=stackp_->getNorm(i);
 					sumcont+=tempcont;
 					TH1D * h=addObject(sumcont.getTH1D(stackp_->getLegend(i)+" "+stackp_->getName()+"_stack_h",divbbw,true,true)); //no errors
 					if(!h)

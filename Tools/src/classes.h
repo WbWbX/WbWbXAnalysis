@@ -33,8 +33,9 @@
 #include "../interface/plotterCompare.h"
 
 #include "../interface/infoCreater.h"
-
+#ifndef __CINT__
 #include "../interface/fileReader.h"
+#endif
 
 namespace
 {
@@ -121,9 +122,9 @@ struct dictionary {
 
 
 	ztop::infoCreater weoirgjerowijgre;
-
-	ztop::fileReader readanicefileityoulikeininteractiverootmode;
-
+#ifndef __CINT__
+	ztop::fileReader readleityoulikeootmode;
+#endif
 
 
 };

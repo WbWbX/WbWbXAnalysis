@@ -42,7 +42,7 @@ container2D& container2D::operator=(const container2D&rhs){
 }
 
 container2D::container2D(const std::vector<float> &xbins,const std::vector<float> &ybins, TString name,TString xaxisname,TString yaxisname, bool mergeufof) :
-        																																																																taggedObject(taggedObject::type_container2D),mergeufof_(mergeufof), xaxisname_(xaxisname), yaxisname_(yaxisname)
+        																																																																						taggedObject(taggedObject::type_container2D),mergeufof_(mergeufof), xaxisname_(xaxisname), yaxisname_(yaxisname)
 {
 	setName(name);
 	//create for each ybin (plus UF OF) a container1D
@@ -973,7 +973,16 @@ void container2D::mergeAllErrors(const TString & mergedname){
 		conts_.at(i).mergeAllErrors(mergedname);
 	}
 }
-
+void container2D::equalizeSystematicsIdxs(container2D &rhs){ //sec
+	if(conts_.size() == rhs.conts_.size()){
+		for(size_t i=0;i<conts_.size();i++){
+			conts_.at(i).equalizeSystematicsIdxs(rhs.conts_.at(i));
+		}
+	}
+	else{
+		throw std::logic_error("container2D::equalizeSystematicsIdxs: TBI for different conts_size()");
+	}
+}
 
 void container2D::copyFrom(const container2D&rhs){
 	conts_=rhs.conts_;

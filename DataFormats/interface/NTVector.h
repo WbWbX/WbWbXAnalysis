@@ -18,7 +18,7 @@ class NTVector{
 
 public:
     NTVector():x_(0),y_(0),z_(0){}
-    NTVector(const float& x,const float& y,const float& z):x_(x),y_(y),z_(z){}
+    NTVector(const float& xin,const float& yin,const float& zin):x_(xin),y_(yin),z_(zin){}
     ~NTVector(){}
 
     const float& x()const{return x_;}

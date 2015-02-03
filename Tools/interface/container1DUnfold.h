@@ -59,6 +59,8 @@ public:
 	void mergePartialVariations(const TString& identifier,bool strictpartialID=true);
 	void mergeAllErrors(const TString & mergedname);
 
+	void equalizeSystematicsIdxs(container1DUnfold &rhs);
+
 
 	void mergeVariations(const std::vector<TString>& names, const TString & outname,bool linearly=false);
 	void mergeVariationsFromFileInCMSSW(const std::string& filename);
@@ -122,6 +124,8 @@ public:
 	container1DUnfold operator * (const container1DUnfold &)const;       //! adds stat errors in squares; treats same named systematics as correlated!!
 	container1DUnfold operator * (float)const;            //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
 	container1DUnfold& operator *= (float);           //! simple scalar multiplication. stat and syst errors are scaled accordingly!! room for performance improvement
+	container1DUnfold operator * (double)const;
+	container1DUnfold& operator *= (double);
 
 	void setDivideBinomial(bool);
 
@@ -257,6 +261,7 @@ private:
 	void addErrorContainer(const TString & ,const container2D &,float){}
 	void addErrorContainer(const TString &,const container2D &){}
 	void getRelSystematicsFrom(const container2D &){}
+	void equalizeSystematicsIdxs(container2D &rhs){}
 
 	std::vector<float> subdivide(const std::vector<float> & bins, size_t div);
 

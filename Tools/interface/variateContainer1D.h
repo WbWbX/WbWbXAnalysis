@@ -46,7 +46,7 @@ public:
 	size_t getNBins()const{return contents_.size();}
 	const std::vector<float>& getBins()const{return bins_;}
 
-	std::vector<TString> getSystNames(){if(contents_.size()>0) return contents_.at(0).getSystNames();else return std::vector<TString>();}
+	std::vector<TString> getSystNames()const{if(contents_.size()>0) return contents_.at(0).getSystNames();else return std::vector<TString>();}
 
 	extendedVariable * getBin(size_t idx){if(contents_.size()>0) return &contents_.at(idx);else return 0;}
 	const extendedVariable * getBin(size_t idx)const{if(contents_.size()>0) return &contents_.at(idx);else return 0;}

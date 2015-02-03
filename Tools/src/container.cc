@@ -31,7 +31,7 @@ bool container1D::c_makelist=false;
 
 ///////function definitions
 container1D::container1D():
-						taggedObject(taggedObject::type_container1D)
+														taggedObject(taggedObject::type_container1D)
 {
 	canfilldyn_=false;
 	//divideBinomial_=true;
@@ -71,7 +71,7 @@ container1D::container1D(float binwidth, TString name,TString xaxisname,TString 
 	hp_=0;
 }
 container1D::container1D(const std::vector<float>& bins,const TString& name,const TString& xaxisname,const TString& yaxisname, bool mergeufof):
-							taggedObject(taggedObject::type_container1D)
+															taggedObject(taggedObject::type_container1D)
 
 {
 	plottag=none;
@@ -866,7 +866,7 @@ float container1D::normalize(bool includeUFOF, bool normsyst, const float& normt
 			float sysintegral=integral(includeUFOF,layer);
 			float tmpnorm=0;
 			if(sysintegral != 0)
-				 tmpnorm=normto / sysintegral;
+				tmpnorm=normto / sysintegral;
 			contents_.getLayer(layer).multiply(tmpnorm);
 		}
 		return norm;
@@ -1254,8 +1254,9 @@ void container1D::setDivideBinomial(bool divideBinomial){
 
 container1D & container1D::operator += (const container1D & second){
 	if(bins_ != second.bins_ && !isDummy()){
-		if(showwarnings_) std::cout << "container1D::operator +=: not same binning for " << name_ << " return this" << std::endl;
-		return *this;
+		std::string errstr= "container1D::operator +=: not same binning for " + (std::string)name_.Data() +
+				"+="+ (std::string)second.name_.Data()  ;
+		throw std::runtime_error(errstr);
 	}
 	if(!isDummy()){
 		contents_ += second.contents_;
@@ -1275,8 +1276,9 @@ container1D container1D::operator + (const container1D & second)const{
 
 container1D & container1D::operator -= (const container1D & second){
 	if(bins_ != second.bins_){
-		if(showwarnings_) std::cout << "container1D::operator +=: not same binning for " << name_ << " return this" << std::endl;
-		return *this;
+		std::string errstr= "container1D::operator -=: not same binning for " + (std::string)name_.Data() +
+				"+="+ (std::string)second.name_.Data()  ;
+		throw std::runtime_error(errstr);
 	}
 	contents_ -= second.contents_;
 	return *this;
@@ -1288,8 +1290,9 @@ container1D container1D::operator - (const container1D & second)const{
 }
 container1D & container1D::operator /= (const container1D & denominator){
 	if(bins_ != denominator.bins_){
-		if(showwarnings_) std::cout << "container1D::operator /=: not same binning for " << name_ << " return this" << std::endl;
-		return *this;
+		std::string errstr= "container1D::operator /=: not same binning for " + (std::string)name_.Data() +
+				"+="+ (std::string)denominator.name_.Data()  ;
+		throw std::runtime_error(errstr);
 	}
 	contents_ /= denominator.contents_;
 	return *this;
@@ -1302,8 +1305,9 @@ container1D container1D::operator / (const container1D & denominator)const{
 }
 container1D & container1D::operator *= (const container1D & rhs){
 	if(bins_ != rhs.bins_){
-		if(showwarnings_) std::cout << "container1D::operator *=: not same binning for " << name_ << " return this" << std::endl;
-		return *this;
+		std::string errstr= "container1D::operator *=: not same binning for " + (std::string)name_.Data() +
+				"+="+ (std::string)rhs.name_.Data()  ;
+		throw std::runtime_error(errstr);
 	}
 	contents_ *= rhs.contents_;
 	return *this;
@@ -1587,7 +1591,7 @@ void container1D::addRelSystematicsFrom(const ztop::container1D & rhs,bool ignor
 			//contents_.getLayer(newlayerit).removeStat();
 			//stat are definitely not correlated
 			bool isnominalequal=(!strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i),1e-2))
-																																					        						|| (strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i))) ;
+																																					        														|| (strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i))) ;
 
 			if(isnominalequal){ //this is just a copy leave it and add no variation
 				//contents_.getLayer(newlayerit).removeStat();
@@ -2166,6 +2170,20 @@ std::vector<float> container1D::createBinning(size_t nbins, float first, float l
 	for(float i=first;i<=last;i+=div)
 		out.push_back(i);
 	return out;
+}
+
+void container1D::equalizeSystematics(std::vector<container1D>& lhs,std::vector<container1D>& rhs){
+	if(rhs.size() <1 || rhs.size() < 1){
+		throw std::logic_error("static container1D::equalizeSystematics: rhs or lhs is empty");
+	}
+	for(size_t i=0;i<lhs.size();i++){
+		lhs.at(i).equalizeSystematicsIdxs(rhs.at(0));
+	}
+	// after this->containers_.at(0) now has a superset of syst,
+	// it will drive the new ordering of rhs
+	for(size_t i=0;i<rhs.size();i++){
+		rhs.at(i).equalizeSystematicsIdxs(lhs.at(0));
+	}
 }
 
 void container1D::copyFrom(const container1D& c){

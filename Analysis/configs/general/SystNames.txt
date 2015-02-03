@@ -83,7 +83,7 @@ BG_2_bjets_DY, DY background (2 b-jets)
 Lumi8, Luminosity (8 TeV)
 Lumi7, Luminosity (7 TeV)
 
-XSec8, $\sigma_{t\bar{t}}$(8 TeV)
-XSec7, $\sigma_{t\bar{t}}$(7 TeV)
+Xsec (8TeV), $\sigma_{t\bar{t}}$(8 TeV)
+Xsec (7TeV), $\sigma_{t\bar{t}}$(7 TeV)
 
 [end-syst names]

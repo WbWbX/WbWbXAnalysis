@@ -11,6 +11,7 @@
 #include "TtZAnalysis/Tools/interface/container1DUnfold.h"
 #include "TtZAnalysis/Tools/interface/containerStackVector.h"
 #include "TtZAnalysis/Tools/interface/containerStack.h"
+#include "TtZAnalysis/Tools/interface/plotterControlPlot.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 #include "TString.h"
 #include <iostream>
@@ -215,7 +216,10 @@ TString TtBarUnfolder::unfold(TString out,TString in)const{
 
         if(moreoutput)
             std::cout << "making control plot" << std::endl;
-        c=stack->makeTCanvas();
+        plotterControlPlot pl;
+        pl.usePad(c);
+        pl.setStack(stack);
+        pl.draw();
         d->WriteTObject(c,((TString)c->GetName()+"_cplot").Data());
         delete c;
 

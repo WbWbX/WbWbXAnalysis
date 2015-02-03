@@ -59,7 +59,7 @@ public:
 
     const double & getNominal()const{return nominal_;}
 
-    const std::vector<TString>& getSystNames(){return sysnames_;}
+    const std::vector<TString>& getSystNames()const{return sysnames_;}
 
     void clear();
 

@@ -169,6 +169,8 @@ public:
 	void mergePartialVariations(const TString& identifier,bool strictpartialID=true);
 	void mergeAllErrors(const TString & mergedname);
 
+	void equalizeSystematicsIdxs(container2D &rhs);
+
 	/**
 	 * sets all bin contents to zero; clears all systematic uncertainties
 	 * resets also binning, keeps name and axis names

@@ -104,7 +104,7 @@ void analysisPlotsTtbarXsecFit::fillPlotsGen(){
 	using namespace ztop;
 	//define vis PS here
 
-	std::vector<NTGenParticle*> genvisleptons3=produceCollection(event()->genleptons3,25,2.5);
+	std::vector<NTGenParticle*> genvisleptons3=produceCollection(event()->genleptons3,35,2.5);
 
 	//only fill one bin in some visible part of the histogram to get the total
 	// n_gen and a nice display of PS migrations

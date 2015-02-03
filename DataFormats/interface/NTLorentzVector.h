@@ -24,8 +24,8 @@ template <class T>
 class NTLorentzVector{
 public:
     NTLorentzVector():pt_(0.00000001),eta_(0),phi_(0),m_(0) {}
-    NTLorentzVector(T pt, T eta, T phi, T m){
-        pt_=pt; eta_=eta; phi_=phi; m_=m;
+    NTLorentzVector(T pt_in, T eta_in, T phi_in, T m_in){
+        pt_=pt_in; eta_=eta_in; phi_=phi_in; m_=m_in;
         if(pt_==0) pt_=0.00000001;
     }
     ~NTLorentzVector(){}
@@ -65,8 +65,8 @@ public:
     T Py() const { return (T) pt_*sin(phi_);}
     T Pz() const {return pt_*std::sinh(eta_);}
     T E2() const {
-        T e2 =  P()*P() + M2();
-        return e2 > 0 ? e2 : 0;
+        T e2out =  P()*P() + M2();
+        return e2out > 0 ? e2out : 0;
     }
     T E() const {return std::sqrt(E2() );}
 
@@ -81,29 +81,29 @@ public:
 
     //setters
 
-    void setPxPyPzE(const T & px, const T &  py, const T &  pz, const T &  e){
-        pt_=std::sqrt(px*px+py*py);
+    void setPxPyPzE(const T & px_in, const T &  py_in, const T &  pz_in, const T &  e_in){
+        pt_=std::sqrt(px_in*px_in+py_in*py_in);
         if(pt_==0) pt_=0.00000001;
-        phi_ = (px == 0.0 && py == 0.0) ? 0 : std::atan2(py,px);
+        phi_ = (px_in == 0.0 && py_in == 0.0) ? 0 : std::atan2(py_in,px_in);
         static const T big_z_scaled =
                 std::pow(std::numeric_limits<T>::epsilon(),static_cast<T>(-.25));
 
-        T z_scaled = pz/pt_;
+        T z_scaled = pz_in/pt_;
         if (std::fabs(z_scaled) < big_z_scaled) {
             eta_= std::log(z_scaled+std::sqrt(z_scaled*z_scaled+1.0));
         } else {
             // apply correction using first order Taylor expansion of sqrt
-            eta_=  pz>0 ? std::log(2.0*z_scaled + 0.5/z_scaled) : -std::log(-2.0*z_scaled);
+            eta_=  pz_in>0 ? std::log(2.0*z_scaled + 0.5/z_scaled) : -std::log(-2.0*z_scaled);
         }
-        T m2=e*e - px*px - py*py - pz*pz;
-        if(m2<0){
+        T m2tmp=e_in*e_in - px_in*px_in - py_in*py_in - pz_in*pz_in;
+        if(m2tmp<0){
             if(bepicky)
                 throw std::out_of_range("NTLorentzVector:setPxPyPzE: M2 < 0, tachyonic.");
-            m_=-std::sqrt(-m2);
+            m_=-std::sqrt(-m2tmp);
 
         }
         else{
-            m_=std::sqrt(m2);}
+            m_=std::sqrt(m2tmp);}
     }
 
 

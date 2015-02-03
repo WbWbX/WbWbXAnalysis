@@ -87,7 +87,6 @@ public:
 	int & getColor (unsigned int i){return colors_.at(i);};
 	const int & getColor (unsigned int i)const {return colors_.at(i);};
 	// double & getNorm  (unsigned int i){return norms_.at(i);}
-	const double & getNorm  (unsigned int i)const{return norms_.at(i);}
 
 	container1D & getContainer(unsigned int i){return containers_.at(i);}
 	const container1D & getContainer(unsigned int i)const{return containers_.at(i);}
@@ -107,9 +106,9 @@ public:
 	//container1DUnfold  getContainer1DUnfold(TString)const;
 	container1DUnfold getFullMCContainer1DUnfold()const;           //! gets the sum of all MC containers (normalized with their stored norm) including error handling
 
-	void multiplyNorm(TString , double);
-	void multiplyNorm(size_t , double);
-	void multiplyAllMCNorms(double);
+	void multiplyNorm(TString , float);
+	void multiplyNorm(size_t , float);
+	void multiplyAllMCNorms(float);
 	void addGlobalRelMCError(TString,double);   //! adds a global systematic variation to the systematics stored (e.g. lumi) is o+err
 
 	void addRelErrorToContribution(double err, const TString& contributionname, TString nameprefix="BG");
@@ -145,21 +144,23 @@ public:
 
 	std::vector<size_t> removeSpikes(bool inclUFOF=false,int limittoindex=-1,float strength=100000,float sign=0.3,float threshold=8);
 
-	void clear(){containers_.clear();legends_.clear();colors_.clear();norms_.clear();}
+	void clear(){containers_.clear();legends_.clear();colors_.clear();}
 
-
+/*
 	THStack * makeTHStack(TString stackname = "");
 	TLegend * makeTLegend(bool inverse=true);
 	void drawControlPlot(TString name="", bool drawxaxislabels=true, double resizelabels=1); // the extra axis is in both... sorry for that!
 	TGraphAsymmErrors * makeMCErrors();
-	void drawRatioPlot(TString name="",double resizelabels=1);
-	std::vector<container1D>  getPEffPlots(size_t idx)const;
+	*/
+	//TCanvas * drawControlPlot(TString stylefile="")const;
+	// void drawRatioPlot(TString name="",double resizelabels=1);
+/*	std::vector<container1D>  getPEffPlots(size_t idx)const;
 	void drawPEffPlot(TString name="",double resizelabels=1);
 	void drawSBGPlot(TString name="",double resizelabels=1,bool invert=false);
 
 	//TCanvas * makeTCanvas(bool drawratioplot=true);
 	TCanvas * makeTCanvas(plotmode plotMode=ratio);
-
+*/
 	std::map<TString, histoBin>  getAllContentsInBin(size_t bin,int syst=-1,bool print=false)const;
 
 	containerStack rebinXToBinning(const std::vector<float> &)const;
@@ -242,8 +243,6 @@ public:
 	 */
 	static bool addErrorsStrict;
 
-	//debugging functions
-	bool checknorms() const;
 
 	///stat test functions
 
@@ -270,7 +269,6 @@ private:
 	std::vector<ztop::container1DUnfold> containers1DUnfold_;
 	std::vector<TString> legends_;
 	std::vector<int> colors_;
-	std::vector<double> norms_;
 	TString dataleg_;
 
 	enum dimension{notset,dim1,dim2,unfolddim1};

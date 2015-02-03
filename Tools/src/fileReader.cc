@@ -164,6 +164,8 @@ std::vector<std::string> fileReader::getMarkerValues(const std::string& markerna
 
             if(varsandvals.size()<1)
                 continue;
+            if(varsandvals.at(0).find("[") ==  std::string::npos) //no marker
+            	continue;
             tfentr.setTrim("[");
             tfentr.ltrim(varsandvals.at(0));
             tfentr.setTrim(" ");

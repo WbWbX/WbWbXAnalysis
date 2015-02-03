@@ -46,13 +46,11 @@ invokeApplication(){
 
 	simpleFitter::printlevel=-1; //for now
 
-	ttbarXsecFitter mainfitter(19741,2.6,5050,2.2);
-	mainfitter.setXsec8(getTtbarXsec(topmass,8));
+	ttbarXsecFitter mainfitter;
 
 	TString mtrepl="_"+toTString(172.5)+"_";TString mtrplwith="_"+toTString(topmass)+"_";
 	mainfitter.setReplaceInInfile(mtrepl,mtrplwith);
 
-	mainfitter.setXsec7(getTtbarXsec(topmass,7));
 
 	if(lhmode=="chi2datamc")
 		mainfitter.setLikelihoodMode(ttbarXsecFitter::lhm_chi2datamcstat);
@@ -114,12 +112,19 @@ invokeApplication(){
 	if(npseudoexp){
 		size_t failcount=0;
 		gErrorIgnoreLevel = 3000;
+		size_t ndatasets=mainfitter.nDatasets();
 
-		container1D pseudoout7(container1D::createBinning(40,-8,8)), pseudoout8(container1D::createBinning(40,-8,8));
+		std::vector<container1D> pulls;
+		pulls.resize(ndatasets,container1D(container1D::createBinning(40,-8,8)));
+
 		plotterControlPlot pl;
 		pl.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/controlPlots_combined.txt");
 		TCanvas cvv;
-
+		for(size_t nbjet=0;nbjet<3;nbjet++){
+			for(size_t ndts=0;ndts<ndatasets;ndts++){
+				cvv.Print(outfile+"_pd"+nbjet+ "_" + mainfitter.datasetName(ndts)+ ".pdf(");
+			}
+		}
 		cvv.Print(outfile+"_pd0_7.pdf(");
 		cvv.Print(outfile+"_pd1_7.pdf(");
 		cvv.Print(outfile+"_pd2_7.pdf(");
@@ -135,58 +140,49 @@ invokeApplication(){
 		std::cout << std::endl;
 		for(int i=0;i<npseudoexp;i++){
 			displayStatusBar(i,npseudoexp);
-			float xsec7,xsec8,errup7,errup8,errdown7,errdown8;
+			std::vector<float> xsecs,errup,errdown;
 			mainfitter.createPseudoDataFromMC(pdmode);
 			mainfitter.createContinuousDependencies();
+			bool succ=true;
 			try{
-				mainfitter.fit(xsec8,errup8,errdown8,xsec7,errup7,errdown7);
+				mainfitter.fit(xsecs,errup,errdown);
 			}catch(...){
 				failcount++;
+				succ=false;
 			}
-			if(errup7 != 0 && errdown7!=0){
-				if(xsec7>0)
-					pseudoout7.fill(xsec7/errup7);
-				else
-					pseudoout7.fill(xsec7/errdown7);
+			if(succ){
+				for(size_t ndts=0;ndts<ndatasets;ndts++){
+					double pull=xsecs.at(ndts)-mainfitter.getXsecOffset(ndts);
+					if(pull>0)
+						pull/=errup.at(ndts);
+					else
+						pull/=errdown.at(ndts);
+					pulls.at(ndts).fill ( pull);
+				}
 			}
-			if(errup8 != 0 && errdown8!=0){
-				if(xsec8>0)
-					pseudoout8.fill(xsec8/errup8);
-				else
-					pseudoout8.fill(xsec8/errdown8);
-			}
+
 			if(i<21){
 				for(size_t nbjet=0;nbjet<3;nbjet++){
-					for(size_t seveneight=0;seveneight<2;seveneight++){
-						if(!mainfitter.has7TeV())
-							seveneight++;
+					for(size_t ndts=0;ndts<ndatasets;ndts++){
 						double dummychi2;
-						containerStack stack=mainfitter.produceStack(false,nbjet,seveneight,dummychi2);
+						containerStack stack=mainfitter.produceStack(false,nbjet,ndts,dummychi2);
 						pl.setStack(&stack);
 						pl.draw();
-						if(seveneight)
-							cvv.Print(outfile+"_pd"+nbjet+ "_7.pdf");
-						else
-							cvv.Print(outfile+"_pd"+nbjet+ "_8.pdf");
+						cvv.Print(outfile+"_pd"+nbjet+ "_" + mainfitter.datasetName(ndts)+ ".pdf");
 					}
 				}
 			}
 		}
 		std::cout << std::endl;
-		cvv.Print(outfile+"_pd0_7.pdf)");
-		cvv.Print(outfile+"_pd1_7.pdf)");
-		cvv.Print(outfile+"_pd2_7.pdf)");
-		cvv.Print(outfile+"_pd0_8.pdf)");
-		cvv.Print(outfile+"_pd1_8.pdf)");
-		cvv.Print(outfile+"_pd2_8.pdf)");
+		for(size_t nbjet=0;nbjet<3;nbjet++){
+			for(size_t ndts=0;ndts<ndatasets;ndts++){
+				cvv.Print(outfile+"_pd"+nbjet+ "_" + mainfitter.datasetName(ndts)+ ".pdf)");
+			}
+		}
 
-		pseudoout7.writeToTFile("pseudoout7.root");
-		pseudoout8.writeToTFile("pseudoout8.root");
 		//fit
-		for(size_t i=0;i<2;i++){ //both pulls
-			container1D * c=&pseudoout7;
-			if(i)
-				c=&pseudoout8;
+		for(size_t i=0;i<pulls.size();i++){ //both pulls
+			container1D * c=&pulls.at(i);
 			graph tofit; tofit.import(c,true);
 			graphFitter fitter;
 			fitter.readGraph(&tofit);
@@ -213,10 +209,7 @@ invokeApplication(){
 			fitted.setName("#splitline{peak: "+fmt.toTString(roundpeak) + "}{width: " +toTString(roundwidth)+"}");
 			plm.addPlot(&fitted);
 			plm.draw();
-			if(i)
-				cv->Print(outfile+"_pull8.pdf");
-			else
-				cv->Print(outfile+"_pull7.pdf");
+			cv->Print(outfile+"_pull_" + mainfitter.datasetName(i)+ ".pdf");
 			delete cv;
 		}
 		std::cout << "Pseudodata run done. " << failcount << " failed out of " << npseudoexp << std::endl;
@@ -226,9 +219,7 @@ invokeApplication(){
 	else{
 		doplotting=true;
 		//ttbarXsecFitter::debug=true;
-		if(debug){
-			simpleFitter::printlevel=1;
-		}
+
 		mainfitter.fit();
 	}
 
@@ -246,12 +237,10 @@ invokeApplication(){
 		TCanvas c;
 		c.Print(outfile+".pdf(");
 		pl.usePad(&c);
-		for(size_t seveneight=0;seveneight<2;seveneight++){
+		for(size_t ndts=0;ndts<mainfitter.nDatasets();ndts++){
 			for(size_t nbjet=0;nbjet<3;nbjet++){
-				if(!mainfitter.has7TeV())
-					seveneight++;
 				double chi2=0;
-				containerStack stack=mainfitter.produceStack(false,nbjet,seveneight,chi2);
+				containerStack stack=mainfitter.produceStack(false,nbjet,ndts,chi2);
 				pl.setStack(&stack);
 				textBoxes tb;
 				tb.add(0.7,0.73,"#chi^{2}="+toTString(chi2));
@@ -259,7 +248,7 @@ invokeApplication(){
 				tb.drawToPad(c.cd(1),true);
 				c.Print(outfile+".pdf");
 				tb.clear();
-				stack=mainfitter.produceStack(true,nbjet,seveneight,chi2);
+				stack=mainfitter.produceStack(true,nbjet,ndts,chi2);
 				pl.setStack(&stack);
 				tb.add(0.7,0.5,"#chi^{2}="+toTString(chi2));
 				pl.draw();
@@ -269,7 +258,7 @@ invokeApplication(){
 			plotterCompare plc;
 			plc.usePad(&c);
 			plc.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/comparePlots_Cb.txt");
-			c.SetName("c_b");
+			/*	c.SetName("c_b");
 			container1D ctmp=mainfitter.getCb(false,seveneight);
 			ctmp.setName("C_{b}  pre-fit");
 			plc.setNominalPlot(&ctmp);
@@ -291,7 +280,7 @@ invokeApplication(){
 			plc.setComparePlot(&ctmp,0);
 			plc.draw();
 			c.Print(outfile+".pdf");
-			c.Write();
+			c.Write(); */
 		}
 
 
@@ -304,17 +293,13 @@ invokeApplication(){
 		c.Print(outfile+".pdf");
 		c.Write();
 
-		texTabler tab8=mainfitter.makeSystBreakdown(8);
-		tab8.writeToFile(outfile+"_tab8.tex");
-		tab8.writeToPdfFile(outfile+"_tab8.pdf");
-		std::cout << tab8.getTable() <<std::endl;
-		if(mainfitter.has7TeV()){
-			texTabler tab7=mainfitter.makeSystBreakdown(7);
-			tab7.writeToFile(outfile+"_tab7.tex");
-			tab7.writeToPdfFile(outfile+"_tab7.pdf");
-			std::cout << tab7.getTable() <<std::endl;
+		for(size_t ndts=0;ndts<mainfitter.nDatasets();ndts++){
+			texTabler tab=mainfitter.makeSystBreakdown(ndts);
+			TString dtsname=mainfitter.datasetName(ndts);
+			tab.writeToFile(outfile+"_tab" +dtsname + ".tex");
+			tab.writeToPdfFile(outfile+"_tab" +dtsname + ".pdf");
+			std::cout << tab.getTable() <<std::endl;
 		}
-
 
 		texTabler corr=mainfitter.makeCorrTable();
 		corr.writeToFile(outfile+"_tabCorr.tex");

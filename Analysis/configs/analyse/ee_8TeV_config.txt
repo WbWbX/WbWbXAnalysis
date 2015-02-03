@@ -70,7 +70,7 @@ ElecSFHisto    = GlobalSF
 
 TriggerSFFile  = /src/TopAnalysis/Configuration/analysis/common/data/triggerSummary_ee_tightleps.root
 
-PUFile         = /src/TtZAnalysis/Data/ReRecoJan13.json.txt_PU $without .root
+PUFile         = /src/TtZAnalysis/Data/Legacy2012.json_PU $without .root
 
 
 btagWP         = csvl

@@ -175,6 +175,20 @@ void container1DUnfold::mergeAllErrors(const TString & mergedname){
 	refolded_.mergeAllErrors(mergedname);
 }
 
+void container1DUnfold::equalizeSystematicsIdxs(container1DUnfold &rhs){
+	if(rhs.conts_.size() == conts_.size()){
+		for(size_t i=0;i<conts_.size();i++){
+			conts_.at(i).equalizeSystematicsIdxs(rhs.conts_.at(i));
+		}
+		recocont_.equalizeSystematicsIdxs(rhs.recocont_);
+		unfolded_.equalizeSystematicsIdxs(rhs.unfolded_);
+		gencont_.equalizeSystematicsIdxs(rhs.gencont_);
+		refolded_.equalizeSystematicsIdxs(rhs.refolded_);
+	}
+	else{
+		throw std::logic_error("container1DUnfold::equalizeSystematicsIdxs: TBI for different conts_size()");
+	}
+}
 
 void container1DUnfold::mergeVariations(const std::vector<TString>& names, const TString & outname,bool linearly){
 	container2D::mergeVariations(names,outname,linearly);
@@ -363,7 +377,13 @@ container1DUnfold& container1DUnfold::operator *= (float val){
 	refolded_*=val;
 	return *this;
 }
-
+container1DUnfold container1DUnfold::operator * (double val)const{
+	return *this * (float) val;
+}
+container1DUnfold& container1DUnfold::operator *= (double val){
+	*this *= (float) val;
+	return *this;
+}
 void container1DUnfold::setDivideBinomial(bool binomial){
 	for(size_t i=0;i<conts_.size();i++)
 		conts_.at(i).setDivideBinomial(binomial);

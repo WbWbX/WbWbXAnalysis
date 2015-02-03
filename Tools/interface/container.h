@@ -362,6 +362,8 @@ public:
 	 */
 	static std::vector<float> createBinning(size_t nbins, float first, float last);
 
+	static void equalizeSystematics(std::vector<container1D>&,std::vector<container1D>&);
+
 	/**
 	 * prints the full content in each bin
 	 */
@@ -451,6 +453,9 @@ public:
 	 * writes object to a Root file
 	 */
 	void writeToTFile(const TString& filename);
+
+
+
 
 
 protected:

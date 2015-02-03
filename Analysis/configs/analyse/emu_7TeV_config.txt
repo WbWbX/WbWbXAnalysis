@@ -61,29 +61,30 @@ inputFilesDir = /nfs/dust/cms/user/kiesej/trees_Oct14/
 
 Lumi           = 5050
 
-JECFile        = /src/TtZAnalysis/Data/Legacy11_V1_DATA_UncertaintySources_AK5PFchs.txt
+JECFile        = /src/TtZAnalysis/Analysis/data/analyse/Legacy11_V1_DATA_UncertaintySources_AK5PFchs.txt
 
-MuonSFFile     = /src/TtZAnalysis/Data/muonEffTop2D.root
+
+MuonSFFile     = /src/TtZAnalysis/Analysis/data/analyse/muon_tight_sf2D_8TeV.root
 MuonSFHisto    = eff_pt_eta_fullwithtrackerr
-TrackingSFFile = /src/TtZAnalysis/Data/muon_tracking_eff.root
+TrackingSFFile = /src/TtZAnalysis/Analysis/data/analyse/muon_trackSF_8TeV.root
 TrackingSFHisto = tracking_eff
 
 
 
-ElecSFFile     = /src/TtZAnalysis/Data/elec_tight_SF.root
-ElecSFHisto    = GlobalSF_err_err_err
+ElecSFFile     = /src/TtZAnalysis/Analysis/data/analyse/elec_tight_sf2D_8TeV.root
+ElecSFHisto    = GlobalSF
 
-$ well this is wrong
-TriggerSFFile  = /src/TtZAnalysis/Analysis/data/analyse/triggerSummary_emu_7TeV_tight.root
+TriggerSFFile  = /src/TtZAnalysis/Analysis/data/analyse/trigger_emu_8TeV_pt30.root
 
-PUFile         = /src/TtZAnalysis/Data/Legacy2011.json_PU $without .root
+PUFile         = /src/TtZAnalysis/Analysis/data/analyse/Legacy2012.json_PU    $without .root
 
-btagWP         = csvt
-btagFile       = all_btags.root $$ doesn't matter
+btagWP         = csvl
+btagFile       = all_btags
 
-modeOptions = GsfelectronsZerojetNozcutNometcutNobcutBtagcsvtLeppt30
 
-btagShapeFileHF = /src/TopAnalysis/ZTopUtils/data/csv_rwt_hf.root
-btagShapeFileLF = /src/TopAnalysis/ZTopUtils/data/csv_rwt_lf.root
+btagShapeFileHF = /src/TopAnalysis/Configuration/analysis/common/data/csv_rwt_hf_20pt_8_20_14.root
+btagShapeFileLF = /src/TopAnalysis/Configuration/analysis/common/data/csv_rwt_lf_20pt_8_20_14.root
 
+
+modeOptions = GsfelectronsZerojetNozcutNometcutNobcutBtagcsvtLeppt30Notoppt
 [parameters-end]

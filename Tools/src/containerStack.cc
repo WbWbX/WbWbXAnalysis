@@ -28,7 +28,6 @@ containerStack::~containerStack(){
 	containers1DUnfold_.clear();
 	legends_.clear();
 	colors_.clear();
-	norms_.clear();
 	for(unsigned int i=0;i<cs_list.size();i++){
 		if(cs_list[i] == this) cs_list.erase(cs_list.begin()+i);
 	}
@@ -58,7 +57,6 @@ void containerStack::push_back(const ztop::container1D& cont,const TString& lege
 				std::cout << "containerStack::push_back(1D): found same legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
 			containers_[i] += cont * norm;
 			containers_[i].setName(legend);
-			norms_[i]=1;//deprecated
 			legorder_[i]=legord;
 			wasthere=true;
 			break;
@@ -72,7 +70,6 @@ void containerStack::push_back(const ztop::container1D& cont,const TString& lege
 		containers_.push_back(cp*norm);
 		legends_.push_back(legend);
 		colors_.push_back(color);
-		norms_.push_back(1);
 		legorder_.push_back(legord);
 	}
 }
@@ -94,7 +91,6 @@ void containerStack::push_back(const ztop::container2D& cont,const TString& lege
 				std::cout << "containerStack::push_back(2D): found same legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
 			containers2D_[i] +=  cont * norm;
 			containers2D_[i].setName(legend);
-			norms_[i]=1;
 			legorder_[i]=legord;
 			wasthere=true;
 			break;
@@ -108,7 +104,6 @@ void containerStack::push_back(const ztop::container2D& cont,const TString& lege
 		containers2D_.push_back(cp*norm);
 		legends_.push_back(legend);
 		colors_.push_back(color);
-		norms_.push_back(1);
 		legorder_.push_back(legord);
 	}
 }
@@ -132,7 +127,6 @@ void containerStack::push_back(const ztop::container1DUnfold& cont,const TString
 			containers1DUnfold_[i].setName(legend);
 			containers_[i] += cont1d * norm;
 			containers_[i].setName(getName());
-			norms_[i]=1;
 			legorder_[i]=legord;
 			wasthere=true;
 			break;
@@ -148,7 +142,6 @@ void containerStack::push_back(const ztop::container1DUnfold& cont,const TString
 		containers_.push_back(cont1d * norm);
 		legends_.push_back(legend);
 		colors_.push_back(color);
-		norms_.push_back(1);
 		legorder_.push_back(legord);
 	}
 
@@ -214,15 +207,15 @@ void containerStack::mergeLegends(const std::vector<TString>& tobemerged,const T
 	for(size_t i=0;i<legends_.size();i++){
 		if(std::find(idxstbm.begin(),idxstbm.end(),i) == idxstbm.end() || i==inidx){ // use lateron
 			if(is1D()||is1DUnfold()){
-				newconts.push_back(containers_.at(i) *norms_.at(i));
+				newconts.push_back(containers_.at(i));
 				if(i==inidx)newidx=newconts.size()-1;
 			}
 			if(is1DUnfold()){
-				newcontsuf.push_back(containers1DUnfold_.at(i)*norms_.at(i));
+				newcontsuf.push_back(containers1DUnfold_.at(i));
 				if(i==inidx)newidx=newcontsuf.size()-1;
 			}
 			if(is2D()){
-				newconts2d.push_back( containers2D_.at(i)*norms_.at(i));
+				newconts2d.push_back( containers2D_.at(i));
 				if(i==inidx)newidx=newconts2d.size()-1;
 			}
 			if(debug)std::cout << "reusing " << legends_.at(i) <<std::endl;
@@ -236,14 +229,14 @@ void containerStack::mergeLegends(const std::vector<TString>& tobemerged,const T
 		if(std::find(idxstbm.begin(),idxstbm.end(),i) != idxstbm.end() && i!=inidx){
 			if(is1D()||is1DUnfold()){
 				if(debug)std::cout << "adding  " << legends_.at(i) << " to " << legs.at(newidx)<<std::endl;
-				newconts.at(newidx)+=(containers_.at(i) *norms_.at(i));
+				newconts.at(newidx)+=(containers_.at(i) );
 			}
 			if(is1DUnfold()){
 				if(debug)std::cout << "adding  " << legends_.at(i) << " to " << legs.at(newidx)<<std::endl;
-				newcontsuf.at(newidx)+=(containers1DUnfold_.at(i)*norms_.at(i));
+				newcontsuf.at(newidx)+=(containers1DUnfold_.at(i));
 			}
 			if(is2D()){
-				newconts2d.at(newidx)+=( containers2D_.at(i)*norms_.at(i));
+				newconts2d.at(newidx)+=( containers2D_.at(i));
 			}
 		}
 	}
@@ -265,14 +258,15 @@ void containerStack::mergeLegends(const std::vector<TString>& tobemerged,const T
 				<< "newconts: " << newconts.size() << " \n"
 				<< "newcontsuf: " << newcontsuf.size() << " \n"
 				<< "newconts2d: " << newconts2d.size() << " \n"
-				<< "newsignals: " << newsignals.size() << " \n" <<std::endl;
+				<< "newsignals: " << newsignals.size() << " \n"
+				<< "renamed "<< legs.at(newidx)<< " to " << mergedname<<std::endl;
+
 	}
 	legends_=legs;
 	legends_.at(newidx) = mergedname;
 	colors_=cols;
 	colors_.at(newidx) = mergedColor;
 	legorder_=legos;
-	norms_=norms;
 	containers_=newconts;
 	containers1DUnfold_=newcontsuf;
 	containers2D_=newconts2d;
@@ -321,19 +315,17 @@ void containerStack::removeContribution(TString legendname){
 	std::vector<TString>::iterator leg=legends_.begin();
 	std::vector<int>::iterator col=colors_.begin();
 	std::vector<int>::iterator lego=legorder_.begin();
-	std::vector<double>::iterator norm=norms_.begin();
 	size_t rmpos=0;
 	for(size_t i=0;i<legends_.size();i++){
 		if(*leg == legendname){
 			legends_.erase(leg);
 			colors_.erase(col);
-			norms_.erase(norm);
 			legorder_.erase(lego);
 			rmpos=i;
 			found=true;
 			break;
 		}
-		++leg;++col;++norm;++lego;
+		++leg;++col;++lego;
 
 	}
 	if(mode==dim1 || mode==unfolddim1)
@@ -353,8 +345,8 @@ int containerStack::getContributionIdx(TString legname) const{
 		if(legname == legends_.at(i))
 			return i;
 	}
-	std::cout << "containerStack::getContributionIdx: " << legname << " not found!" <<std::endl;
-	throw std::out_of_range("containerStack::getContributionIdx: contribution does not exists");
+	std::string errstr = ("containerStack::getContributionIdx: " + legname + " not found!").Data();
+	throw std::out_of_range(errstr);
 	return -1;
 }
 
@@ -364,7 +356,6 @@ ztop::container1D containerStack::getContribution(TString contr) const{
 	if(idx<0 || mode != dim1)
 		return out;
 	out=containers_.at(idx);
-	out*= norms_.at(idx);
 	return out;
 }
 ztop::container2D containerStack::getContribution2D(TString contr)const{
@@ -373,7 +364,6 @@ ztop::container2D containerStack::getContribution2D(TString contr)const{
 	if(idx<0 || mode != dim2)
 		return out;
 	out=containers2D_.at(idx);
-	out*= norms_.at(idx);
 	return out;
 }
 ztop::container1DUnfold containerStack::getContribution1DUnfold(TString contr)const{
@@ -382,7 +372,6 @@ ztop::container1DUnfold containerStack::getContribution1DUnfold(TString contr)co
 	if(idx<0 || mode != unfolddim1)
 		return out;
 	out=containers1DUnfold_.at(idx);
-	out*= norms_.at(idx);
 	return out;
 }
 ztop::container1D containerStack::getContributionsBut(TString contr)const{
@@ -395,7 +384,6 @@ ztop::container1D containerStack::getContributionsBut(TString contr)const{
 	for(std::vector<TString>::const_iterator name=legends_.begin();name<legends_.end();++name){
 		if(contr != *name){
 			container1D temp=containers_[i];
-			out=out+temp * norms_[i];
 		}
 		i++;
 	}
@@ -411,7 +399,6 @@ ztop::container2D containerStack::getContributions2DBut(TString contr) const{
 	for(std::vector<TString>::const_iterator name=legends_.begin();name<legends_.end();++name){
 		if(contr != *name){
 			container2D temp=containers2D_[i];
-			out=out+temp * norms_[i];
 		}
 		i++;
 	}
@@ -427,7 +414,6 @@ ztop::container1DUnfold containerStack::getContributions1DUnfoldBut(TString cont
 	for(std::vector<TString>::const_iterator name=legends_.begin();name<legends_.end();++name){
 		if(contr != *name){
 			container1DUnfold temp=containers1DUnfold_[i];
-			out=out+temp * norms_[i];
 		}
 		i++;
 	}
@@ -449,7 +435,6 @@ ztop::container1D containerStack::getContributionsBut(std::vector<TString> contr
 		}
 		if(get){
 			container1D temp=containers_[i];
-			out +=  temp* norms_[i];
 		}
 	}
 	return out;
@@ -470,7 +455,6 @@ ztop::container2D containerStack::getContributions2DBut(std::vector<TString> con
 		}
 		if(get){
 			container2D temp=containers2D_[i] ;
-			out = out+ temp* norms_[i];
 		}
 	}
 	return out;
@@ -491,40 +475,37 @@ ztop::container1DUnfold containerStack::getContributions1DUnfoldBut(std::vector<
 		}
 		if(get){
 			container1DUnfold temp=containers1DUnfold_[i] ;
-			out = out+ temp* norms_[i];
 		}
 	}
 	return out;
 }
 
-void containerStack::multiplyNorm(size_t i , double multi){
+void containerStack::multiplyNorm(size_t i , float multi){
 	if(i>=size()){
 		throw std::out_of_range("containerStack::multiplyNorm: out of range");
 	}
-	if(dim1){
+	if(containers_.size()>i){
 		containers_.at(i)*=multi;
 	}
-	else if(dim2){
+	if(containers2D_.size()>i){
 		containers2D_.at(i)*=multi;
 	}
-	else if(unfolddim1){
-		containers_.at(i)*=multi;
+	if(containers1DUnfold_.size()>i){
 		containers1DUnfold_.at(i)*=multi;
 	}
 }
 
-void containerStack::multiplyNorm(TString legendentry, double multi){
-	int i=0;
+void containerStack::multiplyNorm(TString legendentry, float multi){
+	size_t i=0;
 	for(std::vector<TString>::iterator name=legends_.begin();name<legends_.end();++name){
 		if(legendentry == *name){
-			if(dim1){
+			if(containers_.size()>i){
 				containers_.at(i)*=multi;
 			}
-			else if(dim2){
+			if(containers2D_.size()>i){
 				containers2D_.at(i)*=multi;
 			}
-			else if(unfolddim1){
-				containers_.at(i)*=multi;
+			if(containers1DUnfold_.size()>i){
 				containers1DUnfold_.at(i)*=multi;
 			}
 			break;
@@ -534,17 +515,16 @@ void containerStack::multiplyNorm(TString legendentry, double multi){
 
 }
 
-void containerStack::multiplyAllMCNorms(double multiplier){
+void containerStack::multiplyAllMCNorms(float multiplier){
 	for(unsigned int i=0;i<legends_.size();i++){
 		if(legends_.at(i)!=dataleg_){
-			if(dim1){
+			if(containers_.size()>i){
 				containers_.at(i)*=multiplier;
 			}
-			else if(dim2){
+			if(containers2D_.size()>i){
 				containers2D_.at(i)*=multiplier;
 			}
-			else if(unfolddim1){
-				containers_.at(i)*=multiplier;
+			if(containers1DUnfold_.size()>i){
 				containers1DUnfold_.at(i)*=multiplier;
 			}
 		}
@@ -566,14 +546,16 @@ void containerStack::addGlobalRelMCError(TString sysname,double error){
 	}
 }
 void containerStack::addRelErrorToContribution(double err, const TString& contributionname, TString nameprefix){
-	size_t idx=getContributionIdx(contributionname);
-	TString sysname=nameprefix+"_"+contributionname;
-	containerStack tmp=*this;
-	tmp.multiplyNorm(idx,(1+err));
-	addErrorStack(sysname+"_up",tmp);
-	tmp=*this;
-	tmp.multiplyNorm(idx,(1-err));
-	addErrorStack(sysname+"_down",tmp);
+	if(debug)
+		std::cout << "containerStack::addRelErrorToContribution: " << contributionname <<std::endl;
+		size_t idx=getContributionIdx(contributionname);
+	std::vector<size_t> excludeidxs;
+	for(size_t i=0;i<size();i++){
+		if(i!=idx)
+			excludeidxs.push_back(i);
+	}
+
+	addRelErrorToBackgrounds(err,false, nameprefix, excludeidxs);
 }
 
 void containerStack::addRelErrorToBackgrounds(double err ,bool aspartials , TString nameprefix,const TString& excludecontr){
@@ -599,41 +581,36 @@ void containerStack::addRelErrorToBackgrounds(double err ,bool aspartials , TStr
 	if(aspartials)
 		nameprefix+=(TString)container1D_partialvariationIDString+"_";
 
-	if(is1D()){
-		for(size_t i=0;i<containers_.size();i++){
-			if(std::find(signals.begin(),signals.end(),i) != signals.end()) continue;
-			//add error to all of them
-			for(size_t j=0;j<containers_.size();j++){
-				if(j==i)
-					containers_.at(j).addGlobalRelError(nameprefix+legends_.at(i),err);
-				else
-					containers_.at(j).addGlobalRelError(nameprefix+legends_.at(i),0);
-			}
-		}
-	}
-	else if(is2D()){
-		for(size_t i=0;i<containers2D_.size();i++){
-			if(std::find(signals.begin(),signals.end(),i) != signals.end()) continue;
-			for(size_t j=0;j<containers_.size();j++){
-				if(j==i)
-					containers2D_.at(j).addGlobalRelError(nameprefix+legends_.at(i),err);
-				else
-					containers2D_.at(j).addGlobalRelError(nameprefix+legends_.at(i),0);
-			}
-		}
-	}
-	else if(is1DUnfold()){
-		for(size_t i=0;i<containers1DUnfold_.size();i++){
-			if(std::find(signals.begin(),signals.end(),i) != signals.end()) continue;
-			for(size_t j=0;j<containers_.size();j++){
-				if(j==i)
-					containers1DUnfold_.at(j).addGlobalRelError(nameprefix+legends_.at(i),err);
-				else
-					containers1DUnfold_.at(j).addGlobalRelError(nameprefix+legends_.at(i),0);
-			}
+	for(size_t i=0;i<containers_.size();i++){
+		if(std::find(signals.begin(),signals.end(),i) != signals.end()) continue;
+		//add error to all of them
+		for(size_t j=0;j<containers_.size();j++){
+			if(j==i)
+				containers_.at(j).addGlobalRelError(nameprefix+legends_.at(i),err);
+			else
+				containers_.at(j).addGlobalRelError(nameprefix+legends_.at(i),0);
 		}
 	}
 
+	for(size_t i=0;i<containers2D_.size();i++){
+		if(std::find(signals.begin(),signals.end(),i) != signals.end()) continue;
+		for(size_t j=0;j<containers_.size();j++){
+			if(j==i)
+				containers2D_.at(j).addGlobalRelError(nameprefix+legends_.at(i),err);
+			else
+				containers2D_.at(j).addGlobalRelError(nameprefix+legends_.at(i),0);
+		}
+	}
+
+	for(size_t i=0;i<containers1DUnfold_.size();i++){
+		if(std::find(signals.begin(),signals.end(),i) != signals.end()) continue;
+		for(size_t j=0;j<containers_.size();j++){
+			if(j==i)
+				containers1DUnfold_.at(j).addGlobalRelError(nameprefix+legends_.at(i),err);
+			else
+				containers1DUnfold_.at(j).addGlobalRelError(nameprefix+legends_.at(i),0);
+		}
+	}
 }
 
 void containerStack::mergePartialVariations(const TString& identifier, bool strictpartialID){
@@ -681,22 +658,16 @@ void containerStack::addErrorStack(const TString & sysname,const containerStack&
 			//found=true;
 			if(mode==dim1 || mode==unfolddim1){
 				//errorstack.containers_[j] = errorstack.containers_[j] * errorstack.norms_[j]; //normalize (in case there is any remultiplication done or something)
-				if(errorstack.norms_[j]!=1 || norms_[i]!=1)
-					throw std::logic_error("containerStack: all entries in the (deprecated) norms_ vector need to be 1!!!");
 				if(containers_[i].addErrorContainer(sysname,errorstack.containers_[j])<0){
 					std::cout << "containerStack::addErrorStack: Problem in " << name_ <<std::endl;
 				}
 			}
 			if(mode==dim2){
-				if(errorstack.norms_[j]!=1 || norms_[i]!=1)
-					throw std::logic_error("containerStack: all entries in the (deprecated) norms_ vector need to be 1!!!");
 				if(containers2D_[i].addErrorContainer(sysname,errorstack.containers2D_[j])<0){
 					std::cout << "containerStack::addErrorStack: Problem in " << name_ <<std::endl;
 				}
 			}
 			if(mode==unfolddim1){
-				if(errorstack.norms_[j]!=1 || norms_[i]!=1)
-					throw std::logic_error("containerStack: all entries in the (deprecated) norms_ vector need to be 1!!!");
 				if(containers1DUnfold_[i].addErrorContainer(sysname,errorstack.containers1DUnfold_[j])<0){
 					std::cout << "containerStack::addErrorStack: Problem in " << name_ <<std::endl;
 				}
@@ -717,7 +688,6 @@ void containerStack::addErrorStack(const TString & sysname,const containerStack&
 			if(mode==unfolddim1){
 				containers1DUnfold_[i].addErrorContainer(sysname,containers1DUnfold_[i]);
 			}
-
 		}
 	}
 }
@@ -824,7 +794,6 @@ ztop::container1D containerStack::getFullMCContainer()const{
 	for(unsigned int i=0;i<containers_.size();i++){
 		if(legends_[i] != dataleg_) {
 			container1D temp=containers_[i];
-			out = out + temp*norms_[i];
 		}
 	}
 	return out;
@@ -838,7 +807,6 @@ ztop::container2D containerStack::getFullMCContainer2D()const{
 	for(unsigned int i=0;i<containers2D_.size();i++){
 		if(legends_[i] != dataleg_){
 			container2D temp= containers2D_[i];
-			out = out + temp*norms_[i];
 		}
 	}
 	return out;
@@ -852,12 +820,11 @@ ztop::container1DUnfold containerStack::getFullMCContainer1DUnfold()const {
 	for(unsigned int i=0;i<containers1DUnfold_.size();i++){
 		if(legends_[i] != dataleg_){
 			container1DUnfold temp=containers1DUnfold_[i];
-			out = out + temp*norms_[i];
 		}
 	}
 	return out;
 }
-
+/*
 THStack * containerStack::makeTHStack(TString stackname){
 	if(!checkDrawDimension()){
 		std::cout << "containerStack::makeTHStack: only available for 1dim stacks!" <<std::endl;
@@ -884,7 +851,6 @@ THStack * containerStack::makeTHStack(TString stackname){
 				std::cout <<"->"<<i << ": " << getLegend(i)<< std::endl;
 			container1D tempcont = getContainer(i);
 
-			tempcont = tempcont * getNorm(i);
 			TH1D * htemp=(tempcont.getTH1D(getLegend(i)+" "+getName()+"_stack_h"));
 			if(!htemp)
 				continue;
@@ -920,7 +886,6 @@ TLegend * containerStack::makeTLegend(bool inverse){
 	for(unsigned int it=0;it<size();it++){
 		size_t i=sorted.at(it);
 		container1D tempcont = containers_[i];
-		tempcont = tempcont * getNorm(i);
 		TH1D * h = addObject((TH1D*)tempcont.getTH1D(getLegend(i)+" "+getName()+"_leg")->Clone());
 		h->SetFillColor(getColor(i));
 		if(getLegend(i) != dataleg_) leg->AddEntry(h,getLegend(i),"f");
@@ -1041,41 +1006,7 @@ void containerStack::drawRatioPlot(TString name,double resizelabels){
 	data.setShowWarnings(false);
 	container1D mc = getFullMCContainer();
 	mc.setShowWarnings(false);
-	//data.setDivideBinomial(false);
-	//mc.setDivideBinomial(false);
-	/*
-	container1D ratio=data;
-	ratio.clear();
-	ratio.setShowWarnings(false);
-	container1D relmcerrstat=data;
-	relmcerrstat.clear();
-	container1D relmcerrsys=relmcerrstat;
-	container1D mccopy=mc;
-	for(size_t i=0; i<ratio.getNBins()+1; i++){ //includes underflow right now, doesn't matter
-		relmcerrstat.setBinContent(i,1.);
-		double errfullup=mc.getBinErrorUp(i)/mc.getBinContent(i);
-		double errfulldown=mc.getBinErrorDown(i) / mc.getBinContent(i);
-		double errstatup=mc.getBinErrorUp(i,true)/mc.getBinContent(i);
-		double errstatdown=mc.getBinErrorDown(i,true) / mc.getBinContent(i);
-		double errsysup=sqrt(errfullup*errfullup - errstatup*errstatup);
-		double errsysdown=sqrt(errfulldown*errfulldown - errstatdown*errstatdown);
-		if(mc.getBinContent(i) ==0){
-			errfullup=0;errfulldown=0;errsysup=0;errsysdown=0;
-		}
-		relmcerrstat.setBinErrorUp(i,errfullup);
-		relmcerrstat.setBinErrorDown(i,errfulldown);
-		relmcerrsys.setBinContent(i,1.);
-		relmcerrsys.setBinErrorUp(i,errsysup);
-		relmcerrsys.setBinErrorDown(i,errsysdown);
-		//set mc error to zero for the ratio plot
-		mccopy.setBinErrorUp(i,0);
-		mccopy.setBinErrorDown(i,0);
-	}
-	bool temp=histoContent::divideStatCorrelated;
-	histoContent::divideStatCorrelated =false;
-	ratio = data / mccopy;
-	histoContent::divideStatCorrelated =temp;
-	 */
+
 	container1D ratio=data;
 	ratio.normalizeToContainer(mc);
 	mc=mc.getRelErrorsContainer();
@@ -1097,9 +1028,7 @@ void containerStack::drawRatioPlot(TString name,double resizelabels){
 	h->GetYaxis()->SetNdivisions(505);
 	h->GetXaxis()->SetTickLength(0.03 * multiplier);
 	h->Draw("AXIS");
-	gratio->Draw("P");/*
-	TGraphAsymmErrors * gmcerr = relmcerrstat.getTGraph(name+"_relerrstat",false,false,false);
-	TGraphAsymmErrors * gmcerrsys = relmcerrsys.getTGraph(name+"_relerrsys",false,false,false); */
+	gratio->Draw("P");
 	TGraphAsymmErrors * gmcerr = addObject(mc.getTGraph(name+"_relerrstat",false,false,false));
 	TGraphAsymmErrors * gmcerrsys = addObject(mc.getTGraph(name+"_relerrsys",false,false,false,true));
 
@@ -1129,12 +1058,8 @@ void containerStack::drawRatioPlot(TString name,double resizelabels){
 		}
 	}
 }
-/**
- * requires all norms=1
- * returns at 0: left to right
- *         at 1: right to left
- *   idx is index of signal. data is being ignored
- */
+
+
 std::vector<container1D> containerStack::getPEffPlots(size_t idx)const{
 	if(idx>=containers_.size()){
 		std::cout << "containerStack::getPEffPlot: idx out of range, return empty" <<std::endl;
@@ -1332,12 +1257,7 @@ void containerStack::drawSBGPlot(TString name,double resizelabels,bool invert){
 		}
 	}
 }
-/*
-TCanvas * containerStack::makeTCanvas(bool drawratioplot){
-	if(drawratioplot) return makeTCanvas(ratio);
-	else return makeTCanvas(normal);
-}
- */
+
 TCanvas * containerStack::makeTCanvas(plotmode plotMode){
 	if(!checkDrawDimension()){
 		std::cout << "containerStack::makeTCanvas: only available for 1dim stacks!" <<std::endl;
@@ -1380,22 +1300,7 @@ TCanvas * containerStack::makeTCanvas(plotmode plotMode){
 			drawPEffPlot("",labelresize);
 		c->cd(1)->RedrawAxis();
 	}
-	/*else{
-		c->Divide(1,3);
-		c->SetFrameBorderSize(0);
-		c->cd(1)->SetLeftMargin(0.15);
-		c->cd(1)->SetBottomMargin(0.0);
-		c->cd(2)->SetLeftMargin(0.15);
-		c->cd(2)->SetBottomMargin(0.0);
-		c->cd(3)->SetLeftMargin(0.15);
-		c->cd(3)->SetBottomMargin(0.4);
-		drawControlPlot(name_,false,1);
-		c->cd(2);
-		drawSBGPlot("",1,false);
-		c->cd(3);
-		drawSBGPlot("",1,true);
-		c->cd(1)->RedrawAxis();
-	}*/
+
 	if(gStyle){
 		gStyle->SetOptTitle(0);
 		gStyle->SetOptStat(0);
@@ -1403,7 +1308,7 @@ TCanvas * containerStack::makeTCanvas(plotmode plotMode){
 	delete htemp;
 	return c;
 }
-
+*/
 std::map<TString, histoBin> containerStack::getAllContentsInBin(size_t bin,int syst,bool print)const{
 
 
@@ -1606,14 +1511,12 @@ containerStack containerStack::append(const containerStack& rhs)const{
 		container1D temp;
 		if(rhspos < rhs.legends_.size()){ //found same entry
 			temp=rhs.containers_.at(rhspos);
-			temp*=rhs.norms_.at(rhspos);
 			rhsused.push_back(leg);
 		}
 		else{
 			temp=rhs.containers_.at(0);
 			temp.setAllErrorsZero();
 		}
-		out.containers_.at(leg) *= out.norms_.at(leg);
 		out.containers_.at(leg) = out.containers_.at(leg).append(temp);
 	}
 
@@ -1622,7 +1525,7 @@ containerStack containerStack::append(const containerStack& rhs)const{
 		container1D temp=out.containers_.at(0);
 		temp.setAllZero();
 		temp=temp.append(rhs.containers_.at(leg));
-		out.push_back(temp,rhs.legends_.at(leg),rhs.colors_.at(leg),rhs.norms_.at(leg),rhs.legorder_.at(leg));
+		out.push_back(temp,rhs.legends_.at(leg),rhs.colors_.at(leg),1,rhs.legorder_.at(leg));
 
 	}
 
@@ -1644,8 +1547,22 @@ void containerStack::equalizeSystematicsIdxs(containerStack& rhs){
 	for(size_t i=0;i<rhs.containers_.size();i++){
 		rhs.containers_.at(i).equalizeSystematicsIdxs(containers_.at(0));
 	}
-	if(!is1D()) //FIXME
-		throw std::runtime_error("containerStack::equalizeSystematicsIdxs: only implemented for 1D stacks (FIXME)");
+
+	for(size_t i=0;i<containers2D_.size();i++){
+		containers2D_.at(i).equalizeSystematicsIdxs(rhs.containers2D_.at(0));
+	}
+	for(size_t i=0;i<rhs.containers2D_.size();i++){
+		rhs.containers2D_.at(i).equalizeSystematicsIdxs(containers2D_.at(0));
+	}
+
+	for(size_t i=0;i<containers1DUnfold_.size();i++){
+		containers1DUnfold_.at(i).equalizeSystematicsIdxs(rhs.containers1DUnfold_.at(0));
+	}
+	// after this->containers_.at(0) now has a superset of syst,
+	// it will drive the new ordering of rhs
+	for(size_t i=0;i<rhs.containers_.size();i++){
+		rhs.containers1DUnfold_.at(i).equalizeSystematicsIdxs(containers1DUnfold_.at(0));
+	}
 }
 
 bool containerStack::setsignal(const TString& sign){
@@ -1740,8 +1657,7 @@ container1D containerStack::getSignalContainer()const{
 }
 container1D containerStack::getBackgroundContainer()const{
 	if(mode != dim1 && mode !=unfolddim1){
-		if(debug) std::cout << "containerStack::getBackgroundContainer: return dummy" <<std::endl;
-		return container1D();
+		throw std::logic_error("containerStack::getBackgroundContainer: only defined for 1D stacks");
 	}
 	std::vector<size_t> sidx=getSignalIdxs();
 	container1D out;
@@ -1749,25 +1665,28 @@ container1D containerStack::getBackgroundContainer()const{
 		out=containers_.at(0);
 		out.clear();
 	}
-	bool first=true;
-	for(size_t i=0;i<containers_.size();i++){
+	//bool first=true;
+	for(size_t i=0;i<legends_.size();i++){
 		if(std::find(sidx.begin(),sidx.end(),i) != sidx.end() || getLegend(i) == dataleg_){
 			continue;
 		}
-		if(first){
-			out=containers_.at(i);
-			first=false;
-		}
-		else{
+		if(mode ==unfolddim1)
+			out+=containers1DUnfold_.at(i).getRecoContainer();
+		else
 			out+=containers_.at(i);
-		}
 	}
 
 	return out;
 
 }
 container1D containerStack::getDataContainer()const{
-	return getContainer(getDataIdx());
+	if(mode ==unfolddim1)
+		return getContainer1DUnfold(getDataIdx()).getRecoContainer();
+	else if(mode ==dim1)
+		return getContainer(getDataIdx());
+	else
+		throw std::logic_error("containerStack::getDataContainer: only available for 1D or 1DUnfold stacks");
+	return container1D();
 }
 container2D containerStack::getSignalContainer2D()const{
 	if(mode != dim2){
@@ -1830,8 +1749,6 @@ container1DUnfold containerStack::produceUnfoldingContainer(const std::vector<TS
 		std::cout << "containerStack::produceUnfoldingContainer: No unfolding information, return empty" <<std::endl;
 		return out;
 	}
-	if(debug)
-		checknorms();
 	bool temp=container1DUnfold::c_makelist;
 	container1DUnfold::c_makelist=false;
 	bool temp2=container1D::c_makelist;
@@ -1857,25 +1774,24 @@ container1DUnfold containerStack::produceUnfoldingContainer(const std::vector<TS
 		for(size_t sig=0;sig<signals.size();sig++){
 			if(signals.at(sig) == legends_.at(leg)){
 				if(debug)
-					std::cout << "containerStack::produceUnfoldingContainer: identified " << legends_.at(leg) << " as signal -> add to signal, norm: "<< norms_[leg] <<std::endl;
+					std::cout << "containerStack::produceUnfoldingContainer: identified " << legends_.at(leg) << " as signal -> add to signal" <<std::endl;
 				container1DUnfold normcuf= *cuf;
-				normcuf = normcuf*norms_[leg];
-				out = out + normcuf;
+				out  += normcuf;
 				issignal=true;
 				break;
 			}
 		}
 		if(!issignal && legends_.at(leg) != dataleg_){
 			if(debug)
-				std::cout << "containerStack::produceUnfoldingContainer: identified as BG: "<< legends_.at(leg) <<  ", norm: "<< norms_[leg] << std::endl;
+				std::cout << "containerStack::produceUnfoldingContainer: identified as BG: "<< legends_.at(leg)  << std::endl;
 			container1D bg=cuf->getRecoContainer();
-			background = background + bg*norms_[leg];
+			background  += bg;
 		}
 		if(legends_.at(leg) == dataleg_){
 			if(debug)
 				std::cout << "containerStack::produceUnfoldingContainer: identified as data: "<< legends_.at(leg) << std::endl;
 			container1D d=cuf->getRecoContainer();
-			data = data + d*norms_[leg];
+			data  += d;
 		}
 	}
 	//migration matrix, eff, background prepared -> finished
@@ -1899,8 +1815,6 @@ container1DUnfold containerStack::produceXCheckUnfoldingContainer(const std::vec
 		std::cout << "containerStack::produceXCheckUnfoldingContainer: No unfolding information, return empty" <<std::endl;
 		return out;
 	}
-	if(debug)
-		checknorms();
 
 	bool temp=container1DUnfold::c_makelist;
 	container1DUnfold::c_makelist=false;
@@ -1919,8 +1833,7 @@ container1DUnfold containerStack::produceXCheckUnfoldingContainer(const std::vec
 		for(size_t sig=0;sig<signals.size();sig++){
 			if(signals.at(sig) == legends_.at(leg)){ //so damn not fast
 				container1DUnfold normcuf=*cuf;
-				normcuf = normcuf*norms_[leg];
-				out = out + normcuf;
+				out  += normcuf;
 				break;
 			}
 		}
@@ -1931,20 +1844,6 @@ container1DUnfold containerStack::produceXCheckUnfoldingContainer(const std::vec
 	return out;
 }
 
-bool containerStack::checknorms() const{
-	bool out=true;
-	for(size_t i=0;i<norms_.size();i++){
-		if(norms_[i] != 1){
-			if(debug){
-				std::cout << "containerStack::checknorms: Norm for " << legends_[i] << " is not 1; " << norms_[i] << std::endl;
-				out=false;
-			}
-			out=false;
-			throw std::logic_error("containerStack: obsolete norms_ vector is supposed to have only 1 as entries");
-		}
-	}
-	return out;
-}
 
 
 container1DUnfold containerStack::getSignalContainer1DUnfold(const std::vector<TString> &sign) const{

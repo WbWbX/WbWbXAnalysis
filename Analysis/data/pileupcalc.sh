@@ -9,28 +9,27 @@ analysisJson=$1
 output=`echo ${analysisJson##*/}`
 
 
-pileupCalc.py --minBiasXsec 68000 --inputLumiJSON $pileupJson --maxPileupBin 70 --numPileupBins 70 --calcMode true -i $analysisJson ${output}_PU.root
-exit
+pileupCalc.py --minBiasXsec 68000 --inputLumiJSON $pileupJson --maxPileupBin 100 --numPileupBins 100 --calcMode true -i $analysisJson ${output}_PU.root
 #up
 
-pileupCalc.py --minBiasXsec 71400 --inputLumiJSON $pileupJson --maxPileupBin 70 --numPileupBins 70 --calcMode true -i $analysisJson ${output}_PU_up.root
+pileupCalc.py --minBiasXsec 71400 --inputLumiJSON $pileupJson --maxPileupBin 100 --numPileupBins 100 --calcMode true -i $analysisJson ${output}_PU_up.root
 
 #down
 
-pileupCalc.py --minBiasXsec 64600 --inputLumiJSON $pileupJson --maxPileupBin 70 --numPileupBins 70 --calcMode true -i $analysisJson ${output}_PU_down.root
+pileupCalc.py --minBiasXsec 64600 --inputLumiJSON $pileupJson --maxPileupBin 100 --numPileupBins 100 --calcMode true -i $analysisJson ${output}_PU_down.root
 
 exit
 # 2012 8 TeV
 
-pileupCalc.py --minBiasXsec 69400 --inputLumiJSON $pileupJson --maxPileupBin 70 --numPileupBins 70 --calcMode true -i $analysisJson ${output}_PU.root
+pileupCalc.py --minBiasXsec 69400 --inputLumiJSON $pileupJson --maxPileupBin 100 --numPileupBins 100 --calcMode true -i $analysisJson ${output}_PU.root
 
 #up
 
-pileupCalc.py --minBiasXsec 72870 --inputLumiJSON $pileupJson --maxPileupBin 70 --numPileupBins 70 --calcMode true -i $analysisJson ${output}_PU_up.root
+pileupCalc.py --minBiasXsec 72870 --inputLumiJSON $pileupJson --maxPileupBin 100 --numPileupBins 100 --calcMode true -i $analysisJson ${output}_PU_up.root
 
 #down
 
-pileupCalc.py --minBiasXsec 65930 --inputLumiJSON $pileupJson --maxPileupBin 70 --numPileupBins 70 --calcMode true -i $analysisJson ${output}_PU_down.root
+pileupCalc.py --minBiasXsec 65930 --inputLumiJSON $pileupJson --maxPileupBin 100 --numPileupBins 100 --calcMode true -i $analysisJson ${output}_PU_down.root
 
 #up: 72870
 #down 65930
