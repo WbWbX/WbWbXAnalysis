@@ -266,14 +266,21 @@ container1D container1DUnfold::getVisibleSignal() const{
 		std::cout << "container1DUnfold::getVisibleSignal: No bins!" << std::endl;
 		throw std::logic_error("container1DUnfold::getVisibleSignal: no bins");
 	}
-	container1D out=projectToY(false);
+	bool tmp=histoContent::subtractStatCorrelated;
+	histoContent::subtractStatCorrelated=true;
+	container1D out=recocont_ - getBackground();
+	histoContent::subtractStatCorrelated=tmp;
 	out.setXAxisName(xaxis1Dname_);
 	out.setYAxisName(yaxis1Dname_);
 	return  out;//no underflow included -> only visible part of response matrix -> generated and reconstructed in visible PS
 }
 container1DUnfold& container1DUnfold::operator += (const container1DUnfold & second){
-	if(second.xbins_ != xbins_ || second.ybins_ != ybins_){
+	if((second.xbins_ != xbins_ || second.ybins_ != ybins_) && !isDummy()){
 		std::cout << "container1DUnfold::operator +=: "<< name_ << " and " << second.name_<<" must have same binning! returning *this" << std::endl;
+		return *this;
+	}
+	if(isDummy()){
+		*this=second;
 		return *this;
 	}
 	for(size_t i=0;i<conts_.size();i++){

@@ -596,11 +596,14 @@ void container2D::setDivideBinomial(bool binomial){
 }
 
 container2D & container2D::operator += (const container2D & second){
-	if(second.xbins_ != xbins_ || second.ybins_ != ybins_){
+	if((second.xbins_ != xbins_ || second.ybins_ != ybins_) && !isDummy()){
 		std::cout << "container2D::operator +=: "<< name_ << " and " << second.name_<<" must have same binning! returning *this" << std::endl;
 		return *this;
 	}
-
+	if(isDummy()){
+		*this=second;
+		return *this;
+	}
 	for(size_t i=0;i<conts_.size();i++){
 		conts_.at(i) += second.conts_.at(i);
 	}

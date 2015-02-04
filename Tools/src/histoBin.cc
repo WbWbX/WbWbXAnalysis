@@ -109,8 +109,8 @@ int histoBins::subtract(const histoBins& rhs,bool statCorr){
 		getBin(i).setContent(getBin(i).getContent()-rhs.getBin(i).getContent());
 		float staterr=0;
 		if(statCorr){
-			staterr=getBin(i).getStat()-rhs.getBin(i).getStat();
-			getBin(i).setStat(staterr);
+			staterr=getBin(i).getStat2()-rhs.getBin(i).getStat2();
+			getBin(i).setStat2(staterr);
 		}
 		else{
 			getBin(i).addToStat(rhs.getBin(i).getStat());

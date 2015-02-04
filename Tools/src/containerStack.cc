@@ -789,11 +789,9 @@ ztop::container1D containerStack::getFullMCContainer()const{
 	container1D out;
 	if(containers_.size()<1)
 		return out;
-	out=containers_[0];
-	out.clear();
 	for(unsigned int i=0;i<containers_.size();i++){
 		if(legends_[i] != dataleg_) {
-			container1D temp=containers_[i];
+			out+=containers_[i];
 		}
 	}
 	return out;
@@ -802,11 +800,9 @@ ztop::container2D containerStack::getFullMCContainer2D()const{
 	container2D out;
 	if(containers2D_.size()<1)
 		return out;
-	out=containers2D_[0];
-	out.clear();
 	for(unsigned int i=0;i<containers2D_.size();i++){
 		if(legends_[i] != dataleg_){
-			container2D temp= containers2D_[i];
+			out+= containers2D_[i];
 		}
 	}
 	return out;
@@ -815,11 +811,9 @@ ztop::container1DUnfold containerStack::getFullMCContainer1DUnfold()const {
 	container1DUnfold out;
 	if(containers1DUnfold_.size()<1)
 		return out;
-	out=containers1DUnfold_[0];
-	out.clear();
 	for(unsigned int i=0;i<containers1DUnfold_.size();i++){
 		if(legends_[i] != dataleg_){
-			container1DUnfold temp=containers1DUnfold_[i];
+			out+=containers1DUnfold_[i];
 		}
 	}
 	return out;

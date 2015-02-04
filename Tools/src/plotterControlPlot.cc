@@ -315,15 +315,19 @@ void plotterControlPlot::drawControlPlot(){
 }
 void plotterControlPlot::drawRatioPlot(){
 	getPad()->cd(2);
-	if(stackp_->size() < 2)
+	if(stackp_->size() < 2){
+		std::cout << "plotterControlPlot::drawRatioPlot: did not find both data and MC, skipping ratio plot." <<std::endl;
 		return;
+	}
 	container1D fullmc=stackp_->getFullMCContainer(); //dont div by bw
-	fullmc=fullmc.getRelErrorsContainer();
+	if(stackp_->is1DUnfold())
+		fullmc=stackp_->getFullMCContainer1DUnfold().getRecoContainer();
+	container1D fullmcerr=fullmc.getRelErrorsContainer();
 
-	plot * mcerr=new plot(&fullmc,false);
+	plot * mcerr=new plot(&fullmcerr,false);
 	tempplots_.push_back(mcerr);
 
-	TH1* axish=addObject(stackp_->getContainer(tempdataentry_).convertToGraph(false).getAxisTH1(false,true));
+	TH1* axish=addObject(fullmc.convertToGraph(false).getAxisTH1(false,true));
 	plotStyle ratiostyle=ratiostyle_;
 	ratiostyle.absorbYScaling(getSubPadYScale(2));
 	axish->Draw("AXIS");
@@ -340,8 +344,10 @@ void plotterControlPlot::drawRatioPlot(){
 
 	///data
 	container1D datac=stackp_->getContainer(tempdataentry_);
+	if(stackp_->is1DUnfold())
+		datac=stackp_->getContainer1DUnfold(tempdataentry_).getRecoContainer();
 
-	datac.normalizeToContainer(stackp_->getFullMCContainer());
+	datac.normalizeToContainer(fullmc);
 
 	plot * datar=new plot(&datac,false);
 	tempplots_.push_back(datar);
