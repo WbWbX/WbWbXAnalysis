@@ -32,7 +32,7 @@
 200  /DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Summer11LegDR-PU_S13_START53_LV6-v1/AODSIM     tree_7TeV_dymumu120inf    globalTag=START53_LV6A1 genFilter=Z genFilterString=MuonMuon genFilterMassLow=120 genFilterMassHigh=100000
 200  /DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Summer11LegDR-PU_S13_START53_LV6-v1/AODSIM     tree_7TeV_dyee120inf      globalTag=START53_LV6A1 genFilter=Z genFilterString=ElectronElectron genFilterMassLow=120 genFilterMassHigh=100000
 
-200  /DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Summer11LegDR-PU_S13_START53_LV6-v1/AODSIM     tree_7TeV_dytautau50inf   globalTag=START53_LV6A1 genFilter=ZgenFilterString=TauTau
+200  /DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Summer11LegDR-PU_S13_START53_LV6-v1/AODSIM     tree_7TeV_dytautau50inf   globalTag=START53_LV6A1 genFilter=Z genFilterString=TauTau
 
 100   /DYJetsToLL_M-10To50_TuneZ2_7TeV-pythia6/Summer11LegDR-PU_S13_START53_LV6-v1/AODSIM                     tree_7TeV_dymumu1050        globalTag=START53_LV6A1 genFilter=Z genFilterString=MuonMuon
 100   /DYJetsToLL_M-10To50_TuneZ2_7TeV-pythia6/Summer11LegDR-PU_S13_START53_LV6-v1/AODSIM                     tree_7TeV_dytautau1050      globalTag=START53_LV6A1 genFilter=Z genFilterString=TauTau
