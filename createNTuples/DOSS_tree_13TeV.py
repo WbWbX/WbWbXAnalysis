@@ -77,6 +77,20 @@ if includePDFWeights:
     #os.environ['LHAPATH']=newlha
 
 
+
+
+
+###############################################################
+## Set Options for physics Objects
+import TopAnalysis.Configuration.objectDefinitions13Tev.definitionOptions_cff as opt
+# All Options are saved as dicts and have to be added in the definitionsOptions as empty dicts
+opt.globalOptions = {'runOnAod':options.runOnAOD,
+                 'signal':isSignal}
+opt.primaryVertexOptions = {'inputCollectionAod':'offlinePrimaryVertices',  # Input Collection for AOD
+                 'inputCollectionMiniAod':'offlineSlimmedPrimaryVertices', # Input Collection for MiniAOD
+                 'outputCollection':''}       # The Collection which is Produced, is set in the apropriate cff File
+
+
 ####################################################################
 ## Define the process
 
@@ -286,26 +300,7 @@ else:
 
 ####################################################################
 ## Primary vertex filtering
-
-
-
-from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
-process.goodOfflinePrimaryVertices = cms.EDFilter( 
-    "PrimaryVertexObjectFilter", 
-    filterParams = pvSelector.clone(
-        minNdof = cms.double(4.0),
-        maxZ = cms.double(24.0), 
-        maxRho = cms.double(2.0)
-        ))
-#    src = cms.InputTag('offlinePrimaryVertices'))
-if runOnAOD:
-    process.goodOfflinePrimaryVertices.src = cms.InputTag('offlinePrimaryVertices')
-else:
-    process.goodOfflinePrimaryVertices.src = cms.InputTag('offlineSlimmedPrimaryVertices')
-if isSignal:
-    process.goodOfflinePrimaryVertices.filter = cms.bool(False)
-
-selectedPrimaryVertices = 'goodOfflinePrimaryVertices'
+process.load('TopAnalysis.Configuration.objectDefinitions13Tev.primaryVertex_cff')
 
 
 #################################################################### 
@@ -351,7 +346,7 @@ if runOnAOD:
     process.load("PhysicsTools.PatAlgos.patSequences_cff")
     from PhysicsTools.PatAlgos.tools.pfTools import usePF2PAT
     usePF2PAT(process, runPF2PAT=True, jetAlgo='AK4', runOnMC=runOnMC, postfix=pfpostfix, 
-              jetCorrections=jetCorr, pvCollection=cms.InputTag(selectedPrimaryVertices),typeIMetCorrections=True) 
+              jetCorrections=jetCorr, pvCollection=cms.InputTag(opt.primaryVertexOptions['outputCollection']),typeIMetCorrections=True) 
 
     getattr(process, 'pfPileUp'+pfpostfix).checkClosestZVertex = False
     
@@ -530,7 +525,7 @@ process.PFTree   = cms.EDAnalyzer('TreeWriterTtZ',
                                   metT0T1TxySrc        =cms.InputTag(metTag),
                                   metT0T1Src           =cms.InputTag(metTag),
                                   metT1TxySrc          =cms.InputTag(metTag),
-                                  vertexSrc = cms.InputTag(selectedPrimaryVertices),
+                                  vertexSrc = cms.InputTag(opt.primaryVertexOptions['outputCollection']),
                                   
                                   #block for extended information needed for efficiency studies
                                   includeReco = cms.bool(False),
