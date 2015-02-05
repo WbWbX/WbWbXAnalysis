@@ -77,6 +77,20 @@ if includePDFWeights:
     #os.environ['LHAPATH']=newlha
 
 
+
+
+
+###############################################################
+## Set Options for physics Objects
+import TopAnalysis.Configuration.objectDefinitions13Tev.definitionOptions_cff as opt
+# All Options are saved as dicts and have to be added in the definitionsOptions as empty dicts
+opt.globalOptions = {'runOnAod':options.runOnAOD,
+                 'signal':isSignal}
+opt.primaryVertexOptions = {'inputCollectionAod':'offlinePrimaryVertices',  # Input Collection for AOD
+                 'inputCollectionMiniAod':'offlineSlimmedPrimaryVertices', # Input Collection for MiniAOD
+                 'outputCollection':''}       # The Collection which is Produced, is set in the apropriate cff File
+
+
 ####################################################################
 ## Define the process
 
@@ -166,7 +180,13 @@ process.TFileService = cms.Service("TFileService",
 ####################################################################
 ## Weights 
 
-                                    
+
+## agrohsje test mc systematic weights 
+##process.load("TopAnalysis.ZTopUtils.EventWeightMCSystematic_cfi")
+#process.scaleUp = cms.EDProducer("EventWeightMCSystematic",
+#                                 weightId=cms.string("1001")
+#                                 )
+
 ## Infos for proper normalization
 process.load('TtZAnalysis.TreeWriter.puinfo_cff')
 
@@ -207,9 +227,6 @@ else:
 
 genJetCollection = 'ak4GenJetsNoNuNoLepton'
 genJetFlavourInfoCollection = 'ak4GenJetFlavourPlusLeptonInfos'
-genLevelBJetProducerInput = 'produceGenLevelBJets'
-genBHadronMatcherInput = 'matchGenBHadron'
-genCHadronMatcherInput = 'matchGenCHadron'
 
 ## Create objects 
 ## Details in: PhysicsTools/JetExamples/test/printJetFlavourInfo.cc, PhysicsTools/JetExamples/test/printJetFlavourInfo.py
@@ -283,29 +300,7 @@ else:
 
 ####################################################################
 ## Primary vertex filtering
-
-#check why not applied in official analysis 
-#process.goodOfflinePrimaryVertices = cms.Sequence()
-#selectedPrimaryVertices = ''
-#if runOnAOD:
-selectedPrimaryVertices = 'goodOfflinePrimaryVertices'
-from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
-process.goodOfflinePrimaryVertices = cms.EDFilter( 
-    "PrimaryVertexObjectFilter", 
-    filterParams = pvSelector.clone(
-        minNdof = cms.double(4.0),
-        maxZ = cms.double(24.0), 
-        maxRho = cms.double(2.0)
-        ))
-#    src = cms.InputTag('offlinePrimaryVertices'))
-if runOnAOD:
-    process.goodOfflinePrimaryVertices.src = cms.InputTag('offlinePrimaryVertices')
-else:
-    process.goodOfflinePrimaryVertices.src = cms.InputTag('offlineSlimmedPrimaryVertices')
-if isSignal:
-    process.goodOfflinePrimaryVertices.filter = cms.bool(False)
-#else:
-#    selectedPrimaryVertices = 'offlineSlimmedPrimaryVertices'
+process.load('TopAnalysis.Configuration.objectDefinitions13Tev.primaryVertex_cff')
 
 
 #################################################################### 
@@ -336,13 +331,11 @@ else:
 
 ## Create and define reco objects 
 if runOnAOD:
-    jetTag = 'patJets' + pfpostfix 
     electronTag = 'patElectrons' + pfpostfix  
     muonTag = 'patMuons' + pfpostfix  
     metTag = 'patMETs' + pfpostfix  
     
     ## Output module for edm files (needed for PAT sequence, even if not used in EndPath) 
-    #agrohsje understand lines ???
     from Configuration.EventContent.EventContent_cff import FEVTEventContent
     process.out = cms.OutputModule("PoolOutputModule",
                                    FEVTEventContent,
@@ -353,90 +346,123 @@ if runOnAOD:
     process.load("PhysicsTools.PatAlgos.patSequences_cff")
     from PhysicsTools.PatAlgos.tools.pfTools import usePF2PAT
     usePF2PAT(process, runPF2PAT=True, jetAlgo='AK4', runOnMC=runOnMC, postfix=pfpostfix, 
-              jetCorrections=jetCorr, pvCollection=cms.InputTag(selectedPrimaryVertices),typeIMetCorrections=True) 
+              jetCorrections=jetCorr, pvCollection=cms.InputTag(opt.primaryVertexOptions['outputCollection']),typeIMetCorrections=True) 
 
     getattr(process, 'pfPileUp'+pfpostfix).checkClosestZVertex = False
-    
-## Selections for PF2PAT objects: Electrons 
-# FIXME: pfSelectedElectrons does not exist anymore
-# FIXME: pfIsolatedElectrons is now sth different, takes now cut value (as previously pfSelectedElectrons + relative isolation based on variables of gsfTrackRef)           
-# FIXME: See: https://cmssdt.cern.ch/SDT/lxr/source/CommonTools/ParticleFlow/python/Isolation/pfIsolatedElectrons_cfi.py                                                    
-# FIXME: Where to set isolation value and cone pfIsolatedElectrons?                                                                                                         
-    getattr(process, electronTag).isolationValues = cms.PSet(
-        pfChargedHadrons = cms.InputTag("elPFIsoValueCharged03PFId"+pfpostfix),
-        pfChargedAll = cms.InputTag("elPFIsoValueChargedAll03PFId"+pfpostfix),
-        pfPUChargedHadrons = cms.InputTag("elPFIsoValuePU03PFId"+pfpostfix),
-        pfNeutralHadrons = cms.InputTag("elPFIsoValueNeutral03PFId"+pfpostfix),
-        pfPhotons = cms.InputTag("elPFIsoValueGamma03PFId"+pfpostfix)
-        )
-
-   ## Selections for PF2PAT objects: Muons
-   # FIXME: same as for electrons    
-    getattr(process, muonTag).isolationValues = cms.PSet(
-        pfNeutralHadrons = cms.InputTag("muPFIsoValueNeutral03"+pfpostfix),
-        pfChargedAll = cms.InputTag("muPFIsoValueChargedAll03"+pfpostfix),
-        pfPUChargedHadrons = cms.InputTag("muPFIsoValuePU03"+pfpostfix),
-        pfPhotons = cms.InputTag("muPFIsoValueGamma03"+pfpostfix),
-        pfChargedHadrons = cms.InputTag("muPFIsoValueCharged03"+pfpostfix)
-        )
-    
- ## Selections for PF2PAT objects: Jets                                                                                                                                    
- # FIXME: line not working, is it relevant?                                                                                                                                  
-    #getattr(process, 'patJetCorrFactors'+pfpostfix).rho = cms.InputTag("kt6PFJets", "rho", "RECO")
-    # FIXME: not working, tag infos not added
-    # Set to true to access b-tagging information in PAT jets
-    #applyPostfix(process, "patJets", pfpostfix).addTagInfos = True
-    
     
     # switch off all top projections
     getattr(process,'pfNoMuon'+pfpostfix).enable = False
     getattr(process,'pfNoElectron'+pfpostfix).enable = False
     getattr(process,'pfNoJet'+pfpostfix).enable = False
     getattr(process,'pfNoTau'+pfpostfix).enable = False
-    # don't require isolation on cmsRun level
-    #agrohsje seems not to work check with python -i ?
-    # why needed ???
+    # agrohsje don't require isolation on cmsRun level !!! 
+    # seems not to work -> check with python -i ?
     getattr(process,'pfIsolatedElectrons'+pfpostfix).isolationCut = cms.double(999999.) 
     getattr(process,'pfIsolatedMuons'+pfpostfix).isolationCut = cms.double(999999.)
 
 
 else :
     #default values for MiniAODs 
-    jetTag = 'slimmedJets' 
     electronTag = 'slimmedElectrons' 
     muonTag = 'slimmedMuons' 
     metTag = 'slimmedMETs'
 
-    ## Recreate tracks and PVs for b tagging
+    #redo jets to adjust b-tagging/JEC info  
     process.load('PhysicsTools.PatAlgos.slimming.unpackedTracksAndVertices_cfi')
     from RecoJets.JetProducers.ak4PFJets_cfi import ak4PFJets
     from RecoJets.JetProducers.ak4GenJets_cfi import ak4GenJets
+    process.pfCHS = cms.EDFilter("CandPtrSelector", 
+                                 src = cms.InputTag("packedPFCandidates"), 
+                                 cut = cms.string("fromPV"))
+    process.ak4PFJetsCHS = ak4PFJets.clone(src = 'pfCHS', doAreaFastjet = True)
     
-    # Still needs modifications for the case of miniAOD in order to rerun the b tagging         
     
-    ####################### Rerun Electron IDs   ###############
-    # See: https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2
-    from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
-    process.load("RecoEgamma.ElectronIdentification.egmGsfElectronIDs_cfi")
-    # overwrite a default parameter: for miniAOD, the collection name is a slimmed one
-    process.egmGsfElectronIDs.physicsObjectSrc = cms.InputTag('slimmedElectrons')
-    from PhysicsTools.SelectorUtils.centralIDRegistry import central_id_registry
-    process.egmGsfElectronIDSequence = cms.Sequence(process.egmGsfElectronIDs)
-    # Define which IDs we want to produce
-    # Each of these two example IDs contains all four standard
-    # cut-based ID working points (only two WP of the PU20bx25 are actually used here).
-    my_id_modules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_PHYS14_PU20bx25_V1_miniAOD_cff']
-    #Add them to the VID producer
-    for idmod in my_id_modules:
-        setupAllVIDIdsInModule(process,idmod,setupVIDElectronSelection)
-    process.load("TopAnalysis.TopUtils.ElectronIdProducer_cff")
-    process.ElectronIdProducer.electrons= cms.InputTag(electronTag)
-    # Name of the ID that is calculated
-    process.ElectronIdProducer.electronIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V1-miniAOD-standalone-tight")
-    # Name of the New Id in the Id Vector
-    process.ElectronIdProducer.idName = cms.string("Phys14-tight")
-    electronTag = 'ElectronIdProducer'
+####################### Rerun Electron IDs   ###############
 
+
+# See: https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2
+from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
+process.load("RecoEgamma.ElectronIdentification.egmGsfElectronIDs_cfi")
+# overwrite a default parameter: for miniAOD, the collection name is a slimmed one
+process.egmGsfElectronIDs.physicsObjectSrc = cms.InputTag(electronTag)
+from PhysicsTools.SelectorUtils.centralIDRegistry import central_id_registry
+process.egmGsfElectronIDSequence = cms.Sequence(process.egmGsfElectronIDs)
+# Define which IDs we want to produce
+# Each of these two example IDs contains all four standard
+# cut-based ID working points (only two WP of the PU20bx25 are actually used here).
+eIDInputTag=''
+if not runOnAOD:
+    eIDInputTag='miniAOD_'
+my_id_modules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_PHYS14_PU20bx25_V1_'+eIDInputTag+'cff']
+#Add them to the VID producer
+for idmod in my_id_modules:
+    setupAllVIDIdsInModule(process,idmod,setupVIDElectronSelection)
+process.load("TopAnalysis.TopUtils.ElectronIdProducer_cff")
+process.ElectronIdProducer.electrons= cms.InputTag(electronTag)
+# Name of the ID that is calculated
+if not runOnAOD:
+    eIDInputTag='miniAOD-'
+process.ElectronIdProducer.electronIdMap = cms.InputTag('egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V1-'+eIDInputTag+'standalone-tight')
+# Name of the New Id in the Id Vector
+keepElectronID='Phys14-tight'
+process.ElectronIdProducer.idName = cms.string(keepElectronID)
+electronTag = 'ElectronIdProducer'
+
+#################################################################### 
+## Use SwitchJetCollection in order to rerun the btagging
+
+
+## b-tag infos
+bTagInfos = ['impactParameterTagInfos','secondaryVertexTagInfos']
+## b-tag discriminators
+bTagDiscriminators = ['jetBProbabilityBJetTags','jetProbabilityBJetTags',
+                      'trackCountingHighPurBJetTags','trackCountingHighEffBJetTags',
+                      'simpleSecondaryVertexHighEffBJetTags','simpleSecondaryVertexHighPurBJetTags',
+                      'combinedSecondaryVertexBJetTags', 'combinedInclusiveSecondaryVertexV2BJetTags'
+                      ]
+## Jets, tracks, and vertices 
+if runOnAOD:
+    jetSource = 'pfJets'+pfpostfix
+    trackSource = 'generalTracks'
+    pvSource = 'offlinePrimaryVertices'
+    svSource = cms.InputTag('inclusiveSecondaryVertices')
+else:
+    jetSource = 'ak4PFJetsCHS' 
+    trackSource = 'unpackedTracksAndVertices'
+    pvSource = 'unpackedTracksAndVertices'
+    svSource = cms.InputTag('unpackedTracksAndVertices','secondary')
+    
+from PhysicsTools.PatAlgos.tools.jetTools import switchJetCollection
+
+## Switch the default jet collection (done in order to use the above specified b-tag infos and discriminators)
+switchJetCollection(
+    process,
+    jetSource = cms.InputTag(jetSource),
+    trackSource = cms.InputTag(trackSource),
+    pvSource = cms.InputTag(pvSource),
+    svSource = svSource,
+    btagInfos = bTagInfos,
+    btagDiscriminators = bTagDiscriminators,
+    jetCorrections = jetCorr,
+    genJetCollection = cms.InputTag(genJetCollection),
+    postfix = pfpostfix
+    )
+
+getattr(process,'patJetPartons'+pfpostfix).particles = cms.InputTag(genParticleCollection)
+getattr(process,'patJetPartonMatch'+pfpostfix).matched = cms.InputTag(genParticleCollection)
+getattr(process, 'patJetCorrFactors'+pfpostfix).primaryVertices = cms.InputTag(pvSource)
+
+## agrohsje following lines needed ?
+process.inclusiveVertexFinder.tracks = cms.InputTag(trackSource)
+process.trackVertexArbitrator.tracks = cms.InputTag(trackSource)
+
+patJets = ['patJets'+pfpostfix]
+for m in patJets:
+    if hasattr(process,m):
+        print "Switching 'addTagInfos' for " + m + " to 'True'"
+        setattr( getattr(process,m), 'addTagInfos', cms.bool(True) )
+        print "Switching 'addJetFlavourInfo' for " + m + " to 'True'"
+        setattr( getattr(process,m), 'addJetFlavourInfo', cms.bool(True) )
 
 
 ####################################################################
@@ -473,65 +499,11 @@ else:
 ####################################################################
 ## Jet information 
 
-
 process.treeJets = selectedPatJets.clone( 
-    src=jetTag, 
+    src='patJets'+pfpostfix, 
     cut='eta < 5 && pt>5') # unfortunately starting at 10 GeV are needed for MET rescaling 8GeV should be ok as corrected pt 
     ### cut at uncorrected pt > 10 GeV on tree writer level! for MET rescaling - might be obsolete for 13 TeV (and when not using MET...)
     
-
-
-#################################################################### 
-## Use SwitchJetCollection in order to rerun the btagging
-
-
-## b-tag infos
-bTagInfos = ['impactParameterTagInfos','secondaryVertexTagInfos']
-
-## b-tag discriminators
-bTagDiscriminators = ['jetBProbabilityBJetTags','jetProbabilityBJetTags',
-                      'trackCountingHighPurBJetTags','trackCountingHighEffBJetTags',
-                      'simpleSecondaryVertexHighEffBJetTags','simpleSecondaryVertexHighPurBJetTags',
-                      'combinedSecondaryVertexBJetTags', 'combinedInclusiveSecondaryVertexV2BJetTags'
-                      ]
-
-
-## Jets, tracks, and vertices 
-if runOnAOD:
-    jetSource = 'pfJets'+pfpostfix
-    trackSource = 'generalTracks'
-    pvSource = 'offlinePrimaryVertices'
-    svSource = cms.InputTag('inclusiveSecondaryVertices')
-else:
-    jetSource = 'ak4PFJets' #ak4PFJetsCHS according to https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMiniAOD ???
-    trackSource = 'unpackedTracksAndVertices'
-    pvSource = 'unpackedTracksAndVertices'
-    svSource = cms.InputTag('unpackedTracksAndVertices','secondary')
-    
-from PhysicsTools.PatAlgos.tools.jetTools import switchJetCollection
-
-## Switch the default jet collection (done in order to use the above specified b-tag infos and discriminators)
-
-switchJetCollection(
-    process,
-    jetSource = cms.InputTag(jetSource),
-    trackSource = cms.InputTag(trackSource),
-    pvSource = cms.InputTag(pvSource),
-    svSource = svSource,
-    btagInfos = bTagInfos,
-    btagDiscriminators = bTagDiscriminators,
-    jetCorrections = jetCorr,
-    genJetCollection = cms.InputTag(genJetCollection),
-    postfix = pfpostfix
-    )
-
-## Add TagInfos to PAT jets
-patJets = ['patJets'+pfpostfix]
-for m in patJets:
-    if hasattr(process,m):
-        print "Switching 'addTagInfos' for " + m + " to 'True'"
-        setattr( getattr(process,m), 'addTagInfos', cms.bool(True) )
-
 
 #################################################################### 
 ## Configure ntuple 
@@ -542,7 +514,7 @@ process.PFTree   = cms.EDAnalyzer('TreeWriterTtZ',
                                   #general input collections
                                   treeName = cms.string('pfTree'),
                                   muonSrc = cms.InputTag(muonTag),
-                                  keepElecIdOnly = cms.string("Phys14-tight"),
+                                  keepElecIdOnly = cms.string(keepElectronID),
                                   elecGSFSrc = cms.InputTag(electronTag), #just the same here to make it run. this can be prevented by a try{}catch(...){} in treewriter for getByLabel
                                   elecPFSrc = cms.InputTag(electronTag),
                                   jetSrc = cms.InputTag('treeJets'),  #jetTag), # ('treeJets'),
@@ -553,7 +525,7 @@ process.PFTree   = cms.EDAnalyzer('TreeWriterTtZ',
                                   metT0T1TxySrc        =cms.InputTag(metTag),
                                   metT0T1Src           =cms.InputTag(metTag),
                                   metT1TxySrc          =cms.InputTag(metTag),
-                                  vertexSrc = cms.InputTag(selectedPrimaryVertices),
+                                  vertexSrc = cms.InputTag(opt.primaryVertexOptions['outputCollection']),
                                   
                                   #block for extended information needed for efficiency studies
                                   includeReco = cms.bool(False),
@@ -574,7 +546,7 @@ process.PFTree   = cms.EDAnalyzer('TreeWriterTtZ',
                                   PUInfo = cms.InputTag('addPileupInfo'),
                                   includePDFWeights = cms.bool(includePDFWeights),
                                   pdfWeights = cms.InputTag("pdfWeights:"+PDF),
-                                  additionalWeights = cms.vstring(""), #can be any vectors of doubles
+                                  additionalWeights = cms.vstring(""), #("scaleUp"), #can be any vector of strings
                                   #agrohsje fix  
                                   rhoIso = cms.InputTag("fixedGridRhoFastjetAll"), #dummy for 13 TeV AOD
                                   
