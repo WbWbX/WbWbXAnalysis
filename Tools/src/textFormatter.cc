@@ -32,6 +32,8 @@ std::string & textFormatter::rtrim(std::string & str) const{
 	{
 		str = str.substr( 0, endpos+1 );
 	}
+	else
+		str.clear(); //only contains trim chars
 	return str;
 }
 /**
@@ -50,6 +52,8 @@ std::string & textFormatter::ltrim(std::string & str) const{
 	{
 		str = str.substr(startpos );
 	}
+	else
+		str.clear(); //only contains trim chars
 	return str;
 }
 /**
@@ -74,7 +78,9 @@ std::string & textFormatter::trimcomments(std::string & str) const{
 
 // trim from both ends
 std::string &textFormatter::trim(std::string &s) const {
-	return ltrim(rtrim(s));
+	ltrim(rtrim(s));
+
+	return s;
 }
 
 
