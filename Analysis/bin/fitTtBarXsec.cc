@@ -17,6 +17,7 @@
 #include "TtZAnalysis/Tools/interface/plotter2D.h"
 #include "TFile.h"
 #include <TError.h>
+#include "TtZAnalysis/Tools/interface/fileReader.h"
 
 invokeApplication(){
 	using namespace ztop;
@@ -75,10 +76,14 @@ invokeApplication(){
 		mainfitter.setRemoveSyst(true);
 		mainfitter.setSilent(true);
 	}
-	mainfitter.readInput((cmsswbase+"/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/"+inputconfig).Data());
-	extendedVariable::debug=false;
+	const std::string fullcfgpath=(cmsswbase+"/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/");
+	if(!fileExists((fullcfgpath+inputconfig).Data())){
+		std::cout << "fitTtBarXsec: input file not found. \nAvailable files in " <<cmsswbase+"/src/TtZAnalysis/Analysis/configs/fitTtBarXsec:"<<std::endl;
+		system(("ls "+fullcfgpath).data());
+		return -1;
+	}
 
-
+	mainfitter.readInput((fullcfgpath+inputconfig).Data());
 
 	//ttbarXsecFitter::debug=true;
 	bool doplotting=false;

@@ -105,7 +105,7 @@ void ttbarXsecFitter::readInput(const std::string & configfilename){
 		if(priorstr=="fixed")
 			setPrior(sysname, prior_parameterfixed);
 	}
-	fileReader::debug=true;
+
 	fr.setStartMarker("[ full extrapolation ]");
 	fr.setEndMarker("[ end - full extrapolation ]");
 	fr.readFile(configfilename);
