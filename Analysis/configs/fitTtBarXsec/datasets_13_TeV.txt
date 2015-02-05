@@ -13,6 +13,34 @@
 #
 #  the files are assumed to be located where the executable is called
 
+
+[ priors ]
+
+#everything will be gaussian except the ones specified here
+
+#   TT_SCALE   =  box
+#   TT_GENPOWPY=  fixed
+#   CR         =  boxleft
+#   TT_MATCH   =  box
+#   TT_HER     =  fixed
+#   TT_GENPOWPY gauss / float
+#   CR = fixed
+#   UE = fixed
+
+[ end - priors ]
+
+[ full extrapolation ]
+
+#   TT_SCALE
+#   TT_MATCH
+#   TT_HER
+#   TT_GENPOWPY
+#   CR
+#   UE
+
+[ end - full extrapolation ]
+
+
 [ datasets ]
 
 	[ dataset - 13TeV ]
@@ -35,14 +63,14 @@
 
 bjet++
 
-   emu_13TeV_172.5_nominal_syst.root | lead b-jet pt 1,0 b-jets step 8
+   emu_13TeV_172.5_nominal_syst.root | total 1,0 b-jets step 8
    emu_13TeV_172.5_nominal_syst.root | lead jet pt 1,1 b-jets step 8
    emu_13TeV_172.5_nominal_syst.root | second jet pt 1,2 b-jets step 8
    emu_13TeV_172.5_nominal_syst.root | third jet pt 1,3 b-jets step 8
 
 bjet++
 
-   emu_13TeV_172.5_nominal_syst.root | second b-jet pt 2,0 b-jets step 8
+   emu_13TeV_172.5_nominal_syst.root | total 2,0 b-jets step 8
    emu_13TeV_172.5_nominal_syst.root | lead jet pt 2,1 b-jets step 8
    emu_13TeV_172.5_nominal_syst.root | second jet pt 2,2 b-jets step 8
    emu_13TeV_172.5_nominal_syst.root | third jet pt 2,3 b-jets step 8
