@@ -160,7 +160,7 @@ process.source = cms.Source('PoolSource',fileNames=cms.untracked.vstring( '/stor
 if not inputScript=='':
     process.load(inputScript)
 
-
+process.source.inputCommands = cms.untracked.vstring('keep *', 'drop GenLumiInfoProduct_*_*_*')
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32 (maxEvents) )
 if options.skipEvents > 0:
     process.source.skipEvents = cms.untracked.uint32(options.skipEvents)
