@@ -462,15 +462,17 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 		ana.setFilePostfixReplace("ttbar.root","ttbar_powpy.root");
 		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_powpy.root");
 	}
-	else if(Syst=="TT_GENPOWHERW_down"){
-		//nothing
+	else if(Syst=="TT_GENPOW_sysnominal"){
+		ana.setFilePostfixReplace("ttbar.root","ttbar_powpy.root");
+		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_powpy.root");
 	}
-	else if(Syst=="TT_GENPOWHERW_up"){
+	else if(Syst=="TT_GENPOW_sysnominal_HER_up"){
 		ana.setFilePostfixReplace("ttbar.root","ttbar_powherw.root");
 		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_powherw.root");
 	}
-	else if(Syst=="TT_GENMCATNLO_down"){
-		//nothing
+	else if(Syst=="TT_GENPOW_sysnominal_HER_down"){
+		ana.setFilePostfixReplace("ttbar.root","ttbar_powpy.root");
+		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_powpy.root");
 	}
 	else if(Syst=="TT_GENMCATNLO_up"){
 		ana.setFilePostfixReplace("ttbar.root","ttbar_mcatnlo.root");

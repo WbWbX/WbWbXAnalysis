@@ -354,7 +354,7 @@ void  MainAnalyzer::analyze(size_t anaid){
 
 	////////////////////  configure discriminator factories here  ////////////////////
 	TString factname="topLH_"+channel_+"_"+energy_+"_"+topmass_;
-	discriminatorFactory::c_makelist=true;
+	discriminatorFactory::c_makelist=false; //now will be ignored in output
 	discriminatorFactory toplikelihood(factname.Data());
 
 	discriminatorFactory::c_makelist=false;
@@ -423,6 +423,7 @@ void  MainAnalyzer::analyze(size_t anaid){
 	//xsecfitplots_step8.enable();
 	mlbmtplots_step8.enable();
 	mlbmtplots_step8.bookPlots();
+	xsecfitplots_step8.enable();
 	xsecfitplots_step8.bookPlots();
 
 	//global settings for analysis plots
@@ -440,7 +441,7 @@ void  MainAnalyzer::analyze(size_t anaid){
 	plots.linkEvent(evt);
 	zplots.linkEvent(evt);
 	ttXsecPlots xsecplots;
-	//xsecplots.enable(false);
+	xsecplots.enable(false);
 	xsecplots.linkEvent(evt);
 	xsecplots.limitToStep(8);
 	xsecplots.initSteps(8);

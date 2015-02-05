@@ -17,6 +17,7 @@
 #include "TtZAnalysis/Tools/interface/plotter2D.h"
 #include "TFile.h"
 #include <TError.h>
+#include "TtZAnalysis/Tools/interface/fileReader.h"
 
 invokeApplication(){
 	using namespace ztop;
@@ -75,36 +76,15 @@ invokeApplication(){
 		mainfitter.setRemoveSyst(true);
 		mainfitter.setSilent(true);
 	}
-	mainfitter.readInput((cmsswbase+"/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/"+inputconfig).Data());
-	extendedVariable::debug=false;
-
-
-	////priors
-	if(npseudoexp==0){
-		try{
-			mainfitter.setPrior("TT_SCALE",ttbarXsecFitter::prior_box);
-			//mainfitter.setPrior("TOPPT",ttbarXsecFitter::prior_float);
-			mainfitter.setPrior("TT_GENPOWPY",ttbarXsecFitter::prior_narrowboxright); //allow PH OR MG but nothing like PH++
-			mainfitter.setPrior("CR",ttbarXsecFitter::prior_narrowboxleft); //allow down but not up
-			mainfitter.setPrior("TT_MATCH",ttbarXsecFitter::prior_box);
-			//mainfitter.setPrior("JES_Flavor",ttbarXsecFitter::prior_box);
-			mainfitter.setPrior("TOPMASS",ttbarXsecFitter::prior_float);
-
-			//mainfitter.setPrior("BTAGH",ttbarXsecFitter::prior_float);
-			//mainfitter.setPrior("BTAGL",ttbarXsecFitter::prior_float);
-		}catch(...){
-			std::cout << "Some priors could not be set"<<std::endl;
-		}
-		try{
-			mainfitter.addFullExtrapolError("TT_SCALE");
-			mainfitter.addFullExtrapolError("TT_MATCH");
-			//mainfitter.addFullExtrapolError("TOPPT");
-		}
-		catch(...){
-			std::cout << "Extrapolation could not be set"<<std::endl;
-		}
-
+	const std::string fullcfgpath=(cmsswbase+"/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/");
+	if(!fileExists((fullcfgpath+inputconfig).Data())){
+		std::cout << "fitTtBarXsec: input file not found. \nAvailable files in " <<cmsswbase+"/src/TtZAnalysis/Analysis/configs/fitTtBarXsec:"<<std::endl;
+		system(("ls "+fullcfgpath).data());
+		return -1;
 	}
+
+	mainfitter.readInput((fullcfgpath+inputconfig).Data());
+
 	//ttbarXsecFitter::debug=true;
 	bool doplotting=false;
 

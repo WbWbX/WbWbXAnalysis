@@ -12,6 +12,33 @@
 #
 #
 #  the files are assumed to be located where the executable is called
+
+[ priors ]
+
+#everything will be gaussian except the ones specified here
+
+   TT_SCALE   =  box
+   TT_GENPOWPY=  fixed
+   CR         =  boxleft
+   TT_MATCH   =  box
+   TT_HER     =  fixed
+   # TT_GENPOWPY gauss / float
+	CR = fixed
+	UE = fixed
+
+[ end - priors ]
+
+[ full extrapolation ]
+
+   TT_SCALE
+   TT_MATCH
+  # TT_HER
+  # TT_GENPOWPY
+  # CR
+  # UE
+
+[ end - full extrapolation ]
+
 [ datasets ]
 
 	[ dataset - 8TeV ]

@@ -57,16 +57,9 @@ public:
 	void setExcludeZeroBjetBin(bool excl){exclude0bjetbin_=excl;}
 
 
-	/**
-	 * defines a prior for a given syst variation
-	 */
-	void setPrior(const TString& sysname, priors prior);
+
 	//read in functions here
 
-	/**
-	 * For this uncertainty, the full error will be added at the end!
-	 */
-	void addFullExtrapolError(const TString& systname);
 
 	void setUseMCOnly(bool set){useMConly_=set;}
 
@@ -155,12 +148,21 @@ public:
 
 private:
 
+	/**
+	 * For this uncertainty, the full error will be added at the end!
+	 */
+	void addFullExtrapolError(const TString& systname);
+	/**
+	 * defines a prior for a given syst variation
+	 */
+	void setPrior(const TString& sysname, priors prior);
+
 	class dataset{
 	public:
 		dataset(double lumi,double lumiunc, double xsecin, TString name):
-		lumi_(lumi),xsecoff_(xsecin),unclumi_(lumiunc),
-		lumiidx_(9999),xsecidx_(9999),name_(name)
-		{}
+			lumi_(lumi),xsecoff_(xsecin),unclumi_(lumiunc),
+			lumiidx_(9999),xsecidx_(9999),name_(name)
+	{}
 
 		extendedVariable& eps_emu(){return eps_emu_;}
 		const extendedVariable& eps_emu()const {return eps_emu_;}
@@ -196,6 +198,12 @@ private:
 
 		void createPseudoDataFromMC(container1D::pseudodatamodes mode=container1D::pseudodata_poisson);
 		void createContinuousDependencies(bool);
+
+		std::vector<TString> getSystNames()const{
+			if(signalconts_nbjets_.size()<1)
+				throw std::logic_error("ttbarXsecFitter::datasets::getSystNames: nothing read in yet");
+			return signalconts_nbjets_.at(0).getSystNameList();
+		}
 
 		void checkSizes()const;
 		bool readyForFit()const{return signalshape_nbjet_.size()>0;}
