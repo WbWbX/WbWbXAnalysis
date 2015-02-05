@@ -13,7 +13,20 @@
 #
 #  the files are assumed to be located where the executable is called
 
-[ 8 TeV ]
+[ datasets ]
+
+	[ dataset - 13TeV ]
+	  lumi  =   1000
+	  lumiunc = 2.6
+	  energy = 13      #for dynamic xsec
+	  topmass = 172.5  #for dynamic xsec
+	[ end dataset - 13TeV ]
+
+[ end datasets ]
+
+#plots for datasets
+
+[ 13TeV ]
 
    emu_13TeV_172.5_nominal_syst.root | total 0,0 b-jets step 8  ##these should include 3+ bjets events
    emu_13TeV_172.5_nominal_syst.root | lead jet pt 0,1 b-jets step 8
@@ -35,9 +48,5 @@ bjet++
    emu_13TeV_172.5_nominal_syst.root | third jet pt 2,3 b-jets step 8
 
 
-[ end - 8 TeV ]
+[ end - 13TeV ]
 ##########################################
-[ 7 TeV ]
-
-
-[ end - 7 TeV ]
