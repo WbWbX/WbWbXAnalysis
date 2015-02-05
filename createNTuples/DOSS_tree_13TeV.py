@@ -83,12 +83,20 @@ if includePDFWeights:
 ###############################################################
 ## Set Options for physics Objects
 import TopAnalysis.Configuration.objectDefinitions13Tev.definitionOptions_cff as opt
+
+pfpostfix = "PFlow"
+
 # All Options are saved as dicts and have to be added in the definitionsOptions as empty dicts
 opt.globalOptions = {'runOnAod':options.runOnAOD,
                  'signal':isSignal}
 opt.primaryVertexOptions = {'inputCollectionAod':'offlinePrimaryVertices',  # Input Collection for AOD
                  'inputCollectionMiniAod':'offlineSlimmedPrimaryVertices', # Input Collection for MiniAOD
                  'outputCollection':''}       # The Collection which is Produced, is set in the apropriate cff File
+opt.muonOptions={'inputCollectionAod':'selectedPatMuons'+pfpostfix,
+                 'inputCollectionMiniAod': 'slimmedMuons',
+                 'outputCollection':'',
+                 'Cuts':False} #Only very loose cuts
+
 
 
 ####################################################################
@@ -320,7 +328,6 @@ else:
 ####################################################################
 ## Full configuration for PF2PAT 
 
-pfpostfix = "PFlow"
 
 if runOnMC:
     jetCorr =('AK4PFchs', ['L1FastJet','L2Relative','L3Absolute'], 'None')
@@ -468,15 +475,11 @@ for m in patJets:
 ####################################################################
 ## Lepton information and dilepton filter at reco level 
 
+process.load('TopAnalysis.Configuration.objectDefinitions13Tev.muon_cff')
 
 from PhysicsTools.PatAlgos.selectionLayer1.electronSelector_cfi import *
-from PhysicsTools.PatAlgos.selectionLayer1.muonSelector_cfi import *
 from PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi import *
 
-process.kinMuons = selectedPatMuons.clone(
-    src = muonTag,
-    cut = 'pt > 8  && abs(eta) < 2.7'
-    )
 process.kinElectrons = selectedPatElectrons.clone(
     src = electronTag,
     cut = 'pt > 8  && abs(eta) < 2.7' # because of ECalP4 to be on the safe side
@@ -484,7 +487,7 @@ process.kinElectrons = selectedPatElectrons.clone(
 
 ## filter on at least two opposite charge elecs/muons or emu
 process.filterkinLeptons = cms.EDFilter("SimpleCounter",
-                                        src = cms.VInputTag(cms.InputTag("kinMuons"),  
+                                        src = cms.VInputTag(cms.InputTag(opt.muonOptions['outputCollection']),  
                                                             cms.InputTag("kinElectrons")), 
                                         requireOppoQ = cms.bool(True),
                                         minNumber = cms.uint32(minleptons),
