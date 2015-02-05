@@ -77,7 +77,44 @@ void ttbarXsecFitter::readInput(const std::string & configfilename){
 	//now idices are fixed
 	for(size_t i=0;i<datasets_.size();i++){
 		datasets_.at(i).createXsecIdx();
+
 	}
+	createContinuousDependencies();
+	//fileReader::debug=true;
+	///////////// READ PRIORS ////////////
+
+	fr.setStartMarker("[ priors ]");
+	fr.setEndMarker("[ end - priors ]");
+	fr.setDelimiter("=");
+	fr.readFile(configfilename);
+	for(size_t i=0;i<fr.nLines();i++){
+		if(fr.nEntries(i)<2)
+			continue;
+		TString sysname= fr.getData<TString>(i,0);
+		TString priorstr=fr.getData<TString>(i,1);
+		if(priorstr=="box")
+			setPrior(sysname, prior_box);
+		if(priorstr=="boxright")
+			setPrior(sysname, prior_narrowboxright);
+		if(priorstr=="boxleft")
+			setPrior(sysname, prior_narrowboxleft);
+		if(priorstr=="float")
+			setPrior(sysname, prior_float);
+		if(priorstr=="gauss")
+			setPrior(sysname, prior_gauss);
+		if(priorstr=="fixed")
+			setPrior(sysname, prior_parameterfixed);
+	}
+	fileReader::debug=true;
+	fr.setStartMarker("[ full extrapolation ]");
+	fr.setEndMarker("[ end - full extrapolation ]");
+	fr.readFile(configfilename);
+	for(size_t i=0;i<fr.nLines();i++){
+		if(fr.nEntries(i)!=1)
+			continue;
+		addFullExtrapolError(fr.getData<TString>(i,0));
+	}
+
 
 	if(debug){
 		std::cout << "ttbarXsecFitter::readInput: done. " <<std::endl;
@@ -179,7 +216,7 @@ void ttbarXsecFitter::setPrior(const TString& sysname, priors prior){
 	if(datasets_.size()<1){
 		throw std::logic_error("ttbarXsecFitter::setPrior: first read in plots");
 	}
-	std::vector<TString> systs=datasets_.at(0).signalshape(0).getSystNames();
+	std::vector<TString> systs=datasets_.at(0).getSystNames();
 	size_t idx=std::find(systs.begin(),systs.end(),sysname) - systs.begin();
 	if(idx == systs.size())
 		throw std::out_of_range("ttbarXsecFitter::setPrior: requested variation not found");
@@ -191,17 +228,17 @@ void ttbarXsecFitter::addFullExtrapolError(const TString& sysname){
 		std::cout << "ttbarXsecFitter::addFullError" <<std::endl;
 
 	if(datasets_.size()<1){
-		throw std::logic_error("ttbarXsecFitter::setPrior: first read in plots");
+		throw std::logic_error("ttbarXsecFitter::addFullExtrapolError: first read in plots");
 	}
-	std::vector<TString> systs=datasets_.at(0).signalshape(0).getSystNames();
+	std::vector<TString> systs=datasets_.at(0).getSystNames();
 	size_t idx=std::find(systs.begin(),systs.end(),sysname) - systs.begin();
-	if(idx == systs.size())
-		throw std::out_of_range("ttbarXsecFitter::addFullError: requested variation not found");
+	if(idx == systs.size()){
+		std::string errstr=(std::string)"ttbarXsecFitter::addFullError: requested variation not found: "+sysname.Data();
+		throw std::out_of_range(errstr);
+	}
 	if(std::find(addfullerrors_.begin(),addfullerrors_.end(),idx) == addfullerrors_.end()){//new
 		addfullerrors_.push_back(idx);
 	}
-
-
 }
 
 containerStack ttbarXsecFitter::produceStack(bool fittedvalues,size_t bjetcat,size_t datasetidx,double& chi2)const{
@@ -493,6 +530,8 @@ texTabler ttbarXsecFitter::makeSystBreakdown(size_t datasetidx){
 
 	}
 	table <<texLine(1);
+	double xsecoffset=datasets_.at(datasetidx).xsecOffset();
+	double xsec=fitter_.getParameter(xsecidx) + xsecoffset;
 	///add extrapolation in addition:
 	double addtoerrup2=0,addtoerrdown2=0;
 	for(size_t i=0;i<addfullerrors_.size();i++){
@@ -508,14 +547,16 @@ texTabler ttbarXsecFitter::makeSystBreakdown(size_t datasetidx){
 			std::cout << "---->> Epsilon emu (%): " << nom*100 << std::endl;
 		paracopy.at(idx)=1;
 		float up=var->getValue(paracopy);
+
 		paracopy.at(idx)=-1;
 		float down=var->getValue(paracopy);
+
 		if(nom==0){
 			if(up!=0 || down!=0)
 				throw std::runtime_error("ttbarXsecFitter::makeSystBreakdown: variable is zero but variations not");
 		}
-		float relup=(up-nom)/nom;
-		float reldown=(down-nom)/nom;
+		float relup=(xsec*nom/up - xsec)/xsec;
+		float reldown=(xsec*nom/down - xsec)/xsec;
 		if(relup>0){
 			addtoerrup2+=relup*relup;
 			addtoerrdown2+=reldown*reldown;
@@ -527,11 +568,11 @@ texTabler ttbarXsecFitter::makeSystBreakdown(size_t datasetidx){
 		}
 		TString errstr;
 		if(anticorr)
-			errstr="$\\mp^{"+fmt.toTString(fmt.round(100*sqrt(addtoerrdown2),0.1))
-			+"}_{"+fmt.toTString(fmt.round(100*sqrt(addtoerrup2),0.1)) +"}$";
+			errstr="$\\mp^{"+fmt.toTString(fmt.round(100*fabs(reldown),0.1))
+			+"}_{"+fmt.toTString(fmt.round(100*fabs(relup),0.1)) +"}$";
 		else
-			errstr="$\\pm^{"+fmt.toTString(fmt.round(100*sqrt(addtoerrup2),0.1))
-			+"}_{"+fmt.toTString(fmt.round(100*sqrt(addtoerrdown2),0.1)) +"}$";
+			errstr="$\\pm^{"+fmt.toTString(fmt.round(100*fabs(relup),0.1))
+			+"}_{"+fmt.toTString(fmt.round(100*fabs(reldown),0.1)) +"}$";
 
 		table << name << "-" <<
 				"-"	<< errstr;
@@ -547,7 +588,6 @@ texTabler ttbarXsecFitter::makeSystBreakdown(size_t datasetidx){
 
 	//add total
 	table << texLine();
-	double xsecoffset=datasets_.at(datasetidx).xsecOffset();
 
 	double fullrelxsecerrup=fitter_.getParameterErrUp()->at(xsecidx)/(fitter_.getParameter(xsecidx) + xsecoffset);
 	fullrelxsecerrup=sqrt(fullrelxsecerrup*fullrelxsecerrup+addtoerrup2);
@@ -825,7 +865,7 @@ variateContainer1D ttbarXsecFitter::dataset::createLeptonJetAcceptance(const std
 	twobjetsignal=twobjetsignal.getIntegralBin();
 
 	container1D correction_b =  ((signalintegral * twobjetsignal) * 4.)
-																																																																						                																																																																										/ ( (onebjetsignal + (twobjetsignal * 2.)) * (onebjetsignal + (twobjetsignal * 2.)));
+																																																																						                																																																																														/ ( (onebjetsignal + (twobjetsignal * 2.)) * (onebjetsignal + (twobjetsignal * 2.)));
 
 	correction_b.removeStatFromAll();
 
@@ -979,6 +1019,8 @@ void  ttbarXsecFitter::dataset::readStacks(const std::string configfilename,cons
 				ex.what();
 				throw std::runtime_error("stack not found");
 			}
+			if(!tmpstack.is1DUnfold())
+				throw std::runtime_error("ttbarXsecFitter::readStacks: Stack is has no unfolding information!");
 			if(tmpstack.getContribution1DUnfold("data").isDummy())
 				throw std::runtime_error("ttbarXsecFitter::readStacks: Stack has no data entry!");
 			if(tmpstack.getSignalIdxs().size() <1)
