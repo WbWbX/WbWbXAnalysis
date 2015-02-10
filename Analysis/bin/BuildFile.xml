@@ -17,6 +17,7 @@
 <bin name="compareNTuples" file="compareNTuples.cc" />
 <bin name="addPseudodata" file="addPseudodata.cc" />
 <bin name="plotControlPlot" file="plotControlPlot.cc" />
+<bin name="addRelSystematics" file="addRelSystematics.cc" />
 
 
 <Flags CXXFLAGS="-lXMLParser -lunfold -fopenmp"/>
