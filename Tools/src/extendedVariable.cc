@@ -6,6 +6,7 @@
  */
 
 #include "../interface/extendedVariable.h"
+#include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 #include <stdexcept>
 #include <algorithm>
 
@@ -52,9 +53,9 @@ void extendedVariable::addDependence(const graph & g, size_t nompoint, const TSt
 	if(g.getNPoints() == 3){
 		gcopy.sortPointsByX();
 		if(gcopy.pointsYIdentical(0,1) || gcopy.pointsYIdentical(1,2)){
-		fitter.setInterpolate(true);
-		if(debug)
-			std::cout << "extendedVariable::addDependence: detected const variation for "<< sysname<< " on one side, switch to interpolate mode." <<std::endl;
+			fitter.setInterpolate(true);
+			if(debug)
+				std::cout << "extendedVariable::addDependence: detected const variation for "<< sysname<< " on one side, switch to interpolate mode." <<std::endl;
 		}
 		else if(debug){
 			std::cout << "extendedVariable::addDependence: detected non-const variation for "<<sysname<< std::endl;
@@ -126,6 +127,8 @@ graph extendedVariable::addDependence(const float & low, const float& nominal, c
 double extendedVariable::getValue(const double * variations)const{
 	if(debug)
 		std::cout << "extendedVariable::getValue" <<std::endl;
+	if(one_)
+			return 1;
 
 	double out=0;
 	for(size_t i=0;i<dependences_.size();i++){
@@ -145,6 +148,8 @@ double extendedVariable::getValue(const double * variations)const{
 double extendedVariable::getValue(const float * variations)const{
 	if(debug)
 		std::cout << "extendedVariable::getValue" <<std::endl;
+	if(one_)
+			return 1;
 	double out=0;
 	for(size_t i=0;i<dependences_.size();i++){
 		out+=dependences_.at(i).getFitOutput((double)variations[i]);
@@ -161,6 +166,8 @@ double extendedVariable::getValue(const float * variations)const{
 double extendedVariable::getValue(const std::vector<float> * variations)const{
 	if(debug)
 		std::cout << "extendedVariable::getValue" <<std::endl;
+	if(one_)
+			return 1;
 
 	if(variations->size()!=dependences_.size()){
 		throw std::out_of_range("extendedVariable::getValue: number of variations and dependencies don't match");
@@ -173,9 +180,14 @@ double extendedVariable::getValue(const std::vector<float> * variations)const{
 double extendedVariable::getValue(const std::vector<float> & variations)const{
 	if(debug)
 		std::cout << "extendedVariable::getValue" <<std::endl;
+	if(one_)
+			return 1;
 
 	if(variations.size()!=dependences_.size()){
-		throw std::out_of_range("extendedVariable::getValue: number of variations and dependencies don't match");
+		std::string errstr=(std::string)"extendedVariable::getValue: number of variations: "+
+				toString(variations.size()) +(std::string)" and dependencies: "
+				+toString(dependences_.size())+(" don't match: "+name_).Data();
+		throw std::out_of_range(errstr);
 	}
 
 	return getValue(&variations);
@@ -184,9 +196,14 @@ double extendedVariable::getValue(const std::vector<float> & variations)const{
 double extendedVariable::getValue(const std::vector<double> * variations)const{
 	if(debug)
 		std::cout << "extendedVariable::getValue" <<std::endl;
+	if(one_)
+		return 1;
 
 	if(variations->size()!=dependences_.size()){
-		throw std::out_of_range("extendedVariable::getValue: number of variations and dependencies don't match");
+		std::string errstr=(std::string)"extendedVariable::getValue: number of variations: "+
+				toString(variations->size()) +(std::string)" and dependencies: "
+				+toString(dependences_.size())+" don't match";
+		throw std::out_of_range(errstr);
 	}
 
 	return getValue(&variations->at(0));
@@ -195,6 +212,8 @@ double extendedVariable::getValue(const std::vector<double> * variations)const{
 double extendedVariable::getValue(size_t idx,float variation)const{
 	if(debug)
 		std::cout << "extendedVariable::getValue" <<std::endl;
+	if(one_)
+			return 1;
 	if(idx >= dependences_.size()){
 		throw std::out_of_range("extendedVariable::getValue: index out of range");
 	}
@@ -205,9 +224,14 @@ double extendedVariable::getValue(size_t idx,float variation)const{
 double extendedVariable::getValue(const std::vector<double> & variations)const{
 	if(debug)
 		std::cout << "extendedVariable::getValue" <<std::endl;
+	if(one_)
+			return 1;
 
 	if(variations.size()!=dependences_.size()){
-		throw std::out_of_range("extendedVariable::getValue: number of variations and dependencies don't match");
+		std::string errstr=(std::string)"extendedVariable::getValue: number of variations: "+
+				toString(variations.size()) +(std::string)" and dependencies: "
+				+toString(dependences_.size())+" don't match";
+		throw std::out_of_range(errstr);
 	}
 
 	return getValue(&variations.at(0));

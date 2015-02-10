@@ -37,7 +37,7 @@ invokeApplication(){
 	const bool debug = parser->getOpt<bool>("d",false,"switches on debug output");
 	const TString pseudoOpts = parser->getOpt<TString>("-pdopts","",
 			"additional options for pseudodata:\nGaus: use Gaussian random distribution\n");
-	const bool systbreak =! parser->getOpt<bool>("-nosyst",false,"switches off systematics breakdown");
+	const bool fitsystematics =! parser->getOpt<bool>("-nosyst",false,"removes systematics");
 	const bool nominos = parser->getOpt<bool>("-nominos",false,"switches off systematics breakdown");
 	const float topmass = parser->getOpt<float>("-topmass",172.5,"Set top mass");
 
@@ -63,8 +63,9 @@ invokeApplication(){
 	mainfitter.setExcludeZeroBjetBin(exclude0bjetbin);
 	mainfitter.setUseMCOnly(onlyMC);
 	mainfitter.setNoMinos(nominos);
-	mainfitter.setNoSystBreakdown(!systbreak);
-
+	mainfitter.setNoSystBreakdown(!fitsystematics);
+	mainfitter.setIgnorePriors(!fitsystematics);
+	mainfitter.setRemoveSyst(!fitsystematics);
 
 	std::string cmsswbase=getenv("CMSSW_BASE");
 	//extendedVariable::debug=true;
@@ -75,6 +76,7 @@ invokeApplication(){
 	if(npseudoexp>0){
 		mainfitter.setRemoveSyst(true);
 		mainfitter.setSilent(true);
+		mainfitter.setIgnorePriors(true);
 	}
 	const std::string fullcfgpath=(cmsswbase+"/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/");
 	if(!fileExists((fullcfgpath+inputconfig).Data())){
@@ -274,8 +276,13 @@ invokeApplication(){
 		c.Write();
 
 		for(size_t ndts=0;ndts<mainfitter.nDatasets();ndts++){
-			texTabler tab=mainfitter.makeSystBreakdown(ndts);
+			texTabler tab=mainfitter.makeSystBreakDownTable(ndts);
 			TString dtsname=mainfitter.datasetName(ndts);
+			tab.writeToFile(outfile+"_tab" +dtsname + ".tex");
+			tab.writeToPdfFile(outfile+"_tab" +dtsname + ".pdf");
+			std::cout << tab.getTable() <<std::endl;
+			tab=mainfitter.makeSystBreakDownTable(ndts,false); //vis PS
+			dtsname+="_vis";
 			tab.writeToFile(outfile+"_tab" +dtsname + ".tex");
 			tab.writeToPdfFile(outfile+"_tab" +dtsname + ".pdf");
 			std::cout << tab.getTable() <<std::endl;

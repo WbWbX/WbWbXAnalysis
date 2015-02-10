@@ -19,12 +19,13 @@
 
    TT_SCALE   =  box
    TT_GENPOWPY=  fixed
-   CR         =  boxleft
+   CR         =  fixed
    TT_MATCH   =  box
    TT_HER     =  fixed
-   # TT_GENPOWPY gauss / float
-	CR = fixed
+	
 	UE = fixed
+	TT_BJESNUDEC = fixed
+	TT_BJESRETUNE = fixed
 
 [ end - priors ]
 
@@ -32,10 +33,13 @@
 
    TT_SCALE
    TT_MATCH
+   TOPPT
+  # ELECSF
+   PDF
   # TT_HER
-  # TT_GENPOWPY
   # CR
   # UE
+  # TT_GENPOWPY
 
 [ end - full extrapolation ]
 

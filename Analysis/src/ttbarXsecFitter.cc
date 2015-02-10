@@ -83,38 +83,40 @@ void ttbarXsecFitter::readInput(const std::string & configfilename){
 	//fileReader::debug=true;
 	///////////// READ PRIORS ////////////
 
-	fr.setStartMarker("[ priors ]");
-	fr.setEndMarker("[ end - priors ]");
-	fr.setDelimiter("=");
-	fr.readFile(configfilename);
-	for(size_t i=0;i<fr.nLines();i++){
-		if(fr.nEntries(i)<2)
-			continue;
-		TString sysname= fr.getData<TString>(i,0);
-		TString priorstr=fr.getData<TString>(i,1);
-		if(priorstr=="box")
-			setPrior(sysname, prior_box);
-		if(priorstr=="boxright")
-			setPrior(sysname, prior_narrowboxright);
-		if(priorstr=="boxleft")
-			setPrior(sysname, prior_narrowboxleft);
-		if(priorstr=="float")
-			setPrior(sysname, prior_float);
-		if(priorstr=="gauss")
-			setPrior(sysname, prior_gauss);
-		if(priorstr=="fixed")
-			setPrior(sysname, prior_parameterfixed);
+	if(!nopriors_){
+		fr.setStartMarker("[ priors ]");
+		fr.setEndMarker("[ end - priors ]");
+		fr.setDelimiter("=");
+		fr.readFile(configfilename);
+		for(size_t i=0;i<fr.nLines();i++){
+			if(fr.nEntries(i)<2)
+				continue;
+			TString sysname= fr.getData<TString>(i,0);
+			TString priorstr=fr.getData<TString>(i,1);
+			if(priorstr=="box")
+				setPrior(sysname, prior_box);
+			if(priorstr=="boxright")
+				setPrior(sysname, prior_narrowboxright);
+			if(priorstr=="boxleft")
+				setPrior(sysname, prior_narrowboxleft);
+			if(priorstr=="float")
+				setPrior(sysname, prior_float);
+			if(priorstr=="gauss")
+				setPrior(sysname, prior_gauss);
+			if(priorstr=="fixed")
+				setPrior(sysname, prior_parameterfixed);
+		}
 	}
-
-	fr.setStartMarker("[ full extrapolation ]");
-	fr.setEndMarker("[ end - full extrapolation ]");
-	fr.readFile(configfilename);
-	for(size_t i=0;i<fr.nLines();i++){
-		if(fr.nEntries(i)!=1)
-			continue;
-		addFullExtrapolError(fr.getData<TString>(i,0));
+	if(!removesyst_){
+		fr.setStartMarker("[ full extrapolation ]");
+		fr.setEndMarker("[ end - full extrapolation ]");
+		fr.readFile(configfilename);
+		for(size_t i=0;i<fr.nLines();i++){
+			if(fr.nEntries(i)!=1)
+				continue;
+			addFullExtrapolError(fr.getData<TString>(i,0));
+		}
 	}
-
 
 	if(debug){
 		std::cout << "ttbarXsecFitter::readInput: done. " <<std::endl;
@@ -183,7 +185,7 @@ void ttbarXsecFitter::dataset::createContinuousDependencies(bool useMConly){
 	background_nbjet_.clear();
 	for(size_t it=0;it<signalconts_nbjets_.size();it++){
 
-		signalshape_nbjet_.push_back(createLeptonJetAcceptance(signalconts_nbjets_,bjetcount));
+		signalshape_nbjet_.push_back(createLeptonJetAcceptance(signalconts_nbjets_,signalpsmigconts_nbjets_,signalvisgenconts_nbjets_, bjetcount));
 		container1D temp=dataconts_nbjets_.at(it);
 		if(useMConly){
 			temp=signalconts_nbjets_.at(it) + backgroundconts_nbjets_.at(it);
@@ -316,7 +318,6 @@ int ttbarXsecFitter::fit(std::vector<float>& xsecs, std::vector<float>& errup ,s
 	fitter_.setRequireFitFunction(false);
 	std::vector<double> stepwidths;
 	stepwidths.resize(fittedparas_.size(),0.1);
-	std::cout << stepwidths.size() << " "<< datasets_.at(0).xsecIdx()<< std::endl;
 	for(size_t i=0;i<datasets_.size();i++){
 		stepwidths.at(datasets_.at(i).xsecIdx())=1;
 	}
@@ -443,6 +444,14 @@ double ttbarXsecFitter::getXsecOffset(size_t datasetidx)const{
 	return datasets_.at(datasetidx).xsecOffset();
 }
 
+double ttbarXsecFitter::getVisXsec(size_t datasetidx)const{
+	if(datasetidx>=datasets_.size())
+		throw std::out_of_range("ttbarXsecFitter::getXsec: dataset index out of range");
+	double visxsec=getXsec(datasetidx);//fitter_.getParameters()->at(datasets_.at(datasetidx).xsecIdx())+datasets_.at(datasetidx).xsecOffset();
+	visxsec*=datasets_.at(datasetidx).fullToVisCorrFact().getValue(fitter_.getParameters());
+	return visxsec;
+}
+
 double ttbarXsecFitter::getParaError(size_t idx)const{
 	if(idx>=fitter_.getParameters()->size())
 		throw std::out_of_range("ttbarXsecFitter::getParaError");
@@ -486,11 +495,244 @@ void ttbarXsecFitter::getParaErrorContributionToXsec(int idxin, size_t datasetid
 		return;
 	}
 }
+void ttbarXsecFitter::createSystematicsBreakdowns(){
+	for(size_t i=0;i<datasets_.size();i++)
+		createSystematicsBreakdown(i);
+}
 
-texTabler ttbarXsecFitter::makeSystBreakdown(size_t datasetidx){
+void ttbarXsecFitter::createSystematicsBreakdown(size_t datasetidx){
+	if(datasetidx>=datasets_.size())
+		throw std::out_of_range("ttbarXsecFitter::createSystematicsBreakdown: dataset index out of range");
+	size_t xsecidx=datasets_.at(datasetidx).xsecIdx();
+	std::cout << "creating systematics breakdown for " << datasets_.at(datasetidx).getName() <<std::endl;
+
+	formatter fmt;
+	TString cmsswbase=getenv("CMSSW_BASE");
+	fmt.readInNameTranslateFile((cmsswbase+"/src/TtZAnalysis/Analysis/configs/general/SystNames.txt").Data());
+
+	for(size_t i=0;i<getNParameters();i++){
+		displayStatusBar(i,getNParameters());
+		bool isxsec=false;
+		for(size_t j=0;j<datasets_.size();j++)
+			if(datasets_.at(j).xsecIdx() == i){
+				isxsec=true;
+				break;
+			}
+		if(isxsec) continue;
+		TString name=fmt.translateName( getParaName(i));
+		double errup,errdown;
+		bool anitcorr;
+		getParaErrorContributionToXsec(i,datasetidx,errup,errdown,anitcorr);
+		dataset::systematic_unc tmpunc;
+		tmpunc.name=name;
+		tmpunc.errdown=errdown;
+		tmpunc.errup=errup;
+		tmpunc.constr= fitter_.getParameterErr(i);
+		tmpunc.pull= fitter_.getParameters()->at(i);
+		datasets_.at(datasetidx).postFitSystematicsFull().push_back(tmpunc);
+		datasets_.at(datasetidx).postFitSystematicsVis().push_back(tmpunc);
+
+	}
+
+
+	std::cout << "\nadding extrapolation uncertainties..." <<std::endl;
+
+	std::vector<double> fulladdtoerrup2,fulladdtoerrdown2,visaddtoerrup2,visaddtoerrdown2;
+	dataset::systematic_unc tmpunc;
+	for(size_t i=0;i<addfullerrors_.size();i++){
+		displayStatusBar(i,addfullerrors_.size());
+		bool anticorr=false;
+		size_t idx=addfullerrors_.at(i);
+		TString name=fmt.translateName( getParaName(idx) );
+		name+=" (extr)";
+		float exup=getExtrapolationError(datasetidx,idx,true,true);
+		float exdown=getExtrapolationError(datasetidx,idx,false,true);
+		double errup,errdown;
+		bool anitcorr;
+		getParaErrorContributionToXsec(idx,datasetidx,errup,errdown,anitcorr);
+		if(anticorr){
+			fulladdtoerrup2.push_back(-errdown*errdown);
+			fulladdtoerrdown2.push_back(-errup*errup);
+			visaddtoerrup2.push_back(-errdown*errdown);
+			visaddtoerrdown2.push_back(-errup*errup);
+		}
+		else{
+			fulladdtoerrdown2.push_back(-errdown*errdown);
+			fulladdtoerrup2.push_back(-errup*errup);
+			visaddtoerrup2.push_back(-errdown*errdown);
+			visaddtoerrdown2.push_back(-errup*errup);
+		}
+
+		///TAKE INTO ACCOUNT THE CONSTRAINTS HERE!! THE PARA ERRORS ARE NOT ASYMM
+
+		double totup=exup+errup;
+		double totdown=exdown+errdown;
+
+		bool corranti;
+		double tmp=getMaxVar(true,totup,totdown,corranti);
+		fulladdtoerrup2.push_back(tmp*tmp);
+		tmp=getMaxVar(false,totup,totdown,corranti);
+		fulladdtoerrdown2.push_back(tmp*tmp);
+
+
+		tmpunc.name=name;
+		tmpunc.errdown=exup;
+		tmpunc.errup=exdown;
+		tmpunc.pull=999;
+		tmpunc.constr=999;
+
+		datasets_.at(datasetidx).postFitSystematicsFull().push_back(tmpunc);
+		// datasets_.at(datasetidx).postFitSystematicsVis().push_back(tmpunc);
+		getMaxVar(true,exup,exdown,corranti);
+
+		if(anticorr){
+			fulladdtoerrup2.push_back(-errdown*errdown);
+			fulladdtoerrdown2.push_back(-errup*errup);
+			visaddtoerrup2.push_back(-errdown*errdown);
+			visaddtoerrdown2.push_back(-errup*errup);
+		}
+		else{
+			fulladdtoerrdown2.push_back(-errdown*errdown);
+			fulladdtoerrup2.push_back(-errup*errup);
+			visaddtoerrdown2.push_back(-errdown*errdown);
+			visaddtoerrup2.push_back(-errup*errup);
+		}
+
+
+		exup=getExtrapolationError(datasetidx,idx,true,false);
+		exdown=getExtrapolationError(datasetidx,idx,false,false);
+
+		totup=exup+errup;
+		totdown=exdown+errdown;
+
+		tmp=getMaxVar(true,totup,totdown,corranti);
+		visaddtoerrup2.push_back(tmp*tmp);
+		tmp=getMaxVar(false,totup,totdown,corranti);
+		visaddtoerrdown2.push_back(tmp*tmp);
+
+		tmpunc.errdown=exup;
+		tmpunc.errup=exdown;
+
+		datasets_.at(datasetidx).postFitSystematicsVis().push_back(tmpunc);
+	}
+
+	//statistics
+	double errupstat,errdownstat;
+	bool anticorr=false;//dummy
+	getParaErrorContributionToXsec(-1,datasetidx,errupstat,errdownstat,anticorr);
+
+	tmpunc.name="Stat";
+	tmpunc.errup=errupstat;
+	tmpunc.errdown=errdownstat;
+	tmpunc.pull=999;
+	tmpunc.constr=999;
+
+	datasets_.at(datasetidx).postFitSystematicsFull().push_back(tmpunc);
+	datasets_.at(datasetidx).postFitSystematicsVis().push_back(tmpunc);
+
+	///finally: cross section error
+	double xsecoffset=datasets_.at(datasetidx).xsecOffset();
+	double fullpsxsec=(fitter_.getParameter(xsecidx) + xsecoffset);
+	double fullrelxsecerrup=fitter_.getParameterErrUp()->at(xsecidx)/fullpsxsec;
+	double fullrelxsecerrdown=fitter_.getParameterErrDown()->at(xsecidx)/fullpsxsec;
+
+	//double extrCorr= datasets_.at(datasetidx).eps_emu_fulltovis().getValue(fittedparas_);
+	//double vispsxsec=extrCorr * fullpsxsec;
+	double vispsrelxsecerrup=fullrelxsecerrup; //no extrapolation yet
+	double vispsrelxsecerrdown=fullrelxsecerrdown; //no extrapolation yet
+
+	for(size_t i=0;i<fulladdtoerrup2.size();i++)
+		fullrelxsecerrup=sqrt(fullrelxsecerrup*fullrelxsecerrup+fulladdtoerrup2.at(i));
+	for(size_t i=0;i<fulladdtoerrdown2.size();i++)
+		fullrelxsecerrdown=sqrt(fullrelxsecerrdown*fullrelxsecerrdown+fulladdtoerrdown2.at(i));
+
+	tmpunc.name="Total";
+	tmpunc.errup=fullrelxsecerrup;
+	tmpunc.errdown=fullrelxsecerrdown;
+
+	datasets_.at(datasetidx).postFitSystematicsFull().push_back(tmpunc);
+
+
+	for(size_t i=0;i<visaddtoerrup2.size();i++)
+		vispsrelxsecerrup=sqrt(vispsrelxsecerrup*vispsrelxsecerrup+visaddtoerrup2.at(i));
+	for(size_t i=0;i<visaddtoerrdown2.size();i++)
+		vispsrelxsecerrdown=sqrt(vispsrelxsecerrdown*vispsrelxsecerrdown+visaddtoerrdown2.at(i));
+
+	tmpunc.errup=vispsrelxsecerrup;
+	tmpunc.errdown=vispsrelxsecerrdown;
+	datasets_.at(datasetidx).postFitSystematicsVis().push_back(tmpunc);
+
+}
+
+texTabler ttbarXsecFitter::makeSystBreakDownTable(size_t datasetidx,bool inclusive){
+
+	/*
+	 * Split this function in a part where the systematic contributions are
+	 * calculated and saved per dataset (for extrapol unc minos errors up/down)
+	 * and then a function to print them to a table
+	 */
+
+
 	if(datasetidx>=datasets_.size())
 		throw std::out_of_range("ttbarXsecFitter::makeSystBreakdown: dataset index out of range");
 
+
+	if((inclusive && datasets_.at(datasetidx).postFitSystematicsFull().size()<1) ||
+			(!inclusive && datasets_.at(datasetidx).postFitSystematicsVis().size()<1))
+		createSystematicsBreakdown(datasetidx);
+
+	formatter fmt;
+	texTabler table(" l | c | c | c ");
+	table << "Name" << "Pull" << "Constr / $\\sigma$" << "Contribution [\\%]";
+	table << texLine();
+	std::vector<dataset::systematic_unc> * unc=&datasets_.at(datasetidx).postFitSystematicsVis();
+	if(inclusive)
+		unc=&datasets_.at(datasetidx).postFitSystematicsFull();
+
+	for(size_t i=0;i<unc->size();i++){
+		dataset::systematic_unc * sys=&unc->at(i);
+
+		bool anticorr=false;
+		getMaxVar(true,sys->errup,sys->errdown,anticorr);
+		TString errstr;
+
+		if(fabs(sys->errdown) == fabs(sys->errup)){
+			if(anticorr)
+				errstr="$\\mp{"+fmt.toTString(fmt.round(100*sys->errdown,0.1))+"}$";
+			else
+				errstr="$\\pm{"+fmt.toTString(fmt.round(100*sys->errup,0.1))+ "}$";
+		}
+		else{
+			if(anticorr)
+				errstr="$\\mp^{"+fmt.toTString(fmt.round(100*fabs(sys->errdown),0.1))+"}_{"+fmt.toTString(fmt.round(100*fabs(sys->errup),0.1))+ "}$";
+			else
+				errstr="$\\pm{"+fmt.toTString(fmt.round(100*fabs(sys->errup),0.1))+ "}_{"+fmt.toTString(fmt.round(100*fabs(sys->errdown),0.1))+"}$";;
+		}
+		if(sys->name == "Total")
+			table <<texLine(1);
+		if(sys->pull < 900)
+			table << sys->name << fmt.round( sys->pull, 0.1)<<
+			fmt.round( sys->constr, 0.1)	<< errstr;
+		else
+			table << sys->name << " "<< " "	<< errstr;
+	}
+	table <<texLine(1);
+	float fullxsec=fitter_.getParameter(datasets_.at(datasetidx).xsecIdx()) + datasets_.at(datasetidx).xsecOffset();
+	if(inclusive){
+		table <<fmt.translateName( getParaName(datasets_.at(datasetidx).xsecIdx()) )<<
+				" " << " "
+				<< fmt.toTString(fmt.round(fullxsec,0.1))+" pb";
+	}
+	else{
+		table <<fmt.translateName( getParaName(datasets_.at(datasetidx).xsecIdx()) )+ " vis"<<
+				" " << " "
+				<< fmt.toTString(fmt.round(getVisXsec(datasetidx),0.01))+" pb";
+	}
+	table << texLine();
+	return table;
+
+
+	/*
 	size_t xsecidx=datasets_.at(datasetidx).xsecIdx();
 	formatter fmt;
 
@@ -503,6 +745,7 @@ texTabler ttbarXsecFitter::makeSystBreakdown(size_t datasetidx){
 
 
 	for(size_t i=0;i<getNParameters();i++){
+		displayStatusBar(i,getNParameters());
 		bool isxsec=false;
 		for(size_t j=0;j<datasets_.size();j++)
 			if(datasets_.at(j).xsecIdx() == i){
@@ -523,7 +766,7 @@ texTabler ttbarXsecFitter::makeSystBreakdown(size_t datasetidx){
 
 		if(std::find(addfullerrors_.begin(),addfullerrors_.end(),i)!=addfullerrors_.end())
 			name+=" (vis)";
-		std::cout <<name<< " +" << errup*100 << "% -" << errdown*100 << "% "<<std::endl;
+
 
 		table << name << fmt.round( fitter_.getParameters()->at(i), 0.1)<<
 				fmt.round( fitter_.getParameterErr(i), 0.1)	<< errstr;
@@ -531,53 +774,67 @@ texTabler ttbarXsecFitter::makeSystBreakdown(size_t datasetidx){
 	}
 	table <<texLine(1);
 	double xsecoffset=datasets_.at(datasetidx).xsecOffset();
-	double xsec=fitter_.getParameter(xsecidx) + xsecoffset;
+	//double xsec=fitter_.getParameter(xsecidx) + xsecoffset;
 	///add extrapolation in addition:
-	double addtoerrup2=0,addtoerrdown2=0;
+	std::vector<double> addtoerrup2,addtoerrdown2;
+
+	std::cout << "\nAdding extrapolation uncertainties for " << datasets_.at(datasetidx).getName() <<std::endl;
+
 	for(size_t i=0;i<addfullerrors_.size();i++){
+		displayStatusBar(i,addfullerrors_.size());
 		bool anticorr=false;
 		size_t idx=addfullerrors_.at(i);
 		TString name=fmt.translateName( getParaName(idx) );
 		name+=" (extr)";
-		extendedVariable * var=&datasets_.at(datasetidx).eps_emu();
+		//	extendedVariable * var=&datasets_.at(datasetidx).eps_emu();
 
-		std::vector<double> paracopy=fittedparas_;
-		float nom=var->getValue(paracopy);
-		if(i==0)
-			std::cout << "---->> Epsilon emu (%): " << nom*100 << std::endl;
-		paracopy.at(idx)=1;
-		float up=var->getValue(paracopy);
 
-		paracopy.at(idx)=-1;
-		float down=var->getValue(paracopy);
-
-		if(nom==0){
-			if(up!=0 || down!=0)
-				throw std::runtime_error("ttbarXsecFitter::makeSystBreakdown: variable is zero but variations not");
-		}
-		float relup=(xsec*nom/up - xsec)/xsec;
-		float reldown=(xsec*nom/down - xsec)/xsec;
-		if(relup>0){
-			addtoerrup2+=relup*relup;
-			addtoerrdown2+=reldown*reldown;
+		float exup=getExtrapolationError(datasetidx,idx,true,true);
+		float exdown=getExtrapolationError(datasetidx,idx,false,true);
+		double errup,errdown;
+		bool anitcorr;
+		getParaErrorContributionToXsec(idx,datasetidx,errup,errdown,anitcorr);
+		if(anticorr){
+			errup=-fabs(errup);
+			errdown=fabs(errdown);
+			addtoerrup2.push_back(-errdown*errdown);
+			addtoerrdown2.push_back(-errup*errup);
 		}
 		else{
-			addtoerrdown2+=relup*relup;
-			addtoerrup2+=reldown*reldown;
-			anticorr=true;
+			errup=fabs(errup);
+			errdown=-fabs(errdown);
+			addtoerrdown2.push_back(-errdown*errdown);
+			addtoerrup2.push_back(-errup*errup);
 		}
+
+		///TAKE INTO ACCOUNT THE CONSTRAINTS HERE!! THE PARA ERRORS ARE NOT ASYMM
+
+		double totup=exup+errup;
+		double totdown=exdown+errdown;
+
+		bool corranti;
+		double tmp=getMaxVar(true,totup,totdown,corranti);
+		addtoerrup2.push_back(tmp*tmp);
+		tmp=getMaxVar(false,totup,totdown,corranti);
+		addtoerrdown2.push_back(tmp*tmp);
+
+		getMaxVar(true,exup,exdown,corranti);
+
+
 		TString errstr;
-		if(anticorr)
-			errstr="$\\mp^{"+fmt.toTString(fmt.round(100*fabs(reldown),0.1))
-			+"}_{"+fmt.toTString(fmt.round(100*fabs(relup),0.1)) +"}$";
+
+
+		if(corranti)
+			errstr="$\\mp^{"+fmt.toTString(fmt.round(100*fabs(exup),0.1))
+			+"}_{"+fmt.toTString(fmt.round(100*fabs(exdown),0.1)) +"}$";
 		else
-			errstr="$\\pm^{"+fmt.toTString(fmt.round(100*fabs(relup),0.1))
-			+"}_{"+fmt.toTString(fmt.round(100*fabs(reldown),0.1)) +"}$";
+			errstr="$\\pm^{"+fmt.toTString(fmt.round(100*fabs(exup),0.1))
+			+"}_{"+fmt.toTString(fmt.round(100*fabs(exdown),0.1)) +"}$";
 
 		table << name << "-" <<
 				"-"	<< errstr;
 	}
-
+	std::cout << std::endl;
 	//add stat
 	double errupstat,errdownstat;
 	bool anticorr=false;//dummy
@@ -590,9 +847,13 @@ texTabler ttbarXsecFitter::makeSystBreakdown(size_t datasetidx){
 	table << texLine();
 
 	double fullrelxsecerrup=fitter_.getParameterErrUp()->at(xsecidx)/(fitter_.getParameter(xsecidx) + xsecoffset);
-	fullrelxsecerrup=sqrt(fullrelxsecerrup*fullrelxsecerrup+addtoerrup2);
+
+	//////change this and take into account correlations
+	for(size_t i=0;i<addtoerrup2.size();i++)
+		fullrelxsecerrup=sqrt(fullrelxsecerrup*fullrelxsecerrup+addtoerrup2.at(i));
 	double fullrelxsecerrdown=fitter_.getParameterErrDown()->at(xsecidx)/(fitter_.getParameter(xsecidx) + xsecoffset);
-	fullrelxsecerrdown=sqrt(fullrelxsecerrdown*fullrelxsecerrdown+addtoerrdown2);
+	for(size_t i=0;i<addtoerrdown2.size();i++)
+		fullrelxsecerrdown=sqrt(fullrelxsecerrdown*fullrelxsecerrdown+addtoerrdown2.at(i));
 
 	TString errstrxsec="$\\pm^{"+ fmt.toTString(fmt.round(100*fullrelxsecerrup,0.1)) +
 			"}_{"+ fmt.toTString(fmt.round(100*fullrelxsecerrdown,0.1))+"}$";
@@ -602,6 +863,7 @@ texTabler ttbarXsecFitter::makeSystBreakdown(size_t datasetidx){
 	table <<fmt.translateName( getParaName(xsecidx) ) << " " << " " << fmt.toTString(fmt.round((fitter_.getParameter(xsecidx) + xsecoffset),0.1))+" pb";
 	table << texLine();
 	return table;
+	 */
 
 }
 
@@ -815,7 +1077,64 @@ void ttbarXsecFitter::dataset::checkSizes()const{
 }//ttbarXsecFitter::checkSizes()
 
 
-variateContainer1D ttbarXsecFitter::dataset::createLeptonJetAcceptance(const std::vector<container1D>& signals, size_t bjetcategory){
+double ttbarXsecFitter::getExtrapolationError( size_t datasetidx, size_t paraidx, bool up, bool fullps){
+	/*std::vector<double> paracopy=fittedparas_;
+		float nom=var->getValue(paracopy);
+		if(i==0)
+			std::cout << "---->> Epsilon emu (%): " << nom*100 << std::endl;
+		paracopy.at(idx)=1;
+		float up=var->getValue(paracopy);
+
+		paracopy.at(idx)=-1;
+		float down=var->getValue(para */
+	if(paraidx >= parameternames_.size()){
+		throw std::out_of_range("ttbarXsecFitter::getExtrapolationError: parameter index.");
+	}
+	double nominal=1,construp=1,constrdown=1,fullup=1,fulldown=1;
+	extendedVariable * varanticorr=0, * varcorr=0;
+	extendedVariable varone;
+	varone.setToOne(true);
+	varcorr=&varone;
+	varanticorr=&datasets_.at(datasetidx).eps_emu();
+	if(!fullps)
+		varcorr=&datasets_.at(datasetidx).fullToVisCorrFact();
+
+	std::vector<double> paracopy=fittedparas_;
+	nominal=varcorr->getValue(paracopy) / varanticorr->getValue(paracopy);       ///<--------
+	paracopy.at(paraidx) += fitter_.getParameterErrUp()->at(paraidx);
+	if(paracopy.at(paraidx) >1)
+		paracopy.at(paraidx)=1;
+	else if(paracopy.at(paraidx)<-1)
+		paracopy.at(paraidx)=-1;
+	construp=varcorr->getValue(paracopy) / varanticorr->getValue(paracopy);          ///<--------
+	paracopy=fittedparas_;  //fabs: make sure sign is right
+	paracopy.at(paraidx) -= (fitter_.getParameterErrDown()->at(paraidx));
+	if(paracopy.at(paraidx) >1)
+		paracopy.at(paraidx)=1;
+	else if(paracopy.at(paraidx)<-1)
+		paracopy.at(paraidx)=-1;
+	constrdown=varcorr->getValue(paracopy) / varanticorr->getValue(paracopy);             ///<--------
+	paracopy.at(paraidx) = 1;
+	fullup=varcorr->getValue(paracopy) / varanticorr->getValue(paracopy);          ///<--------
+	paracopy.at(paraidx) = -1;
+	fulldown=varcorr->getValue(paracopy) / varanticorr->getValue(paracopy);                ///<--------
+
+
+	double xsecup  = ( fullup/nominal  ) - (construp/nominal);
+	double xsecdown= (fulldown/nominal ) - (constrdown/nominal);
+
+	if(up)
+		return xsecup;
+	else
+		return xsecdown;
+
+}
+
+variateContainer1D ttbarXsecFitter::dataset::createLeptonJetAcceptance(const std::vector<container1D>& signals,
+		const std::vector<container1D>& signalpsmig,
+		const std::vector<container1D>& signalvisPSgen,
+		size_t bjetcategory)
+{
 	// this one can use container1D operators!
 	if(debug)
 		std::cout << "ttbarXsecFitter::dataset::createLeptonJetAcceptance: "<< bjetcategory <<", "<< name_<<std::endl;
@@ -847,14 +1166,30 @@ variateContainer1D ttbarXsecFitter::dataset::createLeptonJetAcceptance(const std
 		signalintegral += tmpsig;
 	}
 
-	//need signal integral per bin -> same distributions for fixed add jet multi...
+	container1D psmigint;
+	for(size_t i=minbjetbin;i<maxbjetbin;i++){
+		container1D tmp=signalpsmig.at(i);
+		tmp=tmp.getIntegralBin();
+		psmigint+=tmp;
+	}
+	container1D visgenint;
+	for(size_t i=minbjetbin;i<maxbjetbin;i++){
+		container1D tmp=signalvisPSgen.at(i);
+		tmp=tmp.getIntegralBin();
+		visgenint+=tmp;
+	}
 
+	//need signal integral per bin -> same distributions for fixed add jet multi...
+	bool tmpmultiplyStatCorrelated = histoContent::multiplyStatCorrelated;
+	bool tmpaddStatCorrelated = histoContent::addStatCorrelated;
+	bool tmpdivideStatCorrelated = histoContent::divideStatCorrelated;
 	histoContent::multiplyStatCorrelated = true;
 	histoContent::addStatCorrelated = true;
 	histoContent::divideStatCorrelated = true;
 
+
 	container1D one=signal.createOne();
-	container1D leptonacceptance = signalintegral * gennorm; //this includes lumi unc but cancels the xsec and lumi abs value!
+	container1D AccBRRecodil = signalintegral * gennorm; //this includes lumi unc but cancels the xsec and lumi abs value!
 
 
 	container1D onebjetsignal = signals.at(bjet1bin);//stack->at(bjet1bin).getSignalContainer();
@@ -865,7 +1200,7 @@ variateContainer1D ttbarXsecFitter::dataset::createLeptonJetAcceptance(const std
 	twobjetsignal=twobjetsignal.getIntegralBin();
 
 	container1D correction_b =  ((signalintegral * twobjetsignal) * 4.)
-																																																																						                																																																																														/ ( (onebjetsignal + (twobjetsignal * 2.)) * (onebjetsignal + (twobjetsignal * 2.)));
+																																																																						                																																																																																																																																																														/ ( (onebjetsignal + (twobjetsignal * 2.)) * (onebjetsignal + (twobjetsignal * 2.)));
 
 	correction_b.removeStatFromAll();
 
@@ -881,19 +1216,28 @@ variateContainer1D ttbarXsecFitter::dataset::createLeptonJetAcceptance(const std
 	lepjetcont1bjet.removeStatFromAll();
 	container1D lepjetcont2bjets=    (correction_b * eps_b) * eps_b ;
 	lepjetcont2bjets.removeStatFromAll();
-	container1D lepjetcont0bjet=   leptonacceptance* (one - lepjetcont1bjet - lepjetcont2bjets);
+	container1D lepjetcont0bjet=   AccBRRecodil* (one - lepjetcont1bjet - lepjetcont2bjets);
 	lepjetcont0bjet.removeStatFromAll();
-	lepjetcont1bjet *= leptonacceptance;
+	lepjetcont1bjet *= AccBRRecodil;
 	lepjetcont1bjet.removeStatFromAll();
-	lepjetcont2bjets*= leptonacceptance;
+	lepjetcont2bjets*= AccBRRecodil;
 	lepjetcont2bjets.removeStatFromAll();
 
 	//epsemu (extrapolation)
 	variateContainer1D tmp;
-	tmp.import(leptonacceptance);
+	tmp.import(AccBRRecodil);
 
 	eps_emu_=*tmp.getBin(1);
+	container1D branchingratiotovis= visgenint * (gennorm /((double)totalvisgencontsread_));
+	// The generated part was filled per event for each of the containers
+	//visible = full * BRtovis
 
+	//	container1D fullDivVis =   ((signalintegral- psmigint)/visgenint) / AccBRRecodil  ;//gennorm
+
+	///whats the best?
+
+	tmp.import(branchingratiotovis);
+	fulltoviscorrfact_=*tmp.getBin(1);
 
 	//the stat uncertainties will be screwed up, but they are not used anyway
 	bool tmpvarcdebug=variateContainer1D::debug;
@@ -906,9 +1250,6 @@ variateContainer1D ttbarXsecFitter::dataset::createLeptonJetAcceptance(const std
 	normedsignal.normalize(true,true); //normalize to 1 incl syst
 	out.import(normedsignal);
 
-	//	TCanvas c;
-	//	normedsignal.drawFullPlot();
-	//	c.Print("test"+toTString(bjetbin) +".pdf");
 
 	if(normalization_nbjet_.size() <= bjetbin)
 		normalization_nbjet_.resize(bjetbin+1);
@@ -924,19 +1265,12 @@ variateContainer1D ttbarXsecFitter::dataset::createLeptonJetAcceptance(const std
 		tmpvarc.import(lepjetcont2bjets);
 	}
 	normalization_nbjet_.at(bjetbin) = *tmpvarc.getBin(1);
-	//}
-	/* not norm nbjetglobal else{
-		if(bjetcategory == 0){
-			out.import(lepjetcont0bjet);
-		}
-		else if(bjetcategory == 1){
-			out.import(lepjetcont1bjet);
-		}
-		else if(bjetcategory == 2){
-			out.import(lepjetcont2bjets);
-		}
 
-	} */
+
+	histoContent::multiplyStatCorrelated=tmpmultiplyStatCorrelated;
+	histoContent::addStatCorrelated=tmpaddStatCorrelated;
+	histoContent::divideStatCorrelated=tmpdivideStatCorrelated;
+
 	variateContainer1D::debug=tmpvarcdebug;
 	if(debug)
 		std::cout << "ttbarXsecFitter::dataset::createLeptonJetAcceptance: done " << std::endl;
@@ -1039,28 +1373,30 @@ void  ttbarXsecFitter::dataset::readStacks(const std::string configfilename,cons
 		}
 		jetcount++;
 	}
-	std::cout << std::endl;
 	if(out.size()>0)
 		out.push_back(tmpstacks);//last push back
-	std::cout << out.size() << std::endl;
 	if(out.size()<1)
 		std::cout << "ttbarXsecFitter::readStacks: no plots for " << name_ << " TeV added." <<std::endl;
 	else if(out.size() != 3)
 		throw std::runtime_error("ttbarXsecFitter::readStacks: tried to add less or more than (allowed) 3 nbjets categories");
 
 	signalconts_nbjets_.resize(out.size());
+	signalvisgenconts_nbjets_.resize(out.size());
 	signalpsmigconts_nbjets_.resize(out.size());
 	backgroundconts_nbjets_.resize(out.size());
 	dataconts_nbjets_.resize(out.size());
 	for(size_t nbjet=0;nbjet<out.size();nbjet++){
-		container1D sign,signpsmig,backgr,data;
+		container1D sign,signvisps,signpsmig,backgr,data;
 		for(size_t j=0;j<out.at(nbjet).size();j++){
 			sign          =sign.append(out.at(nbjet).at(j).getSignalContainer1DUnfold().getRecoContainer());
+			signvisps     =signvisps.append(out.at(nbjet).at(j).getSignalContainer1DUnfold().getGenContainer());
+			totalvisgencontsread_++;
 			signpsmig=signpsmig.append(out.at(nbjet).at(j).getSignalContainer1DUnfold().getBackground());
 			backgr      =backgr.append(out.at(nbjet).at(j).getBackgroundContainer());
 			data          =data.append(out.at(nbjet).at(j).getDataContainer());
 		}
 		signalconts_nbjets_.at(nbjet) = sign;
+		signalvisgenconts_nbjets_.at(nbjet)=signvisps;
 		signalpsmigconts_nbjets_.at(nbjet)=signpsmig;
 		backgroundconts_nbjets_.at(nbjet) = backgr;
 		dataconts_nbjets_.at(nbjet)=data;
@@ -1075,19 +1411,9 @@ void  ttbarXsecFitter::dataset::readStacks(const std::string configfilename,cons
  * Assumes consistent ordering within same dataset - is the case if input is read normally
  */
 void ttbarXsecFitter::dataset::equalizeIndices(dataset & rhs){
-	/*
-	 * std::vector<container1D> signalconts_nbjets_;
-		std::vector<container1D> signalcontsorig_nbjets_;
 
-		std::vector<container1D> signalpsmigconts_nbjets_;
-		std::vector<container1D> signalpsmigcontsorig_nbjets_;
-
-		std::vector<container1D> dataconts_nbjets_;
-		std::vector<container1D> datacontsorig_nbjets_;
-		std::vector<container1D> backgroundconts_nbjets_;
-		std::vector<container1D> backgroundcontsorig_nbjets_;
-	 */
 	container1D::equalizeSystematics(signalconts_nbjets_,rhs.signalconts_nbjets_);
+	container1D::equalizeSystematics(signalvisgenconts_nbjets_,rhs.signalvisgenconts_nbjets_);
 	container1D::equalizeSystematics(signalpsmigconts_nbjets_,rhs.signalpsmigconts_nbjets_);
 	container1D::equalizeSystematics(dataconts_nbjets_,rhs.dataconts_nbjets_);
 	container1D::equalizeSystematics(backgroundconts_nbjets_,rhs.backgroundconts_nbjets_);

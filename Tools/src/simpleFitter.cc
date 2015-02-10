@@ -317,7 +317,9 @@ void simpleFitter::fillCorrelationCoefficients(container2D * c)const{
 		}
 	}
 }
-
+/**
+ * always returns positive values if no fault
+ */
 void simpleFitter::getParameterErrorContribution(size_t a, size_t b,double & errup, double& errdown){
 
 	if(!wasSuccess())
@@ -362,7 +364,13 @@ void simpleFitter::getParameterErrorContribution(size_t a, size_t b,double & err
 	else{
 		errdown=-200;
 	}
-	errup=errdown;
+	if(getCorrelationCoefficient(a,b)<0){
+		errup=-errdown;
+	}
+	else{
+		errup=errdown;
+		errdown=-errdown;
+	}
 	delete min;
 }
 void simpleFitter::getStatErrorContribution(size_t b,double & errup, double& errdown){

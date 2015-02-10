@@ -21,11 +21,16 @@ namespace ztop{
  */
 class extendedVariable{
 public:
-    extendedVariable():nominal_(-100000),name_(""){}
-    extendedVariable(const TString & name):nominal_(-100000),name_(name){}
+    extendedVariable():nominal_(-100000),name_(""),one_(false){}
+    extendedVariable(const TString & name):nominal_(-100000),name_(name),one_(false){}
     ~extendedVariable(){}
 
     void setName(const TString & name){name_=name;}
+
+    /**
+     * Use to create a dummy that always returns one. it can be handy in some cases
+     */
+    void setToOne(bool set){one_=set;}
 
     /**
      * just put (non shifted) graph here
@@ -71,6 +76,7 @@ private:
     std::vector<graphFitter> dependences_; //one for each syst
     std::vector<TString> sysnames_; //only for later reference
 
+    bool one_;
 };
 
 }

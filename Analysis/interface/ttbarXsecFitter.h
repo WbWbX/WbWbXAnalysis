@@ -38,7 +38,7 @@ public:
 		fitsucc_(false),norm_nbjet_global_(true),
 		useMConly_(false),removesyst_(false),nominos_(false),
 		parameterwriteback_(true),
-		nosystbd_(false),silent_(false)
+		nosystbd_(false),silent_(false),nopriors_(false)
 	{
 	} //one for each energy
 
@@ -69,6 +69,11 @@ public:
 	 * removes systematics already at read-in
 	 */
 	void setRemoveSyst(bool remove){removesyst_=remove;}
+
+	/**
+	 *
+	 */
+	void setIgnorePriors(bool ignore){nopriors_=ignore;}
 
 	/**
 	 *
@@ -123,6 +128,8 @@ public:
 	double getXsec(size_t datasetidx)const;
 	double getXsecOffset(size_t datasetidx)const;
 
+	double getVisXsec(size_t datasetidx)const;
+
 	size_t getNParameters()const{return fitter_.getParameters()->size();}
 
 	double getParaError(size_t idx)const;
@@ -132,7 +139,9 @@ public:
 	 */
 	void getParaErrorContributionToXsec(int idx, size_t  datasetidx,double& up,double&down,bool& anticorr);
 
-	texTabler makeSystBreakdown(size_t datasetidx);
+	void createSystematicsBreakdowns();
+
+	texTabler makeSystBreakDownTable(size_t datasetidx,bool inclusive=true);
 
 	texTabler makeCorrTable() const;
 
@@ -148,6 +157,8 @@ public:
 
 private:
 
+	void createSystematicsBreakdown(size_t datasetidx);
+
 	/**
 	 * For this uncertainty, the full error will be added at the end!
 	 */
@@ -159,15 +170,24 @@ private:
 
 	class dataset{
 	public:
+
+		struct systematic_unc{
+					TString name;
+					double pull;
+					double constr;
+					double errup;
+					double errdown;
+				};
+
 		dataset(double lumi,double lumiunc, double xsecin, TString name):
 			lumi_(lumi),xsecoff_(xsecin),unclumi_(lumiunc),
-			lumiidx_(9999),xsecidx_(9999),name_(name)
+			lumiidx_(9999),xsecidx_(9999),name_(name),totalvisgencontsread_(0)
 	{}
 
 		extendedVariable& eps_emu(){return eps_emu_;}
 		const extendedVariable& eps_emu()const {return eps_emu_;}
-		extendedVariable& eps_emu_vis(){return eps_emu_vis_;}
-		const extendedVariable& eps_emu_vis()const {return eps_emu_vis_;}
+		extendedVariable& fullToVisCorrFact(){return fulltoviscorrfact_;}
+		const extendedVariable& fullToVisCorrFact()const {return fulltoviscorrfact_;}
 
 		extendedVariable& normalization(size_t nbjet){return normalization_nbjet_.at(nbjet);}
 		const extendedVariable& normalization(size_t nbjet)const {return normalization_nbjet_.at(nbjet);}
@@ -210,12 +230,23 @@ private:
 
 		static const size_t nBjetCat(){return 3;} //to avoid duplication
 
+
+		std::vector<systematic_unc>& postFitSystematicsFull(){return post_fit_systematics_full_;}
+		const std::vector<systematic_unc>& postFitSystematicsFull() const{return post_fit_systematics_full_;}
+		std::vector<systematic_unc>& postFitSystematicsVis(){return post_fit_systematics_vis_;}
+		const std::vector<systematic_unc>& postFitSystematicsVis() const{return post_fit_systematics_vis_;}
+
+
+
 	private:
 
 		void addUncertainties(containerStack * stack,size_t nbjets,bool removesyst)const;
-		variateContainer1D createLeptonJetAcceptance(const std::vector<container1D>& signals, size_t bjetcategory);
+		variateContainer1D createLeptonJetAcceptance(const std::vector<container1D>& signals,
+				const std::vector<container1D>& signalpsmig,
+				const std::vector<container1D>& signalvisPSgen,
+				size_t bjetcategory);
 
-		dataset(){}
+		dataset():totalvisgencontsread_(0){}
 
 		double lumi_,xsecoff_;
 		double unclumi_;
@@ -223,7 +254,7 @@ private:
 		TString name_;
 
 		//global per dataset
-		extendedVariable eps_emu_,eps_emu_vis_;
+		extendedVariable eps_emu_,fulltoviscorrfact_;
 
 		//per bjet_cat
 		std::vector<extendedVariable> normalization_nbjet_;
@@ -241,6 +272,10 @@ private:
 		std::vector<container1D> signalconts_nbjets_;
 		std::vector<container1D> signalcontsorig_nbjets_;
 
+		std::vector<container1D> signalvisgenconts_nbjets_;
+
+		size_t totalvisgencontsread_; //this is NOT signalvisgenconts_nbjets_.size() since some could be merged!
+
 		std::vector<container1D> signalpsmigconts_nbjets_;
 		std::vector<container1D> signalpsmigcontsorig_nbjets_;
 
@@ -248,6 +283,9 @@ private:
 		std::vector<container1D> datacontsorig_nbjets_;
 		std::vector<container1D> backgroundconts_nbjets_;
 		std::vector<container1D> backgroundcontsorig_nbjets_;
+
+		std::vector<systematic_unc> post_fit_systematics_full_,post_fit_systematics_vis_;
+
 
 	};
 
@@ -276,6 +314,7 @@ private:
 	//just a safety check. Should be redundant as soon as class works and is tested
 	void checkSizes()const;
 
+	double getExtrapolationError(size_t datasetidx, size_t paraidx, bool up, bool fullps);
 
 	//can be more sophisticated
 
@@ -292,7 +331,7 @@ private:
 
 	std::pair<TString,TString> replaceininfiles_;
 
-	bool nosystbd_,silent_;
+	bool nosystbd_,silent_,nopriors_;
 
 };
 

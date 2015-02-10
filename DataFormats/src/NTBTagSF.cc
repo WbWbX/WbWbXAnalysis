@@ -1,7 +1,7 @@
 #include "../interface/NTBTagSF.h"
 #include "TFile.h"
 #include "TTree.h"
-
+#include "TtZAnalysis/Configuration/interface/version.h"
 
 namespace ztop{
 
@@ -82,12 +82,14 @@ void NTBTagSF::setWorkingPoint(const TString& wpstring){
         bTagBase::setWorkingPoint(workingPoints::csvm_wp);}
     else if(wpstring=="csvt"){
         bTagBase::setWorkingPoint(workingPoints::csvt_wp);}
+#ifndef CMSSW_LEQ_5
     else if(wpstring=="csvv2l"){
 	bTagBase::setWorkingPoint(workingPoints::csvv2l_wp);}
     else if(wpstring=="csvv2m"){
 	bTagBase::setWorkingPoint(workingPoints::csvv2m_wp);}
     else if(wpstring=="csvv2t"){
 	bTagBase::setWorkingPoint(workingPoints::csvv2t_wp);}
+#endif
     else{
         throw std::logic_error(("NTBTagSF::setWorkingPoint: doesn't exist"));
     }
