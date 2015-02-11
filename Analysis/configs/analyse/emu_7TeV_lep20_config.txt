@@ -1,0 +1,90 @@
+$ comments begin with "$"
+$ This file incorporates inputfiles in [inputfiles-begin] until [inputfiles-end]
+$  some steering parameters and inputs linke energy JECfile etc in 
+$  [parameters-begin] until [parameters-end]
+
+
+[inputfiles-begin]
+
+
+$ inputfile,                       legend entry,        color,   xsection,   legendNumber (for sorting,- allows for gaps),  (opt) isSignal
+
+$data
+$
+tree_7TeV_emu_runA.root,     data,1,1,99
+tree_7TeV_emu_runB.root,data,1,1,99
+
+$ cross section automatic
+tree_7TeV_emuttbar.root,       t#bar{t},		633,	  251.7,	  0, true
+tree_7TeV_emuttbarviatau.root, t#bar{t}(#tau), 	632,	  251.7,	  1, true
+
+tree_7TeV_dyee60120.root,          Z#rightarrowll, 	852,	  3048, 2
+tree_7TeV_dymumu60120.root,        Z#rightarrowll,	852,	  3048, 2
+tree_7TeV_emuttbarbg.root,         t#bar{t}bg,	   	634,	  170,	  3
+
+$ cross section automatic
+tree_7TeV_tW.root,             tW/#bar{t}W#rightarrowll,	   		616,	  11.1,	  4
+tree_7TeV_tbarW.root,	   tW/#bar{t}W#rightarrowll,	   		616,	  11.1,	  4
+
+tree_7TeV_ww.root,		   VV,			390,	  43.0,	  5
+tree_7TeV_zz.root,		   VV,			390,	  5.9,	  5
+tree_7TeV_wz.root,		   VV,			390,	  18.0,	  5
+tree_7TeV_wjets.root,		   Wjets,	   	413,	  31314,  6
+tree_7TeV_dytautau1050.root,	   DY#rightarrow#tau#tau,868,	  740,	  7
+tree_7TeV_dytautau50inf.root,	   DY#rightarrow#tau#tau,868,	  3048, 7
+tree_7TeV_dyee1050.root,	   DY#rightarrowll,	858,	  740,	  8
+tree_7TeV_dyee5060.root,	   DY#rightarrowll,	858,	  3048, 8
+tree_7TeV_dyee120inf.root,	   DY#rightarrowll,	858,	  3048, 8
+tree_7TeV_dymumu1050.root,	   DY#rightarrowll,	858,	  740,	  8
+tree_7TeV_dymumu5060.root,	   DY#rightarrowll,	858,	  3048, 8
+tree_7TeV_dymumu120inf.root,	   DY#rightarrowll,	858,	  3048, 8
+
+$tree_7TeV_qcdem2030.root,	   QCD,			400,	  2914860,9
+$tree_7TeV_qcdem3080.root,	   QCD,			400,	  4615893,9
+$tree_7TeV_qcdem80170.root,	   QCD,			400,	  183294, 9
+$tree_7TeV_qcdmu15.root,		   QCD,			400,	  134680, 9
+
+$ rare tt processes
+
+$tree_ttbarg.root,                  t#bar{t}V/#gamma,    798,      1.8,   10
+$tree_ttbarw.root,                  t#bar{t}V/#gamma,    798,      0.232, 10
+$tree_ttbarz.root,                  t#bar{t}V/#gamma,    798,      0.2057,10
+
+[inputfiles-end]
+
+
+
+[parameters-begin] 
+$$ all directories except for inputfiles are relative to $CMSSW_BASE
+
+inputFilesDir = /nfs/dust/cms/user/kiesej/trees_Oct14/
+
+Lumi           = 5050
+
+JECFile        = /src/TtZAnalysis/Analysis/data/analyse/Legacy11_V1_DATA_UncertaintySources_AK5PFchs.txt
+
+
+MuonSFFile     = /src/TtZAnalysis/Analysis/data/analyse/muon_tight_sf2D_8TeV.root
+MuonSFHisto    = eff_pt_eta_fullwithtrackerr
+TrackingSFFile = /src/TtZAnalysis/Analysis/data/analyse/muon_trackSF_8TeV.root
+TrackingSFHisto = tracking_eff
+
+
+
+ElecSFFile     = /src/TtZAnalysis/Analysis/data/analyse/elec_tight_sf2D_8TeV.root
+ElecSFHisto    = GlobalSF
+
+TriggerSFFile  = /src/TtZAnalysis/Analysis/data/analyse/trigger_emu_8TeV_pt30.root
+
+PUFile         = /src/TtZAnalysis/Analysis/data/analyse/Legacy2012.json_PU    $without .root
+
+btagWP         = csvl
+btagFile       = all_btags
+
+
+btagShapeFileHF = /src/TopAnalysis/Configuration/analysis/common/data/csv_rwt_hf_20pt_8_20_14.root
+btagShapeFileLF = /src/TopAnalysis/Configuration/analysis/common/data/csv_rwt_lf_20pt_8_20_14.root
+
+
+modeOptions = GsfelectronsZerojetNozcutNometcutNobcutBtagcsvtNotoppt
+[parameters-end]
