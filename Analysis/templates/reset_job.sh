@@ -10,7 +10,7 @@ function resetJob(){
     job=$1
     rm -f batch/$job* > /dev/null
     rm -f output/$job* > /dev/null
-    mv stdout/$job.txt "stdout/${job}_old.txt"  > /dev/null
+    mv stdout/$job "stdout/${job}_old"  > /dev/null
 
     echo job $job has been reset
 }

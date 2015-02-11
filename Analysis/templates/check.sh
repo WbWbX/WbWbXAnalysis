@@ -79,14 +79,14 @@ do
 		else
 		    echo "${jobname} \e[1;31m  partially done but aborted\e[0m"
 		    tresubmit=( "${tresubmit[@]}" "../jobscripts/${jobname}" );
-		    rmfiles=( "${rmfiles[@]}" "rm -f ../batch/${file}.o${jobid}; rm -f ../output/${file}.root;rm -f ../stdout/${file}.txt;" );
+		    rmfiles=( "${rmfiles[@]}" "rm -f ../batch/${file}.o${jobid}; rm -f ../output/${file}.root;rm -f ../stdout/${file};" );
 		fi
 	    else
 		if [ $JOBSONBATCH ]
 		then
 		    echo "${jobname} \e[1;31m  partially done but without ID \e[0m"
 		    tresubmit=( "${tresubmit[@]}" "../jobscripts/${jobname}" );
-		    rmfiles=( "${rmfiles[@]}" "rm -f ../batch/${file}.o${jobid}; rm -f ../output/${file}.root;rm -f ../stdout/${file}.txt;" );
+		    rmfiles=( "${rmfiles[@]}" "rm -f ../batch/${file}.o${jobid}; rm -f ../output/${file}.root;rm -f ../stdout/${file};" );
 		else
 		    echo "${jobname} \e[1;32m partially done (${jobid})\e[0m"
 		fi
@@ -95,7 +95,7 @@ do
     elif [ -e "${fullcheckpath}_failed" ];
     then
 	echo "${jobname} \e[1;31m completely failed \e[0m"
-    elif [ -e "../stdout/${file}.txt" ];
+    elif [ -e "../stdout/${file}" ];
     then
 	if [ $jobid ]
 	then
@@ -105,14 +105,14 @@ do
 	    else
 		echo "${jobname} \e[1;31m aborted before producing output\e[0m"
 		tresubmit=( "${tresubmit[@]}" "../jobscripts/${jobname}" );
-		rmfiles=( "${rmfiles[@]}" "rm -f ../batch/${file}.o${jobid}; rm -f ../output/${file}.root;rm -f ../stdout/${file}.txt;" );
+		rmfiles=( "${rmfiles[@]}" "rm -f ../batch/${file}.o${jobid}; rm -f ../output/${file}.root;rm -f ../stdout/${file};" );
 	    fi
 	else
 	    if [ $JOBSONBATCH ]
 	    then
 		echo "${jobname} \e[1;31m  partially done but without ID \e[0m"
 		tresubmit=( "${tresubmit[@]}" "../jobscripts/${jobname}" );
-		rmfiles=( "${rmfiles[@]}" "rm -f ../batch/${file}.o${jobid}; rm -f ../output/${file}.root;rm -f ../stdout/${file}.txt;" );
+		rmfiles=( "${rmfiles[@]}" "rm -f ../batch/${file}.o${jobid}; rm -f ../output/${file}.root;rm -f ../stdout/${file};" );
 	    else
 		echo "${jobname} \e[1;32m partially done (${jobid})\e[0m"
 	    fi
@@ -130,7 +130,7 @@ do
 	else
 	    echo  "${jobname} \e[01;30m still queuing or \e[1;31m died without any tracable reason!! \e[0m"
 	    tresubmit=( "${tresubmit[@]}" "../jobscripts/${jobname}" );
-	    rmfiles=( "${rmfiles[@]}" "rm -f ../batch/${file}.o${jobid}; rm -f ../output/${file}.root;rm -f ../stdout/${file}.txt;" );
+	    rmfiles=( "${rmfiles[@]}" "rm -f ../batch/${file}.o${jobid}; rm -f ../output/${file}.root;rm -f ../stdout/${file};" );
 	fi
     fi
 done
@@ -180,22 +180,12 @@ else
     echo "all your jobs have finished, trying to merge systematics...."
     cd $workdir/output
 
-    test=`echo $PATH | grep ${CMSSW_BASE}/src/TtZAnalysis/Analysis/bin`
-    if [ $test ]
+    if [ ${CMSSW_BASE} ]
     then
 	mergeSyst ${jdone[@]}
     else
-	if [ ${CMSSW_BASE} ]
-	then
-	    echo "Your TtZAnalysis environment is not setup correctly, setting it up and merging"
-	    export PATH=${CMSSW_BASE}/src/TtZAnalysis/Analysis/bin:$PATH
-	    mergeSyst ${jdone[@]}
-
-	    exit 0
-	else
-	    echo "Cannot merge systematics. Has to be run from a CMSSW environment"
-	    exit 0
-	fi
+	echo "Cannot merge systematics. Has to be run from a CMSSW environment"
+	exit 0
     fi
 
 
