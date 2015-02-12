@@ -3,6 +3,7 @@
 #(make sure the right shell will be used)
 #$ -S /bin/sh
 #$ -l site=hh
+#$ -l distro=sld6
 #
 #(the cpu time for this job)
 #$ -l h_rt=02:55:00
