@@ -28,7 +28,8 @@ namespace ztop{
  */
 class plotterBase :protected tObjectList{
 public:
-    plotterBase():tObjectList(), title_(""),tbndc_(true),lastplotidx_(0),tmplegp_(0),pad_(0),drawlegend_(true){
+    plotterBase():tObjectList(), title_(""),tbndc_(true),lastplotidx_(0),
+tmplegp_(0),pad_(0),drawlegend_(true),preparepad_(true){
     	TGaxis::SetMaxDigits(4);
     }
     virtual ~plotterBase(){}
@@ -44,6 +45,10 @@ public:
     void usePad(TVirtualPad* pad){pad_=pad;}
     TVirtualPad* getPad()const; //throws if 0
     bool padAssociated()const{return pad_;}
+    /**
+     * Set if pad will be cleared and prepared by plotter (default true)
+     */
+    void setPreparePad(bool set){preparepad_=set;}
 
     TLegend* getLegend()const {return tmplegp_;}
 
@@ -104,6 +109,7 @@ protected:
 private:
     TVirtualPad * pad_;
     bool drawlegend_;
+    bool preparepad_;
 //    int errToRootFillStyle(const containerStyle *s) const;
 
 };

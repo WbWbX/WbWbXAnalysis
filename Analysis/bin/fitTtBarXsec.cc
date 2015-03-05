@@ -32,26 +32,29 @@ invokeApplication(){
 		exit(-1);
 	}
 	const bool exclude0bjetbin  = parser->getOpt<bool>("-exclude0bjet",false,"Excludes 0,3+ bjet bin from the fit");
-	const TString outfile = parser->getOpt<TString>("o","xsecFit","output file name");
 	const int npseudoexp = parser->getOpt<int>("p",0,"number of pseudo experiments");
 	const bool debug = parser->getOpt<bool>("d",false,"switches on debug output");
 	const TString pseudoOpts = parser->getOpt<TString>("-pdopts","",
 			"additional options for pseudodata:\nGaus: use Gaussian random distribution\n");
 	const bool fitsystematics =! parser->getOpt<bool>("-nosyst",false,"removes systematics");
+	const bool onlytotalerror = parser->getOpt<bool>("-onlytotal",false,"removes systematics");
 	const bool nominos = parser->getOpt<bool>("-nominos",false,"switches off systematics breakdown");
-	const float topmass = parser->getOpt<float>("-topmass",172.5,"Set top mass");
+	const float topmass = parser->getOpt<float>("-topmass",0,"Set top mass");
+	const bool visible =  parser->getOpt<bool>("-vis",false,"performs extraction of visible cross section");
+
+	 TString outfile;
+	if(visible)
+		outfile = (parser->getOpt<TString>("o","xsecFit","output file name")+"_vis");
+	else
+		outfile = parser->getOpt<TString>("o","xsecFit","output file name");
+
 
 	parser->doneParsing();
 
 
-
-	simpleFitter::printlevel=-1; //for now
+	//simpleFitter::printlevel=-1; //for now
 
 	ttbarXsecFitter mainfitter;
-
-	TString mtrepl="_"+toTString(172.5)+"_";TString mtrplwith="_"+toTString(topmass)+"_";
-	mainfitter.setReplaceInInfile(mtrepl,mtrplwith);
-
 
 	if(lhmode=="chi2datamc")
 		mainfitter.setLikelihoodMode(ttbarXsecFitter::lhm_chi2datamcstat);
@@ -60,12 +63,16 @@ invokeApplication(){
 	if(lhmode=="poissondata")
 		mainfitter.setLikelihoodMode(ttbarXsecFitter::lhm_poissondatastat);
 
+	if(topmass)
+		mainfitter.setReplaceTopMass(topmass);
+
 	mainfitter.setExcludeZeroBjetBin(exclude0bjetbin);
 	mainfitter.setUseMCOnly(onlyMC);
 	mainfitter.setNoMinos(nominos);
-	mainfitter.setNoSystBreakdown(!fitsystematics);
+	mainfitter.setNoSystBreakdown((onlytotalerror));
 	mainfitter.setIgnorePriors(!fitsystematics);
 	mainfitter.setRemoveSyst(!fitsystematics);
+	mainfitter.setDoVisiblePS(visible);
 
 	std::string cmsswbase=getenv("CMSSW_BASE");
 	//extendedVariable::debug=true;
@@ -84,13 +91,13 @@ invokeApplication(){
 		system(("ls "+fullcfgpath).data());
 		return -1;
 	}
+	//simpleFitter::printlevel=1;
 
 	mainfitter.readInput((fullcfgpath+inputconfig).Data());
 
 	//ttbarXsecFitter::debug=true;
 	bool doplotting=false;
 
-	variateContainer1D::debug=false;
 	if(npseudoexp){
 		size_t failcount=0;
 		gErrorIgnoreLevel = 3000;
@@ -200,8 +207,8 @@ invokeApplication(){
 	}
 	else{
 		doplotting=true;
-		//ttbarXsecFitter::debug=true;
-
+		//ttbarXsecFitter::debug=false;
+		//simpleFitter::printlevel=1; //for now
 		mainfitter.fit();
 	}
 
@@ -281,11 +288,24 @@ invokeApplication(){
 			tab.writeToFile(outfile+"_tab" +dtsname + ".tex");
 			tab.writeToPdfFile(outfile+"_tab" +dtsname + ".pdf");
 			std::cout << tab.getTable() <<std::endl;
-			tab=mainfitter.makeSystBreakDownTable(ndts,false); //vis PS
-			dtsname+="_vis";
-			tab.writeToFile(outfile+"_tab" +dtsname + ".tex");
-			tab.writeToPdfFile(outfile+"_tab" +dtsname + ".pdf");
-			std::cout << tab.getTable() <<std::endl;
+			tab=mainfitter.makeSystBreakDownTable(ndts); //vis PS
+		}
+		if(mainfitter.nDatasets()>1){
+			for(size_t ndts=0;ndts<mainfitter.nDatasets();ndts++){
+				for(size_t ndts2=ndts;ndts2<mainfitter.nDatasets();ndts2++){
+					if(ndts2==ndts) continue;
+					double errup,errdown;
+					formatter fmt;
+					double ratio=mainfitter.getXsecRatio(ndts,ndts2,errup,errdown);//full ps
+					texTabler ratiotab(" c | l l l");
+					ratiotab << "Ratio: " + mainfitter.datasetName(ndts) + "/" + mainfitter.datasetName(ndts2) ;
+					ratiotab << fmt.round(ratio,0.001) << "$\\pm$" << "$^{" + fmt.toTString(fmt.round(100*errup,0.001)) +"}_{" +
+							fmt.toTString(fmt.round(100*errdown,0.001)) +"}$\\%";
+					ratiotab.writeToFile(outfile+"_ratio_" +mainfitter.datasetName(ndts) +"_"+mainfitter.datasetName(ndts2)+".tex");
+					ratiotab.writeToPdfFile(outfile+"_ratio_" +mainfitter.datasetName(ndts) +"_"+mainfitter.datasetName(ndts2)+".pdf");
+
+				}
+			}
 		}
 
 		texTabler corr=mainfitter.makeCorrTable();

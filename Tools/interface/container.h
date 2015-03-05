@@ -112,7 +112,10 @@ public:
 	float getSystErrorStat(const size_t & number, const size_t & bin) const; //returns DEVIATION!
 
 	const TString & getSystErrorName(const size_t & number) const;
-	const size_t & getSystErrorIndex(const TString & ) const;
+	size_t getSystErrorIndex(const TString & ) const;
+
+	void splitSystematic(const size_t & number, const float& fracadivb,
+			const TString & splinamea,  const TString & splinameb);
 
 	container1D breakDownSyst(const size_t & bin, bool updown) const;
 	container1D sortByBinNames(const container1D & ) const;
@@ -310,6 +313,13 @@ public:
 	 * removes all syst uncertainties, but leaves stat uncertainties of nominal untouched
 	 */
 	void removeAllSystematics(){contents_.removeAdditionalLayers();manualerror_=false;}
+
+	/**
+	 * sets an error zero that contains expression
+	 * returns number of layers set to zero
+	 *
+	 */
+	size_t setErrorZeroContaining(const TString &);
 
 	enum pseudodatamodes{pseudodata_poisson,pseudodata_gaus};
 	/**

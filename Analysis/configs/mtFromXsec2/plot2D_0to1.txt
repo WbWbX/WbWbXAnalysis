@@ -1,0 +1,7 @@
+$comments
+
+
+
+  zaxis.min = 0
+  zaxis.max = 1
+  rootDrawOpt =colz

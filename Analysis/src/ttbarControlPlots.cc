@@ -74,9 +74,9 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
 		middphi=*(event()->midphi);
 	}
 	///GEN
-	SETBINSRANGE(50,0,500);
-	addPlot("top pt", "p_{T}^{t}[GeV]","N_{t}/GeV");
-//	FILLFOREACH(gentops,pt());
+	SETBINSRANGE(50,166,180);
+	addPlot("top mass", "m_{t}[GeV]","N_{t}/GeV");
+	FILLFOREACH(gentops,m());
 
 
 	///LEPTONS

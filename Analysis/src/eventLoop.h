@@ -265,6 +265,8 @@ void  MainAnalyzer::analyze(size_t anaid){
 		leppt30=true;
 	}
 
+	const float lepptthresh= leppt30 ? 30 : 20;
+
 	 float jetptcut;
 	if(mode_.Contains("Jetpt40")){
 		jetptcut=40;
@@ -353,6 +355,7 @@ void  MainAnalyzer::analyze(size_t anaid){
 	NTFullEvent evt;
 
 	////////////////////  configure discriminator factories here  ////////////////////
+	/*
 	TString factname="topLH_"+channel_+"_"+energy_+"_"+topmass_;
 	discriminatorFactory::c_makelist=false; //now will be ignored in output
 	discriminatorFactory toplikelihood(factname.Data());
@@ -405,7 +408,7 @@ void  MainAnalyzer::analyze(size_t anaid){
 		toplikelihood.setSystematics("nominal");
 	}
 
-
+*/
 
 	/////////////////////////////////////////////////////////////////////////////////
 
@@ -773,13 +776,13 @@ void  MainAnalyzer::analyze(size_t anaid){
 		evt.isomuons=&isomuons;
 
 
+
 		for(size_t i=0;i<b_Muons.content()->size();i++){
 			NTMuon* muon = & b_Muons.content()->at(i);
 			if(isMC)
 				muon->setP4(muon->p4() * getMuonEnergySF()->getScalefactor(muon->eta()));
 			allleps << muon;
-			if(muon->pt() < 20)       continue;
-			if(leppt30 && muon->pt() < 30)       continue;
+			if(muon->pt() < lepptthresh)       continue;
 			if(fabs(muon->eta())>2.4) continue;
 			kinmuons << &(b_Muons.content()->at(i));
 
@@ -832,8 +835,7 @@ void  MainAnalyzer::analyze(size_t anaid){
 			//selection fully following https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopEGM l+jets except for pt cut
 
 			allleps << elec;
-			if(elec->pt() < 20)  continue;
-			if(leppt30 && elec->pt() < 30)       continue;
+			if(elec->pt() < lepptthresh)  continue;
 			float abseta=fabs(elec->eta());
 
 			float suclueta = fabs(elec->ECalP4().eta());
@@ -1032,8 +1034,8 @@ void  MainAnalyzer::analyze(size_t anaid){
 				}
 			}
 			if(!(treejets.at(i)->id())) continue;
-			if(!noOverlap(treejets.at(i), isomuons,     0.4)) continue;
-			if(!noOverlap(treejets.at(i), isoelectrons, 0.4)) continue;
+			if(!noOverlap(treejets.at(i), isomuons,     0.5)) continue;
+			if(!noOverlap(treejets.at(i), isoelectrons, 0.5)) continue;
 			if(fabs(treejets.at(i)->eta())>2.4) continue;
 			if(treejets.at(i)->pt() < 10) continue;
 			idjets << (treejets.at(i));
@@ -1372,10 +1374,10 @@ void  MainAnalyzer::analyze(size_t anaid){
 
 
 		if(analysisMllRange){
-
+/*
 			lh_toplh=toplikelihood.getCombinedLikelihood();
 			toplikelihood.fill(puweight);
-
+*/
 			plots.makeControlPlots(step);
 			sel_step[7]+=puweight;
 		}

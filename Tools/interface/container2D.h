@@ -28,7 +28,7 @@ public:
 	enum plotTag{none,topdf};
 
 	container2D();
-	container2D(const std::vector<float> & ,const std::vector<float> &, TString name="",TString xaxisname="",TString yaxisname="", bool mergeufof=false); //! construct with binning
+	container2D(const std::vector<float> & ,const std::vector<float> &, TString name="",TString xaxisname="",TString yaxisname=""/*,TString zaxisname=""*/, bool mergeufof=false); //! construct with binning
 	~container2D();
 	container2D(const container2D&);
 	container2D& operator=(const container2D&);
@@ -45,6 +45,10 @@ public:
 
 	void setYAxisName(const TString& name){yaxisname_=name;}
 	const TString& getYAxisName()const {return yaxisname_;}
+/*
+	void setZAxisName(const TString& name){zaxisname_=name;}
+	const TString& getZAxisName()const {return zaxisname_;}
+*/
 
 
 	size_t getBinNoX(const float&) const; // returns bin index number for (float variable)
@@ -59,6 +63,7 @@ public:
 	histoBin & getBin(const size_t&,const size_t&,const int& layer=-1);
 
 	float getBinArea(const size_t&, const size_t&)const;
+	void getBinCenter(const size_t binx,const size_t biny, float& centerx,float& centery)const;
 
 	float getMax(int syslayer=-1)const;
 	float getMin(int syslayer=-1)const;
@@ -78,9 +83,13 @@ public:
 	float getSystError(unsigned int number, const size_t & xbin, const size_t & ybin) const;
 	float getSystErrorStat(unsigned int number, const size_t & xbin, const size_t & ybin) const;
 	const TString & getSystErrorName(const size_t & number) const;
+	size_t getSystErrorIndex(const TString& name)const;
 
 	void mergeVariations(const std::vector<TString>& names, const TString & outname,bool linearly=false);
 	void mergeVariationsFromFileInCMSSW(const std::string& filename);
+	void splitSystematic(const size_t & number, const float& fracadivb,
+			const TString & splinamea,  const TString & splinameb);
+
 	/*
      float projectBinContentToY(const size_t & ybin,bool includeUFOF=false) const;
      float projectBinContentToX(const size_t & xbin,bool includeUFOF=false) const;
@@ -208,6 +217,7 @@ protected:
 
 	TString xaxisname_;
 	TString yaxisname_;
+	//TString zaxisname_;
 private:
 	void copyFrom(const container2D&);//!< helper
 };

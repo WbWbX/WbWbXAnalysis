@@ -24,10 +24,16 @@ public:
 	mll(0),
 	total(0),
 	vistotal(0),
-	mlbcombthresh_(165)
+	mlbcombthresh_(165),
+	rightassocounter_(0),totalcounter_(0)
 {}
 
-	~analysisPlotsMlbMt(){/* destruction is handled in base class! */}
+	~analysisPlotsMlbMt(){/* destruction is handled in base class! */
+		if(totalcounter_)
+		std::cout << "fraction of properly associated combinations for mlbmin: " << rightassocounter_/totalcounter_
+				<< std::endl;
+
+	}
 
 	void bookPlots();
 	void fillPlotsReco();
@@ -49,7 +55,7 @@ private:
 	*vistotal;
 
 	float mlbcombthresh_;
-
+	float rightassocounter_,totalcounter_;
 
 };
 

@@ -13,7 +13,8 @@ invokeApplication(){
 	using namespace ztop;
 	parser->setAdditionalDesciption("adds relative systematics from containerStackVector in first file to second file\nprovide exactly 2 files!");
 	const bool arenotcorrelated = parser->getOpt("C",false,"nominal entries are not correlated (default: false)");
-	const bool plotplots = parser->getOpt("P",false,"nominal entries are not correlated (default: false)");
+	const bool plotplots = parser->getOpt("P",false,"directly produces plots (default: false)");
+	const bool strict=! parser->getOpt<bool>("-approx",false,"allow a certain small difference not to count as real variation. (default false)");
 	const std::vector<TString> files = parser->getRest<TString>();
 	parser->doneParsing();
 	if(files.size()!=2){
@@ -42,9 +43,18 @@ invokeApplication(){
 		delete csv2;
 		return -1;
 	}
+	std::cout << "WARNING HACKS!!!"<<std::endl;
+	for(size_t i=0;i<csv2->size();i++){
+		csv2->getStack(i).mergeLegends("t#bar{t}(#tau)","t#bar{t}","t#bar{t}",633,true);
+		csv2->getStack(i).mergeLegends("Z#rightarrowll","DY#rightarrowll","DY#rightarrowll",858,false);
 
+	//	csv2->getStack(i).addEmptyLegend("QCD",400,9);
+
+	}
+//containerStack::debug=true;
 	std::cout << "adding systematics..." <<std::endl;
-	csv2->addRelSystematicsFrom(*csv,!arenotcorrelated);
+	//container1D::debug=true;
+	csv2->addRelSystematicsFrom(*csv,!arenotcorrelated,strict);
 	TString cmd="cp "+files.at(1)+" "+files.at(1)+".bu";
 	system(cmd.Data());
 	csv2->writeAllToTFile(files.at(1),true,!plotplots);

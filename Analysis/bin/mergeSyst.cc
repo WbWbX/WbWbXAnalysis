@@ -12,9 +12,9 @@ invokeApplication(){
 
 	TString outputadd=parser->getOpt<TString>("o","","additional string to be added to output file names");
 	TString inputadd =parser->getOpt<TString>("i","","additional string to be added to input file names");
-
+	const bool keeprealvars= parser->getOpt<bool> ("K",false,"keep relative variation output files");
 	std::vector<std::string> allfiles=parser->getRest<std::string>();
-
+	parser->doneParsing();
 	if(allfiles.size() < 1){
 		std::cout << "needs minimum 1 input file" << std::endl;
 		parser->coutHelp();
@@ -87,7 +87,7 @@ invokeApplication(){
 			for(size_t pit=0;pit<partialout.size();pit++){
 				if(partialout.at(pit).BeginsWith(startstring)){
 					std::cout << "adding relative variations from  " << partialout.at(pit)
-									<< "\nto " << nom->getName()<< std::endl;
+											<< "\nto " << nom->getName()<< std::endl;
 					//do by hand
 					containerStackVector * csvpart= new containerStackVector();
 					csvpart->loadFromTFile(partialout.at(pit));
@@ -106,7 +106,7 @@ invokeApplication(){
 					}
 					////FIXME hardcoded
 					else{
-						csvpart->removeSpikes(false,-1,100,0.333,15);
+						//	csvpart->removeSpikes(false,-1,100,0.333,15);
 					}
 
 					container2D::debug=false;
@@ -114,8 +114,8 @@ invokeApplication(){
 					nom->addRelSystematicsFrom(*csvpart,arestatcorr,strictadd);
 					size_t newsystsize=nom->getNSyst();
 					std::cout << "added " << newsystsize-oldsyssize << " systematic variations" <<std::endl;
-				//	for(size_t addsys=oldsyssize;addsys<newsystsize;addsys++)
-				//		nom->removeSystematicsSpikes(false,addsys,100,0.333,15);
+					//	for(size_t addsys=oldsyssize;addsys<newsystsize;addsys++)
+					//		nom->removeSystematicsSpikes(false,addsys,100,0.333,15);
 
 
 					delete csvpart;
@@ -128,7 +128,8 @@ invokeApplication(){
 
 	for(size_t i=0;i<partialout.size();i++){
 		TString cmd="rm -f "+partialout.at(i);
-		system(cmd.Data());
+		if(!keeprealvars)
+			system(cmd.Data());
 	}
 
 

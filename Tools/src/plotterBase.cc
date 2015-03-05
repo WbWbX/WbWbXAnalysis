@@ -45,7 +45,8 @@ TVirtualPad* plotterBase::getPad()const{
  * when plotting again
  */
 void plotterBase::draw(){
-    preparePad();//adjusts canvas that lives outside
+	if(preparepad_)
+		preparePad();//adjusts canvas that lives outside
     drawPlots(); //object handling by plot class
     drawTextBoxes(); //adds new objects to list
     if(drawlegend_)
@@ -135,6 +136,7 @@ void plotterBase::readTStyleFromFile(const std::string& pathtofile){
 
 
 void plotterBase::printToPdf(const std::string& outname){
+	TVirtualPad * oldpad=pad_;
     TCanvas c;
     usePad(&c);
     draw();
@@ -145,6 +147,7 @@ void plotterBase::printToPdf(const std::string& outname){
     system(syscall);
     TString delcall="rm -f "+outnameeps;
     system(delcall);
+    pad_=oldpad;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

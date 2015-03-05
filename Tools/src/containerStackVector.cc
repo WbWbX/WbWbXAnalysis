@@ -247,7 +247,7 @@ void containerStackVector::addGlobalRelMCError(TString sysname,double error){
 	}
 }
 void containerStackVector::getRelSystematicsFrom(const ztop::containerStackVector& stackvec){
-#pragma omp parallel for
+//#pragma omp parallel for
 	for(std::vector<containerStack>::iterator istack=stacks_.begin();istack<stacks_.end(); ++istack){
 		try{
 			const containerStack & stack=stackvec.getStack(istack->getName(),istack-stacks_.begin());
@@ -256,13 +256,14 @@ void containerStackVector::getRelSystematicsFrom(const ztop::containerStackVecto
 	}
 }
 void containerStackVector::addRelSystematicsFrom(const ztop::containerStackVector& stackvec,bool ignorestat,bool strict){
-#pragma omp parallel for
+//#pragma omp parallel for
 	for(std::vector<containerStack>::iterator istack=stacks_.begin();istack<stacks_.end(); ++istack){
 		try{
 			const containerStack & stack=stackvec.getStack(istack->getName(),istack-stacks_.begin());
-			istack->addRelSystematicsFrom(stack);
-		}catch(...){
+			istack->addRelSystematicsFrom(stack,ignorestat,strict);
+		}catch(std::exception& e){
 			std::cout << "containerStackVector::addRelSystematicsFrom: Stack " << istack->getName() << " not found." <<std::endl;
+			std::cout << e.what()<<std::endl;
 		}
 	}
 }

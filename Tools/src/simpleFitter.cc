@@ -157,15 +157,8 @@ void simpleFitter::setAsMinosParameter(size_t parnumber,bool set){
 			minospars_.push_back(parnumber);
 	}
 	else{
-		if(pos>=minospars_.size()){
-			std::cout << "simpleFitter::setAsMinosParameter: WARNING trying to unset but was never set" <<std::endl;}
-		else if(minospars_.size()>0){
-			std::cout << "removing " << minospars_.at(pos) << " from minos " << std::endl;
+		if(minospars_.size()>0 && it!=minospars_.end()){
 			minospars_.erase(it);
-			std::cout << "remaining parameters:";
-			for(size_t i=0;i<minospars_.size();i++)
-				std::cout << " " << minospars_.at(i);
-			std::cout << std::endl;
 		}
 	}
 }
@@ -175,7 +168,7 @@ double simpleFitter::getFitOutput(const double& xin)const{
 }
 void simpleFitter::feedErrorsToSteps(){
 	for(size_t i=0;i<stepsizes_.size();i++)
-		stepsizes_.at(i)=paraerrsup_.at(i)*0.05; //good enough
+		stepsizes_.at(i)=paraerrsup_.at(i);//*0.5; //good enough
 }
 
 void simpleFitter::fit(){
@@ -232,13 +225,13 @@ void simpleFitter::fit(){
 			if(std::find(minospars_.begin(),minospars_.end(),i) != minospars_.end()){
 
 				if(!min->GetMinosError(i, paraerrsdown_.at(i), paraerrsup_.at(i))){
-					paraerrsdown_.at(i)=errs[i];
+					paraerrsdown_.at(i)=-errs[i];
 					paraerrsup_.at(i)=errs[i];
 					minossuccessful_=false;
 				}
 			}
 			else{
-				paraerrsdown_.at(i)=errs[i];
+				paraerrsdown_.at(i)=-errs[i];
 				paraerrsup_.at(i)=errs[i];
 			}
 			if(printlevel>0){
@@ -511,8 +504,8 @@ double simpleFitter::nuisanceGaus(const double & in){
 }
 double simpleFitter::nuisanceBox(const double & in){
 	double disttoone=fabs(in)-1;
-	if(disttoone<0) return 0;
-	return (1e3*disttoone*disttoone);
+	if(disttoone<=0) return 0;
+	return (1e4*disttoone*disttoone);
 }
 double simpleFitter::nuisanceLogNormal(const double & in){
 	throw std::logic_error("simpleFitter::nuisanceLogNormal: nor properly implemented");
@@ -526,11 +519,13 @@ void simpleFitter::copyFrom(const simpleFitter& rhs){
 	if(this==&rhs) return;
 	fitmode_=rhs.fitmode_ ;
 	minimizer_=rhs.minimizer_ ;
-	chi2min_=-1;
+	chi2min_=99999;
 	nompoints_=rhs.nompoints_ ;
 	errsup_=rhs.errsup_ ;
 	errsdown_=rhs.errsdown_ ;
+
 	paras_=rhs.paras_ ;
+
 	stepsizes_=rhs.stepsizes_ ;
 	paraerrsup_=rhs.paraerrsup_ ;
 	paraerrsdown_=rhs.paraerrsdown_ ;
@@ -541,12 +536,14 @@ void simpleFitter::copyFrom(const simpleFitter& rhs){
 	maxcalls_=rhs.maxcalls_ ;
 	requirefitfunction_=rhs.requirefitfunction_ ;
 	minsuccessful_=false;
+	minossuccessful_=false;
 	tolerance_=rhs.tolerance_ ;
 	functobemin_=rhs.functobemin_;
 	algorithm_=rhs.algorithm_ ;
 	minimizerstr_=rhs.minimizerstr_ ;
 	pminimizer_=0;
 	chi2func_=simpleChi2(this);
+	strategy_=rhs.strategy_;
 }
 
 ROOT::Math::Minimizer * simpleFitter::invokeMinimizer()const{

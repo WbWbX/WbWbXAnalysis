@@ -9,4 +9,4 @@
 <export>
   <lib   name="1"/>
 </export>
-<Flags CXXFLAGS="-fopenmp -g"/>
+<Flags CXXFLAGS="-fopenmp"/>

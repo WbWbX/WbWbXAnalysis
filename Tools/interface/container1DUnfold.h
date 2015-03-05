@@ -51,6 +51,9 @@ public:
 	void renameSyst(TString old , TString New){container2D::renameSyst(old,New);gencont_.renameSyst(old,New);recocont_.renameSyst(old, New);}
 	void removeAllSystematics();
 
+	void splitSystematic(const size_t & number, const float& fracadivb,
+			const TString & splinamea,  const TString & splinameb);
+
 	/**
 	 * merges partial variations. only the ones corresponding to the identifier are merged
 	 * hint: do this step at the latest stage you can do it to still keep track of all correlations
@@ -233,6 +236,8 @@ private:
 	}
 	container2D rebinXToBinning(const std::vector<float>& vec)const{return container2D::rebinXToBinning(vec);}
 	container2D rebinYToBinning(const std::vector<float>& vec)const{return container2D::rebinYToBinning(vec);}
+	void setZAxisName(const TString& name){}
+	 TString getZAxisName()const {return "";}
 
 
 	TString xaxis1Dname_,yaxis1Dname_;

@@ -155,7 +155,16 @@ void container1DUnfold::removeAllSystematics(){
 	gencont_.removeAllSystematics();
 	refolded_.removeAllSystematics();
 }
-
+void container1DUnfold::splitSystematic(const size_t & number, const float& fracadivb,
+		const TString & splinamea,  const TString & splinameb){
+	for(size_t i=0;i<conts_.size();i++){
+		conts_.at(i).splitSystematic(number,fracadivb, splinamea, splinameb);
+	}
+	recocont_.splitSystematic(number,fracadivb, splinamea, splinameb);
+	unfolded_.splitSystematic(number,fracadivb, splinamea, splinameb);
+	gencont_.splitSystematic(number,fracadivb, splinamea, splinameb);
+	refolded_.splitSystematic(number,fracadivb, splinamea, splinameb);
+}
 void container1DUnfold::mergePartialVariations(const TString& identifier,bool strictpartialID){
 	for(size_t i=0;i<conts_.size();i++){
 		conts_.at(i).mergePartialVariations(identifier,strictpartialID);
@@ -191,12 +200,17 @@ void container1DUnfold::equalizeSystematicsIdxs(container1DUnfold &rhs){
 }
 
 void container1DUnfold::mergeVariations(const std::vector<TString>& names, const TString & outname,bool linearly){
-	container2D::mergeVariations(names,outname,linearly);
+	try{
+		container2D::mergeVariations(names,outname,linearly);
 
-	recocont_.mergeVariations(names,outname,linearly);
-	unfolded_.mergeVariations(names,outname,linearly);
-	gencont_.mergeVariations(names,outname,linearly);
-	refolded_.mergeVariations(names,outname,linearly);
+		recocont_.mergeVariations(names,outname,linearly);
+		unfolded_.mergeVariations(names,outname,linearly);
+		gencont_.mergeVariations(names,outname,linearly);
+		refolded_.mergeVariations(names,outname,linearly);
+	}
+	catch(std::exception &e){
+		throw e;
+	}
 }
 void container1DUnfold::mergeVariationsFromFileInCMSSW(const std::string& filename){
 	systAdder adder;

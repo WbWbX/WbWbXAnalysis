@@ -31,7 +31,7 @@ bool container1D::c_makelist=false;
 
 ///////function definitions
 container1D::container1D():
-														taggedObject(taggedObject::type_container1D)
+																taggedObject(taggedObject::type_container1D)
 {
 	canfilldyn_=false;
 	//divideBinomial_=true;
@@ -71,7 +71,7 @@ container1D::container1D(float binwidth, TString name,TString xaxisname,TString 
 	hp_=0;
 }
 container1D::container1D(const std::vector<float>& bins,const TString& name,const TString& xaxisname,const TString& yaxisname, bool mergeufof):
-															taggedObject(taggedObject::type_container1D)
+																	taggedObject(taggedObject::type_container1D)
 
 {
 	plottag=none;
@@ -397,14 +397,45 @@ float container1D::getSystErrorStat(const size_t& number, const size_t&  bin) co
 }
 const TString &container1D::getSystErrorName(const size_t &number) const{
 	if(number>=contents_.layerSize()){
-		std::cout << "container1D::getSystErrorName: " << number << " out of range(" << (int)getSystSize()-1 << ")" << std::endl;
-		return name_;
+		std::string errstr= ("container1D::getSystErrorName: " + toTString(number) +
+				" out of range(" + toTString((int)getSystSize()-1) + ")" ).Data();
+		throw std::out_of_range(errstr);
 	}
 	return contents_.getLayerName(number);
 }
-const size_t & container1D::getSystErrorIndex(const TString & name) const{
-	return contents_.getLayerIndex(name);
+ size_t  container1D::getSystErrorIndex(const TString & name) const{
+	size_t ret;
+	ret=contents_.getLayerIndex(name);
+	if(ret==getSystSize()){
+		std::string errstr=("container1D::getSystErrorIndex: name " + name + "not found").Data();
+		throw std::out_of_range(errstr);
+	}
+	return ret;
+
 }
+
+void container1D::splitSystematic(const size_t & number, const float& fracadivb,
+		const TString & splinamea,  const TString & splinameb){
+	if(number>=contents_.layerSize()){
+		std::string errstr= ("container1D::splitSystematic: " + toTString(number) +
+				" out of range(" + toTString((int)getSystSize()-1) + ")" ).Data();
+		throw std::out_of_range(errstr);
+	}
+	if(fracadivb <0 || (fracadivb)>1){
+		throw std::out_of_range("container1D::splitSystematic: fraction needs to be between 0 and 1");
+	}
+	float weighta = std::sqrt(fracadivb);
+	float weightb = std::sqrt(1-fracadivb);
+
+	container1D syscont = getSystContainer(number);
+	contents_.removeLayer(number);
+	if(fracadivb != 0)
+		addErrorContainer(splinamea,syscont,weighta);
+	if(fracadivb!=1)
+		addErrorContainer(splinameb,syscont,weightb);
+
+}
+
 /**
  * container1D breakDownSyst(const size_t & bin, const TString & constrainTo="")
  * constrain to "_up" or "_down"
@@ -1548,7 +1579,7 @@ int container1D::addErrorContainer(const TString & sysname, container1D  deviati
 	manualerror_=false;
 	if(debug)
 		std::cout << "container1D::addErrorContainer: " << name_ << std::endl;
-	contents_.setLayerFromNominal(sysname,deviatingContainer.contents_);
+	contents_.setLayerFromNominal(sysname,deviatingContainer.contents_,weight);
 	return 0;
 }
 int container1D::addErrorContainer(const TString & sysname,const container1D  &deviatingContainer){
@@ -1591,7 +1622,7 @@ void container1D::addRelSystematicsFrom(const ztop::container1D & rhs,bool ignor
 			//contents_.getLayer(newlayerit).removeStat();
 			//stat are definitely not correlated
 			bool isnominalequal=(!strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i),1e-2))
-																																					        														|| (strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i))) ;
+																																					        																|| (strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i))) ;
 
 			if(isnominalequal){ //this is just a copy leave it and add no variation
 				//contents_.getLayer(newlayerit).removeStat();
@@ -1679,6 +1710,18 @@ void container1D::setAllErrorsZero(bool nominalstat){
 		contents_.getLayer(i) = contents_.getNominal();
 
 }
+
+size_t container1D::setErrorZeroContaining(const TString &in){
+	size_t count=0;
+	for(size_t i=0;i<contents_.layerSize();i++){
+		if(contents_.getLayerName(i).Contains(in)){
+			contents_.getLayer(i) = contents_.getNominal();
+			count++;
+		}
+	}
+	return count;
+}
+
 container1D container1D::createPseudoExperiment(TRandom3* rand,const container1D* c, pseudodatamodes mode, int syst)const{
 	std::vector<float> stat2(bins_.size(),0);
 	if(c){

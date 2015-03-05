@@ -17,7 +17,8 @@ bool container2D::debug=false;
 std::vector<container2D*> container2D::c_list;
 bool container2D::c_makelist=false;
 
-container2D::container2D():taggedObject(taggedObject::type_container2D), divideBinomial_(true),mergeufof_(false),xaxisname_(""),yaxisname_("") {
+container2D::container2D():taggedObject(taggedObject::type_container2D), divideBinomial_(true),
+		mergeufof_(false),xaxisname_(""),yaxisname_("")/*,zaxisname_("")*/ {
 	setName("");
 	std::vector<float> nobins;
 	nobins.push_back(1);
@@ -41,8 +42,8 @@ container2D& container2D::operator=(const container2D&rhs){
 	return *this;
 }
 
-container2D::container2D(const std::vector<float> &xbins,const std::vector<float> &ybins, TString name,TString xaxisname,TString yaxisname, bool mergeufof) :
-        																																																																						taggedObject(taggedObject::type_container2D),mergeufof_(mergeufof), xaxisname_(xaxisname), yaxisname_(yaxisname)
+container2D::container2D(const std::vector<float> &xbins,const std::vector<float> &ybins, TString name,TString xaxisname,TString yaxisname,/*TString zaxisname, */bool mergeufof)
+:taggedObject(taggedObject::type_container2D),mergeufof_(mergeufof), xaxisname_(xaxisname), yaxisname_(yaxisname)/*,zaxisname_(zaxisname)*/
 {
 	setName(name);
 	//create for each ybin (plus UF OF) a container1D
@@ -100,7 +101,7 @@ const size_t &container2D::getBinEntries(const size_t & xbin, const size_t & ybi
 
 float container2D::getBinArea(const size_t& binx, const size_t& biny)const{
 	if(isDummy())
-		return 1;
+		throw std::out_of_range("container2D::getBinArea: container is dummy");
 	if(binx >= xbins_.size()-1 || biny >= ybins_.size()-1 || binx<1 || biny <1){ //doesn't work for underflow, overflow
 		throw std::out_of_range("container2D::getBinArea: bin out of range (or UF,OF)");
 	}
@@ -109,6 +110,18 @@ float container2D::getBinArea(const size_t& binx, const size_t& biny)const{
 	float yw= ybins_.at(biny+1)-ybins_.at(biny);
 	return xw*yw;
 
+}
+void container2D::getBinCenter(const size_t binx,const size_t biny, float& centerx,float& centery)const{
+	if(isDummy())
+		throw std::out_of_range("container2D::getBinCenter: container is dummy");
+	if(binx >= xbins_.size()-1 || biny >= ybins_.size()-1 || binx<1 || biny <1){ //doesn't work for underflow, overflow
+		throw std::out_of_range("container2D::getBinCenter: bin out of range (or UF,OF)");
+	}
+
+	float xw= conts_.at(biny).getBinWidth(binx);
+	float yw= ybins_.at(biny+1)-ybins_.at(biny);
+	centerx= xbins_.at(binx)+xw/2;
+	centery=ybins_.at(biny) + yw/2;
 }
 float container2D::getMax(int syslayer)const{
 	float max=-999999999;
@@ -245,7 +258,17 @@ const TString & container2D::getSystErrorName(const size_t & number) const{
 	}
 	return conts_.at(0).getSystErrorName(number);
 }
+size_t container2D::getSystErrorIndex(const TString& name)const{
+	size_t ret;
+	if(conts_.size()<1)
+		throw std::out_of_range("container2D::getSystErrorIndex: container empty");
 
+	size_t max=conts_.at(0).getSystSize();
+	ret=conts_.at(0).getSystErrorIndex(name);
+	if(ret==max)
+		throw std::out_of_range("container2D::getSystErrorIndex: index not found");
+	return ret;
+}
 
 void container2D::mergeVariations(const std::vector<TString>& names, const TString & outname,bool linearly){
 	for(size_t i=0;i<conts_.size();i++)
@@ -265,7 +288,12 @@ void container2D::mergeVariationsFromFileInCMSSW(const std::string& filename){
 	}
 }
 
-
+void container2D::splitSystematic(const size_t & number, const float& fracadivb,
+		const TString & splinamea,  const TString & splinameb){
+	for(size_t i=0;i<conts_.size();i++){
+		conts_.at(i).splitSystematic(number,fracadivb, splinamea, splinameb);
+	}
+}
 /*
  float container2D::projectBinContentToY(const size_t & ybin,bool includeUFOF) const{
 	if((size_t)ybin >= ybins_.size()){
@@ -995,6 +1023,7 @@ void container2D::copyFrom(const container2D&rhs){
 	mergeufof_=rhs.mergeufof_ ;
 	xaxisname_=rhs.xaxisname_ ;
 	yaxisname_=rhs.yaxisname_ ;
+	/*zaxisname_=rhs.zaxisname_ ;*/
 }
 
 

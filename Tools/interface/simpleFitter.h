@@ -116,8 +116,17 @@ public:
 	const std::vector<point2D> * getErrsUp()const{return &errsup_;}
 	const std::vector<point2D> * getErrsDown()const{return &errsdown_;}
 	const std::vector<double> *getParameters()const{return &paras_;}
+	/**
+	 * these are signed!
+	 */
 	const std::vector<double> *getParameterErrUp()const{return &paraerrsup_;}
+	/**
+	 * these are signed!
+	 */
 	const std::vector<double> *getParameterErrDown()const{return &paraerrsdown_;}
+	/**
+	 * always > 0
+	 */
 	double getParameterErr(size_t idx)const;
 	const double&  getParameter(size_t idx)const;
 	const std::vector<TString> *getParameterNames()const {return &paranames_;}

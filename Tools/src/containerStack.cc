@@ -280,7 +280,23 @@ void containerStack::mergeLegends(const TString& tobemergeda,const TString & tob
 	tbm.push_back(tobemergedb);
 	mergeLegends(tbm,mergedname,mergedColor,allowsignal);
 }
-
+void containerStack::addEmptyLegend(const TString & legendentry, int color, int legord){
+	if(mode==dim1){
+		container1D c=containers_.at(0);
+		c.setAllZero();
+		push_back(c,legendentry,color,1,legord);
+	}
+	if(mode==dim2){
+		container2D c=containers2D_.at(0);
+		c.setAllZero();
+		push_back(c,legendentry,color,1,legord);
+	}
+	if(mode==unfolddim1){
+		container1DUnfold c=containers1DUnfold_.at(0);
+		c.setAllZero();
+		push_back(c,legendentry,color,1,legord);
+	}
+}
 /**
  * names without "up" and "down"
  */
@@ -548,7 +564,7 @@ void containerStack::addGlobalRelMCError(TString sysname,double error){
 void containerStack::addRelErrorToContribution(double err, const TString& contributionname, TString nameprefix){
 	if(debug)
 		std::cout << "containerStack::addRelErrorToContribution: " << contributionname <<std::endl;
-		size_t idx=getContributionIdx(contributionname);
+	size_t idx=getContributionIdx(contributionname);
 	std::vector<size_t> excludeidxs;
 	for(size_t i=0;i<size();i++){
 		if(i!=idx)
@@ -711,8 +727,10 @@ void containerStack::getRelSystematicsFrom(const ztop::containerStack & stack){
 	}
 }
 void containerStack::addRelSystematicsFrom(const ztop::containerStack & stack,bool ignorestat,bool strict){
-
+	bool excep=false;
+	std::string errstr;
 	for(size_t j=0;j<stack.legends_.size();j++){
+		bool found=false;
 		for(unsigned int i=0;i<legends_.size();i++){
 			if(legends_[i] == stack.legends_.at(j)){
 				if(debug)
@@ -723,11 +741,35 @@ void containerStack::addRelSystematicsFrom(const ztop::containerStack & stack,bo
 					containers2D_[i].addRelSystematicsFrom(stack.containers2D_.at(j),ignorestat,strict);
 				if(i<containers1DUnfold_.size() && j<stack.containers1DUnfold_.size())
 					containers1DUnfold_[i].addRelSystematicsFrom(stack.containers1DUnfold_.at(j),ignorestat,strict);
-
+				found=true;
 				break;
 			}
 		}
+		if(!found){
+			errstr+= ("containerStack::addRelSystematicsFrom: adding to stack "+name_+ " legendentry "+
+					stack.legends_.at(j) + " from rhs not found - empty entry will be added\n").Data();
+			excep=true;
+			addEmptyLegend(stack.legends_.at(j),stack.colors_.at(j),stack.legorder_.at(j));
+			for(unsigned int i=legends_.size()-1;i;i--){
+				if(legends_[i] == stack.legends_.at(j)){
+					if(debug)
+						std::cout << "containerStack::addRelSystematicsFrom: adding to stack " << name_ << std::endl;
+					if(i<containers_.size() && j<stack.containers_.size())
+						containers_[i].addRelSystematicsFrom(stack.containers_.at(j),ignorestat,strict);
+					if(i<containers2D_.size() && j<stack.containers2D_.size())
+						containers2D_[i].addRelSystematicsFrom(stack.containers2D_.at(j),ignorestat,strict);
+					if(i<containers1DUnfold_.size() && j<stack.containers1DUnfold_.size())
+						containers1DUnfold_[i].addRelSystematicsFrom(stack.containers1DUnfold_.at(j),ignorestat,strict);
+
+					break;
+				}
+			}
+
+
+		}
 	}
+	if(excep)
+		throw std::runtime_error(errstr);
 }
 
 void containerStack::removeError(TString sysname){
@@ -766,6 +808,50 @@ void containerStack::renameSyst(TString old, TString New){
 	}
 
 }
+void containerStack::splitSystematic(const size_t & number, const float& fracadivb,
+		const TString & splinamea,  const TString & splinameb){
+
+	for(unsigned int i=0; i<containers_.size();i++){
+		containers_[i].splitSystematic(number,fracadivb, splinamea, splinameb);
+	}
+	for(unsigned int i=0; i<containers2D_.size();i++){
+		containers2D_[i].splitSystematic(number,fracadivb, splinamea, splinameb);
+	}
+	for(unsigned int i=0; i<containers1DUnfold_.size();i++){
+		containers1DUnfold_[i].splitSystematic(number,fracadivb, splinamea, splinameb);
+	}
+}
+
+
+void containerStack::splitSystematic(const TString & name, const float& fracadivb,
+		const TString & splinamea,  const TString & splinameb){
+	size_t number=0;
+	if(name.EndsWith("_up") || name.EndsWith("_down") || splinamea.EndsWith("_up") || splinameb.EndsWith("_down"))
+		throw std::logic_error("containerStack::splitSystematic(name) works on up and down automatically, don't specify \"up\" or \"down\"");
+
+	if(containers_.size()>0){
+		number=containers_.at(0).getSystErrorIndex(name+"_up");
+	}
+	if(containers2D_.size()>0){
+		number=containers2D_.at(0).getSystErrorIndex(name+"_up");
+	}
+	if(containers1DUnfold_.size()>0){
+		number=containers1DUnfold_.at(0).getSystErrorIndex(name+"_up");
+	}
+	splitSystematic(number,fracadivb,splinamea+"_up",splinameb+"_up");
+	if(containers_.size()>0){
+		number=containers_.at(0).getSystErrorIndex(name+"_down");
+	}
+	if(containers2D_.size()>0){
+		number=containers2D_.at(0).getSystErrorIndex(name+"_down");
+	}
+	if(containers1DUnfold_.size()>0){
+		number=containers1DUnfold_.at(0).getSystErrorIndex(name+"_down");
+	}
+	splitSystematic(number,fracadivb,splinamea+"_down",splinameb+"_down");
+
+}
+
 std::vector<size_t> containerStack::removeSpikes(bool inclUFOF,int limittoindex,
 		float strength,float sign,float threshold){
 
@@ -1302,7 +1388,7 @@ TCanvas * containerStack::makeTCanvas(plotmode plotMode){
 	delete htemp;
 	return c;
 }
-*/
+ */
 std::map<TString, histoBin> containerStack::getAllContentsInBin(size_t bin,int syst,bool print)const{
 
 

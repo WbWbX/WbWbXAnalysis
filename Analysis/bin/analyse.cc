@@ -459,20 +459,20 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 		//nothing
 	}
 	else if(Syst=="TT_GENPOWPY_up"){
-		ana.setFilePostfixReplace("ttbar.root","ttbar_powpy.root");
-		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_powpy.root");
+		ana.setFilePostfixReplace("ttbar.root","ttbar_pow2py.root");
+		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_pow2py.root");
 	}
 	else if(Syst=="TT_GENPOW_sysnominal"){
-		ana.setFilePostfixReplace("ttbar.root","ttbar_powpy.root");
-		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_powpy.root");
+		ana.setFilePostfixReplace("ttbar.root","ttbar_pow2py.root");
+		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_pow2py.root");
 	}
 	else if(Syst=="TT_GENPOW_sysnominal_HER_up"){
 		ana.setFilePostfixReplace("ttbar.root","ttbar_powherw.root");
 		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_powherw.root");
 	}
 	else if(Syst=="TT_GENPOW_sysnominal_HER_down"){
-		ana.setFilePostfixReplace("ttbar.root","ttbar_powpy.root");
-		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_powpy.root");
+		ana.setFilePostfixReplace("ttbar.root","ttbar_pow2py.root");
+		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_pow2py.root");
 	}
 	else if(Syst=="TT_GENMCATNLO_up"){
 		ana.setFilePostfixReplace("ttbar.root","ttbar_mcatnlo.root");

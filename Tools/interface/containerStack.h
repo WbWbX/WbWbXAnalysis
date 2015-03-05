@@ -49,10 +49,10 @@ public:
 	void setLegendOrder(const TString &leg, const size_t& no);
 
 	size_t getSystSize()const{
-		if(is1D() && containers_.size()>0) return containers_.at(0).getSystSize();
-		else if(is2D() && containers2D_.size()>0) return containers2D_.at(0).getSystSize();
-		else if(is1DUnfold() && containers1DUnfold_.size()>0) return containers1DUnfold_.at(0).getSystSize();
-		else return 0;
+		if(containers_.size()>0) return containers_.at(0).getSystSize();
+		if(containers2D_.size()>0) return containers2D_.at(0).getSystSize();
+		if(containers1DUnfold_.size()>0) return containers1DUnfold_.at(0).getSystSize();
+		return 0;
 	}
 
 	// void mergeSameLegends();       //! shouldn't be necessary
@@ -60,7 +60,7 @@ public:
 	void mergeLegends(const std::vector<TString>& tobemerged,const TString & mergedname, int mergedColor, bool allowsignals=false);
 	void mergeLegends(const TString& tobemergeda,const TString & tobemergedb,const TString & mergedname, int mergedColor, bool allowsignals=false);
 
-
+	void addEmptyLegend(const TString & legendentry, int color, int legord);
 	/**
 	 * names without "up" and "down"
 	 */
@@ -139,6 +139,13 @@ public:
 	void removeError(TString);
 	void removeAllSystematics();
 	void renameSyst(TString, TString); //! old, new
+	void splitSystematic(const size_t& number, const float& fracadivb,
+			const TString & splinamea,  const TString & splinameb);
+	/**
+	 * works for up and down at the same time
+	 */
+	void splitSystematic(const TString& sysname, const float& fracadivb,
+			const TString & splinamea,  const TString & splinameb);
 
 	void equalizeSystematicsIdxs(containerStack& rhs);
 
@@ -146,21 +153,21 @@ public:
 
 	void clear(){containers_.clear();legends_.clear();colors_.clear();}
 
-/*
+	/*
 	THStack * makeTHStack(TString stackname = "");
 	TLegend * makeTLegend(bool inverse=true);
 	void drawControlPlot(TString name="", bool drawxaxislabels=true, double resizelabels=1); // the extra axis is in both... sorry for that!
 	TGraphAsymmErrors * makeMCErrors();
-	*/
+	 */
 	//TCanvas * drawControlPlot(TString stylefile="")const;
 	// void drawRatioPlot(TString name="",double resizelabels=1);
-/*	std::vector<container1D>  getPEffPlots(size_t idx)const;
+	/*	std::vector<container1D>  getPEffPlots(size_t idx)const;
 	void drawPEffPlot(TString name="",double resizelabels=1);
 	void drawSBGPlot(TString name="",double resizelabels=1,bool invert=false);
 
 	//TCanvas * makeTCanvas(bool drawratioplot=true);
 	TCanvas * makeTCanvas(plotmode plotMode=ratio);
-*/
+	 */
 	std::map<TString, histoBin>  getAllContentsInBin(size_t bin,int syst=-1,bool print=false)const;
 
 	containerStack rebinXToBinning(const std::vector<float> &)const;

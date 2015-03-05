@@ -18,14 +18,11 @@
 #everything will be gaussian except the ones specified here
 
    TT_SCALE   =  box
-   TT_GENPOWPY=  fixed
-   CR         =  fixed
+   TT_GENPOWPY=  boxright
+   CR         =  boxleft
    TT_MATCH   =  box
-   TT_HER     =  fixed
-	
-	UE = fixed
-	TT_BJESNUDEC = fixed
-	TT_BJESRETUNE = fixed
+   UE = box
+ #  PDF =fixed
 
 [ end - priors ]
 
@@ -34,12 +31,7 @@
    TT_SCALE
    TT_MATCH
    TOPPT
-  # ELECSF
    PDF
-  # TT_HER
-  # CR
-  # UE
-  # TT_GENPOWPY
 
 [ end - full extrapolation ]
 

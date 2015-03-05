@@ -151,7 +151,7 @@ size_t histoContent::addLayer(const TString & name, const histoBins & histbins){
 /**
  * adds layer from nominal of external with name.
  */
-size_t histoContent::setLayerFromNominal(const TString & name, const histoContent & external){
+size_t histoContent::setLayerFromNominal(const TString & name, const histoContent & external, float devweight){
 	if(nominal_.size() < 1){
 		std::cout << "histoContent::addLayerFromNominal: first construct! default constructor is not supposed to be used" <<std::endl;
 		return 999999999999;
@@ -171,7 +171,25 @@ size_t histoContent::setLayerFromNominal(const TString & name, const histoConten
 	}
 	if(external.nominal_.size() != additionalbins_[idx].size())
 		throw std::out_of_range("histoContent::addLayerFromNominal: binning does not match");
-	additionalbins_[idx] = external.nominal_;
+	if(devweight==1)
+		additionalbins_[idx] = external.nominal_;
+	else{ //get difference
+		histoBins difference = external.nominal_;
+		for(size_t i=0;i<difference.size();i++){
+			histoBin & diffbin=difference.getBin(i);
+			const histoBin & extbin=external.nominal_.getBin(i);
+			const histoBin & nombin=nominal_.getBin(i);
+
+			float diff=(extbin.getContent() - nombin.getContent());
+			float newcontent = diff * devweight + nombin.getContent();
+			float statscaler = newcontent/extbin.getContent();
+			diffbin.setContent(newcontent);
+			diffbin.setStat2(statscaler*statscaler * extbin.getStat2());
+
+
+		}
+		additionalbins_[idx] = difference;
+	}
 
 	return idx;
 }
