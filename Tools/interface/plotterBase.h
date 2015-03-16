@@ -9,7 +9,7 @@
 #define PLOTTERBASE_H_
 
 #include "tObjectList.h"
-#include "containerStyle.h"
+#include "histoStyle.h"
 #include "plotStyle.h"
 #include "graph.h"
 #include "legendStyle.h"
@@ -110,7 +110,7 @@ private:
     TVirtualPad * pad_;
     bool drawlegend_;
     bool preparepad_;
-//    int errToRootFillStyle(const containerStyle *s) const;
+//    int errToRootFillStyle(const histoStyle *s) const;
 
 };
 }//ns

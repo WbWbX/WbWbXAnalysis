@@ -8,7 +8,7 @@
 
 
 #include "../interface/systMerger.h"
-#include "TtZAnalysis/Tools/interface/containerStackVector.h"
+#include "TtZAnalysis/Tools/interface/histoStackVector.h"
 #include "../interface/AnalysisUtils.h"
 #include "TtZAnalysis/DataFormats/interface/NTBTagSF.h"
 #include <fstream>
@@ -54,11 +54,14 @@ void systMerger::setInputStrings(const std::vector<std::string>& instrings){
 			else{
 				if(indir_!=dir)
 					throw std::runtime_error(
-							"systMerger::setInputStrings: files with same ..<marer>.root need to be in the same directory");
+							"systMerger::setInputStrings: files with same ..<marer>.ztop need to be in the same directory");
 			}
 		} //dir set
 		TString topushback=instring;
-		topushback.ReplaceAll(".root","");
+		if(topushback.EndsWith(".ztop")){
+			topushback.ReplaceAll(".ztop","");
+			removedext_=".ztop";
+		}
 		if(infileadd_.Length()>0)
 			topushback.ReplaceAll(infileadd_,"");
 		if(debug) std::cout << "systMerger::setInputStrings: pushed back " << topushback <<std::endl;
@@ -115,7 +118,7 @@ void systMerger::searchSystematics(){
 			if(sys==nominals_.at(nom)) continue; //is nominal
 			if(instrings_.at(sys).BeginsWith(startstring) && (infileadd_.Length() < 1 ||  instrings_.at(sys).EndsWith("_"+infileadd_))){
 				if(debug) std::cout << "systMerger::searchSystematics: identified " << instrings_.at(sys)
-                                        						<< " for nominal " << instrings_.at(nominals_.at(nom)) << std::endl;
+                                        								<< " for nominal " << instrings_.at(nominals_.at(nom)) << std::endl;
 
 				syst_.at(nom).push_back(sys);
 			}
@@ -123,9 +126,15 @@ void systMerger::searchSystematics(){
 	}
 }
 
-containerStackVector * systMerger::getFromFileToMem( TString dir, const TString &name)const
+histoStackVector * systMerger::getFromFileToMem( TString dir, const TString &name)const
 {
-	containerStackVector * vtemp=0;
+
+	histoStackVector * vtemp=new histoStackVector();
+	TString readf=name;
+	if(removedext_.length())
+		readf+=removedext_;
+	vtemp->readFromFile(readf.Data());
+	/*
 	TFile * ftemp=0;
 	TTree * ttemp =0;
 #pragma omp critical (systMerger_getFromFileToMem)
@@ -136,12 +145,12 @@ containerStackVector * systMerger::getFromFileToMem( TString dir, const TString 
 		ftemp=new TFile(dir+name+".root","read");
 		ttemp = (TTree*)ftemp->Get("containerStackVectors");
 
-		vtemp=new containerStackVector();
+		vtemp=new histoStackVector();
 		vtemp->loadFromTree(ttemp,name);
 		delete ttemp;
 		delete ftemp;
 	}
-
+	 */
 	return vtemp;
 }
 
@@ -160,9 +169,9 @@ std::vector<TString>  systMerger::mergeAndSafe(){
 
 	std::vector<discriminatorFactory> alldisc;
 	//try in parallel
-//#pragma omp parallel for
+	//#pragma omp parallel for
 	for(size_t nom=0;nom<nominals_.size();nom++){
-		containerStackVector * nominal=getFromFileToMem(dir,instrings_.at(nominals_.at(nom)));
+		histoStackVector * nominal=getFromFileToMem(dir,instrings_.at(nominals_.at(nom)));
 		TString reldir=dir;
 		if(reldir!="")reldir+="/";
 		std::vector<discriminatorFactory> disc;
@@ -170,7 +179,7 @@ std::vector<TString>  systMerger::mergeAndSafe(){
 			disc=discriminatorFactory::readAllFromTFile(reldir+instrings_.at(nominals_.at(nom))+"_discr.root");//get nominal configuration
 		}
 		for(size_t sys=0;sys<syst_.at(nom).size();sys++){
-			containerStackVector * sysvec=getFromFileToMem(dir,instrings_.at(syst_.at(nom).at(sys)));
+			histoStackVector * sysvec=getFromFileToMem(dir,instrings_.at(syst_.at(nom).at(sys)));
 			if(debug) std::cout << "systMerger::mergeAndSafe: adding "<< sysvec->getName() << " to " << nominal->getName()<< std::endl;
 			if(nominalid_ == standardnominal_){
 				nominal->addMCErrorStackVector(*sysvec);
@@ -187,25 +196,27 @@ std::vector<TString>  systMerger::mergeAndSafe(){
 		}
 		nominal->setName(nominal->getName()+outadd+"_syst");
 		std::cout << "systMerger: writing "<< nominal->getName() << std::endl;
-		outputfilenames << nominal->getName()+".root";
+		outputfilenames << nominal->getName()+".ztop";
 		std::cout <<std::endl;
-		nominal->writeAllToTFile(nominal->getName()+".root",true,!drawcanv_); //is critical anyway
+		nominal->writeToFile((nominal->getName()+".ztop").Data()); //is critical anyway
+		if(drawcanv_)
+			nominal->writeAllToTFile(nominal->getName()+"plots_.root",true,false);
 		std::cout << "systMerger: written "<< nominal->getName() << std::endl;
 
 		delete nominal;
 	} //end parallel
 
-//#pragma omp parallel for
+	//#pragma omp parallel for
 	for(size_t nom=0;nom<nominals_.size();nom++){
 		std::vector<discriminatorFactory> disc;
-		containerStackVector * nominal=getFromFileToMem(dir,instrings_.at(nominals_.at(nom)));
+		histoStackVector * nominal=getFromFileToMem(dir,instrings_.at(nominals_.at(nom)));
 		for(size_t i=0;i<disc.size();i++){
 			disc.at(i).extractLikelihoods(*nominal);
 		}
 #pragma omp critical
 		{
-		alldisc << disc;
-		delete nominal;
+			alldisc << disc;
+			delete nominal;
 		}
 	}
 
@@ -220,44 +231,7 @@ void systMerger::mergeBTags()const{
 	if(debug) std::cout << "systMerger::mergeBTags" <<std::endl;
 	std::cout << "systMerger::mergeBTags: not used anymore, single files should be provided to the analysis chain." <<std::endl;
 	return;
-	using namespace ztop;
-	using namespace std;
-	NTBTagSF btags;
-	//check if file exists, if yes, assume btags have been recreated and merge
 
-	if(instrings_.size()>0){
-		TString check=instrings_.at(0);
-
-		std::ifstream OutFileTest((instrings_.at(0)+"_btags.root").Data());
-		if(OutFileTest) { //btags were created
-			cout << "systMerger: merging btag SFs to "<<outfileadd_+"all_btags.root" <<endl;
-
-			for(size_t i=0;i<instrings_.size();i++){
-				TString filename=instrings_.at(i);
-				if(infileadd_.Length()>0)
-					filename+="_"+infileadd_+"_btags.root";
-				else
-					filename+="_btags.root";
-				NTBTagSF temp;
-
-				std::ifstream OutFileTest2(filename.Data());
-				if(OutFileTest2){
-					temp.readFromTFile(filename);
-					btags=btags+temp;
-				}
-				else{
-					cout << "btag file " << filename << " not found" << endl;
-				}
-			}
-
-
-			btags.writeToTFile(outfileadd_+"all_btags.root");
-		}
-		else{
-			std::cout << "systMerger: did not find a valid b-tag file. Not merging b-tag info" << std::endl;
-		}
-
-	}
 }
 
 std::vector<size_t> systMerger::getMergedFiles()const{

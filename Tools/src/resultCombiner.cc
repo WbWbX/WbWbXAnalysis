@@ -13,7 +13,7 @@ namespace ztop{
 
 
 
-void resultCombiner::addInput(const container1D& cont){
+void resultCombiner::addInput(const histo1D& cont){
 	if(distributions_.size()>0){
 		if(distributions_.at(0).bins() != cont.getBins()){
 			throw std::logic_error("resultCombiner::addInput: inputs must have same binning");
@@ -24,7 +24,7 @@ void resultCombiner::addInput(const container1D& cont){
 	}
 
 	temp_=cont;
-	variateContainer1D temp;
+	variateHisto1D temp;
 	temp.import(cont);
 	distributions_.push_back(temp);
 	sysforms_.resize(distributions_.at(0).getNDependencies(), rc_sysf_gaus);
@@ -118,7 +118,7 @@ bool resultCombiner::minimize(){
 	std::vector<float> bins = distributions_.at(0).bins();
 	bins.erase(bins.begin());
 
-	combined_=container1D(bins);
+	combined_=histo1D(bins);
 	combined_.setName("combined");
 	combined_.addGlobalRelErrorUp("combined_err",0);
 	combined_.addGlobalRelErrorDown("combined_err",0);

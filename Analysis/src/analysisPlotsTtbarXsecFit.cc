@@ -20,7 +20,7 @@ void analysisPlotsTtbarXsecFit::bookPlots(){
 	using namespace ztop;
 
 
-	std::vector<float> bins=container1D::createBinning(1,0,1);
+	std::vector<float> bins=histo1D::createBinning(1,0,1);
 	//leadjetpt_plots, secjetpt_plots, thirdjetpt_plots, total_plots;
 	total_plots.at(cat_0bjet0jet) = addPlot(bins,bins,"total 0,0 b-jets","","N_{evt}");
 	total_plots.at(cat_0bjet1jet) = addPlot(bins,bins,"total 0,1 b-jets","","N_{evt}");

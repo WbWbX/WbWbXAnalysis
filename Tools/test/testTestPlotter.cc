@@ -10,12 +10,12 @@
 #include <vector>
 #include "TRandom.h"
 #include "../interface/plotterCompare.h"
-#include "../interface/container.h"
-#include "../interface/container2D.h"
+#include "../interface/histo1D.h"
+#include "../interface/histo2D.h"
 #include "../interface/graph.h"
 #include "TCanvas.h"
 #include <iostream>
-#include "../interface/containerStyle.h"
+#include "../interface/histoStyle.h"
 #include "../interface/plotStyle.h"
 #include "../interface/fileReader.h"
 
@@ -27,9 +27,9 @@ int main(){
 
     for(float ji=0;ji<11;ji++)otherbins.push_back(ji*2);
 
-    container2D c2d(bins,bins);
+    histo2D c2d(bins,bins);
 
-    container1D c1(bins),c2(bins),c3(bins),fdata(bins),cerr;
+    histo1D c1(bins),c2(bins),c3(bins),fdata(bins),cerr;
     TRandom * r=new TRandom(123);
 
     for(int j=0;j<1000;j++){
@@ -48,7 +48,7 @@ int main(){
     //fileReader::debug=true;
     plotStyle ps;
     ps.readFromFile(stylePath+"plotStyles.txt", "Test");
-    containerStyle cs;
+    histoStyle cs;
     cs.readFromFile(stylePath+"containerStyles.txt", "Test");
 
 

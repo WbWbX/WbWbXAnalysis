@@ -3,8 +3,6 @@
         <class name="ztop::reweightfunctions"/>
          
         <class name="std::vector< float*const*>"/>
-    <class name="std::vector<ztop::container1D *>"/>
-    <class name="std::vector<std::vector<ztop::container2D *> >"/>
     <class name="std::string "/>
     <class name="ztop::discriminatorFactory"/>
     

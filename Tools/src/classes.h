@@ -1,13 +1,18 @@
-#include <vector>
+
+#ifndef ZTOP_TOOLS_CLASSES_H
+#define ZTOP_TOOLS_CLASSES_H
+
+#define ZTOP_TOOLS_CLASSES_H_FORGETBOOST
+
 #include "../interface/histoBin.h"
 #include "../interface/indexMap.h"
 #include "../interface/histoContent.h"
-#include "../interface/container.h"
+#include "../interface/histo1D.h"
 
-#include "../interface/container2D.h"
-#include "../interface/containerStack.h"
-#include "../interface/containerStackVector.h"
-#include "../interface/containerStyle.h"
+#include "../interface/histo2D.h"
+#include "../interface/histoStack.h"
+#include "../interface/histoStackVector.h"
+#include "../interface/histoStyle.h"
 #include "../interface/plotStyle.h"
 //#include "../interface/canvasStyle.h"
 //#include "../interface/plotter.h"
@@ -19,7 +24,7 @@
 #include "../TUnfold/TUnfoldSys.h"
 #include "../interface/unfolder.h"
 
-#include "../interface/containerUnfolder.h"
+#include "../interface/histoUnfolder.h"
 #include "../interface/graph.h"
 #include "../interface/graphFitter.h"
 #include "../interface/plot.h"
@@ -59,22 +64,22 @@ struct dictionary {
 	std::vector<ztop::histoContent> sadljiewjfiejwf;
 
 
-	ztop::container1D a;
-	std::vector<ztop::container1D> b;
-	ztop::container2D aa;
-	std::vector<ztop::container2D> bb;
-	ztop::containerStack asda;
-	std::vector<ztop::containerStack> bbd;
-	ztop::containerStackVector aaa;
-	std::vector<ztop::containerStackVector> bbb;
+	ztop::histo1D a;
+	std::vector<ztop::histo1D> b;
+	ztop::histo2D aa;
+	std::vector<ztop::histo2D> bb;
+	ztop::histoStack asda;
+	std::vector<ztop::histoStack> bbd;
+	ztop::histoStackVector aaa;
+	std::vector<ztop::histoStackVector> bbb;
 
 
 	std::vector<TH2D> ijij;
 	std::map<TString,std::vector<TH2D> > kokd;
 
 	std::vector<ztop::unfolder*> asldkjwed;
-	ztop::container1DUnfold  sdfdfsdfsdfsd;
-	std::vector<ztop::container1DUnfold> adasijweodf;
+	ztop::histo1DUnfold  sdfdfsdfsdfsd;
+	std::vector<ztop::histo1DUnfold> adasijweodf;
 
 
 
@@ -85,16 +90,16 @@ struct dictionary {
 
 	ztop::unfolder asdsdad;
 	std::vector<ztop::unfolder> sdadasdasdsl;
-	ztop::containerUnfolder ijsdfoijerg;
+	ztop::histoUnfolder ijsdfoijerg;
 
 	ztop::textBox dsfsd;
-	ztop::containerStyle sdfewfij;
+	ztop::histoStyle sdfewfij;
 	ztop::plotStyle dsfdsfl;
 	//ztop::canvasStyle dsfdf;
 //	ztop::plotter ijdfsij;
 
 	std::vector<ztop::textBox> vdsfsd;
-	std::vector<ztop::containerStyle> vsdfewfij;
+	std::vector<ztop::histoStyle> vsdfewfij;
 	std::vector<ztop::plotStyle> vdsfdsfl;
 
 
@@ -121,6 +126,9 @@ struct dictionary {
 	ztop::plotterCompare ewwefevrefwefewf;
 
 
+    std::vector<ztop::histo1D *> sdfsdfwef;
+    std::vector<std::vector<ztop::histo2D *> > sddf_sdfsf;
+
 	ztop::infoCreater weoirgjerowijgre;
 #ifndef __CINT__
 	ztop::fileReader readleityoulikeootmode;
@@ -130,3 +138,6 @@ struct dictionary {
 };
 }
 
+#undef ZTOP_TOOLS_CLASSES_H_FORGETBOOST
+
+#endif

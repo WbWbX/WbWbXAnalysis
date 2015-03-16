@@ -1,6 +1,6 @@
 #include "../interface/systMerger.h"
 #include "TtZAnalysis/Tools/interface/textFormatter.h"
-#include "TtZAnalysis/Tools/interface/containerStackVector.h"
+#include "TtZAnalysis/Tools/interface/histoStackVector.h"
 
 #include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
 
@@ -8,12 +8,21 @@ invokeApplication(){
 	using namespace ztop;
 	using namespace std;
 
-	containerStackVector::fastadd=false; //be careful because of parallization
+	histoStackVector::fastadd=false; //be careful because of parallization
 
 	TString outputadd=parser->getOpt<TString>("o","","additional string to be added to output file names");
 	TString inputadd =parser->getOpt<TString>("i","","additional string to be added to input file names");
 	const bool keeprealvars= parser->getOpt<bool> ("K",false,"keep relative variation output files");
+	const std::string addextension = parser->getOpt<std::string>("-addextension","","additional extension to be added to input file names");
+
 	std::vector<std::string> allfiles=parser->getRest<std::string>();
+
+	if(addextension.length()>0){
+		for(size_t i=0;i<allfiles.size();i++){
+			allfiles.at(i).append(".");
+			allfiles.at(i).append(addextension);
+		}
+	}
 	parser->doneParsing();
 	if(allfiles.size() < 1){
 		std::cout << "needs minimum 1 input file" << std::endl;
@@ -78,8 +87,8 @@ invokeApplication(){
 		tf.setDelimiter("");
 		for(size_t i=0;i<mergedfiles.size();i++){
 			if(!mergedfiles.at(i).Contains("_nominal")) continue; //should not be the case
-			containerStackVector * nom= new containerStackVector();
-			nom->loadFromTFile(mergedfiles.at(i));
+			histoStackVector * nom= new histoStackVector();
+			nom->readFromFile(mergedfiles.at(i).Data());
 			//nom->writeAllToTFile(mergedfiles.at(i)+"_noreladds.root",true,true);
 			TString startstring=tf.getFormatted(mergedfiles.at(i).Data()).at(0);
 			//by default this should be only one for each merged file
@@ -87,11 +96,11 @@ invokeApplication(){
 			for(size_t pit=0;pit<partialout.size();pit++){
 				if(partialout.at(pit).BeginsWith(startstring)){
 					std::cout << "adding relative variations from  " << partialout.at(pit)
-											<< "\nto " << nom->getName()<< std::endl;
+													<< "\nto " << nom->getName()<< std::endl;
 					//do by hand
-					containerStackVector * csvpart= new containerStackVector();
-					csvpart->loadFromTFile(partialout.at(pit));
-					container2D::debug=true;
+					histoStackVector * csvpart= new histoStackVector();
+					csvpart->readFromFile(partialout.at(pit).Data());
+					histo2D::debug=true;
 					std::vector<size_t> syssmoothened;
 					//syssmoothened=csvpart->removeSystematicsSpikes(false,-1,100,0.333,15);
 
@@ -109,8 +118,8 @@ invokeApplication(){
 						//	csvpart->removeSpikes(false,-1,100,0.333,15);
 					}
 
-					container2D::debug=false;
-					//containerStack::debug=true;
+					histo2D::debug=false;
+					//histoStack::debug=true;
 					nom->addRelSystematicsFrom(*csvpart,arestatcorr,strictadd);
 					size_t newsystsize=nom->getNSyst();
 					std::cout << "added " << newsystsize-oldsyssize << " systematic variations" <<std::endl;
@@ -121,7 +130,7 @@ invokeApplication(){
 					delete csvpart;
 				}
 			}
-			nom->writeAllToTFile(mergedfiles.at(i),true,true);
+			nom->writeToFile(mergedfiles.at(i).Data());
 			delete nom;
 		}
 	}

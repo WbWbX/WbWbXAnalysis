@@ -14,7 +14,7 @@
 #include "Math/Factory.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 #include <Minuit2/MnMachinePrecision.h>
-#include "TtZAnalysis/Tools/interface/container2D.h"
+#include "TtZAnalysis/Tools/interface/histo2D.h"
 #include "Math/Minimizer.h"
 #include "Math/MinimizerOptions.h"
 #include <stdexcept>
@@ -292,7 +292,7 @@ const double& simpleFitter::getCorrelationCoefficient(size_t i, size_t j)const{
 }
 
 
-void simpleFitter::fillCorrelationCoefficients(container2D * c)const{
+void simpleFitter::fillCorrelationCoefficients(histo2D * c)const{
 	if(!c)
 		return;
 	std::vector<float> bins;

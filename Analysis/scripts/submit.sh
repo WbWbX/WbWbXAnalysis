@@ -14,16 +14,16 @@ topmasses=( "172.5"
      # "175.5"
      # "169.5"
 
-     # "178.5"
-     # "166.5"
+    # "178.5"
+    # "166.5"
 );
-pdfeigenvectors=26  # 26 # if set to 0, no variation
+pdfeigenvectors= #26  # 26 # if set to 0, no variation
 
-systs=("nominal"
+systs=( "nominal"
 
-	# for testing	
-    "TOPMASS_up"
-    "TOPMASS_down"
+   # 	# for testing	
+   # "TOPMASS_up"
+   # "TOPMASS_down"
 
     "P11_sysnominal"
     "P11_sysnominal_CR_up"
@@ -34,13 +34,12 @@ systs=("nominal"
    "TT_GENPOWPY_up"
    "TT_GENPOWPY_down"
 
+   # "TT_GENPOW_sysnominal"
+   # "TT_GENPOW_sysnominal_HER_up"
+   # "TT_GENPOW_sysnominal_HER_down"
 
-   # "TT_GENPOWHERW_up"
-   # "TT_GENPOWHERW_down"
-
-
-   #  "TT_GENMCATNLO_up"
-   #  "TT_GENMCATNLO_down"
+    "TT_GENMCATNLO_up"
+    "TT_GENMCATNLO_down"
 
     "TT_BJESNUDEC_down"
     "TT_BJESNUDEC_up"
@@ -68,10 +67,10 @@ systs=("nominal"
     "JER_up"
     "JER_down"
 
-   # "JES_up"
-   # "JES_down"
+# # #    # "JES_up"
+# # #    # "JES_down"
 
-#######JES groups according to toplhcwg use INSTEAD of global JES_up/down
+# # # #######JES groups according to toplhcwg use INSTEAD of global JES_up/down
 
     "JES_AbsoluteMPFBias_up"   
 
@@ -91,7 +90,7 @@ systs=("nominal"
     "JES_RelativeJEREC1_up"
     "JES_RelativeJEREC2_up"
     "JES_RelativeJERHF_up"
-     "JES_RelativePtBB_up"
+    "JES_RelativePtBB_up"
     "JES_RelativePtEC1_up"
     "JES_RelativePtEC2_up"
     "JES_RelativePtHF_up"
@@ -105,7 +104,7 @@ systs=("nominal"
     "JES_PileUpPtHF_up"
 
 
-##down
+# # # ##down
 
       "JES_AbsoluteMPFBias_down"	
 
@@ -139,10 +138,10 @@ systs=("nominal"
     "JES_PileUpPtHF_down"
 
 
-   # "JEC_residuals_up"
-   # "JEC_residuals_down"
+# # #    # "JEC_residuals_up"
+# # #    # "JEC_residuals_down"
 
-########
+# # # ########
 
 
     "BTAGH_up"
@@ -150,17 +149,17 @@ systs=("nominal"
     "BTAGL_up"
     "BTAGL_down"
     
-#####csv rew section
-   # "BTAGHFS1_up"
-   # "BTAGHFS1_down"
-   # "BTAGHFS2_up"
-   # "BTAGHFS2_down"
-   # "BTAGLFS1_up"
-   # "BTAGLFS1_down"
-   # "BTAGLFS2_up"
-   # "BTAGLFS2_down"
-   # "BTAGPUR_up"
-   # "BTAGPUR_down"
+# # # #####csv rew section
+# # #    # "BTAGHFS1_up"
+# # #    # "BTAGHFS1_down"
+# # #    # "BTAGHFS2_up"
+# # #    # "BTAGHFS2_down"
+# # #    # "BTAGLFS1_up"
+# # #    # "BTAGLFS1_down"
+# # #    # "BTAGLFS2_up"
+# # #    # "BTAGLFS2_down"
+# # #    # "BTAGPUR_up"
+# # #    # "BTAGPUR_down"
 
 
      "TOPPT_up"
@@ -170,15 +169,15 @@ systs=("nominal"
     "TT_MATCH_up"
     "TT_SCALE_down"
     "TT_SCALE_up"
+     
 
-
-   #"Z_MATCH_down"
-   #"Z_MATCH_up"
-   #"Z_SCALE_down"
-   #"Z_SCALE_up"
+# #    #"Z_MATCH_down"
+# #    #"Z_MATCH_up"
+# #    #"Z_SCALE_down"
+# #    #"Z_SCALE_up"
 );
 energies=("8TeV"
-#"7TeV"
+# "7TeV"				
 );
 #systs=("nominal")
 
@@ -221,6 +220,8 @@ fi
 echo running on systematics: 
 echo ${systs[@]}
 echo 
+
+sleep 3
 
 dir=$(date +"%Y%m%d_%H%M")_${dirname} 
 
@@ -314,12 +315,12 @@ mkdir configs
 cp -r $analysisDir/configs/analyse configs/
 
 
-mkdir source
-cd source 
-cp $analysisDir/src/eventLoop.h .
-cp $analysisDir/src/MainAnalyzer.cc .
-cp $analysisDir/interface/MainAnalyzer.h .
-cp $analysisDir/bin/analyse.cc .
+
+cp -r $analysisDir/src .
+cp $analysisDir/interface/MainAnalyzer.h src/
+cp $analysisDir/bin/analyse.cc src/
+
+echo -n "These files are just meant for reference (e.g. to check control plot configurations etc)" > src/README
 
 cd $workdir
 mkdir jobscripts
@@ -342,7 +343,7 @@ sed -e 's;##WORKDIR##;'${workdir}';g' < $templatesDir/reset_job.sh > reset_job.s
 chmod +x reset_job.sh
 
 
-#check wheter running on naf or wgs and do qsub or dirty "&"
+#check whether running on naf or wgs and do qsub or dirty "&"
 for (( i=0;i<${#channels[@]};i++)); do
     for (( l=0;l<${#topmasses[@]};l++)); do
 	for (( j=0;j<${#systs[@]};j++)); do
@@ -360,6 +361,10 @@ for (( i=0;i<${#channels[@]};i++)); do
 		    then
 			continue
 		    fi
+		fi
+		if [[ "${syst}" == *"P11_sysnominal"* ]] && [[ "${energy}" = "7TeV" ]] 
+		    then
+		    continue
 		fi
 
 #### dont submit b variations if effieicnes are derived

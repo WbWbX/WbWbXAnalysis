@@ -1,4 +1,4 @@
-#include "../interface/containerStackVector.h"
+#include "../interface/histoStackVector.h"
 #include "../interface/miscUtils.h"
 
 
@@ -15,8 +15,8 @@ top::container1DStack StackTest(){
 
   stack.setDataLegend("data");
 
-  container1D cont(bins,"contr","x","y");
-  container1D cont2=cont;
+  histo1D cont(bins,"contr","x","y");
+  histo1D cont2=cont;
 
   for(float i=0;i<1000;i++) cont.fill(pow(i/100,2));
   stack.push_back(cont, "contr1", kRed, 1);

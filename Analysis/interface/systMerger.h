@@ -13,7 +13,7 @@
 
 namespace ztop{
 
-class containerStackVector;
+class histoStackVector;
 
 
 class systMerger{
@@ -56,7 +56,7 @@ private:
     void searchSystematics();
 
 
-    ztop::containerStackVector * getFromFileToMem( TString dir, const TString& name)const;
+    ztop::histoStackVector * getFromFileToMem( TString dir, const TString& name)const;
 
     std::vector<TString> mergeAndSafe();
 
@@ -78,6 +78,8 @@ private:
     std::string ignorestring_;
 
     bool mergerel_;
+
+    std::string removedext_;
 
 };
 

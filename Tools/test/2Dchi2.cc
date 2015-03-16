@@ -8,7 +8,7 @@
 
 
 
-#include "../interface/containerStackVector.h"
+#include "../interface/histoStackVector.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 #include "../interface/plotter2D.h"
 
@@ -23,14 +23,14 @@ invokeApplication(){
 	if(files.size()!=2)
 		return 1;
 
-	containerStackVector csv;
+	histoStackVector csv;
 	csv.loadFromTFile(files.at(0));
-	containerStack stack=csv.getStack("m_lb min step 8");
-	container1DUnfold cuf1=stack.getSignalContainer1DUnfold();
+	histoStack stack=csv.getStack("m_lb min step 8");
+	histo1DUnfold cuf1=stack.getSignalContainer1DUnfold();
 
 	csv.loadFromTFile(files.at(1));
 	stack=csv.getStack("m_lb min step 8");
-	container1DUnfold cuf2=stack.getSignalContainer1DUnfold();
+	histo1DUnfold cuf2=stack.getSignalContainer1DUnfold();
 
 	std::vector<float> newbins;
 	newbins << 0   << 75 << 100 << 125  << 200 << 350;
@@ -38,10 +38,10 @@ invokeApplication(){
 	cuf1=cuf1.rebinToBinning(newbins);
 	cuf2=cuf2.rebinToBinning(newbins);
 
-	container2D resp1=cuf1.getNormResponseMatrix();
-	container2D resp2=cuf2.getNormResponseMatrix();
+	histo2D resp1=cuf1.getNormResponseMatrix();
+	histo2D resp2=cuf2.getNormResponseMatrix();
 
-	container2D diff=resp1-resp2;
+	histo2D diff=resp1-resp2;
 
 	gStyle->SetOptStat(0);
 
@@ -59,7 +59,7 @@ invokeApplication(){
 	pl.printToPdf((files.at(0)+"_"+ files.at(1) +"_diff").Data());
 
 	size_t ndof;
-	container2D chi2=resp1.chi2container(resp2,&ndof);
+	histo2D chi2=resp1.chi2container(resp2,&ndof);
 
 
 	pl.cleanMem();

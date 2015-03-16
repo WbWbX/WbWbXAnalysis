@@ -25,9 +25,9 @@ int main(){
 
     for(float ji=0;ji<11;ji++)otherbins.push_back(ji*2);
 
-    container2D c2d(bins,bins);
+    histo2D c2d(bins,bins);
 
-    container1D c1(bins),c2(bins),c3(bins),cerr;
+    histo1D c1(bins),c2(bins),c3(bins),cerr;
     TRandom * r=new TRandom(123);
 
     for(int j=0;j<1000;j++){
@@ -38,9 +38,9 @@ int main(){
     }
 
 
-    container1D fdata=c1+c2+c3;
-    containerStack stack;
-    // push_back(ztop::container1D, TString, int, double); //! adds container with, name, colour, norm to st
+    histo1D fdata=c1+c2+c3;
+    histoStack stack;
+    // push_back(ztop::histo1D, TString, int, double); //! adds container with, name, colour, norm to st
     stack.push_back(fdata,"data",kBlack,1);
     stack.push_back(c1,"signal",kRed,1);
     stack.push_back(c2,"bg1",kBlue,1);
@@ -48,7 +48,7 @@ int main(){
     stack.addSignal("signal");
     stack.addSignal("bg2");
 
-    containerStack::batchmode = false;
+    histoStack::batchmode = false;
 
 
     c1.addErrorContainer("syst_up",c2);

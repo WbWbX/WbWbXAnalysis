@@ -11,14 +11,14 @@
 
 #include <string>
 #include "TString.h"
-#include "TtZAnalysis/Tools/interface/container.h"
-#include "TtZAnalysis/Tools/interface/containerStackVector.h"
+#include "TtZAnalysis/Tools/interface/histo1D.h"
+#include "TtZAnalysis/Tools/interface/histoStackVector.h"
 
 class TFile;
 
 namespace ztop{
 class NTFullEvent;
-class container2D;
+class histo2D;
 
 /**
  * put more info here
@@ -38,7 +38,7 @@ class container2D;
  *
  * for one sample write configuration to File:
  *  - writeToTFile
- * for all samples write a containerStackVector (csv) to output file
+ * for all samples write a histoStackVector (csv) to output file
  *  - csv.addList(...)
  *  if signal:
  *    - csv.addSignal(<signalname>)
@@ -126,14 +126,14 @@ public:
      * create a likelihood
      * use this function whn reading from file?
      */
-    void extractLikelihoods(const containerStackVector &);
-    static void extractAllLikelihoods(const containerStackVector &);
+    void extractLikelihoods(const histoStackVector &);
+    static void extractAllLikelihoods(const histoStackVector &);
     /*
      * this only writes the configuration to the file.
      * If it is already written there, it does nothing.
      * You can write several different discriminatorFactory to the same file
      * But take care that they have a different id
-     * Plots MUST be saved in an additional containerStackVector!
+     * Plots MUST be saved in an additional histoStackVector!
      */
     void writeToTFile(TFile *)const;
     void writeToTFile(const TString& filename)const;
@@ -143,7 +143,7 @@ public:
     static void writeAllToTFile(const TString& filename,const std::vector<discriminatorFactory> &vec);
 
     /**
-     * In a first step only works if a containerStack exists for each plot in a containerStackVector
+     * In a first step only works if a histoStack exists for each plot in a histoStackVector
      * just search for one. If there are more than one (usually not) that contain discr. info, give a warning
      *
      */
@@ -177,18 +177,18 @@ private:
     size_t step_;
 
     //only for IO operation. Will be updated with new conts (e.g. after DY rescaling)
-    std::vector<container1D> likelihoods_;
+    std::vector<histo1D> likelihoods_;
 
     //only for filling/pointing purposes, these are like control plots
-    std::vector<container1D *> tobefilled_;
+    std::vector<histo1D *> tobefilled_;
 
-    std::vector<std::vector< container2D *> > tobefilledcorr_;
+    std::vector<std::vector< histo2D *> > tobefilledcorr_;
 
     std::vector< float * const*> vars_;
     std::vector<float> offsets_;
     std::vector<float> ranges_;
     //general pointers/depend on mode. has same indices as vars_
-    std::vector<container1D *> histpointers_;
+    std::vector<histo1D *> histpointers_;
 
     //for using the right systematic variation
     int systidx_;

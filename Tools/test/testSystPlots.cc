@@ -5,14 +5,14 @@
  *      Author: kiesej
  */
 
-#include "../interface/container.h"
+#include "../interface/histo1D.h"
 #include <vector>
 #include "TRandom.h"
 #include "../interface/canvasStyle.h"
-#include "../interface/containerStack.h"
+#include "../interface/histoStack.h"
 #include "../interface/plotter.h"
 
-std::vector<TGraphAsymmErrors *> getVars(const ztop::container1D& c, size_t bin){
+std::vector<TGraphAsymmErrors *> getVars(const ztop::histo1D& c, size_t bin){
 
 	c.coutBinContent(bin);
 	std::vector<double> varsdown,varsup,statvarup,statvardown,zeros,increase;
@@ -49,14 +49,14 @@ std::vector<TGraphAsymmErrors *> getVars(const ztop::container1D& c, size_t bin)
 	h.f
 }
 /*
-TGraphAsymmErrors * getVarUp(const container1D& c, size_t bin){
+TGraphAsymmErrors * getVarUp(const histo1D& c, size_t bin){
 
 
 
 }
 
 
-TGraphAsymmErrors * getStat(const container1D& c, size_t bin){
+TGraphAsymmErrors * getStat(const histo1D& c, size_t bin){
 
 
 
@@ -67,7 +67,7 @@ void testSystPlots(){
 	for(float i=0;i<20;i++)bins.push_back(i);
 
 	using namespace ztop;
-	container1D c1(bins),c2(bins),c3(bins),cerr;
+	histo1D c1(bins),c2(bins),c3(bins),cerr;
 	TRandom * r=new TRandom(123);
 
 	for(int j=0;j<1000;j++){
@@ -80,9 +80,9 @@ void testSystPlots(){
 	pl.setStyle(cstyle);
 
 
-	container1D fdata=c1+c2+c3;
-	containerStack stack;
-	// push_back(ztop::container1D, TString, int, double); //! adds container with, name, colour, norm to st
+	histo1D fdata=c1+c2+c3;
+	histoStack stack;
+	// push_back(ztop::histo1D, TString, int, double); //! adds container with, name, colour, norm to st
 	stack.push_back(fdata,"data",kBlack,1);
 	stack.push_back(c1,"signal",kRed,1);
 	stack.push_back(c2,"bg1",kBlue,1);
@@ -90,7 +90,7 @@ void testSystPlots(){
 	stack.addSignal("signal");
 	stack.addSignal("bg2");
 
-	containerStack::batchmode = false;
+	histoStack::batchmode = false;
 
 
 	c1.addErrorContainer("syst_up",c1+c2*0.1);

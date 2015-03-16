@@ -34,9 +34,9 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	using namespace std;
 	using namespace ztop;
 	if(testmode){
-		ztop::container1D::debug =false;
-		ztop::containerStack::debug=false;
-		ztop::containerStackVector::debug=false;
+		ztop::histo1D::debug =false;
+		ztop::histoStack::debug=false;
+		ztop::histoStackVector::debug=false;
 	}
 
 	TString inputfilewochannel="config.txt";
@@ -147,17 +147,17 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	ana.setSyst(Syst);
 	ana.setTopMass(topmass);
 	if(energy == "7TeV"){
-	    ana.getPUReweighter()->setMCDistrSummer11Leg();    
+		ana.getPUReweighter()->setMCDistrSummer11Leg();
 	}
 	else if(energy == "8TeV"){
-	    ana.getPUReweighter()->setMCDistrSum12();
+		ana.getPUReweighter()->setMCDistrSum12();
 	}
 	else if(energy == "13TeV"){
-	    std::cout<<"FIXME: Still apply 8 TeV PU Reweighting"<<std::endl;
-	    ana.getPUReweighter()->setMCDistrSum12();
+		std::cout<<"FIXME: Still apply 8 TeV PU Reweighting"<<std::endl;
+		ana.getPUReweighter()->setMCDistrSum12();
 	}	   
 	else{
-	    throw std::runtime_error("Undefined Energy! Exit!");
+		throw std::runtime_error("Undefined Energy! Exit!");
 	}
 	ana.getElecSF()->setInput(elecsffile,elecsfhisto);
 	ana.getMuonSF()->setInput(muonsffile,muonsfhisto);
@@ -538,7 +538,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 
 		// recreate file
 
-		TString fulloutfilepath=ana.getOutPath()+".root";
+		TString fulloutfilepath=ana.getOutPath()+".ztop";
 		TString workdir=ana.getOutDir() +"../";
 		TString batchdir=workdir+"batch/";
 
@@ -555,7 +555,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 
 		if(fullsucc>=0){
 
-			csv.loadFromTFile(fulloutfilepath);
+			csv.readFromFile(fulloutfilepath.Data()); //DEBUG
 			vector<TString> dycontributions;
 			dycontributions << "Z#rightarrowll" << "DY#rightarrowll";
 			if(!channel.Contains("emu")){
@@ -567,7 +567,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 				//	for(size_t i=0;i<disc.size();i++){
 				//		disc.at(i).extractLikelihoods(csv);
 				//	}
-				csv.writeAllToTFile(fulloutfilepath,true,!testmode); //recreates file
+				csv.writeToFile(fulloutfilepath.Data()); //recreates file
 				system(("rm -f "+ana.getOutPath()+"_discr.root").Data());
 				//	discriminatorFactory::writeAllToTFile(ana.getOutPath()+"_discr.root",disc);
 
@@ -580,15 +580,14 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 				//		disc.at(i).extractLikelihoods(csv);
 				//	}
 				if(testmode)
-					csv.writeAllToTFile(fulloutfilepath,true,!testmode);
+					csv.writeAllToTFile(fulloutfilepath+"_plots.root",true,!testmode);
 				system(("rm -f "+ana.getOutPath()+"_discr.root").Data());
 				//	discriminatorFactory::writeAllToTFile(ana.getOutPath()+"_discr.root",disc);
 			}
 
 
-			if(!testmode){
-				system(("touch "+batchdir+ana.getOutFileName()+"_fin").Data());
-			}
+			system(("touch "+batchdir+ana.getOutFileName()+"_fin").Data());
+
 			sleep(1);
 			now = time(0);
 			cout << "Started  analyse at: " << dt;// << endl;

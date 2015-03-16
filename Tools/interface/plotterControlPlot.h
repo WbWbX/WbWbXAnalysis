@@ -14,7 +14,7 @@ class TLegend;
 namespace ztop{
 class plot;
 
-class containerStack;
+class histoStack;
 
 /**
  * plotter for control plots. stack+ratio plot
@@ -32,16 +32,16 @@ public:
      * expects entries:
      * [plotterControlPlot] defines divideat, threshold for showing PS migrations
      * [textBoxes - boxes]
-     * [containerStyle - DataUpper]
-     * [containerStyle - MCUpper]
-     * [containerStyle - DataRatio]
-     * [containerStyle - MCRatio]
+     * [histoStyle - DataUpper]
+     * [histoStyle - MCUpper]
+     * [histoStyle - DataRatio]
+     * [histoStyle - MCRatio]
      * [plotStyle - Upper]
      * [plotStyle - Ratio]
      */
 
 
-    void setStack(const containerStack *s){stackp_=s;}
+    void setStack(const histoStack *s){stackp_=s;}
 
     void clear();
     void clearPlots();
@@ -58,17 +58,17 @@ protected:
 private:
     plotStyle upperstyle_;
     plotStyle ratiostyle_;
-    containerStyle datastyleupper_;
-    containerStyle datastyleratio_;
-    containerStyle mcstyleupper_;
-    containerStyle mcstylepsmig_;
-    containerStyle mcstyleratio_;
+    histoStyle datastyleupper_;
+    histoStyle datastyleratio_;
+    histoStyle mcstyleupper_;
+    histoStyle mcstylepsmig_;
+    histoStyle mcstyleratio_;
 
 
 
     float divideat_;
 
-    const containerStack * stackp_;
+    const histoStack * stackp_;
 //taken care of by addObject
   //  TLegend * tmplegp_;
     size_t tempdataentry_;

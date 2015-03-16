@@ -9,7 +9,7 @@
 
 
 #include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
-#include "TtZAnalysis/Tools/interface/container2D.h"
+#include "TtZAnalysis/Tools/interface/histo2D.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 #include "TCanvas.h"
 #include "TtZAnalysis/Tools/interface/plotter2D.h"
@@ -17,9 +17,9 @@
 #include "TStyle.h"
 #include "TtZAnalysis/Tools/interface/graphFitter.h"
 
-ztop::container2D lhtochi2(const ztop::container2D& in){
+ztop::histo2D lhtochi2(const ztop::histo2D& in){
 	using namespace ztop;
-	container2D out=in;
+	histo2D out=in;
 	out.setAllZero();
 
 	for(size_t i=1;i<=in.getNBinsX()-1;i++){
@@ -104,10 +104,10 @@ invokeApplication(){
 	const float maxxsec=getTtbarXsec(mintopmass,energy);
 
 
-	std::vector<float> bins=container1D::createBinning(ndiv,mintopmass,maxtopmass);
-	std::vector<float> binsy=container1D::createBinning(ndiv,minxsec,maxxsec);
-	container2D c=  container2D(bins,binsy,"","m_{t} [GeV]","#sigma_{t#bar{t}} [pb]");
-	container2D contexp=  container2D(bins,binsy,"","m_{t} [GeV]","#sigma_{t#bar{t}} [pb]");
+	std::vector<float> bins=histo1D::createBinning(ndiv,mintopmass,maxtopmass);
+	std::vector<float> binsy=histo1D::createBinning(ndiv,minxsec,maxxsec);
+	histo2D c=  histo2D(bins,binsy,"","m_{t} [GeV]","#sigma_{t#bar{t}} [pb]");
+	histo2D contexp=  histo2D(bins,binsy,"","m_{t} [GeV]","#sigma_{t#bar{t}} [pb]");
 	graph countourexp;
 	graph countourcomb;
 	float scaleerrth,pdferrth;
@@ -186,8 +186,8 @@ invokeApplication(){
 
 	//integrate:
 /*
-	container2D loglh=lhtochi2(contexp);
-	container1D marginalized = loglh.projectToX(false);
+	histo2D loglh=lhtochi2(contexp);
+	histo1D marginalized = loglh.projectToX(false);
 	plotterMultiplePlots plm;
 	plm.usePad(&cv);
 	plm.addPlot(&marginalized);

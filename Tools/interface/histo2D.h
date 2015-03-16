@@ -1,14 +1,14 @@
 /*
- * container2D.h
+ * histo2D.h
  *
  *  Created on: Jun 24, 2013
  *      Author: kiesej
  */
 
-#ifndef CONTAINER2D_H_
-#define CONTAINER2D_H_
+#ifndef histo2D_h_
+#define histo2D_h_
 
-#include "container.h"
+#include "histo1D.h"
 
 
 /*
@@ -18,20 +18,19 @@
  */
 
 namespace ztop{
-class container1DUnfold;
+class histo1DUnfold;
 
-class container2D:public taggedObject {
-	friend class container1DUnfold;
+class histo2D:public taggedObject {
+	friend class histo1DUnfold;
 public:
 
 
-	enum plotTag{none,topdf};
 
-	container2D();
-	container2D(const std::vector<float> & ,const std::vector<float> &, TString name="",TString xaxisname="",TString yaxisname=""/*,TString zaxisname=""*/, bool mergeufof=false); //! construct with binning
-	~container2D();
-	container2D(const container2D&);
-	container2D& operator=(const container2D&);
+	histo2D();
+	histo2D(const std::vector<float> & ,const std::vector<float> &, TString name="",TString xaxisname="",TString yaxisname="",TString zaxisname="", bool mergeufof=false); //! construct with binning
+	~histo2D();
+	histo2D(const histo2D&);
+	histo2D& operator=(const histo2D&);
 
 	bool isDummy()const{return xbins_.size()<=2;}
 
@@ -45,17 +44,17 @@ public:
 
 	void setYAxisName(const TString& name){yaxisname_=name;}
 	const TString& getYAxisName()const {return yaxisname_;}
-/*
+
 	void setZAxisName(const TString& name){zaxisname_=name;}
 	const TString& getZAxisName()const {return zaxisname_;}
-*/
+
 
 
 	size_t getBinNoX(const float&) const; // returns bin index number for (float variable)
 	size_t getBinNoY(const float&) const; //! returns bin index number for (float variable)
 	size_t getNBinsX() const {return xbins_.size()-2;}       //! returns numberof x bins
 	size_t getNBinsY() const {return ybins_.size()-2;}   //! returns numberof x bins
-	const size_t & getBinEntries(const size_t&,const size_t&) const;
+	const uint32_t & getBinEntries(const size_t&,const size_t&) const;
 	const std::vector<float> & getBinsX() const{return xbins_;}     //! returns  x bins
 	const std::vector<float> & getBinsY() const{return ybins_;}       //! returns y bins
 
@@ -68,10 +67,10 @@ public:
 	float getMax(int syslayer=-1)const;
 	float getMin(int syslayer=-1)const;
 
-	container2D rebinXToBinning(const std::vector<float>& )const;
-	container2D rebinXtoBinning(const container1D&)const;
-	container2D rebinYToBinning(const std::vector<float>& )const;
-	container2D rebinYtoBinning(const container1D&)const;
+	histo2D rebinXToBinning(const std::vector<float>& )const;
+	histo2D rebinXtoBinning(const histo1D&)const;
+	histo2D rebinYToBinning(const std::vector<float>& )const;
+	histo2D rebinYtoBinning(const histo1D&)const;
 
 	void fill(const float & xval, const float & yval, const float & weight=1);    //! fills with weight
 
@@ -94,13 +93,13 @@ public:
      float projectBinContentToY(const size_t & ybin,bool includeUFOF=false) const;
      float projectBinContentToX(const size_t & xbin,bool includeUFOF=false) const;
 	 */
-	container1D projectToX(bool includeUFOF=false) const;
-	container1D projectToY(bool includeUFOF=false) const;
-	container1D getYSlice(size_t ybinno) const;
-	container1D getXSlice(size_t xbinno) const;
+	histo1D projectToX(bool includeUFOF=false) const;
+	histo1D projectToY(bool includeUFOF=false) const;
+	histo1D getYSlice(size_t ybinno) const;
+	histo1D getXSlice(size_t xbinno) const;
 
-	void setXSlice(size_t xbinno,const container1D &, bool UFOF=true);
-	void setYSlice(size_t xbinno,const container1D &, bool UFOF=true);
+	void setXSlice(size_t xbinno,const histo1D &, bool UFOF=true);
+	void setYSlice(size_t xbinno,const histo1D &, bool UFOF=true);
 
 	void removeError(TString);
 	void renameSyst(TString, TString);
@@ -119,39 +118,45 @@ public:
 	 * Y errors will be represented as new systematic layers, the stat error will be set to 0.
 	 * The new systematic layers can be named- if not, default is Graphimp_<up/down>
 	 */
-	container2D & import(std::vector<TGraphAsymmErrors *>,bool isbinwidthdivided=false, const TString & newsystname="Graphimp");
+	histo2D & import(std::vector<TGraphAsymmErrors *>,bool isbinwidthdivided=false, const TString & newsystname="Graphimp");
 
 
 	void setDivideBinomial(bool);
 
-	container2D & operator += (const container2D &);       //! adds stat errors in squares; treats same named systematics as correlated!!
-	container2D operator + (const container2D &)const;       //! adds stat errors in squares; treats same named systematics as correlated!!
-	container2D & operator -= (const container2D &);       //! adds errors in squares; treats same named systematics as correlated!!
-	container2D operator - (const container2D &)const;       //! adds errors in squares; treats same named systematics as correlated!!
-	container2D & operator /= (const container2D &);       //! binomial stat error or uncorr error (depends on setDivideBinomial()); treats same named systematics as correlated
-	container2D operator / (const container2D &)const;       //! binomial stat error or uncorr error (depends on setDivideBinomial()); treats same named systematics as correlated
-	container2D & operator *= (const container2D &);       //! adds stat errors in squares; treats same named systematics as correlated!!
-	container2D operator * (const container2D &)const;       //! adds stat errors in squares; treats same named systematics as correlated!!
-	container2D & operator *= (float); //fast hack!            //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
-	container2D operator * (float)const;            //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
-	container2D operator * (double)const;             //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
-	container2D operator * (int)const;               //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
+	histo2D & operator += (const histo2D &);       //! adds stat errors in squares; treats same named systematics as correlated!!
+	histo2D operator + (const histo2D &)const;       //! adds stat errors in squares; treats same named systematics as correlated!!
+	histo2D & operator -= (const histo2D &);       //! adds errors in squares; treats same named systematics as correlated!!
+	histo2D operator - (const histo2D &)const;       //! adds errors in squares; treats same named systematics as correlated!!
+	histo2D & operator /= (const histo2D &);       //! binomial stat error or uncorr error (depends on setDivideBinomial()); treats same named systematics as correlated
+	histo2D operator / (const histo2D &)const;       //! binomial stat error or uncorr error (depends on setDivideBinomial()); treats same named systematics as correlated
+	histo2D & operator *= (const histo2D &);       //! adds stat errors in squares; treats same named systematics as correlated!!
+	histo2D operator * (const histo2D &)const;       //! adds stat errors in squares; treats same named systematics as correlated!!
+	histo2D & operator *= (float); //fast hack!            //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
+	histo2D operator * (float)const;            //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
+	histo2D operator * (double)const;             //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
+	histo2D operator * (int)const;               //! simple scalar multiplication. stat and syst errors are scaled accordingly!!
+
+	bool operator == (const histo2D &rhs)const{
+		return isEqual(rhs);
+	}
+	bool operator != (const histo2D &rhs)const{
+		return !(*this==rhs);
+	}
 
 
-
-	container2D chi2container(const container2D&,size_t * ndof=0)const;
-	float chi2(const container2D&,size_t * ndof=0)const;
+	histo2D chi2container(const histo2D&,size_t * ndof=0)const;
+	float chi2(const histo2D&,size_t * ndof=0)const;
 
 	/**
 	 * cuts everything on the right of the input value (bin boundary chosen accorind to getBinNo())
 	 * and returns new container.
 	 */
-	container2D cutRightX(const float & )const;
+	histo2D cutRightX(const float & )const;
 
-	int addErrorContainer(const TString & ,const container2D &,float);  //! adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down"
-	int addErrorContainer(const TString &,const container2D & );        //! adds deviation to (this) as systematic uncertianty with name. name must be ".._up" or ".._down"
-	void getRelSystematicsFrom(const container2D &);
-	void addRelSystematicsFrom(const container2D &,bool ignorestat=false, bool strict=false);
+	int addErrorContainer(const TString & ,const histo2D &,float);  //! adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down"
+	int addErrorContainer(const TString &,const histo2D & );        //! adds deviation to (this) as systematic uncertianty with name. name must be ".._up" or ".._down"
+	void getRelSystematicsFrom(const histo2D &);
+	void addRelSystematicsFrom(const histo2D &,bool ignorestat=false, bool strict=false);
 	void addGlobalRelError(TString,float);
 
 	/**
@@ -168,7 +173,7 @@ public:
 	std::vector<size_t> removeSpikes(bool inclUFOF=false,int limittoindex=-1,float strength=100000,float sign=0.3,float threshold=8);
 
 
-	container2D createPseudoExperiment(TRandom3* rand,const container2D* c=0, container1D::pseudodatamodes mode=container1D::pseudodata_poisson, int syst=-1)const;
+	histo2D createPseudoExperiment(TRandom3* rand,const histo2D* c=0, histo1D::pseudodatamodes mode=histo1D::pseudodata_poisson, int syst=-1)const;
 
 	/**
 	 * merges partial variations. only the ones corresponding to the identifier are merged
@@ -178,7 +183,7 @@ public:
 	void mergePartialVariations(const TString& identifier,bool strictpartialID=true);
 	void mergeAllErrors(const TString & mergedname);
 
-	void equalizeSystematicsIdxs(container2D &rhs);
+	void equalizeSystematicsIdxs(histo2D &rhs);
 
 	/**
 	 * sets all bin contents to zero; clears all systematic uncertainties
@@ -194,7 +199,7 @@ public:
 	void setAllZero();
 
 	static bool debug;
-	static std::vector<container2D*> c_list;
+	static std::vector<histo2D*> c_list;
 	static bool c_makelist;
 	static void c_deletelist(){
 		size_t count=0,listsize=c_list.size();
@@ -204,31 +209,38 @@ public:
 		}
 	}
 
-	plotTag plottag;
+
+#ifndef __CINT__
+	template <class T>
+	void writeToStream(T & stream)const;
+	template <class T>
+	void readFromStream(T & stream);
+#endif
 
 protected:
 
+	bool isEqual( const histo2D &rhs)const;
 
-
-	std::vector<ztop::container1D> conts_; //! for each y axis bin one container
+	std::vector<ztop::histo1D> conts_; //! for each y axis bin one container
 	std::vector<float> xbins_,ybins_;
 	bool divideBinomial_;
 	bool mergeufof_;
 
 	TString xaxisname_;
 	TString yaxisname_;
+	TString zaxisname_;
 	//TString zaxisname_;
 private:
-	void copyFrom(const container2D&);//!< helper
+	void copyFrom(const histo2D&);//!< helper
 };
 
-inline size_t ztop::container2D::getBinNoX(const float & var) const{
+inline size_t ztop::histo2D::getBinNoX(const float & var) const{
 	if(conts_.size()>0)
 		return conts_.at(0).getBinNo(var);
 	else
 		return 1e9;
 }
-inline size_t ztop::container2D::getBinNoY(const float & var) const {
+inline size_t ztop::histo2D::getBinNoY(const float & var) const {
 
 	if(ybins_.size() <2){
 		return 0;
@@ -240,22 +252,81 @@ inline size_t ztop::container2D::getBinNoY(const float & var) const {
 		return it-ybins_.begin()-1;
 
 }
-inline void ztop::container2D::fill(const float & xval, const float & yval, const float & weight){
+inline void ztop::histo2D::fill(const float & xval, const float & yval, const float & weight){
 	int ybin=getBinNoY(yval);
 	conts_[ybin].fill(xval,weight);
 }
 /**
  * not protected
  */
-inline const histoBin & ztop::container2D::getBin(const size_t &xbinno,const size_t &ybinno,const int &layer) const{
+inline const histoBin & ztop::histo2D::getBin(const size_t &xbinno,const size_t &ybinno,const int &layer) const{
 	return conts_[ybinno].getBin(xbinno,layer);
 }
 /**
  * not protected
  */
-inline histoBin & ztop::container2D::getBin(const size_t &xbinno,const size_t& ybinno,const int &layer){
+inline histoBin & ztop::histo2D::getBin(const size_t &xbinno,const size_t& ybinno,const int &layer){
 	return conts_[ybinno].getBin(xbinno,layer);
 }
 
+#ifndef __CINT__
+
+template <class T>
+inline void ztop::histo2D::writeToStream(T & out)const{
+	taggedObject::writeToStream(out);
+	IO::serializedWrite(conts_,out);
+	IO::serializedWrite(xbins_,out);
+	IO::serializedWrite(ybins_,out);
+	IO::serializedWrite(divideBinomial_,out);
+	IO::serializedWrite(mergeufof_,out);
+	IO::serializedWrite(xaxisname_,out);
+	IO::serializedWrite(yaxisname_,out);
 }
+
+template <class T>
+inline void ztop::histo2D::readFromStream(T & in){
+	taggedObject::readFromStream(in);
+	IO::serializedRead(conts_,in);
+	IO::serializedRead(xbins_,in);
+	IO::serializedRead(ybins_,in);
+	IO::serializedRead(divideBinomial_,in);
+	IO::serializedRead(mergeufof_,in);
+	IO::serializedRead(xaxisname_,in);
+	IO::serializedRead(yaxisname_,in);
+}
+
+namespace IO{
+//implements standardized IO operations for this class
+
+
+template<class T>
+inline void serializedWrite(const histo2D&c, T&stream){
+	c.writeToStream(stream);
+}
+template<class T>
+inline void serializedRead(histo2D&c, T&stream){
+	c.readFromStream(stream);
+}
+//re-instantiate vector ops
+template<class T>
+inline void serializedWrite(const std::vector<histo2D>&in, T&saveFile){
+	size_t len=in.size();
+	saveFile.write(reinterpret_cast<const char *>(&len), sizeof(len));
+	for(size_t i=0;i<len;i++)
+		serializedWrite(in.at(i),saveFile);
+}
+template<class T>
+inline void serializedRead(std::vector<histo2D>&in, T&saveFile){
+	size_t len=0;
+	saveFile.read(reinterpret_cast< char *>(&len), sizeof(len));
+	in.resize(len,histo2D());
+	for(size_t i=0;i<len;i++)
+		serializedRead(in.at(i),saveFile);
+}
+
+
+}//io
+
+#endif
+}//ztop
 #endif /* CONTAINER2D_H_ */

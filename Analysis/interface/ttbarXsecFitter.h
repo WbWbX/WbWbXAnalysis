@@ -8,17 +8,17 @@
 #ifndef TTBARXSECFITTER_H_
 #define TTBARXSECFITTER_H_
 #include <vector>
-#include "TtZAnalysis/Tools/interface/variateContainer1D.h"
+#include "TtZAnalysis/Tools/interface/variateHisto1D.h"
 #include "TtZAnalysis/Tools/interface/simpleFitter.h"
 #include "TtZAnalysis/Tools/interface/formatter.h"
-#include "TtZAnalysis/Tools/interface/container2D.h"
+#include "TtZAnalysis/Tools/interface/histo2D.h"
 #include "TtZAnalysis/Tools/interface/texTabler.h"
 #include "TString.h"
 #include "TRandom3.h"
 #include "TtZAnalysis/Configuration/interface/version.h"
 
 namespace ztop{
-class containerStack;
+class histoStack;
 
 class ttbarXsecFitter {
 public:
@@ -90,7 +90,7 @@ public:
 	/**
 	 * just append all in one
 	 */
-	containerStack produceStack(bool fittedvalues,size_t bjetcat,size_t datasetidx,double& chi2)const;
+	histoStack produceStack(bool fittedvalues,size_t bjetcat,size_t datasetidx,double& chi2)const;
 
 	/**
 	 *
@@ -113,7 +113,7 @@ public:
 	 */
 	int fit(std::vector<float>& xsecs,std::vector<float>& errup,std::vector<float>& errdown);
 	int fit();
-	//container2D getCorrelationCoefficients()const{return fitter_.getCorrelationCoefficients();}
+	//histo2D getCorrelationCoefficients()const{return fitter_.getCorrelationCoefficients();}
 
 
 
@@ -124,10 +124,10 @@ public:
 	std::vector<double> getParameters()const{return *fitter_.getParameters();}
 
 
-	container1D getCb (bool fittedvalues,size_t datasetidx)const; //{if(eighttev) return container_c_b_.at(0); else return container_c_b_.at(1);}
-	container1D getEps(bool fittedvalues,size_t datasetidx)const;
+	histo1D getCb (bool fittedvalues,size_t datasetidx)const; //{if(eighttev) return container_c_b_.at(0); else return container_c_b_.at(1);}
+	histo1D getEps(bool fittedvalues,size_t datasetidx)const;
 
-	container2D getCorrelations()const;
+	histo2D getCorrelations()const;
 
 	double getXsec(size_t datasetidx)const;
 	double getXsecOffset(size_t datasetidx)const;
@@ -149,7 +149,7 @@ public:
 
 	texTabler makeCorrTable() const;
 
-	void createPseudoDataFromMC(container1D::pseudodatamodes mode=container1D::pseudodata_poisson);
+	void createPseudoDataFromMC(histo1D::pseudodatamodes mode=histo1D::pseudodata_poisson);
 
 	void createContinuousDependencies();
 
@@ -194,19 +194,19 @@ private:
 		extendedVariable& normalization(size_t nbjet){return normalization_nbjet_.at(nbjet);}
 		const extendedVariable& normalization(size_t nbjet)const {return normalization_nbjet_.at(nbjet);}
 
-		variateContainer1D& signalshape(size_t nbjet){return signalshape_nbjet_.at(nbjet);}
-		const variateContainer1D& signalshape(size_t nbjet)const {return signalshape_nbjet_.at(nbjet);}
-		variateContainer1D& background(size_t nbjet){return background_nbjet_.at(nbjet);}
-		const variateContainer1D& background(size_t nbjet)const {return background_nbjet_.at(nbjet);}
-		variateContainer1D& data(size_t nbjet){return data_nbjet_.at(nbjet);}
-		const variateContainer1D& data(size_t nbjet)const {return data_nbjet_.at(nbjet);}
+		variateHisto1D& signalshape(size_t nbjet){return signalshape_nbjet_.at(nbjet);}
+		const variateHisto1D& signalshape(size_t nbjet)const {return signalshape_nbjet_.at(nbjet);}
+		variateHisto1D& background(size_t nbjet){return background_nbjet_.at(nbjet);}
+		const variateHisto1D& background(size_t nbjet)const {return background_nbjet_.at(nbjet);}
+		variateHisto1D& data(size_t nbjet){return data_nbjet_.at(nbjet);}
+		const variateHisto1D& data(size_t nbjet)const {return data_nbjet_.at(nbjet);}
 
 
 
-		variateContainer1D& container_c_b(){return container_c_b_;}
-		const variateContainer1D& container_c_b()const {return container_c_b_;}
-		variateContainer1D& container_eps_b(){return container_eps_b_;}
-		const variateContainer1D& container_eps_b()const {return container_eps_b_;}
+		variateHisto1D& container_c_b(){return container_c_b_;}
+		const variateHisto1D& container_c_b()const {return container_c_b_;}
+		variateHisto1D& container_eps_b(){return container_eps_b_;}
+		const variateHisto1D& container_eps_b()const {return container_eps_b_;}
 
 		const TString & getName()const{return name_;}
 		const double & lumi()const{return lumi_;}
@@ -218,7 +218,7 @@ private:
 		//also takes care of proper asso to lumiidx,xsecidx
 		void equalizeIndices(dataset & rhs);
 
-		void createPseudoDataFromMC(container1D::pseudodatamodes mode=container1D::pseudodata_poisson);
+		void createPseudoDataFromMC(histo1D::pseudodatamodes mode=histo1D::pseudodata_poisson);
 		void createContinuousDependencies(bool,bool);
 
 		std::vector<TString> getSystNames()const{
@@ -240,10 +240,10 @@ private:
 
 	private:
 
-		void addUncertainties(containerStack * stack,size_t nbjets,bool removesyst,std::vector<std::pair<TString, double> >& )const;
-		variateContainer1D createLeptonJetAcceptance(const std::vector<container1D>& signals,
-				const std::vector<container1D>& signalpsmig,
-				const std::vector<container1D>& signalvisPSgen,
+		void addUncertainties(histoStack * stack,size_t nbjets,bool removesyst,std::vector<std::pair<TString, double> >& )const;
+		variateHisto1D createLeptonJetAcceptance(const std::vector<histo1D>& signals,
+				const std::vector<histo1D>& signalpsmig,
+				const std::vector<histo1D>& signalvisPSgen,
 				size_t bjetcategory, bool visPS);
 
 		dataset():totalvisgencontsread_(0){}
@@ -259,32 +259,32 @@ private:
 		//per bjet_cat
 		std::vector<extendedVariable> normalization_nbjet_;
 		//per b-jet cat (includes jet categories)
-		std::vector<variateContainer1D>  signalshape_nbjet_;
-		std::vector<variateContainer1D>  background_nbjet_;
-		std::vector<variateContainer1D>  data_nbjet_;
+		std::vector<variateHisto1D>  signalshape_nbjet_;
+		std::vector<variateHisto1D>  background_nbjet_;
+		std::vector<variateHisto1D>  data_nbjet_;
 
 
 		///for checks
-		variateContainer1D container_c_b_;
-		variateContainer1D container_eps_b_;
+		variateHisto1D container_c_b_;
+		variateHisto1D container_eps_b_;
 
 		/*
 		 * includes events from PS migrations
 		 */
-		std::vector<container1D> signalconts_nbjets_;
-		std::vector<container1D> signalcontsorig_nbjets_;
+		std::vector<histo1D> signalconts_nbjets_;
+		std::vector<histo1D> signalcontsorig_nbjets_;
 
-		std::vector<container1D> signalvisgenconts_nbjets_;
+		std::vector<histo1D> signalvisgenconts_nbjets_;
 
 		size_t totalvisgencontsread_; //this is NOT signalvisgenconts_nbjets_.size() since some could be merged!
 
-		std::vector<container1D> signalpsmigconts_nbjets_;
-		std::vector<container1D> signalpsmigcontsorig_nbjets_;
+		std::vector<histo1D> signalpsmigconts_nbjets_;
+		std::vector<histo1D> signalpsmigcontsorig_nbjets_;
 
-		std::vector<container1D> dataconts_nbjets_;
-		std::vector<container1D> datacontsorig_nbjets_;
-		std::vector<container1D> backgroundconts_nbjets_;
-		std::vector<container1D> backgroundcontsorig_nbjets_;
+		std::vector<histo1D> dataconts_nbjets_;
+		std::vector<histo1D> datacontsorig_nbjets_;
+		std::vector<histo1D> backgroundconts_nbjets_;
+		std::vector<histo1D> backgroundcontsorig_nbjets_;
 
 		std::vector<systematic_unc> post_fit_systematics_;
 

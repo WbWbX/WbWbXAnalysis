@@ -7,7 +7,7 @@
 
 #ifndef RESULTCOMBINER_H_
 #define RESULTCOMBINER_H_
-#include "variateContainer1D.h"
+#include "variateHisto1D.h"
 #include <vector>
 #include "TString.h"
 #include "simpleFitter.h"
@@ -44,9 +44,9 @@ private:
  *
  * First fill in containers, then define syst forms
  *
- * needs a conversion from container1D <-> vector<extendedVariable> + bins
- * put this conversion as part of container1D class! or make own class?
- * -->variateContainer1D
+ * needs a conversion from histo1D <-> vector<extendedVariable> + bins
+ * put this conversion as part of histo1D class! or make own class?
+ * -->variateHisto1D
  */
 class resultCombiner{
 public:
@@ -62,7 +62,7 @@ public:
 	void setSystForm(const TString& sys,rc_sys_forms form);
 
 
-	void addInput(const container1D& ); //reset success here, check binning
+	void addInput(const histo1D& ); //reset success here, check binning
 
 	void setLastCorrMatrix(double content, size_t i,size_t j);
 
@@ -71,7 +71,7 @@ public:
 
 	const simpleFitter* getFitter()const{return &fitter_;}
 
-	const container1D& getOutput(){return combined_;}
+	const histo1D& getOutput(){return combined_;}
 
 	void reset(); //clears every input, resets fitter, deletes syst forms, resets additional constraints
 
@@ -83,11 +83,11 @@ private:
 
 	double getChi2(const double * variations); //main functione
 
-	std::vector<variateContainer1D> distributions_;
+	std::vector<variateHisto1D> distributions_;
 	std::vector<matrix>  statcorrelations_;
 
 	bool success_;
-	container1D combined_,temp_;
+	histo1D combined_,temp_;
 	//std::vector<double> workingentries_;
 
 	rc_add_constraints additionalconstraint_;

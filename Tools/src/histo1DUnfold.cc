@@ -1,11 +1,11 @@
 /*
- * container1DUnfold.cc
+ * histo1DUnfold.cc
  *
  *  Created on: Aug 15, 2013
  *      Author: kiesej
  */
 
-#include "../interface/container1DUnfold.h"
+#include "../interface/histo1DUnfold.h"
 #include "FWCore/FWLite/interface/AutoLibraryLoader.h"
 #include "../interface/systAdder.h"
 
@@ -20,10 +20,10 @@
 namespace ztop{
 
 
-bool container1DUnfold::debug=false;
-std::vector<container1DUnfold*> container1DUnfold::c_list;
-bool container1DUnfold::c_makelist=false;
-//bool container1DUnfold::printinfo=false;
+bool histo1DUnfold::debug=false;
+std::vector<histo1DUnfold*> histo1DUnfold::c_list;
+bool histo1DUnfold::c_makelist=false;
+//bool histo1DUnfold::printinfo=false;
 
 /*
  *
@@ -33,7 +33,7 @@ bool container1DUnfold::c_makelist=false;
    bool isMC_;
  */
 
-container1DUnfold::container1DUnfold(): container2D(),xaxis1Dname_(""), yaxis1Dname_(""),
+histo1DUnfold::histo1DUnfold(): histo2D(),xaxis1Dname_(""), yaxis1Dname_(""),
 		tempgen_(0),tempreco_(0),tempgenweight_(1),tempweight_(1),recofill_(false),
 		genfill_(false),isMC_(false),flushed_(true),binbybin_(false),lumi_(1),congruentbins_(false),allowmultirecofill_(false){
 	if(c_makelist){
@@ -41,8 +41,8 @@ container1DUnfold::container1DUnfold(): container2D(),xaxis1Dname_(""), yaxis1Dn
 	}
 	type_=type_container1DUnfold;
 }
-container1DUnfold::container1DUnfold( std::vector<float> genbins, std::vector<float> recobins, TString name,TString xaxisname,TString yaxisname, bool mergeufof)
-:container2D( recobins /*genbins*/ , recobins , name,xaxisname+" (gen)",xaxisname+" (reco)",mergeufof), xaxis1Dname_(xaxisname),
+histo1DUnfold::histo1DUnfold( std::vector<float> genbins, std::vector<float> recobins, TString name,TString xaxisname,TString yaxisname, bool mergeufof)
+:histo2D( recobins /*genbins*/ , recobins , name,xaxisname+" (gen)",xaxisname+" (reco)",mergeufof), xaxis1Dname_(xaxisname),
  yaxis1Dname_(yaxisname),tempgen_(0),tempreco_(0),tempgenweight_(1),tempweight_(1),recofill_(false),genfill_(false),
  isMC_(false),flushed_(true),binbybin_(false),lumi_(1),congruentbins_(false),allowmultirecofill_(false){
 	//bins are set, containers created, at least conts_[0] exists with all options (binomial, mergeufof etc)
@@ -54,42 +54,42 @@ container1DUnfold::container1DUnfold( std::vector<float> genbins, std::vector<fl
 	//everything in same binning for now
 	std::vector<float> databins=ybins_;
 	databins.erase(databins.begin());
-	gencont_  = container1D(databins,name_+"_gen",xaxis1Dname_,yaxis1Dname_,mergeufof_);
-	recocont_ = container1D(databins,name_+"_data",xaxis1Dname_,yaxis1Dname_,mergeufof_);
-	unfolded_ = container1D(databins,name_+"_unfolded",xaxis1Dname_,yaxis1Dname_,mergeufof_);
-	refolded_ = container1D(databins,name_+"_refolded",xaxis1Dname_,yaxis1Dname_,mergeufof_);
+	gencont_  = histo1D(databins,name_+"_gen",xaxis1Dname_,yaxis1Dname_,mergeufof_);
+	recocont_ = histo1D(databins,name_+"_data",xaxis1Dname_,yaxis1Dname_,mergeufof_);
+	unfolded_ = histo1D(databins,name_+"_unfolded",xaxis1Dname_,yaxis1Dname_,mergeufof_);
+	refolded_ = histo1D(databins,name_+"_refolded",xaxis1Dname_,yaxis1Dname_,mergeufof_);
 	congruentbins_=checkCongruentBinBoundariesXY();
 	if(c_makelist){
 		c_list.push_back(this);
 	}
 	type_=type_container1DUnfold;
 }
-container1DUnfold::container1DUnfold( std::vector<float> genbins, TString name,TString xaxisname,TString yaxisname, bool mergeufof){
+histo1DUnfold::histo1DUnfold( std::vector<float> genbins, TString name,TString xaxisname,TString yaxisname, bool mergeufof){
 	std::vector<float> recobins=subdivide(genbins,10);
-	container1DUnfold(genbins,recobins,name,xaxisname,yaxisname,mergeufof);
+	histo1DUnfold(genbins,recobins,name,xaxisname,yaxisname,mergeufof);
 }
 
-container1DUnfold::~container1DUnfold(){
+histo1DUnfold::~histo1DUnfold(){
 	for(size_t i=0;i<c_list.size();i++){
 		if(this==c_list.at(i))
 			c_list.erase(c_list.begin()+i);
 	}
 }
 
-void container1DUnfold::setBinning(const std::vector<float> & genbins,const std::vector<float> &recobins){
+void histo1DUnfold::setBinning(const std::vector<float> & genbins,const std::vector<float> &recobins){
 	genbins_=genbins;
-	container2D::setBinning(recobins,recobins);
+	histo2D::setBinning(recobins,recobins);
 	gencont_=conts_.at(0);
 	gencont_.clear();
 	gencont_.setXAxisName(xaxis1Dname_+"(gen)");
 	std::vector<float> databins=ybins_;
 	databins.erase(databins.begin());
-	recocont_ = container1D(databins,name_+"_data",xaxis1Dname_,yaxis1Dname_,mergeufof_);
-	unfolded_ = container1D(databins,name_+"_unfolded",xaxis1Dname_,yaxis1Dname_,mergeufof_);
-	refolded_ = container1D(databins,name_+"_refolded",xaxis1Dname_,yaxis1Dname_,mergeufof_);
+	recocont_ = histo1D(databins,name_+"_data",xaxis1Dname_,yaxis1Dname_,mergeufof_);
+	unfolded_ = histo1D(databins,name_+"_unfolded",xaxis1Dname_,yaxis1Dname_,mergeufof_);
+	refolded_ = histo1D(databins,name_+"_refolded",xaxis1Dname_,yaxis1Dname_,mergeufof_);
 	congruentbins_=checkCongruentBinBoundariesXY();
 }
-void container1DUnfold::setGenBinning(const std::vector<float> & genbins){
+void histo1DUnfold::setGenBinning(const std::vector<float> & genbins){
 	if(checkCongruence(genbins,xbins_)){
 		genbins_=genbins;
 	}
@@ -98,7 +98,7 @@ void container1DUnfold::setGenBinning(const std::vector<float> & genbins){
 	}
 }
 
-container1DUnfold container1DUnfold::rebinToBinning(const std::vector<float> & newbins)const{
+histo1DUnfold histo1DUnfold::rebinToBinning(const std::vector<float> & newbins)const{
 	size_t maxbinssize=xbins_.size();
 	if(newbins.size()>maxbinssize) maxbinssize=newbins.size();
 	std::vector<float> sames(maxbinssize);
@@ -109,8 +109,8 @@ container1DUnfold container1DUnfold::rebinToBinning(const std::vector<float> & n
 		std::cout << "container1DUnfold::rebinToBinning: binning not compatible" <<std::endl;
 		return *this;
 	}
-	container1DUnfold out=*this;
-	container2D tempc2d=out.rebinXToBinning(newbins);
+	histo1DUnfold out=*this;
+	histo2D tempc2d=out.rebinXToBinning(newbins);
 	tempc2d=tempc2d.rebinYToBinning(newbins);
 	out.conts_=tempc2d.conts_;
 	out.xbins_=tempc2d.xbins_;
@@ -124,15 +124,15 @@ container1DUnfold container1DUnfold::rebinToBinning(const std::vector<float> & n
 	return out;
 
 }
-void container1DUnfold::clear(){
-	container2D::clear();
+void histo1DUnfold::clear(){
+	histo2D::clear();
 	gencont_.clear();
 	recocont_.clear();
 	unfolded_.clear();
 	refolded_.clear();
 }
-void container1DUnfold::reset(){
-	container2D::reset();
+void histo1DUnfold::reset(){
+	histo2D::reset();
 	gencont_.reset();
 	recocont_.reset();
 	unfolded_.reset();
@@ -140,13 +140,13 @@ void container1DUnfold::reset(){
 
 }
 
-void container1DUnfold::setAllZero(){
-	container2D::setAllZero(); gencont_.setAllZero(); recocont_.setAllZero();
+void histo1DUnfold::setAllZero(){
+	histo2D::setAllZero(); gencont_.setAllZero(); recocont_.setAllZero();
 	unfolded_.setAllZero();
 	refolded_.setAllZero();
 }
 
-void container1DUnfold::removeAllSystematics(){
+void histo1DUnfold::removeAllSystematics(){
 	for(size_t i=0;i<conts_.size();i++){
 		conts_.at(i).removeAllSystematics();
 	}
@@ -155,7 +155,7 @@ void container1DUnfold::removeAllSystematics(){
 	gencont_.removeAllSystematics();
 	refolded_.removeAllSystematics();
 }
-void container1DUnfold::splitSystematic(const size_t & number, const float& fracadivb,
+void histo1DUnfold::splitSystematic(const size_t & number, const float& fracadivb,
 		const TString & splinamea,  const TString & splinameb){
 	for(size_t i=0;i<conts_.size();i++){
 		conts_.at(i).splitSystematic(number,fracadivb, splinamea, splinameb);
@@ -165,7 +165,7 @@ void container1DUnfold::splitSystematic(const size_t & number, const float& frac
 	gencont_.splitSystematic(number,fracadivb, splinamea, splinameb);
 	refolded_.splitSystematic(number,fracadivb, splinamea, splinameb);
 }
-void container1DUnfold::mergePartialVariations(const TString& identifier,bool strictpartialID){
+void histo1DUnfold::mergePartialVariations(const TString& identifier,bool strictpartialID){
 	for(size_t i=0;i<conts_.size();i++){
 		conts_.at(i).mergePartialVariations(identifier,strictpartialID);
 	}
@@ -174,7 +174,7 @@ void container1DUnfold::mergePartialVariations(const TString& identifier,bool st
 	gencont_.mergePartialVariations(identifier,strictpartialID);
 	refolded_.mergePartialVariations(identifier,strictpartialID);
 }
-void container1DUnfold::mergeAllErrors(const TString & mergedname){
+void histo1DUnfold::mergeAllErrors(const TString & mergedname){
 	for(size_t i=0;i<conts_.size();i++){
 		conts_.at(i).mergeAllErrors(mergedname);
 	}
@@ -184,7 +184,7 @@ void container1DUnfold::mergeAllErrors(const TString & mergedname){
 	refolded_.mergeAllErrors(mergedname);
 }
 
-void container1DUnfold::equalizeSystematicsIdxs(container1DUnfold &rhs){
+void histo1DUnfold::equalizeSystematicsIdxs(histo1DUnfold &rhs){
 	if(rhs.conts_.size() == conts_.size()){
 		for(size_t i=0;i<conts_.size();i++){
 			conts_.at(i).equalizeSystematicsIdxs(rhs.conts_.at(i));
@@ -199,9 +199,9 @@ void container1DUnfold::equalizeSystematicsIdxs(container1DUnfold &rhs){
 	}
 }
 
-void container1DUnfold::mergeVariations(const std::vector<TString>& names, const TString & outname,bool linearly){
+void histo1DUnfold::mergeVariations(const std::vector<TString>& names, const TString & outname,bool linearly){
 	try{
-		container2D::mergeVariations(names,outname,linearly);
+		histo2D::mergeVariations(names,outname,linearly);
 
 		recocont_.mergeVariations(names,outname,linearly);
 		unfolded_.mergeVariations(names,outname,linearly);
@@ -212,7 +212,7 @@ void container1DUnfold::mergeVariations(const std::vector<TString>& names, const
 		throw e;
 	}
 }
-void container1DUnfold::mergeVariationsFromFileInCMSSW(const std::string& filename){
+void histo1DUnfold::mergeVariationsFromFileInCMSSW(const std::string& filename){
 	systAdder adder;
 	adder.readMergeVariationsFileInCMSSW(filename);
 	size_t ntobemerged=adder.mergeVariationsSize();
@@ -227,7 +227,7 @@ void container1DUnfold::mergeVariationsFromFileInCMSSW(const std::string& filena
 }
 
 
-void container1DUnfold::setBinByBin(bool bbb){
+void histo1DUnfold::setBinByBin(bool bbb){
 	if(!congruentbins_){
 		std::cout << "container1DUnfold::setBinByBin: only possible if congruent bin boundaries for reco/gen! doing nothing" <<std::endl;
 		return;
@@ -235,7 +235,7 @@ void container1DUnfold::setBinByBin(bool bbb){
 	binbybin_=bbb;
 }
 
-void container1DUnfold::setRecoContainer(const ztop::container1D &cont){
+void histo1DUnfold::setRecoContainer(const ztop::histo1D &cont){
 	if(cont.getBins() != recocont_.getBins()){
 		std::cout << "container1DUnfold::setRecoContainer: wrong binning" <<std::endl;
 		return;
@@ -244,7 +244,7 @@ void container1DUnfold::setRecoContainer(const ztop::container1D &cont){
 }
 
 
-void container1DUnfold::setBackground(const container1D & cont){
+void histo1DUnfold::setBackground(const histo1D & cont){
 	//background is supposed to be in x UF bin //no OFUF
 	if(cont.getBins() != ybins_){
 		std::cout << "container1DUnfold::setBackground: Binning not compatible. doing nothing" << std::endl;
@@ -260,12 +260,12 @@ void container1DUnfold::setBackground(const container1D & cont){
 	}
 
 }
-container1D container1DUnfold::getBackground() const{
+histo1D histo1DUnfold::getBackground() const{
 	if(xbins_.size()<1){
 		std::cout << "container1DUnfold::getBackground: No bins!" << std::endl;
 		throw std::logic_error("container1DUnfold::getBackground: no bins");
 	}
-	container1D out=getXSlice(0);
+	histo1D out=getXSlice(0);
 	//add generator overflow
 	//	for(int  sys=-1;sys<(int)getSystSize();sys++)
 	//	out.getBin(out.getBins().size()-1,sys).add( getBin(xbins_.size()-1,0,sys));
@@ -275,20 +275,20 @@ container1D container1DUnfold::getBackground() const{
 	out.setYAxisName(yaxis1Dname_);
 	return out;
 }
-container1D container1DUnfold::getVisibleSignal() const{
+histo1D histo1DUnfold::getVisibleSignal() const{
 	if(xbins_.size()<1){
 		std::cout << "container1DUnfold::getVisibleSignal: No bins!" << std::endl;
 		throw std::logic_error("container1DUnfold::getVisibleSignal: no bins");
 	}
 	bool tmp=histoContent::subtractStatCorrelated;
 	histoContent::subtractStatCorrelated=true;
-	container1D out=recocont_ - getBackground();
+	histo1D out=recocont_ - getBackground();
 	histoContent::subtractStatCorrelated=tmp;
 	out.setXAxisName(xaxis1Dname_);
 	out.setYAxisName(yaxis1Dname_);
 	return  out;//no underflow included -> only visible part of response matrix -> generated and reconstructed in visible PS
 }
-container1DUnfold& container1DUnfold::operator += (const container1DUnfold & second){
+histo1DUnfold& histo1DUnfold::operator += (const histo1DUnfold & second){
 	if((second.xbins_ != xbins_ || second.ybins_ != ybins_) && !isDummy()){
 		std::cout << "container1DUnfold::operator +=: "<< name_ << " and " << second.name_<<" must have same binning! returning *this" << std::endl;
 		return *this;
@@ -307,12 +307,12 @@ container1DUnfold& container1DUnfold::operator += (const container1DUnfold & sec
 	return *this;
 }
 
-container1DUnfold container1DUnfold::operator + (const container1DUnfold & second)const{
-	container1DUnfold out=*this;
+histo1DUnfold histo1DUnfold::operator + (const histo1DUnfold & second)const{
+	histo1DUnfold out=*this;
 	out+=second;
 	return out;
 }
-container1DUnfold& container1DUnfold::operator -= (const container1DUnfold & second){
+histo1DUnfold& histo1DUnfold::operator -= (const histo1DUnfold & second){
 	if(second.xbins_ != xbins_ || second.ybins_ != ybins_){
 		std::cout << "container1DUnfold::operator -=: "<< name_ << " and " << second.name_<<" must have same binning! returning *this"  << std::endl;
 		return *this;
@@ -328,13 +328,13 @@ container1DUnfold& container1DUnfold::operator -= (const container1DUnfold & sec
 
 	return *this;
 }
-container1DUnfold container1DUnfold::operator - (const container1DUnfold & second)const{
-	container1DUnfold out=*this;
+histo1DUnfold histo1DUnfold::operator - (const histo1DUnfold & second)const{
+	histo1DUnfold out=*this;
 	out-=second;
 	return out;
 }
 
-container1DUnfold& container1DUnfold::operator /= (const container1DUnfold & second){
+histo1DUnfold& histo1DUnfold::operator /= (const histo1DUnfold & second){
 	if(second.xbins_ != xbins_ || second.ybins_ != ybins_){
 		std::cout << "container1DUnfold::operator /: "<< name_ << " and " << second.name_<<" must have same binning! returning *this"  << std::endl;
 		return *this;
@@ -353,14 +353,14 @@ container1DUnfold& container1DUnfold::operator /= (const container1DUnfold & sec
 
 	return *this;
 }
-container1DUnfold container1DUnfold::operator / (const container1DUnfold & second)const{
-	container1DUnfold out=*this;
+histo1DUnfold histo1DUnfold::operator / (const histo1DUnfold & second)const{
+	histo1DUnfold out=*this;
 	out/=second;
 	return out;
 }
 
 
-container1DUnfold &container1DUnfold::operator *= (const container1DUnfold & second){
+histo1DUnfold &histo1DUnfold::operator *= (const histo1DUnfold & second){
 	if(second.xbins_ != xbins_ || second.ybins_ != ybins_){
 		std::cout << "container1DUnfold::operator *: "<< name_ << " and " << second.name_<<" must have same binning! returning *this"  << std::endl;
 		return *this;
@@ -377,18 +377,18 @@ container1DUnfold &container1DUnfold::operator *= (const container1DUnfold & sec
 	return *this;
 }
 
-container1DUnfold container1DUnfold::operator * (const container1DUnfold & second)const{
-	container1DUnfold out=*this;
+histo1DUnfold histo1DUnfold::operator * (const histo1DUnfold & second)const{
+	histo1DUnfold out=*this;
 	out*=second;
 	return out;
 }
 
-container1DUnfold container1DUnfold::operator * (float val)const{
-	container1DUnfold out=*this;
+histo1DUnfold histo1DUnfold::operator * (float val)const{
+	histo1DUnfold out=*this;
 	out*=val;
 	return out;
 }
-container1DUnfold& container1DUnfold::operator *= (float val){
+histo1DUnfold& histo1DUnfold::operator *= (float val){
 	for(size_t i=0;i<conts_.size();i++){
 		conts_.at(i) *= val;
 	}
@@ -398,14 +398,78 @@ container1DUnfold& container1DUnfold::operator *= (float val){
 	refolded_*=val;
 	return *this;
 }
-container1DUnfold container1DUnfold::operator * (double val)const{
+histo1DUnfold histo1DUnfold::operator * (double val)const{
 	return *this * (float) val;
 }
-container1DUnfold& container1DUnfold::operator *= (double val){
+histo1DUnfold& histo1DUnfold::operator *= (double val){
 	*this *= (float) val;
 	return *this;
 }
-void container1DUnfold::setDivideBinomial(bool binomial){
+bool histo1DUnfold::operator == (const histo1DUnfold &rhs)const{
+	if(!isEqual(rhs))
+		return false;
+/*
+ *
+	TString xaxis1Dname_,yaxis1Dname_;
+
+	float tempgen_,tempreco_,tempgenweight_,tempweight_;
+	bool recofill_,genfill_;
+
+	bool isMC_;
+	bool flushed_;
+	bool binbybin_;
+
+	histo1D gencont_,recocont_,unfolded_,refolded_;
+	std::vector<float> genbins_;
+
+	float lumi_;
+
+	bool congruentbins_;
+
+	bool allowmultirecofill_;
+ */
+	if(xaxis1Dname_!=rhs.xaxis1Dname_)
+		return false;
+	if(yaxis1Dname_!=rhs.yaxis1Dname_)
+			return false;
+	if(tempgen_!=rhs.tempgen_)
+			return false;
+	if(tempreco_!=rhs.tempreco_)
+			return false;
+	if(tempgenweight_!=rhs.tempgenweight_)
+			return false;
+	if(tempweight_!=rhs.tempweight_)
+			return false;
+	if(recofill_!=rhs.recofill_)
+			return false;
+	if(genfill_!=rhs.genfill_)
+			return false;
+	if(isMC_!=rhs.isMC_)
+			return false;
+	if(flushed_!=rhs.flushed_)
+			return false;
+	if(binbybin_!=rhs.binbybin_)
+			return false;
+	if(gencont_!=rhs.gencont_)
+			return false;
+	if(recocont_!=rhs.recocont_)
+			return false;
+	if(unfolded_!=rhs.unfolded_)
+			return false;
+	if(refolded_!=rhs.refolded_)
+			return false;
+	if(genbins_!=rhs.genbins_)
+			return false;
+	if(lumi_!=rhs.lumi_)
+			return false;
+	if(congruentbins_!=rhs.congruentbins_)
+			return false;
+	if(allowmultirecofill_!=rhs.allowmultirecofill_)
+			return false;
+	return true;
+}
+
+void histo1DUnfold::setDivideBinomial(bool binomial){
 	for(size_t i=0;i<conts_.size();i++)
 		conts_.at(i).setDivideBinomial(binomial);
 	gencont_.setDivideBinomial(binomial);
@@ -414,7 +478,7 @@ void container1DUnfold::setDivideBinomial(bool binomial){
 	refolded_.setDivideBinomial(binomial);
 	divideBinomial_=binomial;
 }
-int container1DUnfold::addErrorContainer(const TString & sysname,const container1DUnfold & cont,float weight){
+int histo1DUnfold::addErrorContainer(const TString & sysname,const histo1DUnfold & cont,float weight){
 	if(xbins_ != cont.xbins_ || ybins_ != cont.ybins_){
 		std::cout << "container1DUnfold::addErrorContainer: " << name_ << " and " << cont.name_ << " must have same x and y axis!" << std::endl;
 	}
@@ -441,11 +505,11 @@ int container1DUnfold::addErrorContainer(const TString & sysname,const container
 	if(tmp<0) out=tmp;
 	return out;
 }
-int container1DUnfold::addErrorContainer(const TString & sysname,const container1DUnfold & cont){
+int histo1DUnfold::addErrorContainer(const TString & sysname,const histo1DUnfold & cont){
 	return addErrorContainer(sysname,cont,1);
 }
 
-void container1DUnfold::addGlobalRelError(TString name,float relerr){
+void histo1DUnfold::addGlobalRelError(TString name,float relerr){
 	for(size_t i=0;i<conts_.size();i++)
 		conts_.at(i).addGlobalRelError(name,relerr);
 	gencont_.addGlobalRelError(name,relerr);
@@ -454,7 +518,7 @@ void container1DUnfold::addGlobalRelError(TString name,float relerr){
 	refolded_.addGlobalRelError(name,relerr);
 }
 
-void container1DUnfold::getRelSystematicsFrom(const container1DUnfold & cont){
+void histo1DUnfold::getRelSystematicsFrom(const histo1DUnfold & cont){
 	if(xbins_ != cont.xbins_ || ybins_ != cont.ybins_){
 		std::cout << "container1DUnfold::getRelSystematicsFrom: " << name_ << " and " << cont.name_ << " must have same x and y axis!" << std::endl;
 	}
@@ -465,7 +529,7 @@ void container1DUnfold::getRelSystematicsFrom(const container1DUnfold & cont){
 	unfolded_.getRelSystematicsFrom(cont.unfolded_);
 	refolded_.getRelSystematicsFrom(cont.refolded_);
 }
-void container1DUnfold::addRelSystematicsFrom(const container1DUnfold & cont,bool ignorestat,bool strict){
+void histo1DUnfold::addRelSystematicsFrom(const histo1DUnfold & cont,bool ignorestat,bool strict){
 	if(xbins_ != cont.xbins_ || ybins_ != cont.ybins_){
 		std::cout << "container1DUnfold::addRelSystematicsFrom: " << name_ << " and " << cont.name_ << " must have same x and y axis!" << std::endl;
 	}
@@ -476,15 +540,15 @@ void container1DUnfold::addRelSystematicsFrom(const container1DUnfold & cont,boo
 	unfolded_.addRelSystematicsFrom(cont.unfolded_,ignorestat,strict);
 	refolded_.addRelSystematicsFrom(cont.refolded_,ignorestat,strict);
 }
-bool container1DUnfold::checkCongruentBinBoundariesXY() const{
+bool histo1DUnfold::checkCongruentBinBoundariesXY() const{
 	if(xbins_.size() <2|| ybins_.size() <2)
 		return false; //emtpy
 	return checkCongruence(xbins_,ybins_);
 }
 /**
- * assumes  ybins >= xbins. should be the case for container1DUnfold
+ * assumes  ybins >= xbins. should be the case for histo1DUnfold
  */
-histoBin container1DUnfold::getDiagonalBin(const size_t & xbin, int layer) const{
+histoBin histo1DUnfold::getDiagonalBin(const size_t & xbin, int layer) const{
 	///NEW rewrite for symmetric internal binning (pretty simple)
 	if(xbin>=xbins_.size()){
 		std::cout << "container1DUnfold::getDiagonalBin: bin out of range" <<std::endl;
@@ -509,8 +573,8 @@ histoBin container1DUnfold::getDiagonalBin(const size_t & xbin, int layer) const
 	return out;
 }
 
-container1D container1DUnfold::getDiagonal()const{
-	container1D out=getRecoContainer();
+histo1D histo1DUnfold::getDiagonal()const{
+	histo1D out=getRecoContainer();
 	for(int sys=-1;sys<(int)getSystSize();sys++){
 		for(size_t bin=0;bin<out.getBins().size();bin++){
 			out.getBin(bin,sys) = getBin(bin,bin,sys);
@@ -519,7 +583,7 @@ container1D container1DUnfold::getDiagonal()const{
 	return out;
 }
 
-bool container1DUnfold::check(){ ///NEW
+bool histo1DUnfold::check(){ ///NEW
 
 	return true;
 
@@ -533,7 +597,7 @@ bool container1DUnfold::check(){ ///NEW
 	return true;
 }
 
-container1D container1DUnfold::fold(const container1D& input,bool addbackground) const{
+histo1D histo1DUnfold::fold(const histo1D& input,bool addbackground) const{
 	if(debug) std::cout << "container1DUnfold::fold" <<std::endl;
 
 
@@ -546,21 +610,21 @@ container1D container1DUnfold::fold(const container1D& input,bool addbackground)
 	}
 
 
-	container2D normresp=getNormResponseMatrix();
+	histo2D normresp=getNormResponseMatrix();
 
 	/*take care of syst layers. check whether all exist.
 	 * in terms of performance improvements, assume input.layersize<*this.layersize
 	 * This does not affect the fact that this function should also work if its
 	 * the other way around - just slightly slower
 	 */
-	container1D out=projectToY(); //to get syst layers etc right
-	container1D preparedinput=input;
+	histo1D out=projectToY(); //to get syst layers etc right
+	histo1D preparedinput=input;
 
 	if(input.getBins() != conts_.at(0).getBins()){
-		// throw std::logic_error("container1DUnfold::fold: input bins and response matrix bins not the same");
+		// throw std::logic_error("histo1DUnfold::fold: input bins and response matrix bins not the same");
 		if(input.getNBins() < conts_.at(0).getNBins()){
 			//try to rebin
-			container1DUnfold copy=*this;
+			histo1DUnfold copy=*this;
 			//this will only affect the 2d part... not tooo good, but .. who cares
 			for(size_t i=0;i<conts_.size();i++){
 				copy.conts_.at(i)=copy.conts_.at(i).rebinToBinning(preparedinput);
@@ -575,7 +639,7 @@ container1D container1DUnfold::fold(const container1D& input,bool addbackground)
 	}
 	out.mergeLayers(preparedinput);
 
-	std::vector<container1D> & copies=normresp.conts_;
+	std::vector<histo1D> & copies=normresp.conts_;
 
 
 
@@ -630,22 +694,22 @@ container1D container1DUnfold::fold(const container1D& input,bool addbackground)
 	return out;
 }
 
-container1D container1DUnfold::getPurity() const{
-	bool mklist=container1D::c_makelist;
-	container1D::c_makelist=false;
+histo1D histo1DUnfold::getPurity() const{
+	bool mklist=histo1D::c_makelist;
+	histo1D::c_makelist=false;
 	if(!congruentbins_){
-		container1D c;
-		container1D::c_makelist=mklist;
+		histo1D c;
+		histo1D::c_makelist=mklist;
 		return c;
 	}
 	//new impl
 
 	//rebin to out binning
-	container1DUnfold rebinned=rebinToBinning(genbins_);
-	container1D rec=rebinned.getVisibleSignal();
-	//  container1D gen=rebinned.getGenContainer();
+	histo1DUnfold rebinned=rebinToBinning(genbins_);
+	histo1D rec=rebinned.getVisibleSignal();
+	//  histo1D gen=rebinned.getGenContainer();
 
-	container1D recgen=rebinned.getDiagonal();
+	histo1D recgen=rebinned.getDiagonal();
 
 	///NEW
 	/*
@@ -657,29 +721,29 @@ container1D container1DUnfold::getPurity() const{
 	//assume a "good" response matrix with most elements being diagonal, so assume stat correlation between both
 	bool temp=histoContent::divideStatCorrelated;
 	histoContent::divideStatCorrelated=true;
-	container1D purity=recgen/rec;
+	histo1D purity=recgen/rec;
 	histoContent::divideStatCorrelated=temp;
-	container1D::c_makelist=mklist;
+	histo1D::c_makelist=mklist;
 	purity.setXAxisName(xaxis1Dname_);
 	return purity;
 
 
 }
 
-container1D container1DUnfold::getStability(bool includeeff) const{
+histo1D histo1DUnfold::getStability(bool includeeff) const{
 
-	bool mklist=container1D::c_makelist;
-	container1D::c_makelist=false;
+	bool mklist=histo1D::c_makelist;
+	histo1D::c_makelist=false;
 	if(!congruentbins_){
 		std::cout << "container1DUnfold::getPurity: plotting stability not possible because of non fitting bin boundaries for " << name_ << std::endl;
-		container1D c;
-		container1D::c_makelist=mklist;
+		histo1D c;
+		histo1D::c_makelist=mklist;
 		return c;
 	}
-	container1DUnfold rebinned=rebinToBinning(genbins_);
-	container1D gen=rebinned.projectToX(includeeff);//UFOF? include "BG"
+	histo1DUnfold rebinned=rebinToBinning(genbins_);
+	histo1D gen=rebinned.projectToX(includeeff);//UFOF? include "BG"
 
-	container1D recgen=rebinned.getDiagonal();
+	histo1D recgen=rebinned.getDiagonal();
 
 
 
@@ -687,18 +751,18 @@ container1D container1DUnfold::getStability(bool includeeff) const{
 	//anyway only affect the error bars
 	bool temp=histoContent::divideStatCorrelated;
 	histoContent::divideStatCorrelated=true;
-	container1D stability=recgen/gen;
+	histo1D stability=recgen/gen;
 	histoContent::divideStatCorrelated=temp;
 
-	container1D::c_makelist=mklist;
+	histo1D::c_makelist=mklist;
 	stability.setXAxisName(xaxis1Dname_);
 	return stability;
 
 }
 
-container1D container1DUnfold::getEfficiency()const{
-	container1D xprojection=projectToX(true);
-	container1D xprojectionwouf=projectToX(false);
+histo1D histo1DUnfold::getEfficiency()const{
+	histo1D xprojection=projectToX(true);
+	histo1D xprojectionwouf=projectToX(false);
 	bool tmp=histoContent::divideStatCorrelated;
 	histoContent::divideStatCorrelated=true;
 	xprojectionwouf =xprojectionwouf/ xprojection;
@@ -709,8 +773,8 @@ container1D container1DUnfold::getEfficiency()const{
 	return xprojectionwouf;
 }
 
-container2D container1DUnfold::getResponseMatrix()const{
-	container2D out;
+histo2D histo1DUnfold::getResponseMatrix()const{
+	histo2D out;
 
 	out.conts_=conts_; //! for each y axis bin one container
 	out.xbins_=xbins_;
@@ -724,11 +788,11 @@ container2D container1DUnfold::getResponseMatrix()const{
 	out.name_=name_+"_respMatrix";
 	return out;
 }
-container2D container1DUnfold::getNormResponseMatrix()const{
-	container2D out;
+histo2D histo1DUnfold::getNormResponseMatrix()const{
+	histo2D out;
 
 	out.conts_=conts_; //! for each y axis bin one container
-	container1D xprojection=projectToX(true);
+	histo1D xprojection=projectToX(true);
 	bool tmp=histoContent::divideStatCorrelated;
 	histoContent::divideStatCorrelated=true;
 	for(size_t i=0;i<out.conts_.size();i++){
@@ -754,7 +818,7 @@ container2D container1DUnfold::getNormResponseMatrix()const{
  *
  * uses generator binning given
  */
-TH2D * container1DUnfold::prepareRespMatrix(bool nominal,unsigned int systNumber) const{ //for each syste
+TH2D * histo1DUnfold::prepareRespMatrix(bool nominal,unsigned int systNumber) const{ //for each syste
 	if(getNBinsX() < 1 || getNBinsY() <1)
 		return 0;
 	if(!nominal && systNumber>=getSystSize()){
@@ -777,7 +841,7 @@ TH2D * container1DUnfold::prepareRespMatrix(bool nominal,unsigned int systNumber
 	}
 
 	//prepare rebinned containers
-	container2D rebinned=getResponseMatrix().rebinXToBinning(genbins_);
+	histo2D rebinned=getResponseMatrix().rebinXToBinning(genbins_);
 	TH2D * h=0;
 #pragma omp critical //protect new TH2D
 	{
@@ -792,7 +856,7 @@ TH2D * container1DUnfold::prepareRespMatrix(bool nominal,unsigned int systNumber
 
 
 
-TString container1DUnfold::coutUnfoldedBinContent(size_t bin,const TString& units) const{
+TString histo1DUnfold::coutUnfoldedBinContent(size_t bin,const TString& units) const{
 	if(!isBinByBin()){
 		std::cout << "container1DUnfold::coutUnfoldedBinContent: only implemented for bin-by-bin unfolded distributions so far, doing nothing" <<std::endl;
 		return "";
@@ -804,7 +868,7 @@ TString container1DUnfold::coutUnfoldedBinContent(size_t bin,const TString& unit
 	TString out;
 	std::cout << "relative background: " <<std::endl;
 	out+="relative background: \n";
-	container1D treco=getRecoContainer();
+	histo1D treco=getRecoContainer();
 	bool temp=histoContent::divideStatCorrelated;
 	histoContent::divideStatCorrelated=false;
 	out+=(getBackground()/treco).coutBinContent(bin,units);
@@ -817,26 +881,26 @@ TString container1DUnfold::coutUnfoldedBinContent(size_t bin,const TString& unit
 
 ///////////////
 
-void container1DUnfold::flushAllListed(){
-	for(size_t i=0;i<container1DUnfold::c_list.size();i++)
-		container1DUnfold::c_list.at(i)->flush();
+void histo1DUnfold::flushAllListed(){
+	for(size_t i=0;i<histo1DUnfold::c_list.size();i++)
+		histo1DUnfold::c_list.at(i)->flush();
 }
 
-void container1DUnfold::setAllListedMC(bool ISMC){
-	for(size_t i=0;i<container1DUnfold::c_list.size();i++)
-		container1DUnfold::c_list.at(i)->setMC(ISMC);
+void histo1DUnfold::setAllListedMC(bool ISMC){
+	for(size_t i=0;i<histo1DUnfold::c_list.size();i++)
+		histo1DUnfold::c_list.at(i)->setMC(ISMC);
 }
 
-void container1DUnfold::setAllListedLumi(float lumi){
-	for(size_t i=0;i<container1DUnfold::c_list.size();i++)
-		container1DUnfold::c_list.at(i)->setLumi(lumi);
+void histo1DUnfold::setAllListedLumi(float lumi){
+	for(size_t i=0;i<histo1DUnfold::c_list.size();i++)
+		histo1DUnfold::c_list.at(i)->setLumi(lumi);
 }
-void container1DUnfold::checkAllListed(){
-	for(size_t i=0;i<container1DUnfold::c_list.size();i++)
-		container1DUnfold::c_list.at(i)->check();
+void histo1DUnfold::checkAllListed(){
+	for(size_t i=0;i<histo1DUnfold::c_list.size();i++)
+		histo1DUnfold::c_list.at(i)->check();
 }
 
-std::vector<float> container1DUnfold::subdivide(const std::vector<float> & bins, size_t div){
+std::vector<float> histo1DUnfold::subdivide(const std::vector<float> & bins, size_t div){
 	std::vector<float> out;
 	for(size_t i=0;i<bins.size()-1;i++){
 		float width=bins.at(i+1)-bins.at(i);
@@ -854,7 +918,7 @@ std::vector<float> container1DUnfold::subdivide(const std::vector<float> & bins,
 /**
  * b needs to be larger than a
  */
-bool container1DUnfold::checkCongruence(const std::vector<float>& a, const std::vector<float>& b) const{
+bool histo1DUnfold::checkCongruence(const std::vector<float>& a, const std::vector<float>& b) const{
 	std::vector<float> sames(b.size()); //always larger than xbins
 	std::vector<float>::iterator it=std::set_intersection(a.begin(),a.end(),b.begin(),b.end(),sames.begin());
 	sames.resize(it-sames.begin());
@@ -864,7 +928,7 @@ bool container1DUnfold::checkCongruence(const std::vector<float>& a, const std::
 
 ////////////////////////////////////////////////FILLING////////////////////////////////////////////////
 
-void container1DUnfold::flush(){ //only for MC
+void histo1DUnfold::flush(){ //only for MC
 	if(!flushed_){
 		if(genfill_)
 			gencont_.fill(tempgen_,tempgenweight_);
@@ -887,7 +951,7 @@ void container1DUnfold::flush(){ //only for MC
 }
 
 
-void container1DUnfold::fillGen(const float & val, const float & weight){
+void histo1DUnfold::fillGen(const float & val, const float & weight){
 	if(genfill_){
 		throw std::logic_error("container1DUnfold::fillGen: Attempt to fill gen (twice) without flushing");
 	}
@@ -897,7 +961,7 @@ void container1DUnfold::fillGen(const float & val, const float & weight){
 	flushed_=false;
 }
 
-void container1DUnfold::fillReco(const float & val, const float & weight){ //fills and resets tempgen_
+void histo1DUnfold::fillReco(const float & val, const float & weight){ //fills and resets tempgen_
 	if(recofill_ && !allowmultirecofill_){
 		throw std::logic_error("container1DUnfold::fillReco: Attempt to fill reco (twice) without flushing");
 	}
@@ -935,11 +999,11 @@ void container1DUnfold::fillReco(const float & val, const float & weight){ //fil
 /////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-void container1DUnfold::loadFromTree(TTree *t, const TString & plotname){
+void histo1DUnfold::loadFromTree(TTree *t, const TString & plotname){
 	if(!t || t->IsZombie()){
 		throw std::runtime_error("container1DUnfold::loadFromTree: tree not ok");
 	}
-	ztop::container1DUnfold * cuftemp=0;
+	ztop::histo1DUnfold * cuftemp=0;
 	if(!t->GetBranch("container1DUnfolds")){
 		throw std::runtime_error("container1DUnfold::loadFromTree: branch container1DUnfolds not found");
 	}
@@ -965,7 +1029,7 @@ void container1DUnfold::loadFromTree(TTree *t, const TString & plotname){
 				<< getName() << ", took the first one." << std::endl;
 	}
 }
-void container1DUnfold::loadFromTFile(TFile *f, const TString & plotname){
+void histo1DUnfold::loadFromTFile(TFile *f, const TString & plotname){
 	if(!f || f->IsZombie()){
 		throw std::runtime_error("container1DUnfold::loadFromTFile: file not ok");
 	}
@@ -974,7 +1038,7 @@ void container1DUnfold::loadFromTFile(TFile *f, const TString & plotname){
 	loadFromTree(ttemp,plotname);
 	delete ttemp;
 }
-void container1DUnfold::loadFromTFile(const TString& filename,
+void histo1DUnfold::loadFromTFile(const TString& filename,
 		const TString & plotname){
 	AutoLibraryLoader::enable();
 	TFile * ftemp=new TFile(filename,"read");
@@ -982,11 +1046,11 @@ void container1DUnfold::loadFromTFile(const TString& filename,
 	delete ftemp;
 }
 
-void container1DUnfold::writeToTree(TTree *t){
+void histo1DUnfold::writeToTree(TTree *t){
 	if(!t || t->IsZombie()){
 		throw std::runtime_error("container1DUnfold::writeToTree: tree not ok");
 	}
-	ztop::container1DUnfold * cufpointer=this;
+	ztop::histo1DUnfold * cufpointer=this;
 	TBranch *b=0;
 	if(t->GetBranch("container1DUnfolds")){
 		t->SetBranchAddress("container1DUnfolds", &cufpointer, &b);
@@ -998,7 +1062,7 @@ void container1DUnfold::writeToTree(TTree *t){
 	t->Fill();
 	t->Write(t->GetName(),TObject::kOverwrite);
 }
-void container1DUnfold::writeToTFile(TFile *f){
+void histo1DUnfold::writeToTFile(TFile *f){
 	if(!f || f->IsZombie()){
 		throw std::runtime_error("container1DUnfold::loadFromTFile: file not ok");
 	}
@@ -1009,7 +1073,7 @@ void container1DUnfold::writeToTFile(TFile *f){
 	writeToTree(ttemp);
 	delete ttemp;
 }
-void container1DUnfold::writeToTFile(const TString& filename){
+void histo1DUnfold::writeToTFile(const TString& filename){
 	TFile * ftemp=new TFile(filename,"update");
 	if(!ftemp || ftemp->IsZombie()){
 		delete ftemp;
@@ -1019,7 +1083,7 @@ void container1DUnfold::writeToTFile(const TString& filename){
 	delete ftemp;
 }
 
-bool container1DUnfold::TFileContainsContainer1DUnfolds(TFile *f){
+bool histo1DUnfold::TFileContainsContainer1DUnfolds(TFile *f){
 	if(!f || f->IsZombie()){
 		throw std::runtime_error("container1DUnfold::TFileContainsContainer1DUnfolds: file not ok");
 	}
@@ -1036,7 +1100,7 @@ bool container1DUnfold::TFileContainsContainer1DUnfolds(TFile *f){
 	return true;
 
 }
-bool container1DUnfold::TFileContainsContainer1DUnfolds(const TString & filename){
+bool histo1DUnfold::TFileContainsContainer1DUnfolds(const TString & filename){
 	TFile *  f = new TFile(filename, "READ");
 	return TFileContainsContainer1DUnfolds(f);
 }

@@ -1,20 +1,20 @@
 /*
- * containerUnfolder.h
+ * histoUnfolder.h
  *
  *  Created on: Sep 4, 2013
  *      Author: kiesej
  */
 
-#ifndef CONTAINERUNFOLDER_H_
-#define CONTAINERUNFOLDER_H_
-#include "container1DUnfold.h"
+#ifndef HISTOUNFOLDER_H_
+#define HISTOUNFOLDER_H_
+#include "histo1DUnfold.h"
 #include "unfolder.h"
-#include "containerStack.h"
+#include "histoStack.h"
 
 namespace ztop{
 
 /**
- * unfolds a container1DUnfold and returns the unfolded container.
+ * unfolds a histo1DUnfold and returns the unfolded container.
  * additionally all tau scan plots for all systematics are available
  *
  *
@@ -22,12 +22,12 @@ namespace ztop{
  * -name unfolder objects same as systematics
  */
 
-class containerUnfolder{
+class histoUnfolder{
 public:
 	enum scanModes{LCurve,minCorr};
 
-	containerUnfolder(): unfnominal_(0),usecontoptions_(true),regmode_(TUnfold::kRegModeCurvature),scanmode_(minCorr){}
-	~containerUnfolder();
+	histoUnfolder(): unfnominal_(0),usecontoptions_(true),regmode_(TUnfold::kRegModeCurvature),scanmode_(minCorr){}
+	~histoUnfolder();
 
 	void clear();
 
@@ -35,9 +35,9 @@ public:
 	void setScanMode(scanModes scmd){scanmode_=scmd;}
 	void setRegMode(TUnfold::ERegMode regmode){regmode_=regmode;}
 	void setIgnoreSyst(std::vector<TString> ign){ignoresyst_=ign;}
-	container1D binbybinunfold(container1DUnfold & cuf);
-	container1D unfold( container1DUnfold &);
-	//container1DUnfold prepareFromStack(const containerStack&);
+	histo1D binbybinunfold(histo1DUnfold & cuf);
+	histo1D unfold( histo1DUnfold &);
+	//histo1DUnfold prepareFromStack(const histoStack&);
 
 	const std::vector<unfolder * > & getSystUnfolder() const {return unfsyst_;}
 	unfolder * getNominalUnfolder() const {return unfnominal_;}

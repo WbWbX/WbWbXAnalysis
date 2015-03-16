@@ -11,8 +11,8 @@
 #include <vector>
 
 #include "TString.h"
-#include "TtZAnalysis/Tools/interface/container.h"
-#include "TtZAnalysis/Tools/interface/containerStackVector.h"
+#include "TtZAnalysis/Tools/interface/histo1D.h"
+#include "TtZAnalysis/Tools/interface/histoStackVector.h"
 #include "TtZAnalysis/Tools/interface/graph.h"
 #include "TtZAnalysis/Tools/interface/plotterBase.h"
 #include "TtZAnalysis/Tools/interface/parameterExtractor.h"
@@ -174,10 +174,10 @@ private:
     //init and read in
 
     void readFiles(); //type specific stuff here background uncertainties are added here!
-    void addLumiUncert(std::vector<container1D> & mc,std::vector<container1D> & data)const;
+    void addLumiUncert(std::vector<histo1D> & mc,std::vector<histo1D> & data)const;
     void renormalize();
-    void mergeSyst(std::vector<container1D> & a, std::vector<container1D> & b)const;
-    std::vector<graph > makeGraphs( std::vector<container1D > & in)const; //at this step the systematics should be ordered in the same way (use first and copy!),
+    void mergeSyst(std::vector<histo1D> & a, std::vector<histo1D> & b)const;
+    std::vector<graph > makeGraphs( std::vector<histo1D > & in)const; //at this step the systematics should be ordered in the same way (use first and copy!),
     // delete input conts
 
     //helper
@@ -191,7 +191,7 @@ private:
 
 
     //same ordering as mtvals
-    // std::vector< containerStackVector> allanalysisplots_;
+    // std::vector< histoStackVector> allanalysisplots_;
 
     TString plotnamedata_;
     TString plotnamemc_; //ff
@@ -204,9 +204,9 @@ private:
     TString extfileformatfile_,extfilepdf_;
     TString extfilepreamble_;
 
-    std::vector<containerStack> savedinputstacks_;
-    std::vector<container1D > datacont_;
-    std::vector<container1D > mcsignalcont_,mcbgcont_,mccont_;
+    std::vector<histoStack> savedinputstacks_;
+    std::vector<histo1D > datacont_;
+    std::vector<histo1D > mcsignalcont_,mcbgcont_,mccont_;
     std::vector<graph > datagraphs_;
     std::vector<graph > mcgraphs_;
     std::vector<float> mtvals_;

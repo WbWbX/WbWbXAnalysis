@@ -56,7 +56,6 @@ public:
   }
 
   void coutList(){
-    using namespace std;
     double allcontr=0;
     for(size_t i=0;i<thirds_.size();i++){
       for(size_t j=0;j<thirds_.at(i).size();j++){
@@ -64,7 +63,7 @@ public:
 	  allcontr=thirds_.at(i).at(j);
       }
     }
-    cout.setf(ios::fixed,ios::floatfield);
+    std::cout.setf(ios::fixed,ios::floatfield);
     std::cout.precision(3);
     for(size_t i=0;i<names_.size();i++){
       std::cout << names_.at(i) << "\n" ;

@@ -8,7 +8,7 @@
 
 #include "TtZAnalysis/Tools/interface/optParser.h"
 #include "TtZAnalysis/Tools/interface/resultCombiner.h"
-#include "TtZAnalysis/Tools/interface/container.h"
+#include "TtZAnalysis/Tools/interface/histo1D.h"
 #include "TtZAnalysis/Tools/interface/fileReader.h"
 #include "TString.h"
 
@@ -65,10 +65,10 @@ invokeApplication(){
 	std::vector<float> bin;bin.push_back(0);bin.push_back(1);
 	resultCombiner combine;
 
-	//variateContainer1D::debug=true;
+	//variateHisto1D::debug=true;
 
 	for(size_t meas=0;meas<centralpoints.size();meas++){
-		container1D onbinned(bin);
+		histo1D onbinned(bin);
 		onbinned.setBinContent(1,centralpoints.at(meas));
 		std::cout << "adding systematics for measurement "<< meas <<std::endl;
 		for(size_t i=0;i<fr.nLines();i++){
@@ -126,7 +126,7 @@ invokeApplication(){
 		return -1;
 	}
 
-	container1D output=combine.getOutput();
+	histo1D output=combine.getOutput();
 
 
 	combine.coutSystBreakDownInBin(1);

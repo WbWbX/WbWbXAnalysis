@@ -14,7 +14,7 @@
 #include "Math/Minimizer.h"
 
 namespace ztop{
-class container2D;
+class histo2D;
 
 /**
  * small 2d point helper
@@ -133,7 +133,7 @@ public:
 
 
 	const double& getCorrelationCoefficient(size_t i, size_t j)const;
-	void  fillCorrelationCoefficients(container2D *)const;
+	void  fillCorrelationCoefficients(histo2D *)const;
 
 	/**
 	 * gets the contribution of a to b by fixing the parameter a, repeating minos and returning the changes in errup and errdown

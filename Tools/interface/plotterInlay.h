@@ -29,7 +29,7 @@ public:
 
 
     void addInlayPlot(const graph *c);
-    void addInlayPlot(const container1D *c,bool divbw=true);
+    void addInlayPlot(const histo1D *c,bool divbw=true);
 
     void removeInlayPlot(size_t idx);
 
@@ -42,10 +42,10 @@ public:
      * inlayY0 =
      * inlayX1 =
      * inlayY1 =
-     * [containerStyle - MainDefault]
-     * [containerStyle - Main<N=0,1,...>] <- only differences wrt to default
-     * [containerStyle - InlayDefault]
-     * [containerStyle - Inlay<N=0,1,...>] <- only differences wrt to default
+     * [histoStyle - MainDefault]
+     * [histoStyle - Main<N=0,1,...>] <- only differences wrt to default
+     * [histoStyle - InlayDefault]
+     * [histoStyle - Inlay<N=0,1,...>] <- only differences wrt to default
      * [plotStyle - MainPlots]
      * [plotStyle - InlayPlots]
      * n plots main n plots inlay
@@ -74,7 +74,7 @@ private:
     void refreshPad(){};
 
     plotStyle pstyleinlay_;
-    std::vector<containerStyle> cstylesinlay_;
+    std::vector<histoStyle> cstylesinlay_;
     std::vector<plot> plotsinlay_;
 
     float inlayx0_,inlayy0_,inlayx1_,inlayy1_;

@@ -9,7 +9,7 @@
 
 
 #include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
-#include "TtZAnalysis/Tools/interface/containerStackVector.h"
+#include "TtZAnalysis/Tools/interface/histoStackVector.h"
 #include "TRandom.h"
 
 invokeApplication(){
@@ -24,7 +24,7 @@ invokeApplication(){
 	if(infile.Length()<1){
 		parser->coutHelp(); //exits
 	}
-	containerStackVector * csv=new containerStackVector();
+	histoStackVector * csv=new histoStackVector();
 
 	try{
 		csv->loadFromTFile(infile);

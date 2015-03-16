@@ -8,7 +8,7 @@
 ///afs/desy.de/user/k/kiesej/www/analysisDump/index.html
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 #include <iostream>
-#include "TtZAnalysis/Tools/interface/containerStackVector.h"
+#include "TtZAnalysis/Tools/interface/histoStackVector.h"
 #include "TFile.h"
 #include <fstream>
 #include <string>
@@ -74,7 +74,7 @@ int appendToIndex(TString title, TString description,TString plotdir, TString in
 return 0;
 }
 
-void makePlotHTML(TString title, TString descr, TString where , ztop::containerStackVector& csv){
+void makePlotHTML(TString title, TString descr, TString where , ztop::histoStackVector& csv){
 	std::ofstream fileout((where+"index.html").Data());
 
 	using namespace std;
@@ -171,7 +171,7 @@ int main(int argc, char* argv[]){
 	plotdir+="/";
 	plotdir=dumpdir+plotdir;
 	system(("mkdir "+plotdir).Data());
-	containerStackVector csv=getFromFile(infile);
+	histoStackVector csv=getFromFile(infile);
 	makePlotHTML(title,  description, plotdir,csv);
 
 

@@ -1,22 +1,22 @@
 /*
- * containerUnfolder.cc
+ * histoUnfolder.cc
  *
  *  Created on: Sep 4, 2013
  *      Author: kiesej
  */
 
-#include "../interface/containerUnfolder.h"
+#include "../interface/histoUnfolder.h"
 #include <omp.h>
 #include <stdexcept>
 
 /*
-class containerUnfolder{
+class histoUnfolder{
 public:
-	containerUnfolder(): unfnominal_(0),usecontoptions_(true){}
-	~containerUnfolder();
+	histoUnfolder(): unfnominal_(0),usecontoptions_(true){}
+	~histoUnfolder();
 
 	void setOptions();
-	container1D unfold(const container1DUnfold &);
+	histo1D unfold(const histo1DUnfold &);
 
 	const std::vector<unfolder * > & getSystUnfolder() const {return unfsyst_;}
 	unfolder * getNominalUnfolder() const {return unfnominal_;}
@@ -32,17 +32,17 @@ private:
 namespace ztop{
 
 
-bool containerUnfolder::printinfo=false;
-bool containerUnfolder::debug=false;
+bool histoUnfolder::printinfo=false;
+bool histoUnfolder::debug=false;
 
 
 
-containerUnfolder::~containerUnfolder(){
+histoUnfolder::~histoUnfolder(){
 	clear();
 	//delete option pointers?
 }
 
-void containerUnfolder::clear(){//don't delete options
+void histoUnfolder::clear(){//don't delete options
 	if(unfnominal_){
 		delete unfnominal_;
 		unfnominal_=0;
@@ -54,21 +54,21 @@ void containerUnfolder::clear(){//don't delete options
 /**
  * implement later, right now, just use default ones
  */
-void containerUnfolder::setOptions(){
+void histoUnfolder::setOptions(){
 
 }
 
-container1D containerUnfolder::binbybinunfold(container1DUnfold & cuf){
+histo1D histoUnfolder::binbybinunfold(histo1DUnfold & cuf){
 
 	//efficiency:
-	bool tempmakelist=container1D::c_makelist;
-	container1D::c_makelist=false;
+	bool tempmakelist=histo1D::c_makelist;
+	histo1D::c_makelist=false;
 
 	if(debug)
 		std::cout << "containerUnfolder::binbybinunfold "<< cuf.getName() << std::endl;
 	//get full gen&reco
-	container1D genreco=cuf.projectToY(false);
-	container1D gen=cuf.getBinnedGenContainer();
+	histo1D genreco=cuf.projectToY(false);
+	histo1D gen=cuf.getBinnedGenContainer();
 	genreco=genreco.rebinToBinning(gen); //make same bins
 
 	//operations
@@ -76,7 +76,7 @@ container1D containerUnfolder::binbybinunfold(container1DUnfold & cuf){
 	histoContent::divideStatCorrelated=true;
 	if(debug)
 		std::cout << "containerUnfolder::binbybinunfold: creating efficiencies: (bin1): ";
-	container1D effinv=gen/genreco;
+	histo1D effinv=gen/genreco;
 	histoContent::divideStatCorrelated=temp;
 	if(debug)
 		std::cout << 1/effinv.getBinContent(1) << std::endl;
@@ -85,9 +85,9 @@ container1D containerUnfolder::binbybinunfold(container1DUnfold & cuf){
 	histoContent::subtractStatCorrelated=false;
 	if(debug)
 		std::cout << "containerUnfolder::binbybinunfold: getting N_sel - N_bg (bin1) ";
-	container1D sel=cuf.getRecoContainer();
-	container1D bg=cuf.getBackground();
-	container1D smbg=sel - bg;
+	histo1D sel=cuf.getRecoContainer();
+	histo1D bg=cuf.getBackground();
+	histo1D smbg=sel - bg;
 	histoContent::subtractStatCorrelated=temp;
 	if(debug)
 		std::cout << smbg.getBinContent(1) << std::endl;
@@ -96,10 +96,10 @@ container1D containerUnfolder::binbybinunfold(container1DUnfold & cuf){
 	histoContent::multiplyStatCorrelated=false;
 	if(debug)
 		std::cout << "containerUnfolder::binbybinunfold: rebinning N_sel-N_bg to efficiencies" << std::endl;
-	container1D smbgrb=smbg.rebinToBinning(effinv);
+	histo1D smbgrb=smbg.rebinToBinning(effinv);
 	if(debug)
 		std::cout << "containerUnfolder::binbybinunfold: compute xsec (w/o lumi)" << std::endl;
-	container1D xsec=smbgrb * effinv;
+	histo1D xsec=smbgrb * effinv;
 	histoContent::multiplyStatCorrelated=temp;
 
 	if(debug)
@@ -108,34 +108,34 @@ container1D containerUnfolder::binbybinunfold(container1DUnfold & cuf){
 	xsec = xsec * lumiinv;
 	cuf.setUnfolded(xsec);
 	cuf.setRefolded(cuf.getRecoContainer());
-	container1D::c_makelist=tempmakelist;
+	histo1D::c_makelist=tempmakelist;
 	return xsec;
 
 }
-container1D containerUnfolder::unfold(/*const*/ container1DUnfold & cuf){
+histo1D histoUnfolder::unfold(/*const*/ histo1DUnfold & cuf){
 
-	bool tempmakelist=container1D::c_makelist;
-	container1D::c_makelist=false;
-	container1D out,refolded;
+	bool tempmakelist=histo1D::c_makelist;
+	histo1D::c_makelist=false;
+	histo1D out,refolded;
 
 	if(cuf.getBackground().integral() > cuf.getRecoContainer().integral() * 0.55){
 		std::cout << "containerUnfolder::unfold: " << cuf.getName() <<  " has more background than signal ("
 				<<cuf.getBackground().integral()/cuf.getRecoContainer().integral()
 				<< "%), skipping" <<std::endl;
-		return container1D();
+		return histo1D();
 	}
 	if(cuf.getRecoContainer().integral() == 0){
 		std::cout << "containerUnfolder::unfold: " << cuf.getName() << " empty, skipping" <<std::endl;
-		return container1D();
+		return histo1D();
 	}
 
 	if(cuf.isBinByBin()){
-		container1D out=binbybinunfold(cuf);
+		histo1D out=binbybinunfold(cuf);
 		return out;
 	}
 	if(cuf.getBinsX().size()<2){
 		std::cout << "containerUnfolder::unfold: " << cuf.getName() << " has no bins, skipping" <<std::endl;
-		return container1D();
+		return histo1D();
 
 	}
 
@@ -188,7 +188,7 @@ container1D containerUnfolder::unfold(/*const*/ container1DUnfold & cuf){
 	}
 	else{
 		std::cout << "containerUnfolder::unfold: unfolding for nominal failed!! skipping rest" << std::endl;
-		return -1;
+		return histo1D();
 	}
 	if(debug)
 		std::cout << "containerUnfolder::unfold: unfolding done for nominal" << std::endl;
@@ -284,9 +284,9 @@ container1D containerUnfolder::unfold(/*const*/ container1DUnfold & cuf){
 		TH1 * hrf=unfsyst_.at(sys)->getRefolded();
 		if(!huf){
 			std::cout << "containerUnfolder::unfold: unfolding result for " << cuf.getName() << ": " << cuf.getSystErrorName(sys) << " could not be retrieved. stopping unfolding!" << std::endl;
-			return -3;
+			return histo1D();
 		}
-		container1D syscont,sysref;
+		histo1D syscont,sysref;
 		syscont.import(huf,outisBWdiv);
 		sysref.import(hrf,outisBWdiv);
 		delete huf;
@@ -294,7 +294,7 @@ container1D containerUnfolder::unfold(/*const*/ container1DUnfold & cuf){
 		out.addErrorContainer(cuf.getSystErrorName(sys),syscont,true); //ignoreMCStat=true, shouldnt do anything
 		refolded.addErrorContainer(cuf.getSystErrorName(sys),sysref,true); //ignoreMCStat=true
 	}
-	//const container1D setter=out;
+	//const histo1D setter=out;
 	double lumiinv=1/cuf.getLumi();
 	out=out*lumiinv;
 	TString xaxisname=out.getXAxisName();
@@ -308,7 +308,7 @@ container1D containerUnfolder::unfold(/*const*/ container1DUnfold & cuf){
 	out.setYAxisName(xaxisname);
 	cuf.setUnfolded(out);
 	cuf.setRefolded(refolded);
-	container1D::c_makelist=tempmakelist;
+	histo1D::c_makelist=tempmakelist;
 	return out;
 }
 

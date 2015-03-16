@@ -1,9 +1,9 @@
-#ifndef containerStack_h
-#define containerStack_h
+#ifndef histoStack_h
+#define histoStack_h
 
-#include "container.h"
-#include "container2D.h"
-#include "container1DUnfold.h"
+#include "histo1D.h"
+#include "histo2D.h"
+#include "histo1DUnfold.h"
 #include <iostream>
 #include "TString.h"
 #include <vector>
@@ -24,24 +24,24 @@
 namespace ztop{
 class plotterControlPlot;
 
-class containerStack: public tObjectList,public taggedObject{
+class histoStack: public tObjectList,public taggedObject{
 	friend class plotterControlPlot;
 public:
 
 
 	enum plotmode{normal,ratio,sigbg};
 
-	containerStack();
-	containerStack(TString);
-	~containerStack();
+	histoStack();
+	histoStack(TString);
+	~histoStack();
 
 	bool is2D()const{if(mode==dim2) return true; else return false;}
 	bool is1D()const{if(mode==dim1) return true; else return false;}
 	bool is1DUnfold()const{if(mode==unfolddim1) return true; else return false;}
 
-	void push_back(const ztop::container1D&,const TString&, int, double, int legord=-1); //! adds container with, name, colour, norm to stack
-	void push_back(const ztop::container2D&,const TString&, int, double, int legord=-1); //! adds container with, name, colour, norm to stack
-	void push_back(const ztop::container1DUnfold&,const TString&, int, double, int legord=-1); //! adds container with, name, colour, norm to stack
+	void push_back(const ztop::histo1D&,const TString&, int, double, int legord=-1); //! adds container with, name, colour, norm to stack
+	void push_back(const ztop::histo2D&,const TString&, int, double, int legord=-1); //! adds container with, name, colour, norm to stack
+	void push_back(const ztop::histo1DUnfold&,const TString&, int, double, int legord=-1); //! adds container with, name, colour, norm to stack
 	void removeContribution(TString); //! removes contribution
 
 	void setDataLegend(TString leg="data"){dataleg_=leg;}
@@ -68,17 +68,17 @@ public:
 
 	void mergeVariationsFromFileInCMSSW(const std::string& filename);
 
-	ztop::container1D getContribution(TString)const;   //! does not ignore data; makes copy, doesn't change member containers!
-	ztop::container1D getContributionsBut(TString)const;  //!does not ignore data; makes copy, doesn't change member containers!
-	ztop::container1D getContributionsBut(std::vector<TString>)const;  //!does not ignore data; makes copy, doesn't change member containers!
+	ztop::histo1D getContribution(TString)const;   //! does not ignore data; makes copy, doesn't change member containers!
+	ztop::histo1D getContributionsBut(TString)const;  //!does not ignore data; makes copy, doesn't change member containers!
+	ztop::histo1D getContributionsBut(std::vector<TString>)const;  //!does not ignore data; makes copy, doesn't change member containers!
 
-	ztop::container2D getContribution2D(TString)const;   //! does not ignore data; makes copy, doesn't change member containers!
-	ztop::container2D getContributions2DBut(TString)const;  //!does not ignore data; makes copy, doesn't change member containers!
-	ztop::container2D getContributions2DBut(std::vector<TString>)const;  //!does not ignore data; makes copy, doesn't change member containers!
+	ztop::histo2D getContribution2D(TString)const;   //! does not ignore data; makes copy, doesn't change member containers!
+	ztop::histo2D getContributions2DBut(TString)const;  //!does not ignore data; makes copy, doesn't change member containers!
+	ztop::histo2D getContributions2DBut(std::vector<TString>)const;  //!does not ignore data; makes copy, doesn't change member containers!
 
-	ztop::container1DUnfold getContribution1DUnfold(TString)const;   //! does not ignore data; makes copy, doesn't change member containers!
-	ztop::container1DUnfold getContributions1DUnfoldBut(TString)const;  //!does not ignore data; makes copy, doesn't change member containers!
-	ztop::container1DUnfold getContributions1DUnfoldBut(std::vector<TString>)const;  //!does not ignore data; makes copy, doesn't change member containers!
+	ztop::histo1DUnfold getContribution1DUnfold(TString)const;   //! does not ignore data; makes copy, doesn't change member containers!
+	ztop::histo1DUnfold getContributions1DUnfoldBut(TString)const;  //!does not ignore data; makes copy, doesn't change member containers!
+	ztop::histo1DUnfold getContributions1DUnfoldBut(std::vector<TString>)const;  //!does not ignore data; makes copy, doesn't change member containers!
 
 
 	size_t size() const{return colors_.size();}
@@ -88,23 +88,23 @@ public:
 	const int & getColor (unsigned int i)const {return colors_.at(i);};
 	// double & getNorm  (unsigned int i){return norms_.at(i);}
 
-	container1D & getContainer(unsigned int i){return containers_.at(i);}
-	const container1D & getContainer(unsigned int i)const{return containers_.at(i);}
-	//container1D & getContainer(TString);
-	//container1D  getContainer(TString) const;
-	container1D getFullMCContainer()const;           //! gets the sum of all MC containers (normalized with their stored norm) including error handling
+	histo1D & getContainer(unsigned int i){return containers_.at(i);}
+	const histo1D & getContainer(unsigned int i)const{return containers_.at(i);}
+	//histo1D & getContainer(TString);
+	//histo1D  getContainer(TString) const;
+	histo1D getFullMCContainer()const;           //! gets the sum of all MC containers (normalized with their stored norm) including error handling
 
-	container2D & getContainer2D(unsigned int i){return containers2D_.at(i);}
-	const container2D & getContainer2D(unsigned int i)const{return containers2D_.at(i);}
-	//container2D & getContainer2D(TString);
-	//container2D  getContainer2D(TString)const;
-	container2D getFullMCContainer2D()const;           //! gets the sum of all MC containers (normalized with their stored norm) including error handling
+	histo2D & getContainer2D(unsigned int i){return containers2D_.at(i);}
+	const histo2D & getContainer2D(unsigned int i)const{return containers2D_.at(i);}
+	//histo2D & getContainer2D(TString);
+	//histo2D  getContainer2D(TString)const;
+	histo2D getFullMCContainer2D()const;           //! gets the sum of all MC containers (normalized with their stored norm) including error handling
 
-	container1DUnfold & getContainer1DUnfold(unsigned int i){return containers1DUnfold_.at(i);}
-	const container1DUnfold & getContainer1DUnfold(unsigned int i)const{return containers1DUnfold_.at(i);}
-	//container1DUnfold & getContainer1DUnfold(TString);
-	//container1DUnfold  getContainer1DUnfold(TString)const;
-	container1DUnfold getFullMCContainer1DUnfold()const;           //! gets the sum of all MC containers (normalized with their stored norm) including error handling
+	histo1DUnfold & getContainer1DUnfold(unsigned int i){return containers1DUnfold_.at(i);}
+	const histo1DUnfold & getContainer1DUnfold(unsigned int i)const{return containers1DUnfold_.at(i);}
+	//histo1DUnfold & getContainer1DUnfold(TString);
+	//histo1DUnfold  getContainer1DUnfold(TString)const;
+	histo1DUnfold getFullMCContainer1DUnfold()const;           //! gets the sum of all MC containers (normalized with their stored norm) including error handling
 
 	void multiplyNorm(TString , float);
 	void multiplyNorm(size_t , float);
@@ -132,10 +132,10 @@ public:
 	void addRelErrorToBackgrounds(double err ,bool aspartials=false, TString nameprefix="BG",const std::vector<size_t> excludeidxs=std::vector<size_t>());
 	void mergePartialVariations(const TString& identifier, bool strictpartialID=true);
 
-	void addMCErrorStack(const TString&,const containerStack &) ; //only for comp reasons
-	void addErrorStack(const TString& ,const containerStack& ); //! calls container1D::addErrorContainer for each same named member container
-	void getRelSystematicsFrom(const ztop::containerStack&);
-	void addRelSystematicsFrom(const ztop::containerStack&,bool ignorestat=false,bool strict=false);
+	void addMCErrorStack(const TString&,const histoStack &) ; //only for comp reasons
+	void addErrorStack(const TString& ,const histoStack& ); //! calls histo1D::addErrorContainer for each same named member container
+	void getRelSystematicsFrom(const ztop::histoStack&);
+	void addRelSystematicsFrom(const ztop::histoStack&,bool ignorestat=false,bool strict=false);
 	void removeError(TString);
 	void removeAllSystematics();
 	void renameSyst(TString, TString); //! old, new
@@ -147,7 +147,7 @@ public:
 	void splitSystematic(const TString& sysname, const float& fracadivb,
 			const TString & splinamea,  const TString & splinameb);
 
-	void equalizeSystematicsIdxs(containerStack& rhs);
+	void equalizeSystematicsIdxs(histoStack& rhs);
 
 	std::vector<size_t> removeSpikes(bool inclUFOF=false,int limittoindex=-1,float strength=100000,float sign=0.3,float threshold=8);
 
@@ -161,7 +161,7 @@ public:
 	 */
 	//TCanvas * drawControlPlot(TString stylefile="")const;
 	// void drawRatioPlot(TString name="",double resizelabels=1);
-	/*	std::vector<container1D>  getPEffPlots(size_t idx)const;
+	/*	std::vector<histo1D>  getPEffPlots(size_t idx)const;
 	void drawPEffPlot(TString name="",double resizelabels=1);
 	void drawSBGPlot(TString name="",double resizelabels=1,bool invert=false);
 
@@ -170,19 +170,23 @@ public:
 	 */
 	std::map<TString, histoBin>  getAllContentsInBin(size_t bin,int syst=-1,bool print=false)const;
 
-	containerStack rebinXToBinning(const std::vector<float> &)const;
-	containerStack rebinYToBinning(const std::vector<float> &)const;
+	histoStack rebinXToBinning(const std::vector<float> &)const;
+	histoStack rebinYToBinning(const std::vector<float> &)const;
 
 
-	containerStack operator + ( containerStack );
-	containerStack operator - ( containerStack );
-	containerStack operator / ( containerStack );
-	containerStack operator * ( containerStack );
-	containerStack operator * (double);
-	containerStack operator * (float);
-	containerStack operator * (int);
+	histoStack operator + ( const histoStack& );
+	histoStack operator - ( const histoStack& );
+	histoStack operator / ( const histoStack& );
+	histoStack operator * ( const histoStack& );
+	histoStack operator * (double);
+	histoStack operator * (float);
+	histoStack operator * (int);
+	bool operator == (const histoStack&)const;
+	bool operator != (const histoStack&rhs)const{
+		return !(*this==rhs);
+	}
 
-	containerStack append(const containerStack&)const;
+	histoStack append(const histoStack&)const;
 
 	bool setsignal(const TString&);
 	bool addSignal(const TString&);
@@ -194,28 +198,28 @@ public:
 
 	size_t getDataIdx()const;
 
-	container1D getSignalContainer()const;
-	container1D getBackgroundContainer()const;
-	container1D getDataContainer()const;
+	histo1D getSignalContainer()const;
+	histo1D getBackgroundContainer()const;
+	histo1D getDataContainer()const;
 
 
-	container2D getSignalContainer2D()const;
-	container2D getBackgroundContainer2D()const;
+	histo2D getSignalContainer2D()const;
+	histo2D getBackgroundContainer2D()const;
 
 
 
 	/**
 	 * Warning! Member functions will return different things than usual for
-	 * the output container1DUnfold
+	 * the output histo1DUnfold
 	 * Prepares to be ready for unfolding in the following scheme:
 	 * All MCs marked as signal (if no input given, the internal info will be used) will be added
-	 * container1DUnfold::getRecoContainer will return DATA!
-	 * container1DUnfold::getBackgroundContainer will return ALL backgrounds added
+	 * histo1DUnfold::getRecoContainer will return DATA!
+	 * histo1DUnfold::getBackgroundContainer will return ALL backgrounds added
 	 * if you need all MC (so summed reco MC), use:
-	 * container1DUnfold::getVisibleSignal() + container1DUnfold::getBackground()
+	 * histo1DUnfold::getVisibleSignal() + histo1DUnfold::getBackground()
 	 *
 	 */
-	container1DUnfold produceUnfoldingContainer(const std::vector<TString> &sign=std::vector<TString>()) const;// if sign empty use "setsignal"
+	histo1DUnfold produceUnfoldingContainer(const std::vector<TString> &sign=std::vector<TString>()) const;// if sign empty use "setsignal"
 
 
 	/*
@@ -223,14 +227,14 @@ public:
        add all recocont_ w/o signaldef -> set BG of cuf
        (add all) with datadef -> setData in cuf
 	 */
-	container1DUnfold produceXCheckUnfoldingContainer(const std::vector<TString> & sign=std::vector<TString>()) const; /* if sign empty use "setsignal"
+	histo1DUnfold produceXCheckUnfoldingContainer(const std::vector<TString> & sign=std::vector<TString>()) const; /* if sign empty use "setsignal"
        just adds all with signaldef (to be then unfolded and a comparison plot to be made gen vs unfolded gen) -> SWITCH OFF SYSTEMATICS HERE! (should be independent)
 
 	 */
 	//define operators (propagate from containers) for easy handling
 	// also define += etc. and use container += if better, needs to be implemented (later)
 
-	container1DUnfold getSignalContainer1DUnfold(const std::vector<TString> &sign=std::vector<TString>()) const;
+	histo1DUnfold getSignalContainer1DUnfold(const std::vector<TString> &sign=std::vector<TString>()) const;
 
 	/**
 	 * Function that just retunrs a formatted string listing all contributions
@@ -238,7 +242,7 @@ public:
 	 */
 	TString listContributions()const;
 
-	static std::vector<ztop::containerStack*> cs_list;
+	static std::vector<ztop::histoStack*> cs_list;
 	static bool cs_makelist;
 	static void cs_clearlist(){cs_list.clear();}
 	static bool debug;
@@ -269,11 +273,21 @@ public:
 	double kolmogorovTest(Option_t* option = "") const;
 
 
+#ifndef __CINT__
+	template <class T>
+	void writeToStream(T & stream)const;
+	template <class T>
+	void readFromStream(T & stream);
+#endif
+
+	void writeToFile(const std::string& filename)const;
+	void readFromFile(const std::string& filename);
+
 private:
 
-	std::vector<ztop::container1D> containers_;
-	std::vector<ztop::container2D> containers2D_;
-	std::vector<ztop::container1DUnfold> containers1DUnfold_;
+	std::vector<ztop::histo1D> containers_;
+	std::vector<ztop::histo2D> containers2D_;
+	std::vector<ztop::histo1DUnfold> containers1DUnfold_;
 	std::vector<TString> legends_;
 	std::vector<int> colors_;
 	TString dataleg_;
@@ -300,9 +314,74 @@ private:
 
 };
 
+#ifndef __CINT__
+
+template <class T>
+inline void histoStack::writeToStream(T & out)const{
+	taggedObject::writeToStream(out);
+	IO::serializedWrite(containers_,out);
+	IO::serializedWrite(containers2D_,out);
+	IO::serializedWrite(containers1DUnfold_,out);
+	IO::serializedWrite(legends_,out);
+	IO::serializedWrite(colors_,out);
+	IO::serializedWrite(dataleg_,out);
+	IO::serializedWrite(mode,out);
+	IO::serializedWrite(legorder_,out);
+	IO::serializedWrite(signals_,out);
+}
+
+template <class T>
+inline void histoStack::readFromStream(T & in){
+	taggedObject::readFromStream(in);
+	cleanMem();
+	IO::serializedRead(containers_,in);
+	IO::serializedRead(containers2D_,in);
+	IO::serializedRead(containers1DUnfold_,in);
+	IO::serializedRead(legends_,in);
+	IO::serializedRead(colors_,in);
+	IO::serializedRead(dataleg_,in);
+	IO::serializedRead(mode,in);
+	IO::serializedRead(legorder_,in);
+	IO::serializedRead(signals_,in);
+}
 
 
-typedef containerStack container1DStack;
+namespace IO{
+//implements standardized IO operations for this class
+
+
+template<class T>
+inline void serializedWrite(const histoStack&c, T&stream){
+	c.writeToStream(stream);
+}
+template<class T>
+inline void serializedRead(histoStack&c, T&stream){
+	c.readFromStream(stream);
+}
+//re-instantiate vector ops
+template<class T>
+inline void serializedWrite(const std::vector<histoStack>&in, T&saveFile){
+	size_t len=in.size();
+	saveFile.write(reinterpret_cast<const char *>(&len), sizeof(len));
+	for(size_t i=0;i<len;i++)
+		serializedWrite(in.at(i),saveFile);
+}
+template<class T>
+inline void serializedRead(std::vector<histoStack>&in, T&saveFile){
+	size_t len=0;
+	saveFile.read(reinterpret_cast< char *>(&len), sizeof(len));
+	in.resize(len,histoStack());
+	for(size_t i=0;i<len;i++)
+		serializedRead(in.at(i),saveFile);
+}
+
+
+}//io
+
+
+#endif
+
+typedef histoStack container1DStack;
 
 }
 #endif

@@ -1,6 +1,6 @@
 
 
-#include "TtZAnalysis/Tools/interface/container2D.h"
+#include "TtZAnalysis/Tools/interface/histo2D.h"
 #include "TFile.h"
 #include "TGraphAsymmErrors.h"
 #include "TString.h"
@@ -27,7 +27,7 @@ void muonEffTopTH2D(){
 
 	if(ybins.size()!=graphnames.size()+1)
 		throw std::out_of_range("muonEffTopTH2D: needs as many input graphs as 2d eta bins");
-	container2D tmpcont(ybins,ybins);
+	histo2D tmpcont(ybins,ybins);
 
 	TFile f(infilename,"OPEN");
 	std::vector<TGraphAsymmErrors*> gs;

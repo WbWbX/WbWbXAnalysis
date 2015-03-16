@@ -8,7 +8,7 @@
 #include <TString.h>
 
 #include "../../plugins/reweightPU.h"
-#include "../../plugins/container.h"
+#include "../../plugins/histo1D.h"
 
 #include <iostream>
 
@@ -74,15 +74,15 @@ namespace top{
       const unsigned int Netabins=etabins.size()-1;
       
       ///prepare the binned inv mass distributions
-      vector<vector<container1D> > invmassData;
-      vector<vector<container1D> > invmassMC;
-      vector<vector<container1D> > invmassDataPassed;
-      vector<vector<container1D> > invmassMCPassed;
+      vector<vector<histo1D> > invmassData;
+      vector<vector<histo1D> > invmassMC;
+      vector<vector<histo1D> > invmassDataPassed;
+      vector<vector<histo1D> > invmassMCPassed;
       
       for(unsigned int i=1;i<Netabins+1;i++){
-	vector<container1D> tempvec;
+	vector<histo1D> tempvec;
 	for(unsigned int j=1;j<Nptbins+1;j++){
-	  container1D temp=container1D(massbins);
+	  histo1D temp=histo1D(massbins);
 	  tempvec.push_back(temp);
 	}
 	invmassData.push_back(tempvec);

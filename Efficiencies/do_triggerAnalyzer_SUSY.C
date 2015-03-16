@@ -15,7 +15,7 @@
 #include "TROOT.h"
 #include "TChain.h"
 #include "makeplotsnice.h"
-#include "TtZAnalysis/Tools/interface/container.h"
+#include "TtZAnalysis/Tools/interface/histo1D.h"
 #include "TtZAnalysis/Tools/interface/miscUtils.h"
 #include <map>
 #include <fstream>
@@ -60,21 +60,21 @@ public:
   void setBinsEta2dY(std::vector<float> binseta2dy){binseta2dy_.clear();binseta2dy_=binseta2dy;};
   void setBinsPt(std::vector<float> binspt){binspt_.clear();binspt_=binspt;}
 
-  top::container1D  getEtaPlot(){return etaeff_;}
-  top::container1D  getPtPlot(){return pteff_;}
-  top::container1D  getCorrelationPt(){return corrpt_;}
-  top::container1D  getCorrelationEta(){return correta_;}
-  top::container1D getDPhiPlot(){return dphieff_;}
-  top::container1D getVmultiPlot(){return vmultieff_;}
-  top::container1D getJetmultiPlot(){return jetmultieff_;}
-  top::container1D getDPhiPlot2(){return dphieff2_;}
-  top::container1D getCorrelationDPhi(){return corrdphi_;}
-  top::container1D getCorrelationDPhi2(){return corrdphi2_;}
-  top::container1D getCorrelationVmulti(){return corrvmulti_;}
-  top::container1D getCorrelationJetmulti(){return corrjetmulti_;}
+  top::histo1D  getEtaPlot(){return etaeff_;}
+  top::histo1D  getPtPlot(){return pteff_;}
+  top::histo1D  getCorrelationPt(){return corrpt_;}
+  top::histo1D  getCorrelationEta(){return correta_;}
+  top::histo1D getDPhiPlot(){return dphieff_;}
+  top::histo1D getVmultiPlot(){return vmultieff_;}
+  top::histo1D getJetmultiPlot(){return jetmultieff_;}
+  top::histo1D getDPhiPlot2(){return dphieff2_;}
+  top::histo1D getCorrelationDPhi(){return corrdphi_;}
+  top::histo1D getCorrelationDPhi2(){return corrdphi2_;}
+  top::histo1D getCorrelationVmulti(){return corrvmulti_;}
+  top::histo1D getCorrelationJetmulti(){return corrjetmulti_;}
 
-  top::container1D getDrlepPlot(){return drlepeff_;}
-  top::container1D getCorrelationDrlep(){return corrdrlep_;}
+  top::histo1D getDrlepPlot(){return drlepeff_;}
+  top::histo1D getCorrelationDrlep(){return corrdrlep_;}
 
   TH2D getEta2D(){return eta_2dim;}
 
@@ -261,54 +261,54 @@ notinMCtriggers.push_back("DiCentralPFJet");
     for(float i=-0.5;i<=7.5;i++) jetmulti << i;
     for(float i=0 ;i<15 ;i++) drlepbins << 2 * i /15;
 
-    container1D c_pteff  = container1D(binspt_);
-    container1D c_etaeff = container1D(binseta_);
-    container1D c_selpt  = container1D(binspt_);
-    container1D c_seleta = container1D(binseta_);
-    container1D c_trigpt = container1D(binspt_);
-    container1D c_trigeta= container1D(binseta_);
-    container1D c_selmettrigpt  = container1D(binspt_);
-    container1D c_selmettrigeta = container1D(binseta_);
-    container1D c_selbothtrigpt = container1D(binspt_);
-    container1D c_selbothtrigeta= container1D(binseta_);
-    container1D c_corrpt  = container1D(binspt_);
-    container1D c_correta = container1D(binseta_);
+    histo1D c_pteff  = histo1D(binspt_);
+    histo1D c_etaeff = histo1D(binseta_);
+    histo1D c_selpt  = histo1D(binspt_);
+    histo1D c_seleta = histo1D(binseta_);
+    histo1D c_trigpt = histo1D(binspt_);
+    histo1D c_trigeta= histo1D(binseta_);
+    histo1D c_selmettrigpt  = histo1D(binspt_);
+    histo1D c_selmettrigeta = histo1D(binseta_);
+    histo1D c_selbothtrigpt = histo1D(binspt_);
+    histo1D c_selbothtrigeta= histo1D(binseta_);
+    histo1D c_corrpt  = histo1D(binspt_);
+    histo1D c_correta = histo1D(binseta_);
 
-    container1D c_dphieff = container1D(dphi);
-    container1D c_seldphi = container1D(dphi);
-    container1D c_trigdphi = container1D(dphi);
-    container1D c_selmettrigdphi = container1D(dphi);
-    container1D c_selbothtrigdphi = container1D(dphi);
-    container1D c_corrdphi = container1D(dphi);
+    histo1D c_dphieff = histo1D(dphi);
+    histo1D c_seldphi = histo1D(dphi);
+    histo1D c_trigdphi = histo1D(dphi);
+    histo1D c_selmettrigdphi = histo1D(dphi);
+    histo1D c_selbothtrigdphi = histo1D(dphi);
+    histo1D c_corrdphi = histo1D(dphi);
 
-    container1D c_vmultieff = container1D(vmulti);
-    container1D c_selvmulti = container1D(vmulti);
-    container1D c_trigvmulti = container1D(vmulti);
-    container1D c_selmettrigvmulti = container1D(vmulti);
-    container1D c_selbothtrigvmulti = container1D(vmulti);
-    container1D c_corrvmulti = container1D(vmulti);
+    histo1D c_vmultieff = histo1D(vmulti);
+    histo1D c_selvmulti = histo1D(vmulti);
+    histo1D c_trigvmulti = histo1D(vmulti);
+    histo1D c_selmettrigvmulti = histo1D(vmulti);
+    histo1D c_selbothtrigvmulti = histo1D(vmulti);
+    histo1D c_corrvmulti = histo1D(vmulti);
 
-    container1D c_drlepeff = container1D(drlepbins);
-    container1D c_seldrlep = container1D(drlepbins);
-    container1D c_trigdrlep = container1D(drlepbins);
-    container1D c_selmettrigdrlep = container1D(drlepbins);
-    container1D c_selbothtrigdrlep = container1D(drlepbins);
-    container1D c_corrdrlep = container1D(drlepbins);
+    histo1D c_drlepeff = histo1D(drlepbins);
+    histo1D c_seldrlep = histo1D(drlepbins);
+    histo1D c_trigdrlep = histo1D(drlepbins);
+    histo1D c_selmettrigdrlep = histo1D(drlepbins);
+    histo1D c_selbothtrigdrlep = histo1D(drlepbins);
+    histo1D c_corrdrlep = histo1D(drlepbins);
 
 
-    container1D c_jetmultieff = container1D(jetmulti);
-    container1D c_seljetmulti = container1D(jetmulti);
-    container1D c_trigjetmulti = container1D(jetmulti);
-    container1D c_selmettrigjetmulti = container1D(jetmulti);
-    container1D c_selbothtrigjetmulti = container1D(jetmulti);
-    container1D c_corrjetmulti = container1D(jetmulti);
+    histo1D c_jetmultieff = histo1D(jetmulti);
+    histo1D c_seljetmulti = histo1D(jetmulti);
+    histo1D c_trigjetmulti = histo1D(jetmulti);
+    histo1D c_selmettrigjetmulti = histo1D(jetmulti);
+    histo1D c_selbothtrigjetmulti = histo1D(jetmulti);
+    histo1D c_corrjetmulti = histo1D(jetmulti);
 
-    container1D c_dphieff2 = container1D(dphi);
-    container1D c_seldphi2 = container1D(dphi);
-    container1D c_trigdphi2 = container1D(dphi);
-    container1D c_selmettrigdphi2 = container1D(dphi);
-    container1D c_selbothtrigdphi2 = container1D(dphi);
-    container1D c_corrdphi2 = container1D(dphi);
+    histo1D c_dphieff2 = histo1D(dphi);
+    histo1D c_seldphi2 = histo1D(dphi);
+    histo1D c_trigdphi2 = histo1D(dphi);
+    histo1D c_selmettrigdphi2 = histo1D(dphi);
+    histo1D c_selbothtrigdphi2 = histo1D(dphi);
+    histo1D c_corrdphi2 = histo1D(dphi);
 
     //  TFile f1(inputFile);
   TFile f2(pufile_);
@@ -1027,7 +1027,7 @@ notinMCtriggers.push_back("DiCentralPFJet");
 
 
 
-  // container1D c_tempmeteff=c_selmettrigpt/c_selpt;
+  // histo1D c_tempmeteff=c_selmettrigpt/c_selpt;
   //  c_tempmeteff.setDivideBinomial(false);
   std::cout << "making correlation plots, ignore warnings!" <<std::endl;
    c_corrpt = (c_pteff * (c_selmettrigpt/c_selpt))/(c_selbothtrigpt/c_selpt);
@@ -1123,21 +1123,21 @@ private:
   std::vector<float> binseta2dx_;
   std::vector<float> binseta2dy_;
   std::vector<float> binspt_;
-  top::container1D etaeff_;
-  top::container1D pteff_;
-  top::container1D correta_;
-  top::container1D corrpt_;
-  top::container1D dphieff_;
-  top::container1D vmultieff_;
-  top::container1D corrdphi_;
-  top::container1D corrvmulti_;
-  top::container1D jetmultieff_;
-  top::container1D corrjetmulti_;
-  top::container1D dphieff2_;
-  top::container1D corrdphi2_;
+  top::histo1D etaeff_;
+  top::histo1D pteff_;
+  top::histo1D correta_;
+  top::histo1D corrpt_;
+  top::histo1D dphieff_;
+  top::histo1D vmultieff_;
+  top::histo1D corrdphi_;
+  top::histo1D corrvmulti_;
+  top::histo1D jetmultieff_;
+  top::histo1D corrjetmulti_;
+  top::histo1D dphieff2_;
+  top::histo1D corrdphi2_;
 
-  top::container1D drlepeff_;
-  top::container1D corrdrlep_;
+  top::histo1D drlepeff_;
+  top::histo1D corrdrlep_;
 
   bool isMC;
 
@@ -1309,19 +1309,19 @@ cout << "\\end{tabular}\n\\caption{Efficiencies for data and MC and correction f
  cout << "\\end{tabular}\n\\caption{Trigger scale factors for different ttbar selection steps}\n\\end{table}" << endl;
 
 
-//   container1D getEtaPlot(){return etaeff_;}
-//   container1D getPtPlot(){return pteff_;}
-//   container1D getCorrelationPt(){return corrpt_;}
-//   container1D getCorrelationEta(){return correta_;}
+//   histo1D getEtaPlot(){return etaeff_;}
+//   histo1D getPtPlot(){return pteff_;}
+//   histo1D getCorrelationPt(){return corrpt_;}
+//   histo1D getCorrelationEta(){return correta_;}
 
 
 
 
 
 
-  container1D scalefactor;
-  container1D data;
-  container1D MC;
+  histo1D scalefactor;
+  histo1D data;
+  histo1D MC;
   TH2D SFdd,datadd,MCdd;
 
   TFile* f5 = new TFile("triggerSummary_ee.root","RECREATE");

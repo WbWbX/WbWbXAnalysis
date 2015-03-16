@@ -16,7 +16,7 @@
 
 #include <vector>
 #include "TRandom.h"
-#include "../interface/containerStack.h"
+#include "../interface/histoStack.h"
 #include "../interface/plotterControlPlot.h"
 #include "TStyle.h"
 
@@ -31,9 +31,9 @@ int main(){
 
     for(float ji=0;ji<11;ji++)otherbins.push_back(ji*2);
 
-    container2D c2d(bins,bins);
+    histo2D c2d(bins,bins);
 
-    container1D c1(bins),c2(bins),c3(bins),cerr;
+    histo1D c1(bins),c2(bins),c3(bins),cerr;
     TRandom * r=new TRandom(123);
 
     for(int j=0;j<10000;j++){
@@ -43,8 +43,8 @@ int main(){
         c2d.fill(r->Gaus(14,1),r->Gaus(15,3));
     }
 
-    containerStack::debug=true;
-    container1D fdata=c1+c2+c3;
+    histoStack::debug=true;
+    histo1D fdata=c1+c2+c3;
     fdata *= 1.05;
 
     fdata.addGlobalRelError("relerror",0.1);
@@ -52,8 +52,8 @@ int main(){
     c1.addGlobalRelError("somemcsyst",0.1);
     fdata.setNames("data","xaxis [u^{N}_{i}Ts]","yaxis [u^{N}_{i}Ts]");
 
-    containerStack stack;
-    // push_back(ztop::container1D, TString, int, double); //! adds container with, name, colour, norm to st
+    histoStack stack;
+    // push_back(ztop::histo1D, TString, int, double); //! adds container with, name, colour, norm to st
     stack.push_back(c1,"signal",kRed,1,1);
     stack.push_back(c2,"bg1",kBlue,1,2);
     stack.push_back(fdata,"data",kBlack,1,0);
@@ -61,7 +61,7 @@ int main(){
 
     stack.addSignal("signal");
 
-    containerStack::batchmode = false;
+    histoStack::batchmode = false;
 
     std::string stylePath="/afs/naf.desy.de/user/k/kieseler/recentProj/src/TtZAnalysis/Tools/styles/";
 

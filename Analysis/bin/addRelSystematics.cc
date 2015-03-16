@@ -6,7 +6,7 @@
  */
 
 #include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
-#include "TtZAnalysis/Tools/interface/containerStackVector.h"
+#include "TtZAnalysis/Tools/interface/histoStackVector.h"
 
 
 invokeApplication(){
@@ -26,7 +26,7 @@ invokeApplication(){
 		return 0;
 	}
 	std::cout << "opening files..." <<std::endl;
-	containerStackVector *csv=new containerStackVector();
+	histoStackVector *csv=new histoStackVector();
 	try{
 		csv->loadFromTFile(files.at(0));
 	}catch(...){
@@ -34,7 +34,7 @@ invokeApplication(){
 		delete csv;
 		return -1;
 	}
-	containerStackVector *csv2=new containerStackVector();
+	histoStackVector *csv2=new histoStackVector();
 	try{
 		csv2->loadFromTFile(files.at(1));
 	}catch(...){
@@ -51,9 +51,9 @@ invokeApplication(){
 	//	csv2->getStack(i).addEmptyLegend("QCD",400,9);
 
 	}
-//containerStack::debug=true;
+//histoStack::debug=true;
 	std::cout << "adding systematics..." <<std::endl;
-	//container1D::debug=true;
+	//histo1D::debug=true;
 	csv2->addRelSystematicsFrom(*csv,!arenotcorrelated,strict);
 	TString cmd="cp "+files.at(1)+" "+files.at(1)+".bu";
 	system(cmd.Data());

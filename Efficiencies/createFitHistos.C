@@ -8,7 +8,7 @@
 #include <TString.h>
 
 #include "../../plugins/reweightPU.h"
-#include "../../plugins/container.h"
+#include "../../plugins/histo1D.h"
 
 #include <iostream>
 

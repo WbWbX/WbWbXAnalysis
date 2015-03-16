@@ -4,7 +4,7 @@
  *  Created on: Apr 17, 2014
  *      Author: kiesej
  */
-#include "TtZAnalysis/Tools/interface/containerStackVector.h"
+#include "TtZAnalysis/Tools/interface/histoStackVector.h"
 #include "TString.h"
 #include <iostream>
 
@@ -19,14 +19,14 @@
  * (run in the same directory testInSituBTag.cc is located in)
  *
  *
- * Here, you will mostly deal with the containerStack and container1D classes
+ * Here, you will mostly deal with the histoStack and histo1D classes
  * these containers are essentially histograms! Just the naming is (historically) different
  * Remember, they already incorporate systematic uncertainties etc.
  * For reference check the include files below
  *
  */
-#include "TtZAnalysis/Tools/interface/containerStack.h"
-#include "TtZAnalysis/Tools/interface/container.h"
+#include "TtZAnalysis/Tools/interface/histoStack.h"
+#include "TtZAnalysis/Tools/interface/histo1D.h"
 
 /*
  * the input file is located in /nfs/dust/cms/user/kiesej/testtemp/emu_8TeV_172.5_nominal_syst.root
@@ -46,23 +46,23 @@ int main(){
      * prepare the input
      */
 
-    containerStackVector csv_in;
+    histoStackVector csv_in;
     csv_in.loadFromTFile(infilelocation,"emu_8TeV_172.5_nominal_pseudodata230");//_syst");
 
-    containerStack bjetmultistack=csv_in.getStack(btagmultiplot);
-    containerStack jetmultistack =csv_in.getStack(jetmultiplot);
+    histoStack bjetmultistack=csv_in.getStack(btagmultiplot);
+    histoStack jetmultistack =csv_in.getStack(jetmultiplot);
 
 
     std::cout << bjetmultistack.listContributions() <<std::endl; //just such that you know what you can get here
 
-    container1D background=bjetmultistack.getBackgroundContainer(); //this might come handy at some point
-    container1D signal=bjetmultistack.getSignalContainer(); //this might come handy at some point
-    container1D data=bjetmultistack.getContribution("data");
-    container1D dyll=bjetmultistack.getContribution("DY#rightarrowll");
+    histo1D background=bjetmultistack.getBackgroundContainer(); //this might come handy at some point
+    histo1D signal=bjetmultistack.getSignalContainer(); //this might come handy at some point
+    histo1D data=bjetmultistack.getContribution("data");
+    histo1D dyll=bjetmultistack.getContribution("DY#rightarrowll");
 
     // -----> Epsilon_emu
-    containerStack genstack = csv_in.getStack("generated events");
-    container1D signalgen = genstack.getSignalContainer();
+    histoStack genstack = csv_in.getStack("generated events");
+    histo1D signalgen = genstack.getSignalContainer();
     size_t genevtbin=signalgen.getBinNo(1);
     float genttbarevents=signalgen.getBinContent(genevtbin);
 
@@ -76,8 +76,8 @@ int main(){
     }
     int somesystindex=0;
     //get a specific systematic:
-    container1D onlysystemtics= signal.getSystContainer(somesystindex);
-    container1D onlynominal=signal.getSystContainer(-1); // -1 is the index of nominal
+    histo1D onlysystemtics= signal.getSystContainer(somesystindex);
+    histo1D onlynominal=signal.getSystContainer(-1); // -1 is the index of nominal
 
     // ------> get a bin
     size_t onejetbin=signal.getBinNo(1);
@@ -100,7 +100,7 @@ int main(){
     // operators that account for systematics
     // e.g. put all systematic variations, etc in one bin of a new container
     // and then just divide it by another one
-    // please check the test programs here and the container.h headers
+    // please check the test programs here and the histo1D.h headers
     // there is already a lot of built-in functionality
 
 

@@ -8,7 +8,7 @@
 
 
 
-#include "TtZAnalysis/Tools/interface/containerStackVector.h"
+#include "TtZAnalysis/Tools/interface/histoStackVector.h"
 #include "TtZAnalysis/Tools/interface/optParser.h"
 
 #include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
@@ -25,7 +25,7 @@ invokeApplication(){
 	if(instrings.size()!=1)
 		return -1;
 
-	containerStackVector csv;
+	histoStackVector csv;
 	csv.loadFromTFile(instrings.at(0));
 
 	if(csv.size()<1)

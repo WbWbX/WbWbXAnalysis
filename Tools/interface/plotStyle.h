@@ -7,12 +7,12 @@
 
 #ifndef ZTOPPLOTSTYLE_H_
 #define ZTOPPLOTSTYLE_H_
-#include "containerStyle.h"
+#include "histoStyle.h"
 #include <vector>
 class TH1;
 class TVirtualPad;
 /**
- * containerStyle -> plotStyle -> canvasStyle
+ * histoStyle -> plotStyle -> canvasStyle
  */
 namespace ztop{
 

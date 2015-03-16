@@ -21,7 +21,7 @@ plotter2D::~plotter2D(){}
 
 
 
-void plotter2D::setPlot(const container2D* c, bool dividebybinarea){
+void plotter2D::setPlot(const histo2D* c, bool dividebybinarea){
 	plot_=*c;
 	if(dividebybinarea)
 		dividebybinarea_=true;

@@ -55,3 +55,26 @@ else
      echo "CMSSW release prepared for TtZAnalysis Framework"
 
 fi
+
+cat > $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected/boost_iostreams.xml <<TOOL_END
+<tool name="boost_iostreams" version="@TOOL_VERSION@">
+  <info url="http://www.boost.org"/>
+  <lib name="boost_iostreams"/>
+  <use name="boost"/>
+  <use name="zlib"/>
+  <use name="bz2lib"/>
+</tool>
+TOOL_END
+
+cat > $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected/boost_serialization.xml <<TOOL_END
+<tool name="boost_serialization" version="@TOOL_VERSION@">
+  <info url="http://www.boost.org"/>
+  <lib name="boost_serialization"/>
+  <use name="boost"/>
+  <use name="zlib"/>
+  <use name="bz2lib"/>
+</tool>
+TOOL_END
+
+scram setup boost_serialization
+scram setup boost_iostreams

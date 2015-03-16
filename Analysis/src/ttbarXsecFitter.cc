@@ -8,8 +8,8 @@
 
 #include "../interface/ttbarXsecFitter.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
-#include "TtZAnalysis/Tools/interface/containerStack.h"
-#include "TtZAnalysis/Tools/interface/containerStackVector.h"
+#include "TtZAnalysis/Tools/interface/histoStack.h"
+#include "TtZAnalysis/Tools/interface/histoStackVector.h"
 #include "TtZAnalysis/Tools/interface/fileReader.h"
 #include "Math/Functor.h"
 #include "TtZAnalysis/Tools/interface/plotterControlPlot.h"
@@ -157,12 +157,12 @@ void ttbarXsecFitter::readInput(const std::string & configfilename){
 		std::cout << "ttbarXsecFitter::readInput: done. " <<std::endl;
 	}
 }
-void ttbarXsecFitter::createPseudoDataFromMC(container1D::pseudodatamodes mode){
+void ttbarXsecFitter::createPseudoDataFromMC(histo1D::pseudodatamodes mode){
 	for(size_t i=0;i<datasets_.size();i++)
 		datasets_.at(i).createPseudoDataFromMC(mode);
 }
 
-void ttbarXsecFitter::dataset::createPseudoDataFromMC(container1D::pseudodatamodes mode){
+void ttbarXsecFitter::dataset::createPseudoDataFromMC(histo1D::pseudodatamodes mode){
 	if(!random_){ //first call
 		random_ = new TRandom3();
 		datacontsorig_nbjets_=dataconts_nbjets_; //safe originals
@@ -183,7 +183,7 @@ void ttbarXsecFitter::dataset::createPseudoDataFromMC(container1D::pseudodatamod
 		//debug=false;
 	}
 	for(size_t i=0;i<dataconts_nbjets_.size();i++){
-		container1D tmpmc=backgroundcontsorig_nbjets_.at(i) + signalcontsorig_nbjets_.at(i);
+		histo1D tmpmc=backgroundcontsorig_nbjets_.at(i) + signalcontsorig_nbjets_.at(i);
 		dataconts_nbjets_.at(i)=tmpmc.createPseudoExperiment(random_,&datacontsorig_nbjets_.at(i),mode);
 		backgroundconts_nbjets_.at(i)=backgroundcontsorig_nbjets_.at(i).createPseudoExperiment(random_,0,mode);
 		signalconts_nbjets_.at(i)=signalcontsorig_nbjets_.at(i).createPseudoExperiment(random_,0,mode);
@@ -223,13 +223,13 @@ void ttbarXsecFitter::dataset::createContinuousDependencies(bool useMConly,bool 
 	for(size_t it=0;it<signalconts_nbjets_.size();it++){
 
 		signalshape_nbjet_.push_back(createLeptonJetAcceptance(signalconts_nbjets_,signalpsmigconts_nbjets_,signalvisgenconts_nbjets_, bjetcount,visibleps));
-		container1D temp=dataconts_nbjets_.at(it);
+		histo1D temp=dataconts_nbjets_.at(it);
 		if(useMConly){
 			temp=signalconts_nbjets_.at(it) + backgroundconts_nbjets_.at(it);
 			temp.setAllErrorsZero(false);
 		}
 
-		variateContainer1D tmpvarc;
+		variateHisto1D tmpvarc;
 		tmpvarc.import(temp);
 		data_nbjet_.push_back(tmpvarc);
 
@@ -281,7 +281,7 @@ void ttbarXsecFitter::addFullExtrapolError(const TString& sysname){
 	}
 }
 
-containerStack ttbarXsecFitter::produceStack(bool fittedvalues,size_t bjetcat,size_t datasetidx,double& chi2)const{
+histoStack ttbarXsecFitter::produceStack(bool fittedvalues,size_t bjetcat,size_t datasetidx,double& chi2)const{
 	if(debug)
 		std::cout << "ttbarXsecFitter::produceStack" <<std::endl;
 	checkSizes();
@@ -293,8 +293,8 @@ containerStack ttbarXsecFitter::produceStack(bool fittedvalues,size_t bjetcat,si
 
 	size_t nbjet=bjetcat;
 
-	containerStack out;
-	container1D data,signal,background;
+	histoStack out;
+	histo1D data,signal,background;
 	std::vector<double> fittedparas;
 	if(fittedvalues)
 		fittedparas=fittedparas_;
@@ -324,7 +324,7 @@ containerStack ttbarXsecFitter::produceStack(bool fittedvalues,size_t bjetcat,si
 
 	if(debug)
 		std::cout << "ttbarXsecFitter::produceStack: signalshape" << std::endl;
-	container1D exportc=datasets_.at(datasetidx).signalshape(nbjet).exportContainer( fittedparas );
+	histo1D exportc=datasets_.at(datasetidx).signalshape(nbjet).exportContainer( fittedparas );
 	signal=  exportc * multi ;
 
 
@@ -443,12 +443,12 @@ int ttbarXsecFitter::fit(){
 	return fit(dummy,dummy,dummy);
 }
 
-container1D ttbarXsecFitter::getCb (bool fittedvalues,size_t datasetidx)const{
+histo1D ttbarXsecFitter::getCb (bool fittedvalues,size_t datasetidx)const{
 	if(datasetidx>=datasets_.size())
 		throw std::out_of_range("ttbarXsecFitter::getCb: dataset index out of range");
 
 	//if(eighttev) return container_c_b_.at(0); else return container_c_b_.at(1);
-	variateContainer1D temp=datasets_.at(datasetidx).container_c_b();
+	variateHisto1D temp=datasets_.at(datasetidx).container_c_b();
 
 	if(fittedvalues)
 		return temp.exportContainer(fittedparas_);
@@ -456,12 +456,12 @@ container1D ttbarXsecFitter::getCb (bool fittedvalues,size_t datasetidx)const{
 		return temp.exportContainer();
 
 }
-container1D ttbarXsecFitter::getEps(bool fittedvalues, size_t datasetidx)const{
+histo1D ttbarXsecFitter::getEps(bool fittedvalues, size_t datasetidx)const{
 	if(datasetidx>=datasets_.size())
 		throw std::out_of_range("ttbarXsecFitter::getEps: dataset index out of range");
 
 	//{if(eighttev) return container_eps_b_.at(0); else return container_eps_b_.at(1);}
-	variateContainer1D temp=datasets_.at(datasetidx).container_eps_b();
+	variateHisto1D temp=datasets_.at(datasetidx).container_eps_b();
 
 	if(fittedvalues)
 		return temp.exportContainer(fittedparas_);
@@ -470,8 +470,8 @@ container1D ttbarXsecFitter::getEps(bool fittedvalues, size_t datasetidx)const{
 
 }
 
-container2D  ttbarXsecFitter::getCorrelations()const{
-	container2D out;
+histo2D  ttbarXsecFitter::getCorrelations()const{
+	histo2D out;
 	fitter_.fillCorrelationCoefficients(&out);
 	return out;
 }
@@ -945,7 +945,7 @@ texTabler ttbarXsecFitter::makeSystBreakDownTable(size_t datasetidx){
 
 texTabler ttbarXsecFitter::makeCorrTable() const{
 	TString format=" l ";
-	container2D corr=getCorrelations();
+	histo2D corr=getCorrelations();
 	for(size_t i=1;i<corr.getBinsX().size()-1;i++)
 		format+=" | c ";
 	texTabler tab(format);
@@ -1284,12 +1284,12 @@ double ttbarXsecFitter::getExtrapolationError( size_t datasetidx, size_t paraidx
 	 */
 }
 
-variateContainer1D ttbarXsecFitter::dataset::createLeptonJetAcceptance(const std::vector<container1D>& signals,
-		const std::vector<container1D>& signalpsmig,
-		const std::vector<container1D>& signalvisPSgen,
+variateHisto1D ttbarXsecFitter::dataset::createLeptonJetAcceptance(const std::vector<histo1D>& signals,
+		const std::vector<histo1D>& signalpsmig,
+		const std::vector<histo1D>& signalvisPSgen,
 		size_t bjetcategory, bool visPS)
 {
-	// this one can use container1D operators!
+	// this one can use histo1D operators!
 	if(debug)
 		std::cout << "ttbarXsecFitter::dataset::createLeptonJetAcceptance: "<< bjetcategory <<", "<< name_<<std::endl;
 
@@ -1307,28 +1307,28 @@ variateContainer1D ttbarXsecFitter::dataset::createLeptonJetAcceptance(const std
 	size_t bjet1bin=minbjetbin+1;
 	size_t bjet2bin=minbjetbin+2;
 
-	container1D signal=signals.at(bjetbin);//.getSignalContainer();
+	histo1D signal=signals.at(bjetbin);//.getSignalContainer();
 	//if(norm_nbjet_global)
 	signal=signal.getIntegralBin();
-	container1D signalintegral=signals.at(minbjetbin); //stack->at(minbjetbin).getSignalContainer();
+	histo1D signalintegral=signals.at(minbjetbin); //stack->at(minbjetbin).getSignalContainer();
 	//if(norm_nbjet_global)
 	signalintegral=signalintegral.getIntegralBin();
 	for(size_t i=minbjetbin+1;i<maxbjetbin;i++){
-		container1D tmpsig=signals.at(i); //stack->at(i).getSignalContainer();
+		histo1D tmpsig=signals.at(i); //stack->at(i).getSignalContainer();
 		//if(norm_nbjet_global)
 		tmpsig=tmpsig.getIntegralBin();
 		signalintegral += tmpsig;
 	}
 
-	container1D psmigint;
+	histo1D psmigint;
 	for(size_t i=minbjetbin;i<maxbjetbin;i++){
-		container1D tmp=signalpsmig.at(i);
+		histo1D tmp=signalpsmig.at(i);
 		tmp=tmp.getIntegralBin();
 		psmigint+=tmp;
 	}
-	container1D visgenint;
+	histo1D visgenint;
 	for(size_t i=minbjetbin;i<maxbjetbin;i++){
-		container1D tmp=signalvisPSgen.at(i);
+		histo1D tmp=signalvisPSgen.at(i);
 		tmp=tmp.getIntegralBin();
 		visgenint+=tmp;
 	}
@@ -1347,9 +1347,9 @@ variateContainer1D ttbarXsecFitter::dataset::createLeptonJetAcceptance(const std
 	histoContent::divideStatCorrelated = true;
 
 
-	container1D one=signal.createOne();
+	histo1D one=signal.createOne();
 
-	container1D AccBRRecodil;
+	histo1D AccBRRecodil;
 	if(visPS){
 		//dilepton reco   *   ( 1 + psmigfraction) -> effective efficiency
 		AccBRRecodil = ((signalintegral - psmigint)/visgenint) * (one + psmigint/signalintegral);// * (visgenint*gennorm) * (visgenint*gennorm) ));
@@ -1360,31 +1360,31 @@ variateContainer1D ttbarXsecFitter::dataset::createLeptonJetAcceptance(const std
 		AccBRRecodil = signalintegral * gennorm; //this includes lumi unc but cancels the xsec and lumi abs value!
 	}
 
-	container1D onebjetsignal = signals.at(bjet1bin);//stack->at(bjet1bin).getSignalContainer();
+	histo1D onebjetsignal = signals.at(bjet1bin);//stack->at(bjet1bin).getSignalContainer();
 	//if(norm_nbjet_global)
 	onebjetsignal=onebjetsignal.getIntegralBin();
-	container1D twobjetsignal = signals.at(bjet2bin);//stack->at(bjet2bin).getSignalContainer();
+	histo1D twobjetsignal = signals.at(bjet2bin);//stack->at(bjet2bin).getSignalContainer();
 	//if(norm_nbjet_global)
 	twobjetsignal=twobjetsignal.getIntegralBin();
 
-	container1D correction_b =  ((signalintegral * twobjetsignal) * 4.)
+	histo1D correction_b =  ((signalintegral * twobjetsignal) * 4.)
 																																																																						                																																																																																																																																																																																								/ ( (onebjetsignal + (twobjetsignal * 2.)) * (onebjetsignal + (twobjetsignal * 2.)));
 
 	correction_b.removeStatFromAll();
 
 	container_c_b_.import(correction_b);
 
-	container1D eps_b = twobjetsignal / (correction_b * signalintegral);
+	histo1D eps_b = twobjetsignal / (correction_b * signalintegral);
 	eps_b.sqrt();
 	eps_b.removeStatFromAll();
 
 	container_eps_b_.import(eps_b);
 
-	container1D lepjetcont1bjet=     (eps_b * 2.  - (correction_b * (eps_b * eps_b)) * 2.);
+	histo1D lepjetcont1bjet=     (eps_b * 2.  - (correction_b * (eps_b * eps_b)) * 2.);
 	lepjetcont1bjet.removeStatFromAll();
-	container1D lepjetcont2bjets=    (correction_b * eps_b) * eps_b ;
+	histo1D lepjetcont2bjets=    (correction_b * eps_b) * eps_b ;
 	lepjetcont2bjets.removeStatFromAll();
-	container1D lepjetcont0bjet=   AccBRRecodil* (one - lepjetcont1bjet - lepjetcont2bjets);
+	histo1D lepjetcont0bjet=   AccBRRecodil* (one - lepjetcont1bjet - lepjetcont2bjets);
 	lepjetcont0bjet.removeStatFromAll();
 	lepjetcont1bjet *= AccBRRecodil;
 	lepjetcont1bjet.removeStatFromAll();
@@ -1392,20 +1392,20 @@ variateContainer1D ttbarXsecFitter::dataset::createLeptonJetAcceptance(const std
 	lepjetcont2bjets.removeStatFromAll();
 
 	//epsemu (extrapolation)
-	variateContainer1D tmp;
+	variateHisto1D tmp;
 	tmp.import(AccBRRecodil);
 
 	eps_emu_=*tmp.getBin(1);
 
 
 	//the stat uncertainties will be screwed up, but they are not used anyway
-	bool tmpvarcdebug=variateContainer1D::debug;
+	bool tmpvarcdebug=variateHisto1D::debug;
 	//	if(debug)
-	//		variateContainer1D::debug=true;
-	variateContainer1D out;
+	//		variateHisto1D::debug=true;
+	variateHisto1D out;
 	//if(norm_nbjet_global){
 	// disentangle shape and global norm here
-	container1D normedsignal = signals.at(bjetbin);//stack->at(bjetbin).getSignalContainer(); //for shape
+	histo1D normedsignal = signals.at(bjetbin);//stack->at(bjetbin).getSignalContainer(); //for shape
 	normedsignal.normalize(true,true); //normalize to 1 incl syst
 	out.import(normedsignal);
 
@@ -1413,7 +1413,7 @@ variateContainer1D ttbarXsecFitter::dataset::createLeptonJetAcceptance(const std
 	if(normalization_nbjet_.size() <= bjetbin)
 		normalization_nbjet_.resize(bjetbin+1);
 
-	variateContainer1D tmpvarc;
+	variateHisto1D tmpvarc;
 	if(bjetcategory == 0){
 		tmpvarc.import(lepjetcont0bjet);
 	}
@@ -1430,7 +1430,7 @@ variateContainer1D ttbarXsecFitter::dataset::createLeptonJetAcceptance(const std
 	histoContent::addStatCorrelated=tmpaddStatCorrelated;
 	histoContent::divideStatCorrelated=tmpdivideStatCorrelated;
 
-	variateContainer1D::debug=tmpvarcdebug;
+	variateHisto1D::debug=tmpvarcdebug;
 	if(debug)
 		std::cout << "ttbarXsecFitter::dataset::createLeptonJetAcceptance: done " << std::endl;
 	return out;
@@ -1468,13 +1468,13 @@ void  ttbarXsecFitter::dataset::readStacks(const std::string configfilename,cons
 	fr.setStartMarker(("[ "+name_+ " ]").Data());
 	fr.setEndMarker(("[ end - "+name_+ " ]").Data());
 	fr.readFile(configfilename);
-	std::vector<std::vector<containerStack> >  out;
+	std::vector<std::vector<histoStack> >  out;
 
 	std::cout << "reading and preparing " << name_ << " stacks..." <<std::endl;
 	size_t bjetcount=0,jetcount=0,oldbjetcount=0;
 	TString oldfilename="";
-	containerStackVector csv;
-	std::vector<containerStack> tmpstacks;
+	histoStackVector csv;
+	std::vector<histoStack> tmpstacks;
 	for(size_t line=0;line<fr.nLines();line++){
 		if(!debug)
 			displayStatusBar(line,fr.nLines());
@@ -1501,10 +1501,10 @@ void  ttbarXsecFitter::dataset::readStacks(const std::string configfilename,cons
 			bool newcsv=oldfilename!=filename;
 			oldfilename=filename;
 			if(newcsv)
-				csv.loadFromTFile(filename); //new file
+				csv.readFromFile(filename.Data()); //new file
 
 			//csv.listStacks();
-			containerStack tmpstack;
+			histoStack tmpstack;
 			try{
 				tmpstack=csv.getStack(plotname);
 			}
@@ -1546,7 +1546,7 @@ void  ttbarXsecFitter::dataset::readStacks(const std::string configfilename,cons
 	backgroundconts_nbjets_.resize(out.size());
 	dataconts_nbjets_.resize(out.size());
 	for(size_t nbjet=0;nbjet<out.size();nbjet++){
-		container1D sign,signvisps,signpsmig,backgr,data;
+		histo1D sign,signvisps,signpsmig,backgr,data;
 		for(size_t j=0;j<out.at(nbjet).size();j++){
 			sign          =sign.append(out.at(nbjet).at(j).getSignalContainer1DUnfold().getRecoContainer());
 			signvisps     =signvisps.append(out.at(nbjet).at(j).getSignalContainer1DUnfold().getGenContainer());
@@ -1572,16 +1572,16 @@ void  ttbarXsecFitter::dataset::readStacks(const std::string configfilename,cons
  */
 void ttbarXsecFitter::dataset::equalizeIndices(dataset & rhs){
 
-	container1D::equalizeSystematics(signalconts_nbjets_,rhs.signalconts_nbjets_);
-	container1D::equalizeSystematics(signalvisgenconts_nbjets_,rhs.signalvisgenconts_nbjets_);
-	container1D::equalizeSystematics(signalpsmigconts_nbjets_,rhs.signalpsmigconts_nbjets_);
-	container1D::equalizeSystematics(dataconts_nbjets_,rhs.dataconts_nbjets_);
-	container1D::equalizeSystematics(backgroundconts_nbjets_,rhs.backgroundconts_nbjets_);
+	histo1D::equalizeSystematics(signalconts_nbjets_,rhs.signalconts_nbjets_);
+	histo1D::equalizeSystematics(signalvisgenconts_nbjets_,rhs.signalvisgenconts_nbjets_);
+	histo1D::equalizeSystematics(signalpsmigconts_nbjets_,rhs.signalpsmigconts_nbjets_);
+	histo1D::equalizeSystematics(dataconts_nbjets_,rhs.dataconts_nbjets_);
+	histo1D::equalizeSystematics(backgroundconts_nbjets_,rhs.backgroundconts_nbjets_);
 
 
 }
 
-void ttbarXsecFitter::dataset::addUncertainties(containerStack * stack,size_t nbjets,bool removesyst,std::vector<std::pair<TString, double> >& priorcorrcoeff)const{ //can be more sophisticated
+void ttbarXsecFitter::dataset::addUncertainties(histoStack * stack,size_t nbjets,bool removesyst,std::vector<std::pair<TString, double> >& priorcorrcoeff)const{ //can be more sophisticated
 	if(debug)
 		std::cout << "ttbarXsecFitter::dataset::addUncertainties: " <<name_ << ", "<< nbjets <<std::endl;
 

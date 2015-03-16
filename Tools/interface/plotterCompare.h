@@ -9,9 +9,9 @@
 #define PLOTTERCOMPARE_H_
 
 #include "plotterBase.h"
-#include "containerStyle.h"
+#include "histoStyle.h"
 #include "plotStyle.h"
-#include "container.h"
+#include "histo1D.h"
 #include "plot.h"
 #include <vector>
 
@@ -33,8 +33,8 @@ public:
     plotterCompare();
     ~plotterCompare(){cleanMem();}
 
-    void setNominalPlot(const container1D *c,bool divbw=true);
-    void setComparePlot(const container1D *c,size_t idx,bool divbw=true);
+    void setNominalPlot(const histo1D *c,bool divbw=true);
+    void setComparePlot(const histo1D *c,size_t idx,bool divbw=true);
     void setNominalPlot(const graph *c);
     void setComparePlot(const graph *c,size_t idx);
 
@@ -57,10 +57,10 @@ public:
     /*
      * expects entries:
      * [plotterCompareStyle] defines size N>0
-     * [containerStyle - NominalUpper]
-     * N x [containerStyle - CompareUpper<N-1>]
-     * [containerStyle - NominalRatio]
-     * N x [containerStyle - CompareRatio<N-1>]
+     * [histoStyle - NominalUpper]
+     * N x [histoStyle - CompareUpper<N-1>]
+     * [histoStyle - NominalRatio]
+     * N x [histoStyle - CompareRatio<N-1>]
      * [plotStyle - Upper]
      * [plotStyle - Ratio]
      */
@@ -84,10 +84,10 @@ protected:
 private:
     plotStyle upperstyle_;
     plotStyle ratiostyle_;
-    containerStyle nomstyleupper_;
-    containerStyle nomstyleratio_;
-    std::vector<containerStyle> compstylesupper_;
-    std::vector<containerStyle> compstylesratio_;
+    histoStyle nomstyleupper_;
+    histoStyle nomstyleratio_;
+    std::vector<histoStyle> compstylesupper_;
+    std::vector<histoStyle> compstylesratio_;
 
     std::string nominalid_;
     std::vector<std::string> compids_;
@@ -100,7 +100,7 @@ private:
     size_t size_;
 
 
-    void drawAllPlots(const plotStyle* ps, const containerStyle * cs, const std::vector<containerStyle>* vcs,
+    void drawAllPlots(const plotStyle* ps, const histoStyle * cs, const std::vector<histoStyle>* vcs,
             const plot * nompl, const std::vector<plot>* vcpl, bool nomlast,bool isratio);
 
     plot plotterCompareStyle(const plot&);

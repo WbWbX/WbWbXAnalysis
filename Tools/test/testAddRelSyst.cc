@@ -7,7 +7,7 @@
 
 
 
-#include "TtZAnalysis/Tools/interface/container.h"
+#include "TtZAnalysis/Tools/interface/histo1D.h"
 #include "TCanvas.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 
@@ -21,7 +21,7 @@ int main(){
 	std::vector<float> bins;
 	bins << 0 << 1 << 2 << 3 << 4 << 5;
 
-	container1D nominal(bins);
+	histo1D nominal(bins);
 
 
 	for(size_t i=0;i<=nominal.getNBins();i++){
@@ -34,12 +34,12 @@ int main(){
 	nominal.drawFullPlot("");
 	c->Print("testRelSys.pdf(");
 
-	container1D nominal2=nominal;
+	histo1D nominal2=nominal;
 	nominal.removeAllSystematics();
 	nominal.addRelSystematicsFrom(nominal2);
 	nominal.drawFullPlot("");
 	c->Print("testRelSys.pdf");
-	container1D::debug=true;
+	histo1D::debug=true;
 	nominal2.renameSyst("sys","sys2");
 	nominal.addRelSystematicsFrom(nominal2);
 	for(size_t i=0;i<=nominal.getNBins();i++){

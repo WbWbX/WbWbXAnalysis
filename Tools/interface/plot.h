@@ -11,7 +11,7 @@
 #include "tObjectList.h"
 #include "TString.h"
 #include "graph.h"
-#include "container.h"
+#include "histo1D.h"
 
 class TH1D;
 class TGraphAsymmErrors;
@@ -25,13 +25,13 @@ namespace ztop{
 class plot: tObjectList{
 public:
     plot();
-    plot(const container1D *,bool divbbw=true);
+    plot(const histo1D *,bool divbbw=true);
     plot(const graph*);
     ~plot();
     plot(const plot& rhs);
     plot & operator = (const plot& rhs);
 
-    void createFrom(const container1D *,bool divbbw=true);
+    void createFrom(const histo1D *,bool divbbw=true);
     void createFrom(const graph *);
 
     void removeXErrors();

@@ -9,7 +9,7 @@
 #include "../interface/resultsSummary.h"
 #include <algorithm>
 #include "../interface/formatter.h"
-#include "../interface/container.h"
+#include "../interface/histo1D.h"
 #include "../interface/systAdder.h"
 
 namespace ztop{

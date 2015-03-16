@@ -10,7 +10,7 @@
 #include <stdexcept>
 #include <vector>
 #include "TString.h"
-#include "TtZAnalysis/Tools/interface/container1DUnfold.h"
+#include "TtZAnalysis/Tools/interface/histo1DUnfold.h"
 #include "NTFullEvent.h"
 
 namespace ztop{
@@ -60,7 +60,7 @@ protected:
         throw std::runtime_error("analysisPlots: no puweight associated");
     }
     const bool & use()const{return use_;}
-    container1DUnfold* addPlot(const std::vector<float>& genbins, const std::vector<float>& recobins, const TString& name, const TString &xname, const TString &yname);
+    histo1DUnfold* addPlot(const std::vector<float>& genbins, const std::vector<float>& recobins, const TString& name, const TString &xname, const TString &yname);
 
     std::vector<float> makebins(size_t nbins,float min,float max)const;
 
@@ -69,7 +69,7 @@ private:
 
     const NTFullEvent * eventp_;
     bool use_;
-    std::vector<container1DUnfold* > conts_;
+    std::vector<histo1DUnfold* > conts_;
     size_t step_;
 };
 

@@ -8,7 +8,7 @@
 #ifndef CONTROLPLOTBASKET_H_
 #define CONTROLPLOTBASKET_H_
 
-#include "TtZAnalysis/Tools/interface/container.h"
+#include "TtZAnalysis/Tools/interface/histo1D.h"
 #include <vector>
 
 //helper
@@ -49,12 +49,12 @@ public:
 protected:
     const NTFullEvent * event(){return evt_;}
 
-    container1D *addPlot(const TString & name, const TString & xaxisname,const TString & yaxisname, const bool & mergeufof=true);
+    histo1D *addPlot(const TString & name, const TString & xaxisname,const TString & yaxisname, const bool & mergeufof=true);
 
     void initStep(const size_t& step);
     std::vector<float> & setBins(){tempbins_.clear();return tempbins_;}
     std::vector<float> & getBins(){return tempbins_;}
-    container1D *  &last(){return lcont_;}
+    histo1D *  &last(){return lcont_;}
 
     const bool & isNewStep()const{return tmpnewstep_;}
 
@@ -70,11 +70,11 @@ private:
     size_t tmpstep_;
     bool tmpnewstep_;
     const NTFullEvent * evt_;
-    container1D * lcont_;
+    histo1D * lcont_;
     size_t size_;
     std::vector<float> tempbins_;
-    std::vector< std::vector<ztop::container1D *> > cplots_; //step,plot
-    std::vector< std::vector<ztop::container1D> > scplots_; //stack! step,plot
+    std::vector< std::vector<ztop::histo1D *> > cplots_; //step,plot
+    std::vector< std::vector<ztop::histo1D> > scplots_; //stack! step,plot
     bool initphase_;
 
 };

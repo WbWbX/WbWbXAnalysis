@@ -1,4 +1,4 @@
-#include "TtZAnalysis/Tools/interface/containerStackVector.h"
+#include "TtZAnalysis/Tools/interface/histoStackVector.h"
 #include "TtZAnalysis/Tools/interface/fileReader.h"
 #include <vector>
 #include "TString.h"
@@ -36,12 +36,17 @@ TString stripStuff(TString s){      /// needs rewriting for "/" part
 
 ztop::container1DStackVector getFromFile(TString filename)
 {
-	TFile * ftemp=new TFile(filename,"read");
-	TTree * ttemp = (TTree*)ftemp->Get("containerStackVectors");
 	ztop::container1DStackVector vtemp;
-	vtemp.loadFromTree(ttemp);
-	delete ttemp;
-	delete ftemp;
+	if(filename.EndsWith(".root")){
+		TFile * ftemp=new TFile(filename,"read");
+		TTree * ttemp = (TTree*)ftemp->Get("containerStackVectors");
+		vtemp.loadFromTree(ttemp);
+		delete ttemp;
+		delete ftemp;
+	}
+	else{
+		vtemp.readFromFile(filename.Data());
+	}
 	return vtemp;
 }
 int main(int argc, char* argv[]){
@@ -56,8 +61,10 @@ int main(int argc, char* argv[]){
 		TString filename=(TString)argv[i];
 		//filenames.push_back(filename);
 		//containerNames.push_back(cname);
-		containerStackVector c=getFromFile(filename);
-		c.writeAllToTFile(filename.ReplaceAll(".root","_plots.root"),true);
+		histoStackVector c=getFromFile(filename);
+		filename.ReplaceAll(".ztop","_plots.root");
+		filename.ReplaceAll(".root","_plots.root");
+		c.writeAllToTFile(filename,true);
 	}
 
 	return 0;

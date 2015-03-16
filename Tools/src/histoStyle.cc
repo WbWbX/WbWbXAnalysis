@@ -1,11 +1,11 @@
 /*
- * containerStyle.cc
+ * histoStyle.cc
  *
  *  Created on: Sep 30, 2013
  *      Author: kiesej
  */
 
-#include "../interface/containerStyle.h"
+#include "../interface/histoStyle.h"
 #include "../interface/fileReader.h"
 #include "TH1.h"
 #include "TGraphAsymmErrors.h"
@@ -144,21 +144,21 @@ void textBoxes::drawToPad(TVirtualPad * p,bool NDC){
 }
 
 
-containerStyle::containerStyle(): markerSize(0),markerStyle(0),markerColor(0),lineSize(0),lineStyle(0),
+histoStyle::histoStyle(): markerSize(0),markerStyle(0),markerColor(0),lineSize(0),lineStyle(0),
         lineColor(0),fillStyle(0),fillColor(0),sysFillStyle(0),sysFillColor(0) {
 }
 
-containerStyle::~containerStyle(){}
+histoStyle::~histoStyle(){}
 
 
-void containerStyle::multiplySymbols(float val){
+void histoStyle::multiplySymbols(float val){
     markerSize*=val;
     lineSize= (int)((float)lineSize * val);
 
 }
 
 
-void containerStyle::readFromFile(const std::string & filename, const std::string& stylename,bool requireall){
+void histoStyle::readFromFile(const std::string & filename, const std::string& stylename,bool requireall){
     fileReader fr;
     fr.setComment("$");
     fr.setDelimiter(",");
@@ -194,7 +194,7 @@ void containerStyle::readFromFile(const std::string & filename, const std::strin
 /**
  * does not add draw style!
  */
-void containerStyle::applyContainerStyle(TH1*h,bool sys)const{
+void histoStyle::applyContainerStyle(TH1*h,bool sys)const{
     h->SetMarkerSize(markerSize);
     h->SetMarkerStyle(markerStyle);
     h->SetMarkerColor(markerColor);
@@ -213,7 +213,7 @@ void containerStyle::applyContainerStyle(TH1*h,bool sys)const{
 /**
  * does not add draw style!
  */
-void containerStyle::applyContainerStyle(TGraphAsymmErrors*h,bool sys)const{
+void histoStyle::applyContainerStyle(TGraphAsymmErrors*h,bool sys)const{
     h->SetMarkerSize(markerSize);
     h->SetMarkerStyle(markerStyle);
     h->SetMarkerColor(markerColor);
@@ -229,7 +229,7 @@ void containerStyle::applyContainerStyle(TGraphAsymmErrors*h,bool sys)const{
         h->SetFillStyle(fillStyle);
     }
 }
-void containerStyle::applyContainerStyle(plot*p)const{
+void histoStyle::applyContainerStyle(plot*p)const{
     applyContainerStyle(p->getStatGraph(),false);
     applyContainerStyle(p->getSystGraph(),true);
 }

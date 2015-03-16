@@ -12,7 +12,7 @@
 
 namespace ztop{
 /**
- * This is a misuse of the container1DUnfold class
+ * This is a misuse of the histo1DUnfold class
  */
 class analysisPlotsTtbarXsecFit : public analysisPlots{
 public:
@@ -41,7 +41,7 @@ private:
 
 
 
-	std::vector<container1DUnfold*>
+	std::vector<histo1DUnfold*>
 	leadjetpt_plots, secondjetpt_plots, thirdjetpt_plots, total_plots;
 
 };

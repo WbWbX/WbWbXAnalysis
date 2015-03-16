@@ -41,7 +41,7 @@ public:
 
 private:
 
-	container1DUnfold
+	histo1DUnfold
 	*Mlb,
 	*mlb,
 	*mlbmin,

@@ -10,7 +10,7 @@
 #include "../interface/ttbarXsecFitter.h"
 #include <iostream>
 #include <string>
-#include "TtZAnalysis/Tools/interface/containerStack.h"
+#include "TtZAnalysis/Tools/interface/histoStack.h"
 #include "TtZAnalysis/Tools/interface/plotterControlPlot.h"
 #include "TtZAnalysis/Tools/interface/plotterMultiplePlots.h"
 #include "TtZAnalysis/Tools/interface/plotterCompare.h"
@@ -103,8 +103,8 @@ invokeApplication(){
 		gErrorIgnoreLevel = 3000;
 		size_t ndatasets=mainfitter.nDatasets();
 
-		std::vector<container1D> pulls;
-		pulls.resize(ndatasets,container1D(container1D::createBinning(40,-8,8)));
+		std::vector<histo1D> pulls;
+		pulls.resize(ndatasets,histo1D(histo1D::createBinning(40,-8,8)));
 
 		plotterControlPlot pl;
 		pl.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/controlPlots_combined.txt");
@@ -123,9 +123,9 @@ invokeApplication(){
 		pl.usePad(&cvv);
 
 		//configure mode
-		container1D::pseudodatamodes pdmode=container1D::pseudodata_poisson;
+		histo1D::pseudodatamodes pdmode=histo1D::pseudodata_poisson;
 		if(pseudoOpts.Contains("Gaus"))
-			pdmode=container1D::pseudodata_gaus;
+			pdmode=histo1D::pseudodata_gaus;
 		std::cout << std::endl;
 		for(int i=0;i<npseudoexp;i++){
 			displayStatusBar(i,npseudoexp);
@@ -154,7 +154,7 @@ invokeApplication(){
 				for(size_t nbjet=0;nbjet<3;nbjet++){
 					for(size_t ndts=0;ndts<ndatasets;ndts++){
 						double dummychi2;
-						containerStack stack=mainfitter.produceStack(false,nbjet,ndts,dummychi2);
+						histoStack stack=mainfitter.produceStack(false,nbjet,ndts,dummychi2);
 						pl.setStack(&stack);
 						pl.draw();
 						cvv.Print(outfile+"_pd"+nbjet+ "_" + mainfitter.datasetName(ndts)+ ".pdf");
@@ -171,7 +171,7 @@ invokeApplication(){
 
 		//fit
 		for(size_t i=0;i<pulls.size();i++){ //both pulls
-			container1D * c=&pulls.at(i);
+			histo1D * c=&pulls.at(i);
 			graph tofit; tofit.import(c,true);
 			graphFitter fitter;
 			fitter.readGraph(&tofit);
@@ -220,7 +220,7 @@ invokeApplication(){
 
 		//compare input stacks before and after
 
-		containerStack stack;
+		histoStack stack;
 		plotterControlPlot pl;
 		pl.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/controlPlots_combined.txt");
 		TCanvas c;
@@ -229,7 +229,7 @@ invokeApplication(){
 		for(size_t ndts=0;ndts<mainfitter.nDatasets();ndts++){
 			for(size_t nbjet=0;nbjet<3;nbjet++){
 				double chi2=0;
-				containerStack stack=mainfitter.produceStack(false,nbjet,ndts,chi2);
+				histoStack stack=mainfitter.produceStack(false,nbjet,ndts,chi2);
 				pl.setStack(&stack);
 				textBoxes tb;
 				tb.add(0.7,0.73,"#chi^{2}="+toTString(chi2));
@@ -248,7 +248,7 @@ invokeApplication(){
 			plc.usePad(&c);
 			plc.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/comparePlots_Cb.txt");
 			/*	c.SetName("c_b");
-			container1D ctmp=mainfitter.getCb(false,seveneight);
+			histo1D ctmp=mainfitter.getCb(false,seveneight);
 			ctmp.setName("C_{b}  pre-fit");
 			plc.setNominalPlot(&ctmp);
 			ctmp=mainfitter.getCb(true,true);
@@ -276,7 +276,7 @@ invokeApplication(){
 		c.SetName("correlations");
 		plotter2D pl2d;
 		pl2d.usePad(&c);
-		container2D corr2d=mainfitter.getCorrelations();
+		histo2D corr2d=mainfitter.getCorrelations();
 		pl2d.setPlot(&corr2d);
 		pl2d.draw();
 		c.Print(outfile+".pdf");

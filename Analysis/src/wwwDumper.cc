@@ -17,7 +17,7 @@
 
 namespace ztop{
 
-void wwwDumper::makePlotHTML(TString title, TString descr, TString where , ztop::containerStackVector& csv){
+void wwwDumper::makePlotHTML(TString title, TString descr, TString where , ztop::histoStackVector& csv){
     std::ofstream fileout((where+"index.html").Data());
 
     using namespace std;
@@ -129,7 +129,7 @@ int wwwDumper::dumpToWWW(TString infile, TString title,TString description){
     plotdir+="/";
     plotdir=dumpdir+plotdir;
     system(("mkdir "+plotdir).Data());
-    containerStackVector csv;
+    histoStackVector csv;
     TString csvname=infile;
     csvname.ReplaceAll(".root","");
     csv.loadFromTFile(infile,csvname);//getFromFile(infile);

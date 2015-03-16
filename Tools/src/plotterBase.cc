@@ -159,10 +159,10 @@ void plotterBase::printToPdf(const std::string& outname){
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*
-int plotterBase::errToRootFillStyle(const containerStyle *s) const{//simple ifs for noErr,normalErr,perpErr,rectErr,fillErr,noXNormalErr,noXPerpErr,noXRectErr
+int plotterBase::errToRootFillStyle(const histoStyle *s) const{//simple ifs for noErr,normalErr,perpErr,rectErr,fillErr,noXNormalErr,noXPerpErr,noXRectErr
     if(debug) std::cout << "plotterBase::errToRootFillStyle" << std::endl;
-    containerStyle::errorBarStyles errStyle=s->errorStyle;
-    if(errStyle == containerStyle::fillErr){
+    histoStyle::errorBarStyles errStyle=s->errorStyle;
+    if(errStyle == histoStyle::fillErr){
         if(s->fillStyle != 0)
             return s->fillStyle;
         else
@@ -170,24 +170,24 @@ int plotterBase::errToRootFillStyle(const containerStyle *s) const{//simple ifs 
     }
     return 0;
 }
-TString plotterBase::errToRootDrawOpt(const containerStyle *s) const{//simple ifs for noErr,normalErr,perpErr,rectErr,fillErr,noXNormalErr,noXPerpErr,noXRectErr
+TString plotterBase::errToRootDrawOpt(const histoStyle *s) const{//simple ifs for noErr,normalErr,perpErr,rectErr,fillErr,noXNormalErr,noXPerpErr,noXRectErr
     if(debug) std::cout << "plotterBase::errToRootDrawOpt" << std::endl;
-    containerStyle::errorBarStyles errStyle=s->errorStyle;
-    if(errStyle == containerStyle::noErr)
+    histoStyle::errorBarStyles errStyle=s->errorStyle;
+    if(errStyle == histoStyle::noErr)
         return "";
-    if(errStyle == containerStyle::normalErr)
+    if(errStyle == histoStyle::normalErr)
         return "e0";
-    if(errStyle == containerStyle::perpErr)
+    if(errStyle == histoStyle::perpErr)
         return "e1";
-    if(errStyle == containerStyle::rectErr)
+    if(errStyle == histoStyle::rectErr)
         return "e2";
-    if(errStyle == containerStyle::noXNormalErr)
+    if(errStyle == histoStyle::noXNormalErr)
         return "e0";
-    if(errStyle == containerStyle::noXPerpErr)
+    if(errStyle == histoStyle::noXPerpErr)
         return "e1";
-    if(errStyle == containerStyle::noXRectErr)
+    if(errStyle == histoStyle::noXRectErr)
         return "e2";
-    if(errStyle == containerStyle::fillErr)
+    if(errStyle == histoStyle::fillErr)
         return "e2";
     return "";
 }
@@ -201,7 +201,7 @@ TString plotterBase::errToRootDrawOpt(const containerStyle *s) const{//simple if
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-void plotterBase::applyStyle(TH1D *h,const containerStyle*s)const{
+void plotterBase::applyStyle(TH1D *h,const histoStyle*s)const{
     if(debug) std::cout << "plotterBase::applyStyle(TH1D*)" << std::endl;
     h->SetMarkerSize(s->markerSize);
     h->SetMarkerStyle(s->markerStyle);
@@ -235,7 +235,7 @@ void plotterBase::applyAxisStyle(TH1D *h,const plotStyle*s)const{
         caxis=s->yAxisStyle();
     }
 }
-void plotterBase::applyStyle(TGraphAsymmErrors *g,const containerStyle*s)const{
+void plotterBase::applyStyle(TGraphAsymmErrors *g,const histoStyle*s)const{
     if(debug) std::cout << "plotterBase::applyStyle(TGraphAsymmErrors*)" << std::endl;
     g->SetMarkerSize(s->markerSize);
     g->SetMarkerStyle(s->markerStyle);

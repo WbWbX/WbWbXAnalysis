@@ -12,6 +12,7 @@
 #include <map>
 #include <stdexcept>
 #include "indexMap.h"
+#include "serialize.h"
 
 namespace ztop{
 
@@ -28,6 +29,15 @@ public:
 	histoContent(size_t nbins);
 	~histoContent(){}
 
+	histoContent(const histoContent&rhs){
+		copyFrom(rhs);
+	}
+
+	histoContent& operator=(const histoContent&rhs){
+		if(rhs==*this) return *this;
+		copyFrom(rhs);
+		return *this;
+	}
 
 	size_t size() const {return nominal_.size();}
 	size_t layerSize() const {return additionalbins_.size();}
@@ -75,7 +85,7 @@ public:
 	float getBinStat(const size_t & binno,const int &layer=-1) const;
 
 	void setBinEntries(const size_t & binno,const float &stat,const int &layer=-1);
-	const size_t & getBinEntries(const size_t & binno,const int &layer=-1) const;
+	const uint32_t & getBinEntries(const size_t & binno,const int &layer=-1) const;
 
 	void clear();
 	void setAllZero();
@@ -115,6 +125,7 @@ public:
 	 */
 	std::vector<TString> getVariations()const;
 
+
 	static bool debug;
 
 	/*
@@ -134,7 +145,7 @@ public:
 	 * 	    	-fitting takes into account statistic errors on sys var (switch!! on/off - depends on stat corr)
 	 *
 	 *
-	 * 	-----------> maybe better in container1D....
+	 * 	-----------> maybe better in histo1D....
 	 */
 
 	void sqrt();
@@ -142,10 +153,19 @@ public:
 	/*
 	 *
 	 */
+
+
+#ifndef __CINT__
+	template <class T>
+	void writeToStream(T & stream)const;
+	template <class T>
+	void readFromStream(T & stream);
+#endif
+
 private:
 	histoBins nominal_;
-	std::vector<histoBins> additionalbins_;
 	indexMap<TString> layermap_;
+	std::vector<histoBins> additionalbins_;
 
 	/**
 	 * first map index: layer index of *this
@@ -153,6 +173,7 @@ private:
 	 */
 	std::map<size_t,size_t> addLayers(const histoContent & rhs);
 
+	void copyFrom(const histoContent& rhs);
 };
 
 
@@ -192,11 +213,59 @@ inline float  histoContent::getBinStat(const size_t & binno,const int &layer) co
 inline void histoContent::setBinEntries(const size_t & binno,const float &stat,const int &layer){
 	getBin(binno,layer).setEntries(stat);
 }
-inline const size_t & histoContent::getBinEntries(const size_t & binno,const int &layer) const{
+inline const uint32_t & histoContent::getBinEntries(const size_t & binno,const int &layer) const{
 	return getBin(binno,layer).getEntries();
 }
 
-}//namesp
+#ifndef __CINT__
+template <class T>
+inline void histoContent::writeToStream(T & stream)const{
 
+	//boost::iostreams::filtering_ostream & stream=*streamp;
+	//tagged object base part (name, tags..)
+	//taggedObject::writeToStream(stream);
+	///
+
+	IO::serializedWrite(nominal_,stream);
+	size_t nlay=layermap_.size();
+	IO::serializedWrite(nlay,stream);
+	for(size_t j=0;j<nlay;j++){
+		IO::serializedWrite(layermap_.getData(j),stream);
+	}
+
+	IO::serializedWrite(additionalbins_,stream);
+
+}
+
+template <class T>
+inline void histoContent::readFromStream(T & stream){
+
+	IO::serializedRead(nominal_,stream);
+	size_t nlay;
+	IO::serializedRead(nlay,stream);
+	layermap_.clear();
+	for(size_t j=0;j<nlay;j++){
+		TString layname;
+		IO::serializedRead(layname,stream);
+		addLayer(layname);
+	}
+	IO::serializedRead(additionalbins_,stream);
+}
+
+namespace IO{
+template<class T>
+inline void serializedWrite(const histoContent&c, T&stream){
+	c.writeToStream(stream);
+}
+template<class T>
+inline void serializedRead(histoContent&c, T&stream){
+	c.readFromStream(stream);
+}
+//re-instantiate vector ops
+ZTOP_IO_SERIALIZE_SPECIALIZEVECTORS(histoContent)
+
+}//io
+#endif
+}//ztop
 
 #endif /* HISTOCONTENT_H_ */

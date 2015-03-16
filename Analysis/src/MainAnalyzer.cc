@@ -71,9 +71,9 @@ MainAnalyzer::MainAnalyzer(){
  */
 MainAnalyzer::~MainAnalyzer(){
 	//delete any remaining containers on heap
-	ztop::container1D::c_deletelist();
-	ztop::container1DUnfold::c_deletelist();
-	ztop::container2D::c_deletelist();
+	ztop::histo1D::c_deletelist();
+	ztop::histo1DUnfold::c_deletelist();
+	ztop::histo2D::c_deletelist();
 
 }
 
@@ -297,9 +297,9 @@ int MainAnalyzer::start(){
 			sleep(1);
 
 		bool nonefailed=true;
-		containerStackVector *csv = new containerStackVector();
+		histoStackVector *csv = new histoStackVector();
 		try{
-			csv->loadFromTFile(getOutPath()+".root");
+			csv->readFromFile((getOutPath()+".ztop").Data());
 			for(size_t i=0;i<legentries_.size();i++){
 				bool legentryfound=false;
 				for(size_t j=0;j<csv->getStack(0).size();j++){
@@ -487,11 +487,11 @@ float MainAnalyzer::createNormalizationInfo(TFile *f, bool isMC,size_t anaid){
 
 	vector<float> onebin;
 	onebin << 0.5 << 1.5;
-	bool tmp=container1D::c_makelist;
-	container1D::c_makelist=true;
-	container1D * generated=  new container1D(onebin, "generated events", "gen", "N_{gen}");
-	container1D * generated2=  new container1D(onebin, "generated filtered events", "gen", "N_{gen}");
-	container1D::c_makelist=tmp; //switch off automatic listing
+	bool tmp=histo1D::c_makelist;
+	histo1D::c_makelist=true;
+	histo1D * generated=  new histo1D(onebin, "generated events", "gen", "N_{gen}");
+	histo1D * generated2=  new histo1D(onebin, "generated filtered events", "gen", "N_{gen}");
+	histo1D::c_makelist=tmp; //switch off automatic listing
 
 	float genentries=0;
 	if(isMC){

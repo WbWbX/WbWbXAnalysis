@@ -8,7 +8,7 @@
 #ifndef PARAEXTRPULL_H_
 #define PARAEXTRPULL_H_
 #include "TtZAnalysis/Tools/interface/parameterExtractor.h"
-#include "TtZAnalysis/Tools/interface/container.h"
+#include "TtZAnalysis/Tools/interface/histo1D.h"
 #include "TtZAnalysis/Tools/interface/graph.h"
 #include <vector>
 #include "TRandom3.h"
@@ -58,7 +58,7 @@ public:
 
 	void setNIterations(size_t nit){niter_=nit;}
 
-	void setFillContainer1D(container1D * c){cont_=c;}
+	void setFillContainer1D(histo1D * c){cont_=c;}
 
 	void setRandom(TRandom3* r){random_=r;}
 
@@ -80,7 +80,7 @@ private:
 	std::vector<float>  datascale_,corrmcscale_,uncorrmcscale_;
 	size_t niter_;
 
-	container1D* cont_;
+	histo1D* cont_;
 	TRandom3* random_;
 
 	std::vector<graph> uncorrtrueinput_,corrtrueinput_,datatrueinput_;

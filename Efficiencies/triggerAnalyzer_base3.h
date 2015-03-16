@@ -17,7 +17,7 @@
 #include "TROOT.h"
 #include "TChain.h"
 //#include "makeplotsnice.h"
-#include "TtZAnalysis/Tools/interface/container.h"
+#include "TtZAnalysis/Tools/interface/histo1D.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 #include "TopAnalysis/ZTopUtils/interface/PUReweighter.h"
 #include <map>

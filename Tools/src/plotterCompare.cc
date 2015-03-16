@@ -23,12 +23,12 @@ divideat_(0.5),memnom_(0),memratio_(0),size_(0){
 	readStyleFromFileInCMSSW("/src/TtZAnalysis/Tools/styles/comparePlots_3MC.txt");
 }
 
-void plotterCompare::setNominalPlot(const container1D *c,bool divbw){
+void plotterCompare::setNominalPlot(const histo1D *c,bool divbw){
     if(debug) std::cout <<"plotterCompare::setNominalPlot" << std::endl;
     nominalplot_.createFrom(c,divbw);
     lastplotidx_=0;
 }
-void plotterCompare::setComparePlot(const container1D *c,size_t idx,bool divbw){
+void plotterCompare::setComparePlot(const histo1D *c,size_t idx,bool divbw){
     if(debug) std::cout <<"plotterCompare::setComparePlot" << std::endl;
     if(idx >= size_){
         throw std::out_of_range("plotterCompare::setComparePlot: plotter configured for less entries");
@@ -113,10 +113,10 @@ void plotterCompare::clearPlots(){
 
 /**
  * expects entries:
- * [containerStyle - NominalUpper]
- * [containerStyle - CompareUpper]
- * [containerStyle - NominalRatio]
- * [containerStyle - CompareRatio]
+ * [histoStyle - NominalUpper]
+ * [histoStyle - CompareUpper]
+ * [histoStyle - NominalRatio]
+ * [histoStyle - CompareRatio]
  * [plotStyle - Upper]
  * [plotStyle - Ratio]
  * [plotterCompareStyle] ? (TBI)
@@ -171,7 +171,7 @@ void plotterCompare::readStylePriv(const std::string& infile, bool requireall){
 
     compstylesupper_.clear();
     compstylesratio_.clear();
-    containerStyle compareupperDefault,compareRatioDefault;
+    histoStyle compareupperDefault,compareRatioDefault;
     compareupperDefault.readFromFile(infile,"CompareUpperDefault",requireall);
     compareRatioDefault.readFromFile(infile,"CompareRatioDefault",requireall);
 
@@ -183,7 +183,7 @@ void plotterCompare::readStylePriv(const std::string& infile, bool requireall){
     }
 
     for(size_t i=0;i<size_;i++){
-        containerStyle temps;
+        histoStyle temps;
         std::string add;
         if(compids_.size()>1){
             add=compids_.at(i);
@@ -281,7 +281,7 @@ void  plotterCompare::drawLegends(){
     tmplegp_=leg;
 }
 
-void plotterCompare::drawAllPlots(const plotStyle* ps, const containerStyle * cs, const std::vector<containerStyle>* vcs,
+void plotterCompare::drawAllPlots(const plotStyle* ps, const histoStyle * cs, const std::vector<histoStyle>* vcs,
         const plot * nompl, const std::vector<plot>* vcpl, bool nomlast,bool isratio){
     if(debug) std::cout <<"plotterCompare::drawAllPlots" << std::endl;
     //draw axis

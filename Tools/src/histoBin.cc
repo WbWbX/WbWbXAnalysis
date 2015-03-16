@@ -6,8 +6,8 @@
  */
 #include "../interface/histoBin.h"
 #include <iostream>
-#include <omp.h>
 #include <stdexcept>
+#include <stdint.h>
 namespace ztop{
 
 /**
@@ -47,18 +47,41 @@ bool histoBin::operator != (const histoBin& rhs)const{
 	if(entries_!=rhs.entries_) return true;
 	if(content_!=rhs.content_) return true;
 	if(stat2_!=rhs.stat2_) return true;
-	if(name_!=rhs.name_) return true;
+	//if(name_!=rhs.name_) return true;
 	return false;
 }
 bool histoBin::operator == (const histoBin& rhs)const{
 	return !(*this!=rhs);
 }
 
+/*
+void histoBin::cutName(){
+	if(name_.Length() > 65535){
+		std::cout << "histoBin: warning: bin name length than 16bit, will be chopped"<<std::endl;
+		name_=TString(name_.Data(),65535);
+	}
+}
+*/
+void histoBin::copyFrom(const histoBin& rhs){
+	content_=rhs.content_;
+	entries_=rhs.entries_;
+	stat2_=rhs.stat2_;
+	//name_=rhs.name_;
+}
+
 /////binning//////
 
 bool histoBins::showwarnings=false;
-
-histoBins::histoBins(size_t Size) : name_(""),layer_(-1){
+/*
+void histoBins::setName(const TString & name){
+	name_=name;
+	if(name_.Length() > UINT16_MAX){
+		std::cout << "histoBins: warning: bin name length than 16bit, will be chopped"<<std::endl;
+		name_=TString(name_.Data(),65535);
+	}
+}
+*/
+histoBins::histoBins(size_t Size){// : name_(""),layer_(-1){
 	setSize(Size);
 }
 void histoBins::setSize(size_t Size){
@@ -206,9 +229,7 @@ void histoBins::removeStat(){
 }
 
 bool histoBins::operator !=(const histoBins& rhs) const{
-	if(layer_ != rhs.layer_) return true;
 	if(bins_!=rhs.bins_) return true;
-	if(name_!=rhs.name_) return true;
 	return false;
 }
 bool histoBins::operator ==(const histoBins& rhs) const{
@@ -233,6 +254,12 @@ bool histoBins::equalContent(const histoBins&rhs,float epsilon) const{
 		}
 		return true;
 	}
+}
+void histoBins::copyFrom(const histoBins&rhs){
+	bins_=rhs.bins_;
+	//name_=rhs.name_;
+	//layer_=rhs.layer_;
+
 }
 
 }//namespace
