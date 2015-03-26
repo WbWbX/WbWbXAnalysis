@@ -63,7 +63,7 @@ public:
 	  allcontr=thirds_.at(i).at(j);
       }
     }
-    std::cout.setf(ios::fixed,ios::floatfield);
+    std::cout.setf(std::ios_base::floatfield);
     std::cout.precision(3);
     for(size_t i=0;i<names_.size();i++){
       std::cout << names_.at(i) << "\n" ;
