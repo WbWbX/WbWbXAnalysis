@@ -1,12 +1,12 @@
 /*
- * containerStyle.h
+ * histoStyle.h
  *
  *  Created on: Sep 30, 2013
  *      Author: kiesej
  */
 
-#ifndef CANVASSTYLE_H_
-#define CANVASSTYLE_H_
+#ifndef HISTOSTYLE_H_
+#define HISTOSTYLE_H_
 /**
  * for slow migration to histoplotter class using these styles
  * in general set style form template like "ratiodata, ratioMC, controlplotdata, controlplotmc..." and then adapt
@@ -22,11 +22,11 @@ class TGraphAsymmErrors;
 class TGAxis;
 
 namespace ztop{
-class containerStyle;
+class histoStyle;
 class plot;
 //helper classes
 class axisStyle{
-	friend class containerStyle;
+	friend class histoStyle;
 
 public:
 	axisStyle();
@@ -62,9 +62,9 @@ public:
 	float posx,posy,posz;
 
 };
-class containerStyle;
+class histoStyle;
 class textBox{
-	friend class containerStyle;
+	friend class histoStyle;
 public:
 	textBox();
 	textBox(float,float,const TString &,float textsize=0.05,int font=62,int align=11,int color=1);
@@ -116,13 +116,13 @@ private:
 
 };
 
-class containerStyle{
+class histoStyle{
 public:
 
 
-	containerStyle();
-	~containerStyle();
-	containerStyle(float markersize, int markerstyle,int markercolor, float linesize, int linestyle, int linecolor,
+	histoStyle();
+	~histoStyle();
+	histoStyle(float markersize, int markerstyle,int markercolor, float linesize, int linestyle, int linecolor,
 			int fillstyle, int fillcolor):
 				markerSize(markersize),markerStyle(markerstyle),markerColor(markercolor),lineSize(linesize),lineStyle(linestyle),lineColor(linecolor),
 				fillStyle(fillstyle),fillColor(fillcolor),sysFillStyle(1001),sysFillColor(1),legendDrawStyle("lpe"){}

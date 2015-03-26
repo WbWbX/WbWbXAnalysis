@@ -99,8 +99,8 @@ void  MainAnalyzer::analyze(size_t anaid){
 	if(legendname==dataname_) isMC=false;
 
 	if(!isMC || !issignal)
-	    getPdfReweighter()->switchOff(true);
-	
+		getPdfReweighter()->switchOff(true);
+
 	//some mode options
 	/* implement here not to overload MainAnalyzer class with private members
 	 *  they are even allowed to overwrite existing configuration
@@ -265,7 +265,9 @@ void  MainAnalyzer::analyze(size_t anaid){
 		leppt30=true;
 	}
 
-	 float jetptcut;
+	const float lepptthresh= leppt30 ? 30 : 20;
+
+	float jetptcut;
 	if(mode_.Contains("Jetpt40")){
 		jetptcut=40;
 	}
@@ -353,6 +355,7 @@ void  MainAnalyzer::analyze(size_t anaid){
 	NTFullEvent evt;
 
 	////////////////////  configure discriminator factories here  ////////////////////
+	/*
 	TString factname="topLH_"+channel_+"_"+energy_+"_"+topmass_;
 	discriminatorFactory::c_makelist=false; //now will be ignored in output
 	discriminatorFactory toplikelihood(factname.Data());
@@ -405,7 +408,7 @@ void  MainAnalyzer::analyze(size_t anaid){
 		toplikelihood.setSystematics("nominal");
 	}
 
-
+	 */
 
 	/////////////////////////////////////////////////////////////////////////////////
 
@@ -427,10 +430,10 @@ void  MainAnalyzer::analyze(size_t anaid){
 	xsecfitplots_step8.bookPlots();
 
 	//global settings for analysis plots
-	container1DUnfold::setAllListedMC(isMC && !fakedata);
-	container1DUnfold::setAllListedLumi((float)lumi_);
+	histo1DUnfold::setAllListedMC(isMC && !fakedata);
+	histo1DUnfold::setAllListedLumi((float)lumi_);
 	if(testmode_)
-		container1DUnfold::setAllListedLumi((float)lumi_*0.08);
+		histo1DUnfold::setAllListedLumi((float)lumi_*0.08);
 
 	//setup everything for control plots
 
@@ -528,9 +531,9 @@ void  MainAnalyzer::analyze(size_t anaid){
 	tBranchHandler<NTWeight>::allow_missing =true;
 	tBranchHandler<vector<NTGenParticle> >::allow_missing =true;
 	tBranchHandler<vector<NTGenParticle> > b_GenBsRad(t,"NTGenBsRad");
-	
+
 	std::vector<ztop::MCReweighter> mcreweighters;
-	
+
 	for(size_t i=0;i<additionalweights_.size();i++){
 		std::cout << "adding weight " << additionalweights_.at(i) << std::endl;
 		tBranchHandler<NTWeight> * weight = new tBranchHandler<NTWeight>(t,additionalweights_.at(i));
@@ -638,7 +641,7 @@ void  MainAnalyzer::analyze(size_t anaid){
 		size_t step=0;
 		evt.reset();
 		evt.event=b_Event.content();
-		container1DUnfold::flushAllListed(); //important to call each event
+		histo1DUnfold::flushAllListed(); //important to call each event
 
 		//reports current status to parent
 		reportStatus(entry,nEntries,anaid);
@@ -657,12 +660,12 @@ void  MainAnalyzer::analyze(size_t anaid){
 		if(apllweightsone) puweight=1;
 		//agrohsje loop over additional weightbranches 
 		for(size_t i=0;i<weightbranches.size();i++){
-		        weightbranches.at(i)->getEntry(entry);
+			weightbranches.at(i)->getEntry(entry);
 			mcreweighters.at(i).setMCWeight(weightbranches.at(i)->content()->getWeight());
 			mcreweighters.at(i).reWeight(puweight);
 			if(apllweightsone) puweight=1;		
 		}
-		
+
 
 		/////////////////////////////////////////////////////////////
 		/////////////////////////////////////////////////////////////
@@ -705,28 +708,28 @@ void  MainAnalyzer::analyze(size_t anaid){
 
 			//if(b_GenLeptons3.content()->size()>1){ //gen info there
 
-				///////////////TOPPT REWEIGHTING////////
-				if(b_GenTops.content()->size()>1){ //ttbar sample
-					getTopPtReweighter()->reWeight(b_GenTops.content()->at(0).pt(),b_GenTops.content()->at(1).pt() ,puweight);
-					if(apllweightsone) puweight=1;
-					gentops.push_back(&b_GenTops.content()->at(0));
-					gentops.push_back(&b_GenTops.content()->at(1));
-				}
+			///////////////TOPPT REWEIGHTING////////
+			if(b_GenTops.content()->size()>1){ //ttbar sample
+				getTopPtReweighter()->reWeight(b_GenTops.content()->at(0).pt(),b_GenTops.content()->at(1).pt() ,puweight);
+				if(apllweightsone) puweight=1;
+				gentops.push_back(&b_GenTops.content()->at(0));
+				gentops.push_back(&b_GenTops.content()->at(1));
+			}
 
-				//recreate dependencies
-				genbs=produceCollection(b_GenBs.content(), &gentops);
-				genbsrad=produceCollection(b_GenBsRad.content(), &genbs);//,-1,-1,&genbs);
-				genws=produceCollection(b_GenWs.content(), &gentops);
+			//recreate dependencies
+			genbs=produceCollection(b_GenBs.content(), &gentops);
+			genbsrad=produceCollection(b_GenBsRad.content(), &genbs);//,-1,-1,&genbs);
+			genws=produceCollection(b_GenWs.content(), &gentops);
 
-				genleptons3=produceCollection(b_GenLeptons3.content(),&genws);
-				genleptons1=produceCollection(b_GenLeptons1.content(),&genleptons3);
+			genleptons3=produceCollection(b_GenLeptons3.content(),&genws);
+			genleptons1=produceCollection(b_GenLeptons1.content(),&genleptons3);
 
-				//b-hadrons that stem from a b quark that itself originates in a top are
-				//assoziated to that top by the bhadronmatcher (Nazar)
-				//this logic is used and kept here
-				genbhadrons=produceCollection(b_GenBHadrons.content(), &gentops);
-				//try to associate the mothers. If successful, b-jet is matched to hadron -> to top
-				genjets=produceCollection(b_GenJets.content());//,&genbhadrons);
+			//b-hadrons that stem from a b quark that itself originates in a top are
+			//assoziated to that top by the bhadronmatcher (Nazar)
+			//this logic is used and kept here
+			genbhadrons=produceCollection(b_GenBHadrons.content(), &gentops);
+			//try to associate the mothers. If successful, b-jet is matched to hadron -> to top
+			genjets=produceCollection(b_GenJets.content());//,&genbhadrons);
 
 			//}
 			if(!fakedata){
@@ -753,7 +756,7 @@ void  MainAnalyzer::analyze(size_t anaid){
 		if(testmode_ && entry==0)
 			std::cout << "testmode("<< anaid << "): got trigger boolians" << std::endl;
 		if(!checkTrigger(b_TriggerBools.content(),b_Event.content(), isMC,anaid)) continue;
-		
+
 
 		/*
 		 * Muons
@@ -773,13 +776,13 @@ void  MainAnalyzer::analyze(size_t anaid){
 		evt.isomuons=&isomuons;
 
 
+
 		for(size_t i=0;i<b_Muons.content()->size();i++){
 			NTMuon* muon = & b_Muons.content()->at(i);
 			if(isMC)
 				muon->setP4(muon->p4() * getMuonEnergySF()->getScalefactor(muon->eta()));
 			allleps << muon;
-			if(muon->pt() < 20)       continue;
-			if(leppt30 && muon->pt() < 30)       continue;
+			if(muon->pt() < lepptthresh)       continue;
 			if(fabs(muon->eta())>2.4) continue;
 			kinmuons << &(b_Muons.content()->at(i));
 
@@ -832,8 +835,7 @@ void  MainAnalyzer::analyze(size_t anaid){
 			//selection fully following https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopEGM l+jets except for pt cut
 
 			allleps << elec;
-			if(elec->pt() < 20)  continue;
-			if(leppt30 && elec->pt() < 30)       continue;
+			if(elec->pt() < lepptthresh)  continue;
 			float abseta=fabs(elec->eta());
 
 			float suclueta = fabs(elec->ECalP4().eta());
@@ -843,7 +845,7 @@ void  MainAnalyzer::analyze(size_t anaid){
 
 			if(fabs(elec->d0V()) < 0.02
 					&& elec->isNotConv()
-			                && elec->storedId() > 0.9
+					&& elec->storedId() > 0.9
 					&& elec->mHits() <= 0
 					&& elec->isPf()){
 
@@ -1010,7 +1012,7 @@ void  MainAnalyzer::analyze(size_t anaid){
 		evt.medjets=&medjets;
 		evt.hardjets=&hardjets;
 		for(size_t i=0;i<b_Jets.content()->size();i++){
-		    treejets << &(b_Jets.content()->at(i));
+			treejets << &(b_Jets.content()->at(i));
 		}
 
 		double dpx=0;
@@ -1032,8 +1034,8 @@ void  MainAnalyzer::analyze(size_t anaid){
 				}
 			}
 			if(!(treejets.at(i)->id())) continue;
-			if(!noOverlap(treejets.at(i), isomuons,     0.4)) continue;
-			if(!noOverlap(treejets.at(i), isoelectrons, 0.4)) continue;
+			if(!noOverlap(treejets.at(i), isomuons,     0.5)) continue;
+			if(!noOverlap(treejets.at(i), isoelectrons, 0.5)) continue;
 			if(fabs(treejets.at(i)->eta())>2.4) continue;
 			if(treejets.at(i)->pt() < 10) continue;
 			idjets << (treejets.at(i));
@@ -1372,10 +1374,10 @@ void  MainAnalyzer::analyze(size_t anaid){
 
 
 		if(analysisMllRange){
-
+			/*
 			lh_toplh=toplikelihood.getCombinedLikelihood();
 			toplikelihood.fill(puweight);
-
+			 */
 			plots.makeControlPlots(step);
 			sel_step[7]+=puweight;
 		}
@@ -1456,13 +1458,13 @@ void  MainAnalyzer::analyze(size_t anaid){
 
 	//renorm all mc weights 
 	for(size_t i=0;i<weightbranches.size();i++){
-	    renormfact=mcreweighters.at(i).getRenormalization();
-	    norm *= renormfact;
-	    if(testmode_ )
-		std::cout << "testmode("<< anaid << "): finished main loop, renorm factor for mc reweighting["<<i<<"]: " <<renormfact  << std::endl;
+		renormfact=mcreweighters.at(i).getRenormalization();
+		norm *= renormfact;
+		if(testmode_ )
+			std::cout << "testmode("<< anaid << "): finished main loop, renorm factor for mc reweighting["<<i<<"]: " <<renormfact  << std::endl;
 	}
-	
-	container1DUnfold::flushAllListed(); // call once again after last event processed
+
+	histo1DUnfold::flushAllListed(); // call once again after last event processed
 
 
 
@@ -1507,6 +1509,26 @@ void  MainAnalyzer::analyze(size_t anaid){
 		if(testmode_ )
 			std::cout << "testmode("<< anaid << "): allowed to write to file " << getOutPath()+".root"<< std::endl;
 
+		ztop::histoStackVector * csv=&allplotsstackvector_;
+
+		if(fileExists((getOutPath()+".ztop").Data())) {
+			csv->readFromFile((getOutPath()+".ztop").Data());
+		}
+		csv->addList1DUnfold(legendname,color,norm,legord);
+		if(testmode_ )
+			std::cout << "testmode("<< anaid << "): added 1DUnfold List"<< std::endl;
+		csv->addList2D(legendname,color,norm,legord);
+		if(testmode_ )
+			std::cout << "testmode("<< anaid << "): added 2D List"<< std::endl;
+		csv->addList(legendname,color,norm,legord);
+		if(testmode_ )
+			std::cout << "testmode("<< anaid << "): added 1D List"<< std::endl;
+
+		if(issignal)
+			csv->addSignal(legendname);
+
+		csv->writeToFile((getOutPath()+".ztop").Data());
+		/*
 		TFile * outfile;
 
 		if(!fileExists((getOutPath()+".root").Data())) {
@@ -1571,7 +1593,7 @@ void  MainAnalyzer::analyze(size_t anaid){
 		outfile->Close();
 		delete outfile;
 
-
+		 */
 
 
 		if(testmode_ )
@@ -1632,6 +1654,7 @@ void  MainAnalyzer::analyze(size_t anaid){
 		}
 
 		//throws if something is not ok
+		/* DEBUG!!!
 		if(outputok){
 			try{
 				csv->loadFromTFile(getOutPath()+".root");
@@ -1649,7 +1672,7 @@ void  MainAnalyzer::analyze(size_t anaid){
 				p_finished.get(anaid)->pwrite(-2001);
 			}
 		}
-
+		 */
 
 		if(outputok)
 			p_finished.get(anaid)->pwrite(1); //turns of write blocking, too

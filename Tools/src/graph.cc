@@ -8,12 +8,14 @@
 #include "../interface/graph.h"
 #include "TGraphAsymmErrors.h"
 #include <algorithm>
-#include "../interface/container.h"
+#include "../interface/histo1D.h"
 #include "TH1F.h"
 #include "TTree.h"
 #include "TFile.h"
 #include "FWCore/FWLite/interface/AutoLibraryLoader.h"
-#include "TtZAnalysis/Tools/interface/containerStyle.h"
+#include "TtZAnalysis/Tools/interface/histoStyle.h"
+#include <boost/iostreams/filtering_stream.hpp>
+#include <boost/iostreams/filter/zlib.hpp>
 
 namespace ztop{
 namespace graphhelperfunctions{
@@ -29,12 +31,12 @@ std::vector<ztop::graph *> graph::g_list;
 bool graph::g_makelist=false;
 bool graph::debug=false;
 
-graph::graph(const TString &name):chi2definition(symmetrize),labelmultiplier_(1){
+graph::graph(const TString &name):chi2definition(symmetrize){
 	setName(name);
 	if(g_makelist) addToList();
 }
 
-graph::graph(const size_t & npoints,const TString &name):chi2definition(symmetrize), xcoords_(npoints),ycoords_(npoints),labelmultiplier_(1){
+graph::graph(const size_t & npoints,const TString &name):chi2definition(symmetrize), xcoords_(npoints),ycoords_(npoints){
 	setName(name);
 	if(g_makelist) addToList();
 }
@@ -85,8 +87,8 @@ size_t graph::addPoint(const float& x, const float & y,const TString & pointname
 	//add new content
 	for(int sysl=-1;sysl<(int)newxcoords.layerSize();sysl++){
 		newxcoords.getBin(oldsize,sysl).setContent(x);
-		if(sysl<0)
-			newxcoords.getBin(oldsize,-1).setName(pointname);
+		if(sysl<0 && pointname.Length()>0)
+			setPointName(oldsize,pointname);
 		newycoords.getBin(oldsize,sysl).setContent(y);
 	}
 
@@ -123,11 +125,7 @@ void graph::setPointXStat(const size_t & point, const float & xcont, const int &
 void graph::setPointYStat(const size_t & point, const float & ycont, const int & syslayer){
 	getPointY(point,syslayer).setStat(ycont);
 }
-void graph::setPointName(const size_t & point, const TString & pointname){
-	if(point>=getNPoints())
-		throw std::out_of_range("graph::setPointName: out of range");
-	xcoords_.getBin(point).setName(pointname);
-}
+
 
 //wrappers
 const float &  graph::getPointXContent(const size_t & point, const int & syslayer) const{
@@ -143,11 +141,6 @@ float   graph::getPointYStat(const size_t & point, const int & syslayer) const{
 	return getPointY(point,syslayer).getStat();
 }
 
-const TString & graph::getPointName(const size_t & point)const{
-	if(point >= getNPoints())
-		throw std::out_of_range("graph::getPointName: out of range");
-	return xcoords_.getBin(point).getName();
-}
 
 
 size_t graph::addErrorGraph(const TString &name, const graph & errg){
@@ -174,8 +167,7 @@ graph  graph::getSystGraph(const size_t sysidx) const{
 	out.clear();
 	out.xcoords_.getNominal()=xcoords_.getLayer(sysidx);
 	//set point names form nominal
-	for(size_t i=0;i<out.xcoords_.size();i++)
-		out.xcoords_.getBin(i).setName(xcoords_.getBin(i).getName());
+	out.pointnames_=pointnames_;
 	out.ycoords_.getNominal()=ycoords_.getLayer(sysidx);
 	return out;
 }
@@ -309,7 +301,7 @@ void graph::normalizeToGraph(const graph& g){
  * defines binwidth as stat of nominal ypoints
  * ignores underflow and overflow
  */
-void graph::import(const container1D * cont,bool dividebybinwidth){
+void graph::import(const histo1D * cont,bool dividebybinwidth){
 	setNPoints(cont->getNBins());
 	// xcoords_=histoContent(cont->getNBins());
 	// ycoords_=histoContent(cont->getNBins());
@@ -444,12 +436,12 @@ TGraphAsymmErrors * graph::getTGraph(TString name,bool onlystat) const{
 	TGraphAsymmErrors * g = new TGraphAsymmErrors(getNPoints(),&x.at(0),&y.at(0),&xel.at(0),&xeh.at(0),&yel.at(0),&yeh.at(0));
 	g->SetName(name);
 	g->SetTitle(name);
-	g->GetYaxis()->SetTitleSize(0.06*labelmultiplier_);
-	g->GetYaxis()->SetLabelSize(0.05*labelmultiplier_);
-	g->GetYaxis()->SetTitleOffset(g->GetYaxis()->GetTitleOffset() / labelmultiplier_);
+	g->GetYaxis()->SetTitleSize(0.06);
+	g->GetYaxis()->SetLabelSize(0.05);
+	g->GetYaxis()->SetTitleOffset(g->GetYaxis()->GetTitleOffset() );
 	g->GetYaxis()->SetTitle(yname_);
-	g->GetXaxis()->SetTitleSize(0.06*labelmultiplier_);
-	g->GetXaxis()->SetLabelSize(0.05*labelmultiplier_);
+	g->GetXaxis()->SetTitleSize(0.06);
+	g->GetXaxis()->SetLabelSize(0.05);
 	g->GetYaxis()->SetNdivisions(510);
 	g->GetXaxis()->SetTitle(xname_);
 	g->SetMarkerStyle(20);
@@ -550,6 +542,21 @@ float graph::getPointYError(const size_t & point, bool onlystat,const TString &l
 	if(up>down) return up;
 	else return down;
 }
+
+const TString & graph::getPointName(const size_t& idx)const{
+	if(idx>=xcoords_.size())
+		throw std::out_of_range("graph::getPointName: idx out of range");
+	return pointnames_.at(idx);
+}
+void graph::setPointName(const size_t& idx,const TString& name){
+	if(pointnames_.size()!=xcoords_.size()){
+		pointnames_.resize(xcoords_.size(),"");
+	}
+	if(idx>=xcoords_.size())
+		throw std::out_of_range("graph::setPointName: idx out of range");
+	pointnames_.at(idx)=name;
+}
+
 
 /**
  * symmetrize to maximum
@@ -666,12 +673,12 @@ float  graph::getYMin(bool includeerror) const{
 
 float graph::getDominantVariation( TString  sysname, const size_t& bin, bool yvar,bool getup) const{ //TString copy on purpose
 	float up=0,down=0;
-const histoContent * contents=&ycoords_;
-if(!yvar) contents=&xcoords_;
-const float & cont=contents->getBin(bin).getContent();
-size_t idx=contents->getLayerIndex(sysname+"_up");
-if(idx >= contents->layerSize())
-	std::cout << "graph::getDominantVariation: serious error: " << sysname << "_up not found" << std::endl;
+	const histoContent * contents=&ycoords_;
+	if(!yvar) contents=&xcoords_;
+	const float & cont=contents->getBin(bin).getContent();
+	size_t idx=contents->getLayerIndex(sysname+"_up");
+	if(idx >= contents->layerSize())
+		std::cout << "graph::getDominantVariation: serious error: " << sysname << "_up not found" << std::endl;
 	up=contents->getBin(bin,idx).getContent()-cont;
 	idx=contents->getLayerIndex(sysname+"_down");
 	if(idx >= contents->layerSize())
@@ -837,7 +844,36 @@ void graph::writeToTFile(const TString& filename){
 }
 
 
-
+void graph::writeToFile(const std::string& filename)const{
+	std::ofstream saveFile;
+	saveFile.open(filename.data(), std::ios_base::binary | std::ios_base::trunc | std::fstream::out );
+	{
+		boost::iostreams::filtering_ostream out;
+		boost::iostreams::zlib_params parms;
+		//parms.level=boost::iostreams::zlib::best_speed;
+		out.push(boost::iostreams::zlib_compressor(parms));
+		out.push(saveFile);
+		{
+			writeToStream(out);
+		}
+	}
+	saveFile.close();
+}
+void graph::readFromFile(const std::string& filename){
+	std::ifstream saveFile;
+	saveFile.open(filename.data(), std::ios_base::binary | std::fstream::in );
+	{
+		boost::iostreams::filtering_istream in;
+		boost::iostreams::zlib_params parms;
+		//parms.level=boost::iostreams::zlib::best_speed;
+		in.push(boost::iostreams::zlib_decompressor(parms));
+		in.push(saveFile);
+		{
+			readFromStream(in);
+		}
+	}
+	saveFile.close();
+}
 
 }//namespace
 

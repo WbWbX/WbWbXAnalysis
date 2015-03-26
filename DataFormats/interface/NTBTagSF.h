@@ -59,6 +59,8 @@ public:
 
     void listAllSampleNames()const;
 
+    void addInSampleNames(const TString&,const TString &);
+
     /**
      * returns - depending on the mode whether the variation is a "real" one depending on the mode
      */

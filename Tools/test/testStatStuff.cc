@@ -5,7 +5,7 @@
  *      Author: kiesej
  */
 
-#include "../interface/container.h"
+#include "../interface/histo1D.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 #include "TRandom.h"
 #include <vector>
@@ -98,14 +98,14 @@ int main(){
 	for(size_t i=0;i<bins.size();i++)
 	std::cout << bins.at(i) <<std::endl;
 
-	container1D generated(bins);
-	container1D sim(bins);
-	container1D onlypois(bins);
-	container1D newlogpois(bins);
-	container1D newtoypois(bins);
+	histo1D generated(bins);
+	histo1D sim(bins);
+	histo1D onlypois(bins);
+	histo1D newlogpois(bins);
+	histo1D newtoypois(bins);
 	std::vector<float> pullbins;
 	pullbins<<-5<<-4<<-3<<-2<<-1<<0<<1<<2<<3<<4<<5;
-	container1D pull(pullbins);
+	histo1D pull(pullbins);
 	newtoypois.setName("P_{new} ");
 
 	generated.setName("toys (obs==pred)");
@@ -167,7 +167,7 @@ int main(){
 	genplotter.draw();
 	cvgen.Print("gen.pdf");
 
-	container1D c1(bins),c2(bins),c3(bins),c4(bins);
+	histo1D c1(bins),c2(bins),c3(bins),c4(bins);
 	c1.setMergeUnderFlowOverFlow(true);
 	c2.setMergeUnderFlowOverFlow(true);
 	c3.setMergeUnderFlowOverFlow(true);

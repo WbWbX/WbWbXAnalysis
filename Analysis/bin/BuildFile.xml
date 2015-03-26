@@ -18,6 +18,7 @@
 <bin name="addPseudodata" file="addPseudodata.cc" />
 <bin name="plotControlPlot" file="plotControlPlot.cc" />
 <bin name="addRelSystematics" file="addRelSystematics.cc" />
+<bin name="listSystematics" file="listSystematics.cc" />
 
 
 <Flags CXXFLAGS="-lXMLParser -lunfold -fopenmp"/>

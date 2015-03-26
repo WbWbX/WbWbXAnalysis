@@ -8,7 +8,7 @@
 
 
 #include "../interface/plotterControlPlot.h"
-#include "../interface/containerStack.h"
+#include "../interface/histoStack.h"
 #include "../interface/fileReader.h"
 #include "../interface/plot.h"
 
@@ -23,10 +23,10 @@ plotterControlPlot::plotterControlPlot(): plotterBase(), divideat_(0), stackp_(0
  * expects entries:
  * [plotterControlPlot] defines divideat
  * [textBoxes - boxes]
- * [containerStyle - DataUpper]
- * [containerStyle - MCUpper]
- * [containerStyle - DataRatio]
- * [containerStyle - MCRatio]
+ * [histoStyle - DataUpper]
+ * [histoStyle - MCUpper]
+ * [histoStyle - DataRatio]
+ * [histoStyle - MCRatio]
  * [plotStyle - Upper]
  * [plotStyle - Ratio]
  */
@@ -208,7 +208,7 @@ void plotterControlPlot::drawControlPlot(){
 		std::vector<size_t> nisorted=stackp_->getSortedIdxs(!invertplots_); //invert
 		std::vector<TH1 *> stackedhistos;
 
-		container1D sumcont=stackp_->getContainer(dataentry);
+		histo1D sumcont=stackp_->getContainer(dataentry);
 		sumcont.clear();
 		bool tmpaddStatCorrelated=histoContent::addStatCorrelated;
 		histoContent::addStatCorrelated=false;
@@ -223,7 +223,7 @@ void plotterControlPlot::drawControlPlot(){
 		for(size_t it=0;it<stackp_->size();it++){ //it is the right ordering
 			size_t i=sorted.at(it);
 			if(i != dataentry){
-				container1D tempcont;
+				histo1D tempcont;
 				if(stackp_->is1DUnfold()){ //special treatment
 					tempcont = stackp_->getContainer1DUnfold(i).getBackground();
 					sumcont+=tempcont;
@@ -240,7 +240,7 @@ void plotterControlPlot::drawControlPlot(){
 						legendentries.push_back(stackp_->getLegend(i));
 					}
 					else{//this is signal but PS migrations!
-						container1D visSig=stackp_->getContainer1DUnfold(i).getVisibleSignal();
+						histo1D visSig=stackp_->getContainer1DUnfold(i).getVisibleSignal();
 						if(tempcont.integral(true) / visSig.integral(true) >psmigthresh_){
 							foundPSmig=true;
 							TH1D * h=addObject(sumcont.getTH1D(stackp_->getLegend(i)+" PSmig "+stackp_->getName()+"_stack_h",divbbw,true,true)); //no errors
@@ -319,10 +319,10 @@ void plotterControlPlot::drawRatioPlot(){
 		std::cout << "plotterControlPlot::drawRatioPlot: did not find both data and MC, skipping ratio plot." <<std::endl;
 		return;
 	}
-	container1D fullmc=stackp_->getFullMCContainer(); //dont div by bw
+	histo1D fullmc=stackp_->getFullMCContainer(); //dont div by bw
 	if(stackp_->is1DUnfold())
 		fullmc=stackp_->getFullMCContainer1DUnfold().getRecoContainer();
-	container1D fullmcerr=fullmc.getRelErrorsContainer();
+	histo1D fullmcerr=fullmc.getRelErrorsContainer();
 
 	plot * mcerr=new plot(&fullmcerr,false);
 	tempplots_.push_back(mcerr);
@@ -343,7 +343,7 @@ void plotterControlPlot::drawRatioPlot(){
 	g->Draw("same"+mcstyleratio_.rootDrawOpt);
 
 	///data
-	container1D datac=stackp_->getContainer(tempdataentry_);
+	histo1D datac=stackp_->getContainer(tempdataentry_);
 	if(stackp_->is1DUnfold())
 		datac=stackp_->getContainer1DUnfold(tempdataentry_).getRecoContainer();
 

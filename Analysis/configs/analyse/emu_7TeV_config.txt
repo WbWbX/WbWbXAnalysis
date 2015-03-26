@@ -16,10 +16,10 @@ tree_7TeV_emu_runB.root,data,1,1,99
 
 $ cross section automatic
 tree_7TeV_emuttbar.root,       t#bar{t},		633,	  251.7,	  0, true
-tree_7TeV_emuttbarviatau.root, t#bar{t}(#tau), 	632,	  251.7,	  1, true
+tree_7TeV_emuttbarviatau.root, t#bar{t}, 	633,	  251.7,	  1, true
 
-tree_7TeV_dyee60120.root,          Z#rightarrowll, 	852,	  3048, 2
-tree_7TeV_dymumu60120.root,        Z#rightarrowll,	852,	  3048, 2
+tree_7TeV_dyee60120.root,          DY#rightarrowll, 	852,	  3048, 2
+tree_7TeV_dymumu60120.root,        DY#rightarrowll,	852,	  3048, 2
 tree_7TeV_emuttbarbg.root,         t#bar{t}bg,	   	634,	  170,	  3
 
 $ cross section automatic
@@ -57,7 +57,7 @@ $tree_ttbarz.root,                  t#bar{t}V/#gamma,    798,      0.2057,10
 [parameters-begin] 
 $$ all directories except for inputfiles are relative to $CMSSW_BASE
 
-inputFilesDir = /nfs/dust/cms/user/kiesej/trees_Oct14/
+inputFilesDir = /nfs/dust/cms/user/kiesej/trees_Xmas1415/
 
 Lumi           = 5050
 
@@ -76,7 +76,7 @@ ElecSFHisto    = GlobalSF
 
 TriggerSFFile  = /src/TtZAnalysis/Analysis/data/analyse/trigger_emu_8TeV_pt30.root
 
-PUFile         = /src/TtZAnalysis/Analysis/data/analyse/Legacy2012.json_PU    $without .root
+PUFile         = /src/TtZAnalysis/Analysis/data/analyse/Legacy2011.json_PU    $without .root
 
 btagWP         = csvl
 btagFile       = all_btags

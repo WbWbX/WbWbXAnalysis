@@ -7,9 +7,9 @@
 
 
 #include "TtZAnalysis/Analysis/interface/discriminatorFactory.h"
-#include "../interface/container.h"
-#include "../interface/containerStack.h"
-#include "../interface/containerStackVector.h"
+#include "../interface/histo1D.h"
+#include "../interface/histoStack.h"
+#include "../interface/histoStackVector.h"
 #include "../interface/plotterBase.h"
 
 #include <iostream>
@@ -46,7 +46,7 @@ int main (){
     std::vector<float> bins;
     for(float i=0;i<binsmax;i+=binsmax/100.) bins<<i;
 
-  //  containerStackVector::debug=true;
+  //  histoStackVector::debug=true;
 
   //  discriminatorFactory::debug=true;
 
@@ -54,13 +54,13 @@ int main (){
     testread.readFromTFile("testDiscrFact_lhds.root","testDF");
        setupDF(testread,evt);
     //dont want them in list here
-       container1D::c_list.clear();
+       histo1D::c_list.clear();
 
     discriminatorFactory discf("testDF");
 
     setupDF(discf,evt);
 
-  //  containerStack::debug=true;
+  //  histoStack::debug=true;
 
     TRandom * r = new TRandom();
     r->SetSeed(scount++);
@@ -75,8 +75,8 @@ int main (){
     ///test to read in again
 
 
-   container1D::c_makelist=true;
-   container1D fullout(bins,"full out step 8");
+   histo1D::c_makelist=true;
+   histo1D fullout(bins,"full out step 8");
 
     //generate some stuff for signal MC
     std::cout << "generating signal..." <<std::endl;
@@ -95,15 +95,15 @@ int main (){
 
     }
     TString signalname="signal";
-    containerStackVector csv;
+    histoStackVector csv;
     csv.addList(signalname,kRed,1,1);
     csv.addSignal(signalname);
 
     fullout.clear();
     ////new loop
 
-    container1D::c_list.clear();
-    container1D::c_list.push_back(&fullout);
+    histo1D::c_list.clear();
+    histo1D::c_list.push_back(&fullout);
 
     discriminatorFactory discf2("testDF");
     setupDF(discf2,evt);
@@ -132,8 +132,8 @@ int main (){
     ///and for pseudo data (just for nicer plotting)
 
 
-    container1D::c_list.clear();
-    container1D::c_list.push_back(&fullout);
+    histo1D::c_list.clear();
+    histo1D::c_list.push_back(&fullout);
     discriminatorFactory discf3("testDF");
     setupDF(discf3,evt);
 
@@ -171,12 +171,12 @@ int main (){
     delete f;
     csv.writeAllToTFile("testDiscrFact_out.root",false,false);
     fullout.clear();
-    container1D::c_list.clear();
-    container1D::c_list.push_back(&fullout);
+    histo1D::c_list.clear();
+    histo1D::c_list.push_back(&fullout);
 
     discriminatorFactory testcreate("testDF");
-  //  container1D::debug=true;
- //   containerStack::debug=true;
+  //  histo1D::debug=true;
+ //   histoStack::debug=true;
     testcreate.extractLikelihoods(csv);
     csv.clear();
     testcreate.setUseLikelihoods(true);

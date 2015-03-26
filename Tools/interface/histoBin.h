@@ -11,6 +11,9 @@
 #include "TString.h"
 #include <cmath>
 #include <cstdlib>
+#include <fstream>
+#include <stdint.h>
+#include "serialize.h"
 
 namespace ztop{
 /**
@@ -18,17 +21,26 @@ namespace ztop{
  */
 class histoBin{
 public:
-	histoBin():content_(0),entries_(0),stat2_(0),name_(""){}
-	histoBin(TString name):content_(0),entries_(0),stat2_(0),name_(name){}
+	histoBin():content_(0),entries_(0),stat2_(0){}//,name_(""){}
+	histoBin(const TString& name):content_(0),entries_(0),stat2_(0){}//,name_(name){
+		//cutName();
+	//}
 	~histoBin(){}
+	histoBin(const histoBin& rhs){
+		copyFrom(rhs);
+	}
+	histoBin & operator=(const histoBin& rhs){
+		copyFrom(rhs);
+		return *this;
+	}
 
 	const float & getContent() const {return content_;}
 	float getStat()            const {return std::sqrt(stat2_);}
-	const size_t & getEntries() const {return entries_;}
+	const uint32_t & getEntries() const {return entries_;}
 	const float & getStat2()   const {return stat2_;}
 
 	void setContent(const float &);
-	void setEntries(const int &);
+	void setEntries(const uint32_t &);
 	void setStat(const float &);
 	void setStat2(const float &);
 
@@ -40,8 +52,8 @@ public:
 
 	void add(const histoBin&);
 
-	void setName(const TString & name){name_=name;}
-	const TString & getName() const {return name_;}
+	//void setName(const TString & name){name_=name;cutName();}
+	//const TString & getName() const {return name_;}
 
 	void multiply(const float&);
 	void sqrt();
@@ -50,17 +62,36 @@ public:
 	bool operator == (const histoBin&) const;
 	bool operator != (const histoBin&) const;
 
+
+#ifndef __CINT__
+	template <class T>
+	void writeToStream(T & stream)const{
+		IO::serializedWrite(content_,stream);
+		IO::serializedWrite(entries_,stream);
+		IO::serializedWrite(stat2_,stream);
+	}
+	template <class T>
+	void readFromStream(T & stream){
+		IO::serializedRead(content_,stream);
+		IO::serializedRead(entries_,stream);
+		IO::serializedRead(stat2_,stream);
+	}
+#endif
+
 private:
+
+	void cutName();
+	void copyFrom(const histoBin&);
 	float content_;
-	size_t entries_;
+	uint32_t entries_;
 	float stat2_;
-	TString name_;
+	//TString name_;
 };
 
 inline void histoBin::setContent(const float & val){
 	content_=val;
 }
-inline void histoBin::setEntries(const int & val){
+inline void histoBin::setEntries(const uint32_t & val){
 	entries_=val;
 }
 inline void histoBin::setStat(const float & val){
@@ -88,6 +119,21 @@ inline void histoBin::addEntry(){
 }
 
 
+#ifndef __CINT__
+namespace IO{
+template<class T>
+inline void serializedWrite(const histoBin&c, T&stream){
+	c.writeToStream(stream);
+}
+template<class T>
+inline void serializedRead(histoBin&c, T&stream){
+	c.readFromStream(stream);
+}
+//re-instantiate vector ops
+
+ZTOP_IO_SERIALIZE_SPECIALIZEVECTORS(histoBin)
+}
+#endif
 //top down to vertical
 /*
  * systNames here, operators here?, final class to be filled in container
@@ -100,22 +146,29 @@ inline void histoBin::addEntry(){
  */
 class histoBins{
 public:
-	histoBins(): name_(""),layer_(-1){}
+	histoBins(){}//: name_(""),layer_(-1){}
 	histoBins(size_t Size); //defines size
 	~histoBins(){}
 	void setSize(size_t);
 	bool resize(const size_t & newsize);
+	histoBins(const histoBins& rhs){
+		copyFrom(rhs);
+	}
+	histoBins & operator=(const histoBins& rhs){
+		copyFrom(rhs);
+		return *this;
+	}
 
 	histoBin & getBin(size_t binno){return bins_[binno];}//not protected
 	const histoBin & getBin(size_t binno) const {return bins_[binno];}
 	size_t size() const {return bins_.size();}
 
-
-	void setName(const TString & name){name_=name;}
+/*
+	void setName(const TString & name);
 	const TString & getName(){return name_;}
-	void setLayer(int Layer){layer_=Layer;}
+	void setLayer(const int& Layer){layer_=Layer;}
 	int getLayer() const {return layer_;}
-
+*/
 	int add(const histoBins&,bool statCorr);
 	int subtract(const histoBins&,bool statCorr);
 	int divide(const histoBins&,bool statCorr);
@@ -140,20 +193,48 @@ public:
 	 * returns true if the relative difference in all bins
 	 * is below epsilon * stat.
 	 */
-//TBI	bool isApproxEqual(const histoBins&,double epsilon=1e-6) const;
+	//TBI	bool isApproxEqual(const histoBins&,double epsilon=1e-6) const;
 
 	static bool showwarnings;
 
+#ifndef __CINT__
+	template <class T>
+	void writeToStream(T & stream)const{
+		IO::serializedWrite(bins_,stream);
+	}
+	template <class T>
+	void readFromStream(T & stream){
+		IO::serializedRead(bins_,stream);
+	}
+#endif
+
+
 private:
 	std::vector<histoBin> bins_;
-	TString name_;
-	int layer_;
+	//TString name_;
+	//int layer_;
+
+	void copyFrom(const histoBins&);
 };
 /**
  * not protected, fast
  */
 
 
+#ifndef __CINT__
+namespace IO{
+template<class T>
+inline void serializedWrite(const histoBins&c, T&stream){
+	c.writeToStream(stream);
+}
+template<class T>
+inline void serializedRead(histoBins&c, T&stream){
+	c.readFromStream(stream);
+}
+//re-instantiate vector ops
+ZTOP_IO_SERIALIZE_SPECIALIZEVECTORS(histoBins)
+}
+#endif
 
 
 }//namespace

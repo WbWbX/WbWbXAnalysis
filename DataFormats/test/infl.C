@@ -2,7 +2,7 @@
 #include "TFile.h"
 #include <fstream>
 #include "TtZAnalysis/DataFormats/src/classes.h" 
-#include "TtZAnalysis/Tools/interface/containerStackVector.h"
+#include "TtZAnalysis/Tools/interface/histoStackVector.h"
 #include "TtZAnalysis/Tools/interface/miscUtils.h"
 
 
@@ -23,7 +23,7 @@ void infl(){
   for(int i=0;i<32;i++) bins << i;
 
 
-  container1D cont(bins);
+  histo1D cont(bins);
 
   for(float i=0;i<n;i++){
     t->GetEntry(i);

@@ -28,7 +28,7 @@ void plotterMultiplePlots::addPlot(const graph *c){
     plots_.push_back(plot(c));
     lastplotidx_=plots_.size()-1;
 }
-void plotterMultiplePlots::addPlot(const container1D *c,bool divbw){
+void plotterMultiplePlots::addPlot(const histo1D *c,bool divbw){
     plots_.push_back(plot(c,divbw));
     lastplotidx_=plots_.size()-1;
 }
@@ -52,12 +52,12 @@ void plotterMultiplePlots::readStylePriv(const std::string& infile,bool requirea
     /*
      * style format:
      * expects entries:
-     * [containerStyle - Default]
-     * [containerStyle - <N=0,1,...>] <- only differences wrt to default
+     * [histoStyle - Default]
+     * [histoStyle - <N=0,1,...>] <- only differences wrt to default
      * [plotStyle - multiPlots]
      * TBI:!! instead of N it is possible to use identifiers (e.g. MC, data)
      */
-    containerStyle defaults;
+    histoStyle defaults;
     //read required part
 
     pstyle_.readFromFile(infile,"MultiPlots",requireall);
@@ -91,7 +91,7 @@ void plotterMultiplePlots::readStylePriv(const std::string& infile,bool requirea
     }
 
     for(size_t i=0;i<ncstyles;i++){ //read until nothing found anymore (exception thrown) - should be done differently..
-        containerStyle temp=defaults;
+        histoStyle temp=defaults;
         std::string add=toString(i);
         if(debug) std::cout << "plotterMultiplePlots::readStyleFromFile: reading " << add <<std::endl;
         // try{

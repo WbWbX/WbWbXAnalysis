@@ -24,7 +24,7 @@ public:
     plotterMultiplePlots();
 
     void addPlot(const graph *c);
-    void addPlot(const container1D *c,bool divbw=true);
+    void addPlot(const histo1D *c,bool divbw=true);
 
     void removePlot(size_t idx);
     /**
@@ -35,8 +35,8 @@ public:
     /**
      * style format:
      * expects entries:
-     * [containerStyle - Default]
-     * [containerStyle - <N=0,1,...>] <- only differences wrt to default
+     * [histoStyle - Default]
+     * [histoStyle - <N=0,1,...>] <- only differences wrt to default
      * [plotStyle - MultiPlots]
      * TBI:!! instead of N it is possible to use identifiers (e.g. MC, data)
      */
@@ -55,7 +55,7 @@ protected:
     void drawLegends();
     void refreshPad(){};
     plotStyle pstyle_;
-    std::vector<containerStyle> cstyles_;
+    std::vector<histoStyle> cstyles_;
     std::vector<plot> plots_;
     bool drawlegend_,tightyaxis_,tightxaxis_;
 

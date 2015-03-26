@@ -24,6 +24,14 @@ class indexMap {
 public:
 	indexMap():size_(0){}
 	~indexMap(){}
+	indexMap(const indexMap& rhs):map_(rhs.map_),imap_(rhs.imap_),size_(rhs.size_) {}
+	indexMap& operator = (const indexMap& rhs){
+		if(rhs==*this) return *this;
+		map_=rhs.map_;
+		imap_=rhs.imap_;
+		size_=rhs.size_;
+		return *this;
+	}
 	/**
 	 * returns the size of the indexMap
 	 */

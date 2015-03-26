@@ -1,21 +1,21 @@
 /*
- * variateContainer1D.cc
+ * variateHisto1D.cc
  *
  *  Created on: Aug 19, 2014
  *      Author: kiesej
  */
 
-#include "../interface/variateContainer1D.h"
+#include "../interface/variateHisto1D.h"
 
 namespace ztop{
 
-/*variateContainer1D(){}
-	~variateContainer1D(){}
+/*variateHisto1D(){}
+	~variateHisto1D(){}
 
-	void import(const container1D&);
+	void import(const histo1D&);
 
 	//exports for a certain set of variations
-	container1D exportContainer(const std::vector<float> & variations);
+	histo1D exportContainer(const std::vector<float> & variations);
 
 private:
 	std::vector<extendedVariable> contents_;
@@ -23,9 +23,9 @@ private:
  *
  */
 
-bool variateContainer1D::debug=false;
+bool variateHisto1D::debug=false;
 
-void variateContainer1D::import(const container1D& cont){
+void variateHisto1D::import(const histo1D& cont){
 
 	if(debug)
 		std::cout << "variateContainer1D::import" <<std::endl;
@@ -72,14 +72,14 @@ void variateContainer1D::import(const container1D& cont){
 }
 
 
-void variateContainer1D::setBinErrUp(size_t bin,const float& err){
+void variateHisto1D::setBinErrUp(size_t bin,const float& err){
 	if(debug)
 		std::cout << "variateContainer1D::setBinErrUp" <<std::endl;
 	if(bin<=bins_.size())
 		throw std::out_of_range("variateContainer1D::setBinErrUp: bin out of range");
 	errsup_.at(bin)=err;
 }
-void variateContainer1D::setBinErrDown(size_t bin,const float& err){
+void variateHisto1D::setBinErrDown(size_t bin,const float& err){
 	if(debug)
 		std::cout << "variateContainer1D::setBinErrDown" <<std::endl;
 	if(bin<=bins_.size())
@@ -87,7 +87,7 @@ void variateContainer1D::setBinErrDown(size_t bin,const float& err){
 	errsdown_.at(bin)=err;
 }
 
-double variateContainer1D::getIntegral(const double * vars)const{
+double variateHisto1D::getIntegral(const double * vars)const{
 	double out=0;
 
 	for(size_t i=0;i<bins_.size();i++)
@@ -96,7 +96,7 @@ double variateContainer1D::getIntegral(const double * vars)const{
 }
 
 
-container1D variateContainer1D::exportContainer()const{
+histo1D variateHisto1D::exportContainer()const{
 	if(contents_.size()<1){
 		throw std::out_of_range("variateContainer1D::exportContainer: cannot export without input!");
 	}
@@ -106,7 +106,7 @@ container1D variateContainer1D::exportContainer()const{
 
 }
 
-container1D variateContainer1D::exportContainer(const std::vector<double> & variations)const{
+histo1D variateHisto1D::exportContainer(const std::vector<double> & variations)const{
 	if(debug)
 		std::cout << "variateContainer1D::exportContainer" <<std::endl;
 	if(contents_.size()<1){
@@ -114,8 +114,8 @@ container1D variateContainer1D::exportContainer(const std::vector<double> & vari
 	}
 	std::vector<float> bins=bins_;
 	bins.erase(bins.begin()); //let UF be created for output
-	container1D out(bins);
-	container1D zerotmp=out;
+	histo1D out(bins);
+	histo1D zerotmp=out;
 
 	for(size_t i=0;i<bins_.size();i++){
 		out.setBinContent(i,contents_.at(i).getValue(variations)  );

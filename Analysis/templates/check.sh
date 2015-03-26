@@ -57,7 +57,7 @@ do
 	jobQ=`echo $qjobs | grep ${jobid} 2>/dev/null | head -c 3`;
     fi
     
-    if [[ -e "${fulloutpath}.root" ]];
+    if [[ -e "${fulloutpath}.ztop" ]];
     then
 	if [ -e "${fullcheckpath}_fin" ];
 	then
@@ -79,14 +79,14 @@ do
 		else
 		    echo "${jobname} \e[1;31m  partially done but aborted\e[0m"
 		    tresubmit=( "${tresubmit[@]}" "../jobscripts/${jobname}" );
-		    rmfiles=( "${rmfiles[@]}" "rm -f ../batch/${file}.o${jobid}; rm -f ../output/${file}.root;rm -f ../stdout/${file};" );
+		    rmfiles=( "${rmfiles[@]}" "rm -f ../batch/${file}.o${jobid}; rm -f ../output/${file}.ztop;rm -f ../stdout/${file};" );
 		fi
 	    else
 		if [ $JOBSONBATCH ]
 		then
 		    echo "${jobname} \e[1;31m  partially done but without ID \e[0m"
 		    tresubmit=( "${tresubmit[@]}" "../jobscripts/${jobname}" );
-		    rmfiles=( "${rmfiles[@]}" "rm -f ../batch/${file}.o${jobid}; rm -f ../output/${file}.root;rm -f ../stdout/${file};" );
+		    rmfiles=( "${rmfiles[@]}" "rm -f ../batch/${file}.o${jobid}; rm -f ../output/${file}.ztop;rm -f ../stdout/${file};" );
 		else
 		    echo "${jobname} \e[1;32m partially done (${jobid})\e[0m"
 		fi
@@ -105,14 +105,14 @@ do
 	    else
 		echo "${jobname} \e[1;31m aborted before producing output\e[0m"
 		tresubmit=( "${tresubmit[@]}" "../jobscripts/${jobname}" );
-		rmfiles=( "${rmfiles[@]}" "rm -f ../batch/${file}.o${jobid}; rm -f ../output/${file}.root;rm -f ../stdout/${file};" );
+		rmfiles=( "${rmfiles[@]}" "rm -f ../batch/${file}.o${jobid}; rm -f ../output/${file}.ztop;rm -f ../stdout/${file};" );
 	    fi
 	else
 	    if [ $JOBSONBATCH ]
 	    then
 		echo "${jobname} \e[1;31m  partially done but without ID \e[0m"
 		tresubmit=( "${tresubmit[@]}" "../jobscripts/${jobname}" );
-		rmfiles=( "${rmfiles[@]}" "rm -f ../batch/${file}.o${jobid}; rm -f ../output/${file}.root;rm -f ../stdout/${file};" );
+		rmfiles=( "${rmfiles[@]}" "rm -f ../batch/${file}.o${jobid}; rm -f ../output/${file}.ztop;rm -f ../stdout/${file};" );
 	    else
 		echo "${jobname} \e[1;32m partially done (${jobid})\e[0m"
 	    fi
@@ -130,7 +130,7 @@ do
 	else
 	    echo  "${jobname} \e[01;30m still queuing or \e[1;31m died without any tracable reason!! \e[0m"
 	    tresubmit=( "${tresubmit[@]}" "../jobscripts/${jobname}" );
-	    rmfiles=( "${rmfiles[@]}" "rm -f ../batch/${file}.o${jobid}; rm -f ../output/${file}.root;rm -f ../stdout/${file};" );
+	    rmfiles=( "${rmfiles[@]}" "rm -f ../batch/${file}.o${jobid}; rm -f ../output/${file}.ztop;rm -f ../stdout/${file};" );
 	fi
     fi
 done
@@ -182,7 +182,7 @@ else
 
     if [ ${CMSSW_BASE} ]
     then
-	mergeSyst ${jdone[@]}
+	mergeSyst --addextension ztop ${jdone[@]}
     else
 	echo "Cannot merge systematics. Has to be run from a CMSSW environment"
 	exit 0

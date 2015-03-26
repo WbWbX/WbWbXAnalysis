@@ -5,7 +5,7 @@
  *      Author: kiesej
  */
 
-#include "../interface/container.h"
+#include "../interface/histo1D.h"
 #include "../../../TopAnalysis/ZTopUtils/interface/miscUtils.h"
 #include "TCanvas.h"
 
@@ -13,14 +13,14 @@ void containerTest(){
 	using namespace ztop;
 	using namespace std;
 
-	container1D::debug =false;
+	histo1D::debug =false;
 	histoBins::showwarnings =true;
 
 
 	vector<float> bins;
 	bins << 0 << 3 << 5 << 6 << 10;
 
-	container1D cont1(bins);
+	histo1D cont1(bins);
 
 	for(int i=0;i<20000;i++){
 		cont1.fill(1);
@@ -32,7 +32,7 @@ void containerTest(){
 
 	cout << "copy container" << endl;
 
-	container1D cont2=cont1;
+	histo1D cont2=cont1;
 
 	cout << "add rel error" << endl;
 
@@ -60,8 +60,8 @@ void containerTest(){
 	cont1*=(1/1.1);
 	cont1*=10.;
 
-	container1D::debug=true;
-	container1D ctemp=cont2;
+	histo1D::debug=true;
+	histo1D ctemp=cont2;
 	//just for testing
 	for(size_t bin=0;bin<cont2.getBins().size();bin++)
 	    cont2.setBinStat(bin,0);

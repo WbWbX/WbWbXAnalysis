@@ -8,17 +8,17 @@
 #ifndef TTBARXSECFITTER_H_
 #define TTBARXSECFITTER_H_
 #include <vector>
-#include "TtZAnalysis/Tools/interface/variateContainer1D.h"
+#include "TtZAnalysis/Tools/interface/variateHisto1D.h"
 #include "TtZAnalysis/Tools/interface/simpleFitter.h"
 #include "TtZAnalysis/Tools/interface/formatter.h"
-#include "TtZAnalysis/Tools/interface/container2D.h"
+#include "TtZAnalysis/Tools/interface/histo2D.h"
 #include "TtZAnalysis/Tools/interface/texTabler.h"
 #include "TString.h"
 #include "TRandom3.h"
 #include "TtZAnalysis/Configuration/interface/version.h"
 
 namespace ztop{
-class containerStack;
+class histoStack;
 
 class ttbarXsecFitter {
 public:
@@ -38,7 +38,7 @@ public:
 		fitsucc_(false),norm_nbjet_global_(true),
 		useMConly_(false),removesyst_(false),nominos_(false),
 		parameterwriteback_(true),
-		nosystbd_(false),silent_(false),nopriors_(false)
+		nosystbd_(false),silent_(false),nopriors_(false),visibleps_(false),topmassrepl_(-100)
 	{
 	} //one for each energy
 
@@ -57,13 +57,15 @@ public:
 	void setExcludeZeroBjetBin(bool excl){exclude0bjetbin_=excl;}
 
 
-
+	void setDoVisiblePS(bool doit){visibleps_=doit;}
 	//read in functions here
 
 
 	void setUseMCOnly(bool set){useMConly_=set;}
 
 	void setNoMinos(bool nomin){nominos_=nomin;}
+
+
 
 	/**
 	 * removes systematics already at read-in
@@ -76,7 +78,7 @@ public:
 	void setIgnorePriors(bool ignore){nopriors_=ignore;}
 
 	/**
-	 *
+	 * Only total unceratinty (and extrapolation errors) will be calculated
 	 */
 	void setNoSystBreakdown(bool no){nosystbd_=no;}
 
@@ -88,12 +90,14 @@ public:
 	/**
 	 * just append all in one
 	 */
-	containerStack produceStack(bool fittedvalues,size_t bjetcat,size_t datasetidx,double& chi2)const;
+	histoStack produceStack(bool fittedvalues,size_t bjetcat,size_t datasetidx,double& chi2)const;
 
 	/**
 	 *
 	 */
 	void setReplaceInInfile(const TString& repl,const TString& with){replaceininfiles_=std::pair<TString,TString>(repl,with);}
+
+	void setReplaceTopMass(float mass){topmassrepl_=mass;}
 
 	/**
 	 * Reads in the input from file
@@ -109,7 +113,7 @@ public:
 	 */
 	int fit(std::vector<float>& xsecs,std::vector<float>& errup,std::vector<float>& errdown);
 	int fit();
-	//container2D getCorrelationCoefficients()const{return fitter_.getCorrelationCoefficients();}
+	//histo2D getCorrelationCoefficients()const{return fitter_.getCorrelationCoefficients();}
 
 
 
@@ -120,15 +124,15 @@ public:
 	std::vector<double> getParameters()const{return *fitter_.getParameters();}
 
 
-	container1D getCb (bool fittedvalues,size_t datasetidx)const; //{if(eighttev) return container_c_b_.at(0); else return container_c_b_.at(1);}
-	container1D getEps(bool fittedvalues,size_t datasetidx)const;
+	histo1D getCb (bool fittedvalues,size_t datasetidx)const; //{if(eighttev) return container_c_b_.at(0); else return container_c_b_.at(1);}
+	histo1D getEps(bool fittedvalues,size_t datasetidx)const;
 
-	container2D getCorrelations()const;
+	histo2D getCorrelations()const;
 
 	double getXsec(size_t datasetidx)const;
 	double getXsecOffset(size_t datasetidx)const;
 
-	double getVisXsec(size_t datasetidx)const;
+	double getXsecRatio(size_t datasetidx1,size_t datasetidx2, double & errup, double& errdown)const;
 
 	size_t getNParameters()const{return fitter_.getParameters()->size();}
 
@@ -141,11 +145,11 @@ public:
 
 	void createSystematicsBreakdowns();
 
-	texTabler makeSystBreakDownTable(size_t datasetidx,bool inclusive=true);
+	texTabler makeSystBreakDownTable(size_t datasetidx);
 
 	texTabler makeCorrTable() const;
 
-	void createPseudoDataFromMC(container1D::pseudodatamodes mode=container1D::pseudodata_poisson);
+	void createPseudoDataFromMC(histo1D::pseudodatamodes mode=histo1D::pseudodata_poisson);
 
 	void createContinuousDependencies();
 
@@ -172,39 +176,37 @@ private:
 	public:
 
 		struct systematic_unc{
-					TString name;
-					double pull;
-					double constr;
-					double errup;
-					double errdown;
-				};
+			TString name;
+			double pull;
+			double constr;
+			double errup;
+			double errdown;
+		};
 
 		dataset(double lumi,double lumiunc, double xsecin, TString name):
 			lumi_(lumi),xsecoff_(xsecin),unclumi_(lumiunc),
 			lumiidx_(9999),xsecidx_(9999),name_(name),totalvisgencontsread_(0)
-	{}
+		{}
 
 		extendedVariable& eps_emu(){return eps_emu_;}
 		const extendedVariable& eps_emu()const {return eps_emu_;}
-		extendedVariable& fullToVisCorrFact(){return fulltoviscorrfact_;}
-		const extendedVariable& fullToVisCorrFact()const {return fulltoviscorrfact_;}
 
 		extendedVariable& normalization(size_t nbjet){return normalization_nbjet_.at(nbjet);}
 		const extendedVariable& normalization(size_t nbjet)const {return normalization_nbjet_.at(nbjet);}
 
-		variateContainer1D& signalshape(size_t nbjet){return signalshape_nbjet_.at(nbjet);}
-		const variateContainer1D& signalshape(size_t nbjet)const {return signalshape_nbjet_.at(nbjet);}
-		variateContainer1D& background(size_t nbjet){return background_nbjet_.at(nbjet);}
-		const variateContainer1D& background(size_t nbjet)const {return background_nbjet_.at(nbjet);}
-		variateContainer1D& data(size_t nbjet){return data_nbjet_.at(nbjet);}
-		const variateContainer1D& data(size_t nbjet)const {return data_nbjet_.at(nbjet);}
+		variateHisto1D& signalshape(size_t nbjet){return signalshape_nbjet_.at(nbjet);}
+		const variateHisto1D& signalshape(size_t nbjet)const {return signalshape_nbjet_.at(nbjet);}
+		variateHisto1D& background(size_t nbjet){return background_nbjet_.at(nbjet);}
+		const variateHisto1D& background(size_t nbjet)const {return background_nbjet_.at(nbjet);}
+		variateHisto1D& data(size_t nbjet){return data_nbjet_.at(nbjet);}
+		const variateHisto1D& data(size_t nbjet)const {return data_nbjet_.at(nbjet);}
 
 
 
-		variateContainer1D& container_c_b(){return container_c_b_;}
-		const variateContainer1D& container_c_b()const {return container_c_b_;}
-		variateContainer1D& container_eps_b(){return container_eps_b_;}
-		const variateContainer1D& container_eps_b()const {return container_eps_b_;}
+		variateHisto1D& container_c_b(){return container_c_b_;}
+		const variateHisto1D& container_c_b()const {return container_c_b_;}
+		variateHisto1D& container_eps_b(){return container_eps_b_;}
+		const variateHisto1D& container_eps_b()const {return container_eps_b_;}
 
 		const TString & getName()const{return name_;}
 		const double & lumi()const{return lumi_;}
@@ -212,12 +214,12 @@ private:
 		const size_t & xsecIdx()const;
 		void createXsecIdx();
 
-		void readStacks(const std::string  configfilename,const std::pair<TString,TString>&,bool);
+		void readStacks(const std::string  configfilename,const std::pair<TString,TString>&,bool,std::vector<std::pair<TString, double> >&);
 		//also takes care of proper asso to lumiidx,xsecidx
 		void equalizeIndices(dataset & rhs);
 
-		void createPseudoDataFromMC(container1D::pseudodatamodes mode=container1D::pseudodata_poisson);
-		void createContinuousDependencies(bool);
+		void createPseudoDataFromMC(histo1D::pseudodatamodes mode=histo1D::pseudodata_poisson);
+		void createContinuousDependencies(bool,bool);
 
 		std::vector<TString> getSystNames()const{
 			if(signalconts_nbjets_.size()<1)
@@ -231,20 +233,18 @@ private:
 		static const size_t nBjetCat(){return 3;} //to avoid duplication
 
 
-		std::vector<systematic_unc>& postFitSystematicsFull(){return post_fit_systematics_full_;}
-		const std::vector<systematic_unc>& postFitSystematicsFull() const{return post_fit_systematics_full_;}
-		std::vector<systematic_unc>& postFitSystematicsVis(){return post_fit_systematics_vis_;}
-		const std::vector<systematic_unc>& postFitSystematicsVis() const{return post_fit_systematics_vis_;}
+		std::vector<systematic_unc>& postFitSystematicsFull(){return post_fit_systematics_;}
+		const std::vector<systematic_unc>& postFitSystematicsFull() const{return post_fit_systematics_;}
 
 
 
 	private:
 
-		void addUncertainties(containerStack * stack,size_t nbjets,bool removesyst)const;
-		variateContainer1D createLeptonJetAcceptance(const std::vector<container1D>& signals,
-				const std::vector<container1D>& signalpsmig,
-				const std::vector<container1D>& signalvisPSgen,
-				size_t bjetcategory);
+		void addUncertainties(histoStack * stack,size_t nbjets,bool removesyst,std::vector<std::pair<TString, double> >& )const;
+		variateHisto1D createLeptonJetAcceptance(const std::vector<histo1D>& signals,
+				const std::vector<histo1D>& signalpsmig,
+				const std::vector<histo1D>& signalvisPSgen,
+				size_t bjetcategory, bool visPS);
 
 		dataset():totalvisgencontsread_(0){}
 
@@ -254,37 +254,39 @@ private:
 		TString name_;
 
 		//global per dataset
-		extendedVariable eps_emu_,fulltoviscorrfact_;
+		extendedVariable eps_emu_;
 
 		//per bjet_cat
 		std::vector<extendedVariable> normalization_nbjet_;
 		//per b-jet cat (includes jet categories)
-		std::vector<variateContainer1D>  signalshape_nbjet_;
-		std::vector<variateContainer1D>  background_nbjet_;
-		std::vector<variateContainer1D>  data_nbjet_;
+		std::vector<variateHisto1D>  signalshape_nbjet_;
+		std::vector<variateHisto1D>  background_nbjet_;
+		std::vector<variateHisto1D>  data_nbjet_;
 
 
 		///for checks
-		variateContainer1D container_c_b_;
-		variateContainer1D container_eps_b_;
+		variateHisto1D container_c_b_;
+		variateHisto1D container_eps_b_;
 
+		/*
+		 * includes events from PS migrations
+		 */
+		std::vector<histo1D> signalconts_nbjets_;
+		std::vector<histo1D> signalcontsorig_nbjets_;
 
-		std::vector<container1D> signalconts_nbjets_;
-		std::vector<container1D> signalcontsorig_nbjets_;
-
-		std::vector<container1D> signalvisgenconts_nbjets_;
+		std::vector<histo1D> signalvisgenconts_nbjets_;
 
 		size_t totalvisgencontsread_; //this is NOT signalvisgenconts_nbjets_.size() since some could be merged!
 
-		std::vector<container1D> signalpsmigconts_nbjets_;
-		std::vector<container1D> signalpsmigcontsorig_nbjets_;
+		std::vector<histo1D> signalpsmigconts_nbjets_;
+		std::vector<histo1D> signalpsmigcontsorig_nbjets_;
 
-		std::vector<container1D> dataconts_nbjets_;
-		std::vector<container1D> datacontsorig_nbjets_;
-		std::vector<container1D> backgroundconts_nbjets_;
-		std::vector<container1D> backgroundcontsorig_nbjets_;
+		std::vector<histo1D> dataconts_nbjets_;
+		std::vector<histo1D> datacontsorig_nbjets_;
+		std::vector<histo1D> backgroundconts_nbjets_;
+		std::vector<histo1D> backgroundcontsorig_nbjets_;
 
-		std::vector<systematic_unc> post_fit_systematics_full_,post_fit_systematics_vis_;
+		std::vector<systematic_unc> post_fit_systematics_;
 
 
 	};
@@ -314,11 +316,11 @@ private:
 	//just a safety check. Should be redundant as soon as class works and is tested
 	void checkSizes()const;
 
-	double getExtrapolationError(size_t datasetidx, size_t paraidx, bool up, bool fullps);
+	double getExtrapolationError(size_t datasetidx, size_t paraidx, bool up);
 
 	//can be more sophisticated
 
-
+	TString translatePartName(const formatter& fmt,const TString& name)const;
 
 	//might come handy in some cases
 	formatter format_;
@@ -331,8 +333,11 @@ private:
 
 	std::pair<TString,TString> replaceininfiles_;
 
-	bool nosystbd_,silent_,nopriors_;
+	//needs to be adapted (?) for more than 2 datasets
+	std::vector<std::pair<TString, double> > priorcorrcoeff_;
 
+	bool nosystbd_,silent_,nopriors_,visibleps_;
+float topmassrepl_;
 };
 
 }

@@ -23,7 +23,7 @@ tree_8TeV_emu_runD_22Jan.root,data,1,1,99
 
 
 tree_8TeV_emuttbar.root,       t#bar{t},		633,	  251.7,	  0, true
-tree_8TeV_emuttbarviatau.root, t#bar{t},	 	632,	  251.7,	  1, true
+tree_8TeV_emuttbarviatau.root, t#bar{t},	 	633,	  251.7,	  1, true
 tree_8TeV_dyee60120.root,          DY#rightarrowll, 	852,	  3532.8, 2
 tree_8TeV_dymumu60120.root,        DY#rightarrowll,	852,	  3532.8, 2
 tree_8TeV_emuttbarbg.root,         t#bar{t}bg,	   	634,	  248.5,	  3
@@ -59,7 +59,7 @@ tree_ttbarz.root,                  t#bar{t}V/#gamma,    798,      0.2057,10
 [parameters-begin] 
 $$ all directories except for inputfiles are relative to $CMSSW_BASE
 
-inputFilesDir = /nfs/dust/cms/user/kiesej/trees_Jul14/ $for naf
+inputFilesDir = /nfs/dust/cms/user/kiesej/trees_Xmas1415/ $for naf
 
 Lumi           = 19741
 

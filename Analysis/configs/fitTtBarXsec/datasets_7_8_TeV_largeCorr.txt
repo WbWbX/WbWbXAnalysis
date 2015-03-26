@@ -1,0 +1,161 @@
+
+
+### comments with #
+## format for each energy:
+# 
+#   <this is the line for 0 add jet>  filename | plotname (, filename, plotname, .....) #all plots here will be taken into account (stat uncorr)
+#   <this is the line for 1 add jet>  filename | plotname ...
+#   ...
+# bjet++
+# < 1 b-jet > ....
+#
+#
+#
+#  the files are assumed to be located where the executable is called
+[ priors ]
+
+#everything will be gaussian except the ones specified here
+
+   TT_SCALE   =  box
+   TT_GENPOWPY=  boxright
+  # CR         =  boxleft
+   TT_MATCH   =  box
+
+   UE = box
+  # PDF =fixed
+   CR         =  boxleft
+
+   ##due to missing SF
+   BTAGH_7TeV = float
+   BTAGL_7TeV = float
+
+
+[ end - priors ]
+
+[ full extrapolation ]
+
+   TT_SCALE
+   TT_MATCH
+   PDF
+   TOPPT
+
+[ end - full extrapolation ]
+
+
+[ datasets ]
+
+	[ dataset - 8TeV ]
+	  lumi  =   19741
+	  lumiunc = 2.6
+	  energy = 8       #for dynamic xsec
+	  topmass = 172.5  #for dynamic xsec
+	[ end dataset - 8TeV ]
+	
+	 [ dataset - 7TeV ]
+	  lumi  =   5010
+	  lumiunc = 2.2
+	  energy = 7       #for dynamic xsec
+	  topmass = 172.5  #for dynamic xsec
+	 [ end dataset - 7TeV ]
+
+[ end datasets ]
+
+
+
+[ correlations 8TeV - 7TeV ]
+
+# 1 is implicit
+ #  PDF = 1
+ #  TOPPT = 1
+ #  TT_MATCH = 1
+ #  TT_SCALE = 1
+ #  UE = 1
+ #  CR = 1
+ #  TT_BJESNUDEC = 1
+ #  TT_BJESRETUNE = 1
+ #  TT_GENPOWPY= 1
+
+   JES_Flavor = 0.9
+
+   JES_RelativeFSR = 0.5
+   JES_AbsoluteMPFBias = 0.2
+   JES_PileupPt = 0
+   JES_Uncorrelated = 0
+   
+   MUONES = 0.5
+  # MUONSF = 0.5
+   MUONSF = 0
+   ELECES = 0.5
+   ELECSF = 0.5
+ # ELECSF = 0
+   JER    = 0.5
+ #  BTAGH  = 0.5
+   BTAGH  = 0
+ #  BTAGL  = 0.5
+   BTAGL  = 0
+   TRIGGER= 0.5
+  # TRIGGER= 0
+   
+   PU = 0.2
+   
+   
+   BG_tW/#bar{t}W#rightarrowll= 0.9
+   BG_VV            = 0.9
+   BG_t#bar{t}bg   = 0.9
+   BG_Wjets   = 0.9
+   BG_QCD   = 0.9
+   BG_t#bar{t}V/#gamma = 0.9
+   BG_0_bjets_DY = 0.9
+   BG_1_bjets_DY = 0.9
+   BG_2_bjets_DY = 0.9
+
+[end - correlations ]
+
+#plots for datasets
+
+[ 8TeV ]
+
+   emu_8TeV_172.5_nominal_syst.root | total 0,0 b-jets step 8  ##these should include 3+ bjets events
+   emu_8TeV_172.5_nominal_syst.root | lead jet pt 0,1 b-jets step 8
+   emu_8TeV_172.5_nominal_syst.root | second jet pt 0,2 b-jets step 8
+   emu_8TeV_172.5_nominal_syst.root | third jet pt 0,3 b-jets step 8
+
+bjet++
+
+   emu_8TeV_172.5_nominal_syst.root | total 1,0 b-jets step 8
+   emu_8TeV_172.5_nominal_syst.root | lead jet pt 1,1 b-jets step 8
+   emu_8TeV_172.5_nominal_syst.root | second jet pt 1,2 b-jets step 8
+   emu_8TeV_172.5_nominal_syst.root | third jet pt 1,3 b-jets step 8
+
+bjet++
+
+   emu_8TeV_172.5_nominal_syst.root | total 2,0 b-jets step 8
+   emu_8TeV_172.5_nominal_syst.root | lead jet pt 2,1 b-jets step 8
+   emu_8TeV_172.5_nominal_syst.root | second jet pt 2,2 b-jets step 8
+   emu_8TeV_172.5_nominal_syst.root | third jet pt 2,3 b-jets step 8
+
+
+[ end - 8TeV ]
+##########################################
+[ 7TeV ]
+
+   emu_7TeV_172.5_nominal_syst.root | total 0,0 b-jets step 8  ##these should include 3+ bjets events
+   emu_7TeV_172.5_nominal_syst.root | lead jet pt 0,1 b-jets step 8
+   emu_7TeV_172.5_nominal_syst.root | second jet pt 0,2 b-jets step 8
+   emu_7TeV_172.5_nominal_syst.root | third jet pt 0,3 b-jets step 8
+
+bjet++
+
+   emu_7TeV_172.5_nominal_syst.root | total 1,0 b-jets step 8
+   emu_7TeV_172.5_nominal_syst.root | lead jet pt 1,1 b-jets step 8
+   emu_7TeV_172.5_nominal_syst.root | second jet pt 1,2 b-jets step 8
+   emu_7TeV_172.5_nominal_syst.root | third jet pt 1,3 b-jets step 8
+
+bjet++
+
+   emu_7TeV_172.5_nominal_syst.root | total 2,0 b-jets step 8
+   emu_7TeV_172.5_nominal_syst.root | lead jet pt 2,1 b-jets step 8
+   emu_7TeV_172.5_nominal_syst.root | second jet pt 2,2 b-jets step 8
+   emu_7TeV_172.5_nominal_syst.root | third jet pt 2,3 b-jets step 8
+
+[ end - 7TeV ]

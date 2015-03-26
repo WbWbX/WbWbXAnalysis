@@ -1,34 +1,34 @@
 /*
- * variateContainer1D.h
+ * variateHisto1D.h
  *
  *  Created on: Aug 19, 2014
  *      Author: kiesej
  */
 
-#ifndef VARIATECONTAINER1D_H_
-#define VARIATECONTAINER1D_H_
+#ifndef VARIATEHISTO1D_H_
+#define VARIATEHISTO1D_H_
 
 #include "extendedVariable.h"
 #include <vector>
-#include "container.h"
+#include "histo1D.h"
 #include <algorithm>
 
 namespace ztop{
 
-class variateContainer1D{
+class variateHisto1D{
 public:
-	variateContainer1D(){}
-	~variateContainer1D(){}
+	variateHisto1D(){}
+	~variateHisto1D(){}
 
-	void import(const container1D&);
+	void import(const histo1D&);
 
 	//exports for a certain set of variations
 	//no syst for now!
-	container1D exportContainer(const std::vector<double> & variations)const;
+	histo1D exportContainer(const std::vector<double> & variations)const;
 	/**
 	 * exports with 0 variation
 	 */
-	container1D exportContainer()const;
+	histo1D exportContainer()const;
 
 	float getBinErrUp(size_t idx){return errsup_.at(idx);}
 	float getBinErrDown(size_t idx){return errsdown_.at(idx);}

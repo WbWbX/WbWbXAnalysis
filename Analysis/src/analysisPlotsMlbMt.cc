@@ -104,12 +104,21 @@ void analysisPlotsMlbMt::fillPlotsGen(){
 				NTLorentzVector<float> llepp4=genvisleptons3.at(0)->p4();
 				NTLorentzVector<float> slepp4=genvisleptons3.at(1)->p4();
 
+				NTGenParticle* pairedlep=genvisleptons3.at(0);
+
 				float fMlb=(bjetp4+llepp4).m();
 				float fm2lb=(bjetp4+slepp4).m();
 				float fmlb=fMlb;
 				float fmlbmin=fMlb;
 				if(fMlb>mlbcombthresh_ && fm2lb<mlbcombthresh_)  fmlb=fm2lb;
-				if(fMlb>fm2lb) fmlbmin=fm2lb;
+				if(fMlb>fm2lb){
+					fmlbmin=fm2lb;
+					pairedlep=genvisleptons3.at(1);
+				}
+
+				if(pairedlep->q() * leadvisb->pdgId() > 0)
+					rightassocounter_++;
+				totalcounter_++;
 
 				Mlb->fillGen(fMlb,puweight());
 				mlb->fillGen(fmlb,puweight());

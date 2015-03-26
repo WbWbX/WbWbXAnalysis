@@ -5,8 +5,8 @@
  *      Author: kiesej
  */
 
-#include "../interface/container2D.h"
-//#include "../src/container2D.cc"
+#include "../interface/histo2D.h"
+//#include "../src/histo2D.cc"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 #include "TRandom.h"
 #include "TCanvas.h"
@@ -24,8 +24,8 @@ void container2DTest(){
 	otherbins << -8 << -4 << 0 << 4 << 8 << 12;
 
 	//binsx << 4<< 6<< 7<<8;
-	container2D c1(binsx,binsy,"testcont","xaxis","yaxis");
-	container2D c2(binsx,binsy,"testcont2","xaxis","yaxis");
+	histo2D c1(binsx,binsy,"testcont","xaxis","yaxis");
+	histo2D c2(binsx,binsy,"testcont2","xaxis","yaxis");
 
 	TRandom * r = new TRandom(12093821);
 
@@ -36,7 +36,7 @@ void container2DTest(){
 	}
 	std::cout << "done filling" << std::endl;
 
-	container2D c3 = c1;///(c2*0.001);
+	histo2D c3 = c1;///(c2*0.001);
 
 	std::cout << "projecting" << std::endl;
 
@@ -47,11 +47,11 @@ void container2DTest(){
 	c3.getTH2D("",false,false)->Draw("colz,text,e");
 	TCanvas *c=new TCanvas();
 	c->cd();
-	container1D xprojection=c3.projectToX(false);
+	histo1D xprojection=c3.projectToX(false);
 
 	xprojection.getTH1D("xproj")->Draw("");
 
-	container1D yprojection= c3.projectToY(false);
+	histo1D yprojection= c3.projectToY(false);
 	TH1D * h=yprojection.getTH1D("yproj");
 	h->SetMarkerColor(kRed);
 	h->Draw("same");
@@ -59,7 +59,7 @@ void container2DTest(){
 	TCanvas *cc=new TCanvas();
 	cc->cd();
 
-	container1D yslice=c3.getXSlice(c3.getBinNoX(0.5));
+	histo1D yslice=c3.getXSlice(c3.getBinNoX(0.5));
 	yslice.getTH1D("",false)->Draw("text,e");
 	c3.getXSlice(c3.getBinNoX(2.5)).getTH1D("",false)->Draw("same,text,e");
 

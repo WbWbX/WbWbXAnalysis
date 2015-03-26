@@ -7,7 +7,7 @@
 
 
 
-#include "TtZAnalysis/Tools/interface/containerStackVector.h"
+#include "TtZAnalysis/Tools/interface/histoStackVector.h"
 #include "TtZAnalysis/Tools/interface/fileReader.h"
 //#include "TtZAnalysis/Tools/interface/plotter.h"
 #include "TtZAnalysis/Tools/interface/simpleRatioPlotter.h"
@@ -20,20 +20,20 @@
 #include <fstream>
 #include <string>
 /*
-ztop::container1D extractBinDependence(const ztop::container1D & cont, const size_t& bin, const TString var){ //give var name and var value independently
+ztop::histo1D extractBinDependence(const ztop::histo1D & cont, const size_t& bin, const TString var){ //give var name and var value independently
 	using namespace ztop;
 
 
 
-	return container1D(); //default return
+	return histo1D(); //default return
 }
  */
 std::vector<TObject *> allobjs_p; //for printing outside main
 
 void drawSystDependenceInBin(const ztop::graph& datadep, const ztop::graph& mcdep, const size_t & bin, const TString & variation,float bincenter){
     /*
-	ztop::container1D datadep=data.getDependenceOnSystematic(bin,variation);
-	ztop::container1D mcdep=mc.getDependenceOnSystematic(bin,variation);
+	ztop::histo1D datadep=data.getDependenceOnSystematic(bin,variation);
+	ztop::histo1D mcdep=mc.getDependenceOnSystematic(bin,variation);
 
 	float ymax=datadep.getYMax(false);
 	float ymin=datadep.getYMin(false);
@@ -171,17 +171,17 @@ ztop::container1DStackVector getCSVFromFile(TString name)
     return vtemp;
 }
 
-ztop::container1DUnfold getCUFFromFile(TString filename,TString plotname)
+ztop::histo1DUnfold getCUFFromFile(TString filename,TString plotname)
 {
     TFile * ftemp=new TFile(stripRoot(filename)+".root","read");
     TTree * ttemp = (TTree*)ftemp->Get("container1DUnfolds");
     if(!ttemp || ttemp->IsZombie()){
         delete ttemp;
-        return ztop::container1DUnfold();
+        return ztop::histo1DUnfold();
     }
-    ztop::container1DUnfold * cuftemp=0;
+    ztop::histo1DUnfold * cuftemp=0;
     if(!ttemp->GetBranch("container1DUnfolds"))
-        return ztop::container1DUnfold();
+        return ztop::histo1DUnfold();
     bool found=false;
     ttemp->SetBranchAddress("container1DUnfolds", &cuftemp);
     for(float n=0;n<ttemp->GetEntries();n++){
@@ -191,7 +191,7 @@ ztop::container1DUnfold getCUFFromFile(TString filename,TString plotname)
             break;
         }
     }
-    ztop::container1DUnfold cuf;
+    ztop::histo1DUnfold cuf;
     if(cuftemp && found)
         cuf=*cuftemp;
 
@@ -216,7 +216,7 @@ int main(int argc, char* argv[]){
     TString variation="MT";
     TString inputfile="";
     TString ignore="";
-    containerStackVector csv;
+    histoStackVector csv;
     size_t ninputfiles=0;
     double lumi=-1;
     for(int i=1;i<argc;i++){
@@ -267,13 +267,13 @@ int main(int argc, char* argv[]){
     }
 
 
-    container1DUnfold cuf;
+    histo1DUnfold cuf;
     cuf=getCUFFromFile(inputfile,plot);
     bool wasunfolded=true;
     if(cuf.isDummy()){//
         wasunfolded=false;
         //try to get from stack
-        containerStack stack=csv.getStack(plot);
+        histoStack stack=csv.getStack(plot);
         //get signal container
         cuf=stack.getSignalContainer1DUnfold();
     }
@@ -299,7 +299,7 @@ int main(int argc, char* argv[]){
         }
     }
 
-    container1D signal=cuf.getGenContainer();
+    histo1D signal=cuf.getGenContainer();
 
     //store indices of relevant variations
     std::vector<size_t> sysidx;
@@ -314,11 +314,11 @@ int main(int argc, char* argv[]){
     }
 
     //get only nominal
-    container1D nominal=signal.getSystContainer(-1);
+    histo1D nominal=signal.getSystContainer(-1);
 
 
     //get relevant variations (naming done automatically)
-    std::vector<container1D> varcont;
+    std::vector<histo1D> varcont;
     for(size_t i=0;i<sysidx.size();i++){
         varcont.push_back(signal.getSystContainer(sysidx.at(i)));
     }
@@ -346,7 +346,7 @@ int main(int argc, char* argv[]){
     leg->AddEntry(h,"nominal","lpf");
 
     std::vector<TH1D *> phists;
-    std::vector<container1D> conts;
+    std::vector<histo1D> conts;
     std::vector<int> colz;
 
     conts.push_back(nominal);
@@ -356,7 +356,7 @@ int main(int argc, char* argv[]){
     float max=nominal.getYMax(true);
     for(size_t i=0;i<varcont.size();i++){
         TString sysname=signal.getSystErrorName(sysidx.at(i));
-        container1D tcont=varcont.at(i);
+        histo1D tcont=varcont.at(i);
         tcont*=(1/lumi);
         float tmax=tcont.getYMax(true);
         if(tmax>max)max=tmax;
@@ -416,8 +416,8 @@ int main(int argc, char* argv[]){
         c->Print(plot+"_"+variation+".pdf");
     }
     else{
-        container1D ufcont=cuf.getUnfolded();
-        std::vector<container1D> ufvars;
+        histo1D ufcont=cuf.getUnfolded();
+        std::vector<histo1D> ufvars;
         std::vector<size_t> mcsysidx=sysidx;
         sysidx.clear();
         colz.clear();
@@ -428,14 +428,14 @@ int main(int argc, char* argv[]){
             }
         }
         colz.push_back(kBlack);
-        container1D ufwovar=ufcont;
+        histo1D ufwovar=ufcont;
         for(size_t i=0;i<sysidx.size();i++){
             ufwovar.removeError(ufcont.getSystErrorName(sysidx.at(i)));
         }
         ufvars.push_back(ufwovar);
         for(size_t i=0;i<sysidx.size();i++){
             TString sysname=ufcont.getSystErrorName(sysidx.at(i));
-            container1D tcont=ufcont.getSystContainer(sysidx.at(i));
+            histo1D tcont=ufcont.getSystContainer(sysidx.at(i));
             ufvars.push_back(tcont);
             colz.push_back(getColor(i,sysname.Contains("up"),false));
         }

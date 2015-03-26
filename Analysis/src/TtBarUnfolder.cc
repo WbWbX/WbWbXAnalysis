@@ -7,10 +7,10 @@
 
 #include "../interface/TtBarUnfolder.h"
 
-#include "TtZAnalysis/Tools/interface/containerUnfolder.h"
-#include "TtZAnalysis/Tools/interface/container1DUnfold.h"
-#include "TtZAnalysis/Tools/interface/containerStackVector.h"
-#include "TtZAnalysis/Tools/interface/containerStack.h"
+#include "TtZAnalysis/Tools/interface/histoUnfolder.h"
+#include "TtZAnalysis/Tools/interface/histo1DUnfold.h"
+#include "TtZAnalysis/Tools/interface/histoStackVector.h"
+#include "TtZAnalysis/Tools/interface/histoStack.h"
 #include "TtZAnalysis/Tools/interface/plotterControlPlot.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 #include "TString.h"
@@ -48,12 +48,12 @@ TString TtBarUnfolder::unfold(TString out,TString in)const{
     outfile+="_unfolded.root";
 
     if(moreoutput){
-        ztop::containerUnfolder::debug=true;
-        ztop::container2D::debug=false;
-        ztop::container1DUnfold::debug=true;
-        ztop::containerStack::debug=false;
+        ztop::histoUnfolder::debug=true;
+        ztop::histo2D::debug=false;
+        ztop::histo1DUnfold::debug=true;
+        ztop::histoStack::debug=false;
     }
-    ztop::containerUnfolder::printinfo = moreoutput;
+    ztop::histoUnfolder::printinfo = moreoutput;
 
 
     /*
@@ -71,15 +71,15 @@ TString TtBarUnfolder::unfold(TString out,TString in)const{
     csvname.ReplaceAll("_plots.root","");
     csvname.ReplaceAll(".root","");
 
-    ztop::containerStackVector csv;
+    ztop::histoStackVector csv;
     csv.loadFromTFile(in);
 
 
     //get right stacks and set signal
     size_t csvsize=csv.getVector().size();
-    std::vector<ztop::containerStack> tobeunfolded;
+    std::vector<ztop::histoStack> tobeunfolded;
     for(size_t i=0; i<csvsize;i++){
-        ztop::containerStack  stack=csv.getStack(i);
+        ztop::histoStack  stack=csv.getStack(i);
         if(stack.is1DUnfold()){
             tobeunfolded.push_back(stack);
         }
@@ -90,9 +90,9 @@ TString TtBarUnfolder::unfold(TString out,TString in)const{
 
     ///unfolding and output part!!
 
-    ztop::containerUnfolder unfolder;
+    ztop::histoUnfolder unfolder;
     //unfolder.setRegMode(TUnfold::kRegModeDerivative);
-    unfolder.setScanMode(ztop::containerUnfolder::minCorr);
+    unfolder.setScanMode(ztop::histoUnfolder::minCorr);
 
     size_t ufsize=tobeunfolded.size();
     //parallel for?!?
@@ -103,7 +103,7 @@ TString TtBarUnfolder::unfold(TString out,TString in)const{
     TDirectory * d=0;
     for(size_t i=0;i<ufsize;i++){
         unfolder.clear();
-        ztop::containerStack * stack=&tobeunfolded.at(i);
+        ztop::histoStack * stack=&tobeunfolded.at(i);
 
         TString name=stack->getName();
         TString nameus=name;
@@ -114,7 +114,7 @@ TString TtBarUnfolder::unfold(TString out,TString in)const{
         TString outdirin=outdir+nameus+"/";
         if(printpdfs) system(("mkdir -p "+outdirin).Data());
 
-        ztop::container1DUnfold  data=stack->produceUnfoldingContainer();
+        ztop::histo1DUnfold  data=stack->produceUnfoldingContainer();
         if(bbb_)
         	data.setBinByBin(true);
 
@@ -138,8 +138,8 @@ TString TtBarUnfolder::unfold(TString out,TString in)const{
             data*=1/brcorr_;
 
 
-        ztop::container1D unfolded=data.getUnfolded();
-        ztop::container1D refolded=data.getRefolded();
+        ztop::histo1D unfolded=data.getUnfolded();
+        ztop::histo1D refolded=data.getRefolded();
 
 
 
@@ -177,7 +177,7 @@ TString TtBarUnfolder::unfold(TString out,TString in)const{
         delete c;
 
 
-        container1D unfoldednormd=unfolded;
+        histo1D unfoldednormd=unfolded;
         unfoldednormd.normalize(true,true);
         unfoldednormd.setYAxisName("1/#sigma "+unfoldednormd.getYAxisName());
         c=new TCanvas();
@@ -203,8 +203,8 @@ TString TtBarUnfolder::unfold(TString out,TString in)const{
         ///use new compare plotters here //FIXME
         setNameAndTitle(c,name+"_refolded_recoBG");
         refolded.drawFullPlot();
-        ztop::container1D reco=data.getRecoContainer();
-        //ztop::container1D recmbg=reco-data.getBackground();
+        ztop::histo1D reco=data.getRecoContainer();
+        //ztop::histo1D recmbg=reco-data.getBackground();
         reco.drawFullPlot("",true,"same");
         data.getBackground().drawFullPlot("",true,"same");
         d->cd();
@@ -225,7 +225,7 @@ TString TtBarUnfolder::unfold(TString out,TString in)const{
 
         if(moreoutput)
             std::cout << "making data-bg plot" << std::endl;
-        container1D dminusBG=data.getRecoContainer();
+        histo1D dminusBG=data.getRecoContainer();
         dminusBG-=data.getBackground();
         c=new TCanvas();
         c->cd(1)->SetBottomMargin(0.15);
@@ -255,7 +255,7 @@ TString TtBarUnfolder::unfold(TString out,TString in)const{
         c->cd(1)->SetBottomMargin(0.15);
         c->cd(1)->SetLeftMargin(0.15);
         setNameAndTitle(c,name+"_pur_stab");
-        ztop::container1DUnfold cuf=stack->getSignalContainer1DUnfold();
+        ztop::histo1DUnfold cuf=stack->getSignalContainer1DUnfold();
         cuf.checkCongruentBinBoundariesXY();
         TH1D * pur=cuf.getPurity().getTH1D("purity",false,false,false);
         TH1D * stab=cuf.getStability().getTH1D("stability",false,false,false);
@@ -318,15 +318,15 @@ TString TtBarUnfolder::unfold(TString out,TString in)const{
         d->cd();
         setNameAndTitle(c,name+"_checkUnfoldGen.pdf");
 
-        ztop::container1DUnfold  check=stack->produceXCheckUnfoldingContainer();
+        ztop::histo1DUnfold  check=stack->produceXCheckUnfoldingContainer();
         if(bbb_)
         	check.setBinByBin(true);
 
         check.setName(check.getName()+"_genToGen");
         unfolder.unfold(check);
-        ztop::container1D checkunfolded=check.getUnfolded();
+        ztop::histo1D checkunfolded=check.getUnfolded();
         float max=checkunfolded.getYMax(true);
-        ztop::container1D generated=check.getBinnedGenContainer();
+        ztop::histo1D generated=check.getBinnedGenContainer();
         generated *= (1/check.getLumi());
         check.writeToTFile(f);
         if(max < generated.getYMax(true)) max=generated.getYMax(true);
@@ -347,7 +347,7 @@ TString TtBarUnfolder::unfold(TString out,TString in)const{
 
 
         delete c;
-        container1D refoldedgen=check.getBinnedGenContainer();;
+        histo1D refoldedgen=check.getBinnedGenContainer();;
         data.fold(refoldedgen);
         c=new TCanvas();
         c->cd(1)->SetBottomMargin(0.15);

@@ -9,7 +9,7 @@
 #define PLOTTER2D_H_
 
 #include "plotterBase.h"
-#include "container2D.h"
+#include "histo2D.h"
 
 namespace ztop{
 
@@ -19,11 +19,17 @@ public:
 	plotter2D();
 	~plotter2D();
 
-	void setPlot(const container2D*, bool dividebybinarea=false);
+	void setPlot(const histo2D*, bool dividebybinarea=false);
+	void setZAxis(const TString &in){zaxistitle_=in;}
 
+/**
+ * simplistic format:
+ * zaxis.min
+ * zaxis.max
+ * rootDrawOpt
+ */
+    void readStyleFromFile(const std::string&);
 
-    void readStyleFromFile(const std::string&){}
-    void addStyleFromFile(const std::string&){}
 
 
 protected:
@@ -32,12 +38,16 @@ protected:
     // void drawTextBoxes();
     void drawLegends();
     void refreshPad(){};
+    void addStyleFromFile(const std::string&){}
 
 private:
-    container2D plot_;
+    histo2D plot_;
     bool dividebybinarea_;
 
     void readStylePriv(const std::string&s, bool){}
+
+    float zaxismin_,zaxismax_;
+    TString rootDrawOpt_,zaxistitle_;
 
 };
 

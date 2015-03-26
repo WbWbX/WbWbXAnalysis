@@ -25,7 +25,7 @@ controlPlotBasket::~controlPlotBasket(){
 /**
  * returns pointer to container if already init
  */
-container1D * controlPlotBasket::addPlot(const TString & name, const TString & xaxisname,const TString & yaxisname, const bool & mergeufof){
+histo1D * controlPlotBasket::addPlot(const TString & name, const TString & xaxisname,const TString & yaxisname, const bool & mergeufof){
     if(tmpnewstep_){ //make new container
         if(!event()){
             throw std::logic_error("controlPlotBasket::addPlot: Not linked to any NTFullEvent");
@@ -41,10 +41,10 @@ container1D * controlPlotBasket::addPlot(const TString & name, const TString & x
                 throw std::logic_error("controlPlotBasket::addPlot: plots must not have same names!");
             }
         }
-        bool tmp=container1D::c_makelist;
-        container1D::c_makelist =true;
-        container1D * cont = new container1D(tempbins_,newname, xaxisname, yaxisname, mergeufof);
-        container1D::c_makelist=tmp;
+        bool tmp=histo1D::c_makelist;
+        histo1D::c_makelist =true;
+        histo1D * cont = new histo1D(tempbins_,newname, xaxisname, yaxisname, mergeufof);
+        histo1D::c_makelist=tmp;
         namelist.push_back(cont->getName());
         cplots_.at(tmpstep_).push_back(cont);
     }
@@ -67,9 +67,9 @@ void controlPlotBasket::initStep(const size_t & step){
             throw std::logic_error("controlPlotBasket::initStep: Not linked to any NTFullEvent");
         }
         tmpnewstep_=true;
-        std::vector<container1D *> tmp;
+        std::vector<histo1D *> tmp;
         cplots_.push_back(tmp);
-        //scplots_.push_back(std::vector<container1D >());
+        //scplots_.push_back(std::vector<histo1D >());
 
         size_=cplots_.size();
         return;

@@ -8,12 +8,12 @@
 #ifndef FILLCONTAINERRANDOM_H_
 #define FILLCONTAINERRANDOM_H_
 
-#include "../interface/container.h"
+#include "../interface/histo1D.h"
 #include "TRandom.h"
 
 enum en_functions{func_gaus,func_binomial,func_breitwigner,func_exp};
 
-void fillRandom(ztop::container1D * c, en_functions func, float para0, float para1, size_t ntimes){
+void fillRandom(ztop::histo1D * c, en_functions func, float para0, float para1, size_t ntimes){
     using namespace ztop;
 
     TRandom * r = new TRandom();

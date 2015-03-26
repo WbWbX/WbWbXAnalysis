@@ -3,7 +3,7 @@
 #include "../interface/discriminatorFactory.h"
 #include <string>
 
-#include "TtZAnalysis/Tools/interface/container.h"
+//#include "TtZAnalysis/Tools/interface/histo1D.h"
 
 namespace
 {
@@ -15,8 +15,6 @@ struct dictionary {
 //
 
     std::vector< float *const*> d;
-    std::vector<ztop::container1D *> e;
-    std::vector<std::vector<ztop::container2D *> >e2d;
     std::string f;
     ztop::discriminatorFactory c;
     //

@@ -14,7 +14,7 @@
 #include "Math/Minimizer.h"
 
 namespace ztop{
-class container2D;
+class histo2D;
 
 /**
  * small 2d point helper
@@ -116,15 +116,24 @@ public:
 	const std::vector<point2D> * getErrsUp()const{return &errsup_;}
 	const std::vector<point2D> * getErrsDown()const{return &errsdown_;}
 	const std::vector<double> *getParameters()const{return &paras_;}
+	/**
+	 * these are signed!
+	 */
 	const std::vector<double> *getParameterErrUp()const{return &paraerrsup_;}
+	/**
+	 * these are signed!
+	 */
 	const std::vector<double> *getParameterErrDown()const{return &paraerrsdown_;}
+	/**
+	 * always > 0
+	 */
 	double getParameterErr(size_t idx)const;
 	const double&  getParameter(size_t idx)const;
 	const std::vector<TString> *getParameterNames()const {return &paranames_;}
 
 
 	const double& getCorrelationCoefficient(size_t i, size_t j)const;
-	void  fillCorrelationCoefficients(container2D *)const;
+	void  fillCorrelationCoefficients(histo2D *)const;
 
 	/**
 	 * gets the contribution of a to b by fixing the parameter a, repeating minos and returning the changes in errup and errdown

@@ -28,7 +28,7 @@ TVirtualPad * plotterInlay::getInlayPad(){
 void plotterInlay::addInlayPlot(const graph *c){
     plotsinlay_.push_back(plot(c));
 }
-void plotterInlay::addInlayPlot(const container1D *c,bool divbw){
+void plotterInlay::addInlayPlot(const histo1D *c,bool divbw){
     plotsinlay_.push_back(plot(c,divbw));
 }
 
@@ -115,7 +115,7 @@ void plotterInlay::readStylePriv(const std::string& infile,bool requireall){
 
 
 
-    containerStyle defaults;
+    histoStyle defaults;
     //read required part
 
     pstyle_.readFromFile(infile,"MainPlots",requireall);
@@ -161,7 +161,7 @@ void plotterInlay::readStylePriv(const std::string& infile,bool requireall){
     }
 
     for(size_t i=0;i<ncstyles;i++){
-        containerStyle temp=defaults;
+        histoStyle temp=defaults;
         std::string add="Main"+toString(i);
         if(debug) std::cout << "plotterInlay::readStyleFromFile: reading " << add <<std::endl;
 
@@ -188,7 +188,7 @@ void plotterInlay::readStylePriv(const std::string& infile,bool requireall){
     }
 
     for(size_t i=0;i<ncstyles;i++){
-        containerStyle temp=defaults;
+        histoStyle temp=defaults;
         std::string add="Inlay"+toString(i);
         if(debug) std::cout << "plotterInlay::readStyleFromFile: reading " << add <<std::endl;
 

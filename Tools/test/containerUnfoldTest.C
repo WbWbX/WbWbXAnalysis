@@ -6,9 +6,9 @@
  */
 
 
-#include "TtZAnalysis/Tools/interface/container1DUnfold.h"
-#include "TtZAnalysis/Tools/interface/containerUnfolder.h"
-#include "TtZAnalysis/Tools/interface/containerStack.h"
+#include "TtZAnalysis/Tools/interface/histo1DUnfold.h"
+#include "TtZAnalysis/Tools/interface/histoUnfolder.h"
+#include "TtZAnalysis/Tools/interface/histoStack.h"
 #include "TRandom.h"
 #include "TCanvas.h"
 #include "TStyle.h"
@@ -38,7 +38,7 @@ std::vector<float> subdivide(const std::vector<float> & bins, size_t div){
     }
     return out;
 }
-void drawFullTG(const ztop::container1D * c,int color, int markerstyle,TString opt){
+void drawFullTG(const ztop::histo1D * c,int color, int markerstyle,TString opt){
     TH1D *h =c->getTH1D("",true,true);
     h->SetLineColor(color);
     h->SetMarkerColor(color);
@@ -51,7 +51,7 @@ void drawFullTG(const ztop::container1D * c,int color, int markerstyle,TString o
     g->Draw("P,same"+opt);
 }
 
-TCanvas * makeFullCheckCanvas(const ztop::container1DUnfold& cont){
+TCanvas * makeFullCheckCanvas(const ztop::histo1DUnfold& cont){
     TCanvas *c = new TCanvas();
     //gen
 
@@ -64,7 +64,7 @@ TCanvas * makeFullCheckCanvas(const ztop::container1DUnfold& cont){
 }
 
 float randcount=1;
-void generateAndFill(ztop::container1DUnfold * c,double syst,float nentries,float systshape=1){
+void generateAndFill(ztop::histo1DUnfold * c,double syst,float nentries,float systshape=1){
     double detRes=0.9;
     double detOff=0.9;
     double effCorr=0.05;
@@ -109,23 +109,23 @@ void test(){
 
     recobins=subdivide(genbins,10);
 
-    container1DUnfold::c_makelist=true;
-    container1DUnfold::debug = true;
+    histo1DUnfold::c_makelist=true;
+    histo1DUnfold::debug = true;
 
-    container1DUnfold tc(genbins,recobins,"nominal","p_{T}","events");
-    container1DUnfold tcsup(genbins,recobins,"syst_up","p_{T}","events");
-    container1DUnfold tcsdown(genbins,recobins,"syst_down","p_{T}","events");
+    histo1DUnfold tc(genbins,recobins,"nominal","p_{T}","events");
+    histo1DUnfold tcsup(genbins,recobins,"syst_up","p_{T}","events");
+    histo1DUnfold tcsdown(genbins,recobins,"syst_down","p_{T}","events");
 
 
     tc.setMC(true);
     tcsup.setMC(true);
     tcsdown.setMC(true);
 
-    container1DUnfold tcd=tc;
+    histo1DUnfold tcd=tc;
     tcd.setMC(false);
     tcd.clear();
-    container1DUnfold tcdsup=tcsup;
-    container1DUnfold tcdsdown=tcsdown;
+    histo1DUnfold tcdsup=tcsup;
+    histo1DUnfold tcdsdown=tcsdown;
     tcsup.clear();
     tcsdown.clear();
 
@@ -146,7 +146,7 @@ void test(){
     double bgshape=4;
     cout << "generating \"BG\"" <<endl;
     generateAndFill(&tcd,bgshape,nentries*norm*bgcont);
-    container1DUnfold tcmcbg=tcd;
+    histo1DUnfold tcmcbg=tcd;
     tcmcbg.clear();
     generateAndFill(&tcmcbg,bgshape,nentries*bgcont);
 
@@ -156,17 +156,17 @@ void test(){
     //stat independent
 
 
-    container1DUnfold forfoldtest=tc;
+    histo1DUnfold forfoldtest=tc;
     forfoldtest.clear();
     generateAndFill(&forfoldtest,0,nentries*0.02);
     forfoldtest*=1/0.02; //norm again
 
     bool systematics=true;
     cout << "adding syst mc" <<endl;
-    container1DUnfold tccopywosys=tc;
+    histo1DUnfold tccopywosys=tc;
 
-    container1DUnfold moresys1=tc;
-    container1DUnfold moresys2=tc;
+    histo1DUnfold moresys1=tc;
+    histo1DUnfold moresys2=tc;
     moresys1.clear();
     moresys2.clear();
     generateAndFill(&moresys1,0.03,nentries,0.9);
@@ -208,13 +208,13 @@ void test(){
 
     //new "fold" stuff
 
-    container1D simsignal=forfoldtest.getGenContainer();
+    histo1D simsignal=forfoldtest.getGenContainer();
     simsignal.setName("just for reference: simulation");
-    container1D simsignalfolded=tc.fold(simsignal);
+    histo1D simsignalfolded=tc.fold(simsignal);
     simsignalfolded.setName("simu folded");
-    container1D closurefolded=tc.fold(tc.getGenContainer());
+    histo1D closurefolded=tc.fold(tc.getGenContainer());
     closurefolded.setName("closure folded");
-    container1D simsignalreco=tc.getRecoContainer();
+    histo1D simsignalreco=tc.getRecoContainer();
     simsignalreco.setName("reco");
     std::cout << "plotting..." <<std::endl;
 
@@ -239,7 +239,7 @@ void test(){
     c->Write();
     f->Close();
 
-    containerStack cstack("stack");
+    histoStack cstack("stack");
     cstack.push_back(tcd,"data",1,1);
     cstack.setLegendOrder("data",2);
     cstack.push_back(tcmcbg,"BG",kBlue,norm);
@@ -257,8 +257,8 @@ void test(){
 
 
     bool manualdraw=false;
-    containerUnfolder unfolder,unfolder2;
-    containerUnfolder::debug=true;
+    histoUnfolder unfolder,unfolder2;
+    histoUnfolder::debug=true;
     cout << "drawing" <<endl;
     if(manualdraw){
         TGraphAsymmErrors* gmccp=tc.getRecoContainer().getTGraph("mc_reco",true,false,false);
@@ -272,15 +272,15 @@ void test(){
         c->Print("containerUnfoldTest_stack.pdf");
     }
 
-    containerStack::debug=true;
-    containerStack::batchmode=false;
+    histoStack::debug=true;
+    histoStack::batchmode=false;
     std::vector<TString> signals;signals << "signal";
-    container1DUnfold cstackUF =cstack.produceUnfoldingContainer(signals);
+    histo1DUnfold cstackUF =cstack.produceUnfoldingContainer(signals);
     unfolder2.unfold(cstackUF);
     c=makeFullCheckCanvas(cstackUF);
     c->Draw();
     c->Print("containerUnfoldTest_stack.pdf");
-    c=cstack.makeTCanvas(containerStack::ratio);
+    c=cstack.makeTCanvas(histoStack::ratio);
     c->Draw();
     c->Print("containerUnfoldTest_stack.pdf)");
 }

@@ -10,6 +10,7 @@
 
 #include <vector>
 #include "TString.h"
+#include "../interface/serialize.h"
 
 namespace ztop{
 
@@ -43,7 +44,7 @@ public:
     taggedObject(objTypes type):
         type_(type),
         sorted_(false){}
-    ~taggedObject(){}
+    virtual ~taggedObject(){}
     /*
      * If you need to add a tag to any object, use these here
      * If tag you need doesn't exist, yet, add it add the very end
@@ -86,9 +87,27 @@ public:
 
 
 protected:
+
+
+#ifndef __CINT__
+	template <class T>
+	void writeToStream(T & stream)const{
+		IO::serializedWrite(name_,stream);
+		IO::serializedWrite(type_,stream);
+		IO::serializedWrite(tags_,stream);
+		IO::serializedWrite(sorted_,stream);
+	}
+	template <class T>
+	void readFromStream(T & stream){
+		IO::serializedRead(name_,stream);
+		IO::serializedRead(type_,stream);
+		IO::serializedRead(tags_,stream);
+		IO::serializedRead(sorted_,stream);
+	}
+#endif
+
     TString name_;
     objTypes type_;
-
 private:
 
     std::vector<ztop::taggedObject::tags> tags_;

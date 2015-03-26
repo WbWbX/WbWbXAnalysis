@@ -8,7 +8,7 @@
 
 #include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
 #include "TtZAnalysis/Tools/interface/plotterControlPlot.h"
-#include "TtZAnalysis/Tools/interface/containerStackVector.h"
+#include "TtZAnalysis/Tools/interface/histoStackVector.h"
 #include "TtZAnalysis/Tools/interface/fileReader.h"
 #include "TtZAnalysis/Tools/interface/textFormatter.h"
 #include "TCanvas.h"
@@ -37,7 +37,7 @@ invokeApplication(){
 
 	/////////   parsing done
 
-	containerStackVector * csv = new containerStackVector();
+	histoStackVector * csv = new histoStackVector();
 
 	try{
 		csv->loadFromTFile(infile);
@@ -69,7 +69,7 @@ invokeApplication(){
 	}
 
 	for(size_t i=0;i<allnames.size();i++){
-		containerStack  stack;
+		histoStack  stack;
 		TString plotname=allnames.at(i);
 		if(plotname.Length()<1) continue;
 		try{

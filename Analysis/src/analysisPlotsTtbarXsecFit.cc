@@ -20,7 +20,7 @@ void analysisPlotsTtbarXsecFit::bookPlots(){
 	using namespace ztop;
 
 
-	std::vector<float> bins=container1D::createBinning(1,0,1);
+	std::vector<float> bins=histo1D::createBinning(1,0,1);
 	//leadjetpt_plots, secjetpt_plots, thirdjetpt_plots, total_plots;
 	total_plots.at(cat_0bjet0jet) = addPlot(bins,bins,"total 0,0 b-jets","","N_{evt}");
 	total_plots.at(cat_0bjet1jet) = addPlot(bins,bins,"total 0,1 b-jets","","N_{evt}");
@@ -103,12 +103,16 @@ void analysisPlotsTtbarXsecFit::fillPlotsGen(){
 	using namespace std;
 	using namespace ztop;
 	//define vis PS here
+	/*
+	 * Following the ATLAS definition, taking into account leptons after FSR/PS (Pythia stat 1)
+	 * Including intermediate tau decays (or not)
+	 */
 
-	std::vector<NTGenParticle*> genvisleptons3=produceCollection(event()->genleptons3,35,2.5);
+	std::vector<NTGenParticle*> genvisleptons1=produceCollection(event()->genleptons1,30,2.4);
 
 	//only fill one bin in some visible part of the histogram to get the total
 	// n_gen and a nice display of PS migrations
-	if(genvisleptons3.size()>1){
+	if(genvisleptons1.size()>1){
 		for(size_t i=0;i<total_plots.size();i++){
 			total_plots.at(i)->fillGen(0.5,puweight());
 			leadjetpt_plots.at(i)->fillGen(20.5,puweight());

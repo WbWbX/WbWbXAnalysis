@@ -5,7 +5,7 @@
  *      Author: kiesej
  */
 
-#include "../interface/containerStackVector.h"
+#include "../interface/histoStackVector.h"
 #include "../interface/plotterMultiplePlots.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 #include "TCanvas.h"
@@ -20,37 +20,37 @@ int main(){
 
 	using namespace ztop;
 
-	containerStackVector* csv=new containerStackVector();
+	histoStackVector* csv=new histoStackVector();
 
-	container1D withvar166, withoutvar166, withvar178, withoutvar178,nominal;
+	histo1D withvar166, withoutvar166, withvar178, withoutvar178,nominal;
 
 	//std::vector<TString> names;
 	//names <<"emu_8TeV_"+mass+"_nominal_tWvar.root" << "emu_8TeV_"+mass+"_nominal.root" ;
 
 
 	csv->loadFromTFile(filedir+"emu_8TeV_166.5_nominal_tWvar.root");
-	containerStack stack=csv->getStack(plot);
+	histoStack stack=csv->getStack(plot);
 	withvar166=stack.getFullMCContainer();
 	withvar166.setName("#splitline{pred. @ m_{t}=166.5 GeV}{(tW @ m_{t}=166.5 GeV)}");
 	delete csv;
-	csv=new containerStackVector();
+	csv=new histoStackVector();
 	csv->loadFromTFile(filedir+"emu_8TeV_166.5_nominal.root");
 	stack=csv->getStack(plot);
 	withoutvar166=stack.getFullMCContainer();
 	withoutvar166.setName("#splitline{pred. @ m_{t}=166.5 GeV}{(tW @ m_{t}=172.5 GeV)}");
 	delete csv;
-	csv=new containerStackVector();
+	csv=new histoStackVector();
 	csv->loadFromTFile(filedir+"emu_8TeV_172.5_nominal.root");
 	stack=csv->getStack(plot);
 	nominal=stack.getFullMCContainer();
 	nominal.setName("pred. @ m_{t}=172.5 GeV");
 	delete csv;
-	csv=new containerStackVector();
+	csv=new histoStackVector();
 	csv->loadFromTFile(filedir+"emu_8TeV_178.5_nominal_tWvar.root");
 	withvar178=csv->getStack(plot).getFullMCContainer();
 	withvar178.setName("#splitline{pred. @ m_{t}=178.5 GeV}{(tW @ m_{t}=178.5 GeV)}");
 	delete csv;
-	csv=new containerStackVector();
+	csv=new histoStackVector();
 	csv->loadFromTFile(filedir+"emu_8TeV_178.5_nominal.root");
 	withoutvar178=csv->getStack(plot).getFullMCContainer();
 	withoutvar178.setName("#splitline{pred. @ m_{t}=178.5 GeV}{(tW @ m_{t}=172.5 GeV)}");

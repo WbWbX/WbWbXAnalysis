@@ -8,7 +8,7 @@
 
 
 
-#include "TtZAnalysis/Tools/interface/containerStackVector.h"
+#include "TtZAnalysis/Tools/interface/histoStackVector.h"
 #include "TtZAnalysis/Tools/interface/optParser.h"
 
 #include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
@@ -17,7 +17,7 @@ invokeApplication(){
 	using namespace ztop;
 	using namespace std;
 
-	bool debug=true;
+	//bool debug=true;
 
 	// TString namescontain = parser.getOpt<TString>("-s","","");
 	std::vector<TString> instrings=parser->getRest<TString>();
@@ -25,7 +25,7 @@ invokeApplication(){
 	if(instrings.size()!=1)
 		return -1;
 
-	containerStackVector csv;
+	histoStackVector csv;
 	csv.loadFromTFile(instrings.at(0));
 
 	if(csv.size()<1)
@@ -33,17 +33,17 @@ invokeApplication(){
 
 	for(size_t i=0;i<csv.size();i++){
 
-	if(csv.getStack(i).is1D()){
-		std::cout << "nsyst 1D: "   << csv.getStack(i).getSystSize() <<std::endl;
-	}
-	if(csv.getStack(i).is2D()){
-		std::cout << "nsyst 2D: "   << csv.getStack(i).getSystSize() <<std::endl;
+		if(csv.getStack(i).is1D()){
+			std::cout << "nsyst 1D: "   << csv.getStack(i).getSystSize() <<std::endl;
+		}
+		if(csv.getStack(i).is2D()){
+			std::cout << "nsyst 2D: "   << csv.getStack(i).getSystSize() <<std::endl;
 
-	}
-	if(csv.getStack(i).is1DUnfold()){
-		std::cout << "nsyst 1DUnf: " << csv.getStack(i).getSystSize() <<std::endl;
+		}
+		if(csv.getStack(i).is1DUnfold()){
+			std::cout << "nsyst 1DUnf: " << csv.getStack(i).getSystSize() <<std::endl;
 
-	}
+		}
 	}
 	return 0;
 }

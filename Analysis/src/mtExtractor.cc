@@ -6,7 +6,7 @@
  */
 
 #include "../interface/mtExtractor.h"
-#include "TtZAnalysis/Tools/interface/container1DUnfold.h"
+#include "TtZAnalysis/Tools/interface/histo1DUnfold.h"
 #include <stdexcept>
 #include <string>
 #include <cstdlib>
@@ -167,7 +167,7 @@ void mtExtractor::drawXsecDependence(TCanvas *c, bool fordata){
 	pltrptrs_.push_back(pltrptr);
 	std::vector<std::string> cids_;
 	pltrptr->readTextBoxesInCMSSW(textboxesfile_,textboxesmarker_);
-	std::vector<container1D> * conts=&mccont_;
+	std::vector<histo1D> * conts=&mccont_;
 	if(fordata) conts=&datacont_;
 
 	for(size_t i=0;i<mtvals_.size();i++){
@@ -193,7 +193,7 @@ void mtExtractor::drawXsecDependence(TCanvas *c, bool fordata){
 	//next loop set plots!
 	size_t newidx=0;
 	for(size_t i=0;i<mtvals_.size();i++){
-		container1D tmp=conts->at(i);
+		histo1D tmp=conts->at(i);
 		tmp.removeAllSystematics();
 
 		if((fabs(1-fabs(defmtop_ - mtvals_.at(i))))<0.1)
@@ -311,12 +311,12 @@ void mtExtractor::drawSystVariation(TCanvas *c,const TString & sys){
 		throw std::runtime_error("mtExtractor::drawSystVariation: no canvas!");
 	}
 	//get right plot
-	container1D cont=mccont_.at(defmtidx_);
+	histo1D cont=mccont_.at(defmtidx_);
 	cont.setYAxisName(datacont_.at(0).getYAxisName());
 	size_t idxup,idxdown;
 	idxup=cont.getSystErrorIndex(sys+"_up");
 	idxdown=cont.getSystErrorIndex(sys+"_down");
-	container1D up = cont.getSystContainer(idxup);
+	histo1D up = cont.getSystContainer(idxup);
 
 	//do translation
 	formatter fmt;
@@ -325,10 +325,10 @@ void mtExtractor::drawSystVariation(TCanvas *c,const TString & sys){
 
 	up.setName(fmt.translateName(sys)+" up");
 	up.setAllErrorsZero();
-	container1D down = cont.getSystContainer(idxdown);
+	histo1D down = cont.getSystContainer(idxdown);
 	down.setName(fmt.translateName(sys)+" down");
 	down.setAllErrorsZero();
-	container1D nominal=cont;
+	histo1D nominal=cont;
 	nominal.setName("nominal");
 	nominal.setAllErrorsZero();
 
@@ -510,10 +510,10 @@ void mtExtractor::readFiles(){
 
 	for(size_t i=0;i<cufinputfiles_.size();i++){
 
-		containerStackVector * csv=new containerStackVector();
+		histoStackVector * csv=new histoStackVector();
 		csv->loadFromTFile(cufinputfiles_.at(i));
 		//  allanalysisplots_.push_back(*csv);
-		containerStack stack=csv->getStack(plotnamedata_);
+		histoStack stack=csv->getStack(plotnamedata_);
 		delete csv;
 		savedinputstacks_.push_back(stack);
 		//BACKGROUND background uncertainties here
@@ -522,16 +522,16 @@ void mtExtractor::readFiles(){
 		//stack.mergePartialVariations("JES",false);
 
 
-		container1DUnfold tempcuf=stack.produceUnfoldingContainer();
+		histo1DUnfold tempcuf=stack.produceUnfoldingContainer();
 
 
 		if(ignorebgstat_){
-			container1D background=tempcuf.getBackground();
+			histo1D background=tempcuf.getBackground();
 			background.removeStatFromAll();
 			tempcuf.setBackground(background);
 		}
 		if(ignoredatastat_){
-			container1D tmpdata=tempcuf.getRecoContainer();
+			histo1D tmpdata=tempcuf.getRecoContainer();
 			tmpdata.removeStatFromAll();
 			tempcuf.setRecoContainer(tmpdata);
 		}
@@ -542,7 +542,7 @@ void mtExtractor::readFiles(){
 		if(tempcuf.isDummy())
 			throw std::runtime_error("mtExtractor::readFiles: at least one file without container1DUnfold");
 
-		container1D datareference;
+		histo1D datareference;
 
 		if(!dofolding_){ //FIXME
 			//unfold here
@@ -556,7 +556,7 @@ void mtExtractor::readFiles(){
 			}
 		}
 		else{
-			container1D temp=tempcuf.getRecoContainer();
+			histo1D temp=tempcuf.getRecoContainer();
 
 			datareference=temp; // NEW POISSON NO BG SUBTRACTION! -tempcuf.getBackground();
 			if(usenormalized_)
@@ -569,7 +569,7 @@ void mtExtractor::readFiles(){
 		datacont_.push_back(datareference);
 
 		TString extfilename;
-		container1D gen,genbg;
+		histo1D gen,genbg;
 		if(mciscuf){
 			isexternalgen_=false;
 			if(!dofolding_){
@@ -649,7 +649,7 @@ void mtExtractor::readFiles(){
 				}
 				throw std::runtime_error("mtExtractor::readFiles: Histogram not found.");
 			}
-			container1D nominal;
+			histo1D nominal;
 			TH1F h=tryToGet<TH1F>(fin,histnames.at(nompos));
 
 			nominal.import(&h,isdivbbw);
@@ -666,7 +666,7 @@ void mtExtractor::readFiles(){
 			for(size_t histpos=0;histpos<histnames.size();histpos++){
 				if(histpos==nompos) continue;
 				TH1F hsys=tryToGet<TH1F>(fin,histnames.at(histpos));
-				container1D tempgen;
+				histo1D tempgen;
 				tempgen.import(&hsys,isdivbbw);
 				tempgen=tempgen.rebinToBinning(datareference);
 				tempgen*=multiplygennorm;
@@ -713,7 +713,7 @@ void mtExtractor::readFiles(){
 
 
 
-void mtExtractor::addLumiUncert(std::vector<container1D> & mc,std::vector<container1D> & data)const{
+void mtExtractor::addLumiUncert(std::vector<histo1D> & mc,std::vector<histo1D> & data)const{
 
 	for(size_t i=0;i<mccont_.size();i++){
 		mc.at(i).addGlobalRelError("LUMI",0.026);
@@ -793,9 +793,9 @@ void mtExtractor::renormalize(){
 	 */
 
 }
-void mtExtractor::mergeSyst(std::vector<container1D> & a, std::vector<container1D> & b)const{
+void mtExtractor::mergeSyst(std::vector<histo1D> & a, std::vector<histo1D> & b)const{
 	bool ignorestat=true;
-	//container1D::debug=true;
+	//histo1D::debug=true;
 	//add from all
 	if(debug) std::cout <<"mtExtractor::mergeSyst: a" << std::endl;
 	for(size_t i=0;i<a.size();i++){
@@ -828,11 +828,11 @@ void mtExtractor::mergeSyst(std::vector<container1D> & a, std::vector<container1
 			b.at(id).equalizeSystematicsIdxs(b.at(0));
 		}
 	}
-	//container1D::debug=false;
+	//histo1D::debug=false;
 	//exit(0);
 }
 //just transforms to graph and change names
-std::vector<graph > mtExtractor::makeGraphs( std::vector<container1D > & in)const{
+std::vector<graph > mtExtractor::makeGraphs( std::vector<histo1D > & in)const{
 
 	std::vector<graph > out;
 
@@ -1466,15 +1466,15 @@ void mtExtractor::drawResultGraph(TCanvas *c, float * nomp, float * errdp, float
 
 std::vector<graph > mtExtractor::makeSignalBinGraphs()const{
 
-	std::vector<container1D> mtconts;
+	std::vector<histo1D> mtconts;
 	for(size_t i=0;i<savedinputstacks_.size();i++){
 
-		container1DUnfold tmpcuf=savedinputstacks_.at(i).produceUnfoldingContainer();
-		container1D tmpcont=tmpcuf.getVisibleSignal();
+		histo1DUnfold tmpcuf=savedinputstacks_.at(i).produceUnfoldingContainer();
+		histo1D tmpcont=tmpcuf.getVisibleSignal();
 		tmpcont.removeAllSystematics();
 		if(usenormalized_){
 			//get correct norm
-			container1D all = tmpcuf.getVisibleSignal()+ tmpcuf.getBackground();
+			histo1D all = tmpcuf.getVisibleSignal()+ tmpcuf.getBackground();
 			all.removeAllSystematics(); //make faster
 			float signcontr = tmpcont.integral(true)/all.integral(true);
 			tmpcont.normalize(true,true,signcontr);
@@ -1490,13 +1490,13 @@ std::vector<graph > mtExtractor::makeSignalBinGraphs()const{
 
 std::vector<graph > mtExtractor::makeBGBinGraphs()const{
 
-	std::vector<container1D> mtconts;
+	std::vector<histo1D> mtconts;
 	for(size_t i=0;i<savedinputstacks_.size();i++){
-		container1DUnfold tmpcuf=savedinputstacks_.at(i).produceUnfoldingContainer();
-		container1D tmpcont=tmpcuf.getBackground();
+		histo1DUnfold tmpcuf=savedinputstacks_.at(i).produceUnfoldingContainer();
+		histo1D tmpcont=tmpcuf.getBackground();
 		if(usenormalized_){
 			//get correct norm
-			container1D all = tmpcuf.getVisibleSignal()+ tmpcuf.getBackground();
+			histo1D all = tmpcuf.getVisibleSignal()+ tmpcuf.getBackground();
 			all.removeAllSystematics(); //make faster
 			float signcontr = tmpcont.integral(true)/all.integral(true);
 			tmpcont.normalize(true,true,signcontr);
@@ -1600,7 +1600,7 @@ void mtExtractor::drawSpreadWithInlay(TCanvas *c){
 	pl->readTextBoxesInCMSSW(textboxesfile_,textboxesmarker_);
 	pl->usePad(c);
 
-	container1D nomdata=datacont_.at(defmtidx_);
+	histo1D nomdata=datacont_.at(defmtidx_);
 
 	nomdata.setName("data");
 	nomdata.removeAllSystematics();
@@ -1613,9 +1613,9 @@ void mtExtractor::drawSpreadWithInlay(TCanvas *c){
 
 	formatter fmt;
 
-	container1D mtmaxup=mccont_.at(maxidx);
-	container1D defmtmc=mccont_.at(defmtidx_);
-	container1D mtmaxdown=mccont_.at(minidx);
+	histo1D mtmaxup=mccont_.at(maxidx);
+	histo1D defmtmc=mccont_.at(defmtidx_);
+	histo1D mtmaxdown=mccont_.at(minidx);
 	mtmaxup.removeAllSystematics();
 	defmtmc.removeAllSystematics();
 	mtmaxdown.removeAllSystematics();

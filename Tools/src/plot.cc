@@ -8,7 +8,7 @@
 #include "../interface/plot.h"
 #include "TGraphAsymmErrors.h"
 #include "TH1D.h"
-#include "../interface/container.h"
+#include "../interface/histo1D.h"
 #include <stdexcept>
 namespace ztop{
 
@@ -20,7 +20,7 @@ plot::plot():tObjectList(),inputg_(graph()),systg_(0),statg_(0),isBWdiv_(false),
 
 }
 
-plot::plot(const container1D *c,bool divbbw){
+plot::plot(const histo1D *c,bool divbbw){
     if(debug) std::cout << "plot(const container1D *)" <<std::endl;
     if(!c || c->isDummy()){
         throw std::logic_error("plot(const graph *) point NULL or graph empty" );
@@ -71,7 +71,7 @@ plot & plot::operator = (const plot& rhs){
     isBWdiv_=rhs.isBWdiv_;
     return *this;
 }
-void plot::createFrom(const container1D * c,bool divbbw){
+void plot::createFrom(const histo1D * c,bool divbbw){
     if(debug) std::cout << "plot::createFrom(const container1D *)" <<std::endl;
     if(!c){
         if(debug) std::cout << "plot::createFrom(const graph *): creating empty from empty (null pointer)" <<std::endl;

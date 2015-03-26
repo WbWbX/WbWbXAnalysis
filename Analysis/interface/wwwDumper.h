@@ -7,7 +7,7 @@
 
 #ifndef WWWDUMPER_H_
 #define WWWDUMPER_H_
-#include "TtZAnalysis/Tools/interface/containerStackVector.h"
+#include "TtZAnalysis/Tools/interface/histoStackVector.h"
 #include "TString.h"
 
 namespace ztop{
@@ -17,7 +17,7 @@ public:
     wwwDumper(){}
     ~wwwDumper(){}
 
-    void makePlotHTML(TString title, TString descr, TString where , ztop::containerStackVector& csv);
+    void makePlotHTML(TString title, TString descr, TString where , ztop::histoStackVector& csv);
     int appendToIndex(TString title, TString description,TString plotdir, TString indexfile);
     int dumpToWWW(TString infile, TString title,TString description);
 

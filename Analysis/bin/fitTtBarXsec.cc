@@ -10,7 +10,7 @@
 #include "../interface/ttbarXsecFitter.h"
 #include <iostream>
 #include <string>
-#include "TtZAnalysis/Tools/interface/containerStack.h"
+#include "TtZAnalysis/Tools/interface/histoStack.h"
 #include "TtZAnalysis/Tools/interface/plotterControlPlot.h"
 #include "TtZAnalysis/Tools/interface/plotterMultiplePlots.h"
 #include "TtZAnalysis/Tools/interface/plotterCompare.h"
@@ -32,26 +32,29 @@ invokeApplication(){
 		exit(-1);
 	}
 	const bool exclude0bjetbin  = parser->getOpt<bool>("-exclude0bjet",false,"Excludes 0,3+ bjet bin from the fit");
-	const TString outfile = parser->getOpt<TString>("o","xsecFit","output file name");
 	const int npseudoexp = parser->getOpt<int>("p",0,"number of pseudo experiments");
 	const bool debug = parser->getOpt<bool>("d",false,"switches on debug output");
 	const TString pseudoOpts = parser->getOpt<TString>("-pdopts","",
 			"additional options for pseudodata:\nGaus: use Gaussian random distribution\n");
 	const bool fitsystematics =! parser->getOpt<bool>("-nosyst",false,"removes systematics");
+	const bool onlytotalerror = parser->getOpt<bool>("-onlytotal",false,"removes systematics");
 	const bool nominos = parser->getOpt<bool>("-nominos",false,"switches off systematics breakdown");
-	const float topmass = parser->getOpt<float>("-topmass",172.5,"Set top mass");
+	const float topmass = parser->getOpt<float>("-topmass",0,"Set top mass");
+	const bool visible =  parser->getOpt<bool>("-vis",false,"performs extraction of visible cross section");
+
+	 TString outfile;
+	if(visible)
+		outfile = (parser->getOpt<TString>("o","xsecFit","output file name")+"_vis");
+	else
+		outfile = parser->getOpt<TString>("o","xsecFit","output file name");
+
 
 	parser->doneParsing();
 
 
-
-	simpleFitter::printlevel=-1; //for now
+	//simpleFitter::printlevel=-1; //for now
 
 	ttbarXsecFitter mainfitter;
-
-	TString mtrepl="_"+toTString(172.5)+"_";TString mtrplwith="_"+toTString(topmass)+"_";
-	mainfitter.setReplaceInInfile(mtrepl,mtrplwith);
-
 
 	if(lhmode=="chi2datamc")
 		mainfitter.setLikelihoodMode(ttbarXsecFitter::lhm_chi2datamcstat);
@@ -60,12 +63,16 @@ invokeApplication(){
 	if(lhmode=="poissondata")
 		mainfitter.setLikelihoodMode(ttbarXsecFitter::lhm_poissondatastat);
 
+	if(topmass)
+		mainfitter.setReplaceTopMass(topmass);
+
 	mainfitter.setExcludeZeroBjetBin(exclude0bjetbin);
 	mainfitter.setUseMCOnly(onlyMC);
 	mainfitter.setNoMinos(nominos);
-	mainfitter.setNoSystBreakdown(!fitsystematics);
+	mainfitter.setNoSystBreakdown((onlytotalerror));
 	mainfitter.setIgnorePriors(!fitsystematics);
 	mainfitter.setRemoveSyst(!fitsystematics);
+	mainfitter.setDoVisiblePS(visible);
 
 	std::string cmsswbase=getenv("CMSSW_BASE");
 	//extendedVariable::debug=true;
@@ -84,20 +91,20 @@ invokeApplication(){
 		system(("ls "+fullcfgpath).data());
 		return -1;
 	}
+	//simpleFitter::printlevel=1;
 
 	mainfitter.readInput((fullcfgpath+inputconfig).Data());
 
 	//ttbarXsecFitter::debug=true;
 	bool doplotting=false;
 
-	variateContainer1D::debug=false;
 	if(npseudoexp){
 		size_t failcount=0;
 		gErrorIgnoreLevel = 3000;
 		size_t ndatasets=mainfitter.nDatasets();
 
-		std::vector<container1D> pulls;
-		pulls.resize(ndatasets,container1D(container1D::createBinning(40,-8,8)));
+		std::vector<histo1D> pulls;
+		pulls.resize(ndatasets,histo1D(histo1D::createBinning(40,-8,8)));
 
 		plotterControlPlot pl;
 		pl.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/controlPlots_combined.txt");
@@ -116,9 +123,9 @@ invokeApplication(){
 		pl.usePad(&cvv);
 
 		//configure mode
-		container1D::pseudodatamodes pdmode=container1D::pseudodata_poisson;
+		histo1D::pseudodatamodes pdmode=histo1D::pseudodata_poisson;
 		if(pseudoOpts.Contains("Gaus"))
-			pdmode=container1D::pseudodata_gaus;
+			pdmode=histo1D::pseudodata_gaus;
 		std::cout << std::endl;
 		for(int i=0;i<npseudoexp;i++){
 			displayStatusBar(i,npseudoexp);
@@ -147,7 +154,7 @@ invokeApplication(){
 				for(size_t nbjet=0;nbjet<3;nbjet++){
 					for(size_t ndts=0;ndts<ndatasets;ndts++){
 						double dummychi2;
-						containerStack stack=mainfitter.produceStack(false,nbjet,ndts,dummychi2);
+						histoStack stack=mainfitter.produceStack(false,nbjet,ndts,dummychi2);
 						pl.setStack(&stack);
 						pl.draw();
 						cvv.Print(outfile+"_pd"+nbjet+ "_" + mainfitter.datasetName(ndts)+ ".pdf");
@@ -164,7 +171,7 @@ invokeApplication(){
 
 		//fit
 		for(size_t i=0;i<pulls.size();i++){ //both pulls
-			container1D * c=&pulls.at(i);
+			histo1D * c=&pulls.at(i);
 			graph tofit; tofit.import(c,true);
 			graphFitter fitter;
 			fitter.readGraph(&tofit);
@@ -200,8 +207,8 @@ invokeApplication(){
 	}
 	else{
 		doplotting=true;
-		//ttbarXsecFitter::debug=true;
-
+		//ttbarXsecFitter::debug=false;
+		//simpleFitter::printlevel=1; //for now
 		mainfitter.fit();
 	}
 
@@ -213,7 +220,7 @@ invokeApplication(){
 
 		//compare input stacks before and after
 
-		containerStack stack;
+		histoStack stack;
 		plotterControlPlot pl;
 		pl.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/controlPlots_combined.txt");
 		TCanvas c;
@@ -222,7 +229,7 @@ invokeApplication(){
 		for(size_t ndts=0;ndts<mainfitter.nDatasets();ndts++){
 			for(size_t nbjet=0;nbjet<3;nbjet++){
 				double chi2=0;
-				containerStack stack=mainfitter.produceStack(false,nbjet,ndts,chi2);
+				histoStack stack=mainfitter.produceStack(false,nbjet,ndts,chi2);
 				pl.setStack(&stack);
 				textBoxes tb;
 				tb.add(0.7,0.73,"#chi^{2}="+toTString(chi2));
@@ -241,7 +248,7 @@ invokeApplication(){
 			plc.usePad(&c);
 			plc.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/comparePlots_Cb.txt");
 			/*	c.SetName("c_b");
-			container1D ctmp=mainfitter.getCb(false,seveneight);
+			histo1D ctmp=mainfitter.getCb(false,seveneight);
 			ctmp.setName("C_{b}  pre-fit");
 			plc.setNominalPlot(&ctmp);
 			ctmp=mainfitter.getCb(true,true);
@@ -269,7 +276,7 @@ invokeApplication(){
 		c.SetName("correlations");
 		plotter2D pl2d;
 		pl2d.usePad(&c);
-		container2D corr2d=mainfitter.getCorrelations();
+		histo2D corr2d=mainfitter.getCorrelations();
 		pl2d.setPlot(&corr2d);
 		pl2d.draw();
 		c.Print(outfile+".pdf");
@@ -281,11 +288,24 @@ invokeApplication(){
 			tab.writeToFile(outfile+"_tab" +dtsname + ".tex");
 			tab.writeToPdfFile(outfile+"_tab" +dtsname + ".pdf");
 			std::cout << tab.getTable() <<std::endl;
-			tab=mainfitter.makeSystBreakDownTable(ndts,false); //vis PS
-			dtsname+="_vis";
-			tab.writeToFile(outfile+"_tab" +dtsname + ".tex");
-			tab.writeToPdfFile(outfile+"_tab" +dtsname + ".pdf");
-			std::cout << tab.getTable() <<std::endl;
+			tab=mainfitter.makeSystBreakDownTable(ndts); //vis PS
+		}
+		if(mainfitter.nDatasets()>1){
+			for(size_t ndts=0;ndts<mainfitter.nDatasets();ndts++){
+				for(size_t ndts2=ndts;ndts2<mainfitter.nDatasets();ndts2++){
+					if(ndts2==ndts) continue;
+					double errup,errdown;
+					formatter fmt;
+					double ratio=mainfitter.getXsecRatio(ndts,ndts2,errup,errdown);//full ps
+					texTabler ratiotab(" c | l l l");
+					ratiotab << "Ratio: " + mainfitter.datasetName(ndts) + "/" + mainfitter.datasetName(ndts2) ;
+					ratiotab << fmt.round(ratio,0.001) << "$\\pm$" << "$^{" + fmt.toTString(fmt.round(100*errup,0.001)) +"}_{" +
+							fmt.toTString(fmt.round(100*errdown,0.001)) +"}$\\%";
+					ratiotab.writeToFile(outfile+"_ratio_" +mainfitter.datasetName(ndts) +"_"+mainfitter.datasetName(ndts2)+".tex");
+					ratiotab.writeToPdfFile(outfile+"_ratio_" +mainfitter.datasetName(ndts) +"_"+mainfitter.datasetName(ndts2)+".pdf");
+
+				}
+			}
 		}
 
 		texTabler corr=mainfitter.makeCorrTable();

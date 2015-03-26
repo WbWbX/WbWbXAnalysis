@@ -6,7 +6,7 @@
  */
 #include "TtZAnalysis/Tools/interface/optParser.h"
 #include "TtZAnalysis/Tools/interface/graph.h"
-#include "TtZAnalysis/Tools/interface/container.h"
+#include "TtZAnalysis/Tools/interface/histo1D.h"
 #include "../interface/mtExtractor.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 
@@ -91,7 +91,7 @@ void makePseudoExperiments(ztop::mtExtractor* ex,size_t niter,float evalpoint, T
 
 	std::cout << "creating pull " <<std::endl;
 
-	std::vector<container1D > allpulls;
+	std::vector<histo1D > allpulls;
 	size_t npulls=3;
 	std::vector<float> evalpoints;
 
@@ -100,7 +100,7 @@ void makePseudoExperiments(ztop::mtExtractor* ex,size_t niter,float evalpoint, T
 	for(size_t i=0;i<npulls;i++){
 
 		pex.setEvalPoint(evalpoints.at(i));
-		container1D  ctemp(binning);
+		histo1D  ctemp(binning);
 		ctemp.setName("pull"+i);
 		ctemp.setXAxisName("m_{t,out}-m_{t,in} / #Delta_{stat}");
 		//do stuff
@@ -124,7 +124,7 @@ void makePseudoExperiments(ztop::mtExtractor* ex,size_t niter,float evalpoint, T
 	for(size_t i=0;i<allpulls.size();i++){
 
 		//Fit the stuff
-		container1D & ctemp= allpulls.at(i);
+		histo1D & ctemp= allpulls.at(i);
 
 		ctemp *= (((float)i+1)/2);
 
@@ -303,7 +303,7 @@ int main(int argc, char* argv[]){
 	// histoContent::debug=true;
 
 	// parameterExtractor::debug=true;
-	// container1D::debug=true;
+	// histo1D::debug=true;
 
 	if(mode=="fitintersect")
 		extractor.getExtractor()->setLikelihoodMode(parameterExtractor::lh_fitintersect);
@@ -575,7 +575,7 @@ int main(int argc, char* argv[]){
 
 	TString defmtfile=extractor.getDefMtopDataFile();
 	std::cout << "loading additional plots from " << defmtfile<<std::endl;
-	containerStackVector defmtvec;
+	histoStackVector defmtvec;
 	defmtvec.loadFromTFile(defmtfile);
 	gStyle->SetOptStat(0);
 	if(onlyCP){
@@ -595,7 +595,7 @@ int main(int argc, char* argv[]){
 				extraconfig.setEndMarker("[end additional plots]");
 			extraconfig.readFile(extconfigfile);
 			std::string tmpfile=extraconfig.dumpFormattedToTmp();
-			containerStack stack2=defmtvec.getStack(plotnames.at(i));
+			histoStack stack2=defmtvec.getStack(plotnames.at(i));
 
 
 			TString name=stack2.getName();
@@ -640,7 +640,7 @@ int main(int argc, char* argv[]){
 		//make yield table
 		std::cout << "making yields table" <<std::endl;
 
-		containerStack stack=defmtvec.getStack("total step 8");
+		histoStack stack=defmtvec.getStack("total step 8");
 		texTabler yieldtable("l | rcr");
 		yieldtable << "Process" << "\\multicolumn{3}{c}{Events} ";
 		yieldtable.newLine();
@@ -692,9 +692,9 @@ int main(int argc, char* argv[]){
 	std::cout << "making response matrix" <<std::endl;
 
 	///make response matrices
-	containerStack stack=defmtvec.getStack(plotname);
-	const container1DUnfold signcuf=stack.produceUnfoldingContainer();
-	container2D mresp=signcuf.getNormResponseMatrix();
+	histoStack stack=defmtvec.getStack(plotname);
+	const histo1DUnfold signcuf=stack.produceUnfoldingContainer();
+	histo2D mresp=signcuf.getNormResponseMatrix();
 
 
 
@@ -744,9 +744,9 @@ int main(int argc, char* argv[]){
 
 	////efficiency
 
-	container1D efficiency =signcuf.getEfficiency();// mresp.projectToX(false);
+	histo1D efficiency =signcuf.getEfficiency();// mresp.projectToX(false);
 	efficiency=efficiency.cutRight(200);
-	container1D ineff=mresp.projectToX(true)-efficiency;
+	histo1D ineff=mresp.projectToX(true)-efficiency;
 	efficiency.removeAllSystematics();
 	efficiency.transformToEfficiency();
 	//TString tmp=efficiency.getName();

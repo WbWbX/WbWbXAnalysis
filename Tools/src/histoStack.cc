@@ -1,4 +1,4 @@
-#include "../interface/containerStack.h"
+#include "../interface/histoStack.h"
 #include <algorithm>
 #include <vector>
 
@@ -6,22 +6,22 @@
 
 namespace ztop{
 
-std::vector<ztop::containerStack*> containerStack::cs_list;
-bool containerStack::cs_makelist=false;
-bool containerStack::batchmode=true;
-bool containerStack::debug=false;
-bool containerStack::addErrorsStrict=true;
+std::vector<ztop::histoStack*> histoStack::cs_list;
+bool histoStack::cs_makelist=false;
+bool histoStack::batchmode=true;
+bool histoStack::debug=false;
+bool histoStack::addErrorsStrict=true;
 
-containerStack::containerStack() : taggedObject(taggedObject::type_containerStack), dataleg_("data"), mode(notset){
+histoStack::histoStack() : taggedObject(taggedObject::type_containerStack), dataleg_("data"), mode(notset){
 	setName("");
 	if(cs_makelist)cs_list.push_back(this);
 }
-containerStack::containerStack(TString name) : taggedObject(taggedObject::type_containerStack), dataleg_("data"), mode(notset) {
+histoStack::histoStack(TString name) : taggedObject(taggedObject::type_containerStack), dataleg_("data"), mode(notset) {
 	mode=notset;
 	setName(name);
 	if(cs_makelist) cs_list.push_back(this);
 }
-containerStack::~containerStack(){
+histoStack::~histoStack(){
 
 	containers_.clear();
 	containers2D_.clear();
@@ -32,7 +32,7 @@ containerStack::~containerStack(){
 		if(cs_list[i] == this) cs_list.erase(cs_list.begin()+i);
 	}
 }
-void containerStack::push_back(const ztop::container1D& cont,const TString& legend, int color, double norm, int legord){
+void histoStack::push_back(const ztop::histo1D& cont,const TString& legend, int color, double norm, int legord){
 	if(mode==notset)
 		mode=dim1;
 	else if(mode!=dim1){
@@ -53,7 +53,7 @@ void containerStack::push_back(const ztop::container1D& cont,const TString& lege
 
 	for(unsigned int i=0;i<legends_.size();i++){
 		if(legend == legends_[i]){
-			if(containerStack::debug)
+			if(histoStack::debug)
 				std::cout << "containerStack::push_back(1D): found same legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
 			containers_[i] += cont * norm;
 			containers_[i].setName(legend);
@@ -63,9 +63,9 @@ void containerStack::push_back(const ztop::container1D& cont,const TString& lege
 		}
 	}
 	if(!wasthere){
-		if(containerStack::debug)
+		if(histoStack::debug)
 			std::cout << "containerStack::push_back (1D): new legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
-		container1D cp=cont;
+		histo1D cp=cont;
 		cp.setName(legend);
 		containers_.push_back(cp*norm);
 		legends_.push_back(legend);
@@ -74,7 +74,7 @@ void containerStack::push_back(const ztop::container1D& cont,const TString& lege
 	}
 }
 
-void containerStack::push_back(const ztop::container2D& cont,const TString& legend, int color, double norm, int legord){
+void histoStack::push_back(const ztop::histo2D& cont,const TString& legend, int color, double norm, int legord){
 	if(mode==notset)
 		mode=dim2;
 	else if(mode!=dim2){
@@ -87,7 +87,7 @@ void containerStack::push_back(const ztop::container2D& cont,const TString& lege
 	}
 	for(unsigned int i=0;i<legends_.size();i++){
 		if(legend == legends_[i]){
-			if(containerStack::debug)
+			if(histoStack::debug)
 				std::cout << "containerStack::push_back(2D): found same legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
 			containers2D_[i] +=  cont * norm;
 			containers2D_[i].setName(legend);
@@ -97,9 +97,9 @@ void containerStack::push_back(const ztop::container2D& cont,const TString& lege
 		}
 	}
 	if(!wasthere){
-		if(containerStack::debug)
+		if(histoStack::debug)
 			std::cout << "containerStack::push_back (2D): new legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
-		container2D cp=cont;
+		histo2D cp=cont;
 		cp.setName(legend);
 		containers2D_.push_back(cp*norm);
 		legends_.push_back(legend);
@@ -107,7 +107,7 @@ void containerStack::push_back(const ztop::container2D& cont,const TString& lege
 		legorder_.push_back(legord);
 	}
 }
-void containerStack::push_back(const ztop::container1DUnfold& cont,const TString& legend, int color, double norm, int legord){
+void histoStack::push_back(const ztop::histo1DUnfold& cont,const TString& legend, int color, double norm, int legord){
 	if(mode==notset)
 		mode=unfolddim1;
 	else if(mode!=unfolddim1){
@@ -117,11 +117,11 @@ void containerStack::push_back(const ztop::container1DUnfold& cont,const TString
 	if(cont.hasTag()){
 		addTagsFrom(&cont);
 	}
-	container1D cont1d=cont.getControlPlot();
+	histo1D cont1d=cont.getControlPlot();
 	bool wasthere=false;
 	for(unsigned int i=0;i<legends_.size();i++){
 		if(legend == legends_[i]){
-			if(containerStack::debug)
+			if(histoStack::debug)
 				std::cout << "containerStack::push_back(1DUF): found same legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
 			containers1DUnfold_[i] += cont * norm;
 			containers1DUnfold_[i].setName(legend);
@@ -133,9 +133,9 @@ void containerStack::push_back(const ztop::container1DUnfold& cont,const TString
 		}
 	}
 	if(!wasthere){
-		if(containerStack::debug)
+		if(histoStack::debug)
 			std::cout << "containerStack::push_back (1DUF): new legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
-		container1DUnfold cp=cont;
+		histo1DUnfold cp=cont;
 		cp.setName(legend);
 		containers1DUnfold_.push_back(cp * norm);
 		cont1d.setName(getName());
@@ -147,7 +147,7 @@ void containerStack::push_back(const ztop::container1DUnfold& cont,const TString
 
 }
 
-void containerStack::setLegendOrder(const TString &leg, const size_t& no){
+void histoStack::setLegendOrder(const TString &leg, const size_t& no){
 	for(size_t i=0;i<legends_.size();i++){
 		if(legends_.at(i)==leg){
 			if(legorder_.size()>i){
@@ -163,7 +163,7 @@ void containerStack::setLegendOrder(const TString &leg, const size_t& no){
 }
 
 
-void containerStack::mergeLegends(const std::vector<TString>& tobemerged,const TString & mergedname, int mergedColor, bool allowsignals){
+void histoStack::mergeLegends(const std::vector<TString>& tobemerged,const TString & mergedname, int mergedColor, bool allowsignals){
 	std::vector<size_t> idxstbm;
 	for(size_t i=0;i<tobemerged.size();i++){
 		try{
@@ -198,9 +198,9 @@ void containerStack::mergeLegends(const std::vector<TString>& tobemerged,const T
 	std::vector<int> cols;
 	std::vector<int> legos;
 	std::vector<double>  norms;
-	std::vector<container1D> newconts;
-	std::vector<container1DUnfold> newcontsuf;
-	std::vector<container2D> newconts2d;
+	std::vector<histo1D> newconts;
+	std::vector<histo1DUnfold> newcontsuf;
+	std::vector<histo2D> newconts2d;
 
 	size_t newidx=0;
 
@@ -274,17 +274,33 @@ void containerStack::mergeLegends(const std::vector<TString>& tobemerged,const T
 
 
 }
-void containerStack::mergeLegends(const TString& tobemergeda,const TString & tobemergedb,const TString & mergedname, int mergedColor, bool allowsignal){
+void histoStack::mergeLegends(const TString& tobemergeda,const TString & tobemergedb,const TString & mergedname, int mergedColor, bool allowsignal){
 	std::vector<TString> tbm;
 	tbm.push_back(tobemergeda);
 	tbm.push_back(tobemergedb);
 	mergeLegends(tbm,mergedname,mergedColor,allowsignal);
 }
-
+void histoStack::addEmptyLegend(const TString & legendentry, int color, int legord){
+	if(mode==dim1){
+		histo1D c=containers_.at(0);
+		c.setAllZero();
+		push_back(c,legendentry,color,1,legord);
+	}
+	if(mode==dim2){
+		histo2D c=containers2D_.at(0);
+		c.setAllZero();
+		push_back(c,legendentry,color,1,legord);
+	}
+	if(mode==unfolddim1){
+		histo1DUnfold c=containers1DUnfold_.at(0);
+		c.setAllZero();
+		push_back(c,legendentry,color,1,legord);
+	}
+}
 /**
  * names without "up" and "down"
  */
-void containerStack::mergeVariations(const std::vector<TString>& names, const TString & outname,bool linearly){
+void histoStack::mergeVariations(const std::vector<TString>& names, const TString & outname,bool linearly){
 	for(size_t i=0;i<containers_.size();i++)
 		containers_.at(i).mergeVariations(names,outname,linearly);
 	for(size_t i=0;i<containers2D_.size();i++)
@@ -295,7 +311,7 @@ void containerStack::mergeVariations(const std::vector<TString>& names, const TS
 
 }
 
-void containerStack::mergeVariationsFromFileInCMSSW(const std::string& filename){
+void histoStack::mergeVariationsFromFileInCMSSW(const std::string& filename){
 	systAdder adder;
 	adder.readMergeVariationsFileInCMSSW(filename);
 	size_t ntobemerged=adder.mergeVariationsSize();
@@ -310,7 +326,7 @@ void containerStack::mergeVariationsFromFileInCMSSW(const std::string& filename)
 }
 
 
-void containerStack::removeContribution(TString legendname){
+void histoStack::removeContribution(TString legendname){
 	bool found=false;
 	std::vector<TString>::iterator leg=legends_.begin();
 	std::vector<int>::iterator col=colors_.begin();
@@ -340,7 +356,7 @@ void containerStack::removeContribution(TString legendname){
 }
 
 
-int containerStack::getContributionIdx(TString legname) const{
+int histoStack::getContributionIdx(TString legname) const{
 	for(size_t i=0;i<legends_.size();i++){
 		if(legname == legends_.at(i))
 			return i;
@@ -350,32 +366,32 @@ int containerStack::getContributionIdx(TString legname) const{
 	return -1;
 }
 
-ztop::container1D containerStack::getContribution(TString contr) const{
-	ztop::container1D out;
+ztop::histo1D histoStack::getContribution(TString contr) const{
+	ztop::histo1D out;
 	int idx=getContributionIdx(contr);
 	if(idx<0 || mode != dim1)
 		return out;
 	out=containers_.at(idx);
 	return out;
 }
-ztop::container2D containerStack::getContribution2D(TString contr)const{
-	ztop::container2D out;
+ztop::histo2D histoStack::getContribution2D(TString contr)const{
+	ztop::histo2D out;
 	int idx=getContributionIdx(contr);
 	if(idx<0 || mode != dim2)
 		return out;
 	out=containers2D_.at(idx);
 	return out;
 }
-ztop::container1DUnfold containerStack::getContribution1DUnfold(TString contr)const{
-	ztop::container1DUnfold out;
+ztop::histo1DUnfold histoStack::getContribution1DUnfold(TString contr)const{
+	ztop::histo1DUnfold out;
 	int idx=getContributionIdx(contr);
 	if(idx<0 || mode != unfolddim1)
 		return out;
 	out=containers1DUnfold_.at(idx);
 	return out;
 }
-ztop::container1D containerStack::getContributionsBut(TString contr)const{
-	ztop::container1D out;
+ztop::histo1D histoStack::getContributionsBut(TString contr)const{
+	ztop::histo1D out;
 	if(mode != dim1)
 		return out;
 	out=containers_.at(0);
@@ -383,14 +399,14 @@ ztop::container1D containerStack::getContributionsBut(TString contr)const{
 	int i=0;
 	for(std::vector<TString>::const_iterator name=legends_.begin();name<legends_.end();++name){
 		if(contr != *name){
-			container1D temp=containers_[i];
+			histo1D temp=containers_[i];
 		}
 		i++;
 	}
 	return out;
 }
-ztop::container2D containerStack::getContributions2DBut(TString contr) const{
-	ztop::container2D out;
+ztop::histo2D histoStack::getContributions2DBut(TString contr) const{
+	ztop::histo2D out;
 	if(mode != dim2)
 		return out;
 	out=containers2D_.at(0);
@@ -398,14 +414,14 @@ ztop::container2D containerStack::getContributions2DBut(TString contr) const{
 	int i=0;
 	for(std::vector<TString>::const_iterator name=legends_.begin();name<legends_.end();++name){
 		if(contr != *name){
-			container2D temp=containers2D_[i];
+			histo2D temp=containers2D_[i];
 		}
 		i++;
 	}
 	return out;
 }
-ztop::container1DUnfold containerStack::getContributions1DUnfoldBut(TString contr) const{
-	ztop::container1DUnfold out;
+ztop::histo1DUnfold histoStack::getContributions1DUnfoldBut(TString contr) const{
+	ztop::histo1DUnfold out;
 	if(mode != dim2)
 		return out;
 	out=containers1DUnfold_.at(0);
@@ -413,14 +429,14 @@ ztop::container1DUnfold containerStack::getContributions1DUnfoldBut(TString cont
 	int i=0;
 	for(std::vector<TString>::const_iterator name=legends_.begin();name<legends_.end();++name){
 		if(contr != *name){
-			container1DUnfold temp=containers1DUnfold_[i];
+			histo1DUnfold temp=containers1DUnfold_[i];
 		}
 		i++;
 	}
 	return out;
 }
-ztop::container1D containerStack::getContributionsBut(std::vector<TString> contr) const{
-	ztop::container1D out;
+ztop::histo1D histoStack::getContributionsBut(std::vector<TString> contr) const{
+	ztop::histo1D out;
 	if(mode!=dim1)
 		return out;
 	out=containers_.at(0);
@@ -434,13 +450,13 @@ ztop::container1D containerStack::getContributionsBut(std::vector<TString> contr
 			}
 		}
 		if(get){
-			container1D temp=containers_[i];
+			histo1D temp=containers_[i];
 		}
 	}
 	return out;
 }
-ztop::container2D containerStack::getContributions2DBut(std::vector<TString> contr) const{
-	ztop::container2D out;
+ztop::histo2D histoStack::getContributions2DBut(std::vector<TString> contr) const{
+	ztop::histo2D out;
 	if(mode!=dim2)
 		return out;
 	out=containers2D_.at(0);
@@ -454,13 +470,13 @@ ztop::container2D containerStack::getContributions2DBut(std::vector<TString> con
 			}
 		}
 		if(get){
-			container2D temp=containers2D_[i] ;
+			histo2D temp=containers2D_[i] ;
 		}
 	}
 	return out;
 }
-ztop::container1DUnfold containerStack::getContributions1DUnfoldBut(std::vector<TString> contr) const{
-	ztop::container1DUnfold out;
+ztop::histo1DUnfold histoStack::getContributions1DUnfoldBut(std::vector<TString> contr) const{
+	ztop::histo1DUnfold out;
 	if(mode!=unfolddim1)
 		return out;
 	out=containers1DUnfold_.at(0);
@@ -474,13 +490,13 @@ ztop::container1DUnfold containerStack::getContributions1DUnfoldBut(std::vector<
 			}
 		}
 		if(get){
-			container1DUnfold temp=containers1DUnfold_[i] ;
+			histo1DUnfold temp=containers1DUnfold_[i] ;
 		}
 	}
 	return out;
 }
 
-void containerStack::multiplyNorm(size_t i , float multi){
+void histoStack::multiplyNorm(size_t i , float multi){
 	if(i>=size()){
 		throw std::out_of_range("containerStack::multiplyNorm: out of range");
 	}
@@ -495,7 +511,7 @@ void containerStack::multiplyNorm(size_t i , float multi){
 	}
 }
 
-void containerStack::multiplyNorm(TString legendentry, float multi){
+void histoStack::multiplyNorm(TString legendentry, float multi){
 	size_t i=0;
 	for(std::vector<TString>::iterator name=legends_.begin();name<legends_.end();++name){
 		if(legendentry == *name){
@@ -515,7 +531,7 @@ void containerStack::multiplyNorm(TString legendentry, float multi){
 
 }
 
-void containerStack::multiplyAllMCNorms(float multiplier){
+void histoStack::multiplyAllMCNorms(float multiplier){
 	for(unsigned int i=0;i<legends_.size();i++){
 		if(legends_.at(i)!=dataleg_){
 			if(containers_.size()>i){
@@ -531,7 +547,7 @@ void containerStack::multiplyAllMCNorms(float multiplier){
 	}
 }
 
-void containerStack::addGlobalRelMCError(TString sysname,double error){
+void histoStack::addGlobalRelMCError(TString sysname,double error){
 	for(unsigned int i=0;i<containers_.size();i++){
 		if(legends_[i]!=dataleg_) containers_[i].addGlobalRelError(sysname,error);
 		else containers_[i].addGlobalRelError(sysname,0);
@@ -545,10 +561,10 @@ void containerStack::addGlobalRelMCError(TString sysname,double error){
 		else containers1DUnfold_[i].addGlobalRelError(sysname,0);
 	}
 }
-void containerStack::addRelErrorToContribution(double err, const TString& contributionname, TString nameprefix){
+void histoStack::addRelErrorToContribution(double err, const TString& contributionname, TString nameprefix){
 	if(debug)
 		std::cout << "containerStack::addRelErrorToContribution: " << contributionname <<std::endl;
-		size_t idx=getContributionIdx(contributionname);
+	size_t idx=getContributionIdx(contributionname);
 	std::vector<size_t> excludeidxs;
 	for(size_t i=0;i<size();i++){
 		if(i!=idx)
@@ -558,19 +574,19 @@ void containerStack::addRelErrorToContribution(double err, const TString& contri
 	addRelErrorToBackgrounds(err,false, nameprefix, excludeidxs);
 }
 
-void containerStack::addRelErrorToBackgrounds(double err ,bool aspartials , TString nameprefix,const TString& excludecontr){
+void histoStack::addRelErrorToBackgrounds(double err ,bool aspartials , TString nameprefix,const TString& excludecontr){
 	std::vector<TString> vec;
 	vec.push_back(excludecontr);
 	addRelErrorToBackgrounds(err,aspartials,nameprefix,vec);
 }
-void containerStack::addRelErrorToBackgrounds(double err ,bool aspartials , TString nameprefix,const std::vector<TString> excludecontr){
+void histoStack::addRelErrorToBackgrounds(double err ,bool aspartials , TString nameprefix,const std::vector<TString> excludecontr){
 	std::vector<size_t> excludeidxs;
 	for(size_t i=0;i<excludecontr.size();i++)
 		excludeidxs.push_back(getContributionIdx(excludecontr.at(i)));
 	addRelErrorToBackgrounds(err,aspartials,nameprefix,excludeidxs);
 }
 
-void containerStack::addRelErrorToBackgrounds(double err ,bool aspartials , TString nameprefix,const std::vector<size_t> excludeidxs){
+void histoStack::addRelErrorToBackgrounds(double err ,bool aspartials , TString nameprefix,const std::vector<size_t> excludeidxs){
 	std::vector<size_t> signals = getSignalIdxs();
 	size_t dataidx=std::find(legends_.begin(),legends_.end(),dataleg_)-legends_.begin();
 	signals.insert(signals.end(),excludeidxs.begin(),excludeidxs.end());
@@ -579,7 +595,7 @@ void containerStack::addRelErrorToBackgrounds(double err ,bool aspartials , TStr
 		nameprefix+="_";
 
 	if(aspartials)
-		nameprefix+=(TString)container1D_partialvariationIDString+"_";
+		nameprefix+=(TString)histo1D_partialvariationIDString+"_";
 
 	for(size_t i=0;i<containers_.size();i++){
 		if(std::find(signals.begin(),signals.end(),i) != signals.end()) continue;
@@ -613,7 +629,7 @@ void containerStack::addRelErrorToBackgrounds(double err ,bool aspartials , TStr
 	}
 }
 
-void containerStack::mergePartialVariations(const TString& identifier, bool strictpartialID){
+void histoStack::mergePartialVariations(const TString& identifier, bool strictpartialID){
 
 	for(size_t i=0;i<containers_.size();i++){
 		containers_.at(i).mergePartialVariations(identifier,strictpartialID);
@@ -626,11 +642,11 @@ void containerStack::mergePartialVariations(const TString& identifier, bool stri
 	}
 }
 
-void containerStack::addMCErrorStack(const TString &sysname,const containerStack &errorstack){
+void histoStack::addMCErrorStack(const TString &sysname,const histoStack &errorstack){
 	addErrorStack( sysname, errorstack);
 }
 
-void containerStack::addErrorStack(const TString & sysname,const containerStack& errorstack){
+void histoStack::addErrorStack(const TString & sysname,const histoStack& errorstack){
 	if(mode!=errorstack.mode){
 		std::cout << "containerStack::addErrorStack: stacks must have same type" << std::endl;
 		return;
@@ -656,18 +672,18 @@ void containerStack::addErrorStack(const TString & sysname,const containerStack&
 		if(it!=errorstack.legends_.end()){
 			size_t j=it-errorstack.legends_.begin();
 			//found=true;
-			if(mode==dim1 || mode==unfolddim1){
+			if(i<containers_.size() && j<errorstack.containers_.size() ){
 				//errorstack.containers_[j] = errorstack.containers_[j] * errorstack.norms_[j]; //normalize (in case there is any remultiplication done or something)
 				if(containers_[i].addErrorContainer(sysname,errorstack.containers_[j])<0){
 					std::cout << "containerStack::addErrorStack: Problem in " << name_ <<std::endl;
 				}
 			}
-			if(mode==dim2){
+			if(i<containers2D_.size() && j<errorstack.containers2D_.size() ){
 				if(containers2D_[i].addErrorContainer(sysname,errorstack.containers2D_[j])<0){
 					std::cout << "containerStack::addErrorStack: Problem in " << name_ <<std::endl;
 				}
 			}
-			if(mode==unfolddim1){
+			if(i<containers1DUnfold_.size() && j<errorstack.containers1DUnfold_.size() ){
 				if(containers1DUnfold_[i].addErrorContainer(sysname,errorstack.containers1DUnfold_[j])<0){
 					std::cout << "containerStack::addErrorStack: Problem in " << name_ <<std::endl;
 				}
@@ -679,20 +695,22 @@ void containerStack::addErrorStack(const TString & sysname,const containerStack&
 				throw std::runtime_error("containerStack::addErrorStack: legend in one stack not found. To allow this, switch containerStack::addErrorsStrict to false");
 			}
 			std::cout << "containerStack::addErrorStack: "<< name_ << " legend " << legends_[i] << " not found. adding 0 error!" << std::endl;
-			if(mode==dim1 || mode==unfolddim1){
+			if(i<containers_.size()){
 				containers_[i].addErrorContainer(sysname,containers_[i]);
 			}
-			if(mode==dim2){
+			if(i<containers2D_.size()){
 				containers2D_[i].addErrorContainer(sysname,containers2D_[i]);
 			}
-			if(mode==unfolddim1){
+			if(i<containers1DUnfold_.size()){
 				containers1DUnfold_[i].addErrorContainer(sysname,containers1DUnfold_[i]);
 			}
 		}
 	}
+	if(debug)
+		std::cout << "containerStack::addErrorStack: " << name_ << " done"<<std::endl;
 }
 
-void containerStack::getRelSystematicsFrom(const ztop::containerStack & stack){
+void histoStack::getRelSystematicsFrom(const ztop::histoStack & stack){
 	for(size_t j=0;j<stack.legends_.size();j++){
 		for(unsigned int i=0;i<legends_.size();i++){
 			if(legends_[i] == stack.legends_.at(j)){
@@ -710,9 +728,11 @@ void containerStack::getRelSystematicsFrom(const ztop::containerStack & stack){
 		}
 	}
 }
-void containerStack::addRelSystematicsFrom(const ztop::containerStack & stack,bool ignorestat,bool strict){
-
+void histoStack::addRelSystematicsFrom(const ztop::histoStack & stack,bool ignorestat,bool strict){
+	bool excep=false;
+	std::string errstr;
 	for(size_t j=0;j<stack.legends_.size();j++){
+		bool found=false;
 		for(unsigned int i=0;i<legends_.size();i++){
 			if(legends_[i] == stack.legends_.at(j)){
 				if(debug)
@@ -723,14 +743,38 @@ void containerStack::addRelSystematicsFrom(const ztop::containerStack & stack,bo
 					containers2D_[i].addRelSystematicsFrom(stack.containers2D_.at(j),ignorestat,strict);
 				if(i<containers1DUnfold_.size() && j<stack.containers1DUnfold_.size())
 					containers1DUnfold_[i].addRelSystematicsFrom(stack.containers1DUnfold_.at(j),ignorestat,strict);
-
+				found=true;
 				break;
 			}
 		}
+		if(!found){
+			errstr+= ("containerStack::addRelSystematicsFrom: adding to stack "+name_+ " legendentry "+
+					stack.legends_.at(j) + " from rhs not found - empty entry will be added\n").Data();
+			excep=true;
+			addEmptyLegend(stack.legends_.at(j),stack.colors_.at(j),stack.legorder_.at(j));
+			for(unsigned int i=legends_.size()-1;i;i--){
+				if(legends_[i] == stack.legends_.at(j)){
+					if(debug)
+						std::cout << "containerStack::addRelSystematicsFrom: adding to stack " << name_ << std::endl;
+					if(i<containers_.size() && j<stack.containers_.size())
+						containers_[i].addRelSystematicsFrom(stack.containers_.at(j),ignorestat,strict);
+					if(i<containers2D_.size() && j<stack.containers2D_.size())
+						containers2D_[i].addRelSystematicsFrom(stack.containers2D_.at(j),ignorestat,strict);
+					if(i<containers1DUnfold_.size() && j<stack.containers1DUnfold_.size())
+						containers1DUnfold_[i].addRelSystematicsFrom(stack.containers1DUnfold_.at(j),ignorestat,strict);
+
+					break;
+				}
+			}
+
+
+		}
 	}
+	if(excep)
+		throw std::runtime_error(errstr);
 }
 
-void containerStack::removeError(TString sysname){
+void histoStack::removeError(TString sysname){
 	for(unsigned int i=0; i<containers_.size();i++){
 		containers_[i].removeError(sysname);
 	}
@@ -742,7 +786,7 @@ void containerStack::removeError(TString sysname){
 	}
 }
 
-void containerStack::removeAllSystematics(){
+void histoStack::removeAllSystematics(){
 	for(unsigned int i=0; i<containers_.size();i++){
 		containers_[i].removeAllSystematics();
 	}
@@ -754,7 +798,7 @@ void containerStack::removeAllSystematics(){
 	}
 }
 
-void containerStack::renameSyst(TString old, TString New){
+void histoStack::renameSyst(TString old, TString New){
 	for(unsigned int i=0; i<containers_.size();i++){
 		containers_[i].renameSyst(old,New);
 	}
@@ -766,10 +810,54 @@ void containerStack::renameSyst(TString old, TString New){
 	}
 
 }
-std::vector<size_t> containerStack::removeSpikes(bool inclUFOF,int limittoindex,
+void histoStack::splitSystematic(const size_t & number, const float& fracadivb,
+		const TString & splinamea,  const TString & splinameb){
+
+	for(unsigned int i=0; i<containers_.size();i++){
+		containers_[i].splitSystematic(number,fracadivb, splinamea, splinameb);
+	}
+	for(unsigned int i=0; i<containers2D_.size();i++){
+		containers2D_[i].splitSystematic(number,fracadivb, splinamea, splinameb);
+	}
+	for(unsigned int i=0; i<containers1DUnfold_.size();i++){
+		containers1DUnfold_[i].splitSystematic(number,fracadivb, splinamea, splinameb);
+	}
+}
+
+
+void histoStack::splitSystematic(const TString & name, const float& fracadivb,
+		const TString & splinamea,  const TString & splinameb){
+	size_t number=0;
+	if(name.EndsWith("_up") || name.EndsWith("_down") || splinamea.EndsWith("_up") || splinameb.EndsWith("_down"))
+		throw std::logic_error("containerStack::splitSystematic(name) works on up and down automatically, don't specify \"up\" or \"down\"");
+
+	if(containers_.size()>0){
+		number=containers_.at(0).getSystErrorIndex(name+"_up");
+	}
+	if(containers2D_.size()>0){
+		number=containers2D_.at(0).getSystErrorIndex(name+"_up");
+	}
+	if(containers1DUnfold_.size()>0){
+		number=containers1DUnfold_.at(0).getSystErrorIndex(name+"_up");
+	}
+	splitSystematic(number,fracadivb,splinamea+"_up",splinameb+"_up");
+	if(containers_.size()>0){
+		number=containers_.at(0).getSystErrorIndex(name+"_down");
+	}
+	if(containers2D_.size()>0){
+		number=containers2D_.at(0).getSystErrorIndex(name+"_down");
+	}
+	if(containers1DUnfold_.size()>0){
+		number=containers1DUnfold_.at(0).getSystErrorIndex(name+"_down");
+	}
+	splitSystematic(number,fracadivb,splinamea+"_down",splinameb+"_down");
+
+}
+
+std::vector<size_t> histoStack::removeSpikes(bool inclUFOF,int limittoindex,
 		float strength,float sign,float threshold){
 
-	//not defined for container1D
+	//not defined for histo1D
 	std::vector<size_t> out,temp;
 
 	for(unsigned int i=0; i<containers2D_.size();i++){
@@ -785,8 +873,8 @@ std::vector<size_t> containerStack::removeSpikes(bool inclUFOF,int limittoindex,
 
 
 
-ztop::container1D containerStack::getFullMCContainer()const{
-	container1D out;
+ztop::histo1D histoStack::getFullMCContainer()const{
+	histo1D out;
 	if(containers_.size()<1)
 		return out;
 	for(unsigned int i=0;i<containers_.size();i++){
@@ -796,8 +884,8 @@ ztop::container1D containerStack::getFullMCContainer()const{
 	}
 	return out;
 }
-ztop::container2D containerStack::getFullMCContainer2D()const{
-	container2D out;
+ztop::histo2D histoStack::getFullMCContainer2D()const{
+	histo2D out;
 	if(containers2D_.size()<1)
 		return out;
 	for(unsigned int i=0;i<containers2D_.size();i++){
@@ -807,8 +895,8 @@ ztop::container2D containerStack::getFullMCContainer2D()const{
 	}
 	return out;
 }
-ztop::container1DUnfold containerStack::getFullMCContainer1DUnfold()const {
-	container1DUnfold out;
+ztop::histo1DUnfold histoStack::getFullMCContainer1DUnfold()const {
+	histo1DUnfold out;
 	if(containers1DUnfold_.size()<1)
 		return out;
 	for(unsigned int i=0;i<containers1DUnfold_.size();i++){
@@ -819,31 +907,31 @@ ztop::container1DUnfold containerStack::getFullMCContainer1DUnfold()const {
 	return out;
 }
 /*
-THStack * containerStack::makeTHStack(TString stackname){
+THStack * histoStack::makeTHStack(TString stackname){
 	if(!checkDrawDimension()){
-		std::cout << "containerStack::makeTHStack: only available for 1dim stacks!" <<std::endl;
+		std::cout << "histoStack::makeTHStack: only available for 1dim stacks!" <<std::endl;
 		return 0;
 	}
 	if(debug)
-		std::cout << "containerStack::makeTHStack: ..." <<std::endl;
+		std::cout << "histoStack::makeTHStack: ..." <<std::endl;
 	TH1::AddDirectory(false);
 	if(stackname == "") stackname = name_+"_s";
 	THStack *tstack = addObject(new THStack(stackname,stackname));
 
 	std::vector<size_t> sorted=getSortedIdxs(false);
 	if(debug)
-		std::cout << "containerStack::makeTHStack: sorted entries" <<std::endl;
+		std::cout << "histoStack::makeTHStack: sorted entries" <<std::endl;
 
 	if(debug)
-		std::cout << "containerStack::makeTHStack: size="<<containers_.size() <<std::endl;
+		std::cout << "histoStack::makeTHStack: size="<<containers_.size() <<std::endl;
 	for(unsigned int it=0;it<size();it++){
 		if(debug)
-			std::cout << "containerStack::makeTHStack: get "<< it;
+			std::cout << "histoStack::makeTHStack: get "<< it;
 		size_t i=sorted.at(it);
 		if(getLegend(i) != dataleg_){
 			if(debug)
 				std::cout <<"->"<<i << ": " << getLegend(i)<< std::endl;
-			container1D tempcont = getContainer(i);
+			histo1D tempcont = getContainer(i);
 
 			TH1D * htemp=(tempcont.getTH1D(getLegend(i)+" "+getName()+"_stack_h"));
 			if(!htemp)
@@ -860,16 +948,16 @@ THStack * containerStack::makeTHStack(TString stackname){
 		}
 	}
 	if(debug)
-		std::cout << "containerStack::makeTHStack: stack produced" <<std::endl;
+		std::cout << "histoStack::makeTHStack: stack produced" <<std::endl;
 	return  tstack;
 }
-TLegend * containerStack::makeTLegend(bool inverse){
+TLegend * histoStack::makeTLegend(bool inverse){
 	if(!checkDrawDimension()){
-		std::cout << "containerStack::makeTLegend: only available for 1dim stacks!" <<std::endl;
+		std::cout << "histoStack::makeTLegend: only available for 1dim stacks!" <<std::endl;
 		return 0;
 	}
 	if(debug)
-		std::cout << "containerStack::makeTLegend: drawing..." <<std::endl;
+		std::cout << "histoStack::makeTLegend: drawing..." <<std::endl;
 	TLegend *leg = addObject(new TLegend((Double_t)0.65,(Double_t)0.50,(Double_t)0.95,(Double_t)0.90));
 	leg->Clear();
 	leg->SetFillStyle(0);
@@ -879,7 +967,7 @@ TLegend * containerStack::makeTLegend(bool inverse){
 
 	for(unsigned int it=0;it<size();it++){
 		size_t i=sorted.at(it);
-		container1D tempcont = containers_[i];
+		histo1D tempcont = containers_[i];
 		TH1D * h = addObject((TH1D*)tempcont.getTH1D(getLegend(i)+" "+getName()+"_leg")->Clone());
 		h->SetFillColor(getColor(i));
 		if(getLegend(i) != dataleg_) leg->AddEntry(h,getLegend(i),"f");
@@ -889,13 +977,13 @@ TLegend * containerStack::makeTLegend(bool inverse){
 
 	return leg;
 }
-void containerStack::drawControlPlot(TString name, bool drawxaxislabels, double resizelabels) {
+void histoStack::drawControlPlot(TString name, bool drawxaxislabels, double resizelabels) {
 	if(!checkDrawDimension()){
-		std::cout << "containerStack::drawControlPlot: only available for 1dim(unfold) stacks!" <<std::endl;
+		std::cout << "histoStack::drawControlPlot: only available for 1dim(unfold) stacks!" <<std::endl;
 		return;
 	}
 	if(debug)
-		std::cout << "containerStack::drawControlPlot: drawing " <<name_ <<std::endl;
+		std::cout << "histoStack::drawControlPlot: drawing " <<name_ <<std::endl;
 	TH1::AddDirectory(false);
 	if(name=="") name=name_;
 	int dataentry=0;
@@ -961,19 +1049,19 @@ void containerStack::drawControlPlot(TString name, bool drawxaxislabels, double 
 
 }
 
-TGraphAsymmErrors * containerStack::makeMCErrors(){
+TGraphAsymmErrors * histoStack::makeMCErrors(){
 	TGraphAsymmErrors * g =addObject(getFullMCContainer().getTGraph());
 	g->SetFillStyle(3005);
 	return g;
 }
 
-void containerStack::drawRatioPlot(TString name,double resizelabels){
+void histoStack::drawRatioPlot(TString name,double resizelabels){
 	if(!checkDrawDimension()){
-		std::cout << "containerStack::drawRatioPlot: only available for 1dim stacks!" <<std::endl;
+		std::cout << "histoStack::drawRatioPlot: only available for 1dim stacks!" <<std::endl;
 		return;
 	}
 	if(debug)
-		std::cout << "containerStack::drawRatioPlot: drawing..." <<std::endl;
+		std::cout << "histoStack::drawRatioPlot: drawing..." <<std::endl;
 	TH1::AddDirectory(false);
 	//prepare container
 	if(name=="") name=name_;
@@ -996,12 +1084,12 @@ void containerStack::drawRatioPlot(TString name,double resizelabels){
 			if(gotdentry && gotof) break;
 		}
 	}
-	container1D data = containers_[dataentry];
+	histo1D data = containers_[dataentry];
 	data.setShowWarnings(false);
-	container1D mc = getFullMCContainer();
+	histo1D mc = getFullMCContainer();
 	mc.setShowWarnings(false);
 
-	container1D ratio=data;
+	histo1D ratio=data;
 	ratio.normalizeToContainer(mc);
 	mc=mc.getRelErrorsContainer();
 
@@ -1054,15 +1142,15 @@ void containerStack::drawRatioPlot(TString name,double resizelabels){
 }
 
 
-std::vector<container1D> containerStack::getPEffPlots(size_t idx)const{
+std::vector<histo1D> histoStack::getPEffPlots(size_t idx)const{
 	if(idx>=containers_.size()){
-		std::cout << "containerStack::getPEffPlot: idx out of range, return empty" <<std::endl;
-		return std::vector<container1D>();
+		std::cout << "histoStack::getPEffPlot: idx out of range, return empty" <<std::endl;
+		return std::vector<histo1D>();
 	}
-	container1D sigcont=containers_.at(0);
+	histo1D sigcont=containers_.at(0);
 	sigcont.clear();
-	container1D bgcont=sigcont;
-	container1D peff=sigcont; //, ...
+	histo1D bgcont=sigcont;
+	histo1D peff=sigcont; //, ...
 	//sig,bg
 	for(size_t i=0;i<containers_.size();i++){
 		if(i==idx)
@@ -1086,7 +1174,7 @@ std::vector<container1D> containerStack::getPEffPlots(size_t idx)const{
 	}
 	// HERE WE ARE  peff.
 	peff.setNames("p*eff","","P*#epsilon");
-	std::vector<container1D> out;
+	std::vector<histo1D> out;
 	out.push_back(peff);
 
 	integralsig=0;integralbg=0;
@@ -1102,29 +1190,29 @@ std::vector<container1D> containerStack::getPEffPlots(size_t idx)const{
 	return out; //default
 }
 
-void containerStack::drawPEffPlot(TString name,double resizelabels){
+void histoStack::drawPEffPlot(TString name,double resizelabels){
 	if(signals_.size()<1){
-		std::cout << "containerStack::drawPEffPlot: no signal set, doing nothing" <<std::endl;
+		std::cout << "histoStack::drawPEffPlot: no signal set, doing nothing" <<std::endl;
 		return;
 	}
 	if(containers_.size()<1){
-		std::cout << "containerStack::drawPEffPlot: no 1dmin containers available. Doing nothing" <<std::endl;
+		std::cout << "histoStack::drawPEffPlot: no 1dmin containers available. Doing nothing" <<std::endl;
 		return;
 	}
 	if(debug)
-		std::cout << "containerStack::drawPEffPlot: drawing..." <<std::endl;
+		std::cout << "histoStack::drawPEffPlot: drawing..." <<std::endl;
 	std::vector<size_t> sidx=getSignalIdxs();
 	TH1::AddDirectory(false);
-	std::vector<std::vector<container1D> > plotss;
+	std::vector<std::vector<histo1D> > plotss;
 	double ymax=0;
 	for(size_t i=0;i<sidx.size();i++){
-		std::vector<container1D> plots=getPEffPlots(sidx.at(i));
+		std::vector<histo1D> plots=getPEffPlots(sidx.at(i));
 		for(size_t j=0;j<plots.size();j++)
 			if(ymax<plots.at(j).getYMax(false)) ymax=plots.at(j).getYMax(false);
 		plotss.push_back(plots);
 	}
 	for(size_t i=0;i<sidx.size();i++){
-		std::vector<container1D> & plots=plotss.at(i);
+		std::vector<histo1D> & plots=plotss.at(i);
 		if(plots.size()>1){
 			if(i==0){
 				float multiplier=1;
@@ -1161,13 +1249,13 @@ void containerStack::drawPEffPlot(TString name,double resizelabels){
 }
 
 
-void containerStack::drawSBGPlot(TString name,double resizelabels,bool invert){
+void histoStack::drawSBGPlot(TString name,double resizelabels,bool invert){
 	if(!checkDrawDimension()){
-		std::cout << "containerStack::drawRatioPlot: only available for 1dim stacks!" <<std::endl;
+		std::cout << "histoStack::drawRatioPlot: only available for 1dim stacks!" <<std::endl;
 		return;
 	}
 	if(debug)
-		std::cout << "containerStack::drawSBGPlot: drawing..." <<std::endl;
+		std::cout << "histoStack::drawSBGPlot: drawing..." <<std::endl;
 	TH1::AddDirectory(false);
 	//prepare container
 	if(name=="") name=name_;
@@ -1191,14 +1279,14 @@ void containerStack::drawSBGPlot(TString name,double resizelabels,bool invert){
 		}
 	}
 	//prepare container
-	std::vector<container1D> vsgbg;
+	std::vector<histo1D> vsgbg;
 	double totmax=-999;
 	for(size_t i=0;i<legends_.size();i++){
 		if(legends_[i]==dataleg_) continue;
-		container1D sig=containers_[i];
-		container1D bg=sig;
+		histo1D sig=containers_[i];
+		histo1D bg=sig;
 		bg.clear();
-		container1D sgbg=bg;
+		histo1D sgbg=bg;
 		//get all other contributions
 		for(size_t j=0;j<legends_.size();j++){
 			if(i==j) continue;
@@ -1231,7 +1319,7 @@ void containerStack::drawSBGPlot(TString name,double resizelabels,bool invert){
 	bool firstdraw=true;
 	for(size_t i=0;i<vsgbg.size();i++){
 		//get TH1Ds
-		container1D * c=&vsgbg[i];
+		histo1D * c=&vsgbg[i];
 		if(firstdraw)
 			c->setLabelSize(multiplier * resizelabels);
 		TH1D * h=addObject(c->getTH1D(""));
@@ -1252,9 +1340,9 @@ void containerStack::drawSBGPlot(TString name,double resizelabels,bool invert){
 	}
 }
 
-TCanvas * containerStack::makeTCanvas(plotmode plotMode){
+TCanvas * histoStack::makeTCanvas(plotmode plotMode){
 	if(!checkDrawDimension()){
-		std::cout << "containerStack::makeTCanvas: only available for 1dim stacks!" <<std::endl;
+		std::cout << "histoStack::makeTCanvas: only available for 1dim stacks!" <<std::endl;
 		return 0;
 	}
 	TH1::AddDirectory(false);
@@ -1262,12 +1350,12 @@ TCanvas * containerStack::makeTCanvas(plotmode plotMode){
 	if(mode==unfolddim1)
 		canvasname = canvasname + "_uf";
 	TCanvas * c = new TCanvas(canvasname,canvasname);
-	if(containerStack::batchmode)
+	if(histoStack::batchmode)
 		c->SetBatch();
 	TH1D * htemp=(new TH1D("sometemphisto"+name_,"sometemphisto"+name_,2,0,1)); //creates all gPad stuff etc and prevents seg vio, which happens in some cases; weird
 	htemp->Draw();
 	if(debug)
-		std::cout << "containerStack::makeTCanvas: prepared canvas "<< canvasname << ", drawing plots" <<std::endl;
+		std::cout << "histoStack::makeTCanvas: prepared canvas "<< canvasname << ", drawing plots" <<std::endl;
 	gStyle->SetOptTitle(0);
 	if(plotMode == normal){
 		c->cd();
@@ -1302,8 +1390,8 @@ TCanvas * containerStack::makeTCanvas(plotmode plotMode){
 	delete htemp;
 	return c;
 }
-*/
-std::map<TString, histoBin> containerStack::getAllContentsInBin(size_t bin,int syst,bool print)const{
+ */
+std::map<TString, histoBin> histoStack::getAllContentsInBin(size_t bin,int syst,bool print)const{
 
 
 	if(is1D()){
@@ -1355,9 +1443,9 @@ std::map<TString, histoBin> containerStack::getAllContentsInBin(size_t bin,int s
 }
 
 
-containerStack containerStack::rebinXToBinning(const std::vector<float> & newbins)const{
+histoStack histoStack::rebinXToBinning(const std::vector<float> & newbins)const{
 
-	containerStack out=*this;
+	histoStack out=*this;
 	for(size_t i=0;i<containers_.size();i++)
 		out.containers_.at(i)=containers_.at(i).rebinToBinning(newbins);
 
@@ -1371,8 +1459,8 @@ containerStack containerStack::rebinXToBinning(const std::vector<float> & newbin
 }
 
 
-containerStack containerStack::rebinYToBinning(const std::vector<float> & newbins)const{
-	containerStack out=*this;
+histoStack histoStack::rebinYToBinning(const std::vector<float> & newbins)const{
+	histoStack out=*this;
 	for(size_t i=0;i<containers2D_.size();i++)
 		out.containers2D_.at(i)=containers2D_.at(i).rebinYToBinning(newbins);
 	return out;
@@ -1380,11 +1468,12 @@ containerStack containerStack::rebinYToBinning(const std::vector<float> & newbin
 
 
 //just perform functions on the containers with same names
-ztop::containerStack containerStack::operator + (containerStack stack){
-	if(mode!=stack.mode){
+ztop::histoStack histoStack::operator + (const histoStack& stackin){
+	if(mode!=stackin.mode){
 		std::cout << "containerStack::operator +: stacks must be of same dimension, returning input" << std::endl;
 		return *this;
 	}
+	histoStack stack=stackin;
 	for(size_t j=0;j<stack.legends_.size();j++){
 		for(unsigned int i=0;i<legends_.size();i++){
 			if(legends_[i] == stack.legends_.at(j)){
@@ -1404,11 +1493,12 @@ ztop::containerStack containerStack::operator + (containerStack stack){
 
 	return stack;
 }
-ztop::containerStack containerStack::operator - (containerStack stack){
-	if(mode!=stack.mode){
+ztop::histoStack histoStack::operator - (const histoStack& stackin){
+	if(mode!=stackin.mode){
 		std::cout << "containerStack::operator -: stacks must be of same dimension, returning input" << std::endl;
 		return *this;
 	}
+	histoStack stack=stackin;
 	for(size_t j=0;j<stack.legends_.size();j++){
 		for(unsigned int i=0;i<legends_.size();i++){
 			if(legends_[i] == stack.legends_.at(j)){
@@ -1428,11 +1518,12 @@ ztop::containerStack containerStack::operator - (containerStack stack){
 
 	return stack;
 }
-ztop::containerStack containerStack::operator / (containerStack  stack){
-	if(mode!=stack.mode){
+ztop::histoStack histoStack::operator / (const histoStack&  stackin){
+	if(mode!=stackin.mode){
 		std::cout << "containerStack::operator /: stacks must be of same dimension, returning input" << std::endl;
-		return stack;
+		return *this;
 	}
+	histoStack stack=stackin;
 	for(size_t j=0;j<stack.legends_.size();j++){
 		for(unsigned int i=0;i<legends_.size();i++){
 			if(legends_[i] == stack.legends_.at(j)){
@@ -1451,11 +1542,12 @@ ztop::containerStack containerStack::operator / (containerStack  stack){
 	}
 	return stack;
 }
-ztop::containerStack containerStack::operator * (containerStack  stack){
-	if(mode!=stack.mode){
+ztop::histoStack histoStack::operator * (const histoStack&  stackin){
+	if(mode!=stackin.mode){
 		std::cout << "containerStack::operator /: stacks must be of same dimension, returning input" << std::endl;
 		return *this;
 	}
+	histoStack stack=stackin;
 	for(size_t j=0;j<stack.legends_.size();j++){
 		for(unsigned int i=0;i<legends_.size();i++){
 			if(legends_[i] == stack.legends_.at(j)){
@@ -1474,22 +1566,36 @@ ztop::containerStack containerStack::operator * (containerStack  stack){
 	}
 	return stack;
 }
-ztop::containerStack containerStack::operator * (double scalar){
-	ztop::containerStack out=*this;
+ztop::histoStack histoStack::operator * (double scalar){
+	ztop::histoStack out=*this;
 	for(unsigned int i=0;i<containers_.size();i++) out.containers_[i] *=  scalar;
 	for(unsigned int i=0;i<containers2D_.size();i++) out.containers2D_[i] *=  scalar;
 	for(unsigned int i=0;i<containers1DUnfold_.size();i++) out.containers1DUnfold_[i] *= scalar;
 	return out;
 }
-ztop::containerStack containerStack::operator * (float scalar){
+ztop::histoStack histoStack::operator * (float scalar){
 	return *this * (double)scalar;
 }
-ztop::containerStack containerStack::operator * (int scalar){
+ztop::histoStack histoStack::operator * (int scalar){
 	return *this * (double)scalar;
 }
 
+bool histoStack::operator == (const histoStack&rhs)const{
+	if(containers_!=rhs.containers_) return false;
+	if(containers2D_!=rhs.containers2D_) return false;
+	if(containers1DUnfold_!=rhs.containers1DUnfold_) return false;
+	if(legends_!=rhs.legends_) return false;
+	if(colors_!=rhs.colors_) return false;
+	if(dataleg_!=rhs.dataleg_) return false;
+	if(mode!=rhs.mode) return false;
+	if(legorder_!=rhs.legorder_) return false;
+	if(signals_!=rhs.signals_) return false;
 
-containerStack containerStack::append(const containerStack& rhs)const{
+	return true;
+
+}
+
+histoStack histoStack::append(const histoStack& rhs)const{
 
 	if(rhs.containers_.size() <1){
 		throw std::logic_error("containerStack::append: only works for 1D stacks");
@@ -1497,12 +1603,12 @@ containerStack containerStack::append(const containerStack& rhs)const{
 	if(containers_.size()<1) //empty stack
 		return rhs;
 
-	containerStack out=*this;
+	histoStack out=*this;
 	std::vector<size_t> rhsused;
 
 	for(size_t leg=0;leg<out.legends_.size();leg++){
 		size_t rhspos=std::find(rhs.legends_.begin(), rhs.legends_.end(), out.legends_.at(leg)) - rhs.legends_.begin();
-		container1D temp;
+		histo1D temp;
 		if(rhspos < rhs.legends_.size()){ //found same entry
 			temp=rhs.containers_.at(rhspos);
 			rhsused.push_back(leg);
@@ -1516,7 +1622,7 @@ containerStack containerStack::append(const containerStack& rhs)const{
 
 	for(size_t leg=0;leg<rhs.legends_.size();leg++){
 		if(std::find(rhsused.begin(), rhsused.end(),leg) != rhsused.end()) continue;
-		container1D temp=out.containers_.at(0);
+		histo1D temp=out.containers_.at(0);
 		temp.setAllZero();
 		temp=temp.append(rhs.containers_.at(leg));
 		out.push_back(temp,rhs.legends_.at(leg),rhs.colors_.at(leg),1,rhs.legorder_.at(leg));
@@ -1527,7 +1633,7 @@ containerStack containerStack::append(const containerStack& rhs)const{
 }
 
 
-void containerStack::equalizeSystematicsIdxs(containerStack& rhs){
+void histoStack::equalizeSystematicsIdxs(histoStack& rhs){
 
 	//no need to look at legends, syst are the same in stack by construction
 	if(rhs.size() < 1 || size() <1)
@@ -1559,7 +1665,7 @@ void containerStack::equalizeSystematicsIdxs(containerStack& rhs){
 	}
 }
 
-bool containerStack::setsignal(const TString& sign){
+bool histoStack::setsignal(const TString& sign){
 	for(size_t i=0;i<legends_.size();i++){
 		if(sign == legends_[i]){
 			signals_.clear();
@@ -1570,7 +1676,7 @@ bool containerStack::setsignal(const TString& sign){
 	std::cout << "containerStack::setsignal: signalname " << sign << " not found in legend entries. doing nothing" <<std::endl;
 	return false;
 }
-bool containerStack::addSignal(const TString& sign){
+bool histoStack::addSignal(const TString& sign){
 	if(std::find(signals_.begin(),signals_.end(),sign)!=signals_.end())
 		return true; //already in
 	for(size_t i=0;i<legends_.size();i++){
@@ -1582,7 +1688,7 @@ bool containerStack::addSignal(const TString& sign){
 	std::cout << "containerStack::setsignal: signalname " << sign << " not found in legend entries. doing nothing" <<std::endl;
 	return false;
 }
-bool containerStack::setsignals(const std::vector<TString> & signs){
+bool histoStack::setsignals(const std::vector<TString> & signs){
 	if(!checkSignals(signs)){
 		std::cout << "containerStack::setsignals: not all signals found in legend entries" <<std::endl;
 		return false;
@@ -1590,7 +1696,7 @@ bool containerStack::setsignals(const std::vector<TString> & signs){
 	signals_=signs;
 	return true;
 }
-std::vector<size_t> containerStack::getSignalIdxs() const{
+std::vector<size_t> histoStack::getSignalIdxs() const{
 	std::vector<size_t> out;
 	for(size_t i=0;i<signals_.size();i++){
 		out.push_back((size_t)(std::find(legends_.begin(),legends_.end(),signals_.at(i)) - legends_.begin()));
@@ -1598,7 +1704,7 @@ std::vector<size_t> containerStack::getSignalIdxs() const{
 	return out;
 }
 
-size_t containerStack::getDataIdx()const{
+size_t histoStack::getDataIdx()const{
 
 	for(size_t i=0;i<legends_.size();i++){
 		if(dataleg_ == legends_.at(i)){
@@ -1609,7 +1715,7 @@ size_t containerStack::getDataIdx()const{
 }
 
 
-float containerStack::getYMax(bool dividebybinwidth)const{
+float histoStack::getYMax(bool dividebybinwidth)const{
 	float max=-99999;
 	if(mode == dim1){
 		if(containers_.size()<1) return 0;
@@ -1631,13 +1737,13 @@ float containerStack::getYMax(bool dividebybinwidth)const{
 	return max;
 }
 
-container1D containerStack::getSignalContainer()const{
+histo1D histoStack::getSignalContainer()const{
 	if(mode != dim1 && mode !=unfolddim1){
 		if(debug) std::cout << "containerStack::getSignalContainer: return dummy" <<std::endl;
-		return container1D();
+		return histo1D();
 	}
 	std::vector<size_t> sidx=getSignalIdxs();
-	container1D out;
+	histo1D out;
 	if(containers_.size()>0){
 		out=containers_.at(0);
 		out.setAllZero();
@@ -1649,12 +1755,12 @@ container1D containerStack::getSignalContainer()const{
 		throw std::logic_error("containerStack::getSignalContainer: No signal defined!");
 	return out;
 }
-container1D containerStack::getBackgroundContainer()const{
+histo1D histoStack::getBackgroundContainer()const{
 	if(mode != dim1 && mode !=unfolddim1){
 		throw std::logic_error("containerStack::getBackgroundContainer: only defined for 1D stacks");
 	}
 	std::vector<size_t> sidx=getSignalIdxs();
-	container1D out;
+	histo1D out;
 	if(containers_.size()>0){
 		out=containers_.at(0);
 		out.clear();
@@ -1673,22 +1779,22 @@ container1D containerStack::getBackgroundContainer()const{
 	return out;
 
 }
-container1D containerStack::getDataContainer()const{
+histo1D histoStack::getDataContainer()const{
 	if(mode ==unfolddim1)
 		return getContainer1DUnfold(getDataIdx()).getRecoContainer();
 	else if(mode ==dim1)
 		return getContainer(getDataIdx());
 	else
 		throw std::logic_error("containerStack::getDataContainer: only available for 1D or 1DUnfold stacks");
-	return container1D();
+	return histo1D();
 }
-container2D containerStack::getSignalContainer2D()const{
+histo2D histoStack::getSignalContainer2D()const{
 	if(mode != dim2){
 		if(debug) std::cout << "containerStack::getSignalContainer2D: return dummy" <<std::endl;
-		return container2D();
+		return histo2D();
 	}
 	std::vector<size_t> sidx=getSignalIdxs();
-	container2D out;
+	histo2D out;
 	if(containers2D_.size()>0){
 		out=containers2D_.at(0);
 		out.setAllZero();
@@ -1701,13 +1807,13 @@ container2D containerStack::getSignalContainer2D()const{
 	return out;
 }
 
-container2D containerStack::getBackgroundContainer2D()const{
+histo2D histoStack::getBackgroundContainer2D()const{
 	if(mode != dim2){
 		if(debug) std::cout << "containerStack::getBackgroundContainer2D: return dummy" <<std::endl;
-		return container2D();
+		return histo2D();
 	}
 	std::vector<size_t> sidx=getSignalIdxs();
-	container2D out;
+	histo2D out;
 	if(containers2D_.size()>0){
 		out=containers2D_.at(0);
 		out.clear();
@@ -1730,7 +1836,7 @@ container2D containerStack::getBackgroundContainer2D()const{
 
 }
 
-container1DUnfold containerStack::produceUnfoldingContainer(const std::vector<TString> &sign) const{// if sign empty use "setsignal"
+histo1DUnfold histoStack::produceUnfoldingContainer(const std::vector<TString> &sign) const{// if sign empty use "setsignal"
 	/*
    ad all signal -> cuf
    add all recocont_ w/o signaldef -> set BG of cuf
@@ -1738,15 +1844,15 @@ container1DUnfold containerStack::produceUnfoldingContainer(const std::vector<TS
 	 */
 
 
-	container1DUnfold out;
+	histo1DUnfold out;
 	if(mode != unfolddim1 || containers1DUnfold_.size()<1){
 		std::cout << "containerStack::produceUnfoldingContainer: No unfolding information, return empty" <<std::endl;
 		return out;
 	}
-	bool temp=container1DUnfold::c_makelist;
-	container1DUnfold::c_makelist=false;
-	bool temp2=container1D::c_makelist;
-	container1D::c_makelist=false;
+	bool temp=histo1DUnfold::c_makelist;
+	histo1DUnfold::c_makelist=false;
+	bool temp2=histo1D::c_makelist;
+	histo1D::c_makelist=false;
 	bool temp3=histoContent::addStatCorrelated;
 	histoContent::addStatCorrelated=false;
 
@@ -1756,20 +1862,20 @@ container1DUnfold containerStack::produceUnfoldingContainer(const std::vector<TS
 		signals=sign;
 	out=containers1DUnfold_.at(0);
 	out.clear();
-	container1D background=containers1DUnfold_.at(0).getRecoContainer();
+	histo1D background=containers1DUnfold_.at(0).getRecoContainer();
 	background.clear();
-	container1D data=background;
+	histo1D data=background;
 
 	//find signal
 
 	for(size_t leg=0;leg<legends_.size();leg++){
 		bool issignal=false;
-		const container1DUnfold * cuf=&containers1DUnfold_.at(leg);
+		const histo1DUnfold * cuf=&containers1DUnfold_.at(leg);
 		for(size_t sig=0;sig<signals.size();sig++){
 			if(signals.at(sig) == legends_.at(leg)){
 				if(debug)
 					std::cout << "containerStack::produceUnfoldingContainer: identified " << legends_.at(leg) << " as signal -> add to signal" <<std::endl;
-				container1DUnfold normcuf= *cuf;
+				histo1DUnfold normcuf= *cuf;
 				out  += normcuf;
 				issignal=true;
 				break;
@@ -1778,13 +1884,13 @@ container1DUnfold containerStack::produceUnfoldingContainer(const std::vector<TS
 		if(!issignal && legends_.at(leg) != dataleg_){
 			if(debug)
 				std::cout << "containerStack::produceUnfoldingContainer: identified as BG: "<< legends_.at(leg)  << std::endl;
-			container1D bg=cuf->getRecoContainer();
+			histo1D bg=cuf->getRecoContainer();
 			background  += bg;
 		}
 		if(legends_.at(leg) == dataleg_){
 			if(debug)
 				std::cout << "containerStack::produceUnfoldingContainer: identified as data: "<< legends_.at(leg) << std::endl;
-			container1D d=cuf->getRecoContainer();
+			histo1D d=cuf->getRecoContainer();
 			data  += d;
 		}
 	}
@@ -1792,28 +1898,28 @@ container1DUnfold containerStack::produceUnfoldingContainer(const std::vector<TS
 	//background needs to be ADDED!!!
 	out.setBackground(out.getBackground()+background);
 	out.setRecoContainer(data);
-	container1DUnfold::c_makelist=temp;
-	container1D::c_makelist=temp2;
+	histo1DUnfold::c_makelist=temp;
+	histo1D::c_makelist=temp2;
 	histoContent::addStatCorrelated=temp3;
 
 	return out;
 }
-container1DUnfold containerStack::produceXCheckUnfoldingContainer(const std::vector<TString> & sign) const{ /* if sign empty use "setsignal"
+histo1DUnfold histoStack::produceXCheckUnfoldingContainer(const std::vector<TString> & sign) const{ /* if sign empty use "setsignal"
    just adds all with signaldef (to be then unfolded and a comparison plot to be made gen vs unfolded gen) -> SWITCH OFF SYSTEMATICS HERE! (should be independent)
 
  */
 	//define operators (propagate from containers) for easy handling
 	// also define += etc. and use container += if better, needs to be implemented (later)
-	container1DUnfold out;
+	histo1DUnfold out;
 	if(mode != unfolddim1 || containers1DUnfold_.size()<1){
 		std::cout << "containerStack::produceXCheckUnfoldingContainer: No unfolding information, return empty" <<std::endl;
 		return out;
 	}
 
-	bool temp=container1DUnfold::c_makelist;
-	container1DUnfold::c_makelist=false;
-	bool temp2=container1D::c_makelist;
-	container1D::c_makelist=false;
+	bool temp=histo1DUnfold::c_makelist;
+	histo1DUnfold::c_makelist=false;
+	bool temp2=histo1D::c_makelist;
+	histo1D::c_makelist=false;
 	bool temp3=histoContent::addStatCorrelated;
 	histoContent::addStatCorrelated=false;
 
@@ -1823,49 +1929,49 @@ container1DUnfold containerStack::produceXCheckUnfoldingContainer(const std::vec
 	out=containers1DUnfold_.at(0);
 	out.clear();
 	for(size_t leg=0;leg<legends_.size();leg++){
-		const container1DUnfold * cuf=&containers1DUnfold_.at(leg);
+		const histo1DUnfold * cuf=&containers1DUnfold_.at(leg);
 		for(size_t sig=0;sig<signals.size();sig++){
 			if(signals.at(sig) == legends_.at(leg)){ //so damn not fast
-				container1DUnfold normcuf=*cuf;
+				histo1DUnfold normcuf=*cuf;
 				out  += normcuf;
 				break;
 			}
 		}
 	}
-	container1DUnfold::c_makelist=temp;
-	container1D::c_makelist=temp2;
+	histo1DUnfold::c_makelist=temp;
+	histo1D::c_makelist=temp2;
 	histoContent::addStatCorrelated=temp3;
 	return out;
 }
 
 
 
-container1DUnfold containerStack::getSignalContainer1DUnfold(const std::vector<TString> &sign) const{
-	bool mklist=container1DUnfold::c_makelist;
-	container1DUnfold::c_makelist=false;
+histo1DUnfold histoStack::getSignalContainer1DUnfold(const std::vector<TString> &sign) const{
+	bool mklist=histo1DUnfold::c_makelist;
+	histo1DUnfold::c_makelist=false;
 	if(mode!=unfolddim1){
 		std::cout << "containerStack::getSignalContainer1DUnfold: bo container1DUnfold content, return empty" <<std::endl;
-		container1DUnfold c;
-		container1DUnfold::c_makelist=mklist;
+		histo1DUnfold c;
+		histo1DUnfold::c_makelist=mklist;
 		return c;
 	}
 	std::vector<TString> signals=sign;
 	if(signals.size()<1)
 		signals=signals_;
-	container1DUnfold out;
+	histo1DUnfold out;
 	if(containers1DUnfold_.size()>0)
 		out=containers1DUnfold_.at(0);
 	out.setAllZero();
 	for(size_t i=0;i<signals.size();i++){
-		container1DUnfold ctemp=getContribution1DUnfold(signals.at(i));
+		histo1DUnfold ctemp=getContribution1DUnfold(signals.at(i));
 		out = out + ctemp;
 	}
 	if(signals.size()<1)
 		throw std::logic_error("containerStack::getSignalContainer1DUnfold: No signal defined!");
-	container1DUnfold::c_makelist=mklist;
+	histo1DUnfold::c_makelist=mklist;
 	return out;
 }
-TString containerStack::listContributions()const{
+TString histoStack::listContributions()const{
 	TString out;
 	out+=getName()+" contributions:\n";
 
@@ -1879,7 +1985,7 @@ TString containerStack::listContributions()const{
 /**
  * calls TH1::Chi2Test on full MC histo and data hist
  */
-double containerStack::chi2Test(Option_t* option, Double_t* res) const{
+double histoStack::chi2Test(Option_t* option, Double_t* res) const{
 	if(!(is1D() || is1DUnfold()))
 		return 0;
 
@@ -1891,19 +1997,19 @@ double containerStack::chi2Test(Option_t* option, Double_t* res) const{
 	delete mc;
 	return out;
 }
-double containerStack::chi2(size_t * ndof)const{
+double histoStack::chi2(size_t * ndof)const{
 	if(!(is1D() || is1DUnfold()))
 		return 0;
 	//double out;
-	container1D data=getDataContainer();
-	container1D mc=getFullMCContainer();
+	histo1D data=getDataContainer();
+	histo1D mc=getFullMCContainer();
 	return data.chi2(mc,ndof);
 }
 
 /**
  * calls TH1::KolmogorovTest on full MC histo and data hist
  */
-double containerStack::kolmogorovTest(Option_t* option) const{
+double histoStack::kolmogorovTest(Option_t* option) const{
 	if(!(is1D() || is1DUnfold()))
 		return 0;
 
@@ -1916,6 +2022,72 @@ double containerStack::kolmogorovTest(Option_t* option) const{
 	return out;
 }
 
+}//ns
+
+
+#include <boost/iostreams/filtering_streambuf.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
+#include <boost/iostreams/filter/zlib.hpp>
+#include "TtZAnalysis/Tools/interface/serialize.h"
+
+namespace ztop{
+
+
+void histoStack::writeToFile(const std::string& filename)const{
+	/*
+	 * std::vector<ztop::histo1D> containers_;
+	std::vector<ztop::histo2D> containers2D_;
+	std::vector<ztop::histo1DUnfold> containers1DUnfold_;
+	std::vector<TString> legends_;
+	std::vector<int> colors_;
+	TString dataleg_;
+
+	enum dimension{notset,dim1,dim2,unfolddim1};
+	dimension mode;
+
+
+	std::vector<int> legorder_;
+
+
+	std::vector<TString> signals_;
+	 *
+	 */
+	std::ofstream saveFile;
+	saveFile.open(filename.data(), std::ios_base::binary | std::ios_base::trunc | std::fstream::out );
+	{
+		boost::iostreams::filtering_ostream out;
+		boost::iostreams::zlib_params parms;
+		//parms.level=boost::iostreams::zlib::best_speed;
+		out.push(boost::iostreams::zlib_compressor(parms));
+		out.push(saveFile);
+		{
+			//actual writing
+			writeToStream(out);
+
+		}
+	}
+	saveFile.close();
+
+
+}
+void histoStack::readFromFile(const std::string& filename){
+	clear();
+	cleanMem();
+
+	std::ifstream saveFile;
+	saveFile.open(filename.data(), std::ios_base::binary | std::fstream::in );
+	{
+		boost::iostreams::filtering_istream in;
+		boost::iostreams::zlib_params parms;
+		//parms.level=boost::iostreams::zlib::best_speed;
+		in.push(boost::iostreams::zlib_decompressor(parms));
+		in.push(saveFile);
+		{
+			readFromStream(in);
+		}
+	}
+	saveFile.close();
+}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1929,19 +2101,19 @@ double containerStack::kolmogorovTest(Option_t* option) const{
 /**
  * rewrite: always true
  */
-int containerStack::checkLegOrder() const{ //depre
+int histoStack::checkLegOrder() const{ //depre
 	return 0;
 	/*
 	for(std::map<TString,size_t>::const_iterator it=legorder_.begin();it!=legorder_.end();++it){
 		if(it->second > size()){
-			std::cout << "containerStack::checkLegOrder: "<< name_ << ": legend ordering numbers (" <<it->second << ") need to be <= size of stack! ("<< size()<<")" <<std::endl;
+			std::cout << "histoStack::checkLegOrder: "<< name_ << ": legend ordering numbers (" <<it->second << ") need to be <= size of stack! ("<< size()<<")" <<std::endl;
 			return -1;
 		}
 	}
 	return 0; */
 }
 
-std::vector<size_t> containerStack::getSortedIdxs(bool inverse) const{
+std::vector<size_t> histoStack::getSortedIdxs(bool inverse) const{
 
 	//new implementation
 	std::vector<int> inputlegord=legorder_;
@@ -1974,11 +2146,11 @@ std::vector<size_t> containerStack::getSortedIdxs(bool inverse) const{
 
 }
 
-bool containerStack::checkDrawDimension() const{
+bool histoStack::checkDrawDimension() const{
 	return (mode==dim1 || mode==unfolddim1);
 }
 
-bool containerStack::checkSignals(const std::vector<TString> &signs) const{
+bool histoStack::checkSignals(const std::vector<TString> &signs) const{
 	size_t count=0;
 	for(size_t j=0;j< signs.size();j++){
 		bool succ=false;

@@ -14,7 +14,7 @@
 #include <iostream>
 #include "TFile.h"
 #include "TTree.h"
-#include "TtZAnalysis/Tools/interface/container2D.h"
+#include "TtZAnalysis/Tools/interface/histo2D.h"
 
 
 #define VAR_TO_TSTRING(variable) ztop::toTString(#variable)
@@ -147,7 +147,7 @@ void discriminatorFactory::addVariable( float * const * var,const TString& varsh
                 //make sure a plot is added to the control plots!
                 // sy
                 likelihoods_.at(i).addTag(taggedObject::dontAddSyst_tag);
-                container1D::c_list.push_back(&likelihoods_.at(i));
+                histo1D::c_list.push_back(&likelihoods_.at(i));
                 if(debug)
                     std::cout << "discriminatorFactory::addVariable: loaded likelihood for " << fullname
                     <<"\nBins: "<< likelihoods_.at(i).getNBins()<<std::endl;
@@ -163,22 +163,22 @@ void discriminatorFactory::addVariable( float * const * var,const TString& varsh
 
     if(debug)
         std::cout << "discriminatorFactory::addVariable: creating all correlation plots" <<std::endl;
-    tobefilledcorr_.push_back(std::vector<container2D *>());
+    tobefilledcorr_.push_back(std::vector<histo2D *>());
 
     //if more than one var add correlation plots
     if(vars_.size()>0){
-        bool c2dmakelist=container2D::c_makelist;
-        container2D::c_makelist=savecorrplots_;
+        bool c2dmakelist=histo2D::c_makelist;
+        histo2D::c_makelist=savecorrplots_;
         for(size_t i=0;i<tobefilled_.size();i++){ //not the last one thats the one just added
             std::vector<float> newybins(tobefilled_.at(i)->getBins().begin()+1,tobefilled_.at(i)->getBins().end());
             TString newyaxisname=tobefilled_.at(i)->getXAxisName();
             TString newxaxisname= varshort;
             TString newname= id_+"_discr_"+newxaxisname+"_vs_"+newyaxisname+" step "+toTString(step_);
-            container2D * c2dtmp= new container2D(bins,newybins,newname,newxaxisname,newyaxisname);
+            histo2D * c2dtmp= new histo2D(bins,newybins,newname,newxaxisname,newyaxisname);
 
             tobefilledcorr_.at(tobefilledcorr_.size()-1).push_back(c2dtmp);
         }
-        container2D::c_makelist=c2dmakelist;
+        histo2D::c_makelist=c2dmakelist;
     }
 
     if(debug)
@@ -188,14 +188,14 @@ void discriminatorFactory::addVariable( float * const * var,const TString& varsh
 
     /*
      * Listing is switched on. That makes sure that the containers will be stored afterwards in a
-     * containerStackVector and treated as all other control plots (ecpet for the fact that they are tagged)
+     * histoStackVector and treated as all other control plots (ecpet for the fact that they are tagged)
      */
-    bool tmpkl=container1D::c_makelist;
-    container1D::c_makelist=true;
+    bool tmpkl=histo1D::c_makelist;
+    histo1D::c_makelist=true;
     if(debug)
         std::cout << "discriminatorFactory::addVariable: pushing back new plot" <<std::endl;
-    tobefilled_.push_back(new container1D(bins,fullname,varshort,"N_{evt}/bw",false));
-    container1D::c_makelist=tmpkl;
+    tobefilled_.push_back(new histo1D(bins,fullname,varshort,"N_{evt}/bw",false));
+    histo1D::c_makelist=tmpkl;
     size_t lastidx=tobefilled_.size()-1;
 
     tobefilled_.at(lastidx)->addTag(taggedObject::isLHDiscr_tag);
@@ -268,28 +268,28 @@ float discriminatorFactory::getCombinedLikelihood()const{ //a plot needs to be a
 
 
 
-void discriminatorFactory::extractLikelihoods(const containerStackVector &csv){
+void discriminatorFactory::extractLikelihoods(const histoStackVector &csv){
     //search for stacks that have the right tag
     if(debug)
         std::cout << "discriminatorFactory::extractLikelihoods" <<std::endl;
 
-    bool tmpkl=container1D::c_makelist;
-    container1D::c_makelist=false; //dont list copies here
+    bool tmpkl=histo1D::c_makelist;
+    histo1D::c_makelist=false; //dont list copies here
 
 
-    std::vector<container1D> signconts,bgconts;
+    std::vector<histo1D> signconts,bgconts;
 
 
-    const std::vector<containerStack> * stacks=&csv.getVector();
+    const std::vector<histoStack> * stacks=&csv.getVector();
 
     if(debug)
         std::cout << "discriminatorFactory::extractLikelihoods: "<< stacks->size() << " stacks available. " << std::endl;
 
 
     for(size_t ist=0;ist<stacks->size();ist++){
-        const containerStack* stack=&stacks->at(ist);
+        const histoStack* stack=&stacks->at(ist);
         if(stack->hasTag(taggedObject::isLHDiscr_tag) && stack->is1D() && stack->getName().BeginsWith(id_)){
-            container1D temp=stack->getSignalContainer();
+            histo1D temp=stack->getSignalContainer();
             if(temp.isDummy()){
                 throw std::logic_error("discriminatorFactory::extractLikelihoods: inputs are dummy");
             }
@@ -314,7 +314,7 @@ void discriminatorFactory::extractLikelihoods(const containerStackVector &csv){
      */
     likelihoods_.clear(); //clear old
     for(size_t i=0;i<signconts.size();i++){
-        container1D temp;
+        histo1D temp;
         temp=signconts.at(i) / (signconts.at(i)+bgconts.at(i));
         temp.setName("LH_"+signconts.at(i).getName());
         temp.addTag(taggedObject::dontDivByBW_tag);
@@ -329,10 +329,10 @@ void discriminatorFactory::extractLikelihoods(const containerStackVector &csv){
         likelihoods_.push_back(temp);
     }
 
-    container1D::c_makelist=tmpkl;
+    histo1D::c_makelist=tmpkl;
     // throw std::runtime_error("discriminatorFactory::extractLikelihoods: To Be Implemented");
 }
-void discriminatorFactory::extractAllLikelihoods(const containerStackVector & csv){
+void discriminatorFactory::extractAllLikelihoods(const histoStackVector & csv){
     for(size_t i=0;i<c_list.size();i++)
         c_list.at(i)->extractLikelihoods(csv);
 }
@@ -433,7 +433,7 @@ void discriminatorFactory::writeAllToTFile(const TString& filename,const std::ve
 }
 
 /**
- * In a first step only works if a containerStack exists for each plot in a containerStackVector
+ * In a first step only works if a histoStack exists for each plot in a histoStackVector
  * just search for one. If there are more than one (usually not) that contain discr. info, give a warning
  *
  */
@@ -448,7 +448,7 @@ void discriminatorFactory::readFromTFile( TFile * f ,const std::string& id){
     likelihoods_.clear();
     /*
      * make sure the containers to be used are tagged as LH
-     *  container.hasTag(taggedObject::isLHDiscr_tag);
+     *  histo1D.hasTag(taggedObject::isLHDiscr_tag);
      */
     if(!f || f->IsZombie()){
         throw std::runtime_error("discriminatorFactory::readFromTFile: file not ok");
@@ -466,8 +466,8 @@ void discriminatorFactory::readFromTFile( TFile * f ,const std::string& id){
     }
     bool found=false;
     size_t count=0;
-    bool tmpkl=container1D::c_makelist;
-    container1D::c_makelist=false; //dont list copies here
+    bool tmpkl=histo1D::c_makelist;
+    histo1D::c_makelist=false; //dont list copies here
 
     t->SetBranchAddress("discriminatorFactorys", &cuftemp);
     for(float n=0;n<t->GetEntries();n++){
@@ -489,7 +489,7 @@ void discriminatorFactory::readFromTFile( TFile * f ,const std::string& id){
 
     delete t;
     c_makelist=tempmakelist;
-    container1D::c_makelist=tmpkl;
+    histo1D::c_makelist=tmpkl;
 
 }
 void discriminatorFactory::readFromTFile( const TString& filename ,const std::string& id){
@@ -518,8 +518,8 @@ std::vector<discriminatorFactory> discriminatorFactory::readAllFromTFile( TFile 
     }
 
 
-    bool tmpkl=container1D::c_makelist;
-    container1D::c_makelist=false; //dont list copies here
+    bool tmpkl=histo1D::c_makelist;
+    histo1D::c_makelist=false; //dont list copies here
 
     t->SetBranchAddress("discriminatorFactorys", &cuftemp);
     for(float n=0;n<t->GetEntries();n++){
@@ -529,7 +529,7 @@ std::vector<discriminatorFactory> discriminatorFactory::readAllFromTFile( TFile 
         out.push_back(*cuftemp);
     }
     delete t;
-    container1D::c_makelist=tmpkl;
+    histo1D::c_makelist=tmpkl;
 
     return out;
 

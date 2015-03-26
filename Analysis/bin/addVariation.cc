@@ -19,7 +19,7 @@
 #include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
 #include <vector>
 #include "TString.h"
-#include "TtZAnalysis/Tools/interface/containerStackVector.h"
+#include "TtZAnalysis/Tools/interface/histoStackVector.h"
 
 invokeApplication(){
 	using namespace ztop;
@@ -41,9 +41,9 @@ invokeApplication(){
 	if(output=="")
 		output=input.at(1);
 
-	containerStackVector* csvnom=new containerStackVector();
-	containerStackVector* csvup=new containerStackVector();
-	containerStackVector* csvdown=new containerStackVector();
+	histoStackVector* csvnom=new histoStackVector();
+	histoStackVector* csvup=new histoStackVector();
+	histoStackVector* csvdown=new histoStackVector();
 
 	//try to load variations first (prob smaller)
 	try{

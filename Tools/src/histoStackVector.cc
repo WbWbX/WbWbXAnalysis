@@ -1,4 +1,4 @@
-#include "../interface/containerStackVector.h"
+#include "../interface/histoStackVector.h"
 #include <omp.h>
 #include "../interface/fileReader.h"
 #include "../interface/indexMap.h"
@@ -9,43 +9,61 @@
 #include "TStyle.h"
 #include "TRandom3.h"
 
-bool ztop::container1D::debug =false;
+#include <boost/iostreams/filtering_stream.hpp>
+#include <boost/iostreams/filter/zlib.hpp>
+
+bool ztop::histo1D::debug =false;
 
 namespace ztop{
 
 
 
-std::vector<containerStackVector*> containerStackVector::csv_list;
-bool containerStackVector::csv_makelist=false;
-bool containerStackVector::debug=false;
-bool containerStackVector::fastadd=false;
-int containerStackVector::treesplitlevel=99;
+std::vector<histoStackVector*> histoStackVector::csv_list;
+bool histoStackVector::csv_makelist=false;
+bool histoStackVector::debug=false;
+bool histoStackVector::fastadd=false;
+int histoStackVector::treesplitlevel=99;
 
-containerStackVector::containerStackVector(){
+histoStackVector::histoStackVector(){
 	if(csv_makelist)csv_list.push_back(this);
 }
-containerStackVector::containerStackVector(TString Name){
+histoStackVector::histoStackVector(TString Name){
 	name_=Name;
 	if(csv_makelist)csv_list.push_back(this);
 }
-containerStackVector::~containerStackVector(){
+histoStackVector::~histoStackVector(){
 	stacks_.clear();
 	for(unsigned int i=0;i<csv_list.size();i++){
 		if(csv_list[i] == this) csv_list.erase(csv_list.begin()+i);
 	}
 }
-void containerStackVector::listStacks(){
-	for(std::vector<ztop::containerStack>::iterator stack=stacks_.begin();stack<stacks_.end();++stack){
+
+
+bool histoStackVector::operator == (const histoStackVector& rhs)const{
+
+	if(name_!=rhs.name_)
+		return false;
+	if(isSyst_!=rhs.isSyst_)
+		return false;
+	if(tempsig_!=rhs.tempsig_)
+		return false;
+	if(stacks_!=rhs.stacks_)
+		return false;
+	return true;
+}
+
+void histoStackVector::listStacks(){
+	for(std::vector<ztop::histoStack>::iterator stack=stacks_.begin();stack<stacks_.end();++stack){
 		std::cout << stack->getName() << std::endl;
 	}
 }
 
-std::vector<TString> containerStackVector::getStackNames(bool withoutstep){
+std::vector<TString> histoStackVector::getStackNames(bool withoutstep){
 	fileReader fr;
 	fr.setComment(" step ");
 	std::vector<TString> out;
 	indexMap<std::string> used;
-	for(std::vector<ztop::containerStack>::iterator stack=stacks_.begin();stack<stacks_.end();++stack){
+	for(std::vector<ztop::histoStack>::iterator stack=stacks_.begin();stack<stacks_.end();++stack){
 		TString tmptst=stack->getName();
 		std::string tmp=tmptst.Data();
 		if(withoutstep) fr.trimcomments(tmp);
@@ -60,17 +78,17 @@ std::vector<TString> containerStackVector::getStackNames(bool withoutstep){
 	return out;
 }
 
-void containerStackVector::setLegendOrder(TString leg, size_t no){
-	for(std::vector<ztop::containerStack>::iterator s=stacks_.begin();s<stacks_.end();++s){
+void histoStackVector::setLegendOrder(TString leg, size_t no){
+	for(std::vector<ztop::histoStack>::iterator s=stacks_.begin();s<stacks_.end();++s){
 		s->setLegendOrder(leg,no);
 	}
 }
 
-void containerStackVector::add(ztop::container1D & container, TString leg , int color , double norm,int legor){
+void histoStackVector::add(ztop::histo1D & container, TString leg , int color , double norm,int legor){
 	bool found=false;
-	for(std::vector<ztop::containerStack>::iterator s=stacks_.begin();s<stacks_.end();++s){
+	for(std::vector<ztop::histoStack>::iterator s=stacks_.begin();s<stacks_.end();++s){
 		if(s->getName() == container.getName()){
-			if(container1D::debug)
+			if(histo1D::debug)
 				std::cout << "containerStackVector::add: adding " << s->getName() << " to existing stack"  <<std::endl;
 			s->push_back(container, leg, color, norm,legor);
 			found=true;
@@ -78,18 +96,18 @@ void containerStackVector::add(ztop::container1D & container, TString leg , int 
 		}
 	}
 	if(!found){
-		if(container1D::debug)
+		if(histo1D::debug)
 			std::cout << "containerStackVector::add: creating new stack " << container.getName()  <<std::endl;
-		ztop::containerStack newstack(container.getName());
+		ztop::histoStack newstack(container.getName());
 		newstack.push_back(container, leg, color, norm,legor);
 		stacks_.push_back(newstack);
 	}
 }
-void containerStackVector::add(ztop::container2D & container, TString leg , int color , double norm,int legor){
+void histoStackVector::add(ztop::histo2D & container, TString leg , int color , double norm,int legor){
 	bool found=false;
-	for(std::vector<ztop::containerStack>::iterator s=stacks_.begin();s<stacks_.end();++s){
+	for(std::vector<ztop::histoStack>::iterator s=stacks_.begin();s<stacks_.end();++s){
 		if(s->getName() == container.getName()){
-			if(container1D::debug)
+			if(histo1D::debug)
 				std::cout << "containerStackVector::add: adding " << s->getName() << " to existing stack"  <<std::endl;
 			s->push_back(container, leg, color, norm,legor);
 			found=true;
@@ -97,18 +115,18 @@ void containerStackVector::add(ztop::container2D & container, TString leg , int 
 		}
 	}
 	if(!found){
-		if(container1D::debug)
+		if(histo1D::debug)
 			std::cout << "containerStackVector::add: creating new stack " << container.getName()  <<std::endl;
-		ztop::containerStack newstack(container.getName());
+		ztop::histoStack newstack(container.getName());
 		newstack.push_back(container, leg, color, norm,legor);
 		stacks_.push_back(newstack);
 	}
 }
-void containerStackVector::add(ztop::container1DUnfold & container, TString leg , int color , double norm,int legor){
+void histoStackVector::add(ztop::histo1DUnfold & container, TString leg , int color , double norm,int legor){
 	bool found=false;
-	for(std::vector<ztop::containerStack>::iterator s=stacks_.begin();s<stacks_.end();++s){
+	for(std::vector<ztop::histoStack>::iterator s=stacks_.begin();s<stacks_.end();++s){
 		if(s->getName() == container.getName()){
-			if(container1D::debug)
+			if(histo1D::debug)
 				std::cout << "containerStackVector::add: adding " << s->getName() << " to existing stack"  <<std::endl;
 			s->push_back(container, leg, color, norm,legor);
 			found=true;
@@ -116,28 +134,28 @@ void containerStackVector::add(ztop::container1DUnfold & container, TString leg 
 		}
 	}
 	if(!found){
-		if(container1D::debug)
+		if(histo1D::debug)
 			std::cout << "containerStackVector::add: creating new stack " << container.getName()  <<std::endl;
-		ztop::containerStack newstack(container.getName());
+		ztop::histoStack newstack(container.getName());
 		newstack.push_back(container, leg, color, norm,legor);
 		stacks_.push_back(newstack);
 	}
 }
 
-void containerStackVector::addList(TString leg, int color, double norm,int legor){
-	for(unsigned int i=0;i<container1D::c_list.size();i++){
-		add(*container1D::c_list[i],leg,color,norm,legor);
+void histoStackVector::addList(TString leg, int color, double norm,int legor){
+	for(unsigned int i=0;i<histo1D::c_list.size();i++){
+		add(*histo1D::c_list[i],leg,color,norm,legor);
 	}
 }
-void containerStackVector::addList2D(TString leg, int color, double norm,int legor){
-	for(unsigned int i=0;i<container2D::c_list.size();i++){
-		add(*container2D::c_list[i],leg,color,norm,legor);
+void histoStackVector::addList2D(TString leg, int color, double norm,int legor){
+	for(unsigned int i=0;i<histo2D::c_list.size();i++){
+		add(*histo2D::c_list[i],leg,color,norm,legor);
 	}
 }
-void containerStackVector::addList1DUnfold(TString leg, int color, double norm,int legor){
-	for(unsigned int i=0;i<container1DUnfold::c_list.size();i++){
-		container1DUnfold::c_list[i]->flush();
-		add(*container1DUnfold::c_list[i],leg,color,norm,legor);
+void histoStackVector::addList1DUnfold(TString leg, int color, double norm,int legor){
+	for(unsigned int i=0;i<histo1DUnfold::c_list.size();i++){
+		histo1DUnfold::c_list[i]->flush();
+		add(*histo1DUnfold::c_list[i],leg,color,norm,legor);
 	}
 }
 
@@ -145,7 +163,7 @@ void containerStackVector::addList1DUnfold(TString leg, int color, double norm,i
 /**
  * call AFTER!!! adding new stacks
  */
-void containerStackVector::addSignal(const TString & signame){
+void histoStackVector::addSignal(const TString & signame){
 	size_t size=stacks_.size();
 #pragma omp parallel for
 	for(size_t i=0;i<size;i++){
@@ -160,18 +178,18 @@ void containerStackVector::addSignal(const TString & signame){
 
 
 
-const ztop::containerStack& containerStackVector::getStack(const TString& name,size_t startidx)const{
+const ztop::histoStack& histoStackVector::getStack(const TString& name,size_t startidx)const{
 	//try same index first
 	if(startidx<stacks_.size()){
 		if(name == stacks_.at(startidx).getName()){
 			return stacks_.at(startidx);
 		}
 	}
-
-	std::vector<ztop::containerStack>::const_iterator it=stacks_.end();
+std::cout << "searching further..." <<std::endl;
+	std::vector<ztop::histoStack>::const_iterator it=stacks_.end();
 	bool abort = false;
 #pragma omp parallel for
-	for(std::vector<ztop::containerStack>::const_iterator s=stacks_.begin();s<stacks_.end();++s){
+	for(std::vector<ztop::histoStack>::const_iterator s=stacks_.begin();s<stacks_.end();++s){
 #pragma omp flush (abort)
 		if (!abort) {
 			if(name == s->getName()){
@@ -190,16 +208,16 @@ const ztop::containerStack& containerStackVector::getStack(const TString& name,s
 	return *it;
 }
 
-ztop::containerStack& containerStackVector::getStack(const TString& name,size_t startidx){
+ztop::histoStack& histoStackVector::getStack(const TString& name,size_t startidx){
 	if(startidx<stacks_.size()){
 		if(name == stacks_.at(startidx).getName()){
 			return stacks_.at(startidx);
 		}
 	}
-	std::vector<ztop::containerStack>::iterator it=stacks_.end();
+	std::vector<ztop::histoStack>::iterator it=stacks_.end();
 	bool abort = false;
 #pragma omp parallel for
-	for(std::vector<ztop::containerStack>::iterator s=stacks_.begin();s<stacks_.end();++s){
+	for(std::vector<ztop::histoStack>::iterator s=stacks_.begin();s<stacks_.end();++s){
 #pragma omp flush (abort)
 		if (!abort) {
 			if(name == s->getName()){
@@ -219,69 +237,67 @@ ztop::containerStack& containerStackVector::getStack(const TString& name,size_t 
 }
 
 
-void containerStackVector::removeContribution(TString contribution){
-	for(std::vector<ztop::containerStack>::iterator stack=stacks_.begin(); stack < stacks_.end(); ++stack){
+void histoStackVector::removeContribution(TString contribution){
+	for(std::vector<ztop::histoStack>::iterator stack=stacks_.begin(); stack < stacks_.end(); ++stack){
 		stack->removeContribution(contribution);
 	}
 }
 
-void containerStackVector::addMCErrorStackVector(const TString &sysname, const ztop::containerStackVector & stackvec){
+void histoStackVector::addMCErrorStackVector(const TString &sysname, const ztop::histoStackVector & stackvec){
 	addErrorStackVector(sysname , stackvec);
 }
-void containerStackVector::addErrorStackVector(const TString &sysname,const  ztop::containerStackVector & stackvec){
-#pragma omp parallel for
-	for(std::vector<containerStack>::iterator istack=stacks_.begin();istack<stacks_.end(); ++istack){
-		try{
-			istack->addMCErrorStack(sysname,stackvec.getStack(istack->getName(),istack-stacks_.begin()));
-		}catch(...){}
+void histoStackVector::addErrorStackVector(const TString &sysname,const  ztop::histoStackVector & stackvec){
+	for(size_t i=0;i<stacks_.size();i++){
+		stacks_.at(i).addMCErrorStack(sysname,stackvec.getStack(stacks_.at(i).getName(),i));
 	}
 }
 
-void containerStackVector::addMCErrorStackVector(const ztop::containerStackVector& stackvec){
+void histoStackVector::addMCErrorStackVector(const ztop::histoStackVector& stackvec){
 	addMCErrorStackVector(stackvec.getSyst(), stackvec);
 }
-void containerStackVector::addGlobalRelMCError(TString sysname,double error){
+void histoStackVector::addGlobalRelMCError(TString sysname,double error){
 #pragma omp parallel for
-	for(std::vector<containerStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
+	for(std::vector<histoStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
 		stack->addGlobalRelMCError(sysname,error);
 	}
 }
-void containerStackVector::getRelSystematicsFrom(const ztop::containerStackVector& stackvec){
-#pragma omp parallel for
-	for(std::vector<containerStack>::iterator istack=stacks_.begin();istack<stacks_.end(); ++istack){
+void histoStackVector::getRelSystematicsFrom(const ztop::histoStackVector& stackvec){
+	//#pragma omp parallel for
+	for(std::vector<histoStack>::iterator istack=stacks_.begin();istack<stacks_.end(); ++istack){
 		try{
-			const containerStack & stack=stackvec.getStack(istack->getName(),istack-stacks_.begin());
+			const histoStack & stack=stackvec.getStack(istack->getName(),istack-stacks_.begin());
 			istack->getRelSystematicsFrom(stack);
 		}catch(...){}
 	}
 }
-void containerStackVector::addRelSystematicsFrom(const ztop::containerStackVector& stackvec,bool ignorestat,bool strict){
-#pragma omp parallel for
-	for(std::vector<containerStack>::iterator istack=stacks_.begin();istack<stacks_.end(); ++istack){
+void histoStackVector::addRelSystematicsFrom(const ztop::histoStackVector& stackvec,bool ignorestat,bool strict){
+	//#pragma omp parallel for
+	for(std::vector<histoStack>::iterator istack=stacks_.begin();istack<stacks_.end(); ++istack){
 		try{
-			const containerStack & stack=stackvec.getStack(istack->getName(),istack-stacks_.begin());
-			istack->addRelSystematicsFrom(stack);
-		}catch(...){
+			const histoStack & stack=stackvec.getStack(istack->getName(),istack-stacks_.begin());
+			istack->addRelSystematicsFrom(stack,ignorestat,strict);
+		}catch(std::exception& e){
 			std::cout << "containerStackVector::addRelSystematicsFrom: Stack " << istack->getName() << " not found." <<std::endl;
+			std::cout << e.what()<<std::endl;
 		}
 	}
 }
 
-void containerStackVector::removeError(TString name){
-	for(std::vector<containerStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
+void histoStackVector::removeError(TString name){
+	for(std::vector<histoStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
 		stack->removeError(name);
 	}
 }
-void containerStackVector::renameSyst(TString old, TString New){
-	for(std::vector<containerStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
+void histoStackVector::renameSyst(TString old, TString New){
+	for(std::vector<histoStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
 		stack->renameSyst(old,New);
 	}
 }
 
-std::vector<size_t> containerStackVector::removeSpikes(bool inclUFOF,
+std::vector<size_t> histoStackVector::removeSpikes(bool inclUFOF,
 		int limittoindex,float strength,float sign,float threshold){
 	std::vector<size_t> out,temp;
-	for(std::vector<containerStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
+	for(std::vector<histoStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
 		temp=stack->removeSpikes(inclUFOF,limittoindex,strength,sign,threshold);
 		out.insert(out.end(),temp.begin(),temp.end());
 	}
@@ -289,8 +305,8 @@ std::vector<size_t> containerStackVector::removeSpikes(bool inclUFOF,
 }
 
 
-void containerStackVector::multiplyNorm(TString legendname, double multi, TString step){
-	for(std::vector<containerStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
+void histoStackVector::multiplyNorm(TString legendname, double multi, TString step){
+	for(std::vector<histoStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
 		if(stack->getName().Contains(step)){
 			stack->multiplyNorm(legendname, multi);
 
@@ -298,13 +314,13 @@ void containerStackVector::multiplyNorm(TString legendname, double multi, TStrin
 	}
 }
 
-void containerStackVector::multiplyNorms(TString legendname, std::vector<double> scalefactors, std::vector<TString> identifier,bool showmessages){
+void histoStackVector::multiplyNorms(TString legendname, std::vector<double> scalefactors, std::vector<TString> identifier,bool showmessages){
 	if((identifier.size() != scalefactors.size())){
 		std::cout << "containerStackVector::multiplyNorms: identifiers and scalefactors must be same size!" << std::endl;
 	}
 	else{
 		unsigned int count=0;
-		for(std::vector<containerStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
+		for(std::vector<histoStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
 			for(unsigned int i=0;i<scalefactors.size();i++){
 				if(stack->getName().EndsWith(identifier.at(i))){
 					if(showmessages) std::cout << "rescaling " << stack->getName() << "  " <<legendname << " by " << scalefactors[i] << std::endl;
@@ -319,13 +335,13 @@ void containerStackVector::multiplyNorms(TString legendname, std::vector<double>
 	}
 }
 
-void containerStackVector::multiplyAllMCNorms(double multiplier){
-	for(std::vector<containerStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
+void histoStackVector::multiplyAllMCNorms(double multiplier){
+	for(std::vector<histoStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
 		stack->multiplyAllMCNorms(multiplier);
 	}
 }
 
-void containerStackVector::addPseudoData(TRandom3 * rand){
+void histoStackVector::addPseudoData(TRandom3 * rand){
 	if(stacks_.size()<1)
 		return;
 	bool hasdata=true;
@@ -340,15 +356,15 @@ void containerStackVector::addPseudoData(TRandom3 * rand){
 	for(size_t i=0;i<stacks_.size();i++){
 
 		if(stacks_.at(i).is1D()){
-			container1D c=stacks_.at(i).getFullMCContainer();
+			histo1D c=stacks_.at(i).getFullMCContainer();
 			c.setAllErrorsZero(false);
 			c.createStatFromContent();
 			c=c.createPseudoExperiment(rand);
 			stacks_.at(i).push_back(c,"data",0,1,999);
 		}
 		if(stacks_.at(i).is1DUnfold()){ //no else here!
-			container1DUnfold c=stacks_.at(i).getFullMCContainer1DUnfold();
-			container1D c2=c.getRecoContainer();
+			histo1DUnfold c=stacks_.at(i).getFullMCContainer1DUnfold();
+			histo1D c2=c.getRecoContainer();
 			c2.setAllErrorsZero(false);
 			c2.createStatFromContent();
 			c2=c2.createPseudoExperiment(rand);
@@ -356,7 +372,7 @@ void containerStackVector::addPseudoData(TRandom3 * rand){
 			stacks_.at(i).push_back(c,"data",0,1,999);
 		}
 		else if(stacks_.at(i).is2D()){
-			container2D c=stacks_.at(i).getFullMCContainer2D();
+			histo2D c=stacks_.at(i).getFullMCContainer2D();
 			c.setAllErrorsZero(false);
 			c.createStatFromContent();
 			c=c.createPseudoExperiment(rand);
@@ -365,7 +381,7 @@ void containerStackVector::addPseudoData(TRandom3 * rand){
 	}
 }
 
-void containerStackVector::writeAllToTFile(TString filename, bool recreate, bool onlydata,TString treename){
+void histoStackVector::writeAllToTFile(TString filename, bool recreate, bool onlydata,TString treename){
 	if(debug)
 		std::cout << "containerStackVector::writeAllToTFile(TString filename, bool recreate, TString treename)" << std::endl;
 
@@ -402,7 +418,7 @@ void containerStackVector::writeAllToTFile(TString filename, bool recreate, bool
 		if(debug) std::cout << "containerStackVector::writeAllToTFile: opened branch" << std::endl;
 		bool temp=csv_makelist;
 		csv_makelist=false;
-		containerStackVector * csv = this;
+		histoStackVector * csv = this;
 		t->SetBranchAddress("containerStackVectors",&csv);
 		csv_makelist=temp;
 	}
@@ -429,8 +445,8 @@ void containerStackVector::writeAllToTFile(TString filename, bool recreate, bool
 
 	}
 	else{
-		bool batch=containerStack::batchmode;
-		containerStack::batchmode=true;
+		//bool batch=histoStack::batchmode;
+		//histoStack::batchmode=true;
 		if(debug)
 			std::cout << "containerStackVector::writeAllToTFile: preparing plots" << std::endl;
 
@@ -449,12 +465,13 @@ void containerStackVector::writeAllToTFile(TString filename, bool recreate, bool
 
 		gStyle->SetOptStat(0);
 
-		for(std::vector<containerStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
+		for(std::vector<histoStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
 
 			if(stack->is1DUnfold()){
 				TDirectory * din=d->mkdir(stack->getName(),stack->getName());
 				din->cd();
 				TCanvas *c = new TCanvas(stack->getName());
+				c->SetBatch(true);
 				pl.setTitle(stack->getName());
 				pl.usePad(c);
 				pl.setStack(&*stack);
@@ -480,10 +497,11 @@ void containerStackVector::writeAllToTFile(TString filename, bool recreate, bool
 					delete c;
 				}
 				pl.cleanMem();
-				container1DUnfold cuf=stack->getSignalContainer1DUnfold();
-				containerStack rebinned=stack->rebinXToBinning(cuf.getGenBins());
+				histo1DUnfold cuf=stack->getSignalContainer1DUnfold();
+				histoStack rebinned=stack->rebinXToBinning(cuf.getGenBins());
 				rebinned.setName(stack->getName()+"_genbins");
 				c = new TCanvas(rebinned.getName());
+				c->SetBatch(true);
 				pl.setTitle(rebinned.getName());
 				pl.usePad(c);
 				pl.setStack(&rebinned);
@@ -505,6 +523,7 @@ void containerStackVector::writeAllToTFile(TString filename, bool recreate, bool
 				TH1D * stab=cuf.getStability().getTH1D("stability",false,false,false);
 				if(pur){
 					c =new TCanvas("purity_stab","purity_stab");
+					c->SetBatch(true);
 					pur->SetMarkerColor(kBlue);
 					stab->SetMarkerColor(kRed); //put to plotter after testing
 					pur->GetYaxis()->SetRangeUser(0,1);
@@ -522,7 +541,8 @@ void containerStackVector::writeAllToTFile(TString filename, bool recreate, bool
 				delete c;
 				delete resp;
 				c =new TCanvas("Gen","Gen");
-				container1D gen= cuf.getGenContainer();
+				c->SetBatch(true);
+				histo1D gen= cuf.getGenContainer();
 				plotterMultiplePlots plgen;
 				plgen.readStyleFromFileInCMSSW("/src/TtZAnalysis/Tools/styles/multiplePlots.txt");
 				plgen.usePad(c);
@@ -534,6 +554,7 @@ void containerStackVector::writeAllToTFile(TString filename, bool recreate, bool
 				dsys->cd();
 				for(size_t i=0;i<cuf.getSystSize();i++){
 					c =new TCanvas("MResp_"+cuf.getSystErrorName(i),"MResp_"+cuf.getSystErrorName(i));
+					c->SetBatch(true);
 					resp=cuf.getResponseMatrix().getTH2DSyst("respMatrix_"+cuf.getSystErrorName(i),i,false,true);;
 					resp->Draw("colz");
 					c->Write();
@@ -556,9 +577,10 @@ void containerStackVector::writeAllToTFile(TString filename, bool recreate, bool
 				//d->mkdir(); //cd dir with idx
 				tdir=dirpv.at(diridx);
 				tdir->cd();
-				//containerStack::debug=true;
+				//histoStack::debug=true;
 				// plotterControlPlot::debug=true;
 				TCanvas *c = new TCanvas(stack->getName());
+				c->SetBatch(true);
 				pl.setTitle(stack->getName());
 				pl.usePad(c);
 				pl.setStack(&*stack);
@@ -623,7 +645,7 @@ void containerStackVector::writeAllToTFile(TString filename, bool recreate, bool
 				for(size_t plot=0;plot<stack->size();plot++){
 
 					///replace with proper plotting tool at some point
-					container2D  c2d= stack->getContainer2D(plot);
+					histo2D  c2d= stack->getContainer2D(plot);
 
 					TH2D * th2d=c2d.getTH2D(stack->getLegend(plot),true,true);
 					if(th2d){
@@ -631,6 +653,7 @@ void containerStackVector::writeAllToTFile(TString filename, bool recreate, bool
 						TString canvasname=stack->getLegend(plot);
 						canvasname+=+"_"+stack->getName();
 						TCanvas *  c= new TCanvas(canvasname);
+						c->SetBatch(true);
 						th2d->Draw("colz");
 						c->Write(canvasname);
 
@@ -640,10 +663,11 @@ void containerStackVector::writeAllToTFile(TString filename, bool recreate, bool
 				}
 
 				//in addition for signal and BG summed
-				container2D  c2d= stack->getSignalContainer2D();
+				histo2D  c2d= stack->getSignalContainer2D();
 				TH2D * th2d=c2d.getTH2D("signal",true,true);
 				if(th2d){
 					TCanvas *  c= new TCanvas("signal_"+stack->getName());
+					c->SetBatch(true);
 					th2d->Draw("colz");
 					c->Write("signal_"+stack->getName());
 
@@ -654,6 +678,7 @@ void containerStackVector::writeAllToTFile(TString filename, bool recreate, bool
 				th2d=c2d.getTH2D("background",true,true);
 				if(th2d){
 					TCanvas *  c= new TCanvas("background_"+stack->getName());
+					c->SetBatch(true);
 					th2d->Draw("colz");
 					c->Write("background_"+stack->getName());
 
@@ -670,7 +695,7 @@ void containerStackVector::writeAllToTFile(TString filename, bool recreate, bool
 
 		f->Close();
 		delete f;
-		containerStack::batchmode=batch;
+
 	}//not onlydata done
 	if(debug)
 		std::cout << "containerStackVector::writeAllToTFile: finished" << std::endl;
@@ -678,9 +703,9 @@ void containerStackVector::writeAllToTFile(TString filename, bool recreate, bool
 }
 
 
-void containerStackVector::printAll(TString namestartswith,TString directory,TString extension){
+void histoStackVector::printAll(TString namestartswith,TString directory,TString extension){
 	plotterControlPlot pl;
-	for(std::vector<containerStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
+	for(std::vector<histoStack>::iterator stack=stacks_.begin();stack<stacks_.end(); ++stack){
 		if(stack->is1D() || stack->is1DUnfold() ){
 			if(namestartswith=="" || stack->getName().BeginsWith(namestartswith)){
 				TCanvas * c=new TCanvas();
@@ -704,7 +729,7 @@ void containerStackVector::printAll(TString namestartswith,TString directory,TSt
 	}
 }
 
-void containerStackVector::writeAllToTFile(TFile * f, TString treename){
+void histoStackVector::writeAllToTFile(TFile * f, TString treename){
 	AutoLibraryLoader::enable();
 	TString name;
 	if(name_=="") name="no_name";
@@ -723,7 +748,7 @@ void containerStackVector::writeAllToTFile(TFile * f, TString treename){
 	if(t->GetBranch("containerStackVectors")){ //branch does exist
 		bool temp=csv_makelist;
 		csv_makelist=false;
-		containerStackVector * csv = this;
+		histoStackVector * csv = this;
 		t->SetBranchAddress("containerStackVectors",&csv);
 		csv_makelist=temp;
 	}
@@ -738,20 +763,20 @@ void containerStackVector::writeAllToTFile(TFile * f, TString treename){
 }
 
 //only for compat reasons
-void containerStackVector::loadFromTree(TTree * t, const TString& name){
+void histoStackVector::loadFromTree(TTree * t, const TString& name){
 	AutoLibraryLoader::enable();
 	getFromTree(t,name);
 
 }
 
-containerStackVector * containerStackVector::getFromTree(TTree * t, const TString& name){
+histoStackVector * histoStackVector::getFromTree(TTree * t, const TString& name){
 #pragma omp critical (containerStackVector_getFromTree)
 	{
 		AutoLibraryLoader::enable();
 		if(!t || t->IsZombie()){
 			throw std::runtime_error("containerStackVector::loadFromTree: tree not ok");
 		}
-		ztop::containerStackVector * cuftemp=0; //new containerStackVector(); //shouldn't make sense.. but seems to decrease TBasket memleaks
+		ztop::histoStackVector * cuftemp=0; //new histoStackVector(); //shouldn't make sense.. but seems to decrease TBasket memleaks
 		if(!t->GetBranch("containerStackVectors")){
 			throw std::runtime_error("containerStackVector::loadFromTree: branch containerStackVectors not found");
 		}
@@ -782,7 +807,7 @@ containerStackVector * containerStackVector::getFromTree(TTree * t, const TStrin
 	return this;
 
 }
-void containerStackVector::loadFromTFile(TFile * f,const TString& csvname,TString treename){
+void histoStackVector::loadFromTFile(TFile * f,const TString& csvname,TString treename){
 	if(!f || f->IsZombie()){
 		throw std::runtime_error("containerStackVector::loadFromTFile: file not ok.");
 	}
@@ -791,7 +816,7 @@ void containerStackVector::loadFromTFile(TFile * f,const TString& csvname,TStrin
 	loadFromTree(ttemp,csvname);
 	delete ttemp;
 }
-void containerStackVector::loadFromTFile(const TString& filename,const TString& csvname,TString treename){
+void histoStackVector::loadFromTFile(const TString& filename,const TString& csvname,TString treename){
 #pragma omp critical (containerStackVector_loadFromTFile)
 	{
 		AutoLibraryLoader::enable(); //to avoid warnings
@@ -803,9 +828,43 @@ void containerStackVector::loadFromTFile(const TString& filename,const TString& 
 }
 
 
-void containerStackVector::listAllInTree(TTree * t){
+
+void histoStackVector::writeToFile(const std::string& filename)const{
+	std::ofstream saveFile;
+	IO::openOutFile(saveFile,filename);
+	{
+		boost::iostreams::filtering_ostream out;
+		boost::iostreams::zlib_params parms;
+		parms.level=boost::iostreams::zlib::best_speed;
+		out.push(boost::iostreams::zlib_compressor(parms));
+		out.push(saveFile);
+		{
+			writeToStream(out);
+		}
+	}
+	saveFile.close();
+}
+void histoStackVector::readFromFile(const std::string& filename){
+	std::ifstream saveFile;
+	IO::openInFile(saveFile,filename);
+	{
+		boost::iostreams::filtering_istream in;
+		boost::iostreams::zlib_params parms;
+		//parms.level=boost::iostreams::zlib::best_speed;
+		in.push(boost::iostreams::zlib_decompressor(parms));
+		in.push(saveFile);
+		{
+			readFromStream(in);
+		}
+	}
+	saveFile.close();
+}
+
+
+
+void histoStackVector::listAllInTree(TTree * t){
 	AutoLibraryLoader::enable();
-	containerStackVector * csv=0;
+	histoStackVector * csv=0;
 	t->SetBranchAddress("containerStackVectors", &csv);
 	for(float n=0;n<t->GetEntries();n++){
 		t->GetEntry(n);

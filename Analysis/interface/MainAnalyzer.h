@@ -3,7 +3,7 @@
 
 #include "TString.h"
 #include "TopAnalysis/ZTopUtils/interface/PUReweighter.h"
-#include "TtZAnalysis/Tools/interface/containerStackVector.h"
+#include "TtZAnalysis/Tools/interface/histoStackVector.h"
 #include "TtZAnalysis/DataFormats/interface/NTJERAdjuster.h"
 #include "TtZAnalysis/DataFormats/interface/NTJECUncertainties.h"
 #include "TtZAnalysis/DataFormats/interface/NTBTagSF.h"
@@ -104,7 +104,7 @@ public:
 	//COMPAT
 	//void setShowStatusBar(bool show){showstatus_=show;}
 
-	ztop::containerStackVector * getPlots(){return & allplotsstackvector_;}
+	ztop::histoStackVector * getPlots(){return & allplotsstackvector_;}
 
 	int start();
 	//  void start(TString);
@@ -196,7 +196,7 @@ private:
 
 	ztop::pdfReweighter pdfweighter_;
 
-	ztop::containerStackVector  allplotsstackvector_;
+	ztop::histoStackVector  allplotsstackvector_;
 
 	size_t filecount_;
 	TString outfileadd_;

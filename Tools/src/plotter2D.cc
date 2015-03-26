@@ -9,23 +9,36 @@
 
 #include "../interface/plotter2D.h"
 #include "TColor.h"
+#include "../interface/fileReader.h"
 
 namespace ztop{
 
 
-plotter2D::plotter2D(): plotterBase(),dividebybinarea_(false){
-
+plotter2D::plotter2D(): plotterBase(),dividebybinarea_(false),zaxismin_(1),zaxismax_(-1){
+	// not here, defaults set by constr : readStyleFromFileInCMSSW("/src/TtZAnalysis/Tools/styles/plot2D_default.txt");
 }
 plotter2D::~plotter2D(){}
 
 
 
-void plotter2D::setPlot(const container2D* c, bool dividebybinarea){
+void plotter2D::setPlot(const histo2D* c, bool dividebybinarea){
 	plot_=*c;
 	if(dividebybinarea)
 		dividebybinarea_=true;
 	else
 		dividebybinarea_=false;
+}
+void plotter2D::readStyleFromFile(const std::string&file){
+
+	fileReader fr;
+	fr.setComment("$");
+	fr.readFile(file);
+
+	zaxismin_ = fr.getValue("zaxis.min",zaxismin_);
+	zaxismax_ = fr.getValue("zaxis.max",zaxismax_);
+
+	rootDrawOpt_ = fr.getValue<TString>("rootDrawOpt",rootDrawOpt_);
+
 }
 
 void plotter2D::preparePad(){
@@ -37,6 +50,9 @@ void plotter2D::preparePad(){
 	c->SetRightMargin(0.2);
 }
 void plotter2D::drawPlots(){
+
+	if(plot_.isDummy())
+		throw std::logic_error("plotter2D::draw: No plot defined");
 
 	const Int_t NRGBs = 5;
 	const Int_t NCont = 255;
@@ -57,6 +73,7 @@ void plotter2D::drawPlots(){
 
 
 	h->GetZaxis()->SetTitleSize(0.06);
+	h->GetZaxis()->SetTitle(zaxistitle_);
 	h->GetZaxis()->SetLabelSize(0.05);
 	h->GetYaxis()->SetTitleSize(0.06);
 	h->GetYaxis()->SetLabelSize(0.05);
@@ -66,10 +83,16 @@ void plotter2D::drawPlots(){
 	float min=plot_.getMin();
 	max=floor(max)+1;
 	min=floor(min)-1;
+	if(zaxismin_>zaxismax_)
+		h->GetZaxis()->SetRangeUser(min,max);
+	else
+		h->GetZaxis()->SetRangeUser(zaxismin_,zaxismax_);
 
-	h->GetZaxis()->SetRangeUser(min,max);
+	/*
+	h->GetZaxis()->SetTitle(plot_.getZAxisName()); */
+	h->Draw("colz");
 
-	h->Draw("colz, text");
+
 }
 // void drawTextBoxes();
 void plotter2D::drawLegends(){
@@ -78,4 +101,8 @@ void plotter2D::drawLegends(){
 
 
 
-}
+
+}//ns
+
+
+

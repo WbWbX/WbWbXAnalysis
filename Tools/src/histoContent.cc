@@ -111,8 +111,8 @@ size_t histoContent::addLayer(const TString & name){
 
 	if(idx>=layermap_.size()){ //layer does not exist yet
 		histoBins binning(nominal_);
-		binning.setName(name);
-		binning.setLayer(layermap_.size());
+	/*	binning.setName(name);
+		binning.setLayer(layermap_.size());*/
 		additionalbins_.push_back(binning);
 		return layermap_.push_back(name);
 	}
@@ -128,21 +128,17 @@ size_t histoContent::addLayer(const TString & name, const histoBins & histbins){
 		std::cout << "histoContent::addLayer(..histoBins): arguments size does not match. doing nothing" <<std::endl;
 		return layerSize();
 	}
-	size_t idx=layermap_.getIndex(name);
+	size_t oldsize=layerSize();
+	size_t idx=addLayer(name);
 
-	if(idx>=layermap_.size()){ //layer does not exist yet
-		if(debug)
-			std::cout << "histoContent::addLayer(..histoBins): adding layer " << name << std::endl;
-		histoBins binning(histbins);
-		binning.setName(name);
-		binning.setLayer(layermap_.size());
-		additionalbins_.push_back(binning);
-		return layermap_.push_back(name);
+	if(idx>=oldsize){
+		additionalbins_.at(idx)=histbins;
 	}
 	else{
-		std::cout << "histoContent::addLayer(..histoBins): layer that should have been filled externally already exists doing nothing " <<std::endl;
-		return layerSize();
+		std::string errstr=(const std::string)"histoContent::addLayer: layer " + name.Data() +(const std::string)" exists";
+		throw std::out_of_range(errstr);
 	}
+
 	return idx;
 } //this function allows for easy syst adding, loop over both content.layers and create empty layers if not exist. then just add, use mapping of one of them, doesn't matter
 
@@ -151,28 +147,34 @@ size_t histoContent::addLayer(const TString & name, const histoBins & histbins){
 /**
  * adds layer from nominal of external with name.
  */
-size_t histoContent::setLayerFromNominal(const TString & name, const histoContent & external){
+size_t histoContent::setLayerFromNominal(const TString & name, const histoContent & external, float devweight){
 	if(nominal_.size() < 1){
 		std::cout << "histoContent::addLayerFromNominal: first construct! default constructor is not supposed to be used" <<std::endl;
 		return 999999999999;
 	}
-	size_t idx=layermap_.getIndex(name);
+	size_t idx=addLayer(name);
 
-	if(idx>=layermap_.size()){ //layer does not exist yet
-		if(debug)
-			std::cout << "histoContent::addLayerFromNominal: adding layer " << name <<" " << idx << " ";
-		histoBins binning(size());
-		binning.setName(name);
-		binning.setLayer(layermap_.size());
-		additionalbins_.push_back(binning);
-		idx= layermap_.push_back(name);
-		if(debug)
-			std::cout << " at idx: " << idx <<std::endl;
-	}
 	if(external.nominal_.size() != additionalbins_[idx].size())
 		throw std::out_of_range("histoContent::addLayerFromNominal: binning does not match");
-	additionalbins_[idx] = external.nominal_;
+	if(devweight==1.)
+		additionalbins_[idx] = external.nominal_;
+	else{ //get difference
+		histoBins difference = external.nominal_;
+		for(size_t i=0;i<difference.size();i++){
+			histoBin & diffbin=difference.getBin(i);
+			const histoBin & extbin=external.nominal_.getBin(i);
+			const histoBin & nombin=nominal_.getBin(i);
 
+			float diff=(extbin.getContent() - nombin.getContent());
+			float newcontent = diff * devweight + nombin.getContent();
+			float statscaler = newcontent/extbin.getContent();
+			diffbin.setContent(newcontent);
+			diffbin.setStat2(statscaler*statscaler * extbin.getStat2());
+
+
+		}
+		additionalbins_[idx] = difference;
+	}
 	return idx;
 }
 
@@ -184,6 +186,7 @@ const TString & histoContent::getLayerName(const size_t &lno) const{
 	return layermap_.getData(lno);
 }
 const size_t & histoContent::getLayerIndex(const TString & name) const{
+
 	return layermap_.getIndex(name);
 }
 histoBins histoContent::copyLayer(const size_t & idx) const{
@@ -420,7 +423,11 @@ std::map<size_t,size_t> histoContent::addLayers(const histoContent & rhs){
 	return outmapping;
 }
 
-
+void histoContent::copyFrom(const histoContent& rhs){
+	nominal_=rhs.nominal_;
+	additionalbins_=rhs.additionalbins_;
+	layermap_=rhs.layermap_;
+}
 
 
 void histoContent::sqrt(){
