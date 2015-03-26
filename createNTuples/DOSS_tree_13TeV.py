@@ -481,7 +481,7 @@ else:
 
 process.treeJets = selectedPatJets.clone( 
     src='patJets'+pfpostfix, 
-    cut='eta < 5 && pt>5') # unfortunately starting at 10 GeV are needed for MET rescaling 8GeV should be ok as corrected pt 
+    cut='eta < 5 && pt>5 &&neutralHadronEnergyFraction < 0.99 && chargedEmEnergyFraction < 0.99 && neutralEmEnergyFraction < 0.99 && chargedHadronEnergyFraction > 0.0 && chargedMultiplicity > 0.0') # unfortunately starting at 10 GeV are needed for MET rescaling 8GeV should be ok as corrected pt 
     ### cut at uncorrected pt > 10 GeV on tree writer level! for MET rescaling - might be obsolete for 13 TeV (and when not using MET...)
     
 
