@@ -66,7 +66,7 @@ class triggerAnalyzer{
 public:
 	triggerAnalyzer(){
 		binseta_.push_back(-2.5);binseta_.push_back(-1.5);binseta_.push_back(-0.8);binseta_.push_back(0.8);binseta_.push_back(1.5);binseta_.push_back(2.5); // ee standard
-		binspt_ << 20 << 25 << 30 << 35 << 40 << 50 << 60 << 100 << 200;
+		binspt_ << 30 << 35 << 40 << 50 << 60 << 100 << 200;
 		binseta2dx_ << 0 << 0.9 << 1.2 << 2.1 << 2.4; //mu standard
 		binseta2dy_=binseta2dx_;
 		whichelectrons_="NTElectrons";
@@ -1178,7 +1178,7 @@ public:
 		mettriggers.push_back("HLT_PFMET170_NoiseCleaned_v1");
 		mettriggers.push_back("HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v1");
 		mettriggers.push_back("HLT_PFMET120_NoiseCleaned_BTagCSV07_v1");
-		mettriggers.push_back("HLT_Photon250_NoHE_PFMET40_v1");
+		/*mettriggers.push_back("HLT_Photon250_NoHE_PFMET40_v1");
 		mettriggers.push_back("HLT_Photon300_NoHE_PFMET40_v1");
 		mettriggers.push_back("HLT_Photon160_PFMET40_v1");
 		mettriggers.push_back("HLT_Photon150_PFMET40_v1");
@@ -1188,7 +1188,7 @@ public:
 		mettriggers.push_back("HLT_Photon50_R9Id90_HE10_Iso40_EBOnly_PFMET40_v1");
 		mettriggers.push_back("HLT_Photon75_R9Id90_HE10_Iso40_EBOnly_PFMET40_v1");
 		mettriggers.push_back("HLT_Photon90_R9Id90_HE10_Iso40_EBOnly_PFMET40_v");
-
+                */ 
 
 		//just for testing
 		// mettriggers.clear();
