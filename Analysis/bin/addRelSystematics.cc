@@ -28,7 +28,7 @@ invokeApplication(){
 	std::cout << "opening files..." <<std::endl;
 	histoStackVector *csv=new histoStackVector();
 	try{
-		csv->loadFromTFile(files.at(0));
+		csv->readFromFile(files.at(0).Data());
 	}catch(...){
 		std::cout << "No Plots found in file " << files.at(0) <<std::endl;
 		delete csv;
@@ -36,28 +36,23 @@ invokeApplication(){
 	}
 	histoStackVector *csv2=new histoStackVector();
 	try{
-		csv2->loadFromTFile(files.at(1));
+		csv2->readFromFile(files.at(1).Data());
 	}catch(...){
 		std::cout << "No Plots found in file " << files.at(1) <<std::endl;
 		delete csv;
 		delete csv2;
 		return -1;
 	}
-	std::cout << "WARNING HACKS!!!"<<std::endl;
-	for(size_t i=0;i<csv2->size();i++){
-		csv2->getStack(i).mergeLegends("t#bar{t}(#tau)","t#bar{t}","t#bar{t}",633,true);
-		csv2->getStack(i).mergeLegends("Z#rightarrowll","DY#rightarrowll","DY#rightarrowll",858,false);
 
-	//	csv2->getStack(i).addEmptyLegend("QCD",400,9);
-
-	}
 //histoStack::debug=true;
 	std::cout << "adding systematics..." <<std::endl;
 	//histo1D::debug=true;
 	csv2->addRelSystematicsFrom(*csv,!arenotcorrelated,strict);
 	TString cmd="cp "+files.at(1)+" "+files.at(1)+".bu";
 	system(cmd.Data());
-	csv2->writeAllToTFile(files.at(1),true,!plotplots);
+	csv2->writeToFile(files.at(1).Data());
+	if(plotplots)
+		csv2->writeAllToTFile(files.at(1)+"_plots.root",true,false);
 	std::cout << "done." <<std::endl;
 
 	delete csv;
