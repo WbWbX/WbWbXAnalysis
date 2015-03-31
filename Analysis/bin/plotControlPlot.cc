@@ -40,7 +40,7 @@ invokeApplication(){
 	histoStackVector * csv = new histoStackVector();
 
 	try{
-		csv->loadFromTFile(infile);
+		csv->readFromFile(infile.Data());
 	}catch(...){
 		std::cout << "No Plots found in file " << infile <<std::endl;
 		delete csv;
