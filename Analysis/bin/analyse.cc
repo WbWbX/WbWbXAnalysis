@@ -1,4 +1,6 @@
 #include "TtZAnalysis/Analysis/interface/MainAnalyzer.h"
+#include "TtZAnalysis/Analysis/interface/analyzer_run1.h"
+#include "TtZAnalysis/Analysis/interface/analyzer_run2.h"
 #include "TtZAnalysis/Analysis/interface/AnalysisUtils.h"
 #include "TtZAnalysis/Tools/interface/fileReader.h"
 #include "../interface/discriminatorFactory.h"
@@ -111,11 +113,17 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 
 
 
-	MainAnalyzer ana;
-	//only used in special cases!
-	ana.setPathToConfigFile(inputfile);
 
-	ana.setFakeDataStartNEntries(fakedatastartentries);
+	MainAnalyzer* ana;
+	if(energy=="7TeV" || energy=="8TeV")
+		ana= new analyzer_run1();
+	else
+		ana= new analyzer_run2();
+
+	//only used in special cases!
+	ana->setPathToConfigFile(inputfile);
+
+	ana->setFakeDataStartNEntries(fakedatastartentries);
 	///some checks
 
 
@@ -124,66 +132,66 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	if(mode.Contains("Btagshape")){
 		std::cout << "Using b-tag shape reweighting" <<std::endl;
 		btagmode=NTBTagSF::shapereweighting_mode;
-		ana.getBTagSF()->readShapeReweightingFiles(cmssw_base+btagshapehffile, cmssw_base+btagshapelffile);
+		ana->getBTagSF()->readShapeReweightingFiles(cmssw_base+btagshapehffile, cmssw_base+btagshapelffile);
 
 	}
 
-	ana.setMaxChilds(6);
+	ana->setMaxChilds(6);
 	if(testmode)
-		ana.setMaxChilds(1);
+		ana->setMaxChilds(1);
 	if(interactive || tickonce)
-		ana.setMaxChilds(20);
-	ana.setMode(mode);
-	ana.setShowStatus(status);
-	ana.setTestMode(testmode);
-	ana.setTickOnceMode(tickonce);
-	ana.setLumi(lumi);
-	ana.setDataSetDirectory(treedir);
-	ana.setUseDiscriminators(!createLH);
-	ana.setDiscriminatorInputFile(discrfile);
-	ana.getPUReweighter()->setDataTruePUInput(pufile+".root");
-	ana.setChannel(channel);
-	ana.setEnergy(energy);
-	ana.setSyst(Syst);
-	ana.setTopMass(topmass);
+		ana->setMaxChilds(20);
+	ana->setMode(mode);
+	ana->setShowStatus(status);
+	ana->setTestMode(testmode);
+	ana->setTickOnceMode(tickonce);
+	ana->setLumi(lumi);
+	ana->setDataSetDirectory(treedir);
+	ana->setUseDiscriminators(!createLH);
+	ana->setDiscriminatorInputFile(discrfile);
+	ana->getPUReweighter()->setDataTruePUInput(pufile+".root");
+	ana->setChannel(channel);
+	ana->setEnergy(energy);
+	ana->setSyst(Syst);
+	ana->setTopMass(topmass);
 	if(energy == "7TeV"){
-		ana.getPUReweighter()->setMCDistrSummer11Leg();
+		ana->getPUReweighter()->setMCDistrSummer11Leg();
 	}
 	else if(energy == "8TeV"){
-		ana.getPUReweighter()->setMCDistrSum12();
+		ana->getPUReweighter()->setMCDistrSum12();
 	}
 	else if(energy == "13TeV"){
 		std::cout<<"FIXME: Still apply 8 TeV PU Reweighting"<<std::endl;
-		ana.getPUReweighter()->setMCDistrSum12();
+		ana->getPUReweighter()->setMCDistrSum12();
 	}	   
 	else{
 		throw std::runtime_error("Undefined Energy! Exit!");
 	}
-	ana.getElecSF()->setInput(elecsffile,elecsfhisto);
-	ana.getMuonSF()->setInput(muonsffile,muonsfhisto);
-	ana.getTrackingSF()->setInput(trackingsffile,trackingsfhisto);
-	ana.getTriggerSF()->setInput(trigsffile,trigsfhisto);
+	ana->getElecSF()->setInput(elecsffile,elecsfhisto);
+	ana->getMuonSF()->setInput(muonsffile,muonsfhisto);
+	ana->getTrackingSF()->setInput(trackingsffile,trackingsfhisto);
+	ana->getTriggerSF()->setInput(trigsffile,trigsfhisto);
 
-	ana.getElecEnergySF()->setGlobal(1,0.15,0.15);
-	ana.getMuonEnergySF()->setGlobal(1,0.3,0.3); //new from muon POG twiki
+	ana->getElecEnergySF()->setGlobal(1,0.15,0.15);
+	ana->getMuonEnergySF()->setGlobal(1,0.3,0.3); //new from muon POG twiki
 	//https://twiki.cern.ch/twiki/bin/viewauth/CMS/MuonReferenceResolution
 	//this is for muons without the corrections so it should be even better with
 
-	ana.getTopPtReweighter()->setFunction(reweightfunctions::toppt);
-	ana.getTopPtReweighter()->setSystematics(reweightfunctions::nominal);
+	ana->getTopPtReweighter()->setFunction(reweightfunctions::toppt);
+	ana->getTopPtReweighter()->setSystematics(reweightfunctions::nominal);
 
-	ana.setOutFileAdd(outfileadd);
-	ana.setOutDir(outdir);
-	ana.getBTagSF()->setMakeEff(dobtag);
-	ana.setBTagSFFile(btagfile);
-	ana.getBTagSF()->setMode(btagmode);
-	ana.getBTagSF()->setWorkingPoint(btagWP);
+	ana->setOutFileAdd(outfileadd);
+	ana->setOutDir(outdir);
+	ana->getBTagSF()->setMakeEff(dobtag);
+	ana->setBTagSFFile(btagfile);
+	ana->getBTagSF()->setMode(btagmode);
+	ana->getBTagSF()->setWorkingPoint(btagWP);
 	if(btagmode==NTBTagSF::shapereweighting_mode && wpval>-2)
-		ana.getBTagSF()->setWorkingPointValue(wpval);
-	ana.getJECUncertainties()->setFile((jecfile).Data());
-	ana.getJECUncertainties()->setSystematics("no");
+		ana->getBTagSF()->setWorkingPointValue(wpval);
+	ana->getJECUncertainties()->setFile((jecfile).Data());
+	ana->getJECUncertainties()->setSystematics("no");
 	if(testmode && dobtag){
-		ana.setBTagSFFile(btagfile+"TESTMODE");
+		ana->setBTagSFFile(btagfile+"TESTMODE");
 		system(("rm -f "+btagfile+"TESTMODE").Data());
 	}
 	//add indication for non-correlated syst by adding the energy to syst name!! then the getCrossSections stuff should recognise it
@@ -194,8 +202,8 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	//btag efficiencies are NOT required here
 
 	if(Syst.Contains("_sysnominal")){
-		ana.getBTagSF()->setMakeEff(true);
-		ana.setBTagSFFile(btagfile+Syst+"_dummy");
+		ana->getBTagSF()->setMakeEff(true);
+		ana->setBTagSFFile(btagfile+Syst+"_dummy");
 	}
 
 	if(Syst=="nominal"){
@@ -203,40 +211,40 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	}
 	///sys nominals...
 	else if(Syst=="P11_sysnominal"){
-		ana.setFilePostfixReplace("ttbar.root","ttbar_mgdecays_p11.root");
-		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mgdecays_p11.root");
+		ana->setFilePostfixReplace("ttbar.root","ttbar_mgdecays_p11.root");
+		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mgdecays_p11.root");
 	}
 	else if(Syst=="P11_sysnominal_CR_up"){ //do nothing
-		ana.setFilePostfixReplace("ttbar.root","ttbar_mgdecays_p11.root");
-		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mgdecays_p11.root");
+		ana->setFilePostfixReplace("ttbar.root","ttbar_mgdecays_p11.root");
+		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mgdecays_p11.root");
 	}
 	else if(Syst=="P11_sysnominal_CR_down"){ //no CR
-		ana.setFilePostfixReplace("ttbar.root","ttbar_mgdecays_p11nocr.root");
-		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mgdecays_p11nocr.root");
+		ana->setFilePostfixReplace("ttbar.root","ttbar_mgdecays_p11nocr.root");
+		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mgdecays_p11nocr.root");
 	}
 	else if(Syst=="P11_sysnominal_UE_up"){
-		ana.setFilePostfixReplace("ttbar.root","ttbar_mgdecays_p11mpihi.root");
-		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mgdecays_p11mpihi.root");
+		ana->setFilePostfixReplace("ttbar.root","ttbar_mgdecays_p11mpihi.root");
+		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mgdecays_p11mpihi.root");
 	}
 	else if(Syst=="P11_sysnominal_UE_down"){
-		ana.setFilePostfixReplace("ttbar.root","ttbar_mgdecays_p11tev.root");
-		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mgdecays_p11tev.root");
+		ana->setFilePostfixReplace("ttbar.root","ttbar_mgdecays_p11tev.root");
+		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mgdecays_p11tev.root");
 	}
 	else if(Syst=="PDF_sysnominal"){
-		ana.getPdfReweighter()->setPdfIndex(0);
+		ana->getPdfReweighter()->setPdfIndex(0);
 	}
 	else if(Syst.Contains("PDF_sysnominal_")){
 		size_t pdfindex=0;
 		for(size_t i=1;i<10000;i++){
 			pdfindex++;
 			if(Syst == "PDF_sysnominal_PDF" + toTString(i) + "_down"){
-				ana.getPdfReweighter()->setPdfIndex(pdfindex);
+				ana->getPdfReweighter()->setPdfIndex(pdfindex);
 				std::cout << "setting index to " << pdfindex << " for " << Syst << std::endl;
 				break;
 			}
 			pdfindex++;
 			if(Syst == "PDF_sysnominal_PDF" + toTString(i) + "_up"){
-				ana.getPdfReweighter()->setPdfIndex(pdfindex);
+				ana->getPdfReweighter()->setPdfIndex(pdfindex);
 				std::cout << "setting index to " << pdfindex << " for " << Syst << std::endl;
 				break;
 			}
@@ -247,42 +255,42 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 
 
 	else if(Syst=="TRIGGER_down"){
-		ana.getTriggerSF()->setSystematics("down");
+		ana->getTriggerSF()->setSystematics("down");
 	}
 	else if(Syst=="TRIGGER_up"){
-		ana.getTriggerSF()->setSystematics("up");
+		ana->getTriggerSF()->setSystematics("up");
 	}
 	else if(Syst=="ELECSF_up"){
-		ana.getElecSF()->setSystematics("up");
+		ana->getElecSF()->setSystematics("up");
 	}
 	else if(Syst=="ELECSF_down"){
-		ana.getElecSF()->setSystematics("down");
+		ana->getElecSF()->setSystematics("down");
 	}
 	else if(Syst=="MUONSF_up"){
-		ana.getMuonSF()->setSystematics("up");
+		ana->getMuonSF()->setSystematics("up");
 	}
 	else if(Syst=="MUONSF_down"){
-		ana.getMuonSF()->setSystematics("down");
+		ana->getMuonSF()->setSystematics("down");
 	}
 	else if(Syst=="MUONES_up"){
-		ana.getMuonEnergySF()->setSystematics("up");
+		ana->getMuonEnergySF()->setSystematics("up");
 	}
 	else if(Syst=="MUONES_down"){
-		ana.getMuonEnergySF()->setSystematics("down");
+		ana->getMuonEnergySF()->setSystematics("down");
 	}
 	else if(Syst=="ELECES_up"){
-		ana.getElecEnergySF()->setSystematics("up");
+		ana->getElecEnergySF()->setSystematics("up");
 	}
 	else if(Syst=="ELECES_down"){
-		ana.getElecEnergySF()->setSystematics("down");
+		ana->getElecEnergySF()->setSystematics("down");
 	}
 	else if(Syst=="JES_up"){
-		ana.getJECUncertainties()->setSystematics("up");
-		ana.getBTagSF()->setSystematic(bTagBase::jesup);
+		ana->getJECUncertainties()->setSystematics("up");
+		ana->getBTagSF()->setSystematic(bTagBase::jesup);
 	}
 	else if(Syst=="JES_down"){
-		ana.getJECUncertainties()->setSystematics("down");
-		ana.getBTagSF()->setSystematic(bTagBase::jesdown);
+		ana->getJECUncertainties()->setSystematics("down");
+		ana->getBTagSF()->setSystematic(bTagBase::jesdown);
 	}
 
 
@@ -293,7 +301,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	else if(Syst.BeginsWith("JES_")){
 		std::vector<std::string> sources;
 
-		sources = ana.getJECUncertainties()->getSourceNames();
+		sources = ana->getJECUncertainties()->getSourceNames();
 
 		for(size_t i=0;i<=sources.size();i++){
 			std::cout << sources.at(i) <<std::endl;
@@ -302,36 +310,36 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 
 			//jes systematics
 			if("JES_"+(TString)sources.at(i)+"_down" == Syst || "JES_"+sources.at(i)+"_up" == Syst){
-				ana.getJECUncertainties()->setSource(sources.at(i));
+				ana->getJECUncertainties()->setSource(sources.at(i));
 				//some specials
 
 				if(sources.at(i) == "FlavorPureGluon"){
-					ana.getJECUncertainties()->restrictToFlavour(23);
-					ana.getJECUncertainties()->restrictToFlavour(0);
+					ana->getJECUncertainties()->restrictToFlavour(23);
+					ana->getJECUncertainties()->restrictToFlavour(0);
 				}
 				else if(sources.at(i) == "FlavorPureQuark"){
-					ana.getJECUncertainties()->restrictToFlavour (1);
-					ana.getJECUncertainties()->restrictToFlavour(-1);
-					ana.getJECUncertainties()->restrictToFlavour (2);
-					ana.getJECUncertainties()->restrictToFlavour(-2);
-					ana.getJECUncertainties()->restrictToFlavour (3);
-					ana.getJECUncertainties()->restrictToFlavour(-3);
+					ana->getJECUncertainties()->restrictToFlavour (1);
+					ana->getJECUncertainties()->restrictToFlavour(-1);
+					ana->getJECUncertainties()->restrictToFlavour (2);
+					ana->getJECUncertainties()->restrictToFlavour(-2);
+					ana->getJECUncertainties()->restrictToFlavour (3);
+					ana->getJECUncertainties()->restrictToFlavour(-3);
 				}
 				else if(sources.at(i) == "FlavorPureCharm"){
-					ana.getJECUncertainties()->restrictToFlavour(4);
-					ana.getJECUncertainties()->restrictToFlavour(-4);
+					ana->getJECUncertainties()->restrictToFlavour(4);
+					ana->getJECUncertainties()->restrictToFlavour(-4);
 				}
 				else if(sources.at(i) == "FlavorPureBottom"){
-					ana.getJECUncertainties()->restrictToFlavour(5);
-					ana.getJECUncertainties()->restrictToFlavour(-5);
+					ana->getJECUncertainties()->restrictToFlavour(5);
+					ana->getJECUncertainties()->restrictToFlavour(-5);
 				}
 
 				if("JES_"+(TString)sources.at(i)+"_down" == Syst){
-					ana.getJECUncertainties()->setSystematics("down");
+					ana->getJECUncertainties()->setSystematics("down");
 					break;
 				}
 				else if("JES_"+sources.at(i)+"_up" == Syst){
-					ana.getJECUncertainties()->setSystematics("up");
+					ana->getJECUncertainties()->setSystematics("up");
 					break;
 				}
 			}
@@ -347,158 +355,158 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 
 	else if(Syst=="JEC_residuals_up"){
 		//use default
-		//	ana.setFilePostfixReplace("_22Jan.root","_22Jan_ptres.root");
+		//	ana->setFilePostfixReplace("_22Jan.root","_22Jan_ptres.root");
 	}
 	else if(Syst=="JEC_residuals_down"){
-		ana.setFilePostfixReplace("_22Jan.root","_22Jan_noptres.root");
+		ana->setFilePostfixReplace("_22Jan.root","_22Jan_noptres.root");
 	}
 
 	else if(Syst=="JER_up"){
-		ana.getJERAdjuster()->setSystematics("up");
+		ana->getJERAdjuster()->setSystematics("up");
 	}
 	else if(Syst=="JER_down"){
-		ana.getJERAdjuster()->setSystematics("down");
+		ana->getJERAdjuster()->setSystematics("down");
 	}
 	else if(Syst=="PU_up"){
-		ana.getPUReweighter()->setDataTruePUInput(pufile+"_up.root");
+		ana->getPUReweighter()->setDataTruePUInput(pufile+"_up.root");
 	}
 	else if(Syst=="PU_down"){
-		ana.getPUReweighter()->setDataTruePUInput(pufile+"_down.root");
+		ana->getPUReweighter()->setDataTruePUInput(pufile+"_down.root");
 	}
 
 	/////////btag
 
 	else if(Syst=="BTAGH_up"){
-		ana.getBTagSF()->setSystematic(bTagBase::heavyup);
+		ana->getBTagSF()->setSystematic(bTagBase::heavyup);
 	}
 	else if(Syst=="BTAGH_down"){
-		ana.getBTagSF()->setSystematic(bTagBase::heavydown);
+		ana->getBTagSF()->setSystematic(bTagBase::heavydown);
 	}
 	else if(Syst=="BTAGL_up"){
-		ana.getBTagSF()->setSystematic(bTagBase::lightup);
+		ana->getBTagSF()->setSystematic(bTagBase::lightup);
 	}
 	else if(Syst=="BTAGL_down"){
-		ana.getBTagSF()->setSystematic(bTagBase::lightdown);
+		ana->getBTagSF()->setSystematic(bTagBase::lightdown);
 	}
 	else if(Syst=="BTAGHFS1_up"){
-		ana.getBTagSF()->setSystematic(bTagBase::hfstat1up);
+		ana->getBTagSF()->setSystematic(bTagBase::hfstat1up);
 	}
 	else if(Syst=="BTAGHFS1_down"){
-		ana.getBTagSF()->setSystematic(bTagBase::hfstat1down);
+		ana->getBTagSF()->setSystematic(bTagBase::hfstat1down);
 	}
 	else if(Syst=="BTAGHFS2_up"){
-		ana.getBTagSF()->setSystematic(bTagBase::hfstat2up);
+		ana->getBTagSF()->setSystematic(bTagBase::hfstat2up);
 	}
 	else if(Syst=="BTAGHFS2_down"){
-		ana.getBTagSF()->setSystematic(bTagBase::hfstat2down);
+		ana->getBTagSF()->setSystematic(bTagBase::hfstat2down);
 	}
 	else if(Syst=="BTAGLFS1_up"){
-		ana.getBTagSF()->setSystematic(bTagBase::lfstat1up);
+		ana->getBTagSF()->setSystematic(bTagBase::lfstat1up);
 	}
 	else if(Syst=="BTAGLFS1_down"){
-		ana.getBTagSF()->setSystematic(bTagBase::lfstat1down);
+		ana->getBTagSF()->setSystematic(bTagBase::lfstat1down);
 	}
 	else if(Syst=="BTAGLFS2_up"){
-		ana.getBTagSF()->setSystematic(bTagBase::lfstat2up);
+		ana->getBTagSF()->setSystematic(bTagBase::lfstat2up);
 	}
 	else if(Syst=="BTAGLFS2_down"){
-		ana.getBTagSF()->setSystematic(bTagBase::lfstat2down);
+		ana->getBTagSF()->setSystematic(bTagBase::lfstat2down);
 	}
 	else if(Syst=="BTAGPUR_up"){
-		ana.getBTagSF()->setSystematic(bTagBase::purityup);
+		ana->getBTagSF()->setSystematic(bTagBase::purityup);
 	}
 	else if(Syst=="BTAGPUR_down"){
-		ana.getBTagSF()->setSystematic(bTagBase::puritydown);
+		ana->getBTagSF()->setSystematic(bTagBase::puritydown);
 	}
 
 
 	/////////top pt
 
 	else if(Syst=="TOPPT_up"){
-		ana.getTopPtReweighter()->setSystematics(reweightfunctions::up);
+		ana->getTopPtReweighter()->setSystematics(reweightfunctions::up);
 	}
 	else if(Syst=="TOPPT_down"){
-		ana.getTopPtReweighter()->setSystematics(reweightfunctions::down);
+		ana->getTopPtReweighter()->setSystematics(reweightfunctions::down);
 	}
 	///////////////////file replacements/////////////
 	else if(Syst=="TT_MATCH_up"){
-		ana.setFilePostfixReplace("ttbar.root","ttbar_ttmup.root");
-		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_ttmup.root");
+		ana->setFilePostfixReplace("ttbar.root","ttbar_ttmup.root");
+		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_ttmup.root");
 	}
 	else if(Syst=="TT_MATCH_down"){
-		ana.setFilePostfixReplace("ttbar.root","ttbar_ttmdown.root");
-		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_ttmdown.root");
+		ana->setFilePostfixReplace("ttbar.root","ttbar_ttmdown.root");
+		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_ttmdown.root");
 	}
 	else if(Syst=="TT_SCALE_up"){
-		ana.setFilePostfixReplace("ttbar.root","ttbar_ttscaleup.root");
-		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_ttscaleup.root");
+		ana->setFilePostfixReplace("ttbar.root","ttbar_ttscaleup.root");
+		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_ttscaleup.root");
 	}
 	else if(Syst=="TT_SCALE_down"){
-		ana.setFilePostfixReplace("ttbar.root","ttbar_ttscaledown.root");
-		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_ttscaledown.root");
+		ana->setFilePostfixReplace("ttbar.root","ttbar_ttscaledown.root");
+		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_ttscaledown.root");
 	}
 	/////////
 	else if(Syst=="TT_SCALE_down"){
-		ana.setFilePostfixReplace("ttbar.root","ttbar_ttscaledown.root");
-		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_ttscaledown.root");
+		ana->setFilePostfixReplace("ttbar.root","ttbar_ttscaledown.root");
+		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_ttscaledown.root");
 	}
 	////////////
 	else if(Syst=="Z_MATCH_up"){
-		ana.setFilePostfixReplace("60120.root","60120_Zmup.root");
+		ana->setFilePostfixReplace("60120.root","60120_Zmup.root");
 	}
 	else if(Syst=="Z_MATCH_down"){
-		ana.setFilePostfixReplace("60120.root","60120_Zmdown.root");
+		ana->setFilePostfixReplace("60120.root","60120_Zmdown.root");
 	}
 	else if(Syst=="Z_SCALE_up"){
-		ana.setFilePostfixReplace("60120.root","60120_Zscaleup.root");
+		ana->setFilePostfixReplace("60120.root","60120_Zscaleup.root");
 	}
 	else if(Syst=="Z_SCALE_down"){
-		ana.setFilePostfixReplace("60120.root","60120_Zscaledown.root");
+		ana->setFilePostfixReplace("60120.root","60120_Zscaledown.root");
 	}
 	else if(Syst=="TT_GENPOWPY_down"){
 		//nothing
 	}
 	else if(Syst=="TT_GENPOWPY_up"){
-		ana.setFilePostfixReplace("ttbar.root","ttbar_pow2py.root");
-		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_pow2py.root");
+		ana->setFilePostfixReplace("ttbar.root","ttbar_pow2py.root");
+		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_pow2py.root");
 	}
 	else if(Syst=="TT_GENPOW_sysnominal"){
-		ana.setFilePostfixReplace("ttbar.root","ttbar_pow2py.root");
-		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_pow2py.root");
+		ana->setFilePostfixReplace("ttbar.root","ttbar_pow2py.root");
+		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_pow2py.root");
 	}
 	else if(Syst=="TT_GENPOW_sysnominal_HER_up"){
-		ana.setFilePostfixReplace("ttbar.root","ttbar_powherw.root");
-		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_powherw.root");
+		ana->setFilePostfixReplace("ttbar.root","ttbar_powherw.root");
+		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_powherw.root");
 	}
 	else if(Syst=="TT_GENPOW_sysnominal_HER_down"){
-		ana.setFilePostfixReplace("ttbar.root","ttbar_pow2py.root");
-		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_pow2py.root");
+		ana->setFilePostfixReplace("ttbar.root","ttbar_pow2py.root");
+		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_pow2py.root");
 	}
 	else if(Syst=="TT_GENMCATNLO_up"){
-		ana.setFilePostfixReplace("ttbar.root","ttbar_mcatnlo.root");
-		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mcatnlo.root");
+		ana->setFilePostfixReplace("ttbar.root","ttbar_mcatnlo.root");
+		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mcatnlo.root");
 	}
 	else if(Syst=="TT_BJESNUDEC_down"){
-		ana.addWeightBranch("NTWeight_bJesweightNuDown");
+		ana->addWeightBranch("NTWeight_bJesweightNuDown");
 	}
 	else if(Syst=="TT_BJESNUDEC_up"){
-		ana.addWeightBranch("NTWeight_bJesweightNuUp");
+		ana->addWeightBranch("NTWeight_bJesweightNuUp");
 	}
 	else if(Syst=="TT_BJESRETUNE_up"){
-		ana.addWeightBranch("NTWeight_bJesweightRetune");
+		ana->addWeightBranch("NTWeight_bJesweightRetune");
 	}
 	else if(Syst=="TT_BJESRETUNE_down"){
 		//default
 	}
 	else if(Syst=="TOPMASS_up"){ //consider as systematic variation. for testing purp! leaves normalization fixed
 		//default
-		ana.setFilePostfixReplace("ttbar.root","ttbar_mt175.5.root");
-		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mt175.5.root");
+		ana->setFilePostfixReplace("ttbar.root","ttbar_mt175.5.root");
+		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mt175.5.root");
 	}
 	else if(Syst=="TOPMASS_down"){
 		//default
-		ana.setFilePostfixReplace("ttbar.root","ttbar_mt169.5.root");
-		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mt169.5.root");
+		ana->setFilePostfixReplace("ttbar.root","ttbar_mt169.5.root");
+		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mt169.5.root");
 	}
 	else{
 		didnothing=true;
@@ -508,17 +516,17 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 
 	if(topmass != "172.5"){
 		std::cout << "replacing top mass value of 172.5 with "<< topmass << std::endl;
-		ana.setFilePostfixReplace("ttbar.root","ttbar_mt"+topmass+ ".root");
-		ana.setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mt"+topmass+ ".root");
+		ana->setFilePostfixReplace("ttbar.root","ttbar_mt"+topmass+ ".root");
+		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mt"+topmass+ ".root");
 
 		if(topmass == "178.5" || topmass == "166.5"){
-			//	ana.setFilePostfixReplace("_tWtoLL.root","_tWtoLL_mt"+topmass+ ".root");
-			//	ana.setFilePostfixReplace("_tbarWtoLL.root","_tbarWtoLL_mt"+topmass+ ".root");
+			//	ana->setFilePostfixReplace("_tWtoLL.root","_tWtoLL_mt"+topmass+ ".root");
+			//	ana->setFilePostfixReplace("_tbarWtoLL.root","_tbarWtoLL_mt"+topmass+ ".root");
 		}
 
 	}
 
-	ana.setFileList(inputfile);
+	ana->setFileList(inputfile);
 
 
 
@@ -538,8 +546,8 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 
 		// recreate file
 
-		TString fulloutfilepath=ana.getOutPath()+".ztop";
-		TString workdir=ana.getOutDir() +"../";
+		TString fulloutfilepath=ana->getOutPath()+".ztop";
+		TString workdir=ana->getOutDir() +"../";
 		TString batchdir=workdir+"batch/";
 
 		system(("rm -rf "+fulloutfilepath).Data());
@@ -549,7 +557,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 		cout << "\nStarting analyse at: " << dt << endl;
 
 
-		int fullsucc=ana.start();
+		int fullsucc=ana->start();
 
 		ztop::container1DStackVector csv;
 
@@ -563,30 +571,30 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 				if(testmode)
 					std::cout << "drawing plots..." <<std::endl;
 
-				//	std::vector<discriminatorFactory> disc=discriminatorFactory::readAllFromTFile(ana.getOutPath()+".root");
+				//	std::vector<discriminatorFactory> disc=discriminatorFactory::readAllFromTFile(ana->getOutPath()+".root");
 				//	for(size_t i=0;i<disc.size();i++){
 				//		disc.at(i).extractLikelihoods(csv);
 				//	}
 				csv.writeToFile(fulloutfilepath.Data()); //recreates file
-				system(("rm -f "+ana.getOutPath()+"_discr.root").Data());
-				//	discriminatorFactory::writeAllToTFile(ana.getOutPath()+"_discr.root",disc);
+				system(("rm -f "+ana->getOutPath()+"_discr.root").Data());
+				//	discriminatorFactory::writeAllToTFile(ana->getOutPath()+"_discr.root",disc);
 
 
 			}
 			else{
 				std::cout << "drawing plots..." <<std::endl;
-				//	std::vector<discriminatorFactory> disc=discriminatorFactory::readAllFromTFile(ana.getOutPath()+".root");
+				//	std::vector<discriminatorFactory> disc=discriminatorFactory::readAllFromTFile(ana->getOutPath()+".root");
 				//	for(size_t i=0;i<disc.size();i++){
 				//		disc.at(i).extractLikelihoods(csv);
 				//	}
 				if(testmode)
 					csv.writeAllToTFile(fulloutfilepath+"_plots.root",true,!testmode);
-				system(("rm -f "+ana.getOutPath()+"_discr.root").Data());
-				//	discriminatorFactory::writeAllToTFile(ana.getOutPath()+"_discr.root",disc);
+				system(("rm -f "+ana->getOutPath()+"_discr.root").Data());
+				//	discriminatorFactory::writeAllToTFile(ana->getOutPath()+"_discr.root",disc);
 			}
 
 
-			system(("touch "+batchdir+ana.getOutFileName()+"_fin").Data());
+			system(("touch "+batchdir+ana->getOutFileName()+"_fin").Data());
 
 			sleep(1);
 			now = time(0);
@@ -610,12 +618,12 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 					<< std::endl;
 			//put more once you introduce one
 			if(!testmode){
-				system(("touch "+batchdir+ana.getOutFileName()+"_failed").Data());
+				system(("touch "+batchdir+ana->getOutFileName()+"_failed").Data());
 			}
 		}
 	}
 
-
+	delete ana;
 
 }
 

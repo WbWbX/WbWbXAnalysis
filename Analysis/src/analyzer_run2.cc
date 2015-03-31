@@ -12,50 +12,9 @@
  *      Do not include it in any other file than MainAnalyzer.cc
  */
 
-#ifndef EVENTLOOP_H_
-#define EVENTLOOP_H_
-#include "../interface/MainAnalyzer.h"
-#include "../interface/AnalysisUtils.h"
-#include "../interface/NTFullEvent.h"
-#include "../interface/ttbarControlPlots.h"
-#include "../interface/ttXsecPlots.h"
-#include "../interface/ZControlPlots.h"
-#include "../interface/MCReweighter.h"
-#include "TtZAnalysis/plugins/leptonSelector2.h"
 
-#include "TtZAnalysis/DataFormats/interface/NTLepton.h"
-#include "TtZAnalysis/DataFormats/interface/NTMuon.h"
-#include "TtZAnalysis/DataFormats/interface/NTElectron.h"
-#include "TtZAnalysis/DataFormats/interface/NTJet.h"
-#include "TtZAnalysis/DataFormats/interface/NTMet.h"
-#include "TtZAnalysis/DataFormats/interface/NTEvent.h"
-#include "TtZAnalysis/DataFormats/interface/NTIsolation.h"
-#include "TtZAnalysis/DataFormats/interface/NTTrack.h"
-#include "TtZAnalysis/DataFormats/interface/NTSuClu.h"
-#include "TtZAnalysis/DataFormats/interface/NTTrigger.h"
-#include "TtZAnalysis/DataFormats/interface/NTTriggerObject.h"
+#include "../interface/analyzer_run2.h"
 
-
-#include "TtZAnalysis/DataFormats/interface/NTVertex.h"
-
-#include "TtZAnalysis/DataFormats/interface/NTGenLepton.h"
-#include "TtZAnalysis/DataFormats/interface/NTGenParticle.h"
-#include "TtZAnalysis/DataFormats/interface/NTGenJet.h"
-#include "TtZAnalysis/DataFormats/interface/NTLorentzVector.h"
-
-
-#include "TtZAnalysis/DataFormats/interface/helpers.h"
-
-#include "../interface/analysisPlotsMlbMt.h"
-#include "../interface/analysisPlotsTtbarXsecFit.h"
-
-#include "../interface/discriminatorFactory.h"
-
-#include "../interface/tBranchHandler.h"
-
-#include "TtZAnalysis/DataFormats/interface/NTSystWeight.h"
-
-#include <sys/types.h>
 
 /*
  * Running on the samples is parallelized.
@@ -79,7 +38,7 @@
  *
  * Please indicate the meaning of the error code in the cout at the end of ../app_src/analyse.cc
  */
-void  MainAnalyzer::analyze(size_t anaid){
+void  analyzer_run2::analyze(size_t anaid){
 
 	using namespace std;
 	using namespace ztop;
@@ -1687,7 +1646,7 @@ void  MainAnalyzer::analyze(size_t anaid){
 
 
 
-bool MainAnalyzer::checkTrigger(std::vector<bool> * p_TriggerBools,ztop::NTEvent * pEvent, bool isMC,size_t anaid){
+bool analyzer_run2::checkTrigger(std::vector<bool> * p_TriggerBools,ztop::NTEvent * pEvent, bool isMC,size_t anaid){
 
 
 	//do trigger stuff - onlye 8TeV for now
@@ -1756,4 +1715,3 @@ bool MainAnalyzer::checkTrigger(std::vector<bool> * p_TriggerBools,ztop::NTEvent
 
 
 
-#endif /* EVENTLOOP_H_ */

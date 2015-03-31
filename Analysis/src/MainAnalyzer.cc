@@ -2,21 +2,14 @@
 #include "FWCore/FWLite/interface/AutoLibraryLoader.h"
 #include "../interface/MainAnalyzer.h"
 
-#include "TtZAnalysis/DataFormats/interface/elecRhoIsoAdder.h"
 
+#include "TtZAnalysis/DataFormats/interface/elecRhoIsoAdder.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 #include "TTree.h"
 #include "TFile.h"
 #include <fstream>
-//#include <omp.h>
 #include "TtZAnalysis/Analysis/interface/AnalysisUtils.h"
-
-#include "TtZAnalysis/Tools/interface/fileReader.h"
-
-#include "eventLoop.h"
 #include <algorithm>
-#include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
-
 #include <sys/stat.h>
 #include "../interface/tBranchHandler.h"
 
@@ -76,6 +69,7 @@ MainAnalyzer::~MainAnalyzer(){
 	ztop::histo2D::c_deletelist();
 
 }
+
 
 
 int MainAnalyzer::checkForWriteRequest(){
@@ -416,68 +410,6 @@ void MainAnalyzer::readFileList(){
 
 
 }
-/*
-void MainAnalyzer::copyAll(const MainAnalyzer & analyzer){
-
-
-    showstatus_=analyzer.showstatus_;
-    onlySummary_=analyzer.
-    testmode_=analyzer.
-    singlefile_=analyzer.
-
-    channel_=analyzer.channel_;
-    b_ee_=analyzer.b_ee_;
-    b_emu_=analyzer.b_emu_;
-    b_mumu_=analyzer.b_mumu_;
-    syst_=analyzer.syst_;
-    energy_=analyzer.energy_;
-    dataname_=analyzer.dataname_;
-    topmass_=analyzer.topmass_;
-
-
-    discrInput_=analyzer.discrInput_;
-    usediscr_=analyzer.discrInput_;
-
-    lumi_=analyzer.lumi_;
-    datasetdirectory_=analyzer.datasetdirectory_;
-    filelist_=analyzer.filelist_;
-
-    puweighter_= analyzer.puweighter_;
-    jeradjuster_= analyzer.jeradjuster_;
-    jecuncertainties_= analyzer.jecuncertainties_;
-    btagsf_ = analyzer.btagsf_;
-    elecsf_=analyzer.elecsf_;
-    muonsf_=analyzer.muonsf_;
-    triggersf_=analyzer.triggersf_;
-    elecenergysf_=analyzer.elecenergysf_;
-    muonenergysf_=analyzer.muonenergysf_;
-    topptReweighter_=analyzer.topptReweighter_;
-
-
-    allplotsstackvector_ = analyzer.allplotsstackvector_;
-
-    infiles_=analyzer.infiles_;
-    legentries_=analyzer.legentries_;
-    colz_=analyzer.colz_;
-    norms_=analyzer.norms_;
-    issignal_=analyzer.issignal_;
-    outfileadd_=analyzer.outfileadd_;
-
-    //pipes are NOT in here. they need to be created during running?
-
-    writeAllowed_=analyzer.writeAllowed_;
-}
- */
-/*
-MainAnalyzer::MainAnalyzer(const MainAnalyzer & analyzer){
-    copyAll(analyzer);
-}
-
-MainAnalyzer & MainAnalyzer::operator = (const MainAnalyzer & analyzer){
-    copyAll(analyzer);
-    return *this;
-}
- */
 
 
 float MainAnalyzer::createNormalizationInfo(TFile *f, bool isMC,size_t anaid){

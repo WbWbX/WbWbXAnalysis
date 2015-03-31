@@ -13,6 +13,60 @@
 #include "reweightfunctions.h"
 #include <cstdlib>
 #include "AnalysisUtils.h"
+#include "../interface/AnalysisUtils.h"
+#include "../interface/NTFullEvent.h"
+#include "../interface/ttbarControlPlots.h"
+#include "../interface/ttXsecPlots.h"
+#include "../interface/ZControlPlots.h"
+#include "../interface/MCReweighter.h"
+#include "../interface/leptonSelector2.h"
+
+#include "TtZAnalysis/DataFormats/interface/NTLepton.h"
+#include "TtZAnalysis/DataFormats/interface/NTMuon.h"
+#include "TtZAnalysis/DataFormats/interface/NTElectron.h"
+#include "TtZAnalysis/DataFormats/interface/NTJet.h"
+#include "TtZAnalysis/DataFormats/interface/NTMet.h"
+#include "TtZAnalysis/DataFormats/interface/NTEvent.h"
+#include "TtZAnalysis/DataFormats/interface/NTIsolation.h"
+#include "TtZAnalysis/DataFormats/interface/NTTrack.h"
+#include "TtZAnalysis/DataFormats/interface/NTSuClu.h"
+#include "TtZAnalysis/DataFormats/interface/NTTrigger.h"
+#include "TtZAnalysis/DataFormats/interface/NTTriggerObject.h"
+
+
+#include "TtZAnalysis/DataFormats/interface/NTVertex.h"
+
+#include "TtZAnalysis/DataFormats/interface/NTGenLepton.h"
+#include "TtZAnalysis/DataFormats/interface/NTGenParticle.h"
+#include "TtZAnalysis/DataFormats/interface/NTGenJet.h"
+#include "TtZAnalysis/DataFormats/interface/NTLorentzVector.h"
+
+
+#include "TtZAnalysis/DataFormats/interface/helpers.h"
+
+#include "../interface/analysisPlotsMlbMt.h"
+#include "../interface/analysisPlotsTtbarXsecFit.h"
+
+#include "../interface/discriminatorFactory.h"
+
+#include "../interface/tBranchHandler.h"
+
+#include "TtZAnalysis/DataFormats/interface/NTSystWeight.h"
+
+#include <sys/types.h>
+
+
+#include "TtZAnalysis/Tools/interface/fileReader.h"
+
+#include "TtZAnalysis/DataFormats/interface/elecRhoIsoAdder.h"
+#include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
+#include "TTree.h"
+#include "TFile.h"
+#include <fstream>
+#include "TtZAnalysis/Analysis/interface/AnalysisUtils.h"
+#include <algorithm>
+#include <sys/stat.h>
+#include "../interface/tBranchHandler.h"
 
 namespace ztop{class NTEvent;}
 
@@ -34,9 +88,9 @@ class MainAnalyzer{
 
 public:
 	MainAnalyzer();
-	MainAnalyzer(const MainAnalyzer &);
 
-	~MainAnalyzer();
+
+	virtual ~MainAnalyzer();
 
 	void setChannel(TString chan){
 		if(chan.Contains("mumu")) b_mumu_=true;
@@ -79,7 +133,8 @@ public:
 	float createNormalizationInfo(TFile *f,bool isMC,size_t anaid);
 
 	void setMaxChilds(size_t childs){maxchilds_=childs;}
-	void analyze(size_t i);
+
+	virtual void analyze(size_t i)=0;
 
 	void setFileList(TString fl){filelist_=fl;}
 	void setFilePostfixReplace(TString file,TString pf,bool clear=false){
@@ -138,7 +193,7 @@ public:
 
 	///analysis helper functions
 
-	bool checkTrigger(std::vector<bool> * ,ztop::NTEvent * , bool , size_t);
+	virtual bool checkTrigger(std::vector<bool> * ,ztop::NTEvent * , bool , size_t)=0;
 
 	/**
 	 * for child processes
@@ -162,8 +217,7 @@ public:
 
 	void setPathToConfigFile(const TString & path){pathtoconffile_=path;}
 
-private:
-
+protected:
 
 
 	void copyAll(const MainAnalyzer &);
