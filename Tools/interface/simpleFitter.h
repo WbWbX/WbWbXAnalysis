@@ -12,6 +12,7 @@
 #include <vector>
 #include "Math/Functor.h"
 #include "Math/Minimizer.h"
+#include <algorithm>
 
 namespace ztop{
 class histo2D;
@@ -57,7 +58,7 @@ public:
 	 *  - 2st parameter: x- shift
 	 *  - 3nd parameter: width
 	 */
-	enum fitmodes{fm_pol0,fm_pol1,fm_pol2,fm_pol3,fm_pol4,fm_gaus,fm_offgaus};
+	enum fitmodes{fm_pol0,fm_pol1,fm_pol2,fm_pol3,fm_pol4,fm_gaus,fm_offgaus,fm_exp};
 	enum printlevels{pl_silent,pl_normal,pl_verb}; //TBI
 	enum minimizers{mm_minuitMinos,mm_minuit2};
 
@@ -94,6 +95,11 @@ public:
 
 	void setParameter(size_t idx,double value);
 	void setParameterFixed(size_t idx,bool fixed=true);
+	void setParameterLowerLimit(size_t idx,double value);
+	void setParameterUpperLimit(size_t idx,double value);
+	void removeParameterLowerLimit(size_t idx);
+	void removeParameterUpperLimit(size_t idx);
+
 
 	void setRequireFitFunction(bool req){requirefitfunction_=req;}
 
@@ -141,6 +147,12 @@ public:
 	 * requires parameter b to be a minos parameter
 	 */
 	void getParameterErrorContribution(size_t a, size_t b,double & errup, double& errdown);
+	/**
+	 * gets the contribution of a to b by fixing the parameters a, repeating minos and returning the changes in errup and errdown
+	 * failures are indicated by negative return values!
+	 * requires parameter b to be a minos parameter
+	 */
+	void getParameterErrorContributions(std::vector<size_t> a, size_t b,double & errup, double& errdown);
 
 	/**
 	 * Fixes all parameters and thereby determines the statistical component of the
@@ -193,6 +205,8 @@ private:
 	std::vector< std::vector<double> > paracorrs_;
 
 	std::vector<int> minospars_;
+	std::vector<std::pair<bool, double> > lowerlimits_;
+	std::vector<std::pair<bool, double> > upperlimits_;
 
 	unsigned int  maxcalls_;
 

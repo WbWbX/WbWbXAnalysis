@@ -19,6 +19,7 @@
 <bin name="plotControlPlot" file="plotControlPlot.cc" />
 <bin name="addRelSystematics" file="addRelSystematics.cc" />
 <bin name="listSystematics" file="listSystematics.cc" />
+<bin name="makeCombination" file="makeCombination.cc" />
 
-
+<bin name="extractMtFromInclXsec" file="extractMtFromInclXsec.cc" />
 <Flags CXXFLAGS="-lXMLParser -lunfold -fopenmp"/>

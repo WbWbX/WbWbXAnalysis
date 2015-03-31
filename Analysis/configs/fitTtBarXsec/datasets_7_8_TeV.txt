@@ -18,13 +18,12 @@
 
    TT_SCALE   =  box
    TT_GENPOWPY=  boxright
-  # CR         =  boxleft
    TT_MATCH   =  box
 
    UE = box
-  # PDF =fixed
    CR         =  boxleft
 
+   TOPPT = boxright
    ##due to missing SF
  #  BTAGH_7TeV = float
  #  BTAGL_7TeV = float
@@ -64,6 +63,7 @@
 
 [ correlations 8TeV - 7TeV ]
 
+
 # 1 is implicit
  #  PDF = 1
  #  TOPPT = 1
@@ -75,39 +75,38 @@
  #  TT_BJESRETUNE = 1
  #  TT_GENPOWPY= 1
 
-   JES_Flavor = 0.5
+   JES_Flavor = 1
 
    JES_RelativeFSR = 0.5
-   JES_AbsoluteMPFBias = 0.2
-   JES_PileupPt = 0
+   JES_AbsoluteMPFBias = 0.5
+   JES_PileupPt = 0.5
    JES_Uncorrelated = 0
    
-   MUONES = 0.5
+   MUONES = 0.9
   # MUONSF = 0.5
-   MUONSF = 0
-   ELECES = 0.5
-   ELECSF = 0.5
- # ELECSF = 0
-   JER    = 0.5
+   ELECES = 0.9
+   ELECSF = 0.9
+   JER    = 0.9
  #  BTAGH  = 0.5
    BTAGH  = 0
  #  BTAGL  = 0.5
    BTAGL  = 0
- #  TRIGGER= 0.5
-   TRIGGER= 0
+   TRIGGER= 0.8
+  # TRIGGER= 0
    
-   PU = 0
+   PU = 0.5
    
    
-   BG_tW/#bar{t}W#rightarrowll= 0.5
-   BG_VV            = 0.5
-   BG_t#bar{t}bg   = 0.5
-   BG_Wjets   = 0.5
-   BG_QCD   = 0.5
-   BG_t#bar{t}V/#gamma = 0.5
-   BG_0_bjets_DY = 0.5
-   BG_1_bjets_DY = 0.5
-   BG_2_bjets_DY = 0.5
+   BG_tW/#bar{t}W#rightarrowll= 0.9
+   BG_VV            = 0.9
+   BG_t#bar{t}bg   = 0.9
+   BG_Wjets   = 0.9
+   BG_QCD   = 0.9
+   BG_t#bar{t}V/#gamma = 0.9
+   BG_0_bjets_DY = 0.9
+   BG_1_bjets_DY = 0.9
+   BG_2_bjets_DY = 0.9
+
 
 [end - correlations ]
 
@@ -115,47 +114,47 @@
 
 [ 8TeV ]
 
-   emu_8TeV_172.5_nominal_syst.root | total 0,0 b-jets step 8  ##these should include 3+ bjets events
-   emu_8TeV_172.5_nominal_syst.root | lead jet pt 0,1 b-jets step 8
-   emu_8TeV_172.5_nominal_syst.root | second jet pt 0,2 b-jets step 8
-   emu_8TeV_172.5_nominal_syst.root | third jet pt 0,3 b-jets step 8
+   emu_8TeV_172.5_nominal_syst.ztop | total 0,0 b-jets step 8  ##these should include 3+ bjets events
+   emu_8TeV_172.5_nominal_syst.ztop | lead jet pt 0,1 b-jets step 8
+   emu_8TeV_172.5_nominal_syst.ztop | second jet pt 0,2 b-jets step 8
+   emu_8TeV_172.5_nominal_syst.ztop | third jet pt 0,3 b-jets step 8
 
 bjet++
 
-   emu_8TeV_172.5_nominal_syst.root | total 1,0 b-jets step 8
-   emu_8TeV_172.5_nominal_syst.root | lead jet pt 1,1 b-jets step 8
-   emu_8TeV_172.5_nominal_syst.root | second jet pt 1,2 b-jets step 8
-   emu_8TeV_172.5_nominal_syst.root | third jet pt 1,3 b-jets step 8
+   emu_8TeV_172.5_nominal_syst.ztop | total 1,0 b-jets step 8
+   emu_8TeV_172.5_nominal_syst.ztop | lead jet pt 1,1 b-jets step 8
+   emu_8TeV_172.5_nominal_syst.ztop | second jet pt 1,2 b-jets step 8
+   emu_8TeV_172.5_nominal_syst.ztop | third jet pt 1,3 b-jets step 8
 
 bjet++
 
-   emu_8TeV_172.5_nominal_syst.root | total 2,0 b-jets step 8
-   emu_8TeV_172.5_nominal_syst.root | lead jet pt 2,1 b-jets step 8
-   emu_8TeV_172.5_nominal_syst.root | second jet pt 2,2 b-jets step 8
-   emu_8TeV_172.5_nominal_syst.root | third jet pt 2,3 b-jets step 8
+   emu_8TeV_172.5_nominal_syst.ztop | total 2,0 b-jets step 8
+   emu_8TeV_172.5_nominal_syst.ztop | lead jet pt 2,1 b-jets step 8
+   emu_8TeV_172.5_nominal_syst.ztop | second jet pt 2,2 b-jets step 8
+   emu_8TeV_172.5_nominal_syst.ztop | third jet pt 2,3 b-jets step 8
 
 
 [ end - 8TeV ]
 ##########################################
 [ 7TeV ]
 
-   emu_7TeV_172.5_nominal_syst.root | total 0,0 b-jets step 8  ##these should include 3+ bjets events
-   emu_7TeV_172.5_nominal_syst.root | lead jet pt 0,1 b-jets step 8
-   emu_7TeV_172.5_nominal_syst.root | second jet pt 0,2 b-jets step 8
-   emu_7TeV_172.5_nominal_syst.root | third jet pt 0,3 b-jets step 8
+   emu_7TeV_172.5_nominal_syst.ztop | total 0,0 b-jets step 8  ##these should include 3+ bjets events
+   emu_7TeV_172.5_nominal_syst.ztop | lead jet pt 0,1 b-jets step 8
+   emu_7TeV_172.5_nominal_syst.ztop | second jet pt 0,2 b-jets step 8
+   emu_7TeV_172.5_nominal_syst.ztop | third jet pt 0,3 b-jets step 8
 
 bjet++
 
-   emu_7TeV_172.5_nominal_syst.root | total 1,0 b-jets step 8
-   emu_7TeV_172.5_nominal_syst.root | lead jet pt 1,1 b-jets step 8
-   emu_7TeV_172.5_nominal_syst.root | second jet pt 1,2 b-jets step 8
-   emu_7TeV_172.5_nominal_syst.root | third jet pt 1,3 b-jets step 8
+   emu_7TeV_172.5_nominal_syst.ztop | total 1,0 b-jets step 8
+   emu_7TeV_172.5_nominal_syst.ztop | lead jet pt 1,1 b-jets step 8
+   emu_7TeV_172.5_nominal_syst.ztop | second jet pt 1,2 b-jets step 8
+   emu_7TeV_172.5_nominal_syst.ztop | third jet pt 1,3 b-jets step 8
 
 bjet++
 
-   emu_7TeV_172.5_nominal_syst.root | total 2,0 b-jets step 8
-   emu_7TeV_172.5_nominal_syst.root | lead jet pt 2,1 b-jets step 8
-   emu_7TeV_172.5_nominal_syst.root | second jet pt 2,2 b-jets step 8
-   emu_7TeV_172.5_nominal_syst.root | third jet pt 2,3 b-jets step 8
+   emu_7TeV_172.5_nominal_syst.ztop | total 2,0 b-jets step 8
+   emu_7TeV_172.5_nominal_syst.ztop | lead jet pt 2,1 b-jets step 8
+   emu_7TeV_172.5_nominal_syst.ztop | second jet pt 2,2 b-jets step 8
+   emu_7TeV_172.5_nominal_syst.ztop | third jet pt 2,3 b-jets step 8
 
 [ end - 7TeV ]

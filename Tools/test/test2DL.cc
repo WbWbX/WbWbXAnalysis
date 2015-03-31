@@ -71,23 +71,50 @@ double LH_Exp(float mtop,float xsec){
 invokeApplication(){
 
 	using namespace ztop;
+	const float corrcoeff=parser->getOpt<float>("-c",0,"correlation coefficient between fitted cross sections");
 	const std::vector<TString> in=parser->getRest<TString>();
-	if(in.size()!=1)
-		return -1;
-	const TString infile=in.at(0);
+	parser->doneParsing();
+	std::vector<TString> in7TeV,in8TeV;
+	for(size_t i=0;i<in.size();i++){
+		const TString & infile=in.at(i);
+		if(infile.Contains("7TeV"))
+			in7TeV.push_back(infile);
+		else
+			in8TeV.push_back(infile);
+	}
 
-	float energy=8;
-	if(infile.Contains("7TeV"))
-		energy=7;
+	graph expg7,expg8;
+	graphFitter gf7,gf8;
+	for(size_t k=0;k<2;k++){
+		graph& g=expg7;
+		const std::vector<TString>& ins=in7TeV;
+		if(k){
+			g=expg8;
+			ins=in8TeV;
+		}
+		for(size_t i=0;i<ins.size();i++){
+			const TString & infile=ins.at(i);
+			graph tmpg;
+			tmpg.readFromFile(ins.at(i).Data());
+			g.mergeWith(tmpg);
+		}
 
-	graph expg;
-	expg.loadFromTFile(infile,"");
-	graphFitter gf;
-	gf.setFitMode(graphFitter::fm_pol2);
-	gf.readGraph(&expg);
-	gf.fit();
+	}
 
-	std::cout << "Fitted dep: " << gf.getParameter(0) << "+ mt * " << gf.getParameter(1) << "+ mt*mt*" << gf.getParameter(2) <<std::endl;
+
+	graphFitter gf7,gf8;
+	gf7.setFitMode(graphFitter::fm_pol2);
+	gf7.readGraph(&expg7);
+	gf7.fit();
+	gf8.setFitMode(graphFitter::fm_pol2);
+	gf8.readGraph(&expg7);
+	gf8.fit();
+
+	std::cout << "Fitted dep 7TeV: " << gf7.getParameter(0)
+			<< "+ mt * " << gf7.getParameter(1) << "+ mt*mt*" << gf7.getParameter(2) <<std::endl;
+	std::cout << "Fitted dep 8TeV: " << gf7.getParameter(0)
+				<< "+ mt * " << gf8.getParameter(1) << "+ mt*mt*" << gf8.getParameter(2) <<std::endl;
+
 
 	float xsecerrup=0.039;
 	float xsecerrdown=0.035;
@@ -185,7 +212,7 @@ invokeApplication(){
 	pl.cleanMem();
 
 	//integrate:
-/*
+	/*
 	histo2D loglh=lhtochi2(contexp);
 	histo1D marginalized = loglh.projectToX(false);
 	plotterMultiplePlots plm;
@@ -195,7 +222,7 @@ invokeApplication(){
 	plm.readTextBoxesInCMSSW("/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt","CMSnoSplitRight2D");
 	plm.draw();
 	cv.Print("expTheoMarg" +nrgstr+".pdf");
-*/
+	 */
 
 	//brute force scan for max
 	float maxmt=0,maxlh=0,dummy;

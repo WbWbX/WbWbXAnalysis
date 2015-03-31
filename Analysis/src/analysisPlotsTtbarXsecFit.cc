@@ -36,7 +36,7 @@ void analysisPlotsTtbarXsecFit::bookPlots(){
 	total_plots.at(cat_2bjet3jet) = addPlot(bins,bins,"total 2,3 b-jets","","N_{evt}");
 
 	bins.clear();
-	bins << 20 << 25 << 30 << 35  << 40 << 50 << 60 << 70 << 80 << 90 << 100 << 120 << 140 << 160 << 200;
+	bins << 30 << 35  << 40 << 50 << 60 << 70 << 80 << 90 << 100 << 120 << 140 << 160 << 200;
 	leadjetpt_plots.at(cat_0bjet0jet) = addPlot(bins,bins,"lead jet pt 0,0 b-jets","p_{t}^{1^{st}j} [GeV]","N_{j}");
 	leadjetpt_plots.at(cat_0bjet1jet) = addPlot(bins,bins,"lead jet pt 0,1 b-jets","p_{t}^{1^{st}j} [GeV]","N_{j}");
 	leadjetpt_plots.at(cat_0bjet2jet) = addPlot(bins,bins,"lead jet pt 0,2 b-jets","p_{t}^{1^{st}j} [GeV]","N_{j}");
@@ -46,7 +46,7 @@ void analysisPlotsTtbarXsecFit::bookPlots(){
 	leadjetpt_plots.at(cat_1bjet2jet) = addPlot(bins,bins,"lead jet pt 1,2 b-jets","p_{t}^{1^{st}j} [GeV]","N_{j}");
 	leadjetpt_plots.at(cat_1bjet3jet) = addPlot(bins,bins,"lead jet pt 1,3 b-jets","p_{t}^{1^{st}j} [GeV]","N_{j}");
 	bins.clear();
-	bins << 20  << 30  << 40 << 50 << 60 << 70 << 80 << 90 << 100 << 160 << 200;
+	bins << 30    << 40 << 50 << 60 << 70 << 80 << 90 << 120 << 160;
 	leadjetpt_plots.at(cat_2bjet0jet) = addPlot(bins,bins,"lead jet pt 2,0 b-jets","p_{t}^{1^{st}j} [GeV]","N_{j}");
 	leadjetpt_plots.at(cat_2bjet1jet) = addPlot(bins,bins,"lead jet pt 2,1 b-jets","p_{t}^{1^{st}j} [GeV]","N_{j}");
 	leadjetpt_plots.at(cat_2bjet2jet) = addPlot(bins,bins,"lead jet pt 2,2 b-jets","p_{t}^{1^{st}j} [GeV]","N_{j}");
@@ -54,19 +54,23 @@ void analysisPlotsTtbarXsecFit::bookPlots(){
 
 
 	bins.clear();
-	bins << 20 << 25 << 30 << 35  << 40 << 50 << 60 << 70 << 80 << 90 << 100 << 120 << 140 << 160 << 200;
+	bins << 30 << 35  << 40 << 50 << 60 << 70 << 80 << 90 << 100 << 120 << 140  << 200;
 	secondjetpt_plots.at(cat_0bjet0jet) = addPlot(bins,bins,"second jet pt 0,0 b-jets","p_{t}^{2^{nd}j} [GeV]","N_{j}");
 	secondjetpt_plots.at(cat_0bjet1jet) = addPlot(bins,bins,"second jet pt 0,1 b-jets","p_{t}^{2^{nd}j} [GeV]","N_{j}");
 	secondjetpt_plots.at(cat_0bjet2jet) = addPlot(bins,bins,"second jet pt 0,2 b-jets","p_{t}^{2^{nd}j} [GeV]","N_{j}");
 	secondjetpt_plots.at(cat_0bjet3jet) = addPlot(bins,bins,"second jet pt 0,3 b-jets","p_{t}^{2^{nd}j} [GeV]","N_{j}");
 	secondjetpt_plots.at(cat_0bjet3jet) ->setAllowMultiRecoFill(true); //little twist
+	bins.clear();
+	bins      << 30 << 35  << 40 << 50 << 60 << 70 << 80 << 90 << 100 << 120 << 140  << 200;
 	secondjetpt_plots.at(cat_1bjet0jet) = addPlot(bins,bins,"second jet pt 1,0 b-jets","p_{t}^{2^{nd}j} [GeV]","N_{j}");
 	secondjetpt_plots.at(cat_1bjet1jet) = addPlot(bins,bins,"second jet pt 1,1 b-jets","p_{t}^{2^{nd}j} [GeV]","N_{j}");
 	secondjetpt_plots.at(cat_1bjet2jet) = addPlot(bins,bins,"second jet pt 1,2 b-jets","p_{t}^{2^{nd}j} [GeV]","N_{j}");
+	bins.clear();
+	bins      << 30 << 35  << 40 << 50 << 60 << 70 << 80 << 90 << 100 << 120 << 200;
 	secondjetpt_plots.at(cat_1bjet3jet) = addPlot(bins,bins,"second jet pt 1,3 b-jets","p_{t}^{2^{nd}j} [GeV]","N_{j}");
 	secondjetpt_plots.at(cat_1bjet3jet) ->setAllowMultiRecoFill(true); //little twist
 	bins.clear();
-	bins << 20  << 30  << 40 << 50 << 60 << 70 << 80 << 90 << 100 << 160 << 200;
+	bins  << 30  << 45 <<  65  << 80 << 100 << 120 << 160 << 300;
 	secondjetpt_plots.at(cat_2bjet0jet) = addPlot(bins,bins,"second jet pt 2,0 b-jets","p_{t}^{2^{nd}j} [GeV]","N_{j}");
 	secondjetpt_plots.at(cat_2bjet1jet) = addPlot(bins,bins,"second jet pt 2,1 b-jets","p_{t}^{2^{nd}j} [GeV]","N_{j}");
 	secondjetpt_plots.at(cat_2bjet2jet) = addPlot(bins,bins,"second jet pt 2,2 b-jets","p_{t}^{2^{nd}j} [GeV]","N_{j}");
@@ -74,19 +78,21 @@ void analysisPlotsTtbarXsecFit::bookPlots(){
 	secondjetpt_plots.at(cat_2bjet3jet) ->setAllowMultiRecoFill(true); //little twist
 
 	bins.clear();
-	bins << 20 << 25 << 30 << 35  << 40 << 50 << 60 << 70 << 80 << 90 << 100 << 120 << 140 << 160 << 200;
+	bins<< 30 << 35  << 40 << 50 << 60 << 70 << 80 << 90 << 100 << 120 << 140 << 200;
 	thirdjetpt_plots.at(cat_0bjet0jet) = addPlot(bins,bins,"third jet pt 0,0 b-jets","p_{t}^{3^{rd}j} [GeV]","N_{j}");
 	thirdjetpt_plots.at(cat_0bjet1jet) = addPlot(bins,bins,"third jet pt 0,1 b-jets","p_{t}^{3^{rd}j} [GeV]","N_{j}");
 	thirdjetpt_plots.at(cat_0bjet2jet) = addPlot(bins,bins,"third jet pt 0,2 b-jets","p_{t}^{3^{rd}j} [GeV]","N_{j}");
 	thirdjetpt_plots.at(cat_0bjet3jet) = addPlot(bins,bins,"third jet pt 0,3 b-jets","p_{t}^{3^{rd}j} [GeV]","N_{j}");
 	thirdjetpt_plots.at(cat_0bjet3jet) ->setAllowMultiRecoFill(true); //little twist
+	bins.clear();
+	bins << 30 << 35  << 40 << 50 << 60 << 70 << 80 << 90 << 100 << 200;
 	thirdjetpt_plots.at(cat_1bjet0jet) = addPlot(bins,bins,"third jet pt 1,0 b-jets","p_{t}^{3^{rd}j} [GeV]","N_{j}");
 	thirdjetpt_plots.at(cat_1bjet1jet) = addPlot(bins,bins,"third jet pt 1,1 b-jets","p_{t}^{3^{rd}j} [GeV]","N_{j}");
 	thirdjetpt_plots.at(cat_1bjet2jet) = addPlot(bins,bins,"third jet pt 1,2 b-jets","p_{t}^{3^{rd}j} [GeV]","N_{j}");
 	thirdjetpt_plots.at(cat_1bjet3jet) = addPlot(bins,bins,"third jet pt 1,3 b-jets","p_{t}^{3^{rd}j} [GeV]","N_{j}");
 	thirdjetpt_plots.at(cat_1bjet3jet) ->setAllowMultiRecoFill(true); //little twist
 	bins.clear();
-	bins << 20  << 30  << 40 << 50 << 60 << 70 << 80 << 90 << 100 << 160 << 200;
+	bins << 30    << 55  << 70  << 90  << 200;
 	thirdjetpt_plots.at(cat_2bjet0jet) = addPlot(bins,bins,"third jet pt 2,0 b-jets","p_{t}^{3^{rd}j} [GeV]","N_{j}");
 	thirdjetpt_plots.at(cat_2bjet1jet) = addPlot(bins,bins,"third jet pt 2,1 b-jets","p_{t}^{3^{rd}j} [GeV]","N_{j}");
 	thirdjetpt_plots.at(cat_2bjet2jet) = addPlot(bins,bins,"third jet pt 2,2 b-jets","p_{t}^{3^{rd}j} [GeV]","N_{j}");
@@ -108,7 +114,7 @@ void analysisPlotsTtbarXsecFit::fillPlotsGen(){
 	 * Including intermediate tau decays (or not)
 	 */
 
-	std::vector<NTGenParticle*> genvisleptons1=produceCollection(event()->genleptons1,30,2.4);
+	std::vector<NTGenParticle*> genvisleptons1=produceCollection(event()->genleptons1,20,2.4);
 
 	//only fill one bin in some visible part of the histogram to get the total
 	// n_gen and a nice display of PS migrations

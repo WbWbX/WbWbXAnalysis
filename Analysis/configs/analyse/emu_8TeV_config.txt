@@ -41,16 +41,17 @@ tree_8TeV_dyee120inf.root,	   DY#rightarrowll,	858,	  3532.8, 8
 tree_8TeV_dymumu1050.root,	   DY#rightarrowll,	858,	  860,	  8
 tree_8TeV_dymumu5060.root,	   DY#rightarrowll,	858,	  3532.8, 8
 tree_8TeV_dymumu120inf.root,	   DY#rightarrowll,	858,	  3532.8, 8
-tree_8TeV_qcdem2030.root,	   QCD,			400,	  2914860,9
-tree_8TeV_qcdem3080.root,	   QCD,			400,	  4615893,9
-tree_8TeV_qcdem80170.root,	   QCD,			400,	  183294, 9
-tree_8TeV_qcdmu15.root,		   QCD,			400,	  134680, 9
+
+$tree_8TeV_qcdem2030.root,	   QCD,			400,	  2914860,9
+$tree_8TeV_qcdem3080.root,	   QCD,			400,	  4615893,9
+$tree_8TeV_qcdem80170.root,	   QCD,			400,	  183294, 9
+$tree_8TeV_qcdmu15.root,		   QCD,			400,	  134680, 9
 
 $ rare tt processes
 
-tree_ttbarg.root,                  t#bar{t}V/#gamma,    798,      1.8,   10
-tree_ttbarw.root,                  t#bar{t}V/#gamma,    798,      0.232, 10
-tree_ttbarz.root,                  t#bar{t}V/#gamma,    798,      0.2057,10
+$tree_ttbarg.root,                  t#bar{t}V/#gamma,    798,      1.8,   10
+tree_ttbarw.root,                  t#bar{t}V,    798,      0.232, 10
+tree_ttbarz.root,                  t#bar{t}V,    798,      0.2057,10
 
 [inputfiles-end]
 
@@ -87,6 +88,6 @@ btagShapeFileHF = /src/TopAnalysis/Configuration/analysis/common/data/csv_rwt_hf
 btagShapeFileLF = /src/TopAnalysis/Configuration/analysis/common/data/csv_rwt_lf_20pt_8_20_14.root
 
 
-modeOptions = GsfelectronsZerojetNozcutNometcutNobcutBtagcsvtLeppt30Notoppt
+modeOptions = GsfelectronsZerojetNozcutNometcutNobcutBtagcsvtNotoppt
 
 [parameters-end]

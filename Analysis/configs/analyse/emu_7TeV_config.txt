@@ -47,8 +47,8 @@ $tree_7TeV_qcdmu15.root,		   QCD,			400,	  134680, 9
 $ rare tt processes
 
 $tree_ttbarg.root,                  t#bar{t}V/#gamma,    798,      1.8,   10
-$tree_ttbarw.root,                  t#bar{t}V/#gamma,    798,      0.232, 10
-$tree_ttbarz.root,                  t#bar{t}V/#gamma,    798,      0.2057,10
+tree_ttbarw.root,                  t#bar{t}V,    798,      0.17, 10
+tree_ttbarz.root,                  t#bar{t}V,    798,      0.14,10
 
 [inputfiles-end]
 
@@ -86,5 +86,5 @@ btagShapeFileHF = /src/TopAnalysis/Configuration/analysis/common/data/csv_rwt_hf
 btagShapeFileLF = /src/TopAnalysis/Configuration/analysis/common/data/csv_rwt_lf_20pt_8_20_14.root
 
 
-modeOptions = GsfelectronsZerojetNozcutNometcutNobcutBtagcsvtLeppt30Notoppt
+modeOptions = GsfelectronsZerojetNozcutNometcutNobcutBtagcsvtNotoppt
 [parameters-end]

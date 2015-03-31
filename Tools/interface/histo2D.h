@@ -66,6 +66,8 @@ public:
 
 	float getMax(int syslayer=-1)const;
 	float getMin(int syslayer=-1)const;
+	float getMax(size_t& xbin, size_t& ybin,int syslayer=-1)const;
+	float getMin(size_t& xbin, size_t& ybin,int syslayer=-1)const;
 
 	histo2D rebinXToBinning(const std::vector<float>& )const;
 	histo2D rebinXtoBinning(const histo1D&)const;

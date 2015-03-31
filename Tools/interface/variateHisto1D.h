@@ -25,6 +25,11 @@ public:
 	//exports for a certain set of variations
 	//no syst for now!
 	histo1D exportContainer(const std::vector<double> & variations)const;
+
+	/**
+	 * exports for a certain set of variations and constraints on them
+	 */
+	histo1D exportContainer(const std::vector<double> & variations,const std::vector<double> & symm_constraints,const std::vector<TString> & varnames)const;
 	/**
 	 * exports with 0 variation
 	 */
@@ -52,6 +57,27 @@ public:
 	const extendedVariable * getBin(size_t idx)const{if(contents_.size()>0) return &contents_.at(idx);else return 0;}
 
 	double getIntegral(const double * vars)const;
+	extendedVariable getIntegral()const;
+
+	variateHisto1D& operator *= (const variateHisto1D&);
+	variateHisto1D operator * (const variateHisto1D&)const;
+	variateHisto1D& operator /= (const variateHisto1D&);
+	variateHisto1D operator / (const variateHisto1D&)const;
+	variateHisto1D& operator += (const variateHisto1D&);
+	variateHisto1D operator + (const variateHisto1D&)const;
+	variateHisto1D& operator -= (const variateHisto1D&);
+	variateHisto1D operator - (const variateHisto1D&)const;
+
+	variateHisto1D& operator *= (const extendedVariable&);
+	variateHisto1D operator * (const extendedVariable&)const;
+	variateHisto1D& operator /= (const extendedVariable&);
+	variateHisto1D operator / (const extendedVariable&)const;
+
+
+	variateHisto1D& operator *= (const double&);
+	variateHisto1D operator * (const double&)const;
+	variateHisto1D& operator /= (const double&);
+	variateHisto1D operator / (const double&)const;
 
 	static bool debug;
 
@@ -63,6 +89,8 @@ private:
 	//this is for stat uncertainties
 	std::vector<float> errsup_;
 	std::vector<float> errsdown_;
+
+	void checkCompat(const variateHisto1D& rhs)const;
 
 };
 

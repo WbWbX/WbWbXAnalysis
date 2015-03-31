@@ -73,7 +73,8 @@ void graphFitter::readGraph(const graph* g){
 
 	}
 
-
+	float ymax=g->getYMax(true);
+	float ymin=g->getYMin(true);
 	for(size_t i=0;i<g->getNPoints();i++){
 
 		if(debug){
@@ -82,8 +83,17 @@ void graphFitter::readGraph(const graph* g){
 		}
 
 		nompoints.push_back(point2D (g->getPointXContent(i),g->getPointYContent(i)));
-		errsup.push_back(point2D (g->getPointXErrorUp(i,false),g->getPointYErrorUp(i,false)));
-		errsdown.push_back(point2D (g->getPointXErrorDown(i,false),g->getPointYErrorDown(i,false)));
+		float xup,xdown,yup,ydown;
+		xup=g->getPointXErrorUp(i,false);
+		xdown=g->getPointXErrorDown(i,false);
+		yup=g->getPointYErrorUp(i,false);
+		ydown=g->getPointYErrorDown(i,false);
+		if(yup==0)
+			yup=fabs(ymax-ymin)*0.0001;
+		if(ydown==0)
+			ydown=fabs(ymax-ymin)*0.0001;
+		errsup.push_back(point2D (xup,yup));
+		errsdown.push_back(point2D (xdown,ydown));
 	}
 	setPoints(nompoints);
 	setErrorsUp(errsup);

@@ -38,7 +38,7 @@ public:
 		fitsucc_(false),norm_nbjet_global_(true),
 		useMConly_(false),removesyst_(false),nominos_(false),
 		parameterwriteback_(true),
-		nosystbd_(false),silent_(false),nopriors_(false),visibleps_(false),topmassrepl_(-100)
+		nosystbd_(false),silent_(false),nopriors_(false),topmassrepl_(-100)
 	{
 	} //one for each energy
 
@@ -56,8 +56,6 @@ public:
 	 */
 	void setExcludeZeroBjetBin(bool excl){exclude0bjetbin_=excl;}
 
-
-	void setDoVisiblePS(bool doit){visibleps_=doit;}
 	//read in functions here
 
 
@@ -131,6 +129,7 @@ public:
 
 	double getXsec(size_t datasetidx)const;
 	double getXsecOffset(size_t datasetidx)const;
+	double getVisXsec(size_t datasetidx)const;
 
 	double getXsecRatio(size_t datasetidx1,size_t datasetidx2, double & errup, double& errdown)const;
 
@@ -144,10 +143,13 @@ public:
 	void getParaErrorContributionToXsec(int idx, size_t  datasetidx,double& up,double&down,bool& anticorr);
 
 	void createSystematicsBreakdowns();
+	void createSystematicsBreakdownsMerged();
 
-	texTabler makeSystBreakDownTable(size_t datasetidx);
+	texTabler makeSystBreakDownTable(size_t datasetidx,bool detailed=true);
 
 	texTabler makeCorrTable() const;
+
+	graph getResultsGraph(size_t idx,const float x_coord)const;
 
 	void createPseudoDataFromMC(histo1D::pseudodatamodes mode=histo1D::pseudodata_poisson);
 
@@ -189,10 +191,14 @@ private:
 		{}
 
 		extendedVariable& eps_emu(){return eps_emu_;}
+		extendedVariable& acceptance_extr(){return acceptance_extr_;}
+		extendedVariable& acceptance(){return acceptance_;}
 		const extendedVariable& eps_emu()const {return eps_emu_;}
+		const extendedVariable& acceptance_extr()const{return acceptance_extr_;}
+		const extendedVariable& acceptance()const{return acceptance_;}
 
-		extendedVariable& normalization(size_t nbjet){return normalization_nbjet_.at(nbjet);}
-		const extendedVariable& normalization(size_t nbjet)const {return normalization_nbjet_.at(nbjet);}
+		extendedVariable& omega_b(size_t nbjet){return omega_nbjet_.at(nbjet);}
+		const extendedVariable& omega_b(size_t nbjet)const {return omega_nbjet_.at(nbjet);}
 
 		variateHisto1D& signalshape(size_t nbjet){return signalshape_nbjet_.at(nbjet);}
 		const variateHisto1D& signalshape(size_t nbjet)const {return signalshape_nbjet_.at(nbjet);}
@@ -219,7 +225,7 @@ private:
 		void equalizeIndices(dataset & rhs);
 
 		void createPseudoDataFromMC(histo1D::pseudodatamodes mode=histo1D::pseudodata_poisson);
-		void createContinuousDependencies(bool,bool);
+		void createContinuousDependencies(bool,const std::vector<size_t>& );
 
 		std::vector<TString> getSystNames()const{
 			if(signalconts_nbjets_.size()<1)
@@ -235,6 +241,8 @@ private:
 
 		std::vector<systematic_unc>& postFitSystematicsFull(){return post_fit_systematics_;}
 		const std::vector<systematic_unc>& postFitSystematicsFull() const{return post_fit_systematics_;}
+		std::vector<systematic_unc>& postFitSystematicsFullSimple(){return post_fit_systematics_simple_;}
+		const std::vector<systematic_unc>& postFitSystematicsFullSimple() const{return post_fit_systematics_simple_;}
 
 
 
@@ -244,7 +252,7 @@ private:
 		variateHisto1D createLeptonJetAcceptance(const std::vector<histo1D>& signals,
 				const std::vector<histo1D>& signalpsmig,
 				const std::vector<histo1D>& signalvisPSgen,
-				size_t bjetcategory, bool visPS);
+				size_t bjetcategory, std::vector<size_t> addfullerrs);
 
 		dataset():totalvisgencontsread_(0){}
 
@@ -253,11 +261,13 @@ private:
 		size_t lumiidx_,xsecidx_;
 		TString name_;
 
-		//global per dataset
+		//global per dataset dependence on extrapolation unc are set to 0 here
 		extendedVariable eps_emu_;
+		//global per dataset dependence on extrapolation unc (and all others) are implemented here
+		extendedVariable acceptance_,acceptance_extr_;
 
 		//per bjet_cat
-		std::vector<extendedVariable> normalization_nbjet_;
+		std::vector<extendedVariable> omega_nbjet_;
 		//per b-jet cat (includes jet categories)
 		std::vector<variateHisto1D>  signalshape_nbjet_;
 		std::vector<variateHisto1D>  background_nbjet_;
@@ -286,7 +296,7 @@ private:
 		std::vector<histo1D> backgroundconts_nbjets_;
 		std::vector<histo1D> backgroundcontsorig_nbjets_;
 
-		std::vector<systematic_unc> post_fit_systematics_;
+		std::vector<systematic_unc> post_fit_systematics_,post_fit_systematics_simple_;
 
 
 	};
@@ -336,7 +346,7 @@ private:
 	//needs to be adapted (?) for more than 2 datasets
 	std::vector<std::pair<TString, double> > priorcorrcoeff_;
 
-	bool nosystbd_,silent_,nopriors_,visibleps_;
+	bool nosystbd_,silent_,nopriors_;
 float topmassrepl_;
 };
 

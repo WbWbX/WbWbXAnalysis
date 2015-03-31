@@ -96,12 +96,16 @@ size_t simpleFitter::hasNParameters(fitmodes mode)const{
 		npars=3;
 	if(mode==fm_pol3)
 		npars=4;
+	if(mode==fm_pol4)
+		npars=5;
 
 
 	if(mode==fm_gaus)
 		npars=3;
 	if(mode==fm_offgaus)
 		npars=4;
+	if(mode==fm_exp)
+		npars=3;
 
 	return npars;
 
@@ -113,13 +117,7 @@ void simpleFitter::setFitMode(fitmodes fitmode){
 
 	paras_.resize(npars,0);
 	stepsizes_.resize(npars,0.001);
-	paraerrsup_.resize(npars,0);
-	paraerrsdown_.resize(npars,0);
-	parafixed_.resize(npars,false);
-	std::vector<double> dummy;
-	dummy.resize(paras_.size(),0);
-	paracorrs_.clear();
-	paracorrs_.resize(paras_.size(),dummy);
+	setParameters(paras_,stepsizes_);
 
 }
 void simpleFitter::setMinFunction( ROOT::Math::Functor* f){
@@ -136,6 +134,9 @@ void simpleFitter::setParameters(const std::vector<double>& inpars,const std::ve
 	dummy.resize(paras_.size(),0);
 	paracorrs_.clear();
 	paracorrs_.resize(paras_.size(),dummy);
+	std::pair<bool, double> limits(false,0);
+	lowerlimits_.resize(paras_.size(),limits);
+	upperlimits_.resize(paras_.size(),limits);
 }
 
 void simpleFitter::setParameter(size_t idx,double value){
@@ -147,6 +148,31 @@ void simpleFitter::setParameterFixed(size_t idx,bool fixed){
 	if(idx >= paras_.size())
 		throw std::out_of_range("simpleFitter::setParameterFixed: index out of range");
 	parafixed_.at(idx)=fixed;
+}
+
+void simpleFitter::setParameterLowerLimit(size_t idx,double value){
+	if(idx >= paras_.size())
+		throw std::out_of_range("simpleFitter::setParameterLowerLimit: index out of range");
+	std::pair<bool, double> limit(true,value);
+	lowerlimits_.at(idx)=limit;
+}
+void simpleFitter::setParameterUpperLimit(size_t idx,double value){
+	if(idx >= paras_.size())
+		throw std::out_of_range("simpleFitter::setParameterUpperLimit: index out of range");
+	std::pair<bool, double> limit(true,value);
+	upperlimits_.at(idx)=limit;
+}
+void simpleFitter::removeParameterLowerLimit(size_t idx){
+	if(idx >= paras_.size())
+		throw std::out_of_range("simpleFitter::removeParameterLowerLimit: index out of range");
+	std::pair<bool, double> limit(false,0);
+	lowerlimits_.at(idx)=limit;
+}
+void simpleFitter::removeParameterUpperLimit(size_t idx){
+	if(idx >= paras_.size())
+		throw std::out_of_range("simpleFitter::removeParameterLowerLimit: index out of range");
+	std::pair<bool, double> limit(false,0);
+	upperlimits_.at(idx)=limit;
 }
 
 void simpleFitter::setAsMinosParameter(size_t parnumber,bool set){
@@ -168,7 +194,7 @@ double simpleFitter::getFitOutput(const double& xin)const{
 }
 void simpleFitter::feedErrorsToSteps(){
 	for(size_t i=0;i<stepsizes_.size();i++)
-		stepsizes_.at(i)=paraerrsup_.at(i);//*0.5; //good enough
+		stepsizes_.at(i)=paraerrsup_.at(i)/2;//*0.5; //good enough
 }
 
 void simpleFitter::fit(){
@@ -314,7 +340,6 @@ void simpleFitter::fillCorrelationCoefficients(histo2D * c)const{
  * always returns positive values if no fault
  */
 void simpleFitter::getParameterErrorContribution(size_t a, size_t b,double & errup, double& errdown){
-
 	if(!wasSuccess())
 		throw std::logic_error("simpleFitter::getParameterErrorContribution: can only be called after fit");
 	if(!pminimizer_)
@@ -326,11 +351,36 @@ void simpleFitter::getParameterErrorContribution(size_t a, size_t b,double & err
 		errup=0;
 		return;
 	}
+
+	std::vector<size_t> as;
+	as.push_back(a);
+
+	getParameterErrorContributions(as,b,errup,errdown);
+	if(getCorrelationCoefficient(a,b)<0){
+		errup=-errdown;
+	}
+	else{
+		errup=errdown;
+		errdown=-errdown;
+	}
+}
+
+void simpleFitter::getParameterErrorContributions(std::vector<size_t> a, size_t b,double & errup, double& errdown){
+
+	if(!wasSuccess())
+		throw std::logic_error("simpleFitter::getParameterErrorContributions: can only be called after fit");
+	if(!pminimizer_)
+		throw std::logic_error("simpleFitter::getParameterErrorContributions: can only be called after fit (minimizer pointer 0) IF YOU SEE THIS< SOMETHING IS SERIOUSLY WRONG");
+	if(a.size()>=paras_.size() || b>=paras_.size())
+		throw std::out_of_range("simpleFitter::getParameterErrorContributions: one index out of range");
+	if(a.size()<1)
+		throw std::out_of_range("simpleFitter::getParameterErrorContributions: input indices empty");
 	//work on hesse errors
 	double olderr=pminimizer_->Errors()[b];
 	//std::cout << "olderr: " << olderr<<std::endl;
 	ROOT::Math::Minimizer *  min=invokeMinimizer();
-	min->SetFixedVariable(a,paranames_.at(a).Data(),paras_.at(a));
+	for(size_t i=0;i<a.size();i++)
+		min->SetFixedVariable(a.at(i),paranames_.at(a.at(i)).Data(),paras_.at(a.at(i)));
 	ROOT::Math::Functor fcn(chi2func_,paras_.size());
 	if(functobemin_){
 		min->SetFunction(*functobemin_);
@@ -357,13 +407,7 @@ void simpleFitter::getParameterErrorContribution(size_t a, size_t b,double & err
 	else{
 		errdown=-200;
 	}
-	if(getCorrelationCoefficient(a,b)<0){
-		errup=-errdown;
-	}
-	else{
-		errup=errdown;
-		errdown=-errdown;
-	}
+	errup=errdown;
 	delete min;
 }
 void simpleFitter::getStatErrorContribution(size_t b,double & errup, double& errdown){
@@ -455,6 +499,9 @@ double simpleFitter::fitfunction(const double& x,const double *par)const{
 	else if(fitmode_==fm_offgaus){
 		value = par[0]+ par[1] * exp(- (x-par[2])*(x-par[2]) / (2* par[3]*par[3]) ) ;
 	}
+	else if(fitmode_==fm_exp){
+		value = par[0]+ par[1] * exp(x*par[2]);
+	}
 
 	if(value!=value){
 		throw std::runtime_error("simpleFitter::fitfunction: NAN produced");
@@ -479,6 +526,10 @@ bool simpleFitter::checkSizes()const{
 		return false;
 	if(paras_.size() != paraerrsdown_.size())
 		return false;
+	if(paras_.size() != lowerlimits_.size())
+		return false;
+	if(paras_.size() != upperlimits_.size())
+		return false;
 
 	if(requirefitfunction_){
 		if(paras_.size() != hasNParameters(fitmode_))
@@ -502,10 +553,11 @@ bool simpleFitter::checkSizes()const{
 double simpleFitter::nuisanceGaus(const double & in){
 	return in*in;
 }
+
+
+
 double simpleFitter::nuisanceBox(const double & in){
-	double disttoone=fabs(in)-1;
-	if(disttoone<=0) return 0;
-	return (1e4*disttoone*disttoone);
+	throw std::logic_error("simpleFitter::nuisanceBox: use parameter limits instead!");
 }
 double simpleFitter::nuisanceLogNormal(const double & in){
 	throw std::logic_error("simpleFitter::nuisanceLogNormal: nor properly implemented");
@@ -533,6 +585,8 @@ void simpleFitter::copyFrom(const simpleFitter& rhs){
 	parafixed_=rhs.parafixed_ ;
 	paracorrs_=rhs.paracorrs_ ;
 	minospars_=rhs.minospars_ ;
+	lowerlimits_=rhs.lowerlimits_;
+	upperlimits_=rhs.upperlimits_;
 	maxcalls_=rhs.maxcalls_ ;
 	requirefitfunction_=rhs.requirefitfunction_ ;
 	minsuccessful_=false;
@@ -591,10 +645,31 @@ ROOT::Math::Minimizer * simpleFitter::invokeMinimizer()const{
 			min->SetFixedVariable((unsigned int)i,paraname.Data(),paras_.at(i));
 		else
 			min->SetVariable((unsigned int)i,paraname.Data(),paras_.at(i), stepsizes_.at(i));
+
+		if(lowerlimits_.at(i).first && upperlimits_.at(i).first){
+			if(lowerlimits_.at(i).second>=upperlimits_.at(i).second){
+				std::string errstr="simpleFitter::invokeMinimizer: parameter ";
+				errstr+= paraname.Data();
+				errstr+=" has upper limit < lower limit";
+				throw std::out_of_range(errstr);
+			}
+			min->SetLimitedVariable((unsigned int)i,paraname.Data(),paras_.at(i), stepsizes_.at(i),
+					lowerlimits_.at(i).second,upperlimits_.at(i).second);
+		}
+		else if(lowerlimits_.at(i).first){
+			min->SetLowerLimitedVariable((unsigned int)i,paraname.Data(),paras_.at(i), stepsizes_.at(i),
+					lowerlimits_.at(i).second);
+		}
+		else if(upperlimits_.at(i).first){
+			min->SetUpperLimitedVariable((unsigned int)i,paraname.Data(),paras_.at(i), stepsizes_.at(i),
+					upperlimits_.at(i).second);
+		}
 	}
 	//std::numeric_limits<double> lim;
 	min->SetPrecision(DBL_EPSILON); //16
 	min->SetStrategy(strategy_);
+
+
 
 	return min;
 }

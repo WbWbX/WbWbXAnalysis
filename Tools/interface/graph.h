@@ -26,6 +26,11 @@ class histo1D;
 /**
  * Class for handling x-y points with n errors (each including optional statistics)
  * Be careful! X points contain Y variations and Y points contain X variations!
+ * ->no problem if public access functions are used
+ *
+ * Some "add" functions treat the graph like a histogram, some more like a graph
+ * keep that in mind for this hybrid class. But (this part) of the behaviour
+ * in functions is commented thoroughly
  *
  */
 class graph : public taggedObject{
@@ -110,6 +115,16 @@ public:
 	const size_t & getSystErrorIndex(const TString & ) const;
 	size_t getSystSize() const{return ycoords_.layerSize();}
 
+	/**
+	 * This function equalizes the association of systematic indices between rhs and *this
+	 * if an uncertainty does not exist, it is copied from nominal
+	 * The new ordering will be derived  from rhs mostly, fully if rhs has a superset of
+	 * systematics
+	 */
+	void equalizeSystematicsIdxs(graph &rhs);
+
+
+
 	void removeYErrors(); //comes handy
 	void removeXErrors(); //comes handy
 	void removeAllXYSyst();
@@ -118,14 +133,22 @@ public:
 
 	bool pointsYIdentical(size_t , size_t)const;
 
-	/*
-	 * operators... define carefully based on histocontent. Not too much overlap with histo1D
+	/**
+	 * treats as histogram and adds Y-entries
 	 */
-
 	graph addY(const graph &) const;//if any x errors differ, let it fail
 	void clear();
 
+	/**
+	 * treats as histogram and normalizes Y entries
+	 */
 	void normalizeToGraph(const graph &);
+
+	/**
+	 * merges with rhs graph. The new graph will contain all points (and layers) from
+	 * both graphs
+	 */
+	void mergeWith(const graph& rhs);
 
 
 	/*
@@ -133,6 +156,8 @@ public:
 	 */
 
 	void import(const histo1D*,bool dividebybinwidth=true); //uses bin centers, adds x errors binwidth_up/down
+
+	void import(const TGraphAsymmErrors*);
 
 	TGraphAsymmErrors * getTGraph(TString name="",bool onlystat=false) const;
 
@@ -168,6 +193,7 @@ public:
 	void writeToTFile(TFile *);
 	void writeToTFile(const TString& filename);
 
+	void coutAllContent(bool rel=true)const;
 
 
 #ifndef __CINT__

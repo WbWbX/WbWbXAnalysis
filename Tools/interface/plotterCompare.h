@@ -106,7 +106,7 @@ private:
     plot plotterCompareStyle(const plot&);
     void makeRatioPlots(); //sets mem*
 
-    float getMaximumUpper();
+    float getMaxMinUpper(bool max=true);
 
     void readStylePriv(const std::string & file, bool requireall);
 

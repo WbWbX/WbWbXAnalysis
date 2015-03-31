@@ -25,6 +25,7 @@ void resultCombiner::addInput(const histo1D& cont){
 
 	temp_=cont;
 	variateHisto1D temp;
+	variateHisto1D::debug=true;
 	temp.import(cont);
 	distributions_.push_back(temp);
 	sysforms_.resize(distributions_.at(0).getNDependencies(), rc_sysf_gaus);
@@ -80,7 +81,7 @@ bool resultCombiner::minimize(){
 	forcednorm_=integral;
 
 	std::vector<double> stepwidths;
-	stepwidths.resize(startparas.size(),1e-19);
+	stepwidths.resize(startparas.size(),1e-3);
 	std::vector<TString> paranames=distributions_.at(0).getSystNames();
 
 	fitter_.setParameterNames(paranames);
@@ -99,7 +100,7 @@ bool resultCombiner::minimize(){
 
 	simpleFitter::printlevel=0;
 
-	fitter_.setTolerance(0.0001);
+	fitter_.setTolerance(0.1);
 	fitter_.fit();
 
 

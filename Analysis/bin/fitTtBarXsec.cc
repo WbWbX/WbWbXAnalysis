@@ -40,13 +40,10 @@ invokeApplication(){
 	const bool onlytotalerror = parser->getOpt<bool>("-onlytotal",false,"removes systematics");
 	const bool nominos = parser->getOpt<bool>("-nominos",false,"switches off systematics breakdown");
 	const float topmass = parser->getOpt<float>("-topmass",0,"Set top mass");
-	const bool visible =  parser->getOpt<bool>("-vis",false,"performs extraction of visible cross section");
 
-	 TString outfile;
-	if(visible)
-		outfile = (parser->getOpt<TString>("o","xsecFit","output file name")+"_vis");
-	else
-		outfile = parser->getOpt<TString>("o","xsecFit","output file name");
+	TString outfile;
+
+	outfile = parser->getOpt<TString>("o","xsecFit","output file name");
 
 
 	parser->doneParsing();
@@ -72,7 +69,6 @@ invokeApplication(){
 	mainfitter.setNoSystBreakdown((onlytotalerror));
 	mainfitter.setIgnorePriors(!fitsystematics);
 	mainfitter.setRemoveSyst(!fitsystematics);
-	mainfitter.setDoVisiblePS(visible);
 
 	std::string cmsswbase=getenv("CMSSW_BASE");
 	//extendedVariable::debug=true;
@@ -94,7 +90,7 @@ invokeApplication(){
 	//simpleFitter::printlevel=1;
 
 	mainfitter.readInput((fullcfgpath+inputconfig).Data());
-
+	bool fitsucc=true;
 	//ttbarXsecFitter::debug=true;
 	bool doplotting=false;
 
@@ -209,7 +205,14 @@ invokeApplication(){
 		doplotting=true;
 		//ttbarXsecFitter::debug=false;
 		//simpleFitter::printlevel=1; //for now
-		mainfitter.fit();
+		try{
+			mainfitter.fit();
+		}
+		catch(std::exception &e){
+			std::cout << "Fit failed, will do plots only" <<std::endl;
+			fitsucc=false;
+			e.what();
+		}
 	}
 
 
@@ -239,7 +242,7 @@ invokeApplication(){
 				tb.clear();
 				stack=mainfitter.produceStack(true,nbjet,ndts,chi2);
 				pl.setStack(&stack);
-				tb.add(0.7,0.5,"#chi^{2}="+toTString(chi2));
+				tb.add(0.7,0.73,"#chi^{2}="+toTString(chi2));
 				pl.draw();
 				tb.drawToPad(c.cd(1),true);
 				c.Print(outfile+".pdf");
@@ -278,9 +281,11 @@ invokeApplication(){
 		pl2d.usePad(&c);
 		histo2D corr2d=mainfitter.getCorrelations();
 		pl2d.setPlot(&corr2d);
-		pl2d.draw();
-		c.Print(outfile+".pdf");
-		c.Write();
+		if(fitsucc){
+			pl2d.draw();
+			c.Print(outfile+".pdf");
+			c.Write();
+		}
 
 		for(size_t ndts=0;ndts<mainfitter.nDatasets();ndts++){
 			texTabler tab=mainfitter.makeSystBreakDownTable(ndts);
@@ -288,9 +293,18 @@ invokeApplication(){
 			tab.writeToFile(outfile+"_tab" +dtsname + ".tex");
 			tab.writeToPdfFile(outfile+"_tab" +dtsname + ".pdf");
 			std::cout << tab.getTable() <<std::endl;
-			tab=mainfitter.makeSystBreakDownTable(ndts); //vis PS
+			tab=mainfitter.makeSystBreakDownTable(ndts,false); //vis PS
+			tab.writeToFile(outfile+"_tab_simple" +dtsname + ".tex");
+			tab.writeToPdfFile(outfile+"_tab_simple" +dtsname + ".pdf");
+			std::cout << tab.getTable() <<std::endl;
+
+			//graph out
+			graph resultsgraph=mainfitter.getResultsGraph(ndts,topmass);
+			if(fitsucc)
+				resultsgraph.writeToFile((outfile+"_graph" +dtsname + ".ztop").Data());
+
 		}
-		if(mainfitter.nDatasets()>1){
+		if(mainfitter.nDatasets()>1 && fitsucc){
 			for(size_t ndts=0;ndts<mainfitter.nDatasets();ndts++){
 				for(size_t ndts2=ndts;ndts2<mainfitter.nDatasets();ndts2++){
 					if(ndts2==ndts) continue;

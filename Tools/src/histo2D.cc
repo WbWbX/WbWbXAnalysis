@@ -124,20 +124,37 @@ void histo2D::getBinCenter(const size_t binx,const size_t biny, float& centerx,f
 	centery=ybins_.at(biny) + yw/2;
 }
 float histo2D::getMax(int syslayer)const{
+	size_t dummy,dummy2;
+	return getMax(dummy,dummy2,syslayer);
+}
+float histo2D::getMin(int syslayer)const{
+	size_t dummy,dummy2;
+	return getMin(dummy,dummy2,syslayer);
+}
+
+float histo2D::getMax(size_t& x, size_t& y,int syslayer)const{
 	float max=-999999999;
+	size_t binx;
 	for(size_t i=0;i<conts_.size();i++){
-		float tempmax=conts_.at(i).getYMax(false,syslayer);
-		if(tempmax > max)
+		float tempmax=conts_.at(i).getYMax(binx,false,syslayer);
+		if(tempmax > max){
 			max=tempmax;
+			x=binx;
+			y=i;
+		}
 	}
 	return max;
 }
-float histo2D::getMin(int syslayer)const{
+float histo2D::getMin(size_t& x, size_t& y,int syslayer)const{
 	float min=999999999;
+	size_t binx;
 	for(size_t i=0;i<conts_.size();i++){
-		float tempmin=conts_.at(i).getYMin(false,syslayer);
-		if(tempmin < min)
+		float tempmin=conts_.at(i).getYMin(binx,false,syslayer);
+		if(tempmin < min){
 			min=tempmin;
+			x=binx;
+			y=i;
+		}
 	}
 	return min;
 }
@@ -711,7 +728,7 @@ histo2D histo2D::operator * (int val)const{
 	return out;
 }
 bool histo2D::isEqual (const histo2D &rhs)const{
-/*
+	/*
 	std::vector<ztop::histo1D> conts_; //! for each y axis bin one container
 	std::vector<float> xbins_,ybins_;
 	bool divideBinomial_;
@@ -719,7 +736,7 @@ bool histo2D::isEqual (const histo2D &rhs)const{
 
 	TString xaxisname_;
 	TString yaxisname_;
-	*/
+	 */
 	if(conts_ != rhs.conts_)
 		return false;
 	if(xbins_ != rhs.xbins_)

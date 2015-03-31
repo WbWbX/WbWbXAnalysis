@@ -89,7 +89,7 @@ void plotterMultiplePlots::readStylePriv(const std::string& infile,bool requirea
             }
         }
     }
-
+    cstyles_.clear();
     for(size_t i=0;i<ncstyles;i++){ //read until nothing found anymore (exception thrown) - should be done differently..
         histoStyle temp=defaults;
         std::string add=toString(i);
@@ -103,7 +103,8 @@ void plotterMultiplePlots::readStylePriv(const std::string& infile,bool requirea
         } */
         cstyles_.push_back(temp);
     }
-
+    if(requireall)
+    	textboxes_.clear();
 
     textboxes_.readFromFile(infile,"boxes");
     legstyle_.readFromFile(infile,"",true);

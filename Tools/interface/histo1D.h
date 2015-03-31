@@ -165,6 +165,8 @@ public:
 
 	float getYMax(bool dividebybinwidth ,const int& systLayer=-1) const;
 	float getYMin(bool dividebybinwidth, const int& systLayer=-1) const;
+	float getYMax(size_t & bin,bool dividebybinwidth ,const int& systLayer=-1) const;
+	float getYMin(size_t & bin,bool dividebybinwidth, const int& systLayer=-1) const;
 
 	float normalize(bool includeUFOF=true, bool normsyst=false, const float &normto=1);
 	void normalizeToContainer(const histo1D & ); /////////
@@ -191,6 +193,7 @@ public:
 	TH1D * getTH1DSyst(TString name, size_t systNo, bool dividebybinwidth=true, bool statErrors=false) const;
 
 
+	histo1D& import(const graph&);
 	/**
 	 * imports TH1. Assumes errros to be stat errors! That means, bin entries are
 	 * defined according to stat^2
@@ -296,6 +299,10 @@ public:
 	void renameSyst(const TString &,const  TString&); //!< rename from para1 to para2
 
 	/**
+	 * entry has to be names stat_up and -down
+	 */
+	void transformSystToStat();
+	/**
 	 * transforms the stat uncertainty to a systematic uncertainty
 	 * para1: name of new uncertainty
 	 */
@@ -314,6 +321,8 @@ public:
 	 * syst will be exact copies of nominal
 	 */
 	void setAllErrorsZero(bool nominalstat=true); //! sets all errors zero
+
+	void setErrorZero(const size_t& idx);
 	/**
 	 * removes all syst uncertainties, but leaves stat uncertainties of nominal untouched
 	 */

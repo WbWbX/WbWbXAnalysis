@@ -264,7 +264,7 @@ void  MainAnalyzer::analyze(size_t anaid){
 	if(mode_.Contains("Leppt30")){
 		leppt30=true;
 	}
-
+	//if(leppt30) leppt30=false;
 	const float lepptthresh= leppt30 ? 30 : 20;
 
 	float jetptcut;
@@ -992,8 +992,8 @@ void  MainAnalyzer::analyze(size_t anaid){
 		plots.makeControlPlots(step);
 		zplots.makeControlPlots(step);
 
-
-
+	//	if(leadingptlep->pt()<30)
+	//		continue;
 
 		///////// 20 GeV cut /// STEP 3 ///////////////////////////////////////
 		step++;
@@ -1040,9 +1040,9 @@ void  MainAnalyzer::analyze(size_t anaid){
 			if(treejets.at(i)->pt() < 10) continue;
 			idjets << (treejets.at(i));
 
-			if(treejets.at(i)->pt() < 10) continue;
+			if(treejets.at(i)->pt() < 20) continue;
 			medjets << treejets.at(i);
-			if(treejets.at(i)->pt() < jetptcut) continue;
+			if(treejets.at(i)->pt() <= jetptcut) continue;
 			hardjets << treejets.at(i);
 		}
 		//jets
@@ -1123,9 +1123,7 @@ void  MainAnalyzer::analyze(size_t anaid){
 
 
 
-		vector<NTJet*> * selectedjets=&hardjets;
-
-
+		vector<NTJet*> * selectedjets=&hardjets;// &hardjets;
 
 
 
@@ -1153,7 +1151,7 @@ void  MainAnalyzer::analyze(size_t anaid){
 
 
 		getBTagSF()->changeNTJetTags(selectedjets);
-		for(size_t i=0;i<selectedjets->size();i++){
+		for(size_t i=0;i<hardjets.size();i++){
 			if(selectedjets->at(i)->btag() < getBTagSF()->getWPDiscrValue()){
 
 				selectednonbjets.push_back(selectedjets->at(i));

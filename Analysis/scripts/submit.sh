@@ -1,4 +1,4 @@
-#!/bin/sh
+##!/bin/sh
 
 
 channels=( #"ee"
@@ -8,16 +8,16 @@ channels=( #"ee"
 ## scale and match variations will be ignored for other top masses then 172.5.. (hardcoded below)
 topmasses=( "172.5"
 
-     # "171.5"
-     # "173.5"
+     "171.5"
+     "173.5"
 
-     # "175.5"
-     # "169.5"
+      "175.5"
+      "169.5"
 
-    # "178.5"
-    # "166.5"
+   # "178.5"
+   # "166.5"
 );
-pdfeigenvectors= #26  # 26 # if set to 0, no variation
+pdfeigenvectors=26  # 26 # if set to 0, no variation
 
 systs=( "nominal"
 
@@ -38,8 +38,8 @@ systs=( "nominal"
    # "TT_GENPOW_sysnominal_HER_up"
    # "TT_GENPOW_sysnominal_HER_down"
 
-    "TT_GENMCATNLO_up"
-    "TT_GENMCATNLO_down"
+    # "TT_GENMCATNLO_up"
+    # "TT_GENMCATNLO_down"
 
     "TT_BJESNUDEC_down"
     "TT_BJESNUDEC_up"
@@ -177,7 +177,7 @@ systs=( "nominal"
 # #    #"Z_SCALE_up"
 );
 energies=("8TeV"
-# "7TeV"				
+ "7TeV"				
 );
 #systs=("nominal")
 

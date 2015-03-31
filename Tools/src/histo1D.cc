@@ -36,7 +36,7 @@ bool histo1D::c_makelist=false;
 bool histo1D::showwarnings=false;
 ///////function definitions
 histo1D::histo1D():
-																																		taggedObject(taggedObject::type_container1D)
+																																														taggedObject(taggedObject::type_container1D)
 {
 
 	//divideBinomial_=true;
@@ -52,7 +52,7 @@ histo1D::histo1D():
 }
 
 histo1D::histo1D(const std::vector<float>& bins,const TString& name,const TString& xaxisname,const TString& yaxisname, bool mergeufof):
-																																			taggedObject(taggedObject::type_container1D)
+																																															taggedObject(taggedObject::type_container1D)
 
 {
 	setBins(bins);
@@ -200,7 +200,7 @@ size_t histo1D::getNBins() const{
 }
 const TString & histo1D::getBinName(size_t idx)const{
 	if(idx>=bins_.size())
-			throw std::out_of_range("container1D::getBinName: idx out of range");
+		throw std::out_of_range("container1D::getBinName: idx out of range");
 	return binnames_.at(idx);
 }
 
@@ -419,10 +419,10 @@ void histo1D::splitSystematic(const size_t & number, const float& fracadivb,
 
 	histo1D syscont = getSystContainer(number);
 	contents_.removeLayer(number);
-	if(fracadivb != 0)
-		addErrorContainer(splinamea,syscont,weighta);
-	if(fracadivb!=1)
-		addErrorContainer(splinameb,syscont,weightb);
+
+	addErrorContainer(splinamea,syscont,weighta);
+
+	addErrorContainer(splinameb,syscont,weightb);
 
 }
 
@@ -866,6 +866,31 @@ float histo1D::getYMin(bool dividebybinwidth,const int& systLayer) const{
 	return min;
 }
 
+float histo1D::getYMax(size_t & bin,bool dividebybinwidth ,const int& systLayer) const{
+	float max=-999999999999.;
+	for(size_t i=1;i<bins_.size()-1;i++){ //only in visible bins
+		float binc=getBinContent(i,systLayer);
+		if(dividebybinwidth) binc*= 1/getBinWidth(i);
+		if(max < binc){
+			max = binc;
+			bin=i;
+		}
+	}
+	return max;
+}
+float histo1D::getYMin(size_t & binidx,bool dividebybinwidth, const int& systLayer) const{
+	float min=999999999999.;
+	for(size_t i=1;i<bins_.size()-1;i++){ //only in visible bins
+		float binc=getBinContent(i,systLayer);
+		if(dividebybinwidth) binc*= 1/getBinWidth(i);
+		if(min > binc){
+			min = binc;
+			binidx=i;
+		}
+	}
+	return min;
+}
+
 /**
  * normalizes container and returns normalization factor of nominal
  */
@@ -1018,6 +1043,43 @@ TH1D * histo1D::getTH1DSyst(TString name, size_t systNo, bool dividebybinwidth, 
 	return h;
 }
 
+histo1D& histo1D::import(const graph&gin){
+	graph g=gin;
+	g.sortPointsByX();
+	std::vector<float> xpoints;
+
+	bool noxerrs=true;
+	for(size_t realit=0;realit<g.getNPoints();realit++){
+		if(g.getPointXError(realit,false)!=0.)
+			noxerrs=false;
+	}
+	if(noxerrs){
+		for(size_t i=0;i<g.getNPoints();i++){
+			if(i<g.getNPoints()-1)
+				xpoints.push_back(g.getPointXContent(i)- (g.getPointXContent(i+1)-g.getPointXContent(i))/2);
+			else if(i>0){
+				xpoints.push_back(g.getPointXContent(i)- (g.getPointXContent(i)-g.getPointXContent(i-1))/2);
+				xpoints.push_back(g.getPointXContent(i)+ (g.getPointXContent(i)-g.getPointXContent(i-1))/2);
+			}
+			else{
+				xpoints.push_back(g.getPointXContent(i)-1);
+				xpoints.push_back(g.getPointXContent(i)+1);
+			}
+		}
+	}
+	else{
+		throw std::logic_error("histo1D::import: graph import with x bin indications not supported, yet (TBI)");
+	}
+	setBins(xpoints);
+	for(int sys=-1;sys<(int)g.getSystSize();sys++){
+		if(sys>-1)
+			contents_.addLayer(g.getSystErrorName(sys));
+		for(size_t bin=1;bin<bins_.size()-1;bin++)
+			getBin(bin,sys)=gin.ycoords_.getBin(bin-1,sys);
+	}
+
+	return *this;
+}
 histo1D & histo1D::import(TH1 * h,bool isbinwidthdivided){
 	int nbins=h->GetNbinsX();
 	std::vector<float> cbins;
@@ -1068,7 +1130,7 @@ histo1D & histo1D::import(TGraphAsymmErrors *g,bool isbinwidthdivided, const TSt
 			g->GetErrorXlow(realit);
 			g->GetErrorXlow(realit+1);
 			if(fabs( x+ g->GetErrorXhigh(realit)-(xnext-g->GetErrorXlow(realit+1))) > 0.01*(xnext-x)){
-				throw std::runtime_error("container1D::import: cannot find valid bin indications in input graph");
+				throw std::runtime_error("histo1D::import: cannot find valid bin indications in input graph");
 			}
 			bins.push_back(x-g->GetErrorXlow(realit));
 		}
@@ -1616,7 +1678,7 @@ void histo1D::addRelSystematicsFrom(const ztop::histo1D & rhs,bool ignorestat,bo
 			//contents_.getLayer(newlayerit).removeStat();
 			//stat are definitely not correlated
 			bool isnominalequal=(!strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i),1e-2))
-																																					        																																		|| (strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i))) ;
+																																					        																																														|| (strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i))) ;
 
 			if(isnominalequal){ //this is just a copy leave it and add no variation
 				//contents_.getLayer(newlayerit).removeStat();
@@ -1661,7 +1723,18 @@ void histo1D::removeError(const TString &sysname){
 void histo1D::removeError(const size_t &idx){
 	contents_.removeLayer(idx);
 }
+void histo1D::transformSystToStat(){
+	size_t idxup=getSystErrorIndex("stat_up");
+	size_t idxdown=getSystErrorIndex("stat_down");
 
+	for(size_t bin=0;bin<contents_.size();bin++){
+		histoBin& nombin=contents_.getBin(bin);
+		float maxstat=fabs(contents_.getBin(bin,idxup).getContent()-nombin.getContent());
+		float otherstat=fabs(contents_.getBin(bin,idxdown).getContent()-nombin.getContent());
+		if(maxstat<otherstat) maxstat=otherstat;
+		nombin.setStat(maxstat);
+	}
+}
 void histo1D::transformStatToSyst(const TString &sysname){
 	size_t layers=contents_.layerSize();
 	if(contents_.getLayerIndex(sysname+"_up") < layers || contents_.getLayerIndex(sysname+"_down") < layers){
@@ -1702,6 +1775,14 @@ void histo1D::setAllErrorsZero(bool nominalstat){
 		contents_.clearLayerStat(-1);
 	for(size_t i=0;i<contents_.layerSize();i++)
 		contents_.getLayer(i) = contents_.getNominal();
+
+}
+
+void histo1D::setErrorZero(const size_t& idx){
+	if(idx>=getSystSize()){
+		throw std::out_of_range("histo1D::setErrorZero: idx out of range");
+	}
+	contents_.getLayer(idx) = contents_.getNominal();
 
 }
 

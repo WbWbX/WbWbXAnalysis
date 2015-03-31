@@ -200,6 +200,24 @@ const TString &graph::getSystErrorName(const size_t &number) const{
 const size_t & graph::getSystErrorIndex(const TString & name) const{
 	return xcoords_.getLayerIndex(name);
 }
+
+void  graph::equalizeSystematicsIdxs(graph &rhs){
+	if(xcoords_.hasSameLayerMap(rhs.xcoords_))
+		return;
+
+	std::map<size_t,size_t> asso=xcoords_.mergeLayers(rhs.xcoords_);
+	ycoords_.mergeLayers(rhs.ycoords_);
+	graph reordered=*this;
+	reordered.xcoords_.removeAdditionalLayers();
+	reordered.ycoords_.removeAdditionalLayers();
+	for(size_t i=0;i<rhs.getSystSize();i++){ //could use asso..
+		size_t oldidx=getSystErrorIndex(rhs.getSystErrorName(i));
+		reordered.xcoords_.addLayer(getSystErrorName(oldidx),xcoords_.getLayer(oldidx));
+		reordered.ycoords_.addLayer(getSystErrorName(oldidx),ycoords_.getLayer(oldidx));
+	}
+	*this=reordered;
+}
+
 void graph::removeYErrors(){
 	for(int sys=-1;sys<(int)getSystSize();sys++){
 		for(size_t p=0;p<getNPoints();p++){ //stat 0 all sys equal content
@@ -295,7 +313,30 @@ void graph::normalizeToGraph(const graph& g){
 	histoContent::divideStatCorrelated=temp;
 }
 
+void  graph::mergeWith(const graph& rhs){
 
+	graph hrscp=rhs;
+	ycoords_.mergeLayers(hrscp.ycoords_);
+	//this to rhs
+	std::map<size_t,size_t>  asso=xcoords_.mergeLayers(hrscp.xcoords_);
+	pointnames_ << hrscp.pointnames_;
+	size_t newsize=ycoords_.size() + hrscp.ycoords_.size();
+	size_t thissize=ycoords_.size();
+	ycoords_.resizeBins(newsize);
+	xcoords_.resizeBins(newsize);
+	size_t nlay=ycoords_.layerSize();
+
+	for(int i=-1;i<(int)nlay;i++){
+		int assorhs=i;
+		if(i>-1)
+			assorhs=asso[i];
+		for(size_t point=0;point<rhs.getNPoints();point++){ //append new bins
+			ycoords_.getBin(thissize+point,i) = hrscp.ycoords_.getBin(point,assorhs);
+			xcoords_.getBin(thissize+point,i) = hrscp.xcoords_.getBin(point,assorhs);
+		}
+	}
+
+}
 
 /**
  * defines binwidth as stat of nominal ypoints
@@ -327,6 +368,26 @@ void graph::import(const histo1D * cont,bool dividebybinwidth){
 	yname_=cont->getYAxisName();
 	xname_=cont->getXAxisName();
 	name_=cont->getName();
+}
+void graph::import(const TGraphAsymmErrors* g){
+	setNPoints(g->GetN());
+	addErrorGraph("xerr_up",*this);
+	addErrorGraph("xerr_down",*this);
+	addErrorGraph("yerr_up",*this);
+	addErrorGraph("yerr_down",*this);
+	for(int i=0;i<g->GetN();i++){
+		double x,y,xerrh,xerrl,yerrh,yerrl;
+		g->GetPoint(i,x,y);
+		xerrh=g->GetErrorXhigh(i);
+		xerrl=g->GetErrorXlow(i);
+		yerrh=g->GetErrorYhigh(i);
+		yerrl=g->GetErrorYlow(i);
+		setPointContents((size_t )i, true, x,y);
+		setPointContents((size_t )i, true, x+xerrh,y,0);
+		setPointContents((size_t )i, true, x-xerrl,y,1);
+		setPointContents((size_t )i, true, x,y+yerrh,2);
+		setPointContents((size_t )i, true, x,y-yerrl,3);
+	}
 }
 
 /**
@@ -544,8 +605,8 @@ float graph::getPointYError(const size_t & point, bool onlystat,const TString &l
 }
 
 const TString & graph::getPointName(const size_t& idx)const{
-	if(idx>=xcoords_.size())
-		throw std::out_of_range("graph::getPointName: idx out of range");
+	if(idx>=pointnames_.size())
+		throw std::out_of_range("graph::getPointName: idx out of range - no point names?");
 	return pointnames_.at(idx);
 }
 void graph::setPointName(const size_t& idx,const TString& name){
@@ -844,6 +905,8 @@ void graph::writeToTFile(const TString& filename){
 }
 
 
+
+
 void graph::writeToFile(const std::string& filename)const{
 	std::ofstream saveFile;
 	saveFile.open(filename.data(), std::ios_base::binary | std::ios_base::trunc | std::fstream::out );
@@ -873,6 +936,31 @@ void graph::readFromFile(const std::string& filename){
 		}
 	}
 	saveFile.close();
+}
+
+
+
+void  graph::coutAllContent(bool rel)const{
+	using namespace std;
+	for(size_t i=0;i<getNPoints();i++){
+		cout << "point: " << i << " ";
+		if(hasPointNames())
+			cout << getPointName(i);
+		cout << ":" <<endl;
+		cout << "  content "  << " (" <<getPointXContent(i) << ", " << getPointYContent(i) << ")" <<endl;
+		if(rel)
+			cout << "  staterr "  << " (" <<getPointXStat(i)/getPointXContent(i)-1 << ", " << getPointYStat(i)/getPointYContent(i)-1 << ")" <<endl;
+		else
+			cout << "  staterr "  << " (" <<getPointXStat(i) << ", " << getPointYStat(i) << ")" <<endl;
+		for(int sys=0;sys<(int)getSystSize();sys++){
+			if(rel)
+				cout << "  " <<getSystErrorName(sys)  << " (" <<getPointXContent(i,sys)/getPointXContent(i)-1  << ", " << getPointYContent(i,sys)/getPointYContent(i)-1  << ")" <<endl;
+			else
+				cout << "  " <<getSystErrorName(sys)  << " (" <<getPointXContent(i,sys) << ", " << getPointYContent(i,sys) << ")" <<endl;
+
+		}
+		cout <<endl;
+	}
 }
 
 }//namespace

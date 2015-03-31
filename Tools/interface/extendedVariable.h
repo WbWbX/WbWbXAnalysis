@@ -21,16 +21,25 @@ namespace ztop{
  */
 class extendedVariable{
 public:
-    extendedVariable():nominal_(-100000),name_(""),one_(false){}
-    extendedVariable(const TString & name):nominal_(-100000),name_(name),one_(false){}
-    ~extendedVariable(){}
+    extendedVariable():nominal_(-100000),name_(""),operatedon_(0),operation_(op_plus),constant_(false),constval_(0){}
+    extendedVariable(const TString & name):nominal_(-100000),name_(name),operatedon_(0),operation_(op_plus),constant_(false),constval_(0){}
+    ~extendedVariable(){
+    	clear();
+    }
+    extendedVariable & operator =(const extendedVariable&);
+    extendedVariable(const extendedVariable&);
+
 
     void setName(const TString & name){name_=name;}
 
     /**
      * Use to create a dummy that always returns one. it can be handy in some cases
      */
-    void setToOne(bool set){one_=set;}
+    void setToOne(bool set){constant_=set;constval_=1.;}
+
+    void setConstant(double val){constant_=true;constval_=val;}
+
+    void resetConstant(){constant_=false;}
 
     /**
      * just put (non shifted) graph here
@@ -68,15 +77,50 @@ public:
 
     void clear();
 
+
+
+    extendedVariable& operator *= (const extendedVariable&);
+    extendedVariable operator * (const extendedVariable&)const;
+    extendedVariable& operator /= (const extendedVariable&);
+    extendedVariable operator / (const extendedVariable&)const;
+    extendedVariable& operator += (const extendedVariable&);
+    extendedVariable operator + (const extendedVariable&)const;
+    extendedVariable& operator -= (const extendedVariable&);
+    extendedVariable operator - (const extendedVariable&)const;
+
+
+    extendedVariable& operator *= (const double&);
+    extendedVariable operator * (const double&)const;
+    extendedVariable& operator /= (const double&);
+    extendedVariable operator / (const double&)const;
+
     static bool debug;
 private:
 
+    enum operators{op_plus,op_minus,op_multi,op_divide};
+
     double nominal_;
     TString name_;
-    std::vector<graphFitter> dependences_; //one for each syst
+    std::vector<graphFitter>  dependences_; //one for each syst
+
+    extendedVariable * operatedon_;
+    operators operation_;
+    double addOperations(const double&,const float * )const;
+    double addOperations(const double&,const double * )const;
+//return max dependence depth
+    size_t checkDepth()const;
+
     std::vector<TString> sysnames_; //only for later reference
 
-    bool one_;
+    bool constant_;
+    double constval_;
+
+    void copyFrom(const extendedVariable&) ;
+
+    extendedVariable* getLast();
+    void slim();
+    void checkDependencies(const extendedVariable&);
+    void insertOperations(const extendedVariable&) ;
 };
 
 }

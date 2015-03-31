@@ -29,7 +29,7 @@ TT_MATCH,	ME/PS matching
 TT_SCALE,	$Q^{2}$ scale
 LUMI,		Luminosity
 
-LEPIDISO,   Lepton ID, isolation
+LEPIDISO,   Lepton ID/isolation
 LES,        Lepton energy scale
 
 JEC_residuals,          JES: Residual corrections
@@ -62,6 +62,10 @@ JES_SinglePionECAL , JES: Single pion ECAL
 JES_SinglePionHCAL , JES: Single pion HCAL
 JES_Time , JES: Time
 
+JES, Jet energy scale
+
+Hadro_JES, Hadronization (JES)
+
 UE, 	Underlying event
 CR,		Color reconnection 
 
@@ -75,15 +79,16 @@ BG_t#bar{t}bg, $t\bar{t}$ background
 BG_Wjets,  W+jets background
 BG_QCD, QCD background
 BG_t#bar{t}V/#gamma, $t\bar{t}+V/\gamma$ background
+BG_t#bar{t}V, $t\bar{t}+V$ background
 
 BG_0_bjets_DY, DY background (0 b-jets)
 BG_1_bjets_DY, DY background (1 b-jets)
 BG_2_bjets_DY, DY background (2 b-jets)
+BG_DY, DY background
 
-Lumi8, Luminosity (8 TeV)
-Lumi7, Luminosity (7 TeV)
 
-Xsec (8TeV), $\sigma_{t\bar{t}}$(8 TeV)
-Xsec (7TeV), $\sigma_{t\bar{t}}$(7 TeV)
+
+Xsec_8TeV, $\sigma_{t\bar{t}}$(8 TeV)
+Xsec_7TeV, $\sigma_{t\bar{t}}$(7 TeV)
 
 [end-syst names]

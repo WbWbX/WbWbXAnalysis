@@ -94,7 +94,139 @@ double variateHisto1D::getIntegral(const double * vars)const{
 		out+=getBin(i)->getValue(vars);
 	return out;
 }
+extendedVariable variateHisto1D::getIntegral()const{
+	extendedVariable out;
+	if(bins_.size()<1){
+		throw std::logic_error("variateHisto1D::getIntegral: histogram has no bins");
+	}
+	std::vector<TString> names=contents_.at(0).getSystNames();
+	std::vector<double> vars(names.size(),0);
+	for(size_t sys=0;sys<names.size();sys++){
+		double integralnom=0,integralup=0,integraldown=0;
+		for(size_t i=0;i<bins_.size();i++){
+			integralnom+=contents_.at(i).getValue(vars);
+		}
+		vars.at(sys)=+1;
+		for(size_t i=0;i<bins_.size();i++){
+			integralup+=contents_.at(i).getValue(vars);
+		}
+		vars.at(sys)=-1;
+		for(size_t i=0;i<bins_.size();i++){
+			integraldown+=contents_.at(i).getValue(vars);
+		}
+		vars.at(sys)=0;
+		out.addDependence(integraldown,integralnom,integralup,names.at(sys));
+	}
+	return out;
+}
 
+variateHisto1D& variateHisto1D::operator *= (const variateHisto1D&rhs){
+	checkCompat(rhs);
+	for(size_t i=0;i<contents_.size();i++){
+		contents_.at(i)*=rhs.contents_.at(i);
+	}
+	return *this;
+}
+variateHisto1D variateHisto1D::operator * (const variateHisto1D&rhs)const{
+	variateHisto1D cp=*this;
+	return cp*=rhs;
+}
+
+variateHisto1D& variateHisto1D::operator += (const variateHisto1D&rhs){
+	checkCompat(rhs);
+	for(size_t i=0;i<contents_.size();i++){
+		contents_.at(i)+=rhs.contents_.at(i);
+	}
+	return *this;
+}
+
+variateHisto1D variateHisto1D::operator + (const variateHisto1D&rhs)const{
+	variateHisto1D cp=*this;
+	return cp+=rhs;
+}
+
+variateHisto1D& variateHisto1D::operator -= (const variateHisto1D&rhs){
+	checkCompat(rhs);
+	for(size_t i=0;i<contents_.size();i++){
+		contents_.at(i)-=rhs.contents_.at(i);
+	}
+	return *this;
+}
+
+variateHisto1D variateHisto1D::operator - (const variateHisto1D&rhs)const{
+	variateHisto1D cp=*this;
+	return cp-=rhs;
+}
+
+variateHisto1D& variateHisto1D::operator /= (const variateHisto1D&rhs){
+	checkCompat(rhs);
+	for(size_t i=0;i<contents_.size();i++){
+		contents_.at(i)/=rhs.contents_.at(i);
+	}
+	return *this;
+}
+
+variateHisto1D variateHisto1D::operator / (const variateHisto1D&rhs)const{
+	variateHisto1D cp=*this;
+	return cp/=rhs;
+}
+
+
+variateHisto1D& variateHisto1D::operator *= (const extendedVariable&v){
+	for(size_t i=0;i<contents_.size();i++){
+		contents_.at(i)*=v;
+	}
+	return *this;
+}
+
+variateHisto1D variateHisto1D::operator * (const extendedVariable&v)const{
+	variateHisto1D cp=*this;
+	return cp*=v;
+}
+
+variateHisto1D& variateHisto1D::operator /= (const extendedVariable&v){
+	for(size_t i=0;i<contents_.size();i++){
+		contents_.at(i)/=v;
+	}
+	return *this;
+}
+
+variateHisto1D variateHisto1D::operator / (const extendedVariable&v)const{
+	variateHisto1D cp=*this;
+	return cp/=v;
+}
+
+
+
+variateHisto1D& variateHisto1D::operator *= (const double&v){
+	for(size_t i=0;i<contents_.size();i++){
+		contents_.at(i)*=v;
+	}
+	return *this;
+}
+variateHisto1D variateHisto1D::operator * (const double&v)const{
+	variateHisto1D cp=*this;
+	return cp*=v;
+}
+
+variateHisto1D& variateHisto1D::operator /= (const double&v){
+	for(size_t i=0;i<contents_.size();i++){
+		contents_.at(i)/=v;
+	}
+	return *this;
+}
+variateHisto1D variateHisto1D::operator / (const double&v)const{
+	variateHisto1D cp=*this;
+	return cp/=v;
+}
+
+
+void variateHisto1D::checkCompat(const variateHisto1D& rhs)const{
+	if(bins_!=rhs.bins_)
+		throw std::out_of_range("variateHisto1D::checkCompat: bins dont match");
+	if(bins_.size()<1 || contents_.at(0).getNDependencies() !=  rhs.contents_.at(0).getNDependencies() )
+		throw std::out_of_range("variateHisto1D::checkCompat: n dependencies dont match");
+}
 
 histo1D variateHisto1D::exportContainer()const{
 	if(contents_.size()<1){
@@ -119,14 +251,34 @@ histo1D variateHisto1D::exportContainer(const std::vector<double> & variations)c
 
 	for(size_t i=0;i<bins_.size();i++){
 		out.setBinContent(i,contents_.at(i).getValue(variations)  );
-		out.setBinErrorUp(i,errsup_.at(i));
-		out.setBinErrorDown(i,errsdown_.at(i));
+		out.setBinStat(i,(errsup_.at(i)+errsdown_.at(i))/2);
 	}
 
 
 	return out;
 }
+histo1D variateHisto1D::exportContainer(const std::vector<double> & variations,
+		const std::vector<double> & symm_constraints,const std::vector<TString> & varnames)const{
+	if(varnames.size() != variations.size() || symm_constraints.size()!=variations.size())
+		throw std::out_of_range("variateHisto1D::exportContainer: sizes downt match");
 
+	histo1D nominal=exportContainer(variations);
+	std::vector<double> varcp=variations;
+	for(size_t i=0;i<varnames.size();i++){
+		TString name=varnames.at(i)+"_up";
+		varcp.at(i)+=symm_constraints.at(i);
+		histo1D err=exportContainer(varcp);
+		nominal.addErrorContainer(name,err);
+		name=varnames.at(i)+"_down";
+		varcp.at(i)=variations.at(i);
+		varcp.at(i)-=symm_constraints.at(i);
+		err=exportContainer(varcp);
+		nominal.addErrorContainer(name,err);
+		varcp.at(i)=variations.at(i);//set back to default
+	}
+	return nominal;
+
+}
 
 }
 

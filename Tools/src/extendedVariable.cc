@@ -14,6 +14,17 @@ namespace ztop{
 
 bool extendedVariable::debug=false;
 
+extendedVariable & extendedVariable::operator =(const extendedVariable&rhs){
+	if(this==&rhs) return *this;
+	copyFrom(rhs);
+	return *this;
+}
+extendedVariable::extendedVariable(const extendedVariable&rhs){
+	if(this==&rhs) return;
+	copyFrom(rhs);
+}
+
+
 void extendedVariable::addDependence(const graph & g, size_t nompoint, const TString& sysname){
 	if(debug)
 		std::cout << "extendedVariable::addDependence" <<std::endl;
@@ -127,8 +138,8 @@ graph extendedVariable::addDependence(const float & low, const float& nominal, c
 double extendedVariable::getValue(const double * variations)const{
 	if(debug)
 		std::cout << "extendedVariable::getValue" <<std::endl;
-	if(one_)
-			return 1;
+	if(constant_)
+		return constval_;
 
 	double out=0;
 	for(size_t i=0;i<dependences_.size();i++){
@@ -143,13 +154,13 @@ double extendedVariable::getValue(const double * variations)const{
 			throw std::runtime_error("extendedVariable::getValue: nan produced");
 		}
 	}
-	return out+nominal_;
+	return addOperations(out+nominal_,variations);
 }
 double extendedVariable::getValue(const float * variations)const{
 	if(debug)
 		std::cout << "extendedVariable::getValue" <<std::endl;
-	if(one_)
-			return 1;
+	if(constant_)
+		return constval_;
 	double out=0;
 	for(size_t i=0;i<dependences_.size();i++){
 		out+=dependences_.at(i).getFitOutput((double)variations[i]);
@@ -160,14 +171,14 @@ double extendedVariable::getValue(const float * variations)const{
 			throw std::runtime_error("extendedVariable::getValue: nan produced");
 		}
 	}
-	return out+nominal_;
+	return addOperations(out+nominal_,variations);
 }
 
 double extendedVariable::getValue(const std::vector<float> * variations)const{
 	if(debug)
 		std::cout << "extendedVariable::getValue" <<std::endl;
-	if(one_)
-			return 1;
+	if(constant_)
+		return constval_;
 
 	if(variations->size()!=dependences_.size()){
 		throw std::out_of_range("extendedVariable::getValue: number of variations and dependencies don't match");
@@ -180,8 +191,8 @@ double extendedVariable::getValue(const std::vector<float> * variations)const{
 double extendedVariable::getValue(const std::vector<float> & variations)const{
 	if(debug)
 		std::cout << "extendedVariable::getValue" <<std::endl;
-	if(one_)
-			return 1;
+	if(constant_)
+		return constval_;
 
 	if(variations.size()!=dependences_.size()){
 		std::string errstr=(std::string)"extendedVariable::getValue: number of variations: "+
@@ -196,8 +207,8 @@ double extendedVariable::getValue(const std::vector<float> & variations)const{
 double extendedVariable::getValue(const std::vector<double> * variations)const{
 	if(debug)
 		std::cout << "extendedVariable::getValue" <<std::endl;
-	if(one_)
-		return 1;
+	if(constant_)
+		return constval_;
 
 	if(variations->size()!=dependences_.size()){
 		std::string errstr=(std::string)"extendedVariable::getValue: number of variations: "+
@@ -212,8 +223,8 @@ double extendedVariable::getValue(const std::vector<double> * variations)const{
 double extendedVariable::getValue(size_t idx,float variation)const{
 	if(debug)
 		std::cout << "extendedVariable::getValue" <<std::endl;
-	if(one_)
-			return 1;
+	if(constant_)
+		return constval_;
 	if(idx >= dependences_.size()){
 		throw std::out_of_range("extendedVariable::getValue: index out of range");
 	}
@@ -224,8 +235,8 @@ double extendedVariable::getValue(size_t idx,float variation)const{
 double extendedVariable::getValue(const std::vector<double> & variations)const{
 	if(debug)
 		std::cout << "extendedVariable::getValue" <<std::endl;
-	if(one_)
-			return 1;
+	if(constant_)
+		return constval_;
 
 	if(variations.size()!=dependences_.size()){
 		std::string errstr=(std::string)"extendedVariable::getValue: number of variations: "+
@@ -239,11 +250,165 @@ double extendedVariable::getValue(const std::vector<double> & variations)const{
 }
 
 
+double extendedVariable::addOperations(const double& in,const float * variations)const{
+	if(operatedon_==0)
+		return in;
+	if(operation_ == op_plus){
+		return in+operatedon_->getValue(variations);
+	}
+	else if(operation_ == op_minus){
+		return in-operatedon_->getValue(variations);
+	}
+	else if(operation_ == op_multi){
+		return in*operatedon_->getValue(variations);
+	}
+	else if(operation_ == op_divide){
+		return in/operatedon_->getValue(variations);
+	}
+	return in;
+}
+double extendedVariable::addOperations(const double& in,const double * variations)const{
+	if(operatedon_==0)
+		return in;
+	if(operation_ == op_plus){
+		return in+operatedon_->getValue(variations);
+	}
+	else if(operation_ == op_minus){
+		return in-operatedon_->getValue(variations);
+	}
+	else if(operation_ == op_multi){
+		return in*operatedon_->getValue(variations);
+	}
+	else if(operation_ == op_divide){
+		return in/operatedon_->getValue(variations);
+	}
+	return in;
+}
+
+size_t extendedVariable::checkDepth()const{
+	size_t out=0;
+	if(operatedon_){
+		out++;
+		out+=operatedon_->checkDepth();
+	}
+	if(out > 200)
+		throw std::out_of_range("extendedVariable::checkDepth: performed too many operations (>200) on extended variables, result may be unreliable");
+	return out;
+}
+
+
+
+void extendedVariable::copyFrom(const extendedVariable& rhs){
+	nominal_=rhs.nominal_;
+	name_=rhs.name_;
+	dependences_=rhs.dependences_;
+	operation_=rhs.operation_;
+	sysnames_=rhs.sysnames_;
+	constant_=rhs.constant_;
+	constval_=rhs.constval_;
+	if(rhs.operatedon_)
+		operatedon_ = new extendedVariable(*rhs.operatedon_); //this will be recursive
+	else
+		operatedon_ = 0;
+}
+
+
+
 void extendedVariable::clear(){
 	if(debug)
 		std::cout << "extendedVariable::clear" <<std::endl;
 	dependences_.clear();
 	sysnames_.clear();
 	nominal_=-100000;
+	if(operatedon_) delete operatedon_;
+	operatedon_=0;
 }
+
+extendedVariable* extendedVariable::getLast(){
+	extendedVariable* out=this;
+	while(1){
+		if(!out->operatedon_) break;
+		out=out->operatedon_;
+	}
+	return out;
+}
+void extendedVariable::slim(){
+	name_="";
+}
+void extendedVariable::checkDependencies(const extendedVariable&rhs){
+	if(rhs.getNDependencies()!=getNDependencies())
+		throw std::out_of_range("extendedVariable::checkDependencies: ndep don't match");
+	if(rhs.sysnames_!=sysnames_)
+		throw std::out_of_range("extendedVariable::checkDependencies: dependencies names don't match");
+
+}
+
+void extendedVariable::insertOperations(const extendedVariable&rhs){
+	checkDependencies(rhs);
+	extendedVariable* rhscp=new extendedVariable(rhs);
+	extendedVariable* lastrhs=rhscp->getLast();
+	lastrhs->operatedon_=operatedon_;
+	lastrhs->operation_=operation_;
+	operatedon_=rhscp;
+	checkDepth();
+}
+extendedVariable& extendedVariable::operator *= (const extendedVariable&rhs){
+	insertOperations(rhs);
+	operation_=op_multi;
+	return *this;
+}
+extendedVariable extendedVariable::operator * (const extendedVariable&rhs)const{
+	extendedVariable cp=*this;
+	return cp*=rhs;
+}
+extendedVariable& extendedVariable::operator /= (const extendedVariable&rhs){
+	insertOperations(rhs);
+	operation_=op_divide;
+	return *this;
+}
+extendedVariable extendedVariable::operator / (const extendedVariable&rhs)const{
+	extendedVariable cp=*this;
+	return cp/=rhs;
+}
+extendedVariable& extendedVariable::operator += (const extendedVariable&rhs){
+	insertOperations(rhs);
+	operation_=op_plus;
+	return *this;
+}
+extendedVariable extendedVariable::operator + (const extendedVariable&rhs)const{
+	extendedVariable cp=*this;
+	return cp+=rhs;
+}
+extendedVariable& extendedVariable::operator -= (const extendedVariable&rhs){
+	insertOperations(rhs);
+	operation_=op_minus;
+	return *this;
+}
+extendedVariable extendedVariable::operator - (const extendedVariable&rhs)const{
+	extendedVariable cp=*this;
+	return cp-=rhs;
+}
+
+extendedVariable& extendedVariable::operator *= (const double&v){
+	extendedVariable n=*this;
+	n.setConstant(v);
+	*this*=n;
+	return *this;
+}
+extendedVariable extendedVariable::operator * (const double&v)const{
+	extendedVariable cp=*this;
+	return cp*=v;
+}
+extendedVariable& extendedVariable::operator /= (const double&v){
+	extendedVariable n=*this;
+	n.setConstant(v);
+	*this/=n;
+	return *this;
+}
+extendedVariable extendedVariable::operator / (const double&v)const{
+	extendedVariable cp=*this;
+	return cp/=v;
+}
+
+
 }
