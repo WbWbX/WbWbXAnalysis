@@ -122,13 +122,13 @@ void  analyzer_run2::analyze(size_t anaid){
 		std::cout << "entering pfelectrons mode" <<std::endl;
 	}
 
-	if(mode_.Contains("Btagcsvt") && ! mode_.Contains("Btagshape")){
-		getBTagSF()->setWorkingPoint("csvt");
-		std::cout << "entering btagcsvt mode" <<std::endl;
+	if(mode_.Contains("Btagcsvv2t") && ! mode_.Contains("Btagshape")){
+		getBTagSF()->setWorkingPoint("csvv2t");
+		std::cout << "entering btagcsvv2t mode" <<std::endl;
 	}
-	if(mode_.Contains("Btagcsvm")&& ! mode_.Contains("Btagshape")){
-		getBTagSF()->setWorkingPoint("csvm");
-		std::cout << "entering btagcsvm mode" <<std::endl;
+	if(mode_.Contains("Btagcsvv2m")&& ! mode_.Contains("Btagshape")){
+		getBTagSF()->setWorkingPoint("csvv2m");
+		std::cout << "entering btagcsvv2m mode" <<std::endl;
 	}
 	if(mode_.Contains("Onejet")){
 		onejet=true;
@@ -714,7 +714,7 @@ void  analyzer_run2::analyze(size_t anaid){
 		b_TriggerBools.getEntry(entry);
 		if(testmode_ && entry==0)
 			std::cout << "testmode("<< anaid << "): got trigger boolians" << std::endl;
-		if(!checkTrigger(b_TriggerBools.content(),b_Event.content(), isMC,anaid)) continue;
+		//agrohsje uncomment for time being if(!checkTrigger(b_TriggerBools.content(),b_Event.content(), isMC,anaid)) continue;
 
 
 		/*
@@ -804,12 +804,12 @@ void  analyzer_run2::analyze(size_t anaid){
 
 			if(fabs(elec->d0V()) < 0.02
 					&& elec->isNotConv()
-					&& elec->storedId() > 0.9
+			   && elec->storedId() > 0.9 ////agrohsje 1 or 0 should work 
 					&& elec->mHits() <= 0
 					&& elec->isPf()){
 
 				idelectrons <<  elec;
-				if(fabs(elec->rhoIso())<0.1){
+				if(fabs(elec->isoVal(/* agrohsje rhoIso()*/))<0.1){
 					isoelectrons <<  elec;
 					isoleptons << elec;
 				}
@@ -971,6 +971,8 @@ void  analyzer_run2::analyze(size_t anaid){
 		evt.medjets=&medjets;
 		evt.hardjets=&hardjets;
 		for(size_t i=0;i<b_Jets.content()->size();i++){
+		        //agrohsje added fake scaling
+		        b_Jets.content()->at(i).setP4(b_Jets.content()->at(i).p4()*1.0);
 			treejets << &(b_Jets.content()->at(i));
 		}
 

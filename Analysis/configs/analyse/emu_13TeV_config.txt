@@ -16,31 +16,38 @@ tree_13TeV_emuttbar.root,          t#bar{t},		633,	  831.76,	  0,      true
 tree_13TeV_tW.root,                tW/#bar{t}W,	   	616,	  35.6,	          4
 tree_13TeV_tbarW.root,	           tW/#bar{t}W,	   	616,	  35.6,	          4
 
-tree_13TeV_dy50inf.root,           DY,                  852,      2008.4,         2 
+tree_13TeV_ttbarw.root,            t#bar{t}V,           390,      1.152,          10    
+$ tree_13TeV_ttbarz.root,           t#bar{t}V,           390,      2.232,          10 
+$ tree_13TeV_ttbarh.root,	   t#bar{t}H,           xxx,	  xxx		  x		   
 
-tree_13TeV_ttbarw.root,            t#bar{t}V,           390,      1.152,          5    
-tree_13TeV_ttbarz.root,            t#bar{t}V,           390,      2.232,          5 
+tree_13TeV_dy50inf.root,           DY,                  852,      6025.2,         2 
 
-$tree_13TeV_qcdbctoe3080.root,     QCD,                 400,                      9
-$tree_13TeV_qcdbctoe80170.root,    QCD,                 400,                      9
-$tree_13TeV_qcdbctoe170inf.root,   QCD,                 400,                      9
-$tree_13TeV_qcdem3080.root,        QCD,                 400,                      9
-$tree_13TeV_qcdem80170.root,       QCD,                 400,                      9
+tree_13TeV_wjets.root,		   Wjets,		413,	  61526,	  6
 
+tree_13TeV_zz.root,		   VV,			390,	  17.654,	  5  
+tree_13TeV_wz.root,		   VV,			390,	  33.21,  	  5
 
+$ tree_13TeV_qcdbctoe3080.root,	   QCD,                 400,	  167040, 	  9
+tree_13TeV_qcdbctoe80170.root,	   QCD,			400,	  12981,	  9
+$ tree_13TeV_qcdbctoe170inf.root,   QCD,                 400,      xxxx,	  9
+tree_13TeV_qcdem3080.root,	   QCD,                 400,	  4615893,  	  9
+tree_13TeV_qcdem80170.root,	   QCD,                 400,      183294,	  9
 
 [inputfiles-end]
+
+
 
 
 
 [parameters-begin] 
 $$ all directories except for inputfiles are relative to $CMSSW_BASE
 
-inputFilesDir = /nfs/dust/cms/user/agrohsje/NAF_workingDir/ana_samples_150109/
+$ana_samples_150109/
+inputFilesDir = /nfs/dust/cms/user/agrohsje/NAF_workingDir/ana_samples_150206/
 
 Lumi           = 1000
 
-JECFile        = /src/TtZAnalysis/Analysis/data/analyse/Summer13_V5_DATA_UncertaintySources_AK5PFchs.txt
+JECFile        = /src/TtZ/nfs/dust/cms/user/agrohsje/NAF_workingDir/ana_samples_150206/Analysis/Analysis/data/analyse/Summer13_V5_DATA_UncertaintySources_AK5PFchs.txt
 
 MuonSFFile     = /src/TtZAnalysis/Analysis/data/analyse/muon_tight_sf2D_8TeV.root
 MuonSFHisto    = eff_pt_eta_fullwithtrackerr
