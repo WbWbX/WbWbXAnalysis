@@ -959,6 +959,11 @@ void  graph::coutAllContent(bool rel)const{
 				cout << "  " <<getSystErrorName(sys)  << " (" <<getPointXContent(i,sys) << ", " << getPointYContent(i,sys) << ")" <<endl;
 
 		}
+		if(rel)
+			cout << "  total err "  << " (" <<getPointXError(i,false)/getPointXContent(i)-1 << ", " << getPointYError(i,false)/getPointYContent(i)-1   << ")" <<endl;
+		else
+			cout << "  total err "  << " (" <<getPointXError(i,false) << ", " << getPointYError(i,false)  << ")" <<endl;
+
 		cout <<endl;
 	}
 }

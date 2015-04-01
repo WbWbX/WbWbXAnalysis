@@ -1,5 +1,5 @@
 #include "triggerAnalyzer_base_13TeV.h"
-#include "TtZAnalysis/plugins/leptonSelector2.h"
+#include "TtZAnalysis/Analysis/interface/leptonSelector2.h"
 #include "TtZAnalysis/Tools/TUnfold/TUnfold.h"
 #include "TTreePerfStats.h"
 #include "FWCore/FWLite/interface/AutoLibraryLoader.h"

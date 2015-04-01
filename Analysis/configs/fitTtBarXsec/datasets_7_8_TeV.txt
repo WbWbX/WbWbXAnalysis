@@ -107,7 +107,7 @@
    BG_1_bjets_DY = 0.9
    BG_2_bjets_DY = 0.9
    
-   Lumi = 0.5
+   Lumi = 0 # 0.5
 
 
 [end - correlations ]

@@ -25,7 +25,6 @@ void resultCombiner::addInput(const histo1D& cont){
 
 	temp_=cont;
 	variateHisto1D temp;
-	variateHisto1D::debug=true;
 	temp.import(cont);
 	distributions_.push_back(temp);
 	sysforms_.resize(distributions_.at(0).getNDependencies(), rc_sysf_gaus);

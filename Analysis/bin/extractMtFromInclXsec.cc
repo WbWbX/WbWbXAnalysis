@@ -18,7 +18,7 @@
 invokeApplication(){
 
 	using namespace ztop;
-	const float corrcoeff=parser->getOpt<float>("c",0,"correlation coefficient between fitted cross sections");
+	const float corrcoeff=parser->getOpt<float>("c",-100,"correlation coefficient between fitted cross sections");
 	const bool noplots=parser->getOpt<bool>("-noplots",false,"correlation coefficient between fitted cross sections");
 	//const float energy = parser->getOpt<float>("e",8,"energy -  TESTMODE!");
 	const std::vector<std::string> in=parser->getRest<std::string>();
@@ -84,6 +84,10 @@ invokeApplication(){
 			//g->SetMarkerSize(0.15);
 			//g->Draw("P,same");
 			ex.getExpPoints().getTGraph()->Draw("P");
+			graph onesigma=ex.createOneSigmaPoints(ex.getExpLikelihood());
+			TGraphAsymmErrors * tg=onesigma.getTGraph();
+			tg->SetMarkerSize(0.2);
+			tg->Draw("P");
 			tb2d.drawToPad(&cv);
 			cv.Print("expOnly" +nrgstr+".pdf");
 			pl.cleanMem();
@@ -97,6 +101,10 @@ invokeApplication(){
 			//	g2->SetMarkerSize(0.15);
 			//	g2->Draw("P,same");
 			//g->Draw("P,same");
+			onesigma=ex.createOneSigmaPoints(ex.getJointLikelihood());
+			tg=onesigma.getTGraph();
+			tg->SetMarkerSize(0.2);
+			tg->Draw("P");
 			tb2d.drawToPad(&cv);
 			cv.Print("expTheo" +nrgstr+".pdf");
 			pl.cleanMem();
@@ -104,10 +112,14 @@ invokeApplication(){
 		graph res=ex.getResult();
 
 		res.coutAllContent();
+
 		results.push_back(res);
 	}
 
 	if(results.size()==2){
+
+		if(corrcoeff<-90)
+			throw std::logic_error("provide a correlation coefficient for the fitted uncertainty between both datasets!");
 
 		resultCombiner comb;
 		histo1D combine0,combine1;

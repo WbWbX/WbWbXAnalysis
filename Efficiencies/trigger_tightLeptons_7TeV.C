@@ -1,10 +1,10 @@
 #include "triggerAnalyzer_base3.h"
-#include "TtZAnalysis/plugins/leptonSelector2.h"
+#include "TtZAnalysis/Analysis/interface/leptonSelector2.h"
 #include "TTreePerfStats.h"
 #include "FWCore/FWLite/interface/AutoLibraryLoader.h"
 
-#define DEF_ELEC_PT 30
-#define DEF_MUON_PT 30
+#define DEF_ELEC_PT 20
+#define DEF_MUON_PT 20
 
 double 
 triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::vector<ztop::NTElectron> * inputElectrons){

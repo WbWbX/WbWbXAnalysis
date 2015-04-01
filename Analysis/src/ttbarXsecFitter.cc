@@ -586,9 +586,10 @@ double ttbarXsecFitter::getXsecRatio(size_t datasetidx1,size_t datasetidx2, doub
 	double errdown2 = fitter_.getParameterErrDown()->at(xsecidx2);
 	double corrcoeff= fitter_.getCorrelationCoefficient(xsecidx1,xsecidx2);
 	//assumes positive correlation! (choice of up/down)
-	double err2up = square(errup1 / xsec1) + square(errup2 / xsec2) - 2* (corrcoeff * errup1*errup2)/(xsec1*xsec2);
+	double err2up =  square(errup1 / xsec1) + square(errup2 / xsec2) - 2* (corrcoeff * errup1*errup2)/(xsec1*xsec2);
 	double err2down = square(errdown1 / xsec1) + square(errdown2 / xsec2) - 2* (corrcoeff * errdown1*errdown2)/(xsec1*xsec2);
-
+	err2up=err2up * ratio*ratio;
+	err2down=err2down * ratio*ratio;
 
 	//add extrapolation uncertainties (inter-unc-correlation 1)
 	//debug check
