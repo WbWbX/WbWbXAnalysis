@@ -100,6 +100,13 @@ bool resultCombiner::minimize(){
 	simpleFitter::printlevel=0;
 
 	fitter_.setTolerance(0.1);
+
+	std::vector<size_t> minoserrs;
+	if(combminos_){
+	for(size_t i=distributions_.at(0).getNDependencies(); i< startparas.size();i++)
+			 fitter_.setAsMinosParameter(i,true);
+	}
+
 	fitter_.fit();
 
 

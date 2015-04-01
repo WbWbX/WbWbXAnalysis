@@ -111,7 +111,7 @@ invokeApplication(){
 		}
 		graph res=ex.getResult();
 
-		res.coutAllContent();
+		res.coutAllContent(false);
 
 		results.push_back(res);
 	}
@@ -138,6 +138,9 @@ invokeApplication(){
 
 		comb.addInput(combine0);
 		comb.addInput(combine1);
+
+		comb.setCombinedMinos(true);
+
 		bool succ=comb.minimize();
 		if(!succ){
 			std::cout << "failed to combine " <<std::endl;
@@ -147,6 +150,8 @@ invokeApplication(){
 		out.coutFullContent();
 
 		comb.coutSystBreakDownInBin(1);
+
+		std::cout << "uncertainty: +" << out.getBinContent(1,0)-out.getBinContent(1) << " " << out.getBinContent(1,1)-out.getBinContent(1)<<std::endl;
 
 		std::cout << "\"stat\" is the uncorrelated part of the fit uncertainty " <<std::endl;
 
