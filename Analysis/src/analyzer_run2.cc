@@ -1,15 +1,13 @@
 /*
- * eventLoop.h
+ * analyzer_run2.cc based on former eventLoop.h
  *
  *  Created on: Jul 17, 2013
  *      Author: kiesej
  *
  *
- *      THIS IS NOT REALLY A HEADER FILE
- *
- *      it only defines the analyze() function of MainAnalyzer and is put in a
+ *      this file defines the analyze() function of MainAnalyzer and is put in a
  *      separate file only for structure reasons!
- *      Do not include it in any other file than MainAnalyzer.cc
+ *      do not include it in any other file than MainAnalyzer.cc
  */
 
 
@@ -121,14 +119,17 @@ void  analyzer_run2::analyze(size_t anaid){
 		electrontype="NTPFElectrons";
 		std::cout << "entering pfelectrons mode" <<std::endl;
 	}
-
 	if(mode_.Contains("Btagcsvv2t") && ! mode_.Contains("Btagshape")){
-		getBTagSF()->setWorkingPoint("csvv2t");
-		std::cout << "entering btagcsvv2t mode" <<std::endl;
+	    getBTagSF()->setWorkingPoint("csvv2t");
+	    std::cout << "entering btagcsvv2t mode" <<std::endl;
 	}
 	if(mode_.Contains("Btagcsvv2m")&& ! mode_.Contains("Btagshape")){
-		getBTagSF()->setWorkingPoint("csvv2m");
-		std::cout << "entering btagcsvv2m mode" <<std::endl;
+	    getBTagSF()->setWorkingPoint("csvv2m");
+	    std::cout << "entering btagcsvv2m mode" <<std::endl;
+	}
+	if(mode_.Contains("Btagcsvv2l")&& ! mode_.Contains("Btagshape")){
+	    getBTagSF()->setWorkingPoint("csvv2l");
+	    std::cout << "entering btagcsvv2l mode" <<std::endl;
 	}
 	if(mode_.Contains("Onejet")){
 		onejet=true;
@@ -739,29 +740,30 @@ void  analyzer_run2::analyze(size_t anaid){
 		for(size_t i=0;i<b_Muons.content()->size();i++){
 			NTMuon* muon = & b_Muons.content()->at(i);
 			if(isMC)
-				muon->setP4(muon->p4() * getMuonEnergySF()->getScalefactor(muon->eta()));
+			    muon->setP4(muon->p4() * getMuonEnergySF()->getScalefactor(muon->eta()));
 			allleps << muon;
 			if(muon->pt() < lepptthresh)       continue;
 			if(fabs(muon->eta())>2.4) continue;
 			kinmuons << &(b_Muons.content()->at(i));
 
 			//tight muon selection: https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideMuonId#Tight_Muon
-			//isPF is implicit
-
+			//agrohsje isPF requirement already at ntuple level 
+			
 			if(muon->isGlobal()
-					&& muon->normChi2()<10.
-					&& muon->muonHits()>0
-					&& muon->matchedStations() >1  //not in trees
-					&& fabs(muon->d0V())<0.2
-					&& fabs(muon->dzV())<0.5
-					&& muon->pixHits()>0
-					&& muon->trkHits()>5){
+			   && muon->matchedStations()>1 
+			   && muon->pixHits()>0
+			   && muon->muonHits()>0
+			   && muon->normChi2()<10.
+			   && muon->trkHits()>5			   
+			   && fabs(muon->d0V())<0.2
+			   && fabs(muon->dzV())<0.5)
+			    {
 				idmuons <<  &(b_Muons.content()->at(i));
-			}
+			    }
 		}
-
-
-
+		
+		
+		
 		for(size_t i=0;i<idmuons.size();i++){
 			NTMuon * muon =  idmuons.at(i);
 			if(!mode_invertiso && fabs(muon->isoVal()) > 0.12) continue;
@@ -786,36 +788,25 @@ void  analyzer_run2::analyze(size_t anaid){
 			NTElectron * elec=&(b_Electrons.content()->at(i));
 			float ensf=1;
 			if(isMC)
-				ensf=getElecEnergySF()->getScalefactor(elec->eta());
-
+			    ensf=getElecEnergySF()->getScalefactor(elec->eta());
 			elec->setECalP4(elec->ECalP4() * ensf);
 			elec->setP4(elec->ECalP4() * ensf); //both the same now!!
-
-			//selection fully following https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopEGM l+jets except for pt cut
 
 			allleps << elec;
 			if(elec->pt() < lepptthresh)  continue;
 			float abseta=fabs(elec->eta());
 
 			float suclueta = fabs(elec->ECalP4().eta());
-			if(abseta > 2.4) continue;
+			if(abseta > 2.5) continue;
 			if(suclueta > 1.4442 && suclueta < 1.5660) continue; //transistion region
 			kinelectrons  << elec;
 
-			if(fabs(elec->d0V()) < 0.02
-					&& elec->isNotConv()
-			   && elec->storedId() > 0.9 ////agrohsje 1 or 0 should work 
-					&& elec->mHits() <= 0
-					&& elec->isPf()){
-
-				idelectrons <<  elec;
-				if(fabs(elec->isoVal(/* agrohsje rhoIso()*/))<0.1){
-					isoelectrons <<  elec;
-					isoleptons << elec;
-				}
-
+			if(elec->storedId() > 0.9){  ////agrohsje 1 or 0 should work 
+			    idelectrons <<  elec;
+			    //if(fabs(elec->isoVal(/* agrohsje rhoIso()*/))<0.1){ // iso already done in id 
+			    isoelectrons <<  elec;
+			    isoleptons << elec;
 			}
-
 		}
 
 		/*
@@ -909,7 +900,8 @@ void  analyzer_run2::analyze(size_t anaid){
 			lepweight*=getTriggerSF()->getScalefactor(fabs(firstlep->eta()),fabs(seclep->eta()));
 		}
 		else if(b_emu_){
-			if(leppair->first.size() < 1 || leppair->second.size() < 1) continue;
+		    
+		    if(leppair->first.size() < 1 || leppair->second.size() < 1) continue;
 			dilp4=leppair->first[0]->p4() + leppair->second[0]->p4();
 			mll=dilp4.M();
 			firstlep=leppair->first[0];
@@ -987,6 +979,7 @@ void  analyzer_run2::analyze(size_t anaid){
 					useJetForMet=true; //dont even do something
 
 				getJECUncertainties()->applyToJet(treejets.at(i));
+				//agrohsje uncomment 
 				getJERAdjuster()->correctJet(treejets.at(i));
 				//corrected
 				if(useJetForMet){
@@ -995,8 +988,8 @@ void  analyzer_run2::analyze(size_t anaid){
 				}
 			}
 			if(!(treejets.at(i)->id())) continue;
-			if(!noOverlap(treejets.at(i), isomuons,     0.5)) continue;
-			if(!noOverlap(treejets.at(i), isoelectrons, 0.5)) continue;
+			if(!noOverlap(treejets.at(i), isomuons,     0.4)) continue;
+			if(!noOverlap(treejets.at(i), isoelectrons, 0.4)) continue;
 			if(fabs(treejets.at(i)->eta())>2.4) continue;
 			if(treejets.at(i)->pt() < 10) continue;
 			idjets << (treejets.at(i));
@@ -1354,8 +1347,7 @@ void  analyzer_run2::analyze(size_t anaid){
 		step++;
 
 		if(!usetopdiscr && !nobcut && selectedbjets.size() < 1) continue;
-		// if(usetopdiscr && topdiscr3<0.9) continue;
-		if(usetopdiscr && lh_toplh<0.3) continue;
+		//agrohsje uncomment if(usetopdiscr && lh_toplh<0.3) continue;
 		if(getBTagSF()->getMode() != NTBTagSF::shapereweighting_mode){
 			puweight*=getBTagSF()->getNTEventWeight(*selectedjets);
 		}
