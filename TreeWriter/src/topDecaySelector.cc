@@ -17,7 +17,7 @@ namespace ztop{
 bool topDecaySelector::debug=false;
 
 //C++ initialize all members here that need an initial value. keep ordering
-topDecaySelector::topDecaySelector(): partonshower_(ps_pythia6),incollectionp_(0)
+topDecaySelector::topDecaySelector(): partonshower_(ps_pythia6),incollectionp_(0),statTop_(3)
 {
 	// I usually put this kind of debug ouput on top of each function call, it makes debugging
 	// much easier. Also in case it is done long after the class was developed
@@ -43,21 +43,85 @@ topDecaySelector& topDecaySelector::operator = (const topDecaySelector&rhs){
 	return *this;
 }
 
-
 //this is where the magic happens
 void  topDecaySelector::process(){
-
-	// whenever something goes wrong, please throw exceptions with a proper
-	// error output. examples below
-	std::string errstr="topDecaySelector::process: has to be implemented. ";
-	errstr+=" additional info (index, etc)";
-	throw std::logic_error(errstr);
+        
+        //Vectors to save the tops, ws
+        std::vector<const reco::GenParticle *> tops, ws;
+        const reco::GenParticle * mother, * daughter;
 
 	if(!incollectionp_){// pointer 0 -> real check, no example! ;)
 		throw std::logic_error("topDecaySelector::process: input collection not defined");
 	}
+        
+        if(debug) std::cout << "Filling tops" << std::endl;
+        for(size_t i=0;i<incollectionp_->size();i++){
+                mother = incollectionp_->at(i);
+                if(std::abs(mother->pdgId()) ==6 && std::abs(mother->status())==statTop_ ){ 
+                        metops_.push_back(mother);
+                        daughter = findLastParticle(mother);
+                        tops.push_back(daughter);
+                        dectops_.push_back(daughter);
+                }
+        }
+        if(tops.size()< 2){
+                throw std::logic_error("topDecaySelector::process: less than two tops found");
+        }
+        if(debug) std::cout<<"Filling ws"<< std::endl;
+        
+        for(size_t i=0;i<tops.size();i++){
+                mother=tops.at(i);
+                for(size_t j=0;j<mother->numberOfDaughters();j++){
+                        daughter = dynamic_cast<const reco::GenParticle*>(mother->daughter(j));
+                        if(std::abs(daughter->pdgId())== 24){
+                                mews_.push_back(daughter);
+                                ws.push_back(findLastParticle(daughter));
+                                decws_.push_back(findLastParticle(daughter));
+                         }
+                }
+        }
+        if(debug) std::cout<<"Filling Leps"<<std::endl;
+        if(ws.size()< 2){
+                throw std::logic_error("topDecaySelector::process: less than two ws found");
+        }
+        for(size_t i=0;i<ws.size();i++){
+                mother=ws.at(i);
+                for(size_t j=0;j<mother->numberOfDaughters();j++){
+                        daughter = dynamic_cast<const reco::GenParticle*>(mother->daughter(j));
+                        if (std::abs(daughter->pdgId())== 11 || std::abs(daughter->pdgId())== 13 || std::abs(daughter->pdgId()==15)){
+                               meleptons_.push_back(daughter);
+                               finalstateleptonsfromw_.push_back(findLastParticle(daughter)); 
+                        }
+                        else if (std::abs(daughter->pdgId())== 12 || std::abs(daughter->pdgId())== 14 || std::abs(daughter->pdgId()==16)){
+                               meneutrinos_.push_back(daughter);
+                        }
 
+                }
 
+        }
+        if(debug) std::cout<<"Filling Bs"<<std::endl;
+        for(size_t i=0;i<ws.size();i++){
+                mother=ws.at(i);
+                for(size_t j=0;j<mother->numberOfDaughters();j++){
+                        daughter = dynamic_cast<const reco::GenParticle*>(mother->daughter(j));
+                        if (std::abs(daughter->pdgId())== 5){
+                               mebs_.push_back(daughter);
+                        }
+
+                }
+
+        }
+        if(debug) std::cout<<"Filling Final State Leptons"<<std::endl;
+        for(size_t i=0;i<incollectionp_->size();i++){
+                mother= incollectionp_->at(i);
+                if(mother->status()==1 && (std::abs(mother->pdgId())==11 || std::abs(mother->pdgId())==13 || std::abs(mother->pdgId())==15 )){
+                        finalstateleptons_.push_back(mother);        
+                }
+                else if(mother->status()==1 && (std::abs(mother->pdgId())==12 || std::abs(mother->pdgId())==14 || std::abs(mother->pdgId())==16 )){
+                        finalstateneutrinos_.push_back(mother);
+                }
+
+        }
 }
 
 
@@ -73,7 +137,39 @@ void topDecaySelector::copyFrom(const topDecaySelector& rhs){
 	partonshower_=rhs.partonshower_;
 	incollectionp_=rhs.incollectionp_;
 	finalstateleptons_=rhs.finalstateleptons_;
+        statTop_=rhs.statTop_;
 }
 
+//Function to find last particle in decay chain
+const reco::GenParticle* topDecaySelector::findLastParticle(const reco::GenParticle* p) {
+        if(debug) std::cout<<"Looking for last particle in chain."<<std::endl;
+        unsigned int particleID = std::abs(p->pdgId());
+        bool containsItself = false;
+        unsigned int d_idx = 0;
+        for (unsigned idx = 0; idx < p->numberOfDaughters(); ++idx) {
+                if (std::abs(p->daughter(idx)->pdgId()) == particleID) {
+                        containsItself = true;
+                        d_idx = idx;
+                }
+        }
+
+        if (!containsItself) return p;
+        else {
+                if (partonshower_ == ps_pythia6 && (particleID == 24 || particleID == 6)){
+                /* Pythia6 has a weird idea of W bosons and top quarks
+                W (status == 3) -> q qbar' W. The new W is status 2 and has no daughters
+                */
+                        if(p->status() == 3)return p;
+                }
+        return findLastParticle((reco::GenParticle*)p->daughter(d_idx));
+        }
+}
+
+
+//Function to set status codes for the top, this function is private, it is called when the partonShower is defined
+void topDecaySelector::setTopStatus(partonShowers ps){
+        if (ps == ps_pythia6) statTop_ = 3;
+        if (ps==ps_pythia8) statTop_=22;
+}
 
 }

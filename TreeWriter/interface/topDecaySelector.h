@@ -11,6 +11,7 @@
 
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 
+
 /*
  * I added some C++ programming comments, can be deleted afterwards
  * please mind const'ness. First, it seems a pain, but later it provides very
@@ -54,7 +55,8 @@ public:
 	void setGenCollection( std::vector<const reco::GenParticle *>* in){
 		incollectionp_=in;}
 
-	void setPartonShower(partonShowers ps){partonshower_=ps;}
+	void setPartonShower(partonShowers ps){partonshower_=ps;
+                setTopStatus(partonshower_);}
 
 	// I would suggest to put this in one function and produce the collections here
 	// afterwards, they are just asked for with getBlabla()
@@ -79,8 +81,20 @@ public:
 	const std::vector<const reco::GenParticle *>& getFinalStateLeptonsFromW()const{return finalstateleptonsfromw_;}
 
 	const std::vector<const reco::GenParticle *>& getMELeptons()const{return meleptons_;}
+        
+        const std::vector<const reco::GenParticle *>& getDecTops()const{return dectops_;}
 
+        const std::vector<const reco::GenParticle *>& getDecWs()const{return decws_;}
 
+        const std::vector<const reco::GenParticle *>& getMETops()const{return metops_;}
+  
+        const std::vector<const reco::GenParticle *>& getMEWs()const{return mews_;}
+
+        const std::vector<const reco::GenParticle *>& getMENeutrinos()const{return meneutrinos_;}
+ 
+        const std::vector<const reco::GenParticle *>& getFinalStateNeutrinos()const{return finalstateneutrinos_;}
+
+        const std::vector<const reco::GenParticle *>& getMEBs()const{return mebs_;}        
 
 private:
 
@@ -89,8 +103,13 @@ private:
 
 	//input collection
 	std::vector<const reco::GenParticle *>* incollectionp_;
-
-
+        
+        // The status codes for the Matrix Element and the decaying top quarks, and a function to define them
+        int statTop_;
+        void setTopStatus (partonShowers ps);
+  
+        //Function to follow up decay chains
+        const reco::GenParticle* findLastParticle(const reco::GenParticle* p);
 
 	//output collections: ...
 	//fill them with pointers
@@ -102,11 +121,25 @@ private:
 	std::vector<const reco::GenParticle *> finalstateleptonsfromw_;
 	//leps directly from w on ME level
 	std::vector<const reco::GenParticle *> meleptons_;
+        // decaying tops and ws
+        std::vector<const reco::GenParticle *> dectops_;
+        std::vector<const reco::GenParticle *> decws_;
+        // Matrix Element tops and ws
+        std::vector<const reco::GenParticle *> metops_;
+        std::vector<const reco::GenParticle *> mews_;
+        //Neutrinos
+        std::vector<const reco::GenParticle *> finalstateneutrinos_;
+        std::vector<const reco::GenParticle *> meneutrinos_;
+        //Bs from ME
+        std::vector<const reco::GenParticle *> mebs_;
 	/* ...
 	std::vector<const reco::GenParticle *> mews_;
 	std::vector<const reco::GenParticle *> finalstateleptons_;
 	 */
-
+        
+        std::vector<int > metops_mothers_;
+        std::vector<int > metops_daughters_;
+        
 	// function used by operator= and copy-constructor.
 	// needs to be adapted to the members
 	void copyFrom(const topDecaySelector&);
@@ -119,4 +152,4 @@ private:
 
 
 
-#endif /* TOPDECAYSELECTOR_H_ */
+#endif /* TOPDECAYSELECTOR_H_ */ 
