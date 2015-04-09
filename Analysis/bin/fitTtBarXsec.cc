@@ -313,8 +313,8 @@ invokeApplication(){
 					double ratio=mainfitter.getXsecRatio(ndts,ndts2,errup,errdown);//full ps
 					texTabler ratiotab(" c | l l l");
 					ratiotab << "Ratio: " + mainfitter.datasetName(ndts) + "/" + mainfitter.datasetName(ndts2) ;
-					ratiotab << fmt.round(ratio,0.001) << "$\\pm$" << "$^{" + fmt.toTString(fmt.round(100*errup,0.001)) +"}_{" +
-							fmt.toTString(fmt.round(100*errdown,0.001)) +"}$\\%";
+					ratiotab << fmt.round(ratio,0.01) << "$\\pm$" << "$^{" + fmt.toTString(fmt.round(errup,0.01)) +"}_{" +
+							fmt.toTString(fmt.round(errdown,0.01)) +"}$";
 					ratiotab.writeToFile(outfile+"_ratio_" +mainfitter.datasetName(ndts) +"_"+mainfitter.datasetName(ndts2)+".tex");
 					ratiotab.writeToPdfFile(outfile+"_ratio_" +mainfitter.datasetName(ndts) +"_"+mainfitter.datasetName(ndts2)+".pdf");
 

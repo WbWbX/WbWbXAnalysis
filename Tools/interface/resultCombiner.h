@@ -54,7 +54,7 @@ public:
 	enum rc_sys_forms{rc_sysf_gaus,rc_sysf_box};
 	enum rc_add_constraints{rc_addc_none,rc_addc_normalized};
 
-	resultCombiner():success_(false),additionalconstraint_(rc_addc_none),forcednorm_(0){}
+	resultCombiner():success_(false),additionalconstraint_(rc_addc_none),forcednorm_(0),combminos_(false){}
 	~resultCombiner(){}
 
 	void setAdditionalConstraint(rc_add_constraints c){additionalconstraint_=c;}
@@ -68,6 +68,8 @@ public:
 
 	bool minimize();
 	/* invoke a fitter temporarily? -> no access to correlations etc */
+
+	void setCombinedMinos(bool set){combminos_=set;}
 
 	const simpleFitter* getFitter()const{return &fitter_;}
 
@@ -95,6 +97,8 @@ private:
 
 	simpleFitter fitter_;
 	std::vector<rc_sys_forms> sysforms_;
+
+	bool combminos_;
 
 	//nuisance functions - all assume central @ 0
 	double getNuisanceLogGaus(const double & )const;

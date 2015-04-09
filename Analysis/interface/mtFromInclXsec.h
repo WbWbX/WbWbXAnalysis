@@ -43,6 +43,8 @@ public:
 
 	const graph& getExpPoints()const;
 
+	graph createOneSigmaPoints(const histo2D&)const;
+
 	/**
 	 * This will include the envelope uncertainty used for the Joint likelihood,
 	 * and variations according to the other uncertainties (for comibnation with

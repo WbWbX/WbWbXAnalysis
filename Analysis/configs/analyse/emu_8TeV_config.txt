@@ -76,7 +76,7 @@ TrackingSFHisto = tracking_eff
 ElecSFFile     = /src/TtZAnalysis/Analysis/data/analyse/elec_tight_sf2D_8TeV.root
 ElecSFHisto    = GlobalSF
 
-TriggerSFFile  = /src/TtZAnalysis/Analysis/data/analyse/trigger_emu_8TeV_pt30.root
+TriggerSFFile  = /src/TopAnalysis/Configuration/analysis/common/data/triggerSummary_emu_tightleps.root
 
 PUFile         = /src/TtZAnalysis/Analysis/data/analyse/Legacy2012.json_PU    $without .root
 

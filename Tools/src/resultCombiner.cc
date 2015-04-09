@@ -25,7 +25,6 @@ void resultCombiner::addInput(const histo1D& cont){
 
 	temp_=cont;
 	variateHisto1D temp;
-	variateHisto1D::debug=true;
 	temp.import(cont);
 	distributions_.push_back(temp);
 	sysforms_.resize(distributions_.at(0).getNDependencies(), rc_sysf_gaus);
@@ -101,6 +100,13 @@ bool resultCombiner::minimize(){
 	simpleFitter::printlevel=0;
 
 	fitter_.setTolerance(0.1);
+
+	std::vector<size_t> minoserrs;
+	if(combminos_){
+	for(size_t i=distributions_.at(0).getNDependencies(); i< startparas.size();i++)
+			 fitter_.setAsMinosParameter(i,true);
+	}
+
 	fitter_.fit();
 
 

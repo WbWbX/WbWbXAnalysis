@@ -1,5 +1,5 @@
 #include "triggerAnalyzer_base3.h"
-#include "TtZAnalysis/plugins/leptonSelector2.h"
+#include "TtZAnalysis/Analysis/interface/leptonSelector2.h"
 #include "TTreePerfStats.h"
 
 

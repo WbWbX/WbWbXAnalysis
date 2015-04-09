@@ -24,7 +24,8 @@ invokeApplication(){
 			getenv("CMSSW_BASE")+(std::string)"/src/TtZAnalysis/Tools/styles/controlPlots_standard.txt",
 			"Specify (optional) control plot style file");
 	const std::string plotnames=parser->getOpt<std::string>("p","","specify plot names as list plot1 %% plot2 %% ...");
-	const std::string inlist=parser->getOpt<std::string>("-list","","specify a file that represents a list of all plots to be plotted.");
+	const std::string inlist=parser->getOpt<std::string>("-list","","specify a file that represents a list of all plots to be plotted.\n     one line for each plot or %% as delimiter");
+	const std::string suffix=parser->getOpt<std::string>("s","","specify a suffix.");
 
 	std::vector<TString> tmpv=parser->getRest<TString>();
 	parser->doneParsing();
@@ -91,6 +92,7 @@ invokeApplication(){
 		pl.setStack(&stack);
 
 		TString outname=stack.getFormattedName();
+		outname+=suffix;
 		outname+=".pdf";
 		pl.draw();
 		cv.Print(outname);

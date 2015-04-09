@@ -231,6 +231,20 @@ const histo2D&  mtFromInclXsec::getJointLikelihood()const{
 const graph& mtFromInclXsec::getExpPoints()const{
 	return exppoints_;
 }
+graph mtFromInclXsec::createOneSigmaPoints(const histo2D&in)const{
+	graph out;
+	float onesigma=(float)exp(-0.5);
+	for(size_t i=1;i<=in.getNBinsX();i++){
+		for(size_t j=1;j<=in.getNBinsY();j++){
+			if(isApprox(in.getBinContent(i,j),onesigma,0.01)){
+				float cx,cy;
+				in.getBinCenter(i,j,cx,cy);
+				out.addPoint(cx,cy);
+			}
+		}
+	}
+	return out;
+}
 
 graph mtFromInclXsec::getResult()const{
 	return result_;

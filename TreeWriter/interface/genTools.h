@@ -1,6 +1,16 @@
 #ifndef GENTOOLS_H
 #define GENTOOLS_H
 
+
+/*
+ *
+ * This will be / is deprecated and removed in the next clean-up.
+ *
+ */
+
+
+
+
 //#define WITHOUT_NTOBJECTS
 
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
