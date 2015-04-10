@@ -16,18 +16,19 @@
 50    /DYJetsToLL_M-50_13TeV-madgraph-pythia8/Phys14DR-PU20bx25_PHYS14_25_V1-v1/MINIAODSIM                   tree_13TeV_dy50inf             runOnAOD=False
 
 ### W bosons
-25   /WJetsToLNu_13TeV-madgraph-pythia8-tauola/Phys14DR-PU20bx25_PHYS14_25_V1-v1/MINIAODSIM                 tree_13TeV_wjets               runOnAOD=False     
+25    /WJetsToLNu_13TeV-madgraph-pythia8-tauola/Phys14DR-PU20bx25_PHYS14_25_V1-v1/MINIAODSIM                 tree_13TeV_wjets               runOnAOD=False     
 
 ### VV
-25   /ZZTo4L_Tune4C_13TeV-powheg-pythia8/Phys14DR-PU20bx25_PHYS14_25_V1-v1/MINIAODSIM                       tree_13TeV_zz                  runOnAOD=False
-25   /WZJetsTo3LNu_Tune4C_13TeV-madgraph-tauola/Phys14DR-PU20bx25_PHYS14_25_V1-v1/MINIAODSIM                tree_13TeV_wz                  runOnAOD=False   
+25    /ZZTo4L_Tune4C_13TeV-powheg-pythia8/Phys14DR-PU20bx25_PHYS14_25_V1-v1/MINIAODSIM                       tree_13TeV_zz                  runOnAOD=False
+25    /WZJetsTo3LNu_Tune4C_13TeV-madgraph-tauola/Phys14DR-PU20bx25_PHYS14_25_V1-v1/MINIAODSIM                tree_13TeV_wz                  runOnAOD=False   
 
 ### QCD
-50    /QCD_Pt_30to80_bcToE_Tune4C_13TeV_pythia8/Phys14DR-PU20bx25_PHYS14_25_V1-v1/MINIAODSIM                 tree_13TeV_qcdem3080           runOnAOD=False
-40    /QCD_Pt_80to170_bcToE_Tune4C_13TeV_pythia8/Phys14DR-PU20bx25_PHYS14_25_V1-v1/MINIAODSIM                tree_13TeV_qcdem80170          runOnAOD=False
-35    /QCD_Pt-30to80_EMEnriched_Tune4C_13TeV_pythia8/Phys14DR-PU20bx25_castor_PHYS14_25_V1-v1/MINIAODSIM     tree_13TeV_qcdbctoe3080        runOnAOD=False
-50    /QCD_Pt-80to170_EMEnriched_Tune4C_13TeV_pythia8/Phys14DR-PU20bx25_castor_PHYS14_25_V1-v1/MINIAODSIM    tree_13TeV_qcdbctoe80170       runOnAOD=False
+50    /QCD_Pt_30to80_bcToE_Tune4C_13TeV_pythia8/Phys14DR-PU20bx25_PHYS14_25_V1-v1/MINIAODSIM                 tree_13TeV_qcdbctoe3080        runOnAOD=False
+40    /QCD_Pt_80to170_bcToE_Tune4C_13TeV_pythia8/Phys14DR-PU20bx25_PHYS14_25_V1-v1/MINIAODSIM                tree_13TeV_qcdbctoe80170       runOnAOD=False
 20    /QCD_Pt_170toInf_bcToE_Tune4C_13TeV_pythia8/Phys14DR-PU20bx25_PHYS14_25_V1-v1/MINIAODSIM               tree_13TeV_qcdbctoe170inf      runOnAOD=False
+35    /QCD_Pt-30to80_EMEnriched_Tune4C_13TeV_pythia8/Phys14DR-PU20bx25_castor_PHYS14_25_V1-v1/MINIAODSIM     tree_13TeV_qcdem3080           runOnAOD=False
+50    /QCD_Pt-80to170_EMEnriched_Tune4C_13TeV_pythia8/Phys14DR-PU20bx25_castor_PHYS14_25_V1-v1/MINIAODSIM    tree_13TeV_qcdem80170          runOnAOD=False
+
 
 ### ttV
 10    /TTZJets_Tune4C_13TeV-madgraph-tauola/Phys14DR-PU20bx25_PHYS14_25_V1-v1/MINIAODSIM                     tree_13TeV_ttbarz              runOnAOD=False
@@ -48,7 +49,8 @@
 
 ### scale ttbar
 
-35   /TT_scaleup_Tune4C_13TeV-pythia8-tauola/Phys14DR-PU20bx25_PHYS14_25_V1-v1/MINIAODSIM                   tree_13TeV_emuttbar_ttscaleup   runOnAOD=False isSignal=True
+35   /TT_scaleup_Tune4C_13TeV-pythia8-tauola/Phys14DR-PU20bx25_PHYS14_25_V1-v1/MINIAODSIM                   tree_13TeV_emuttbar_ttscaleup      runOnAOD=False isSignal=True
+### 35   /TT_scaledown_Tune4C_13TeV-pythia8-tauola/Phys14DR-PU20bx25_PHYS14_25_V1-v2/MINIAODSIM             tree_13TeV_emuttbar_ttscaledown    runOnAOD=False isSignal=True
 
 
 ### Scale Z
@@ -56,4 +58,5 @@
 
 
 ### mass samples 
-
+### 50   /TT_mass1695_Tune4C_13TeV-pythia8-tauola/Phys14DR-PU20bx25_PHYS14_25_V1-v2/MINIAODSIM              tree_13TeV_emuttbar_169p5   runOnAOD=False isSignal=True 
+### 50   /TT_mass1755_Tune4C_13TeV-pythia8-tauola/Phys14DR-PU20bx25_PHYS14_25_V1-v1/MINIAODSIM  	    tree_13TeV_emuttbar_175p5   runOnAOD=False isSignal=True
