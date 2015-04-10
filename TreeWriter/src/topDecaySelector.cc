@@ -112,13 +112,13 @@ void  topDecaySelector::process(){
 
         }
         if(debug) std::cout<<"Filling Bs"<<std::endl;
-        for(size_t i=0;i<ws.size();i++){
-                mother=ws.at(i);
+        for(size_t i=0;i<tops.size();i++){
+                mother=tops.at(i);
                 for(size_t j=0;j<mother->numberOfDaughters();j++){
                         daughter = dynamic_cast<const reco::GenParticle*>(mother->daughter(j));
                         if (std::abs(daughter->pdgId())== 5){
                                mebs_.push_back(daughter);
-                               decws_daughters_.push_back(daughter);
+                               dectops_daughters_.push_back(daughter);
                                mebs_mothers_.push_back(mother);
                         }
 
