@@ -89,12 +89,42 @@ public:
         const std::vector<const reco::GenParticle *>& getMETops()const{return metops_;}
   
         const std::vector<const reco::GenParticle *>& getMEWs()const{return mews_;}
-
+     
         const std::vector<const reco::GenParticle *>& getMENeutrinos()const{return meneutrinos_;}
  
         const std::vector<const reco::GenParticle *>& getFinalStateNeutrinos()const{return finalstateneutrinos_;}
 
         const std::vector<const reco::GenParticle *>& getMEBs()const{return mebs_;}        
+        
+        //Mothers
+        const std::vector<const reco::GenParticle *>& getDecTopsMothers()const{return dectops_mothers_;}
+
+        const std::vector<const reco::GenParticle *>& getMEWsMothers()const{return mews_mothers_;}
+        
+        const std::vector<const reco::GenParticle *>& getDecWsMothers()const{return decws_mothers_;}
+        
+        const std::vector<const reco::GenParticle *>& getMELeptonsMothers()const{return meleptons_mothers_;}
+
+        const std::vector<const reco::GenParticle *>& getFinalStateLeptonsFromWMothers()const{return finalstateleptonsfromw_mothers_;}
+
+        const std::vector<const reco::GenParticle *>& getMENeutrinosMothers()const{return meneutrinos_mothers_;}
+
+        const std::vector<const reco::GenParticle *>& getMEBsMothers()const{return mebs_mothers_;}
+
+        //Daughters
+        
+        const std::vector<const reco::GenParticle *>& getMETopsDaughters()const{return metops_daughters_;}
+
+        const std::vector<const reco::GenParticle *>& getDecTopsDaughters()const{return dectops_daughters_;}
+
+        const std::vector<const reco::GenParticle *>& getMEWsDaughters()const{return mews_daughters_;}
+
+        const std::vector<const reco::GenParticle *>& getDecWsDaughters()const{return decws_daughters_;}
+
+        const std::vector<const reco::GenParticle *>& getMELeptonsDaughters()const{return meleptons_daughters_;}
+
+
+
 
 private:
 
@@ -127,6 +157,7 @@ private:
         // Matrix Element tops and ws
         std::vector<const reco::GenParticle *> metops_;
         std::vector<const reco::GenParticle *> mews_;
+
         //Neutrinos
         std::vector<const reco::GenParticle *> finalstateneutrinos_;
         std::vector<const reco::GenParticle *> meneutrinos_;
@@ -136,9 +167,22 @@ private:
 	std::vector<const reco::GenParticle *> mews_;
 	std::vector<const reco::GenParticle *> finalstateleptons_;
 	 */
-        
-        std::vector<int > metops_mothers_;
-        std::vector<int > metops_daughters_;
+
+        //Mothers
+        std::vector<const reco::GenParticle *> dectops_mothers_;
+        std::vector<const reco::GenParticle *> mews_mothers_;
+        std::vector<const reco::GenParticle *> decws_mothers_;
+        std::vector<const reco::GenParticle *> meleptons_mothers_;
+        std::vector<const reco::GenParticle *> finalstateleptonsfromw_mothers_;
+        std::vector<const reco::GenParticle *> meneutrinos_mothers_;
+        std::vector<const reco::GenParticle *> mebs_mothers_;
+
+        //Daughters
+        std::vector<const reco::GenParticle *> metops_daughters_;
+        std::vector<const reco::GenParticle *> dectops_daughters_;        
+        std::vector<const reco::GenParticle *> mews_daughters_;
+        std::vector<const reco::GenParticle *> decws_daughters_;
+        std::vector<const reco::GenParticle *> meleptons_daughters_;
         
 	// function used by operator= and copy-constructor.
 	// needs to be adapted to the members
