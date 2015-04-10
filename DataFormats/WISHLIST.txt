@@ -1,0 +1,14 @@
+
+This file is supposed to summarize a wishlist for format changes
+
+
+Higher priority:
+
+NTEvent->runNo: float to size_t
+NTEvent->eventNo: float to size_t
+
+
+
+Low priority:
+
+NTJet: new: float jetarea (right now added as members)
