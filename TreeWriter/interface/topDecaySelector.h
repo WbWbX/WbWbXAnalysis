@@ -16,17 +16,7 @@
  * I added some C++ programming comments, can be deleted afterwards
  * please mind const'ness. First, it seems a pain, but later it provides very
  * useful constraints on what you expect from a function and what not
- *
- * I would think of something like:
- * topDecaySelector tds;
- * tds.setPartonShower(topDecaySelector::ps_pythia6);
- * tds.setGenCollection(allgeneratedparticles);
- * tds.process();
- *
- *  // get output.
- *
- */
-
+*/
 namespace ztop{
 
 class topDecaySelector {
@@ -60,14 +50,9 @@ public:
 
 	// I would suggest to put this in one function and produce the collections here
 	// afterwards, they are just asked for with getBlabla()
-	// this way, there is a clear separation of const access (get an output)
-	// and non-const "produce" steps.
 	void process();
 
-	//C++: this function is just inlined, should be done for simple setter and getter
-	/**
-	 * returns collection of final state leptons following the rivet definition "not from hadron"
-	 */
+	 // returns collection of final state leptons following the rivet definition "not from hadron"
 	const std::vector<const reco::GenParticle *>& getFinalStateLeptons()const{return finalstateleptons_;}
 
 	/**
@@ -80,20 +65,28 @@ public:
 	 */
 	const std::vector<const reco::GenParticle *>& getFinalStateLeptonsFromW()const{return finalstateleptonsfromw_;}
 
+        //returns collection of leptons directly from the W
 	const std::vector<const reco::GenParticle *>& getMELeptons()const{return meleptons_;}
         
+        //returns collection of the Decaying Tops (same as METops for Pythia6)
         const std::vector<const reco::GenParticle *>& getDecTops()const{return dectops_;}
 
+        //returns collection of the Decaying Ws (same as MEWs for Pythia6)
         const std::vector<const reco::GenParticle *>& getDecWs()const{return decws_;}
 
+        //returns collection of the Matrix Element Tops
         const std::vector<const reco::GenParticle *>& getMETops()const{return metops_;}
-  
+        
+        //returns collection of the Ws directly from the Tops
         const std::vector<const reco::GenParticle *>& getMEWs()const{return mews_;}
      
+        //returns collection of the Neutrinos directly form the Ws
         const std::vector<const reco::GenParticle *>& getMENeutrinos()const{return meneutrinos_;}
  
+        //returns collection of all Status 1 Neutrinos
         const std::vector<const reco::GenParticle *>& getFinalStateNeutrinos()const{return finalstateneutrinos_;}
 
+        //returns collection of the bs directly from the Ws
         const std::vector<const reco::GenParticle *>& getMEBs()const{return mebs_;}        
         
         //Mothers
@@ -140,12 +133,10 @@ private:
   
         //Function to follow up decay chains
         const reco::GenParticle* findLastParticle(const reco::GenParticle* p);
+        const reco::GenParticle* tauDecay(const reco::GenParticle* tau);
 
-	//output collections: ...
-	//fill them with pointers
+	//output collections: Fill with Pointers
 	//better fill more collections and avoid switches.
-	//we could put many switches and then many instances of the topDecaySelector class
-	//if you prefer that...
 	std::vector<const reco::GenParticle *> finalstateleptons_;
 	std::vector<const reco::GenParticle *> finalstateleptonsdressed_;
 	std::vector<const reco::GenParticle *> finalstateleptonsfromw_;
@@ -163,10 +154,6 @@ private:
         std::vector<const reco::GenParticle *> meneutrinos_;
         //Bs from ME
         std::vector<const reco::GenParticle *> mebs_;
-	/* ...
-	std::vector<const reco::GenParticle *> mews_;
-	std::vector<const reco::GenParticle *> finalstateleptons_;
-	 */
 
         //Mothers
         std::vector<const reco::GenParticle *> dectops_mothers_;

@@ -48,7 +48,7 @@ void  topDecaySelector::process(){
         
         //Vectors to save the tops, ws
         std::vector<const reco::GenParticle *> tops, ws;
-        const reco::GenParticle * mother, * daughter, * secondDaughter;
+        const reco::GenParticle * mother, * daughter, * secondDaughter, * thirdDaughter;
 
 	if(!incollectionp_){// pointer 0 -> real check, no example! ;)
 		throw std::logic_error("topDecaySelector::process: input collection not defined");
@@ -104,6 +104,14 @@ void  topDecaySelector::process(){
                                        finalstateleptonsfromw_.push_back(secondDaughter); 
                                        finalstateleptonsfromw_mothers_.push_back(daughter);
                                        meleptons_daughters_.push_back(secondDaughter);
+                               }
+                               else if (std::abs(secondDaughter->pdgId())==15){
+                                       if(tauDecay(secondDaughter)  ){
+                                               thirdDaughter = tauDecay(secondDaughter);
+                                               finalstateleptonsfromw_.push_back(thirdDaughter);
+                                               finalstateleptonsfromw_mothers_.push_back(daughter);
+                                               meleptons_daughters_.push_back(thirdDaughter); 
+                                       }
                                }
                         }
                         else if (std::abs(daughter->pdgId())== 12 || std::abs(daughter->pdgId())== 14 || std::abs(daughter->pdgId())==16){
@@ -205,6 +213,18 @@ const reco::GenParticle* topDecaySelector::findLastParticle(const reco::GenParti
         }
 }
 
+//Function to handle Tau Decays
+const reco::GenParticle* topDecaySelector::tauDecay(const reco::GenParticle* tau){
+        const reco::GenParticle* daughter,*secondDaughter;
+        for (unsigned i=0;i<tau->numberOfDaughters();i++){
+                daughter = dynamic_cast<const reco::GenParticle*> (tau->daughter(i));
+                if(std::abs(daughter->pdgId())==11 || std::abs(daughter->pdgId())==13){
+                        secondDaughter= findLastParticle(daughter);
+                        if(secondDaughter->status()==1) return daughter;        
+                }
+        }
+        return 0; 
+}
 
 //Function to set status codes for the top, this function is private, it is called when the partonShower is defined
 void topDecaySelector::setTopStatus(partonShowers ps){
