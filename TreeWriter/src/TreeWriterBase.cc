@@ -5,6 +5,7 @@
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 #include "MagneticField/Engine/interface/MagneticField.h"
 
+#include <algorithm>
 TreeWriterBase::TreeWriterBase(const edm::ParameterSet& iConfig)
 {
 
@@ -215,17 +216,20 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		///couts//// all tagged with ##cout##
 
 
-
 		const reco::GenParticle * daughter;
 		const reco::GenParticle * mother;
 
 
 		std::vector<const reco::GenParticle *> allgen, tops, Zs, Ws, bs, Bhadrons, nus, leps1, leps3, allnus;
-
-
+                std::vector<const reco::GenParticle *> wmothers, leps3mothers,bmothers,numothers,leps1mothers;
 
 		// nttops,ntws,ntbs,ntbhadrons,ntnus,ntleps3,ntleps1, ntallnus;
 
+
+                /*Please note that the Mother Daughter relations heavily depend on the generator!!
+                * With the implementation below the Mother Daughter relations were only tested with PYTHIA 6.
+                * Any Other Generator will likely require additional implementation
+                */
 		if(debugmode) std::cout << "filling all gen Particles" << std::endl;
 
 		bool gotTop=false;
@@ -236,87 +240,104 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		for(size_t i=0;i<genParticles->size();i++){
 			allgen << &genParticles->at(i);
 		}
-
+                std::vector<const reco::GenParticle *>* allgenForDec(&allgen);
+                ztop::topDecaySelector * topDecay = new topDecaySelector();
+                topDecay->setGenCollection(allgenForDec);
+                ztop::topDecaySelector::partonShowers ps = ztop::topDecaySelector::ps_pythia6;
+                topDecay->setPartonShower(ps);
 		if(debugmode) std::cout << "Filling tops" << std::endl;
-
-		for(size_t i=0;i<allgen.size();i++){
-			if(fabs(allgen.at(i)->pdgId() -6) < 0.1){ // 6
-				ztop::NTGenParticle temp=makeNTGen(allgen.at(i));
-				temp.setGenId(genidit++);
-				nttops << temp;
-				tops << allgen.at(i);
-				gotTop=true;
-			}
-			else if(fabs(allgen.at(i)->pdgId() +6) < 0.1){ // -6
-				ztop::NTGenParticle temp=makeNTGen(allgen.at(i));
-				temp.setGenId(genidit++);
-				nttops << temp;
-				tops << allgen.at(i);
-			}
-			if(tops.size() > 1) break;
+                topDecay->process();
+                tops = topDecay->getMETops();
+		for(size_t i=0;i<tops.size();i++){
+			ztop::NTGenParticle temp=makeNTGen(tops.at(i));
+			temp.setGenId(genidit++);
+			nttops << temp;
+			gotTop=true;
 		}
-
-		//makes shure the right ordering is done
-		///////////////
-
-		bool gotWFromTop=false;
-		////////////to be used for other generator types!
-
-		if(debugmode) std::cout << "filling Ws" << std::endl;
-
-		if(tops.size()>1){ //should always be the case for ttbar sample
-			for(size_t i=0;i<tops.size();i++){
-				mother=tops.at(i);
-				for(size_t j=0;j<mother->numberOfDaughters();j++){
-					daughter = dynamic_cast<const reco::GenParticle*>(mother->daughter(j));
-					if(fabs(daughter->pdgId() - 24) < 0.1){
-						ztop::NTGenParticle temp=makeNTGen(daughter);
-						temp.setGenId(genidit++);
-						temp.addMotherIt(nttops.at(i).genId());
-						nttops.at(i).addDaughterIt(temp.genId());
-						ntws << temp;
-						Ws   << daughter;
-						gotWFromTop=true;
-					}
-					if(fabs(daughter->pdgId() + 24) < 0.1){
-						ztop::NTGenParticle temp=makeNTGen(daughter);
-						temp.setGenId(genidit++);
-						temp.addMotherIt(nttops.at(i).genId());
-						nttops.at(i).addDaughterIt(temp.genId());
-						ntws << temp;
-						Ws   << daughter;
-					}
-				}
-			}
-		}
-
-		//////direct W decay leps3 and nus
-
-		if(debugmode) std::cout << "filling neutrinoes and stat3 leps from W" << std::endl;
-
-		for(size_t i=0;i<Ws.size();i++){
-			mother=Ws.at(i);
-
-			for(size_t j=0;j<mother->numberOfDaughters();j++){
-				daughter = dynamic_cast<const reco::GenParticle*>(mother->daughter(j));
-				if(isAbsApprox(daughter->pdgId(), 11) || isAbsApprox(daughter->pdgId(), 13) || isAbsApprox(daughter->pdgId(), 15)){
-					ztop::NTGenParticle temp=makeNTGen(daughter);
-					temp.setGenId(genidit++);
-					temp.addMotherIt(ntws.at(i).genId());
-					ntws.at(i).addDaughterIt(temp.genId());
-					ntleps3 << temp;
-					leps3 << daughter;
-				}
-				if(isAbsApprox(daughter->pdgId(), 12) || isAbsApprox(daughter->pdgId(), 14) || isAbsApprox(daughter->pdgId(), 16)){
-					ztop::NTGenParticle temp=makeNTGen(daughter);
-					temp.setGenId(genidit++);
-					temp.addMotherIt(ntws.at(i).genId());
-					ntws.at(i).addDaughterIt(temp.genId());
-					ntnus << temp;
-					nus << daughter;
-				}
-			}
-		}
+                bool gotWFromTop=false;
+                Ws = topDecay->getMEWs();
+                wmothers = topDecay->getMEWsMothers();
+                for(size_t i=0;i<Ws.size();i++){
+                        ztop::NTGenParticle temp=makeNTGen(Ws.at(i));
+                        temp.setGenId(genidit++);
+                        for(size_t k=0;k<tops.size();k++){
+                                if(wmothers.at(i) == tops.at(k)){
+                                        temp.addMotherIt(nttops.at(k).genId());
+                                        nttops.at(k).addDaughterIt(temp.genId());
+                                        break;
+                                }
+                        }
+                        ntws << temp;
+                        gotWFromTop=true;
+                }
+                leps3 = topDecay->getMELeptons();
+                leps3mothers= topDecay->getMELeptonsMothers();
+                for(size_t i=0;i<leps3.size();i++){
+                        ztop::NTGenParticle temp=makeNTGen(leps3.at(i));
+                        temp.setGenId(genidit++);
+                        for(size_t k=0;k<Ws.size();k++){
+                                if (leps3mothers.at(i)==Ws.at(k)){
+                                        temp.addMotherIt(ntws.at(k).genId());
+                                        ntws.at(k).addDaughterIt(temp.genId());
+                                        break;
+                                }
+                        }
+                        ntleps3 << temp;
+                }
+                nus=topDecay->getMENeutrinos();
+                numothers=topDecay->getMENeutrinosMothers();
+                for(size_t i=0;i<nus.size();i++){
+                        ztop::NTGenParticle temp=makeNTGen(nus.at(i));
+                        temp.setGenId(genidit++);
+                        for(size_t k=0;k<Ws.size();k++){
+                                if (numothers.at(i)==Ws.at(k)){
+                                        temp.addMotherIt(ntws.at(k).genId());
+                                        ntws.at(k).addDaughterIt(temp.genId());
+                                        break;
+                                }
+                        }
+                        ntnus << temp;
+                }
+                leps1=topDecay->getFinalStateLeptonsFromW();
+                leps1mothers=topDecay->getFinalStateLeptonsFromWMothers();
+                for(size_t i=0;i<leps1.size();i++){
+                        ztop::NTGenParticle temp=makeNTGen(leps1.at(i));
+                        temp.setGenId(genidit++);
+                        for(size_t k=0;k<leps3.size();k++){
+                                if (leps1mothers.at(i)==leps3.at(k)){
+                                        temp.addMotherIt(ntleps3.at(k).genId());
+                                        ntleps3.at(k).addDaughterIt(temp.genId());
+                                        break;
+                                }
+                        }
+                        ntleps1 << temp;
+                }
+                allnus=topDecay->getFinalStateNeutrinos();
+                for(size_t i=0;i<allnus.size();i++){
+                        ztop::NTGenParticle temp=makeNTGen(allnus.at(i));
+                        temp.setGenId(genidit++);
+                        //temp.addMotherIt(ntws.at(i).genId());
+                        //ntws.at(i).addDaughterIt(temp.genId());
+                        ntallnus << temp;
+                        genmet_f+=allnus.at(i)->pt();
+                }
+                //FIXME:NTBRads is no longer implemented, needs to be added to topDecayselector 
+                bs=topDecay->getMEBs();
+                bmothers = topDecay->getMEBsMothers();
+                for(size_t i=0;i<bs.size();i++){
+                        ztop::NTGenParticle temp=makeNTGen(bs.at(i));
+                        temp.setGenId(genidit++);
+                        for(size_t k=0;k<tops.size();k++){
+                                if (bmothers.at(i)==tops.at(k)){
+                                        temp.addMotherIt(nttops.at(k).genId());
+                                        nttops.at(k).addDaughterIt(temp.genId());
+                                        break;
+                                }
+                        }
+                        ntbs << temp;
+                }                                                                        
+                //FIXME:This only works for PYTHIA 6  in the moment !!!
+                //FIXME:Especially not implemented for PYTHIA 8                       
 
 		if(!gotWFromTop && !gotTop){ //must b Z or something else
 
@@ -331,7 +352,8 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 					break;
 				}
 			}
-
+                        //This only works for PYTHIA 6  in the moment !!!
+                        //Especially not implemented for PYTHIA 8
 			if(debugmode) std::cout << "Fillig Z daughters stat 3" << std::endl;
 
 			for(size_t i=0;i<Zs.size();i++){
@@ -359,52 +381,6 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		}
 
 		/////further lep decay to stat 1 leps; the above can be stat 1, too
-		if(debugmode) std::cout << "Filling stat 1 leptons" << std::endl;
-
-		int newid=0;
-		for(size_t j=0;j<leps3.size();j++){
-			mother=leps3[j];
-			size_t i=0;
-			size_t ndaugh=mother->numberOfDaughters();
-			while(i<ndaugh){
-				daughter = dynamic_cast<const reco::GenParticle*>(mother->daughter(i));
-				i++;
-				if(isAbsApprox(daughter->pdgId(),11) || isAbsApprox(daughter->pdgId(),13) || isAbsApprox(daughter->pdgId(),15)){
-					if(isAbsApprox(daughter->status(),1)){
-						ztop::NTGenParticle temp=makeNTGen(daughter);
-						temp.setGenId(genidit++);
-						temp.addMotherIt(ntleps3.at(j).genId());
-						ntleps3.at(j).addDaughterIt(temp.genId());
-						leps1 << daughter;
-						smallIdMap[daughter]=newid;
-						ntleps1 << temp;
-						newid++;
-						break;
-					}
-					else{
-						mother=daughter;
-						i=0;
-						ndaugh=mother->numberOfDaughters();
-					}
-				}
-			}
-		}
-		//all nus (for met or other stuff)
-
-		if(debugmode) std::cout << "filling all neutrinos" << std::endl;
-		genmet_f=0;
-		for(size_t i=0;i<allgen.size();i++){
-			if(isAbsApprox(allgen.at(i)->pdgId(), 12)
-					|| isAbsApprox(allgen.at(i)->pdgId(), 14)
-					|| isAbsApprox(allgen.at(i)->pdgId(), 16)){
-				ztop::NTGenParticle temp=makeNTGen(allgen.at(i));
-				// temp.setGenId(genidit++);
-				ntallnus << temp;
-				allnus << allgen.at(i);
-				genmet_f+=allgen.at(i)->pt();
-			}
-		}
-
 		if(debugmode) std::cout << "filling genMet" << std::endl;
 
 
@@ -439,41 +415,6 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 			iEvent.getByLabel(genBHadIndex_, genBHadIndex);
 
 
-		}
-
-
-		/////////
-
-
-
-
-		if(debugmode) std::cout << "Filling b- quarks" << std::endl;
-
-		for(size_t i=0;i<tops.size();i++){
-			mother=tops[i];
-			for(size_t j=0;j<mother->numberOfDaughters();j++){
-				daughter = dynamic_cast<const reco::GenParticle*>(mother->daughter(j));
-				if(isAbsApprox(daughter->pdgId(),5)){
-					ztop::NTGenParticle temp=makeNTGen(daughter);
-					temp.setGenId(genidit++);
-					temp.addMotherIt(nttops.at(i).genId());
-					nttops.at(i).addDaughterIt(temp.genId());
-					ntbs << temp;
-					bs << daughter;
-
-					//check stat 2 daughters
-					for(size_t k=0;k<daughter->numberOfDaughters();k++){
-						const reco::GenParticle* daudaughter = dynamic_cast<const reco::GenParticle*>(daughter->daughter(k));
-						if(isAbsApprox(daudaughter->pdgId(),5)){
-							temp=makeNTGen(daudaughter);
-							temp.setGenId(genidit++);
-							temp.addMotherIt(ntbs.at(ntbs.size()-1).genId());
-							ntbs.at(ntbs.size()-1).addDaughterIt(temp.genId());
-							ntradbs << temp;
-						}
-					}
-				}
-			}
 		}
 
 		/////B hadrons
