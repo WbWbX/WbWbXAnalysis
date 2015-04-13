@@ -121,7 +121,7 @@ void  analyzer_run2::analyze(size_t anaid){
 		electrontype="NTPFElectrons";
 		std::cout << "entering pfelectrons mode" <<std::endl;
 	}
-	if(mode_.Contains("Btagcsvv2t") && ! mode_.Contains("Btagshape")){
+/*	if(mode_.Contains("Btagcsvv2t") && ! mode_.Contains("Btagshape")){
 	    getBTagSF()->setWorkingPoint("csvv2t");
 	    std::cout << "entering btagcsvv2t mode" <<std::endl;
 	}
@@ -133,7 +133,7 @@ void  analyzer_run2::analyze(size_t anaid){
 	    getBTagSF()->setWorkingPoint("csvv2l");
 	    std::cout << "entering btagcsvv2l mode" <<std::endl;
 	}
-	if(mode_.Contains("Onejet")){
+*/	if(mode_.Contains("Onejet")){
 		onejet=true;
 		std::cout << "entering Onejet mode" <<std::endl;
 	}
@@ -245,7 +245,7 @@ void  analyzer_run2::analyze(size_t anaid){
 	/*
 	 * end of mode switches
 	 */
-	bool wasbtagsys=false;
+//	bool wasbtagsys=false;
 	//fake data configuration
 	if(fakedata){
 		//this whole section is bad style because the configuration should be done from the outside
@@ -264,8 +264,8 @@ void  analyzer_run2::analyze(size_t anaid){
 		getTrackingSF()->setSystematics("nom");
 
 		// getPUReweighter()-> //setSystematics("nom");
-		wasbtagsys=getBTagSF()->isRealSyst();
-		getBTagSF()->setSystematic(NTBTagSF::nominal);
+	//	wasbtagsys= getBTagSF()->isRealSyst();
+		//getBTagSF()->setSystematic(NTBTagSF::nominal);
 		getJECUncertainties()->setSystematics("no");
 		getJERAdjuster()->setSystematics("def");
 
@@ -430,16 +430,16 @@ void  analyzer_run2::analyze(size_t anaid){
 
 	//make sure the nominal scale factors are used for varations of the SF
 	TString btagSysAdd=topmass_+"_"+getSyst();
-	if(getBTagSF()->isRealSyst() || wasbtagsys)
-		btagSysAdd=topmass_+"_nominal";
+//	if(getBTagSF()->isRealSyst() || wasbtagsys)
+//		btagSysAdd=topmass_+"_nominal";
 
 	if(fakedata) //always use nominal
 		btagSysAdd+="_fakedata";
 	std::string btagsamplename=(channel_+"_"+btagSysAdd+"_"+toString(inputfile)).Data();
-	if(getBTagSF()->setSampleName(btagsamplename) < 0){
-		reportError(-3,anaid);
-		return;
-	}
+//	if(getBTagSF()->setSampleName(btagsamplename) < 0){
+//		reportError(-3,anaid);
+//		return;
+//	}
 	getBTagSF()->setIsMC(isMC);
 	//  if(testmode_)
 	//    std::cout << "testmode(" <<anaid << ") setBtagSmaplename " <<channel_+"_"+btagSysAdd+"_"+toString(inputfile)).Data() <<std::endl;
@@ -1106,13 +1106,13 @@ void  analyzer_run2::analyze(size_t anaid){
 		evt.selectednonbjets=&selectednonbjets;
 
 
-		getBTagSF()->changeNTJetTags(selectedjets);
+	//	getBTagSF()->changeNTJetTags(selectedjets);
 		for(size_t i=0;i<hardjets.size();i++){
-			if(selectedjets->at(i)->btag() < getBTagSF()->getWPDiscrValue()){
+		//	if(selectedjets->at(i)->btag() < getBTagSF()->getWPDiscrValue()){
 
-				selectednonbjets.push_back(selectedjets->at(i));
-				continue;
-			}
+		//		selectednonbjets.push_back(selectedjets->at(i));
+		//		continue;
+		//	}
 			selectedbjets.push_back(selectedjets->at(i));
 		}
 
@@ -1267,14 +1267,14 @@ void  analyzer_run2::analyze(size_t anaid){
 
 		if(!zerojet && selectedjets->size() < 1) continue;
 
-		if(getBTagSF()->getMode() == NTBTagSF::shapereweighting_mode){
+/*		if(getBTagSF()->getMode() == NTBTagSF::shapereweighting_mode){
 
 			if(onejet)
 				puweight*=getBTagSF()->getNTEventWeight(selectedjets->at(0));
 			else
 				puweight*=getBTagSF()->getNTEventWeight(*selectedjets);
 		}
-		if(apllweightsone) puweight=1;
+*/		if(apllweightsone) puweight=1;
 		//ht+=adjustedmet.met();
 		//double mllj=0;
 		//double phijl=0;
@@ -1341,18 +1341,18 @@ void  analyzer_run2::analyze(size_t anaid){
 		}
 
 		//make the b-tag SF
-		for(size_t i=0;i<selectedbjets.size();i++){
-			getBTagSF()->fillEff(selectedjets->at(i),puweight);
-		}
+	//	for(size_t i=0;i<selectedbjets.size();i++){
+	//		getBTagSF()->fillEff(selectedjets->at(i),puweight);
+	//	}
 
 		///////////////////// btag cut STEP 8 //////////////////////////
 		step++;
 
 		if(!usetopdiscr && !nobcut && selectedbjets.size() < 1) continue;
 		//agrohsje uncomment if(usetopdiscr && lh_toplh<0.3) continue;
-		if(getBTagSF()->getMode() != NTBTagSF::shapereweighting_mode){
-			puweight*=getBTagSF()->getNTEventWeight(*selectedjets);
-		}
+	//	if(getBTagSF()->getMode() != NTBTagSF::shapereweighting_mode){
+	//		puweight*=getBTagSF()->getNTEventWeight(*selectedjets);
+	//	}
 		if(apllweightsone) puweight=1;
 
 		float mlbmin=0;
@@ -1424,13 +1424,13 @@ void  analyzer_run2::analyze(size_t anaid){
 	// Fill all containers in the stackVector
 
 	// std::cout << "Filling containers to the Stack\n" << std::endl;
-	btagsf_.makeEffs(); //only does that if switched on, so safe
+	//btagsf_.makeEffs(); //only does that if switched on, so safe
 
 	if(testmode_ )
 		std::cout << "testmode("<< anaid << "): filled all b-tag effs" << std::endl;
 
-	if(!getBTagSF()->getMakeEff())
-		std::cout << "B-Tag nan count: " << getBTagSF()->getNanCount() << std::endl;
+//	if(!getBTagSF()->getMakeEff())
+//		std::cout << "B-Tag nan count: " << getBTagSF()->getNanCount() << std::endl;
 
 
 	// delete t;
@@ -1554,7 +1554,7 @@ void  analyzer_run2::analyze(size_t anaid){
 
 
 		///btagsf
-		if(btagsf_.makesEff()){
+/*		if(btagsf_.makesEff()){
 			if(fileExists(btagsffile_.Data())){
 				if(testmode_ )
 					std::cout << "testmode("<< anaid << "): reading btag file"<< std::endl;
@@ -1566,7 +1566,7 @@ void  analyzer_run2::analyze(size_t anaid){
 				std::cout << "testmode("<< anaid << "): writing btag file"<< std::endl;
 			btagsf_.writeToTFile(btagsffile_); //recreates the file
 		}///makes eff
-
+*/
 		std::cout << inputfile << ": " << std::endl;
 		for(unsigned int i=0;i<9;i++){
 			std::cout << "selection step "<< toTString(i)<< " "  << sel_step[i];
@@ -1594,7 +1594,7 @@ void  analyzer_run2::analyze(size_t anaid){
 		//all operations done
 		//check if everything was written correctly
 		bool outputok=true;
-		if(btagsf_.makesEff()){
+		/*if(btagsf_.makesEff()){
 			ztop::NTBTagSF btsf;
 			btsf.readFromTFile(btagsffile_);
 			if(btsf.setSampleName(btagsamplename)<0){
@@ -1605,7 +1605,7 @@ void  analyzer_run2::analyze(size_t anaid){
 				outputok=true;
 			}
 		}
-
+*/
 		//throws if something is not ok
 		/* DEBUG!!!
 		if(outputok){
