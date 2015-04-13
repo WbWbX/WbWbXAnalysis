@@ -121,19 +121,7 @@ void  analyzer_run2::analyze(size_t anaid){
 		electrontype="NTPFElectrons";
 		std::cout << "entering pfelectrons mode" <<std::endl;
 	}
-/*	if(mode_.Contains("Btagcsvv2t") && ! mode_.Contains("Btagshape")){
-	    getBTagSF()->setWorkingPoint("csvv2t");
-	    std::cout << "entering btagcsvv2t mode" <<std::endl;
-	}
-	if(mode_.Contains("Btagcsvv2m")&& ! mode_.Contains("Btagshape")){
-	    getBTagSF()->setWorkingPoint("csvv2m");
-	    std::cout << "entering btagcsvv2m mode" <<std::endl;
-	}
-	if(mode_.Contains("Btagcsvv2l")&& ! mode_.Contains("Btagshape")){
-	    getBTagSF()->setWorkingPoint("csvv2l");
-	    std::cout << "entering btagcsvv2l mode" <<std::endl;
-	}
-*/	if(mode_.Contains("Onejet")){
+	if(mode_.Contains("Onejet")){
 		onejet=true;
 		std::cout << "entering Onejet mode" <<std::endl;
 	}
@@ -245,7 +233,7 @@ void  analyzer_run2::analyze(size_t anaid){
 	/*
 	 * end of mode switches
 	 */
-//	bool wasbtagsys=false;
+	//bool wasbtagsys=false;
 	//fake data configuration
 	if(fakedata){
 		//this whole section is bad style because the configuration should be done from the outside
@@ -264,8 +252,7 @@ void  analyzer_run2::analyze(size_t anaid){
 		getTrackingSF()->setSystematics("nom");
 
 		// getPUReweighter()-> //setSystematics("nom");
-	//	wasbtagsys= getBTagSF()->isRealSyst();
-		//getBTagSF()->setSystematic(NTBTagSF::nominal);
+		getBTagSF()->setSystematics(NTBTagSF::nominal);
 		getJECUncertainties()->setSystematics("no");
 		getJERAdjuster()->setSystematics("def");
 
@@ -427,6 +414,15 @@ void  analyzer_run2::analyze(size_t anaid){
 	//init b-tag scale factor utility
 	if(testmode_)
 		std::cout << "testmode("<< anaid << "): preparing btag SF" << std::endl;
+/*
+ * 	if(mode_.Contains("Btagcsvt") && ! mode_.Contains("Btagshape")){
+ * 		getBTagSF()->setWorkingPoint("csvt");
+ * 		std::cout << "entering btagcsvt mode" <<std::endl;
+ * 	}
+ * 	if(mode_.Contains("Btagcsvm")&& ! mode_.Contains("Btagshape")){
+ * 		getBTagSF()->setWorkingPoint("csvm");
+ * 		std::cout << "entering btagcsvm mode" <<std::endl;
+ * 	}
 
 	//make sure the nominal scale factors are used for varations of the SF
 	TString btagSysAdd=topmass_+"_"+getSyst();
@@ -440,7 +436,12 @@ void  analyzer_run2::analyze(size_t anaid){
 //		reportError(-3,anaid);
 //		return;
 //	}
+*/
+	TString btagfile=btagefffile_;
+        btagfile+="_"+inputfile;
 	getBTagSF()->setIsMC(isMC);
+	if(!getBTagSF()->getMakeEff())
+        getBTagSF()->readFromFile(btagfile.Data());
 	//  if(testmode_)
 	//    std::cout << "testmode(" <<anaid << ") setBtagSmaplename " <<channel_+"_"+btagSysAdd+"_"+toString(inputfile)).Data() <<std::endl;
 
@@ -1267,14 +1268,10 @@ void  analyzer_run2::analyze(size_t anaid){
 
 		if(!zerojet && selectedjets->size() < 1) continue;
 
-/*		if(getBTagSF()->getMode() == NTBTagSF::shapereweighting_mode){
-
-			if(onejet)
-				puweight*=getBTagSF()->getNTEventWeight(selectedjets->at(0));
-			else
-				puweight*=getBTagSF()->getNTEventWeight(*selectedjets);
+		if(getBTagSF()->getMode() == NTBTagSF::shapereweighting_mode){
+                        throw std::runtime_error("NTBTagSF::shapereweighting_mode: not impl");
 		}
-*/		if(apllweightsone) puweight=1;
+		if(apllweightsone) puweight=1;
 		//ht+=adjustedmet.met();
 		//double mllj=0;
 		//double phijl=0;
@@ -1350,10 +1347,8 @@ void  analyzer_run2::analyze(size_t anaid){
 
 		if(!usetopdiscr && !nobcut && selectedbjets.size() < 1) continue;
 		//agrohsje uncomment if(usetopdiscr && lh_toplh<0.3) continue;
-	//	if(getBTagSF()->getMode() != NTBTagSF::shapereweighting_mode){
-	//		puweight*=getBTagSF()->getNTEventWeight(*selectedjets);
-	//	}
-		if(apllweightsone) puweight=1;
+	
+        	if(apllweightsone) puweight=1;
 
 		float mlbmin=0;
 		evt.mlbmin=&mlbmin;
@@ -1423,15 +1418,6 @@ void  analyzer_run2::analyze(size_t anaid){
 
 	// Fill all containers in the stackVector
 
-	// std::cout << "Filling containers to the Stack\n" << std::endl;
-	//btagsf_.makeEffs(); //only does that if switched on, so safe
-
-	if(testmode_ )
-		std::cout << "testmode("<< anaid << "): filled all b-tag effs" << std::endl;
-
-//	if(!getBTagSF()->getMakeEff())
-//		std::cout << "B-Tag nan count: " << getBTagSF()->getNanCount() << std::endl;
-
 
 	// delete t;
 	f->Close(); //deletes t
@@ -1481,92 +1467,18 @@ void  analyzer_run2::analyze(size_t anaid){
 			csv->addSignal(legendname);
 
 		csv->writeToFile((getOutPath()+".ztop").Data());
-		/*
-		TFile * outfile;
-
-		if(!fileExists((getOutPath()+".root").Data())) {
-			outfile=new TFile(getOutPath()+".root","RECREATE");
-
-		}
-		else{
-			outfile=new TFile(getOutPath()+".root","READ");
-		}
-
-		TTree * outtree;
-		ztop::container1DStackVector * csv=&allplotsstackvector_;
-
-		// std::cout << "trying to get tree" <<std::endl;
-
-		if(outfile->Get("containerStackVectors")){
-			outtree=(TTree*)outfile->Get("containerStackVectors");
-			if(outtree->GetBranch("containerStackVectors")){ //exists already others are filled
-				// csv->loadFromTree(outtree,csv->getName()); //makes copy
-				csv=csv->getFromTree(outtree,csv->getName());
-			}
-		}
-
-		csv->addList1DUnfold(legendname,color,norm,legord);
-		if(testmode_ )
-			std::cout << "testmode("<< anaid << "): added 1DUnfold List"<< std::endl;
-		csv->addList2D(legendname,color,norm,legord);
-		if(testmode_ )
-			std::cout << "testmode("<< anaid << "): added 2D List"<< std::endl;
-		csv->addList(legendname,color,norm,legord);
-		if(testmode_ )
-			std::cout << "testmode("<< anaid << "): added 1D List"<< std::endl;
-
-		if(issignal)
-			csv->addSignal(legendname);
-
-		outfile->Close();
-		delete outfile;
-
-		outfile=new TFile((getOutPath()+".root"),"RECREATE");
-		outfile->cd();
-
-		outtree= new TTree("containerStackVectors","containerStackVectors");
-		outtree->Branch("containerStackVectors",&csv);
-		if(testmode_ )
-			std::cout << "testmode("<< anaid << "): added Branch"<< std::endl;
-		outtree->Fill();
-		if(testmode_ )
-			std::cout << "testmode("<< anaid << "): filled new outfile tree"<< std::endl;
-
-		outtree->Write("",TObject::kOverwrite);//"",TObject::kOverwrite);
-		if(testmode_ )
-			std::cout << "testmode("<< anaid << "): written new outfile tree"<< std::endl;
-
-
-		//write discriminatorFactory configuration to newly created outfile (last job will persist)
-		discriminatorFactory::debug=true;
-		discriminatorFactory::writeAllToTFile(outfile);
-		if(testmode_ )
-			std::cout << "testmode("<< anaid << "): written "<< discriminatorFactory::c_list.size()<< " discriminatorFactorys"<< std::endl;
-
-		outfile->Close();
-		delete outfile;
-
-		 */
-
-
-		if(testmode_ )
+		
+                if(testmode_ )
 			std::cout << "testmode("<< anaid << "): written main output"<< std::endl;
 
 
 		///btagsf
-/*		if(btagsf_.makesEff()){
-			if(fileExists(btagsffile_.Data())){
-				if(testmode_ )
-					std::cout << "testmode("<< anaid << "): reading btag file"<< std::endl;
-				ztop::NTBTagSF  btsf;
-				btsf.readFromTFile(btagsffile_);
-				btagsf_ = (btagsf_ + btsf);
-			}
+		if(btagsf_.makesEff()){
 			if(testmode_ )
 				std::cout << "testmode("<< anaid << "): writing btag file"<< std::endl;
-			btagsf_.writeToTFile(btagsffile_); //recreates the file
+			getBTagSF()->writeToFile((std::string)btagfile.Data()); //recreates the file
 		}///makes eff
-*/
+
 		std::cout << inputfile << ": " << std::endl;
 		for(unsigned int i=0;i<9;i++){
 			std::cout << "selection step "<< toTString(i)<< " "  << sel_step[i];
@@ -1594,38 +1506,6 @@ void  analyzer_run2::analyze(size_t anaid){
 		//all operations done
 		//check if everything was written correctly
 		bool outputok=true;
-		/*if(btagsf_.makesEff()){
-			ztop::NTBTagSF btsf;
-			btsf.readFromTFile(btagsffile_);
-			if(btsf.setSampleName(btagsamplename)<0){
-				p_finished.get(anaid)->pwrite(-2003);
-				outputok=false;
-			}
-			else{
-				outputok=true;
-			}
-		}
-*/
-		//throws if something is not ok
-		/* DEBUG!!!
-		if(outputok){
-			try{
-				csv->loadFromTFile(getOutPath()+".root");
-				for(size_t i=0;i<csv->getStack(0).size();i++){
-					outputok=false;
-					if(csv->getStack(0).getLegend(i) == legendname){
-						outputok=true;
-						break;
-					}
-				}
-				//	if(csv) delete csv;
-			}
-			catch(...){
-				outputok=false;
-				p_finished.get(anaid)->pwrite(-2001);
-			}
-		}
-		 */
 
 		if(outputok)
 			p_finished.get(anaid)->pwrite(1); //turns of write blocking, too
