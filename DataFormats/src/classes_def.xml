@@ -38,7 +38,6 @@
   <class name="std::vector<ztop::NTVertex>"/>
 
   <class name="ztop::NTBTagSF"/>
-  <class name="std::vector<ztop::NTBTagSF>"/>
   <class name="ztop::NTJECUncertainties"/>
   <class name="std::vector<ztop::NTJECUncertainties>"/>
   <class name="ztop::NTJERAdjuster"/>

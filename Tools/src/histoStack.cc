@@ -1744,13 +1744,19 @@ histo1D histoStack::getSignalContainer()const{
 	}
 	std::vector<size_t> sidx=getSignalIdxs();
 	histo1D out;
-	if(containers_.size()>0){
-		out=containers_.at(0);
-		out.setAllZero();
+	if(mode==dim1){
+		if(containers_.size()>0){
+			out=containers_.at(0);
+			out.setAllZero();
+		}
+		if(sidx.size()>0) out=getContainer(sidx.at(0));
+		for(size_t i=1;i<sidx.size();i++)
+			out+=getContainer(sidx.at(i));
 	}
-	if(sidx.size()>0) out=getContainer(sidx.at(0));
-	for(size_t i=1;i<sidx.size();i++)
-		out+=getContainer(sidx.at(i));
+	else if(mode==unfolddim1){
+		for(size_t i=0;i<sidx.size();i++)
+			out+=getContainer1DUnfold(sidx.at(i)).getRecoContainer();
+	}
 	if(sidx.size()<1)
 		throw std::logic_error("containerStack::getSignalContainer: No signal defined!");
 	return out;

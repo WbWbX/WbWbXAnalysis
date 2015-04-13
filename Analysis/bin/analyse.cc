@@ -58,7 +58,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 
 
 	TString treedir,jecfile,pufile,muonsffile,muonsfhisto,elecsffile,elecsfhisto,trigsffile,elecensffile,muonensffile,trackingsffile,trackingsfhisto; //...
-	TString btagWP,btagshapehffile,btagshapelffile;
+
 
 	if(lumi<0)
 		lumi=fr.getValue<double>("Lumi");
@@ -75,9 +75,8 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	//elecensffile =cmssw_base+fr.getValue<TString>("ElecEnergySFFile");
 	//muonensffile =cmssw_base+fr.getValue<TString>("MuonEnergySFFile");
 
-	btagWP=               fr.getValue<TString>("btagWP");
-	btagshapehffile       =  fr.getValue<TString>("btagShapeFileHF");
-	btagshapelffile       =  fr.getValue<TString>("btagShapeFileLF");
+	//btagWP=               fr.getValue<TString>("btagWP");
+	const std::string btagSFFile       =  cmssw_base.Data()+fr.getValue<std::string>("btagSFFile");
 
 	//mode options CAN be additionally parsed by file
 	fr.setRequireValues(false);
@@ -95,17 +94,17 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 
 	system("mkdir -p output");
 	TString outdir="output";
-
-
+	TString sysc="mkdir -p "+outdir+"/btags";
+	system(sysc.Data());
 	if(dobtag){
-		btagfile=outdir+"/"+ channel+"_"+energy+"_"+topmass+"_"+Syst+"_btags.root";
-		system(("rm -f "+btagfile).Data());
+
+		btagfile=outdir+"/btags/"+ channel+"_"+energy+"_"+topmass+"_"+Syst;
 	}
 	else if(Syst.BeginsWith("BTAG")){
-		btagfile=database+btagfile+"/"+ channel+"_"+energy+"_"+topmass+"_"+"nominal"+"_btags.root";
+		btagfile=database+btagfile+"/"+ channel+"_"+energy+"_"+topmass+"_"+"nominal";
 	}
 	else{
-		btagfile=database+btagfile+"/"+ channel+"_"+energy+"_"+topmass+"_"+Syst+"_btags.root";
+		btagfile=database+btagfile+"/"+ channel+"_"+energy+"_"+topmass+"_"+Syst;
 	}
 
 
@@ -127,14 +126,6 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	///some checks
 
 
-
-	NTBTagSF::modes btagmode=NTBTagSF::randomtagging_mode;
-	if(mode.Contains("Btagshape")){
-		std::cout << "Using b-tag shape reweighting" <<std::endl;
-		btagmode=NTBTagSF::shapereweighting_mode;
-		ana->getBTagSF()->readShapeReweightingFiles(cmssw_base+btagshapehffile, cmssw_base+btagshapelffile);
-
-	}
 
 	ana->setMaxChilds(6);
 	if(testmode)
@@ -182,18 +173,20 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 
 	ana->setOutFileAdd(outfileadd);
 	ana->setOutDir(outdir);
+
 	ana->getBTagSF()->setMakeEff(dobtag);
-	ana->setBTagSFFile(btagfile);
-	ana->getBTagSF()->setMode(btagmode);
-	ana->getBTagSF()->setWorkingPoint(btagWP);
-	if(btagmode==NTBTagSF::shapereweighting_mode && wpval>-2)
-		ana->getBTagSF()->setWorkingPointValue(wpval);
+	ana->setBTagMCEffFile(btagfile);
+
+	//change
+	ana->getBTagSF()->setMode(NTBTagSF::randomtagging_mode);
+
+	ana->getBTagSF()->loadBCSF(btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets","up","down");
+	ana->getBTagSF()->loadUDSGSF(btagSFFile, BTagEntry::OP_TIGHT,"csv","comb","up","down");
+
+
 	ana->getJECUncertainties()->setFile((jecfile).Data());
 	ana->getJECUncertainties()->setSystematics("no");
-	if(testmode && dobtag){
-		ana->setBTagSFFile(btagfile+"TESTMODE");
-		system(("rm -f "+btagfile+"TESTMODE").Data());
-	}
+
 	//add indication for non-correlated syst by adding the energy to syst name!! then the getCrossSections stuff should recognise it
 
 	//although it produces overhead, add background rescaling here?
@@ -203,7 +196,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 
 	if(Syst.Contains("_sysnominal")){
 		ana->getBTagSF()->setMakeEff(true);
-		ana->setBTagSFFile(btagfile+Syst+"_dummy");
+		ana->setBTagMCEffFile(outdir+"/btag_dummy");
 	}
 
 	if(Syst=="nominal"){
@@ -286,11 +279,11 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	}
 	else if(Syst=="JES_up"){
 		ana->getJECUncertainties()->setSystematics("up");
-		ana->getBTagSF()->setSystematic(bTagBase::jesup);
+		//	ana->getBTagSF()->setSystematic(bTagSFBase::jesup);
 	}
 	else if(Syst=="JES_down"){
 		ana->getJECUncertainties()->setSystematics("down");
-		ana->getBTagSF()->setSystematic(bTagBase::jesdown);
+		//	ana->getBTagSF()->setSystematic(bTagSFBase::jesdown);
 	}
 
 
@@ -377,48 +370,17 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	/////////btag
 
 	else if(Syst=="BTAGH_up"){
-		ana->getBTagSF()->setSystematic(bTagBase::heavyup);
+		ana->getBTagSF()->setSystematics(bTagSFBase::heavyup);
 	}
 	else if(Syst=="BTAGH_down"){
-		ana->getBTagSF()->setSystematic(bTagBase::heavydown);
+		ana->getBTagSF()->setSystematics(bTagSFBase::heavydown);
 	}
 	else if(Syst=="BTAGL_up"){
-		ana->getBTagSF()->setSystematic(bTagBase::lightup);
+		ana->getBTagSF()->setSystematics(bTagSFBase::lightup);
 	}
 	else if(Syst=="BTAGL_down"){
-		ana->getBTagSF()->setSystematic(bTagBase::lightdown);
+		ana->getBTagSF()->setSystematics(bTagSFBase::lightdown);
 	}
-	else if(Syst=="BTAGHFS1_up"){
-		ana->getBTagSF()->setSystematic(bTagBase::hfstat1up);
-	}
-	else if(Syst=="BTAGHFS1_down"){
-		ana->getBTagSF()->setSystematic(bTagBase::hfstat1down);
-	}
-	else if(Syst=="BTAGHFS2_up"){
-		ana->getBTagSF()->setSystematic(bTagBase::hfstat2up);
-	}
-	else if(Syst=="BTAGHFS2_down"){
-		ana->getBTagSF()->setSystematic(bTagBase::hfstat2down);
-	}
-	else if(Syst=="BTAGLFS1_up"){
-		ana->getBTagSF()->setSystematic(bTagBase::lfstat1up);
-	}
-	else if(Syst=="BTAGLFS1_down"){
-		ana->getBTagSF()->setSystematic(bTagBase::lfstat1down);
-	}
-	else if(Syst=="BTAGLFS2_up"){
-		ana->getBTagSF()->setSystematic(bTagBase::lfstat2up);
-	}
-	else if(Syst=="BTAGLFS2_down"){
-		ana->getBTagSF()->setSystematic(bTagBase::lfstat2down);
-	}
-	else if(Syst=="BTAGPUR_up"){
-		ana->getBTagSF()->setSystematic(bTagBase::purityup);
-	}
-	else if(Syst=="BTAGPUR_down"){
-		ana->getBTagSF()->setSystematic(bTagBase::puritydown);
-	}
-
 
 	/////////top pt
 
@@ -558,6 +520,10 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 
 
 		int fullsucc=ana->start();
+
+		//clean up
+		TString rmdummybtagfiles="rm -f "+outdir+"/btag_dummy*";
+		system(rmdummybtagfiles.Data());
 
 		ztop::container1DStackVector csv;
 

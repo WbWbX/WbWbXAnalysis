@@ -126,10 +126,12 @@ invokeApplication(){
 		combine0.import(results.at(0));
 		combine1.import(results.at(1));
 
-		combine0.splitSystematic(combine0.getSystErrorIndex("fit_up"),corrcoeff,"fitcorr_up","stat_up");
-		combine0.splitSystematic(combine0.getSystErrorIndex("fit_down"),corrcoeff,"fitcorr_down","stat_down");
-		combine1.splitSystematic(combine1.getSystErrorIndex("fit_up"),corrcoeff,"fitcorr_up","stat_up");
-		combine1.splitSystematic(combine1.getSystErrorIndex("fit_down"),corrcoeff,"fitcorr_down","stat_down");
+		double spltfrac=corrcoeff*corrcoeff;
+
+		combine0.splitSystematic(combine0.getSystErrorIndex("fit_up"),spltfrac,"fitcorr_up","stat_up");
+		combine0.splitSystematic(combine0.getSystErrorIndex("fit_down"),spltfrac,"fitcorr_down","stat_down");
+		combine1.splitSystematic(combine1.getSystErrorIndex("fit_up"),spltfrac,"fitcorr_up","stat_up");
+		combine1.splitSystematic(combine1.getSystErrorIndex("fit_down"),spltfrac,"fitcorr_down","stat_down");
 
 		combine1.transformSystToStat();
 		combine0.transformSystToStat();

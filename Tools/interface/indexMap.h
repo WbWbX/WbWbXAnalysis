@@ -120,7 +120,7 @@ public:
 		return size_-1;
 	}
 
-	const T & operator[](const size_t index) const{
+	const T & operator[](const size_t& index) const{
 		return getData(index);
 	}
 	const T & at(const size_t index) const{

@@ -117,6 +117,11 @@ public:
 	const TString & getSystErrorName(const size_t & number) const;
 	size_t getSystErrorIndex(const TString & ) const;
 
+
+	/**
+	 * splitting does not follow the "standard" correlation coefficient definition.
+	 * it corresponds to sqrt(rho). To get "standard" behaviour, fill rho*rho.
+	 */
 	void splitSystematic(const size_t & number, const float& fracadivb,
 			const TString & splinamea,  const TString & splinameb);
 
@@ -387,6 +392,8 @@ public:
 	static std::vector<float> createBinning(size_t nbins, float first, float last);
 
 	static void equalizeSystematics(std::vector<histo1D>&,std::vector<histo1D>&);
+
+	void adaptSystematicsIdxs(const histo1D&);
 
 	/**
 	 * prints the full content in each bin

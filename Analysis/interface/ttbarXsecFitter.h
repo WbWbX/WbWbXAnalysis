@@ -161,6 +161,9 @@ public:
 	//just a debug / verbose switch
 	static bool debug;
 
+
+	histoStack applyParametersToStack(const histoStack& stack, size_t bjetcat, size_t datasetidx, bool fitted)const;
+
 private:
 
 	void createSystematicsBreakdown(size_t datasetidx);
@@ -220,9 +223,16 @@ private:
 		const size_t & xsecIdx()const;
 		void createXsecIdx();
 
+		void readStack(const histoStack& stack, size_t nbjet);
+		void readStackVec(const std::vector<histoStack>& stacks, size_t nbjet);
+
 		void readStacks(const std::string  configfilename,const std::pair<TString,TString>&,bool,std::vector<std::pair<TString, double> >&);
 		//also takes care of proper asso to lumiidx,xsecidx
 		void equalizeIndices(dataset & rhs);
+		/**
+		 * implies that rhs has the same and more (or equal) entries
+		 */
+		void adaptIndices(const dataset & rhs);
 
 		void createPseudoDataFromMC(histo1D::pseudodatamodes mode=histo1D::pseudodata_poisson);
 		void createContinuousDependencies(bool,const std::vector<size_t>& );
@@ -238,17 +248,19 @@ private:
 
 		static const size_t nBjetCat(){return 3;} //to avoid duplication
 
+		void resetTotVisGenCount(){totalvisgencontsread_=0;}
 
 		std::vector<systematic_unc>& postFitSystematicsFull(){return post_fit_systematics_;}
 		const std::vector<systematic_unc>& postFitSystematicsFull() const{return post_fit_systematics_;}
 		std::vector<systematic_unc>& postFitSystematicsFullSimple(){return post_fit_systematics_simple_;}
 		const std::vector<systematic_unc>& postFitSystematicsFullSimple() const{return post_fit_systematics_simple_;}
 
+		void addUncertainties(histoStack * stack,size_t nbjets,bool removesyst,const std::vector<std::pair<TString, double> >& )const;
 
+		double signalIntegral(size_t nbjets) const{return signalintegral_.at(nbjets);}
 
 	private:
 
-		void addUncertainties(histoStack * stack,size_t nbjets,bool removesyst,std::vector<std::pair<TString, double> >& )const;
 		variateHisto1D createLeptonJetAcceptance(const std::vector<histo1D>& signals,
 				const std::vector<histo1D>& signalpsmig,
 				const std::vector<histo1D>& signalvisPSgen,
@@ -273,6 +285,8 @@ private:
 		std::vector<variateHisto1D>  background_nbjet_;
 		std::vector<variateHisto1D>  data_nbjet_;
 
+		//for later use. BEFORE fit!
+		std::vector<double> signalintegral_;
 
 		///for checks
 		variateHisto1D container_c_b_;

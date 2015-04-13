@@ -65,48 +65,10 @@
 
 [ correlations 8TeV - 7TeV ]
 
-# 1 is implicit
- #  PDF = 1
- #  TOPPT = 1
- #  TT_MATCH = 1
- #  TT_SCALE = 1
- #  UE = 1
- #  CR = 1
- #  TT_BJESNUDEC = 1
- #  TT_BJESRETUNE = 1
- #  TT_GENPOWPY= 1
 
-   JES_Flavor = 1
-
-   JES_RelativeFSR = 1
-   JES_AbsoluteMPFBias = 1
-   JES_PileupPt = 1
-   JES_Uncorrelated = 0
-   
-   MUONES = 0.5
-  # MUONSF = 0.5
-   ELECES = 0.5
-   ELECSF = 0.5
-   JER    = 0.5
- #  BTAGH  = 0.5
    BTAGH  = 0
- #  BTAGL  = 0.5
    BTAGL  = 0
-   TRIGGER= 0.5
-  # TRIGGER= 0
-   
-   PU = 0.2
-   
-   
-   BG_tW/#bar{t}W#rightarrowll= 0.9
-   BG_VV            = 0.9
-   BG_t#bar{t}bg   = 0.9
-   BG_Wjets   = 0.9
-   BG_QCD   = 0.9
-   BG_t#bar{t}V/#gamma = 0.9
-   BG_0_bjets_DY = 0.9
-   BG_1_bjets_DY = 0.9
-   BG_2_bjets_DY = 0.9
+
 
 [end - correlations ]
 

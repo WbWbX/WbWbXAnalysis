@@ -2306,6 +2306,34 @@ void histo1D::equalizeSystematics(std::vector<histo1D>& lhs,std::vector<histo1D>
 		rhs.at(i).equalizeSystematicsIdxs(lhs.at(0));
 	}
 }
+void histo1D::adaptSystematicsIdxs(const histo1D& rhs){
+	if(hasSameLayerOrdering(rhs))
+		return;
+	histo1D cp=*this;
+	contents_.removeAdditionalLayers();
+	for(size_t i=0;i<rhs.contents_.layerSize();i++)
+		contents_.addLayer(rhs.getSystErrorName(i));
+	//ordering ok
+	std::vector<size_t> used;
+	for(size_t i=0;i<rhs.contents_.layerSize();i++){
+		const TString& namerhs=rhs.getSystErrorName(i);
+		size_t oldidx=cp.contents_.getLayerIndex(namerhs);
+		if(oldidx<cp.contents_.layerSize()){
+			contents_.getLayer(i)=cp.contents_.getLayer(oldidx);
+			used.push_back(oldidx);
+		}
+	}
+	if(used.size() == cp.contents_.layerSize())
+		return; //all ok
+
+	std::string errstr="histo1D::adaptSystematicsIdxs: rhs need to incorporate all syst that *this has (and opt more)\n not found: ";
+
+	for(size_t i=0;i<cp.contents_.layerSize();i++)
+		if(std::find(used.begin(),used.end(),cp.contents_.getLayerName(i)) == used.end())
+			errstr+=(cp.contents_.getLayerName(i)+" ").Data();
+
+	throw std::logic_error(errstr);
+}
 
 void histo1D::copyFrom(const histo1D& c){
 

@@ -18,6 +18,7 @@
 #include "TFile.h"
 #include <TError.h>
 #include "TtZAnalysis/Tools/interface/fileReader.h"
+#include "TtZAnalysis/Tools/interface/histoStackVector.h"
 
 invokeApplication(){
 	using namespace ztop;
@@ -330,6 +331,25 @@ invokeApplication(){
 		c.Print(outfile+".pdf)");
 		f->Close();
 		delete f;
+
+		//make some plots with and without constraints
+		//test area
+		if(mainfitter.nDatasets()>=1){
+			histoStackVector  hsv;hsv.readFromFile("emu_8TeV_172.5_nominal_syst.ztop");
+			histoStack stack=hsv.getStack("third jet pt 2,3 b-jets step 8");
+			stack=mainfitter.applyParametersToStack(stack,2,0,false);
+			plotterControlPlot plctr;
+			TCanvas cvs;
+			plctr.setStack(&stack);
+			plctr.usePad(&cvs);
+			plctr.draw();
+			cvs.Print("testplot.pdf(");
+			stack=hsv.getStack("third jet pt 2,3 b-jets step 8");
+			stack=mainfitter.applyParametersToStack(stack,1,0,true);
+			plctr.setStack(&stack);
+			plctr.draw();
+			cvs.Print("testplot.pdf)");
+		}
 	}
 	return 0;
 }

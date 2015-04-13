@@ -127,22 +127,6 @@ int MainAnalyzer::start(){
 	}
 
 
-	bTagBase::systematics btagsyst=getBTagSF()->getSystematic();
-	//load btag:
-	if(!(getBTagSF()->makesEff()) && getBTagSF()->getMode() != NTBTagSF::shapereweighting_mode){ //no input needed
-		std::cout << "loading b-tag File: " << btagsffile_ << std::endl;
-		std::ifstream testfile(btagsffile_.Data());
-		if(!testfile){
-			std::cout << "b-tag File " << btagsffile_ << " not found, exit (-3)" << std::endl;
-			return -3;
-		}
-
-		//only a workaround
-		TString  btagwps=getBTagSF()->getWorkingPointString();
-		getBTagSF()->readFromTFile(btagsffile_);
-		getBTagSF()->setWorkingPoint(btagwps);
-		getBTagSF()->bTagBase::setSystematic(btagsyst);
-	}
 
 	///communication stuff...
 

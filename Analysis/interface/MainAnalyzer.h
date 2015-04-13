@@ -121,7 +121,7 @@ public:
 	TString getOutPath(){return outdir_+getOutFileName();}
 	TString getOutDir(){return outdir_;}
 
-	void setBTagSFFile(TString file){btagsffile_=file;}
+	void setBTagMCEffFile(TString file){btagefffile_=file;}
 
 	void setLumi(double Lumi){lumi_=Lumi;}
 
@@ -256,7 +256,7 @@ protected:
 	TString outfileadd_;
 	TString outdir_;
 
-	TString btagsffile_;
+	TString btagefffile_;
 
 	//for scalefactors provided in THXX format:
 	ztop::scalefactors elecsf_,muonsf_,triggersf_,elecenergysf_,muonenergysf_,trackingsf_;

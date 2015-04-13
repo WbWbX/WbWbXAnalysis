@@ -211,7 +211,7 @@ void trigger_tightLeptons(){
 	TString PURunA = cmssw_base+"/src/TtZAnalysis/Data/Legacy2011_RunA.json_PU.root";
 	TString PURunB = cmssw_base+"/src/TtZAnalysis/Data/Legacy2011_RunB.json_PU.root";
 
-	TString pileuproot = cmssw_base+"/src/TtZAnalysis/Data/Legacy2011.json_PU.root";
+	//TString pileuproot = cmssw_base+"/src/TtZAnalysis/Data/Legacy2011.json_PU.root";
 
 
 	std::vector<TString> mumumcfiles, eemcfiles, emumcfiles, datafilesFull,datafilesRunB, datafilesRunA;
@@ -236,11 +236,11 @@ void trigger_tightLeptons(){
 
 	//for others just copy data and mc, change input and pu file
 
-
+/*
 	ta_eeMC.setPUFile(pileuproot);
 	ta_mumuMC.setPUFile(pileuproot);
 	ta_emuMC.setPUFile(pileuproot);
-
+*/
 	ta_eeMC.setChain(eemcfiles);
 	ta_mumuMC.setChain(mumumcfiles);
 	ta_emuMC.setChain(emumcfiles);
@@ -252,7 +252,7 @@ void trigger_tightLeptons(){
 
 
 
-	analyzeAll( ta_eed,  ta_eeMC,  ta_mumud,  ta_mumuMC,  ta_emud,  ta_emuMC,"direct_comb","direct 5 fb^{-1}");
+	//analyzeAll( ta_eed,  ta_eeMC,  ta_mumud,  ta_mumuMC,  ta_emud,  ta_emuMC,"direct_comb","direct 5 fb^{-1}");
 
 
 

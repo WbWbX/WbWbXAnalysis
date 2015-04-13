@@ -78,7 +78,6 @@ public:
     void clear();
 
 
-
     extendedVariable& operator *= (const extendedVariable&);
     extendedVariable operator * (const extendedVariable&)const;
     extendedVariable& operator /= (const extendedVariable&);
