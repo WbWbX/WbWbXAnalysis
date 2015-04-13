@@ -48,7 +48,7 @@ void  topDecaySelector::process(){
         
         //Vectors to save the tops, ws
         std::vector<const reco::GenParticle *> tops, ws;
-        const reco::GenParticle * mother, * daughter;
+        const reco::GenParticle * mother, * daughter, * secondDaughter;
 
 	if(!incollectionp_){// pointer 0 -> real check, no example! ;)
 		throw std::logic_error("topDecaySelector::process: input collection not defined");
@@ -80,9 +80,10 @@ void  topDecaySelector::process(){
                                 mews_mothers_.push_back(mother);
                                 dectops_daughters_.push_back(daughter);
                                 decws_mothers_.push_back(daughter);
-                                ws.push_back(findLastParticle(daughter));
-                                decws_.push_back(findLastParticle(daughter));
-                                mews_daughters_.push_back(findLastParticle(daughter));
+                                secondDaughter = findLastParticle(daughter);
+                                ws.push_back(secondDaughter);
+                                decws_.push_back(secondDaughter);
+                                mews_daughters_.push_back(secondDaughter);
                          }
                 }
         }
@@ -98,10 +99,11 @@ void  topDecaySelector::process(){
                                meleptons_.push_back(daughter);
                                decws_daughters_.push_back(daughter);
                                meleptons_mothers_.push_back(mother);
-                               if (findLastParticle(daughter)->status()==1){
-                                       finalstateleptonsfromw_.push_back(findLastParticle(daughter)); 
+                               secondDaughter=findLastParticle(daughter);
+                               if (secondDaughter->status()==1){
+                                       finalstateleptonsfromw_.push_back(secondDaughter); 
                                        finalstateleptonsfromw_mothers_.push_back(daughter);
-                                       meleptons_daughters_.push_back(findLastParticle(daughter));
+                                       meleptons_daughters_.push_back(secondDaughter);
                                }
                         }
                         else if (std::abs(daughter->pdgId())== 12 || std::abs(daughter->pdgId())== 14 || std::abs(daughter->pdgId())==16){
@@ -152,8 +154,30 @@ void  topDecaySelector::process(){
 void topDecaySelector::copyFrom(const topDecaySelector& rhs){
 	partonshower_=rhs.partonshower_;
 	incollectionp_=rhs.incollectionp_;
-	finalstateleptons_=rhs.finalstateleptons_;
         statTop_=rhs.statTop_;
+        finalstateleptons_=rhs.finalstateleptons_;
+        finalstateleptonsdressed_=rhs.finalstateleptonsdressed_;
+        finalstateleptonsfromw_=rhs.finalstateleptonsfromw_;
+        meleptons_=rhs.meleptons_;
+        dectops_=rhs.dectops_;
+        decws_=rhs.decws_;
+        metops_=rhs.metops_;
+        mews_=rhs.mews_;
+        finalstateneutrinos_=rhs.finalstateneutrinos_;
+        meneutrinos_=rhs.meneutrinos_;
+        mebs_=rhs.mebs_;
+        dectops_mothers_=rhs.dectops_mothers_;
+        mews_mothers_=rhs.mews_mothers_;
+        decws_mothers_=rhs.decws_mothers_;
+        meleptons_mothers_=rhs.meleptons_mothers_;
+        finalstateleptonsfromw_mothers_=rhs.finalstateleptonsfromw_mothers_;
+        meneutrinos_mothers_=rhs.meneutrinos_mothers_;
+        mebs_mothers_=rhs.mebs_mothers_;
+        metops_daughters_=rhs.metops_daughters_;
+        dectops_daughters_=rhs.dectops_daughters_;
+        mews_daughters_=rhs.mews_daughters_;
+        decws_daughters_=rhs.decws_daughters_;
+        meleptons_daughters_=rhs.meleptons_daughters_;
 }
 
 //Function to find last particle in decay chain
