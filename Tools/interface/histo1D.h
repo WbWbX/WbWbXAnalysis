@@ -17,7 +17,7 @@
 #include "extendedVariable.h"
 #include "TRandom3.h"
 #include "../interface/serialize.h"
-
+#include "corrMatrix.h"
 
 
 
@@ -118,6 +118,7 @@ public:
 	size_t getSystErrorIndex(const TString & ) const;
 
 
+
 	/**
 	 * splitting does not follow the "standard" correlation coefficient definition.
 	 * it corresponds to sqrt(rho). To get "standard" behaviour, fill rho*rho.
@@ -140,7 +141,10 @@ public:
 	 * If you know its a global variation its ok to do it earlier
 	 */
 	void mergePartialVariations(const TString& identifier,bool linearly=false,bool strictpartialID=true);
-	void mergeAllErrors(const TString & mergedname,bool linearly=false);
+	/**
+	 * if correlation matrix is given, linearly is ignored
+	 */
+	void mergeAllErrors(const TString & mergedname,bool linearly=false,const corrMatrix& corr=corrMatrix());
 	/**
 	 * names without "up" and "down"
 	 */

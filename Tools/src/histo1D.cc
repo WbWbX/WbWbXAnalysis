@@ -36,7 +36,7 @@ bool histo1D::c_makelist=false;
 bool histo1D::showwarnings=false;
 ///////function definitions
 histo1D::histo1D():
-																																														taggedObject(taggedObject::type_container1D)
+																																																taggedObject(taggedObject::type_container1D)
 {
 
 	//divideBinomial_=true;
@@ -52,7 +52,7 @@ histo1D::histo1D():
 }
 
 histo1D::histo1D(const std::vector<float>& bins,const TString& name,const TString& xaxisname,const TString& yaxisname, bool mergeufof):
-																																															taggedObject(taggedObject::type_container1D)
+																																																	taggedObject(taggedObject::type_container1D)
 
 {
 	setBins(bins);
@@ -648,7 +648,35 @@ void histo1D::mergeVariationsFromFileInCMSSW(const std::string& filename){
 }
 
 
-void histo1D::mergeAllErrors(const TString & mergedname,bool linearly){
+void histo1D::mergeAllErrors(const TString & mergedname,bool linearly,const corrMatrix& corr){
+
+	std::vector<size_t > assoup,assodown;
+	bool usecorr=false;
+	if(corr.size()>0){
+		//do a check of syst and asso indicies (up/down -> corrmat idx)
+		if(corr.size()*2 != contents_.layerSize())
+			throw std::out_of_range("histo1D::mergeAllErrors: correlation matrix has wrong size");
+		for(size_t i=0;i<corr.size();i++){
+			try{
+				size_t upidx=getSystErrorIndex(corr.getEntryName(i)+"_up");
+				size_t downidx=getSystErrorIndex(corr.getEntryName(i)+"_down");
+				assoup.push_back(upidx);
+				assodown.push_back(downidx);
+			}
+			catch(...){
+				std::string errstr="histo1D::mergeAllErrors: syst name from corr matrix not found in histogram: ";
+				errstr+=corr.getEntryName(i).Data();
+				throw std::out_of_range(errstr);
+			}
+
+		}
+		if(assoup.size() != corr.size()){
+			throw std::out_of_range("histo1D::mergeAllErrors: not all systematics specified in correlation matrix found in histo");
+		}
+		usecorr=true;
+	}
+
+
 	histo1D cp=*this;
 	cp.removeAllSystematics();
 	cp.addGlobalRelErrorUp(mergedname,0);
@@ -656,13 +684,35 @@ void histo1D::mergeAllErrors(const TString & mergedname,bool linearly){
 	for(size_t i=0;i<bins_.size();i++){
 		//for(size_t sys=0;sys<getSystSize();sys++){
 		float stat=getBinStat(i);
-		if(!linearly){
+		if(!linearly && !usecorr){
 			float cup=getBinErrorUp(i,false);
 			float cdown=getBinErrorDown(i,false);
 			cp.setBinContent(i,getBinContent(i)+std::sqrt(cup*cup-stat*stat) ,0);
 			cp.setBinContent(i,getBinContent(i)-std::sqrt(cdown*cdown-stat*stat) ,1);
 		}
-		else{
+		else if(usecorr){
+			float cup=0;
+			float cdown=0;
+			for(size_t row=0;row<assoup.size();row++){
+				for(size_t col=0;col<assoup.size();col++){
+					double  corrcoeff=corr.getEntry(col,row);
+					if(corrcoeff){
+						float errupvara = getBinContent(i,assoup.at(row)) - getBinContent(i);
+						float errdownvara= getBinContent(i,assodown.at(row)) - getBinContent(i);
+						float errupvarb = getBinContent(i,assoup.at(col)) - getBinContent(i);
+						float errdownvarb= getBinContent(i,assodown.at(col)) - getBinContent(i);
+
+						cup   += corrcoeff * errupvara * errupvarb;
+						cdown += corrcoeff * errdownvara * errdownvarb;
+					}
+				}
+			}
+			//cup+=stat*stat;
+			//cdown+=stat*stat;
+			cp.setBinContent(i,getBinContent(i)+std::sqrt(cup) ,0);
+			cp.setBinContent(i,getBinContent(i)-std::sqrt(cdown) ,1);
+		}
+		else{ //linearly
 			float cup=0,cdown=0;
 			std::vector<TString> vars=contents_.getVariations();
 			for(size_t var=0;var<vars.size();var++){
@@ -1678,7 +1728,7 @@ void histo1D::addRelSystematicsFrom(const ztop::histo1D & rhs,bool ignorestat,bo
 			//contents_.getLayer(newlayerit).removeStat();
 			//stat are definitely not correlated
 			bool isnominalequal=(!strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i),1e-2))
-																																					        																																														|| (strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i))) ;
+																																					        																																																|| (strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i))) ;
 
 			if(isnominalequal){ //this is just a copy leave it and add no variation
 				//contents_.getLayer(newlayerit).removeStat();

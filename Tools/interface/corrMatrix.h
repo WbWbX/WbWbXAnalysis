@@ -27,6 +27,7 @@ public:
 	const TString& getEntryName(const size_t &)const;
 	const size_t& getEntryIndex(const TString&)const;
 
+	const size_t& size()const{return names_.size();}
 
 private:
 	indexMap<TString> names_;

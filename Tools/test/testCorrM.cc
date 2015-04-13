@@ -9,6 +9,8 @@
 
 
 #include "../interface/corrMatrix.h"
+#include "../interface/histo1D.h"
+#include "../interface/plotterMultiplePlots.h"
 
 int main(){
 	using namespace ztop;
@@ -22,9 +24,22 @@ int main(){
 
 	corrMatrix m(names);
 
-	for(size_t i=0;i<5;i++)
+
+
+	histo1D histo(histo1D::createBinning(10,0,10));
+
+	for(size_t i=0;i<10;i++)
+		for(size_t j=0;j<100;j++) histo.fill(i,i);
+
+	for(size_t i=0;i<5;i++){
 		for(size_t j=0;j<5;j++)
-			 m.setEntry(i,j,3.*j*i) ;
+			 m.setEntry(i,j,-3.*j*i/75) ;
+
+		float multi= 1+( 3.*(i+1)/20);
+		histo.addErrorContainer(m.getEntryName(i)+"_up", (histo)*multi );
+		histo.addErrorContainer(m.getEntryName(i)+"_down", (histo)*(1/multi) );
+
+	}
 
 	for(size_t i=0;i<5;i++){
 		std::cout <<  m.getEntryName(i) << "   " ;
@@ -32,6 +47,14 @@ int main(){
 			std::cout <<  m.getEntry(i,j) << "   " ;
 		std::cout<<std::endl;
 	}
+
+	histo1D histocp=histo;
+	histocp.mergeAllErrors("merged",false,m);
+
+	plotterMultiplePlots pl;
+	pl.addPlot(&histocp);
+	//pl.addPlot(&histo);
+	pl.printToPdf("testCorrM");
 
 	return 0;
 }
