@@ -94,15 +94,17 @@ void  topDecaySelector::process(){
                 mother=ws.at(i);
                 for(size_t j=0;j<mother->numberOfDaughters();j++){
                         daughter = dynamic_cast<const reco::GenParticle*>(mother->daughter(j));
-                        if (std::abs(daughter->pdgId())== 11 || std::abs(daughter->pdgId())== 13 || std::abs(daughter->pdgId()==15)){
+                        if (std::abs(daughter->pdgId())== 11 || std::abs(daughter->pdgId())== 13 || std::abs(daughter->pdgId())==15){
                                meleptons_.push_back(daughter);
                                decws_daughters_.push_back(daughter);
                                meleptons_mothers_.push_back(mother);
-                               finalstateleptonsfromw_.push_back(findLastParticle(daughter)); 
-                               finalstateleptonsfromw_mothers_.push_back(daughter);
-                               meleptons_daughters_.push_back(findLastParticle(daughter));
+                               if (findLastParticle(daughter)->status()==1){
+                                       finalstateleptonsfromw_.push_back(findLastParticle(daughter)); 
+                                       finalstateleptonsfromw_mothers_.push_back(daughter);
+                                       meleptons_daughters_.push_back(findLastParticle(daughter));
+                               }
                         }
-                        else if (std::abs(daughter->pdgId())== 12 || std::abs(daughter->pdgId())== 14 || std::abs(daughter->pdgId()==16)){
+                        else if (std::abs(daughter->pdgId())== 12 || std::abs(daughter->pdgId())== 14 || std::abs(daughter->pdgId())==16){
                                meneutrinos_.push_back(daughter);
                                decws_daughters_.push_back(daughter);
                                meneutrinos_mothers_.push_back(mother);
