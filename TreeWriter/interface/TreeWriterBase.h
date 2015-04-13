@@ -114,6 +114,7 @@
 
 #include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 #include "HLTrigger/HLTcore/interface/HLTEventAnalyzerAOD.h"
+#include "../interface/topDecaySelector.h"
 
 //
 // class declaration
