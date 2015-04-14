@@ -7,12 +7,11 @@
  *
  *      this file defines the analyze() function of MainAnalyzer and is put in a
  *      separate file only for structure reasons!
- *      do not include it in any other file than MainAnalyzer.cc
+ *      Do not include it in any other file than MainAnalyzer.cc
  */
 
-
 #include "../interface/analyzer_run2.h"
-#include "TtZAnalysis/Configuration/interface/version.h"
+
 
 /*
  * Running on the samples is parallelized.
@@ -37,11 +36,9 @@
  * Please indicate the meaning of the error code in the cout at the end of ../app_src/analyse.cc
  */
 void  analyzer_run2::analyze(size_t anaid){
-#ifndef CMSSW_LEQ_5
+
 	using namespace std;
 	using namespace ztop;
-
-
 
 	TString inputfile=infiles_.at(anaid); //modified in some mode options
 	const TString& legendname=legentries_.at(anaid);
@@ -121,6 +118,7 @@ void  analyzer_run2::analyze(size_t anaid){
 		electrontype="NTPFElectrons";
 		std::cout << "entering pfelectrons mode" <<std::endl;
 	}
+
 	if(mode_.Contains("Onejet")){
 		onejet=true;
 		std::cout << "entering Onejet mode" <<std::endl;
@@ -414,34 +412,37 @@ void  analyzer_run2::analyze(size_t anaid){
 	//init b-tag scale factor utility
 	if(testmode_)
 		std::cout << "testmode("<< anaid << "): preparing btag SF" << std::endl;
-/*
- * 	if(mode_.Contains("Btagcsvt") && ! mode_.Contains("Btagshape")){
- * 		getBTagSF()->setWorkingPoint("csvt");
- * 		std::cout << "entering btagcsvt mode" <<std::endl;
- * 	}
- * 	if(mode_.Contains("Btagcsvm")&& ! mode_.Contains("Btagshape")){
- * 		getBTagSF()->setWorkingPoint("csvm");
- * 		std::cout << "entering btagcsvm mode" <<std::endl;
- * 	}
 
+
+	/*
+	if(mode_.Contains("Btagcsvt") && ! mode_.Contains("Btagshape")){
+		getBTagSF()->setWorkingPoint("csvt");
+		std::cout << "entering btagcsvt mode" <<std::endl;
+	}
+	if(mode_.Contains("Btagcsvm")&& ! mode_.Contains("Btagshape")){
+		getBTagSF()->setWorkingPoint("csvm");
+		std::cout << "entering btagcsvm mode" <<std::endl;
+	}
 	//make sure the nominal scale factors are used for varations of the SF
 	TString btagSysAdd=topmass_+"_"+getSyst();
-//	if(getBTagSF()->isRealSyst() || wasbtagsys)
-//		btagSysAdd=topmass_+"_nominal";
+	if(getBTagSF()->isRealSyst() || wasbtagsys)
+		btagSysAdd=topmass_+"_nominal";
 
 	if(fakedata) //always use nominal
 		btagSysAdd+="_fakedata";
 	std::string btagsamplename=(channel_+"_"+btagSysAdd+"_"+toString(inputfile)).Data();
-//	if(getBTagSF()->setSampleName(btagsamplename) < 0){
-//		reportError(-3,anaid);
-//		return;
-//	}
-*/
+	if(getBTagSF()->setSampleName(btagsamplename) < 0){
+		reportError(-3,anaid);
+		return;
+	}
+	 */
+
 	TString btagfile=btagefffile_;
-        btagfile+="_"+inputfile;
+	btagfile+="_"+inputfile;
 	getBTagSF()->setIsMC(isMC);
 	if(!getBTagSF()->getMakeEff())
-        getBTagSF()->readFromFile(btagfile.Data());
+		getBTagSF()->readFromFile(btagfile.Data());
+
 	//  if(testmode_)
 	//    std::cout << "testmode(" <<anaid << ") setBtagSmaplename " <<channel_+"_"+btagSysAdd+"_"+toString(inputfile)).Data() <<std::endl;
 
@@ -743,7 +744,7 @@ void  analyzer_run2::analyze(size_t anaid){
 		for(size_t i=0;i<b_Muons.content()->size();i++){
 			NTMuon* muon = & b_Muons.content()->at(i);
 			if(isMC)
-			    muon->setP4(muon->p4() * getMuonEnergySF()->getScalefactor(muon->eta()));
+				muon->setP4(muon->p4() * getMuonEnergySF()->getScalefactor(muon->eta()));
 			allleps << muon;
 			if(muon->pt() < lepptthresh)       continue;
 			if(fabs(muon->eta())>2.4) continue;
@@ -763,10 +764,11 @@ void  analyzer_run2::analyze(size_t anaid){
 			    {
 				idmuons <<  &(b_Muons.content()->at(i));
 			    }
+
 		}
-		
-		
-		
+
+
+
 		for(size_t i=0;i<idmuons.size();i++){
 			NTMuon * muon =  idmuons.at(i);
 			if(!mode_invertiso && fabs(muon->isoVal()) > 0.12) continue;
@@ -791,16 +793,19 @@ void  analyzer_run2::analyze(size_t anaid){
 			NTElectron * elec=&(b_Electrons.content()->at(i));
 			float ensf=1;
 			if(isMC)
-			    ensf=getElecEnergySF()->getScalefactor(elec->eta());
+				ensf=getElecEnergySF()->getScalefactor(elec->eta());
+
 			elec->setECalP4(elec->ECalP4() * ensf);
 			elec->setP4(elec->ECalP4() * ensf); //both the same now!!
+
+			//selection fully following https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopEGM l+jets except for pt cut
 
 			allleps << elec;
 			if(elec->pt() < lepptthresh)  continue;
 			float abseta=fabs(elec->eta());
 
 			float suclueta = fabs(elec->ECalP4().eta());
-			if(abseta > 2.5) continue;
+			if(abseta > 2.4) continue;
 			if(suclueta > 1.4442 && suclueta < 1.5660) continue; //transistion region
 			kinelectrons  << elec;
 
@@ -903,8 +908,7 @@ void  analyzer_run2::analyze(size_t anaid){
 			lepweight*=getTriggerSF()->getScalefactor(fabs(firstlep->eta()),fabs(seclep->eta()));
 		}
 		else if(b_emu_){
-		    
-		    if(leppair->first.size() < 1 || leppair->second.size() < 1) continue;
+			if(leppair->first.size() < 1 || leppair->second.size() < 1) continue;
 			dilp4=leppair->first[0]->p4() + leppair->second[0]->p4();
 			mll=dilp4.M();
 			firstlep=leppair->first[0];
@@ -946,14 +950,18 @@ void  analyzer_run2::analyze(size_t anaid){
 		plots.makeControlPlots(step);
 		zplots.makeControlPlots(step);
 
-	//	if(leadingptlep->pt()<30)
-	//		continue;
+		//	if(leadingptlep->pt()<30)
+		//		continue;
 
 		///////// 20 GeV cut /// STEP 3 ///////////////////////////////////////
 		step++;
 
 		if(mll < 20)
 			continue;
+
+		//agrohsje added for debugging 
+		//std::cout<< evt.event->eventNoInt() <<" "<<leadingptlep->pt()<<" "<<leadingptlep->eta()<<" "<<secleadingptlep->pt()<<" "<<secleadingptlep->eta()<<std::endl;
+
 
 		// create jec jets for met and ID jets
 		// create ID Jets and correct JER
@@ -966,8 +974,6 @@ void  analyzer_run2::analyze(size_t anaid){
 		evt.medjets=&medjets;
 		evt.hardjets=&hardjets;
 		for(size_t i=0;i<b_Jets.content()->size();i++){
-		        //agrohsje added fake scaling
-		        b_Jets.content()->at(i).setP4(b_Jets.content()->at(i).p4()*1.0);
 			treejets << &(b_Jets.content()->at(i));
 		}
 
@@ -980,9 +986,8 @@ void  analyzer_run2::analyze(size_t anaid){
 				bool useJetForMet=false;
 				if(treejets.at(i)->emEnergyFraction() < 0.9 && treejets.at(i)->pt() > 10)
 					useJetForMet=true; //dont even do something
-
+				//agrohsje global 2% scaling for JESup/JESdown added to ZTopUtils/src/JECBase.cc, splitting gives default sys
 				getJECUncertainties()->applyToJet(treejets.at(i));
-				//agrohsje uncomment 
 				getJERAdjuster()->correctJet(treejets.at(i));
 				//corrected
 				if(useJetForMet){
@@ -991,6 +996,7 @@ void  analyzer_run2::analyze(size_t anaid){
 				}
 			}
 			if(!(treejets.at(i)->id())) continue;
+			//agrohsje changed cut to 0.4 instead of 0.5 
 			if(!noOverlap(treejets.at(i), isomuons,     0.4)) continue;
 			if(!noOverlap(treejets.at(i), isoelectrons, 0.4)) continue;
 			if(fabs(treejets.at(i)->eta())>2.4) continue;
@@ -1107,13 +1113,13 @@ void  analyzer_run2::analyze(size_t anaid){
 		evt.selectednonbjets=&selectednonbjets;
 
 
-	//	getBTagSF()->changeNTJetTags(selectedjets);
+		getBTagSF()->changeNTJetTags(selectedjets);
 		for(size_t i=0;i<hardjets.size();i++){
-		//	if(selectedjets->at(i)->btag() < getBTagSF()->getWPDiscrValue()){
+			if(selectedjets->at(i)->btag() < getBTagSF()->getWPDiscrValue()){
 
-		//		selectednonbjets.push_back(selectedjets->at(i));
-		//		continue;
-		//	}
+				selectednonbjets.push_back(selectedjets->at(i));
+				continue;
+			}
 			selectedbjets.push_back(selectedjets->at(i));
 		}
 
@@ -1269,7 +1275,7 @@ void  analyzer_run2::analyze(size_t anaid){
 		if(!zerojet && selectedjets->size() < 1) continue;
 
 		if(getBTagSF()->getMode() == NTBTagSF::shapereweighting_mode){
-                        throw std::runtime_error("NTBTagSF::shapereweighting_mode: not impl");
+			throw std::runtime_error("NTBTagSF::shapereweighting_mode: not impl");
 		}
 		if(apllweightsone) puweight=1;
 		//ht+=adjustedmet.met();
@@ -1338,17 +1344,19 @@ void  analyzer_run2::analyze(size_t anaid){
 		}
 
 		//make the b-tag SF
-	//	for(size_t i=0;i<selectedbjets.size();i++){
-	//		getBTagSF()->fillEff(selectedjets->at(i),puweight);
-	//	}
+		for(size_t i=0;i<selectedbjets.size();i++){
+			getBTagSF()->fillEff(selectedjets->at(i),puweight);
+		}
 
 		///////////////////// btag cut STEP 8 //////////////////////////
 		step++;
 
 		if(!usetopdiscr && !nobcut && selectedbjets.size() < 1) continue;
-		//agrohsje uncomment if(usetopdiscr && lh_toplh<0.3) continue;
-	
-        	if(apllweightsone) puweight=1;
+		// if(usetopdiscr && topdiscr3<0.9) continue;
+		if(usetopdiscr && lh_toplh<0.3) continue;
+
+
+		if(apllweightsone) puweight=1;
 
 		float mlbmin=0;
 		evt.mlbmin=&mlbmin;
@@ -1418,6 +1426,8 @@ void  analyzer_run2::analyze(size_t anaid){
 
 	// Fill all containers in the stackVector
 
+	// std::cout << "Filling containers to the Stack\n" << std::endl;
+
 
 	// delete t;
 	f->Close(); //deletes t
@@ -1467,8 +1477,10 @@ void  analyzer_run2::analyze(size_t anaid){
 			csv->addSignal(legendname);
 
 		csv->writeToFile((getOutPath()+".ztop").Data());
-		
-                if(testmode_ )
+
+
+
+		if(testmode_ )
 			std::cout << "testmode("<< anaid << "): written main output"<< std::endl;
 
 
@@ -1476,7 +1488,9 @@ void  analyzer_run2::analyze(size_t anaid){
 		if(btagsf_.makesEff()){
 			if(testmode_ )
 				std::cout << "testmode("<< anaid << "): writing btag file"<< std::endl;
+
 			getBTagSF()->writeToFile((std::string)btagfile.Data()); //recreates the file
+
 		}///makes eff
 
 		std::cout << inputfile << ": " << std::endl;
@@ -1517,7 +1531,7 @@ void  analyzer_run2::analyze(size_t anaid){
 
 
 
-#endif
+
 }
 
 
@@ -1588,6 +1602,5 @@ bool analyzer_run2::checkTrigger(std::vector<bool> * p_TriggerBools,ztop::NTEven
 	}
 	return true;
 }
-
 
 

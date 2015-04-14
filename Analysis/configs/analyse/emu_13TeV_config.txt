@@ -59,14 +59,10 @@ TriggerSFFile  = /src/TopAnalysis/Configuration/analysis/common/data/triggerSumm
 PUFile         = /src/TtZAnalysis/Analysis/data/analyse/Legacy2012.json_PU    $without .root
 $PUFile         = /src/TtZAnalysis/Analysis/data/analyse/Data_PUDist_Full2012ReReco_FinalRecommendation
 
-btagWP         = csvv2t       
+btagSFFile     = /src/TopAnalysis/ZTopUtils/data/CSV_8TeV.csv
 btagFile       = all_btags
 
 
-btagShapeFileHF = /src/TopAnalysis/Configuration/analysis/common/data/csv_rwt_hf_20pt_8_20_14.root
-btagShapeFileLF = /src/TopAnalysis/Configuration/analysis/common/data/csv_rwt_lf_20pt_8_20_14.root
-
-
-modeOptions = GsfelectronsZerojetNozcutNometcutNobcutBtagcsvv2tNotoppt
+modeOptions = GsfelectronsZerojetNozcutNometcutNobcutNotoppt
 
 [parameters-end]

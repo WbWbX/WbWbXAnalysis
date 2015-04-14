@@ -18,7 +18,7 @@
 
 #everything will be gaussian except the ones specified here
 
-   TT_SCALE   =  box
+#   TT_SCALE   =  box
 #   TT_GENPOWPY=  fixed
 #   CR         =  boxleft
 #   TT_MATCH   =  box
