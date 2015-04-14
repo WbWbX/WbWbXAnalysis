@@ -805,7 +805,7 @@ void  analyzer_run2::analyze(size_t anaid){
 			float abseta=fabs(elec->eta());
 
 			float suclueta = fabs(elec->ECalP4().eta());
-			if(abseta > 2.4) continue;
+			if(abseta > 2.5) continue;
 			if(suclueta > 1.4442 && suclueta < 1.5660) continue; //transistion region
 			kinelectrons  << elec;
 
@@ -960,7 +960,7 @@ void  analyzer_run2::analyze(size_t anaid){
 			continue;
 
 		//agrohsje added for debugging 
-		//std::cout<< evt.event->eventNoInt() <<" "<<leadingptlep->pt()<<" "<<leadingptlep->eta()<<" "<<secleadingptlep->pt()<<" "<<secleadingptlep->eta()<<std::endl;
+		//std::cout<< evt.event->eventNo() <<" "<<leadingptlep->pt()<<" "<<leadingptlep->eta()<<" "<<secleadingptlep->pt()<<" "<<secleadingptlep->eta()<<std::endl;
 
 
 		// create jec jets for met and ID jets
