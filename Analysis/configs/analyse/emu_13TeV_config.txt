@@ -10,44 +10,39 @@ $  [parameters-begin] until [parameters-end]
 $ inputfile,                       legend entry,        color,   xsection,   legendNumber (for sorting,- allows for gaps),  (opt) isSignal
 
 
-
 tree_13TeV_emuttbar.root,          t#bar{t},		633,	  831.76,	  0,      true   
 
 tree_13TeV_tW.root,                tW/#bar{t}W,	   	616,	  35.6,	          4
 tree_13TeV_tbarW.root,	           tW/#bar{t}W,	   	616,	  35.6,	          4
 
-tree_13TeV_ttbarw.root,            t#bar{t}V,           390,      1.152,          10    
-$ tree_13TeV_ttbarz.root,           t#bar{t}V,           390,      2.232,          10 
-$ tree_13TeV_ttbarh.root,	   t#bar{t}H,           xxx,	  xxx		  x		   
-
 tree_13TeV_dy50inf.root,           DY,                  852,      6025.2,         2 
-
-tree_13TeV_wjets.root,		   Wjets,		413,	  61526,	  6
 
 tree_13TeV_zz.root,		   VV,			390,	  17.654,	  5  
 tree_13TeV_wz.root,		   VV,			390,	  33.21,  	  5
 
-$ tree_13TeV_qcdbctoe3080.root,	   QCD,                 400,	  167040, 	  9
-tree_13TeV_qcdbctoe80170.root,	   QCD,			400,	  12981,	  9
-$ tree_13TeV_qcdbctoe170inf.root,   QCD,                 400,      xxxx,	  9
-tree_13TeV_qcdem3080.root,	   QCD,                 400,	  4615893,  	  9
-tree_13TeV_qcdem80170.root,	   QCD,                 400,      183294,	  9
+$tree_13TeV_ttbarw.root,           t#bar{t}V,           390,      1.152,          10    
+$tree_13TeV_ttbarz.root,           t#bar{t}V,           390,      2.232,          10 
+$tree_13TeV_ttbarh.root,	   t#bar{t}H,           xxx,	  xxx		  x		   
+$tree_13TeV_wjets.root,		   Wjets,		413,	  61526,	  6
+$tree_13TeV_qcdbctoe3080.root,	   QCD,                 400,	  167040, 	  9
+$tree_13TeV_qcdbctoe80170.root,	   QCD,			400,	  12981,	  9
+$tree_13TeV_qcdbctoe170inf.root,   QCD,                 400,      xxxx,	  9
+$tree_13TeV_qcdem3080.root,	   QCD,                 400,	  4615893,  	  9
+$tree_13TeV_qcdem80170.root,	   QCD,                 400,      183294,	  9
 
 [inputfiles-end]
-
-
 
 
 
 [parameters-begin] 
 $$ all directories except for inputfiles are relative to $CMSSW_BASE
 
-$ana_samples_150109/
-inputFilesDir = /nfs/dust/cms/user/agrohsje/NAF_workingDir/ana_samples_150206/
+inputFilesDir = /nfs/dust/cms/user/tarndt/NTuples/Fit_1004/
+$/nfs/dust/cms/user/agrohsje/NAF_workingDir/ana_samples_150206/
 
 Lumi           = 1000
 
-JECFile        = /src/TtZ/nfs/dust/cms/user/agrohsje/NAF_workingDir/ana_samples_150206/Analysis/Analysis/data/analyse/Summer13_V5_DATA_UncertaintySources_AK5PFchs.txt
+JECFile        = /src/TtZAnalysis/Analysis/data/analyse/Summer13_V5_DATA_UncertaintySources_AK5PFchs.txt
 
 MuonSFFile     = /src/TtZAnalysis/Analysis/data/analyse/muon_tight_sf2D_8TeV.root
 MuonSFHisto    = eff_pt_eta_fullwithtrackerr
@@ -59,11 +54,12 @@ TrackingSFHisto = tracking_eff
 ElecSFFile     = /src/TtZAnalysis/Analysis/data/analyse/elec_tight_sf2D_8TeV.root
 ElecSFHisto    = GlobalSF
 
-TriggerSFFile  = /src/TtZAnalysis/Analysis/data/analyse/trigger_emu_8TeV_pt30.root
+TriggerSFFile  = /src/TopAnalysis/Configuration/analysis/common/data/triggerSummary_emu_tightleps.root
 
 PUFile         = /src/TtZAnalysis/Analysis/data/analyse/Legacy2012.json_PU    $without .root
+$PUFile         = /src/TtZAnalysis/Analysis/data/analyse/Data_PUDist_Full2012ReReco_FinalRecommendation
 
-btagWP         = csvv2l       
+btagWP         = csvv2t       
 btagFile       = all_btags
 
 
@@ -71,6 +67,6 @@ btagShapeFileHF = /src/TopAnalysis/Configuration/analysis/common/data/csv_rwt_hf
 btagShapeFileLF = /src/TopAnalysis/Configuration/analysis/common/data/csv_rwt_lf_20pt_8_20_14.root
 
 
-modeOptions = GsfelectronsZerojetNozcutNometcutNobcutBtagcsvv2tLeppt30Notoppt
+modeOptions = GsfelectronsZerojetNozcutNometcutNobcutBtagcsvv2tNotoppt
 
 [parameters-end]

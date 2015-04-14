@@ -570,7 +570,7 @@ process.path = cms.Path(
     process.preCutPUInfo*
     process.fsFilterSequence*
     process.postCutPUInfo*
-    process.goodOfflinePrimaryVertices *   
+#    process.goodOfflinePrimaryVertices *   
     process.prefilterSequence * #for data only 
     #    process.dump *
     process.kinLeptonFilterSequence * # agrohsje 
