@@ -11,7 +11,6 @@
  */
 
 #include "../interface/analyzer_run2.h"
-#include "TtZAnalysis/Configuration/interface/version.h"
 
 /*
  * Running on the samples is parallelized.
@@ -37,7 +36,6 @@
  */
 void  analyzer_run2::analyze(size_t anaid){
 
-#ifndef CMSSW_LEQ_5
 
 	using namespace std;
 	using namespace ztop;
@@ -1530,8 +1528,6 @@ void  analyzer_run2::analyze(size_t anaid){
 		std::cout << "testmode("<< anaid << "): failed to write to file " << getOutPath()+".root"<< std::endl;
 		p_finished.get(anaid)->pwrite(-2); //write failed
 	}
-
-#endif
 
 }
 
