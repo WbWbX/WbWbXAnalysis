@@ -489,7 +489,7 @@ void  analyzer_run2::analyze(size_t anaid){
 	tBranchHandler<vector<NTGenParticle> > b_GenLeptons1(t,"NTGenLeptons1");
 	tBranchHandler<vector<NTGenJet> >      b_GenJets(t,"NTGenJets");
 	tBranchHandler<vector<NTGenParticle> > b_GenNeutrinos(t,"NTGenNeutrinos");
-
+	
 	//additional weights
 	std::vector<tBranchHandler<NTWeight>*> weightbranches;
 	tBranchHandler<NTWeight>::allow_missing =true;
@@ -506,7 +506,11 @@ void  analyzer_run2::analyze(size_t anaid){
 		ztop::MCReweighter mcreweighter; 
 		mcreweighters.push_back(mcreweighter);
 	}
-
+	//agrohsje debugging ntevt 
+	int ntevt;
+	t->SetBranchAddress("ntevt",&ntevt); 
+	//tBranchHandler<int> b_ntevt(t,"ntevt");
+	
 	//some helpers
 	double sel_step[]={0,0,0,0,0,0,0,0,0};
 	float count_samesign=0;
@@ -581,7 +585,8 @@ void  analyzer_run2::analyze(size_t anaid){
 
 	for(Long64_t entry=firstentry;entry<nEntries;entry++){
 
-
+	    //agrohsje debugging ntevt 
+	    t->GetEntry(entry);
 
 		//for fakedata
 		if(skipregion){
@@ -746,6 +751,18 @@ void  analyzer_run2::analyze(size_t anaid){
 			if(isMC)
 				muon->setP4(muon->p4() * getMuonEnergySF()->getScalefactor(muon->eta()));
 			allleps << muon;
+			/* agrohsje 
+			std::cout<<" muon->pt() "<<muon->pt()
+				 <<" muon->eta() "<<muon->eta()
+				 <<" muon->isGlobal() "<<muon->isGlobal()
+				 <<" muon->matchedStations() "<<muon->matchedStations()
+				 <<" muon->pixHits() "<<muon->pixHits()
+				 <<" muon->muonHits() "<<muon->muonHits()
+				 <<" muon->normChi2() "<<muon->normChi2()
+				 <<" fabs(muon->d0V()) "<<fabs(muon->d0V())
+				 <<" fabs(muon->isoVal()) "<<fabs(muon->isoVal())
+				 <<std::endl;
+			*/
 			if(muon->pt() < lepptthresh)       continue;
 			if(fabs(muon->eta())>2.4) continue;
 			kinmuons << &(b_Muons.content()->at(i));
@@ -766,8 +783,6 @@ void  analyzer_run2::analyze(size_t anaid){
 			    }
 
 		}
-
-
 
 		for(size_t i=0;i<idmuons.size();i++){
 			NTMuon * muon =  idmuons.at(i);
@@ -794,7 +809,7 @@ void  analyzer_run2::analyze(size_t anaid){
 			float ensf=1;
 			if(isMC)
 				ensf=getElecEnergySF()->getScalefactor(elec->eta());
-
+			
 			elec->setECalP4(elec->ECalP4() * ensf);
 			elec->setP4(elec->ECalP4() * ensf); //both the same now!!
 
@@ -804,14 +819,13 @@ void  analyzer_run2::analyze(size_t anaid){
 			if(elec->pt() < lepptthresh)  continue;
 			float abseta=fabs(elec->eta());
 
-			float suclueta = fabs(elec->ECalP4().eta());
+			float suclueta = fabs(elec->suClu().eta());//elec->ECalP4().eta());
 			if(abseta > 2.5) continue;
 			if(suclueta > 1.4442 && suclueta < 1.5660) continue; //transistion region
 			kinelectrons  << elec;
-
 			if(elec->storedId() > 0.9){  ////agrohsje 1 or 0 should work 
 			    idelectrons <<  elec;
-			    //if(fabs(elec->isoVal(/* agrohsje rhoIso()*/))<0.1){ // iso already done in id 
+			    //iso already included in ID
 			    isoelectrons <<  elec;
 			    isoleptons << elec;
 			}
@@ -838,12 +852,11 @@ void  analyzer_run2::analyze(size_t anaid){
 
 		//////////two ID leptons STEP 1///////////////////////////////
 		step++;
-
-
+		
 		if(b_ee_ && idelectrons.size() < 2) continue;
 		if(b_mumu_ && (idmuons.size() < 2 )) continue;
 		if(b_emu_ && (idmuons.size() + idelectrons.size() < 2 )) continue;
-
+		
 		sel_step[1]+=puweight;
 		plots.makeControlPlots(step);
 		zplots.makeControlPlots(step);
@@ -852,7 +865,7 @@ void  analyzer_run2::analyze(size_t anaid){
 
 		//////// require two iso leptons  STEP 2  //////////////////////////
 		step++;
-
+		
 		if(b_ee_ && isoelectrons.size() < 2) continue;
 		if(b_mumu_ && isomuons.size() < 2 ) continue;
 		if(b_emu_ && isomuons.size() + isoelectrons.size() < 2) continue;
@@ -959,8 +972,10 @@ void  analyzer_run2::analyze(size_t anaid){
 		if(mll < 20)
 			continue;
 
-		//agrohsje added for debugging 
-		//std::cout<< evt.event->eventNo() <<" "<<leadingptlep->pt()<<" "<<leadingptlep->eta()<<" "<<secleadingptlep->pt()<<" "<<secleadingptlep->eta()<<std::endl;
+		//now agrohsje added for debugging
+		//b_ntevt.getEntry(entry);
+		//int ntevt=*(b_ntevt.content());		
+		//std::cout<< ntevt <<" "<<leadingptlep->pt()<<" "<<leadingptlep->eta()<<" "<<secleadingptlep->pt()<<" "<<secleadingptlep->eta()<<std::endl;
 
 
 		// create jec jets for met and ID jets
