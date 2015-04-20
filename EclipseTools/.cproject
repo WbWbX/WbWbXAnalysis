@@ -39,7 +39,9 @@
 
 								</option>
 								<option id="org.eclipse.cdt.build.core.settings.holder.symbols.1157954861" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="&quot;size_t=long unsigned int&quot;"/>
+                                                                        <listOptionValue builtIn="false" value="__GNUC__=3"/>
+                                                                        <listOptionValue builtIn="false" value="__GNUC_MINOR__=4"/>
+                                                                        <listOptionValue builtIn="false" value="__linux__=1"/>
 								</option>
 								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1997178425" languageId="org.eclipse.cdt.core.g++" languageName="GNU C++" sourceContentType="org.eclipse.cdt.core.cxxSource,org.eclipse.cdt.core.cxxHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
 							</tool>

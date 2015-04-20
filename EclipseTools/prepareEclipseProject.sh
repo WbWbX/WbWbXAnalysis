@@ -8,8 +8,9 @@ fi
 
 if [ ! $1 ]
 then
-echo "please specify your LOCAL! c++ include path (e.g. /usr/include/c++/4.2.1)"
-echo "run gcc -x c++ -v -E /dev/null on you local machine to get it"
+echo "please specify your LOCAL! c++ include paths (e.g. /usr/include/c++/4.2.1...)"
+echo "run gcc -x c++ -v -E /dev/null on you local machine to get them"
+echo "parse them separated with blanks (should be about 2-5 paths)"
 exit 1
 fi
 
@@ -19,12 +20,14 @@ echo "Eclipse will use a copy of the CMSSW release that needs to be located at ~
 echo "If it does not exist, please create it, otherwise come parts of the completion will not work"
 
 
-allpaths="\${CWD}:\${HOME}/CMSSW/$CMSSW_VERSION/src:${1}:\${ROOTSYS}/include:/usr/include"
+allpaths="\${CWD}:\${HOME}/CMSSW/$CMSSW_VERSION/src:\${ROOTSYS}/include"
 
 cd $CMSSW_BASE
 
+in="${@}"
+in=(${in// /:})
+allpaths="${allpaths}:${in}"
 array=(${allpaths//:/ })
-
 
 for i in "${!array[@]}"
 do
