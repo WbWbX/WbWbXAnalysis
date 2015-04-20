@@ -78,13 +78,10 @@ TriggerSFFile  = /src/TtZAnalysis/Analysis/data/analyse/triggerSummary_emu_7TeV_
 
 PUFile         = /src/TtZAnalysis/Analysis/data/analyse/Legacy2011.json_PU    $without .root
 
-btagWP         = csvl
+
+
+btagSFFile     = /src/TopAnalysis/ZTopUtils/data/CSV_8TeV.csv
 btagFile       = all_btags
-
-
-btagShapeFileHF = /src/TopAnalysis/Configuration/analysis/common/data/csv_rwt_hf_20pt_8_20_14.root
-btagShapeFileLF = /src/TopAnalysis/Configuration/analysis/common/data/csv_rwt_lf_20pt_8_20_14.root
-
 
 modeOptions = GsfelectronsZerojetNozcutNometcutNobcutBtagcsvtNotoppt
 [parameters-end]

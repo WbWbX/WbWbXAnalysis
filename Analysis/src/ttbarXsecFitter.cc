@@ -281,7 +281,8 @@ void ttbarXsecFitter::addFullExtrapolError(const TString& sysname){
 	}
 }
 
-histoStack ttbarXsecFitter::produceStack(bool fittedvalues,size_t bjetcat,size_t datasetidx,double& chi2)const{
+//FIXME: use applyParameters.... here
+histoStack ttbarXsecFitter::produceStack(bool fittedvalues,size_t bjetcat,size_t datasetidx,double& chi2, corrMatrix& corrmatr)const{
 	if(debug)
 		std::cout << "ttbarXsecFitter::produceStack" <<std::endl;
 	checkSizes();
@@ -350,6 +351,7 @@ histoStack ttbarXsecFitter::produceStack(bool fittedvalues,size_t bjetcat,size_t
 
 	signal=tmpvar.exportContainer(fittedparas,constr,names );
 
+	corrmatr=fitter_.getCorrelationMatrix();
 
 	out.push_back(data,"data",1,1,99);
 	out.push_back(background,"background",601,1,2);
@@ -528,7 +530,7 @@ double ttbarXsecFitter::getXsec(size_t datasetidx)const{
 	double fitted= fitter_.getParameters()->at(datasets_.at(datasetidx).xsecIdx())+datasets_.at(datasetidx).xsecOffset();
 
 	double acceptancecorr=datasets_.at(datasetidx).acceptance().getValue(fittedparas_)
-																									/datasets_.at(datasetidx).acceptance_extr().getValue(fittedparas_);
+																																			/datasets_.at(datasetidx).acceptance_extr().getValue(fittedparas_);
 	return fitted*acceptancecorr;
 
 }
@@ -677,7 +679,8 @@ void ttbarXsecFitter::getParaErrorContributionToXsec(int idxin, size_t datasetid
 	}
 }
 
-histoStack ttbarXsecFitter::applyParametersToStack(const histoStack& stack, size_t bjetcat, size_t datasetidx, bool fitted)const{
+histoStack ttbarXsecFitter::applyParametersToStack(const histoStack& stack, size_t bjetcat,
+		size_t datasetidx, bool fitted, corrMatrix& corrmatr)const{
 	if(datasetidx >= datasets_.size()){
 		throw std::out_of_range("ttbarXsecFitter::applyParametersToStack: dataset idx out of range");
 	}
@@ -700,7 +703,7 @@ histoStack ttbarXsecFitter::applyParametersToStack(const histoStack& stack, size
 	cpdts.adaptIndices(datasets_.at(datasetidx));
 
 	cpdts.createContinuousDependencies(false,addfullerrors_);
-/*
+	/*
 	if(debug)
 		std::cout << "ttbarXsecFitter::applyParametersToStack: creating association" <<std::endl;
 	std::vector<size_t> indexasso;
@@ -714,7 +717,7 @@ histoStack ttbarXsecFitter::applyParametersToStack(const histoStack& stack, size
 
 	if(debug)
 		std::cout << "ttbarXsecFitter::applyParametersToStack: associating new parameters" <<std::endl;
-*/
+	 */
 	histo1D data,signal,background;
 	std::vector<double> fittedparas;
 	std::vector<double> constr;
@@ -731,22 +734,7 @@ histoStack ttbarXsecFitter::applyParametersToStack(const histoStack& stack, size
 	for(size_t i=0;i<datasets_.size();i++)
 		constr.at(datasets_.at(i).xsecIdx())=0;
 
-/*	if(fitted && fitsucc_){
-		for(size_t i=0;i<fittedparas_.size();i++){
-			size_t cpidx=indexasso.at(i);
-			std::cout << cpidx<<std::endl;
-			names.at(cpidx) = fitter_.getParameterNames()->at(i);
-			fittedparas.at(cpidx) = fittedparas_.at(i);
-			bool isxsec=false;
-			for(size_t j=0;j<datasets_.size();j++)
-				if(datasets_.at(j).xsecIdx() == i) isxsec=true;
-			if(isxsec)
-				constr.at(cpidx) =0;
-			else
-				constr.at(cpidx) =fitter_.getParameterErrUp()->at(i);//anyway symmetric
-		}
-	}
-*/
+
 
 
 	if(debug)
@@ -777,16 +765,99 @@ histoStack ttbarXsecFitter::applyParametersToStack(const histoStack& stack, size
 	signal=tmpvar.exportContainer(fittedparas,constr,names );
 	signal *= stack.getSignalContainer().integral(true) /  datasets_.at(datasetidx).signalIntegral(bjetcat);
 
+	signal.setYAxisName(stack.getSignalContainer().getYAxisName());
+	signal.setXAxisName(stack.getSignalContainer().getXAxisName());
+	data.setYAxisName(stack.getSignalContainer().getYAxisName());
+	data.setXAxisName(stack.getSignalContainer().getXAxisName());
+	background.setYAxisName(stack.getSignalContainer().getYAxisName());
+	background.setXAxisName(stack.getSignalContainer().getXAxisName());
+
 	out=histoStack();
 
 	out.push_back(data,"data",1,1,99);
 	out.push_back(background,"background",601,1,2);
 	out.push_back(signal,"signal",633,1,1);
 
-	out.setName(out.getName() + "_" + datasets_.at(datasetidx).getName());
+	out.setName(stack.getName() + "_" + datasets_.at(datasetidx).getName());
+
+	//return corr matrix
+	corrmatr = fitter_.getCorrelationMatrix();
 
 
 	return out;
+}
+
+
+void ttbarXsecFitter::printAdditionalControlplots(const std::string& inputfile, const std::string & configfile,const std::string& prependToOutput)const{
+
+	//read file
+	fileReader fr;
+	fr.setComment("#");
+	fr.setDelimiter(":");
+	//read plots
+	std::vector< std::vector<std::string> > plotnames; //0: main, 1+ add
+	std::vector<size_t> nbjets;
+	std::vector<std::string> stylefiles;
+	fr.readFile(configfile);
+	for(size_t line=0;line<fr.nLines();line++){
+		if(fr.nEntries(line)>1){
+			nbjets.push_back(fr.getData<size_t>(line,0));
+
+			textFormatter fmt;
+			fmt.setComment("#");
+			fmt.setDelimiter("=");
+			std::vector<std::string> subnames;
+			std::vector<std::string> subplots=fmt.getFormatted(fr.getData<std::string>(line,1));
+			if(subplots.size()<2)
+				subnames=subplots;
+			else{
+				fmt.setDelimiter("+");
+				subnames.push_back(subplots.at(0));
+				subplots=fmt.getFormatted(subplots.at(1));
+				subnames << subplots;
+			}
+			plotnames.push_back(subnames);
+			if(fr.nEntries(line)>2)
+				stylefiles.push_back(fr.getData<std::string>(line,2));
+			else
+				stylefiles.push_back("");
+
+		}
+	}
+	histoStackVector  hsv;hsv.readFromFile(inputfile);
+	for(size_t i=0;i<nbjets.size();i++){
+		if(plotnames.at(i).size()<1)continue;
+		plotterControlPlot pl;
+		histoStack stack;
+		for(size_t j=0;j<plotnames.at(i).size();j++){
+			if(plotnames.at(i).size()==1){
+				stack=hsv.getStack(plotnames.at(i).at(j).data());
+			}
+			else if(j==0){
+				j++;
+				stack=hsv.getStack(plotnames.at(i).at(j).data());
+				j++;
+			}
+			else{
+				stack=stack+hsv.getStack(plotnames.at(i).at(j).data());
+			}
+		}
+		if(plotnames.at(i).size()!=1){
+			stack.setName(plotnames.at(i).at(0).data());
+		}
+		TString name=stack.getName();
+		name.ReplaceAll(" ","_");
+		stack.setName(name);
+		corrMatrix correlations;
+		histoStack prestack=applyParametersToStack(stack,2,0,false, correlations);
+		pl.setStack(&prestack);
+		pl.printToPdf(prependToOutput+prestack.getName().Data());
+		histoStack poststack=applyParametersToStack(stack,1,0,true,correlations);
+		poststack.setName(poststack.getName()+"_postfit");
+		pl.setStack(&poststack);
+		pl.associateCorrelationMatrix(correlations);
+		pl.printToPdf(prependToOutput+poststack.getName().Data());
+	}
 }
 
 
@@ -848,7 +919,10 @@ void ttbarXsecFitter::createSystematicsBreakdown(size_t datasetidx){
 				}
 			}
 		}
-		mergeasso.push_back(std::pair< TString , std::vector<size_t> >(merged,assoidcs));
+		if(assoidcs.size()>0)
+			mergeasso.push_back(std::pair< TString , std::vector<size_t> >(merged,assoidcs));
+		else
+			std::cout << "ttbarXsecFitter::createSystematicsBreakdown: not able to merge to "<< merged << ". contributions not found. (skip)" <<std::endl;
 	}
 
 
@@ -1755,7 +1829,7 @@ variateHisto1D ttbarXsecFitter::dataset::createLeptonJetAcceptance(const std::ve
 		leptonreco =signalintegral/visgenint;
 	}
 	else{
-		std::cout << "Warning no visible phase space defined. Will merge acceptance and dilepton efficiencies" <<std::endl;
+		std::cout << "Warning no visible phase space defined. Will merge acceptance and dilepton efficiencies -> ok for control plots" <<std::endl;
 		leptonreco=signalintegral.createOne();
 		acceptance=signalintegral*gennorm;
 	}
@@ -1778,7 +1852,7 @@ variateHisto1D ttbarXsecFitter::dataset::createLeptonJetAcceptance(const std::ve
 	twobjetsignal=twobjetsignal.getIntegralBin();
 
 	histo1D correction_b =  ((signalintegral * twobjetsignal) * 4.)
-																																																																						                																																																																																																																																																																																																																																																																																/ ( (onebjetsignal + (twobjetsignal * 2.)) * (onebjetsignal + (twobjetsignal * 2.)));
+																																																																						                																																																																																																																																																																																																																																																																																										/ ( (onebjetsignal + (twobjetsignal * 2.)) * (onebjetsignal + (twobjetsignal * 2.)));
 
 	correction_b.removeStatFromAll();
 
@@ -1946,7 +2020,7 @@ void ttbarXsecFitter::dataset::readStack(const histoStack& stack, size_t nbjet){
 	vec.push_back(stack);
 	readStackVec(vec,nbjet);
 }
-void ttbarXsecFitter::dataset::readStackVec(const std::vector<histoStack> & out,size_t nbjet){
+void ttbarXsecFitter::dataset::readStackVec(const std::vector<histoStack> & in,size_t nbjet){
 	if(nbjet > 2){
 		throw std::out_of_range("ttbarXsecFitter::dataset::readStackVec: nbjet out of range");
 	}
@@ -1957,13 +2031,21 @@ void ttbarXsecFitter::dataset::readStackVec(const std::vector<histoStack> & out,
 	backgroundconts_nbjets_.resize(maxnbjetcat);
 	dataconts_nbjets_.resize(maxnbjetcat);
 	histo1D sign,signvisps,signpsmig,backgr,data;
-	for(size_t j=0;j<out.size();j++){
-		sign          =sign.append(out.at(j).getSignalContainer1DUnfold().getRecoContainer());
-		signvisps     =signvisps.append(out.at(j).getSignalContainer1DUnfold().getGenContainer());
-		totalvisgencontsread_++;
-		signpsmig=signpsmig.append(out.at(j).getSignalContainer1DUnfold().getBackground());
-		backgr      =backgr.append(out.at(j).getBackgroundContainer());
-		data          =data.append(out.at(j).getDataContainer());
+	for(size_t j=0;j<in.size();j++){
+		if(in.at(j).is1DUnfold()){
+			sign          =sign.append(in.at(j).getSignalContainer1DUnfold().getRecoContainer());
+			signvisps     =signvisps.append(in.at(j).getSignalContainer1DUnfold().getGenContainer());
+			totalvisgencontsread_++;
+			signpsmig=signpsmig.append(in.at(j).getSignalContainer1DUnfold().getBackground());
+		}
+		else if(in.at(j).is1D()){
+			sign          =sign.append(in.at(j).getSignalContainer());
+			signvisps     =signvisps.append(in.at(j).getSignalContainer());
+			signvisps.setAllZero();
+			signpsmig     =sign;
+		}
+		backgr      =backgr.append(in.at(j).getBackgroundContainer());
+		data          =data.append(in.at(j).getDataContainer());
 	}
 	signalconts_nbjets_.at(nbjet) = sign;
 	signalvisgenconts_nbjets_.at(nbjet)=signvisps;

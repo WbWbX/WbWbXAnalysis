@@ -88,7 +88,7 @@ public:
 	/**
 	 * just append all in one
 	 */
-	histoStack produceStack(bool fittedvalues,size_t bjetcat,size_t datasetidx,double& chi2)const;
+	histoStack produceStack(bool fittedvalues,size_t bjetcat,size_t datasetidx,double& chi2, corrMatrix& corrmatr)const;
 
 	/**
 	 *
@@ -127,6 +127,7 @@ public:
 
 	histo2D getCorrelations()const;
 
+
 	double getXsec(size_t datasetidx)const;
 	double getXsecOffset(size_t datasetidx)const;
 	double getVisXsec(size_t datasetidx)const;
@@ -162,7 +163,9 @@ public:
 	static bool debug;
 
 
-	histoStack applyParametersToStack(const histoStack& stack, size_t bjetcat, size_t datasetidx, bool fitted)const;
+	histoStack applyParametersToStack(const histoStack& stack, size_t bjetcat, size_t datasetidx, bool fitted, corrMatrix& retcorrelations)const;
+
+	void printAdditionalControlplots(const std::string& inputfile, const std::string & configfile,const std::string& prependToOutput)const;
 
 private:
 

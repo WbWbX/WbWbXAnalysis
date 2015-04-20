@@ -14,23 +14,23 @@ namespace ztop{
 
 
 
-std::map< TTree* ,std::vector<TString> > tBranchHandlerBase::branchesfortree_;
+std::map< tTreeHandler* ,std::vector<TString> > tBranchHandlerBase::branchesfortree_;
 
-void tBranchHandlerBase::addTreeAndBranch(TTree * t, const TString& branchname){
+void tBranchHandlerBase::addTreeAndBranch(tTreeHandler * t, const TString& branchname){
 
 	if(std::find(branchesfortree_[t].begin(),branchesfortree_[t].end(),branchname) != branchesfortree_[t].end()){
 		throw std::logic_error("tBranchHandlerBase::addTreeAndBranch: Only one handler per branch allowed!");
 	}
 	branchesfortree_[t].push_back(branchname);
-
+	t->associate(this);
 }
-void tBranchHandlerBase::removeTreeAndBranch(TTree * t, const TString& branchname){
-
+void tBranchHandlerBase::removeTreeAndBranch( tTreeHandler * t, const TString& branchname){
 	std::vector<TString> & branches=branchesfortree_[t];
 	std::vector<TString>::iterator it=std::find(branches.begin(),branches.end(),branchname);
 	if(it != branches.end()){
 		branchesfortree_[t].erase(it);
 	}
+	t->removeAsso(this);
 }
 
 

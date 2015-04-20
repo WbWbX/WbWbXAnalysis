@@ -53,7 +53,7 @@ int main(){
 
 	plotterMultiplePlots pl;
 	pl.addPlot(&histocp);
-	//pl.addPlot(&histo);
+	pl.addPlot(&histo);
 	pl.printToPdf("testCorrM");
 
 	return 0;

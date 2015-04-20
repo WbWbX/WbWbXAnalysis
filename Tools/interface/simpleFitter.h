@@ -14,6 +14,8 @@
 #include "Math/Minimizer.h"
 #include <algorithm>
 
+#include "corrMatrix.h"
+
 namespace ztop{
 class histo2D;
 
@@ -140,6 +142,7 @@ public:
 
 	const double& getCorrelationCoefficient(size_t i, size_t j)const;
 	void  fillCorrelationCoefficients(histo2D *)const;
+	corrMatrix getCorrelationMatrix()const;
 
 	/**
 	 * gets the contribution of a to b by fixing the parameter a, repeating minos and returning the changes in errup and errdown
@@ -202,6 +205,7 @@ private:
 	std::vector<TString> paranames_;
 	std::vector<bool> parafixed_;
 
+	//FIXME change to corrMatrix class
 	std::vector< std::vector<double> > paracorrs_;
 
 	std::vector<int> minospars_;

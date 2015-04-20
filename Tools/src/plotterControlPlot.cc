@@ -14,7 +14,9 @@
 
 namespace ztop{
 
-plotterControlPlot::plotterControlPlot(): plotterBase(), divideat_(0), stackp_(0),tempdataentry_(0),invertplots_(false),psmigthresh_(0){
+plotterControlPlot::plotterControlPlot(): plotterBase(), divideat_(0),
+		stackp_(0),tempdataentry_(0),invertplots_(false),psmigthresh_(0),
+		corrm_(0){
 	readStyleFromFileInCMSSW("/src/TtZAnalysis/Tools/styles/controlPlots_standard.txt");
 	gStyle->SetOptStat(0);
 }
@@ -89,6 +91,7 @@ void plotterControlPlot::clear(){
 		if(tempplots_.at(i)) delete tempplots_.at(i);
 	}
 	tempplots_.clear();
+	corrm_=0;
 }
 void plotterControlPlot::clearPlots(){
 	for(size_t i=0;i<tempplots_.size();i++){
@@ -294,6 +297,8 @@ void plotterControlPlot::drawControlPlot(){
 
 		}
 		//make errors (use sumcont)
+		if(corrm_)
+			sumcont.mergeAllErrors("mergederr",false,*corrm_);
 		TG * mcerr=addObject(sumcont.getTGraph(stackp_->getName()+"mcerr_cp",divbbw,false,false,false));
 		mcstyleupper_.applyContainerStyle(mcerr,true);
 
@@ -322,7 +327,10 @@ void plotterControlPlot::drawRatioPlot(){
 	histo1D fullmc=stackp_->getFullMCContainer(); //dont div by bw
 	if(stackp_->is1DUnfold())
 		fullmc=stackp_->getFullMCContainer1DUnfold().getRecoContainer();
+
 	histo1D fullmcerr=fullmc.getRelErrorsContainer();
+	if(corrm_)
+		fullmcerr.mergeAllErrors("merged",false,*corrm_);
 
 	plot * mcerr=new plot(&fullmcerr,false);
 	tempplots_.push_back(mcerr);

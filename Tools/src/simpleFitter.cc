@@ -336,6 +336,17 @@ void simpleFitter::fillCorrelationCoefficients(histo2D * c)const{
 		}
 	}
 }
+corrMatrix simpleFitter::getCorrelationMatrix()const{
+	corrMatrix out(paranames_);
+	for(size_t i=0;i<paracorrs_.size();i++){
+		for(size_t j=0;j<paracorrs_.at(i).size();j++){
+			out.setEntry(j,i,paracorrs_.at(i).at(j));
+		}
+	}
+	return out;
+}
+
+
 /**
  * always returns positive values if no fault
  */

@@ -10,23 +10,27 @@
 
 #include "TString.h"
 #include "TBranch.h"
-#include "TTree.h"
 #include <stdexcept>
 #include <iostream>
 #include <map>
+#include "tTreeHandler.h"
 
 namespace ztop{
 
 
 class tBranchHandlerBase{
 public:
-	tBranchHandlerBase(){}
+	tBranchHandlerBase():gotentry_(false){}
 	~tBranchHandlerBase(){}
+
+	void newEntry(){gotentry_=false;}
+
 protected:
-	void addTreeAndBranch(TTree * t, const TString& branchname);
-	void removeTreeAndBranch(TTree * t, const TString& branchname);
+	void addTreeAndBranch(tTreeHandler * t, const TString& branchname);
+	void removeTreeAndBranch(tTreeHandler * t, const TString& branchname);
 	//avoids double setting
-	static std::map< TTree* ,std::vector<TString> > branchesfortree_;
+	static std::map< tTreeHandler* ,std::vector<TString> > branchesfortree_;
+	bool gotentry_;
 };
 
 
@@ -38,16 +42,19 @@ protected:
 template<class T>
 class tBranchHandler : private tBranchHandlerBase{
 public:
-	tBranchHandler():t_(0),content_(0),copied_(false),branch_(0),branchname_(""),missingbranch_(true){
+	tBranchHandler():tBranchHandlerBase(),t_(0),content_(0),copied_(false),branch_(0),
+	branchname_(""),missingbranch_(true){
 		// doesn't do anything
 		throw std::logic_error("tBranchHandler: default constructor should not be used");
 	}
-	tBranchHandler(TTree * t, const TString& branchname):t_(t),content_(0),copied_(false),branch_(0),branchname_(branchname),missingbranch_(false){
+	tBranchHandler(tTreeHandler * t, const TString& branchname):tBranchHandlerBase(),
+			t_(t),content_(0),copied_(false),
+			branch_(0),branchname_(branchname),missingbranch_(false){
 		if(!t){
 			throw std::runtime_error("tBranchHandler: tree pointer is NULL!");
 		}
 
-		int ret=t->SetBranchAddress(branchname_,&content_,&branch_);
+		int ret=t->tree()->SetBranchAddress(branchname_,&content_,&branch_);
 
 		// Error handling
 
@@ -80,19 +87,15 @@ public:
 		removeTreeAndBranch(t_,branchname_);
 	}
 
-	void getEntry(const Long64_t& entry){
-		realcontent_=T();
-		copied_=false;
-		if(!missingbranch_)
-			branch_->GetEntry(entry);
-	}
-	const T  * content()const{
-		if(copied_) return &realcontent_;
-		if(content_) return content_;
-		else
-			throw std::runtime_error("tBranchHandler::content() pointer NULL!");
-	}
+
+
+	/**
+	 * always copy | safer
+	 */
 	T  * content(){
+		if(!gotentry_){
+			getEntry(t_->currentEntry());
+		}
 		if(content_){
 			if(!copied_){
 				realcontent_=*content_;
@@ -108,7 +111,16 @@ public:
 	static bool allow_missing;
 
 private:
-	TTree *t_;
+
+	void getEntry(const Long64_t& entry){
+		realcontent_=T();
+		copied_=false;
+		if(!missingbranch_)
+			branch_->GetEntry(entry);
+		gotentry_=true;
+	}
+
+	tTreeHandler *t_;
 	T* content_;
 	T realcontent_;
 	bool copied_;

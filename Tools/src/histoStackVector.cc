@@ -89,7 +89,7 @@ void histoStackVector::add(ztop::histo1D & container, TString leg , int color , 
 	for(std::vector<ztop::histoStack>::iterator s=stacks_.begin();s<stacks_.end();++s){
 		if(s->getName() == container.getName()){
 			if(histo1D::debug)
-				std::cout << "containerStackVector::add: adding " << s->getName() << " to existing stack"  <<std::endl;
+				std::cout << "histoStackVector::add: adding " << s->getName() << " to existing stack"  <<std::endl;
 			s->push_back(container, leg, color, norm,legor);
 			found=true;
 			break;
@@ -97,7 +97,7 @@ void histoStackVector::add(ztop::histo1D & container, TString leg , int color , 
 	}
 	if(!found){
 		if(histo1D::debug)
-			std::cout << "containerStackVector::add: creating new stack " << container.getName()  <<std::endl;
+			std::cout << "histoStackVector::add: creating new stack " << container.getName()  <<std::endl;
 		ztop::histoStack newstack(container.getName());
 		newstack.push_back(container, leg, color, norm,legor);
 		stacks_.push_back(newstack);
@@ -108,7 +108,7 @@ void histoStackVector::add(ztop::histo2D & container, TString leg , int color , 
 	for(std::vector<ztop::histoStack>::iterator s=stacks_.begin();s<stacks_.end();++s){
 		if(s->getName() == container.getName()){
 			if(histo1D::debug)
-				std::cout << "containerStackVector::add: adding " << s->getName() << " to existing stack"  <<std::endl;
+				std::cout << "histoStackVector::add: adding " << s->getName() << " to existing stack"  <<std::endl;
 			s->push_back(container, leg, color, norm,legor);
 			found=true;
 			break;
@@ -116,7 +116,7 @@ void histoStackVector::add(ztop::histo2D & container, TString leg , int color , 
 	}
 	if(!found){
 		if(histo1D::debug)
-			std::cout << "containerStackVector::add: creating new stack " << container.getName()  <<std::endl;
+			std::cout << "histoStackVector::add: creating new stack " << container.getName()  <<std::endl;
 		ztop::histoStack newstack(container.getName());
 		newstack.push_back(container, leg, color, norm,legor);
 		stacks_.push_back(newstack);
@@ -127,7 +127,7 @@ void histoStackVector::add(ztop::histo1DUnfold & container, TString leg , int co
 	for(std::vector<ztop::histoStack>::iterator s=stacks_.begin();s<stacks_.end();++s){
 		if(s->getName() == container.getName()){
 			if(histo1D::debug)
-				std::cout << "containerStackVector::add: adding " << s->getName() << " to existing stack"  <<std::endl;
+				std::cout << "histoStackVector::add: adding " << s->getName() << " to existing stack"  <<std::endl;
 			s->push_back(container, leg, color, norm,legor);
 			found=true;
 			break;
@@ -135,7 +135,7 @@ void histoStackVector::add(ztop::histo1DUnfold & container, TString leg , int co
 	}
 	if(!found){
 		if(histo1D::debug)
-			std::cout << "containerStackVector::add: creating new stack " << container.getName()  <<std::endl;
+			std::cout << "histoStackVector::add: creating new stack " << container.getName()  <<std::endl;
 		ztop::histoStack newstack(container.getName());
 		newstack.push_back(container, leg, color, norm,legor);
 		stacks_.push_back(newstack);
@@ -185,7 +185,7 @@ const ztop::histoStack& histoStackVector::getStack(const TString& name,size_t st
 			return stacks_.at(startidx);
 		}
 	}
-std::cout << "searching further..." <<std::endl;
+	std::cout << "searching further..." <<std::endl;
 	std::vector<ztop::histoStack>::const_iterator it=stacks_.end();
 	bool abort = false;
 #pragma omp parallel for
@@ -193,7 +193,7 @@ std::cout << "searching further..." <<std::endl;
 #pragma omp flush (abort)
 		if (!abort) {
 			if(name == s->getName()){
-#pragma omp critical (containerStackVector_searchstack_const)
+#pragma omp critical (histoStackVector_searchstack_const)
 				{
 					it=s;
 					abort=true;
@@ -203,7 +203,10 @@ std::cout << "searching further..." <<std::endl;
 		}
 	}
 	if(it == stacks_.end()){
-		throw std::out_of_range("containerStackVector::getStack: stack not found");
+		std::string errstr="histoStackVector::getStack: stack ";
+		errstr+=name.Data();
+		errstr+=" not found";
+		throw std::out_of_range(errstr);
 	}
 	return *it;
 }
@@ -221,7 +224,7 @@ ztop::histoStack& histoStackVector::getStack(const TString& name,size_t startidx
 #pragma omp flush (abort)
 		if (!abort) {
 			if(name == s->getName()){
-#pragma omp critical (containerStackVector_searchstack)
+#pragma omp critical (histoStackVector_searchstack)
 				{
 					it=s;
 					abort=true;
@@ -231,7 +234,7 @@ ztop::histoStack& histoStackVector::getStack(const TString& name,size_t startidx
 		}
 	}
 	if(it == stacks_.end()){
-		throw std::out_of_range("containerStackVector::getStack: stack not found");
+		throw std::out_of_range("histoStackVector::getStack: stack not found");
 	}
 	return *it;
 }
@@ -277,7 +280,7 @@ void histoStackVector::addRelSystematicsFrom(const ztop::histoStackVector& stack
 			const histoStack & stack=stackvec.getStack(istack->getName(),istack-stacks_.begin());
 			istack->addRelSystematicsFrom(stack,ignorestat,strict);
 		}catch(std::exception& e){
-			std::cout << "containerStackVector::addRelSystematicsFrom: Stack " << istack->getName() << " not found." <<std::endl;
+			std::cout << "histoStackVector::addRelSystematicsFrom: Stack " << istack->getName() << " not found." <<std::endl;
 			std::cout << e.what()<<std::endl;
 		}
 	}
@@ -316,7 +319,7 @@ void histoStackVector::multiplyNorm(TString legendname, double multi, TString st
 
 void histoStackVector::multiplyNorms(TString legendname, std::vector<double> scalefactors, std::vector<TString> identifier,bool showmessages){
 	if((identifier.size() != scalefactors.size())){
-		std::cout << "containerStackVector::multiplyNorms: identifiers and scalefactors must be same size!" << std::endl;
+		std::cout << "histoStackVector::multiplyNorms: identifiers and scalefactors must be same size!" << std::endl;
 	}
 	else{
 		unsigned int count=0;
@@ -330,8 +333,8 @@ void histoStackVector::multiplyNorms(TString legendname, std::vector<double> sca
 				}
 			}
 		}
-		if(count < identifier.size()) std::cout << "containerStackVector::multiplyNorms: warning: not all identifiers found!" << std::endl;
-		else if(count > identifier.size() && showmessages) std::cout << "containerStackVector::multiplyNorms: warning: identifiers where ambiguous! Scaled more than one stack per identifier (intended?)" << std::endl;
+		if(count < identifier.size()) std::cout << "histoStackVector::multiplyNorms: warning: not all identifiers found!" << std::endl;
+		else if(count > identifier.size() && showmessages) std::cout << "histoStackVector::multiplyNorms: warning: identifiers where ambiguous! Scaled more than one stack per identifier (intended?)" << std::endl;
 	}
 }
 
@@ -351,7 +354,7 @@ void histoStackVector::addPseudoData(TRandom3 * rand){
 		hasdata=false;
 	}
 	if(hasdata){
-		std::cout << "containerStackVector::addPseudoData: Warning: Trying to add pseudo data to already existing data." <<std::endl;
+		std::cout << "histoStackVector::addPseudoData: Warning: Trying to add pseudo data to already existing data." <<std::endl;
 	}
 	for(size_t i=0;i<stacks_.size();i++){
 
@@ -383,7 +386,7 @@ void histoStackVector::addPseudoData(TRandom3 * rand){
 
 void histoStackVector::writeAllToTFile(TString filename, bool recreate, bool onlydata,TString treename){
 	if(debug)
-		std::cout << "containerStackVector::writeAllToTFile(TString filename, bool recreate, TString treename)" << std::endl;
+		std::cout << "histoStackVector::writeAllToTFile(TString filename, bool recreate, TString treename)" << std::endl;
 
 	AutoLibraryLoader::enable();
 	TH1::AddDirectory(false);
@@ -407,35 +410,35 @@ void histoStackVector::writeAllToTFile(TString filename, bool recreate, bool onl
 	}
 	if(t){
 		if(debug)
-			std::cout << "containerStackVector::writeAllToTFile: created/opened file and tree" << std::endl;
+			std::cout << "histoStackVector::writeAllToTFile: created/opened file and tree" << std::endl;
 	}
 	else{
-		std::cout << "containerStackVector::writeAllToTFile: creating/opening tree failed" << std::endl;
+		std::cout << "histoStackVector::writeAllToTFile: creating/opening tree failed" << std::endl;
 	}
 
 
-	if(t->GetBranch("containerStackVectors")){ //branch does  exist
-		if(debug) std::cout << "containerStackVector::writeAllToTFile: opened branch" << std::endl;
+	if(t->GetBranch("histoStackVectors")){ //branch does  exist
+		if(debug) std::cout << "histoStackVector::writeAllToTFile: opened branch" << std::endl;
 		bool temp=csv_makelist;
 		csv_makelist=false;
 		histoStackVector * csv = this;
-		t->SetBranchAddress("containerStackVectors",&csv);
+		t->SetBranchAddress("histoStackVectors",&csv);
 		csv_makelist=temp;
 	}
 	else{
-		t->Branch("containerStackVectors",this);
-		if(debug) std::cout << "containerStackVector::writeAllToTFile: added branch" << std::endl;
+		t->Branch("histoStackVectors",this);
+		if(debug) std::cout << "histoStackVector::writeAllToTFile: added branch" << std::endl;
 	}
 	if(debug)
-		std::cout << "containerStackVector::writeAllToTFile: got branch" << std::endl;
+		std::cout << "histoStackVector::writeAllToTFile: got branch" << std::endl;
 
 	t->Fill();
 	if(debug)
-		std::cout << "containerStackVector::writeAllToTFile: filled branch" << std::endl;
+		std::cout << "histoStackVector::writeAllToTFile: filled branch" << std::endl;
 
 	t->Write("",TObject::kOverwrite);
 	if(debug)
-		std::cout << "containerStackVector::writeAllToTFile: written branch" << std::endl;
+		std::cout << "histoStackVector::writeAllToTFile: written branch" << std::endl;
 
 	delete t;
 
@@ -448,7 +451,7 @@ void histoStackVector::writeAllToTFile(TString filename, bool recreate, bool onl
 		//bool batch=histoStack::batchmode;
 		//histoStack::batchmode=true;
 		if(debug)
-			std::cout << "containerStackVector::writeAllToTFile: preparing plots" << std::endl;
+			std::cout << "histoStackVector::writeAllToTFile: preparing plots" << std::endl;
 
 		TDirectory * d = f->mkdir(name + "_ratio",name + "_ratio");
 		d->cd();
@@ -690,7 +693,7 @@ void histoStackVector::writeAllToTFile(TString filename, bool recreate, bool onl
 			}
 		}
 		if(debug)
-			std::cout << "containerStackVector::writeAllToTFile: ratio plots drawn" << std::endl;
+			std::cout << "histoStackVector::writeAllToTFile: ratio plots drawn" << std::endl;
 
 
 		f->Close();
@@ -698,7 +701,7 @@ void histoStackVector::writeAllToTFile(TString filename, bool recreate, bool onl
 
 	}//not onlydata done
 	if(debug)
-		std::cout << "containerStackVector::writeAllToTFile: finished" << std::endl;
+		std::cout << "histoStackVector::writeAllToTFile: finished" << std::endl;
 
 }
 
@@ -715,7 +718,7 @@ void histoStackVector::printAll(TString namestartswith,TString directory,TString
 				if(c){
 					TString newname=stack->getName();
 					newname.ReplaceAll(" ","_");
-#pragma omp critical (containerStackVector_printAll)
+#pragma omp critical (histoStackVector_printAll)
 					{
 						c->Print(directory+newname+extension);
 						stack->cleanMem();
@@ -745,16 +748,16 @@ void histoStackVector::writeAllToTFile(TFile * f, TString treename){
 	else{
 		t = new TTree(treename,treename,treesplitlevel);
 	}
-	if(t->GetBranch("containerStackVectors")){ //branch does exist
+	if(t->GetBranch("histoStackVectors")){ //branch does exist
 		bool temp=csv_makelist;
 		csv_makelist=false;
 		histoStackVector * csv = this;
-		t->SetBranchAddress("containerStackVectors",&csv);
+		t->SetBranchAddress("histoStackVectors",&csv);
 		csv_makelist=temp;
 	}
 	else{
-		t->Branch("containerStackVectors",this);
-		if(debug)std::cout << "containerStackVector::writeAllToTFile: added branch" << std::endl;
+		t->Branch("histoStackVectors",this);
+		if(debug)std::cout << "histoStackVector::writeAllToTFile: added branch" << std::endl;
 	}
 	t->Fill();
 	t->Write("",TObject::kOverwrite);
@@ -770,21 +773,21 @@ void histoStackVector::loadFromTree(TTree * t, const TString& name){
 }
 
 histoStackVector * histoStackVector::getFromTree(TTree * t, const TString& name){
-#pragma omp critical (containerStackVector_getFromTree)
+#pragma omp critical (histoStackVector_getFromTree)
 	{
 		AutoLibraryLoader::enable();
 		if(!t || t->IsZombie()){
-			throw std::runtime_error("containerStackVector::loadFromTree: tree not ok");
+			throw std::runtime_error("histoStackVector::loadFromTree: tree not ok");
 		}
 		ztop::histoStackVector * cuftemp=0; //new histoStackVector(); //shouldn't make sense.. but seems to decrease TBasket memleaks
-		if(!t->GetBranch("containerStackVectors")){
-			throw std::runtime_error("containerStackVector::loadFromTree: branch containerStackVectors not found");
+		if(!t->GetBranch("histoStackVectors")){
+			throw std::runtime_error("histoStackVector::loadFromTree: branch histoStackVectors not found");
 		}
 		bool found=false;
 		size_t count=0;
-		t->SetBranchAddress("containerStackVectors", &cuftemp);
+		t->SetBranchAddress("histoStackVectors", &cuftemp);
 		if(name == "*" && t->GetEntries()>1){
-			throw std::runtime_error("containerStackVector::getFromTree: No csv name specified but more than one object in file");
+			throw std::runtime_error("histoStackVector::getFromTree: No csv name specified but more than one object in file");
 		}
 		for(float n=0;n<t->GetEntries();n++){
 			t->GetEntry(n);
@@ -797,10 +800,10 @@ histoStackVector * histoStackVector::getFromTree(TTree * t, const TString& name)
 		}
 		delete cuftemp;
 		if(!found){
-			throw std::runtime_error("containerStackVector::loadFromTree: no containerStackVector with name not found");
+			throw std::runtime_error("histoStackVector::loadFromTree: no histoStackVector with name not found");
 		}
 		if(count>1){
-			std::cout << "containerStackVector::loadFromTree: found more than one object with name "
+			std::cout << "histoStackVector::loadFromTree: found more than one object with name "
 					<< getName() << ", took the first one." << std::endl;
 		}
 	}
@@ -809,7 +812,7 @@ histoStackVector * histoStackVector::getFromTree(TTree * t, const TString& name)
 }
 void histoStackVector::loadFromTFile(TFile * f,const TString& csvname,TString treename){
 	if(!f || f->IsZombie()){
-		throw std::runtime_error("containerStackVector::loadFromTFile: file not ok.");
+		throw std::runtime_error("histoStackVector::loadFromTFile: file not ok.");
 	}
 	f->cd();
 	TTree * ttemp = (TTree*)f->Get(treename);
@@ -817,7 +820,7 @@ void histoStackVector::loadFromTFile(TFile * f,const TString& csvname,TString tr
 	delete ttemp;
 }
 void histoStackVector::loadFromTFile(const TString& filename,const TString& csvname,TString treename){
-#pragma omp critical (containerStackVector_loadFromTFile)
+#pragma omp critical (histoStackVector_loadFromTFile)
 	{
 		AutoLibraryLoader::enable(); //to avoid warnings
 		TFile * ftemp=new TFile(filename,"read");
@@ -865,7 +868,7 @@ void histoStackVector::readFromFile(const std::string& filename){
 void histoStackVector::listAllInTree(TTree * t){
 	AutoLibraryLoader::enable();
 	histoStackVector * csv=0;
-	t->SetBranchAddress("containerStackVectors", &csv);
+	t->SetBranchAddress("histoStackVectors", &csv);
 	for(float n=0;n<t->GetEntries();n++){
 		t->GetEntry(n);
 		std::cout << csv->getName() << std::endl;

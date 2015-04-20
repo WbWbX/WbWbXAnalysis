@@ -1,0 +1,32 @@
+
+# this is just a list of plots that are plotted pre/post fit as control ditributions
+# they will only include: data, signal, background (merged) but will incorporate all 
+# correlations
+#
+# It is essential to provide input plots divided into nbjets categories
+# categories can be merged in a second step (see format)
+# an optional style file can be specified
+#
+# comments: # 
+# format: 
+#    b-jetcat: plotname (: opt plotformatfile)
+#  or
+#    b-jetcat: plotname = plot1 + plot2 + ... (: opt plotformatfile)  FIXME!
+#  the latter if (same binned) plots should be merged to one afterwards
+#  here, if categories are merged, b-jetcat must be set to 3
+#
+# keep in mind that bjet category 0 also includes 3+ bjets
+#  
+
+
+1: total 0,1 b-jets step 8
+2: total 1,2 b-jets step 8
+
+1: mll 1 b-jets step 8
+2: mll 2 b-jets step 8
+
+1: lead lep pt 1 b-jets step 8
+2: lead lep pt 2 b-jets step 8
+
+1: sec lep pt 1 b-jets step 8
+2: sec lep pt 2 b-jets step 8

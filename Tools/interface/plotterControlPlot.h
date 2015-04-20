@@ -9,6 +9,7 @@
 #define PLOTTERCONTROLPLOT_H_
 
 #include "plotterBase.h"
+#include "corrMatrix.h"
 
 class TLegend;
 namespace ztop{
@@ -42,6 +43,7 @@ public:
 
 
     void setStack(const histoStack *s){stackp_=s;}
+    void associateCorrelationMatrix(const corrMatrix& m){corrm_=&m;}
 
     void clear();
     void clearPlots();
@@ -78,6 +80,8 @@ private:
     bool invertplots_;
 
     float psmigthresh_;
+
+    const corrMatrix* corrm_;
 
     void drawControlPlot();
     void drawRatioPlot();

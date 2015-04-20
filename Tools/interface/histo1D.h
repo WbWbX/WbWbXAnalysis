@@ -143,6 +143,9 @@ public:
 	void mergePartialVariations(const TString& identifier,bool linearly=false,bool strictpartialID=true);
 	/**
 	 * if correlation matrix is given, linearly is ignored
+	 * This is the ONLY way to take into account correlations when looking at the total error.
+	 * EVERY OTHER function just returns total errors that assume no correlations between individual
+	 * systematic variations!
 	 */
 	void mergeAllErrors(const TString & mergedname,bool linearly=false,const corrMatrix& corr=corrMatrix());
 	/**

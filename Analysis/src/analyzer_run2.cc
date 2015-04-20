@@ -289,75 +289,9 @@ void  analyzer_run2::analyze(size_t anaid){
 	if(testmode_)
 		std::cout << "testmode("<< anaid << "): check input file "<<inputfile << " (isMC)"<< isMC << std::endl;
 
-	TFile *f;
-	if(!fileExists((datasetdirectory_+inputfile).Data())){
-		std::cout << datasetdirectory_+inputfile << " not found!!" << std::endl;
-		reportError(-1,anaid);
-		return;
-	}
-	else{
-		f=TFile::Open(datasetdirectory_+inputfile);
-	}
+
 
 	NTFullEvent evt;
-
-	////////////////////  configure discriminator factories here  ////////////////////
-	/*
-	TString factname="topLH_"+channel_+"_"+energy_+"_"+topmass_;
-	discriminatorFactory::c_makelist=false; //now will be ignored in output
-	discriminatorFactory toplikelihood(factname.Data());
-
-	discriminatorFactory::c_makelist=false;
-
-	if(usediscr_){
-		toplikelihood.readFromTFile(discrInput_,toplikelihood.getIdentifier());
-
-	}
-	else{
-		toplikelihood.setNBins(40);
-		toplikelihood.setStep(7); //includes met for ee/mumu
-	}
-
-	toplikelihood.setUseLikelihoods(usediscr_);
-
-	toplikelihood.setSaveCorrelationPlots(false);
-
-	toplikelihood.addVariable(&evt.lhi_dphillj,"#Delta#phi(ll,j)",0,M_PI);
-	toplikelihood.addVariable(&evt.lhi_cosleplepangle,"#cos#theta_{ll}",-1.,1.);
-	// if(!usediscr_)
-	//      toplikelihood.addVariable(&evt.lhi_leadjetbtag,"D_{b}^{jet1}",-1,1);
-	toplikelihood.addVariable(&evt.lhi_sumdphimetl,"#Delta#phi(met,l_{1})+#Delta#phi(met,l_{2})",0,2*M_PI);
-	//  toplikelihood.addVariable(&evt.lhi_seljetmulti,"N_{jets}",-0.5,4.5);
-	//  toplikelihood.addVariable(&evt.lhi_selbjetmulti,"N_{b-jets}",-0.5,4.5);
-	toplikelihood.addVariable(&evt.lhi_leadleppt,"p_{T}^{1st lep}",0,150);
-	toplikelihood.addVariable(&evt.lhi_secleadleppt,"p_{T}^{2nd lep}",0,150);
-	toplikelihood.addVariable(&evt.lhi_leadlepeta,"#eta^{1st lep}",-2.4,2.4);
-	toplikelihood.addVariable(&evt.lhi_secleadlepeta,"#eta^{2nd lep}",-2.4,2.4);
-	toplikelihood.addVariable(&evt.lhi_leadlepphi,"#phi^{1st lep}",-M_PI,M_PI);
-	toplikelihood.addVariable(&evt.lhi_secleadlepphi,"#phi^{2nd lep}",-M_PI,M_PI);
-	//  toplikelihood.addVariable(&evt.lhi_leadjetpt,"p_{T}^{1st jet}",0,150);
-	toplikelihood.addVariable(&evt.lhi_mll,"m_{ll}",0.,300);
-	// toplikelihood.addVariable(&evt.lhi_ptllj,"p_{T}(llj) [GeV]",50,400);
-
-
-
-	//   toplikelihood.addVariable(&evt.lhi_cosllvsetafirstlep,"cos#theta vs #eta_{l1}",-4,2);
-	//   toplikelihood.addVariable(&evt.lhi_etafirstvsetaseclep,"#eta_{l1} vs #eta_{l2}",-3,3);
-	//  toplikelihood.addVariable(&evt.lhi_deltaphileps,"#Delta#phi(l_{1},l_{2})",-2*M_PI,2*M_PI);
-	//  toplikelihood.addVariable(&evt.lhi_coslepanglevsmll,"cos#theta vs m_{ll}",-1,1);
-	//  toplikelihood.addVariable(&evt.lhi_mllvssumdphimetl,"m_{ll} vs #Delta#phi(met,l_{1})+#Delta#phi(met,l_{2})",-10,0.5);
-
-
-	if(usediscr_){
-		toplikelihood.setSystematics(getSyst());
-	}
-	else{
-		toplikelihood.setSystematics("nominal");
-	}
-
-	 */
-
-	/////////////////////////////////////////////////////////////////////////////////
 
 	//just a test
 
@@ -400,14 +334,23 @@ void  analyzer_run2::analyze(size_t anaid){
 	mlbmtplots_step8.setEvent(evt);
 	xsecfitplots_step8.setEvent(evt);
 
-
+	TFile *f;
+	if(!fileExists((datasetdirectory_+inputfile).Data())){
+		std::cout << datasetdirectory_+inputfile << " not found!!" << std::endl;
+		reportError(-1,anaid);
+		return;
+	}
+	else{
+		f=TFile::Open(datasetdirectory_+inputfile);
+	}
 	//get normalization - switch on or off pdf weighter before!!!
 	double norm=createNormalizationInfo(f,isMC,anaid);
 	if(testmode_)
 		std::cout << "testmode("<< anaid << "): multiplying norm with "<< normmultiplier <<" file: " << inputfile<< std::endl;
 	norm*= normmultiplier;
 	/////////////////////////// configure scalefactors ////
-
+	f->Close();
+	delete f;
 
 	//init b-tag scale factor utility
 	if(testmode_)
@@ -472,7 +415,11 @@ void  analyzer_run2::analyze(size_t anaid){
 	 * Set branches
 	 * the handler is only a small wrapper
 	 */
-	TTree * t = (TTree*) f->Get("PFTree/PFTree");
+	//TTree * t = (TTree*) f->Get("PFTree/PFTree");
+	tTreeHandler tree( datasetdirectory_+inputfile ,"PFTree/PFTree");
+	tTreeHandler *t =&tree;
+
+
 
 	tBranchHandler<std::vector<bool> >     b_TriggerBools(t,"TriggerBools");
 	tBranchHandler<vector<NTElectron> >    b_Electrons(t,electrontype);
@@ -489,7 +436,7 @@ void  analyzer_run2::analyze(size_t anaid){
 	tBranchHandler<vector<NTGenParticle> > b_GenLeptons1(t,"NTGenLeptons1");
 	tBranchHandler<vector<NTGenJet> >      b_GenJets(t,"NTGenJets");
 	tBranchHandler<vector<NTGenParticle> > b_GenNeutrinos(t,"NTGenNeutrinos");
-	
+
 	//additional weights
 	std::vector<tBranchHandler<NTWeight>*> weightbranches;
 	tBranchHandler<NTWeight>::allow_missing =true;
@@ -508,9 +455,9 @@ void  analyzer_run2::analyze(size_t anaid){
 	}
 	//agrohsje debugging ntevt 
 	int ntevt;
-	t->SetBranchAddress("ntevt",&ntevt); 
+	t->tree()->SetBranchAddress("ntevt",&ntevt);
 	//tBranchHandler<int> b_ntevt(t,"ntevt");
-	
+
 	//some helpers
 	double sel_step[]={0,0,0,0,0,0,0,0,0};
 	float count_samesign=0;
@@ -518,10 +465,10 @@ void  analyzer_run2::analyze(size_t anaid){
 	if(!testmode_){
 		// this enables some caching while reading the tree. Speeds up batch mode
 		// significantly!
-		setCacheProperties(t,datasetdirectory_+inputfile);
+		t->setPreCache();
 	}
 
-	Long64_t nEntries=t->GetEntries();
+	Long64_t nEntries=t->entries();
 	if(norm==0) nEntries=0; //skip for norm0
 	if(testmode_ && ! tickoncemode_) nEntries*=0.08;
 
@@ -585,8 +532,8 @@ void  analyzer_run2::analyze(size_t anaid){
 
 	for(Long64_t entry=firstentry;entry<nEntries;entry++){
 
-	    //agrohsje debugging ntevt 
-	    t->GetEntry(entry);
+		//agrohsje debugging ntevt
+		t->setEntry(entry);
 
 		//for fakedata
 		if(skipregion){
@@ -599,7 +546,7 @@ void  analyzer_run2::analyze(size_t anaid){
 				continue;
 		}
 
-		t->LoadTree(entry);
+
 
 		////////////////////////////////////////////////////
 		////////////////////  INIT EVENT ///////////////////
@@ -615,7 +562,7 @@ void  analyzer_run2::analyze(size_t anaid){
 		//reports current status to parent
 		reportStatus(entry,nEntries,anaid);
 
-		b_Event.getEntry(entry);
+
 		float puweight=1;
 		if (isMC) puweight = getPUReweighter()->getPUweight(b_Event.content()->truePU());
 		if(apllweightsone) puweight=1;
@@ -629,7 +576,7 @@ void  analyzer_run2::analyze(size_t anaid){
 		if(apllweightsone) puweight=1;
 		//agrohsje loop over additional weightbranches 
 		for(size_t i=0;i<weightbranches.size();i++){
-			weightbranches.at(i)->getEntry(entry);
+			//weightbranches.at(i)->getEntry(entry);
 			mcreweighters.at(i).setMCWeight(weightbranches.at(i)->content()->getWeight());
 			mcreweighters.at(i).reWeight(puweight);
 			if(apllweightsone) puweight=1;		
@@ -659,16 +606,6 @@ void  analyzer_run2::analyze(size_t anaid){
 		evt.genleptons3=&genleptons3;
 		evt.genjets=&genjets;
 
-
-		//move back to geninfo part, only here for testing
-		b_GenLeptons3.getEntry(entry);
-		b_GenTops.getEntry(entry);
-		b_GenWs.getEntry(entry);
-		b_GenBs.getEntry(entry);
-		b_GenBsRad.getEntry(entry);
-		b_GenBHadrons.getEntry(entry);
-		b_GenJets.getEntry(entry);
-		b_GenLeptons1.getEntry(entry);
 
 
 		if(isMC){
@@ -721,7 +658,7 @@ void  analyzer_run2::analyze(size_t anaid){
 		/*
 		 *  Trigger
 		 */
-		b_TriggerBools.getEntry(entry);
+
 		if(testmode_ && entry==0)
 			std::cout << "testmode("<< anaid << "): got trigger boolians" << std::endl;
 		//agrohsje uncomment for time being if(!checkTrigger(b_TriggerBools.content(),b_Event.content(), isMC,anaid)) continue;
@@ -730,7 +667,7 @@ void  analyzer_run2::analyze(size_t anaid){
 		/*
 		 * Muons
 		 */
-		b_Muons.getEntry(entry);
+
 
 
 		vector<NTLepton *> allleps;
@@ -762,25 +699,25 @@ void  analyzer_run2::analyze(size_t anaid){
 				 <<" fabs(muon->d0V()) "<<fabs(muon->d0V())
 				 <<" fabs(muon->isoVal()) "<<fabs(muon->isoVal())
 				 <<std::endl;
-			*/
+			 */
 			if(muon->pt() < lepptthresh)       continue;
 			if(fabs(muon->eta())>2.4) continue;
 			kinmuons << &(b_Muons.content()->at(i));
 
 			//tight muon selection: https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideMuonId#Tight_Muon
 			//agrohsje isPF requirement already at ntuple level 
-			
+
 			if(muon->isGlobal()
-			   && muon->matchedStations()>1 
-			   && muon->pixHits()>0
-			   && muon->muonHits()>0
-			   && muon->normChi2()<10.
-			   && muon->trkHits()>5			   
-			   && fabs(muon->d0V())<0.2
-			   && fabs(muon->dzV())<0.5)
-			    {
+					&& muon->matchedStations()>1
+					&& muon->pixHits()>0
+					&& muon->muonHits()>0
+					&& muon->normChi2()<10.
+					&& muon->trkHits()>5
+					&& fabs(muon->d0V())<0.2
+					&& fabs(muon->dzV())<0.5)
+			{
 				idmuons <<  &(b_Muons.content()->at(i));
-			    }
+			}
 
 		}
 
@@ -796,7 +733,7 @@ void  analyzer_run2::analyze(size_t anaid){
 		 * Electrons
 		 */
 
-		b_Electrons.getEntry(entry);
+
 
 
 		vector<NTElectron *> kinelectrons,idelectrons,isoelectrons;
@@ -809,7 +746,7 @@ void  analyzer_run2::analyze(size_t anaid){
 			float ensf=1;
 			if(isMC)
 				ensf=getElecEnergySF()->getScalefactor(elec->eta());
-			
+
 			elec->setECalP4(elec->ECalP4() * ensf);
 			elec->setP4(elec->ECalP4() * ensf); //both the same now!!
 
@@ -824,10 +761,10 @@ void  analyzer_run2::analyze(size_t anaid){
 			if(suclueta > 1.4442 && suclueta < 1.5660) continue; //transistion region
 			kinelectrons  << elec;
 			if(elec->storedId() > 0.9){  ////agrohsje 1 or 0 should work 
-			    idelectrons <<  elec;
-			    //iso already included in ID
-			    isoelectrons <<  elec;
-			    isoleptons << elec;
+				idelectrons <<  elec;
+				//iso already included in ID
+				isoelectrons <<  elec;
+				isoleptons << elec;
 			}
 		}
 
@@ -852,11 +789,11 @@ void  analyzer_run2::analyze(size_t anaid){
 
 		//////////two ID leptons STEP 1///////////////////////////////
 		step++;
-		
+
 		if(b_ee_ && idelectrons.size() < 2) continue;
 		if(b_mumu_ && (idmuons.size() < 2 )) continue;
 		if(b_emu_ && (idmuons.size() + idelectrons.size() < 2 )) continue;
-		
+
 		sel_step[1]+=puweight;
 		plots.makeControlPlots(step);
 		zplots.makeControlPlots(step);
@@ -865,7 +802,7 @@ void  analyzer_run2::analyze(size_t anaid){
 
 		//////// require two iso leptons  STEP 2  //////////////////////////
 		step++;
-		
+
 		if(b_ee_ && isoelectrons.size() < 2) continue;
 		if(b_mumu_ && isomuons.size() < 2 ) continue;
 		if(b_emu_ && isomuons.size() + isoelectrons.size() < 2) continue;
@@ -980,7 +917,7 @@ void  analyzer_run2::analyze(size_t anaid){
 
 		// create jec jets for met and ID jets
 		// create ID Jets and correct JER
-		b_Jets.getEntry(entry);
+
 
 
 
@@ -1031,7 +968,7 @@ void  analyzer_run2::analyze(size_t anaid){
 
 
 
-		b_Met.getEntry(entry);
+
 
 
 

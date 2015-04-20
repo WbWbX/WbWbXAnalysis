@@ -151,8 +151,10 @@ invokeApplication(){
 				for(size_t nbjet=0;nbjet<3;nbjet++){
 					for(size_t ndts=0;ndts<ndatasets;ndts++){
 						double dummychi2;
-						histoStack stack=mainfitter.produceStack(false,nbjet,ndts,dummychi2);
+						corrMatrix m;
+						histoStack stack=mainfitter.produceStack(false,nbjet,ndts,dummychi2,m);
 						pl.setStack(&stack);
+						pl.associateCorrelationMatrix(m);
 						pl.draw();
 						cvv.Print(outfile+"_pd"+nbjet+ "_" + mainfitter.datasetName(ndts)+ ".pdf");
 					}
@@ -233,7 +235,9 @@ invokeApplication(){
 		for(size_t ndts=0;ndts<mainfitter.nDatasets();ndts++){
 			for(size_t nbjet=0;nbjet<3;nbjet++){
 				double chi2=0;
-				histoStack stack=mainfitter.produceStack(false,nbjet,ndts,chi2);
+				corrMatrix m;
+				histoStack stack=mainfitter.produceStack(false,nbjet,ndts,chi2,m);
+				pl.associateCorrelationMatrix(m);
 				pl.setStack(&stack);
 				textBoxes tb;
 				tb.add(0.7,0.73,"#chi^{2}="+toTString(chi2));
@@ -241,8 +245,9 @@ invokeApplication(){
 				tb.drawToPad(c.cd(1),true);
 				c.Print(outfile+".pdf");
 				tb.clear();
-				stack=mainfitter.produceStack(true,nbjet,ndts,chi2);
+				stack=mainfitter.produceStack(true,nbjet,ndts,chi2,m);
 				pl.setStack(&stack);
+				pl.associateCorrelationMatrix(m);
 				tb.add(0.7,0.73,"#chi^{2}="+toTString(chi2));
 				pl.draw();
 				tb.drawToPad(c.cd(1),true);
@@ -332,9 +337,22 @@ invokeApplication(){
 		f->Close();
 		delete f;
 
+		std::cout << "making additional plots..." <<std::endl;
 		//make some plots with and without constraints
 		//test area
-		if(mainfitter.nDatasets()>=1){
+		for(size_t ndts=0;ndts<mainfitter.nDatasets();ndts++){
+			std::string infile="emu_";
+			infile+=mainfitter.datasetName(ndts).Data();
+			infile+="_172.5_nominal_syst.ztop";
+			std::string dir=outfile.Data();
+			dir+="_";
+			dir+=mainfitter.datasetName(ndts).Data();
+			system(("mkdir -p "+dir).data());
+			dir+="/";
+			mainfitter.printAdditionalControlplots(infile,cmsswbase+"/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/prefit_postfit_plots.txt",dir);
+
+
+			/*
 			histoStackVector  hsv;hsv.readFromFile("emu_8TeV_172.5_nominal_syst.ztop");
 			histoStack stack=hsv.getStack("third jet pt 2,3 b-jets step 8");
 			stack=mainfitter.applyParametersToStack(stack,2,0,false);
@@ -349,6 +367,7 @@ invokeApplication(){
 			plctr.setStack(&stack);
 			plctr.draw();
 			cvs.Print("testplot.pdf)");
+			*/
 		}
 	}
 	return 0;

@@ -291,77 +291,10 @@ void  analyzer_run1::analyze(size_t anaid){
 	if(testmode_)
 		std::cout << "testmode("<< anaid << "): check input file "<<inputfile << " (isMC)"<< isMC << std::endl;
 
-	TFile *f;
-	if(!fileExists((datasetdirectory_+inputfile).Data())){
-		std::cout << datasetdirectory_+inputfile << " not found!!" << std::endl;
-		reportError(-1,anaid);
-		return;
-	}
-	else{
-		f=TFile::Open(datasetdirectory_+inputfile);
-	}
+
 
 	NTFullEvent evt;
 
-	////////////////////  configure discriminator factories here  ////////////////////
-	/*
-	TString factname="topLH_"+channel_+"_"+energy_+"_"+topmass_;
-	discriminatorFactory::c_makelist=false; //now will be ignored in output
-	discriminatorFactory toplikelihood(factname.Data());
-
-	discriminatorFactory::c_makelist=false;
-
-	if(usediscr_){
-		toplikelihood.readFromTFile(discrInput_,toplikelihood.getIdentifier());
-
-	}
-	else{
-		toplikelihood.setNBins(40);
-		toplikelihood.setStep(7); //includes met for ee/mumu
-	}
-
-	toplikelihood.setUseLikelihoods(usediscr_);
-
-	toplikelihood.setSaveCorrelationPlots(false);
-
-	toplikelihood.addVariable(&evt.lhi_dphillj,"#Delta#phi(ll,j)",0,M_PI);
-	toplikelihood.addVariable(&evt.lhi_cosleplepangle,"#cos#theta_{ll}",-1.,1.);
-	// if(!usediscr_)
-	//      toplikelihood.addVariable(&evt.lhi_leadjetbtag,"D_{b}^{jet1}",-1,1);
-	toplikelihood.addVariable(&evt.lhi_sumdphimetl,"#Delta#phi(met,l_{1})+#Delta#phi(met,l_{2})",0,2*M_PI);
-	//  toplikelihood.addVariable(&evt.lhi_seljetmulti,"N_{jets}",-0.5,4.5);
-	//  toplikelihood.addVariable(&evt.lhi_selbjetmulti,"N_{b-jets}",-0.5,4.5);
-	toplikelihood.addVariable(&evt.lhi_leadleppt,"p_{T}^{1st lep}",0,150);
-	toplikelihood.addVariable(&evt.lhi_secleadleppt,"p_{T}^{2nd lep}",0,150);
-	toplikelihood.addVariable(&evt.lhi_leadlepeta,"#eta^{1st lep}",-2.4,2.4);
-	toplikelihood.addVariable(&evt.lhi_secleadlepeta,"#eta^{2nd lep}",-2.4,2.4);
-	toplikelihood.addVariable(&evt.lhi_leadlepphi,"#phi^{1st lep}",-M_PI,M_PI);
-	toplikelihood.addVariable(&evt.lhi_secleadlepphi,"#phi^{2nd lep}",-M_PI,M_PI);
-	//  toplikelihood.addVariable(&evt.lhi_leadjetpt,"p_{T}^{1st jet}",0,150);
-	toplikelihood.addVariable(&evt.lhi_mll,"m_{ll}",0.,300);
-	// toplikelihood.addVariable(&evt.lhi_ptllj,"p_{T}(llj) [GeV]",50,400);
-
-
-
-	//   toplikelihood.addVariable(&evt.lhi_cosllvsetafirstlep,"cos#theta vs #eta_{l1}",-4,2);
-	//   toplikelihood.addVariable(&evt.lhi_etafirstvsetaseclep,"#eta_{l1} vs #eta_{l2}",-3,3);
-	//  toplikelihood.addVariable(&evt.lhi_deltaphileps,"#Delta#phi(l_{1},l_{2})",-2*M_PI,2*M_PI);
-	//  toplikelihood.addVariable(&evt.lhi_coslepanglevsmll,"cos#theta vs m_{ll}",-1,1);
-	//  toplikelihood.addVariable(&evt.lhi_mllvssumdphimetl,"m_{ll} vs #Delta#phi(met,l_{1})+#Delta#phi(met,l_{2})",-10,0.5);
-
-
-	if(usediscr_){
-		toplikelihood.setSystematics(getSyst());
-	}
-	else{
-		toplikelihood.setSystematics("nominal");
-	}
-
-	 */
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	//just a test
 
 	if(testmode_)
 		std::cout << "testmode("<< anaid << "): preparing container1DUnfolds" << std::endl;
@@ -403,8 +336,18 @@ void  analyzer_run1::analyze(size_t anaid){
 	xsecfitplots_step8.setEvent(evt);
 
 
+	if(!fileExists((datasetdirectory_+inputfile).Data())){
+		std::cout << datasetdirectory_+inputfile << " not found!!" << std::endl;
+		reportError(-1,anaid);
+		return;
+	}
+	TFile *intfile;
+	intfile=TFile::Open(datasetdirectory_+inputfile);
 	//get normalization - switch on or off pdf weighter before!!!
-	double norm=createNormalizationInfo(f,isMC,anaid);
+	double norm=createNormalizationInfo(intfile,isMC,anaid);
+	intfile->Close();
+	delete intfile;
+
 	if(testmode_)
 		std::cout << "testmode("<< anaid << "): multiplying norm with "<< normmultiplier <<" file: " << inputfile<< std::endl;
 	norm*= normmultiplier;
@@ -416,28 +359,6 @@ void  analyzer_run1::analyze(size_t anaid){
 		std::cout << "testmode("<< anaid << "): preparing btag SF" << std::endl;
 
 
-	/*
-	if(mode_.Contains("Btagcsvt") && ! mode_.Contains("Btagshape")){
-		getBTagSF()->setWorkingPoint("csvt");
-		std::cout << "entering btagcsvt mode" <<std::endl;
-	}
-	if(mode_.Contains("Btagcsvm")&& ! mode_.Contains("Btagshape")){
-		getBTagSF()->setWorkingPoint("csvm");
-		std::cout << "entering btagcsvm mode" <<std::endl;
-	}
-	//make sure the nominal scale factors are used for varations of the SF
-	TString btagSysAdd=topmass_+"_"+getSyst();
-	if(getBTagSF()->isRealSyst() || wasbtagsys)
-		btagSysAdd=topmass_+"_nominal";
-
-	if(fakedata) //always use nominal
-		btagSysAdd+="_fakedata";
-	std::string btagsamplename=(channel_+"_"+btagSysAdd+"_"+toString(inputfile)).Data();
-	if(getBTagSF()->setSampleName(btagsamplename) < 0){
-		reportError(-3,anaid);
-		return;
-	}
-	 */
 
 	TString btagfile=btagefffile_;
 	btagfile+="_"+inputfile;
@@ -474,29 +395,34 @@ void  analyzer_run1::analyze(size_t anaid){
 	 * Set branches
 	 * the handler is only a small wrapper
 	 */
-	TTree * t = (TTree*) f->Get("PFTree/PFTree");
+	//TTree * t = (TTree*) f->Get("PFTree/PFTree");
+
+	tTreeHandler tree( datasetdirectory_+inputfile ,"PFTree/PFTree");
+	tTreeHandler *t =&tree;
+
+
 
 	tBranchHandler<std::vector<bool> >     b_TriggerBools(t,"TriggerBools");
-	tBranchHandler<vector<NTElectron> >    b_Electrons(t,electrontype);
-	tBranchHandler<vector<NTMuon> >        b_Muons(t,"NTMuons");
-	tBranchHandler<vector<NTJet> >         b_Jets(t,"NTJets");
+	tBranchHandler<std::vector<NTElectron> >    b_Electrons(t,electrontype);
+	tBranchHandler<std::vector<NTMuon> >        b_Muons(t,"NTMuons");
+	tBranchHandler<std::vector<NTJet> >         b_Jets(t,"NTJets");
 	tBranchHandler<NTMet>                  b_Met(t,mettype);
 	tBranchHandler<NTEvent>                b_Event(t,eventbranch_);
-	tBranchHandler<vector<NTGenParticle> > b_GenTops(t,"NTGenTops");
-	tBranchHandler<vector<NTGenParticle> > b_GenWs(t,"NTGenWs");
-	tBranchHandler<vector<NTGenParticle> > b_GenZs(t,"NTGenZs");
-	tBranchHandler<vector<NTGenParticle> > b_GenBs(t,"NTGenBs");
-	tBranchHandler<vector<NTGenParticle> > b_GenBHadrons(t,"NTGenBHadrons");
-	tBranchHandler<vector<NTGenParticle> > b_GenLeptons3(t,"NTGenLeptons3");
-	tBranchHandler<vector<NTGenParticle> > b_GenLeptons1(t,"NTGenLeptons1");
-	tBranchHandler<vector<NTGenJet> >      b_GenJets(t,"NTGenJets");
-	tBranchHandler<vector<NTGenParticle> > b_GenNeutrinos(t,"NTGenNeutrinos");
+	tBranchHandler<std::vector<NTGenParticle> > b_GenTops(t,"NTGenTops");
+	tBranchHandler<std::vector<NTGenParticle> > b_GenWs(t,"NTGenWs");
+	tBranchHandler<std::vector<NTGenParticle> > b_GenZs(t,"NTGenZs");
+	tBranchHandler<std::vector<NTGenParticle> > b_GenBs(t,"NTGenBs");
+	tBranchHandler<std::vector<NTGenParticle> > b_GenBHadrons(t,"NTGenBHadrons");
+	tBranchHandler<std::vector<NTGenParticle> > b_GenLeptons3(t,"NTGenLeptons3");
+	tBranchHandler<std::vector<NTGenParticle> > b_GenLeptons1(t,"NTGenLeptons1");
+	tBranchHandler<std::vector<NTGenJet> >      b_GenJets(t,"NTGenJets");
+	tBranchHandler<std::vector<NTGenParticle> > b_GenNeutrinos(t,"NTGenNeutrinos");
 
 	//additional weights
 	std::vector<tBranchHandler<NTWeight>*> weightbranches;
 	tBranchHandler<NTWeight>::allow_missing =true;
-	tBranchHandler<vector<NTGenParticle> >::allow_missing =true;
-	tBranchHandler<vector<NTGenParticle> > b_GenBsRad(t,"NTGenBsRad");
+	tBranchHandler<std::vector<NTGenParticle> >::allow_missing =true;
+	tBranchHandler<std::vector<NTGenParticle> > b_GenBsRad(t,"NTGenBsRad");
 
 	std::vector<ztop::MCReweighter> mcreweighters;
 
@@ -509,6 +435,8 @@ void  analyzer_run1::analyze(size_t anaid){
 		mcreweighters.push_back(mcreweighter);
 	}
 
+
+
 	//some helpers
 	double sel_step[]={0,0,0,0,0,0,0,0,0};
 	float count_samesign=0;
@@ -516,10 +444,11 @@ void  analyzer_run1::analyze(size_t anaid){
 	if(!testmode_){
 		// this enables some caching while reading the tree. Speeds up batch mode
 		// significantly!
-		setCacheProperties(t,datasetdirectory_+inputfile);
+		t->setPreCache();
+		//setCacheProperties(t->tree(),datasetdirectory_+inputfile);
 	}
 
-	Long64_t nEntries=t->GetEntries();
+	Long64_t nEntries=t->entries();
 	if(norm==0) nEntries=0; //skip for norm0
 	if(testmode_ && ! tickoncemode_) nEntries*=0.08;
 
@@ -566,7 +495,6 @@ void  analyzer_run1::analyze(size_t anaid){
 
 	}
 
-
 	///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
@@ -579,6 +507,7 @@ void  analyzer_run1::analyze(size_t anaid){
 
 	if(testmode_)
 		std::cout << "testmode("<< anaid << "): starting mainloop with file "<< inputfile << " norm " << norm << " entries: "<<nEntries << " fakedata: " <<  fakedata<<std::endl;
+
 
 
 	for(Long64_t entry=firstentry;entry<nEntries;entry++){
@@ -595,8 +524,8 @@ void  analyzer_run1::analyze(size_t anaid){
 			if(entry < regionlowerbound || entry > regionupperbound)
 				continue;
 		}
-
-		t->LoadTree(entry);
+		t->setEntry(entry);
+		//t.tree()->LoadTree(entry);
 
 		////////////////////////////////////////////////////
 		////////////////////  INIT EVENT ///////////////////
@@ -612,7 +541,7 @@ void  analyzer_run1::analyze(size_t anaid){
 		//reports current status to parent
 		reportStatus(entry,nEntries,anaid);
 
-		b_Event.getEntry(entry);
+
 		float puweight=1;
 		if (isMC) puweight = getPUReweighter()->getPUweight(b_Event.content()->truePU());
 		if(apllweightsone) puweight=1;
@@ -626,7 +555,7 @@ void  analyzer_run1::analyze(size_t anaid){
 		if(apllweightsone) puweight=1;
 		//agrohsje loop over additional weightbranches 
 		for(size_t i=0;i<weightbranches.size();i++){
-			weightbranches.at(i)->getEntry(entry);
+		//	weightbranches.at(i)->getEntry(entry);
 			mcreweighters.at(i).setMCWeight(weightbranches.at(i)->content()->getWeight());
 			mcreweighters.at(i).reWeight(puweight);
 			if(apllweightsone) puweight=1;		
@@ -658,7 +587,7 @@ void  analyzer_run1::analyze(size_t anaid){
 
 
 		//move back to geninfo part, only here for testing
-		b_GenLeptons3.getEntry(entry);
+	/*	b_GenLeptons3.getEntry(entry);
 		b_GenTops.getEntry(entry);
 		b_GenWs.getEntry(entry);
 		b_GenBs.getEntry(entry);
@@ -666,7 +595,7 @@ void  analyzer_run1::analyze(size_t anaid){
 		b_GenBHadrons.getEntry(entry);
 		b_GenJets.getEntry(entry);
 		b_GenLeptons1.getEntry(entry);
-
+*/
 
 		if(isMC){
 			if(testmode_ && entry==0)
@@ -718,7 +647,7 @@ void  analyzer_run1::analyze(size_t anaid){
 		/*
 		 *  Trigger
 		 */
-		b_TriggerBools.getEntry(entry);
+		//b_TriggerBools.getEntry(entry);
 		if(testmode_ && entry==0)
 			std::cout << "testmode("<< anaid << "): got trigger boolians" << std::endl;
 		if(!checkTrigger(b_TriggerBools.content(),b_Event.content(), isMC,anaid)) continue;
@@ -727,7 +656,7 @@ void  analyzer_run1::analyze(size_t anaid){
 		/*
 		 * Muons
 		 */
-		b_Muons.getEntry(entry);
+	//	b_Muons.getEntry(entry);
 
 
 		vector<NTLepton *> allleps;
@@ -781,7 +710,7 @@ void  analyzer_run1::analyze(size_t anaid){
 		 * Electrons
 		 */
 
-		b_Electrons.getEntry(entry);
+		//b_Electrons.getEntry(entry);
 
 
 		vector<NTElectron *> kinelectrons,idelectrons,isoelectrons;
@@ -804,7 +733,7 @@ void  analyzer_run1::analyze(size_t anaid){
 			if(elec->pt() < lepptthresh)  continue;
 			float abseta=fabs(elec->eta());
 
-			float suclueta = fabs(elec->ECalP4().eta());
+			float suclueta = fabs(elec->suClu().eta());
 			if(abseta > 2.4) continue;
 			if(suclueta > 1.4442 && suclueta < 1.5660) continue; //transistion region
 			kinelectrons  << elec;
@@ -969,7 +898,7 @@ void  analyzer_run1::analyze(size_t anaid){
 
 		// create jec jets for met and ID jets
 		// create ID Jets and correct JER
-		b_Jets.getEntry(entry);
+		//b_Jets.getEntry(entry);
 
 
 
@@ -1019,7 +948,7 @@ void  analyzer_run1::analyze(size_t anaid){
 
 
 
-		b_Met.getEntry(entry);
+		//b_Met.getEntry(entry);
 
 
 
@@ -1393,6 +1322,8 @@ void  analyzer_run1::analyze(size_t anaid){
 
 
 	}
+	//clear input tree and close
+	tree.clear();
 
 	///////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////
@@ -1433,8 +1364,8 @@ void  analyzer_run1::analyze(size_t anaid){
 
 
 	// delete t;
-	f->Close(); //deletes t
-	delete f;
+	//f->Close(); //deletes t
+	//delete f;
 	/*s
 	for(size_t i=0;i<ntestconts;i++)
 			delete testconts.at(i);

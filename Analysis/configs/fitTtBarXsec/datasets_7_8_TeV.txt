@@ -101,7 +101,7 @@
    BG_VV            = 0.9
    BG_t#bar{t}bg   = 0.9
    BG_Wjets   = 0.9
-   BG_QCD   = 0.9
+  # BG_QCD   = 0.9
    BG_t#bar{t}V/#gamma = 0.9
    BG_0_bjets_DY = 0.9
    BG_1_bjets_DY = 0.9

@@ -178,6 +178,11 @@ public:
 	histoStack operator - ( const histoStack& );
 	histoStack operator / ( const histoStack& );
 	histoStack operator * ( const histoStack& );
+	/*
+	histoStack& operator += ( const histoStack& rhs){*this=*this+rhs;return *this;}//FIXME still contradictory to mode logic if *this is empty
+	histoStack& operator -= ( const histoStack& rhs){*this=*this-rhs;return *this;}
+	histoStack& operator /= ( const histoStack& rhs){*this=*this/rhs;return *this;}
+	histoStack& operator *= ( const histoStack& rhs){*this=*this*rhs;return *this;}*/
 	histoStack operator * (double);
 	histoStack operator * (float);
 	histoStack operator * (int);
