@@ -5,6 +5,7 @@
 if [ ! -d $CMSSW_BASE/eclipse/.metadata ] || [ ! -f $CMSSW_BASE/src/.cproject ]
 then
     echo "first set up a basic eclipse project using $CMSSW_BASE/runEclipse.sh and follow the instruction in README/twiki"
+exit
 fi
 
 ## attach CMSSW specific things to the project file
@@ -12,7 +13,7 @@ fi
 
 
 cd $CMSSW_BASE/src/TtZAnalysis/EclipseTools
-
+ln -s $CMSSW_BASE/bin/$SCRAM_ARCH bin
 
 #### build within eclipse
 
@@ -56,8 +57,15 @@ ADDINCLUDES=$( cat $CMSSW_BASE/src/TtZAnalysis/EclipseTools/includeconfigdiff | 
 append_after_line "name=\"GCC C++ Compiler\"" "${ADDINCLUDES}\n" .tmp .tmp2
 rm -f .tmp
 append_after_line "${ADDINCLUDES}" "<listOptionValue builtIn=\"false\" value=\"${CMSSW_RELEASE_BASE}/src\"/>\n<listOptionValue builtIn=\"false\" value=\"${ROOTSYS}/include\"/>\n</option>" .tmp2 .tmp3 
+rm -f .tmp2
+STORAGE=$( cat $CMSSW_BASE/src/TtZAnalysis/EclipseTools/refreshpolicydiff | escape_ws )
+append_after_line "<storageModule moduleId=\"org.eclipse.cdt.core.LanguageSettingsProviders\"/>" "${STORAGE}" .tmp3 .tmp4
+
+EXCLUDEINFO=$( cat $CMSSW_BASE/src/TtZAnalysis/EclipseTools/excludediff | escape_ws )
+append_after_line "</folderInfo>" "${EXCLUDEINFO}" .tmp4 .tmp3
+
 cp $CMSSW_BASE/src/.cproject $CMSSW_BASE/src/.cproject.bak
 mv .tmp3 $CMSSW_BASE/src/.cproject
-rm .tmp2
+rm -f .tmp4
 echo "eclipse project ready to be used"
 
