@@ -50,7 +50,7 @@ function append_after_line {
 # <builder arguments="b -j12" autoBuildTarget="all" buildPath="${workspace_loc:/testProj}" cleanBuildTarget="clean" command="scram" enableAutoBuild="false" enableCleanBuild="true" enabledIncrementalBuild="true" id="cdt.managedbuild.target.gnu.builder.exe.release.1873982263" incrementalBuildTarget=" " keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" parallelizationNumber="1" superClass="cdt.managedbuild.target.gnu.builder.exe.release"/>
 REPLACEWITH=$( cat $CMSSW_BASE/src/TtZAnalysis/EclipseTools/buildconfigdiff | escape_ws )
 
-change_line "<builder buildPath=" "${REPLACEWITH}" cproject_orig .tmp
+change_line "<builder buildPath=" "${REPLACEWITH}" $CMSSW_BASE/src/.cproject .tmp
 ADDINCLUDES=$( cat $CMSSW_BASE/src/TtZAnalysis/EclipseTools/includeconfigdiff | escape_ws )
 
 append_after_line "name=\"GCC C++ Compiler\"" "${ADDINCLUDES}\n" .tmp .tmp2
