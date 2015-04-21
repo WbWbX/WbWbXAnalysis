@@ -17,7 +17,7 @@ fi
 mkdir -p ${CMSSW_BASE}/external/${SCRAM_ARCH}/lib
 cd ${CMSSW_BASE}/src/TtZAnalysis
 
-if [[ -a ${CMSSW_BASE}/external/${SCRAM_ARCH}/lib/libunfold.so && -a ../TopAnalysis/ZTopUtils/BuildFile.xml &&  -a ../FWCore/FWLite/BuildFile.xml && -a ${CMSSW_BASE}/src/TtZAnalysis/Tools/TUnfold/libunfold.so  ]]
+if [[ -a ${CMSSW_BASE}/external/${SCRAM_ARCH}/lib/libunfold.so && -a ../TopAnalysis/ZTopUtils/BuildFile.xml &&  -a ../FWCore/FWLite/BuildFile.xml && -a ${CMSSW_BASE}/src/TtZAnalysis/Tools/TUnfold/libunfold.so  && -a ${CMSSW_BASE}/runEclipse.sh ]]
 then
     echo "CMSSW release already prepared for TtZAnalysis Framework"
 else
@@ -56,11 +56,11 @@ fi
     then
         echo "#!/bin/bash\nif [ ! \`which eclipse\` ]\nthen\necho first install eclipse\nexit\nfi\nexport _JAVA_OPTIONS=-Xmx1536M\neclipse -data ${CMSSW_BASE}/eclipse" > $CMSSW_BASE/runEclipse.sh
         chmod +x  $CMSSW_BASE/runEclipse.sh
-    fi
+    
     echo "*************************"
 	echo "Eclipse launcher prepared"
 	echo "*************************"
-
+fi
     echo "CMSSW release prepared for TtZAnalysis Framework"
 
 fi
