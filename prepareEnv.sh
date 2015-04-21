@@ -51,8 +51,17 @@ else
 	echo "************************"
 	echo "linked to  FWCore/FWLite"
 	echo "************************"
+fi
+    if [ ! -f $CMSSW_BASE/runEclipse.sh ]
+    then
+        echo "#!/bin/bash\nif [ ! \`which eclipse\` ]\nthen\necho first install eclipse\nexit\nfi\nexport _JAVA_OPTIONS=-Xmx1536M\neclipse -data ${CMSSW_BASE}/eclipse" > $CMSSW_BASE/runEclipse.sh
+        chmod +x  $CMSSW_BASE/runEclipse.sh
     fi
-     echo "CMSSW release prepared for TtZAnalysis Framework"
+    echo "*************************"
+	echo "Eclipse launcher prepared"
+	echo "*************************"
+
+    echo "CMSSW release prepared for TtZAnalysis Framework"
 
 fi
 
