@@ -54,7 +54,7 @@ else
 fi
     if [ ! -f $CMSSW_BASE/runEclipse.sh ]
     then
-        echo "#!/bin/bash\nif [ ! \`which eclipse\` ]\nthen\necho first install eclipse\nexit\nfi\nexport _JAVA_OPTIONS=-Xmx1536M\neclipse -data ${CMSSW_BASE}/eclipse" > $CMSSW_BASE/runEclipse.sh
+        echo "#!/bin/bash\nif [ ! \`which eclipse\` ]\nthen\necho first install eclipse\nexit\nfi\nexport _JAVA_OPTIONS=-Xmx2048M\neclipse -data ${CMSSW_BASE}/eclipse" > $CMSSW_BASE/runEclipse.sh
         chmod +x  $CMSSW_BASE/runEclipse.sh
     
     echo "*************************"
