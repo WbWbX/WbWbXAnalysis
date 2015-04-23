@@ -92,79 +92,15 @@ public:
 
 	virtual ~MainAnalyzer();
 
-	void setChannel(TString chan){
-		if(chan.Contains("mumu")) b_mumu_=true;
-		else if(chan.Contains("emu")) b_emu_=true;
-		else if(chan.Contains("ee")) b_ee_=true;
-		else{
-			std::cout << "channel wrongly set! exit" << std::endl;
-			std::exit(EXIT_FAILURE);
-		}
-		channel_=chan;}
+	//goes to higher level
+	void setChannel(const TString& chan);
 	void setSyst(TString syst){syst_=syst;}
 	void setEnergy(TString e){if(e.Contains("7TeV")) is7TeV_=true; energy_=e;}
-	void setOutFileAdd(TString o){outfileadd_=o;}
 	void setTopMass(TString topmass){topmass_=topmass;}
-
-	TString getOutFileName(){
-		if(outfileadd_=="") return channel_+"_"+energy_+"_"+topmass_+"_"+syst_;
-		else return channel_+"_"+energy_+"_"+topmass_+"_"+syst_+"_"+outfileadd_;
-	}
-
-	void setOutDir(TString dir){
-		if(dir.EndsWith("/"))
-			outdir_=dir;
-		else
-			outdir_=dir+"/";
-	}
-
-	TString getOutPath(){return outdir_+getOutFileName();}
-	TString getOutDir(){return outdir_;}
-
 	void setBTagMCEffFile(TString file){btagefffile_=file;}
-
-	void setLumi(double Lumi){lumi_=Lumi;}
-
-	// void replaceInAllOptions(TString replace, TString with){name_.ReplaceAll(replace,with);analysisplots_.setName(name_);}
 	TString getChannel(){return channel_;}
 	TString getSyst(){return syst_;}
 	TString Energy(){return energy_;}
-
-	float createNormalizationInfo(TFile *f,bool isMC,size_t anaid);
-
-	void setMaxChilds(size_t childs){maxchilds_=childs;}
-
-	virtual void analyze(size_t i)=0;
-
-	void setFileList(TString fl){filelist_=fl;}
-	void setFilePostfixReplace(TString file,TString pf,bool clear=false){
-		if(clear){ fwithfix_.clear();ftorepl_.clear();}
-		ftorepl_.push_back(file); fwithfix_.push_back(pf);
-	}
-
-	void setFilePostfixReplace(std::vector<TString> files,std::vector<TString> pf){
-		if(files.size() != pf.size()){std::cout << "setFilePostfixReplace: vectors have to be same size, exit!" << std::endl; std::exit(EXIT_FAILURE);}
-		ftorepl_=files;fwithfix_=pf;
-	}
-
-
-	void setDataSetDirectory(TString dir){datasetdirectory_=dir;}
-	void setShowStatus(bool show){showstatus_=show;}
-	void setOnlySummary(bool show){onlySummary_=show;}
-	void setTestMode(bool test){testmode_=test;}
-	void setTickOnceMode(bool test){tickoncemode_=test;}
-
-	void setMode(TString mode){mode_=mode;}
-
-	//COMPAT
-	//void setShowStatusBar(bool show){showstatus_=show;}
-
-	ztop::histoStackVector * getPlots(){return & allplotsstackvector_;}
-
-	int start();
-	//  void start(TString);
-
-	void clear(){allplotsstackvector_.clear();}
 
 	void setDiscriminatorInputFile(const std::string filename){discrInput_=filename;}
 	void setUseDiscriminators(bool use){usediscr_=use;}
@@ -185,11 +121,59 @@ public:
 
 	ztop::pdfReweighter * getPdfReweighter(){return &pdfweighter_;}
 
+	void addWeightBranch(const TString & name){additionalweights_.push_back(name);}
+
+
+	//override with specifics in higher level
+	TString getOutFileName(){
+		if(outfileadd_=="") return channel_+"_"+energy_+"_"+topmass_+"_"+syst_;
+		else return channel_+"_"+energy_+"_"+topmass_+"_"+syst_+"_"+outfileadd_;
+	}
+	/////////////////////////// interface to higher levels
+	const size_t ownChildIndex()const{return ownchildindex_;}
+
+
+
+	/////////////////////////// remain in base
+
+	virtual void analyze(size_t i)=0;
+	void setLumi(double Lumi){lumi_=Lumi;}
+
+	void setMode(TString mode){mode_=mode;} //will only set the mode, reading will be done at higher level
+
+	void setOutFileAdd(TString o){outfileadd_=o;}
+	TString getOutPath(){return outdir_+getOutFileName();}
+	TString getOutDir(){return outdir_;}
+
+	void setOutDir(const TString& dir);
+	float createNormalizationInfo(TFile *f,bool isMC,size_t anaid);
+	void setMaxChilds(size_t childs){maxchilds_=childs;}
+
+
+	void setFileList(TString fl){filelist_=fl;}
+	void setFilePostfixReplace(const TString& file,const TString& pf,bool clear=false);
+
+	void setFilePostfixReplace(const std::vector<TString>& files,const std::vector<TString>& pf);
+
+
+	void setDataSetDirectory(TString dir){datasetdirectory_=dir;}
+	void setShowStatus(bool show){showstatus_=show;}
+	void setOnlySummary(bool show){onlySummary_=show;}
+	void setTestMode(bool test){testmode_=test;}
+	void setTickOnceMode(bool test){tickoncemode_=test;}
+
+
+
+	int start();
+	//  void start(TString);
+
+	void clear(){allplotsstackvector_.clear();}
+
+
 	MainAnalyzer & operator= (const MainAnalyzer &);
 
 	void setFakeDataStartNEntries(float startdiv){fakedata_startentries_=startdiv;}
 
-	void addWeightBranch(const TString & name){additionalweights_.push_back(name);}
 
 	///analysis helper functions
 
@@ -291,6 +275,9 @@ protected:
 
 	size_t maxchilds_;
 	pid_t PID_;
+private: //make all these here private later
+	size_t ownchildindex_;
+protected:
 	std::vector<pid_t> daughPIDs_;
 
 	TString topmass_;

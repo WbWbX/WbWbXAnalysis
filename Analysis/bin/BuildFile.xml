@@ -20,6 +20,7 @@
 <bin name="addRelSystematics" file="addRelSystematics.cc" />
 <bin name="listSystematics" file="listSystematics.cc" />
 <bin name="makeCombination" file="makeCombination.cc" />
+<bin name="displayStatusBar" file="displayStatusBar.cc" />
 
 <bin name="extractMtFromInclXsec" file="extractMtFromInclXsec.cc" />
 <Flags CXXFLAGS="-lXMLParser -lunfold -fopenmp"/>

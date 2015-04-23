@@ -14,12 +14,35 @@
 #include "../interface/tBranchHandler.h"
 
 
+//go to higher level at some point!
+void MainAnalyzer::setChannel(const TString& chan){
+	if(chan.Contains("mumu")) b_mumu_=true;
+	else if(chan.Contains("emu")) b_emu_=true;
+	else if(chan.Contains("ee")) b_ee_=true;
+	else{
+		std::cout << "channel wrongly set! exit" << std::endl;
+		std::exit(EXIT_FAILURE);
+	}
+	channel_=chan;
+}
+
+
+///////////////////////////
+///////////////////////////
+///////////////////////////
+///////////////////////////
+/////////////////////////// remain in base
+///////////////////////////
+///////////////////////////
+///////////////////////////
+
 
 void MainAnalyzer::reportError(int errorno, size_t anaid){
 	if(errorno >0) errorno=-errorno;
 	p_askwrite.get(anaid)->pwrite(anaid);
 	p_allowwrite.get(anaid)->pread();
 	p_finished.get(anaid)->pwrite(errorno);
+
 }
 
 void MainAnalyzer::reportStatus(Long64_t entry,Long64_t nEntries,size_t anaid){
@@ -71,7 +94,6 @@ MainAnalyzer::~MainAnalyzer(){
 }
 
 
-
 int MainAnalyzer::checkForWriteRequest(){
 	for(size_t i=0;i<p_askwrite.size();i++){
 		if(p_askwrite.get(i)->preadready()){
@@ -82,6 +104,24 @@ int MainAnalyzer::checkForWriteRequest(){
 	return -1;
 }
 
+void MainAnalyzer::setOutDir(const TString& dir){
+	if(dir.EndsWith("/"))
+		outdir_=dir;
+	else
+		outdir_=dir+"/";
+}
+
+void MainAnalyzer::setFilePostfixReplace(const TString& file,const TString& pf,bool clear){
+	if(clear){ fwithfix_.clear();ftorepl_.clear();}
+	ftorepl_.push_back(file); fwithfix_.push_back(pf);
+}
+void MainAnalyzer::setFilePostfixReplace(const std::vector<TString>& files,const std::vector<TString>& pf){
+	if(files.size() != pf.size()){
+		std::string errstr= "setFilePostfixReplace: vectors have to be same size!";
+		throw std::logic_error(errstr);
+	}
+	ftorepl_=files;fwithfix_=pf;
+}
 
 
 /**
@@ -103,8 +143,6 @@ int MainAnalyzer::start(){
 
 
 	readFileList();
-
-
 
 
 	//TString name=channel_+"_"+energy_+"_"+syst_;
@@ -167,7 +205,8 @@ int MainAnalyzer::start(){
 			daughPIDs_.at(i)=fork();
 			if(daughPIDs_.at(i)==0){ //child
 				try{
-					analyze(p_idx.get(i)->pread());
+					ownchildindex_=p_idx.get(i)->pread();
+					analyze(ownchildindex_);
 				}
 				catch(std::exception& e){
 					//  reportError(-99,i);
@@ -485,23 +524,23 @@ float MainAnalyzer::createNormalizationInfo(TFile *f, bool isMC,size_t anaid){
 	//check for top mass scaling
 	//if(infiles_.at(anaid).Contains("ttbar") && ! infiles_.at(anaid).Contains("_ttbar")){ //selects all ttbar samples but not ttbarg/w/z
 	if(legentries_.at(anaid) != dataname_){ //don't automatically rescale pseudodata
-	        float sampletopmass = atof(topmass_.Data());
+		float sampletopmass = atof(topmass_.Data());
 		//subtract TeV in string and convert to float 
 		TString tmp(energy_);
 		tmp.ReplaceAll("TeV","");
 		if(!tmp.IsFloat()) throw std::runtime_error("MainAnalyzer::Can't convert energy string to float!");  
 		float energy = atof(tmp.Data());
-		
+
 		if(infiles_.at(anaid).Contains("ttbar") &&  !infiles_.at(anaid).Contains("_ttbar")){
-		        float xsec=getTtbarXsec(sampletopmass,energy);
+			float xsec=getTtbarXsec(sampletopmass,energy);
 			std::cout << "GetNorm: File " << infiles_.at(anaid) << "\tis a ttbar sample , top mass is "
 					<< sampletopmass << " xsec: " << xsec <<std::endl;
 			norms_.at(anaid)=xsec;
 		}
 		//tW
 		if(infiles_.at(anaid).Contains("_tW.root") || infiles_.at(anaid).Contains("_tbarW.root")
-		   || infiles_.at(anaid).Contains("_tbarWtoLL")|| infiles_.at(anaid).Contains("_tWtoLL")){
-		        float xsec=getTWXsec(sampletopmass,energy);
+				|| infiles_.at(anaid).Contains("_tbarWtoLL")|| infiles_.at(anaid).Contains("_tWtoLL")){
+			float xsec=getTWXsec(sampletopmass,energy);
 			norms_.at(anaid)=xsec;
 		}
 		//}

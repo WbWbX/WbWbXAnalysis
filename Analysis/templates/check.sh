@@ -164,30 +164,34 @@ then
 fi
 
 
-
 if [ "${#allj[@]}" -gt "${#jdone[@]}" ]
 then
 
     echo "you have still unfinished jobs: (${#jdone[@]} / ${#allj[@]} done)"
+    displayStatusBar ${#jdone[@]} ${#allj[@]}
     exit 6
 
 
 else
+    echo "all your jobs have finished"
+    displayStatusBar ${#jdone[@]} ${#allj[@]}
     if [[ "${option}" == "nomerge" ]]
-	then
-	exit 0
+        then
+        exit 0
     fi
-    echo "all your jobs have finished, trying to merge systematics...."
+    echo "trying to merge systematics...."
     cd $workdir/output
 
     if [ ${CMSSW_BASE} ]
     then
-	mergeSyst --addextension ztop ${jdone[@]}
+        mergeSyst --addextension ztop ${jdone[@]}
     else
-	echo "Cannot merge systematics. Has to be run from a CMSSW environment"
-	exit 0
+        echo "Cannot merge systematics. Has to be run from a CMSSW environment"
+        exit 0
     fi
 
 
 fi
+
+
 
