@@ -10,14 +10,18 @@
 
 void muonEffTopTH2D(){
 	using namespace ztop;
-	TString infilename="TnP_Muon_Iso_SF.root";
+	TString effcut="Iso";   // "ID" or "Iso"
+	TString infilename="TnP_Muon_"+effcut+"_SF.root";
 
-	TString outfilename="muonEffTop2D_Iso.root";
+	TString outfilename="muonEffTop2D_"+effcut+".root";
 	TString outhistoname="eff_pt_eta";
-
+	
 	TString prefix="DATA_over_MC_pt_PLOT_abseta_bin";
-        TString suffix = "_&_Tight2012_pass_&_mcTrue_true";
-        //TString suffix="_&_mcTrue_true";
+	
+	TString suffix;
+	if (effcut == "Iso") suffix = "_&_Tight2012_pass_&_mcTrue_true";
+	else suffix="_&_mcTrue_true";
+	
 	std::vector<TString> graphnames;
 	graphnames
 	<< "0"
