@@ -10,6 +10,7 @@ $  [parameters-begin] until [parameters-end]
 $ inputfile,                       legend entry,        color,   xsection,   legendNumber (for sorting,- allows for gaps),  (opt) isSignal
 
 
+$tree_13TeV_emuttbar_mg5.root,      t#bar{t},		633,	  831.76,	  0,      true   
 tree_13TeV_emuttbar.root,          t#bar{t},		633,	  831.76,	  0,      true   
 
 tree_13TeV_tW.root,                tW/#bar{t}W,	   	616,	  35.6,	          4
@@ -57,7 +58,6 @@ ElecSFHisto    = GlobalSF
 TriggerSFFile  = /src/TopAnalysis/Configuration/analysis/common/data/triggerSummary_emu_tightleps.root
 
 PUFile         = /src/TtZAnalysis/Analysis/data/analyse/Legacy2012.json_PU    $without .root
-$PUFile         = /src/TtZAnalysis/Analysis/data/analyse/Data_PUDist_Full2012ReReco_FinalRecommendation
 
 btagSFFile     = /src/TopAnalysis/ZTopUtils/data/CSV_8TeV.csv
 btagFile       = all_btags

@@ -228,6 +228,9 @@ void  analyzer_run2::analyze(size_t anaid){
 	else{
 		jetptcut=30;
 	}
+	
+	float mllcut = 50.;
+	
 	/*
 	 * end of mode switches
 	 */
@@ -903,10 +906,10 @@ void  analyzer_run2::analyze(size_t anaid){
 		//	if(leadingptlep->pt()<30)
 		//		continue;
 
-		///////// 20 GeV cut /// STEP 3 ///////////////////////////////////////
+		///////// cut on invariant mll mass /// STEP 3 ///////////////////////////////////////
 		step++;
 
-		if(mll < 20)
+		if(mll < mllcut)
 			continue;
 
 		//now agrohsje added for debugging
@@ -1449,7 +1452,7 @@ void  analyzer_run2::analyze(size_t anaid){
 		for(unsigned int i=0;i<9;i++){
 			std::cout << "selection step "<< toTString(i)<< " "  << sel_step[i];
 			if(i==3)
-				cout << "  => sync step 1 \tmll>20";
+			        cout << "  => sync step 1 \tmll>" << mllcut;
 			if(i==4)
 				cout << "  => sync step 2 \tZVeto";
 			if(i==6)
