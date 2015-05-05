@@ -1385,8 +1385,8 @@ void  analyzer_run2::analyze(size_t anaid){
 
 
 	// delete t;
-	f->Close(); //deletes t
-	delete f;
+	//f->Close(); //deletes t
+	//delete f;
 	/*s
 	for(size_t i=0;i<ntestconts;i++)
 			delete testconts.at(i);
