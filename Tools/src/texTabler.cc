@@ -95,7 +95,7 @@ TString texTabler::getTable()const{
 
 void texTabler::writeToFile(const TString& filename)const{
     TString string=getTable();
-    ofstream outs;
+    std::ofstream outs;
     outs.open(filename.Data());
     outs << string;
     outs.close();

@@ -1,31 +1,31 @@
 #include <vector>
 #include <string>
-#include "../interface/NTLepton.h"
-#include "../interface/NTMuon.h"
-#include "../interface/NTElectron.h"
-#include "../interface/NTJet.h"
-#include "../interface/NTMet.h"
-#include "../interface/NTEvent.h"
-#include "../interface/NTIsolation.h"
-#include "../interface/NTTrack.h"
-#include "../interface/NTSuClu.h"
-#include "../interface/NTTrigger.h"
-#include "../interface/NTTriggerObject.h"
+#include "TtZAnalysis/DataFormats/interface/NTLepton.h"
+#include "TtZAnalysis/DataFormats/interface/NTMuon.h"
+#include "TtZAnalysis/DataFormats/interface/NTElectron.h"
+#include "TtZAnalysis/DataFormats/interface/NTJet.h"
+#include "TtZAnalysis/DataFormats/interface/NTMet.h"
+#include "TtZAnalysis/DataFormats/interface/NTEvent.h"
+#include "TtZAnalysis/DataFormats/interface/NTIsolation.h"
+#include "TtZAnalysis/DataFormats/interface/NTTrack.h"
+#include "TtZAnalysis/DataFormats/interface/NTSuClu.h"
+#include "TtZAnalysis/DataFormats/interface/NTTrigger.h"
+#include "TtZAnalysis/DataFormats/interface/NTTriggerObject.h"
 
 
-#include "../interface/NTVertex.h"
+#include "TtZAnalysis/DataFormats/interface/NTVertex.h"
 
-#include "../interface/NTGenLepton.h"
-#include "../interface/NTGenParticle.h"
-#include "../interface/NTGenJet.h"
+#include "TtZAnalysis/DataFormats/interface/NTGenLepton.h"
+#include "TtZAnalysis/DataFormats/interface/NTGenParticle.h"
+#include "TtZAnalysis/DataFormats/interface/NTGenJet.h"
 
-#include "../interface/NTBTagSF.h"
-#include "../interface/NTJECUncertainties.h"
-#include "../interface/NTJERAdjuster.h"
-#include "../interface/mathdefs.h"
-#include "../interface/NTLorentzVector.h"
+#include "TtZAnalysis/DataFormats/interface/NTBTagSF.h"
+#include "TtZAnalysis/DataFormats/interface/NTJECUncertainties.h"
+#include "TtZAnalysis/DataFormats/interface/NTJERAdjuster.h"
+#include "TtZAnalysis/DataFormats/interface/mathdefs.h"
+#include "TtZAnalysis/DataFormats/interface/NTLorentzVector.h"
 
-#include "../interface/NTSystWeight.h"
+#include "TtZAnalysis/DataFormats/interface/NTSystWeight.h"
 
 //backward comp
 
@@ -33,7 +33,7 @@ namespace top{using namespace ztop;}
 
 namespace
 {
-  struct dictionary {
+  struct dictionary_dataformats {
 
 
       ztop::NTLorentzVector<float> vecfff;

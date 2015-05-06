@@ -4,47 +4,47 @@
 
 #define ZTOP_TOOLS_CLASSES_H_FORGETBOOST
 
-#include "../interface/histoBin.h"
-#include "../interface/indexMap.h"
-#include "../interface/histoContent.h"
-#include "../interface/histo1D.h"
+#include "TtZAnalysis/Tools/interface/histoBin.h"
+#include "TtZAnalysis/Tools/interface/indexMap.h"
+#include "TtZAnalysis/Tools/interface/histoContent.h"
+#include "TtZAnalysis/Tools/interface/histo1D.h"
 
-#include "../interface/histo2D.h"
-#include "../interface/histoStack.h"
-#include "../interface/histoStackVector.h"
-#include "../interface/histoStyle.h"
-#include "../interface/plotStyle.h"
+#include "TtZAnalysis/Tools/interface/histo2D.h"
+#include "TtZAnalysis/Tools/interface/histoStack.h"
+#include "TtZAnalysis/Tools/interface/histoStackVector.h"
+#include "TtZAnalysis/Tools/interface/histoStyle.h"
+#include "TtZAnalysis/Tools/interface/plotStyle.h"
 //#include "../interface/canvasStyle.h"
 //#include "../interface/plotter.h"
 
 
-#include "../TUnfold/TUnfold.h"
-#include "../TUnfold/TUnfoldBinning.h"
-#include "../TUnfold/TUnfoldDensity.h"
-#include "../TUnfold/TUnfoldSys.h"
-#include "../interface/unfolder.h"
+//#include "TtZAnalysis/Tools/TUnfold/TUnfold.h"
+//#include "TtZAnalysis/Tools/TUnfold/TUnfoldBinning.h"
+//#include "TtZAnalysis/Tools/TUnfold/TUnfoldDensity.h"
+//#include "TtZAnalysis/Tools/TUnfold/TUnfoldSys.h"
+#include "TtZAnalysis/Tools/interface/unfolder.h"
 
-#include "../interface/histoUnfolder.h"
-#include "../interface/graph.h"
-#include "../interface/graphFitter.h"
-#include "../interface/plot.h"
-#include "../interface/tObjectList.h"
+#include "TtZAnalysis/Tools/interface/histoUnfolder.h"
+#include "TtZAnalysis/Tools/interface/graph.h"
+#include "TtZAnalysis/Tools/interface/graphFitter.h"
+#include "TtZAnalysis/Tools/interface/plot.h"
+#include "TtZAnalysis/Tools/interface/tObjectList.h"
 
-#include "../interface/textFormatter.h"
+#include "TtZAnalysis/Tools/interface/textFormatter.h"
 
-#include "../interface/plotterBase.h"
-#include "../interface/plotterControlPlot.h"
-#include "../interface/plotterMultiplePlots.h"
-#include "../interface/plotterCompare.h"
+#include "TtZAnalysis/Tools/interface/plotterBase.h"
+#include "TtZAnalysis/Tools/interface/plotterControlPlot.h"
+#include "TtZAnalysis/Tools/interface/plotterMultiplePlots.h"
+#include "TtZAnalysis/Tools/interface/plotterCompare.h"
 
-#include "../interface/infoCreater.h"
+#include "TtZAnalysis/Tools/interface/infoCreater.h"
 #ifndef __CINT__
-#include "../interface/fileReader.h"
+#include "TtZAnalysis/Tools/interface/fileReader.h"
 #endif
 
 namespace
 {
-struct dictionary {
+struct dictionary_tools {
 
 	std::vector<double> klklkl;
 	std::vector<TString> kkj;
@@ -83,10 +83,10 @@ struct dictionary {
 
 
 
-	TUnfoldV17 sdfsdfsdf;
-	TUnfoldBinningV17 sdfsdfsdfsdff;
-	TUnfoldDensityV17 sdfewfeerfw;
-	TUnfoldSysV17 fweewfewfds;
+	//TUnfoldV17 *sdfsdfsdf;
+	//TUnfoldBinningV17 *sdfsdfsdfsdff;
+	//TUnfoldDensityV17 *sdfewfeerfw;
+	//TUnfoldSysV17 *fweewfewfds;
 
 	ztop::unfolder asdsdad;
 	std::vector<ztop::unfolder> sdadasdasdsl;

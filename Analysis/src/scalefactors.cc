@@ -50,9 +50,9 @@ int scalefactors::setInput(TString filename, TString histname, TString histnamee
 		if(histnameerrup.Length()<1 || histnameerrup.Length()<1){
 			for(int binx=0;binx<=th2d_.GetNbinsX();binx++){
 				for(int biny=0;biny<=th2d_.GetNbinsY();biny++){
-					//std::cout << "setting errors: " << th2d_.GetCellContent(binx,biny) + th2d_.GetCellError(binx,biny) <<std::endl;
-					th2derrup_.SetCellContent(binx,biny, th2d_.GetCellContent(binx,biny) + th2d_.GetCellError(binx,biny) );
-					th2derrdown_.SetCellContent(binx,biny, th2d_.GetCellContent(binx,biny) - th2d_.GetCellError(binx,biny) );
+					//std::cout << "setting errors: " << th2d_.GetBinContent(binx,biny) + th2d_.GetBinError(binx,biny) <<std::endl;
+					th2derrup_.SetBinContent(binx,biny, th2d_.GetBinContent(binx,biny) + th2d_.GetBinError(binx,biny) );
+					th2derrdown_.SetBinContent(binx,biny, th2d_.GetBinContent(binx,biny) - th2d_.GetBinError(binx,biny) );
 				}
 			}
 		}
