@@ -38,6 +38,7 @@ else
     if  [[ ! -a ${CMSSW_BASE}/lib/${SCRAM_ARCH}/libunfold.so ]]
     then
 	ln -s  ${CMSSW_BASE}/src/TtZAnalysis/Tools/TUnfold/libunfold.so ${CMSSW_BASE}/lib/${SCRAM_ARCH}/libunfold.so
+-	ln -s ${CMSSW_BASE}/src/TtZAnalysis/Tools/TUnfold/libunfold.so ${CMSSW_BASE}/external/${SCRAM_ARCH}/lib/libunfold.so
         ln -s  ${CMSSW_BASE}/src/TtZAnalysis/Tools/TUnfold/TUnfoldBinningV17Dict_rdict.pcm ${CMSSW_BASE}/lib/${SCRAM_ARCH}/TUnfoldBinningV17Dict_rdict.pcm
         ln -s  ${CMSSW_BASE}/src/TtZAnalysis/Tools/TUnfold/TUnfoldBinningXMLV17Dict_rdict.pcm ${CMSSW_BASE}/lib/${SCRAM_ARCH}/TUnfoldBinningXMLV17Dict_rdict.pcm
         ln -s  ${CMSSW_BASE}/src/TtZAnalysis/Tools/TUnfold/TUnfoldDensityV17Dict_rdict.pcm ${CMSSW_BASE}/lib/${SCRAM_ARCH}/TUnfoldDensityV17Dict_rdict.pcm
