@@ -17,6 +17,7 @@ bool extendedVariable::debugoperations=false;
 
 extendedVariable & extendedVariable::operator =(const extendedVariable&rhs){
 	if(this==&rhs) return *this;
+	clear();
 	copyFrom(rhs);
 	return *this;
 }
