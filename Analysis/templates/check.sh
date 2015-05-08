@@ -9,10 +9,10 @@ option=$1
 
 if [ $option ]
 then
-    if [[ $option != "nomerge" ]] && [[ $option != "resubmit" ]];
+    if [[ $option != "cont" ]] && [[ $option != "nomerge" ]] && [[ $option != "resubmit" ]];
     then
 	echo "option \"${option}\" not known. Available options are:"
-	echo "\"nomerge\", \"resubmit\" or no option"
+	echo "\"nomerge\", \"resubmit\", \"cont\" or no option"
 	exit
     fi
 
@@ -169,6 +169,15 @@ then
 
     echo "you have still unfinished jobs: (${#jdone[@]} / ${#allj[@]} done)"
     displayStatusBar ${#jdone[@]} ${#allj[@]}
+    if [[ "${option}" == "cont" ]] || [[ "${2}" == "cont" ]]
+    then
+       sleep 10;
+       cd $workdir;
+       clear;
+       exec ./check.sh $option $2
+       exit 7
+    fi
+
     exit 6
 
 

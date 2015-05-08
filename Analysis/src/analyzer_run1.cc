@@ -145,34 +145,27 @@ void  analyzer_run1::analyze(size_t anaid){
 		usetopdiscr=true;
 		std::cout << "entering Topdiscr mode" <<std::endl;
 	}
-	//hmm this should actually go to readFiles function.. but then interferes with the mode idea.. leave it here for the moment
-	if(mode_.Contains("Mgdecays")){
-		std::cout << "entering Mgdecays mode: norm will be adapted" <<std::endl;
-		if(inputfile.Contains("ttbar.root")){
-			inputfile.ReplaceAll("ttbar.root", "ttbar_mgdecays.root");
-			// infiles_.at(anaid).ReplaceAll("ttbar.root", "ttbar_mgdecays.root");
-		}
-		else if(inputfile.Contains("ttbarviatau.root")){
-			inputfile.ReplaceAll("ttbarviatau.root", "ttbarviatau_mgdecays.root");
-			// infiles_.at(anaid).ReplaceAll("ttbar.root", "ttbar_mgdecays.root");
-		}
+	bool isdileptonexcl=false;
+	if(inputfile.Contains("ttbar_dil") || inputfile.Contains("ttbarviatau_dil"))
+		isdileptonexcl=true;
+
+	//adapt wrong MG BR for madspin and syst samples
+	if((inputfile.Contains("ttbar.root")
+			|| inputfile.Contains("ttbarviatau.root")
+			|| inputfile.Contains("ttbar_")
+			|| inputfile.Contains("ttbarviatau_") )
+			&&! isdileptonexcl){
+		if(  ! (syst_.BeginsWith("TT_GEN") && syst_.EndsWith("_up"))  ) //other generator
+			normmultiplier=(0.1062/0.11104);//correct both W
+		/*
+		 * BR W-> lnu: 0.1086
+		 * n_comb for leptonic: 1+1+1+2+2+2 (incl taus)
+		 * total lept branching fraction for WW: 0.1086^2 * 9 = 0.1062
+		 * In Madgraph: 0.11104
+		 */
 	}
-	else{
-		//adapt wrong MG BR for madspin and syst samples
-		if(inputfile.Contains("ttbar.root") || inputfile.Contains("ttbarviatau.root")
-				|| inputfile.Contains("ttbar_") ||
-				inputfile.Contains("ttbarviatau_") ){
-			if(  ! (syst_.BeginsWith("TT_GEN") && syst_.EndsWith("_up"))  ) //other generator
-				normmultiplier=(0.1062/0.11104);//correct both W
-			/*
-			 * BR W-> lnu: 0.1086
-			 * n_comb for leptonic: 1+1+1+2+2+2 (incl taus)
-			 * total lept branching fraction for WW: 0.1086^2 * 9 = 0.1062
-			 * In Madgraph: 0.11104
-			 */
-		}
-	}
-	if(inputfile.Contains("_mgdecays_") || inputfile.Contains("_tbarWtoLL")|| inputfile.Contains("_tWtoLL")){
+
+	if(isdileptonexcl || inputfile.Contains("_mgdecays_") || inputfile.Contains("_tbarWtoLL")|| inputfile.Contains("_tWtoLL")){
 		normmultiplier=0.1062; //fully leptonic branching fraction for both Ws
 	}
 
@@ -555,7 +548,7 @@ void  analyzer_run1::analyze(size_t anaid){
 		if(apllweightsone) puweight=1;
 		//agrohsje loop over additional weightbranches 
 		for(size_t i=0;i<weightbranches.size();i++){
-		//	weightbranches.at(i)->getEntry(entry);
+			//	weightbranches.at(i)->getEntry(entry);
 			mcreweighters.at(i).setMCWeight(weightbranches.at(i)->content()->getWeight());
 			mcreweighters.at(i).reWeight(puweight);
 			if(apllweightsone) puweight=1;		
@@ -587,7 +580,7 @@ void  analyzer_run1::analyze(size_t anaid){
 
 
 		//move back to geninfo part, only here for testing
-	/*	b_GenLeptons3.getEntry(entry);
+		/*	b_GenLeptons3.getEntry(entry);
 		b_GenTops.getEntry(entry);
 		b_GenWs.getEntry(entry);
 		b_GenBs.getEntry(entry);
@@ -595,7 +588,7 @@ void  analyzer_run1::analyze(size_t anaid){
 		b_GenBHadrons.getEntry(entry);
 		b_GenJets.getEntry(entry);
 		b_GenLeptons1.getEntry(entry);
-*/
+		 */
 
 		if(isMC){
 			if(testmode_ && entry==0)
@@ -656,7 +649,7 @@ void  analyzer_run1::analyze(size_t anaid){
 		/*
 		 * Muons
 		 */
-	//	b_Muons.getEntry(entry);
+		//	b_Muons.getEntry(entry);
 
 
 		vector<NTLepton *> allleps;

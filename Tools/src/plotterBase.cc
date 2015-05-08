@@ -33,7 +33,7 @@ plotterBase::plotterBase(const plotterBase& rhs): tObjectList(rhs){
 
 TVirtualPad* plotterBase::getPad()const{
     if(!pad_){
-        std::cout << "plotterBase::getCanvas: no canvas associated!" << std::endl;
+       // std::cout << "plotterBase::getCanvas: no canvas associated!" << std::endl;
         throw std::logic_error("plotterBase::getCanvas: no canvas associated!");
     }
     return pad_;

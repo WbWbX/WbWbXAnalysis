@@ -11,6 +11,7 @@
 #include "TH1.h"
 #include "TVirtualPad.h"
 #include <stdexcept>
+#include <cmath>
 
 namespace ztop{
 plotStyle::plotStyle():bottomMargin(0.15),topMargin(0.05),leftMargin(0.15),rightMargin(0.05),divideByBinWidth(true),horizontal(false){setAxisDefaults();}
@@ -80,7 +81,7 @@ void plotStyle::absorbYScaling(float val){
 	// xAxisStyle()->labelOffset*= val;
 
 	yAxisStyle()->labelSize*= val;
-	//yAxisStyle()->tickLength*= val;
+	yAxisStyle()->tickLength*= sqrt(val);
 	yAxisStyle()->titleOffset/= val;
 	yAxisStyle()->titleSize*= val;
 	//yAxisStyle()->labelOffset*= val;
@@ -100,9 +101,12 @@ void plotStyle::absorbXScaling(float val){
 	// xAxisStyle()->titleSize*= val;
 	// xAxisStyle()->labelOffset*= val;
 
+	//new
 	// yAxisStyle()->labelSize*= val;
 	yAxisStyle()->tickLength*= val;
 	yAxisStyle()->titleOffset*= val;
+
+	//new
 	// yAxisStyle()->titleSize*= val;
 	yAxisStyle()->labelOffset*= val;
 
@@ -130,6 +134,7 @@ void plotStyle::applyAxisStyle(TH1*h)const{
 	h->GetYaxis()->SetLabelOffset(yaxis_.labelOffset);
 	h->GetYaxis()->SetTickLength(yaxis_.tickLength);
 	h->GetYaxis()->SetNdivisions(yaxis_.ndiv);
+
 	if(!yaxis_.name.Contains("USEDEF"))
 		h->GetYaxis()->SetTitle(yaxis_.name);
 	if(yaxis_.applyAxisRange())

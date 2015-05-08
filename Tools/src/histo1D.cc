@@ -36,7 +36,7 @@ bool histo1D::c_makelist=false;
 bool histo1D::showwarnings=false;
 ///////function definitions
 histo1D::histo1D():
-																																																taggedObject(taggedObject::type_container1D)
+																																																		taggedObject(taggedObject::type_container1D)
 {
 
 	//divideBinomial_=true;
@@ -52,7 +52,7 @@ histo1D::histo1D():
 }
 
 histo1D::histo1D(const std::vector<float>& bins,const TString& name,const TString& xaxisname,const TString& yaxisname, bool mergeufof):
-																																																	taggedObject(taggedObject::type_container1D)
+																																																			taggedObject(taggedObject::type_container1D)
 
 {
 	setBins(bins);
@@ -1066,6 +1066,25 @@ TH1D * histo1D::getTH1D(TString name, bool dividebybinwidth, bool onlystat, bool
 	if(wasoverflow_)  h->SetTitle((TString)h->GetTitle() + "_of");
 	return h;
 }
+
+TH1D * histo1D::getAxisTH1D()const{
+
+	std::vector<float> bins=createBinning(getNBins()*100,bins_.at(1),bins_.at(bins_.size()-1));
+
+	TH1D *  h = new TH1D("","",bins.size()-1,&(bins.at(0)));
+	h->GetYaxis()->SetTitleSize(0.06);
+	h->GetYaxis()->SetLabelSize(0.05);
+	h->GetYaxis()->SetTitleOffset(h->GetYaxis()->GetTitleOffset() );
+	h->GetYaxis()->SetTitle(yname_);
+	h->GetYaxis()->SetNdivisions(510);
+	h->GetXaxis()->SetTitleSize(0.06);
+	h->GetXaxis()->SetLabelSize(0.05);
+	h->GetXaxis()->SetTitle(xname_);
+	h->LabelsDeflate("X");
+	h->SetMarkerStyle(20);
+	return h;
+}
+
 /**
  * histo1D::getTH1DSyst(TString name="", unsigned int systNo, bool dividebybinwidth=true, bool statErrors=false)
  * -name: name of output histogram
@@ -1728,7 +1747,7 @@ void histo1D::addRelSystematicsFrom(const ztop::histo1D & rhs,bool ignorestat,bo
 			//contents_.getLayer(newlayerit).removeStat();
 			//stat are definitely not correlated
 			bool isnominalequal=(!strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i),1e-2))
-																																					        																																																|| (strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i))) ;
+																																					        																																																		|| (strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i))) ;
 
 			if(isnominalequal){ //this is just a copy leave it and add no variation
 				//contents_.getLayer(newlayerit).removeStat();
@@ -2337,9 +2356,13 @@ histo1D histo1D::createRandom(size_t nbins,size_t distr,size_t n,size_t seed){
 
 std::vector<float> histo1D::createBinning(size_t nbins, float first, float last){
 	std::vector<float> out;
-	float div=(last-first)/(float)(nbins+1);
-	for(float i=first;i<=last;i+=div)
-		out.push_back(i);
+	float div=(last-first)/(float)(nbins);
+	float current=first;
+	for(size_t i=0;i<nbins;i++){
+		out.push_back(current);
+		current+=div;
+	}
+	out.push_back(last);
 	return out;
 }
 

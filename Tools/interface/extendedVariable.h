@@ -21,7 +21,7 @@ namespace ztop{
  */
 class extendedVariable{
 public:
-    extendedVariable():nominal_(-100000),name_(""),operatedon_(0),operation_(op_plus),constant_(false),constval_(0){}
+   explicit extendedVariable():nominal_(-100000),name_(""),operatedon_(0),operation_(op_plus),constant_(false),constval_(0){}
     extendedVariable(const TString & name):nominal_(-100000),name_(name),operatedon_(0),operation_(op_plus),constant_(false),constval_(0){}
     ~extendedVariable(){
     	clear();
@@ -93,7 +93,17 @@ public:
     extendedVariable& operator /= (const double&);
     extendedVariable operator / (const double&)const;
 
+    /**
+     * if operations were performed on the variable, this function
+     * returns the total multiplication factor for a given set of variations
+     * used for variateHisto1D
+     */
+    double getMultiplicationFactor(const double * variations)const;
+    double getMultiplicationFactor(const std::vector<double> * variations)const;
+    double getMultiplicationFactor(const std::vector<double> &variations)const;
+
     static bool debug;
+    static bool debugoperations;
 private:
 
     enum operators{op_plus,op_minus,op_multi,op_divide};
@@ -102,10 +112,15 @@ private:
     TString name_;
     std::vector<graphFitter>  dependences_; //one for each syst
 
-    extendedVariable * operatedon_;
-    operators operation_;
-    double addOperations(const double&,const float * )const;
-    double addOperations(const double&,const double * )const;
+
+    std::vector<extendedVariable *> operatedon_;
+    std::vector<operators> operation_;
+    double addOperations( double,const float * )const;
+    double addOperations( double,const double * )const;
+
+    double getMultiplicationFactorRec(const double * variations)const;
+    //only adds factors,
+    double addMultiFactors( double,const double * )const;
 //return max dependence depth
     size_t checkDepth()const;
 
@@ -116,7 +131,7 @@ private:
 
     void copyFrom(const extendedVariable&) ;
 
-    extendedVariable* getLast();
+   // extendedVariable* getLast();
     void slim();
     void checkDependencies(const extendedVariable&);
     void insertOperations(const extendedVariable&) ;

@@ -82,7 +82,7 @@ inline double scalefactors::getScalefactor(double xval,double yval)const{
 		std::cout << "scalefactors::getScalefactor: input has not been set! returning -999999" << std::endl;
 		return -999999;
 	}
-	if(!isth2d_ && yval!=0){
+	if(!isglobal_ && !isth2d_ && yval!=0){
 		throw std::logic_error("scalefactors::getScalefactor: trying to give a y value to 1D scale factor!");
 	}
 

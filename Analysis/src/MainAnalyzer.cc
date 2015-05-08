@@ -423,12 +423,7 @@ void MainAnalyzer::readFileList(){
 		//	continue;
 		infiles_.at(i) =   replaceExtension(infiles_.at(i));
 		///load pdf files
-		if(issignal_.at(i)  && !getPdfReweighter()->switchedOff()){
-			textFormatter ftm;
-			std::string filename= ftm.addFilenameSuffix(infiles_.at(i).Data(), "_pdf");
-			infiles_.at(i) = filename;
 
-		}
 	}
 
 

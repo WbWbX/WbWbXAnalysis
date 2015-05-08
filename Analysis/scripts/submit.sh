@@ -8,11 +8,11 @@ channels=( #"ee"
 ## scale and match variations will be ignored for other top masses then 172.5.. (hardcoded below)
 topmasses=( "172.5"
 
-     "171.5"
-     "173.5"
-
-      "175.5"
-      "169.5"
+     #"171.5"
+     #"173.5"
+     #
+     # "175.5"
+     # "169.5"
 
    # "178.5"
    # "166.5"
@@ -34,12 +34,12 @@ systs=( "nominal"
    "TT_GENPOWPY_up"
    "TT_GENPOWPY_down"
 
-   # "TT_GENPOW_sysnominal"
-   # "TT_GENPOW_sysnominal_HER_up"
-   # "TT_GENPOW_sysnominal_HER_down"
+    #"TT_GENPOW_sysnominal" #
+    #"TT_GENPOW_sysnominal_HER_up" #
+    #"TT_GENPOW_sysnominal_HER_down" #
 
-    # "TT_GENMCATNLO_up"
-    # "TT_GENMCATNLO_down"
+    #"TT_GENMCATNLO_up" #
+    # "TT_GENMCATNLO_down" #
 
     "TT_BJESNUDEC_down"
     "TT_BJESNUDEC_up"

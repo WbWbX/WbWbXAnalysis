@@ -49,6 +49,15 @@ public:
     void clearPlots();
     void cleanMem();
 
+    plotStyle& getUpperStyle(){return upperstyle_;}
+    const plotStyle& getUpperStyle()const{return upperstyle_;}
+
+    plotStyle& getRatioStyle(){return ratiostyle_;}
+    const plotStyle& getRatioStyle()const{return ratiostyle_;}
+
+    float getXAxisLowerLimit()const;
+    float getXAxisHigherLimit()const;
+
 protected:
     void preparePad();
     void drawPlots();
@@ -58,6 +67,9 @@ protected:
 
 
 private:
+    plotterControlPlot& operator=(const plotterControlPlot&){return *this;}
+    plotterControlPlot(const plotterControlPlot&){}
+
     plotStyle upperstyle_;
     plotStyle ratiostyle_;
     histoStyle datastyleupper_;

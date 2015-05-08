@@ -1,0 +1,40 @@
+
+ 
+  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+[plotStyle - Upper]
+
+    bottomMargin  = 0.03
+    topMargin     = 0.1
+    leftMargin    = 0.0
+    rightMargin   = 0.0
+    
+    
+    
+    yaxis.titleSize   = 0.0
+    yaxis.labelSize   = 0.0
+    yaxis.titleOffset = 1
+    yaxis.labelOffset = 0.005
+    yaxis.tickLength  = 0.03
+    yaxis.ndiv        = 510
+    yaxis.max         = -1
+    yaxis.min         = 1
+    yaxis.log         = true
+    yaxis.name        = USEDEF
+    
+[end plotStyle]
+  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+[plotStyle - Ratio]
+    
+    bottomMargin  = 0.45
+    topMargin     = 0.01
+    leftMargin    = 0.0
+    rightMargin   = 0.0
+    
+    yaxis.titleSize   = 0.0
+    yaxis.labelSize   = 0.0
+    yaxis.titleOffset = 0.95
+    yaxis.labelOffset = 0.005
+    
+[end plotStyle]

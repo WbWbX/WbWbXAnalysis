@@ -85,10 +85,7 @@ public:
 	 */
 	void setSilent(bool silent){silent_=silent;}
 
-	/**
-	 * just append all in one
-	 */
-	histoStack produceStack(bool fittedvalues,size_t bjetcat,size_t datasetidx,double& chi2, corrMatrix& corrmatr)const;
+
 
 	/**
 	 *
@@ -166,6 +163,14 @@ public:
 	histoStack applyParametersToStack(const histoStack& stack, size_t bjetcat, size_t datasetidx, bool fitted, corrMatrix& retcorrelations)const;
 
 	void printAdditionalControlplots(const std::string& inputfile, const std::string & configfile,const std::string& prependToOutput)const;
+
+	/**
+	 * just append all in one
+	 */
+	void printControlStack(bool fittedvalues,size_t bjetcat,size_t datasetidx,const std::string& prependToOutput)const;
+
+
+
 
 private:
 
@@ -262,6 +267,8 @@ private:
 
 		double signalIntegral(size_t nbjets) const{return signalintegral_.at(nbjets);}
 
+		const std::vector<histoStack>& getOriginalInputStacks(const size_t & nbjet)const;
+
 	private:
 
 		variateHisto1D createLeptonJetAcceptance(const std::vector<histo1D>& signals,
@@ -315,6 +322,11 @@ private:
 
 		std::vector<systematic_unc> post_fit_systematics_,post_fit_systematics_simple_;
 
+		///just for plotting afterwards!
+		// safe them as-is. no adding of unc or anything!
+		std::vector<std::vector<histoStack> > inputstacks_;
+
+
 
 	};
 
@@ -364,7 +376,7 @@ private:
 	std::vector<std::pair<TString, double> > priorcorrcoeff_;
 
 	bool nosystbd_,silent_,nopriors_;
-float topmassrepl_;
+	float topmassrepl_;
 };
 
 }

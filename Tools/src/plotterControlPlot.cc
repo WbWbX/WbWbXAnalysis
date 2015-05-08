@@ -108,6 +108,27 @@ void plotterControlPlot::cleanMem(){
 	tempplots_.clear();
 }
 
+
+float plotterControlPlot::getXAxisLowerLimit()const{
+	if(!stackp_){
+		throw std::logic_error("plotterControlPlot::getXAxisLowerLimit: containerStack not set");
+	}
+	if(!stackp_->checkDrawDimension()){
+		throw std::logic_error( "plotterControlPlot::getXAxisLowerLimit: only available for 1dim stacks!" );
+	}
+	return stackp_->getDataContainer().getBins().at(1);
+}
+float plotterControlPlot::getXAxisHigherLimit()const{
+	if(!stackp_){
+		throw std::logic_error("plotterControlPlot::getXAxisHigherLimit: containerStack not set");
+	}
+	if(!stackp_->checkDrawDimension()){
+		throw std::logic_error( "plotterControlPlot::getXAxisHigherLimit: only available for 1dim stacks!" );
+	}
+	return stackp_->getDataContainer().getBins().at(stackp_->getDataContainer().getBins().size()-1);
+}
+
+
 ///plotting
 
 void plotterControlPlot::preparePad(){
@@ -116,8 +137,7 @@ void plotterControlPlot::preparePad(){
 		throw std::logic_error("plotterControlPlot::preparePad: containerStack not set");
 	}
 	if(!stackp_->checkDrawDimension()){
-		if(debug) std::cout << "plotterControlPlot::draw: only available for 1dim stacks!" <<std::endl;
-		return;
+		throw std::logic_error( "plotterControlPlot::preparePad: only available for 1dim stacks!");
 	}
 	cleanMem();
 	TVirtualPad * c = getPad();
@@ -175,23 +195,28 @@ void plotterControlPlot::drawControlPlot(){
 	}
 	bool divbbw= upperstyle_.divideByBinWidth;
 	if(stackp_->hasTag(taggedObject::dontDivByBW_tag)) divbbw=false;
-	TH1 * axish=addObject(stackp_->getContainer(dataentry).getTH1D("",divbbw,false,false));
+	TH1 * axish=addObject(stackp_->getContainer(dataentry).getAxisTH1D());//("",divbbw,false,false));
 	plotStyle upperstyle=upperstyle_;
 	upperstyle.absorbYScaling(getSubPadYScale(1));
+	//new
+
+	upperstyle.absorbXScaling(getSubPadXScale(1));
+
 	axish->Draw("AXIS");
-	float ymax=stackp_->getYMax();
+	float ymax=stackp_->getYMax(divbbw);
 	if(ymax<=0)
 		ymax=1/1.2;
 	axish->GetYaxis()->SetRangeUser(0.0001,ymax*1.2);
 	upperstyle.applyAxisStyle(axish);
 	axish->Draw("AXIS");
-
+	if(debug)std::cout <<  "axis drawn" <<std::endl;
 
 	//prepare data
 	plot* dataplottemp =  new plot(&stackp_->getContainer(dataentry),divbbw);
 	tempplots_.push_back(dataplottemp);
 	datastyleupper_.applyContainerStyle(dataplottemp);
 
+	if(debug)std::cout <<  "setting up legend" <<std::endl;
 	//set up legend here....
 	tmplegp_=addObject(new TLegend((Double_t)0.65,(Double_t)0.50,(Double_t)0.95,(Double_t)0.90));
 	tmplegp_->Clear();

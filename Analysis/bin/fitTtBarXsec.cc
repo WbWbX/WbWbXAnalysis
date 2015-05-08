@@ -19,6 +19,7 @@
 #include <TError.h>
 #include "TtZAnalysis/Tools/interface/fileReader.h"
 #include "TtZAnalysis/Tools/interface/histoStackVector.h"
+#include "TtZAnalysis/Tools/interface/plotterMultiStack.h"
 
 invokeApplication(){
 	using namespace ztop;
@@ -150,13 +151,7 @@ invokeApplication(){
 			if(i<21){
 				for(size_t nbjet=0;nbjet<3;nbjet++){
 					for(size_t ndts=0;ndts<ndatasets;ndts++){
-						double dummychi2;
-						corrMatrix m;
-						histoStack stack=mainfitter.produceStack(false,nbjet,ndts,dummychi2,m);
-						pl.setStack(&stack);
-						pl.associateCorrelationMatrix(m);
-						pl.draw();
-						cvv.Print(outfile+"_pd"+nbjet+ "_" + mainfitter.datasetName(ndts)+ ".pdf");
+						mainfitter.printControlStack(false,nbjet,ndts,"pd_"+toString(i));
 					}
 				}
 			}
@@ -234,51 +229,11 @@ invokeApplication(){
 		pl.usePad(&c);
 		for(size_t ndts=0;ndts<mainfitter.nDatasets();ndts++){
 			for(size_t nbjet=0;nbjet<3;nbjet++){
-				double chi2=0;
-				corrMatrix m;
-				histoStack stack=mainfitter.produceStack(false,nbjet,ndts,chi2,m);
-				pl.associateCorrelationMatrix(m);
-				pl.setStack(&stack);
-				textBoxes tb;
-				tb.add(0.7,0.73,"#chi^{2}="+toTString(chi2));
-				pl.draw();
-				tb.drawToPad(c.cd(1),true);
-				c.Print(outfile+".pdf");
-				tb.clear();
-				stack=mainfitter.produceStack(true,nbjet,ndts,chi2,m);
-				pl.setStack(&stack);
-				pl.associateCorrelationMatrix(m);
-				tb.add(0.7,0.73,"#chi^{2}="+toTString(chi2));
-				pl.draw();
-				tb.drawToPad(c.cd(1),true);
-				c.Print(outfile+".pdf");
-			}
-			plotterCompare plc;
-			plc.usePad(&c);
-			plc.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/comparePlots_Cb.txt");
-			/*	c.SetName("c_b");
-			histo1D ctmp=mainfitter.getCb(false,seveneight);
-			ctmp.setName("C_{b}  pre-fit");
-			plc.setNominalPlot(&ctmp);
-			ctmp=mainfitter.getCb(true,true);
-			ctmp.setName("C_{b} post-fit");
-			plc.setComparePlot(&ctmp,0);
-			plc.draw();
-			c.Print(outfile+".pdf");
-			c.Write();
-			plc.clearPlots();
+				mainfitter.printControlStack(false,nbjet,ndts,outfile.Data());
+				mainfitter.printControlStack(true,nbjet,ndts,outfile.Data());
 
-			c.SetName("eps_b");
-			ctmp=mainfitter.getEps(false,seveneight);
-			ctmp.setName("#epsilon_{b}  pre-fit");
-			plc.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/comparePlots_epsb.txt");
-			plc.setNominalPlot(&ctmp);
-			ctmp=mainfitter.getEps(true,true);
-			ctmp.setName("#epsilon_{b} post-fit");
-			plc.setComparePlot(&ctmp,0);
-			plc.draw();
-			c.Print(outfile+".pdf");
-			c.Write(); */
+			}
+
 		}
 
 
@@ -352,22 +307,6 @@ invokeApplication(){
 			mainfitter.printAdditionalControlplots(infile,cmsswbase+"/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/prefit_postfit_plots.txt",dir);
 
 
-			/*
-			histoStackVector  hsv;hsv.readFromFile("emu_8TeV_172.5_nominal_syst.ztop");
-			histoStack stack=hsv.getStack("third jet pt 2,3 b-jets step 8");
-			stack=mainfitter.applyParametersToStack(stack,2,0,false);
-			plotterControlPlot plctr;
-			TCanvas cvs;
-			plctr.setStack(&stack);
-			plctr.usePad(&cvs);
-			plctr.draw();
-			cvs.Print("testplot.pdf(");
-			stack=hsv.getStack("third jet pt 2,3 b-jets step 8");
-			stack=mainfitter.applyParametersToStack(stack,1,0,true);
-			plctr.setStack(&stack);
-			plctr.draw();
-			cvs.Print("testplot.pdf)");
-			*/
 		}
 	}
 	return 0;

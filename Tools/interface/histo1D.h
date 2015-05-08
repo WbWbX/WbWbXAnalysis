@@ -203,7 +203,7 @@ public:
 
 	TH1D * getTH1D(TString name="", bool dividebybinwidth=true, bool onlystat=false, bool nostat=false) const; //! returns a TH1D pointer with symmetrized errors (TString name); small bug with content(bin)=0 and error(bin)=0
 	TH1D * getTH1DSyst(TString name, size_t systNo, bool dividebybinwidth=true, bool statErrors=false) const;
-
+	TH1D * getAxisTH1D()const;
 
 	histo1D& import(const graph&);
 	/**

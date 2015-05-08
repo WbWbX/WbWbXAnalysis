@@ -202,6 +202,52 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
 	addPlot("muon d0V", "D0", "N_{#mu}/bw");
 	FILLFOREACH(idmuons,d0V());
 
+
+	//////for 7 TeV eff checks
+	SETBINS << -2.4 << -2.1 << -1.47 << -0.8 << 0.8 << 1.47 << 2.1 << 2.4;
+	addPlot("muon eta pt 20-30", "#eta_{#mu}","N_{#mu}");
+	if(event()->isomuons){
+		for(size_t i=0;i<event()->isomuons->size();i++){
+			NTMuon* mu=event()->isomuons->at(i);
+			if(mu->pt()<30)
+				last()->fill(mu->eta(),* event()->puweight);
+		}
+	}
+
+	addPlot("muon eta pt 30-40", "#eta_{#mu}","N_{#mu}");
+	if(event()->isomuons){
+		for(size_t i=0;i<event()->isomuons->size();i++){
+			NTMuon* mu=event()->isomuons->at(i);
+			if(mu->pt()<40 && mu->pt()>=30)
+				last()->fill(mu->eta(),* event()->puweight);
+		}
+	}
+	SETBINS << 0 << 10 << 20 << 25 << 30 << 35 << 40 << 45 << 50 << 60 << 70 << 100 << 200;
+	addPlot( "muon pt eta0.8", "p_{T} [GeV]", "N_{#mu}/GeV");
+	if(event()->isomuons){
+		for(size_t i=0;i<event()->isomuons->size();i++){
+			NTMuon* mu=event()->isomuons->at(i);
+			if(fabs(mu->eta())<0.8)
+				last()->fill(mu->pt(),* event()->puweight);
+		}
+	}
+
+
+	SETBINSRANGE(50,0,1);
+	addPlot("muon isolation pt 20-30 eta0.8", "Iso", "N_{#mu}/bw");
+	if(event()->idmuons){
+		for(size_t i=0;i<event()->idmuons->size();i++){
+			NTMuon* mu=event()->idmuons->at(i);
+			if(fabs(mu->eta())<0.8 && mu->pt()<30)
+				last()->fill(mu->isoVal(),* event()->puweight);
+		}
+	}
+
+
+	////////////
+
+
+
 	SETBINS << 0 << 10 << 20 << 25 << 30 << 35 << 40 << 45 << 50 << 60 << 70 << 100 << 200;
 	addPlot("lead lepton pt", "p_{T,l1} [GeV]", "N_{evt}/GeV");
 	FILL(leadinglep,pt());
@@ -539,16 +585,16 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
 	//end more dimensions
 
 	SETBINS << 20 << 30 << 40 << 50 << 60 << 70 << 90 << 120 << 200;
-	addPlot("lead lep pt 0 b-jets","p_{t}^{l1} [GeV]","N_{evt}/GeV");
+	addPlot("lead lep pt 0 b-jets","p_{T}^{l1} [GeV]","N_{evt}/GeV");
 	if(nbjets==0 || nbjets>2)
 		FILL(leadinglep,pt());
 
 
-	addPlot("lead lep pt 1 b-jets","p_{t}^{l1} [GeV]","N_{evt}/GeV");
+	addPlot("lead lep pt 1 b-jets","p_{T}^{l1} [GeV]","N_{evt}/GeV");
 	if(nbjets==1)
 		FILL(leadinglep,pt());
 
-	addPlot("lead lep pt 2 b-jets","p_{t}^{l1} [GeV]","N_{evt}/GeV");
+	addPlot("lead lep pt 2 b-jets","p_{T}^{l1} [GeV]","N_{evt}/GeV");
 	if(nbjets==2)
 		FILL(leadinglep,pt());
 
@@ -559,17 +605,17 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
 	////end more dimensions
 
 	SETBINS << 20 << 25 << 30 << 35 << 40 << 50 << 60  << 80 << 200;
-	addPlot("sec lep pt 0 b-jets","p_{t}^{l2} [GeV]","N_{evt}/GeV");
+	addPlot("sec lep pt 0 b-jets","p_{T}^{l2} [GeV]","N_{evt}/GeV");
 	if(nbjets==0 || nbjets>2)
 		FILL(secleadinglep,pt());
 
 	SETBINS << 20 << 25 << 30 << 35 << 40 << 50 << 60  << 80 << 200;
-	addPlot("sec lep pt 1 b-jets","p_{t}^{l2} [GeV]","N_{evt}/GeV");
+	addPlot("sec lep pt 1 b-jets","p_{T}^{l2} [GeV]","N_{evt}/GeV");
 	if(nbjets==1)
 		FILL(secleadinglep,pt());
 
 	SETBINS << 20 << 25 << 30 << 35 << 40 << 50 << 60  << 80 << 200;
-	addPlot("sec lep pt 2 b-jets","p_{t}^{l2} [GeV]","N_{evt}/GeV");
+	addPlot("sec lep pt 2 b-jets","p_{T}^{l2} [GeV]","N_{evt}/GeV");
 	if(nbjets==2)
 		FILL(secleadinglep,pt());
 

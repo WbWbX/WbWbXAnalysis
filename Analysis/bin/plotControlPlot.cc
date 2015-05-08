@@ -26,6 +26,7 @@ invokeApplication(){
 	const std::string plotnames=parser->getOpt<std::string>("p","","specify plot names as list plot1 %% plot2 %% ...");
 	const std::string inlist=parser->getOpt<std::string>("-list","","specify a file that represents a list of all plots to be plotted.\n     one line for each plot or %% as delimiter");
 	const std::string suffix=parser->getOpt<std::string>("s","","specify a suffix.");
+	const std::string outdir=parser->getOpt<std::string>("d",".","specify an optional output directory.");
 
 	std::vector<TString> tmpv=parser->getRest<TString>();
 	parser->doneParsing();
@@ -68,6 +69,8 @@ invokeApplication(){
 			allnames.push_back(str);
 		}
 	}
+	if(outdir.length()>0)
+		system(("mkdir -p "+ outdir).data());
 
 	for(size_t i=0;i<allnames.size();i++){
 		histoStack  stack;
@@ -94,6 +97,7 @@ invokeApplication(){
 		TString outname=stack.getFormattedName();
 		outname+=suffix;
 		outname+=".pdf";
+		outname=(TString)outdir.data()+"/"+outname;
 		pl.draw();
 		cv.Print(outname);
 	}

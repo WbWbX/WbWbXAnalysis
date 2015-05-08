@@ -14,6 +14,7 @@
 #include "Math/Functor.h"
 #include "TtZAnalysis/Tools/interface/plotterControlPlot.h"
 #include "TtZAnalysis/Tools/interface/texTabler.h"
+#include "TtZAnalysis/Tools/interface/plotterMultiStack.h"
 #include "limits.h"
 
 namespace ztop{
@@ -281,89 +282,55 @@ void ttbarXsecFitter::addFullExtrapolError(const TString& sysname){
 	}
 }
 
-//FIXME: use applyParameters.... here
-histoStack ttbarXsecFitter::produceStack(bool fittedvalues,size_t bjetcat,size_t datasetidx,double& chi2, corrMatrix& corrmatr)const{
-	if(debug)
-		std::cout << "ttbarXsecFitter::produceStack" <<std::endl;
-	checkSizes();
-	if(bjetcat > 2)
-		throw std::logic_error("ttbarXsecFitter::produceStack: allowed b-jet categories: 0,1,2. 0 includes 3+");
-
-	if(datasetidx >= datasets_.size())
-		throw std::out_of_range("ttbarXsecFitter::produceStack: dataset index out of range");
-
-	size_t nbjet=bjetcat;
-
-	histoStack out;
-	histo1D data,signal,background;
-	std::vector<double> fittedparas;
-	std::vector<double> constr;
-	std::vector<TString> names=*fitter_.getParameterNames();
-	if(fittedvalues && fitsucc_){
-		fittedparas=fittedparas_;
-		constr=*fitter_.getParameterErrUp();
-		//they are anyway symmetric
-
-
+void  ttbarXsecFitter::printControlStack(bool fittedvalues,size_t bjetcat,size_t datasetidx,
+		const std::string& prependToOutput)const{
+	if(datasetidx>=datasets_.size())
+		throw std::out_of_range("ttbarXsecFitter::printControlStack: dataset index.");
+	if(bjetcat >= datasets_.at(0).nBjetCat()){
+		throw std::out_of_range("ttbarXsecFitter::printControlStack: bjetcat out of range or no input read, yet.");
 	}
-	else{
-		fittedparas.resize(fittedparas_.size(),0);
-		constr.resize(fittedparas_.size(),1);
+	plotterMultiStack plm;
+	plm.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiStack_standard.txt");
+
+
+	plm.readTextBoxesInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiStack_standard.txt",
+			toString(bjetcat)+"btag"+toString( datasets_.at(datasetidx).getName()));
+
+	std::vector<histoStack> stacks=datasets_.at(datasetidx).getOriginalInputStacks(bjetcat);
+
+	corrMatrix corrmatr;
+
+	if(fittedvalues){
+		for(size_t i=0;i<stacks.size();i++){
+			stacks.at(i)=applyParametersToStack(stacks.at(i),bjetcat,datasetidx,fittedvalues,corrmatr);
+		}
 	}
-	//remove xsec errors
-	for(size_t i=0;i<datasets_.size();i++)
-		constr.at(datasets_.at(i).xsecIdx())=0;
+	plm.associateCorrelationMatrix(corrmatr);
+	float chi2=0;
+	for(size_t i=0;i<stacks.size();i++){
+		plm.addStack(&stacks.at(i));
+		histoStack cp=stacks.at(i);
+		cp.removeAllSystematics();
+		chi2+=cp.chi2();
+	}
+	TCanvas cv;
+	plm.usePad(&cv);
+	plm.draw();
+	TString add="";
+	if(fittedvalues)
+		add="_fitted";
 
+	textBoxes tb;
+	tb.add(0.13,0.1,"#chi^{2}="+toTString(chi2));
+	tb.drawToPad(&cv);
+	if(prependToOutput.length()>0)
+		cv.Print((prependToOutput+"_fitdistr_").data()+toTString(bjetcat) +"bjets_"+  datasets_.at(datasetidx).getName()+add+".png");
+	else
+		cv.Print("fitdistr_"+toTString(bjetcat) +"bjets_"+  datasets_.at(datasetidx).getName()+add+".png");
 
-	if(debug)
-		std::cout << "ttbarXsecFitter::produceStack: data: "<< datasets_.at(datasetidx).data(nbjet).getNDependencies() << std::endl;
-	data=datasets_.at(datasetidx).data(nbjet).exportContainer( fittedparas,constr,names );
-
-	if(debug)
-		std::cout << "ttbarXsecFitter::produceStack: background" << std::endl;
-	background=datasets_.at(datasetidx).background(nbjet).exportContainer( fittedparas,constr,names );
-
-
-	/*
-	if(norm_nbjet_global_)
-		multi*=datasets_.at(datasetidx).normalization(nbjet).getValue(fittedparas);
-
-
-	if(debug)
-		std::cout << "ttbarXsecFitter::produceStack: signalshape" << std::endl;
-	histo1D exportc=datasets_.at(datasetidx).signalshape(nbjet).exportContainer( fittedparas,constr,names );
-	exportc.normalize(true,true);
-	 */
-	//shape
-	variateHisto1D tmpvar=datasets_.at(datasetidx).signalshape(nbjet);
-	extendedVariable integral=datasets_.at(datasetidx).signalshape(nbjet).getIntegral();
-	tmpvar/=integral;
-
-	if(debug)
-		std::cout << "ttbarXsecFitter::produceStack: normalization" << std::endl;
-	double multi = datasets_.at(datasetidx).lumi() *
-			(fittedparas[datasets_.at(datasetidx).xsecIdx()] + datasets_.at(datasetidx).xsecOffset());
-
-	tmpvar *= multi ; //add xsec and lumi
-	tmpvar *= datasets_.at(datasetidx).acceptance() ;
-	tmpvar *= datasets_.at(datasetidx).eps_emu() ;
-	tmpvar *= datasets_.at(datasetidx).omega_b(nbjet); //add bjet norm
-
-	signal=tmpvar.exportContainer(fittedparas,constr,names );
-
-	corrmatr=fitter_.getCorrelationMatrix();
-
-	out.push_back(data,"data",1,1,99);
-	out.push_back(background,"background",601,1,2);
-	out.push_back(signal,"signal",633,1,1);
-
-	out.setName(out.getName() + "_" + datasets_.at(datasetidx).getName());
-	histoStack cp=out;
-	cp.removeAllSystematics();
-	chi2=cp.chi2();
-
-	return out;
 }
+
+
 
 
 int ttbarXsecFitter::fit(std::vector<float>& xsecs, std::vector<float>& errup ,std::vector<float>& errdown){
@@ -529,8 +496,8 @@ double ttbarXsecFitter::getXsec(size_t datasetidx)const{
 		throw std::out_of_range("ttbarXsecFitter::getXsec: first perform successful fit");
 	double fitted= fitter_.getParameters()->at(datasets_.at(datasetidx).xsecIdx())+datasets_.at(datasetidx).xsecOffset();
 
-	double acceptancecorr=datasets_.at(datasetidx).acceptance().getValue(fittedparas_)
-																																			/datasets_.at(datasetidx).acceptance_extr().getValue(fittedparas_);
+	double acceptancecorr=datasets_.at(datasetidx).acceptance().getValue(fittedparas_)/
+			datasets_.at(datasetidx).acceptance_extr().getValue(fittedparas_);
 	return fitted*acceptancecorr;
 
 }
@@ -731,8 +698,8 @@ histoStack ttbarXsecFitter::applyParametersToStack(const histoStack& stack, size
 		constr=*fitter_.getParameterErrUp(); //anyway symm
 	}
 
-	for(size_t i=0;i<datasets_.size();i++)
-		constr.at(datasets_.at(i).xsecIdx())=0;
+	//for(size_t i=0;i<datasets_.size();i++)
+	//	constr.at(datasets_.at(i).xsecIdx())=0;
 
 
 
@@ -1852,7 +1819,7 @@ variateHisto1D ttbarXsecFitter::dataset::createLeptonJetAcceptance(const std::ve
 	twobjetsignal=twobjetsignal.getIntegralBin();
 
 	histo1D correction_b =  ((signalintegral * twobjetsignal) * 4.)
-																																																																						                																																																																																																																																																																																																																																																																																										/ ( (onebjetsignal + (twobjetsignal * 2.)) * (onebjetsignal + (twobjetsignal * 2.)));
+																																																																						                																																																																																																																																																																																																																																																																																																						/ ( (onebjetsignal + (twobjetsignal * 2.)) * (onebjetsignal + (twobjetsignal * 2.)));
 
 	correction_b.removeStatFromAll();
 
@@ -1886,14 +1853,16 @@ variateHisto1D ttbarXsecFitter::dataset::createLeptonJetAcceptance(const std::ve
 		omega_nbjet_.resize(bjetbin+1);
 	omega_nbjet_.at(bjetbin) = *tmpvarc.getBin(1);
 
+
+	histoContent::multiplyStatCorrelated=tmpmultiplyStatCorrelated;
+	histoContent::addStatCorrelated=tmpaddStatCorrelated;
+	histoContent::divideStatCorrelated=tmpdivideStatCorrelated;
+
 	variateHisto1D out;
 	histo1D normedsignal = signals.at(bjetbin);//stack->at(bjetbin).getSignalContainer(); //for shape
 	normedsignal.normalize(true,true); //normalize to 1 incl syst
 	out.import(normedsignal);
 
-	histoContent::multiplyStatCorrelated=tmpmultiplyStatCorrelated;
-	histoContent::addStatCorrelated=tmpaddStatCorrelated;
-	histoContent::divideStatCorrelated=tmpdivideStatCorrelated;
 
 	if(debug)
 		std::cout << "ttbarXsecFitter::dataset::createLeptonJetAcceptance: done " << std::endl;
@@ -1957,6 +1926,9 @@ void  ttbarXsecFitter::dataset::readStacks(const std::string configfilename,cons
 			oldbjetcount=bjetcount;
 			tmpstacks.clear();
 		}
+
+		inputstacks_.resize(nBjetCat(),std::vector<histoStack>());
+
 		for(size_t entry=0;entry<fr.nEntries(line);entry++){
 			TString filename=fr.getData<TString>(line,entry);
 			if(replaceininfiles.first.Length()>0)
@@ -1984,6 +1956,8 @@ void  ttbarXsecFitter::dataset::readStacks(const std::string configfilename,cons
 				throw std::runtime_error("ttbarXsecFitter::readStacks: Stack has no data entry!");
 			if(tmpstack.getSignalIdxs().size() <1)
 				throw std::runtime_error("ttbarXsecFitter::readStacks: No signal defined!");
+
+			inputstacks_.at(bjetcount).push_back(tmpstack); //BEFORE ADDIND UNC!
 
 			addUncertainties(&tmpstack,bjetcount,removesyst,priorcorr);
 			/*	if(newcsv) //not necessary if same csv where everything is ordered in the same manner
@@ -2145,6 +2119,15 @@ void ttbarXsecFitter::dataset::addUncertainties(histoStack * stack,size_t nbjets
 
 
 }
+
+const std::vector<histoStack>& ttbarXsecFitter::dataset::getOriginalInputStacks(const size_t & nbjet)const{
+	if(nbjet>=inputstacks_.size())
+		throw std::out_of_range("ttbarXsecFitter::dataset::getOriginalInputStacks: nbjet too large or no stacks read");
+
+	return inputstacks_.at(nbjet);
+}
+
+
 TString ttbarXsecFitter::translatePartName(const formatter& fmt,const TString& name)const{
 	TString namecp=name;
 	TString datasetname="";

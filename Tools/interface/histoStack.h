@@ -39,9 +39,9 @@ public:
 	bool is1D()const{if(mode==dim1) return true; else return false;}
 	bool is1DUnfold()const{if(mode==unfolddim1) return true; else return false;}
 
-	void push_back(const ztop::histo1D&,const TString&, int, double, int legord=-1); //! adds container with, name, colour, norm to stack
-	void push_back(const ztop::histo2D&,const TString&, int, double, int legord=-1); //! adds container with, name, colour, norm to stack
-	void push_back(const ztop::histo1DUnfold&,const TString&, int, double, int legord=-1); //! adds container with, name, colour, norm to stack
+	void push_back(const ztop::histo1D&,const TString&, int, double, int legord= 99999); //! adds container with, name, colour, norm to stack
+	void push_back(const ztop::histo2D&,const TString&, int, double, int legord=99999); //! adds container with, name, colour, norm to stack
+	void push_back(const ztop::histo1DUnfold&,const TString&, int, double, int legord=99999); //! adds container with, name, colour, norm to stack
 	void removeContribution(TString); //! removes contribution
 
 	void setDataLegend(TString leg="data"){dataleg_=leg;}
@@ -200,6 +200,7 @@ public:
 	std::vector<size_t> getSortedIdxs(bool inverse) const;
 
 	float getYMax(bool dividebybinwidth=true)const;
+	float getYMin(bool dividebybinwidth=true, bool onlydata=false)const;
 
 	size_t getDataIdx()const;
 

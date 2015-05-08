@@ -35,9 +35,9 @@ public:
 	 */
 	histo1D exportContainer()const;
 
-	float getBinErrUp(size_t idx){return errsup_.at(idx);}
-	float getBinErrDown(size_t idx){return errsdown_.at(idx);}
-	float getBinErr(size_t idx){return std::max(errsdown_.at(idx),errsup_.at(idx));}
+	float getBinErrUp(size_t idx){return errsup_.at(idx)*contents_.at(idx).getMultiplicationFactor(zeroVar());}
+	float getBinErrDown(size_t idx){return errsdown_.at(idx)*contents_.at(idx).getMultiplicationFactor(zeroVar());}
+	float getBinErr(size_t idx){return std::max(errsdown_.at(idx),errsup_.at(idx))*contents_.at(idx).getMultiplicationFactor(zeroVar());}
 
 	void setBinErrUp(size_t ,const float&);
 	void setBinErrDown(size_t ,const float&);
@@ -58,6 +58,13 @@ public:
 
 	double getIntegral(const double * vars)const;
 	extendedVariable getIntegral()const;
+
+
+	/*
+	 * Warning: All operations are assumed to have no statistical limitations!
+	 * The stat uncertainty of "this" will be kept and scaled accordingly, but
+	 * no extra uncertainty will be added from additional variateHisto1Ds
+	 */
 
 	variateHisto1D& operator *= (const variateHisto1D&);
 	variateHisto1D operator * (const variateHisto1D&)const;
@@ -85,6 +92,8 @@ private:
 
 	std::vector<extendedVariable> contents_;
 	std::vector<float> bins_;
+
+	std::vector<double> zeroVar()const;
 
 	//this is for stat uncertainties
 	std::vector<float> errsup_;

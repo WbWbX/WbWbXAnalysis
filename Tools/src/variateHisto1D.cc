@@ -201,6 +201,8 @@ variateHisto1D variateHisto1D::operator / (const extendedVariable&v)const{
 variateHisto1D& variateHisto1D::operator *= (const double&v){
 	for(size_t i=0;i<contents_.size();i++){
 		contents_.at(i)*=v;
+		errsup_.at(i) *=v;
+		errsdown_.at(i) *=v;
 	}
 	return *this;
 }
@@ -212,6 +214,8 @@ variateHisto1D variateHisto1D::operator * (const double&v)const{
 variateHisto1D& variateHisto1D::operator /= (const double&v){
 	for(size_t i=0;i<contents_.size();i++){
 		contents_.at(i)/=v;
+		errsup_.at(i) /=v;
+		errsdown_.at(i) /=v;
 	}
 	return *this;
 }
@@ -219,7 +223,10 @@ variateHisto1D variateHisto1D::operator / (const double&v)const{
 	variateHisto1D cp=*this;
 	return cp/=v;
 }
-
+std::vector<double> variateHisto1D::zeroVar()const{
+	if(contents_.size()<1) return std::vector<double>();
+	return std::vector<double> (contents_.at(0).getNDependencies(),0);
+}
 
 void variateHisto1D::checkCompat(const variateHisto1D& rhs)const{
 	if(bins_!=rhs.bins_)
@@ -251,7 +258,7 @@ histo1D variateHisto1D::exportContainer(const std::vector<double> & variations)c
 
 	for(size_t i=0;i<bins_.size();i++){
 		out.setBinContent(i,contents_.at(i).getValue(variations)  );
-		out.setBinStat(i,(errsup_.at(i)+errsdown_.at(i))/2);
+		out.setBinStat(i,(errsup_.at(i)+errsdown_.at(i))/2 * contents_.at(i).getMultiplicationFactor(variations));
 	}
 
 

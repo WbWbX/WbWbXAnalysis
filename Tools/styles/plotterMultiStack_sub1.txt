@@ -1,0 +1,83 @@
+
+ 
+  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+[plotStyle - Upper]
+
+    bottomMargin  = 0.03
+    topMargin     = 0.1
+    leftMargin    = 0.15
+    rightMargin   = 0.0
+    
+    $both not used right now
+    
+    divideByBinWidth  = true
+    horizontal        = false
+    
+    $$ axis styles
+    
+    xaxis.titleSize   = 0.06
+    xaxis.labelSize   = 0.0
+    xaxis.titleOffset = 0.8
+    xaxis.labelOffset = 0.005
+    xaxis.tickLength  = 0.03
+    xaxis.ndiv        = 510
+    xaxis.max         = -1
+    xaxis.min         = 1
+    xaxis.log         = false
+    xaxis.name        = USEDEF
+    
+    
+    
+    
+    yaxis.titleSize   = 0.06
+    yaxis.labelSize   = 0.05
+    yaxis.titleOffset = 1
+    yaxis.labelOffset = 0.005
+    yaxis.tickLength  = 0.03
+    yaxis.ndiv        = 510
+    yaxis.max         = 1.2e3
+    yaxis.min         = 1
+    yaxis.log         = true
+    yaxis.name        = USEDEF
+    
+[end plotStyle]
+  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+[plotStyle - Ratio]
+    
+    bottomMargin  = 0.45
+    topMargin     = 0.01
+    leftMargin    = 0.15
+    rightMargin   = 0.0
+    
+    $both not used right now
+    
+    divideByBinWidth  = false
+    horizontal        = false
+    
+    $$ axis styles
+    
+    xaxis.titleSize   = 0.06
+    xaxis.labelSize   = 0.05
+    xaxis.titleOffset = 0.9
+    xaxis.labelOffset = 0.005
+    xaxis.tickLength  = 0.03
+    xaxis.ndiv        = 510
+    xaxis.max         = -1
+    xaxis.min         = 1
+    xaxis.log         = false
+    xaxis.name        = USEDEF
+    
+    yaxis.titleSize   = 0.0
+    yaxis.labelSize   = 0.0
+    yaxis.titleOffset = 0.95
+    yaxis.labelOffset = 0.005
+    yaxis.tickLength  = 0.03
+    yaxis.ndiv        = 505
+    yaxis.max         = 1.65
+    yaxis.log         = false
+    yaxis.min         = 0.35
+    yaxis.name        = #frac{obs}{pred}
+    
+[end plotStyle]

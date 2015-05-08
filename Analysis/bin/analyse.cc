@@ -180,7 +180,7 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	//change
 	ana->getBTagSF()->setMode(NTBTagSF::randomtagging_mode);
 
-	ana->getBTagSF()->loadBCSF(btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets","up","down");
+	ana->getBTagSF()->loadBCSF  (btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets","up","down");
 	ana->getBTagSF()->loadUDSGSF(btagSFFile, BTagEntry::OP_TIGHT,"csv","comb","up","down");
 
 
@@ -224,9 +224,18 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mgdecays_p11tev.root");
 	}
 	else if(Syst=="PDF_sysnominal"){
+		ana->setFilePostfixReplace("ttbar.root","ttbar_pdf.root");
+		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_pdf.root");
+		ana->setFilePostfixReplace("ttbar_dil.root","ttbar_pdf.root"); //FIXME
+		ana->setFilePostfixReplace("ttbarviatau_dil.root","ttbarviatau_pdf.root"); //FIXME
 		ana->getPdfReweighter()->setPdfIndex(0);
 	}
 	else if(Syst.Contains("PDF_sysnominal_")){
+		ana->setFilePostfixReplace("ttbar.root","ttbar_pdf.root");
+		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_pdf.root");
+		ana->setFilePostfixReplace("ttbar_dil.root","ttbar_pdf.root"); //FIXME
+		ana->setFilePostfixReplace("ttbarviatau_dil.root","ttbarviatau_pdf.root"); //FIXME
+
 		size_t pdfindex=0;
 		for(size_t i=1;i<10000;i++){
 			pdfindex++;
@@ -394,23 +403,26 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	else if(Syst=="TT_MATCH_up"){
 		ana->setFilePostfixReplace("ttbar.root","ttbar_ttmup.root");
 		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_ttmup.root");
+		ana->setFilePostfixReplace("ttbar_dil.root","ttbar_dil_ttmup.root");
+		ana->setFilePostfixReplace("ttbarviatau_dil.root","ttbarviatau_dil_ttmup.root");
 	}
 	else if(Syst=="TT_MATCH_down"){
 		ana->setFilePostfixReplace("ttbar.root","ttbar_ttmdown.root");
 		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_ttmdown.root");
+		ana->setFilePostfixReplace("ttbar_dil.root","ttbar_dil_ttmdown.root");
+		ana->setFilePostfixReplace("ttbarviatau_dil.root","ttbarviatau_dil_ttmdown.root");
 	}
 	else if(Syst=="TT_SCALE_up"){
 		ana->setFilePostfixReplace("ttbar.root","ttbar_ttscaleup.root");
 		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_ttscaleup.root");
+		ana->setFilePostfixReplace("ttbar_dil.root","ttbar_dil_ttscaleup.root");
+		ana->setFilePostfixReplace("ttbarviatau_dil.root","ttbarviatau_dil_ttscaleup.root");
 	}
 	else if(Syst=="TT_SCALE_down"){
 		ana->setFilePostfixReplace("ttbar.root","ttbar_ttscaledown.root");
 		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_ttscaledown.root");
-	}
-	/////////
-	else if(Syst=="TT_SCALE_down"){
-		ana->setFilePostfixReplace("ttbar.root","ttbar_ttscaledown.root");
-		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_ttscaledown.root");
+		ana->setFilePostfixReplace("ttbar_dil.root","ttbar_dil_ttscaledown.root");
+		ana->setFilePostfixReplace("ttbarviatau_dil.root","ttbarviatau_dil_ttscaledown.root");
 	}
 	////////////
 	else if(Syst=="Z_MATCH_up"){
@@ -431,6 +443,8 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	else if(Syst=="TT_GENPOWPY_up"){
 		ana->setFilePostfixReplace("ttbar.root","ttbar_pow2py.root");
 		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_pow2py.root");
+		ana->setFilePostfixReplace("ttbar_dil.root","ttbar_pow2py.root");
+		ana->setFilePostfixReplace("ttbarviatau_dil.root","ttbarviatau_pow2py.root");
 	}
 	else if(Syst=="TT_GENPOW_sysnominal"){
 		ana->setFilePostfixReplace("ttbar.root","ttbar_pow2py.root");
@@ -448,6 +462,9 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 		ana->setFilePostfixReplace("ttbar.root","ttbar_mcatnlo.root");
 		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mcatnlo.root");
 	}
+	else if(Syst=="TT_GENMCATNLO_down"){
+		//this is just default sample
+	}
 	else if(Syst=="TT_BJESNUDEC_down"){
 		ana->addWeightBranch("NTWeight_bJesweightNuDown");
 	}
@@ -462,13 +479,11 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	}
 	else if(Syst=="TOPMASS_up"){ //consider as systematic variation. for testing purp! leaves normalization fixed
 		//default
-		ana->setFilePostfixReplace("ttbar.root","ttbar_mt175.5.root");
-		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mt175.5.root");
+		topmass="178.5";
 	}
 	else if(Syst=="TOPMASS_down"){
 		//default
-		ana->setFilePostfixReplace("ttbar.root","ttbar_mt169.5.root");
-		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mt169.5.root");
+		topmass="166.5";
 	}
 	else{
 		didnothing=true;
@@ -480,6 +495,8 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 		std::cout << "replacing top mass value of 172.5 with "<< topmass << std::endl;
 		ana->setFilePostfixReplace("ttbar.root","ttbar_mt"+topmass+ ".root");
 		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mt"+topmass+ ".root");
+		ana->setFilePostfixReplace("ttbar_dil.root","ttbar_dil_mt"+topmass+ ".root");
+		ana->setFilePostfixReplace("ttbarviatau_dil.root","ttbarviatau_dil_mt"+topmass+ ".root");
 
 		if(topmass == "178.5" || topmass == "166.5"){
 			//	ana->setFilePostfixReplace("_tWtoLL.root","_tWtoLL_mt"+topmass+ ".root");

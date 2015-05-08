@@ -1716,12 +1716,32 @@ size_t histoStack::getDataIdx()const{
 
 
 float histoStack::getYMax(bool dividebybinwidth)const{
-	float max=-99999;
+	if(mode == dim1 || mode == unfolddim1){
+		float max=getDataContainer().getYMax(dividebybinwidth);
+		float tmp=0;
+		if(mode == dim1)
+			tmp=getFullMCContainer().getYMax(dividebybinwidth);
+		else
+			tmp=getFullMCContainer1DUnfold().getRecoContainer().getYMax(dividebybinwidth);
+		if(max<tmp)max=tmp;
+		return max;
+	}
+	return 0;
+
+}
+
+float histoStack::getYMin(bool dividebybinwidth, bool onlydata)const{
+	float min=1e20;
 	if(mode == dim1){
 		if(containers_.size()<1) return 0;
-		for(size_t i=0;i<containers_.size();i++){
-			float temp=containers_.at(i).getYMax(dividebybinwidth);
-			if(max<temp)max=temp;
+		if(!onlydata){
+			for(size_t i=0;i<containers_.size();i++){
+				float temp=containers_.at(i).getYMin(dividebybinwidth);
+				if(min>temp)min=temp;
+			}
+		}
+		else{
+			min=getDataContainer().getYMin(dividebybinwidth);
 		}
 	}
 	else if(mode == dim2){
@@ -1729,12 +1749,17 @@ float histoStack::getYMax(bool dividebybinwidth)const{
 	}
 	else if(mode == unfolddim1){
 		if(containers1DUnfold_.size()<1) return 0;
-		for(size_t i=0;i<containers1DUnfold_.size();i++){
-			float temp=containers1DUnfold_.at(i).getRecoContainer().getYMax(dividebybinwidth);
-			if(max<temp)max=temp;
+		if(!onlydata){
+			for(size_t i=0;i<containers1DUnfold_.size();i++){
+				float temp=containers1DUnfold_.at(i).getRecoContainer().getYMin(dividebybinwidth);
+				if(min>temp)min=temp;
+			}
+		}
+		else{
+			min=getDataContainer().getYMin(dividebybinwidth);
 		}
 	}
-	return max;
+	return min;
 }
 
 histo1D histoStack::getSignalContainer()const{
@@ -2147,6 +2172,8 @@ std::vector<size_t> histoStack::getSortedIdxs(bool inverse) const{
 			std::cout << legasso.at(i) << " " << legends_.at(i) << " ";
 		std::cout<<std::endl;
 	}
+
+	legasso.resize(legends_.size(),1e10);//for missing indices
 
 	return legasso;
 

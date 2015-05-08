@@ -30,7 +30,7 @@ void fillRandom(ztop::histo1D * c, en_functions func, float para0, float para1, 
 
     }
 
-
+    delete r;
 
 
 }

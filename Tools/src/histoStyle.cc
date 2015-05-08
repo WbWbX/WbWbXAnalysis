@@ -80,7 +80,7 @@ void textBoxes::readFromFile(const std::string & filename, const std::string & m
 
 
     fr.setStartMarker("[textBoxes - "+markername+']');
-    fr.setEndMarker("[end textBoxes]");
+    fr.setEndMarker("[end - textBoxes]");
     fr.readFile(filename);
     fr.setRequireValues(false);
     TString externalfile= fr.getValue<TString>("externalFile","");
