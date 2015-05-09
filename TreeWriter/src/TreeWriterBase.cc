@@ -243,7 +243,7 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                 std::vector<const reco::GenParticle *>* allgenForDec(&allgen);
                 ztop::topDecaySelector * topDecay = new topDecaySelector();
                 topDecay->setGenCollection(allgenForDec);
-                ztop::topDecaySelector::partonShowers ps = ztop::topDecaySelector::ps_pythia6;
+                ztop::topDecaySelector::partonShowers ps = ztop::topDecaySelector::ps_pythia8;
                 topDecay->setPartonShower(ps);
 		if(debugmode) std::cout << "Filling tops" << std::endl;
                 topDecay->process();
