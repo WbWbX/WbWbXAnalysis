@@ -610,6 +610,9 @@ process.PFTree   = cms.EDAnalyzer('TreeWriterTtZ',
                                   #old switches, can be removed at some point
                                   isSusy =  cms.bool(False),
                                   isJPsi = cms.bool(False),
+
+                                  #setting PartonShower to Pythia8
+                                  partonShower = cms.string("pythia8"),
                                   )
 
 

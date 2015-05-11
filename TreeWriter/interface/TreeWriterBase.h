@@ -252,7 +252,7 @@ public:
   edm::Handle<reco::ConversionCollection> conversions;
 
   std::string keepelecidOnly_;
-
+  std::string partonShower_;
 };
 
 //

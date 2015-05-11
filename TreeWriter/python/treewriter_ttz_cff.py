@@ -70,6 +70,8 @@ PFTree   = cms.EDAnalyzer('TreeWriterTtZ',
                           triggerObjects = cms.vstring(""),
 
 
-                          additionalWeights = cms.vstring("")
+                          additionalWeights = cms.vstring(""),
+
+                          partonShower = cms.string("pythia6")
 
                           )

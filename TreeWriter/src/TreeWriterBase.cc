@@ -78,7 +78,8 @@ TreeWriterBase::TreeWriterBase(const edm::ParameterSet& iConfig)
 	triggerObjects_            =iConfig.getParameter<std::vector<std::string> > ("triggerObjects");
 
 	keepelecidOnly_            =iConfig.getParameter<std::string>               ("keepElecIdOnly");
-
+        
+        partonShower_              =iConfig.getParameter<std::string>               ("partonShower");
 
 	std::cout << "n\n################## Tree writer ########################"
 			<<  "\n#" << treename_
@@ -243,7 +244,10 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                 std::vector<const reco::GenParticle *>* allgenForDec(&allgen);
                 ztop::topDecaySelector * topDecay = new topDecaySelector();
                 topDecay->setGenCollection(allgenForDec);
-                ztop::topDecaySelector::partonShowers ps = ztop::topDecaySelector::ps_pythia8;
+                ztop::topDecaySelector::partonShowers ps;
+                if(partonShower_ == "pythia6")  ps = ztop::topDecaySelector::ps_pythia6;
+                else if (partonShower_ == "pythia8") ps = ztop::topDecaySelector::ps_pythia8;
+                else  throw std::logic_error("TreeWriterBase::analyze: Wrong partonShower set in Config.");      
                 topDecay->setPartonShower(ps);
 		if(debugmode) std::cout << "Filling tops" << std::endl;
                 topDecay->process();
