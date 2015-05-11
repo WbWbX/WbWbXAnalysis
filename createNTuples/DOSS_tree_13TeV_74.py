@@ -410,8 +410,8 @@ else :
 
 ###########################################################################
 # Electron IDs are calculated in a function
-#import TopAnalysis.Configuration.objectDefinitions13Tev.electron_cff as electron
-#electron.electron(process)
+import TopAnalysis.Configuration.objectDefinitions13Tev.electron_cff as electron
+electron.electron(process)
 
 
 #################################################################### 
@@ -480,7 +480,7 @@ from PhysicsTools.PatAlgos.selectionLayer1.electronSelector_cfi import *
 from PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi import *
 
 process.kinElectrons = selectedPatElectrons.clone(
-    src = 'selectedPatElectrons'+pfpostfix,
+    src = opt.electronOptions["outputCollection"],
     cut = 'pt > 8  && abs(eta) < 2.7' # because of ECalP4 to be on the safe side
     )        
 
@@ -546,9 +546,9 @@ process.PFTree   = cms.EDAnalyzer('TreeWriterTtZ',
                                   #general input collections
                                   treeName = cms.string('pfTree'),
                                   muonSrc = cms.InputTag(muonTag),
-                                  keepElecIdOnly = cms.string(""),
-                                  elecGSFSrc = cms.InputTag('selectedPatElectrons'+pfpostfix), #just the same here to make it run. this can be prevented by a try{}catch(...){} in treewriter for getByLabel
-                                  elecPFSrc = cms.InputTag('selectedPatElectrons'+pfpostfix),
+                                  keepElecIdOnly = cms.string("Phys14-medium"),
+                                  elecGSFSrc = cms.InputTag(opt.electronOptions["outputCollection"]), #just the same here to make it run. this can be prevented by a try{}catch(...){} in treewriter for getByLabel
+                                  elecPFSrc = cms.InputTag(opt.electronOptions["outputCollection"]),
                                   jetSrc = cms.InputTag('treeJets'),  #jetTag), # ('treeJets'),
                                   btagAlgo = cms.string('combinedInclusiveSecondaryVertexV2BJetTags'), ###combinedSecondaryVertexBJetTags'),
                                   metSrc = cms.InputTag(metTag),  #here also try, catch statements
