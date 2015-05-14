@@ -6,7 +6,7 @@
 
 
 ### ttbar 
-1000    /TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/Fall14DR73-PFr1_Flat_20_50_50ns_GSFromFall14_MCRUN2_73_V11-v1/AODSIM        tree_13TeV_emuttbar_amc            runOnAOD=True isSignal=True 
+1000   /TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/Fall14DR73-PFr1_Flat_20_50_50ns_GSFromFall14_MCRUN2_73_V11-v1/AODSIM   tree_13TeV_emuttbar_amc   runOnAOD=True isSignal=True includePDFWeights=True PDF=NNPDF30 nominalPDF=1001 beginPDFVar=2001 endPDFVar=2102
 
-1000    /TT_TuneCUETP8M1_13TeV-powheg-pythia8/Fall14DR73-PFr1_Flat_20_50_50ns_GSFromFall14_MCRUN2_73_V11-v1/AODSIM          tree_13TeV_emuttbar_pow            runOnAOD=True isSignal=True
+1000   /TT_TuneCUETP8M1_13TeV-powheg-pythia8/Fall14DR73-PFr1_Flat_20_50_50ns_GSFromFall14_MCRUN2_73_V11-v1/AODSIM             tree_13TeV_emuttbar_pow   runOnAOD=True isSignal=True includePDFWeights=True PDF=NNPDF30 nominalPDF=1001 beginPDFVar=2001 endPDFVar=2100
 

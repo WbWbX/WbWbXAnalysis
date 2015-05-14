@@ -25,7 +25,9 @@ options.register('genFilterMassHigh',0,VarParsing.VarParsing.multiplicity.single
 options.register('genFilterInvert',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"invert gen Filter")
 options.register('includePDFWeights',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"includes pdf weights info for event")
 options.register('PDF','CT10',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"pdf set for weights")
-options.register('PDFArrayBegin','2001',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"index of first pdf weight")
+options.register('nominalPDF','1001',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"weight index of nominal pdf")
+options.register('beginPDFVar','2001',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"first weight index for pdf variation")
+options.register('endPDFVar','2052',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"last weight index for pdf variation")
 options.register('reportEvery',1000,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.int,"report every")
 options.register('wantSummary',True,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"prints trigger summary")
 options.register('debug',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"enters debug mode")
@@ -57,7 +59,9 @@ genFilterString=options.genFilterString     # 'none'
 genFilterInvert=options.genFilterInvert     # False
 includePDFWeights=options.includePDFWeights # False
 PDF=options.PDF                             # CT10
-PDFArrayBegin=options.PDFArrayBegin         
+nominalPDF=options.nominalPDF
+beginPDFVar=options.beginPDFVar
+endPDFVar=options.endPDFVar
 inputScript=options.inputScript             # TtZAnalysis.Configuration.samples.mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12-PU_S7_START52_V9-v2_cff
 print 'Using input script: ', inputScript
 json=options.json                           # parse absolute paths here!
@@ -195,7 +199,7 @@ process.load("TopAnalysis.ZTopUtils.EventWeightMCSystematic_cfi")
 process.nominal = cms.EDProducer("EventWeightMCSystematic",
                                  genEventInfoTag=cms.InputTag("generator"),
                                  lheEventInfoTag=cms.InputTag("externalLHEProducer"),
-                                 weightID=cms.string("1001"), 
+                                 weightID=cms.string("0000"), 
                                  printLHE=cms.bool(False)
                                  )
 process.scaleUp = cms.EDProducer("EventWeightMCSystematic",
@@ -214,10 +218,11 @@ process.scaleDown = cms.EDProducer("EventWeightMCSystematic",
 ## PDF weights if required 
 if includePDFWeights:
     process.pdfWeights = cms.EDProducer("EventWeightPDF",
-                                        genEventInfoTag=cms.InputTag("generator"),
                                         lheEventInfoTag=cms.InputTag("externalLHEProducer"),
-                                        beginWeightID=cms.vstring(PDFArrayBegin),
-                                        PDFSetNames=cms.vstring(PDF),
+                                        PDFName=cms.vstring(PDF),
+                                        nominalWeightID=cms.vstring(nominalPDF),
+                                        beginWeightID=cms.vstring(beginPDFVar),
+                                        endWeightID=cms.vstring(endPDFVar),
                                         printLHE=cms.bool(False)
                                         )
 #cms.EDProducer("PdfWeightProducer",
