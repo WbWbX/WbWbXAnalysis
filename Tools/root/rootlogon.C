@@ -1,10 +1,4 @@
 {
-
-
-  //for interactive vector handling 
-#include <vector>
-#pragma link C++ class std::vector<float>;
-
   gSystem->Load("libFWCoreFWLite.so"); 
   AutoLibraryLoader::enable();
 
@@ -18,6 +12,12 @@
 
   //this would make inlined functions working (root bug), but takes a lot of loading time
   //#include "TtZAnalysis/DataFormats/src/classes.h"
+  //for interactive vector handling 
+
+
+  //for interactive vector handling 
+#include <vector>
+#pragma link C++ class std::vector<float>;
 
 
   //reduce eye-bleeding with standard colz style
