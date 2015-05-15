@@ -18,7 +18,6 @@
 #include "../interface/ttbarControlPlots.h"
 #include "../interface/ttXsecPlots.h"
 #include "../interface/ZControlPlots.h"
-#include "../interface/MCReweighter.h"
 #include "../interface/leptonSelector2.h"
 
 #include "TtZAnalysis/DataFormats/interface/NTLepton.h"

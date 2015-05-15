@@ -417,14 +417,13 @@ void  analyzer_run1::analyze(size_t anaid){
 	tBranchHandler<std::vector<NTGenParticle> >::allow_missing =true;
 	tBranchHandler<std::vector<NTGenParticle> > b_GenBsRad(t,"NTGenBsRad");
 
-	std::vector<ztop::MCReweighter> mcreweighters;
+	std::vector<ztop::simpleReweighter> mcreweighters;
 
 	for(size_t i=0;i<additionalweights_.size();i++){
 		std::cout << "adding weight " << additionalweights_.at(i) << std::endl;
 		tBranchHandler<NTWeight> * weight = new tBranchHandler<NTWeight>(t,additionalweights_.at(i));
 		weightbranches.push_back(weight);
-		//agrohsje 
-		ztop::MCReweighter mcreweighter; 
+		ztop::simpleReweighter mcreweighter; 
 		mcreweighters.push_back(mcreweighter);
 	}
 
@@ -549,7 +548,7 @@ void  analyzer_run1::analyze(size_t anaid){
 		//agrohsje loop over additional weightbranches 
 		for(size_t i=0;i<weightbranches.size();i++){
 			//	weightbranches.at(i)->getEntry(entry);
-			mcreweighters.at(i).setMCWeight(weightbranches.at(i)->content()->getWeight());
+			mcreweighters.at(i).setNewWeight(weightbranches.at(i)->content()->getWeight());
 			mcreweighters.at(i).reWeight(puweight);
 			if(apllweightsone) puweight=1;		
 		}
