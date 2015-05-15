@@ -1378,20 +1378,6 @@ void  analyzer_run2::analyze(size_t anaid){
 	histo1DUnfold::flushAllListed(); // call once again after last event processed
 
 
-
-	// Fill all containers in the stackVector
-
-	// std::cout << "Filling containers to the Stack\n" << std::endl;
-
-
-	// delete t;
-	//f->Close(); //deletes t
-	//delete f;
-	/*s
-	for(size_t i=0;i<ntestconts;i++)
-			delete testconts.at(i);
-	 */
-
 	///////////////////////////////
 	///////////////////////////////
 	///////////////////////////////

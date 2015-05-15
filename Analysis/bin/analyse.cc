@@ -97,7 +97,6 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	TString sysc="mkdir -p "+outdir+"/btags";
 	system(sysc.Data());
 	if(dobtag){
-
 		btagfile=outdir+"/btags/"+ channel+"_"+energy+"_"+topmass+"_"+Syst;
 	}
 	else if(Syst.BeginsWith("BTAG")){
@@ -179,10 +178,15 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 
 	//change
 	ana->getBTagSF()->setMode(NTBTagSF::randomtagging_mode);
-
-	ana->getBTagSF()->loadBCSF  (btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets","up","down");
-	ana->getBTagSF()->loadUDSGSF(btagSFFile, BTagEntry::OP_TIGHT,"csv","comb","up","down");
-
+	if(energy == "13TeV"){
+	    ana->getBTagSF()->loadBCSF  (btagSFFile, BTagEntry::OP_TIGHT,"csvv2","mujets","up","down");
+	    ana->getBTagSF()->loadUDSGSF(btagSFFile, BTagEntry::OP_TIGHT,"csvv2","comb","up","down");
+	}else if (energy == "7TeV" || energy == "8TeV"){
+	    ana->getBTagSF()->loadBCSF  (btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets","up","down");
+	    ana->getBTagSF()->loadUDSGSF(btagSFFile, BTagEntry::OP_TIGHT,"csv","comb","up","down");
+	}else{
+	    throw std::runtime_error("Undefined Energy! Exit!");
+	}
 
 	ana->getJECUncertainties()->setFile((jecfile).Data());
 	ana->getJECUncertainties()->setSystematics("no");
