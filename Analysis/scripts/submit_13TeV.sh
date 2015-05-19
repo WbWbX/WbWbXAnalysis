@@ -17,7 +17,7 @@ topmasses=( "172.5"
      # "178.5"
      # "166.5"
 );
-pdfeigenvectors=0 #26  # 26 # if set to 0, no variation
+pdfeigenvectors=50 # POWHEG:50; MG5_aMC@NLO:51   # if set to 0, no variation
 
 systs=("nominal"
 
@@ -145,10 +145,10 @@ systs=("nominal"
 ########
 
 
- #   "BTAGH_up"
- #   "BTAGH_down"
- #   "BTAGL_up"
- #   "BTAGL_down"
+    "BTAGH_up"
+    "BTAGH_down"
+    "BTAGL_up"
+    "BTAGL_down"
     
 #####csv rew section
    # "BTAGHFS1_up"

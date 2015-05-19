@@ -113,11 +113,19 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 
 
 	MainAnalyzer* ana;
-	if(energy=="7TeV" || energy=="8TeV")
-		ana= new analyzer_run1();
-	else
-		ana= new analyzer_run2();
-
+	if(energy=="7TeV" || energy=="8TeV"){
+	        ana= new analyzer_run1();
+	}
+	else if(energy=="13TeV"){
+	    ana= new analyzer_run2(); 
+	        //agrohsje 
+		//not ideal, should be steared via command file as sample property 
+		ana->addWeightBranch("NTWeight_nominal");
+	}
+	else{
+	        throw std::runtime_error("Undefined Energy! Exit!");
+	}
+	
 	//only used in special cases!
 	ana->setPathToConfigFile(inputfile);
 
@@ -144,19 +152,17 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	ana->setEnergy(energy);
 	ana->setSyst(Syst);
 	ana->setTopMass(topmass);
-	if(energy == "7TeV"){
+	if(energy=="7TeV"){
 		ana->getPUReweighter()->setMCDistrSummer11Leg();
 	}
-	else if(energy == "8TeV"){
+	else if(energy=="8TeV"){
 		ana->getPUReweighter()->setMCDistrSum12();
 	}
-	else if(energy == "13TeV"){
-		std::cout<<"FIXME: Still apply 8 TeV PU Reweighting"<<std::endl;
-		ana->getPUReweighter()->setMCDistrSum12();
+	else if(energy=="13TeV"){
+	    std::cout<<"FIXME: Apply flat 13 TeV PU Reweighting"<<std::endl;
+	    ana->getPUReweighter()->setMCDistrSum15();
 	}	   
-	else{
-		throw std::runtime_error("Undefined Energy! Exit!");
-	}
+	
 	ana->getElecSF()->setInput(elecsffile,elecsfhisto);
 	ana->getMuonSF()->setInput(muonsffile,muonsfhisto);
 	ana->getTrackingSF()->setInput(trackingsffile,trackingsfhisto);
@@ -178,16 +184,15 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 
 	//change
 	ana->getBTagSF()->setMode(NTBTagSF::randomtagging_mode);
-	if(energy == "13TeV"){
-	    ana->getBTagSF()->loadBCSF  (btagSFFile, BTagEntry::OP_TIGHT,"csvv2","mujets","up","down");
-	    ana->getBTagSF()->loadUDSGSF(btagSFFile, BTagEntry::OP_TIGHT,"csvv2","comb","up","down");
-	}else if (energy == "7TeV" || energy == "8TeV"){
+	if (energy=="7TeV" || energy=="8TeV"){
 	    ana->getBTagSF()->loadBCSF  (btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets","up","down");
 	    ana->getBTagSF()->loadUDSGSF(btagSFFile, BTagEntry::OP_TIGHT,"csv","comb","up","down");
-	}else{
-	    throw std::runtime_error("Undefined Energy! Exit!");
 	}
-
+	else if(energy=="13TeV"){
+	    ana->getBTagSF()->loadBCSF  (btagSFFile, BTagEntry::OP_TIGHT,"csvv2","mujets","up","down");
+	    ana->getBTagSF()->loadUDSGSF(btagSFFile, BTagEntry::OP_TIGHT,"csvv2","comb","up","down");
+	}
+	
 	ana->getJECUncertainties()->setFile((jecfile).Data());
 	ana->getJECUncertainties()->setSystematics("no");
 
@@ -228,18 +233,23 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mgdecays_p11tev.root");
 	}
 	else if(Syst=="PDF_sysnominal"){
+	    //agrohsje no replacement needed as weights included in default samples in run 2
+	    if(energy=="7TeV" || energy=="8TeV"){
 		ana->setFilePostfixReplace("ttbar.root","ttbar_pdf.root");
 		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_pdf.root");
 		ana->setFilePostfixReplace("ttbar_dil.root","ttbar_pdf.root"); //FIXME
 		ana->setFilePostfixReplace("ttbarviatau_dil.root","ttbarviatau_pdf.root"); //FIXME
-		ana->getPdfReweighter()->setPdfIndex(0);
+	    }
+	    ana->getPdfReweighter()->setPdfIndex(0);
 	}
 	else if(Syst.Contains("PDF_sysnominal_")){
+	    //agrohsje no replacement needed as weights included in default samples in run 2 
+	    if(energy=="7TeV" || energy=="8TeV"){
 		ana->setFilePostfixReplace("ttbar.root","ttbar_pdf.root");
 		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_pdf.root");
 		ana->setFilePostfixReplace("ttbar_dil.root","ttbar_pdf.root"); //FIXME
 		ana->setFilePostfixReplace("ttbarviatau_dil.root","ttbarviatau_pdf.root"); //FIXME
-
+	    }
 		size_t pdfindex=0;
 		for(size_t i=1;i<10000;i++){
 			pdfindex++;
@@ -417,16 +427,28 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 		ana->setFilePostfixReplace("ttbarviatau_dil.root","ttbarviatau_dil_ttmdown.root");
 	}
 	else if(Syst=="TT_SCALE_up"){
+	    if (energy=="7TeV" || energy=="8TeV"){	
 		ana->setFilePostfixReplace("ttbar.root","ttbar_ttscaleup.root");
 		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_ttscaleup.root");
 		ana->setFilePostfixReplace("ttbar_dil.root","ttbar_dil_ttscaleup.root");
 		ana->setFilePostfixReplace("ttbarviatau_dil.root","ttbarviatau_dil_ttscaleup.root");
+	    }
+	    else if(energy=="13TeV"){
+		//agrohsje 
+		ana->addWeightBranch("NTWeight_scaleUp");
+	    }
 	}
 	else if(Syst=="TT_SCALE_down"){
-		ana->setFilePostfixReplace("ttbar.root","ttbar_ttscaledown.root");
+	    if (energy=="7TeV" || energy=="8TeV"){	
+	        ana->setFilePostfixReplace("ttbar.root","ttbar_ttscaledown.root");
 		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_ttscaledown.root");
 		ana->setFilePostfixReplace("ttbar_dil.root","ttbar_dil_ttscaledown.root");
 		ana->setFilePostfixReplace("ttbarviatau_dil.root","ttbarviatau_dil_ttscaledown.root");
+	    }
+	    else if(energy=="13TeV"){
+		//agrohsje 
+		ana->addWeightBranch("NTWeight_scaleDown");
+	    }
 	}
 	////////////
 	else if(Syst=="Z_MATCH_up"){

@@ -10,8 +10,9 @@ $  [parameters-begin] until [parameters-end]
 $ inputfile,                       legend entry,        color,   xsection,   legendNumber (for sorting,- allows for gaps),  (opt) isSignal
 
 
-$tree_13TeV_emuttbar_mg5.root,      t#bar{t},		633,	  831.76,	  0,      true   
-tree_13TeV_emuttbar.root,          t#bar{t},		633,	  831.76,	  0,      true   
+$tree_13TeV_emuttbar_amc.root,      t#bar{t},		633,	  831.76,	  0,      true   
+tree_13TeV_emuttbar_pow.root,      t#bar{t},		633,	  831.76,	  0,      true   
+$tree_13TeV_emuttbar.root,           t#bar{t},		633,	  831.76,	  0,      true   
 
 tree_13TeV_tW.root,                tW/#bar{t}W,	   	616,	  35.6,	          4
 tree_13TeV_tbarW.root,	           tW/#bar{t}W,	   	616,	  35.6,	          4
@@ -38,8 +39,8 @@ $tree_13TeV_qcdem80170.root,	   QCD,                 400,      183294,	  9
 [parameters-begin] 
 $$ all directories except for inputfiles are relative to $CMSSW_BASE
 
-inputFilesDir = /nfs/dust/cms/user/tarndt/NTuples/Fit_1004/
-$/nfs/dust/cms/user/agrohsje/NAF_workingDir/ana_samples_150206/
+inputFilesDir = /nfs/dust/cms/user/agrohsje/NAF_workingDir/ana_samples_rr2v1_150513/
+$inputFilesDir = /nfs/dust/cms/user/agrohsje/NAF_workingDir/ana_samples_150206/
 
 Lumi           = 1000
 
@@ -50,19 +51,17 @@ MuonSFHisto    = eff_pt_eta_fullwithtrackerr
 TrackingSFFile = /src/TtZAnalysis/Analysis/data/analyse/muon_trackSF_8TeV.root
 TrackingSFHisto = tracking_eff
 
-
-
 ElecSFFile     = /src/TtZAnalysis/Analysis/data/analyse/elec_tight_sf2D_8TeV.root
 ElecSFHisto    = GlobalSF
 
 TriggerSFFile  = /src/TopAnalysis/Configuration/analysis/common/data/triggerSummary_emu_tightleps.root
 
-PUFile         = /src/TtZAnalysis/Analysis/data/analyse/Legacy2012.json_PU    $without .root
+PUFile         = /src/TtZAnalysis/Analysis/data/analyse/Legacy2012.json_PU_shift15    $without .root
 
-btagSFFile     = /src/TopAnalysis/ZTopUtils/data/CSV_8TeV.csv
-btagFile       = all_btags
+btagSFFile     = /src/TopAnalysis/ZTopUtils/data/CSV_8TeV.csv   $CSV8TeVbreak.csv  CSV7TeVbreak.csv
+btagFile       = all_btags_73
 
-
+$modeOptions = GsfelectronsNotoppt
 modeOptions = GsfelectronsZerojetNozcutNometcutNobcutNotoppt
 
 [parameters-end]
