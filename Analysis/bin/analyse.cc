@@ -5,14 +5,46 @@
 #include "TtZAnalysis/Tools/interface/fileReader.h"
 #include "../interface/discriminatorFactory.h"
 #include <time.h>
+
+#include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
 //#include "Analyzer.cc"
 //should be taken care of by the linker!
 
 
 
-void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
-		double lumi, bool dobtag, bool status,bool testmode,bool tickonce,TString maninputfile,
-		TString mode,TString topmass,TString btagfile,bool createLH, std::string discrfile,float fakedatastartentries,bool interactive,float wpval){ //options like syst..
+//void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
+//		double lumi, bool dobtag, bool status,bool testmode,bool tickonce,TString maninputfile,
+//		TString mode,TString topmass,TString btagfile,bool createLH, std::string discrfile,float fakedatastartentries,bool interactive,float wpval){ //options like syst..
+
+invokeApplication(){
+	using namespace ztop;
+
+	TString channel= parser->getOpt<TString>   ("c","emu","channel (ee, emu, mumu), default: emu\n");         //-c channel
+	TString Syst   = parser->getOpt<TString>   ("s","nominal","systematic variation <var>_<up/down>, default: nominal");     //-s <syst>
+	TString energy = parser->getOpt<TString>   ("e","8TeV","energy (8TeV, 7 TeV), default: 8TeV");        //-e default 8TeV
+	double lumi    = parser->getOpt<float>     ("l",-1,"luminosity, default -1 (= read from config file)");            //-l default -1
+	bool dobtag    = parser->getOpt<bool>      ("B",false,"produce b-tag efficiencies (switch)");         //-B switches on default false
+	TString btagfile = parser->getOpt<TString> ("b","all_btags","use btagfile (default files in dir all_btags)");        //-b btagfile default all_btags.root
+	//const float wpval = parser->getOpt<float>     ("bwp",-100,"btag discriminator cut value (default: not use)");            //-l default -1
+
+	TString outfileadd= parser->getOpt<TString>   ("o","","additional output id");            //-o <outfile> should be something like channel_energy_syst.root // only for plots
+	bool status    = parser->getOpt<bool>      ("S",false,"show regular status update (switch)");         //-S enables default false
+	bool testmode  = parser->getOpt<bool>      ("T",false,"enable testmode: 8% of stat, more printout");         //-T enables default false
+	bool tickonce  = parser->getOpt<bool>      ("TO",false,"enable tick once: breaks as soon as 1 event survived full selection (for software testing)");         //-T enables default false
+	TString mode   = parser->getOpt<TString>   ("m","xsec","additional mode options");        //-m (xsec,....) default xsec changes legends? to some extend
+	TString maninputfile= parser->getOpt<TString> ("i","","specify configuration file input manually (default is configs/analyse/<channel>_<energy>_config.txt");          //-i empty will use automatic
+	TString topmass  = parser->getOpt<TString> ("mt","172.5","top mass value to be used, default: 172.5");          //-i empty will use automatic
+	std::string discrfile=parser->getOpt<std::string>  ("lh","" , "specify discriminator input file. If not specified, likelihoods are created");          //-i empty will use automatic
+
+	const bool interactive = parser->getOpt<bool>      ("I",false,"enable interactive mode: no fork limit");
+
+	float fakedatastartentries = parser->getOpt<float>    ("-startdiv",0.9,"point to start fake data entries wrt to to evts");
+
+	bool createLH=false;
+	if(discrfile.length()<1)
+		createLH=true;
+
+	parser->doneParsing();
 
 	bool didnothing=false;
 	//some env variables
@@ -114,18 +146,15 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 
 	MainAnalyzer* ana;
 	if(energy=="7TeV" || energy=="8TeV"){
-	        ana= new analyzer_run1();
+		ana= new analyzer_run1();
 	}
 	else if(energy=="13TeV"){
-	    ana= new analyzer_run2(); 
-	        //agrohsje 
-		//not ideal, should be steared via command file as sample property 
+		ana= new analyzer_run2();
 		ana->addWeightBranch("NTWeight_nominal");
 	}
-	else{
-	        throw std::runtime_error("Undefined Energy! Exit!");
-	}
-	
+	else
+		throw std::runtime_error("Undefined Energy! Exit!");
+
 	//only used in special cases!
 	ana->setPathToConfigFile(inputfile);
 
@@ -152,17 +181,20 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	ana->setEnergy(energy);
 	ana->setSyst(Syst);
 	ana->setTopMass(topmass);
-	if(energy=="7TeV"){
+	if(energy == "7TeV"){
 		ana->getPUReweighter()->setMCDistrSummer11Leg();
 	}
-	else if(energy=="8TeV"){
+	else if(energy == "8TeV"){
 		ana->getPUReweighter()->setMCDistrSum12();
 	}
-	else if(energy=="13TeV"){
-	    std::cout<<"FIXME: Apply flat 13 TeV PU Reweighting"<<std::endl;
-	    ana->getPUReweighter()->setMCDistrSum15();
+	else if(energy == "13TeV"){
+		std::cout<<"FIXME: Apply flat 13 TeV PU Reweighting"<<std::endl;
+		//ana->getPUReweighter()->setMCDistrSum15();
+		throw std::runtime_error("Please port modification of PU reweighter to the master branch in TopAnalysis! ;)");
 	}	   
-	
+	else{
+		throw std::runtime_error("Undefined Energy! Exit!");
+	}
 	ana->getElecSF()->setInput(elecsffile,elecsfhisto);
 	ana->getMuonSF()->setInput(muonsffile,muonsfhisto);
 	ana->getTrackingSF()->setInput(trackingsffile,trackingsfhisto);
@@ -184,15 +216,15 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 
 	//change
 	ana->getBTagSF()->setMode(NTBTagSF::randomtagging_mode);
-	if (energy=="7TeV" || energy=="8TeV"){
-	    ana->getBTagSF()->loadBCSF  (btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets","up","down");
-	    ana->getBTagSF()->loadUDSGSF(btagSFFile, BTagEntry::OP_TIGHT,"csv","comb","up","down");
+	if(energy == "13TeV"){
+		ana->getBTagSF()->loadBCSF  (btagSFFile, BTagEntry::OP_TIGHT,"csvv2","mujets","up","down");
+		ana->getBTagSF()->loadUDSGSF(btagSFFile, BTagEntry::OP_TIGHT,"csvv2","comb","up","down");
+	}else if (energy == "7TeV" || energy == "8TeV"){
+		ana->getBTagSF()->loadSF  (btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets","up","down");
+	}else{
+		throw std::runtime_error("Undefined Energy! Exit!");
 	}
-	else if(energy=="13TeV"){
-	    ana->getBTagSF()->loadBCSF  (btagSFFile, BTagEntry::OP_TIGHT,"csvv2","mujets","up","down");
-	    ana->getBTagSF()->loadUDSGSF(btagSFFile, BTagEntry::OP_TIGHT,"csvv2","comb","up","down");
-	}
-	
+
 	ana->getJECUncertainties()->setFile((jecfile).Data());
 	ana->getJECUncertainties()->setSystematics("no");
 
@@ -233,23 +265,21 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mgdecays_p11tev.root");
 	}
 	else if(Syst=="PDF_sysnominal"){
-	    //agrohsje no replacement needed as weights included in default samples in run 2
-	    if(energy=="7TeV" || energy=="8TeV"){
-		ana->setFilePostfixReplace("ttbar.root","ttbar_pdf.root");
-		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_pdf.root");
-		ana->setFilePostfixReplace("ttbar_dil.root","ttbar_pdf.root"); //FIXME
-		ana->setFilePostfixReplace("ttbarviatau_dil.root","ttbarviatau_pdf.root"); //FIXME
-	    }
-	    ana->getPdfReweighter()->setPdfIndex(0);
+		if(energy=="7TeV" || energy=="8TeV"){
+			ana->setFilePostfixReplace("ttbar.root","ttbar_pdf.root");
+			ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_pdf.root");
+			ana->setFilePostfixReplace("ttbar_dil.root","ttbar_dil_pdf.root");
+			ana->setFilePostfixReplace("ttbarviatau_dil.root","ttbarviatau_dil_pdf.root");
+		}
+		ana->getPdfReweighter()->setPdfIndex(0);
 	}
 	else if(Syst.Contains("PDF_sysnominal_")){
-	    //agrohsje no replacement needed as weights included in default samples in run 2 
-	    if(energy=="7TeV" || energy=="8TeV"){
-		ana->setFilePostfixReplace("ttbar.root","ttbar_pdf.root");
-		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_pdf.root");
-		ana->setFilePostfixReplace("ttbar_dil.root","ttbar_pdf.root"); //FIXME
-		ana->setFilePostfixReplace("ttbarviatau_dil.root","ttbarviatau_pdf.root"); //FIXME
-	    }
+		if(energy=="7TeV" || energy=="8TeV"){
+			ana->setFilePostfixReplace("ttbar.root","ttbar_pdf.root");
+			ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_pdf.root");
+			ana->setFilePostfixReplace("ttbar_dil.root","ttbar_dil_pdf.root");
+			ana->setFilePostfixReplace("ttbarviatau_dil.root","ttbarviatau_dil_pdf.root");
+		}
 		size_t pdfindex=0;
 		for(size_t i=1;i<10000;i++){
 			pdfindex++;
@@ -377,21 +407,34 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 		ana->setFilePostfixReplace("_22Jan.root","_22Jan_noptres.root");
 	}
 
-	else if(Syst=="JER_up"){
-		ana->getJERAdjuster()->setSystematics("up");
-	}
-	else if(Syst=="JER_down"){
-		ana->getJERAdjuster()->setSystematics("down");
-	}
+
 	else if(Syst=="PU_up"){
 		ana->getPUReweighter()->setDataTruePUInput(pufile+"_up.root");
+		if(!dobtag){
+			ana->getBTagSF()->loadBCSF(btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets","up_PileUp","down_PileUp");
+			ana->getBTagSF()->setSystematics(bTagSFBase::heavyup);}
 	}
 	else if(Syst=="PU_down"){
 		ana->getPUReweighter()->setDataTruePUInput(pufile+"_down.root");
+		if(!dobtag){
+			ana->getBTagSF()->loadBCSF(btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets","up_PileUp","down_PileUp");
+			ana->getBTagSF()->setSystematics(bTagSFBase::heavydown);}
 	}
 
+	//btag uncertainties are correlated
+	else if(Syst=="JER_up"){
+		ana->getJERAdjuster()->setSystematics("up");
+		if(!dobtag){
+			ana->getBTagSF()->loadBCSF(btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets","up_JER","down_JER");
+			ana->getBTagSF()->setSystematics(bTagSFBase::heavyup);}
+	}
+	else if(Syst=="JER_down"){
+		ana->getJERAdjuster()->setSystematics("down");
+		if(!dobtag){
+			ana->getBTagSF()->loadBCSF(btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets","up_JER","down_JER");
+			ana->getBTagSF()->setSystematics(bTagSFBase::heavydown);}
+	}
 	/////////btag
-
 	else if(Syst=="BTAGH_up"){
 		ana->getBTagSF()->setSystematics(bTagSFBase::heavyup);
 	}
@@ -403,6 +446,23 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	}
 	else if(Syst=="BTAGL_down"){
 		ana->getBTagSF()->setSystematics(bTagSFBase::lightdown);
+	}
+	else if(Syst.BeginsWith("BTAGH_")){ //this is not standard up/down but splitting! only for heavy SF
+		TString btagsubstr=Syst;
+		btagsubstr.ReplaceAll("BTAGH_","");
+		btagsubstr.ReplaceAll("_up","");
+		btagsubstr.ReplaceAll("_down","");
+		TString btagsubstrup="up_"+btagsubstr;
+		btagsubstr="down_"+btagsubstr;
+
+		ana->getBTagSF()->loadBCSF(btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets",btagsubstrup.Data(),btagsubstr.Data());
+
+		if(Syst.EndsWith("_up"))
+			ana->getBTagSF()->setSystematics(bTagSFBase::heavyup);
+		else if (Syst.EndsWith("_down"))
+			ana->getBTagSF()->setSystematics(bTagSFBase::heavydown);
+		else
+			throw std::runtime_error("btag subsplitting has to end with up/down");
 	}
 
 	/////////top pt
@@ -427,28 +487,27 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 		ana->setFilePostfixReplace("ttbarviatau_dil.root","ttbarviatau_dil_ttmdown.root");
 	}
 	else if(Syst=="TT_SCALE_up"){
-	    if (energy=="7TeV" || energy=="8TeV"){	
-		ana->setFilePostfixReplace("ttbar.root","ttbar_ttscaleup.root");
-		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_ttscaleup.root");
-		ana->setFilePostfixReplace("ttbar_dil.root","ttbar_dil_ttscaleup.root");
-		ana->setFilePostfixReplace("ttbarviatau_dil.root","ttbarviatau_dil_ttscaleup.root");
-	    }
-	    else if(energy=="13TeV"){
-		//agrohsje 
-		ana->addWeightBranch("NTWeight_scaleUp");
-	    }
+		if (energy=="7TeV" || energy=="8TeV"){
+			ana->setFilePostfixReplace("ttbar.root","ttbar_ttscaleup.root");
+			ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_ttscaleup.root");
+			ana->setFilePostfixReplace("ttbar_dil.root","ttbar_dil_ttscaleup.root");
+			ana->setFilePostfixReplace("ttbarviatau_dil.root","ttbarviatau_dil_ttscaleup.root");
+		}
+		else if(energy=="13TeV"){
+			ana->addWeightBranch("NTWeight_scaleUp");
+		}
 	}
 	else if(Syst=="TT_SCALE_down"){
-	    if (energy=="7TeV" || energy=="8TeV"){	
-	        ana->setFilePostfixReplace("ttbar.root","ttbar_ttscaledown.root");
-		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_ttscaledown.root");
-		ana->setFilePostfixReplace("ttbar_dil.root","ttbar_dil_ttscaledown.root");
-		ana->setFilePostfixReplace("ttbarviatau_dil.root","ttbarviatau_dil_ttscaledown.root");
-	    }
-	    else if(energy=="13TeV"){
-		//agrohsje 
-		ana->addWeightBranch("NTWeight_scaleDown");
-	    }
+		if (energy=="7TeV" || energy=="8TeV"){
+			ana->setFilePostfixReplace("ttbar.root","ttbar_ttscaledown.root");
+			ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_ttscaledown.root");
+			ana->setFilePostfixReplace("ttbar_dil.root","ttbar_dil_ttscaledown.root");
+			ana->setFilePostfixReplace("ttbarviatau_dil.root","ttbarviatau_dil_ttscaledown.root");
+		}
+		else if(energy=="13TeV"){
+			ana->addWeightBranch("NTWeight_scaleDown");
+		}
+
 	}
 	////////////
 	else if(Syst=="Z_MATCH_up"){
@@ -633,53 +692,6 @@ void analyse(TString channel, TString Syst, TString energy, TString outfileadd,
 	}
 
 	delete ana;
-
-}
-
-
-
-
-//////////////////
-#include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
-
-invokeApplication(){
-	using namespace ztop;
-
-	TString channel= parser->getOpt<TString>   ("c","emu","channel (ee, emu, mumu), default: emu\n");         //-c channel
-	TString syst   = parser->getOpt<TString>   ("s","nominal","systematic variation <var>_<up/down>, default: nominal");     //-s <syst>
-	TString energy = parser->getOpt<TString>   ("e","8TeV","energy (8TeV, 7 TeV), default: 8TeV");        //-e default 8TeV
-	double lumi    = parser->getOpt<float>     ("l",-1,"luminosity, default -1 (= read from config file)");            //-l default -1
-	bool dobtag    = parser->getOpt<bool>      ("B",false,"produce b-tag efficiencies (switch)");         //-B switches on default false
-	TString btagfile = parser->getOpt<TString> ("b","all_btags.root","use btagfile (default all_btags.root)");        //-b btagfile default all_btags.root
-	const float wpval = parser->getOpt<float>     ("bwp",-100,"btag discriminator cut value (default: not use)");            //-l default -1
-
-	TString outfile= parser->getOpt<TString>   ("o","","additional output id");            //-o <outfile> should be something like channel_energy_syst.root // only for plots
-	bool status    = parser->getOpt<bool>      ("S",false,"show regular status update (switch)");         //-S enables default false
-	bool testmode  = parser->getOpt<bool>      ("T",false,"enable testmode: 8% of stat, more printout");         //-T enables default false
-	bool tickonce  = parser->getOpt<bool>      ("TO",false,"enable tick once: breaks as soon as 1 event survived full selection (for software testing)");         //-T enables default false
-	TString mode   = parser->getOpt<TString>   ("m","xsec","additional mode options");        //-m (xsec,....) default xsec changes legends? to some extend
-	TString inputfile= parser->getOpt<TString> ("i","","specify configuration file input manually (default is configs/analyse/<channel>_<energy>_config.txt");          //-i empty will use automatic
-	TString topmass  = parser->getOpt<TString> ("mt","172.5","top mass value to be used, default: 172.5");          //-i empty will use automatic
-	TString discrFile=parser->getOpt<TString>  ("lh","" , "specify discriminator input file. If not specified, likelihoods are created");          //-i empty will use automatic
-
-	const bool interactive = parser->getOpt<bool>      ("I",false,"enable interactive mode: no fork limit");
-
-	float fakedatastartentries = parser->getOpt<float>    ("-startdiv",0.9,"point to start fake data entries wrt to to evts");
-
-	bool createLH=false;
-	if(discrFile.Length()<1)
-		createLH=true;
-
-	parser->doneParsing();
-
-	bool mergefiles=false;
-	std::vector<TString> filestomerge;
-
-	if(mergefiles){
-		//do the merging with filestomerge
-	}
-	else{
-		analyse(channel, syst, energy, outfile, lumi,dobtag , status, testmode,tickonce,inputfile,mode,topmass,btagfile,createLH,discrFile.Data(),fakedatastartentries,interactive,wpval);
-	}
 	return 0;
 }
+
