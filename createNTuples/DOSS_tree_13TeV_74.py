@@ -382,7 +382,7 @@ if runOnAOD:
     process.load("PhysicsTools.PatAlgos.patSequences_cff")
     from PhysicsTools.PatAlgos.tools.pfTools import usePF2PAT
     usePF2PAT(process, runPF2PAT=True, jetAlgo='AK4', runOnMC=runOnMC, postfix=pfpostfix, 
-              jetCorrections=jetCorr, pvCollection=cms.InputTag(opt.primaryVertexOptions['outputCollection']),typeIMetCorrections=True) 
+              jetCorrections=jetCorr, pvCollection=cms.InputTag('offlinePrimaryVertices'),typeIMetCorrections=True) 
 
     getattr(process, 'pfPileUp'+pfpostfix).checkClosestZVertex = False
     
@@ -394,7 +394,9 @@ if runOnAOD:
     # agrohsje don't require isolation on cmsRun level !!! 
     # seems not to work -> check with python -i ?
     getattr(process,'pfIsolatedElectrons'+pfpostfix).isolationCut = cms.double(999999.) 
-    getattr(process,'pfIsolatedMuons'+pfpostfix).isolationCut = cms.double(999999.)
+    getattr(process,'pfIsolatedMuonsPFBRECO'+pfpostfix).cut = ''
+    getattr(process,'pfMuonsFromVertexPFBRECO'+pfpostfix).d0Cut = cms.double(999999.)
+    getattr(process,'pfMuonsFromVertexPFBRECO'+pfpostfix).dzCut = cms.double(999999.)
 
 
 else :
@@ -519,6 +521,11 @@ switchJetCollection(
     postfix = pfpostfix
 )
 
+
+getattr(process,'patJetPartons'+pfpostfix).particles = cms.InputTag(genParticleCollection)
+getattr(process,'patJetPartonMatch'+pfpostfix).matched = cms.InputTag(genParticleCollection)
+getattr(process,'jetTracksAssociatorAtVertex'+pfpostfix).tracks = cms.InputTag(trackSource)
+getattr(process,'inclusiveSecondaryVertexFinderTagInfos'+pfpostfix).extSVCollection = svSource
 
 patJets = ['patJets'+pfpostfix]
 for m in patJets:
