@@ -179,6 +179,23 @@ else:
 print "Using global tag: ", process.GlobalTag.globaltag
 
 
+jecFile=os.path.relpath( os.environ['CMSSW_BASE']+'/src/TtZAnalysis/Data/PHYS14_V4_MC.db')
+from CondCore.DBCommon.CondDBSetup_cfi import *
+process.jec = cms.ESSource("PoolDBESSource",CondDBSetup,
+    connect = cms.string('sqlite_file:'+jecFile),
+    toGet =  cms.VPSet(
+    cms.PSet(record = cms.string("JetCorrectionsRecord"),
+        tag = cms.string("JetCorrectorParametersCollection_PHYS14_V4_MC_AK4PF"),
+        Label = cms.untracked.string("AK4PF")),
+        cms.PSet(record = cms.string("JetCorrectionsRecord"),
+        tag =cms.string("JetCorrectorParametersCollection_PHYS14_V4_MC_AK4PFchs"),
+        Label = cms.untracked.string("AK4PFchs"))
+    )
+)
+process.es_prefer_jec = cms.ESPrefer("PoolDBESSource","jec")
+
+
+
 ####################################################################
 ## Configure TFileService    
 
@@ -391,9 +408,12 @@ if runOnAOD:
     getattr(process,'pfNoElectron'+pfpostfix).enable = False
     getattr(process,'pfNoJet'+pfpostfix).enable = False
     getattr(process,'pfNoTau'+pfpostfix).enable = False
-    # agrohsje don't require isolation on cmsRun level !!! 
-    # seems not to work -> check with python -i ?
-    getattr(process,'pfIsolatedElectrons'+pfpostfix).isolationCut = cms.double(999999.) 
+    # agrohsje don't require isolation on cmsRun level !!!
+    # tarndt especially don't require it in the default pf2pat process
+    #        PFBRECO is subset of pf2pat processes 
+    getattr(process,'pfIsolatedElectronsPFBRECO'+pfpostfix).cut=''
+    getattr(process,'pfElectronsFromVertexPFBRECO'+pfpostfix).d0Cut = cms.double(999999.)
+    getattr(process,'pfElectronsFromVertexPFBRECO'+pfpostfix).dzCut = cms.double(999999.) 
     getattr(process,'pfIsolatedMuonsPFBRECO'+pfpostfix).cut = ''
     getattr(process,'pfMuonsFromVertexPFBRECO'+pfpostfix).d0Cut = cms.double(999999.)
     getattr(process,'pfMuonsFromVertexPFBRECO'+pfpostfix).dzCut = cms.double(999999.)
@@ -439,45 +459,16 @@ if runOnAOD:
     trackSource = 'generalTracks'
     pvSource = 'offlinePrimaryVertices'
     svSource = cms.InputTag('inclusiveSecondaryVertices')
+    electronSource=cms.InputTag(opt.electronOptions['inputCollectionAod'])
+    muonSource=cms.InputTag(opt.muonOptions['inputCollectionAod'])
 else:
     jetSource = 'ak4PFJetsCHS' 
     trackSource = 'unpackedTracksAndVertices'
     pvSource = 'unpackedTracksAndVertices'
     svSource = cms.InputTag('unpackedTracksAndVertices','secondary')
+    electronSource=cms.InputTag(opt.electronOptions['inputCollectionMiniAod'])
+    muonSource=cms.InputTag(opt.muonOptions['inputCollectionMiniAod'])
     
-#from PhysicsTools.PatAlgos.tools.jetTools import switchJetCollection
-
-## Switch the default jet collection (done in order to use the above specified b-tag infos and discriminators)
-#switchJetCollection(
-#    process,
-#    jetSource = cms.InputTag(jetSource),
-#    trackSource = cms.InputTag(trackSource),
-#    pvSource = cms.InputTag(pvSource),
-#    svSource = svSource,
-#    btagInfos = bTagInfos,
-#    btagDiscriminators = bTagDiscriminators,
-#    jetCorrections = jetCorr,
-#    genJetCollection = cms.InputTag(genJetCollection),
-#    postfix = pfpostfix
-   # )
-#
-#getattr(process,'patJetPartons'+pfpostfix).particles = cms.InputTag(genParticleCollection)
-#getattr(process,'patJetPartonMatch'+pfpostfix).matched = cms.InputTag(genParticleCollection)
-#getattr(process, 'patJetCorrFactors'+pfpostfix).primaryVertices = cms.InputTag(pvSource)
-
-## agrohsje following lines needed ?
-#process.inclusiveVertexFinder.tracks = cms.InputTag(trackSource)
-#process.trackVertexArbitrator.tracks = cms.InputTag(trackSource)
-
-#patJets = ['patJets'+pfpostfix]
-#for m in patJets:
-#    if hasattr(process,m):
-#        print "Switching 'addTagInfos' for " + m + " to 'True'"
-#        setattr( getattr(process,m), 'addTagInfos', cms.bool(True) )
-#        print "Switching 'addJetFlavourInfo' for " + m + " to 'True'"
-##        setattr( getattr(process,m), 'addJetFlavourInfo', cms.bool(True) )
-
-
 ####################################################################
 ## Lepton information and dilepton filter at reco level 
 
@@ -512,8 +503,8 @@ switchJetCollection(
     pfCandidates = cms.InputTag(trackSource),
     pvSource = cms.InputTag(pvSource),
     svSource = svSource,
-    elSource = cms.InputTag('kinElectrons'),
-    muSource = cms.InputTag(opt.muonOptions['outputCollection']),
+    elSource = electronSource,
+    muSource = muonSource,
     btagInfos = bTagInfos,
     btagDiscriminators = bTagDiscriminators,
     jetCorrections = jetCorr,
