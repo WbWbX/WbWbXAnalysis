@@ -179,7 +179,7 @@ else:
 print "Using global tag: ", process.GlobalTag.globaltag
 
 
-jecFile=os.path.relpath( os.environ['CMSSW_BASE']+'/src/TtZAnalysis/Data/PHYS14_V4_MC.db')
+jecFile=os.path.relpath( os.environ['CMSSW_BASE']+'/src/TtZAnalysis/Data/Run2/PHYS14_V4_MC.db')
 from CondCore.DBCommon.CondDBSetup_cfi import *
 process.jec = cms.ESSource("PoolDBESSource",CondDBSetup,
     connect = cms.string('sqlite_file:'+jecFile),
