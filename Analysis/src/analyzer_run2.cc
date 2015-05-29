@@ -420,8 +420,8 @@ void  analyzer_run2::analyze(size_t anaid){
 		mcreweighters.push_back(mcreweighter);
 	}
 	//agrohsje debugging 
-	//int ntevt;
-	//t->tree()->SetBranchAddress("ntevt",&ntevt);
+	int ntevt;
+	t->tree()->SetBranchAddress("ntevt",&ntevt);
 
 	//some helpers
 	double sel_step[]={0,0,0,0,0,0,0,0,0};
@@ -496,8 +496,8 @@ void  analyzer_run2::analyze(size_t anaid){
 	
 	for(Long64_t entry=firstentry;entry<nEntries;entry++){
 
-		//agrohsje ntevt
-		//t->setEntry(entry);
+	    //agrohsje added for ntevt
+	    t->tree()->GetEntry(entry);
 
 		//for fakedata
 		if(skipregion){
@@ -509,8 +509,10 @@ void  analyzer_run2::analyze(size_t anaid){
 			if(entry < regionlowerbound || entry > regionupperbound)
 				continue;
 		}
+
 		t->setEntry(entry);
-		
+
+
 		////////////////////////////////////////////////////
 		////////////////////  INIT EVENT ///////////////////
 		/////////////////////////////////////////////////////////////
@@ -631,8 +633,6 @@ void  analyzer_run2::analyze(size_t anaid){
 		 * Muons
 		 */
 
-
-
 		vector<NTLepton *> allleps;
 		std::vector<NTLepton *> isoleptons;
 		// TBI std::vector<NTLepton *> vetoleps;
@@ -643,23 +643,25 @@ void  analyzer_run2::analyze(size_t anaid){
 		evt.kinmuons=&kinmuons;
 		evt.idmuons=&idmuons;
 		evt.isomuons=&isomuons;
-
 		for(size_t i=0;i<b_Muons.content()->size();i++){
 			NTMuon* muon = & b_Muons.content()->at(i);
 			if(isMC)
 				muon->setP4(muon->p4() * getMuonEnergySF()->getScalefactor(muon->eta()));
 			allleps << muon;
-			/* agrohsje 
-			std::cout<<" muon->pt() "<<muon->pt()
-				 <<" muon->eta() "<<muon->eta()
-				 <<" muon->isGlobal() "<<muon->isGlobal()
-				 <<" muon->matchedStations() "<<muon->matchedStations()
-				 <<" muon->pixHits() "<<muon->pixHits()
-				 <<" muon->muonHits() "<<muon->muonHits()
-				 <<" muon->normChi2() "<<muon->normChi2()
-				 <<" fabs(muon->d0V()) "<<fabs(muon->d0V())
-				 <<" fabs(muon->isoVal()) "<<fabs(muon->isoVal())
-				 <<std::endl;
+			/*
+			  std::cout<<ntevt 
+			  <<" muon->pt() "<<muon->pt()
+			  <<" muon->eta() "<<muon->eta()
+			  <<" muon->isGlobal() "<<muon->isGlobal()
+			  <<" muon->normChi2() "<<muon->normChi2()
+			  <<" muon->trkHits() "<<muon->trkHits()
+			  <<" muon->matchedStations() "<<muon->matchedStations()
+			  <<" fabs(muon->d0V()) "<<fabs(muon->d0V())
+			  <<" fabs(muon->dzV()) "<<fabs(muon->dzV())
+			  <<" muon->pixHits() "<<muon->pixHits()
+			  <<" muon->muonHits() "<<muon->muonHits()
+			  <<" fabs(muon->isoVal()) "<<fabs(muon->isoVal())
+			  <<std::endl;
 			*/
 			if(muon->pt() < lepptthresh)       continue;
 			if(fabs(muon->eta())>2.4) continue;
@@ -667,38 +669,35 @@ void  analyzer_run2::analyze(size_t anaid){
 
 			//tight muon selection: https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideMuonId#Tight_Muon
 			//agrohsje isPF requirement already at ntuple level 
-
+			
 			if(muon->isGlobal()
-					&& muon->matchedStations()>1
-					&& muon->pixHits()>0
-					&& muon->muonHits()>0
-					&& muon->normChi2()<10.
-					&& muon->trkHits()>5
-					&& fabs(muon->d0V())<0.2
-					&& fabs(muon->dzV())<0.5)
-			{
+			   && muon->matchedStations()>1
+			   && muon->pixHits()>0
+			   && muon->muonHits()>0
+			   && muon->normChi2()<10.
+			   && muon->trkHits()>5
+			   && fabs(muon->d0V())<0.2
+			   && fabs(muon->dzV())<0.5)
+			    {
 				idmuons <<  &(b_Muons.content()->at(i));
-			}
-
+			    }
+			
 		}
-
 		for(size_t i=0;i<idmuons.size();i++){
-			NTMuon * muon =  idmuons.at(i);
+		        NTMuon * muon =  idmuons.at(i);
 			if(!mode_invertiso && fabs(muon->isoVal()) > 0.12) continue;
 			if(mode_invertiso && muon->isoVal() < 0.12) continue;
 			isomuons <<  muon;
 			isoleptons << muon;
 		}
-
+		
 		/*
 		 * Electrons
 		 */
-		
 		vector<NTElectron *> kinelectrons,idelectrons,isoelectrons;
 		evt.kinelectrons=&kinelectrons;
 		evt.idelectrons=&idelectrons;
 		evt.isoelectrons=&isoelectrons;
-
 		for(size_t i=0;i<b_Electrons.content()->size();i++){
 			NTElectron * elec=&(b_Electrons.content()->at(i));
 			float ensf=1;
@@ -707,9 +706,17 @@ void  analyzer_run2::analyze(size_t anaid){
 
 			elec->setECalP4(elec->ECalP4() * ensf);
 			elec->setP4(elec->ECalP4() * ensf); //both the same now!!
-
-			//selection fully following https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopEGM l+jets except for pt cut
 			
+			/*
+			    std::cout<<" agrohsje check electrons "
+				     <<ntevt
+				     <<" elec->pt() " <<elec->pt()
+				     <<" fabs(elec->eta()) " <<fabs(elec->eta())  
+				     <<" fabs(elec->suClu().eta()) " <<fabs(elec->suClu().eta()) 
+				     <<" elec->storedId() " <<elec->storedId()
+				     <<std::endl;
+			*/
+			//selection fully following https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopEGM l+jets except for pt cut
 			allleps << elec;
 			if(elec->pt() < lepptthresh)  continue;
 			float abseta=fabs(elec->eta());
@@ -745,7 +752,7 @@ void  analyzer_run2::analyze(size_t anaid){
 
 		//////////two ID leptons STEP 1///////////////////////////////
 		step++;
-
+		
 		if(b_ee_ && idelectrons.size() < 2) continue;
 		if(b_mumu_ && (idmuons.size() < 2 )) continue;
 		if(b_emu_ && (idmuons.size() + idelectrons.size() < 2 )) continue;
@@ -824,6 +831,7 @@ void  analyzer_run2::analyze(size_t anaid){
 			lepweight*=getTrackingSF()->getScalefactor((seclep->eta()));
 			lepweight*=getTriggerSF()->getScalefactor(fabs(firstlep->eta()),fabs(seclep->eta()));
 		}
+
 		//channel defined
 		if(firstlep->pt() > seclep->pt()){
 			leadingptlep=firstlep;
@@ -863,7 +871,7 @@ void  analyzer_run2::analyze(size_t anaid){
 		    continue;
 
 		//now agrohsje added for debugging
-		//std::cout<< ntevt <<" "<<leadingptlep->pt()<<" "<<leadingptlep->eta()<<" "<<secleadingptlep->pt()<<" "<<secleadingptlep->eta()<<std::endl;
+		//		std::cout<<ntevt<</*" "<<leadingptlep->pt()<<" "<<leadingptlep->eta()<<" "<<secleadingptlep->pt()<<" "<<secleadingptlep->eta()<<*/std::endl;
 
 
 		// create jec jets for met and ID jets
@@ -1197,14 +1205,27 @@ void  analyzer_run2::analyze(size_t anaid){
 		if(isZrange){
 			zplots.makeControlPlots(step);
 		}
-
-
+		//agrohsje debug jet 
+		if(ntevt>19075300){
+		    std::cout<< ntevt <<" : "<<std::endl;  
+		    for(unsigned ijet=0; ijet<selectedjets->size();ijet++){
+			std::cout<<"jet pt = "<<selectedjets->at(ijet)->pt() 
+				 <<", jet eta = "<<selectedjets->at(ijet)->eta()
+				 <<", jet id = "<<selectedjets->at(ijet)->id()
+				 <<", jet btag() = "<<selectedjets->at(ijet)->btag()<<std::endl;
+		    }
+		    std::cout<<"######################################################################"<<std::endl;
+		}
 
 		/////////////////////// at least two jets STEP 6 /////////////
 		step++;
-
+		
 		//if(midphi && dphiplushardjets.size()<2) continue;
 		if(!zerojet && !onejet && selectedjets->size() < 2) continue;
+		
+		//agrohsje 
+		//std::cout<<ntevt<</*" "<<leadingptlep->pt()<<" "<<leadingptlep->eta()<<" "<<secleadingptlep->pt()<<" "<<secleadingptlep->eta()<<*/std::endl;
+		
 		//if(!midphi && medjets.size()<2) continue;
 		//if(ptllj<140) continue;
 		/*if(dphillj > 2.65 && dphillj < 3.55){

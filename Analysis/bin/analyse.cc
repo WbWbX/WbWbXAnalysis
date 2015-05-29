@@ -142,8 +142,6 @@ invokeApplication(){
 	///set input files list etc (common)
 
 
-
-
 	MainAnalyzer* ana;
 	if(energy=="7TeV" || energy=="8TeV"){
 		ana= new analyzer_run1();
@@ -188,13 +186,10 @@ invokeApplication(){
 		ana->getPUReweighter()->setMCDistrSum12();
 	}
 	else if(energy == "13TeV"){
-		std::cout<<"FIXME: Apply flat 13 TeV PU Reweighting"<<std::endl;
-		//ana->getPUReweighter()->setMCDistrSum15();
-		throw std::runtime_error("Please port modification of PU reweighter to the master branch in TopAnalysis! ;)");
+	        std::cout<<"FIXME: Apply flat 13 TeV PU Reweighting"<<std::endl;
+		ana->getPUReweighter()->setMCDistrSum15();
 	}	   
-	else{
-		throw std::runtime_error("Undefined Energy! Exit!");
-	}
+
 	ana->getElecSF()->setInput(elecsffile,elecsfhisto);
 	ana->getMuonSF()->setInput(muonsffile,muonsfhisto);
 	ana->getTrackingSF()->setInput(trackingsffile,trackingsfhisto);
@@ -217,8 +212,10 @@ invokeApplication(){
 	//change
 	ana->getBTagSF()->setMode(NTBTagSF::randomtagging_mode);
 	if(energy == "13TeV"){
-		ana->getBTagSF()->loadBCSF  (btagSFFile, BTagEntry::OP_TIGHT,"csvv2","mujets","up","down");
-		ana->getBTagSF()->loadUDSGSF(btagSFFile, BTagEntry::OP_TIGHT,"csvv2","comb","up","down");
+	    //agrohsje 
+	    ana->getBTagSF()->loadBCSF  (btagSFFile, BTagEntry::OP_MEDIUM,"csvv2","mujets","up","down");
+	    ana->getBTagSF()->loadUDSGSF(btagSFFile, BTagEntry::OP_MEDIUM,"csvv2","comb","up","down");
+	    //ana->getBTagSF()->loadSF  (btagSFFile, BTagEntry::OP_TIGHT,"csvv2","mujets","up","down");
 	}else if (energy == "7TeV" || energy == "8TeV"){
 		ana->getBTagSF()->loadSF  (btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets","up","down");
 	}else{
