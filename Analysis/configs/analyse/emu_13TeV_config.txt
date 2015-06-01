@@ -60,7 +60,7 @@ ElecSFHisto    = GlobalSF
 
 TriggerSFFile  = /src/TopAnalysis/Configuration/analysis/common/data/triggerSummary_emu_tightleps.root   
 
-PUFile         = /src/TtZAnalysis/Analysis/data/analyse/Legacy2012.json_PU_shift15    $without .root
+PUFile         = /src/TtZAnalysis/Analysis/data/analyse/Legacy2012.json_PU    $without .root
 
 btagSFFile     = /src/TopAnalysis/ZTopUtils/data/CSV_8TeV.csv   $CSV8TeVbreak.csv  CSV7TeVbreak.csv
 btagFile       = all_btags_73
