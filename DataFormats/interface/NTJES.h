@@ -20,7 +20,7 @@ public:
 	void setIs2012(bool is){JesBase_.setIs2012(is);}
         
         void setFilesCorrection (const TString* filePathL1, const TString* filePathL2, const TString* filePathL3, const TString* filePathL2L3, const bool& isMC) {
-        JesBase_.configureFactorizedJetCorrector( filePathL1, filePathL2, filePathL3, filePathL2L3, isMC);
+	        JesBase_.configureFactorizedJetCorrector( filePathL1, filePathL2, filePathL3, filePathL2L3, isMC);
         }
 	/**
 	 * Adds a source with name to the sources to be varied
@@ -58,10 +58,10 @@ public:
                 float jetInitialPt = jet->pt();
                 float jetInitialEta = jet->eta(); 
                 float jetCorr = JesBase_.correctionForUncorrectedJet(jetArea, jetInitialEta, jetInitialPt, rho);
-                jet->setP4(jet->p4() * jetCorr);
+		jet->setP4(jet->p4() * jetCorr);
         }
         void correctJets(std::vector<ztop::NTJet *> jets, float rho){
-                for(size_t i=0;i<jets.size();i++) correctJet(jets.at(i),jets.at(i)->getMember(1), rho);
+                for(size_t i=0;i<jets.size();i++) correctJet(jets.at(i),jets.at(i)->getMember(0), rho);
         }
 	void applyToJets(std::vector<ztop::NTJet *> jets){
 		for(size_t i=0;i<jets.size();i++)
