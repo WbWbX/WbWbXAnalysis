@@ -11,6 +11,8 @@
  */
 
 #include "../interface/analyzer_run2.h"
+// agrohsje/tarndt 
+#include "../../DataFormats/interface/NTJES.h"
 
 /*
  * Running on the samples is parallelized.
@@ -150,20 +152,23 @@ void  analyzer_run2::analyze(size_t anaid){
 
 	//adapt wrong MG BR for madspin and syst samples
 	if((inputfile.Contains("ttbar.root")
-			|| inputfile.Contains("ttbarviatau.root")
-			|| inputfile.Contains("ttbar_")
-			|| inputfile.Contains("ttbarviatau_") )
-			&&! isdileptonexcl){
-		if(  ! (syst_.BeginsWith("TT_GEN") && syst_.EndsWith("_up"))  ) //other generator
-			normmultiplier=(0.1062/0.11104);//correct both W
-		/*
-		 * BR W-> lnu: 0.1086
-		 * n_comb for leptonic: 1+1+1+2+2+2 (incl taus)
-		 * total lept branching fraction for WW: 0.1086^2 * 9 = 0.1062
-		 * In Madgraph: 0.11104
-		 */
+	    || inputfile.Contains("ttbarviatau.root")
+	    || inputfile.Contains("ttbar_")
+	    || inputfile.Contains("ttbarviatau_") )
+	   &&! isdileptonexcl 
+	   //agrohsje 
+	   && inputfile.Contains("_mgbr")){
+	    //agrohsje uncomment
+	    //if(  ! (syst_.BeginsWith("TT_GEN") && syst_.EndsWith("_up"))  ) //other generator
+	    normmultiplier=(0.1062/0.11104);//correct both W
+	    /*
+	     * BR W-> lnu: 0.1086
+	     * n_comb for leptonic: 1+1+1+2+2+2 (incl taus)
+	     * total lept branching fraction for WW: 0.1086^2 * 9 = 0.1062
+	     * In Madgraph: 0.11104
+	     */
 	}
-
+	// for pure dileptonic samples 
 	if(isdileptonexcl || inputfile.Contains("_mgdecays_") || inputfile.Contains("_tbarWtoLL")|| inputfile.Contains("_tWtoLL")){
 		normmultiplier=0.1062; //fully leptonic branching fraction for both Ws
 	}
@@ -375,17 +380,25 @@ void  analyzer_run2::analyze(size_t anaid){
 	getElecEnergySF()->setIsMC(isMC);
 	getMuonEnergySF()->setIsMC(isMC);
 
+	//REMOVE AGAIN OR DO PROPERLY !!! 
+	//agrohsje/tarndt include jes at ana level for testing 
+	NTJES jescorr = NTJES();
+	//took files from https://twiki.cern.ch/twiki/bin/view/CMS/JECDataMC
+	const TString* dataJECFile = new TString(""); 
+	const TString* mcL1JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Data/Run2/PHYS14_V4_MC_L1FastJet_AK4PFchs.txt");
+	const TString* mcL2JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Data/Run2/PHYS14_V4_MC_L2Relative_AK4PFchs.txt");
+	const TString* mcL3JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Data/Run2/PHYS14_V4_MC_L3Absolute_AK4PFchs.txt");
+	jescorr.setFilesCorrection(mcL1JECFile,mcL2JECFile,
+				   mcL3JECFile,dataJECFile,(const bool) isMC);
+	
 	/*
 	 * Open Main tree,
 	 * Set branches
 	 * the handler is only a small wrapper
 	 */
-	//TTree * t = (TTree*) f->Get("PFTree/PFTree");
 	tTreeHandler tree( datasetdirectory_+inputfile ,"PFTree/PFTree");
 	tTreeHandler *t =&tree;
-
-
-
+	
 	tBranchHandler<std::vector<bool> >     b_TriggerBools(t,"TriggerBools");
 	tBranchHandler<vector<NTElectron> >    b_Electrons(t,electrontype);
 	tBranchHandler<vector<NTMuon> >        b_Muons(t,"NTMuons");
@@ -894,9 +907,15 @@ void  analyzer_run2::analyze(size_t anaid){
 				bool useJetForMet=false;
 				if(treejets.at(i)->emEnergyFraction() < 0.9 && treejets.at(i)->pt() > 10)
 					useJetForMet=true; //dont even do something
-				//agrohsje global 2% scaling for JESup/JESdown added to ZTopUtils/src/JECBase.cc, splitting gives default sys
+				//agrohsje/tarndt just for testing REMOVE
+				//std::cout<<"agrohsje jet pt before "<<treejets.at(i)->pt()<<" rho=" <<b_Event.content()->isoRho(0)<< " area="<< treejets.at(i)->getMember(0) <<std::endl;
+				//jescorr.correctJet(treejets.at(i), treejets.at(i)->getMember(0),b_Event.content()->isoRho(0));
+				//std::cout<<"agrohsje for ntevt="<< ntevt<<" jet pt after jes "<<treejets.at(i)->pt()<<std::endl;
+				//agrohsje global 2% scaling for JESup/JESdown can be added to ZTopUtils/src/JECBase.cc, splitting gives default sys
 				getJECUncertainties()->applyToJet(treejets.at(i));
+				//std::cout<<"agrohsje jet pt after sys var "<<treejets.at(i)->pt()<<std::endl;
 				getJERAdjuster()->correctJet(treejets.at(i));
+				//std::cout<<"agrohsje jet pt after jer "<<treejets.at(i)->pt()<<std::endl;
 				//corrected
 				if(useJetForMet){
 					dpx += oldp4.Px() - treejets.at(i)->p4().Px();
@@ -1206,6 +1225,7 @@ void  analyzer_run2::analyze(size_t anaid){
 			zplots.makeControlPlots(step);
 		}
 		//agrohsje debug jet 
+		/*
 		if(ntevt>19075300){
 		    std::cout<< ntevt <<" : "<<std::endl;  
 		    for(unsigned ijet=0; ijet<selectedjets->size();ijet++){
@@ -1216,7 +1236,7 @@ void  analyzer_run2::analyze(size_t anaid){
 		    }
 		    std::cout<<"######################################################################"<<std::endl;
 		}
-
+		*/
 		/////////////////////// at least two jets STEP 6 /////////////
 		step++;
 		
@@ -1226,14 +1246,6 @@ void  analyzer_run2::analyze(size_t anaid){
 		//agrohsje 
 		//std::cout<<ntevt<</*" "<<leadingptlep->pt()<<" "<<leadingptlep->eta()<<" "<<secleadingptlep->pt()<<" "<<secleadingptlep->eta()<<*/std::endl;
 		
-		//if(!midphi && medjets.size()<2) continue;
-		//if(ptllj<140) continue;
-		/*if(dphillj > 2.65 && dphillj < 3.55){
-			if(ptllj < 190)
-				continue;
-		} */
-
-
 		if(analysisMllRange){
 
 			plots.makeControlPlots(step);
