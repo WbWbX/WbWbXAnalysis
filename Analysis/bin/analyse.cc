@@ -186,8 +186,7 @@ invokeApplication(){
 		ana->getPUReweighter()->setMCDistrSum12();
 	}
 	else if(energy == "13TeV"){
-	        std::cout<<"FIXME: Apply flat 13 TeV PU Reweighting"<<std::endl;
-		ana->getPUReweighter()->setMCDistrSum15();
+	        ana->getPUReweighter()->setMCDistrSum15("50ns_poisson");
 	}	   
 
 	ana->getElecSF()->setInput(elecsffile,elecsfhisto);
