@@ -506,7 +506,10 @@ void  analyzer_run2::analyze(size_t anaid){
 
 	if(testmode_)
 		std::cout << "testmode("<< anaid << "): starting mainloop with file "<< inputfile << " norm " << norm << " entries: "<<nEntries << " fakedata: " <<  fakedata<<std::endl;
-	
+	//agrohsje 
+	float pusum(0.); 
+	float pusum_sel(0.);
+	int nEntries_sel(0);
 	for(Long64_t entry=firstentry;entry<nEntries;entry++){
 
 	    //agrohsje added for ntevt
@@ -539,13 +542,15 @@ void  analyzer_run2::analyze(size_t anaid){
 
 		//reports current status to parent
 		reportStatus(entry,nEntries,anaid);
-
+		
 		float puweight=1;
 		if (isMC) puweight = getPUReweighter()->getPUweight(b_Event.content()->truePU());
+		//agrohsje
+		pusum+=puweight;
 		if(apllweightsone) puweight=1;
 		if(testmode_ && entry==0)
-			std::cout << "testmode("<< anaid << "): got first event entry" << std::endl;
-
+		    std::cout << "testmode("<< anaid << "): got first event entry" << std::endl;
+		
 		evt.puweight=&puweight;
 
 		getPdfReweighter()->setNTEvent(b_Event.content());
@@ -1320,6 +1325,9 @@ void  analyzer_run2::analyze(size_t anaid){
 			std::cout << "tickOnce("<< anaid << "): finished main loop once. break"<<std::endl;
 			break; //one event survived, sufficient
 		}
+		//agrohsje debug pu 
+		pusum_sel+=getPUReweighter()->getPUweight(b_Event.content()->truePU());
+		nEntries_sel++;
 	}
 	//clear input tree and close
 	tree.clear();
@@ -1433,7 +1441,9 @@ void  analyzer_run2::analyze(size_t anaid){
 		std::cout << "\nEvents total (normalized): "
 				<< nEntries*norm << "\n"
 				"nEvents_selected normd: "<< sel_step[8]*norm<< " " << inputfile<< std::endl;
-
+		//agrohsje debug pu
+		std::cout<<"selection bias for PU?: pusum="<<pusum<<" for all nEntries="<<nEntries
+			 << ", pusum_sel=" << pusum_sel << " for selected events=" << nEntries_sel << std::endl;
 
 		if(singlefile_) return;
 
