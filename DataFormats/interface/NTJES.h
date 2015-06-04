@@ -1,7 +1,27 @@
 #ifndef NTJES_H
 #define NTJES_H
 
+#include "TtZAnalysis/Configuration/interface/version.h"
+#ifndef CMSSW_LEQ_5
 #include "TopAnalysis/ZTopUtils/interface/JESBase.h"
+#else
+
+class JESBase{
+public:
+
+	void setFile(std::string pathToFile){}
+	void setSystematics(std::string syst){}
+	void configureFactorizedJetCorrector(const TString* filePathL1, const TString* filePathL2, const TString* filePathL3, const TString* filePathL2L3, const bool& isMC){}
+	void setIs2012(bool is){}
+	std::vector<std::string> getSourceNames(){return std::vector<std::string>();}
+	void restrictToFlavour(int flav){}
+	void clearRestrictToFlavour(){}
+	void applyUncertainties(float a,float b,float c,float d, int f){}
+	float correctionForUncorrectedJet(float a,float b,float c,float d){return 0.;}
+	void setSource(const std::string& str){}
+};
+
+#endif
 #include "TtZAnalysis/DataFormats/interface/NTJet.h"
 
 #include "NTLorentzVector.h"
