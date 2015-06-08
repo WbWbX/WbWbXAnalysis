@@ -92,7 +92,7 @@ pfpostfix = "PFlow"
 opt.globalOptions = {'runOnAod':options.runOnAOD,
                  'signal':isSignal}
 opt.primaryVertexOptions = {'inputCollectionAod':'offlinePrimaryVertices',  # Input Collection for AOD
-                 'inputCollectionMiniAod':'unpackedTracksAndVertices', # Input Collection for MiniAOD
+                 'inputCollectionMiniAod':'offlineSlimmedPrimaryVertices', # Input Collection for MiniAOD
                  'outputCollection':''}       # The Collection which is Produced, is set in the apropriate cff File
 opt.muonOptions={'inputCollectionAod':'selectedPatMuons'+pfpostfix,
                  'inputCollectionMiniAod': 'slimmedMuons',
@@ -231,6 +231,19 @@ process.scaleDown = cms.EDProducer("EventWeightMCSystematic",
                                    weightID=cms.string("1009"), 
                                    printLHE=cms.bool(False)
                                    )
+process.hDampUp = cms.EDProducer("EventWeightMCSystematic",
+                                 genEventInfoTag=cms.InputTag("generator"),
+                                 lheEventInfoTag=cms.InputTag("externalLHEProducer"),
+                                 weightID=cms.string("5014"),
+                                 printLHE=cms.bool(False)
+                                 )
+process.hDampDown = cms.EDProducer("EventWeightMCSystematic",
+                                   genEventInfoTag=cms.InputTag("generator"),
+                                   lheEventInfoTag=cms.InputTag("externalLHEProducer"),
+                                   weightID=cms.string("5027"),
+                                   printLHE=cms.bool(False)
+                                   )
+
 
 ## PDF weights if required 
 if includePDFWeights:
@@ -320,8 +333,13 @@ process.ak4GenJetFlavourPlusLeptonInfos = ak4JetFlavourInfos.clone(
 ####################################################################
 ## Generator-level selection 
 
-#agrohsje todo: add gen-level filters  
-process.fsFilterSequence = cms.Sequence()
+if genFilter == "ttbar":
+    process.load('TtZAnalysis.TreeWriter.topDecayFilter_cff')
+    process.topDecayFilter.src=genParticleCollection
+    process.topDecayFilter.invert=genFilterInvert
+    process.fsFilterSequence = cms.Sequence(process.topDecayFilter)
+else :
+    process.fsFilterSequence = cms.Sequence()
     
 ####################################################################
 ## Prefilter sequence
@@ -425,7 +443,6 @@ else :
     metTag = 'slimmedMETs'
 
     #redo jets to adjust b-tagging/JEC info  
-    process.load('PhysicsTools.PatAlgos.slimming.unpackedTracksAndVertices_cfi')
     from RecoJets.JetProducers.ak4PFJets_cfi import ak4PFJets
     from RecoJets.JetProducers.ak4GenJets_cfi import ak4GenJets
     process.pfCHS = cms.EDFilter("CandPtrSelector", 
@@ -446,26 +463,23 @@ electron.electron(process)
 
 
 ## b-tag infos
-bTagInfos = ['impactParameterTagInfos','secondaryVertexTagInfos']
+#bTagInfos = ['impactParameterTagInfos','secondaryVertexTagInfos']
 ## b-tag discriminators
-bTagDiscriminators = ['jetBProbabilityBJetTags','jetProbabilityBJetTags',
-                      'trackCountingHighPurBJetTags','trackCountingHighEffBJetTags',
-                      'simpleSecondaryVertexHighEffBJetTags','simpleSecondaryVertexHighPurBJetTags',
-                      'combinedSecondaryVertexBJetTags', 'combinedInclusiveSecondaryVertexV2BJetTags'
+bTagDiscriminators = ['pfCombinedInclusiveSecondaryVertexV2BJetTags'
                       ]
 ## Jets, tracks, and vertices 
 if runOnAOD:
     jetSource = 'pfJets'+pfpostfix
-    trackSource = 'generalTracks'
+    pfCandidates = 'particleFlow'
     pvSource = 'offlinePrimaryVertices'
-    svSource = cms.InputTag('inclusiveSecondaryVertices')
+    svSource = cms.InputTag('inclusiveCandidateSecondaryVertices')
     electronSource=cms.InputTag(opt.electronOptions['inputCollectionAod'])
     muonSource=cms.InputTag(opt.muonOptions['inputCollectionAod'])
 else:
     jetSource = 'ak4PFJetsCHS' 
-    trackSource = 'unpackedTracksAndVertices'
-    pvSource = 'unpackedTracksAndVertices'
-    svSource = cms.InputTag('unpackedTracksAndVertices','secondary')
+    pfCandidates = 'packedPFCandidates'
+    pvSource = 'offlineSlimmedPrimaryVertices'
+    svSource = cms.InputTag('slimmedSecondaryVertices')
     electronSource=cms.InputTag(opt.electronOptions['inputCollectionMiniAod'])
     muonSource=cms.InputTag(opt.muonOptions['inputCollectionMiniAod'])
     
@@ -482,10 +496,13 @@ process.kinElectrons = selectedPatElectrons.clone(
     cut = 'pt > 8  && abs(eta) < 2.7' # because of ECalP4 to be on the safe side
     )        
 
+process.muonEleMerge = cms.EDProducer("CandViewMerger",
+                                     src = cms.VInputTag(cms.InputTag("kinElectrons"),cms.InputTag(opt.muonOptions['outputCollection']                                           ))
+                                     )
+
 ## filter on at least two opposite charge elecs/muons or emu
 process.filterkinLeptons = cms.EDFilter("SimpleCounter",
-                                        src = cms.VInputTag(cms.InputTag(opt.muonOptions['outputCollection']),  
-                                                            cms.InputTag("kinElectrons")), 
+                                        src = cms.VInputTag(cms.InputTag("muonEleMerge")), 
                                         requireOppoQ = cms.bool(True),
                                         minNumber = cms.uint32(minleptons),
                                         debug=cms.bool(debug)
@@ -500,12 +517,12 @@ from PhysicsTools.PatAlgos.tools.jetTools import switchJetCollection
 switchJetCollection(
     process,
     jetSource = cms.InputTag('ak4PFJetsCHS'),#jetSource),
-    pfCandidates = cms.InputTag(trackSource),
+    pfCandidates = cms.InputTag(pfCandidates),
     pvSource = cms.InputTag(pvSource),
     svSource = svSource,
     elSource = electronSource,
     muSource = muonSource,
-    btagInfos = bTagInfos,
+#    btagInfos = bTagInfos,
     btagDiscriminators = bTagDiscriminators,
     jetCorrections = jetCorr,
     genJetCollection = cms.InputTag(genJetCollection),
@@ -515,8 +532,12 @@ switchJetCollection(
 
 getattr(process,'patJetPartons'+pfpostfix).particles = cms.InputTag(genParticleCollection)
 getattr(process,'patJetPartonMatch'+pfpostfix).matched = cms.InputTag(genParticleCollection)
-getattr(process,'jetTracksAssociatorAtVertex'+pfpostfix).tracks = cms.InputTag(trackSource)
-getattr(process,'inclusiveSecondaryVertexFinderTagInfos'+pfpostfix).extSVCollection = svSource
+#getattr(process,'jetTracksAssociatorAtVertex'+pfpostfix).tracks = cms.InputTag(pfCandidates)
+#getattr(process,'inclusiveSecondaryVertexFinderTagInfos'+pfpostfix).extSVCollection = svSource
+
+from PhysicsTools.PatAlgos.tools.pfTools import *
+## Adapt primary vertex collection
+adaptPVs(process, pvCollection=cms.InputTag(pvSource))
 
 patJets = ['patJets'+pfpostfix]
 for m in patJets:
@@ -553,7 +574,7 @@ process.PFTree   = cms.EDAnalyzer('TreeWriterTtZ',
                                   elecGSFSrc = cms.InputTag(opt.electronOptions["outputCollection"]), #just the same here to make it run. this can be prevented by a try{}catch(...){} in treewriter for getByLabel
                                   elecPFSrc = cms.InputTag(opt.electronOptions["outputCollection"]),
                                   jetSrc = cms.InputTag('treeJets'),  #jetTag), # ('treeJets'),
-                                  btagAlgo = cms.string('combinedInclusiveSecondaryVertexV2BJetTags'), ###combinedSecondaryVertexBJetTags'),
+                                  btagAlgo = cms.string('pfCombinedInclusiveSecondaryVertexV2BJetTags'), ###combinedSecondaryVertexBJetTags'),
                                   metSrc = cms.InputTag(metTag),  #here also try, catch statements
                                   mvaMetSrc = cms.InputTag(metTag), 
                                   metT1Src   =cms.InputTag(metTag),
