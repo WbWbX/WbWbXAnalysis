@@ -11,17 +11,18 @@ $ inputfile,                       legend entry,        color,   xsection,   leg
 
 $ add tag "_mgbr" if W->lnu BR is 11.104% and not 10.620% 
 $tree_13TeV_emuttbar_amc_mgbr.root,      t#bar{t},		633,	  831.76,	  0,      true   
-tree_13TeV_emuttbar_pow.root,      t#bar{t},		633,	  831.76,	  0,      true   
+tree_13TeV_emuttbar_mg5_mgbr.root,      t#bar{t},		633,	  831.76,	  0,      true   
 $tree_13TeV_emuttbar.root,           t#bar{t},		633,	  831.76,	  0,      true   
 
-tree_13TeV_tW.root,                tW/#bar{t}W,	   	616,	  35.6,	          4
-tree_13TeV_tbarW.root,	           tW/#bar{t}W,	   	616,	  35.6,	          4
 
-tree_13TeV_dy50inf.root,           DY,                  852,      6025.2,         2 
+$tree_13TeV_tW.root,                tW/#bar{t}W,	   	616,	  35.6,	          4
+$tree_13TeV_tbarW.root,	           tW/#bar{t}W,	   	616,	  35.6,	          4
 
-tree_13TeV_ww.root,		   VV,			390,	  11,   	  5
-tree_13TeV_wz.root,		   VV,			390,	  22.82,   	  5
-tree_13TeV_zz.root,		   VV,			390,	  10.32,	  5  
+$tree_13TeV_dy50inf.root,           DY,                  852,      6025.2,         2 
+
+$tree_13TeV_ww.root,		   VV,			390,	  11,   	  5
+$tree_13TeV_wz.root,		   VV,			390,	  66.1,   	  5
+$tree_13TeV_zz.root,		   VV,			390,	  31.8,	          5  
 $ phys 14 samples: generated 1000 events  
 $tree_13TeV_wz.root,		   VV,			390,	  1.685,   	  5
 $tree_13TeV_zz.root,		   VV,			390,	  1.269,	  5  
@@ -43,7 +44,7 @@ $tree_13TeV_qcdem80170.root,	   QCD,                 400,      183294,	  9
 [parameters-begin] 
 $$ all directories except for inputfiles are relative to $CMSSW_BASE
 
-inputFilesDir = /nfs/dust/cms/user/agrohsje/NAF_workingDir/ana_samples_rr2v1_150513/
+inputFilesDir = /nfs/dust/cms/user/tarndt/NTuples/Prod_741/
 $inputFilesDir = /nfs/dust/cms/user/agrohsje/NAF_workingDir/ana_samples_150206/
 
 Lumi           = 1000
@@ -51,7 +52,7 @@ Lumi           = 1000
 JECFile        = /src/TtZAnalysis/Analysis/data/analyse/Summer13_V5_DATA_UncertaintySources_AK5PFchs.txt
 
 MuonSFFile     = /src/TtZAnalysis/Analysis/data/analyse/muon_tight_sf2D_8TeV.root
-MuonSFHisto    = eff_pt_eta_fullwithtrackerr
+MuonSFHisto    = GlobalSF
 TrackingSFFile = /src/TtZAnalysis/Analysis/data/analyse/muon_trackSF_8TeV.root
 TrackingSFHisto = tracking_eff
 
@@ -62,10 +63,11 @@ TriggerSFFile  = /src/TopAnalysis/Configuration/analysis/common/data/triggerSumm
 
 PUFile         = /src/TtZAnalysis/Analysis/data/analyse/Legacy2012.json_PU    $without .root
 
-btagSFFile     = /src/TopAnalysis/ZTopUtils/data/CSV_8TeV.csv   $CSV8TeVbreak.csv  CSV7TeVbreak.csv
-btagFile       = all_btags_73
+btagSFFile     = /src/TopAnalysis/ZTopUtils/data/CSV8TeVbreak_full.csv  $CSV7TeVbreak.csv
+btagFile       = btag_74
 
 $modeOptions = GsfelectronsNotoppt
+$modeOptions = GsfelectronsNozcutNometcutNotopptNoweights
+$modeOptions = GsfelectronsNotopptNoweights
 modeOptions = GsfelectronsZerojetNozcutNometcutNobcutNotoppt
-
 [parameters-end]
