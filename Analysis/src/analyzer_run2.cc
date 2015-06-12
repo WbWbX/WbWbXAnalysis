@@ -135,7 +135,7 @@ void  analyzer_run2::analyze(size_t anaid){
 	}
 	if(mode_.Contains("Nozcut")){
 		nozcut=true;
-		std::cout << "entering Nometcut mode" <<std::endl;
+		std::cout << "entering Nozcut mode" <<std::endl;
 	}
 	if(mode_.Contains("Nobcut")){
 		nobcut=true;
@@ -670,7 +670,9 @@ void  analyzer_run2::analyze(size_t anaid){
 			  std::cout<<ntevt 
 			  <<" muon->pt() "<<muon->pt()
 			  <<" muon->eta() "<<muon->eta()
+                          <<" muon->phi() "<<muon->phi()
 			  <<" muon->isGlobal() "<<muon->isGlobal()
+                          <<" muon->isPf()     "<<muon->isPf()
 			  <<" muon->normChi2() "<<muon->normChi2()
 			  <<" muon->trkHits() "<<muon->trkHits()
 			  <<" muon->matchedStations() "<<muon->matchedStations()
@@ -689,6 +691,7 @@ void  analyzer_run2::analyze(size_t anaid){
 			//agrohsje isPF requirement already at ntuple level 
 			
 			if(muon->isGlobal()
+                           && muon->isPf()
 			   && muon->matchedStations()>1
 			   && muon->pixHits()>0
 			   && muon->muonHits()>0
@@ -740,7 +743,7 @@ void  analyzer_run2::analyze(size_t anaid){
 			float abseta=fabs(elec->eta());
 
 			float suclueta = fabs(elec->suClu().eta());//elec->ECalP4().eta());
-			if(abseta > 2.5) continue;
+			if(abseta > 2.4) continue;
 			if(suclueta > 1.4442 && suclueta < 1.5660) continue; //transistion region
 			kinelectrons  << elec;
 			if(elec->storedId() > 0.9){  ////agrohsje 1 or 0 should work 
@@ -783,16 +786,46 @@ void  analyzer_run2::analyze(size_t anaid){
 
 		//////// require two iso leptons  STEP 2  //////////////////////////
 		step++;
-
-		if(b_ee_ && isoelectrons.size() < 2) continue;
-		if(b_mumu_ && isomuons.size() < 2 ) continue;
-		if(b_emu_ && isomuons.size() + isoelectrons.size() < 2) continue;
+                vector<NTElectron*> channelelectrons;
+                vector<NTMuon*> channelmuons;
+		if(b_ee_ ){
+                        if(isoelectrons.size() < 2) continue;
+                        else if (isomuons.size()>0 ){
+                                if (isomuons.at(0)->pt() > isoelectrons.at(1)->pt()) continue;
+                        }
+                        channelelectrons << isoelectrons.at(0) << isoelectrons.at(1);
+                }
+		if(b_mumu_ ){
+                        if(isomuons.size() < 2) continue;
+                        else if (isoelectrons.size()>0 ){
+                                if (isoelectrons.at(0)->pt() > isomuons.at(1)->pt()) continue;
+                        }
+                        channelmuons << isomuons.at(0) << isomuons.at(1);
+                }
+		if(b_emu_ ){
+                        if(isomuons.size() < 1 || isoelectrons.size() < 1) continue;
+                        else{ 
+                                if (isoelectrons.size()>1 ){
+                                        if (isoelectrons.at(1)->pt() > isomuons.at(0)->pt()) continue;
+                                }
+                                if (isomuons.size()>1){
+                                        if (isomuons.at(1)->pt() > isoelectrons.at(0)->pt()) continue;
+                                }
+                        }
+                        channelmuons << isomuons.at(0);
+                        channelelectrons << isoelectrons.at(0);
+                }
 
 		//make pair
 		pair<vector<NTElectron*>, vector<NTMuon*> > oppopair,sspair;
-		oppopair = ztop::getOppoQHighestPtPair(isoelectrons, isomuons);
-		sspair = ztop::getOppoQHighestPtPair(isoelectrons, isomuons,-1);
+		//oppopair = ztop::getOppoQHighestPtPair(isoelectrons, isomuons);
+		//sspair = ztop::getOppoQHighestPtPair(isoelectrons, isomuons,-1);
+                //tarndt : Require the lepton pair to be the two highest pt leptons
+                oppopair = ztop::getOppoQHighestPtPair(channelelectrons, channelmuons);
+                sspair = ztop::getOppoQHighestPtPair(channelelectrons, channelmuons,-1);
+                
 
+                 
 		pair<vector<NTElectron*>, vector<NTMuon*> > *leppair=&oppopair;
 		if(mode_samesign)
 			leppair=&sspair;
