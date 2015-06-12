@@ -1476,7 +1476,7 @@ void  analyzer_run2::analyze(size_t anaid){
 				"nEvents_selected normd: "<< sel_step[8]*norm<< " " << inputfile<< std::endl;
 		//agrohsje debug pu
 		std::cout<<"selection bias for PU?: pusum="<<pusum<<" for all nEntries="<<nEntries
-			 << ", pusum_sel=" << pusum_sel << " for selected events=" << nEntries_sel << std::endl;
+			 << ", pusum_sel=" << pusum_sel*norm << " for selected events=" << nEntries_sel*norm << std::endl;
 
 		if(singlefile_) return;
 
