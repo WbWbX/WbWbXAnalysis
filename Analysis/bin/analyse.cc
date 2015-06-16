@@ -211,16 +211,13 @@ invokeApplication(){
 	//change
 	ana->getBTagSF()->setMode(NTBTagSF::randomtagging_mode);
 	if(energy == "13TeV"){
-	    //agrohsje 
-	    ana->getBTagSF()->loadBCSF  (btagSFFile, BTagEntry::OP_MEDIUM,"csvv2","mujets","up","down");
-	    ana->getBTagSF()->loadUDSGSF(btagSFFile, BTagEntry::OP_MEDIUM,"csvv2","comb","up","down");
-	    //ana->getBTagSF()->loadSF  (btagSFFile, BTagEntry::OP_TIGHT,"csvv2","mujets","up","down");
+	        //agrohsje 
+	        //ana->getBTagSF()->loadSF  (btagSFFile, BTagEntry::OP_MEDIUM,"csvv2","mujets","up","down");
+	        ana->getBTagSF()->loadSF  (btagSFFile, BTagEntry::OP_TIGHT,"csvv2","mujets","up","down");
 	}else if (energy == "7TeV" || energy == "8TeV"){
 		ana->getBTagSF()->loadSF  (btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets","up","down");
-	}else{
-		throw std::runtime_error("Undefined Energy! Exit!");
 	}
-
+	
 	ana->getJECUncertainties()->setFile((jecfile).Data());
 	ana->getJECUncertainties()->setSystematics("no");
 
@@ -406,29 +403,36 @@ invokeApplication(){
 
 	else if(Syst=="PU_up"){
 		ana->getPUReweighter()->setDataTruePUInput(pufile+"_up.root");
-		if(!dobtag){
+		if(energy=="7TeV" || energy=="8TeV"){
+		    if(!dobtag){
 			ana->getBTagSF()->loadBCSF(btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets","up_PileUp","down_PileUp");
 			ana->getBTagSF()->setSystematics(bTagSFBase::heavyup);}
+		}
 	}
 	else if(Syst=="PU_down"){
 		ana->getPUReweighter()->setDataTruePUInput(pufile+"_down.root");
-		if(!dobtag){
+		if(energy=="7TeV" || energy=="8TeV"){
+		    if(!dobtag){
 			ana->getBTagSF()->loadBCSF(btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets","up_PileUp","down_PileUp");
 			ana->getBTagSF()->setSystematics(bTagSFBase::heavydown);}
+		}
 	}
-
 	//btag uncertainties are correlated
 	else if(Syst=="JER_up"){
-		ana->getJERAdjuster()->setSystematics("up");
-		if(!dobtag){
+	        ana->getJERAdjuster()->setSystematics("up");
+	        if(energy=="7TeV" || energy=="8TeV"){
+		    if(!dobtag){
 			ana->getBTagSF()->loadBCSF(btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets","up_JER","down_JER");
 			ana->getBTagSF()->setSystematics(bTagSFBase::heavyup);}
+		}
 	}
 	else if(Syst=="JER_down"){
-		ana->getJERAdjuster()->setSystematics("down");
-		if(!dobtag){
+	    ana->getJERAdjuster()->setSystematics("down");
+		if(energy=="7TeV" || energy=="8TeV"){
+		    if(!dobtag){
 			ana->getBTagSF()->loadBCSF(btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets","up_JER","down_JER");
 			ana->getBTagSF()->setSystematics(bTagSFBase::heavydown);}
+		}
 	}
 	/////////btag
 	else if(Syst=="BTAGH_up"){
