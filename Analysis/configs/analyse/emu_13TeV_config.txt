@@ -11,18 +11,18 @@ $ inputfile,                       legend entry,        color,   xsection,   leg
 
 $ add tag "_mgbr" if W->lnu BR is 11.104% and not 10.620% 
 $tree_13TeV_emuttbar_amc_mgbr.root,      t#bar{t},		633,	  831.76,	  0,      true   
-tree_13TeV_emuttbar_mg5_mgbr.root,      t#bar{t},		633,	  831.76,	  0,      true   
-$tree_13TeV_emuttbar.root,           t#bar{t},		633,	  831.76,	  0,      true   
+$tree_13TeV_emuttbar_mg5_mgbr.root,      t#bar{t},		633,	  831.76,	  0,      true   
+tree_13TeV_emuttbar.root,          t#bar{t},		633,	  831.76,	  0,      true   
+tree_13TeV_emuttbarbg.root,        t#bar{t}bg,	   	634,	  831.76,	  3
 
-
-$tree_13TeV_tW.root,                tW/#bar{t}W,	   	616,	  35.6,	          4
+$tree_13TeV_tW.root,               tW/#bar{t}W,	   	616,	  35.6,	          4
 $tree_13TeV_tbarW.root,	           tW/#bar{t}W,	   	616,	  35.6,	          4
 
-$tree_13TeV_dy50inf.root,           DY,                  852,      6025.2,         2 
+$tree_13TeV_dy50inf.root,          DY,                  852,      6025.2,         2 
 
-$tree_13TeV_ww.root,		   VV,			390,	  11,   	  5
-$tree_13TeV_wz.root,		   VV,			390,	  66.1,   	  5
-$tree_13TeV_zz.root,		   VV,			390,	  31.8,	          5  
+tree_13TeV_ww.root,		   VV,			390,	  11,   	  5
+tree_13TeV_wz.root,		   VV,			390,	  66.1,   	  5
+tree_13TeV_zz.root,		   VV,			390,	  31.8,	          5  
 $ phys 14 samples: generated 1000 events  
 $tree_13TeV_wz.root,		   VV,			390,	  1.685,   	  5
 $tree_13TeV_zz.root,		   VV,			390,	  1.269,	  5  
