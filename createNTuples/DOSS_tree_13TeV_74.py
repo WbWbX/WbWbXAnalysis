@@ -581,7 +581,7 @@ process.PFTree   = cms.EDAnalyzer('TreeWriterTtZ',
                                   metT0T1TxySrc        =cms.InputTag(metTag),
                                   metT0T1Src           =cms.InputTag(metTag),
                                   metT1TxySrc          =cms.InputTag(metTag),
-                                  vertexSrc = cms.InputTag(opt.primaryVertexOptions['outputCollection']),
+                                  vertexSrc = cms.InputTag(pvSource),
                                   
                                   #block for extended information needed for efficiency studies
                                   includeReco = cms.bool(False),
