@@ -362,7 +362,7 @@ void histoStack::removeContribution(TString legendname){
 }
 
 
-int histoStack::getContributionIdx(TString legname) const{
+int histoStack::getContributionIdx(const TString& legname) const{
 	for(size_t i=0;i<legends_.size();i++){
 		if(legname == legends_.at(i))
 			return i;

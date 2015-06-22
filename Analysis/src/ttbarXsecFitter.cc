@@ -35,7 +35,9 @@ void ttbarXsecFitter::readInput(const std::string & configfilename){
 	fr.setStartMarker("[ general ]");
 	fr.setEndMarker("[ end - general ]");
 	fr.readFile(configfilename);
+	fr.setRequireValues(false);
 	wjetsrescalefactor_=fr.getValue<float>("rescaleWjets",1.);
+	fr.setRequireValues(true);
 	mergesystfile_="/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/"+fr.getValue<std::string>("mergeSystFile");
 	if(!fileExists((getenv("CMSSW_BASE")+mergesystfile_).data()))
 		throw std::runtime_error("mergeSystFile does not exists");
@@ -1366,8 +1368,8 @@ void ttbarXsecFitter::createSystematicsBreakdown(size_t datasetidx){
 		for(size_t j=0;j<addfullerrors_.at(i).second.size();j++){
 			size_t idx=addfullerrors_.at(i).second.at(j);
 
-			 exup=getExtrapolationError(datasetidx,idx,true);
-			 exdown=getExtrapolationError(datasetidx,idx,false);
+			exup=getExtrapolationError(datasetidx,idx,true);
+			exdown=getExtrapolationError(datasetidx,idx,false);
 
 			bool corranti;
 			double tmp=getMaxVar(true,exup,exdown,corranti);
@@ -1909,7 +1911,7 @@ variateHisto1D ttbarXsecFitter::dataset::createLeptonJetAcceptance(const std::ve
 	twobjetsignal=twobjetsignal.getIntegralBin();
 
 	histo1D correction_b =  ((signalintegral * twobjetsignal) * 4.)
-																																																																						                																																																																																																																																																																																																																																																																																																																																																																																																						/ ( (onebjetsignal + (twobjetsignal * 2.)) * (onebjetsignal + (twobjetsignal * 2.)));
+																																																																						                																																																																																																																																																																																																																																																																																																																																																																																																								/ ( (onebjetsignal + (twobjetsignal * 2.)) * (onebjetsignal + (twobjetsignal * 2.)));
 
 	correction_b.removeStatFromAll();
 
@@ -2187,8 +2189,16 @@ void ttbarXsecFitter::dataset::addUncertainties(histoStack * stack,size_t nbjets
 		dy2bjetserr=0.3;
 
 
-	//hardcoded scaling of Wjets/QCD....
-
+	//hardcoded scaling of QCD/Wjets....
+	try{
+		int wjetsqcdidx=stack->getContributionIdx("QCD/Wjets");
+		stack->multiplyNorm(wjetsqcdidx,parent_->wjetsrescalefactor_);
+	}
+	catch(...){
+		if(parent_->wjetsrescalefactor_!=(float)1.){
+			std::cout << "Warning. wjetsrescalefactor!=1 but no QCD/Wjets contribution found" <<std::endl;
+		}
+	}
 
 	stack->addRelErrorToContribution(dy0bjetserr,"DY","BG_0_bjets");
 	stack->addRelErrorToContribution(dy1bjetserr,"DY","BG_1_bjets");

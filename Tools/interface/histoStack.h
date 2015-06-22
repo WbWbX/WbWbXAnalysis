@@ -280,6 +280,8 @@ public:
 	 */
 	double kolmogorovTest(Option_t* option = "") const;
 
+	int getContributionIdx(const TString&) const;
+
 
 #ifndef __CINT__
 	template <class T>
@@ -312,7 +314,6 @@ private:
 	std::vector<TString> signals_;
 
 
-	int getContributionIdx(TString) const;
 	bool checkDrawDimension() const;
 	bool checkSignals(const std::vector<TString> &) const;
 
