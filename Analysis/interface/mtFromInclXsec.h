@@ -13,21 +13,26 @@
 #include "TtZAnalysis/Tools/interface/graph.h"
 #include "TtZAnalysis/Tools/interface/graphFitter.h"
 #include "TtZAnalysis/Tools/interface/histo2D.h"
+#include "TtZAnalysis/Analysis/interface/predictions.h"
 
 namespace ztop{
 
 class mtFromInclXsec{
 public:
 
-	mtFromInclXsec():energy_(8){}
+	mtFromInclXsec(){}
 
 	void readInFiles(const std::vector<std::string>&);
+	void readPrediction(const std::string& file,const std::string& id){
+		predicted_.readPrediction(file,id);
+	}
 
 	void setEnvelopeUnc(const TString uncname){envunc_=uncname;}
 
 	graphFitter getMassDependence(const TString& syst="")const;
 
-	void setEnergy(const float& en){energy_=en;}
+
+	//void setEnergy(const float& en){energy_=en;}
 
 	void extract();
 
@@ -52,13 +57,16 @@ public:
 	 */
 	graph getResult()const;
 
+	static bool debug;
+
 private:
 
-	float energy_;
+	//float energy_;
 	TString envunc_;
 	histo2D explh_,theolh_,jointlh_;
 	graph exppoints_;
 	graph result_;
+	top_prediction predicted_;
 
 
 	double LH_Exp(const float& mtop,const float& xsec,const ztop::graphFitter & gf, const float& errup,const float& errdown)const;

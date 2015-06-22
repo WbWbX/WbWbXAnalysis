@@ -1,0 +1,23 @@
+
+
+[plotStyle - Upper]
+
+    topMargin     = 0.1
+    leftMargin    = 0.15
+    rightMargin   = 0.0
+    
+    yaxis.titleOffset = 1
+
+[end plotStyle]
+  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+[plotStyle - Ratio]
+    
+    topMargin     = 0.01
+    leftMargin    = 0.15
+    rightMargin   = 0.0
+    
+    yaxis.titleOffset = 0.95
+    
+    
+[end plotStyle]
+    

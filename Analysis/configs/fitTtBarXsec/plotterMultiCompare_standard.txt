@@ -1,0 +1,46 @@
+$$$$
+$$$ comments
+
+[plotterMultiCompare]
+
+      $$this is the main file
+	    controlPlotStyleFile = src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiCompare_ctrDef.txt
+	   
+	    nplots = 4
+	    
+	    addStyle0 =   src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiCompare_sub0.txt
+	    addStyle1 =   src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiCompare_sub1.txt
+	    addStyle2 =   src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiCompare_sub2.txt
+	    addStyle3 =   src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiCompare_sub3.txt
+	    
+	    
+	   
+	    frac0=0.7
+	    frac1=0.7
+	    frac2=0.583
+	    frac3=0.66
+	    
+	    connectUpperYAxis = 1|2|3
+	 
+[end - plotterMultiCompare]
+
+
+[textBoxes - boxes]
+
+	   0.127 , 0.865, 0 add. jets,   0.048,  42, 31
+	   0.445  , 0.865, 1 add. jet,   0.048,  42, 31
+	   0.665 , 0.865, 2 add. jet,   0.048,  42, 31
+	   0.89 , 0.865, #geq3 add. jet,   0.048,  42, 31
+	   
+	   0.965,   0.85,   CMS,   0.06, 61, 31
+[end - textBoxes]
+
+
+ [legendStyle]
+    x0  =  0.14
+	y0  =  0.32
+	x1  =  0.25
+	y1  =  0.935
+	nColumns        = 1
+	columnSeparator = 0.1
+[end legendStyle]

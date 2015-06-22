@@ -50,6 +50,8 @@
 	  topmass = 172.5  #for dynamic xsec
 	[ end dataset - 8TeV ]
 	
+	rescaleWjets=1.5
+	
 [ end datasets ]
 
 

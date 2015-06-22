@@ -338,7 +338,7 @@ public:
 	/**
 	 * removes all syst uncertainties, but leaves stat uncertainties of nominal untouched
 	 */
-	void removeAllSystematics(){contents_.removeAdditionalLayers();manualerror_=false;}
+	void removeAllSystematics(const TString& exception="");
 
 	/**
 	 * sets an error zero that contains expression
@@ -357,6 +357,10 @@ public:
 	 * Mode can be set to poisson (default) or gauss (mostly for checks)
 	 */
 	histo1D createPseudoExperiment(TRandom3* rand,const histo1D* c=0, pseudodatamodes mode=pseudodata_poisson,int syst=-1)const;
+	/**
+	 * Also creates psuedoexp for syst variations
+	 */
+	histo1D createPseudoExperiments(TRandom3* rand,const histo1D* c=0, pseudodatamodes mode=pseudodata_poisson, const std::vector<size_t> & excludefromvar=std::vector<size_t>())const;
 
 
 	/**
@@ -440,6 +444,10 @@ public:
 	 */
 	TString coutBinContent(size_t bin,const TString & unit="") const;
 
+	/**
+	 * output: variation_nominal, variation_up, variation_down
+	 */
+	std::vector<histo1D> produceVariations(const TString & sysname)const;
 
 	/*
 	 * high level stuff e.g. transforming particular systematic to a container y(x)=y(variation)

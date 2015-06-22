@@ -10,6 +10,8 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
+#include <sstream>
 
 namespace ztop{
 
@@ -43,34 +45,61 @@ public:
 	/**
 	 * returns formatted text fragments according to the farmet rules defined previously
 	 */
-	std::vector<std::string> getFormatted(const std::string& in)const;
+	template<class T>
+	std::vector<T> getFormatted(const std::string& in)const{
+		std::vector<T> out;
+		using namespace std;
+		string s=in;
+		trimcomments(s);
+		trim(s);
+		istringstream ss(s);
+		while (ss)
+		{
+			string s2;
+			if (!getline( ss, s2, *delimiter_.data() )) break;
+			if(debug)
+				std::cout << "got \"" << s2 << "\""<<std::endl;
+			trim(s2);
+			if(debug)
+				std::cout << "trimmed to \"" << s2 << "\"" << std::endl;
+			if(s2.length()>0)
+				out.push_back( (T)s2 );
+		}
+		return out;
+	}
 
+	std::vector<std::string> getFormatted(const std::string& in)const{
+		return getFormatted<std::string>(in);
+	}
 	/**
 	 * returns file name with extension but without path
 	 */
-	std::string getFilename(const std::string& pathtofile)const;
+	static std::string getFilename(const std::string& pathtofile);
 	/**
 	 * returns file extension or empty string if none
 	 */
-	std::string getFileExtension(const std::string& pathtofile)const;
+	static std::string getFileExtension(const std::string& pathtofile);
 	/**
 	 * strips file of extension
 	 */
-	std::string stripFileExtension(const std::string& pathtofile)const;
+	static std::string stripFileExtension(const std::string& pathtofile);
 	/**
 	 * strips file of dir
 	 */
-	std::string stripFileDir(const std::string& pathtofile)const;
+	static std::string stripFileDir(const std::string& pathtofile);
 	/**
 	 * gets file directory
 	 */
-	std::string getFileDir(const std::string& pathtofile)const;
+	static std::string getFileDir(const std::string& pathtofile);
 
 	/**
 	 * adds a suffix to file name but keeps extension, e.g. path/bla.txt is transformed to
 	 * path/bla_<suffix>.txt
 	 */
-	std::string addFilenameSuffix(const std::string& pathtofile, const std::string& suffix)const;
+	static std::string addFilenameSuffix(const std::string& pathtofile, const std::string& suffix);
+
+
+	static std::string makeCompatibleFileName(const std::string &);
 
 	/**
 	 * switch for more output

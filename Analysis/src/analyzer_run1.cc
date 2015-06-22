@@ -155,18 +155,21 @@ void  analyzer_run1::analyze(size_t anaid){
 			|| inputfile.Contains("ttbar_")
 			|| inputfile.Contains("ttbarviatau_") )
 			&&! isdileptonexcl){
-		if(  ! (syst_.BeginsWith("TT_GEN") && syst_.EndsWith("_up"))  ) //other generator
-			normmultiplier=(0.1062/0.11104);//correct both W
 		/*
 		 * BR W-> lnu: 0.1086
 		 * n_comb for leptonic: 1+1+1+2+2+2 (incl taus)
 		 * total lept branching fraction for WW: 0.1086^2 * 9 = 0.1062
 		 * In Madgraph: 0.11104
 		 */
+		if(  ! (syst_.BeginsWith("TT_GEN") && syst_.EndsWith("_up"))  ){ //other generator
+			normmultiplier*=(0.1062/((0.11112*0.11112 )*9));//correct both W
+			std::cout << inputfile<<": applying correction to MG BR: "<<normmultiplier <<std::endl;
+		}
 	}
 
 	if(isdileptonexcl || inputfile.Contains("_mgdecays_") || inputfile.Contains("_tbarWtoLL")|| inputfile.Contains("_tWtoLL")){
-		normmultiplier=0.1062; //fully leptonic branching fraction for both Ws
+		normmultiplier*=0.1062; //fully leptonic branching fraction for both Ws
+		std::cout << inputfile<<": applying dileptonic BR: "<<normmultiplier <<std::endl;
 	}
 
 
@@ -635,6 +638,13 @@ void  analyzer_run1::analyze(size_t anaid){
 		/////////////////////////////////////////////////////////////
 
 
+		/*
+		 * Step 0 before active trigger and ntuple cuts on leptons
+		 */
+		sel_step[0]+=puweight;
+		plots.makeControlPlots(step);
+		zplots.makeControlPlots(step);
+
 
 		/*
 		 *  Trigger
@@ -756,16 +766,10 @@ void  analyzer_run1::analyze(size_t anaid){
 		if(testmode_ && entry==0)
 			std::cout << "testmode("<< anaid << "): first controlPlots" << std::endl;
 
-		/*
-		 * Step 0 after trigger and ntuple cuts on leptons
-		 */
-		sel_step[0]+=puweight;
-		plots.makeControlPlots(step);
-		zplots.makeControlPlots(step);
 
 
 
-		//////////two ID leptons STEP 1///////////////////////////////
+		//////////two ID leptons and trigger STEP 1///////////////////////////////
 		step++;
 
 
@@ -830,8 +834,8 @@ void  analyzer_run1::analyze(size_t anaid){
 			mll=dilp4.M();
 			firstlep=leppair->second[0];
 			seclep=leppair->second[1];
-			lepweight*=getMuonSF()->getScalefactor(firstlep->pt(),fabs(firstlep->eta()));
-			lepweight*=getMuonSF()->getScalefactor(seclep->pt(),fabs(seclep->eta()));
+			lepweight*=getMuonSF()->getScalefactor((firstlep->eta()),firstlep->pt());
+			lepweight*=getMuonSF()->getScalefactor((seclep->eta()),seclep->pt());
 			lepweight*=getTrackingSF()->getScalefactor((firstlep->eta()));
 			lepweight*=getTrackingSF()->getScalefactor((seclep->eta()));
 			lepweight*=getTriggerSF()->getScalefactor(fabs(firstlep->eta()),fabs(seclep->eta()));
@@ -843,7 +847,7 @@ void  analyzer_run1::analyze(size_t anaid){
 			firstlep=leppair->first[0];
 			seclep=leppair->second[0];
 			lepweight*=getElecSF()->getScalefactor((firstlep->eta()),firstlep->pt());
-			lepweight*=getMuonSF()->getScalefactor(seclep->pt(),fabs(seclep->eta()));
+			lepweight*=getMuonSF()->getScalefactor((seclep->eta()),seclep->pt());
 			lepweight*=getTrackingSF()->getScalefactor((seclep->eta()));
 			lepweight*=getTriggerSF()->getScalefactor(fabs(firstlep->eta()),fabs(seclep->eta()));
 		}

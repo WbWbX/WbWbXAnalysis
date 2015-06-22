@@ -18,7 +18,7 @@
 #everything will be gaussian except the ones specified here
 
    TT_SCALE   =  box
-   TT_GENPOWPY=  fixed
+   TT_GENPOWPY=  boxright
    TT_MATCH   =  box
 
   # UE = box
@@ -36,18 +36,21 @@
    TT_MATCH
    TOPPT
    PDF
+  # TT_GENPOWPY
    #Lumi
 
 [ end - full extrapolation ]
 
 [ datasets ]
 
-	 [ dataset - 7TeV ]
+	[ dataset - 7TeV ]
 	  lumi  =   5010
-	  lumiunc = 2.8 
+	  lumiunc = 2.2
 	  energy = 7       #for dynamic xsec
 	  topmass = 172.5  #for dynamic xsec
-	 [ end dataset - 7TeV ]
+	[ end dataset - 7TeV ]
+	
+	rescaleWjets=1.5
 	
 [ end datasets ]
 
@@ -75,4 +78,7 @@ bjet++
    emu_7TeV_172.5_nominal_syst.ztop | second jet pt 2,2 b-jets step 8
    emu_7TeV_172.5_nominal_syst.ztop | third jet pt 2,3 b-jets step 8
 
+
 [ end - 7TeV ]
+##########################################
+

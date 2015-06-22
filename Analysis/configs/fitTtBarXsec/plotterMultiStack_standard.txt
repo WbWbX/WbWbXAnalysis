@@ -41,15 +41,15 @@ $$$ comments
 
 
 [textBoxes - 0btag7TeV]
-       0.965,   0.943,   0 or >2 b-tagged jets   5.1 fb^{-1} (7 TeV),   0.048,  42, 31
+       0.965,   0.943,   0 or >2 b-tagged jets   5.0 fb^{-1} (7 TeV),   0.048,  42, 31
 [end - textBoxes]
 
 [textBoxes - 1btag7TeV]
-	   0.965,   0.943,   1 b-tagged jet   5.1 fb^{-1} (7 TeV),   0.048,  42, 31
+	   0.965,   0.943,   1 b-tagged jet   5.0 fb^{-1} (7 TeV),   0.048,  42, 31
 [end - textBoxes]
 
 [textBoxes - 2btag7TeV]
-	   0.965,   0.943,   2 b-tagged jets   5.1 fb^{-1} (7 TeV),   0.048,  42, 31
+	   0.965,   0.943,   2 b-tagged jets   5.0 fb^{-1} (7 TeV),   0.048,  42, 31
 [end - textBoxes]
 
 

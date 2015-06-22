@@ -50,8 +50,8 @@ public:
      * [plotStyle - InlayPlots]
      * n plots main n plots inlay
      */
-    void addStyleFromFile(const std::string&);
-    void readStyleFromFile(const std::string&);
+ //   void addStyleFromFile(const std::string&);
+ //   void readStyleFromFile(const std::string&);
 
     void clear();
 

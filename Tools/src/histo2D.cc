@@ -10,6 +10,8 @@
 #include "../interface/histo2D.h"
 #include <algorithm>
 #include "../interface/systAdder.h"
+#include <boost/iostreams/filtering_stream.hpp>
+#include <boost/iostreams/filter/zlib.hpp>
 
 namespace ztop{
 
@@ -87,23 +89,23 @@ void histo2D::setBinning(const std::vector<float> &xbins, std::vector<float> ybi
 }
 
 const float &histo2D::getBinContent(const size_t & xbin,const size_t & ybin) const{
-	if((unsigned int)xbin>xbins_.size() || (unsigned int)ybin> ybins_.size()){
-		std::cout << "container2D::getBinContent: xbin or ybin is out of range!! return -1" << std::endl;
+	if(xbin>=xbins_.size() || ybin>= conts_.size()){
+		throw std::out_of_range ("histo2D::getBinContent: xbin or ybin is out of range");// << std::endl;
 	}
 	return conts_.at(ybin).getBinContent(xbin);
 }
 const uint32_t &histo2D::getBinEntries(const size_t & xbin, const size_t & ybin) const{
-	if(ybin>=ybins_.size()){
-		std::cout << "container2D::getBinEntries: ybin out of range! return " << std::endl;
+	if(xbin>=xbins_.size() || ybin>= conts_.size()){
+		throw std::out_of_range ("histo2D::getBinEntries: xbin or ybin is out of range");
 	}
 	return conts_.at(ybin).getBinEntries(xbin);
 }
 
 float histo2D::getBinArea(const size_t& binx, const size_t& biny)const{
 	if(isDummy())
-		throw std::out_of_range("container2D::getBinArea: container is dummy");
+		throw std::out_of_range("histo2D::getBinArea: container is dummy");
 	if(binx >= xbins_.size()-1 || biny >= ybins_.size()-1 || binx<1 || biny <1){ //doesn't work for underflow, overflow
-		throw std::out_of_range("container2D::getBinArea: bin out of range (or UF,OF)");
+		throw std::out_of_range("histo2D::getBinArea: bin out of range (or UF,OF)");
 	}
 
 	float xw= conts_.at(biny).getBinWidth(binx);
@@ -113,9 +115,9 @@ float histo2D::getBinArea(const size_t& binx, const size_t& biny)const{
 }
 void histo2D::getBinCenter(const size_t binx,const size_t biny, float& centerx,float& centery)const{
 	if(isDummy())
-		throw std::out_of_range("container2D::getBinCenter: container is dummy");
+		throw std::out_of_range("histo2D::getBinCenter: container is dummy");
 	if(binx >= xbins_.size()-1 || biny >= ybins_.size()-1 || binx<1 || biny <1){ //doesn't work for underflow, overflow
-		throw std::out_of_range("container2D::getBinCenter: bin out of range (or UF,OF)");
+		throw std::out_of_range("histo2D::getBinCenter: bin out of range (or UF,OF)");
 	}
 
 	float xw= conts_.at(biny).getBinWidth(binx);
@@ -235,21 +237,21 @@ histo2D histo2D::rebinYToBinning(const std::vector<float> & newbins) const{
 }
 
 float histo2D::getBinErrorUp(const size_t & xbin, const size_t & ybin, bool onlystat,TString limittosys) const{
-	if(ybin>=ybins_.size()){
-		std::cout << "container2D::getBinErrorUp: ybin out of range! return -1" << std::endl;
-	}
+	if(xbin>=xbins_.size() || ybin>= conts_.size()){
+			throw std::out_of_range ("histo2D::getBinErrorUp: xbin or ybin is out of range");// << std::endl;
+		}
 	return conts_.at(ybin).getBinErrorUp(xbin,  onlystat, limittosys);
 }
 float histo2D::getBinErrorDown(const size_t & xbin, const size_t & ybin, bool onlystat,TString limittosys) const{
-	if(ybin>=ybins_.size()){
-		std::cout << "container2D::getBinErrorDown: ybin out of range! return -1" << std::endl;
-	}
+	if(xbin>=xbins_.size() || ybin>= conts_.size()){
+				throw std::out_of_range ("histo2D::getBinErrorDown: xbin or ybin is out of range");// << std::endl;
+			}
 	return conts_.at(ybin).getBinErrorDown(xbin,  onlystat, limittosys);
 }
 float histo2D::getBinError(const size_t & xbin, const size_t & ybin, bool onlystat,TString limittosys) const{
-	if(ybin>=ybins_.size()){
-		std::cout << "container2D::getBinError: ybin out of range! return -1" << std::endl;
-	}
+	if(xbin>=xbins_.size() || ybin>= conts_.size()){
+					throw std::out_of_range ("histo2D::getBinError: xbin or ybin is out of range");// << std::endl;
+				}
 	return conts_.at(ybin).getBinError(xbin,  onlystat, limittosys);
 }
 
@@ -548,6 +550,7 @@ TH2D * histo2D::getTH2D(TString name, bool dividebybinarea, bool onlystat) const
 	}
 	h->GetXaxis()->SetTitle(xaxisname_);
 	h->GetYaxis()->SetTitle(yaxisname_);
+	h->GetZaxis()->SetTitle(zaxisname_);
 	if(entries>0)
 		h->SetEntries(entries);
 	else
@@ -851,9 +854,9 @@ void histo2D::renameSyst(TString old, TString New){
 		conts_.at(i).renameSyst(old,New);
 	}
 }
-void histo2D::removeAllSystematics(){
+void histo2D::removeAllSystematics(const TString& exception){
 	for(size_t i=0;i<conts_.size();i++){
-		conts_.at(i).removeAllSystematics();
+		conts_.at(i).removeAllSystematics(exception);
 	}
 }
 void histo2D::setAllErrorsZero(bool nominalstat){
@@ -1058,6 +1061,12 @@ void histo2D::equalizeSystematicsIdxs(histo2D &rhs){ //sec
 	}
 }
 
+std::vector<TString> histo2D::getSystNameList()const{
+		if(isDummy())
+			throw std::logic_error("histo2D::getSystNameList() histo dummy");
+		return conts_.at(0).getSystNameList();
+	}
+
 void histo2D::copyFrom(const histo2D&rhs){
 	conts_=rhs.conts_;
 	xbins_=rhs.xbins_;
@@ -1066,7 +1075,41 @@ void histo2D::copyFrom(const histo2D&rhs){
 	mergeufof_=rhs.mergeufof_ ;
 	xaxisname_=rhs.xaxisname_ ;
 	yaxisname_=rhs.yaxisname_ ;
-	/*zaxisname_=rhs.zaxisname_ ;*/
+	zaxisname_=rhs.zaxisname_ ;
+}
+
+
+void histo2D::writeToFile(const std::string& filename)const{
+	std::ofstream saveFile;
+	saveFile.open(filename.data(), std::ios_base::binary | std::ios_base::trunc | std::fstream::out );
+	{
+		boost::iostreams::filtering_ostream out;
+		boost::iostreams::zlib_params parms;
+		//parms.level=boost::iostreams::zlib::best_speed;
+		out.push(boost::iostreams::zlib_compressor(parms));
+		out.push(saveFile);
+		{
+			writeToStream(out);
+		}
+	}
+	saveFile.close();
+}
+void histo2D::readFromFile(const std::string& filename){
+	std::ifstream saveFile;
+	saveFile.open(filename.data(), std::ios_base::binary | std::fstream::in );
+	{
+		boost::iostreams::filtering_istream in;
+		boost::iostreams::zlib_params parms;
+		//parms.level=boost::iostreams::zlib::best_speed;
+		in.push(boost::iostreams::zlib_decompressor(parms));
+		in.push(saveFile);
+		{
+			readFromStream(in);
+		}
+	}
+	saveFile.close();
+
+
 }
 
 

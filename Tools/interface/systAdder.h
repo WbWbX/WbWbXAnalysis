@@ -32,7 +32,7 @@ public:
 	 * has to be in section[merge syst] -> [end-merge syst]
 	 * Comments: #
 	 */
-	void readMergeVariationsFileInCMSSW(const std::string&);
+	void readMergeVariationsFileInCMSSW(const std::string& file, const std::string&marker="");
 	/**
 	 * expects the following format:
 	 * <mergedname> <mergeoption> <contribution1> <contribution2> ....
@@ -47,7 +47,7 @@ public:
 	 *  ALL   squared BLA BLU
 	 *
 	 */
-	void readMergeVariationsFile(const std::string&);
+	void readMergeVariationsFile(const std::string& file, const std::string&marker="");
 
 	size_t mergeVariationsSize(){return tomerge.size();}
 

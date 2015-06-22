@@ -1,0 +1,30 @@
+
+
+[plotStyle - Upper]
+
+    topMargin     = 0.1
+    leftMargin    = 0.25
+    rightMargin   = 0.5
+    yaxis.titleOffset = 1.5
+    yaxis.labelOffset = 0.005
+    yaxis.tickLength  = 0.03
+    yaxis.ndiv        = 510
+    
+    xaxis.ndiv        = 100
+
+[end plotStyle]
+  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+[plotStyle - Ratio]
+    
+    xaxis.ndiv        = 100
+    yaxis.titleOffset = 1.5
+    
+    topMargin     = 0.01
+    leftMargin    = 0.25
+    rightMargin   = 0.5
+    
+    
+    
+    
+[end plotStyle]
+    

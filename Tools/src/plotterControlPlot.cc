@@ -15,8 +15,7 @@
 namespace ztop{
 
 plotterControlPlot::plotterControlPlot(): plotterBase(), divideat_(0),
-		stackp_(0),tempdataentry_(0),invertplots_(false),psmigthresh_(0),
-		corrm_(0){
+		stackp_(0),tempdataentry_(0),invertplots_(false),psmigthresh_(0){
 	readStyleFromFileInCMSSW("/src/TtZAnalysis/Tools/styles/controlPlots_standard.txt");
 	gStyle->SetOptStat(0);
 }
@@ -32,12 +31,20 @@ plotterControlPlot::plotterControlPlot(): plotterBase(), divideat_(0),
  * [plotStyle - Upper]
  * [plotStyle - Ratio]
  */
-void plotterControlPlot::addStyleFromFile(const std::string& infile){
-	readStylePriv(infile,false);
+
+void plotterControlPlot::addStyleFromFile(const std::string& file,const std::string&  marker,const std::string&  endmarker){
+	fileReader extraconfig;
+	extraconfig.setComment("$");
+	extraconfig.setDelimiter(",");
+	extraconfig.setStartMarker(marker);
+	extraconfig.setEndMarker(endmarker);
+
+	extraconfig.readFile(file);
+	std::string tmpfile=extraconfig.dumpFormattedToTmp();
+	plotterBase::addStyleFromFile(tmpfile);
+	system(("rm -f " + tmpfile).data());
 }
-void plotterControlPlot::readStyleFromFile(const std::string& infile){
-	readStylePriv(infile,true);
-}
+
 void plotterControlPlot::readStylePriv(const std::string& infile,bool requireall){
 
 	if(debug) std::cout <<"plotterControlPlot::readStyleFromFile" << std::endl;

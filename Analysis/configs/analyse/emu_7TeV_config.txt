@@ -59,19 +59,18 @@ $$ all directories except for inputfiles are relative to $CMSSW_BASE
 
 inputFilesDir = /nfs/dust/cms/user/kiesej/trees_Xmas1415/
 
-Lumi           = 5050
+Lumi           = 5010
 
 JECFile        = /src/TtZAnalysis/Analysis/data/analyse/Legacy11_V1_DATA_UncertaintySources_AK5PFchs.txt
 
-
-MuonSFFile     = /src/TtZAnalysis/Analysis/data/analyse/muon_tight_sf2D_8TeV.root
-MuonSFHisto    = eff_pt_eta_fullwithtrackerr
+MuonSFFile     = /src/TtZAnalysis/Analysis/data/analyse/muon_tight_sf2D_7TeV.root
+MuonSFHisto    = GlobalSF
 TrackingSFFile = /src/TtZAnalysis/Analysis/data/analyse/muon_trackSF_8TeV.root
 TrackingSFHisto = tracking_eff
 
 
 
-ElecSFFile     = /src/TtZAnalysis/Analysis/data/analyse/elec_tight_sf2D_8TeV.root
+ElecSFFile     = /src/TtZAnalysis/Analysis/data/analyse/elec_tight_sf2D_7TeV.root
 ElecSFHisto    = GlobalSF
 
 TriggerSFFile  = /src/TtZAnalysis/Analysis/data/analyse/triggerSummary_emu_7TeV_tight20.root
@@ -80,7 +79,7 @@ PUFile         = /src/TtZAnalysis/Analysis/data/analyse/Legacy2011.json_PU    $w
 
 
 
-btagSFFile     = /src/TopAnalysis/ZTopUtils/data/CSV_8TeV.csv
+btagSFFile     = /src/TopAnalysis/ZTopUtils/data/CSV7TeVbreak_full.csv
 btagFile       = all_btags
 
 modeOptions = GsfelectronsZerojetNozcutNometcutNobcutBtagcsvtNotoppt

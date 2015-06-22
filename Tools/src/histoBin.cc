@@ -63,6 +63,7 @@ void histoBin::cutName(){
 }
 */
 void histoBin::copyFrom(const histoBin& rhs){
+	if(&rhs == this) return;
 	content_=rhs.content_;
 	entries_=rhs.entries_;
 	stat2_=rhs.stat2_;
@@ -256,6 +257,7 @@ bool histoBins::equalContent(const histoBins&rhs,float epsilon) const{
 	}
 }
 void histoBins::copyFrom(const histoBins&rhs){
+	if(&rhs==this) return;
 	bins_=rhs.bins_;
 	//name_=rhs.name_;
 	//layer_=rhs.layer_;

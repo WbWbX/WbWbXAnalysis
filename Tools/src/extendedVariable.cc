@@ -104,23 +104,10 @@ graph extendedVariable::addDependence(const float & low, const float& nominal, c
 	tmpg.setPointYContent(1,nominal);
 	tmpg.setPointYContent(2,high);
 
-	float min=std::min(fabs(low),fabs(high));
-	min=std::min(fabs(nominal),fabs(min));
-	if(min==0){ //one is zero
-		float maxi=std::max(fabs(low),fabs(high));
-		maxi=std::max(fabs(maxi),fabs(nominal));
-		if(maxi==0) min=1e-3; //will be solved instead of fitted anyway
-		else min=1e-3*maxi;
 
-		tmpg.setPointYStat(0,min);
-		tmpg.setPointYStat(1,min);
-		tmpg.setPointYStat(2,min);
-	}
-	else{
-		tmpg.setPointYStat(0,low/100);
-		tmpg.setPointYStat(1,nominal/100);
-		tmpg.setPointYStat(2,high/100);
-	}
+	tmpg.setPointYStat(0,1);//just fake stat
+	tmpg.setPointYStat(1,1);
+	tmpg.setPointYStat(2,1);
 
 	tmpg.setName(name_+"_"+sysname);
 	tmpg.setXAxisName(sysname+"[#sigma_{"+sysname+"}]");
@@ -539,7 +526,6 @@ double extendedVariable::addMultiFactors( double in,const double * variations)co
 			in/=operatedon_.at(i)->getMultiplicationFactorRec(variations);
 		}
 		else{
-			std::cout <<"[]"<<std::endl;
 			operatedon_.at(i)->getMultiplicationFactorRec(variations);
 		}
 	}

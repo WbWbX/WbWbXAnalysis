@@ -26,12 +26,12 @@ public:
 	vistotal(0),
 	mlbcombthresh_(165),
 	rightassocounter_(0),totalcounter_(0)
-{}
+{extraplots_.resize(cat_bjetjetmax,0);}
 
 	~analysisPlotsMlbMt(){/* destruction is handled in base class! */
 		if(totalcounter_)
-		std::cout << "fraction of properly associated combinations for mlbmin: " << rightassocounter_/totalcounter_
-				<< std::endl;
+			std::cout << "fraction of properly associated combinations for mlbmin: " << rightassocounter_/totalcounter_
+			<< std::endl;
 
 	}
 
@@ -40,6 +40,16 @@ public:
 	void fillPlotsGen();
 
 private:
+
+	enum bjetnjetscategories{
+		cat_0bjet0jet,cat_0bjet1jet,cat_0bjet2jet,cat_0bjet3jet,
+		cat_1bjet0jet,cat_1bjet1jet,cat_1bjet2jet,cat_1bjet3jet,
+		cat_2bjet0jet,cat_2bjet1jet,cat_2bjet2jet,cat_2bjet3jet,cat_bjetjetmax}
+	jetcategory;
+
+	void setJetCategory(size_t nbjets,size_t njets);
+
+	std::vector<histo1DUnfold*> extraplots_;
 
 	histo1DUnfold
 	*Mlb,

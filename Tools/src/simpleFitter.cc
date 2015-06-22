@@ -66,7 +66,7 @@ bool simpleFitter::debug=false;
 
 simpleFitter::simpleFitter():fitmode_(fm_pol0),minimizer_(mm_minuitMinos),maxcalls_(4e8),
 		requirefitfunction_(true),minsuccessful_(false),minossuccessful_(false),tolerance_(0.1),functobemin_(0),
-		algorithm_(""),minimizerstr_("Minuit2"),pminimizer_(0),chi2func_(this),strategy_(2){
+		algorithm_(""),minimizerstr_("Minuit2"),pminimizer_(0),chi2func_(this),strategy_(2),dummyrun_(false){
 
 	setFitMode(fitmode_);
 }
@@ -98,6 +98,10 @@ size_t simpleFitter::hasNParameters(fitmodes mode)const{
 		npars=4;
 	if(mode==fm_pol4)
 		npars=5;
+	if(mode==fm_pol5)
+		npars=6;
+	if(mode==fm_pol6)
+		npars=7;
 
 
 	if(mode==fm_gaus)
@@ -219,6 +223,35 @@ void simpleFitter::fit(){
 		std::cout << "simpleFitter::fit(): fitting "  << paras_.size() <<  " parameters." <<std::endl;
 
 	minsuccessful_=false;
+
+	// invoke min, set func, fill errors, chi2min, correlations
+	if(dummyrun_){
+		std::cout << "simpleFitter::fit: warning. Dummyrun mode -> will just fill dummies."<<std::endl;
+		chi2min_=0;
+		if(pminimizer_){
+			delete pminimizer_;
+			pminimizer_=0;
+		}
+		pminimizer_=invokeMinimizer();
+		std::vector<double> dummy;
+		dummy.resize(paras_.size(),0);
+		paracorrs_.clear();
+		paracorrs_.resize(paras_.size(),dummy);
+		for(size_t i=0;i<paras_.size();i++){
+			paraerrsdown_.at(i)=-1;
+			paraerrsup_.at(i)=1;
+			for(size_t j=0;j<paras_.size();j++){
+				if(i!=j)
+					paracorrs_.at(i).at(j)=0;
+				else
+					paracorrs_.at(i).at(j)=1;
+			}
+		}
+		minossuccessful_=true;
+		minsuccessful_=true;
+		return;
+	}
+
 
 	//  if(functobemin_)
 	if(pminimizer_){
@@ -345,7 +378,9 @@ corrMatrix simpleFitter::getCorrelationMatrix()const{
 	}
 	return out;
 }
-
+graph simpleFitter::getContourScan(size_t i, size_t j)const{
+	return graph();
+}
 
 /**
  * always returns positive values if no fault
@@ -365,15 +400,19 @@ void simpleFitter::getParameterErrorContribution(size_t a, size_t b,double & err
 
 	std::vector<size_t> as;
 	as.push_back(a);
-
-	getParameterErrorContributions(as,b,errup,errdown);
-	if(getCorrelationCoefficient(a,b)<0){
+	if(dummyrun_){
+		errup=1;
+		errdown=-1;
+	}
+	else
+		getParameterErrorContributions(as,b,errup,errdown);
+	/*	if(getCorrelationCoefficient(a,b)<0){
 		errup=-errdown;
 	}
 	else{
 		errup=errdown;
 		errdown=-errdown;
-	}
+	}*/
 }
 
 void simpleFitter::getParameterErrorContributions(std::vector<size_t> a, size_t b,double & errup, double& errdown){
@@ -387,6 +426,13 @@ void simpleFitter::getParameterErrorContributions(std::vector<size_t> a, size_t 
 	if(a.size()<1)
 		throw std::out_of_range("simpleFitter::getParameterErrorContributions: input indices empty");
 	//work on hesse errors
+	if(dummyrun_){
+		errup=100;
+		errdown=-100;
+		return;
+	}
+
+
 	double olderr=pminimizer_->Errors()[b];
 	//std::cout << "olderr: " << olderr<<std::endl;
 	ROOT::Math::Minimizer *  min=invokeMinimizer();
@@ -402,6 +448,33 @@ void simpleFitter::getParameterErrorContributions(std::vector<size_t> a, size_t 
 
 	bool succ=min->Minimize();
 	if(succ){
+		if(std::find(minospars_.begin(),minospars_.end(),b) != minospars_.end()){// minos para
+			double merrd,merrup;
+			double oldup=paraerrsup_.at(b);
+			double olddown=paraerrsdown_.at(b);
+			bool succ = min->GetMinosError(b, merrd,merrup);
+			if(succ){
+				if(olddown*olddown-merrd*merrd > 0 )
+					errdown=sqrt(olddown*olddown-merrd*merrd);
+				else if(fabs(olddown / merrd -1 ) < 0.01) //prob only numerical
+					errdown=0;
+				else
+					errdown/=0;//produce a nan
+
+				if(oldup*oldup - merrup*merrup >0)
+					errup=sqrt(oldup*oldup - merrup*merrup);
+				else if(fabs(oldup / merrup -1) < 0.01) //prob only numerical
+					errup=0;
+				else
+					errup/=0;//produce a nan
+
+				delete min;
+				return;
+			} //if not make symm
+			std::cout << "simpleFitter::getParameterErrorContributions: warning. evaluating minos error failed. will revert to symmetric error"
+					<<std::endl;
+		}
+
 		errdown=min->Errors()[b];
 		//std::cout << "newerr: " << errdown<<std::endl;
 		double reldiff= (olderr-errdown)/olderr;
@@ -411,14 +484,22 @@ void simpleFitter::getParameterErrorContributions(std::vector<size_t> a, size_t 
 			if(reldiff>-0.001) //purely numerical difference
 				errdown=0;
 			else
-				errdown=-100;
+				errdown=-1000;
 		}
-
+		errup=errdown;
+		if(a.size()<2){
+			if(getCorrelationCoefficient(a.at(0),b)<0){
+				errup=-errdown;
+			}
+			else{
+				errdown=-errdown;
+			}
+		}
 	}
 	else{
-		errdown=-200;
+		errdown=-2000;
+		errup=errdown;
 	}
-	errup=errdown;
 	delete min;
 }
 void simpleFitter::getStatErrorContribution(size_t b,double & errup, double& errdown){
@@ -429,6 +510,12 @@ void simpleFitter::getStatErrorContribution(size_t b,double & errup, double& err
 		throw std::logic_error("simpleFitter::getStatErrorContribution: can only be called after fit (minimizer pointer 0) IF YOU SEE THIS< SOMETHING IS SERIOUSLY WRONG");
 	if(b>=paras_.size())
 		throw std::out_of_range("simpleFitter::getStatErrorContribution:  index out of range");
+
+	if(dummyrun_){
+		errup=1000;
+		errdown=1000;
+		return;
+	}
 
 	//work on hesse errors
 	double olderr=pminimizer_->Errors()[b];
@@ -503,6 +590,12 @@ double simpleFitter::fitfunction(const double& x,const double *par)const{
 	}
 	else if(fitmode_==fm_pol4){
 		value=par[0] + x* par[1] + x*x*par[2]  + x*x*x*par[3]  + x*x*x*x*par[4];
+	}
+	else if(fitmode_==fm_pol5){
+		value=par[0] + x* par[1] + x*x*par[2]  + x*x*x*par[3]  + x*x*x*x*par[4] + x*x*x*x*x*par[5];
+	}
+	else if(fitmode_==fm_pol6){
+		value=par[0] + x* par[1] + x*x*par[2]  + x*x*x*par[3]  + x*x*x*x*par[4] + x*x*x*x*x*par[5] + x*x*x*x*x*x*par[6];
 	}
 	else if(fitmode_==fm_gaus){
 		value =  par[0] * exp(- (x-par[1])*(x-par[1]) / (2* par[2]*par[2]) ) ;

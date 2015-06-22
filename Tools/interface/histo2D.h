@@ -19,9 +19,11 @@
 
 namespace ztop{
 class histo1DUnfold;
+class likelihood2D;
 
 class histo2D:public taggedObject {
 	friend class histo1DUnfold;
+	friend class likelihood2D;
 public:
 
 
@@ -105,7 +107,7 @@ public:
 
 	void removeError(TString);
 	void renameSyst(TString, TString);
-	void removeAllSystematics();
+	void removeAllSystematics(const TString& exception="");
 
 	void setAllErrorsZero(bool nominalstat);
 
@@ -187,6 +189,8 @@ public:
 
 	void equalizeSystematicsIdxs(histo2D &rhs);
 
+	std::vector<TString> getSystNameList()const;
+
 	/**
 	 * sets all bin contents to zero; clears all systematic uncertainties
 	 * resets also binning, keeps name and axis names
@@ -219,6 +223,10 @@ public:
 	void readFromStream(T & stream);
 #endif
 
+
+	void writeToFile(const std::string& filename)const;
+	void readFromFile(const std::string& filename);
+
 protected:
 
 	bool isEqual( const histo2D &rhs)const;
@@ -232,7 +240,7 @@ protected:
 	TString yaxisname_;
 	TString zaxisname_;
 	//TString zaxisname_;
-private:
+
 	void copyFrom(const histo2D&);//!< helper
 };
 
@@ -262,13 +270,17 @@ inline void ztop::histo2D::fill(const float & xval, const float & yval, const fl
  * not protected
  */
 inline const histoBin & ztop::histo2D::getBin(const size_t &xbinno,const size_t &ybinno,const int &layer) const{
-	return conts_[ybinno].getBin(xbinno,layer);
+	if(xbinno>=xbins_.size() || ybinno>= conts_.size()){
+		throw std::out_of_range ("histo2D::getBin: xbin or ybin is out of range");// << std::endl;
+	}
+	return conts_.at(ybinno).getBin(xbinno,layer);
 }
-/**
- * not protected
- */
+
 inline histoBin & ztop::histo2D::getBin(const size_t &xbinno,const size_t& ybinno,const int &layer){
-	return conts_[ybinno].getBin(xbinno,layer);
+	if(xbinno>=xbins_.size() || ybinno>= conts_.size()){
+		throw std::out_of_range ("histo2D::getBin: xbin or ybin is out of range");// << std::endl;
+	}
+	return conts_.at(ybinno).getBin(xbinno,layer);
 }
 
 #ifndef __CINT__

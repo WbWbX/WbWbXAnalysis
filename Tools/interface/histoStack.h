@@ -55,6 +55,8 @@ public:
 		return 0;
 	}
 
+	std::vector<TString> getSystNameList()const;
+
 	// void mergeSameLegends();       //! shouldn't be necessary
 
 	void mergeLegends(const std::vector<TString>& tobemerged,const TString & mergedname, int mergedColor, bool allowsignals=false);
@@ -66,7 +68,7 @@ public:
 	 */
 	void mergeVariations(const std::vector<TString>& names, const TString & outname,bool linearly=false);
 
-	void mergeVariationsFromFileInCMSSW(const std::string& filename);
+	void mergeVariationsFromFileInCMSSW(const std::string& filename,const std::string& marker="");
 
 	ztop::histo1D getContribution(TString)const;   //! does not ignore data; makes copy, doesn't change member containers!
 	ztop::histo1D getContributionsBut(TString)const;  //!does not ignore data; makes copy, doesn't change member containers!
@@ -137,7 +139,7 @@ public:
 	void getRelSystematicsFrom(const ztop::histoStack&);
 	void addRelSystematicsFrom(const ztop::histoStack&,bool ignorestat=false,bool strict=false);
 	void removeError(TString);
-	void removeAllSystematics();
+	void removeAllSystematics(const TString& exception="");
 	void renameSyst(TString, TString); //! old, new
 	void splitSystematic(const size_t& number, const float& fracadivb,
 			const TString & splinamea,  const TString & splinameb);

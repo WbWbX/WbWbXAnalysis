@@ -1,0 +1,26 @@
+
+
+[plotStyle - Upper]
+
+    leftMargin    = 0.0
+    rightMargin   = 0.0
+    
+    
+    yaxis.titleSize   = 0.0
+    yaxis.labelSize   = 0.0
+    
+    
+[end plotStyle]
+  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+[plotStyle - Ratio]
+    
+
+    leftMargin    = 0.0
+    rightMargin   = 0.0
+    
+    yaxis.titleSize   = 0.0
+    yaxis.labelSize   = 0.0
+    
+    
+[end plotStyle]
+    

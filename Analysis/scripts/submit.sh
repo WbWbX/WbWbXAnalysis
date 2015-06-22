@@ -14,8 +14,8 @@ topmasses=( "172.5"
      # "175.5"
      # "169.5"
 
-   # "178.5"
-   # "166.5"
+   "178.5"
+   "166.5"
 );
 pdfeigenvectors=26  # 26 # if set to 0, no variation
 
@@ -144,24 +144,51 @@ systs=( "nominal"
 # # # ########
 
 
-    "BTAGH_up"
-    "BTAGH_down"
+ #   "BTAGH_up"
+ #   "BTAGH_down"
     "BTAGL_up"
     "BTAGL_down"
+   
+# # # ######## BTAGH splitting
+
+#### BTAGH_PileUp and BTAGH_JER are included in the corr unc
+
+     "BTAGH_BFragmentation_up"
+     "BTAGH_DeltaR_up"
+     "BTAGH_GluonSplitting_up"
+     "BTAGH_IFSR_up"
+     "BTAGH_IP-bias_up"
+     "BTAGH_JES_up"
+     "BTAGH_JetAway_up"
+     "BTAGH_KT_up"
+     "BTAGH_LT-Bias_up"
+     "BTAGH_LT-Cb_up"
+     "BTAGH_LT-others_up"
+     "BTAGH_MuPt_up"
+     "BTAGH_PS_up"
+     "BTAGH_PT-l2c_up"
+     "BTAGH_S8-ptrel_up"
+     "BTAGH_Statistic_up"
+     "BTAGH_TCT_up"
+     
+     "BTAGH_BFragmentation_down"
+     "BTAGH_DeltaR_down"
+     "BTAGH_GluonSplitting_down"
+     "BTAGH_IFSR_down"
+     "BTAGH_IP-bias_down"
+     "BTAGH_JES_down"
+     "BTAGH_JetAway_down"
+     "BTAGH_KT_down"
+     "BTAGH_LT-Bias_down"
+     "BTAGH_LT-Cb_down"
+     "BTAGH_LT-others_down"
+     "BTAGH_MuPt_down"
+     "BTAGH_PS_down"
+     "BTAGH_PT-l2c_down"
+     "BTAGH_S8-ptrel_down"
+     "BTAGH_Statistic_down"
+     "BTAGH_TCT_down"
     
-# # # #####csv rew section
-# # #    # "BTAGHFS1_up"
-# # #    # "BTAGHFS1_down"
-# # #    # "BTAGHFS2_up"
-# # #    # "BTAGHFS2_down"
-# # #    # "BTAGLFS1_up"
-# # #    # "BTAGLFS1_down"
-# # #    # "BTAGLFS2_up"
-# # #    # "BTAGLFS2_down"
-# # #    # "BTAGPUR_up"
-# # #    # "BTAGPUR_down"
-
-
      "TOPPT_up"
      "TOPPT_down"
 

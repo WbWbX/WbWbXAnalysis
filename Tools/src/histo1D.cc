@@ -35,8 +35,7 @@ std::vector<histo1D*> histo1D::c_list;
 bool histo1D::c_makelist=false;
 bool histo1D::showwarnings=false;
 ///////function definitions
-histo1D::histo1D():
-																																																		taggedObject(taggedObject::type_container1D)
+histo1D::histo1D():taggedObject(taggedObject::type_container1D)
 {
 
 	//divideBinomial_=true;
@@ -52,7 +51,7 @@ histo1D::histo1D():
 }
 
 histo1D::histo1D(const std::vector<float>& bins,const TString& name,const TString& xaxisname,const TString& yaxisname, bool mergeufof):
-																																																			taggedObject(taggedObject::type_container1D)
+																																																															taggedObject(taggedObject::type_container1D)
 
 {
 	setBins(bins);
@@ -419,10 +418,10 @@ void histo1D::splitSystematic(const size_t & number, const float& fracadivb,
 
 	histo1D syscont = getSystContainer(number);
 	contents_.removeLayer(number);
-
-	addErrorContainer(splinamea,syscont,weighta);
-
-	addErrorContainer(splinameb,syscont,weightb);
+	if(weighta>0)
+		addErrorContainer(splinamea,syscont,weighta);
+	if(weightb>0)
+		addErrorContainer(splinameb,syscont,weightb);
 
 }
 
@@ -977,30 +976,7 @@ float histo1D::normalize(bool includeUFOF, bool normsyst, const float& normto){
  */
 void histo1D::normalizeToContainer(const histo1D & cont){
 	histo1D tcont=cont;
-	tcont.setAllErrorsZero();
-	//when dividing all systematics will be recreated from nominal (now with 0 stat error)
-	//int syssize=(int)getSystSize();
-
-	//new: do by hand
-	/*
-	for(size_t i=0;i<bins_.size();++i){
-		float nomcont=cont.getBinContent(i);
-
-		for(int sys=-1;sys<syssize;++sys){
-			if(nomcont!=0){
-				setBinContent(i, getBinContent(i,sys)/nomcont);
-				setBinStat(i, getBinStat(i,sys)/nomcont);
-
-			}
-			else{
-				setBinContent(i, 0);
-				setBinStat(i, 0);
-			}
-		}
-	}
-
-	return; */
-	//old impl
+	tcont.removeAllSystematics();
 	bool temp=histoContent::divideStatCorrelated;
 	histoContent::divideStatCorrelated=false;
 	*this/=tcont;
@@ -1747,7 +1723,7 @@ void histo1D::addRelSystematicsFrom(const ztop::histo1D & rhs,bool ignorestat,bo
 			//contents_.getLayer(newlayerit).removeStat();
 			//stat are definitely not correlated
 			bool isnominalequal=(!strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i),1e-2))
-																																					        																																																		|| (strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i))) ;
+																																					        																																																														|| (strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i))) ;
 
 			if(isnominalequal){ //this is just a copy leave it and add no variation
 				//contents_.getLayer(newlayerit).removeStat();
@@ -1795,14 +1771,20 @@ void histo1D::removeError(const size_t &idx){
 void histo1D::transformSystToStat(){
 	size_t idxup=getSystErrorIndex("stat_up");
 	size_t idxdown=getSystErrorIndex("stat_down");
-
+	histo1D cp=*this;
+	cp.removeAllSystematics();
 	for(size_t bin=0;bin<contents_.size();bin++){
-		histoBin& nombin=contents_.getBin(bin);
+		histoBin& nombin=cp.contents_.getBin(bin);
 		float maxstat=fabs(contents_.getBin(bin,idxup).getContent()-nombin.getContent());
 		float otherstat=fabs(contents_.getBin(bin,idxdown).getContent()-nombin.getContent());
 		if(maxstat<otherstat) maxstat=otherstat;
 		nombin.setStat(maxstat);
 	}
+	for(size_t i=0;i<getSystSize();i++){
+		if(i!=idxup && i!=idxdown)
+		cp.contents_.addLayer(getSystErrorName(i),contents_.getLayer(i));
+	}
+	*this=cp;
 }
 void histo1D::transformStatToSyst(const TString &sysname){
 	size_t layers=contents_.layerSize();
@@ -1853,6 +1835,18 @@ void histo1D::setErrorZero(const size_t& idx){
 	}
 	contents_.getLayer(idx) = contents_.getNominal();
 
+}
+void histo1D::removeAllSystematics(const TString& exception){
+	if(exception.Length()<1){
+		contents_.removeAdditionalLayers();manualerror_=false;
+	}
+	else{
+		histoBins upcp=contents_.getLayer(exception+"_up");
+		histoBins downcp=contents_.getLayer(exception+"_down");
+		contents_.removeAdditionalLayers();manualerror_=false;
+		contents_.addLayer(exception+"_up",upcp);
+		contents_.addLayer(exception+"_down",downcp);
+	}
 }
 
 size_t histo1D::setErrorZeroContaining(const TString &in){
@@ -1916,8 +1910,8 @@ histo1D histo1D::createPseudoExperiment(TRandom3* rand,const histo1D* c, pseudod
 		}
 		out.setBinContent(i,newpoint);
 		out.setBinStat(i,newstatorg);
-	}
 
+	}
 	if(debug){
 		std::cout << "container1D::createPseudoExperiment: creating copies of nominal for syst "<< out.contents_.layerSize() <<std::endl;
 	}
@@ -1928,6 +1922,17 @@ histo1D histo1D::createPseudoExperiment(TRandom3* rand,const histo1D* c, pseudod
 
 	return out;
 
+}
+histo1D histo1D::createPseudoExperiments(TRandom3* rand,const histo1D* c, pseudodatamodes mode, const std::vector<size_t> & excludefromvar)const{
+
+	histo1D tmp=*this;
+	tmp.setName(getName()+"_pe");
+	tmp.removeAllSystematics();
+	tmp=tmp.createPseudoExperiment(rand,c,mode);
+
+	tmp.addRelSystematicsFrom(*this,true,true);
+
+	return tmp;
 }
 
 void histo1D::renameSyst(const TString &old, const TString &New){
@@ -1997,17 +2002,7 @@ TString histo1D::coutBinContent(size_t bin,const TString& unit) const{
 	}
 	TString out;
 	float content=getBinContent(bin);
-	//rewrite to tex format
-	//cout in standard, "out" in tex table
-	/*
-	 * \begin{tabular}{|c|c|}
-\hline
-� & � \\
-\hline
-� & � \\
-\hline
-\end{tabular}
-	 */
+
 	TString starttable="\\begin{tabular}{|c|c|}\n  \\hline \n" ;
 	std::stringstream cont;
 	cont.setf(ios::fixed,ios::floatfield);
@@ -2125,6 +2120,18 @@ TString histo1D::coutBinContent(size_t bin,const TString& unit) const{
 }
 
 
+std::vector<histo1D> histo1D::produceVariations(const TString & sysname)const{
+	std::vector<histo1D>  out(3);
+	out.at(0) = getSystContainer(-1);
+	out.at(0).setName("nominal");
+	size_t idxup=getSystErrorIndex(sysname+"_up");
+	size_t idxdown=getSystErrorIndex(sysname+"_down");
+	out.at(1) = getSystContainer(idxup);
+	out.at(1).setName(sysname+" up");
+	out.at(2) = getSystContainer(idxdown);
+	out.at(2).setName(sysname+" down");
+	return out;
+}
 
 /**
  * for bin

@@ -10,6 +10,8 @@
 #include "../interface/mtFromInclXsec.h"
 namespace ztop{
 
+bool mtFromInclXsec::debug=false;
+
 void mtFromInclXsec::readInFiles(const std::vector<std::string>& ins){
 	std::cout << "reading..."<<std::endl;
 	if(ins.size()<1)
@@ -23,13 +25,17 @@ void mtFromInclXsec::readInFiles(const std::vector<std::string>& ins){
 		tmpg.readFromFile(infile);
 		exppoints_.mergeWith(tmpg);
 	}
+	if(debug)
+		for(size_t i=0;i<exppoints_.getNPoints();i++){
+			std::cout << "added point: " << exppoints_.getPointXContent(i) << ',' << exppoints_.getPointYContent(i) <<std::endl;
+		}
 }
 
 
 
 graphFitter mtFromInclXsec::getMassDependence(const TString& syst)const{
-	if(exppoints_.getNPoints() < 3)
-		throw std::logic_error("mtFromInclXsec::getMassDependence: at least 3 points needed!");
+	if(exppoints_.getNPoints() != 3)
+		throw std::logic_error("mtFromInclXsec::getMassDependence: exactly 3 points needed!");
 	size_t idxup,idxdown;
 
 	idxup=exppoints_.getSystErrorIndex(envunc_+"_up");
@@ -49,9 +55,10 @@ graphFitter mtFromInclXsec::getMassDependence(const TString& syst)const{
 		fitgr=exppoints_;
 	}
 	fitgr.removeAllXYSyst();
-	fitgr.addErrorGraph(exppoints_.getSystErrorName(idxup),exppoints_.getSystGraph(idxup));
-	fitgr.addErrorGraph(exppoints_.getSystErrorName(idxdown),exppoints_.getSystGraph(idxdown));
+	//fitgr.addErrorGraph(exppoints_.getSystErrorName(idxup),exppoints_.getSystGraph(idxup));
+	//fitgr.addErrorGraph(exppoints_.getSystErrorName(idxdown),exppoints_.getSystGraph(idxdown));
 	gf.readGraph(&fitgr);
+
 
 	gf.fit();
 
@@ -89,14 +96,15 @@ void  mtFromInclXsec::extract(){
 
 
 
-	const float mintopmass=166;
-	const float maxtopmass=178;
+	const float mintopmass=165.5;
+	const float maxtopmass=179.5;
 	const float ndiv=500;
-	const float minxsec=getTtbarXsec(maxtopmass,energy_);
-	const float maxxsec=getTtbarXsec(mintopmass,energy_);
-	float scaleerrth,pdferrth;
-	getTtbarXsec(nommass,energy_,&scaleerrth,&pdferrth);
-	double tottheoerr=sqrt(scaleerrth*scaleerrth+pdferrth*pdferrth);
+	const float minxsec= predicted_.getXsec(maxtopmass);
+	const float maxxsec= predicted_.getXsec(mintopmass);
+	//float scaleerrth,pdferrth;
+	//getTtbarXsec(nommass,energy_,&scaleerrth,&pdferrth);
+	//	predicted_.getXsec((maxtopmass+mintopmass)/2,top_prediction::err
+	//	double tottheoerr=sqrt(scaleerrth*scaleerrth+pdferrth*pdferrth);
 
 
 	std::vector<float> bins=histo1D::createBinning(ndiv,mintopmass,maxtopmass);
@@ -109,14 +117,15 @@ void  mtFromInclXsec::extract(){
 	for(int sys=-1;sys<(int)exppoints_.getSystSize();sys++){
 		if((size_t)sys==idxup || (size_t)sys==idxdown) continue;
 
+
 		graphFitter sysfit;
 		if(sys>-1.)
 			sysfit=getMassDependence(exppoints_.getSystErrorName(sys)); //PERF
 		else
 			sysfit=getMassDependence();
 
-		for(size_t i=1;i<=theolh_.getNBinsX();i++){
-			for(size_t j=1;j<=theolh_.getNBinsY();j++){
+		for(size_t i=1;i<=massup.getNBinsX();i++){
+			for(size_t j=1;j<=massup.getNBinsY();j++){
 				//centerx+=1;
 				float centery,centerx;
 				theolh_.getBinCenter(i,j,centerx,centery);
@@ -148,23 +157,26 @@ void  mtFromInclXsec::extract(){
 
 	float binwidthhalf=(maxxsec-minxsec)/ndiv;
 
+	predicted_.exportLikelihood(&theolh_);
+
 	for(size_t i=1;i<=theolh_.getNBinsX();i++){
 		for(size_t j=1;j<=theolh_.getNBinsY();j++){
+
+
 			float centery,centerx;
 			theolh_.getBinCenter(i,j,centerx,centery);
-			double xsec= getTtbarXsec(centerx,energy_);
-			long double lnL = xsec - centery;
-			lnL/=(tottheoerr*xsec);
-			lnL=sq(lnL)/2;//lnL/1e6;
-			lnL=exp(-lnL);
-			theolh_.getBin(i,j).setContent(lnL);
+			double xsec= predicted_.getXsec(centerx);
+			double xsecup= predicted_.getXsec(centerx,top_prediction::err_maxup);
+			double xsecdown= predicted_.getXsec(centerx,top_prediction::err_maxdown);
+
+
 			if(isApprox((float)xsec,centery,binwidthhalf))
 				splittheolh.getBin(i,j).setContent(1);
 			else
 				splittheolh.getBin(i,j).setContent(0);
-			if(isApprox((float)(xsec+xsec*tottheoerr),centery,binwidthhalf))
+			if(isApprox((float)(xsecup),centery,binwidthhalf))
 				splittheolh.getBin(i,j,0).setContent(1);
-			if(isApprox((float)(xsec-xsec*tottheoerr),centery,binwidthhalf))
+			if(isApprox((float)(xsecdown),centery,binwidthhalf))
 				splittheolh.getBin(i,j,1).setContent(1);
 		}
 	}
@@ -181,6 +193,7 @@ void  mtFromInclXsec::extract(){
 	float onesigma=(float)exp(-0.5);
 	for(size_t i=1;i<=forextr.getNBinsX();i++){
 		for(size_t j=1;j<=forextr.getNBinsY();j++){
+
 			if(forextr.getBinContent(i,j)>maxlh){
 				maxlh=forextr.getBinContent(i,j);
 				forextr.getBinCenter(i,j,maxmt,dummy);
@@ -193,7 +206,7 @@ void  mtFromInclXsec::extract(){
 			}
 		}
 	}
-	std::cout << "mtop: "<< maxmt << "  +" << errright-maxmt<< "-"<<  maxmt-errleft << "   (" << energy_ << " TeV)"<<std::endl;
+	std::cout << "mtop: "<< maxmt << "   (" << predicted_.idString() << ")"<<std::endl;
 	result_.addPoint(1,maxmt);
 	graph tmp = result_;
 	tmp.setPointYContent(0,errright);
@@ -206,6 +219,7 @@ void  mtFromInclXsec::extract(){
 
 		size_t binx=0,biny=0;
 		forextr.getMax(binx,biny,i);
+		std::cout << binx << ","<<biny << std::endl;
 		float cy,cx;
 		forextr.getBinCenter(binx,biny,cx,cy);
 		tmp.setPointYContent(0,cx);

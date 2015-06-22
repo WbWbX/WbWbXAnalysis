@@ -20,9 +20,10 @@
 namespace ztop{
 class histoStack;
 
+
 class ttbarXsecFitter {
 public:
-
+	friend class dataset;
 	enum likelihoodmodes{lhm_chi2datastat,lhm_chi2datamcstat,lhm_poissondatastat};
 
 	enum priors{prior_gauss,prior_box,prior_float,prior_narrowboxleft,prior_narrowboxright,
@@ -38,7 +39,8 @@ public:
 		fitsucc_(false),norm_nbjet_global_(true),
 		useMConly_(false),removesyst_(false),nominos_(false),
 		parameterwriteback_(true),
-		nosystbd_(false),silent_(false),nopriors_(false),topmassrepl_(-100)
+		nosystbd_(false),silent_(false),nopriors_(false),topmassrepl_(-100),pseudodatarun_(false),
+		wjetsrescalefactor_(1)
 	{
 	} //one for each energy
 
@@ -101,6 +103,8 @@ public:
 	void readInput(const std::string & configfilename);
 
 
+	void setDummyFit(bool set){fitter_.setOnlyRunDummy(set);}
+
 	/**
 	 * creates all variate containers
 	 * adds lumi uncertainty and "xsec" as syst
@@ -121,6 +125,7 @@ public:
 
 	histo1D getCb (bool fittedvalues,size_t datasetidx)const; //{if(eighttev) return container_c_b_.at(0); else return container_c_b_.at(1);}
 	histo1D getEps(bool fittedvalues,size_t datasetidx)const;
+	float getEps_emu(bool fittedvalues,size_t datasetidx)const;
 
 	histo2D getCorrelations()const;
 
@@ -128,6 +133,8 @@ public:
 	double getXsec(size_t datasetidx)const;
 	double getXsecOffset(size_t datasetidx)const;
 	double getVisXsec(size_t datasetidx)const;
+
+	void cutAndCountSelfCheck(size_t datasetidx)const;
 
 	double getXsecRatio(size_t datasetidx1,size_t datasetidx2, double & errup, double& errdown)const;
 
@@ -160,7 +167,8 @@ public:
 	static bool debug;
 
 
-	histoStack applyParametersToStack(const histoStack& stack, size_t bjetcat, size_t datasetidx, bool fitted, corrMatrix& retcorrelations)const;
+	histoStack applyParametersToStack(const histoStack& stack, size_t bjetcat, size_t datasetidx, bool fitted,
+			corrMatrix& retcorrelations, variateHisto1D* fullmc=0)const;
 
 	void printAdditionalControlplots(const std::string& inputfile, const std::string & configfile,const std::string& prependToOutput)const;
 
@@ -170,7 +178,10 @@ public:
 	void printControlStack(bool fittedvalues,size_t bjetcat,size_t datasetidx,const std::string& prependToOutput)const;
 
 
+	void printVariations(size_t bjetcat,size_t datasetidx,const std::string& prependToOutput, bool postfitcontr=false)const;
 
+
+	std::vector<float> tempdata;
 
 private:
 
@@ -196,9 +207,9 @@ private:
 			double errdown;
 		};
 
-		dataset(double lumi,double lumiunc, double xsecin, TString name):
+		dataset(double lumi,double lumiunc, double xsecin, TString name, ttbarXsecFitter* par):
 			lumi_(lumi),xsecoff_(xsecin),unclumi_(lumiunc),
-			lumiidx_(9999),xsecidx_(9999),name_(name),totalvisgencontsread_(0)
+			lumiidx_(9999),xsecidx_(9999),name_(name),totalvisgencontsread_(0),firstpseudoexp_(true),parent_(par)
 		{}
 
 		extendedVariable& eps_emu(){return eps_emu_;}
@@ -225,6 +236,7 @@ private:
 		variateHisto1D& container_eps_b(){return container_eps_b_;}
 		const variateHisto1D& container_eps_b()const {return container_eps_b_;}
 
+
 		const TString & getName()const{return name_;}
 		const double & lumi()const{return lumi_;}
 		const double & xsecOffset()const{return xsecoff_;}
@@ -242,8 +254,10 @@ private:
 		 */
 		void adaptIndices(const dataset & rhs);
 
-		void createPseudoDataFromMC(histo1D::pseudodatamodes mode=histo1D::pseudodata_poisson);
-		void createContinuousDependencies(bool,const std::vector<size_t>& );
+		void cutAndCountSelfCheck(const std::vector<std::pair<TString, double> >&)const;
+
+		void createPseudoDataFromMC(histo1D::pseudodatamodes mode, const std::vector<size_t> & excludefromvar);
+		void createContinuousDependencies();
 
 		std::vector<TString> getSystNames()const{
 			if(signalconts_nbjets_.size()<1)
@@ -274,9 +288,9 @@ private:
 		variateHisto1D createLeptonJetAcceptance(const std::vector<histo1D>& signals,
 				const std::vector<histo1D>& signalpsmig,
 				const std::vector<histo1D>& signalvisPSgen,
-				size_t bjetcategory, std::vector<size_t> addfullerrs);
+				size_t bjetcategory);
 
-		dataset():totalvisgencontsread_(0){}
+		dataset():totalvisgencontsread_(0),firstpseudoexp_(true){}
 
 		double lumi_,xsecoff_;
 		double unclumi_;
@@ -309,6 +323,7 @@ private:
 		std::vector<histo1D> signalcontsorig_nbjets_;
 
 		std::vector<histo1D> signalvisgenconts_nbjets_;
+		std::vector<histo1D> signalvisgencontsorig_nbjets_;
 
 		size_t totalvisgencontsread_; //this is NOT signalvisgenconts_nbjets_.size() since some could be merged!
 
@@ -326,7 +341,8 @@ private:
 		// safe them as-is. no adding of unc or anything!
 		std::vector<std::vector<histoStack> > inputstacks_;
 
-
+		bool firstpseudoexp_;
+		ttbarXsecFitter * parent_;
 
 	};
 
@@ -343,7 +359,7 @@ private:
 	std::vector<TString> parameternames_;
 	likelihoodmodes lhmode_;
 	std::vector<priors> priors_;
-	std::vector<size_t> addfullerrors_;
+	std::vector< std::pair<TString ,std::vector<size_t> > > addfullerrors_;
 	simpleFitter fitter_;
 
 	bool fitsucc_;
@@ -361,6 +377,8 @@ private:
 
 	TString translatePartName(const formatter& fmt,const TString& name)const;
 
+	bool isXSecIdx(const size_t& idx)const;
+
 	//might come handy in some cases
 	formatter format_;
 
@@ -377,6 +395,11 @@ private:
 
 	bool nosystbd_,silent_,nopriors_;
 	float topmassrepl_;
+
+	bool pseudodatarun_;
+
+	float wjetsrescalefactor_;
+	std::string mergesystfile_;
 };
 
 }

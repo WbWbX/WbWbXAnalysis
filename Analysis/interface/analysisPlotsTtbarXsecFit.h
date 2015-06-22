@@ -16,15 +16,20 @@ namespace ztop{
  */
 class analysisPlotsTtbarXsecFit : public analysisPlots{
 public:
-	analysisPlotsTtbarXsecFit(size_t step):analysisPlots(step),jetcategory(cat_0bjet0jet)
-	{
+	analysisPlotsTtbarXsecFit(size_t step):analysisPlots(step),jetcategory(cat_0bjet0jet),totevts_(0),vispsevts_(0),totevtsw_(0),vispsevtsw_(0)
+{
 		leadjetpt_plots.resize(cat_bjetjetmax,0);
 		secondjetpt_plots.resize(cat_bjetjetmax,0);
 		thirdjetpt_plots.resize(cat_bjetjetmax,0);
 		total_plots.resize(cat_bjetjetmax,0);
-	}
+}
 
-	~analysisPlotsTtbarXsecFit(){/* destruction is handled in base class! */}
+	~analysisPlotsTtbarXsecFit(){/* destruction is handled in base class! */
+		if(totevts_){
+			std::cout << "fraction of visible phase space events:" << (double)vispsevts_/(double)totevts_<<std::endl;
+			std::cout << "fraction of visible phase space events (weighted):" << vispsevtsw_/totevtsw_<<std::endl;
+		}
+	}
 
 	void bookPlots();
 	void fillPlotsReco();
@@ -39,6 +44,8 @@ private:
 
 	void setJetCategory(size_t nbjets,size_t njets);
 
+	size_t totevts_,vispsevts_;
+	double totevtsw_,vispsevtsw_;
 
 
 	std::vector<histo1DUnfold*>

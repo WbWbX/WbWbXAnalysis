@@ -1,42 +1,47 @@
 
 
-### comments with #
-## format for each energy:
-# 
-#   <this is the line for 0 add jet>  filename | plotname (, filename, plotname, .....) #all plots here will be taken into account (stat uncorr)
-#   <this is the line for 1 add jet>  filename | plotname ...
-#   ...
-# bjet++
-# < 1 b-jet > ....
-#
-#
-#
-#  the files are assumed to be located where the executable is called
+$$$ comments with $
+$$ format for each energy:
+$ 
+$   <this is the line for 0 add jet>  filename | plotname (, filename, plotname, .....) $all plots here will be taken into account (stat uncorr)
+$   <this is the line for 1 add jet>  filename | plotname ...
+$   ...
+$ bjet++
+$ < 1 b-jet > ....
+$
+$
+$
+$  the files are assumed to be located where the executable is called
 
+[ general ]
+
+    mergeSystFile = combine_syst.txt
+
+[ end - general ]
 
 [ priors ]
 
-#everything will be gaussian except the ones specified here
+$everything will be gaussian except the ones specified here
 
    TT_SCALE   =  box
-#   TT_GENPOWPY=  fixed
-#   CR         =  boxleft
-#   TT_MATCH   =  box
-#   TT_HER     =  fixed
-#   TT_GENPOWPY gauss / float
-#   CR = fixed
-#   UE = fixed
+$   TT_GENPOWPY=  fixed
+$   CR         =  boxleft
+$   TT_MATCH   =  box
+$   TT_HER     =  fixed
+$   TT_GENPOWPY gauss / float
+$   CR = fixed
+$   UE = fixed
 
 [ end - priors ]
 
 [ full extrapolation ]
 
    TT_SCALE
-#   TT_MATCH
-#   TT_HER
-#   TT_GENPOWPY
-#   CR
-#   UE
+$   TT_MATCH
+$   TT_HER
+$   TT_GENPOWPY
+$   CR
+$   UE
 
 [ end - full extrapolation ]
 
@@ -46,17 +51,17 @@
 	[ dataset - 13TeV ]
 	  lumi  =   1000
 	  lumiunc = 4.0
-	  energy = 13      #for dynamic xsec
-	  topmass = 172.5  #for dynamic xsec
+	  energy = 13      $for dynamic xsec
+	  topmass = 172.5  $for dynamic xsec
 	[ end dataset - 13TeV ]
 
 [ end datasets ]
 
-#plots for datasets
+$plots for datasets
 
 [ 13TeV ]
 
-   emu_13TeV_172.5_nominal_syst.ztop | total 0,0 b-jets step 8  ##these should include 3+ bjets events
+   emu_13TeV_172.5_nominal_syst.ztop | total 0,0 b-jets step 8  $$these should include 3+ bjets events
    emu_13TeV_172.5_nominal_syst.ztop | lead jet pt 0,1 b-jets step 8
    emu_13TeV_172.5_nominal_syst.ztop | second jet pt 0,2 b-jets step 8
    emu_13TeV_172.5_nominal_syst.ztop | third jet pt 0,3 b-jets step 8
@@ -77,4 +82,4 @@ bjet++
 
 
 [ end - 13TeV ]
-##########################################
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$

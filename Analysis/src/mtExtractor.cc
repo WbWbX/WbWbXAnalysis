@@ -69,11 +69,11 @@ void mtExtractor::setInputFiles(const std::vector<TString>& pl){
 	fr.readFile(extfileformatfile_.Data());
 	//extfilepreamble_ = fr.getValue<TString>("filepreamble");
 	TString extfileendpattern = fr.getValue<TString>("fileendpattern");
-	ztop::textFormatter tf;
+
 	isexternalgen_=false;
 	extgenfiles_.clear();cufinputfiles_.clear();
 	for(size_t i=0;i<pl.size();i++){
-		TString filename=tf.getFilename(pl.at(i).Data());
+		TString filename=ztop::textFormatter::getFilename(pl.at(i).Data());
 		if(filename.BeginsWith(extfilepreamble_) && filename.EndsWith(extfileendpattern)){ //this is external gen input
 			if(debug) std::cout << "mtExtractor::setInputFiles: part of input is external" <<std::endl;
 			plottypemc_="ext"; //at least one external!

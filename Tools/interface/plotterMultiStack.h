@@ -5,73 +5,47 @@
  *      Author: kiesej
  */
 
-#ifndef TTZANALYSIS_TOOLS_INTERFACE_PLOTTERMULTISTACK_H_
-#define TTZANALYSIS_TOOLS_INTERFACE_PLOTTERMULTISTACK_H_
+#ifndef TTZANALYSIS_TOOLS_INTERFACE_plotterMultiStack_H_
+#define TTZANALYSIS_TOOLS_INTERFACE_plotterMultiStack_H_
 
 #include "plotterBase.h"
 #include "plotterControlPlot.h"
+#include "plotterMultiColumn.h"
+#include "histoStack.h"
 
 
 namespace ztop{
-class histoStack;
 
-class plotterMultiStack : public plotterBase{
+class plotterMultiStack : public plotterMultiColumn{
 public:
 
 
-	plotterMultiStack();
-	~plotterMultiStack(){plotterMultiStack::cleanMem();}
+	plotterMultiStack():plotterMultiColumn(){
+		readStyleFromFileInCMSSW("/src/TtZAnalysis/Tools/styles/plotterMultiStack_standard.txt");
+	}
+	~plotterMultiStack(){}
 
-	void readStyleFromFile(const std::string& );
-	/*
-	 * expects entries:
-	 * [textBoxes - boxes]
-	 *
-	 * [plotterMultiStack]
-	 *   controlPlotStyleFile=<file abs path within CMSSW_BASE>
-	 *   ...
-	 *   frac0= ...
-	 * [end - plotterMultiStack]
-	 *
-	 * [legendStyle] (for legend printed in last plot)
-	 *
-	 */
 
 
 	void addStack(const histoStack *s);
-	void associateCorrelationMatrix(const corrMatrix& m){corrm_=&m;}
 
-	void cleanMem();
-	void printToPdf(const std::string& outname);
-
+	void cleanMem(){stacks_.clear(); plotterMultiColumn::cleanMem();}
 
 protected:
-	void preparePad();
-	void drawPlots();
-	// void drawTextBoxes();
-	void drawLegends();
-	void refreshPad();
+
 
 private:
-	void addStyleFromFile(const std::string& );
-	void clear(){}
-	void clearPlots(){}
+
+	plotterBase * invokePlotter()const{return new plotterControlPlot();}
+	void addPlotData(const size_t & idx);//
+
+	 float getYMax(const size_t& idx,bool divbw)const;
+	 float getYMin(const size_t& idx,bool divbw)const;
 
 	std::vector<const histoStack*> stacks_;
-	std::vector<plotterControlPlot*> plotter_;
 
-	const corrMatrix* corrm_;
+	 void readStylePriv(const std::string & file, bool requireall);
 
-	std::string stylefile_;
-
-	TLegend* globalleg_;
-
-	std::vector<float> separators_;
-	std::vector<size_t> yaxisconnects_;
-	/*
-	float bottommarg_,topmarg_,leftmarg_,rightmarg_;*/
-
-	void readStylePriv(const std::string& infile,bool requireall);
 
 };
 
@@ -80,4 +54,4 @@ private:
 
 
 
-#endif /* TTZANALYSIS_TOOLS_INTERFACE_PLOTTERMULTISTACK_H_ */
+#endif /* TTZANALYSIS_TOOLS_INTERFACE_plotterMultiStack_H_ */

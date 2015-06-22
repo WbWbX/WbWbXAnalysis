@@ -39,6 +39,8 @@ public:
 	graph(const TString &name="");
 	graph(const size_t & npoints,const TString &name="");
 	~graph();
+	graph(const graph&);
+	graph& operator = (const graph&);
 
 	bool isEmpty()const{return getNPoints()<1;}
 	bool hasNans()const;
@@ -208,7 +210,7 @@ public:
 
 
 private:
-
+public:
 
 
 	/*
@@ -245,6 +247,7 @@ void graph::writeToStream(T & stream)const{
 	IO::serializedWrite(yname_,stream);
 	IO::serializedWrite(xname_,stream);
 	IO::serializedWrite(pointnames_,stream);
+	IO::serializedWrite(chi2definition,stream);
 }
 template <class T>
 void graph::readFromStream(T & stream){
@@ -253,6 +256,7 @@ void graph::readFromStream(T & stream){
 	IO::serializedRead(yname_,stream);
 	IO::serializedRead(xname_,stream);
 	IO::serializedRead(pointnames_,stream);
+	IO::serializedRead(chi2definition,stream);
 }
 
 namespace IO{

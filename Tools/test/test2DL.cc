@@ -38,14 +38,15 @@ double sq(double a){
 
 double LH_Exp(float mtop,float xsec,ztop::graphFitter & gf, const float& errup,const float& errdown){
 
-	double xsecmeas=gf.getFitOutput(mtop);
+	double xsecmeas=246.4;//gf.getFitOutput(mtop);
 	double xsecerr=errup*xsecmeas;
 	if(xsec<xsecmeas)
 		xsecerr=xsecmeas*errdown;
-	//double mtoperr=0.5;
+	const double mtoperr=sqrt(0.6*0.6);// + 1);
+	const double mtopmeas=173.1;
 
 	double lnLHxsec = sq((xsecmeas-xsec)/xsecerr)/2;
-	double lnLHmt = 0;//sq((mtopmeas-mtop)/mtoperr)/2;
+	double lnLHmt = sq((mtopmeas-mtop)/mtoperr)/2;
 
 	double combined = exp( - lnLHxsec - lnLHmt);
 	return combined;
@@ -85,9 +86,10 @@ invokeApplication(){
 
 	graph expg7,expg8;
 	graphFitter gf7,gf8;
+	/*
 	for(size_t k=0;k<2;k++){
 		graph& g=expg7;
-		const std::vector<TString>& ins=in7TeV;
+		 std::vector<TString> ins=in7TeV;
 		if(k){
 			g=expg8;
 			ins=in8TeV;
@@ -102,7 +104,7 @@ invokeApplication(){
 	}
 
 
-	graphFitter gf7,gf8;
+
 	gf7.setFitMode(graphFitter::fm_pol2);
 	gf7.readGraph(&expg7);
 	gf7.fit();
@@ -114,7 +116,9 @@ invokeApplication(){
 			<< "+ mt * " << gf7.getParameter(1) << "+ mt*mt*" << gf7.getParameter(2) <<std::endl;
 	std::cout << "Fitted dep 8TeV: " << gf7.getParameter(0)
 				<< "+ mt * " << gf8.getParameter(1) << "+ mt*mt*" << gf8.getParameter(2) <<std::endl;
+*/
 
+	float energy=8;
 
 	float xsecerrup=0.039;
 	float xsecerrdown=0.035;
@@ -152,7 +156,7 @@ invokeApplication(){
 			lnL=exp(-lnL);
 			c.getBin(i,j).setContent(lnL);
 			//centerx+=1;
-			double lhexp=LH_Exp(centerx,centery,gf,xsecerrup,xsecerrdown);
+			double lhexp=LH_Exp(centerx,centery,gf8,xsecerrup,xsecerrdown);
 
 			contexp.getBin(i,j).setContent(lhexp);
 			if(isApprox(lhexp,exp(-0.5),0.01) )
@@ -192,10 +196,11 @@ invokeApplication(){
 	TGraphAsymmErrors * g=countourexp.getTGraph("",true);
 	g->SetMarkerSize(0.15);
 	g->Draw("P,same");
-	expg.getTGraph()->Draw("PX");
+	//expg.getTGraph()->Draw("PX");
 	tb2d.drawToPad(&cv);
 	cv.Print("expOnly" +nrgstr+".pdf");
 	pl.cleanMem();
+	contexp.writeToFile("2DLH_exp.ztop");
 
 	contexp*=c;
 

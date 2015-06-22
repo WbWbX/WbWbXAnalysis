@@ -11,33 +11,51 @@ JES_Flavor         linear       JES_FlavorPureGluon   JES_FlavorPureQuark    JES
 
  JES_PileupPt       squared      JES_PileUpPtBB    JES_PileUpPtEC    JES_PileUpPtHF
 
- JES_Uncorrelated   squared         JES_AbsoluteStat   JES_AbsoluteScale    JES_HighPtExtra    JES_SinglePionECAL   JES_SinglePionHCAL    JES_Time    JES_RelativeJEREC1    JES_RelativeJEREC2    JES_RelativeJERHF    JES_RelativePtBB    JES_RelativePtEC1       JES_RelativePtEC2       JES_RelativePtHF       JES_RelativeStatEC2       JES_RelativeStatHF   JES_PileUpDataMC    JES_PileUpBias
+% JES_Uncorrelated   squared         JES_AbsoluteStat   JES_AbsoluteScale    JES_HighPtExtra    JES_SinglePionECAL   JES_SinglePionHCAL    JES_Time    JES_RelativeJEREC1    JES_RelativeJEREC2    JES_RelativeJERHF    JES_RelativePtBB    JES_RelativePtEC1       JES_RelativePtEC2       JES_RelativePtHF       JES_RelativeStatEC2       JES_RelativeStatHF   JES_PileUpDataMC    JES_PileUpBias
 
-%this will merge all JES
+ JES_UncorrCorr   squared   JES_HighPtExtra    JES_SinglePionECAL   JES_SinglePionHCAL
+ 
+ JES_UncorrUncorr squared    JES_AbsoluteStat   JES_AbsoluteScale     JES_Time    JES_RelativeJEREC1    JES_RelativeJEREC2    JES_RelativeJERHF    JES_RelativePtBB    JES_RelativePtEC1       JES_RelativePtEC2       JES_RelativePtHF       JES_RelativeStatEC2       JES_RelativeStatHF   JES_PileUpDataMC    JES_PileUpBias
+ 
+ BTAGH squared BTAGH_BFragmentation   BTAGH_DeltaR   BTAGH_GluonSplitting   BTAGH_IFSR   BTAGH_IP-bias    BTAGH_JetAway   BTAGH_KT    BTAGH_LT-Bias    BTAGH_LT-Cb    BTAGH_LT-others    BTAGH_MuPt    BTAGH_PS    BTAGH_PT-l2c   BTAGH_S8-ptrel     BTAGH_TCT 
+ % BTAGH_JES not included
 
-% JES                squared      JES_Flavor  JES_PileupPt   JES_Uncorrelated  JES_RelativeFSR   JES_AbsoluteMPFBias
+ PDF                squared      PDF1    PDF2    PDF3    PDF4    PDF5    PDF6    PDF7    PDF8    PDF9    PDF10    PDF11    PDF12    PDF13    PDF14    PDF15     PDF16     PDF17     PDF18    PDF19     PDF20    PDF21    PDF22    PDF23    PDF24  PDF25  PDF26
 
-PDF                squared      PDF1    PDF2    PDF3    PDF4    PDF5    PDF6    PDF7    PDF8    PDF9    PDF10    PDF11    PDF12    PDF13    PDF14    PDF15     PDF16     PDF17     PDF18    PDF19     PDF20    PDF21    PDF22    PDF23    PDF24  PDF25  PDF26
-
-
-%LES                squared      MUONES  ELECES
-
-%LEPIDISO           squared      ELECSF   MUONSF
 
 [end-merge_syst]
 
 %
 %List systematics that are fitted independently but summed for the final systematics table
-% format: summed name = <name1> + <name2> + ...
+% format: summed name = <name1>   <name2> + ...
 % also here, names still follow the "raw" convention )so e.g. "JES_Flavor" instead of "JES: Flavor"
 
 [merge in table]
 
-JES =  JES_PileupPt + JES_Uncorrelated + JES_AbsoluteMPFBias + JES_RelativeFSR
+JES =  JES_PileupPt + JES_UncorrCorr + JES_UncorrUncorr + JES_AbsoluteMPFBias + JES_RelativeFSR
 BG_DY = BG_0_bjets_DY + BG_1_bjets_DY + BG_2_bjets_DY
 Hadro_JES = JES_Flavor + TT_BJESNUDEC + TT_BJESRETUNE
 
 LES = MUONES + ELECES
 LEPIDISO = ELECSF + MUONSF
 
+% BTAGH = BTAGH_BFragmentation + BTAGH_DeltaR + BTAGH_GluonSplitting + BTAGH_IFSR + BTAGH_IP-bias + BTAGH_JES + BTAGH_JetAway + BTAGH_KT  + BTAGH_LT-Bias  + BTAGH_LT-Cb  + BTAGH_LT-others  + BTAGH_MuPt  + BTAGH_PS  + BTAGH_PT-l2c + BTAGH_S8-ptrel + BTAGH_Statistic + BTAGH_TCT 
+
+BTAGH = BTAGH_JES + BTAGH_Statistic
+
 [end - merge in table]
+
+
+[merge for plots]
+
+JES squared  JES_PileupPt  JES_UncorrCorr  JES_UncorrUncorr  JES_AbsoluteMPFBias  JES_RelativeFSR
+% BG_DY squared BG_0_bjets_DY  BG_1_bjets_DY  BG_2_bjets_DY
+Hadro_JES squared JES_Flavor  TT_BJESNUDEC  TT_BJESRETUNE
+
+LES squared MUONES  ELECES
+LEPIDISO squared ELECSF  MUONSF
+
+% BTAGH squared BTAGH_BFragmentation   BTAGH_DeltaR   BTAGH_GluonSplitting   BTAGH_IFSR   BTAGH_IP-bias   BTAGH_JES   BTAGH_JetAway   BTAGH_KT    BTAGH_LT-Bias    BTAGH_LT-Cb    BTAGH_LT-others    BTAGH_MuPt    BTAGH_PS    BTAGH_PT-l2c   BTAGH_S8-ptrel   BTAGH_Statistic   BTAGH_TCT 
+
+
+[end - merge for plots ]

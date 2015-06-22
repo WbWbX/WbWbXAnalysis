@@ -161,7 +161,13 @@ void histoStack::setLegendOrder(const TString &leg, const size_t& no){
 		}
 	}
 }
-
+std::vector<TString> histoStack::getSystNameList()const{
+	if(mode ==unfolddim1 || mode == dim1)
+		return getDataContainer().getSystNameList();
+	else if(containers2D_.size()>0)
+		return containers2D_.at(0).getSystNameList();
+	throw std::logic_error("histoStack::getSystNameList: stack empty");
+}
 
 void histoStack::mergeLegends(const std::vector<TString>& tobemerged,const TString & mergedname, int mergedColor, bool allowsignals){
 	std::vector<size_t> idxstbm;
@@ -311,9 +317,9 @@ void histoStack::mergeVariations(const std::vector<TString>& names, const TStrin
 
 }
 
-void histoStack::mergeVariationsFromFileInCMSSW(const std::string& filename){
+void histoStack::mergeVariationsFromFileInCMSSW(const std::string& filename,const std::string& marker){
 	systAdder adder;
-	adder.readMergeVariationsFileInCMSSW(filename);
+	adder.readMergeVariationsFileInCMSSW(filename,marker);
 	size_t ntobemerged=adder.mergeVariationsSize();
 	for(size_t i=0;i<ntobemerged;i++){
 
@@ -786,15 +792,15 @@ void histoStack::removeError(TString sysname){
 	}
 }
 
-void histoStack::removeAllSystematics(){
+void histoStack::removeAllSystematics(const TString& exception){
 	for(unsigned int i=0; i<containers_.size();i++){
-		containers_[i].removeAllSystematics();
+		containers_[i].removeAllSystematics(exception);
 	}
 	for(unsigned int i=0; i<containers2D_.size();i++){
-		containers2D_[i].removeAllSystematics();
+		containers2D_[i].removeAllSystematics(exception);
 	}
 	for(unsigned int i=0; i<containers1DUnfold_.size();i++){
-		containers1DUnfold_[i].removeAllSystematics();
+		containers1DUnfold_[i].removeAllSystematics(exception);
 	}
 }
 
@@ -875,11 +881,18 @@ std::vector<size_t> histoStack::removeSpikes(bool inclUFOF,int limittoindex,
 
 ztop::histo1D histoStack::getFullMCContainer()const{
 	histo1D out;
-	if(containers_.size()<1)
-		return out;
-	for(unsigned int i=0;i<containers_.size();i++){
-		if(legends_[i] != dataleg_) {
-			out+=containers_[i];
+	if(mode==dim1){
+		for(unsigned int i=0;i<containers_.size();i++){
+			if(legends_[i] != dataleg_) {
+				out+=containers_[i];
+			}
+		}
+	}
+	else if(mode==unfolddim1){
+		for(unsigned int i=0;i<containers1DUnfold_.size();i++){
+			if(legends_[i] != dataleg_){
+				out+=containers1DUnfold_[i].getRecoContainer();
+			}
 		}
 	}
 	return out;

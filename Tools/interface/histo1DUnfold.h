@@ -49,7 +49,7 @@ public:
 	void setAllZero();
 	void removeError(TString name){histo2D::removeError(name); gencont_.removeError(name); recocont_.removeError(name);unfolded_.removeError(name);}
 	void renameSyst(TString old , TString New){histo2D::renameSyst(old,New);gencont_.renameSyst(old,New);recocont_.renameSyst(old, New);}
-	void removeAllSystematics();
+	void removeAllSystematics(const TString& exception="");
 
 	void splitSystematic(const size_t & number, const float& fracadivb,
 			const TString & splinamea,  const TString & splinameb);
@@ -243,6 +243,8 @@ public:
 	void readFromStream(T & stream);
 #endif
 
+	void writeToFile(const std::string& filename)const;
+	void readFromFile(const std::string& filename);
 
 
 private:

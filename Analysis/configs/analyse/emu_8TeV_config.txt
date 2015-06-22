@@ -67,7 +67,7 @@ Lumi           = 19741
 JECFile        = /src/TtZAnalysis/Analysis/data/analyse/Summer13_V5_DATA_UncertaintySources_AK5PFchs.txt
 
 MuonSFFile     = /src/TtZAnalysis/Analysis/data/analyse/muon_tight_sf2D_8TeV.root
-MuonSFHisto    = eff_pt_eta_fullwithtrackerr
+MuonSFHisto    = GlobalSF
 TrackingSFFile = /src/TtZAnalysis/Analysis/data/analyse/muon_trackSF_8TeV.root
 TrackingSFHisto = tracking_eff
 
@@ -80,7 +80,7 @@ TriggerSFFile  = /src/TopAnalysis/Configuration/analysis/common/data/triggerSumm
 
 PUFile         = /src/TtZAnalysis/Analysis/data/analyse/Legacy2012.json_PU    $without .root
 
-btagSFFile     = /src/TopAnalysis/ZTopUtils/data/CSV_8TeV.csv
+btagSFFile     = /src/TopAnalysis/ZTopUtils/data/CSV8TeVbreak_full.csv
 btagFile       = all_btags
 
 

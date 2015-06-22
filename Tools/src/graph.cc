@@ -48,6 +48,23 @@ graph::~graph(){
 	}
 }
 
+graph::graph(const graph& rhs):taggedObject(rhs), chi2definition(rhs.chi2definition),xcoords_(rhs.xcoords_),ycoords_(rhs.ycoords_),
+		yname_(rhs.yname_),xname_(rhs.xname_),pointnames_(rhs.pointnames_){
+
+}
+graph& graph::operator = (const graph& rhs){
+	if(&rhs==this)
+		return *this;
+	taggedObject::operator=(rhs);
+	xcoords_=rhs.xcoords_;
+	ycoords_=rhs.ycoords_;
+	yname_=rhs.yname_;
+	xname_=rhs.xname_;
+	pointnames_=rhs.pointnames_;
+	chi2definition=rhs.chi2definition;
+	return *this;
+}
+
 bool graph::hasNans()const{
 	for(int sys=-1;sys<(int)getSystSize();sys++){
 		for(size_t i=0;i<getNPoints();i++){
@@ -246,6 +263,7 @@ void graph::removeAllXYSyst(){
  *
  */
 void graph::sortPointsByX(){
+	//if(getNPoints()<2) return;
 	std::vector<std::pair<float,size_t> >tx;
 	for(size_t i=0;i<getNPoints();i++){
 		float cont=getPointXContent(i);
@@ -306,7 +324,7 @@ void graph::normalizeToGraph(const graph& g){
 		throw std::logic_error("graph::normalizeToGraph: only possible if x coords are identical!");
 	}
 	graph tempg=g;
-	tempg.removeYErrors();
+	tempg.removeAllXYSyst();
 	bool temp=histoContent::divideStatCorrelated;
 	histoContent::divideStatCorrelated=false;
 	ycoords_/=tempg.ycoords_;

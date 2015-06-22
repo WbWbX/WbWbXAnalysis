@@ -1,0 +1,39 @@
+$$$$
+$$$ comments
+
+[plotterMultiCompare]
+
+      $$this is the main file
+	    controlPlotStyleFile = src/TtZAnalysis/Tools/styles/plotterMultiCompare_ctrDef.txt
+	   
+	    nplots = 4
+	    
+	    addStyle0 =   src/TtZAnalysis/Tools/styles/plotterMultiCompare_sub0.txt
+	    addStyle1 =   src/TtZAnalysis/Tools/styles/plotterMultiCompare_sub1.txt
+	    addStyle2 =   src/TtZAnalysis/Tools/styles/plotterMultiCompare_sub2.txt
+	    addStyle3 =   src/TtZAnalysis/Tools/styles/plotterMultiCompare_sub3.txt
+	    
+	    
+	    frac0=0.7
+	    frac1=0.9
+	    frac2=0.75
+	    frac3=0.85
+	    
+	    connectUpperYAxis = 1|2|3
+	 
+[end - plotterMultiCompare]
+
+
+[textBoxes - boxes]
+
+[end - textBoxes]
+
+
+ [legendStyle]
+    x0  =  0.12
+	y0  =  0.50
+	x1  =  0.21
+	y1  =  0.88
+	nColumns        = 1
+	columnSeparator = 0.1
+[end legendStyle]

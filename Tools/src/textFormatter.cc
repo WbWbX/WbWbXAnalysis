@@ -10,7 +10,7 @@
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
-
+#include <algorithm>
 
 namespace ztop{
 
@@ -84,32 +84,10 @@ std::string &textFormatter::trim(std::string &s) const {
 }
 
 
-std::vector<std::string> textFormatter::getFormatted(const std::string& in)const{
-	std::vector<std::string> out;
-	using namespace std;
-	string s=in;
-	trimcomments(s);
-	trim(s);
-	istringstream ss(s);
 
-	while (ss)
-	{
+//static member functions
 
-		string s2;
-		if (!getline( ss, s2, *delimiter_.data() )) break;
-		if(debug)
-			std::cout << "got \"" << s2 << "\""<<std::endl;
-		trim(s2);
-		if(debug)
-			std::cout << "trimmed to \"" << s2 << "\"" << std::endl;
-
-		out.push_back( s2 );
-	}
-
-	return out;
-}
-
-std::string textFormatter::getFilename(const std::string& pathtofile)const{
+std::string textFormatter::getFilename(const std::string& pathtofile){
 	std::string out;
 	using namespace std;
 	string s=pathtofile;
@@ -128,7 +106,7 @@ std::string textFormatter::getFilename(const std::string& pathtofile)const{
 }
 
 
-std::string textFormatter::getFileExtension(const std::string& pathtofile)const{
+std::string textFormatter::getFileExtension(const std::string& pathtofile){
 	std::string out=getFilename(pathtofile);
 	using namespace std;
 	string s=out;
@@ -148,7 +126,7 @@ std::string textFormatter::getFileExtension(const std::string& pathtofile)const{
 		return "";
 	return out;
 }
-std::string textFormatter::stripFileExtension(const std::string& pathtofile)const{
+std::string textFormatter::stripFileExtension(const std::string& pathtofile){
 	std::string temp=getFilename(pathtofile);
 	using namespace std;
 	string s=temp;
@@ -163,7 +141,7 @@ std::string textFormatter::stripFileExtension(const std::string& pathtofile)cons
 
 	return out;
 }
-std::string textFormatter::stripFileDir(const std::string& pathtofile)const{
+std::string textFormatter::stripFileDir(const std::string& pathtofile){
 	std::string temp=getFilename(pathtofile);
 	using namespace std;
 	string s=temp;
@@ -178,7 +156,7 @@ std::string textFormatter::stripFileDir(const std::string& pathtofile)const{
 	return out;
 }
 
-std::string textFormatter::getFileDir(const std::string& pathtofile)const{
+std::string textFormatter::getFileDir(const std::string& pathtofile){
 	using namespace std;
 	string str=pathtofile;
 	size_t endpos = str.find_last_of("/");
@@ -189,13 +167,24 @@ std::string textFormatter::getFileDir(const std::string& pathtofile)const{
 	return str;
 
 }
-std::string textFormatter::addFilenameSuffix(const std::string& pathtofile, const std::string& suffix)const{
+std::string textFormatter::addFilenameSuffix(const std::string& pathtofile, const std::string& suffix){
 
 	std::string onlyname=stripFileExtension(pathtofile);
 
 	std::string extension=getFileExtension(pathtofile);
 	return onlyname+suffix+"."+extension;
 
+}
+
+std::string textFormatter::makeCompatibleFileName(const std::string &in){
+	std::string out=in;
+	std::replace( out.begin(), out.end(), '#', '_');
+	std::replace( out.begin(), out.end(), '/', '_');
+	std::replace( out.begin(), out.end(), '{', '_');
+	std::replace( out.begin(), out.end(), '}', '_');
+	std::replace( out.begin(), out.end(), ' ', '_');
+	std::replace( out.begin(), out.end(), '\\', '_');
+	return out;
 }
 
 }//ns

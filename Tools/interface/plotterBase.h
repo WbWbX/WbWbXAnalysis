@@ -15,6 +15,7 @@
 #include "legendStyle.h"
 #include "TStyle.h"
 #include "TGaxis.h"
+#include "corrMatrix.h"
 
 class TH1D;
 class TGraphAsymmErrors;
@@ -29,8 +30,9 @@ namespace ztop{
 class plotterBase :protected tObjectList{
 public:
     plotterBase():tObjectList(), title_(""),tbndc_(true),lastplotidx_(0),
-tmplegp_(0),pad_(0),drawlegend_(true),preparepad_(true){
+tmplegp_(0),corrm_(0),pad_(0),drawlegend_(true),preparepad_(true){
     	TGaxis::SetMaxDigits(4);
+    	gStyle->SetOptStat(0);
     }
     virtual ~plotterBase(){}
 
@@ -71,14 +73,33 @@ tmplegp_(0),pad_(0),drawlegend_(true),preparepad_(true){
 
      void readStyleFromFileInCMSSW(const std::string&);
 
-     virtual void readStyleFromFile(const std::string&) =0;
-     virtual void addStyleFromFile(const std::string&) =0;
+     void readStyleFromFile(const std::string&file){
+    	 readStylePriv(file,true);
+     }
+     void addStyleFromFile(const std::string&file){
+    	 readStylePriv(file,false);
+     }
 
      void readTStyleFromFile(const std::string& pathtofile);
 
      void printToPdf(const std::string& outname);
 
+     virtual bool hasRatio()const=0;
+
+     void associateCorrelationMatrix(const corrMatrix& m){corrm_=&m;}
+
+
+     virtual plotStyle& getUpperStyle() =0;
+     virtual plotStyle& getRatioStyle() =0;
+     virtual const plotStyle& getUpperStyle()const=0;
+     virtual const plotStyle& getRatioStyle()const=0;
+
+
+     virtual float getXAxisLowerLimit()const=0;
+    virtual float getXAxisHigherLimit()const=0;
+
 protected:
+
 
     typedef TGraphAsymmErrors TG;
     TString title_;
@@ -105,6 +126,7 @@ protected:
     virtual void readStylePriv(const std::string & , bool )=0;
 
     TLegend * tmplegp_;
+    const corrMatrix* corrm_;
 
 private:
     TVirtualPad * pad_;

@@ -74,9 +74,23 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
 		middphi=*(event()->midphi);
 	}
 	///GEN
-	SETBINSRANGE(50,166,180);
-	addPlot("top mass", "m_{t}[GeV]","N_{t}/GeV");
-	FILLFOREACH(gentops,m());
+
+	SETBINSRANGE(40,0,200);
+	addPlot("gen lepton1 pt", "p_{T}[GeV]","N_{l}/GeV");
+	FILLFOREACH(genleptons1,pt());
+
+	SETBINSRANGE(40,-3,3);
+	addPlot("gen lepton1 eta", "#eta_{l}]","N_{l}/bw");
+	FILLFOREACH(genleptons1,eta());
+
+
+	SETBINSRANGE(40,0,200);
+	addPlot("gen lepton3 pt", "p_{T}[GeV]","N_{l}/GeV");
+	FILLFOREACH(genleptons3,pt());
+
+	SETBINSRANGE(40,-4,4);
+	addPlot("gen lepton3 eta", "#eta_{l}]","N_{l}/bw");
+	FILLFOREACH(genleptons3,eta());
 
 
 	///LEPTONS
@@ -319,7 +333,7 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
     FILL(dphilljjets,size());
     addPlot("dphiplushard jets multi", "N_{jet}", "N_{evt}");
     FILL(dphiplushardjets,size()); */
-	SETBINSRANGE(6,-0.5,5.5);
+	SETBINSRANGE(4,-0.5,3.5);
 	addPlot("selected b-jet multi","N_{b}","N_{evt}",true);
 	FILL(selectedbjets,size());
 

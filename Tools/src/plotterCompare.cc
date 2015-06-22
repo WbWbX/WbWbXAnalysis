@@ -77,6 +77,26 @@ void plotterCompare::cleanMem(){
 		memratio_=0;
 	}
 }
+
+
+float plotterCompare::getXAxisLowerLimit()const{
+	if(nominalplot_.getInputGraph().isEmpty())
+		throw std::out_of_range("plotterCompare::getXAxisLowerLimit(): plot empty");
+	float min,max;
+	nominalplot_.getXRange(min,max);
+	return min;
+}
+float plotterCompare::getXAxisHigherLimit()const{
+	if(nominalplot_.getInputGraph().isEmpty())
+		throw std::out_of_range("plotterCompare::getXAxisHigherLimit(): plot empty");
+
+	float min,max;
+	nominalplot_.getXRange(min,max);
+	return max;
+
+}
+
+
 /**
  * clears plots, clears styles
  */
@@ -125,12 +145,7 @@ void plotterCompare::clearPlots(){
  * nominal upper and nominal ratio
  *
  */
-void plotterCompare::addStyleFromFile(const std::string& infile){
-	readStylePriv(infile,false);
-}
-void plotterCompare::readStyleFromFile(const std::string& infile){
-	readStylePriv(infile,true);
-}
+
 void plotterCompare::readStylePriv(const std::string& infile, bool requireall){
 
 
@@ -169,16 +184,16 @@ void plotterCompare::readStylePriv(const std::string& infile, bool requireall){
 
 	if(debug) std::cout <<"plotterCompare::readStyleFromFile: reading compare styles" << std::endl;
 
-	compstylesupper_.clear();
-	compstylesratio_.clear();
-	histoStyle compareupperDefault,compareRatioDefault;
-	compareupperDefault.readFromFile(infile,"CompareUpperDefault",requireall);
-	compareRatioDefault.readFromFile(infile,"CompareRatioDefault",requireall);
+	compstylesupper_.resize(size_);
+	compstylesratio_.resize(size_);
+	//	histoStyle compareupperDefault,compareRatioDefault;
+	//	compareupperDefault.readFromFile(infile,"CompareUpperDefault",requireall);
+	//	compareRatioDefault.readFromFile(infile,"CompareRatioDefault",requireall);
 
 
 	if(compids_.size()>0 && compids_.size()!=size_){
 		std::cout << "plotterCompare::readStyle: size of compare ids (" <<compids_.size()
-    					<< ") must match number of plots to be compared to nominal.(" << size_ << ")"<<std::endl;
+    									<< ") must match number of plots to be compared to nominal.(" << size_ << ")"<<std::endl;
 		throw std::out_of_range("plotterCompare::readStyle: size of compare ids must match number of plots to be compared to nominal.");
 	}
 
@@ -193,13 +208,12 @@ void plotterCompare::readStylePriv(const std::string& infile, bool requireall){
 			oss << i;
 			add=oss.str();
 		}
-		temps=compareupperDefault;
-		temps.readFromFile(infile, "CompareUpper"+add,false);
-		compstylesupper_.push_back(temps);
+		compstylesupper_.at(i).readFromFile(infile,"CompareUpperDefault",requireall);
+		compstylesupper_.at(i).readFromFile(infile, "CompareUpper"+add,false);
 
-		temps=compareRatioDefault;
-		temps.readFromFile(infile, "CompareRatio"+add,false);
-		compstylesratio_.push_back(temps);
+		compstylesratio_.at(i).readFromFile(infile,"CompareRatioDefault",requireall);
+		compstylesratio_.at(i).readFromFile(infile, "CompareRatio"+add,false);
+
 	}
 
 	//text boxes
@@ -260,18 +274,12 @@ void  plotterCompare::drawPlots(){
 	if(debug) std::cout <<"plotterCompare::drawPlots: draw ratio plots" << std::endl;
 	drawAllPlots(&ratiostyle,&nomstyleratio_,&compstylesratio_,memnom_,memratio_,false,true);
 
+	//create legend
 
-}
-
-void  plotterCompare::drawLegends(){
-	if(debug) std::cout <<"plotterCompare::drawLegends" << std::endl;
-	getPad()->cd(1);
 	TLegend *leg = addObject(new TLegend((Double_t)0.65,(Double_t)0.50,(Double_t)0.95,(Double_t)0.90));
 	leg->Clear();
 	leg->SetFillStyle(0);
 	leg->SetBorderSize(0);
-	legstyle_.applyLegendStyle(leg);
-
 	if(std::find(nolegendidx_.begin(),nolegendidx_.end(),0) == nolegendidx_.end() && nomstyleupper_.legendDrawStyle!="none")
 		leg->AddEntry(nominalplot_.getStatGraph(),nominalplot_.getName(), nomstyleupper_.legendDrawStyle);
 	for(size_t i=0;i<compareplots_.size() ; i++){
@@ -279,8 +287,19 @@ void  plotterCompare::drawLegends(){
 				|| compstylesupper_.at(i).legendDrawStyle =="none") continue;
 		leg->AddEntry(compareplots_.at(i).getStatGraph(),compareplots_.at(i).getName(),compstylesupper_.at(i).legendDrawStyle);
 	}
-	leg->Draw("same");
 	tmplegp_=leg;
+
+}
+
+void  plotterCompare::drawLegends(){
+	if(debug) std::cout <<"plotterCompare::drawLegends" << std::endl;
+	getPad()->cd(1);
+	TLegend *leg =tmplegp_;
+	legstyle_.applyLegendStyle(leg);
+
+
+	leg->Draw("same");
+
 }
 
 void plotterCompare::drawAllPlots(const plotStyle* ps, const histoStyle * cs, const std::vector<histoStyle>* vcs,
@@ -347,15 +366,18 @@ plot  plotterCompare::plotterCompareStyle(const plot&p){
 void plotterCompare::makeRatioPlots(){
 	if(debug) std::cout <<"plotterCompare::makeRatioPlots" << std::endl;
 	//////
-
+	if(memratio_){delete memratio_;memratio_=0;}
+	if(memnom_){delete memnom_;memnom_=0;}
 	graph nomgr=nominalplot_.getInputGraph();
 	memratio_=new std::vector<plot>();
 	for(size_t i=0;i<compareplots_.size();i++){
-		if(debug) std::cout << "plotterCompare::drawPlots: normalize " <<  compareplots_.at(i).getName()  << std::endl;
+		if(debug) std::cout << i << " of " <<compareplots_.size() << std::endl;
+		if(debug) std::cout << "plotterCompare::makeRatioPlots: normalize " <<  compareplots_.at(i).getName()  << std::endl;
 		graph compg=compareplots_.at(i).getInputGraph();
 		compg.normalizeToGraph(nomgr);
-		if(debug) std::cout << "plotterCompare::drawPlots: push_back " <<  compareplots_.at(i).getName()  << std::endl;
+		if(debug) std::cout << "plotterCompare::makeRatioPlots: push_back " <<  compareplots_.at(i).getName()  << std::endl;
 		memratio_->push_back(plot(&compg));
+		if(debug) std::cout << "done "<<i << " of " <<compareplots_.size() << std::endl;
 	}
 	nomgr=nomgr.getRelYErrorsGraph();
 	memnom_ = new plot(&nomgr);
@@ -365,16 +387,16 @@ void plotterCompare::makeRatioPlots(){
 float plotterCompare::getMaxMinUpper(bool retmax){
 	float max=-1e20,min=1e20;
 	for(size_t i=0;i<compareplots_.size();i++){
-		if(compareplots_.at(i).getInputGraph().getYMax() > max)
-			max=compareplots_.at(i).getInputGraph().getYMax();
-		if(compareplots_.at(i).getInputGraph().getYMin() < min)
-			min=compareplots_.at(i).getInputGraph().getYMin();
+		if(compareplots_.at(i).getInputGraph().getYMax(true) > max)
+			max=compareplots_.at(i).getInputGraph().getYMax(true);
+		if(compareplots_.at(i).getInputGraph().getYMin(true) < min)
+			min=compareplots_.at(i).getInputGraph().getYMin(true);
 
 	}
-	if(nominalplot_.getInputGraph().getYMax() > max)
-		max=nominalplot_.getInputGraph().getYMax();
-	if(nominalplot_.getInputGraph().getYMin() < min)
-		min=nominalplot_.getInputGraph().getYMin();
+	if(nominalplot_.getInputGraph().getYMax(true) > max)
+		max=nominalplot_.getInputGraph().getYMax(true);
+	if(nominalplot_.getInputGraph().getYMin(true) < min)
+		min=nominalplot_.getInputGraph().getYMin(true);
 	max=max+fabs((max-min)*0.05);
 	if(retmax)
 		return max;

@@ -8,7 +8,7 @@
 
 
 
-#include "../interface/plotterMultiStack.h"
+#include <TtZAnalysis/Tools/interface/plotterMultiColumn.h>
 #include "../interface/histoStack.h"
 #include "fillContainerRandom.h"
 #include "TRandom3.h"
@@ -72,31 +72,14 @@ int main(){
 	plm.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiStack_standard.txt");
 
 	TCanvas cv;
-	plm.usePad(&cv);
 	plm.readTextBoxesInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiStack_standard.txt","0btag7TeV");
 	plm.addStack(&tot);
 	plm.addStack(&j1);
 	plm.addStack(&j2);
 	plm.addStack(&j3);
-
-	TPostScript ps("test_multivc.ps",111);
-	//ps.Range(40,60);
-	cv.ResizeOpaque();
-	gStyle->SetPaperSize();
+	plm.printToPdf("test_multivc2pdf");
+	plm.usePad(&cv);
 	plm.draw();
-	//float multi=cv.GetXsizeReal()/cv.GetXsizeUser();
-	//cv.Size(cv.GetXsizeReal(),cv.GetYsizeReal()*multi);
-	//cv.Draw();
-	//plm.usePad(cv.cd(2));
-	//plm.draw();
-	//plm.usePad(cv.cd(3));
-	//plm.draw();
-	ps.Close();
-	cv.Print("test_multivc.png");
-	TFile f("testPMS.root","RECREATE");
-	cv.Write();
-	cv.Print("test_multivcpdf.pdf");
-
-
+	cv.Print("test_multivc2.bmp");
 	return 0;
 }

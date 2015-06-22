@@ -28,14 +28,16 @@ void plotter2D::setPlot(const histo2D* c, bool dividebybinarea){
 	else
 		dividebybinarea_=false;
 }
-void plotter2D::readStyleFromFile(const std::string&file){
+void plotter2D::readStylePriv(const std::string&file, bool requireall){
 
 	fileReader fr;
 	fr.setComment("$");
 	fr.readFile(file);
+	fr.setRequireValues(requireall);
 
-	zaxismin_ = fr.getValue("zaxis.min",zaxismin_);
-	zaxismax_ = fr.getValue("zaxis.max",zaxismax_);
+	zaxismin_ = fr.getValue<float>("zaxis.min",zaxismin_);//,zaxismin_);
+	zaxismax_ = fr.getValue<float>("zaxis.max",zaxismax_);//,zaxismax_);
+
 
 	rootDrawOpt_ = fr.getValue<TString>("rootDrawOpt",rootDrawOpt_);
 
@@ -73,7 +75,7 @@ void plotter2D::drawPlots(){
 
 
 	h->GetZaxis()->SetTitleSize(0.06);
-	h->GetZaxis()->SetTitle(zaxistitle_);
+
 	h->GetZaxis()->SetLabelSize(0.05);
 	h->GetYaxis()->SetTitleSize(0.06);
 	h->GetYaxis()->SetLabelSize(0.05);
@@ -83,7 +85,8 @@ void plotter2D::drawPlots(){
 	float min=plot_.getMin();
 	max=floor(max)+1;
 	min=floor(min)-1;
-	if(zaxismin_>zaxismax_)
+
+	if(zaxismin_ > zaxismax_)
 		h->GetZaxis()->SetRangeUser(min,max);
 	else
 		h->GetZaxis()->SetRangeUser(zaxismin_,zaxismax_);

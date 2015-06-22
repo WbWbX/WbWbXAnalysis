@@ -9,7 +9,6 @@
 #define PLOTTERCONTROLPLOT_H_
 
 #include "plotterBase.h"
-#include "corrMatrix.h"
 
 class TLegend;
 namespace ztop{
@@ -27,8 +26,10 @@ public:
     plotterControlPlot();
     ~plotterControlPlot(){plotterControlPlot::cleanMem();}
 
-    void addStyleFromFile(const std::string& );
-    void readStyleFromFile(const std::string& );
+  //  void addStyleFromFile(const std::string& );
+
+    void addStyleFromFile(const std::string&,const std::string&,const std::string&    );
+  //  void readStyleFromFile(const std::string& );
     /*
      * expects entries:
      * [plotterControlPlot] defines divideat, threshold for showing PS migrations
@@ -43,7 +44,6 @@ public:
 
 
     void setStack(const histoStack *s){stackp_=s;}
-    void associateCorrelationMatrix(const corrMatrix& m){corrm_=&m;}
 
     void clear();
     void clearPlots();
@@ -51,12 +51,13 @@ public:
 
     plotStyle& getUpperStyle(){return upperstyle_;}
     const plotStyle& getUpperStyle()const{return upperstyle_;}
-
     plotStyle& getRatioStyle(){return ratiostyle_;}
     const plotStyle& getRatioStyle()const{return ratiostyle_;}
 
     float getXAxisLowerLimit()const;
     float getXAxisHigherLimit()const;
+
+    bool hasRatio()const{return true;}
 
 protected:
     void preparePad();
@@ -93,7 +94,6 @@ private:
 
     float psmigthresh_;
 
-    const corrMatrix* corrm_;
 
     void drawControlPlot();
     void drawRatioPlot();

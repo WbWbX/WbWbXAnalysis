@@ -40,14 +40,24 @@ public:
      * [plotStyle - MultiPlots]
      * TBI:!! instead of N it is possible to use identifiers (e.g. MC, data)
      */
-    void readStyleFromFile(const std::string&);
-    void addStyleFromFile(const std::string&);
+ ////   void readStyleFromFile(const std::string&);
+ ///   void addStyleFromFile(const std::string&);
+
+
+    plotStyle& getUpperStyle(){return pstyle_;}
+    const plotStyle& getUpperStyle()const{return pstyle_;}
 
     /**
      * cleans mem and deletes plots.
      * Doesn't change styles
      */
     void clear();
+    bool hasRatio()const{return false;}
+
+
+    float getXAxisLowerLimit()const;
+    float getXAxisHigherLimit()const;
+
 protected:
 
     void preparePad();
@@ -60,6 +70,10 @@ protected:
     bool drawlegend_,tightyaxis_,tightxaxis_;
 
 private:
+
+
+    plotStyle& getRatioStyle(){throw std::logic_error("NA");}
+    const plotStyle& getRatioStyle()const{throw std::logic_error("NA");}
 
     float getMaximum()const;
     float getMinimum()const;

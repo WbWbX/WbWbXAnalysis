@@ -30,6 +30,7 @@ void variateHisto1D::import(const histo1D& cont){
 	if(debug)
 		std::cout << "variateContainer1D::import" <<std::endl;
 
+	setName(cont.getName());
 	contents_.clear();errsup_.clear(),errsdown_.clear();
 	contents_.resize(cont.getBins().size());
 	errsup_.resize(cont.getBins().size());
@@ -254,8 +255,8 @@ histo1D variateHisto1D::exportContainer(const std::vector<double> & variations)c
 	std::vector<float> bins=bins_;
 	bins.erase(bins.begin()); //let UF be created for output
 	histo1D out(bins);
-	histo1D zerotmp=out;
-
+	//histo1D zerotmp=out;
+	out.setName(getName());
 	for(size_t i=0;i<bins_.size();i++){
 		out.setBinContent(i,contents_.at(i).getValue(variations)  );
 		out.setBinStat(i,(errsup_.at(i)+errsdown_.at(i))/2 * contents_.at(i).getMultiplicationFactor(variations));
@@ -283,6 +284,7 @@ histo1D variateHisto1D::exportContainer(const std::vector<double> & variations,
 		nominal.addErrorContainer(name,err);
 		varcp.at(i)=variations.at(i);//set back to default
 	}
+	nominal.setName(getName());
 	return nominal;
 
 }

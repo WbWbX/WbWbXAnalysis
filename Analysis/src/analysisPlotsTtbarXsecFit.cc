@@ -22,82 +22,86 @@ void analysisPlotsTtbarXsecFit::bookPlots(){
 
 	std::vector<float> bins=histo1D::createBinning(1,0,1);
 	//leadjetpt_plots, secjetpt_plots, thirdjetpt_plots, total_plots;
-	total_plots.at(cat_0bjet0jet) = addPlot(bins,bins,"total 0,0 b-jets","","N_{evt}");
-	total_plots.at(cat_0bjet1jet) = addPlot(bins,bins,"total 0,1 b-jets","","N_{evt}");
-	total_plots.at(cat_0bjet2jet) = addPlot(bins,bins,"total 0,2 b-jets","","N_{evt}");
-	total_plots.at(cat_0bjet3jet) = addPlot(bins,bins,"total 0,3 b-jets","","N_{evt}");
-	total_plots.at(cat_1bjet0jet) = addPlot(bins,bins,"total 1,0 b-jets","","N_{evt}");
-	total_plots.at(cat_1bjet1jet) = addPlot(bins,bins,"total 1,1 b-jets","","N_{evt}");
-	total_plots.at(cat_1bjet2jet) = addPlot(bins,bins,"total 1,2 b-jets","","N_{evt}");
-	total_plots.at(cat_1bjet3jet) = addPlot(bins,bins,"total 1,3 b-jets","","N_{evt}");
-	total_plots.at(cat_2bjet0jet) = addPlot(bins,bins,"total 2,0 b-jets","","N_{evt}");
-	total_plots.at(cat_2bjet1jet) = addPlot(bins,bins,"total 2,1 b-jets","","N_{evt}");
-	total_plots.at(cat_2bjet2jet) = addPlot(bins,bins,"total 2,2 b-jets","","N_{evt}");
-	total_plots.at(cat_2bjet3jet) = addPlot(bins,bins,"total 2,3 b-jets","","N_{evt}");
+	total_plots.at(cat_0bjet0jet) = addPlot(bins,bins,"total 0,0 b-jets","","Events");
+	total_plots.at(cat_0bjet1jet) = addPlot(bins,bins,"total 0,1 b-jets","","Events");
+	total_plots.at(cat_0bjet2jet) = addPlot(bins,bins,"total 0,2 b-jets","","Events");
+	total_plots.at(cat_0bjet3jet) = addPlot(bins,bins,"total 0,3 b-jets","","Events");
+	total_plots.at(cat_1bjet0jet) = addPlot(bins,bins,"total 1,0 b-jets","","Events");
+	total_plots.at(cat_1bjet1jet) = addPlot(bins,bins,"total 1,1 b-jets","","Events");
+	total_plots.at(cat_1bjet2jet) = addPlot(bins,bins,"total 1,2 b-jets","","Events");
+	total_plots.at(cat_1bjet3jet) = addPlot(bins,bins,"total 1,3 b-jets","","Events");
+	total_plots.at(cat_2bjet0jet) = addPlot(bins,bins,"total 2,0 b-jets","","Events");
+	total_plots.at(cat_2bjet1jet) = addPlot(bins,bins,"total 2,1 b-jets","","Events");
+	total_plots.at(cat_2bjet2jet) = addPlot(bins,bins,"total 2,2 b-jets","","Events");
+	total_plots.at(cat_2bjet3jet) = addPlot(bins,bins,"total 2,3 b-jets","","Events");
 
 	bins.clear();
 	bins << 30 << 35  << 40 << 50 << 60 << 70 << 80 << 90 << 100 << 120 << 140 << 160 << 200;
-	leadjetpt_plots.at(cat_0bjet0jet) = addPlot(bins,bins,"lead jet pt 0,0 b-jets","p_{T}^{1^{st}j} [GeV]","N_{evt}/GeV");
-	leadjetpt_plots.at(cat_0bjet1jet) = addPlot(bins,bins,"lead jet pt 0,1 b-jets","p_{T}^{1^{st}j} [GeV]","N_{evt}/GeV");
-	leadjetpt_plots.at(cat_0bjet2jet) = addPlot(bins,bins,"lead jet pt 0,2 b-jets","p_{T}^{1^{st}j} [GeV]","N_{evt}/GeV");
-	leadjetpt_plots.at(cat_0bjet3jet) = addPlot(bins,bins,"lead jet pt 0,3 b-jets","p_{T}^{1^{st}j} [GeV]","N_{evt}/GeV");
-	leadjetpt_plots.at(cat_1bjet0jet) = addPlot(bins,bins,"lead jet pt 1,0 b-jets","p_{T}^{1^{st}j} [GeV]","N_{evt}/GeV");
-	leadjetpt_plots.at(cat_1bjet1jet) = addPlot(bins,bins,"lead jet pt 1,1 b-jets","p_{T}^{1^{st}j} [GeV]","N_{evt}/GeV");
-	leadjetpt_plots.at(cat_1bjet2jet) = addPlot(bins,bins,"lead jet pt 1,2 b-jets","p_{T}^{1^{st}j} [GeV]","N_{evt}/GeV");
-	leadjetpt_plots.at(cat_1bjet3jet) = addPlot(bins,bins,"lead jet pt 1,3 b-jets","p_{T}^{1^{st}j} [GeV]","N_{evt}/GeV");
+	leadjetpt_plots.at(cat_0bjet0jet) = addPlot(bins,bins,"lead jet pt 0,0 b-jets","p_{T}} [GeV]","Events/GeV");
+	leadjetpt_plots.at(cat_0bjet1jet) = addPlot(bins,bins,"lead jet pt 0,1 b-jets","p_{T}} [GeV]","Events/GeV");
+	leadjetpt_plots.at(cat_0bjet2jet) = addPlot(bins,bins,"lead jet pt 0,2 b-jets","p_{T}} [GeV]","Events/GeV");
+	leadjetpt_plots.at(cat_0bjet3jet) = addPlot(bins,bins,"lead jet pt 0,3 b-jets","p_{T}} [GeV]","Events/GeV");
+	leadjetpt_plots.at(cat_1bjet0jet) = addPlot(bins,bins,"lead jet pt 1,0 b-jets","p_{T}} [GeV]","Events/GeV");
+	leadjetpt_plots.at(cat_1bjet1jet) = addPlot(bins,bins,"lead jet pt 1,1 b-jets","p_{T}} [GeV]","Events/GeV");
+	leadjetpt_plots.at(cat_1bjet2jet) = addPlot(bins,bins,"lead jet pt 1,2 b-jets","p_{T}} [GeV]","Events/GeV");
+	leadjetpt_plots.at(cat_1bjet3jet) = addPlot(bins,bins,"lead jet pt 1,3 b-jets","p_{T}} [GeV]","Events/GeV");
 	bins.clear();
 	bins << 30    << 40 << 50 << 60 << 70 << 80 << 90 << 120 << 160;
-	leadjetpt_plots.at(cat_2bjet0jet) = addPlot(bins,bins,"lead jet pt 2,0 b-jets","p_{T}^{1^{st}j} [GeV]","N_{evt}/GeV");
-	leadjetpt_plots.at(cat_2bjet1jet) = addPlot(bins,bins,"lead jet pt 2,1 b-jets","p_{T}^{1^{st}j} [GeV]","N_{evt}/GeV");
-	leadjetpt_plots.at(cat_2bjet2jet) = addPlot(bins,bins,"lead jet pt 2,2 b-jets","p_{T}^{1^{st}j} [GeV]","N_{evt}/GeV");
-	leadjetpt_plots.at(cat_2bjet3jet) = addPlot(bins,bins,"lead jet pt 2,3 b-jets","p_{T}^{1^{st}j} [GeV]","N_{evt}/GeV");
+	leadjetpt_plots.at(cat_2bjet0jet) = addPlot(bins,bins,"lead jet pt 2,0 b-jets","p_{T}} [GeV]","Events/GeV");
+	leadjetpt_plots.at(cat_2bjet1jet) = addPlot(bins,bins,"lead jet pt 2,1 b-jets","p_{T}} [GeV]","Events/GeV");
+	leadjetpt_plots.at(cat_2bjet2jet) = addPlot(bins,bins,"lead jet pt 2,2 b-jets","p_{T}} [GeV]","Events/GeV");
+	leadjetpt_plots.at(cat_2bjet3jet) = addPlot(bins,bins,"lead jet pt 2,3 b-jets","p_{T}} [GeV]","Events/GeV");
 
 
 	bins.clear();
 	bins << 30 << 35  << 40 << 50 << 60 << 70 << 80 << 90 << 100 << 120 << 140  << 200;
-	secondjetpt_plots.at(cat_0bjet0jet) = addPlot(bins,bins,"second jet pt 0,0 b-jets","p_{T}^{2^{nd}j} [GeV]","N_{evt}/GeV");
-	secondjetpt_plots.at(cat_0bjet1jet) = addPlot(bins,bins,"second jet pt 0,1 b-jets","p_{T}^{2^{nd}j} [GeV]","N_{evt}/GeV");
-	secondjetpt_plots.at(cat_0bjet2jet) = addPlot(bins,bins,"second jet pt 0,2 b-jets","p_{T}^{2^{nd}j} [GeV]","N_{evt}/GeV");
-	secondjetpt_plots.at(cat_0bjet3jet) = addPlot(bins,bins,"second jet pt 0,3 b-jets","p_{T}^{2^{nd}j} [GeV]","N_{evt}/GeV");
-	secondjetpt_plots.at(cat_0bjet3jet) ->setAllowMultiRecoFill(true); //little twist
+	secondjetpt_plots.at(cat_0bjet0jet) = addPlot(bins,bins,"second jet pt 0,0 b-jets","p_{T}} [GeV]","Events/GeV");
+	secondjetpt_plots.at(cat_0bjet1jet) = addPlot(bins,bins,"second jet pt 0,1 b-jets","p_{T}} [GeV]","Events/GeV");
+	secondjetpt_plots.at(cat_0bjet2jet) = addPlot(bins,bins,"second jet pt 0,2 b-jets","p_{T}} [GeV]","Events/GeV");
+	secondjetpt_plots.at(cat_0bjet3jet) = addPlot(bins,bins,"second jet pt 0,3 b-jets","p_{T}} [GeV]","Events/GeV");
 	bins.clear();
 	bins      << 30 << 35  << 40 << 50 << 60 << 70 << 80 << 90 << 100 << 120 << 140  << 200;
-	secondjetpt_plots.at(cat_1bjet0jet) = addPlot(bins,bins,"second jet pt 1,0 b-jets","p_{T}^{2^{nd}j} [GeV]","N_{evt}/GeV");
-	secondjetpt_plots.at(cat_1bjet1jet) = addPlot(bins,bins,"second jet pt 1,1 b-jets","p_{T}^{2^{nd}j} [GeV]","N_{evt}/GeV");
-	secondjetpt_plots.at(cat_1bjet2jet) = addPlot(bins,bins,"second jet pt 1,2 b-jets","p_{T}^{2^{nd}j} [GeV]","N_{evt}/GeV");
+	secondjetpt_plots.at(cat_1bjet0jet) = addPlot(bins,bins,"second jet pt 1,0 b-jets","p_{T}} [GeV]","Events/GeV");
+	secondjetpt_plots.at(cat_1bjet1jet) = addPlot(bins,bins,"second jet pt 1,1 b-jets","p_{T}} [GeV]","Events/GeV");
+	secondjetpt_plots.at(cat_1bjet2jet) = addPlot(bins,bins,"second jet pt 1,2 b-jets","p_{T}} [GeV]","Events/GeV");
 	bins.clear();
 	bins      << 30 << 35  << 40 << 50 << 60 << 70 << 80 << 90 << 100 << 120 << 200;
-	secondjetpt_plots.at(cat_1bjet3jet) = addPlot(bins,bins,"second jet pt 1,3 b-jets","p_{T}^{2^{nd}j} [GeV]","N_{evt}/GeV");
-	secondjetpt_plots.at(cat_1bjet3jet) ->setAllowMultiRecoFill(true); //little twist
+	secondjetpt_plots.at(cat_1bjet3jet) = addPlot(bins,bins,"second jet pt 1,3 b-jets","p_{T}} [GeV]","Events/GeV");
 	bins.clear();
 	bins  << 30  << 45 <<  65  << 80 << 100 << 120 << 160 << 300;
-	secondjetpt_plots.at(cat_2bjet0jet) = addPlot(bins,bins,"second jet pt 2,0 b-jets","p_{T}^{2^{nd}j} [GeV]","N_{evt}/GeV");
-	secondjetpt_plots.at(cat_2bjet1jet) = addPlot(bins,bins,"second jet pt 2,1 b-jets","p_{T}^{2^{nd}j} [GeV]","N_{evt}/GeV");
-	secondjetpt_plots.at(cat_2bjet2jet) = addPlot(bins,bins,"second jet pt 2,2 b-jets","p_{T}^{2^{nd}j} [GeV]","N_{evt}/GeV");
-	secondjetpt_plots.at(cat_2bjet3jet) = addPlot(bins,bins,"second jet pt 2,3 b-jets","p_{T}^{2^{nd}j} [GeV]","N_{evt}/GeV");
-	secondjetpt_plots.at(cat_2bjet3jet) ->setAllowMultiRecoFill(true); //little twist
+	secondjetpt_plots.at(cat_2bjet0jet) = addPlot(bins,bins,"second jet pt 2,0 b-jets","p_{T}} [GeV]","Events/GeV");
+	secondjetpt_plots.at(cat_2bjet1jet) = addPlot(bins,bins,"second jet pt 2,1 b-jets","p_{T}} [GeV]","Events/GeV");
+	bins.clear();
+	bins  << 30  << 45 <<  65  << 80 << 100 << 120  << 300;
+	secondjetpt_plots.at(cat_2bjet2jet) = addPlot(bins,bins,"second jet pt 2,2 b-jets","p_{T}} [GeV]","Events/GeV");
+	secondjetpt_plots.at(cat_2bjet3jet) = addPlot(bins,bins,"second jet pt 2,3 b-jets","p_{T}} [GeV]","Events/GeV");
 
 	bins.clear();
 	bins<< 30 << 35  << 40 << 50 << 60 << 70 << 80 << 90 << 100 << 120 << 140 << 200;
-	thirdjetpt_plots.at(cat_0bjet0jet) = addPlot(bins,bins,"third jet pt 0,0 b-jets","p_{T}^{#geq3^{rd}j} [GeV]","N_{evt}/GeV");
-	thirdjetpt_plots.at(cat_0bjet1jet) = addPlot(bins,bins,"third jet pt 0,1 b-jets","p_{T}^{#geq3^{rd}j} [GeV]","N_{evt}/GeV");
-	thirdjetpt_plots.at(cat_0bjet2jet) = addPlot(bins,bins,"third jet pt 0,2 b-jets","p_{T}^{#geq3^{rd}j} [GeV]","N_{evt}/GeV");
-	thirdjetpt_plots.at(cat_0bjet3jet) = addPlot(bins,bins,"third jet pt 0,3 b-jets","p_{T}^{#geq3^{rd}j} [GeV]","N_{evt}/GeV");
-	thirdjetpt_plots.at(cat_0bjet3jet) ->setAllowMultiRecoFill(true); //little twist
+	thirdjetpt_plots.at(cat_0bjet0jet) = addPlot(bins,bins,"third jet pt 0,0 b-jets","p_{T}} [GeV]","Events/GeV");
+	thirdjetpt_plots.at(cat_0bjet1jet) = addPlot(bins,bins,"third jet pt 0,1 b-jets","p_{T}} [GeV]","Events/GeV");
+	thirdjetpt_plots.at(cat_0bjet2jet) = addPlot(bins,bins,"third jet pt 0,2 b-jets","p_{T}} [GeV]","Events/GeV");
 	bins.clear();
 	bins << 30 << 35  << 40 << 50 << 60 << 70 << 80 << 90 << 100 << 200;
-	thirdjetpt_plots.at(cat_1bjet0jet) = addPlot(bins,bins,"third jet pt 1,0 b-jets","p_{T}^{#geq3^{rd}j} [GeV]","N_{evt}/GeV");
-	thirdjetpt_plots.at(cat_1bjet1jet) = addPlot(bins,bins,"third jet pt 1,1 b-jets","p_{T}^{#geq3^{rd}j} [GeV]","N_{evt}/GeV");
-	thirdjetpt_plots.at(cat_1bjet2jet) = addPlot(bins,bins,"third jet pt 1,2 b-jets","p_{T}^{#geq3^{rd}j} [GeV]","N_{evt}/GeV");
-	thirdjetpt_plots.at(cat_1bjet3jet) = addPlot(bins,bins,"third jet pt 1,3 b-jets","p_{T}^{#geq3^{rd}j} [GeV]","N_{evt}/GeV");
-	thirdjetpt_plots.at(cat_1bjet3jet) ->setAllowMultiRecoFill(true); //little twist
+	thirdjetpt_plots.at(cat_0bjet3jet) = addPlot(bins,bins,"third jet pt 0,3 b-jets","p_{T}} [GeV]","Events/GeV");
+	bins.clear();
+	bins << 30 << 35  << 40 << 50 << 60 << 70 << 80 << 90 << 100 << 200;
+	thirdjetpt_plots.at(cat_1bjet0jet) = addPlot(bins,bins,"third jet pt 1,0 b-jets","p_{T}} [GeV]","Events/GeV");
+	thirdjetpt_plots.at(cat_1bjet1jet) = addPlot(bins,bins,"third jet pt 1,1 b-jets","p_{T}} [GeV]","Events/GeV");
+	thirdjetpt_plots.at(cat_1bjet2jet) = addPlot(bins,bins,"third jet pt 1,2 b-jets","p_{T}} [GeV]","Events/GeV");
+	bins.clear();
+	bins << 30 << 35  << 40 << 50 << 60 << 80 << 200;
+	thirdjetpt_plots.at(cat_1bjet3jet) = addPlot(bins,bins,"third jet pt 1,3 b-jets","p_{T}} [GeV]","Events/GeV");
 	bins.clear();
 	bins << 30    << 55  << 70  << 90  << 200;
-	thirdjetpt_plots.at(cat_2bjet0jet) = addPlot(bins,bins,"third jet pt 2,0 b-jets","p_{T}^{#geq3^{rd}j} [GeV]","N_{evt}/GeV");
-	thirdjetpt_plots.at(cat_2bjet1jet) = addPlot(bins,bins,"third jet pt 2,1 b-jets","p_{T}^{#geq3^{rd}j} [GeV]","N_{evt}/GeV");
-	thirdjetpt_plots.at(cat_2bjet2jet) = addPlot(bins,bins,"third jet pt 2,2 b-jets","p_{T}^{#geq3^{rd}j} [GeV]","N_{evt}/GeV");
-	thirdjetpt_plots.at(cat_2bjet3jet) = addPlot(bins,bins,"third jet pt 2,3 b-jets","p_{T}^{#geq3^{rd}j} [GeV]","N_{evt}/GeV");
-	thirdjetpt_plots.at(cat_2bjet3jet) ->setAllowMultiRecoFill(true); //little twist
+	thirdjetpt_plots.at(cat_2bjet0jet) = addPlot(bins,bins,"third jet pt 2,0 b-jets","p_{T}} [GeV]","Events/GeV");
+	thirdjetpt_plots.at(cat_2bjet1jet) = addPlot(bins,bins,"third jet pt 2,1 b-jets","p_{T}} [GeV]","Events/GeV");
+	bins.clear();
+	bins << 30    << 55  << 70  <<  200;
+	thirdjetpt_plots.at(cat_2bjet2jet) = addPlot(bins,bins,"third jet pt 2,2 b-jets","p_{T}} [GeV]","Events/GeV");
+	bins.clear();
+	bins << 30    << 50  <<  200;
+	thirdjetpt_plots.at(cat_2bjet3jet) = addPlot(bins,bins,"third jet pt 2,3 b-jets","p_{T}} [GeV]","Events/GeV");
 
 
 }
@@ -115,7 +119,8 @@ void analysisPlotsTtbarXsecFit::fillPlotsGen(){
 	 */
 
 	std::vector<NTGenParticle*> genvisleptons1=produceCollection(event()->genleptons1,20,2.4);
-
+	totevts_++;
+	totevtsw_+=puweight();
 	//only fill one bin in some visible part of the histogram to get the total
 	// n_gen and a nice display of PS migrations
 	if(genvisleptons1.size()>1){
@@ -125,6 +130,8 @@ void analysisPlotsTtbarXsecFit::fillPlotsGen(){
 			secondjetpt_plots.at(i)->fillGen(20.5,puweight());
 			thirdjetpt_plots.at(i)->fillGen(20.5,puweight());
 		}
+		vispsevts_++;
+		vispsevtsw_+=puweight();
 	}
 
 

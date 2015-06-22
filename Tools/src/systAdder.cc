@@ -17,21 +17,27 @@ bool systAdder::debug=false;
  * expects the following format:
  * <mergedname> <mergeoption> <contribution1> <contribution2> ....
  */
-void systAdder::readMergeVariationsFileInCMSSW(const std::string&filename){
+void systAdder::readMergeVariationsFileInCMSSW(const std::string&filename,const std::string&  marker){
 	std::string cmsenv=getenv("CMSSW_BASE");
-	readMergeVariationsFile(cmsenv+"/"+filename);
+	readMergeVariationsFile(cmsenv+"/"+filename,marker);
 }
 /**
  * expects the following format:
  * <mergedname> <mergeoption> <contribution1> <contribution2> ....
  */
-void systAdder::readMergeVariationsFile(const std::string&filename){
+void systAdder::readMergeVariationsFile(const std::string&filename,const std::string&  marker){
 	fileReader fr;
 	fr.setComment("%");
 	fr.setDelimiter(" ");
 	//fileReader::debug=true;
-	fr.setStartMarker("[merge_syst]");
-	fr.setEndMarker("[end-merge_syst]");
+	if(marker.length()<1){
+		fr.setStartMarker("[merge_syst]");
+		fr.setEndMarker("[end-merge_syst]");
+	}
+	else{
+		fr.setStartMarker("[" +marker+ "]");
+		fr.setEndMarker("[end - " +marker+ "]");
+	}
 	fr.readFile(filename);
 
 	tomerge.clear();
@@ -70,21 +76,21 @@ void systAdder::readMergeVariationsFile(const std::string&filename){
 }
 
 TString              systAdder::getMergedName(size_t idx)const{
-		if(idx>=tomerge.size())
-			throw std::out_of_range("systAdder::getMergedName");
-		return tomerge.at(idx).mergename;
-	}
-	std::vector<TString> systAdder::getToBeMergedName(size_t idx)const{
-		if(idx>=tomerge.size())
-			throw std::out_of_range("systAdder::getToBeMergedName");
-		return tomerge.at(idx).tobemerged;
-	}
+	if(idx>=tomerge.size())
+		throw std::out_of_range("systAdder::getMergedName");
+	return tomerge.at(idx).mergename;
+}
+std::vector<TString> systAdder::getToBeMergedName(size_t idx)const{
+	if(idx>=tomerge.size())
+		throw std::out_of_range("systAdder::getToBeMergedName");
+	return tomerge.at(idx).tobemerged;
+}
 
-	bool                 systAdder::getToBeMergedLinearly(size_t idx)const{
-		if(idx>=tomerge.size())
-			throw std::out_of_range("systAdder::getToBeMergedLinearly");
-		return tomerge.at(idx).linearly;
-	}
+bool                 systAdder::getToBeMergedLinearly(size_t idx)const{
+	if(idx>=tomerge.size())
+		throw std::out_of_range("systAdder::getToBeMergedLinearly");
+	return tomerge.at(idx).linearly;
+}
 
 
 

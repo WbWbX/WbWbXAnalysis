@@ -1,20 +1,29 @@
 
 
-### comments with #
-## format for each energy:
-# 
-#   <this is the line for 0 add jet>  filename | plotname (, filename, plotname, .....) #all plots here will be taken into account (stat uncorr)
-#   <this is the line for 1 add jet>  filename | plotname ...
-#   ...
-# bjet++
-# < 1 b-jet > ....
-#
-#
-#
-#  the files are assumed to be located where the executable is called
+$$$ comments with $
+$$ format for each energy:
+$ 
+$   <this is the line for 0 add jet>  filename | plotname (, filename, plotname, .....) $all plots here will be taken into account (stat uncorr)
+$   <this is the line for 1 add jet>  filename | plotname ...
+$   ...
+$ bjet++
+$ < 1 b-jet > ....
+$
+$
+$
+$  the files are assumed to be located where the executable is called
+
+[ general ]
+
+    mergeSystFile = combine_syst_low.txt
+   
+    rescaleWjets = 1.5 $to use Wjets shape for QCD, too
+
+[ end - general ]
+
 [ priors ]
 
-#everything will be gaussian except the ones specified here
+$everything will be gaussian except the ones specified here
 
    TT_SCALE   =  box
    TT_GENPOWPY=  boxright
@@ -22,11 +31,13 @@
 
    UE = box
    CR         =  boxleft
-
+   
+   
    TOPPT = boxright
-   ##due to missing SF
- #  BTAGH_7TeV = float
- #  BTAGL_7TeV = float
+   
+   $$due to missing SF
+ $  BTAGH_7TeV = float
+ $  BTAGL_7TeV = float
 
 
 [ end - priors ]
@@ -35,7 +46,7 @@
 
    TT_SCALE
    TT_MATCH
-   PDF
+   PDF*
    TOPPT
 
 [ end - full extrapolation ]
@@ -46,16 +57,17 @@
 	[ dataset - 8TeV ]
 	  lumi  =   19741
 	  lumiunc = 2.6
-	  energy = 8       #for dynamic xsec
-	  topmass = 172.5  #for dynamic xsec
+	  energy = 8       $for dynamic xsec
+	  topmass = 172.5  $for dynamic xsec
 	[ end dataset - 8TeV ]
 	
 	 [ dataset - 7TeV ]
 	  lumi  =   5010
 	  lumiunc = 2.2
-	  energy = 7       #for dynamic xsec
-	  topmass = 172.5  #for dynamic xsec
+	  energy = 7       $for dynamic xsec
+	  topmass = 172.5  $for dynamic xsec
 	 [ end dataset - 7TeV ]
+	 
 
 [ end datasets ]
 
@@ -63,60 +75,84 @@
 
 [ correlations 8TeV - 7TeV ]
 
-##following the top-mass combination PAS
+$$following the top-mass combination PAS
 
- # 1 is implicit
- # PDF = 1
- # TOPPT = 1
- # TT_MATCH = 1
- # TT_SCALE = 1
- # UE = 1
- # CR = 1
- # TT_BJESNUDEC = 1
- # TT_BJESRETUNE = 1
- # TT_GENPOWPY= 1
+ $ 1 is implicit
+ $ all PDF = 1
+ $ TOPPT = 0
+ $ TT_MATCH = 1
+ $ TT_SCALE = 1
+ $ UE = 1
+ $ CR = 1
+ $ TT_BJESNUDEC = 1
+ $ TT_BJESRETUNE = 1
+ $ TT_GENPOWPY= 1
 
- # JES_Flavor = 1
- # JES_RelativeFSR = 1
- # JES_AbsoluteMPFBias = 1
-   JES_PileupPt = 0
-   JES_Uncorrelated = 0
+ $ JES_Flavor = 1
+ 
+ $ JES_HighPtExtra = 1
+ $ JES_SinglePionECAL = 1
+ $ JES_SinglePionHCAL = 1
+   JES_AbsoluteStat = 0
+   JES_AbsoluteScale = 0
+   JES_Time = 0
+   JES_RelativeJEREC1 = 0
+   JES_RelativeJEREC2 = 0
+   JES_RelativeJERHF = 0
+   JES_RelativePtBB = 0.  $ 0.2
+   JES_RelativePtEC1 = 0. $ 0.2
+   JES_RelativePtEC2 = 0. $ 0.2
+   JES_RelativePtHF = 0.  $ 0.2
+   JES_RelativeStatEC2 = 0  
+   JES_RelativeStatHF = 0
+   JES_PileUpDataMC = 0
+   JES_PileUpBias = 0
    
- #  JER    = 1
+   JES_RelativeFSR = 0
+   JES_AbsoluteMPFBias = 0
+   JES_PileUpPtBB = 0
+   JES_PileUpPtEC = 0
+   JES_PileUpPtHF = 0
+    
+    
+   JER    = 0.9
    
    MUONES = 0.9
    MUONSF = 0.9
    ELECES = 0.9
    ELECSF = 0.9
 
-   BTAGH  = 0
-   BTAGL  = 0
+  
+  $$btag
+   BTAGH_Statistic = 0 $$the rest is correlated!
+   BTAGH_JES = 0.2
+   BTAGL  = 0.8
+  
    
    TRIGGER= 0.8
    
-   PU = 0.2
+   PU = 0.5
    
    
    BG_tW/#bar{t}W#rightarrowll= 0.9
    BG_VV            = 0.9
    BG_t#bar{t}bg   = 0.9
    BG_QCD/Wjets   = 0.9
-  # BG_QCD   = 0.9
-   BG_t#bar{t}V/#gamma = 0.9
+   BG_t#bar{t}V = 0.9
    BG_0_bjets_DY = 0.9
    BG_1_bjets_DY = 0.9
    BG_2_bjets_DY = 0.9
    
-   Lumi = 0 # 0.5
+   Lumi = 0.0
 
 
 [end - correlations ]
 
-#plots for datasets
+$plots for datasets
 
 [ 8TeV ]
 
-   emu_8TeV_172.5_nominal_syst.ztop | total 0,0 b-jets step 8  ##these should include 3+ bjets events
+   emu_8TeV_172.5_nominal_syst.ztop | total 0,0 b-jets step 8  $$these should include 3+ bjets events
    emu_8TeV_172.5_nominal_syst.ztop | lead jet pt 0,1 b-jets step 8
    emu_8TeV_172.5_nominal_syst.ztop | second jet pt 0,2 b-jets step 8
    emu_8TeV_172.5_nominal_syst.ztop | third jet pt 0,3 b-jets step 8
@@ -137,10 +173,10 @@ bjet++
 
 
 [ end - 8TeV ]
-##########################################
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 [ 7TeV ]
 
-   emu_7TeV_172.5_nominal_syst.ztop | total 0,0 b-jets step 8  ##these should include 3+ bjets events
+   emu_7TeV_172.5_nominal_syst.ztop | total 0,0 b-jets step 8  $$these should include 3+ bjets events
    emu_7TeV_172.5_nominal_syst.ztop | lead jet pt 0,1 b-jets step 8
    emu_7TeV_172.5_nominal_syst.ztop | second jet pt 0,2 b-jets step 8
    emu_7TeV_172.5_nominal_syst.ztop | third jet pt 0,3 b-jets step 8

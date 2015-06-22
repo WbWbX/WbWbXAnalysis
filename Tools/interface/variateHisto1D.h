@@ -12,10 +12,11 @@
 #include <vector>
 #include "histo1D.h"
 #include <algorithm>
+#include "taggedObject.h"
 
 namespace ztop{
 
-class variateHisto1D{
+class variateHisto1D : public taggedObject{
 public:
 	variateHisto1D(){}
 	~variateHisto1D(){}
@@ -37,7 +38,8 @@ public:
 
 	float getBinErrUp(size_t idx){return errsup_.at(idx)*contents_.at(idx).getMultiplicationFactor(zeroVar());}
 	float getBinErrDown(size_t idx){return errsdown_.at(idx)*contents_.at(idx).getMultiplicationFactor(zeroVar());}
-	float getBinErr(size_t idx){return std::max(errsdown_.at(idx),errsup_.at(idx))*contents_.at(idx).getMultiplicationFactor(zeroVar());}
+	float getBinErr(size_t idx){float out= std::max(errsdown_.at(idx),errsup_.at(idx))*contents_.at(idx).getMultiplicationFactor(zeroVar());
+	if(out!=out)return 0.;else return out;}
 
 	void setBinErrUp(size_t ,const float&);
 	void setBinErrDown(size_t ,const float&);

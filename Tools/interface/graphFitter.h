@@ -43,6 +43,11 @@ public:
 	 */
 	void setDoXYShift(bool dos){shiftxy_=dos;}
 
+	const float& getXShift()const{return shiftx_;}
+	const float& getYShift()const{return shifty_;}
+	void setXShift(const float& shift){ shiftx_=shift;}
+	void setYShift(const float& shift){ shifty_=shift;}
+
 	graph exportFittedCurve(size_t npoints=100) const;
 
 	double getFitOutput(const double& xin)const;

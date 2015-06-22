@@ -17,6 +17,8 @@
 #include <stdexcept>
 #include "TTree.h"
 #include "TFile.h"
+#include <boost/iostreams/filtering_stream.hpp>
+#include <boost/iostreams/filter/zlib.hpp>
 namespace ztop{
 
 
@@ -146,14 +148,14 @@ void histo1DUnfold::setAllZero(){
 	refolded_.setAllZero();
 }
 
-void histo1DUnfold::removeAllSystematics(){
+void histo1DUnfold::removeAllSystematics(const TString& exception){
 	for(size_t i=0;i<conts_.size();i++){
-		conts_.at(i).removeAllSystematics();
+		conts_.at(i).removeAllSystematics(exception);
 	}
-	recocont_.removeAllSystematics();
-	unfolded_.removeAllSystematics();
-	gencont_.removeAllSystematics();
-	refolded_.removeAllSystematics();
+	recocont_.removeAllSystematics(exception);
+	unfolded_.removeAllSystematics(exception);
+	gencont_.removeAllSystematics(exception);
+	refolded_.removeAllSystematics(exception);
 }
 void histo1DUnfold::splitSystematic(const size_t & number, const float& fracadivb,
 		const TString & splinamea,  const TString & splinameb){
@@ -1103,6 +1105,40 @@ bool histo1DUnfold::TFileContainsContainer1DUnfolds(TFile *f){
 bool histo1DUnfold::TFileContainsContainer1DUnfolds(const TString & filename){
 	TFile *  f = new TFile(filename, "READ");
 	return TFileContainsContainer1DUnfolds(f);
+}
+
+
+void histo1DUnfold::writeToFile(const std::string& filename)const{
+	std::ofstream saveFile;
+	saveFile.open(filename.data(), std::ios_base::binary | std::ios_base::trunc | std::fstream::out );
+	{
+		boost::iostreams::filtering_ostream out;
+		boost::iostreams::zlib_params parms;
+		//parms.level=boost::iostreams::zlib::best_speed;
+		out.push(boost::iostreams::zlib_compressor(parms));
+		out.push(saveFile);
+		{
+			writeToStream(out);
+		}
+	}
+	saveFile.close();
+}
+void histo1DUnfold::readFromFile(const std::string& filename){
+	std::ifstream saveFile;
+	saveFile.open(filename.data(), std::ios_base::binary | std::fstream::in );
+	{
+		boost::iostreams::filtering_istream in;
+		boost::iostreams::zlib_params parms;
+		//parms.level=boost::iostreams::zlib::best_speed;
+		in.push(boost::iostreams::zlib_decompressor(parms));
+		in.push(saveFile);
+		{
+			readFromStream(in);
+		}
+	}
+	saveFile.close();
+
+
 }
 
 

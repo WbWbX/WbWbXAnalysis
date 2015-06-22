@@ -8,6 +8,7 @@
 #include "../interface/plotterMultiplePlots.h"
 #include "TStyle.h"
 #include "TRandom3.h"
+#include <string>
 
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/zlib.hpp>
@@ -234,7 +235,10 @@ ztop::histoStack& histoStackVector::getStack(const TString& name,size_t startidx
 		}
 	}
 	if(it == stacks_.end()){
-		throw std::out_of_range("histoStackVector::getStack: stack not found");
+		std::string errstr="histoStackVector::getStack: stack ";
+		errstr+=name.Data();
+		errstr+=" not found.";
+		throw std::out_of_range(errstr);
 	}
 	return *it;
 }

@@ -52,6 +52,9 @@ public:
 
 
     const graph& getInputGraph()const{return inputg_;}
+    void getXRange(float& low,float& hi)const{
+    	low=xmin_;hi=xmax_;
+    }
 
     static bool debug;
 
@@ -60,6 +63,7 @@ private:
     graph inputg_;
     TGraphAsymmErrors* systg_, *statg_;
     bool isBWdiv_,divbybw_;
+    float xmin_,xmax_;
     void cleanMem(){}
     void size()const{}
     //internally 0: TH1D, 1: with syst, 2: only stat

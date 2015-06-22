@@ -34,7 +34,7 @@ public:
 	}
 
 	histoContent& operator=(const histoContent&rhs){
-		if(rhs==*this) return *this;
+		if(&rhs==this) return *this;
 		copyFrom(rhs);
 		return *this;
 	}

@@ -15,7 +15,7 @@
 #include <algorithm>
 
 #include "corrMatrix.h"
-
+#include "TtZAnalysis/Tools/interface/graph.h"
 namespace ztop{
 class histo2D;
 
@@ -60,7 +60,7 @@ public:
 	 *  - 2st parameter: x- shift
 	 *  - 3nd parameter: width
 	 */
-	enum fitmodes{fm_pol0,fm_pol1,fm_pol2,fm_pol3,fm_pol4,fm_gaus,fm_offgaus,fm_exp};
+	enum fitmodes{fm_pol0,fm_pol1,fm_pol2,fm_pol3,fm_pol4,fm_pol5,fm_pol6,fm_gaus,fm_offgaus,fm_exp};
 	enum printlevels{pl_silent,pl_normal,pl_verb}; //TBI
 	enum minimizers{mm_minuitMinos,mm_minuit2};
 
@@ -144,6 +144,8 @@ public:
 	void  fillCorrelationCoefficients(histo2D *)const;
 	corrMatrix getCorrelationMatrix()const;
 
+	graph getContourScan(size_t i, size_t j)const;
+
 	/**
 	 * gets the contribution of a to b by fixing the parameter a, repeating minos and returning the changes in errup and errdown
 	 * failures are indicated by negative return values!
@@ -175,6 +177,9 @@ public:
 	 * clears all input points
 	 */
 	void clearPoints();
+
+	void setOnlyRunDummy(bool dummyrun){dummyrun_=dummyrun;}
+
 
 	static bool debug;
 
@@ -253,7 +258,7 @@ private:
 	}chi2func_;
 
 	int strategy_;
-
+	bool dummyrun_;
 };
 
 }

@@ -104,12 +104,6 @@ void plotterInlay::clear(){
 
 
 
-void plotterInlay::addStyleFromFile(const std::string& infile){
-    readStylePriv(infile,false);
-}
-void plotterInlay::readStyleFromFile(const std::string& infile){
-    readStylePriv(infile,true);
-}
 
 void plotterInlay::readStylePriv(const std::string& infile,bool requireall){
 

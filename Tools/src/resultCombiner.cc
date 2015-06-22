@@ -11,7 +11,7 @@
 
 namespace ztop{
 
-
+bool resultCombiner::debug=false;
 
 void resultCombiner::addInput(const histo1D& cont){
 	if(distributions_.size()>0){
@@ -24,8 +24,14 @@ void resultCombiner::addInput(const histo1D& cont){
 	}
 
 	temp_=cont;
+	histo1D contcp=cont;
+	binsstart_=cont.getSystNameList().size();
+	for(size_t i=0;i<contcp.getBins().size();i++)
+		contcp.addGlobalRelError("bins_"+toTString(i),0); //fake variations foe each bin
 	variateHisto1D temp;
-	temp.import(cont);
+
+	temp.import(contcp);
+
 	distributions_.push_back(temp);
 	sysforms_.resize(distributions_.at(0).getNDependencies(), rc_sysf_gaus);
 	matrix m(distributions_.at(0).bins().size(),distributions_.at(0).bins().size());
@@ -60,6 +66,7 @@ bool resultCombiner::minimize(){
 		return false;
 	//configure fitter
 	std::vector<double> startparas(distributions_.at(0).getNDependencies() ,0);
+	std::vector<TString> paranames=distributions_.at(0).getSystNames();
 
 	//make sure to treat UF OF properly
 
@@ -74,21 +81,22 @@ bool resultCombiner::minimize(){
 		mean/=(double)distributions_.size();
 		//	std::cout << "mean in bin " << i << ": " << mean << std::endl;
 		integral+= distributions_.at(0).getBin(i)->getNominal();
-		startparas.push_back(mean);
+		startparas.at(binsstart_+i)=mean;
+		if(debug)
+			std::cout << "resultCombiner::minimize: setting start value for bin " << i << " " << mean<<std::endl;
 	}
 
 	forcednorm_=integral;
 
 	std::vector<double> stepwidths;
-	stepwidths.resize(startparas.size(),1e-3);
-	std::vector<TString> paranames=distributions_.at(0).getSystNames();
+	stepwidths.resize(startparas.size(),1);
 
 	fitter_.setParameterNames(paranames);
 	fitter_.setRequireFitFunction(false);
 	fitter_.setParameters(startparas,stepwidths);
 
 	fitter_.setMinimizer(simpleFitter::mm_minuit2);
-	fitter_.setMaxCalls(4e6);
+	fitter_.setMaxCalls(4e5);
 	//fitter_.setTolerance(0.5);//0.1);
 	//first do a simple scan
 
@@ -96,15 +104,18 @@ bool resultCombiner::minimize(){
 	ROOT::Math::Functor f(this,&resultCombiner::getChi2,fitter_.getParameters()->size());
 
 	fitter_.setMinFunction(&f);
-
-	simpleFitter::printlevel=0;
-
+	fitter_.setStrategy(0);
+	fitter_.setTolerance(1);
+	fitter_.fit();
+	if(fitter_.wasSuccess())
+		fitter_.feedErrorsToSteps();
+	fitter_.setStrategy(2);
 	fitter_.setTolerance(0.1);
 
 	std::vector<size_t> minoserrs;
 	if(combminos_){
-	for(size_t i=distributions_.at(0).getNDependencies(); i< startparas.size();i++)
-			 fitter_.setAsMinosParameter(i,true);
+		for(size_t i=binsstart_; i< startparas.size();i++)
+			fitter_.setAsMinosParameter(i,true);
 	}
 
 	fitter_.fit();
@@ -112,15 +123,10 @@ bool resultCombiner::minimize(){
 
 
 	//feed back
-	std::vector<double> fittedbins=*fitter_.getParameters();
-	size_t nsys=distributions_.at(0).getNDependencies();
-	fittedbins.erase(fittedbins.begin(),fittedbins.begin() + nsys);
 
-	std::vector<double> fittederrsup=*fitter_.getParameterErrUp();
-	fittederrsup.erase(fittederrsup.begin(),fittederrsup.begin() + nsys);
-	std::vector<double> fittederrsdown=*fitter_.getParameterErrDown();
-	fittederrsdown.erase(fittederrsdown.begin(),fittederrsdown.begin() + nsys);
-
+	std::vector<double> fittedbins(fitter_.getParameters()->begin() + binsstart_, fitter_.getParameters()->end());
+	std::vector<double> fittederrsup(fitter_.getParameterErrUp()->begin() + binsstart_, fitter_.getParameterErrUp()->end());
+	std::vector<double> fittederrsdown(fitter_.getParameterErrDown()->begin() + binsstart_, fitter_.getParameterErrDown()->end());
 
 	std::vector<float> bins = distributions_.at(0).bins();
 	bins.erase(bins.begin());
@@ -150,7 +156,7 @@ void resultCombiner::coutSystBreakDownInBin(size_t idx)const{
 
 	for(size_t i=0;i<getFitter()->getParameters()->size() - combined_.getBins().size();i++){
 		float breakdown=0;
-		breakdown=sqrt(sq(avgerror)-sq(avgerror * sqrt(1-sq(getFitter()->getCorrelationCoefficient(distributions_.at(0).getNDependencies()+idx,i)))));
+		breakdown=sqrt(sq(avgerror)-sq(avgerror * sqrt(1-sq(getFitter()->getCorrelationCoefficient(binsstart_+idx,i)))));
 		breakdown/=content;
 		breakdown*=100;
 		std::cout  << getFitter()->getParameters()->at(i) << "\t"<< getFitter()->getParameterErr(i) << "\t"
@@ -179,7 +185,7 @@ double resultCombiner::getNuisanceLogNormal(const double & in)const{
 double resultCombiner::getChi2(const double * variations){
 	double chi2=0;
 	const double * combbincontents=variations;
-	combbincontents += distributions_.at(0).getNDependencies();
+	combbincontents += binsstart_;
 
 	//for norm use  forcednorm_ later and for last bin = forcednorm_-allbinssum
 	for(size_t meas=0;meas<distributions_.size();meas++){
@@ -193,23 +199,26 @@ double resultCombiner::getChi2(const double * variations){
 			if(additionalconstraint_==rc_addc_normalized){
 				if(i<distributions_.at(0).bins().size()-1){
 					chi2+= sq( combbincontents [i] - distributions_.at(meas).getBin(i)->getValue(variations))
-											/ sq(binerror); //this is gaussian
+													/ sq(binerror); //this is gaussian
 					binsum+=distributions_.at(meas).getBin(i)->getValue(variations);
 				}
 				else{
 					chi2+= sq( combbincontents [i] - binsum)
-											/ sq(binerror); //this is gaussian
+													/ sq(binerror); //this is gaussian
 				}
 			}
 			else{
-				chi2+= sq( combbincontents [i] - distributions_.at(meas).getBin(i)->getValue(variations)) / sq(binerror) ; //this is gaussian
+				chi2+= sq( combbincontents [i] -
+						distributions_.at(meas).getBin(i)->getValue(variations)) /
+						sq(binerror) ; //this is gaussian
 			}
 		}
 	}
-	//	std::cout <<"chi2 " << chi2 << std::endl;
+
 	//	return chi2;
 	//nuisance parameters
-	for(size_t i=0;i<distributions_.at(0).getNDependencies();i++){
+	for(size_t i=0;i<binsstart_;i++){
+
 		if(sysforms_.at(i) == rc_sysf_gaus)
 			chi2+=getNuisanceLogGaus(variations[i]);
 		else if(sysforms_.at(i) == rc_sysf_box)

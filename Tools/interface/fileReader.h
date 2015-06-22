@@ -28,8 +28,15 @@ public:
     void setComment(const std::string& c){comment_=c;}
     void setDelimiter(const std::string& d){delimiter_=d;}
 	 */
-	void setStartMarker(const std::string& d){start_=d;}
-	void setEndMarker(const std::string& d){end_=d;}
+
+	/**
+	 * ignores any white spaces!!
+	 */
+	void setStartMarker( std::string d);
+	/**
+		 * ignores any white spaces!!
+		 */
+	void setEndMarker( std::string d);
 
 	void setBlindMode(bool blind){blindmode_=blind;}
 	void setRequireValues(bool req) {requirevalues_=req;}
@@ -76,8 +83,8 @@ public:
 		T out;
 		std::string s(getValueString(str,true));
 		if(s.length()<1){
-			std::cout << "fileReader::getValue: value for " << str << " not found in " << tempinfilename_<< std::endl;
-			throw std::runtime_error("fileReader::getValue: no value found and no default defined!");
+			std::string exstring="fileReader::getValue: value for " + str + " not found in " + tempinfilename_;
+			throw std::runtime_error(exstring);
 		}
 		std::stringstream ss(s);
 		ss >> out;
@@ -107,6 +114,7 @@ public:
 	 */
 	std::string dumpFormattedToTmp()const;
 
+
 private:
 	std::string start_,end_;
 	std::vector<std::vector<std::string> > lines_;
@@ -133,8 +141,8 @@ inline bool fileReader::getValue<bool>(const std::string & str){
 	bool out;
 	std::string s(getValueString(str,true));
 	if(s.length()<1){
-		std::cout << "fileReader::getValue: value for " << str << " not found in " << tempinfilename_<< std::endl;
-		throw std::runtime_error("fileReader::getValue: value required or no default defined!");
+		std::string exstring="fileReader::getValue: value for " + str + " not found in " + tempinfilename_;
+		throw std::runtime_error(exstring);
 	}
 
 	std::stringstream ss(s);
@@ -164,8 +172,8 @@ template<>
 inline std::string fileReader::getValue<std::string>(const std::string & str){
 	std::string s(getValueString(str));
 	if(s.length()<1){
-		std::cout << "fileReader::getValue: value for " << str << " not found in " << tempinfilename_<< std::endl;
-		throw std::runtime_error("fileReader::getValue: value required or no default defined!");
+		std::string exstring="fileReader::getValue: value for " + str + " not found in " + tempinfilename_;
+		throw std::runtime_error(exstring);
 	}
 	return s;
 }
@@ -186,8 +194,8 @@ template<>
 inline TString fileReader::getValue<TString>(const std::string & str){
 	std::string s(getValueString(str));
 	if(s.length()<1){
-		std::cout << "fileReader::getValue: value for " << str << " not found in " << tempinfilename_<< std::endl;
-		throw std::runtime_error("fileReader::getValue: value required or no default defined!");
+		std::string exstring="fileReader::getValue: value for " + str + " not found in " + tempinfilename_;
+		throw std::runtime_error(exstring);
 	}
 	return (TString)s;
 }

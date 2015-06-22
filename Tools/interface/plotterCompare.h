@@ -52,8 +52,8 @@ public:
 
     //void setComparePlotStyles();
     //void setNominalPlotStyle();
-    void readStyleFromFile(const std::string&);
-    void addStyleFromFile(const std::string&);
+  //  void readStyleFromFile(const std::string&);
+  //  void addStyleFromFile(const std::string&);
     /*
      * expects entries:
      * [plotterCompareStyle] defines size N>0
@@ -72,6 +72,19 @@ public:
      * returns numer of total plots including nominal
      */
     size_t size(){return compareplots_.size()+1;}
+
+    bool hasRatio()const{return true;}
+
+    plotStyle& getUpperStyle(){return upperstyle_;}
+    const plotStyle& getUpperStyle()const{return upperstyle_;}
+    plotStyle& getRatioStyle(){return ratiostyle_;}
+    const plotStyle& getRatioStyle()const{return ratiostyle_;}
+
+
+    float getXAxisLowerLimit()const;
+    float getXAxisHigherLimit()const;
+
+    float getMaxMinUpper(bool max=true);
 
 protected:
     void preparePad();
@@ -106,7 +119,7 @@ private:
     plot plotterCompareStyle(const plot&);
     void makeRatioPlots(); //sets mem*
 
-    float getMaxMinUpper(bool max=true);
+
 
     void readStylePriv(const std::string & file, bool requireall);
 

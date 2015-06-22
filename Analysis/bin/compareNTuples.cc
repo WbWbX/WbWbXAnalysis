@@ -42,7 +42,7 @@ invokeApplication(){
 
     //search for double filenames in input (to know which to compare)
     //and only ush back the ones that are indeed double
-    textFormatter tf;
+   // textFormatter tf;
 
     std::vector<TString> onlyfilenames;
     for(size_t i=0;i<files.size();i++){
@@ -50,7 +50,7 @@ invokeApplication(){
             std::cout << "file " << files.at(i) << " does not exists exit"  <<std::endl;
             exit(1);
         }
-        TString filename=tf.getFilename(files.at(i).Data());
+        TString filename=ztop::textFormatter::getFilename(files.at(i).Data());
         onlyfilenames.push_back(filename);
     }
 
