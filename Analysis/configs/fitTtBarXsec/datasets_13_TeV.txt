@@ -15,7 +15,7 @@ $  the files are assumed to be located where the executable is called
 
 [ general ]
 
-    mergeSystFile = combine_syst.txt
+    mergeSystFile = combine_syst_13TeV.txt
 
 [ end - general ]
 
@@ -61,7 +61,7 @@ $plots for datasets
 
 [ 13TeV ]
 
-   emu_13TeV_172.5_nominal_syst.ztop | total 0,0 b-jets step 8  $$these should include 3+ bjets events
+   emu_13TeV_172.5_nominal_syst.ztop | total 0,0 b-jets step 8 $$these should include 3+ bjets events 
    emu_13TeV_172.5_nominal_syst.ztop | lead jet pt 0,1 b-jets step 8
    emu_13TeV_172.5_nominal_syst.ztop | second jet pt 0,2 b-jets step 8
    emu_13TeV_172.5_nominal_syst.ztop | third jet pt 0,3 b-jets step 8
