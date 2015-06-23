@@ -1,0 +1,37 @@
+#defaults: runOnMC=True, channel=emu, isSignal=False, PDF=CT10
+#inputs are seperated by min 2 spaces; use runallNaf!!
+
+
+### data
+
+
+### ttbar 
+150   /TT_TuneCUETP8M1_13TeV-powheg-pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v4/MINIAODSIM   tree_13TeV_emuttbar            runOnAOD=False isSignal=True includePDFWeights=True PDF=CT10 nominalPDF=3001 beginPDFVar=3002 endPDFVar=3053 genFilter=ttbar
+
+
+150   /TT_TuneCUETP8M1_13TeV-powheg-pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v4/MINIAODSIM   tree_13TeV_emuttbarbg            runOnAOD=False isSignal=True includePDFWeights=True PDF=CT10 nominalPDF=3001 beginPDFVar=3002 endPDFVar=3053 genFilter=ttbar genFilterInvert=True
+
+
+#200   /TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1/MINIAODSIM    tree_13TeV_emuttbar_mg5_br            runOnAOD=False isSignal=True genFilter=ttbar 
+
+#200   /TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1/MINIAODSIM    tree_13TeV_emuttbar_mg5_br_bg            runOnAOD=False isSignal=True genFilter=ttbar genFilterInvert=True
+
+
+#Single top
+50    /ST_tW_top_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M1/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1/MINIAODSIM         tree_13TeV_tW                  runOnAOD=False
+
+50   /ST_tW_antitop_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M1/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2/MINIAODSIM      tree_13TeV_tbarW               runOnAOD=False
+
+## DY 
+250    /DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2/MINIAODSIM      tree_13TeV_dy50inf             runOnAOD=False
+
+#### W bosons
+50     /WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1/MINIAODSIM     tree_13TeV_wjets               runOnAOD=False
+
+#### VV
+75        /ZZ_TuneCUETP8M1_13TeV-pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2/MINIAODSIM        tree_13TeV_zz                  runOnAOD=False
+
+75    /WZ_TuneCUETP8M1_13TeV-pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2/MINIAODSIM         tree_13TeV_wz                  runOnAOD=False
+
+75     /WWTo2L2Nu_13TeV-powheg/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2/MINIAODSIM         tree_13TeV_ww                  runOnAOD=False
+
