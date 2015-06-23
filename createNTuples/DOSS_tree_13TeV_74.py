@@ -161,7 +161,7 @@ if runOnAOD:
 ### Geometry and Detector Conditions  
 
 
-process.load('Configuration.StandardSequences.GeometryDB_cff')
+process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff') # contains https://cmssdt.cern.ch/SDT/lxr/source/Configuration/StandardSequences/python/MagneticField_cff.py MagneticField_38T_cff
 
@@ -244,6 +244,10 @@ process.hDampDown = cms.EDProducer("EventWeightMCSystematic",
                                    printLHE=cms.bool(False)
                                    )
 
+if isSignal:
+    additionalWeights = cms.vstring("nominal","scaleUp","scaleDown")
+else:
+    additionalWeights = cms.vstring("nominal")
 
 ## PDF weights if required 
 if includePDFWeights:
@@ -457,7 +461,6 @@ else :
 import TopAnalysis.Configuration.objectDefinitions13Tev.electron_cff as electron
 electron.electron(process)
 
-
 #################################################################### 
 ## Use SwitchJetCollection in order to rerun the btagging
 
@@ -514,39 +517,53 @@ else:
 
 from PhysicsTools.PatAlgos.tools.jetTools import switchJetCollection
 # Switch the default jet collection (done in order to use the above specified b-tag infos and discriminators)
-switchJetCollection(
-    process,
-    jetSource = cms.InputTag('ak4PFJetsCHS'),#jetSource),
-    pfCandidates = cms.InputTag(pfCandidates),
-    pvSource = cms.InputTag(pvSource),
-    svSource = svSource,
-    elSource = electronSource,
-    muSource = muonSource,
+#switchJetCollection(
+#    process,
+#    jetSource = cms.InputTag('ak4PFJetsCHS'),#jetSource),
+#    pfCandidates = cms.InputTag(pfCandidates),
+#    pvSource = cms.InputTag(pvSource),
+#    svSource = svSource,
+#    elSource = electronSource,
+#    muSource = muonSource,
 #    btagInfos = bTagInfos,
-    btagDiscriminators = bTagDiscriminators,
-    jetCorrections = jetCorr,
-    genJetCollection = cms.InputTag(genJetCollection),
-    postfix = pfpostfix
-)
+#    btagDiscriminators = bTagDiscriminators,
+#    jetCorrections = jetCorr,
+#    genJetCollection = cms.InputTag(genJetCollection),
+#    postfix = pfpostfix
+#)
 
 
-getattr(process,'patJetPartons'+pfpostfix).particles = cms.InputTag(genParticleCollection)
-getattr(process,'patJetPartonMatch'+pfpostfix).matched = cms.InputTag(genParticleCollection)
+#getattr(process,'patJetPartons'+pfpostfix).particles = cms.InputTag(genParticleCollection)
+#getattr(process,'patJetPartonMatch'+pfpostfix).matched = cms.InputTag(genParticleCollection)
 #getattr(process,'jetTracksAssociatorAtVertex'+pfpostfix).tracks = cms.InputTag(pfCandidates)
 #getattr(process,'inclusiveSecondaryVertexFinderTagInfos'+pfpostfix).extSVCollection = svSource
 
-from PhysicsTools.PatAlgos.tools.pfTools import *
-## Adapt primary vertex collection
-adaptPVs(process, pvCollection=cms.InputTag(pvSource))
+#from PhysicsTools.PatAlgos.tools.pfTools import *
+### Adapt primary vertex collection
+#adaptPVs(process, pvCollection=cms.InputTag(pvSource))
 
-patJets = ['patJets'+pfpostfix]
-for m in patJets:
-    if hasattr(process,m):
-        print "Switching 'addTagInfos' for " + m + " to 'True'"
-        setattr( getattr(process,m), 'addTagInfos', cms.bool(True) )
-        print "Switching 'addJetFlavourInfo' for " + m + " to 'True'"
-        setattr( getattr(process,m), 'addJetFlavourInfo', cms.bool(True) )
+#patJets = ['patJets'+pfpostfix]
+#for m in patJets:
+#    if hasattr(process,m):
+#        print "Switching 'addTagInfos' for " + m + " to 'True'"
+#        setattr( getattr(process,m), 'addTagInfos', cms.bool(True) )
+#        print "Switching 'addJetFlavourInfo' for " + m + " to 'True'"
+#        setattr( getattr(process,m), 'addJetFlavourInfo', cms.bool(True) )
 
+
+from PhysicsTools.PatAlgos.producersLayer1.jetUpdater_cff import patJetCorrFactorsUpdated
+process.patJetCorrFactorsReapplyJEC = patJetCorrFactorsUpdated.clone(
+  src = cms.InputTag("slimmedJets"),
+  levels = ['L1FastJet', 
+        'L2Relative', 
+        'L3Absolute'],
+  payload = 'AK4PFchs' ) # Make sure to choose the appropriate levels and payload here!
+
+from PhysicsTools.PatAlgos.producersLayer1.jetUpdater_cff import patJetsUpdated
+process.patJetsReapplyJEC = patJetsUpdated.clone(
+  jetSource = cms.InputTag("slimmedJets"),
+  jetCorrFactorsSource = cms.VInputTag(cms.InputTag("patJetCorrFactorsReapplyJEC"))
+)
 
 
 
@@ -556,7 +573,7 @@ for m in patJets:
 ## Jet information 
 
 process.treeJets = selectedPatJets.clone( 
-    src='patJets'+pfpostfix, 
+    src="patJetsReapplyJEC",   #'patJets'+pfpostfix, 
     cut='eta < 5 && pt>5 &&neutralHadronEnergyFraction < 0.99 && chargedEmEnergyFraction < 0.99 && neutralEmEnergyFraction < 0.99 && chargedHadronEnergyFraction > 0.0 && chargedMultiplicity > 0.0') # unfortunately starting at 10 GeV are needed for MET rescaling 8GeV should be ok as corrected pt 
     ### cut at uncorrected pt > 10 GeV on tree writer level! for MET rescaling - might be obsolete for 13 TeV (and when not using MET...)
     
@@ -581,7 +598,7 @@ process.PFTree   = cms.EDAnalyzer('TreeWriterTtZ',
                                   metT0T1TxySrc        =cms.InputTag(metTag),
                                   metT0T1Src           =cms.InputTag(metTag),
                                   metT1TxySrc          =cms.InputTag(metTag),
-                                  vertexSrc = cms.InputTag(pvSource),
+                                  vertexSrc = cms.InputTag(pvSource ),
                                   
                                   #block for extended information needed for efficiency studies
                                   includeReco = cms.bool(False),
@@ -602,7 +619,7 @@ process.PFTree   = cms.EDAnalyzer('TreeWriterTtZ',
                                   PUInfo = cms.InputTag('addPileupInfo'),
                                   includePDFWeights = cms.bool(includePDFWeights),
                                   pdfWeights = cms.InputTag("pdfWeights:"+PDF),
-                                  additionalWeights = cms.vstring("nominal","scaleUp","scaleDown"), #can be any vector of strings, generated by EDProducer: EventWeightMCSystematic
+                                  additionalWeights = additionalWeights, #can be any vector of strings, generated by EDProducer: EventWeightMCSystematic
                                   #agrohsje fix  
                                   rhoIso = cms.InputTag("fixedGridRhoFastjetAll"), #dummy for 13 TeV AOD
                                   
