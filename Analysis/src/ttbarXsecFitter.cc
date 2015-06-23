@@ -542,6 +542,9 @@ int ttbarXsecFitter::fit(std::vector<float>& xsecs, std::vector<float>& errup ,s
 		std::cout << "fitting parameters: "<<std::endl;
 		for(size_t i=0;i<parameternames_.size();i++)
 			std::cout << parameternames_.at(i) << std::endl;
+		std::cout << "\nprior correlations:" << std::endl;
+		for(size_t i=0;i<priorcorrcoeff_.size();i++)
+			std::cout << priorcorrcoeff_.at(i).first << " " << priorcorrcoeff_.at(i).second << std::endl;
 	}
 	//no except: sizes ok
 	//	fittedparas_.at(xsecidx8_)=-8.; //other starting value closer to measured value TEST
@@ -792,7 +795,9 @@ void ttbarXsecFitter::dataset::cutAndCountSelfCheck(const std::vector<std::pair<
 			addUncertainties(&(incp.at(i).at(j)),i,false,priorcorrcoeff);
 
 	//get nominal value
-	float data=0,signal=0,generated=0,background=0;
+	float data=0,signal=0,generated=0,background=0,
+			alldils=0,alldild=0,alldilbg=0,
+			alltwojetss=0,alltwojetsd=0,alltwojetsbg=0;
 	generated=xsecoff_*lumi_;
 	for(size_t nbjet=1;nbjet<nBjetCat();nbjet++){
 		size_t minjet=0;
@@ -803,6 +808,26 @@ void ttbarXsecFitter::dataset::cutAndCountSelfCheck(const std::vector<std::pair<
 			data+=incp.at(nbjet).at(njet).getDataContainer().integral(false);
 		}
 	}
+	for(size_t nbjet=0;nbjet<nBjetCat();nbjet++){
+		size_t minjet=0;
+		for(size_t njet=minjet;njet<4;njet++){
+			alldils+=incp.at(nbjet).at(njet).getSignalContainer().integral(false);
+			alldilbg+=incp.at(nbjet).at(njet).getBackgroundContainer().integral(false);
+			alldild+=incp.at(nbjet).at(njet).getDataContainer().integral(false);
+		}
+	}
+	for(size_t nbjet=0;nbjet<nBjetCat();nbjet++){
+		size_t minjet=0;
+		if(!nbjet) minjet=2;
+		if(nbjet==1) minjet=1;
+		if(nbjet==2) minjet=0;
+		for(size_t njet=minjet;njet<4;njet++){
+			alltwojetss+=incp.at(nbjet).at(njet).getSignalContainer().integral(false);
+			alltwojetsbg+=incp.at(nbjet).at(njet).getBackgroundContainer().integral(false);
+			alltwojetsd+=incp.at(nbjet).at(njet).getDataContainer().integral(false);
+		}
+	}
+
 	float xsecnom = (data-background)/(signal/generated * lumi_);
 	std::cout << "nominal cross section C&C "<<getName()<<" " << xsecnom <<std::endl;
 
@@ -854,7 +879,21 @@ void ttbarXsecFitter::dataset::cutAndCountSelfCheck(const std::vector<std::pair<
 		totalup2+=up*up;
 		totaldown2+=down*down;
 	}
-	std::cout << "Xsec (C&C): " << xsecnom << " +" << sqrt(totalup2) << " -" << sqrt(totaldown2) << "\n"<<std::endl;
+	std::cout << "Xsec (C&C): "
+			<< xsecnom << " +" << sqrt(totalup2)
+			<< " -" << sqrt(totaldown2)
+			<< "\n"       << "Yields data:    "
+			<< data      <<"\n       bg:      "
+			<< background<<"\n       sig:     "
+			<< signal
+			<<"\n all dil data:  "<< alldild
+			<<"\n all dil sig:  "<< alldils
+			<<"\n all dil bg:    "<< alldilbg
+			<<"\n two jets data:  "<< alltwojetsd
+			<<"\n two jets sig:  "<< alltwojetss
+			<<"\n two jets bg:    "<< alltwojetsbg
+			<<"\n" <<std::endl;
+
 }
 
 double ttbarXsecFitter::getXsecOffset(size_t datasetidx)const{
@@ -1282,6 +1321,8 @@ void ttbarXsecFitter::createSystematicsBreakdown(size_t datasetidx){
 		}
 	}
 	std::cout << "creating simplified breakdown table for " << datasets_.at(datasetidx).getName()<<std::endl;
+
+	float xsec=getXsec(datasetidx);
 	for(size_t i=0;i<plannedmergesindx.size();i++){
 		if(!debug)
 			displayStatusBar(i,plannedmergesindx.size());
@@ -1296,6 +1337,10 @@ void ttbarXsecFitter::createSystematicsBreakdown(size_t datasetidx){
 		//	}
 		if(!nosystbd_){
 			fitter_.getParameterErrorContributions(plannedmergesindx.at(i).second ,datasets_.at(datasetidx).xsecIdx(),errup,errdown);
+			errup/=xsec;
+			errdown/=xsec;
+			if(debug)
+				std::cout << name << ": " << errup << " " << errdown<< std::endl;
 		}
 		tmpunc.name=name;
 		tmpunc.errdown=errdown;
@@ -1442,6 +1487,11 @@ texTabler ttbarXsecFitter::makeSystBreakDownTable(size_t datasetidx,bool detaile
 	if(!detailed)
 		unc=&datasets_.at(datasetidx).postFitSystematicsFullSimple();
 
+	float tableprecision=0.1;
+	if(detailed)
+		tableprecision=0.01;
+
+
 	for(size_t i=0;i<unc->size();i++){
 		dataset::systematic_unc * sys=&unc->at(i);
 
@@ -1453,20 +1503,20 @@ texTabler ttbarXsecFitter::makeSystBreakDownTable(size_t datasetidx,bool detaile
 		}
 		else if(fabs(sys->errdown) == fabs(sys->errup)){
 			if(anticorr)
-				errstr="$\\mp{"+fmt.toTString(fmt.round(100*sys->errdown,0.1))+"}$";
+				errstr="$\\mp{"+fmt.toFixedCommaTString(100*sys->errdown,tableprecision)+"}$";
 			else
-				errstr="$\\pm{"+fmt.toTString(fmt.round(100*sys->errup,0.1))+ "}$";
+				errstr="$\\pm{"+fmt.toFixedCommaTString(100*sys->errup,tableprecision)+ "}$";
 		}
 		else{
 			if(anticorr)
-				errstr="$\\mp^{"+fmt.toTString(fmt.round(100*fabs(sys->errdown),0.1))+"}_{"+fmt.toTString(fmt.round(100*fabs(sys->errup),0.1))+ "}$";
+				errstr="$\\mp^{"+fmt.toFixedCommaTString(100*fabs(sys->errdown),tableprecision)+"}_{"+fmt.toFixedCommaTString(100*fabs(sys->errup),tableprecision)+ "}$";
 			else
-				errstr="$\\pm^{"+fmt.toTString(fmt.round(100*fabs(sys->errup),0.1))+ "}_{"+fmt.toTString(fmt.round(100*fabs(sys->errdown),0.1))+"}$";;
+				errstr="$\\pm^{"+fmt.toFixedCommaTString(100*fabs(sys->errup),tableprecision)+ "}_{"+fmt.toFixedCommaTString(100*fabs(sys->errdown),tableprecision)+"}$";;
 		}
 		if(sys->name == "Total" || sys->name == "Total fitted")
 			table <<texLine(1);
 		if(sys->pull < 900)
-			table << sys->name << fmt.round( sys->pull, 0.1)<<
+			table << sys->name << fmt.round( sys->pull, tableprecision)<<
 			fmt.round( sys->constr, 0.1)	<< errstr;
 		else
 			table << sys->name << " "<< " "	<< errstr;
@@ -1474,7 +1524,7 @@ texTabler ttbarXsecFitter::makeSystBreakDownTable(size_t datasetidx,bool detaile
 			table <<texLine(1);
 			table <<fmt.translateName( getParaName(datasets_.at(datasetidx).xsecIdx()) ) +" vis"<<
 					" " << " "
-					<< fmt.toTString(fmt.round(getVisXsec(datasetidx),0.01))+" pb";
+					<< fmt.toTString(fmt.round(getVisXsec(datasetidx),tableprecision))+" pb";
 			table <<texLine(1);
 		}
 	}
@@ -1488,7 +1538,7 @@ texTabler ttbarXsecFitter::makeSystBreakDownTable(size_t datasetidx,bool detaile
 	else{*/
 	table <<fmt.translateName( getParaName(datasets_.at(datasetidx).xsecIdx()) )<<
 			" " << " "
-			<< fmt.toTString(fmt.round(fullxsec,1.))+" pb";
+			<< fmt.toTString(fmt.round(fullxsec,tableprecision*10))+" pb";
 	//}
 	table << texLine();
 	return table;
@@ -1522,9 +1572,9 @@ texTabler ttbarXsecFitter::makeCorrTable() const{
 			else if(i<=j){
 				float content=corr.getBinContent(i,j);
 				if(fabs(content)<0.3)
-					tab << Formatter.round(corr.getBinContent(i,j),0.01);
+					tab << Formatter.toFixedCommaTString(corr.getBinContent(i,j),0.01);
 				else
-					tab <<  "\\textbf{" +Formatter.toTString(Formatter.round(corr.getBinContent(i,j),0.01)) +"}";
+					tab <<  "\\textbf{" +Formatter.toFixedCommaTString(corr.getBinContent(i,j),0.01) +"}";
 			}
 			else
 				tab << "";
@@ -1611,18 +1661,17 @@ double ttbarXsecFitter::toBeMinimized(const double * variations){
 				double datastat = set->data(nbjet).getBinErr(bin);
 
 				//this  might happen for some variations, fix it to physics values
-				if(nbackground<0) nbackground=0;
-				if(signal<0)signal=0;
 
 				double predicted = signal+nbackground;
-
+				if(predicted<0)predicted=0;
 
 				if(lhmode_ == lhm_poissondatastat)   {
-					double roundpred=predicted;//format_.round(predicted,1);
-					if(roundpred<0)roundpred=0;//safety
 					if(data<0)data=0; //safety
 					//if(data==0)
-					out+=-2*logPoisson(data, roundpred); //unstable...
+					if(predicted>0)
+						out+=-2*logPoisson(data, predicted); //unstable...
+					else if(data>0)
+						out+=100;
 				}
 
 				else if(lhmode_ ==lhm_chi2datastat)   {
@@ -1911,7 +1960,7 @@ variateHisto1D ttbarXsecFitter::dataset::createLeptonJetAcceptance(const std::ve
 	twobjetsignal=twobjetsignal.getIntegralBin();
 
 	histo1D correction_b =  ((signalintegral * twobjetsignal) * 4.)
-																																																																						                																																																																																																																																																																																																																																																																																																																																																																																																								/ ( (onebjetsignal + (twobjetsignal * 2.)) * (onebjetsignal + (twobjetsignal * 2.)));
+																																																																						                																																																																																																																																																																																																																																																																																																																																																																																																														/ ( (onebjetsignal + (twobjetsignal * 2.)) * (onebjetsignal + (twobjetsignal * 2.)));
 
 	correction_b.removeStatFromAll();
 

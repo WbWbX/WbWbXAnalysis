@@ -449,6 +449,6 @@ invokeApplication(){
 
 		}
 	}
-
+	std::cout << "fitTtBarXsec done" << std::endl;
 	return 0;
 }

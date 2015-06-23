@@ -427,8 +427,8 @@ void simpleFitter::getParameterErrorContributions(std::vector<size_t> a, size_t 
 		throw std::out_of_range("simpleFitter::getParameterErrorContributions: input indices empty");
 	//work on hesse errors
 	if(dummyrun_){
-		errup=100;
-		errdown=-100;
+		errup=100000;
+		errdown=-100000;
 		return;
 	}
 
@@ -497,7 +497,7 @@ void simpleFitter::getParameterErrorContributions(std::vector<size_t> a, size_t 
 		}
 	}
 	else{
-		errdown=-2000;
+		errdown=-200000;
 		errup=errdown;
 	}
 	delete min;
@@ -512,8 +512,8 @@ void simpleFitter::getStatErrorContribution(size_t b,double & errup, double& err
 		throw std::out_of_range("simpleFitter::getStatErrorContribution:  index out of range");
 
 	if(dummyrun_){
-		errup=1000;
-		errdown=1000;
+		errup=1000000;
+		errdown=1000000;
 		return;
 	}
 
@@ -541,12 +541,12 @@ void simpleFitter::getStatErrorContribution(size_t b,double & errup, double& err
 			if(reldiff>-0.001) //purely numerical difference
 				errdown=0;
 			else
-				errdown=-100;
+				errdown=-100000;
 		}
 
 	}
 	else{
-		errdown=-200;
+		errdown=-200000;
 	}
 	errup=errdown;
 	delete min;

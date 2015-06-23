@@ -143,7 +143,7 @@ $$following the top-mass combination PAS
    BG_1_bjets_DY = 0.9
    BG_2_bjets_DY = 0.9
    
-   Lumi = 0.0
+   Lumi = 0
 
 
 [end - correlations ]

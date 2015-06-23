@@ -262,8 +262,8 @@
     yaxis.labelOffset = 0.005
     yaxis.tickLength  = 0.03
     yaxis.ndiv        = 505
-    yaxis.max         = 1.4
-    yaxis.min         = 0.6
+    yaxis.max         = 1.5
+    yaxis.min         = 0.5
     yaxis.log         = false
     yaxis.name        = #frac{exp}{obs}
     
