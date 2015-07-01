@@ -434,7 +434,7 @@ void  analyzer_run2::analyze(size_t anaid){
 	}
 	//agrohsje debugging 
 	int ntevt;
-	t->tree()->SetBranchAddress("ntevt",&ntevt);
+	t->tree()->SetBranchAddress("EventNumber",&ntevt);
 
 	//some helpers
 	double sel_step[]={0,0,0,0,0,0,0,0,0};
