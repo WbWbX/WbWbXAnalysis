@@ -205,6 +205,8 @@ public:
   ztop::NTMet ntmet;
   ztop::NTMet ntmvamet,ntt1met,ntt0t1txymet,ntt0t1met,ntt1txymet;
   ztop::NTEvent ntevent;
+  ULong64_t runno_,lumiblock_,eventno_;
+
   ztop::NTTrigger nttrigger;
   float genmet_f;
 

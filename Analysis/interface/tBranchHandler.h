@@ -14,6 +14,7 @@
 #include <iostream>
 #include <map>
 #include "tTreeHandler.h"
+#include  <boost/type_traits/is_fundamental.hpp>
 
 namespace ztop{
 
@@ -54,7 +55,15 @@ public:
 			throw std::runtime_error("tBranchHandler: tree pointer is NULL!");
 		}
 
-		int ret=t->tree()->SetBranchAddress(branchname_,&content_,&branch_);
+		int ret=0;
+		bool isPrimitive_ = boost::is_fundamental<T>::value;
+		//WHY does root do that?!?!
+		if(isPrimitive_){
+			content_=new T();
+			ret=t->tree()->SetBranchAddress(branchname_,content_,&branch_);
+		}
+		else
+			ret=t->tree()->SetBranchAddress(branchname_,&content_,&branch_);
 
 		// Error handling
 
@@ -127,6 +136,7 @@ private:
 	TBranch * branch_;
 	TString branchname_;
 	bool missingbranch_;
+	bool isPrimitive_ ;
 
 };
 

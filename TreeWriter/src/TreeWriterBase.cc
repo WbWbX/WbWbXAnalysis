@@ -199,6 +199,10 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	ztop::NTTrigger clear;
 	nttrigger=clear;
 
+	runno_=0;
+	lumiblock_=0;
+	eventno_=0;
+
 	bool IsRealData = false;
 	edm::Handle <reco::GenParticleCollection> genParticles;
 	try {
@@ -888,6 +892,17 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	ntevent.setVertexMulti(vertices->size());
 	//  ntevent.setFiredTriggers(firedtriggers_);
 
+	runno_=iEvent.id().run();
+	lumiblock_=iEvent.id().luminosityBlock();
+	eventno_=iEvent.id().event();
+
+	/*ZTOP_COUTVAR(iEvent.id().run());
+	ZTOP_COUTVAR(runno_);
+	ZTOP_COUTVAR(iEvent.id().luminosityBlock());
+	ZTOP_COUTVAR(lumiblock_);
+	ZTOP_COUTVAR(iEvent.id().event());
+	ZTOP_COUTVAR(eventno_);*/
+
 	float BXminus=0;
 	float BXzero=0;
 	float BXplus=0;
@@ -1050,6 +1065,16 @@ TreeWriterBase::beginJob()
 	// Ntuple->Branch("NTGenElectrons", "std::vector<ztop::NTGenParticle>", &ntgenelecs1);
 	// Ntuple->Branch("NTGenMuons",     "std::vector<ztop::NTGenParticle>", &ntgenmuons1);
 	//  Ntuple->Branch("Channel",channel_);
+	
+	//simpel branches
+	/*runno_,lumiblock_,eventno_*/
+
+	Ntuple->Branch("RunNumber",      &runno_);
+	Ntuple->Branch("LumiBlock",      &lumiblock_);
+	Ntuple->Branch("EventNumber",   &eventno_);
+
+
+
 
 	if(debugmode) std::cout <<"branches set" << std::endl;
 
