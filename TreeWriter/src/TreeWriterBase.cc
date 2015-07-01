@@ -168,6 +168,7 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	jetvtx.clear();
 	dimuonvtx.clear();
 
+        ntevt_=0;
 	nttops.clear();
 	ntws.clear();
 	ntzs.clear();
@@ -883,6 +884,7 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	ntevent.setRunNo(iEvent.id().run());
 	ntevent.setLumiBlock(iEvent.id().luminosityBlock());
 	ntevent.setEventNo(iEvent.id().event());
+        ntevt_=iEvent.id().event();
 	ntevent.setVertexMulti(vertices->size());
 	//  ntevent.setFiredTriggers(firedtriggers_);
 
@@ -907,26 +909,21 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	
 	std::vector<float> temprhos;
 	//agrohsje rho not available in mini aods, disable in aod corrections for 13 TeV (fixme!!!) 
-	if(runonaod_){
 	    //rhoiso,,rhojetsiso,,rhojetsisonopu
-	    edm::Handle<double> rho;
+	edm::Handle<double> rho;
 	    
-	    if(debugmode) std::cout << "add rho iso" << std::endl;
+	if(debugmode) std::cout << "add rho iso" << std::endl;
 	    
-	    iEvent.getByLabel(rhoiso_,rho);
-	    temprhos.push_back(*rho);
-	    ntevent.setIsoRho(temprhos);
-	    
+	iEvent.getByLabel(rhoiso_,rho);
+	temprhos.push_back(*rho);
+	ntevent.setIsoRho(temprhos);
+	if(runonaod_){    
 	    //add rhoiso to electrons (uses 2011 corrections (second argument set to false));
 	    ztop::elecRhoIsoAdder addrho(!IsRealData, true);
 	    addrho.setRho(temprhos[0]);
 	    addrho.addRhoIso(ntpfelectrons);
 	    addrho.addRhoIso(ntgsfelectrons);
-	}else{
-	    temprhos.push_back(999.);
-	    ntevent.setIsoRho(temprhos);
 	}
-	
 	/////pdf weights///////
 	if(includepdfweights_ && !IsRealData){
 
@@ -1053,7 +1050,6 @@ TreeWriterBase::beginJob()
 	// Ntuple->Branch("NTGenElectrons", "std::vector<ztop::NTGenParticle>", &ntgenelecs1);
 	// Ntuple->Branch("NTGenMuons",     "std::vector<ztop::NTGenParticle>", &ntgenmuons1);
 	//  Ntuple->Branch("Channel",channel_);
-	
 
 	if(debugmode) std::cout <<"branches set" << std::endl;
 
