@@ -168,7 +168,6 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	jetvtx.clear();
 	dimuonvtx.clear();
 
-        ntevt_=0;
 	nttops.clear();
 	ntws.clear();
 	ntzs.clear();
@@ -888,7 +887,6 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	ntevent.setRunNo(iEvent.id().run());
 	ntevent.setLumiBlock(iEvent.id().luminosityBlock());
 	ntevent.setEventNo(iEvent.id().event());
-        ntevt_=iEvent.id().event();
 	ntevent.setVertexMulti(vertices->size());
 	//  ntevent.setFiredTriggers(firedtriggers_);
 
