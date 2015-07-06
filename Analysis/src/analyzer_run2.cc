@@ -878,7 +878,7 @@ void  analyzer_run2::analyze(size_t anaid){
 			firstlep=leppair->first[0];
 			seclep=leppair->second[0];
 			lepweight*=getElecSF()->getScalefactor((firstlep->eta()),firstlep->pt());
-			lepweight*=getMuonSF()->getScalefactor(seclep->pt(),fabs(seclep->eta()));
+			lepweight*=getMuonSF()->getScalefactor(fabs(seclep->eta()),seclep->pt());
 			lepweight*=getTrackingSF()->getScalefactor((seclep->eta()));
 			lepweight*=getTriggerSF()->getScalefactor(fabs(firstlep->eta()),fabs(seclep->eta()));
 		}
