@@ -47,19 +47,19 @@ $$ all directories except for inputfiles are relative to $CMSSW_BASE
 inputFilesDir = /nfs/dust/cms/user/tarndt/NTuples/Prod_741/
 $inputFilesDir = /nfs/dust/cms/user/agrohsje/NAF_workingDir/ana_samples_150206/
 
-Lumi           = 1000
+Lumi           =1000
 
 JECFile        = /src/TtZAnalysis/Analysis/data/analyse/Summer13_V5_DATA_UncertaintySources_AK5PFchs.txt
 
-MuonSFFile     = /src/TtZAnalysis/Analysis/data/analyse/muon_tight_sf2D_8TeV.root
-MuonSFHisto    = GlobalSF
+MuonSFFile     = /src/TtZAnalysis/Analysis/data/analyse/muon_tight_sf2D_13TeV.root
+MuonSFHisto    = SF_statErr
 TrackingSFFile = /src/TtZAnalysis/Analysis/data/analyse/muon_trackSF_8TeV.root
 TrackingSFHisto = tracking_eff
 
-ElecSFFile     = /src/TtZAnalysis/Analysis/data/analyse/elec_tight_sf2D_8TeV.root
+ElecSFFile     = /src/TtZAnalysis/Analysis/data/analyse/elec_tight_sf2D_13TeV.root
 ElecSFHisto    = GlobalSF
 
-TriggerSFFile  = /src/TopAnalysis/Configuration/analysis/common/data/triggerSummary_emu_tightleps.root   
+TriggerSFFile  = /src/TtZAnalysis/Analysis/data/analyse/triggerSummary_emu_13TeV.root   
 
 PUFile         = /src/TtZAnalysis/Analysis/data/analyse/Legacy2012.json_PU    $without .root
 
