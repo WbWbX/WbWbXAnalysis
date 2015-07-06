@@ -39,8 +39,13 @@ int scalefactors::setInput(TString filename, TString histname, TString histnamee
 
 	TObject * ph = tryToGet<TObject>(f,histname);
 	TString classname = ph->ClassName();
-	if (classname.Contains("TH2D")) {
-		th2d_ = *(TH2D*) ph;
+	if (classname.Contains("TH2")) {
+		TH2* th2 = (TH2D*) ph;
+                for(int binx=0;binx<=th2->GetNbinsX();binx++){
+                        for(int biny=0;biny<=th2->GetNbinsY();biny++){
+                        th2d_.SetBinContent(binx,biny, th2->GetBinContent(binx,biny) );  
+                        }
+                }
 		h = &th2d_;
 		isth2d_ = true;
 		isglobal_ = false;
@@ -143,7 +148,7 @@ int scalefactors::setInput(TString filename, TString histname, TString histnamee
 
 	}else {
 		std::cout
-		<< "scalefactors::setInput: class of input histo must be TH1D, TGraphAsymmErrors or TH2D"
+		<< "scalefactors::setInput: class of input histo must be TH1D, TGraphAsymmErrors or TH2*"
 		<< std::endl;
 		throw std::runtime_error("scalefactors::setInput: histo wrong format");
 	}
