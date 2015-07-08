@@ -13,7 +13,7 @@ options.register('channel', 'emu', VarParsing.VarParsing.multiplicity.singleton,
 options.register('isSignal',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"is SignalMC")
 options.register('maxEvents',-1,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.int,"maximum events")
 options.register('skipEvents', 0, VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, "skip N events")
-options.register('inputScript','TopAnalysis.Configuration.Phys14.miniAOD.TT_Tune4C_13TeV_pythia8_tauola_Phys14DR_PU20bx25_tsg_PHYS14_25_V1_v1_cff',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"input Script")
+options.register('inputScript','TopAnalysis.Configuration.Spring15.miniAOD.TT_TuneCUETP8M1_13TeV_powheg_pythia8_RunIISpring15DR74_Asympt50ns_MCRUN2_74_V9A_v4_cff',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"input Script")
 #options.register('inputScript', '', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "python file with input source")
 options.register('json','nojson',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"json files")
 options.register('outputFile','def_out',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"output File (w/o .root)")
@@ -171,7 +171,7 @@ if globalTag != '':
 else:
     print "Determine global tag automatically"
     if options.runOnMC:
-        process.GlobalTag.globaltag = cms.string('MCRUN2_74_V7D::All')
+        process.GlobalTag.globaltag = cms.string('MCRUN2_74_V9A::All')
         #agrohsje process.GlobalTag.globaltag = cms.string('PHYS14_50_V2::All') 
     else:
         process.GlobalTag.globaltag = cms.string('FT53_V21A_AN6::All')
@@ -574,7 +574,7 @@ process.patJetsReapplyJEC = patJetsUpdated.clone(
 
 process.treeJets = selectedPatJets.clone( 
     src="patJetsReapplyJEC",   #'patJets'+pfpostfix, 
-    cut='eta < 5 && pt>5 &&neutralHadronEnergyFraction < 0.99 && chargedEmEnergyFraction < 0.99 && neutralEmEnergyFraction < 0.99 && chargedHadronEnergyFraction > 0.0 && chargedMultiplicity > 0.0') # unfortunately starting at 10 GeV are needed for MET rescaling 8GeV should be ok as corrected pt 
+    cut='eta < 5 && pt>5 &&neutralHadronEnergyFraction < 0.99 && neutralEmEnergyFraction < 0.99 && (chargedMultiplicity+neutralMultiplicity) > 1 && muonEnergyFraction < 0.8 && ((abs(eta)<2.4 && chargedHadronEnergyFraction > 0.0 && chargedMultiplicity > 0.0 && chargedEmEnergyFraction < 0.99) || abs(eta)>2.4)') # unfortunately starting at 10 GeV are needed for MET rescaling 8GeV should be ok as corrected pt 
     ### cut at uncorrected pt > 10 GeV on tree writer level! for MET rescaling - might be obsolete for 13 TeV (and when not using MET...)
     
 
