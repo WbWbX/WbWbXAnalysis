@@ -212,8 +212,8 @@ invokeApplication(){
 	ana->getBTagSF()->setMode(NTBTagSF::randomtagging_mode);
 	if(energy == "13TeV"){
 	        //agrohsje 
-	        //ana->getBTagSF()->loadSF  (btagSFFile, BTagEntry::OP_MEDIUM,"csvv2","mujets","up","down");
-	        ana->getBTagSF()->loadSF  (btagSFFile, BTagEntry::OP_TIGHT,"csvv2","mujets","up","down");
+	        //ana->getBTagSF()->loadSF  (btagSFFile, BTagEntry::OP_MEDIUM,"csvv2_50ns","mujets","up","down");
+	        ana->getBTagSF()->loadSF  (btagSFFile, BTagEntry::OP_TIGHT,"csvv2_50ns","mujets","up","down");
 	}else if (energy == "7TeV" || energy == "8TeV"){
 		ana->getBTagSF()->loadSF  (btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets","up","down");
 	}
