@@ -725,7 +725,7 @@ void  analyzer_run2::analyze(size_t anaid){
 			if(isMC)
 				ensf=getElecEnergySF()->getScalefactor(elec->eta());
 
-			elec->setECalP4(elec->ECalP4() * ensf);
+			//elec->setECalP4(elec->ECalP4() * ensf);
 			elec->setP4(elec->ECalP4() * ensf); //both the same now!!
 			
 			/*
