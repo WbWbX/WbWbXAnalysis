@@ -550,20 +550,20 @@ from PhysicsTools.PatAlgos.tools.jetTools import switchJetCollection
 #        print "Switching 'addJetFlavourInfo' for " + m + " to 'True'"
 #        setattr( getattr(process,m), 'addJetFlavourInfo', cms.bool(True) )
 
+if not options.runOnAOD:
+    from PhysicsTools.PatAlgos.producersLayer1.jetUpdater_cff import patJetCorrFactorsUpdated
+    process.patJetCorrFactorsReapplyJEC = patJetCorrFactorsUpdated.clone(
+      src = cms.InputTag("slimmedJets"),
+      levels = ['L1FastJet', 
+            'L2Relative', 
+            'L3Absolute'],
+      payload = 'AK4PFchs' ) # Make sure to choose the appropriate levels and payload here!
 
-from PhysicsTools.PatAlgos.producersLayer1.jetUpdater_cff import patJetCorrFactorsUpdated
-process.patJetCorrFactorsReapplyJEC = patJetCorrFactorsUpdated.clone(
-  src = cms.InputTag("slimmedJets"),
-  levels = ['L1FastJet', 
-        'L2Relative', 
-        'L3Absolute'],
-  payload = 'AK4PFchs' ) # Make sure to choose the appropriate levels and payload here!
-
-from PhysicsTools.PatAlgos.producersLayer1.jetUpdater_cff import patJetsUpdated
-process.patJetsReapplyJEC = patJetsUpdated.clone(
-  jetSource = cms.InputTag("slimmedJets"),
-  jetCorrFactorsSource = cms.VInputTag(cms.InputTag("patJetCorrFactorsReapplyJEC"))
-)
+    from PhysicsTools.PatAlgos.producersLayer1.jetUpdater_cff import patJetsUpdated
+    process.patJetsReapplyJEC = patJetsUpdated.clone(
+      jetSource = cms.InputTag("slimmedJets"),
+      jetCorrFactorsSource = cms.VInputTag(cms.InputTag("patJetCorrFactorsReapplyJEC"))
+    )
 
 
 
@@ -572,8 +572,13 @@ process.patJetsReapplyJEC = patJetsUpdated.clone(
 ####################################################################
 ## Jet information 
 
+if options.runOnAOD:
+    jetColl= 'patJets'+pfpostfix
+else :
+    jetColl= "patJetsReapplyJEC"
+
 process.treeJets = selectedPatJets.clone( 
-    src="patJetsReapplyJEC",   #'patJets'+pfpostfix, 
+    src=jetColl,   #'patJets'+pfpostfix, 
     cut='eta < 5 && pt>5 &&neutralHadronEnergyFraction < 0.99 && neutralEmEnergyFraction < 0.99 && (chargedMultiplicity+neutralMultiplicity) > 1 && muonEnergyFraction < 0.8 && ((abs(eta)<2.4 && chargedHadronEnergyFraction > 0.0 && chargedMultiplicity > 0.0 && chargedEmEnergyFraction < 0.99) || abs(eta)>2.4)') # unfortunately starting at 10 GeV are needed for MET rescaling 8GeV should be ok as corrected pt 
     ### cut at uncorrected pt > 10 GeV on tree writer level! for MET rescaling - might be obsolete for 13 TeV (and when not using MET...)
     
