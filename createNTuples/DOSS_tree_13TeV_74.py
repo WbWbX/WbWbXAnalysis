@@ -174,21 +174,21 @@ else:
         process.GlobalTag.globaltag = cms.string('MCRUN2_74_V9A::All')
         #agrohsje process.GlobalTag.globaltag = cms.string('PHYS14_50_V2::All') 
     else:
-        process.GlobalTag.globaltag = cms.string('FT53_V21A_AN6::All')
+        process.GlobalTag.globaltag = cms.string('GR_P_V56::All')
         
 print "Using global tag: ", process.GlobalTag.globaltag
 
 
-jecFile=os.path.relpath( os.environ['CMSSW_BASE']+'/src/TtZAnalysis/Data/Run2/PHYS14_V4_MC.db')
+jecFile=os.path.relpath( os.environ['CMSSW_BASE']+'/src/TtZAnalysis/Data/Run2/PY8_RunIISpring15DR74_bx50_MC.db')
 from CondCore.DBCommon.CondDBSetup_cfi import *
 process.jec = cms.ESSource("PoolDBESSource",CondDBSetup,
     connect = cms.string('sqlite_file:'+jecFile),
     toGet =  cms.VPSet(
     cms.PSet(record = cms.string("JetCorrectionsRecord"),
-        tag = cms.string("JetCorrectorParametersCollection_PHYS14_V4_MC_AK4PF"),
+        tag = cms.string("JetCorrectorParametersCollection_PY8_RunIISpring15DR74_bx50_MC_AK4PF"),
         Label = cms.untracked.string("AK4PF")),
         cms.PSet(record = cms.string("JetCorrectionsRecord"),
-        tag =cms.string("JetCorrectorParametersCollection_PHYS14_V4_MC_AK4PFchs"),
+        tag =cms.string("JetCorrectorParametersCollection_PY8_RunIISpring15DR74_bx50_MC_AK4PFchs"),
         Label = cms.untracked.string("AK4PFchs"))
     )
 )
@@ -245,9 +245,12 @@ process.hDampDown = cms.EDProducer("EventWeightMCSystematic",
                                    )
 
 if isSignal:
-    additionalWeights = cms.vstring("nominal","scaleUp","scaleDown")
-else:
+    additionalWeights = cms.vstring("nominal","scaleUp","scaleDown","hDampUp","hDampDown")
+elif runOnMC:
     additionalWeights = cms.vstring("nominal")
+else: 
+    additionalWeights=cms.vstring()
+
 
 ## PDF weights if required 
 if includePDFWeights:
@@ -349,8 +352,8 @@ else :
 ## Prefilter sequence
 
 
-if runOnMC:
-    process.prefilterSequence = cms.Sequence()
+if runOnMC or not runOnAOD:
+     process.prefilterSequence = cms.Sequence()
 else:
     ## HCAL noise filter
     process.load('CommonTools/RecoAlgos/HBHENoiseFilter_cfi')
