@@ -1201,16 +1201,23 @@ void TreeWriterBase::setTriggers(){
 
 	// agrohsje added triggers for upcoming 13 TeV run 
 	//mumu
-	triggers_.push_back("HLT_Mu17_Mu8_v"); //26
-	triggers_.push_back("HLT_Mu17_TkMu8_v"); //27
-	triggers_.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v"); //28
-	triggers_.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v"); //29
-	triggers_.push_back("HLT_DoubleMu33NoFiltersNoVtx_v"); //30
+	triggers_.push_back("HLT_Mu17_Mu8_DZ_v"); //26
+	triggers_.push_back("HLT_Mu17_TkMu8_DZ_v2"); //27
+	triggers_.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v"); //28
+	triggers_.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v"); //29
+        triggers_.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");//30
+        triggers_.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2");//31 
+	triggers_.push_back("HLT_DoubleMu18NoFiltersNoVtx_v"); //32
 	//ee 
-	triggers_.push_back("HLT_Ele23_Ele12_CaloId_TrackId_Iso_v"); //31
+	triggers_.push_back("HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"); //33
+        triggers_.push_back("HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_v"); //34
+        triggers_.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"); //35
+        triggers_.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"); //36
 	//emu
-	triggers_.push_back("HLT_Mu23_TrkIsoVVL_Ele12_Gsf_CaloId_TrackId_Iso_MediumWP_v"); //32
-	triggers_.push_back("HLT_Mu8_TrkIsoVVL_Ele23_Gsf_CaloId_TrackId_Iso_MediumWP_v"); //33
+	triggers_.push_back("HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v"); //37
+	triggers_.push_back("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v2"); //38
+        triggers_.push_back("HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v2"); //39
+        triggers_.push_back("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v2"); //40
 	//triggers_.push_back("");
 
 }
