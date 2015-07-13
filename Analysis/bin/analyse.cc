@@ -495,6 +495,8 @@ invokeApplication(){
 		}
 		else if(energy=="13TeV"){
 			ana->addWeightBranch("NTWeight_scaleUp");
+                        ana->setFilePostfixReplace("ttbar.root","ttbar_ttscaleup.root");
+                        ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_ttscaleup.root");
 		}
 	}
 	else if(Syst=="TT_SCALE_down"){
@@ -506,6 +508,9 @@ invokeApplication(){
 		}
 		else if(energy=="13TeV"){
 			ana->addWeightBranch("NTWeight_scaleDown");
+                        ana->setFilePostfixReplace("ttbar.root","ttbar_ttscaledown.root");
+                        ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_ttscaledown.root");
+
 		}
 
 	}
@@ -564,11 +569,13 @@ invokeApplication(){
 	}
 	else if(Syst=="TOPMASS_up"){ //consider as systematic variation. for testing purp! leaves normalization fixed
 		//default
-		topmass="178.5";
+		if (energy=="7TeV" || energy=="8TeV") topmass="178.5";
+                else if (energy=="13TeV") topmass = "175.5";
 	}
 	else if(Syst=="TOPMASS_down"){
 		//default
-		topmass="166.5";
+		if (energy=="7TeV" || energy=="8TeV") topmass="166.5";
+                else if (energy=="13TeV") topmass = "169.5";
 	}
 	else{
 		didnothing=true;
@@ -578,11 +585,16 @@ invokeApplication(){
 
 	if(topmass != "172.5"){
 		std::cout << "replacing top mass value of 172.5 with "<< topmass << std::endl;
-		ana->setFilePostfixReplace("ttbar.root","ttbar_mt"+topmass+ ".root");
-		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mt"+topmass+ ".root");
-		ana->setFilePostfixReplace("ttbar_dil.root","ttbar_dil_mt"+topmass+ ".root");
-		ana->setFilePostfixReplace("ttbarviatau_dil.root","ttbarviatau_dil_mt"+topmass+ ".root");
-
+                if (energy=="7TeV" || energy=="8TeV") {
+	   	        ana->setFilePostfixReplace("ttbar.root","ttbar_mt"+topmass+ ".root");
+		        ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mt"+topmass+ ".root");
+		        ana->setFilePostfixReplace("ttbar_dil.root","ttbar_dil_mt"+topmass+ ".root");
+		        ana->setFilePostfixReplace("ttbarviatau_dil.root","ttbarviatau_dil_mt"+topmass+ ".root");
+                }
+                else if (energy == "13TeV"){
+                        ana->setFilePostfixReplace("ttbar.root","ttbar_mt175.5.root");
+                        ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_mt169.5.root");
+                }
 		if(topmass == "178.5" || topmass == "166.5"){
 			//	ana->setFilePostfixReplace("_tWtoLL.root","_tWtoLL_mt"+topmass+ ".root");
 			//	ana->setFilePostfixReplace("_tbarWtoLL.root","_tbarWtoLL_mt"+topmass+ ".root");
