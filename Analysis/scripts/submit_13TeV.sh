@@ -11,13 +11,13 @@ topmasses=( "172.5"
      # "171.5"
      # "173.5"
 
-     # "175.5"
-     # "169.5"
+    "175.5"
+    "169.5"
 
      # "178.5"
      # "166.5"
 );
-pdfeigenvectors=50 # POWHEG:50; MG5_aMC@NLO:51   # if set to 0, no variation
+pdfeigenvectors=50 # POWHEG:NNPDF:50; MG5_aMC@NLO:NNPDF:51   # if set to 0, no variation
 
 systs=("nominal"
 
@@ -34,7 +34,7 @@ systs=("nominal"
 #   "TT_GENPOWPY_up"
 #   "TT_GENPOWPY_down"
 
-
+# use later for powheg herwig, file ending should be powhpp
    # "TT_GENPOWHERW_up"
    # "TT_GENPOWHERW_down"
 

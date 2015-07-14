@@ -536,6 +536,13 @@ invokeApplication(){
 		ana->setFilePostfixReplace("ttbar_dil.root","ttbar_pow2py.root");
 		ana->setFilePostfixReplace("ttbarviatau_dil.root","ttbarviatau_pow2py.root");
 	}
+	else if(Syst=="TT_GENPOWHERW_up"){
+		ana->setFilePostfixReplace("ttbar.root","ttbar_powhpp.root");
+		ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_powhpp.root");
+	}
+	else if(Syst=="TT_GENPOWHERW_down"){
+		//this is just default sample
+	}
 	else if(Syst=="TT_GENPOW_sysnominal"){
 		ana->setFilePostfixReplace("ttbar.root","ttbar_pow2py.root");
 		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_pow2py.root");
