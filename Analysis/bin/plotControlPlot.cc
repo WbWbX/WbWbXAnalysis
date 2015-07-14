@@ -27,6 +27,7 @@ invokeApplication(){
 	const std::string inlist=parser->getOpt<std::string>("-list","","specify a file that represents a list of all plots to be plotted.\n     one line for each plot or %% as delimiter");
 	const std::string suffix=parser->getOpt<std::string>("s","","specify a suffix.");
 	const std::string outdir=parser->getOpt<std::string>("d",".","specify an optional output directory.");
+        const bool normToInt=parser->getOpt<bool>("int",false,"specify whether you want to normalize to the integral of the data or to the lumi.");
 
 	std::vector<TString> tmpv=parser->getRest<TString>();
 	parser->doneParsing();
@@ -90,6 +91,11 @@ invokeApplication(){
 			delete csv;
 			return -3;
 		}
+                if(normToInt){
+                        double integral_data = stack.getDataContainer().integral();
+                        double integral_mc   = stack.getFullMCContainer().integral();
+                        stack.multiplyAllMCNorms(integral_data/integral_mc);
+                }
 		TCanvas cv;
 		pl.usePad(&cv);
 		pl.setStack(&stack);
