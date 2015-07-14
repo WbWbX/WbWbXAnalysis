@@ -592,8 +592,8 @@ invokeApplication(){
 		        ana->setFilePostfixReplace("ttbarviatau_dil.root","ttbarviatau_dil_mt"+topmass+ ".root");
                 }
                 else if (energy == "13TeV"){
-                        ana->setFilePostfixReplace("ttbar.root","ttbar_mt175.5.root");
-                        ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_mt169.5.root");
+		        ana->setFilePostfixReplace("ttbar.root","ttbar_mt"+topmass+".root");
+                        ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_mt"+topmass+".root");
                 }
 		if(topmass == "178.5" || topmass == "166.5"){
 			//	ana->setFilePostfixReplace("_tWtoLL.root","_tWtoLL_mt"+topmass+ ".root");
