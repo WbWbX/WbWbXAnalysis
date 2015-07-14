@@ -385,9 +385,9 @@ void  analyzer_run2::analyze(size_t anaid){
 	NTJES jescorr = NTJES();
 	//took files from https://twiki.cern.ch/twiki/bin/view/CMS/JECDataMC
 	const TString* dataJECFile = new TString(""); 
-	const TString* mcL1JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Data/Run2/PHYS14_V4_MC_L1FastJet_AK4PFchs.txt");
-	const TString* mcL2JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Data/Run2/PHYS14_V4_MC_L2Relative_AK4PFchs.txt");
-	const TString* mcL3JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Data/Run2/PHYS14_V4_MC_L3Absolute_AK4PFchs.txt");
+	const TString* mcL1JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Data/Run2/PY8_RunIISpring15DR74_bx50_MC_L1FastJet_AK4PFchs.txt");
+	const TString* mcL2JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Data/Run2/PY8_RunIISpring15DR74_bx50_MC_L2Relative_AK4PFchs.txt");
+	const TString* mcL3JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Data/Run2/PY8_RunIISpring15DR74_bx50_MC_L3Absolute_AK4PFchs.txt");
 	jescorr.setFilesCorrection(mcL1JECFile,mcL2JECFile,
 				   mcL3JECFile,dataJECFile,(const bool) isMC);
 	
@@ -433,7 +433,7 @@ void  analyzer_run2::analyze(size_t anaid){
 		mcreweighters.push_back(mcreweighter);
 	}
 	//agrohsje debugging 
-	int ntevt;
+	ULong64_t ntevt;
 	t->tree()->SetBranchAddress("EventNumber",&ntevt);
 
 	//some helpers
