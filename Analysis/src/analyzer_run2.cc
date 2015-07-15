@@ -947,7 +947,7 @@ void  analyzer_run2::analyze(size_t anaid){
 					useJetForMet=true; //dont even do something
 				//agrohsje/tarndt just for testing REMOVE
 				//std::cout<<"agrohsje jet pt before "<<treejets.at(i)->pt()<<" rho=" <<b_Event.content()->isoRho(0)<< " area="<< treejets.at(i)->getMember(0) <<std::endl;
-				//jescorr.correctJet(treejets.at(i), treejets.at(i)->getMember(0),b_Event.content()->isoRho(0));
+				jescorr.correctJet(treejets.at(i), treejets.at(i)->getMember(0),b_Event.content()->isoRho(0));
 				//std::cout<<"agrohsje for ntevt="<< ntevt<<" jet pt after jes "<<treejets.at(i)->pt()<<std::endl;
 				//agrohsje global 2% scaling for JESup/JESdown can be added to ZTopUtils/src/JECBase.cc, splitting gives default sys
 				getJECUncertainties()->applyToJet(treejets.at(i));
