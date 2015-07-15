@@ -19,14 +19,21 @@
 #  
 
 
-1: total 0,1 b-jets step 8
-2: total 1,2 b-jets step 8
 
+0: mll 0 b-jets step 8
 1: mll 1 b-jets step 8
 2: mll 2 b-jets step 8
 
+0: lead lep pt 0 b-jets step 8
 1: lead lep pt 1 b-jets step 8
 2: lead lep pt 2 b-jets step 8
 
+0: sec lep pt 0 b-jets step 8
 1: sec lep pt 1 b-jets step 8
 2: sec lep pt 2 b-jets step 8
+
+#merged ones
+
+# 3: lead lep pt step 8 = sec lep pt 0 b-jets step 8 + sec lep pt 1 b-jets step 8 + sec lep pt 2 b-jets step 8
+
+# 3: sec lep pt 0 b-jets step 8

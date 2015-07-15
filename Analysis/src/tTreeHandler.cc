@@ -15,6 +15,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include "FWCore/FWLite/interface/AutoLibraryLoader.h"
 
 namespace ztop{
 tTreeHandler::tTreeHandler(const TString & filename, const TString &treename):file_(0), t_(0),entry_(0),entries_(0){
@@ -37,6 +38,7 @@ void tTreeHandler::load(const TString & filename, const TString &treename){
 		errstr+=filename.Data();
 		throw std::runtime_error(errstr);
 	}
+	AutoLibraryLoader::enable();
 	TFile* f=new TFile(filename,"READ");
 	if(!f || f->IsZombie()){
 		throw std::runtime_error("tTreeHandler::load: file not ok.");

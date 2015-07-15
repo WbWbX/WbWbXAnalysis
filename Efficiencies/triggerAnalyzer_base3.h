@@ -26,7 +26,7 @@
 
 #include "TtZAnalysis/Tools/interface/effTriple.h"
 #include "TtZAnalysis/Tools/interface/namedPairs.h" 
-
+#include "TtZAnalysis/Tools/interface/texTabler.h"
 
 using namespace ztop;
 namespace top{using namespace ztop;}
@@ -204,6 +204,16 @@ public:
 			mettriggers=initTriggers();
 		else
 			mettriggers=mettriggers_;
+		if(checktriggerpaths_){
+			cout << "used MET triggers: " << endl;
+			texTabler table("|c|");
+			for(unsigned int i=0;i<mettriggers.size();i++){
+				//std::cout << out.at(i) << std::endl;
+				table << mettriggers.at(i) ;
+			}
+			std::cout <<  table.getTable() << std::endl;
+		}
+
 
 		TString MCadd="";
 		if(isMC_) MCadd="MC";
@@ -439,7 +449,7 @@ public:
 			}
 			else{
 				cout << "Branch " << "NTTriggerObjects_"+(TString)trigsObj_.at(i) 
-				    																				 << " not found\n    will be ignored" << endl;
+				    																						 << " not found\n    will be ignored" << endl;
 				invalidbranches << i;
 			}
 		}
@@ -1004,9 +1014,9 @@ public:
 		cout << "\n\nIn channel " << mode_<< " (ee,emu,mumu)  " << MCdata << endl;
 		cout << "triggers: " <<endl;
 		if(!isMC_){
-		for(unsigned int i=0;i<dileptriggers.size();i++){
-			cout << dileptriggers[i] << endl;
-		}
+			for(unsigned int i=0;i<dileptriggers.size();i++){
+				cout << dileptriggers[i] << endl;
+			}
 		}
 		else{
 			for(unsigned int i=0;i<dileptriggersMC.size();i++)
@@ -1276,12 +1286,7 @@ public:
 			if(isOk) out.push_back(mettriggers[j]);
 		}
 
-		if(checktriggerpaths_){
-			cout << "used MET triggers: " << endl;
-			for(unsigned int i=0;i<out.size();i++){
-				std::cout << out.at(i) << std::endl;
-			}
-		}
+
 
 		// mettriggers=notinMCtriggers;
 		return out;
@@ -1538,19 +1543,19 @@ void analyzeAll(triggerAnalyzer &ta_eed, triggerAnalyzer &ta_eeMC, triggerAnalyz
 
 	cout << "$ee$ & " << eed[0] <<" $\\pm$ " << eed[1] << " (stat.) & "
 			<< eeMC[0] << " $\\pm$ " << eeMC[1] << " (stat.) & " << eed[0]/eeMC[0]
-			                                                                    << " $\\pm$ " << sqrt((eed[1]/eeMC[0])*(eed[1]/eeMC[0]) + (eed[0]/(eeMC[0]*eeMC[0]))*eeMC[1]*eeMC[1]*(eed[0]/(eeMC[0]*eeMC[0]))) << " (stat.)  "
-			                                                                    <<  " $\\pm$ " << sqrt(0.01*eed[0]/eeMC[0]*eed[0]/eeMC[0]*0.01  +fabs(ratiomultiplier*eed[0]/eeMC[0] * eeMC[2])*fabs(ratiomultiplier*eed[0]/eeMC[0] * eeMC[2])) << " (syst.) \\\\" << endl;
+																				<< " $\\pm$ " << sqrt((eed[1]/eeMC[0])*(eed[1]/eeMC[0]) + (eed[0]/(eeMC[0]*eeMC[0]))*eeMC[1]*eeMC[1]*(eed[0]/(eeMC[0]*eeMC[0]))) << " (stat.)  "
+																				<<  " $\\pm$ " << sqrt(0.01*eed[0]/eeMC[0]*eed[0]/eeMC[0]*0.01  +fabs(ratiomultiplier*eed[0]/eeMC[0] * eeMC[2])*fabs(ratiomultiplier*eed[0]/eeMC[0] * eeMC[2])) << " (syst.) \\\\" << endl;
 
 
 	cout << "$\\mu\\mu$ & " << mumud[0] <<" $\\pm$ " << mumud[1] << " (stat.) & "
 			<< mumuMC[0] << " $\\pm$ " << mumuMC[1] << " (stat.) & " << mumud[0]/mumuMC[0]
-			                                                                            << " $\\pm$ " << sqrt((mumud[1]/mumuMC[0])*(mumud[1]/mumuMC[0]) + (mumud[0]/(mumuMC[0]*mumuMC[0]))*mumuMC[1]*mumuMC[1]*(mumud[0]/(mumuMC[0]*mumuMC[0]))) << " (stat.)  "
-			                                                                            <<  " $\\pm$ " << sqrt(0.01*mumud[0]/mumuMC[0]*mumud[0]/mumuMC[0]*0.01+fabs(ratiomultiplier*mumud[0]/mumuMC[0] * mumuMC[2])*fabs(ratiomultiplier*mumud[0]/mumuMC[0] * mumuMC[2])) << " (syst.) \\\\" << endl;
+																						<< " $\\pm$ " << sqrt((mumud[1]/mumuMC[0])*(mumud[1]/mumuMC[0]) + (mumud[0]/(mumuMC[0]*mumuMC[0]))*mumuMC[1]*mumuMC[1]*(mumud[0]/(mumuMC[0]*mumuMC[0]))) << " (stat.)  "
+																						<<  " $\\pm$ " << sqrt(0.01*mumud[0]/mumuMC[0]*mumud[0]/mumuMC[0]*0.01+fabs(ratiomultiplier*mumud[0]/mumuMC[0] * mumuMC[2])*fabs(ratiomultiplier*mumud[0]/mumuMC[0] * mumuMC[2])) << " (syst.) \\\\" << endl;
 
 	cout << "$e\\mu$ & " << emud[0] <<" $\\pm$ " << emud[1] << " (stat.) & "
 			<< emuMC[0] << " $\\pm$ " << emuMC[1] << " (stat.) & " << emud[0]/emuMC[0]
-			                                                                        << " $\\pm$ " << sqrt((emud[1]/emuMC[0])*(emud[1]/emuMC[0]) + (emud[0]/(emuMC[0]*emuMC[0]))*emuMC[1]*emuMC[1]*(emud[0]/(emuMC[0]*emuMC[0]))) << " (stat.)  "
-			                                                                        <<  " $\\pm$ " << sqrt(0.01*emud[0]/emuMC[0]*emud[0]/emuMC[0]*0.01+fabs(ratiomultiplier*emud[0]/emuMC[0] * emuMC[2])*fabs(ratiomultiplier*emud[0]/emuMC[0] * emuMC[2])) << " (syst.) \\\\" << endl;
+																					<< " $\\pm$ " << sqrt((emud[1]/emuMC[0])*(emud[1]/emuMC[0]) + (emud[0]/(emuMC[0]*emuMC[0]))*emuMC[1]*emuMC[1]*(emud[0]/(emuMC[0]*emuMC[0]))) << " (stat.)  "
+																					<<  " $\\pm$ " << sqrt(0.01*emud[0]/emuMC[0]*emud[0]/emuMC[0]*0.01+fabs(ratiomultiplier*emud[0]/emuMC[0] * emuMC[2])*fabs(ratiomultiplier*emud[0]/emuMC[0] * emuMC[2])) << " (syst.) \\\\" << endl;
 
 	cout << "\\end{tabular}\n\\caption{Dilepton trigger efficiencies for data and MC and resulting scaling factors}\n\\end{table}" << endl;
 

@@ -37,6 +37,8 @@ public:
 
 	bool applyAxisRange() const; //if min>max false (default)
 
+	static TString makeTexConsistentName(const TString& in);
+
 	/**
 	 * creates new object (handle memory!)
 	 */

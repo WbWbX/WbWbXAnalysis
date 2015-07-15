@@ -248,9 +248,11 @@ public:
 
 
 private:
+	size_t getBinNoY(const float & var) const;
 
 	void fill(const float & xval, const float & yval, const float & weight=1){
-		histo2D::fill(xval,yval,weight);
+		size_t ybin=getBinNoY(yval);
+		conts_[ybin].fill(xval,weight);
 	}
 	histo2D rebinXToBinning(const std::vector<float>& vec)const{return histo2D::rebinXToBinning(vec);}
 	histo2D rebinYToBinning(const std::vector<float>& vec)const{return histo2D::rebinYToBinning(vec);}
@@ -292,6 +294,22 @@ private:
 
 };
 
+inline size_t ztop::histo1DUnfold::getBinNoY(const float & var) const {
+
+	if(ybins_.size() <2){
+		return 0;
+	}
+	size_t binno=0;
+	std::vector<float>::const_iterator it=std::lower_bound(ybins_.begin()+1, ybins_.end(), var);
+	if(var==*it)
+		binno= it-ybins_.begin();
+	else
+		binno= it-ybins_.begin()-1;
+
+	//no changes wrt underflow, overflow. MUST be kept
+
+	 return binno;
+}
 
 #ifndef __CINT__
 

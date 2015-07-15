@@ -15,28 +15,29 @@
 #include <stdexcept>
 #include <iostream>
 #include "TLatex.h"
+#include "TtZAnalysis/Tools/interface/textFormatter.h"
 
 namespace ztop{
 
 bool plotterBase::debug=false;
 
 plotterBase::plotterBase(const plotterBase& rhs): tObjectList(rhs){
-    pad_ = rhs.pad_;
-    tbndc_=rhs.tbndc_;
-    drawlegend_=rhs.drawlegend_;
-    legstyle_=rhs.legstyle_;
-    textboxes_ = rhs.textboxes_;
-    intstyle_ = rhs.intstyle_; //start with env style
-    lastplotidx_ = rhs.lastplotidx_;
-    tmplegp_=0;
+	pad_ = rhs.pad_;
+	tbndc_=rhs.tbndc_;
+	drawlegend_=rhs.drawlegend_;
+	legstyle_=rhs.legstyle_;
+	textboxes_ = rhs.textboxes_;
+	intstyle_ = rhs.intstyle_; //start with env style
+	lastplotidx_ = rhs.lastplotidx_;
+	tmplegp_=0;
 }
 
 TVirtualPad* plotterBase::getPad()const{
-    if(!pad_){
-       // std::cout << "plotterBase::getCanvas: no canvas associated!" << std::endl;
-        throw std::logic_error("plotterBase::getCanvas: no canvas associated!");
-    }
-    return pad_;
+	if(!pad_){
+		// std::cout << "plotterBase::getCanvas: no canvas associated!" << std::endl;
+		throw std::logic_error("plotterBase::getCanvas: no canvas associated!");
+	}
+	return pad_;
 }
 
 
@@ -47,107 +48,137 @@ TVirtualPad* plotterBase::getPad()const{
 void plotterBase::draw(){
 	if(preparepad_)
 		preparePad();//adjusts canvas that lives outside
-    drawPlots(); //object handling by plot class
-    drawTextBoxes(); //adds new objects to list
-    if(drawlegend_)
-        drawLegends();//adds new objects to list
-    refreshPad();
+	drawPlots(); //object handling by plot class
+	drawTextBoxes(); //adds new objects to list
+	if(drawlegend_)
+		drawLegends();//adds new objects to list
+	refreshPad();
 }
 /**
  * returns >1
  */
 float plotterBase::getSubPadXScale(int idx){
-    TVirtualPad * p=getPad()->cd(idx);
-    float multiplier=1;
-    double ylow,yhigh,xlow,xhigh;
-    p->GetPadPar(xlow,ylow,xhigh,yhigh);
-    multiplier = (float)1/(xhigh-xlow);
-    return multiplier;
+	TVirtualPad * p=getPad()->cd(idx);
+	float multiplier=1;
+	double ylow,yhigh,xlow,xhigh;
+	p->GetPadPar(xlow,ylow,xhigh,yhigh);
+	multiplier = (float)1/(xhigh-xlow);
+	return multiplier;
 }
+
+
 
 /**
  * returns >1
  */
 float plotterBase::getSubPadYScale(int idx){
-    TVirtualPad * p=getPad()->cd(idx);
-    float multiplier=1;
-    double ylow,yhigh,xlow,xhigh;
-    p->GetPadPar(xlow,ylow,xhigh,yhigh);
-    multiplier = (float)1/(yhigh-ylow);
-    return multiplier;
+	TVirtualPad * p=getPad()->cd(idx);
+	float multiplier=1;
+	double ylow,yhigh,xlow,xhigh;
+	p->GetPadPar(xlow,ylow,xhigh,yhigh);
+	multiplier = (float)1/(yhigh-ylow);
+	return multiplier;
 }
+
+
+void plotterBase::convertUserCoordsToNDC(TVirtualPad * subpad, const float & ux, const float & uy, float& ndcx, float& ndcy)const{
+
+	subpad->Update();
+	int py,px;
+	px=subpad->XtoPixel(ux);
+	py=subpad->YtoPixel(uy); //(ux,uy,&px,&py);
+
+	TVirtualPad * fullpad=getPad();
+	int pixh=fullpad->GetWh();
+	int pixw=fullpad->GetWw();
+	ndcx=(float)px/(float)pixw;
+	ndcy=(float)py/(float)pixh;
+
+	std::cout << "px: "<<px << "," << "py: "<<py << std::endl;
+	std::cout << " user: " << ux << "," <<uy << "  ndx: "<<ndcx << "," << ndcy << std::endl;
+}
+
 /**
  * text boxes are ALWAYS drawn with respect to full pad
  */
 void plotterBase::drawTextBoxes(){
-    if(debug) std::cout << "plotterBase::drawTextBoxes: " << textboxes_.size() << std::endl;
+	if(debug) std::cout << "plotterBase::drawTextBoxes: " << textboxes_.size() << std::endl;
 
-    getPad()->cd();
+	getPad()->cd();
 
-    TLatex * tb=0;
+	TLatex * tb=0;
 
- //if NDC   getPad()->GetPadPar(Double_t& xlow, Double_t& ylow, Double_t& xup, Double_t& yup)
+	//if NDC   getPad()->GetPadPar(Double_t& xlow, Double_t& ylow, Double_t& xup, Double_t& yup)
 
-    for(size_t i=0;i<textboxes_.size();i++){
-        if(textboxes_.at(i).getText() != "DEFTITLE")
-            tb=addObject(new TLatex(textboxes_.at(i).getX(), textboxes_.at(i).getY(), textboxes_.at(i).getText()));
-        else
-            tb=addObject(new TLatex(textboxes_.at(i).getX(), textboxes_.at(i).getY(), title_));
-        tb->SetTextSize(textboxes_.at(i).getTextSize());
-        tb->SetTextFont(textboxes_.at(i).getFont());
-        tb->SetTextAlign(textboxes_.at(i).getAlign());
-        //if(tbndc_)
-        tb->SetNDC(tbndc_);
-        tb->Draw("same");
-    }
+	for(size_t i=0;i<textboxes_.size();i++){
+		if(textboxes_.at(i).getText() != "DEFTITLE")
+			tb=addObject(new TLatex(textboxes_.at(i).getX(), textboxes_.at(i).getY(), textboxes_.at(i).getText()));
+		else
+			tb=addObject(new TLatex(textboxes_.at(i).getX(), textboxes_.at(i).getY(), title_));
+		tb->SetTextSize(textboxes_.at(i).getTextSize());
+		tb->SetTextFont(textboxes_.at(i).getFont());
+		tb->SetTextAlign(textboxes_.at(i).getAlign());
+		//if(tbndc_)
+		tb->SetNDC(tbndc_);
+		tb->Draw("same");
+	}
 
 }
 
 
 void plotterBase::addTextBox(float x,float y,const TString & text,float textsize){
 
-    textboxes_.add(x,y,text,textsize);
+	textboxes_.add(x,y,text,textsize);
 
 }
 void plotterBase::readTextBoxesInCMSSW(const std::string& pathtofile,const std::string& marker){
-    std::string path=getenv("CMSSW_BASE");
-    path+="/";
-    path+=pathtofile;
-    textboxes_.readFromFile(path,marker);
+	std::string path=getenv("CMSSW_BASE");
+	path+="/";
+	path+=pathtofile;
+	textboxes_.readFromFile(path,marker);
 }
 void plotterBase::readTextBoxes(const std::string& pathtofile,const std::string& marker){
 
 
-    textboxes_.readFromFile(pathtofile,marker);
+	textboxes_.readFromFile(pathtofile,marker);
 
 
 }
 
 void plotterBase::readStyleFromFileInCMSSW(const std::string&pathtofile){
-    std::string path=getenv("CMSSW_BASE");
-    path+="/";
-    path+=pathtofile;
-    readStyleFromFile(path);
+	std::string path=getenv("CMSSW_BASE");
+	path+="/";
+	path+=pathtofile;
+	readStyleFromFile(path);
 }
 
 void plotterBase::readTStyleFromFile(const std::string& pathtofile){
-    std::cout << "TBI " <<pathtofile.length() <<std::endl;
+	std::cout << "TBI " <<pathtofile.length() <<std::endl;
 }
 
 
 void plotterBase::printToPdf(const std::string& outname){
 	TVirtualPad * oldpad=pad_;
-    TCanvas c;
-    usePad(&c);
-    draw();
-    TString outnameeps=outname;
-    outnameeps+=".eps";
-    c.Print(outnameeps);
-    TString syscall="epstopdf --outfile="+outname+".pdf " + outnameeps;
-    system(syscall);
-    TString delcall="rm -f "+outnameeps;
-    system(delcall);
-    pad_=oldpad;
+	TCanvas c;
+	usePad(&c);
+	draw();
+	TString outnameeps=outname;
+	outnameeps+=".eps";
+	c.Print(outnameeps);
+	TString syscall="epstopdf --outfile="+outname+".pdf " + outnameeps;
+	system(syscall);
+	TString delcall="rm -f "+outnameeps;
+	system(delcall);
+	pad_=oldpad;
+}
+void plotterBase::saveAsCanvasC(const std::string& outname){
+	TVirtualPad * oldpad=pad_;
+	TString outnametstring=textFormatter::makeCompatibleFileName(outname);
+	TCanvas c(outnametstring);
+	usePad(&c);
+	draw();
+	c.Print(outnametstring+".C");
+	pad_=oldpad;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

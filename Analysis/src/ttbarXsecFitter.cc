@@ -23,6 +23,8 @@ namespace ztop{
 bool ttbarXsecFitter::debug=false;
 TRandom3 * ttbarXsecFitter::random_=0;
 
+bool ttbarXsecFitter::includeUFOF=true;
+
 void ttbarXsecFitter::readInput(const std::string & configfilename){
 	if(debug)
 		std::cout << "ttbarXsecFitter::readInput" <<std::endl;
@@ -159,11 +161,20 @@ void ttbarXsecFitter::readInput(const std::string & configfilename){
 	if(!removesyst_){
 		fr.setStartMarker("[ full extrapolation ]");
 		fr.setEndMarker("[ end - full extrapolation ]");
+		fr.setDelimiter(",");
 		fr.readFile(configfilename);
 		for(size_t i=0;i<fr.nLines();i++){
-			if(fr.nEntries(i)!=1)
+			if(fr.nEntries(i)<1)
 				continue;
-			addFullExtrapolError(fr.getData<TString>(i,0));
+			if(fr.nEntries(i)<2)
+				addFullExtrapolError(fr.getData<TString>(i,0));
+			else if(fr.nEntries(i)==3)
+				addFullExtrapolError(fr.getData<TString>(i,0),fr.getData<float>(i,1),fr.getData<float>(i,2));
+			else{
+				std::string errstr="ttbarXsecFitter::readInput: extrapolation uncertainty line not recognized ";
+				errstr+=fr.getReJoinedLine(i);
+				throw std::runtime_error(errstr);
+			}
 		}
 
 	}
@@ -296,7 +307,15 @@ void ttbarXsecFitter::setPrior(const TString& sysname, priors prior){
 	}
 	priors_.at(idx) = prior;
 }
-void ttbarXsecFitter::addFullExtrapolError(const TString& sysname){
+
+void ttbarXsecFitter::addUncertainties(histoStack * stack,size_t datasetidx,size_t nbjets)const{
+	if(datasets_.size()<=datasetidx){
+		throw std::out_of_range("ttbarXsecFitter::addUncertainties: datasetidx too large");
+	}
+	datasets_.at(datasetidx).addUncertainties(stack,nbjets,false,std::vector<std::pair<TString, double> >());
+}
+
+void ttbarXsecFitter::addFullExtrapolError(const TString& sysname, const float & restmin, const float& restmax){
 	if(debug)
 		std::cout << "ttbarXsecFitter::addFullError" <<std::endl;
 
@@ -310,21 +329,25 @@ void ttbarXsecFitter::addFullExtrapolError(const TString& sysname){
 			std::string errstr=(std::string)"ttbarXsecFitter::addFullError: requested variation not found: "+sysname.Data();
 			throw std::runtime_error (errstr);
 		}
-		addfullerrors_.push_back(std::pair<TString, std::vector<size_t> > (sysname, std::vector<size_t>(1, idx)));
+		addfullerrors_.push_back(extrapolationError(sysname, std::vector<size_t>(1, idx),
+				std::vector<float>(1, restmin),std::vector<float>(1, restmax)));
 
 	}
 	else{
 		size_t oldsize=addfullerrors_.size();
 		TString choppedname=sysname;
 		choppedname.ReplaceAll("*","");
-
+		std::vector<float> maxes,mins;
 		std::vector<size_t> idxs;
 		for(size_t i=0;i<systs.size();i++){
-			if(systs.at(i).BeginsWith(choppedname))
+			if(systs.at(i).BeginsWith(choppedname)){
 				idxs.push_back(i);
+				maxes.push_back(restmax);
+				mins.push_back(restmin);
+			}
 		}
 		if(idxs.size()>0)
-			addfullerrors_.push_back(std::pair<TString, std::vector<size_t> >(choppedname, idxs));
+			addfullerrors_.push_back(extrapolationError(choppedname, idxs, mins,maxes));
 		if(oldsize==addfullerrors_.size())
 			throw std::runtime_error ("ttbarXsecFitter::addFullError: requested variations not found");
 	}
@@ -345,8 +368,12 @@ void  ttbarXsecFitter::printControlStack(bool fittedvalues,size_t bjetcat,size_t
 	}
 	plotterMultiStack plm;
 	plm.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiStack_standard.txt");
-
-
+	/* if(!fittedvalues)
+		plm.addStyleForAllPlots(getenv("CMSSW_BASE")
+				+(std::string)"/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/controlPlots_mergeleg.txt",
+				"[merge for pre-fit plots]",
+				"[end - merge for pre-fit plots]");
+	 */
 	plm.readTextBoxesInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiStack_standard.txt",
 			toString(bjetcat)+"btag"+toString( datasets_.at(datasetidx).getName()));
 
@@ -777,7 +804,7 @@ double ttbarXsecFitter::getVisXsec(size_t datasetidx)const{
 void ttbarXsecFitter::cutAndCountSelfCheck(size_t datasetidx)const{
 	if(datasetidx>=datasets_.size())
 		throw std::out_of_range("ttbarXsecFitter::cutAndCountSelfCheck: dataset index out of range");
-	datasets_.at(datasetidx).cutAndCountSelfCheck(priorcorrcoeff_);
+	datasets_.at(datasetidx).cutAndCountSelfCheck(std::vector<std::pair<TString, double> >());
 }
 void ttbarXsecFitter::dataset::cutAndCountSelfCheck(const std::vector<std::pair<TString, double> >& priorcorrcoeff)const{
 	//very specific function TROUBLE (just a marker if something makes problems)
@@ -794,26 +821,38 @@ void ttbarXsecFitter::dataset::cutAndCountSelfCheck(const std::vector<std::pair<
 		for(size_t j=0;j<incp.at(i).size();j++)
 			addUncertainties(&(incp.at(i).at(j)),i,false,priorcorrcoeff);
 
+	histo1D signh,bghist,datah,vispsh;
 	//get nominal value
 	float data=0,signal=0,generated=0,background=0,
 			alldils=0,alldild=0,alldilbg=0,
 			alltwojetss=0,alltwojetsd=0,alltwojetsbg=0;
+	float visps=0;
 	generated=xsecoff_*lumi_;
-	for(size_t nbjet=1;nbjet<nBjetCat();nbjet++){
+	float nplots=0;
+	for(size_t nbjet=0;nbjet<nBjetCat();nbjet++){
 		size_t minjet=0;
 		if(nbjet==1) minjet=1;
-		for(size_t njet=minjet;njet<4;njet++){
-			signal+=incp.at(nbjet).at(njet).getSignalContainer().integral(false);
-			background+=incp.at(nbjet).at(njet).getBackgroundContainer().integral(false);
-			data+=incp.at(nbjet).at(njet).getDataContainer().integral(false);
+		for(size_t njet=0;njet<4;njet++){
+			vispsh+=incp.at(nbjet).at(njet).getSignalContainer1DUnfold().getGenContainer().getIntegralBin(true);
+			visps+=incp.at(nbjet).at(njet).getSignalContainer1DUnfold().getGenContainer().integral(true);
+			nplots++;
+			if(nbjet<1) continue;
+			if(njet<minjet) continue;
+			signal+=incp.at(nbjet).at(njet).getSignalContainer().integral(true);
+			background+=incp.at(nbjet).at(njet).getBackgroundContainer().integral(true);
+			data+=incp.at(nbjet).at(njet).getDataContainer().integral(true);
+
+			signh += incp.at(nbjet).at(njet).getSignalContainer().getIntegralBin(true);
+			bghist+=incp.at(nbjet).at(njet).getBackgroundContainer().getIntegralBin(true);
+			datah+=incp.at(nbjet).at(njet).getDataContainer().getIntegralBin(true);
 		}
 	}
 	for(size_t nbjet=0;nbjet<nBjetCat();nbjet++){
 		size_t minjet=0;
 		for(size_t njet=minjet;njet<4;njet++){
-			alldils+=incp.at(nbjet).at(njet).getSignalContainer().integral(false);
-			alldilbg+=incp.at(nbjet).at(njet).getBackgroundContainer().integral(false);
-			alldild+=incp.at(nbjet).at(njet).getDataContainer().integral(false);
+			alldils+=incp.at(nbjet).at(njet).getSignalContainer().integral(true);
+			alldilbg+=incp.at(nbjet).at(njet).getBackgroundContainer().integral(true);
+			alldild+=incp.at(nbjet).at(njet).getDataContainer().integral(true);
 		}
 	}
 	for(size_t nbjet=0;nbjet<nBjetCat();nbjet++){
@@ -822,17 +861,19 @@ void ttbarXsecFitter::dataset::cutAndCountSelfCheck(const std::vector<std::pair<
 		if(nbjet==1) minjet=1;
 		if(nbjet==2) minjet=0;
 		for(size_t njet=minjet;njet<4;njet++){
-			alltwojetss+=incp.at(nbjet).at(njet).getSignalContainer().integral(false);
-			alltwojetsbg+=incp.at(nbjet).at(njet).getBackgroundContainer().integral(false);
-			alltwojetsd+=incp.at(nbjet).at(njet).getDataContainer().integral(false);
+			alltwojetss+=incp.at(nbjet).at(njet).getSignalContainer().integral(true);
+			alltwojetsbg+=incp.at(nbjet).at(njet).getBackgroundContainer().integral(true);
+			alltwojetsd+=incp.at(nbjet).at(njet).getDataContainer().integral(true);
 		}
 	}
 
-	float xsecnom = (data-background)/(signal/generated * lumi_);
-	std::cout << "nominal cross section C&C "<<getName()<<" " << xsecnom <<std::endl;
 
-	float totalup2=0;
-	float totaldown2=0;
+	visps/=(float)totalvisgencontsread_;
+	float xsecnom = (data-background)/(signal/generated * lumi_);
+	//float xsecvisnom= (data-background)/(signal/visps);
+	std::cout << "nominal cross section C&C "<<getName()<<" " << xsecnom <<std::endl;
+	float xsecvis=(data-background)/(signal/visps * lumi_);
+	std::cout << "vis cross section C&C "<<getName()<<" " << xsecvis <<std::endl;
 
 	std::vector<TString > tmpnames=incp.at(0).at(0).getSystNameList();
 	std::vector<TString *> sysnames;
@@ -848,7 +889,40 @@ void ttbarXsecFitter::dataset::cutAndCountSelfCheck(const std::vector<std::pair<
 			sysnames.push_back(&tmpnames.at(i));
 		}
 	}
+	vispsh*= (1/(float)totalvisgencontsread_);
+	//ignore MC stat
+	bghist.removeStatFromAll();
+	signh.removeStatFromAll();
+	vispsh.removeStatFromAll();
+	datah.removeStatFromAll(false);
+	histo1D xsec = (datah - bghist)/(signh * (lumi_/generated ));
+	xsec.removeStatFromAll();
+	std::cout << "xsec " << getName() <<std::endl;
+	xsec.coutBinContent(1,"pb");
+	vispsh.setErrorZeroContaining("Lumi");
+	histo1D xsecvish = (datah - bghist)/((signh /vispsh)  *lumi_);
+	xsecvish.removeStatFromAll();
+	std::cout << "xsec vis " << getName() <<std::endl;
+	xsecvish.coutBinContent(1,"pb");
 
+	std::cout
+			<< "\n"       << "Yields data:    "
+			<< data      <<"\n       bg:      "
+			<< background<<"\n       sig:     "
+			<< signal
+			<<"\n all dil data:  "<< alldild
+			<<"\n all dil sig:  "<< alldils
+			<<"\n all dil bg:    "<< alldilbg
+			<<"\n two jets data:  "<< alltwojetsd
+			<<"\n two jets sig:  "<< alltwojetss
+			<<"\n two jets bg:    "<< alltwojetsbg
+			<<"\n" <<std::endl;
+
+	//old impl
+	/*
+	 * float totalup2=0;
+	float totaldown2=0;
+	 *
 	for(size_t i=0;i<sysnames.size();i++){
 		TString nameup=*sysnames.at(i)+"_up";
 		TString namedown=*sysnames.at(i)+"_down";
@@ -856,10 +930,12 @@ void ttbarXsecFitter::dataset::cutAndCountSelfCheck(const std::vector<std::pair<
 		int idxdown=incp.at(0).at(0).getDataContainer().getSystErrorIndex(namedown);
 
 		float signalup=0, signaldown=0, backgroundup=0, backgrounddown=0;
+		float vispsup=0,vispsdown=0;
 		for(size_t nbjet=1;nbjet<nBjetCat();nbjet++){
 			size_t minjet=0;
 			if(nbjet==1) minjet=1;
 			for(size_t njet=minjet;njet<4;njet++){
+
 				signalup+=incp.at(nbjet).at(njet).getSignalContainer().integral(false,idxup);
 				signaldown+=incp.at(nbjet).at(njet).getSignalContainer().integral(false,idxdown);
 				backgroundup+=incp.at(nbjet).at(njet).getBackgroundContainer().integral(false,idxup);
@@ -893,7 +969,7 @@ void ttbarXsecFitter::dataset::cutAndCountSelfCheck(const std::vector<std::pair<
 			<<"\n two jets sig:  "<< alltwojetss
 			<<"\n two jets bg:    "<< alltwojetsbg
 			<<"\n" <<std::endl;
-
+	 */
 }
 
 double ttbarXsecFitter::getXsecOffset(size_t datasetidx)const{
@@ -1407,14 +1483,16 @@ void ttbarXsecFitter::createSystematicsBreakdown(size_t datasetidx){
 
 	for(size_t i=0;i<addfullerrors_.size();i++){
 		double errup2=0,errdown2=0;
-		TString name=translatePartName(fmt,addfullerrors_.at(i).first );
+		TString name=translatePartName(fmt,addfullerrors_.at(i).name );
 		name+=" (extr)";
 		float exup=100,exdown=100;
-		for(size_t j=0;j<addfullerrors_.at(i).second.size();j++){
-			size_t idx=addfullerrors_.at(i).second.at(j);
+		for(size_t j=0;j<addfullerrors_.at(i).indices.size();j++){
+			size_t idx=addfullerrors_.at(i).indices.at(j);
+			float min=addfullerrors_.at(i).restmin.at(j);
+			float max=addfullerrors_.at(i).restmax.at(j);
 
-			exup=getExtrapolationError(datasetidx,idx,true);
-			exdown=getExtrapolationError(datasetidx,idx,false);
+			exup=getExtrapolationError(datasetidx,idx,true,min,max);
+			exdown=getExtrapolationError(datasetidx,idx,false,min,max);
 
 			bool corranti;
 			double tmp=getMaxVar(true,exup,exdown,corranti);
@@ -1426,7 +1504,7 @@ void ttbarXsecFitter::createSystematicsBreakdown(size_t datasetidx){
 		}
 
 		tmpunc.name=name;
-		if(addfullerrors_.at(i).second.size()>1){
+		if(addfullerrors_.at(i).indices.size()>1){
 			tmpunc.errdown=-sqrt(errdown2);
 			tmpunc.errup=sqrt(errup2);
 		}
@@ -1524,7 +1602,7 @@ texTabler ttbarXsecFitter::makeSystBreakDownTable(size_t datasetidx,bool detaile
 			table <<texLine(1);
 			table <<fmt.translateName( getParaName(datasets_.at(datasetidx).xsecIdx()) ) +" vis"<<
 					" " << " "
-					<< fmt.toTString(fmt.round(getVisXsec(datasetidx),tableprecision))+" pb";
+					<< fmt.toTString(fmt.round(getVisXsec(datasetidx),tableprecision/10))+" pb";
 			table <<texLine(1);
 		}
 	}
@@ -1642,7 +1720,7 @@ double ttbarXsecFitter::toBeMinimized(const double * variations){
 			}
 			//make sure its normalized
 			//the influence usually is <0.001%, but still more correct that way
-			double shapeintegral=set->signalshape(nbjet).getIntegral(variations);
+			double shapeintegral=set->signalshape(nbjet).getIntegral(variations);  //includes UFOF
 			double omega_b= set->omega_b(nbjet).getValue(variations);
 			double acceptance= set->acceptance().getValue(variations);
 			double eps_emu=set->eps_emu().getValue(variations);
@@ -1814,7 +1892,7 @@ void ttbarXsecFitter::dataset::checkSizes()const{
 }//ttbarXsecFitter::checkSizes()
 
 
-double ttbarXsecFitter::getExtrapolationError( size_t datasetidx, size_t paraidx, bool up){
+double ttbarXsecFitter::getExtrapolationError( size_t datasetidx, size_t paraidx, bool up, const float& min,const float& max){
 	/*std::vector<double> paracopy=fittedparas_;
 		float nom=var->getValue(paracopy);
 		if(i==0)
@@ -1843,15 +1921,15 @@ double ttbarXsecFitter::getExtrapolationError( size_t datasetidx, size_t paraidx
 	double optpara=fitter_.getParameter(paraidx);
 	std::vector<double> paras=fittedparas_;
 
-	if(up && optpara>1)
+	if(up && optpara>max)
 		return 0;
-	if(!up && optpara<-1)
+	if(!up && optpara<min)
 		return 0;
 
 	if(up)
-		paras.at(paraidx)=1;
+		paras.at(paraidx)=max;
 	else
-		paras.at(paraidx)=-1;
+		paras.at(paraidx)=min;
 
 	double nominal=extracp.getValue(fittedparas_);
 	double varied=extracp.getValue(paras);
@@ -1888,14 +1966,14 @@ variateHisto1D ttbarXsecFitter::dataset::createLeptonJetAcceptance(const std::ve
 
 	histo1D signal=signals.at(bjetbin);//.getSignalContainer();
 	//if(norm_nbjet_global)
-	signal=signal.getIntegralBin();
+	signal=signal.getIntegralBin(includeUFOF);
 	histo1D signalintegral=signals.at(minbjetbin); //stack->at(minbjetbin).getSignalContainer();
 	//if(norm_nbjet_global)
-	signalintegral=signalintegral.getIntegralBin();
+	signalintegral=signalintegral.getIntegralBin(includeUFOF);
 	for(size_t i=minbjetbin+1;i<maxbjetbin;i++){
 		histo1D tmpsig=signals.at(i); //stack->at(i).getSignalContainer();
 		//if(norm_nbjet_global)
-		tmpsig=tmpsig.getIntegralBin();
+		tmpsig=tmpsig.getIntegralBin(includeUFOF);
 		signalintegral += tmpsig;
 	}
 
@@ -1907,13 +1985,13 @@ variateHisto1D ttbarXsecFitter::dataset::createLeptonJetAcceptance(const std::ve
 	histo1D psmigint;
 	for(size_t i=minbjetbin;i<maxbjetbin;i++){
 		histo1D tmp=signalpsmig.at(i);
-		tmp=tmp.getIntegralBin();
+		tmp=tmp.getIntegralBin(includeUFOF);
 		psmigint+=tmp;
 	}
 	histo1D visgenint;
 	for(size_t i=minbjetbin;i<maxbjetbin;i++){
 		histo1D tmp=signalvisPSgen.at(i);
-		tmp=tmp.getIntegralBin();
+		tmp=tmp.getIntegralBin(includeUFOF);
 		visgenint+=tmp;
 	}
 	visgenint *= (1 /((double)totalvisgencontsread_));
@@ -1945,8 +2023,8 @@ variateHisto1D ttbarXsecFitter::dataset::createLeptonJetAcceptance(const std::ve
 	tmp.import(acceptance);
 	acceptance_extr_=*tmp.getBin(1);
 	for(size_t i=0;i<parent_->addfullerrors_.size();i++){
-		for(size_t j=0;j<parent_->addfullerrors_.at(i).second.size();j++)
-			acceptance.setErrorZeroContaining(acceptance.getSystErrorName( parent_->addfullerrors_.at(i).second.at(j)));
+		for(size_t j=0;j<parent_->addfullerrors_.at(i).indices.size();j++)
+			acceptance.setErrorZeroContaining(acceptance.getSystErrorName( parent_->addfullerrors_.at(i).indices.at(j)));
 	}
 	tmp.import(acceptance);
 	acceptance_=*tmp.getBin(1);
@@ -1955,12 +2033,12 @@ variateHisto1D ttbarXsecFitter::dataset::createLeptonJetAcceptance(const std::ve
 
 
 	histo1D onebjetsignal = signals.at(bjet1bin);
-	onebjetsignal=onebjetsignal.getIntegralBin();
+	onebjetsignal=onebjetsignal.getIntegralBin(includeUFOF);
 	histo1D twobjetsignal = signals.at(bjet2bin);
-	twobjetsignal=twobjetsignal.getIntegralBin();
+	twobjetsignal=twobjetsignal.getIntegralBin(includeUFOF);
 
 	histo1D correction_b =  ((signalintegral * twobjetsignal) * 4.)
-																																																																						                																																																																																																																																																																																																																																																																																																																																																																																																														/ ( (onebjetsignal + (twobjetsignal * 2.)) * (onebjetsignal + (twobjetsignal * 2.)));
+																																																																						                																																																																																																																																																																																																																																																																																																																																																																																																																		/ ( (onebjetsignal + (twobjetsignal * 2.)) * (onebjetsignal + (twobjetsignal * 2.)));
 
 	correction_b.removeStatFromAll();
 
@@ -2198,6 +2276,12 @@ void ttbarXsecFitter::dataset::adaptIndices(const dataset & rhs){
 		dataconts_nbjets_.at(i).adaptSystematicsIdxs(rhs.dataconts_nbjets_.at(i));
 		backgroundconts_nbjets_.at(i).adaptSystematicsIdxs(rhs.backgroundconts_nbjets_.at(i));
 	}
+}
+size_t ttbarXsecFitter::getDatasetIndex(const TString & name)const{
+	for(size_t i=0;i<datasets_.size();i++)
+		if(name==datasets_.at(i).getName())
+			return i;
+	throw std::runtime_error("ttbarXsecFitter::getDatasetIndex: dataset name not found");
 }
 
 void ttbarXsecFitter::dataset::addUncertainties(histoStack * stack,size_t nbjets,bool removesyst,

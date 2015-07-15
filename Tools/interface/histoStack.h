@@ -59,7 +59,7 @@ public:
 
 	// void mergeSameLegends();       //! shouldn't be necessary
 
-	void mergeLegends(const std::vector<TString>& tobemerged,const TString & mergedname, int mergedColor, bool allowsignals=false);
+	void mergeLegends(const std::vector<TString>& tobemerged,const TString & mergedname, int mergedColor, bool allowsignals=false,int newlego=99999);
 	void mergeLegends(const TString& tobemergeda,const TString & tobemergedb,const TString & mergedname, int mergedColor, bool allowsignals=false);
 
 	void addEmptyLegend(const TString & legendentry, int color, int legord);

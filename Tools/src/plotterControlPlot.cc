@@ -15,7 +15,7 @@
 namespace ztop{
 
 plotterControlPlot::plotterControlPlot(): plotterBase(), divideat_(0),
-		stackp_(0),tempdataentry_(0),invertplots_(false),psmigthresh_(0){
+		stackp_(0),/*tempdataentry_(0),*/invertplots_(false),psmigthresh_(0){
 	readStyleFromFileInCMSSW("/src/TtZAnalysis/Tools/styles/controlPlots_standard.txt");
 	gStyle->SetOptStat(0);
 }
@@ -53,7 +53,7 @@ void plotterControlPlot::readStylePriv(const std::string& infile,bool requireall
 	fr.setComment("$");
 	fr.setDelimiter(",");
 	fr.setStartMarker("[plotterControlPlot]");
-	fr.setEndMarker("[end plotterControlPlot]");
+	fr.setEndMarker("[end - plotterControlPlot]");
 	fr.readFile(infile);
 	fr.setRequireValues(false);
 
@@ -71,6 +71,21 @@ void plotterControlPlot::readStylePriv(const std::string& infile,bool requireall
 		divideat_  = fr.getValue<float>("divideat",divideat_);
 		invertplots_  = fr.getValue<bool>("invertplots",invertplots_);
 		psmigthresh_  = fr.getValue<float>("PSMigThreshold",psmigthresh_);
+	}
+	//merges are never required
+	fr.clear();
+	fr.setStartMarker("[merge legends]");
+	fr.setEndMarker("[end - merge legends]");
+	fr.readFile(infile);
+	for(size_t line=0;line<fr.nLines();line++){
+		if(fr.nEntries(line) < 3) continue; //not valid entry
+		legendmerge mleg;
+		mleg.mergedname = fr.getData<TString>(line,0);
+		mleg.mergedcolor = fr.getData<int>(line,1);
+		for(size_t entr=2;entr<fr.nEntries(line);entr++){
+			mleg.tobemerged.push_back(fr.getData<TString>(line,entr));
+		}
+		mergelegends.push_back(mleg);
 	}
 
 
@@ -192,17 +207,28 @@ void plotterControlPlot::drawControlPlot(){
 	TH1::AddDirectory(false);
 	//make axis histo
 	//draw axis
-	size_t dataentry= std::find(stackp_->legends_.begin(),stackp_->legends_.end(),stackp_->dataleg_) - stackp_->legends_.begin();
 
-	if(debug)std::cout <<  "found dataentry at position "<< dataentry<< " of " <<  stackp_->size()-1<< std::endl;
-	tempdataentry_=dataentry;
-	if(dataentry == stackp_->size()){
-		std::cout <<  "plotterControlPlot::drawControlPlot: no data entry found for " << stackp_->getName() <<std::endl;
+	const histoStack * usestack=stackp_;
+	histoStack mergedlegstack; //keep empty if not needed
+	if(mergelegends.size()>0){
+		mergedlegstack=*stackp_;//copy
+		for(size_t i=0;i<mergelegends.size();i++){
+			mergedlegstack.mergeLegends(mergelegends.at(i).tobemerged,mergelegends.at(i).mergedname, mergelegends.at(i).mergedcolor,true);
+		}
+		usestack=&mergedlegstack;
+	}
+
+	size_t dataentry= std::find(usestack->legends_.begin(),usestack->legends_.end(),usestack->dataleg_) - usestack->legends_.begin();
+
+	if(debug)std::cout <<  "found dataentry at position "<< dataentry<< " of " <<  usestack->size()-1<< std::endl;
+
+	if(dataentry == usestack->size()){
+		std::cout <<  "plotterControlPlot::drawControlPlot: no data entry found for " << usestack->getName() <<std::endl;
 		throw std::runtime_error("plotterControlPlot::drawControlPlot: no data entry found");
 	}
 	bool divbbw= upperstyle_.divideByBinWidth;
-	if(stackp_->hasTag(taggedObject::dontDivByBW_tag)) divbbw=false;
-	TH1 * axish=addObject(stackp_->getContainer(dataentry).getAxisTH1D());//("",divbbw,false,false));
+	if(usestack->hasTag(taggedObject::dontDivByBW_tag)) divbbw=false;
+	TH1 * axish=addObject(usestack->getContainer(dataentry).getAxisTH1D());//("",divbbw,false,false));
 	plotStyle upperstyle=upperstyle_;
 	upperstyle.absorbYScaling(getSubPadYScale(1));
 	//new
@@ -210,7 +236,7 @@ void plotterControlPlot::drawControlPlot(){
 	upperstyle.absorbXScaling(getSubPadXScale(1));
 
 	axish->Draw("AXIS");
-	float ymax=stackp_->getYMax(divbbw);
+	float ymax=usestack->getYMax(divbbw);
 	if(ymax<=0)
 		ymax=1/1.2;
 	axish->GetYaxis()->SetRangeUser(0.0001,ymax*1.2);
@@ -219,7 +245,7 @@ void plotterControlPlot::drawControlPlot(){
 	if(debug)std::cout <<  "axis drawn" <<std::endl;
 
 	//prepare data
-	plot* dataplottemp =  new plot(&stackp_->getContainer(dataentry),divbbw);
+	plot* dataplottemp =  new plot(&usestack->getContainer(dataentry),divbbw);
 	tempplots_.push_back(dataplottemp);
 	datastyleupper_.applyContainerStyle(dataplottemp);
 
@@ -231,19 +257,19 @@ void plotterControlPlot::drawControlPlot(){
 	tmplegp_->SetBorderSize(0);
 
 	if(datastyleupper_.legendDrawStyle != "none")
-		tmplegp_->AddEntry(dataplottemp->getSystGraph(),stackp_->getLegend(dataentry),datastyleupper_.legendDrawStyle);
+		tmplegp_->AddEntry(dataplottemp->getSystGraph(),usestack->getLegend(dataentry),datastyleupper_.legendDrawStyle);
 
-	std::vector<size_t> signalidxs=stackp_->getSignalIdxs();
+	std::vector<size_t> signalidxs=usestack->getSignalIdxs();
 
 
-	if(stackp_->size()>1){ //its not only data
+	if(usestack->size()>1){ //its not only data
 
 		std::vector<TObject *> sortedout;
-		std::vector<size_t> sorted=stackp_->getSortedIdxs(invertplots_); //invert
-		std::vector<size_t> nisorted=stackp_->getSortedIdxs(!invertplots_); //invert
+		std::vector<size_t> sorted=usestack->getSortedIdxs(invertplots_); //invert
+		std::vector<size_t> nisorted=usestack->getSortedIdxs(!invertplots_); //invert
 		std::vector<TH1 *> stackedhistos;
 
-		histo1D sumcont=stackp_->getContainer(dataentry);
+		histo1D sumcont=usestack->getContainer(dataentry);
 		sumcont.clear();
 		bool tmpaddStatCorrelated=histoContent::addStatCorrelated;
 		histoContent::addStatCorrelated=false;
@@ -252,45 +278,47 @@ void plotterControlPlot::drawControlPlot(){
 
 		std::vector<TString> legendentries;
 		bool foundPSmig=false;
-		if(sorted.size() != stackp_->size())
-			throw std::out_of_range("plotterControlPlot::drawControlPlot: serious: sorted.size() != stackp_->size()");
+		if(sorted.size() != usestack->size())
+			throw std::out_of_range("plotterControlPlot::drawControlPlot: serious: sorted.size() != usestack->size()");
 
-		for(size_t it=0;it<stackp_->size();it++){ //it is the right ordering
+		for(size_t it=0;it<usestack->size();it++){ //it is the right ordering
 			size_t i=sorted.at(it);
 			if(i != dataentry){
 				histo1D tempcont;
-				if(stackp_->is1DUnfold()){ //special treatment
-					tempcont = stackp_->getContainer1DUnfold(i).getBackground();
+				if(usestack->is1DUnfold()){ //special treatment
+					tempcont = usestack->getContainer1DUnfold(i).getBackground();
 					sumcont+=tempcont;
 					//is not signal
 
 
 					if(std::find(signalidxs.begin(),signalidxs.end(),i)==signalidxs.end()){//is not signal
-						TH1D * h=addObject(sumcont.getTH1D(stackp_->getLegend(i)+" "+stackp_->getName()+"_stack_h",divbbw,true,true)); //no errors
+						TH1D * h=addObject(sumcont.getTH1D(usestack->getLegend(i)+" "+usestack->getName()+"_stack_h",divbbw,true,true)); //no errors
 						if(!h)
 							continue;
 						mcstyleupper_.applyContainerStyle(h,false);
-						h->SetFillColor(stackp_->colors_.at(i));
+						h->SetFillColor(usestack->colors_.at(i));
 						stackedhistos.push_back(h);
-						legendentries.push_back(stackp_->getLegend(i));
+						legendentries.push_back(usestack->getLegend(i));
 					}
 					else{//this is signal but PS migrations!
-						histo1D visSig=stackp_->getContainer1DUnfold(i).getVisibleSignal();
+						histo1D visSig=usestack->getContainer1DUnfold(i).getVisibleSignal();
 						if(tempcont.integral(true) / visSig.integral(true) >psmigthresh_){
 							foundPSmig=true;
-							TH1D * h=addObject(sumcont.getTH1D(stackp_->getLegend(i)+" PSmig "+stackp_->getName()+"_stack_h",divbbw,true,true)); //no errors
+							TH1D * h=addObject(sumcont.getTH1D(usestack->getLegend(i)+" PSmig "+usestack->getName()+"_stack_h",divbbw,true,true)); //no errors
 							mcstylepsmig_.applyContainerStyle(h,false);
-							h->SetFillColor(1);//stackp_->colors_.at(i)+5);
+							h->SetFillColor(1);//usestack->colors_.at(i)+5);
 							stackedhistos.push_back(h);
 							legendentries.push_back("");
 						}
 						tempcont = visSig;
 						sumcont+=tempcont;
-						TH1D * hsig=addObject(sumcont.getTH1D(stackp_->getLegend(i)+" "+stackp_->getName()+"_stack_h",divbbw,true,true));
+						TH1D * hsig=addObject(sumcont.getTH1D(usestack->getLegend(i)+" "+usestack->getName()+"_stack_h",divbbw,true,true));
 						mcstyleupper_.applyContainerStyle(hsig,false);
-						hsig->SetFillColor(stackp_->colors_.at(i));
+						hsig->SetFillColor(usestack->colors_.at(i));
 						stackedhistos.push_back(hsig);
-						legendentries.push_back(stackp_->getLegend(i));
+						legendentries.push_back(usestack->getLegend(i));
+						if(debug)
+							std::cout << "plotterControlPlot::drawControlPlot: added to stack: " << usestack->getLegend(i) <<std::endl;
 
 					}
 
@@ -298,21 +326,24 @@ void plotterControlPlot::drawControlPlot(){
 
 				}
 				else{
-					tempcont = stackp_->getContainer(i);
+					tempcont = usestack->getContainer(i);
 					sumcont+=tempcont;
-					TH1D * h=addObject(sumcont.getTH1D(stackp_->getLegend(i)+" "+stackp_->getName()+"_stack_h",divbbw,true,true)); //no errors
+					TH1D * h=addObject(sumcont.getTH1D(usestack->getLegend(i)+" "+usestack->getName()+"_stack_h",divbbw,true,true)); //no errors
 					if(!h)
 						continue;
 					mcstyleupper_.applyContainerStyle(h,false);
-					h->SetFillColor(stackp_->colors_.at(i));
+					h->SetFillColor(usestack->colors_.at(i));
 					stackedhistos.push_back(h);
-					legendentries.push_back(stackp_->getLegend(i));
+					legendentries.push_back(usestack->getLegend(i));
+					if(debug)
+						std::cout << "plotterControlPlot::drawControlPlot: added to stack: " << usestack->getLegend(i) <<std::endl;
 				}
 
 
 			}
 			else{
 				stackedhistos.push_back(0);
+				legendentries.push_back("data");
 			}
 		}
 		//draw in inverse order
@@ -325,17 +356,20 @@ void plotterControlPlot::drawControlPlot(){
 				stackedhistos.at(i)->Draw(mcstyleupper_.rootDrawOpt+"same");
 				if(legendentries.at(i)!="" && mcstyleupper_.legendDrawStyle != "none")
 					tmplegp_->AddEntry(stackedhistos.at(i),legendentries.at(i),mcstyleupper_.legendDrawStyle);
+				if(debug)
+					std::cout << "plotterControlPlot::drawControlPlot: drawn: " << legendentries.at(i) <<std::endl;
+
 			}
 
 		}
 		//make errors (use sumcont)
 		if(corrm_)
 			sumcont.mergeAllErrors("mergederr",false,*corrm_);
-		TG * mcerr=addObject(sumcont.getTGraph(stackp_->getName()+"mcerr_cp",divbbw,false,false,false));
+		TG * mcerr=addObject(sumcont.getTGraph(usestack->getName()+"mcerr_cp",divbbw,false,false,false));
 		mcstyleupper_.applyContainerStyle(mcerr,true);
 
 		tmplegp_->AddEntry(mcerr,"MC syst+stat","f");
-		if(stackp_->is1DUnfold() && foundPSmig){ //
+		if(usestack->is1DUnfold() && foundPSmig){ //
 			TH1D * dummy=addObject(new TH1D());
 			mcstylepsmig_.applyContainerStyle(dummy,false);
 			dummy->SetFillColor(1);
@@ -351,7 +385,15 @@ void plotterControlPlot::drawControlPlot(){
 
 }
 void plotterControlPlot::drawRatioPlot(){
-	getPad()->cd(2);
+	/*
+	 *
+	 * For #geq indicators: copy axis to new axis without labels and ticks and name
+	 * last bin with #geq and blanks
+	 *
+	 */
+
+
+	//TVirtualPad* thispad=getPad()->cd(2);
 	if(stackp_->size() < 2){
 		std::cout << "plotterControlPlot::drawRatioPlot: did not find both data and MC, skipping ratio plot." <<std::endl;
 		return;
@@ -375,6 +417,15 @@ void plotterControlPlot::drawRatioPlot(){
 	axish->GetYaxis()->CenterTitle(true);
 	axish->Draw("AXIS");
 
+	//// experimental part
+	//TGaxis * gaxis=addObject(new TGaxis());
+	//TAxis * axiscp = addObject(new TAxis(* axish->GetXaxis()));
+
+	//should be put in something like getbincenterNDC(bin,pad)
+	//the axis is at leftmargin,bottommargin in pad coords
+
+	///
+
 	mcstyleratio_.applyContainerStyle(mcerr);
 	TG* g =mcerr->getStatGraph();
 	TG* gs=mcerr->getSystGraph();
@@ -382,10 +433,10 @@ void plotterControlPlot::drawRatioPlot(){
 	gs->Draw("same"+mcstyleratio_.sysRootDrawOpt);
 	g->Draw("same"+mcstyleratio_.rootDrawOpt);
 
+
+
 	///data
-	histo1D datac=stackp_->getContainer(tempdataentry_);
-	if(stackp_->is1DUnfold())
-		datac=stackp_->getContainer1DUnfold(tempdataentry_).getRecoContainer();
+	histo1D datac=stackp_->getDataContainer();
 
 	datac.normalizeToContainer(fullmc);
 
@@ -399,6 +450,18 @@ void plotterControlPlot::drawRatioPlot(){
 	gs->Draw("same"+datastyleratio_.sysRootDrawOpt);
 	g->Draw("same"+datastyleratio_.rootDrawOpt);
 
+	//experimental part...
+
+	/*thispad->GetListOfPrimitives()->Print();
+
+	float ux=datac.getBinCenter(datac.getBins().size()-2);
+	float uy=ratiostyle_.yAxisStyle()->min;
+	float ndcx, ndcy;
+	convertUserCoordsToNDC(thispad,ux,uy,ndcx,ndcy);
+	addTextBox(ndcx,ndcy-ratiostyle_.yAxisStyle()->labelOffset- ratiostyle_.yAxisStyle()->labelSize,"#geq   ",
+			ratiostyle_.yAxisStyle()->labelSize);
+	textboxes_.at(textboxes_.size()-1).setAlign(32);
+*/
 
 	TLine * l = addObject(new TLine(datac.getXMin(),1,datac.getXMax(),1));
 	l->Draw("same");

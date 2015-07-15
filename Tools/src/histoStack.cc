@@ -64,7 +64,7 @@ void histoStack::push_back(const ztop::histo1D& cont,const TString& legend, int 
 	}
 	if(!wasthere){
 		if(histoStack::debug)
-			std::cout << "containerStack::push_back (1D): new legend ("<<  legend <<"), adding " << cont.getName() << std::endl;
+			std::cout << "containerStack::push_back (1D): new legend ("<<  legend <<"), adding " << cont.getName() << " at " << legord<<std::endl;
 		histo1D cp=cont;
 		cp.setName(legend);
 		containers_.push_back(cp*norm);
@@ -169,7 +169,8 @@ std::vector<TString> histoStack::getSystNameList()const{
 	throw std::logic_error("histoStack::getSystNameList: stack empty");
 }
 
-void histoStack::mergeLegends(const std::vector<TString>& tobemerged,const TString & mergedname, int mergedColor, bool allowsignals){
+void histoStack::mergeLegends(const std::vector<TString>& tobemerged,const TString & mergedname, int mergedColor, bool allowsignals,int newlego){
+
 	std::vector<size_t> idxstbm;
 	for(size_t i=0;i<tobemerged.size();i++){
 		try{
@@ -181,7 +182,12 @@ void histoStack::mergeLegends(const std::vector<TString>& tobemerged,const TStri
 		if(debug)	std::cout << i << std::endl;
 	}
 
-	if(idxstbm.size()<2) return;
+
+	if(idxstbm.size()<2){
+		if(idxstbm.size()>0)
+			legends_.at(idxstbm.at(0)) = mergedname;
+		return;
+	}
 	size_t inidx=idxstbm.at(0);
 
 	std::vector<TString> newsignals;
@@ -227,7 +233,10 @@ void histoStack::mergeLegends(const std::vector<TString>& tobemerged,const TStri
 			if(debug)std::cout << "reusing " << legends_.at(i) <<std::endl;
 			legs.push_back(legends_.at(i));
 			cols.push_back(colors_.at(i));
-			legos.push_back(legorder_.at(i));
+			if(i==inidx && newlego<99999)
+				legos.push_back(newlego);
+			else
+				legos.push_back(legorder_.at(i));
 			norms.push_back(1);
 		}
 	}
@@ -2160,13 +2169,44 @@ int histoStack::checkLegOrder() const{ //depre
 std::vector<size_t> histoStack::getSortedIdxs(bool inverse) const{
 
 	//new implementation
-	std::vector<int> inputlegord=legorder_;
+	std::vector<int> inputlegord;
+	for(size_t i=0;i<legorder_.size();i++){
+		if(legorder_.at(i)<99999){
+			inputlegord.push_back(legorder_.at(i));
+		}
+	}
 	std::vector<int> sortedilo=inputlegord;
+	std::vector<size_t> out;
 	if(inverse)
-		std::sort(sortedilo.begin(),sortedilo.end(),std::greater<int>());
+		out=retsort(sortedilo.begin(),sortedilo.end(),std::greater<int>());
 	else
-		std::sort(sortedilo.begin(),sortedilo.end());
+		out=retsort(sortedilo.begin(),sortedilo.end());
+	std::vector<size_t> rest;
 
+
+	if(inverse){
+
+		for(size_t i=size();i;i--){
+			size_t idx=i-1;
+			if(std::find(out.begin(),out.end(),idx)==out.end())
+				rest.push_back(idx);
+		}
+		rest << out;
+		out=rest;
+	}
+	else{
+		for(size_t i=0;i<size();i++){
+			if(std::find(out.begin(),out.end(),i)==out.end())
+				rest.push_back(i);
+		}
+		out<<rest;
+	}
+	if(debug)
+		for(size_t i=0;i<out.size();i++){
+			std::cout << out.at(i) <<" " <<legorder_.at(out.at(i))<<std::endl;
+		}
+	return out;
+	/*
 	std::vector<size_t> legasso;
 	//protect size etc
 
@@ -2188,7 +2228,9 @@ std::vector<size_t> histoStack::getSortedIdxs(bool inverse) const{
 
 	legasso.resize(legends_.size(),1e10);//for missing indices
 
-	return legasso;
+	//retsort()
+
+	return legasso;*/
 
 }
 

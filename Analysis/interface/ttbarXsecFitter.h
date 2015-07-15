@@ -163,9 +163,13 @@ public:
 	size_t nDatasets()const;
 	const TString& datasetName(size_t datasetidx)const;
 
+	void addUncertainties(histoStack * stack,size_t datasetidx,size_t nbjets=0)const;
+
+	size_t getDatasetIndex(const TString & name)const;
+
 	//just a debug / verbose switch
 	static bool debug;
-
+	static bool includeUFOF;
 
 	histoStack applyParametersToStack(const histoStack& stack, size_t bjetcat, size_t datasetidx, bool fitted,
 			corrMatrix& retcorrelations, variateHisto1D* fullmc=0)const;
@@ -187,10 +191,12 @@ private:
 
 	void createSystematicsBreakdown(size_t datasetidx);
 
+
+
 	/**
 	 * For this uncertainty, the full error will be added at the end!
 	 */
-	void addFullExtrapolError(const TString& systname);
+	void addFullExtrapolError(const TString& systname, const float & restmin=-1, const float& restmax=1);
 	/**
 	 * defines a prior for a given syst variation
 	 */
@@ -277,6 +283,7 @@ private:
 		std::vector<systematic_unc>& postFitSystematicsFullSimple(){return post_fit_systematics_simple_;}
 		const std::vector<systematic_unc>& postFitSystematicsFullSimple() const{return post_fit_systematics_simple_;}
 
+
 		void addUncertainties(histoStack * stack,size_t nbjets,bool removesyst,const std::vector<std::pair<TString, double> >& )const;
 
 		double signalIntegral(size_t nbjets) const{return signalintegral_.at(nbjets);}
@@ -359,7 +366,22 @@ private:
 	std::vector<TString> parameternames_;
 	likelihoodmodes lhmode_;
 	std::vector<priors> priors_;
-	std::vector< std::pair<TString ,std::vector<size_t> > > addfullerrors_;
+
+	class extrapolationError{
+	public:
+		extrapolationError(const TString& iname, const std::vector<size_t>& idx,
+				const std::vector<float>& irestmin, const std::vector<float>& irestmax): name(iname),
+				indices(idx),restmin(irestmin),restmax(irestmax)
+	{}
+
+
+		TString name;
+		std::vector<size_t> indices;
+		std::vector<float> restmin;
+		std::vector<float> restmax;
+	};
+
+	std::vector< extrapolationError > addfullerrors_;
 	simpleFitter fitter_;
 
 	bool fitsucc_;
@@ -371,7 +393,7 @@ private:
 	//just a safety check. Should be redundant as soon as class works and is tested
 	void checkSizes()const;
 
-	double getExtrapolationError(size_t datasetidx, size_t paraidx, bool up);
+	double getExtrapolationError(size_t datasetidx, size_t paraidx, bool up, const float& min=-1,const float& max=1);
 
 	//can be more sophisticated
 

@@ -15,6 +15,35 @@
 #include "../interface/analyzer_run1.h"
 
 
+bool analyzer_run1::passesLeptonId(const ztop::NTLepton* lep, bool ismuon)const{
+	if(ismuon){
+		ztop::NTMuon * muon=(ztop::NTMuon*)lep;
+		if(!      (muon->isGlobal()
+				&& muon->normChi2()<10.
+				&& muon->isPf() //technically obsolete (validated!)
+				&& muon->muonHits()>0
+				&& muon->matchedStations() >1  //not in trees
+				&& fabs(muon->d0V())<0.2
+				&& fabs(muon->dzV())<0.5
+				&& muon->pixHits()>0
+				&& muon->trkHits()>5)
+		) return false;
+		return true;
+	}
+
+	else{
+		ztop::NTElectron * elec=(ztop::NTElectron*)lep;
+		if(!      (fabs(elec->d0V()) < 0.02
+				&& elec->isNotConv()
+				&& elec->storedId() > 0.9
+				&& elec->mHits() <= 0
+				&& elec->isPf())
+		) return false;
+		return true;
+	}
+	throw std::logic_error("analyzer_run1::passesLeptonId: neither elec nor muon");
+}
+
 /*
  * Running on the samples is parallelized.
  * This function is called for each sample individually.
@@ -82,6 +111,7 @@ void  analyzer_run1::analyze(size_t anaid){
 	bool nometcut=false;
 	bool nozcut=false;
 	bool nobcut=false;
+	bool notrigger=false;
 
 	float normmultiplier=1; //use in case modes need to change norm
 
@@ -89,6 +119,12 @@ void  analyzer_run1::analyze(size_t anaid){
 	if(mode_.Contains("Samesign")){
 		mode_samesign=true;
 		std::cout << "entering same sign mode" <<std::endl;
+	}
+
+
+	if(mode_.Contains("Notrigger")){
+		notrigger=true;
+		std::cout << "entering no trigger mode" <<std::endl;
 	}
 
 	if(mode_.Contains("Invertiso")){
@@ -420,6 +456,11 @@ void  analyzer_run1::analyze(size_t anaid){
 	tBranchHandler<std::vector<NTGenParticle> >::allow_missing =true;
 	tBranchHandler<std::vector<NTGenParticle> > b_GenBsRad(t,"NTGenBsRad");
 
+	tBranchHandler<ULong64_t>::allow_missing =true;
+	tBranchHandler<ULong64_t> b_EventNumber(t,"EventNumber");
+	tBranchHandler<ULong64_t> b_RunNumber(t,"RunNumber");
+	tBranchHandler<ULong64_t> b_LumiBlock(t,"LumiBlock");
+
 	std::vector<ztop::simpleReweighter> mcreweighters;
 
 	for(size_t i=0;i<additionalweights_.size();i++){
@@ -503,7 +544,7 @@ void  analyzer_run1::analyze(size_t anaid){
 	if(testmode_)
 		std::cout << "testmode("<< anaid << "): starting mainloop with file "<< inputfile << " norm " << norm << " entries: "<<nEntries << " fakedata: " <<  fakedata<<std::endl;
 
-
+	double elecid=0,eleciso=0,muonsid=0,muonsiso=0;
 
 	for(Long64_t entry=firstentry;entry<nEntries;entry++){
 
@@ -649,18 +690,15 @@ void  analyzer_run1::analyze(size_t anaid){
 		/*
 		 *  Trigger
 		 */
-		//b_TriggerBools.getEntry(entry);
 		if(testmode_ && entry==0)
 			std::cout << "testmode("<< anaid << "): got trigger boolians" << std::endl;
-		if(!checkTrigger(b_TriggerBools.content(),b_Event.content(), isMC,anaid)) continue;
+		if(!notrigger)
+			if(!checkTrigger(b_TriggerBools.content(),b_Event.content(), isMC,anaid)) continue;
 
 
 		/*
 		 * Muons
 		 */
-		//	b_Muons.getEntry(entry);
-
-
 		vector<NTLepton *> allleps;
 		std::vector<NTLepton *> isoleptons;
 		// TBI std::vector<NTLepton *> vetoleps;
@@ -681,40 +719,43 @@ void  analyzer_run1::analyze(size_t anaid){
 			allleps << muon;
 			if(muon->pt() < lepptthresh)       continue;
 			if(fabs(muon->eta())>2.4) continue;
-			kinmuons << &(b_Muons.content()->at(i));
+			kinmuons << muon;
+
+			/*
+			//loose muon selection a la diff xsec
+			if(!      ((muon->isGlobal()
+					|| muon->isTracker())
+					&& muon->isPf() )//technically obsolete (validated!)
+			) continue;*/
 
 			//tight muon selection: https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideMuonId#Tight_Muon
-			//isPF is implicit
-
-			if(muon->isGlobal()
+			if(!      (muon->isGlobal()
 					&& muon->normChi2()<10.
+					&& muon->isPf() //technically obsolete (validated!)
 					&& muon->muonHits()>0
 					&& muon->matchedStations() >1  //not in trees
 					&& fabs(muon->d0V())<0.2
 					&& fabs(muon->dzV())<0.5
 					&& muon->pixHits()>0
-					&& muon->trkHits()>5){
-				idmuons <<  &(b_Muons.content()->at(i));
-			}
-		}
+					&& muon->trkHits()>5)
+			) continue;
 
+			idmuons <<  muon;
 
+			//loose
+			/*if(!mode_invertiso && fabs(muon->isoVal()) > 0.2666
+					) continue;*/
 
-		for(size_t i=0;i<idmuons.size();i++){
-			NTMuon * muon =  idmuons.at(i);
 			if(!mode_invertiso && fabs(muon->isoVal()) > 0.12) continue;
-			if(mode_invertiso && muon->isoVal() < 0.12) continue;
+			if(mode_invertiso  && fabs(muon->isoVal()) < 0.12) continue;
 			isomuons <<  muon;
 			isoleptons << muon;
 		}
 
+
 		/*
 		 * Electrons
 		 */
-
-		//b_Electrons.getEntry(entry);
-
-
 		vector<NTElectron *> kinelectrons,idelectrons,isoelectrons;
 		evt.kinelectrons=&kinelectrons;
 		evt.idelectrons=&idelectrons;
@@ -722,14 +763,12 @@ void  analyzer_run1::analyze(size_t anaid){
 
 		for(size_t i=0;i<b_Electrons.content()->size();i++){
 			NTElectron * elec=&(b_Electrons.content()->at(i));
-			float ensf=1;
-			if(isMC)
-				ensf=getElecEnergySF()->getScalefactor(elec->eta());
+
+			float ensf=getElecEnergySF()->getScalefactor(fabs(elec->eta()));
 
 			elec->setECalP4(elec->ECalP4() * ensf);
-			elec->setP4(elec->ECalP4() * ensf); //both the same now!!
+			elec->setP4(elec->ECalP4()); //both the same now!!
 
-			//selection fully following https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopEGM l+jets except for pt cut
 
 			allleps << elec;
 			if(elec->pt() < lepptthresh)  continue;
@@ -740,20 +779,32 @@ void  analyzer_run1::analyze(size_t anaid){
 			if(suclueta > 1.4442 && suclueta < 1.5660) continue; //transistion region
 			kinelectrons  << elec;
 
-			if(fabs(elec->d0V()) < 0.02
+			/*
+			//loose electron selection (diff xsec)
+			if(!      (elec->isNotConv()
+					&& elec->storedId() > 0.5
+					&& elec->mHits() <= 0
+					&& elec->isPf())
+			) continue;
+			 */
+			//tight elec selection
+			//selection fully following https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopEGM l+jets except for pt cut
+			if(!      (fabs(elec->d0V()) < 0.02
 					&& elec->isNotConv()
 					&& elec->storedId() > 0.9
 					&& elec->mHits() <= 0
-					&& elec->isPf()){
+					&& elec->isPf())
+			) continue;
 
-				idelectrons <<  elec;
-				if(fabs(elec->rhoIso())<0.1){
-					isoelectrons <<  elec;
-					isoleptons << elec;
-				}
+			idelectrons <<  elec;
 
-			}
+			//loose
+			/*if(!mode_invertiso && fabs(elec->rhoIso())>0.15) continue;*/
 
+			if(!mode_invertiso && fabs(elec->rhoIso())>0.1) continue;
+			if(mode_invertiso  && fabs(elec->rhoIso())<0.1) continue;
+			isoelectrons <<  elec;
+			isoleptons << elec;
 		}
 
 		/*
@@ -767,7 +818,11 @@ void  analyzer_run1::analyze(size_t anaid){
 			std::cout << "testmode("<< anaid << "): first controlPlots" << std::endl;
 
 
-
+		//DEBUG
+		elecid+=puweight*(float)idelectrons.size();
+		eleciso+=puweight*(float)isoelectrons.size();
+		muonsid+=puweight*(float)idmuons.size();
+		muonsiso+=puweight*(float)isomuons.size();
 
 		//////////two ID leptons and trigger STEP 1///////////////////////////////
 		step++;
@@ -871,13 +926,18 @@ void  analyzer_run1::analyze(size_t anaid){
 		float cosleplepangle=cosAngle_3d(leadingptlep->p4(),secleadingptlep->p4());
 		evt.cosleplepangle=&cosleplepangle;
 
-		puweight*=lepweight;
+
 		if(apllweightsone) puweight=1;
 		//just a quick faety net against very weird weights
 		if(isMC && fabs(puweight) > 99999){
 			reportError(-88,anaid);
 			return;
 		}
+		if(isMC && fabs(lepweight) > 99999){
+			reportError(-89,anaid);
+			return;
+		}
+		puweight*=lepweight;
 
 		sel_step[2]+=puweight;
 		plots.makeControlPlots(step);
@@ -896,6 +956,18 @@ void  analyzer_run1::analyze(size_t anaid){
 		// create ID Jets and correct JER
 		//b_Jets.getEntry(entry);
 
+
+		///////DEBUG run lumi event
+		if(*b_EventNumber.content() == 159496
+				|| *b_EventNumber.content() == 159504
+				|| *b_EventNumber.content() == 159515
+				|| *b_EventNumber.content() == 159517){
+			std::cout <<*b_EventNumber.content() <<": " <<leadingptlep->pt() <<" "<< leadingptlep->eta() << " " << secleadingptlep->pt() << ' ' << secleadingptlep->eta()
+					<< std::endl;
+			for(size_t i=0;i<isomuons.size();i++)
+				if(leadingptlep==isomuons.at(i))
+					std::cout << "lead muon" <<std::endl;
+		}
 
 
 		vector<NTJet *> treejets,idjets,medjets,hardjets;
@@ -1440,6 +1512,7 @@ void  analyzer_run1::analyze(size_t anaid){
 		}
 
 
+
 		std::cout << "\nEvents total (normalized): "
 				<< nEntries*norm << "\n"
 				"nEvents_selected normd: "<< sel_step[8]*norm<< " " << inputfile<< std::endl;
@@ -1502,24 +1575,34 @@ bool analyzer_run1::checkTrigger(std::vector<bool> * p_TriggerBools,ztop::NTEven
 			return false;
 
 		if(b_mumu_){
+			/*
 			if(isMC && !p_TriggerBools->at(5))
 				return false;
 			if(!isMC && pEvent->runNo() < 163869 && !p_TriggerBools->at(5))
 				return false;
 			if(!isMC && pEvent->runNo() >= 163869 && !p_TriggerBools->at(6))
 				return false;
+			 */
+			if(!   (   p_TriggerBools->at(12)
+					|| p_TriggerBools->at(13)
+					|| p_TriggerBools->at(14)
+					|| p_TriggerBools->at(15)
+					|| p_TriggerBools->at(16)))
+				return false;
 		}
 		else if(b_ee_){
-			if(!(p_TriggerBools->at(3) || p_TriggerBools->at(4) || p_TriggerBools->at(1)))
+			if(!   (   p_TriggerBools->at(17) 
+					|| p_TriggerBools->at(18)
+					|| p_TriggerBools->at(19)
+					|| p_TriggerBools->at(10)))
 				return false;
 		}
 		else if(b_emu_){
 
-			if(p_TriggerBools->size()<26){ //emu are 20 - 25
+			if(p_TriggerBools->size()<26){ //emu are 21 - 25
 				throw std::out_of_range("TriggerBools too small in size for 7 TeV trees");
 			}
-			if(!(p_TriggerBools->at(20)
-					|| p_TriggerBools->at(21)
+			if(!(p_TriggerBools->at(21)
 					|| p_TriggerBools->at(22)
 					|| p_TriggerBools->at(23)
 					|| p_TriggerBools->at(24)

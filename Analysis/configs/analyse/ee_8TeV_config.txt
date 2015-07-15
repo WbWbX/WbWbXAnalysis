@@ -24,8 +24,6 @@ tree_8TeV_ee_runD_22Jan.root,data,1,1,99
 
 tree_8TeV_eettbar.root,       t#bar{t},		633,	  251.7,	  0, true
 tree_8TeV_eettbarviatau.root, t#bar{t},	 	633,	  251.7,	  1, true
-tree_8TeV_dyee60120.root,          DY#rightarrowll, 	852,	  3532.8, 2
-tree_8TeV_dymumu60120.root,        DY#rightarrowll,	852,	  3532.8, 2
 tree_8TeV_eettbarbg.root,         t#bar{t}bg,	   	634,	  248.5,	  3
 tree_8TeV_tWtoLL.root,             tW/#bar{t}W#rightarrowll,	   		616,	  11.1,	  4
 tree_8TeV_tbarWtoLL.root,	   tW/#bar{t}W#rightarrowll,	   		616,	  11.1,	  4
@@ -33,14 +31,19 @@ tree_8TeV_wwp.root,		   VV,			390,	  54.8,	  5
 tree_8TeV_zz.root,		   VV,			390,	  17.7,	  5
 tree_8TeV_wz.root,		   VV,			390,	  33.2,	  5
 tree_8TeV_wjets.root,		   QCD/Wjets,	   	413,	  36257,  6
+
 tree_8TeV_dytautau1050.root,	   DY#rightarrow#tau#tau,868,	  860,	  7
 tree_8TeV_dytautau50inf.root,	   DY#rightarrow#tau#tau,868,	  3532.8, 7
+
 tree_8TeV_dyee1050.root,	   DY#rightarrowll,	858,	  860,	  8
 tree_8TeV_dyee5060.root,	   DY#rightarrowll,	858,	  3532.8, 8
+tree_8TeV_dyee60120.root,      DY#rightarrowll, 858,	  3532.8, 8
 tree_8TeV_dyee120inf.root,	   DY#rightarrowll,	858,	  3532.8, 8
+
 tree_8TeV_dymumu1050.root,	   DY#rightarrowll,	858,	  860,	  8
 tree_8TeV_dymumu5060.root,	   DY#rightarrowll,	858,	  3532.8, 8
-tree_8TeV_dymumu120inf.root,	   DY#rightarrowll,	858,	  3532.8, 8
+tree_8TeV_dymumu60120.root,    DY#rightarrowll,	858,	  3532.8, 8
+tree_8TeV_dymumu120inf.root,   DY#rightarrowll,	858,	  3532.8, 8
 
 $tree_8TeV_qcdem2030.root,	   QCD/Wjets,			400,	  2914860,9
 $tree_8TeV_qcdem3080.root,	   QCD/Wjets,			400,	  4615893,9
@@ -58,16 +61,15 @@ tree_ttbarz.root,                  t#bar{t}V,    798,      0.2057,10
 
 
 [parameters-begin] 
-$$ all directories except for inputfiles are relative to $CMSSW_BASE
 
 inputFilesDir = /nfs/dust/cms/user/kiesej/trees_Xmas1415/ $for naf
 
-Lumi           = 19741
+Lumi           = 19664
 
 JECFile        = /src/TtZAnalysis/Analysis/data/analyse/Summer13_V5_DATA_UncertaintySources_AK5PFchs.txt
 
 MuonSFFile     = /src/TtZAnalysis/Analysis/data/analyse/muon_tight_sf2D_8TeV.root
-MuonSFHisto    = eff_pt_eta_fullwithtrackerr
+MuonSFHisto    = GlobalSF
 TrackingSFFile = /src/TtZAnalysis/Analysis/data/analyse/muon_trackSF_8TeV.root
 TrackingSFHisto = tracking_eff
 
@@ -75,6 +77,11 @@ TrackingSFHisto = tracking_eff
 
 ElecSFFile     = /src/TtZAnalysis/Analysis/data/analyse/elec_tight_sf2D_8TeV.root
 ElecSFHisto    = GlobalSF
+
+
+ ElecEnergySFFile = /src/TtZAnalysis/Analysis/data/analyse/ElecEnergySF_8TeV.root
+ ElecEnergySFHisto= sf
+
 
 TriggerSFFile  = /src/TopAnalysis/Configuration/analysis/common/data/triggerSummary_ee_tightleps.root
 

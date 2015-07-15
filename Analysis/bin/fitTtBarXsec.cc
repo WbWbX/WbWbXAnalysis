@@ -49,6 +49,8 @@ invokeApplication(){
 	const bool printplots = ! parser->getOpt<bool>("-noplots",false,"switches off all plotting");
 	const bool dummyrun =  parser->getOpt<bool>("-dummyrun",false,"fit will not be performed, only dummy values will be returned (for testing of plots etc)");
 
+	const bool variationplots = parser->getOpt<bool>("-varplots",false,"switches on variation plots");
+
 	TString outfile;
 
 	outfile = parser->getOpt<TString>("o","xsecFit","output file name");
@@ -57,17 +59,55 @@ invokeApplication(){
 	parser->doneParsing();
 	std::string cmsswbase=getenv("CMSSW_BASE");
 
-	const std::string fullcfgpath=(cmsswbase+"/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/");
+
+	const std::string fullcfgpath=
+			inputconfig.BeginsWith("/") || inputconfig.BeginsWith("./") ? "" :
+					(cmsswbase+"/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/");
 	if(!fileExists((fullcfgpath+inputconfig).Data())){
 		std::cout << "fitTtBarXsec: input file not found. \nAvailable files in " <<cmsswbase+"/src/TtZAnalysis/Analysis/configs/fitTtBarXsec:"<<std::endl;
 		system(("ls "+fullcfgpath).data());
 		return -1;
 	}
 
+	ttbarXsecFitter mainfitter;
+	mainfitter.setDummyFit(dummyrun);
+
+	if(lhmode=="chi2datamc")
+		mainfitter.setLikelihoodMode(ttbarXsecFitter::lhm_chi2datamcstat);
+	if(lhmode=="chi2data")
+		mainfitter.setLikelihoodMode(ttbarXsecFitter::lhm_chi2datastat);
+	if(lhmode=="poissondata")
+		mainfitter.setLikelihoodMode(ttbarXsecFitter::lhm_poissondatastat);
+
+	if(topmass)
+		mainfitter.setReplaceTopMass(topmass);
+
+	mainfitter.setExcludeZeroBjetBin(exclude0bjetbin);
+	mainfitter.setUseMCOnly(onlyMC);
+	mainfitter.setNoMinos(nominos);
+	mainfitter.setNoSystBreakdown((onlytotalerror));
+	mainfitter.setIgnorePriors(!fitsystematics);
+	mainfitter.setRemoveSyst(!fitsystematics);
+
+	//extendedVariable::debug=true;
+	ttbarXsecFitter::debug=debug;
+
+
+
+	if(npseudoexp>0){
+		mainfitter.setRemoveSyst(true);
+		mainfitter.setSilent(true);
+		mainfitter.setIgnorePriors(true);
+	}
+	//simpleFitter::printlevel=1;
+
+	mainfitter.readInput((fullcfgpath+inputconfig).Data());
+	std::cout << "Input file sucessfully read. Free for changes." << std::endl;
 
 	if(onlycontrolplots){
 
-		//get list of input files, fast brute force
+		//get list of input files, fast brute force -> can be changed since input is read by
+		// fitter before, now
 
 		fileReader fr;
 		fr.setComment("#");
@@ -135,17 +175,22 @@ invokeApplication(){
 			for(size_t stackit=0;stackit<plotnames.size();stackit++){
 				histoStack stack=vec.getStack(plotnames.at(stackit).data());
 				plotterControlPlot pl;
-
+				//plotterControlPlot::debug=true;
+				//histoStack::debug=true;
 				pl.readStyleFromFileInCMSSW(specialcplots.getValue<std::string>("defaultStyle"));
+				std::string mergelgdefs=(std::string)getenv("CMSSW_BASE")+(std::string)"/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/controlPlots_mergeleg.txt";
+				pl.addStyleFromFile( mergelgdefs,"[merge for control plots]","[end - merge for control plots]");
 				//	textBoxes::debug=true;
 				if(stackit+1<plotnames.size())
 					pl.addStyleFromFile(fracfile,  "[plot - " + plotnames.at(stackit)+"]", "[plot - "+ plotnames.at(stackit+1) +"]" );
 				else
 					pl.addStyleFromFile(fracfile,  "[plot - " + plotnames.at(stackit) +"]","[end - additional plots]");
 				//pl.readTextBoxesInCMSSW("/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt","CMSSplit03Left");
+				size_t datasetidx=mainfitter.getDatasetIndex(datasets.at(file).data() );
+				mainfitter.addUncertainties(&stack, datasetidx);
 				pl.setStack(&stack);
 				pl.printToPdf((ctrplotsoutir+"/"+stack.getFormattedName()+"_"+datasets.at(file)).Data());
-
+				pl.saveAsCanvasC((ctrplotsoutir+"/"+stack.getFormattedName()+"_"+datasets.at(file)).Data());
 			}
 			system(("rm -f "+fracfile).data());
 		}
@@ -156,40 +201,7 @@ invokeApplication(){
 
 	//simpleFitter::printlevel=-1; //for now
 
-	ttbarXsecFitter mainfitter;
-	mainfitter.setDummyFit(dummyrun);
 
-	if(lhmode=="chi2datamc")
-		mainfitter.setLikelihoodMode(ttbarXsecFitter::lhm_chi2datamcstat);
-	if(lhmode=="chi2data")
-		mainfitter.setLikelihoodMode(ttbarXsecFitter::lhm_chi2datastat);
-	if(lhmode=="poissondata")
-		mainfitter.setLikelihoodMode(ttbarXsecFitter::lhm_poissondatastat);
-
-	if(topmass)
-		mainfitter.setReplaceTopMass(topmass);
-
-	mainfitter.setExcludeZeroBjetBin(exclude0bjetbin);
-	mainfitter.setUseMCOnly(onlyMC);
-	mainfitter.setNoMinos(nominos);
-	mainfitter.setNoSystBreakdown((onlytotalerror));
-	mainfitter.setIgnorePriors(!fitsystematics);
-	mainfitter.setRemoveSyst(!fitsystematics);
-
-	//extendedVariable::debug=true;
-	ttbarXsecFitter::debug=debug;
-
-
-
-	if(npseudoexp>0){
-		mainfitter.setRemoveSyst(true);
-		mainfitter.setSilent(true);
-		mainfitter.setIgnorePriors(true);
-	}
-	//simpleFitter::printlevel=1;
-
-	mainfitter.readInput((fullcfgpath+inputconfig).Data());
-	std::cout << "Input file sucessfully read. Free for changes." << std::endl;
 
 	if(candc){
 		std::cout << "C&C cross check:" <<std::endl;
@@ -209,11 +221,10 @@ invokeApplication(){
 		std::vector<histo1D> pulls;
 		pulls.resize(ndatasets,histo1D(histo1D::createBinning(40,-8,8)));
 
-		plotterControlPlot pl;
-		pl.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/controlPlots_combined.txt");
+		//plotterControlPlot pl;
 		TCanvas cvv;
 
-		pl.usePad(&cvv);
+		//	pl.usePad(&cvv);
 
 		//configure mode
 		histo1D::pseudodatamodes pdmode=histo1D::pseudodata_poisson;
@@ -352,11 +363,11 @@ invokeApplication(){
 
 	if(printplots){
 		histoStack stack;
-		plotterControlPlot pl;
-		pl.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/controlPlots_combined.txt");
+		//plotterControlPlot pl;
+		//pl.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/controlPlots_combined.txt");
 		TCanvas c;
 		c.Print(outfile+".pdf(");
-		pl.usePad(&c);
+		//pl.usePad(&c);
 		for(size_t ndts=0;ndts<mainfitter.nDatasets();ndts++){
 			TString dir=outfile+"_vars/";
 			system( ("mkdir -p "+dir).Data());
@@ -365,8 +376,10 @@ invokeApplication(){
 				mainfitter.printControlStack(false,nbjet,ndts,outfile.Data());
 				mainfitter.printControlStack(true,nbjet,ndts,outfile.Data());
 
-				mainfitter.printVariations(nbjet,ndts,dir.Data());
-				mainfitter.printVariations(nbjet,ndts,dir.Data(),true);
+				if(variationplots){
+					mainfitter.printVariations(nbjet,ndts,dir.Data());
+					mainfitter.printVariations(nbjet,ndts,dir.Data(),true);
+				}
 			}
 
 		}

@@ -81,8 +81,7 @@ public:
 			if(((TString)temp_.at(i)).BeginsWith("-")){
 				if( bepicky && (TString)temp_.at(i) != "-h" && (TString)temp_.at(i) != "--help"){
 					std::cout << "optParser: warning option "<<temp_.at(i) << " set but not parsed, yet" << std::endl;
-
-					throw std::runtime_error("optParser: begin picky: not all options parsed");
+					coutHelp(); //exits
 					continue;
 				}
 

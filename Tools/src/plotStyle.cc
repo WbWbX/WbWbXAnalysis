@@ -140,6 +140,11 @@ void plotStyle::applyAxisStyle(TH1*h)const{
 	if(yaxis_.applyAxisRange())
 		h->SetAxisRange(yaxis_.min,yaxis_.max,"Y");
 
+	//make sure to kill obsolete }{...
+	h->GetYaxis()->SetTitle(axisStyle::makeTexConsistentName(h->GetYaxis()->GetTitle()));
+	h->GetXaxis()->SetTitle(axisStyle::makeTexConsistentName(h->GetXaxis()->GetTitle()));
+
+
 }
 void plotStyle::applyPadStyle(TVirtualPad*c)const{
 	c->SetBottomMargin(bottomMargin);

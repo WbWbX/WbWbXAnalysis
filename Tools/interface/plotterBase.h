@@ -84,6 +84,13 @@ tmplegp_(0),corrm_(0),pad_(0),drawlegend_(true),preparepad_(true){
 
      void printToPdf(const std::string& outname);
 
+     /**
+      * Try to avoid this function whereever possible! This is NOT the recommended way
+      * to use these plotters and should be banished anyway!
+      * Only in here for compatibility reasons with other frameworks
+      */
+     void saveAsCanvasC(const std::string& outname);
+
      virtual bool hasRatio()const=0;
 
      void associateCorrelationMatrix(const corrMatrix& m){corrm_=&m;}
@@ -115,6 +122,12 @@ protected:
 
     float getSubPadYScale(int padidx);
     float getSubPadXScale(int padidx);
+
+    /**
+     * eats some performance due to roots ridiculous transform system
+     * gets NDC of parent (full) pad
+     */
+    void convertUserCoordsToNDC(TVirtualPad *subpad, const float & ux, const float & uy, float& ndcx, float& ndcy)const;
 
 
     legendStyle legstyle_;

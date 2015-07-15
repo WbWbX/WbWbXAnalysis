@@ -37,6 +37,7 @@ public:
 	 */
 
 
+	void addStyleForAllPlots(const std::string &);
 
 
 	void associateCorrelationMatrix(const corrMatrix& m){corrm_=&m;}

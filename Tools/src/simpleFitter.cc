@@ -604,7 +604,7 @@ double simpleFitter::fitfunction(const double& x,const double *par)const{
 		value = par[0]+ par[1] * exp(- (x-par[2])*(x-par[2]) / (2* par[3]*par[3]) ) ;
 	}
 	else if(fitmode_==fm_exp){
-		value = par[0]+ par[1] * exp(x*par[2]);
+		value = par[0] + exp((x + par[1])*par[2]);
 	}
 
 	if(value!=value){

@@ -35,7 +35,7 @@ bool histo1DUnfold::c_makelist=false;
    bool isMC_;
  */
 
-histo1DUnfold::histo1DUnfold(): histo2D(),xaxis1Dname_(""), yaxis1Dname_(""),
+histo1DUnfold::histo1DUnfold(): histo2D(std::vector<float>(),std::vector<float>(),"","","","",false),xaxis1Dname_(""), yaxis1Dname_(""),
 		tempgen_(0),tempreco_(0),tempgenweight_(1),tempweight_(1),recofill_(false),
 		genfill_(false),isMC_(false),flushed_(true),binbybin_(false),lumi_(1),congruentbins_(false),allowmultirecofill_(false){
 	if(c_makelist){
@@ -44,13 +44,14 @@ histo1DUnfold::histo1DUnfold(): histo2D(),xaxis1Dname_(""), yaxis1Dname_(""),
 	type_=type_container1DUnfold;
 }
 histo1DUnfold::histo1DUnfold( std::vector<float> genbins, std::vector<float> recobins, TString name,TString xaxisname,TString yaxisname, bool mergeufof)
-:histo2D( recobins /*genbins*/ , recobins , name,xaxisname+" (gen)",xaxisname+" (reco)",mergeufof), xaxis1Dname_(xaxisname),
+:histo2D( recobins /*genbins*/ , recobins , name,xaxisname+" (gen)",xaxisname+" (reco)",yaxisname,false), xaxis1Dname_(xaxisname),
  yaxis1Dname_(yaxisname),tempgen_(0),tempreco_(0),tempgenweight_(1),tempweight_(1),recofill_(false),genfill_(false),
  isMC_(false),flushed_(true),binbybin_(false),lumi_(1),congruentbins_(false),allowmultirecofill_(false){
 	//bins are set, containers created, at least conts_[0] exists with all options (binomial, mergeufof etc)
 
+	//histo2D constructed without merge. -> UF OF in x direction
 
-
+	mergeufof_=mergeufof;
 	genbins_=genbins; //can be changed and rebinned afterwards
 
 	//everything in same binning for now
@@ -80,7 +81,10 @@ histo1DUnfold::~histo1DUnfold(){
 
 void histo1DUnfold::setBinning(const std::vector<float> & genbins,const std::vector<float> &recobins){
 	genbins_=genbins;
+	bool temp=mergeufof_;
+	mergeufof_=false;
 	histo2D::setBinning(recobins,recobins);
+	mergeufof_=temp;
 	gencont_=conts_.at(0);
 	gencont_.clear();
 	gencont_.setXAxisName(xaxis1Dname_+"(gen)");
@@ -410,8 +414,8 @@ histo1DUnfold& histo1DUnfold::operator *= (double val){
 bool histo1DUnfold::operator == (const histo1DUnfold &rhs)const{
 	if(!isEqual(rhs))
 		return false;
-/*
- *
+	/*
+	 *
 	TString xaxis1Dname_,yaxis1Dname_;
 
 	float tempgen_,tempreco_,tempgenweight_,tempweight_;
@@ -429,45 +433,45 @@ bool histo1DUnfold::operator == (const histo1DUnfold &rhs)const{
 	bool congruentbins_;
 
 	bool allowmultirecofill_;
- */
+	 */
 	if(xaxis1Dname_!=rhs.xaxis1Dname_)
 		return false;
 	if(yaxis1Dname_!=rhs.yaxis1Dname_)
-			return false;
+		return false;
 	if(tempgen_!=rhs.tempgen_)
-			return false;
+		return false;
 	if(tempreco_!=rhs.tempreco_)
-			return false;
+		return false;
 	if(tempgenweight_!=rhs.tempgenweight_)
-			return false;
+		return false;
 	if(tempweight_!=rhs.tempweight_)
-			return false;
+		return false;
 	if(recofill_!=rhs.recofill_)
-			return false;
+		return false;
 	if(genfill_!=rhs.genfill_)
-			return false;
+		return false;
 	if(isMC_!=rhs.isMC_)
-			return false;
+		return false;
 	if(flushed_!=rhs.flushed_)
-			return false;
+		return false;
 	if(binbybin_!=rhs.binbybin_)
-			return false;
+		return false;
 	if(gencont_!=rhs.gencont_)
-			return false;
+		return false;
 	if(recocont_!=rhs.recocont_)
-			return false;
+		return false;
 	if(unfolded_!=rhs.unfolded_)
-			return false;
+		return false;
 	if(refolded_!=rhs.refolded_)
-			return false;
+		return false;
 	if(genbins_!=rhs.genbins_)
-			return false;
+		return false;
 	if(lumi_!=rhs.lumi_)
-			return false;
+		return false;
 	if(congruentbins_!=rhs.congruentbins_)
-			return false;
+		return false;
 	if(allowmultirecofill_!=rhs.allowmultirecofill_)
-			return false;
+		return false;
 	return true;
 }
 
@@ -932,17 +936,42 @@ bool histo1DUnfold::checkCongruence(const std::vector<float>& a, const std::vect
 
 void histo1DUnfold::flush(){ //only for MC
 	if(!flushed_){
+		if(isDummy())
+			return;
+
 		if(genfill_)
 			gencont_.fill(tempgen_,tempgenweight_);
 		if(recofill_)
 			recocont_.fill(tempreco_,tempweight_);
 
 		if(genfill_ && !recofill_){ //put in Reco UF bins
-			fill(tempgen_,ybins_[1]-100,tempgenweight_);}
+
+			fill(tempgen_,ybins_[1]-100,tempgenweight_);
+		}
 		else if(recofill_ && !genfill_){ //put in gen underflow bins -> goes to background
-			fill(xbins_[1]-100,tempreco_,tempweight_);}
+
+			if(mergeufof_){
+				size_t binnoy=getBinNoY(tempreco_);
+				if(binnoy == 0)
+					fill(xbins_[1]-100,ybins_.at(1),tempweight_);//force first vis bin
+				else if(binnoy == ybins_.size()-1)
+					fill(xbins_[1]-100,ybins_.size()-2,tempweight_);//force last vis bin
+			}
+			else{
+				fill(xbins_[1]-100,tempreco_,tempweight_);
+			}
+		}
 		else if(genfill_ && recofill_){
-			fill(tempgen_,tempreco_,tempweight_);
+			if(mergeufof_){
+				size_t binnoy=getBinNoY(tempreco_);
+				if(binnoy == 0)
+					fill(tempgen_,ybins_.at(1),tempweight_);//force first vis bin
+				else if(binnoy == ybins_.size()-1)
+					fill(tempgen_,ybins_.size()-2,tempweight_);//force last vis bin
+			}
+			else{
+				fill(tempgen_,tempreco_,tempweight_);
+			}
 			fill(tempgen_,ybins_[1]-100,(tempgenweight_-tempweight_)); // w_gen * (1 - recoweight), tempweight_=fullweight=tempgenweight_*recoweight
 		}
 	}

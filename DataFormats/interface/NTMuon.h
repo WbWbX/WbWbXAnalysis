@@ -20,6 +20,8 @@ class NTMuon : public NTLepton {
 public:
     explicit NTMuon(){q_=0;};
     ~NTMuon(){};
+
+
     //sets
     void setIsGlobal(bool IsGlobal){isGlobal_=IsGlobal;}
     void setIsTracker(bool IsTracker){isTracker_=IsTracker;}
@@ -47,6 +49,7 @@ public:
     float isoVal() const{
         return (iso_.chargedHadronIso() + std::max(0.0,iso_.neutralHadronIso() + iso_.photonIso() - 0.5*iso_.puChargedHadronIso()))/p4_.pt();
     }
+
     const std::vector<std::string>& matchedTrig()const{return matchedTrig_;}
     const NTLorentzVector<float> &trackP4()const{return trkP4_;}
     const bool &isPf()const{return ispf_;}

@@ -5,6 +5,7 @@
 #include "TTree.h"
 #include "TFile.h"
 #include "../interface/systAdder.h"
+#include "../interface/textFormatter.h"
 
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/zlib.hpp>
@@ -51,7 +52,7 @@ histo1D::histo1D():taggedObject(taggedObject::type_container1D)
 }
 
 histo1D::histo1D(const std::vector<float>& bins,const TString& name,const TString& xaxisname,const TString& yaxisname, bool mergeufof):
-																																																															taggedObject(taggedObject::type_container1D)
+																																																																					taggedObject(taggedObject::type_container1D)
 
 {
 	setBins(bins);
@@ -96,11 +97,10 @@ histo1D histo1D::createOne()const{
 
 void histo1D::setBins(std::vector<float> bins){
 
-	if(bins.size()<1){
-		std::cout << "container1D::setBins: bins have to be at least of size 1! "<< name_ <<std::endl;
-		throw std::logic_error("container1D::setBins: bins have to be at least of size 1!");
-	}
+
 	reset();
+	if(bins.size()<1)
+		bins.push_back(1);
 	//NEW: just sort bins. no error message anymore
 	std::sort(bins.begin(),bins.end());
 	//get rid of duplicates
@@ -523,11 +523,12 @@ histo1D histo1D::getRelErrorsContainer()const{
 	return out;
 }
 
-void histo1D::removeStatFromAll(){
+void histo1D::removeStatFromAll(bool alsonom){
 	for(size_t i=0;i<contents_.layerSize();i++){
 		contents_.getLayer(i).removeStat();
 	}
-	contents_.getNominal().removeStat();
+	if(alsonom)
+		contents_.getNominal().removeStat();
 }
 void histo1D::createStatFromContent(){
 	for(int i=-1;i<(int)contents_.layerSize();i++){
@@ -871,7 +872,7 @@ size_t histo1D::cIntegralEntries(float from, float to,const int& systLayer) cons
 	return integr;
 }
 
-histo1D histo1D::getIntegralBin()const{
+histo1D histo1D::getIntegralBin(const bool& includeUFOF)const{
 	if(bins_.size()<2)
 		throw std::out_of_range("container1D::getIntegralBin: no bins!");
 
@@ -885,7 +886,14 @@ histo1D histo1D::getIntegralBin()const{
 	out.bins_.at(0)=0;
 	out.bins_.at(1)=0; //real bin is from 0 to 1
 	out.bins_.at(2)=1;
-
+	if(includeUFOF){
+		for(int sys=-1;sys<(int)out.getSystSize();sys++){
+			out.contents_.getBin(1,sys).add(out.contents_.getBin(0,sys));
+			out.contents_.getBin(1,sys).add(out.contents_.getBin(2,sys));
+			out.contents_.getBin(0,sys).multiply(0);
+			out.contents_.getBin(2,sys).multiply(0);
+		}
+	}
 	return out;
 }
 
@@ -1006,6 +1014,7 @@ void histo1D::setAllZero(){
  */
 TH1D * histo1D::getTH1D(TString name, bool dividebybinwidth, bool onlystat, bool nostat) const{
 	if(name=="") name=name_;
+	name=textFormatter::makeCompatibleFileName(name.Data());
 	if(bins_.size() < 2)
 		return 0;
 	if(debug)
@@ -1047,7 +1056,7 @@ TH1D * histo1D::getAxisTH1D()const{
 
 	std::vector<float> bins=createBinning(getNBins()*100,bins_.at(1),bins_.at(bins_.size()-1));
 
-	TH1D *  h = new TH1D("","",bins.size()-1,&(bins.at(0)));
+	TH1D *  h = new TH1D((TString)textFormatter::makeCompatibleFileName(name_.Data())+"_axis","",bins.size()-1,&(bins.at(0)));
 	h->GetYaxis()->SetTitleSize(0.06);
 	h->GetYaxis()->SetLabelSize(0.05);
 	h->GetYaxis()->SetTitleOffset(h->GetYaxis()->GetTitleOffset() );
@@ -1220,7 +1229,7 @@ void histo1D::writeTH1D(TString name, bool dividebybinwidth,bool onlystat, bool 
 TGraphAsymmErrors * histo1D::getTGraph(TString name, bool dividebybinwidth, bool onlystat, bool noXErrors, bool nostat) const{
 
 	if(name=="") name=name_;
-
+	name=textFormatter::makeCompatibleFileName(name.Data());
 
 	float x[getNBins()];for(size_t i=0;i<getNBins();i++) x[i]=0;
 	float xeh[getNBins()];for(size_t i=0;i<getNBins();i++) xeh[i]=0;
@@ -1276,6 +1285,7 @@ TGraphAsymmErrors * histo1D::getTGraph(TString name, bool dividebybinwidth, bool
 TGraphAsymmErrors * histo1D::getTGraphSwappedAxis(TString name, bool dividebybinwidth, bool onlystat, bool noXErrors, bool nostat) const{
 
 	if(name=="") name=name_;
+	name=textFormatter::makeCompatibleFileName(name_.Data());
 	float x[getNBins()];
 	float xeh[getNBins()];
 	float xel[getNBins()];
@@ -1323,7 +1333,6 @@ TGraphAsymmErrors * histo1D::getTGraphSwappedAxis(TString name, bool dividebybin
 }
 void histo1D::writeTGraph(TString name, bool dividebybinwidth, bool onlystat,bool noXErrors, bool nostat) const{
 	TGraphAsymmErrors * g=getTGraph(name,dividebybinwidth,onlystat,noXErrors,nostat);
-	g->SetName(name);
 	g->Draw("AP");
 	g->Write();
 	delete g;
@@ -1333,7 +1342,7 @@ void histo1D::writeTGraph(TString name, bool dividebybinwidth, bool onlystat,boo
  */
 graph histo1D::convertToGraph(bool dividebybinwidth)const{
 	graph out;
-	out.name_=name_;
+	out.name_=name_;//textFormatter::makeCompatibleFileName(name_.Data());
 	//transfer all syst layers
 	out.ycoords_=contents_;
 	out.xcoords_=contents_;
@@ -1402,12 +1411,17 @@ histo1D histo1D::operator + (const histo1D & second)const{
 }
 
 histo1D & histo1D::operator -= (const histo1D & second){
-	if(bins_ != second.bins_){
+	if(bins_ != second.bins_ && !isDummy()){
 		std::string errstr= "container1D::operator -=: not same binning for " + (std::string)name_.Data() +
-				"+="+ (std::string)second.name_.Data()  ;
+				"-="+ (std::string)second.name_.Data()  ;
 		throw std::runtime_error(errstr);
 	}
-	contents_ -= second.contents_;
+	if(!isDummy()){
+		contents_ -= second.contents_;
+	}
+	else{
+		*this=second;
+	}
 	return *this;
 }
 histo1D histo1D::operator - (const histo1D & second)const{
@@ -1723,7 +1737,7 @@ void histo1D::addRelSystematicsFrom(const ztop::histo1D & rhs,bool ignorestat,bo
 			//contents_.getLayer(newlayerit).removeStat();
 			//stat are definitely not correlated
 			bool isnominalequal=(!strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i),1e-2))
-																																					        																																																														|| (strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i))) ;
+																																					        																																																																				|| (strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i))) ;
 
 			if(isnominalequal){ //this is just a copy leave it and add no variation
 				//contents_.getLayer(newlayerit).removeStat();
@@ -1782,7 +1796,7 @@ void histo1D::transformSystToStat(){
 	}
 	for(size_t i=0;i<getSystSize();i++){
 		if(i!=idxup && i!=idxdown)
-		cp.contents_.addLayer(getSystErrorName(i),contents_.getLayer(i));
+			cp.contents_.addLayer(getSystErrorName(i),contents_.getLayer(i));
 	}
 	*this=cp;
 }

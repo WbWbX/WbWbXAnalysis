@@ -86,7 +86,7 @@ private:
     const histoStack * stackp_;
 //taken care of by addObject
   //  TLegend * tmplegp_;
-    size_t tempdataentry_;
+  //  size_t tempdataentry_;
 //must be taken care of
     std::vector<plot *> tempplots_;
 
@@ -99,6 +99,15 @@ private:
     void drawRatioPlot();
 
     void readStylePriv(const std::string & file, bool requireall);
+
+    class legendmerge{
+    public:
+    	TString mergedname;
+    	int mergedcolor;
+    	std::vector<TString> tobemerged;
+    };
+
+    std::vector<legendmerge> mergelegends;
 
 };
 

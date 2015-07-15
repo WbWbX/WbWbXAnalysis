@@ -10,6 +10,12 @@
 
 namespace ztop{
 
+void plotterMultiStack::addStyleForAllPlots(const std::string & f,const std::string &sm,const std::string &em){
+	for(size_t idx=0;idx<plotter_.size();idx++){
+		plotterControlPlot * pl = (plotterControlPlot *)plotter_.at(idx);
+		pl->addStyleFromFile(f,sm,em);
+	}
+}
 
 void plotterMultiStack::addStack(const histoStack *s){
 	if(!s)

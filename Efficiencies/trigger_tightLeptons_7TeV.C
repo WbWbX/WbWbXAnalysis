@@ -138,6 +138,8 @@ void trigger_tightLeptons(){
 	triggerAnalyzer ta_emud;
 	ta_emud.setPUFile("Summer11_Leg");
 
+	ta_eed.checkTriggerPaths(true);
+	ta_emud.checkTriggerPaths(true);
 
 	///7 TeV met triggers
 	std::vector<string> mettriggers;
@@ -165,6 +167,18 @@ void trigger_tightLeptons(){
 			("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v")<<
 			("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v")<<
 			("HLT_Mu10_Ele10_CaloIdL_v");
+
+	eetriggers << "HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v"
+			<< "HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v"
+			<< "HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v"
+			<< "HLT_DoubleEle45_CaloIdL_v";
+
+	mumutriggers<<"HLT_DoubleMu7_"
+			<< "HLT_Mu13_Mu8_v"
+			<< "HLT_Mu17_Mu8_v"
+			<< "HLT_DoubleMu6_"
+			<< "HLT_DoubleMu45_";
+
 
 	std::vector<string> empty;empty << " ";
 

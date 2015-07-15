@@ -33,11 +33,8 @@ $everything will be gaussian except the ones specified here
    CR         =  boxleft
    
    
-   TOPPT = boxright
+   TOPPT = float
    
-   $$due to missing SF
- $  BTAGH_7TeV = float
- $  BTAGL_7TeV = float
 
 
 [ end - priors ]
@@ -47,7 +44,7 @@ $everything will be gaussian except the ones specified here
    TT_SCALE
    TT_MATCH
    PDF*
-   TOPPT
+   TOPPT,0,1
 
 [ end - full extrapolation ]
 
@@ -55,14 +52,14 @@ $everything will be gaussian except the ones specified here
 [ datasets ]
 
 	[ dataset - 8TeV ]
-	  lumi  =   19741
+	  lumi  =   19664
 	  lumiunc = 2.6
 	  energy = 8       $for dynamic xsec
 	  topmass = 172.5  $for dynamic xsec
 	[ end dataset - 8TeV ]
 	
 	 [ dataset - 7TeV ]
-	  lumi  =   5010
+	  lumi  =   5049
 	  lumiunc = 2.2
 	  energy = 7       $for dynamic xsec
 	  topmass = 172.5  $for dynamic xsec

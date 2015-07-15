@@ -18,7 +18,7 @@ invokeApplication(){
 
 	using namespace ztop;
 
-	histoStackVector hsv;hsv.readFromFile("emu_8TeV_172.5_nominal.ztop");
+	histoStackVector hsv;hsv.readFromFile("emu_7TeV_172.5_nominal.ztop");
 
 	std::cout << "File read" <<std::endl;
 
@@ -100,7 +100,7 @@ invokeApplication(){
 			ups.push_back(tmp);
 		}
 		plotterMultiCompare pl;
-		pl.readStyleFromFileInCMSSW("/src/TtZAnalysis/Tools/styles/plotterMultiCompare_standard.txt");
+		pl.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiCompare_standard.txt");
 		std::cout << "nominals " <<std::endl;
 		pl.setNominalPlots(&nominals);
 		std::cout << "comps " <<std::endl;
@@ -108,11 +108,11 @@ invokeApplication(){
 		//pl.setComparePlots(&downs,1);
 		//plotterCompare::debug=true;
 		std::cout << "print " <<std::endl;
-		pl.printToPdf((std::string)"out/"+sysname.Data());
+		pl.printToPdf((std::string)"out/"+(sysname+"_7TeV").Data());
 		TCanvas cv;
 		pl.usePad(&cv);
 		pl.draw();
-		cv.Print("out/"+sysname+".png");
+		cv.Print("out/"+sysname+"_7TeV.png");
 	}
 	return 0;
 }

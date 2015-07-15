@@ -17,13 +17,19 @@
 
 workdir=`pwd`
 executable=$1
+option="all"
+outputfile=$2
+if [[ "${outputfile}" == "" ]]
+then
+	outputfile=$workdir/indep_$executable
+fi
+
 if [[ "${executable}" == "" ]]
 then
 	echo "USAGE: ${0} <executable> <options>"
 	exit 1
 fi
 
-option="all"
 
 execpath=`which $1`
 tmpdir=`mktemp -d`
@@ -113,14 +119,14 @@ exit 0
 
 EOT
 
-cat scriptheader.sh.in >> indep_$executable
-echo "PAYLOAD:" >> indep_$executable
+#output file is already defined in workdir
+cat scriptheader.sh.in >> $outputfile
+echo "PAYLOAD:" >> $outputfile
 
-cat pack.tar.gz >> indep_$executable
+cat pack.tar.gz >> $outputfile
 
-chmod +x indep_$executable
+chmod +x $outputfile
 
-mv indep_$executable $workdir
 
 rm -rf $tmpdir
 

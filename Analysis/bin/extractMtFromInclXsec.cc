@@ -123,7 +123,7 @@ invokeApplication(){
 			graph onesigma=ex.createOneSigmaPoints(ex.getExpLikelihood());
 			TGraphAsymmErrors * tg=onesigma.getTGraph();
 			tg->SetMarkerSize(0.2);
-			tg->Draw("P");
+			//tg->Draw("P");
 			tb2d.drawToPad(&cv);
 			tb22d.drawToPad(&cv);
 			cv.Print("expOnly" +nrgstr+".pdf");

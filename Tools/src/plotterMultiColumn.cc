@@ -260,7 +260,10 @@ void plotterMultiColumn::readStylePrivMarker(const std::string& infile,bool requ
 	}
 	yaxisconnects_=cntv;
 }
-
+void plotterMultiColumn::addStyleForAllPlots(const std::string &f){
+	for(size_t i=0;i<plotter_.size();i++)
+		plotter_.at(i)->addStyleFromFile(f);
+}
 
 void plotterMultiColumn::cleanMem(){
 

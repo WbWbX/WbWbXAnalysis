@@ -22,7 +22,7 @@ pdfeigenvectors=26  # 26 # if set to 0, no variation
 systs=( "nominal"
 
    # 	# for testing	
-   # "TOPMASS_up"
+   #"TOPMASS_up"
    # "TOPMASS_down"
 
     "P11_sysnominal"
@@ -204,33 +204,24 @@ systs=( "nominal"
 # #    #"Z_SCALE_up"
 );
 energies=("8TeV"
- "7TeV"				
+          "7TeV"				
 );
-#systs=("nominal")
-
-#creates new subdir (analysis_timestamp) , copy source there and make dir inside (output).
-# adds script there to get plots, merge etc as independent as possible from rest (will need container classes at least)
 
 
-# defined all syst here in an array
-# qsub stuff
-# check in background whether files are done (sleep 150) --> switch: last option c
-# check merges automatically if all succ done
+##############################
+##############################
+##############################
+####### USER INPUT ENDS ######
+##############################
+##############################
+##############################
 
-# may want to have an additional script for pdf variations (to get all of them) needs level of communication between tree and this script...? how many variations..? or just do 40 and skip non existing, mark file in output and ignore in the following
-
+thisscript=$(pwd)/$0
 dirname=$1
 addParameters=$2
-# if $3 == c, a check will be performed every 150 sec
 
-####
-#
-#  additional parameters are passed to analyse. docu can be found in app_src/analyse.cc
-#  specify syst, channels and energies to run on here (just (un)comment in arrays)
-#
-####
-
-
+analysisDir=$CMSSW_BASE/src/TtZAnalysis/Analysis/
+templatesDir=$CMSSW_BASE/src/TtZAnalysis/Analysis/templates
 
 
 ########add pdf variations#######
@@ -250,13 +241,7 @@ echo
 
 sleep 3
 
-dir=$(date +"%Y%m%d_%H%M")_${dirname} 
 
-
-echo "running in dir $dir"
-
-analysisDir=$CMSSW_BASE/src/TtZAnalysis/Analysis/
-templatesDir=$CMSSW_BASE/src/TtZAnalysis/Analysis/templates
 
 JOBSONBATCH=$SGE_CELL
 if [ ${INTERACTIVE_ANALYSIS_JOBS} ]
@@ -266,7 +251,7 @@ fi
 
 
 cd $analysisDir
-#mkdir -p workdir
+workdir=$(date +"%Y%m%d_%H%M")_${dirname}
 if [[ $JOBSONBATCH ]] ;
 then
     mkdir -p /nfs/dust/cms/user/$USER/AnalysisWorkdir
@@ -275,74 +260,61 @@ then
 	ln -s /nfs/dust/cms/user/$USER/AnalysisWorkdir workdir 
     fi
     cd workdir
-    mkdir $dir
+    mkdir $workdir
 else 
     mkdir -p $analysisDir/interactiveWorkdir  
     cd interactiveWorkdir
-    mkdir $dir
+    mkdir $workdir
 fi
 if [[ -L "last" ]]
 then
     rm last
 fi
-ln -s $dir last
-cd $dir
+ln -s $workdir last
+cd $workdir
+
+echo "running in dir $workdir"
+#make path absolute
 workdir=`pwd`
-mkdir scripts
-cp $analysisDir/scripts/submit.sh scripts/
-mkdir  $workdir/bin
-analysepath=`which analyse`
-cp $analysepath $workdir/bin/
-mkdir -p lib
+BATCHDIR=$workdir/batch
+
+#make directory tree
+
+mkdir -p $workdir/scripts
+mkdir -p $workdir/bin
+mkdir -p $workdir/lib #not needed anymore
+mkdir -p $workdir/data/analyse
+mkdir -p $workdir/jobscripts
+mkdir -p $workdir/stdout
+mkdir -p $workdir/configs/analyse
+mkdir -p $BATCHDIR
+
+cp $thisscript scripts/
+
+echo creating independent executable package...
+echo "(code can be compiled while jobs are running)"
+cd $workdir/bin
+makePackage.sh analyse $workdir/bin/analyse& #can run in background..
+cd $workdir
+
+echo copying data files...
+rsync -a $analysisDir/data/analyse data/ --exclude *_btags
+cd $analysisDir/data/analyse
+for d in *_btags
+do
+    tar czf $workdir/data/analyse/$d.tar.gz $d &
+done
+wait
+cd $workdir/data/analyse
+for f in *_btags.tar.gz #maybe there are even more
+do
+    tar xzf $f &
+done
+# do other stuff in the meantime...
 
 
-CMSLIBS=$CMSSW_BASE/lib/$SCRAM_ARCH/
-EXTLIBS=${CMSSW_BASE}/external/${SCRAM_ARCH}/lib/
-RELBASELIBS=$CMSSW_RELEASE_BASE/lib/$SCRAM_ARCH/
-
-#declare -a libs
-
-LOCLIB=$workdir/lib
-
-libs=("TopAnalysisZTopUtils" 
-    "TtZAnalysisDataFormats" 
-    "TtZAnalysisTools"
-    "TtZAnalysisAnalysis"
-    "FWCoreFWLite"
-);
-rellibs=(""
-);
-
-function copylibs(){
-
-    linklibs=""
-    libdir=$LOCLIB
-    mkdir -p $libdir
-
-    for (( i=0;i<${#libs[@]};i++)); do
-	linklibs="$linklibs -l${libs[${i}]}"
-	cp ${CMSLIBS}lib${libs[${i}]}.so $libdir
-    done
-    for (( i=0;i<${#libs[@]};i++)); do
-	if [[ ${rellibs[${i}]} ]]
-	then
-	linklibs="$linklibs -l${libs[${i}]}"
-	cp ${RELBASELIBS}lib${rellibs[${i}]}.so $libdir
-	fi
-    done
-    cp $EXTLIBS/libunfold.so $libdir 
-
-}
-
-copylibs
-
-mkdir data
-cp -r $analysisDir/data/analyse data/
-mkdir configs
+cd $workdir
 cp -r $analysisDir/configs/analyse configs/
-
-
-
 cp -r $analysisDir/src .
 cp $analysisDir/interface/MainAnalyzer.h src/
 cp $analysisDir/bin/analyse.cc src/
@@ -350,12 +322,6 @@ cp $analysisDir/bin/analyse.cc src/
 echo -n "These files are just meant for reference (e.g. to check control plot configurations etc)" > src/README
 
 cd $workdir
-mkdir jobscripts
-mkdir stdout
-
-BATCHDIR=$workdir/batch
-
-mkdir -p $BATCHDIR
 
 
 if [ $JOBSONBATCH ]
@@ -369,7 +335,15 @@ chmod +x check.sh
 sed -e 's;##WORKDIR##;'${workdir}';g' < $templatesDir/reset_job.sh > reset_job.sh
 chmod +x reset_job.sh
 
+# wait for tars to be finished and delete
+wait
+for f in $workdir/data/analyse/*_btags.tar.gz
+do
+     rm -f $f &
+done
 
+echo "preparation done, start submission..."
+cd $workdir
 #check whether running on naf or wgs and do qsub or dirty "&"
 for (( i=0;i<${#channels[@]};i++)); do
     for (( l=0;l<${#topmasses[@]};l++)); do

@@ -22,7 +22,8 @@ namespace ztop{
 class extendedVariable{
 public:
    explicit extendedVariable():nominal_(-100000),name_(""),operatedon_(0),operation_(op_plus),constant_(false),constval_(0){}
-    extendedVariable(const TString & name):nominal_(-100000),name_(name),operatedon_(0),operation_(op_plus),constant_(false),constval_(0){}
+    extendedVariable(const TString & name):nominal_(-100000),name_(name),operatedon_(0),
+    		operation_(op_plus),constant_(false),constval_(0),extrapolatelinear_(true){}
     ~extendedVariable(){
     	clear();
     }
@@ -40,6 +41,18 @@ public:
     void setConstant(double val){constant_=true;constval_=val;}
 
     void resetConstant(){constant_=false;}
+
+
+
+    /**
+     * In case of pseudo-variations, e.g. down=nominal, nominal=nominal, up=real variation
+     * set extrapolation mode such that a "down" variation gets added
+     * If set to false, the dependence will be constant towards "down"
+     * (The same applies analogously to the "up" variation if that one is
+     * a pseudo variation
+     * Default is true
+     */
+    void setExtrapolateLinearly(bool set ){extrapolatelinear_=set;}
 
     /**
      * just put (non shifted) graph here
@@ -128,6 +141,8 @@ private:
 
     bool constant_;
     double constval_;
+
+    bool extrapolatelinear_;
 
     void copyFrom(const extendedVariable&) ;
 

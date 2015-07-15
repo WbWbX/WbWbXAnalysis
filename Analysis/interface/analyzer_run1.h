@@ -9,7 +9,7 @@
 #define ANALYZER_RUN1_H_
 
 #include "../interface/MainAnalyzer.h"
-
+#include "TtZAnalysis/DataFormats/interface/NTLepton.h"
 class analyzer_run1 : public MainAnalyzer{
 public:
 
@@ -23,6 +23,7 @@ private:
 	analyzer_run1(const analyzer_run1 &);
 	analyzer_run1& operator = (const analyzer_run1 &);
 
+	bool passesLeptonId(const ztop::NTLepton* , bool )const;
 
 };
 

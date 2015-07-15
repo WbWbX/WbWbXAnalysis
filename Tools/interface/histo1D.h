@@ -131,7 +131,7 @@ public:
 	histo1D getSystContainer(const int &syslayer)const;
 	histo1D getRelErrorsContainer()const;
 
-	void removeStatFromAll();
+	void removeStatFromAll(bool alsonom=true);
 
 	void createStatFromContent();
 
@@ -173,7 +173,7 @@ public:
 	 * including syst
 	 * UF and OF will be kept
 	 */
-	histo1D getIntegralBin()const;
+	histo1D getIntegralBin(const bool& includeUFOF=false)const;
 
 	float getYMax(bool dividebybinwidth ,const int& systLayer=-1) const;
 	float getYMin(bool dividebybinwidth, const int& systLayer=-1) const;
@@ -527,7 +527,7 @@ protected:
 
 	TString  xname_, yname_;
 
-//	float labelmultiplier_;//!< multiplier to labels when plotting, becomes less and les important with plotter classes inheriting from plotterBase
+	//	float labelmultiplier_;//!< multiplier to labels when plotting, becomes less and les important with plotter classes inheriting from plotterBase
 
 
 	TGraphAsymmErrors * gp_;//!< this is only for interactive usage to keep track on newly created plots
@@ -565,29 +565,33 @@ inline size_t ztop::histo1D::getBinNo(const float & var) const{
 	if(bins_.size() <2){
 		return 0;
 	}
+	size_t binno=0;
 	std::vector<float>::const_iterator it=std::lower_bound(bins_.begin()+1, bins_.end(), var);
 	if(var==*it)
-		return it-bins_.begin();
+		binno= it-bins_.begin();
 	else
-		return it-bins_.begin()-1;
-
+		binno= it-bins_.begin()-1;
+	if(mergeufof_){
+		if(binno==0){
+			binno++;
+		}
+		else if(binno == bins_.size()-1){
+			binno--;
+		}
+	}
+	return binno;
 }
 
 
 inline void ztop::histo1D::fill(const float & what, const float & weight){
+	if(isDummy())
+		return;
 	size_t bin=getBinNo(what);
 	//int bin=0;
-
-	if(mergeufof_){
-		if(bin==0 && bins_.size() > 1){
-			bin=1;
-			wasunderflow_=true;
-		}
-		else if(bin==bins_.size()-1){
-			bin--;
-			wasoverflow_=true;
-		}
-	}
+	if(what < bins_.at(1))
+		wasunderflow_=true;
+	if(what>bins_.at(bins_.size()-1))
+		wasoverflow_=true;
 	histoBin * b=&contents_.getBin(bin);
 	b->addToContent(weight);
 	b->addEntry();

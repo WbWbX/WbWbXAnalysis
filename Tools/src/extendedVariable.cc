@@ -60,20 +60,42 @@ void extendedVariable::addDependence(const graph & g, size_t nompoint, const TSt
 	graphFitter fitter;
 	fitter.setFitMode(graphFitter::fm_pol2);
 	fitter.setMinimizer(graphFitter::mm_minuit2);
-	fitter.readGraph(&gcopy);
 
 	//in case of const variation on one side
 	if(g.getNPoints() == 3){
 		gcopy.sortPointsByX();
 		if(gcopy.pointsYIdentical(0,1) || gcopy.pointsYIdentical(1,2)){
 			fitter.setInterpolate(true);
-			if(debug)
-				std::cout << "extendedVariable::addDependence: detected const variation for "<< sysname<< " on one side, switch to interpolate mode." <<std::endl;
+			// make a linear extrapolation
+			// DO NOT ASSUME A +-1 VARIATION AROUND 0 HERE
+			if(debug){
+				std::cout << "extendedVariable::addDependence: detected const variation for "<< sysname<< " on one side, switch to linear mode."
+						<<std::endl;
+			}
+			if(extrapolatelinear_){
+				size_t extr1=0,extrto=2;
+				if(gcopy.pointsYIdentical(0,1)){
+					extr1=2;
+					extrto=0;
+				}
+
+				// y = a*(x-gcopy.getPointXContent(1)) +b
+				float b=gcopy.getPointYContent(1);
+				float a=(gcopy.getPointYContent(1)-gcopy.getPointYContent(extr1))
+											/ (gcopy.getPointXContent(1)-gcopy.getPointXContent(extr1));
+				float extry=a*(gcopy.getPointXContent(extrto)-gcopy.getPointXContent(1)) +b;
+				gcopy.setPointYContent(extrto,extry);
+				if(debug){
+					std::cout << "extendedVariable::addDependence: extrapolated linearly from point "
+							<< 1 << "to point "<<extrto<< std::endl;
+				}
+			}
 		}
 		else if(debug){
 			std::cout << "extendedVariable::addDependence: detected non-const variation for "<<sysname<< std::endl;
 		}
 	}
+	fitter.readGraph(&gcopy);
 
 	fitter.fit();
 

@@ -255,15 +255,22 @@ inline size_t ztop::histo2D::getBinNoY(const float & var) const {
 	if(ybins_.size() <2){
 		return 0;
 	}
+	size_t binno=0;
 	std::vector<float>::const_iterator it=std::lower_bound(ybins_.begin()+1, ybins_.end(), var);
 	if(var==*it)
-		return it-ybins_.begin();
+		binno= it-ybins_.begin();
 	else
-		return it-ybins_.begin()-1;
-
+		binno= it-ybins_.begin()-1;
+	if(mergeufof_){
+		if(binno==0)
+			binno++;
+		else if(binno == ybins_.size()-1)
+			binno--;
+	}
+	return binno;
 }
 inline void ztop::histo2D::fill(const float & xval, const float & yval, const float & weight){
-	int ybin=getBinNoY(yval);
+	size_t ybin=getBinNoY(yval);
 	conts_[ybin].fill(xval,weight);
 }
 /**

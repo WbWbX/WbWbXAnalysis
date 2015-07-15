@@ -113,6 +113,8 @@ invokeApplication(){
 	//mode options CAN be additionally parsed by file
 	fr.setRequireValues(false);
 	mode                 += fr.getValue<TString>("modeOptions",TString(mode));
+	const TString elecEnsffile=cmssw_base+fr.getValue<TString>("ElecEnergySFFile","DEFFILEWILDCARDDONTREMOVE");
+	const TString elecEnsfhisto=          fr.getValue<TString>("ElecEnergySFHisto","");
 
 
 
@@ -186,7 +188,7 @@ invokeApplication(){
 		ana->getPUReweighter()->setMCDistrSum12();
 	}
 	else if(energy == "13TeV"){
-	        ana->getPUReweighter()->setMCDistrSum15("50ns_poisson");
+		ana->getPUReweighter()->setMCDistrSum15("50ns_poisson");
 	}	   
 
 	ana->getElecSF()->setInput(elecsffile,elecsfhisto);
@@ -194,7 +196,11 @@ invokeApplication(){
 	ana->getTrackingSF()->setInput(trackingsffile,trackingsfhisto);
 	ana->getTriggerSF()->setInput(trigsffile,trigsfhisto);
 
-	ana->getElecEnergySF()->setGlobal(1,0.15,0.15);
+	if(elecEnsffile.EndsWith("DEFFILEWILDCARDDONTREMOVE"))
+		ana->getElecEnergySF()->setGlobal(1,0.15,0.15);
+	else{
+		ana->getElecEnergySF()->setInput(elecEnsffile,elecEnsfhisto);
+	}
 	ana->getMuonEnergySF()->setGlobal(1,0.3,0.3); //new from muon POG twiki
 	//https://twiki.cern.ch/twiki/bin/viewauth/CMS/MuonReferenceResolution
 	//this is for muons without the corrections so it should be even better with
@@ -211,13 +217,13 @@ invokeApplication(){
 	//change
 	ana->getBTagSF()->setMode(NTBTagSF::randomtagging_mode);
 	if(energy == "13TeV"){
-	        //agrohsje 
-	        //ana->getBTagSF()->loadSF  (btagSFFile, BTagEntry::OP_MEDIUM,"csvv2_50ns","mujets","up","down");
-	        ana->getBTagSF()->loadSF  (btagSFFile, BTagEntry::OP_TIGHT,"csvv2_50ns","mujets","up","down");
+		//agrohsje
+		//ana->getBTagSF()->loadSF  (btagSFFile, BTagEntry::OP_MEDIUM,"csvv2_50ns","mujets","up","down");
+		ana->getBTagSF()->loadSF  (btagSFFile, BTagEntry::OP_TIGHT,"csvv2_50ns","mujets","up","down");
 	}else if (energy == "7TeV" || energy == "8TeV"){
 		ana->getBTagSF()->loadSF  (btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets","up","down");
 	}
-	
+
 	ana->getJECUncertainties()->setFile((jecfile).Data());
 	ana->getJECUncertainties()->setSystematics("no");
 
@@ -404,34 +410,34 @@ invokeApplication(){
 	else if(Syst=="PU_up"){
 		ana->getPUReweighter()->setDataTruePUInput(pufile+"_up.root");
 		if(energy=="7TeV" || energy=="8TeV"){
-		    if(!dobtag){
-			ana->getBTagSF()->loadBCSF(btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets","up_PileUp","down_PileUp");
-			ana->getBTagSF()->setSystematics(bTagSFBase::heavyup);}
+			if(!dobtag){
+				ana->getBTagSF()->loadBCSF(btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets","up_PileUp","down_PileUp");
+				ana->getBTagSF()->setSystematics(bTagSFBase::heavyup);}
 		}
 	}
 	else if(Syst=="PU_down"){
 		ana->getPUReweighter()->setDataTruePUInput(pufile+"_down.root");
 		if(energy=="7TeV" || energy=="8TeV"){
-		    if(!dobtag){
-			ana->getBTagSF()->loadBCSF(btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets","up_PileUp","down_PileUp");
-			ana->getBTagSF()->setSystematics(bTagSFBase::heavydown);}
+			if(!dobtag){
+				ana->getBTagSF()->loadBCSF(btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets","up_PileUp","down_PileUp");
+				ana->getBTagSF()->setSystematics(bTagSFBase::heavydown);}
 		}
 	}
 	//btag uncertainties are correlated
 	else if(Syst=="JER_up"){
-	        ana->getJERAdjuster()->setSystematics("up");
-	        if(energy=="7TeV" || energy=="8TeV"){
-		    if(!dobtag){
-			ana->getBTagSF()->loadBCSF(btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets","up_JER","down_JER");
-			ana->getBTagSF()->setSystematics(bTagSFBase::heavyup);}
+		ana->getJERAdjuster()->setSystematics("up");
+		if(energy=="7TeV" || energy=="8TeV"){
+			if(!dobtag){
+				ana->getBTagSF()->loadBCSF(btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets","up_JER","down_JER");
+				ana->getBTagSF()->setSystematics(bTagSFBase::heavyup);}
 		}
 	}
 	else if(Syst=="JER_down"){
-	    ana->getJERAdjuster()->setSystematics("down");
+		ana->getJERAdjuster()->setSystematics("down");
 		if(energy=="7TeV" || energy=="8TeV"){
-		    if(!dobtag){
-			ana->getBTagSF()->loadBCSF(btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets","up_JER","down_JER");
-			ana->getBTagSF()->setSystematics(bTagSFBase::heavydown);}
+			if(!dobtag){
+				ana->getBTagSF()->loadBCSF(btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets","up_JER","down_JER");
+				ana->getBTagSF()->setSystematics(bTagSFBase::heavydown);}
 		}
 	}
 	/////////btag
@@ -495,8 +501,8 @@ invokeApplication(){
 		}
 		else if(energy=="13TeV"){
 			ana->addWeightBranch("NTWeight_scaleUp");
-                        ana->setFilePostfixReplace("ttbar.root","ttbar_ttscaleup.root");
-                        ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_ttscaleup.root");
+			ana->setFilePostfixReplace("ttbar.root","ttbar_ttscaleup.root");
+			ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_ttscaleup.root");
 		}
 	}
 	else if(Syst=="TT_SCALE_down"){
@@ -508,8 +514,8 @@ invokeApplication(){
 		}
 		else if(energy=="13TeV"){
 			ana->addWeightBranch("NTWeight_scaleDown");
-                        ana->setFilePostfixReplace("ttbar.root","ttbar_ttscaledown.root");
-                        ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_ttscaledown.root");
+			ana->setFilePostfixReplace("ttbar.root","ttbar_ttscaledown.root");
+			ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_ttscaledown.root");
 
 		}
 
@@ -577,12 +583,12 @@ invokeApplication(){
 	else if(Syst=="TOPMASS_up"){ //consider as systematic variation. for testing purp! leaves normalization fixed
 		//default
 		if (energy=="7TeV" || energy=="8TeV") topmass="178.5";
-                else if (energy=="13TeV") topmass = "175.5";
+		else if (energy=="13TeV") topmass = "175.5";
 	}
 	else if(Syst=="TOPMASS_down"){
 		//default
 		if (energy=="7TeV" || energy=="8TeV") topmass="166.5";
-                else if (energy=="13TeV") topmass = "169.5";
+		else if (energy=="13TeV") topmass = "169.5";
 	}
 	else{
 		didnothing=true;
@@ -592,16 +598,16 @@ invokeApplication(){
 
 	if(topmass != "172.5"){
 		std::cout << "replacing top mass value of 172.5 with "<< topmass << std::endl;
-                if (energy=="7TeV" || energy=="8TeV") {
-	   	        ana->setFilePostfixReplace("ttbar.root","ttbar_mt"+topmass+ ".root");
-		        ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mt"+topmass+ ".root");
-		        ana->setFilePostfixReplace("ttbar_dil.root","ttbar_dil_mt"+topmass+ ".root");
-		        ana->setFilePostfixReplace("ttbarviatau_dil.root","ttbarviatau_dil_mt"+topmass+ ".root");
-                }
-                else if (energy == "13TeV"){
-		        ana->setFilePostfixReplace("ttbar.root","ttbar_mt"+topmass+".root");
-                        ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_mt"+topmass+".root");
-                }
+		if (energy=="7TeV" || energy=="8TeV") {
+			ana->setFilePostfixReplace("ttbar.root","ttbar_mt"+topmass+ ".root");
+			ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mt"+topmass+ ".root");
+			ana->setFilePostfixReplace("ttbar_dil.root","ttbar_dil_mt"+topmass+ ".root");
+			ana->setFilePostfixReplace("ttbarviatau_dil.root","ttbarviatau_dil_mt"+topmass+ ".root");
+		}
+		else if (energy == "13TeV"){
+			ana->setFilePostfixReplace("ttbar.root","ttbar_mt"+topmass+".root");
+			ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_mt"+topmass+".root");
+		}
 		if(topmass == "178.5" || topmass == "166.5"){
 			//	ana->setFilePostfixReplace("_tWtoLL.root","_tWtoLL_mt"+topmass+ ".root");
 			//	ana->setFilePostfixReplace("_tbarWtoLL.root","_tbarWtoLL_mt"+topmass+ ".root");

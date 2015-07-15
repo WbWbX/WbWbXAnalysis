@@ -28,8 +28,9 @@ public:
 	enum error_enum{err_scaleup=0, err_scaledown=1,
 		err_pdfup=2, err_pdfdown=3,
 		err_alphasup=4, err_alphasdown=5,
-		err_nominal=6,
-		err_maxup=7,err_maxdown=8
+		err_addgausup=6, err_addgausdown=7,
+		err_nominal=8,
+		err_maxup=9,err_maxdown=10
 		};
 
 	top_prediction(){

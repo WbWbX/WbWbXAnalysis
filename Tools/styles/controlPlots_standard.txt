@@ -120,7 +120,7 @@
     lineColor    = 632 
 
     fillStyle    = 1001 $3004
-    fillColor    = 432 
+    fillColor    = 920 
 
     sysFillStyle = 3005
     sysFillColor = 1

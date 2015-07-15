@@ -6,10 +6,13 @@
 
 namespace ztop{
 
+
+
 class NTLepton{
  public:
   explicit NTLepton(){q_=0;};
-  ~NTLepton(){};
+   ~NTLepton(){};
+
   //sets
   void setP4(NTLorentzVector<float> p4In){p4_=p4In;}
  // void setP4(PolarLorentzVector p4In){p4_=p4In;}
@@ -44,7 +47,6 @@ class NTLepton{
   const float &d0Bs()const{return d0Bs_;}
 
   const int& genMatch()const{return genid_;}
-
 
  protected:
   NTLorentzVector<float> p4_;

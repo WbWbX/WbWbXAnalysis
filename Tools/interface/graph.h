@@ -131,6 +131,8 @@ public:
 	void removeXErrors(); //comes handy
 	void removeAllXYSyst();
 
+	void removeYStatFromAll(bool alsonominal);
+
 	void sortPointsByX();
 
 	bool pointsYIdentical(size_t , size_t)const;

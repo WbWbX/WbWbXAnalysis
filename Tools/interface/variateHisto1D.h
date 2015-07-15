@@ -13,12 +13,13 @@
 #include "histo1D.h"
 #include <algorithm>
 #include "taggedObject.h"
+#include "simpleFitter.h"
 
 namespace ztop{
 
 class variateHisto1D : public taggedObject{
 public:
-	variateHisto1D(){}
+	variateHisto1D():comparehist_(0){}
 	~variateHisto1D(){}
 
 	void import(const histo1D&);
@@ -62,6 +63,9 @@ public:
 	extendedVariable getIntegral()const;
 
 
+	simpleFitter fitToConstHisto(const histo1D&);
+
+
 	/*
 	 * Warning: All operations are assumed to have no statistical limitations!
 	 * The stat uncertainty of "this" will be kept and scaled accordingly, but
@@ -102,6 +106,9 @@ private:
 	std::vector<float> errsdown_;
 
 	void checkCompat(const variateHisto1D& rhs)const;
+
+	double toBeMinimizedInFit(const double * variations)const;
+	const histo1D* comparehist_;//fot fit
 
 };
 

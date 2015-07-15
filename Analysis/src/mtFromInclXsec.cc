@@ -46,7 +46,16 @@ graphFitter mtFromInclXsec::getMassDependence(const TString& syst)const{
 	}
 
 	graphFitter gf;
-	gf.setFitMode(graphFitter::fm_pol2);
+	//gf.setFitMode(graphFitter::fm_pol2);
+	//graphFitter::debug=true;
+	//simpleFitter::printlevel=2;
+
+	gf.setFitMode(graphFitter::fm_exp);
+	gf.setParameterUpperLimit(1,-100);
+	gf.setParameterUpperLimit(2,0);
+	gf.setParameter(0,170);
+	//gf.setStrategy(2);
+
 	graph fitgr;
 	if(syst.Length()>0){
 		fitgr=exppoints_.getSystGraph(exppoints_.getSystErrorIndex(syst));
@@ -61,6 +70,9 @@ graphFitter mtFromInclXsec::getMassDependence(const TString& syst)const{
 
 
 	gf.fit();
+	if(syst.Length()<1)
+		std::cout << "fitted curve: xsec(m_t) = "
+		<< "\\text{exp}\\left(" << gf.getParameter(2) << "\\cdot (m_t/\\GeV + " << gf.getParameter(1) <<" ) " << "\\right)+"<< gf.getParameter(0)<<std::endl;
 
 	if(!gf.wasSuccess())
 		throw std::runtime_error("mtFromInclXsec::getMassDependence: fit failed");
@@ -121,9 +133,10 @@ void  mtFromInclXsec::extract(){
 		graphFitter sysfit;
 		if(sys>-1.)
 			sysfit=getMassDependence(exppoints_.getSystErrorName(sys)); //PERF
-		else
+		else{
+			std::cout << predicted_.idString() <<std::endl;
 			sysfit=getMassDependence();
-
+		}
 		for(size_t i=1;i<=massup.getNBinsX();i++){
 			for(size_t j=1;j<=massup.getNBinsY();j++){
 				//centerx+=1;

@@ -73,47 +73,47 @@ void analysisPlotsMlbMt::bookPlots(){
 	vector<float> coarsebins=histo1D::createBinning(10,20,160);
 	vector<float> verycoarsebins=histo1D::createBinning(3,20,160);
 
-	Mlb=addPlot(genmlb_bins,genmlb_bins,"m_lb leading unfold","M_{lb} [GeV]", "N_{evt}/GeV");
+	Mlb=addPlot(genmlb_bins,genmlb_bins,"m_lb leading unfold","M_{lb} [GeV]", "Events/GeV");
 
-	mlb=addPlot(genmlb_bins,genmlb_bins,"m_lb","m_{lb}* [GeV]", "N_{evt}/GeV");
+	mlb=addPlot(genmlb_bins,genmlb_bins,"m_lb","m_{lb}* [GeV]", "Events/GeV");
 
-	mlbmin=addPlot(genmlbmin_bins,genmlbmin_bins,"m_lb min","m_{lb}^{min} [GeV]", "N_{evt}/GeV");
+	mlbmin=addPlot(genmlbmin_bins,genmlbmin_bins,"m_lb min","m_{lb}^{min} [GeV]", "Events/GeV");
 
 	for(size_t nbjet=0;nbjet<3;nbjet++){
 		for(size_t nadd=0;nadd<4;nadd++){
 			setJetCategory(nbjet,nadd);
 			if(nbjet>0){
 				if(nbjet<2 && nadd < 3)
-					extraplots_.at(jetcategory)=addPlot(semicoarsebins,semicoarsebins,"m_lb min "+toTString(nbjet)+","+toTString(nadd)+ " b-jets","m_{lb}^{min} [GeV]", "N_{evt}/GeV");
+					extraplots_.at(jetcategory)=addPlot(semicoarsebins,semicoarsebins,"m_lb min "+toTString(nbjet)+","+toTString(nadd)+ " b-jets","m_{lb}^{min} [GeV]", "Events/GeV");
 				else if(nadd < 3 || nbjet<2)
-					extraplots_.at(jetcategory)=addPlot(coarsebins,coarsebins,"m_lb min "+toTString(nbjet)+","+toTString(nadd)+ " b-jets","m_{lb}^{min} [GeV]", "N_{evt}/GeV");
+					extraplots_.at(jetcategory)=addPlot(coarsebins,coarsebins,"m_lb min "+toTString(nbjet)+","+toTString(nadd)+ " b-jets","m_{lb}^{min} [GeV]", "Events/GeV");
 				else
-					extraplots_.at(jetcategory)=addPlot(verycoarsebins,verycoarsebins,"m_lb min "+toTString(nbjet)+","+toTString(nadd)+ " b-jets","m_{lb}^{min} [GeV]", "N_{evt}/GeV");
+					extraplots_.at(jetcategory)=addPlot(verycoarsebins,verycoarsebins,"m_lb min "+toTString(nbjet)+","+toTString(nadd)+ " b-jets","m_{lb}^{min} [GeV]", "Events/GeV");
 			}
 		}
 	}
-	mlbivansbins=addPlot(ivangen_mlbbins,ivan_mlbbins,"m_lb ivansbins","m_{lb}^{ivan} [GeV]", "N_{evt}/GeV");
+	mlbivansbins=addPlot(ivangen_mlbbins,ivan_mlbbins,"m_lb ivansbins","m_{lb}^{ivan} [GeV]", "Events/GeV");
 
-	mlbminbsrad=addPlot(genmlbmin_bins,genmlbmin_bins,"m_lb min bsrad","m_{lb}^{min} [GeV]", "N_{evt}/GeV");
+	mlbminbsrad=addPlot(genmlbmin_bins,genmlbmin_bins,"m_lb min bsrad","m_{lb}^{min} [GeV]", "Events/GeV");
 
 	vector<float> tmpbins=makebins(40,20,200);
 
-	leadleppt = addPlot(tmpbins,tmpbins,"leading top-lepton pt","p_{t}^{l} [GeV]", "N_{evt}/GeV");
+	leadleppt = addPlot(tmpbins,tmpbins,"leading top-lepton pt","p_{t}^{l} [GeV]", "Events/GeV");
 
 	tmpbins=makebins(40,20,350);
-	mll  = addPlot(tmpbins,tmpbins,"dilepton mass","m_{ll} [GeV]", "N_{evt}/GeV");
+	mll  = addPlot(tmpbins,tmpbins,"dilepton mass","m_{ll} [GeV]", "Events/GeV");
 
 
 
 	vector<float> inclbins; inclbins << 0.5 << 1.5; //vis PS, fullPS
 
 
-	total=addPlot(inclbins,inclbins,"total","bin","N_{evt}");
+	total=addPlot(inclbins,inclbins,"total","bin","Events");
 	total->setBinByBin(true); //independent bins
 	total->addTag(taggedObject::dontDivByBW_tag);
 
 
-	vistotal=addPlot(inclbins,inclbins,"vis total","bin","N_{evt}");
+	vistotal=addPlot(inclbins,inclbins,"vis total","bin","Events");
 	vistotal->setBinByBin(true); //independent bins
 	vistotal->addTag(taggedObject::dontDivByBW_tag);
 }

@@ -9,6 +9,7 @@
 <use   name="TopAnalysis/ZTopUtils"/>
 <use   name="CondFormats/JetMETObjects"/>
 <use   name="boost_iostreams"/>
+<use   name="qt"/>
 <export>
   <lib   name="1"/>
 </export>

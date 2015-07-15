@@ -9,7 +9,7 @@ echo "This script does not replace a proper compilation. It is just meant to qui
 infile=$1
 opts=$2
 
-export CPLUS_INCLUDE_PATH=$CMSSW_BASE/src
+export CPLUS_INCLUDE_PATH=$CMSSW_BASE/src:/usr/include/gtk-2.0/:/usr/include/glib-2.0/
 ROOTFLAGS=`root-config --cflags`
 ROOTLIBS=`root-config --libs`
 ROOTLIBS="${ROOTLIBS} -lXMLParser" #for TUnfold

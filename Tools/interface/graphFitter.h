@@ -27,6 +27,8 @@ public:
 	 */
 	void setInterpolate(bool set){interpolate_=set;}
 
+
+
 	/**
 	 * reads points, errors etc as input to fitting
 	 * systematic (if any) uncertainties are added in quadrature

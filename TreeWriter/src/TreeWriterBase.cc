@@ -1185,39 +1185,39 @@ void TreeWriterBase::setTriggers(){
 	triggers_.push_back("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v"); //17
 	triggers_.push_back("HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v"); //18
 	triggers_.push_back("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v"); //19
-	triggers_.push_back("HLT_DoubleEle45_CaloIdL_v");
+	triggers_.push_back("HLT_DoubleEle45_CaloIdL_v"); //20
 
 	//emu
 
-	triggers_.push_back("HLT_Mu10_Ele10_CaloIdL_"); //20
-	triggers_.push_back("HLT_Mu8_Ele17_CaloIdL_"); //21
-	triggers_.push_back("HLT_Mu17_Ele8_CaloIdL_"); //22
-	triggers_.push_back("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v"); //23
-	triggers_.push_back("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v"); //24
-	triggers_.push_back("HLT_Mu10_Ele10_CaloIdL_v"); //25
+	triggers_.push_back("HLT_Mu10_Ele10_CaloIdL_"); //21
+	triggers_.push_back("HLT_Mu8_Ele17_CaloIdL_"); //22
+	triggers_.push_back("HLT_Mu17_Ele8_CaloIdL_"); //23
+	triggers_.push_back("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v"); //24
+	triggers_.push_back("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v"); //25
+	triggers_.push_back("HLT_Mu10_Ele10_CaloIdL_v"); //26
 
 	/// 7TeV single lep go here!!! only append - DONT change order (kills compat inbetween ntuples!)
 
 
 	// agrohsje added triggers for upcoming 13 TeV run 
 	//mumu
-	triggers_.push_back("HLT_Mu17_Mu8_DZ_v"); //26
-	triggers_.push_back("HLT_Mu17_TkMu8_DZ_v2"); //27
-	triggers_.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v"); //28
-	triggers_.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v"); //29
-        triggers_.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");//30
-        triggers_.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2");//31 
-	triggers_.push_back("HLT_DoubleMu18NoFiltersNoVtx_v"); //32
+	triggers_.push_back("HLT_Mu17_Mu8_DZ_v"); //27
+	triggers_.push_back("HLT_Mu17_TkMu8_DZ_v2"); //28
+	triggers_.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v"); //29
+	triggers_.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v"); //30
+        triggers_.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");//31
+        triggers_.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2");//32
+	triggers_.push_back("HLT_DoubleMu18NoFiltersNoVtx_v"); //33
 	//ee 
-	triggers_.push_back("HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"); //33
-        triggers_.push_back("HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_v"); //34
-        triggers_.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"); //35
-        triggers_.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"); //36
+	triggers_.push_back("HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"); //34
+        triggers_.push_back("HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_v"); //35
+        triggers_.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"); //36
+        triggers_.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"); //37
 	//emu
-	triggers_.push_back("HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v"); //37
-	triggers_.push_back("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v2"); //38
-        triggers_.push_back("HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v2"); //39
-        triggers_.push_back("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v2"); //40
+	triggers_.push_back("HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v"); //38
+	triggers_.push_back("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v2"); //39
+        triggers_.push_back("HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v2"); //40
+        triggers_.push_back("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v2"); //41
 	//triggers_.push_back("");
 
 }

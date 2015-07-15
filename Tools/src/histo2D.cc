@@ -10,6 +10,7 @@
 #include "../interface/histo2D.h"
 #include <algorithm>
 #include "../interface/systAdder.h"
+#include "../interface/textFormatter.h"
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/zlib.hpp>
 
@@ -23,7 +24,6 @@ histo2D::histo2D():taggedObject(taggedObject::type_container2D), divideBinomial_
 		mergeufof_(false),xaxisname_(""),yaxisname_(""),zaxisname_("") {
 	setName("");
 	std::vector<float> nobins;
-	nobins.push_back(1);
 	setBinning(nobins,nobins);
 	if(c_makelist){
 		c_list.push_back(this);
@@ -55,10 +55,7 @@ histo2D::histo2D(const std::vector<float> &xbins,const std::vector<float> &ybins
 }
 
 void histo2D::setBinning(const std::vector<float> &xbins, std::vector<float> ybins){
-	if(xbins.size()<1 || ybins.size() <1){
-		std::cout << "container2D::setBinning: bins have to be at least of size 1! ybins: "<<  ybins.size()<< " xbins: "<< xbins.size()<<" name: " <<name_ <<std::endl;
-		throw std::logic_error("container2D::setBinning: bins have to be at least of size 1!");
-	}
+
 
 
 	bool temp=histo1D::c_makelist;
@@ -532,7 +529,8 @@ void histo2D::setYSlice(size_t ybinno,const histo1D & in, bool UFOF){
 TH2D * histo2D::getTH2D(TString name, bool dividebybinarea, bool onlystat) const{
 	if(getNBinsX() < 1 || getNBinsY() <1)
 		return 0; //there is not even one real, non OF or UF container
-
+	if(name=="")name=name_;
+	name=textFormatter::makeCompatibleFileName(name.Data());
 	TH2D * h=new TH2D(name,name,getNBinsX(),&(xbins_.at(1)),getNBinsY(),&(ybins_.at(1)));
 	size_t entries=0;
 	for(size_t xbin=0;xbin<=getNBinsX()+1;xbin++){ // 0 underflow, genBins+1 overflow included!!

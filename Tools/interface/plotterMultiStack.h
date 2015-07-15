@@ -25,6 +25,7 @@ public:
 	}
 	~plotterMultiStack(){}
 
+	void addStyleForAllPlots(const std::string &,const std::string &,const std::string &);
 
 
 	void addStack(const histoStack *s);

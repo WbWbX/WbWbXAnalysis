@@ -121,6 +121,43 @@ extendedVariable variateHisto1D::getIntegral()const{
 	return out;
 }
 
+double variateHisto1D::toBeMinimizedInFit(const double * variations)const{
+	if(!comparehist_)
+		return 0;
+	double out=0;
+	for(size_t i=0;i<contents_.size();i++){
+		double binval=contents_.at(i).getValue(variations);
+
+		double chi2= (binval - comparehist_->getBinContent(i));
+		chi2/=comparehist_->getBinStat(i);
+		chi2*=chi2;
+
+		out+=chi2;
+	}
+	return out;
+}
+
+simpleFitter variateHisto1D::fitToConstHisto(const histo1D& h){
+	if(h.getBins() != bins_){
+		throw std::runtime_error("variateHisto1D::fitToConstHisto: bins have to be the same");
+	}
+
+	comparehist_=&h;
+	simpleFitter fitter;
+	fitter.setRequireFitFunction(false);
+	//fitter.setRequireFitFunction()
+	///define function object somewhere
+	size_t ndep= getNDependencies();
+	ROOT::Math::Functor func=ROOT::Math::Functor(this,&variateHisto1D::toBeMinimizedInFit,ndep);
+	std::vector<double> paras(ndep,0);
+	std::vector<double> steps(ndep,0.1);
+	fitter.setParameters(paras,steps);
+	fitter.setMinFunction (&func);
+	fitter.fit();
+
+	return fitter;
+}
+
 variateHisto1D& variateHisto1D::operator *= (const variateHisto1D&rhs){
 	checkCompat(rhs);
 	for(size_t i=0;i<contents_.size();i++){

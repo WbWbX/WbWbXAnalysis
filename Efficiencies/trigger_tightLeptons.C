@@ -139,10 +139,14 @@ void trigger_tightLeptons(){
 	ta_eed.setMassCutLow(20);
 	ta_eed.setIncludeCorr(includecorr);
 
+	ta_eed.checkTriggerPaths(true);
+
 	ta_emud.setMode("emu");
 	ta_emud.setMassCutLow(20);
 	ta_emud.setIncludeCorr(includecorr);
 	//   ta_emud.setDileptonTrigger("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
+
+	ta_emud.checkTriggerPaths(true);
 
 	ta_mumud.setMode("mumu");
 	//  ta_mumud.setDileptonTrigger("HLT_Mu17_Mu8_v");

@@ -92,6 +92,8 @@ void top_prediction::readPrediction(const std::string& infile, const std::string
 		fr.setRequireValues(false);
 		relerrors_.at(err_alphasup)=fr.getValue<double>("alphaserrup",0);
 		relerrors_.at(err_alphasdown)=fr.getValue<double>("alphaserrdown",0);
+		relerrors_.at(err_addgausup)=fr.getValue<double>("adderrup",0);
+		relerrors_.at(err_addgausdown)=fr.getValue<double>("adderrdown",0);
 		for(size_t i=0;i<relerrors_.size();i++){
 			if(relerrors_.at(i)==0)
 				relerrors_.at(i)=1e-6; //protect against zeros
@@ -193,6 +195,8 @@ void top_prediction::exportLikelihood(histo2D *h,bool scalegaus)const{
 			double scaledown= getXsec(centerx,err_scaledown)- xsec;
 			double asup= getXsec(centerx,err_alphasup)- xsec;
 			double asdown= getXsec(centerx,err_alphasdown)- xsec;
+			double addgup= getXsec(centerx,err_addgausup)- xsec;
+			double addgdown= getXsec(centerx,err_addgausdown)- xsec;
 			bool corrdummy=true;
 			double maxscaleup=getMaxVar(true,scaleup,scaledown,corrdummy);
 			double maxscaledown=getMaxVar(false,scaleup,scaledown,corrdummy);
@@ -203,10 +207,12 @@ void top_prediction::exportLikelihood(histo2D *h,bool scalegaus)const{
 			double maxasup=getMaxVar(true,asup,asdown,corrdummy);
 			double maxasdown=getMaxVar(false,asup,asdown,corrdummy);
 
+			double maxaddup=getMaxVar(true,addgup,addgdown,corrdummy);
+			double maxadddown=getMaxVar(false,addgup,addgdown,corrdummy);
 			//add alpha_s errors
 
-			double totalgaussup=sqrt(maxasup*maxasup+maxpdfup*maxpdfup);
-			double totalgaussdown=sqrt(maxasdown*maxasdown+maxpdfdown*maxpdfdown);
+			double totalgaussup=sqrt(maxasup*maxasup+maxpdfup*maxpdfup+maxaddup*maxaddup);
+			double totalgaussdown=sqrt(maxasdown*maxasdown+maxpdfdown*maxpdfdown+maxadddown*maxadddown);
 			double likelihood  =0;
 			if(!scalegaus){
 				likelihood= 1/(2* (maxscaleup -  maxscaledown));

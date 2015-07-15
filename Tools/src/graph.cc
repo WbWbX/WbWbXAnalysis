@@ -14,6 +14,7 @@
 #include "TFile.h"
 #include "FWCore/FWLite/interface/AutoLibraryLoader.h"
 #include "TtZAnalysis/Tools/interface/histoStyle.h"
+#include "TtZAnalysis/Tools/interface/textFormatter.h"
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/zlib.hpp>
 
@@ -257,7 +258,14 @@ void graph::removeAllXYSyst(){
 	xcoords_.removeAdditionalLayers();
 	ycoords_.removeAdditionalLayers();
 }
-
+void graph::removeYStatFromAll(bool alsonominal){
+	int start=-1;
+	if(!alsonominal) start=0;
+	for(int sys=start;sys<(int)ycoords_.layerSize();sys++){
+		for(size_t i=0;i<ycoords_.size();i++)
+			ycoords_.setBinStat(i,0,sys);
+	}
+}
 /**
  * changes indices of coordinates according to their x coordinates (increasing order)
  *
@@ -325,6 +333,7 @@ void graph::normalizeToGraph(const graph& g){
 	}
 	graph tempg=g;
 	tempg.removeAllXYSyst();
+	tempg.removeYStatFromAll(true);
 	bool temp=histoContent::divideStatCorrelated;
 	histoContent::divideStatCorrelated=false;
 	ycoords_/=tempg.ycoords_;
@@ -498,6 +507,7 @@ void graph::shiftAllYCoordinates(const float& value){
 
 TGraphAsymmErrors * graph::getTGraph(TString name,bool onlystat) const{
 	if(name=="") name=name_;
+	name=textFormatter::makeCompatibleFileName(name.Data());
 	if(getNPoints()<1)
 		return 0;
 	std::vector<float> x,y,xeh,xel,yeh,yel;
@@ -555,7 +565,7 @@ TH1 * graph::getAxisTH1(bool tighty,bool tightx)const{
 		xmin-=(0.20* (xmax-xmin));
 		xmax+=(0.20* (xmax-xminold));
 	}
-	TH1F * h = new TH1F(name_+"_axis",name_+"_axis",200,xmin,xmax);
+	TH1F * h = new TH1F((TString)textFormatter::makeCompatibleFileName(name_.Data())+"_axis",name_+"_axis",200,xmin,xmax);
 	h->GetXaxis()->SetTitle(xname_);
 	h->GetYaxis()->SetTitle(yname_);
 	h->Fill(xmax-xmin);
