@@ -49,7 +49,7 @@ $$ all directories except for inputfiles are relative to $CMSSW_BASE
 inputFilesDir = /nfs/dust/cms/user/tarndt/NTuples/Prod_746/
 $inputFilesDir = /nfs/dust/cms/user/agrohsje/NAF_workingDir/ana_samples_150206/
 
-Lumi           =5.7
+Lumi           =18.7
 
 JECFile        = /src/TtZAnalysis/Analysis/data/analyse/Summer13_V5_DATA_UncertaintySources_AK5PFchs.txt
 
