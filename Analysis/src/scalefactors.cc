@@ -40,19 +40,14 @@ int scalefactors::setInput(TString filename, TString histname, TString histnamee
 	TObject * ph = tryToGet<TObject>(f,histname);
 	TString classname = ph->ClassName();
 	if (classname.Contains("TH2")) {
-		TH2* th2 = (TH2D*) ph;
-                for(int binx=0;binx<=th2->GetNbinsX();binx++){
-                        for(int biny=0;biny<=th2->GetNbinsY();biny++){
-                        th2d_.SetBinContent(binx,biny, th2->GetBinContent(binx,biny) );  
-                        }
-                }
+		th2d_ = *(TH2D*) ph;
 		h = &th2d_;
 		isth2d_ = true;
 		isglobal_ = false;
 		//fill errors
 		th2derrup_=th2d_;
 		th2derrdown_=th2d_;
-		if(histnameerrup.Length()<1 || histnameerrup.Length()<1){
+		if(histnameerrup.Length()<1 || histnameerrdown.Length()<1){
 			for(int binx=0;binx<=th2d_.GetNbinsX();binx++){
 				for(int biny=0;biny<=th2d_.GetNbinsY();biny++){
 					//std::cout << "setting errors: " << th2d_.GetBinContent(binx,biny) + th2d_.GetBinError(binx,biny) <<std::endl;
