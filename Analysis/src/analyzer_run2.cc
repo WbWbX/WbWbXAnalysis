@@ -867,8 +867,9 @@ void  analyzer_run2::analyze(size_t anaid){
 			seclep=leppair->second[1];
 			lepweight*=getMuonSF()->getScalefactor(firstlep->pt(),fabs(firstlep->eta()));
 			lepweight*=getMuonSF()->getScalefactor(seclep->pt(),fabs(seclep->eta()));
-			lepweight*=getTrackingSF()->getScalefactor((firstlep->eta()));
-			lepweight*=getTrackingSF()->getScalefactor((seclep->eta()));
+			//agrohsje not used for time being
+			//lepweight*=getTrackingSF()->getScalefactor((firstlep->eta()));
+			//lepweight*=getTrackingSF()->getScalefactor((seclep->eta()));
 			lepweight*=getTriggerSF()->getScalefactor(fabs(firstlep->eta()),fabs(seclep->eta()));
 		}
 		else if(b_emu_){
@@ -879,7 +880,8 @@ void  analyzer_run2::analyze(size_t anaid){
 			seclep=leppair->second[0];
 			lepweight*=getElecSF()->getScalefactor((firstlep->eta()),firstlep->pt());
 			lepweight*=getMuonSF()->getScalefactor(fabs(seclep->eta()),seclep->pt());
-			lepweight*=getTrackingSF()->getScalefactor((seclep->eta()));
+			//agrohsje not used for time being
+			//lepweight*=getTrackingSF()->getScalefactor((seclep->eta()));
 			lepweight*=getTriggerSF()->getScalefactor(fabs(firstlep->eta()),fabs(seclep->eta()));
 		}
 
