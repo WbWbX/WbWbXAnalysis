@@ -379,8 +379,8 @@ scaleerrup = 6.1473537203743038e-02
 scaleerrdown = -1.0284630011330465e-01
 pdferrup   = 2.9480754703121548e-02
 pdferrdown   = -2.5866611183521279e-02
-alphaserrup   = 1.5493412161201762e-02
-alphaserrdown   = -3.9741109631453393e-02
+alphaserrup   = 1.32370638e-02
+alphaserrdown   = -1.203369434e-02
 adderrup     = 1.79e-2
 adderrdown   = -1.79e-2
 [end pred]
@@ -398,11 +398,11 @@ par5     = -3.0818775240137875e-07
 par6     = 3.2944157415080999e-09
 relerr   = true
 scaleerrup = 6.5244654025845686e-02
-scaleerrdown = -1.0158523871653384e-01
+scaleerrdown = -1.0158523871653384e-01 
 pdferrup   = 2.7506407179157734e-02
 pdferrdown   = -2.4175447143279950e-02
-alphaserrup   = 1.4384766849355272e-02
-alphaserrdown   = -3.7623806927323686e-02
+alphaserrup   = 1.2605042-02
+alphaserrdown   = -1.260504202e-02
 adderrup     = 1.72e-2
 adderrdown   = -1.72e-2
 [end pred]
