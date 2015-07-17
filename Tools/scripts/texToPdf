@@ -4,12 +4,13 @@
 # from tools.
 # creates a new pdf file with a small border
 
-if [ `which pdflatex` ]
+if [ `which pdflatex` ] && [ $1 ]
 then
     
-    tmpfile=$(date +%s%N)
-
-    export TEXINPUTS=/afs/desy.de/user/k/kiesej/latexPacks:$TEXINPUTS
+    tmpfile=/tmp/$(date +%s%N)
+    trap "rm -rf $tmpfile; exit" SIGHUP SIGINT SIGTERM
+    
+    export TEXINPUTS=$CMSSW_BASE/src/TtZAnalysis/Tools/scripts/tex_packages:$TEXINPUTS
     
     printf "\\\documentclass[11pt]{article}">>| $tmpfile
 #printf "\\\usepackage{blindtext}">>| $tmpfile
