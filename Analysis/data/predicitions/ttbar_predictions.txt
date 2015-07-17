@@ -228,7 +228,7 @@ adderrdown   = -1.72e-2
 
 
 [pred - Hathor_MMHT2014nnlo68cl_NNLO_7000_MSbar]
-central for mt172.5 = 1.7410881090347397e+02
+central  = 1.7410881090347397e+02
 xshift   = 1.6000000000000000e+02
 yshift   = 2.5633230590820312e+02
 par0     = -5.2302495700341296e+01
@@ -250,7 +250,7 @@ adderrdown   = -1.79e-2
 [end pred]
 
 [pred - Hathor_MMHT2014nnlo68cl_NNLO_8000_MSbar]
-central for mt172.5 = 2.4846210620782708e+02
+central  = 2.4846210620782708e+02
 xshift   = 1.6000000000000000e+02
 yshift   = 3.6133300781250000e+02
 par0     = -7.1219131166543775e+01
@@ -272,7 +272,7 @@ adderrdown   = -1.72e-2
 [end pred]
 
 [pred - Hathor_MMHT2014nnlo68cl_NLO_7000_MSbar]
-central for mt172.5 = 1.6865951571556786e+02
+central  = 1.6865951571556786e+02
 xshift   = 1.6000000000000000e+02
 yshift   = 2.4812538146972656e+02
 par0     = -5.0521237952084903e+01
@@ -294,7 +294,7 @@ adderrdown   = -1.79e-2
 [end pred]
 
 [pred - Hathor_MMHT2014nnlo68cl_NLO_8000_MSbar]
-central for mt172.5 = 2.4071059042493292e+02
+central  = 2.4071059042493292e+02
 xshift   = 1.6000000000000000e+02
 yshift   = 3.4981838989257812e+02
 par0     = -6.8808107685832510e+01
@@ -317,7 +317,7 @@ adderrdown   = -1.72e-2
 
 
 [pred - Hathor_MMHT2014nnlo68cl_LO_7000_MSbar]
-central for mt172.5 = 1.3337698866150814e+02
+central  = 1.3337698866150814e+02
 xshift   = 1.6000000000000000e+02
 yshift   = 1.9418864440917969e+02
 par0     = -3.8386123072616556e+01
@@ -341,7 +341,7 @@ adderrdown   = -1.79e-2
 
 
 [pred - Hathor_MMHT2014nnlo68cl_LO_8000_MSbar]
-central for mt172.5 = 1.8883198015286635e+02
+central  = 1.8883198015286635e+02
 xshift   = 1.6000000000000000e+02
 yshift   = 2.7172198486328125e+02
 par0     = -5.1903034679640314e+01
