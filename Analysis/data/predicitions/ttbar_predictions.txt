@@ -1,0 +1,277 @@
+[pred - Hathor_NNPDF30_nnlo_as_0118_NNLO_7000_MSbar]
+central for mt172.5 = 1.7239809192455965e+02
+xshift   = 1.6000000000000000e+02
+yshift   = 2.5456178283691406e+02
+par0     = -5.2345581967907492e+01
+par1     = -6.5340089044117349e+00
+par2     = 1.2214752154977759e-01
+par3     = -1.7332285463611541e-03
+par4     = 2.0610259987341450e-05
+par5     = -2.4406631714962712e-07
+par6     = 2.9520730937884765e-09
+relerr   = true
+scaleerrup = 9.4821279272757474e-03
+scaleerrdown = -3.2571302371771693e-02
+pdferrup   = 2.5908344652075910e-02
+pdferrdown   = -2.5908344652075910e-02
+alphaserrup   = 0.0146171694 
+alphaserrdown   = -0.01148491879
+adderrup     = 1.79e-2
+adderrdown   = -1.79e-2
+[end pred]
+
+[pred - Hathor_NNPDF30_nnlo_as_0118_NNLO_8000_MSbar]
+central for mt172.5 = 2.4679951280591973e+02
+xshift   = 1.6000000000000000e+02
+yshift   = 3.5976083374023438e+02
+par0     = -7.1365954979246453e+01
+par1     = -9.0990857955672482e+00
+par2     = 1.6686330248450076e-01
+par3     = -2.3308864537199270e-03
+par4     = 2.7313663371053565e-05
+par5     = -3.1981727406302229e-07
+par6     = 3.9136387659267913e-09
+relerr   = true
+scaleerrup = 8.9723579646291060e-03
+scaleerrdown = -3.1812374716659708e-02
+pdferrup   = 2.3536831748705595e-02
+pdferrdown   = -2.3536831748705595e-02
+alphaserrup   = 0.0136831997 
+alphaserrdown   = -0.01134526477
+adderrup     = 1.72e-2
+adderrdown   = -1.72e-2
+[end pred]
+
+
+[pred - Hathor_NNPDF30_nnlo_as_0118_NLO_7000_MSbar]
+central for mt172.5 = 1.6694675909913067e+02
+xshift   = 1.6000000000000000e+02
+yshift   = 2.4633729553222656e+02
+par0     = -5.0553202322942980e+01
+par1     = -6.3183201487254337e+00
+par2     = 1.1799758475567046e-01
+par3     = -1.6719592609053535e-03
+par4     = 1.9941089957953295e-05
+par5     = -2.3374026991013208e-07
+par6     = 2.5564737085072287e-09
+relerr   = true
+scaleerrup = 6.1785871955674129e-02
+scaleerrdown = -1.0289375464480680e-01
+pdferrup   = 2.5903278803045139e-02
+pdferrdown   = -2.5903278803045139e-02
+alphaserrup   = 0.0143798682 
+alphaserrdown   = -0.01078490114 
+adderrup     = 1.79e-2
+adderrdown   = -1.79e-2
+[end pred]
+q
+
+[pred - Hathor_NNPDF30_nnlo_as_0118_NLO_8000_MSbar]
+central for mt172.5 = 2.3903174017656949e+02
+xshift   = 1.6000000000000000e+02
+yshift   = 3.4820770263671875e+02
+par0     = -6.8939599203888974e+01
+par1     = -8.8008027010173464e+00
+par2     = 1.6123211496903878e-01
+par3     = -2.2487736531218161e-03
+par4     = 2.6450838367608753e-05
+par5     = -3.0661608831777931e-07
+par6     = 3.3537987881651632e-09
+relerr   = true
+scaleerrup = 6.5406052349342894e-02
+scaleerrdown = -1.0148931289972117e-01
+pdferrup   = 2.3546356845414288e-02
+pdferrdown   = -2.3546356845414288e-02
+alphaserrup   = 0.0133456052 
+alphaserrdown   = -0.011002803 
+adderrup     = 1.72e-2
+adderrdown   = -1.72e-2
+[end pred]
+
+
+[pred - Hathor_NNPDF30_nnlo_as_0118_LO_7000_MSbar]
+central for mt172.5 = 1.3186750675139794e+02
+xshift   = 1.6000000000000000e+02
+yshift   = 1.9258541870117188e+02
+par0     = -3.8393958608287448e+01
+par1     = -4.8843131768314834e+00
+par2     = 8.9797821625438701e-02
+par3     = -1.2546887071653856e-03
+par4     = 1.4648642285397528e-05
+par5     = -1.7051416446693668e-07
+par6     = 2.0480691890686908e-09
+relerr   = true
+scaleerrup = 3.5009224802105726e-01
+scaleerrdown = -2.4071360736414141e-01
+pdferrup   = 2.3805123101489994e-02
+pdferrdown   = -2.3805123101489994e-02
+alphaserrup   = 0 
+alphaserrdown   = 0 
+adderrup     = 1.79e-2
+adderrdown   = -1.79e-2
+[end pred]
+
+[pred - Hathor_NNPDF30_nnlo_as_0118_LO_8000_MSbar]
+central for mt172.5 = 1.8733038166679682e+02
+xshift   = 1.6000000000000000e+02
+yshift   = 2.7024032592773438e+02
+par0     = -5.1990148029383818e+01
+par1     = -6.7537664734430223e+00
+par2     = 1.2183530517583563e-01
+par3     = -1.6755065569542538e-03
+par4     = 1.9265984596117391e-05
+par5     = -2.2230183297118622e-07
+par6     = 2.7111514968800043e-09
+relerr   = true
+scaleerrup = 3.3755458410905675e-01
+scaleerrdown = -2.3472590657875222e-01
+pdferrup   = 2.1787931718006383e-02
+pdferrdown   = -2.1787931718006383e-02
+alphaserrup   = 0 
+alphaserrdown   = 0 
+adderrup     = 1.72e-2
+adderrdown   = -1.72e-2
+[end pred]
+
+
+[pred - Hathor_NNPDF30_nlo_as_0118_NLO_7000_MSbar]
+central for mt172.5 = 1.7262367816799727e+02
+xshift   = 1.6000000000000000e+02
+yshift   = 2.5439360046386719e+02
+par0     = -5.2020677484697188e+01
+par1     = -6.5168988175040310e+00
+par2     = 1.2145015039537589e-01
+par3     = -1.7176895425881839e-03
+par4     = 2.0471552431403432e-05
+par5     = -2.3922973695660111e-07
+par6     = 2.5811100703876906e-09
+relerr   = true
+scaleerrup = 6.2568088287185658e-02
+scaleerrdown = -1.0370204593946197e-01
+pdferrup   = 2.1646425342331750e-02
+pdferrdown   = -2.1646425342331750e-02
+alphaserrup   = 0.0127462341 
+alphaserrdown   = -0.01564310545 
+adderrup     = 1.79e-2
+adderrdown   = -1.79e-2
+[end pred]
+
+[pred - Hathor_NNPDF30_nlo_as_0118_NLO_8000_MSbar]
+central for mt172.5 = 2.4673960658232252e+02
+xshift   = 1.6000000000000000e+02
+yshift   = 3.5898764038085938e+02
+par0     = -7.0813632910793672e+01
+par1     = -9.0611621918354359e+00
+par2     = 1.6565027143190900e-01
+par3     = -2.3061599759578856e-03
+par4     = 2.7108947212221739e-05
+par5     = -3.1327282116719680e-07
+par6     = 3.3769301225568769e-09
+relerr   = true
+scaleerrup = 6.6136234640599562e-02
+scaleerrdown = -1.0219768546250198e-01
+pdferrup   = 1.9871968010973257e-02
+pdferrdown   = -1.9871968010973257e-02
+alphaserrup   = 0.0127462341 
+alphaserrdown   = -0.01499797325 
+adderrup     = 1.72e-2
+adderrdown   = -1.72e-2
+[end pred]
+
+
+[pred - Hathor_NNPDF30_lo_as_0118_LO_7000_MSbar]
+central for mt172.5 = 1.3684007058923555e+02
+xshift   = 1.6000000000000000e+02
+yshift   = 2.0040574645996094e+02
+par0     = -4.0295247008972183e+01
+par1     = -5.0937849350693796e+00
+par2     = 9.4159431416670714e-02
+par3     = -1.3237948304336555e-03
+par4     = 1.5575452009475299e-05
+par5     = -1.8248827158250103e-07
+par6     = 2.1787285942390100e-09
+relerr   = true
+scaleerrup = 3.4934924712744214e-01
+scaleerrdown = -2.4074041546823266e-01
+pdferrup   = 1.4184165418788172e-01
+pdferrdown   = -1.4184165418788172e-01
+alphaserrup   = 0 
+alphaserrdown   = 0 
+adderrup     = 1.79e-2
+adderrdown   = -1.79e-2
+[end pred]
+
+[pred - Hathor_NNPDF30_lo_as_0118_LO_8000_MSbar]
+central for mt172.5 = 1.9500083534404772e+02
+xshift   = 1.6000000000000000e+02
+yshift   = 2.8225997924804688e+02
+par0     = -5.4884208906235472e+01
+par1     = -7.0755742376857143e+00
+par2     = 1.2848452392717036e-01
+par3     = -1.7799319086142518e-03
+par4     = 2.0652200531712239e-05
+par5     = -2.4008939604990009e-07
+par6     = 2.9077269229557667e-09
+relerr   = true
+scaleerrup = 3.3754786911502882e-01
+scaleerrdown = -2.3513138657331645e-01
+pdferrup   = 1.3829445726340506e-01
+pdferrdown   = -1.3829445726340506e-01
+alphaserrup   = 0 
+alphaserrdown   = 0 
+adderrup     = 1.72e-2
+adderrdown   = -1.72e-2
+[end pred]
+
+
+############## NNPDF30 DONE ###############
+
+
+
+
+[pred - Hathor_MMHT2014nlo68clas118_NLO_7000_MSbar]
+central for mt172.5 = 1.6621068265715289e+02
+xshift   = 1.6000000000000000e+02
+yshift   = 2.4538059997558594e+02
+par0     = -5.0447835196610413e+01
+par1     = -6.2937548967450994e+00
+par2     = 1.1769487620892960e-01
+par3     = -1.6727293070815108e-03
+par4     = 2.0055499804882970e-05
+par5     = -2.3444949720854980e-07
+par6     = 2.5158496427639399e-09
+relerr   = true
+scaleerrup = 6.1473537203743038e-02
+scaleerrdown = -1.0284630011330465e-01
+pdferrup   = 2.9480754703121548e-02
+pdferrdown   = -2.5866611183521279e-02
+alphaserrup   = 1.5493412161201762e-02
+alphaserrdown   = -3.9741109631453393e-02
+adderrup     = 1.79e-2
+adderrdown   = -1.79e-2
+[end pred]
+
+[pred - Hathor_MMHT2014nlo68clas118_NLO_8000_MSbar]
+central for mt172.5 = 2.3808484011122238e+02
+xshift   = 1.6000000000000000e+02
+yshift   = 3.4712655639648438e+02
+par0     = -6.8916825028102721e+01
+par1     = -8.7777039261582104e+00
+par2     = 1.6109761670014677e-01
+par3     = -2.2543801850698486e-03
+par4     = 2.6668502654869641e-05
+par5     = -3.0818775240137875e-07
+par6     = 3.2944157415080999e-09
+relerr   = true
+scaleerrup = 6.5244654025845686e-02
+scaleerrdown = -1.0158523871653384e-01
+pdferrup   = 2.7506407179157734e-02
+pdferrdown   = -2.4175447143279950e-02
+alphaserrup   = 1.4384766849355272e-02
+alphaserrdown   = -3.7623806927323686e-02
+adderrup     = 1.72e-2
+adderrdown   = -1.72e-2
+[end pred]
+
+
+
