@@ -227,6 +227,140 @@ adderrdown   = -1.72e-2
 ############## NNPDF30 DONE ###############
 
 
+[pred - Hathor_MMHT2014nnlo68cl_NNLO_7000_MSbar]
+central for mt172.5 = 1.7410881090347397e+02
+xshift   = 1.6000000000000000e+02
+yshift   = 2.5633230590820312e+02
+par0     = -5.2302495700341296e+01
+par1     = -6.5542382183537029e+00
+par2     = 1.2206107814458278e-01
+par3     = -1.7297619552500976e-03
+par4     = 2.0564835268466197e-05
+par5     = -2.4248044555585935e-07
+par6     = 2.9324322831092431e-09
+relerr   = true
+scaleerrup = 9.3560860633288643e-03
+scaleerrdown = -3.1959934323525334e-02
+pdferrup   = 2.2333541076985122e-02
+pdferrdown   = -3.1227617792665252e-02
+alphaserrup   = 2.1270579995640970e-02
+alphaserrdown   = -1.6917862416821468e-02
+adderrup     = 1.79e-2
+adderrdown   = -1.79e-2
+[end pred]
+
+[pred - Hathor_MMHT2014nnlo68cl_NNLO_8000_MSbar]
+central for mt172.5 = 2.4846210620782708e+02
+xshift   = 1.6000000000000000e+02
+yshift   = 3.6133300781250000e+02
+par0     = -7.1219131166543775e+01
+par1     = -9.1088733206490815e+00
+par2     = 1.6652920394693638e-01
+par3     = -2.3241070616339954e-03
+par4     = 2.7230285020607425e-05
+par5     = -3.1817084221452685e-07
+par6     = 3.9158951090426108e-09
+relerr   = true
+scaleerrup = 8.8602464116823380e-03
+scaleerrdown = -3.1252275782740639e-02
+pdferrup   = 2.0798227637090477e-02
+pdferrdown   = -2.8469216141922854e-02
+alphaserrup   = 1.9606007526340827e-02
+alphaserrdown   = -1.6008296292793593e-02
+adderrup     = 1.72e-2
+adderrdown   = -1.72e-2
+[end pred]
+
+[pred - Hathor_MMHT2014nnlo68cl_NLO_7000_MSbar]
+central for mt172.5 = 1.6865951571556786e+02
+xshift   = 1.6000000000000000e+02
+yshift   = 2.4812538146972656e+02
+par0     = -5.0521237952084903e+01
+par1     = -6.3395595153760951e+00
+par2     = 1.1793487579399198e-01
+par3     = -1.6688267071893748e-03
+par4     = 1.9916071130055002e-05
+par5     = -2.3223295236331210e-07
+par6     = 2.5111540273396737e-09
+relerr   = true
+scaleerrup = 6.1380535650438724e-02
+scaleerrdown = -1.0163119517492099e-01
+pdferrup   = 2.2273922674347812e-02
+pdferrdown   = -3.1216574479810136e-02
+alphaserrup   = 2.0972954174425389e-02
+alphaserrdown   = -1.6602905784874677e-02 
+adderrup     = 1.79e-2
+adderrdown   = -1.79e-2
+[end pred]
+
+[pred - Hathor_MMHT2014nnlo68cl_NLO_8000_MSbar]
+central for mt172.5 = 2.4071059042493292e+02
+xshift   = 1.6000000000000000e+02
+yshift   = 3.4981838989257812e+02
+par0     = -6.8808107685832510e+01
+par1     = -8.8121388948702588e+00
+par2     = 1.6093359136036156e-01
+par3     = -2.2426345865955710e-03
+par4     = 2.6387254646431657e-05
+par5     = -3.0467568967393333e-07
+par6     = 3.3237793715251707e-09
+relerr   = true
+scaleerrup = 6.5052555463250422e-02
+scaleerrdown = -1.0030910261540506e-01
+pdferrup   = 2.0758670149869568e-02
+pdferrdown   = -2.8479823689127250e-02
+alphaserrup   = 1.9306271349701636e-02 
+alphaserrdown   = -1.5692123188074943e-02 
+adderrup     = 1.72e-2
+adderrdown   = -1.72e-2
+[end pred]
+
+
+[pred - Hathor_MMHT2014nnlo68cl_LO_7000_MSbar]
+central for mt172.5 = 1.3337698866150814e+02
+xshift   = 1.6000000000000000e+02
+yshift   = 1.9418864440917969e+02
+par0     = -3.8386123072616556e+01
+par1     = -4.9046641652366247e+00
+par2     = 8.9791517631880424e-02
+par3     = -1.2525296836445321e-03
+par4     = 1.4629653376063700e-05
+par5     = -1.6933423312506801e-07
+par6     = 2.0123047757194396e-09
+relerr   = true
+scaleerrup = 3.4581909100725650e-01
+scaleerrdown = -2.3876241830462464e-01
+pdferrup   = 2.0530638682800001e-02
+pdferrdown   = -2.9405964294485304e-02
+alphaserrup   = 0 
+alphaserrdown   = 0 
+adderrup     = 1.79e-2
+adderrdown   = -1.79e-2
+[end pred]
+
+
+
+[pred - Hathor_MMHT2014nnlo68cl_LO_8000_MSbar]
+central for mt172.5 = 1.8883198015286635e+02
+xshift   = 1.6000000000000000e+02
+yshift   = 2.7172198486328125e+02
+par0     = -5.1903034679640314e+01
+par1     = -6.7663662705115257e+00
+par2     = 1.2164169268388036e-01
+par3     = -1.6710241344233268e-03
+par4     = 1.9216583407866139e-05
+par5     = -2.2056511896247077e-07
+par6     = 2.6832554138669917e-09
+relerr   = true
+scaleerrup = 3.3343424841429203e-01
+scaleerrdown = -2.3278168442469543e-01
+pdferrup   = 1.9240238771929371e-02
+pdferrdown   = -2.6949467627627424e-02
+alphaserrup   = 0 
+alphaserrdown   = 0 
+adderrup     = 1.72e-2
+adderrdown   = -1.72e-2
+[end pred]
 
 
 [pred - Hathor_MMHT2014nlo68clas118_NLO_7000_MSbar]
