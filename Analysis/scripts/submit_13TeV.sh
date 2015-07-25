@@ -10,9 +10,9 @@ topmasses=( "172.5"
 
      # "171.5"
      # "173.5"
-
-    "175.5"
-    "169.5"
+#agrohsje 
+#    "175.5"
+#    "169.5"
 
      # "178.5"
      # "166.5"
@@ -163,8 +163,8 @@ systs=("nominal"
    # "BTAGPUR_down"
 
 
-     "TOPPT_up"
-     "TOPPT_down"
+#     "TOPPT_up"
+#     "TOPPT_down"
 
 #    "TT_MATCH_down"
 #    "TT_MATCH_up"
