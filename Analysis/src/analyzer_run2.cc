@@ -325,7 +325,7 @@ void  analyzer_run2::analyze(size_t anaid){
 	plots.linkEvent(evt);
 	zplots.linkEvent(evt);
 	ttXsecPlots xsecplots;
-	xsecplots.enable(false);
+	xsecplots.enable(true);
 	xsecplots.linkEvent(evt);
 	xsecplots.limitToStep(8);
 	xsecplots.initSteps(8);
@@ -385,9 +385,9 @@ void  analyzer_run2::analyze(size_t anaid){
 	NTJES jescorr = NTJES();
 	//took files from https://twiki.cern.ch/twiki/bin/view/CMS/JECDataMC
 	const TString* dataJECFile = new TString(""); 
-	const TString* mcL1JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Data/Run2/PY8_RunIISpring15DR74_bx50_MC_L1FastJet_AK4PFchs.txt");
-	const TString* mcL2JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Data/Run2/PY8_RunIISpring15DR74_bx50_MC_L2Relative_AK4PFchs.txt");
-	const TString* mcL3JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Data/Run2/PY8_RunIISpring15DR74_bx50_MC_L3Absolute_AK4PFchs.txt");
+	const TString* mcL1JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Analysis/data/analyse/Summer15_50nsV2_MC_L1FastJet_AK4PFchs.txt");
+	const TString* mcL2JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Analysis/data/analyse/Summer15_50nsV2_MC_L2Relative_AK4PFchs.txt");
+	const TString* mcL3JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Analysis/data/analyse/Summer15_50nsV2_MC_L3Absolute_AK4PFchs.txt");
 	jescorr.setFilesCorrection(mcL1JECFile,mcL2JECFile,
 				   mcL3JECFile,dataJECFile,(const bool) isMC);
 	
@@ -1478,7 +1478,7 @@ void  analyzer_run2::analyze(size_t anaid){
 				"nEvents_selected normd: "<< sel_step[8]*norm<< " " << inputfile<< std::endl;
 		//agrohsje debug pu
 		std::cout<<"selection bias for PU?: pusum="<<pusum<<" for all nEntries="<<nEntries
-			 << ", pusum_sel=" << pusum_sel*norm << " for selected events=" << nEntries_sel*norm << std::endl;
+			 << ", pusum_sel normd=" << pusum_sel*norm << " for selected events normd=" << nEntries_sel*norm << std::endl;
 
 		if(singlefile_) return;
 
