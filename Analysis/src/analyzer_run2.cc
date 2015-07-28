@@ -631,6 +631,10 @@ void  analyzer_run2::analyze(size_t anaid){
 				xsecfitplots_step8.fillPlotsGen();
 			}
 		} /// isMC ends
+                if (b_Muons.content()->size() && b_Electrons.content()->size()){
+                    if ( !b_Muons.content()->at(0).pt()> 10 || !b_Electrons.content()->at(0).pt()>10) continue;
+                }
+                else continue;
 
 		/////////////////////////////////////////////////////////////
 		/////////////////////////////////////////////////////////////
