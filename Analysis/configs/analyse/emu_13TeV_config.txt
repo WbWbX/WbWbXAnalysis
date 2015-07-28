@@ -65,7 +65,8 @@ TriggerSFFile   = /src/TtZAnalysis/Analysis/data/analyse/triggerSummary_emu_13Te
 
 PUFile          = /src/TtZAnalysis/Analysis/data/analyse/Legacy2012.json_PU    $without .root
 
-btagSFFile      = /src/TopAnalysis/ZTopUtils/data/CSV8TeVbreak_full.csv  $CSV7TeVbreak.csv
+$btagSFFile      = /src/TopAnalysis/ZTopUtils/data/CSV8TeVbreak_full.csv $CSV7TeVbreak.csv
+btagSFFile      = /src/TtZAnalysis/Analysis/data/analyse/CSV_8TeV_5unc.csv
 btagFile        = btags_74
 
 $modeOptions = GsfelectronsNotoppt
