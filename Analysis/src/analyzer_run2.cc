@@ -424,6 +424,11 @@ void  analyzer_run2::analyze(size_t anaid){
 	tBranchHandler<vector<NTGenParticle> >::allow_missing =true;
 	tBranchHandler<vector<NTGenParticle> > b_GenBsRad(t,"NTGenBsRad");
 
+	tBranchHandler<ULong64_t>::allow_missing =true;
+	tBranchHandler<ULong64_t> b_EventNumber(t,"EventNumber");
+	tBranchHandler<ULong64_t> b_RunNumber(t,"RunNumber");
+	tBranchHandler<ULong64_t> b_LumiBlock(t,"LumiBlock");
+	
 	std::vector<ztop::simpleReweighter> mcreweighters;
 
 	for(size_t i=0;i<additionalweights_.size();i++){
@@ -435,9 +440,6 @@ void  analyzer_run2::analyze(size_t anaid){
 		ztop::simpleReweighter mcreweighter; 
 		mcreweighters.push_back(mcreweighter);
 	}
-	//agrohsje debugging 
-	ULong64_t ntevt;
-	t->tree()->SetBranchAddress("EventNumber",&ntevt);
 
 	//some helpers
 	double sel_step[]={0,0,0,0,0,0,0,0,0};
@@ -515,23 +517,20 @@ void  analyzer_run2::analyze(size_t anaid){
 	int nEntries_sel(0);
 	for(Long64_t entry=firstentry;entry<nEntries;entry++){
 
-	    //agrohsje added for ntevt
-	    t->tree()->GetEntry(entry);
-
-		//for fakedata
-		if(skipregion){
-			if(entry >= regionlowerbound && entry <= regionupperbound)
-				continue;
-		}
-		else{//one case includes the entries, this is always true for non fakedata
-			// and lowerbound is 0, upper bound nEntries+1 -> no effect
-			if(entry < regionlowerbound || entry > regionupperbound)
-				continue;
-		}
-
-		t->setEntry(entry);
-
-
+	    //for fakedata
+	    if(skipregion){
+		if(entry >= regionlowerbound && entry <= regionupperbound)
+		    continue;
+	    }
+	    else{//one case includes the entries, this is always true for non fakedata
+		// and lowerbound is 0, upper bound nEntries+1 -> no effect
+		if(entry < regionlowerbound || entry > regionupperbound)
+		    continue;
+	    }
+	    
+	    t->setEntry(entry);
+	    
+	    
 		////////////////////////////////////////////////////
 		////////////////////  INIT EVENT ///////////////////
 		/////////////////////////////////////////////////////////////
@@ -670,7 +669,7 @@ void  analyzer_run2::analyze(size_t anaid){
 				muon->setP4(muon->p4() * getMuonEnergySF()->getScalefactor(muon->eta()));
 			allleps << muon;
 			/*
-			  std::cout<<ntevt 
+			  std::cout<<*b_EventNumber.content() 
 			  <<" muon->pt() "<<muon->pt()
 			  <<" muon->eta() "<<muon->eta()
                           <<" muon->phi() "<<muon->phi()
@@ -733,7 +732,7 @@ void  analyzer_run2::analyze(size_t anaid){
 			
 			/*
 			    std::cout<<" agrohsje check electrons "
-				     <<ntevt
+				     <<*b_EventNumber.content()
 				     <<" elec->pt() " <<elec->pt()
 				     <<" fabs(elec->eta()) " <<fabs(elec->eta())  
 				     <<" fabs(elec->suClu().eta()) " <<fabs(elec->suClu().eta()) 
@@ -927,7 +926,7 @@ void  analyzer_run2::analyze(size_t anaid){
 		    continue;
 
 		//now agrohsje added for debugging
-		//		std::cout<<ntevt<</*" "<<leadingptlep->pt()<<" "<<leadingptlep->eta()<<" "<<secleadingptlep->pt()<<" "<<secleadingptlep->eta()<<*/std::endl;
+		//		std::cout<<*b_EventNumber.content()<</*" "<<leadingptlep->pt()<<" "<<leadingptlep->eta()<<" "<<secleadingptlep->pt()<<" "<<secleadingptlep->eta()<<*/std::endl;
 
 
 		// create jec jets for met and ID jets
@@ -953,8 +952,8 @@ void  analyzer_run2::analyze(size_t anaid){
 				//agrohsje/tarndt just for testing REMOVE
 				//std::cout<<"agrohsje jet pt before "<<treejets.at(i)->pt()<<" rho=" <<b_Event.content()->isoRho(0)<< " area="<< treejets.at(i)->getMember(0) <<std::endl;
 				jescorr.correctJet(treejets.at(i), treejets.at(i)->getMember(0),b_Event.content()->isoRho(0));
-				//std::cout<<"agrohsje for ntevt="<< ntevt<<" jet pt after jes "<<treejets.at(i)->pt()<<std::endl;
-				//agrohsje global 2% scaling for JESup/JESdown can be added to ZTopUtils/src/JECBase.cc, splitting gives default sys
+				//std::cout<<"agrohsje for b_EventNumber.content()="<< *b_EventNumber.content()<<" jet pt after jes "<<treejets.at(i)->pt()<<std::endl;
+				//agrohsje global 3% scaling for JESup/JESdown can be added to ZTopUtils/src/JECBase.cc, splitting gives default sys
 				getJECUncertainties()->applyToJet(treejets.at(i));
 				//std::cout<<"agrohsje jet pt after sys var "<<treejets.at(i)->pt()<<std::endl;
 				getJERAdjuster()->correctJet(treejets.at(i));
@@ -1269,8 +1268,8 @@ void  analyzer_run2::analyze(size_t anaid){
 		}
 		//agrohsje debug jet 
 		/*
-		if(ntevt>19075300){
-		    std::cout<< ntevt <<" : "<<std::endl;  
+		if(*b_EventNumber.content()>19075300){
+		    std::cout<< *b_EventNumber.content() <<" : "<<std::endl;  
 		    for(unsigned ijet=0; ijet<selectedjets->size();ijet++){
 			std::cout<<"jet pt = "<<selectedjets->at(ijet)->pt() 
 				 <<", jet eta = "<<selectedjets->at(ijet)->eta()
@@ -1287,7 +1286,7 @@ void  analyzer_run2::analyze(size_t anaid){
 		if(!zerojet && !onejet && selectedjets->size() < 2) continue;
 		
 		//agrohsje 
-		//std::cout<<ntevt<</*" "<<leadingptlep->pt()<<" "<<leadingptlep->eta()<<" "<<secleadingptlep->pt()<<" "<<secleadingptlep->eta()<<*/std::endl;
+		//std::cout<<*b_EventNumber.content()<</*" "<<leadingptlep->pt()<<" "<<leadingptlep->eta()<<" "<<secleadingptlep->pt()<<" "<<secleadingptlep->eta()<<*/std::endl;
 		
 		if(analysisMllRange){
 
@@ -1399,7 +1398,7 @@ void  analyzer_run2::analyze(size_t anaid){
 	    if(testmode_ )
 		std::cout << "testmode("<< anaid << "): finished main loop, renorm factor for mc reweighting["<<i<<"]: " <<renormfact  << std::endl;
 	}
-	
+
 	histo1DUnfold::flushAllListed(); // call once again after last event processed
 
 
@@ -1476,9 +1475,9 @@ void  analyzer_run2::analyze(size_t anaid){
 		}
 
 
-		std::cout << "\nEvents total (normalized): "
-				<< nEntries*norm << "\n"
-				"nEvents_selected normd: "<< sel_step[8]*norm<< " " << inputfile<< std::endl;
+		std::cout << "\nEvents total (normalized): "<< nEntries*norm 
+			  << "\n nEvents_selected normd: "<< sel_step[8]*norm
+			  << " with norm " << norm << " for " << inputfile<< std::endl;
 		//agrohsje debug pu
 		std::cout<<"selection bias for PU?: pusum="<<pusum<<" for all nEntries="<<nEntries
 			 << ", pusum_sel normd=" << pusum_sel*norm << " for selected events normd=" << nEntries_sel*norm << std::endl;

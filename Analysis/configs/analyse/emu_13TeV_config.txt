@@ -12,33 +12,32 @@ $ inputfile,                       legend entry,        color,   xsection,   leg
 
 MuonEG.root,                       data,                1,        1,              99
 $ add tag "_mgbr" if W->lnu BR is 11.104% and not 10.620% 
-$tree_13TeV_emuttbar_amc_mgbr.root,      t#bar{t},		633,	  831.76,	  0,      true   
-$tree_13TeV_emuttbar_mg5_mgbr.root,      t#bar{t},		633,	  831.76,	  0,      true   
-tree_13TeV_emuttbar.root,          t#bar{t},		633,	  831.76,	  0,      true   
-tree_13TeV_emuttbarbg.root,        t#bar{t}bg,	   	634,	  831.76,	  3
+$tree_13TeV_emuttbar_amc_mgbr.root,      t#bar{t},		633,	  831.76,	  10,      true   
+$tree_13TeV_emuttbar_mg5_mgbr.root,      t#bar{t},		633,	  831.76,	  10,      true   
+tree_13TeV_emuttbar.root,          t#bar{t},		633,	  831.76,	 10,      true   
+tree_13TeV_emuttbarbg.root,        t#bar{t}bg,	   	634,	  831.76,	  4
 
-tree_13TeV_tW.root,                tW/#bar{t}W,	   	616,	  35.6,	          4
-tree_13TeV_tbarW.root,	           tW/#bar{t}W,	   	616,	  35.6,	          4
+tree_13TeV_tW.root,                tW/#bar{t}W,	   	616,	  35.6,	          1
+tree_13TeV_tbarW.root,	           tW/#bar{t}W,	   	616,	  35.6,	          1
 
-$tree_13TeV_dy1050.root,            DY,                  852,      18610,          2  
-tree_13TeV_dy50inf.root,           DY,                  852,      6025.2,         2 
+tree_13TeV_dy1050.root,            DY,                  852,      22635.1,        0  
+tree_13TeV_dy50inf.root,           DY,                  852,      6025.2,         0 
 
-tree_13TeV_ww.root,		   VV,			390,	  11,   	  5
-tree_13TeV_wz.root,		   VV,			390,	  66.1,   	  5
-tree_13TeV_zz.root,		   VV,			390,	  31.8,	          5  
-$ phys 14 samples: generated 1000 events  
-$tree_13TeV_wz.root,		   VV,			390,	  1.685,   	  5
-$tree_13TeV_zz.root,		   VV,			390,	  1.269,	  5  
+tree_13TeV_wjets.root,		   Wjets,		413,	  61526,	  3
 
-$tree_13TeV_ttbarw.root,           t#bar{t}V,           390,      1.152,          10    
-$tree_13TeV_ttbarz.root,           t#bar{t}V,           390,      2.232,          10 
+tree_13TeV_ww.root,		   VV,			390,      118.7,   	  2
+tree_13TeV_wz.root,		   VV,			390,	  66.1,   	  2
+tree_13TeV_zz.root,		   VV,			390,	  31.8,	          2  
+
+$tree_13TeV_ttbarw.root,           t#bar{t}V,           390,      1.152,          x    
+$tree_13TeV_ttbarz.root,           t#bar{t}V,           390,      2.232,          x 
 $tree_13TeV_ttbarh.root,	   t#bar{t}H,           xxx,	  xxx		  x		   
-tree_13TeV_wjets.root,		   Wjets,		413,	  61526,	  6
-$tree_13TeV_qcdbctoe3080.root,	   QCD,                 400,	  167040, 	  9
-$tree_13TeV_qcdbctoe80170.root,	   QCD,			400,	  12981,	  9
-$tree_13TeV_qcdbctoe170inf.root,   QCD,                 400,      xxxx,	  9
-$tree_13TeV_qcdem3080.root,	   QCD,                 400,	  4615893,  	  9
-$tree_13TeV_qcdem80170.root,	   QCD,                 400,      183294,	  9
+
+$tree_13TeV_qcdbctoe3080.root,	   QCD,                 400,	  167040, 	  x
+$tree_13TeV_qcdbctoe80170.root,	   QCD,			400,	  12981,	  x
+$tree_13TeV_qcdbctoe170inf.root,   QCD,                 400,xxxx,	   9
+$tree_13TeV_qcdem3080.root,	   QCD,                 400,	  4615893,  	  x
+$tree_13TeV_qcdem80170.root,	   QCD,                 400,      183294,	  x
 
 [inputfiles-end]
 
@@ -50,7 +49,7 @@ $$ all directories except for inputfiles are relative to $CMSSW_BASE
 inputFilesDir   = /nfs/dust/cms/user/tarndt/NTuples/Prod_746/
 $inputFilesDir  = /nfs/dust/cms/user/agrohsje/NAF_workingDir/ana_samples_150206/
 
-Lumi            = 40.9
+Lumi            = 40.2
 
 JECFile         = /src/TtZAnalysis/Analysis/data/analyse/Summer13_V5_DATA_UncertaintySources_AK5PFchs.txt
 
