@@ -49,7 +49,7 @@ $   UE
 [ datasets ]
 
 	[ dataset - 13TeV ]
-	  lumi  =   40.2
+	  lumi  =   40.03
 	  lumiunc = 10.0
 	  energy = 13      $for dynamic xsec
 	  topmass = 172.5  $for dynamic xsec
