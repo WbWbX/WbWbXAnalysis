@@ -149,9 +149,9 @@ void analysisPlotsTtbarXsecFit::fillPlotsReco(){
 		naddjets=event()->selectedjets->size() - nbjets;
 
 		setJetCategory(nbjets,naddjets);
-		if(naddjets==0)
-			total_plots.at(jetcategory)->fillReco(0.5,puweight());
-		else if(naddjets==1)
+		//if(naddjets==0)
+		total_plots.at(jetcategory)->fillReco(0.5,puweight());
+		if(naddjets==1)
 			leadjetpt_plots.at(jetcategory)->fillReco(event()->selectedjets->at(0)->pt(),puweight());
 		else if(naddjets==2)
 			secondjetpt_plots.at(jetcategory)->fillReco(event()->selectedjets->at(1)->pt(),puweight());

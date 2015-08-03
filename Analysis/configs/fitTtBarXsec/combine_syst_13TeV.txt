@@ -9,7 +9,7 @@
 
 [merge_syst]
 
-JES_Flavor         linear       JES_FlavorPureGluon   JES_FlavorPureQuark    JES_FlavorPureCharm   JES_FlavorPureBottom
+%JES_Flavor         linear       JES_FlavorPureGluon   JES_FlavorPureQuark    JES_FlavorPureCharm   JES_FlavorPureBottom
 
 [end-merge_syst]
 
@@ -20,7 +20,7 @@ JES_Flavor         linear       JES_FlavorPureGluon   JES_FlavorPureQuark    JES
 
 [merge in table]
 
-JES =  JES_PileUpPtBB + JES_PileUpPtEC + JES_PileUpPtHF + JES_HighPtExtra + JES_SinglePionECAL + JES_SinglePionHCAL +  + JES_AbsoluteMPFBias + JES_RelativeFSR + JES_AbsoluteStat + JES_AbsoluteScale   +  JES_Time  +  JES_RelativeJEREC1  +  JES_RelativeJEREC2  +  JES_RelativeJERHF +   JES_RelativePtBB  +  JES_RelativePtEC1  +  JES_RelativePtEC2  + JES_RelativePtHF  + JES_RelativeStatEC2  +  JES_RelativeStatHF + JES_PileUpDataMC + JES_PileUpBias
+%JES =  JES_PileUpPtBB + JES_PileUpPtEC + JES_PileUpPtHF + JES_HighPtExtra + JES_SinglePionECAL + JES_SinglePionHCAL +  + JES_AbsoluteMPFBias + JES_RelativeFSR + JES_AbsoluteStat + JES_AbsoluteScale   +  JES_Time  +  JES_RelativeJEREC1  +  JES_RelativeJEREC2  +  JES_RelativeJERHF +   JES_RelativePtBB  +  JES_RelativePtEC1  +  JES_RelativePtEC2  + JES_RelativePtHF  + JES_RelativeStatEC2  +  JES_RelativeStatHF + JES_PileUpDataMC + JES_PileUpBias
 BG_DY = BG_0_bjets_DY + BG_1_bjets_DY + BG_2_bjets_DY
 %Hadro_JES = JES_Flavor + TT_BJESNUDEC + TT_BJESRETUNE
 

@@ -501,8 +501,9 @@ invokeApplication(){
 		}
 		else if(energy=="13TeV"){
 			ana->addWeightBranch("NTWeight_scaleUp");
-			ana->setFilePostfixReplace("ttbar.root","ttbar_ttscaleup.root");
-			ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_ttscaleup.root");
+			//agrohsje pure ME variation
+			//ana->setFilePostfixReplace("ttbar.root","ttbar_ttscaleup.root");
+			//ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_ttscaleup.root");
 		}
 	}
 	else if(Syst=="TT_SCALE_down"){
@@ -514,8 +515,9 @@ invokeApplication(){
 		}
 		else if(energy=="13TeV"){
 			ana->addWeightBranch("NTWeight_scaleDown");
-			ana->setFilePostfixReplace("ttbar.root","ttbar_ttscaledown.root");
-			ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_ttscaledown.root");
+			//agrohsje pure ME variation
+			//ana->setFilePostfixReplace("ttbar.root","ttbar_ttscaledown.root");
+			//ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_ttscaledown.root");
 
 		}
 
@@ -562,8 +564,14 @@ invokeApplication(){
 		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_pow2py.root");
 	}
 	else if(Syst=="TT_GENMCATNLO_up"){
+	    if (energy=="7TeV" || energy=="8TeV"){
 		ana->setFilePostfixReplace("ttbar.root","ttbar_mcatnlo.root");
 		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mcatnlo.root");
+	    }
+	    else if(energy=="13TeV"){
+		ana->setFilePostfixReplace("ttbar.root","ttbar_amc_mgbr.root");
+		ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_amc_mgbr.root");
+	    }
 	}
 	else if(Syst=="TT_GENMCATNLO_down"){
 		//this is just default sample
