@@ -160,11 +160,11 @@ void  analyzer_run2::analyze(size_t anaid){
 	   && inputfile.Contains("_mgbr")){
 	    //agrohsje uncomment
 	    //if(  ! (syst_.BeginsWith("TT_GEN") && syst_.EndsWith("_up"))  ) //other generator
-	    normmultiplier=(0.1062/0.11104);//correct both W
+	    normmultiplier=(0.104976/0.11104);//correct both W
 	    /*
-	     * BR W-> lnu: 0.1086
+	     * BR W-> lnu: 0.1086 take 0.108 as default is Powheg in run ii 
 	     * n_comb for leptonic: 1+1+1+2+2+2 (incl taus)
-	     * total lept branching fraction for WW: 0.1086^2 * 9 = 0.1062
+	     * total lept branching fraction for WW: 0.1086^2 * 9 = 0.1062 // 0.108^2 * 9 = 0.104976
 	     * In Madgraph: 0.11104
 	     */
 	}
@@ -516,6 +516,7 @@ void  analyzer_run2::analyze(size_t anaid){
 	float pusum(0.); 
 	float pusum_sel(0.);
 	int nEntries_sel(0);
+	float mcwsum(0.);
 	for(Long64_t entry=firstentry;entry<nEntries;entry++){
 
 	    //for fakedata
@@ -568,7 +569,7 @@ void  analyzer_run2::analyze(size_t anaid){
 		    mcreweighters.at(i).reWeight(puweight);
 		    if(apllweightsone) puweight=1;		
 		}
-
+		mcwsum += weightbranches.at(0)->content()->getWeight();
 		/////////////////////////////////////////////////////////////
 		/////////////////////////////////////////////////////////////
 		/////////////////// Generator Information////////////////////
@@ -633,8 +634,7 @@ void  analyzer_run2::analyze(size_t anaid){
 			}
 		} /// isMC ends
 
-		//agrohsje
-                // check if event fails preselection and should be skipped 
+                //agrohsje : check if event fails preselection and should be skipped 
 		//std::cout<<" agrohsje check flag " << *b_AnalyseEvent.content()<<std::endl;
 		if (*b_AnalyseEvent.content()!=1) continue;
 		
@@ -957,7 +957,7 @@ void  analyzer_run2::analyze(size_t anaid){
 				//std::cout<<"agrohsje jet pt before "<<treejets.at(i)->pt()<<" rho=" <<b_Event.content()->isoRho(0)<< " area="<< treejets.at(i)->getMember(0) <<std::endl;
 				jescorr.correctJet(treejets.at(i), treejets.at(i)->getMember(0),b_Event.content()->isoRho(0));
 				//std::cout<<"agrohsje for b_EventNumber.content()="<< *b_EventNumber.content()<<" jet pt after jes "<<treejets.at(i)->pt()<<std::endl;
-				//agrohsje global 3% scaling for JESup/JESdown can be added to ZTopUtils/src/JECBase.cc, splitting gives default sys
+				//agrohsje global 4% scaling for JESup/JESdown can be added to ZTopUtils/src/JECBase.cc, splitting gives default sys
 				getJECUncertainties()->applyToJet(treejets.at(i));
 				//std::cout<<"agrohsje jet pt after sys var "<<treejets.at(i)->pt()<<std::endl;
 				getJERAdjuster()->correctJet(treejets.at(i));
@@ -1289,9 +1289,7 @@ void  analyzer_run2::analyze(size_t anaid){
 		//if(midphi && dphiplushardjets.size()<2) continue;
 		if(!zerojet && !onejet && selectedjets->size() < 2) continue;
 		
-		//agrohsje 
-		//std::cout<<*b_EventNumber.content()<</*" "<<leadingptlep->pt()<<" "<<leadingptlep->eta()<<" "<<secleadingptlep->pt()<<" "<<secleadingptlep->eta()<<*/std::endl;
-		
+	
 		if(analysisMllRange){
 
 			plots.makeControlPlots(step);
@@ -1482,9 +1480,13 @@ void  analyzer_run2::analyze(size_t anaid){
 		std::cout << "\nEvents total (normalized): "<< nEntries*norm 
 			  << "\n nEvents_selected normd: "<< sel_step[8]*norm
 			  << " with norm " << norm << " for " << inputfile<< std::endl;
-		//agrohsje debug pu
-		std::cout<<"selection bias for PU?: pusum="<<pusum<<" for all nEntries="<<nEntries
-			 << ", pusum_sel normd=" << pusum_sel*norm << " for selected events normd=" << nEntries_sel*norm << std::endl;
+		//agrohsje check phase space bias in weights
+		std::cout<<"selection bias for PU?: \n"
+			 <<"pusum=" << pusum << " for all nEntries=" << nEntries
+			 << ", pusum_sel normd=" << pusum_sel*norm << " for selected events normd=" << nEntries_sel*norm <<"\n" 
+			 <<"selection bias for mc weight? \n"
+			 <<"mcwsum="<< mcwsum << " for all nEntries=" << nEntries 
+			 << std::endl;
 
 		if(singlefile_) return;
 
