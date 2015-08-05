@@ -13,8 +13,8 @@ scaleerrup   = 3.4000001847743988e-02
 scaleerrdown = -3.4000001847743988e-02
 pdferrup     = 2.6000000536441803e-02
 pdferrdown   = -2.6000000536441803e-02
-alphasup     = 0
-alphasdown   = 0
+alphasup     = 1.5e-2
+alphasdown   = -1.5e-2
 adderrup     = 1.72e-2
 adderrdown   = -1.72e-2
 [end pred]
@@ -34,8 +34,8 @@ scaleerrup   = 3.4000001847743988e-02
 scaleerrdown = -3.4000001847743988e-02
 pdferrup     = 2.8000000864267349e-02
 pdferrdown   = -2.8000000864267349e-02
-alphasup     = 0
-alphasdown   = 0
+alphasup     = 1.5e-2
+alphasdown   = -1.5e-2
 adderrup     = 1.79e-2
 adderrdown   = -1.79e-2
 [end pred]
