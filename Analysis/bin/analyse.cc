@@ -201,10 +201,13 @@ invokeApplication(){
 	else{
 		ana->getElecEnergySF()->setInput(elecEnsffile,elecEnsfhisto);
 	}
-	ana->getMuonEnergySF()->setGlobal(1,0.3,0.3); //new from muon POG twiki
-	//https://twiki.cern.ch/twiki/bin/viewauth/CMS/MuonReferenceResolution
-	//this is for muons without the corrections so it should be even better with
-
+	if(energy == "7TeV" || energy == "8TeV")
+	    //https://twiki.cern.ch/twiki/bin/viewauth/CMS/MuonReferenceResolution
+	    //this is for muons without the corrections so it should be even better with
+	    ana->getMuonEnergySF()->setGlobal(1,0.3,0.3); //new from muon POG twiki
+	else if(energy == "13TeV")
+	    ana->getMuonEnergySF()->setGlobal(1,0.5,0.5);
+	
 	ana->getTopPtReweighter()->setFunction(reweightfunctions::toppt);
 	ana->getTopPtReweighter()->setSystematics(reweightfunctions::nominal);
 

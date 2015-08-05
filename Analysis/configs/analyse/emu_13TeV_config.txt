@@ -10,7 +10,7 @@ $  [parameters-begin] until [parameters-end]
 $ inputfile,                       legend entry,        color,   xsection,   legendNumber (for sorting,- allows for gaps),  (opt) isSignal
 
 
-MuonEG.root,                       data,                1,        1,              99
+tree_13TeV_emu.root,               data,                1,        1,              99
 $ add tag "_mgbr" if W->lnu BR is 11.104% and not 10.620% 
 $tree_13TeV_emuttbar_powhepp.root,      t#bar{t},		633,	  831.76,	  10,      true   
 $tree_13TeV_emuttbar_amc_mgbr.root,      t#bar{t},		633,	  831.76,	  10,      true   
