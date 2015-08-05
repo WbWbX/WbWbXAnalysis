@@ -636,8 +636,9 @@ void  analyzer_run2::analyze(size_t anaid){
 
                 //agrohsje : check if event fails preselection and should be skipped 
 		//std::cout<<" agrohsje check flag " << *b_AnalyseEvent.content()<<std::endl;
+
 		if (*b_AnalyseEvent.content()!=1) continue;
-		
+
 		/////////////////////////////////////////////////////////////
 		/////////////////////////////////////////////////////////////
 		///////////////////       Reco Part      ////////////////////
@@ -949,24 +950,25 @@ void  analyzer_run2::analyze(size_t anaid){
 
 		for(size_t i=0;i<treejets.size();i++){ //ALSO THE RESOLUTION AFFECTS MET. HERE INTENDED!!! GOOD?
 			NTLorentzVector<float>  oldp4=treejets.at(i)->p4();
-			if(isMC){// && !is7TeV_){
-				bool useJetForMet=false;
-				if(treejets.at(i)->emEnergyFraction() < 0.9 && treejets.at(i)->pt() > 10)
-					useJetForMet=true; //dont even do something
-				//agrohsje/tarndt just for testing REMOVE
-				//std::cout<<"agrohsje jet pt before "<<treejets.at(i)->pt()<<" rho=" <<b_Event.content()->isoRho(0)<< " area="<< treejets.at(i)->getMember(0) <<std::endl;
-				jescorr.correctJet(treejets.at(i), treejets.at(i)->getMember(0),b_Event.content()->isoRho(0));
-				//std::cout<<"agrohsje for b_EventNumber.content()="<< *b_EventNumber.content()<<" jet pt after jes "<<treejets.at(i)->pt()<<std::endl;
-				//agrohsje global 4% scaling for JESup/JESdown can be added to ZTopUtils/src/JECBase.cc, splitting gives default sys
-				getJECUncertainties()->applyToJet(treejets.at(i));
-				//std::cout<<"agrohsje jet pt after sys var "<<treejets.at(i)->pt()<<std::endl;
-				getJERAdjuster()->correctJet(treejets.at(i));
-				//std::cout<<"agrohsje jet pt after jer "<<treejets.at(i)->pt()<<std::endl;
-				//corrected
-				if(useJetForMet){
-					dpx += oldp4.Px() - treejets.at(i)->p4().Px();
-					dpy += oldp4.Py() - treejets.at(i)->p4().Py();
-				}
+			bool useJetForMet=false;
+			if(treejets.at(i)->emEnergyFraction() < 0.9 && treejets.at(i)->pt() > 10)
+			    useJetForMet=true; //dont even do something
+			//agrohsje/tarndt just for testing REMOVE
+			//std::cout<<"jet["<<i<<"] in event "<<*b_EventNumber.content()<<std::endl;
+			//std::cout<<"agrohsje jet pt before "<<treejets.at(i)->pt()<<" rho=" <<b_Event.content()->isoRho(0)<< " area="<< treejets.at(i)->getMember(0) <<std::endl;
+			jescorr.correctJet(treejets.at(i), treejets.at(i)->getMember(0),b_Event.content()->isoRho(0));
+			//std::cout<<"agrohsje jet pt after jes "<<treejets.at(i)->pt()<<" eta "<<treejets.at(i)->eta()<<std::endl;
+			if(isMC){
+			    //agrohsje global 4% scaling for JESup/JESdown can be added to ZTopUtils/src/JECBase.cc, splitting gives default sys
+			    getJECUncertainties()->applyToJet(treejets.at(i));
+			    //std::cout<<"agrohsje jet pt after sys var "<<treejets.at(i)->pt()<<" eta "<<treejets.at(i)->eta()<<std::endl;
+			    getJERAdjuster()->correctJet(treejets.at(i));
+			    //std::cout<<"agrohsje jet pt after jer "<<treejets.at(i)->pt()<<" eta "<<treejets.at(i)->eta()<<std::endl;
+			    //corrected
+			}
+			if(useJetForMet){
+			    dpx += oldp4.Px() - treejets.at(i)->p4().Px();
+			    dpy += oldp4.Py() - treejets.at(i)->p4().Py();
 			}
 			if(!(treejets.at(i)->id())) continue;
 			//agrohsje changed cut to 0.4 instead of 0.5 
