@@ -384,13 +384,11 @@ void  analyzer_run2::analyze(size_t anaid){
 	//agrohsje/tarndt include jes at ana level for testing 
 	NTJES jescorr = NTJES();
 	//took files from https://twiki.cern.ch/twiki/bin/view/CMS/JECDataMC
-	const TString* dataJECFile = new TString(""); 
+	const TString* dataJECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Analysis/data/analyse/Summer15_50nsV2_DATA_L2L3Residual_AK4PFchs.txt");
 	const TString* mcL1JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Analysis/data/analyse/Summer15_50nsV2_MC_L1FastJet_AK4PFchs.txt");
 	const TString* mcL2JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Analysis/data/analyse/Summer15_50nsV2_MC_L2Relative_AK4PFchs.txt");
 	const TString* mcL3JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Analysis/data/analyse/Summer15_50nsV2_MC_L3Absolute_AK4PFchs.txt");
-	//const TString* mcL1JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Data/Run2/PY8_RunIISpring15DR74_bx50_MC_L1FastJet_AK4PFchs.txt");
-	//const TString* mcL2JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Data/Run2/PY8_RunIISpring15DR74_bx50_MC_L2Relative_AK4PFchs.txt");
-	//const TString* mcL3JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Data/Run2/PY8_RunIISpring15DR74_bx50_MC_L3Absolute_AK4PFchs.txt");	
+
 	jescorr.setFilesCorrection(mcL1JECFile,mcL2JECFile,
 				   mcL3JECFile,dataJECFile,(const bool) isMC);
 	
@@ -955,13 +953,14 @@ void  analyzer_run2::analyze(size_t anaid){
 			    useJetForMet=true; //dont even do something
 			//agrohsje/tarndt just for testing REMOVE
 			//std::cout<<"jet["<<i<<"] in event "<<*b_EventNumber.content()<<std::endl;
-			//std::cout<<"agrohsje jet pt before "<<treejets.at(i)->pt()<<" rho=" <<b_Event.content()->isoRho(0)<< " area="<< treejets.at(i)->getMember(0) <<std::endl;
+			//std::cout<<"agrohsje jet pt before: pt="<<treejets.at(i)->pt()<<" rho=" <<b_Event.content()->isoRho(0)<< " area="<< treejets.at(i)->getMember(0) <<std::endl;
 			jescorr.correctJet(treejets.at(i), treejets.at(i)->getMember(0),b_Event.content()->isoRho(0));
-			//std::cout<<"agrohsje jet pt after jes "<<treejets.at(i)->pt()<<" eta "<<treejets.at(i)->eta()<<std::endl;
+			//std::cout<<"agrohsje jet pt after jes: pt="<<treejets.at(i)->pt()<<" eta="<<treejets.at(i)->eta()<<std::endl;
 			if(isMC){
-			    //agrohsje global 4% scaling for JESup/JESdown can be added to ZTopUtils/src/JECBase.cc, splitting gives default sys
+			    //agrohsje global 4% scaling for JESup/JESdown can be added to ZTopUtils/src/JECBase.cc
+			    //use NTJES w./ ZTopUtils/src/JESBase.cc for both correction/uncertainties 
 			    getJECUncertainties()->applyToJet(treejets.at(i));
-			    //std::cout<<"agrohsje jet pt after sys var "<<treejets.at(i)->pt()<<" eta "<<treejets.at(i)->eta()<<std::endl;
+			    //std::cout<<"agrohsje jet pt after sys var: pt="<<treejets.at(i)->pt()<<" eta="<<treejets.at(i)->eta()<<std::endl;
 			    getJERAdjuster()->correctJet(treejets.at(i));
 			    //std::cout<<"agrohsje jet pt after jer "<<treejets.at(i)->pt()<<" eta "<<treejets.at(i)->eta()<<std::endl;
 			    //corrected
@@ -1090,9 +1089,9 @@ void  analyzer_run2::analyze(size_t anaid){
 
 		getBTagSF()->changeNTJetTags(selectedjets);
 		for(size_t i=0;i<hardjets.size();i++){
-			if(selectedjets->at(i)->btag() < getBTagSF()->getWPDiscrValue()){
-
-				selectednonbjets.push_back(selectedjets->at(i));
+		        if(selectedjets->at(i)->btag() < getBTagSF()->getWPDiscrValue()){
+			    //std::cout<<"agrohsje btagging in event " << *b_EventNumber.content() <<" "<<selectedjets->at(i)->pt()<<"  "<<selectedjets->at(i)->btag() <<std::endl;
+			    selectednonbjets.push_back(selectedjets->at(i));
 				continue;
 			}
 			selectedbjets.push_back(selectedjets->at(i));
