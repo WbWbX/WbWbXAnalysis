@@ -196,11 +196,16 @@ invokeApplication(){
 	ana->getTrackingSF()->setInput(trackingsffile,trackingsfhisto);
 	ana->getTriggerSF()->setInput(trigsffile,trigsfhisto);
 
-	if(elecEnsffile.EndsWith("DEFFILEWILDCARDDONTREMOVE"))
+	if(elecEnsffile.EndsWith("DEFFILEWILDCARDDONTREMOVE")){
+	    if(energy == "7TeV" || energy == "8TeV")
 		ana->getElecEnergySF()->setGlobal(1,0.15,0.15);
-	else{
-		ana->getElecEnergySF()->setInput(elecEnsffile,elecEnsfhisto);
+	    else if(energy == "13TeV")
+		ana->getElecEnergySF()->setGlobal(1,1.0,1.0);
 	}
+	else{
+	    ana->getElecEnergySF()->setInput(elecEnsffile,elecEnsfhisto);
+	}
+	
 	if(energy == "7TeV" || energy == "8TeV")
 	    //https://twiki.cern.ch/twiki/bin/viewauth/CMS/MuonReferenceResolution
 	    //this is for muons without the corrections so it should be even better with
@@ -221,13 +226,15 @@ invokeApplication(){
 	ana->getBTagSF()->setMode(NTBTagSF::randomtagging_mode);
 	if(energy == "13TeV"){
 		//agrohsje
-		//ana->getBTagSF()->loadSF  (btagSFFile, BTagEntry::OP_MEDIUM,"csvv2_50ns","mujets","up","down");
-		ana->getBTagSF()->loadSF  (btagSFFile, BTagEntry::OP_TIGHT,"csvv2_50ns","mujets","up","down");
+	        //ana->getBTagSF()->loadSF  (btagSFFile, BTagEntry::OP_MEDIUM,"csvv2_50ns","mujets","up","down");
+	        ana->getBTagSF()->loadSF  (btagSFFile, BTagEntry::OP_TIGHT,"csvv2_50ns","mujets","up","down");
 	}else if (energy == "7TeV" || energy == "8TeV"){
 		ana->getBTagSF()->loadSF  (btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets","up","down");
 	}
 
 	ana->getJECUncertainties()->setFile((jecfile).Data());
+	//agrohsje 
+	if(energy == "13TeV") ana->getJECUncertainties()->setIs2012(false);
 	ana->getJECUncertainties()->setSystematics("no");
 
 	//add indication for non-correlated syst by adding the energy to syst name!! then the getCrossSections stuff should recognise it
@@ -548,8 +555,11 @@ invokeApplication(){
 		ana->setFilePostfixReplace("ttbarviatau_dil.root","ttbarviatau_pow2py.root");
 	}
 	else if(Syst=="TT_GENPOWHERW_up"){
-		ana->setFilePostfixReplace("ttbar.root","ttbar_powhpp.root");
-		ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_powhpp.root");
+	    //agrohsje fix after proper renaming
+	    //ana->setFilePostfixReplace("ttbar.root","ttbar_powhpp.root");
+	    //ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_powhpp.root");
+	    ana->setFilePostfixReplace("ttbar.root","ttbar_her.root");
+	    ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_her.root");
 	}
 	else if(Syst=="TT_GENPOWHERW_down"){
 		//this is just default sample
