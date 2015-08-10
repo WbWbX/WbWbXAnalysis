@@ -231,10 +231,9 @@ invokeApplication(){
 	}else if (energy == "7TeV" || energy == "8TeV"){
 		ana->getBTagSF()->loadSF  (btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets","up","down");
 	}
-
-	ana->getJECUncertainties()->setFile((jecfile).Data());
 	//agrohsje 
 	if(energy == "13TeV") ana->getJECUncertainties()->setIs2012(false);
+	ana->getJECUncertainties()->setFile((jecfile).Data());
 	ana->getJECUncertainties()->setSystematics("no");
 
 	//add indication for non-correlated syst by adding the energy to syst name!! then the getCrossSections stuff should recognise it
