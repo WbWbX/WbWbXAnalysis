@@ -17,8 +17,8 @@ public:
 
 	void setFile(std::string pathToFile){JecBase_.setFile(pathToFile);}
 	void setSystematics(std::string syst){JecBase_.setSystematics(syst);} //! up, down, no
-	void setIs2012(bool is){JecBase_.setIs2012(is);}
-
+        void setIs2012(bool is){JecBase_.setIs2012(is);}//use to distinguish run i and ii
+    
 	/**
 	 * Adds a source with name to the sources to be varied
 	 */
