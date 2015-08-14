@@ -634,7 +634,6 @@ void  analyzer_run2::analyze(size_t anaid){
 
                 //agrohsje : check if event fails preselection and should be skipped 
 		//std::cout<<" agrohsje check flag " << *b_AnalyseEvent.content()<<std::endl;
-
 		if (*b_AnalyseEvent.content()!=1) continue;
 
 		/////////////////////////////////////////////////////////////
@@ -649,7 +648,8 @@ void  analyzer_run2::analyze(size_t anaid){
 
 		if(testmode_ && entry==0)
 			std::cout << "testmode("<< anaid << "): got trigger boolians" << std::endl;
-		//agrohsje uncomment for time being if(!checkTrigger(b_TriggerBools.content(),b_Event.content(), isMC,anaid)) continue;
+
+		if(!checkTrigger(b_TriggerBools.content(),b_Event.content(), isMC,anaid)) continue;
 
 
 		/*
@@ -1506,71 +1506,14 @@ void  analyzer_run2::analyze(size_t anaid){
 
 
 
-bool analyzer_run2::checkTrigger(std::vector<bool> * p_TriggerBools,ztop::NTEvent * pEvent, bool isMC,size_t anaid){
-
-
-	//do trigger stuff - onlye 8TeV for now
-	if(!is7TeV_){
-		if(p_TriggerBools->size() < 3)
-			return false;
-
-		if(b_mumu_){
-			if(!(p_TriggerBools->at(1) || p_TriggerBools->at(2)))
-				return false;
-			else
-				return true;
-		}
-		else if(b_ee_){
-			if(!p_TriggerBools->at(0))
-				return false;
-			else
-				return true;
-		}
-		else if(b_emu_){
-			if(p_TriggerBools->size()<10){
-				//p_finished.get(anaid)->pwrite(-3);
-				return false;
-			}
-			if(!(p_TriggerBools->at(10) || p_TriggerBools->at(11)))
-				return false;
-			else
-				return true;
-		}
-	}
-	else{ //is7TeV_
-		if(p_TriggerBools->size() < 3)
-			return false;
-
-		if(b_mumu_){
-			if(isMC && !p_TriggerBools->at(5))
-				return false;
-			if(!isMC && pEvent->runNo() < 163869 && !p_TriggerBools->at(5))
-				return false;
-			if(!isMC && pEvent->runNo() >= 163869 && !p_TriggerBools->at(6))
-				return false;
-		}
-		else if(b_ee_){
-			if(!(p_TriggerBools->at(3) || p_TriggerBools->at(4) || p_TriggerBools->at(1)))
-				return false;
-		}
-		else if(b_emu_){
-
-			if(p_TriggerBools->size()<26){ //emu are 20 - 25
-				throw std::out_of_range("TriggerBools too small in size for 7 TeV trees");
-			}
-			if(!(p_TriggerBools->at(20)
-					|| p_TriggerBools->at(21)
-					|| p_TriggerBools->at(22)
-					|| p_TriggerBools->at(23)
-					|| p_TriggerBools->at(24)
-					|| p_TriggerBools->at(25)
-			))
-				return false;
-			else
-				return true;
-		}
-	}
-	return true;
+bool analyzer_run2::checkTrigger(std::vector<bool> * p_TriggerBools,ztop::NTEvent * pEvent, bool isMC,size_t anaid)
+{
+    if(isMC) return true;
+    if(b_emu_){
+	if(!(p_TriggerBools->at(38) || p_TriggerBools->at(40)))
+	    return false;
+    }
+    return true;
 }
 
 
