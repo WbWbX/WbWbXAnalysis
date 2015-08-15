@@ -72,8 +72,10 @@ CR,		Color reconnection
 TT_BJESNUDEC,   B-hadron $\nu$ decay fraction
 TT_BJESRETUNE,  b-fragmentation tune
 TT_GENPOWPY,    MG+PY $\rightarrow$ PH+PY
+TT_GENMCATNLO,  NLO generator 
 
 BG_tW/#bar{t}W#rightarrowll, Single top background
+BG_tW/bartW, Single top background
 BG_VV, Diboson background
 BG_t#bar{t}bg, $t\bar{t}$ background
 BG_Wjets,  W+jets background
@@ -90,5 +92,5 @@ BG_DY, DY background
 
 Xsec_8TeV, $\sigma_{t\bar{t}}$(8 TeV)
 Xsec_7TeV, $\sigma_{t\bar{t}}$(7 TeV)
-
+Xsec_13TeV, $\sigma_{t\bar{t}}$(13 TeV)
 [end-syst names]
