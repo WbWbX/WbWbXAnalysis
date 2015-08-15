@@ -3,7 +3,7 @@
 
 channels=( #"ee"
     "emu"
-    #"mumu"
+#    "mumu"
 );
 ## scale and match variations will be ignored for other top masses then 172.5.. (hardcoded below)
 topmasses=( "172.5"
@@ -11,16 +11,17 @@ topmasses=( "172.5"
      # "171.5"
      # "173.5"
 #agrohsje 
-#    "175.5"
-#    "169.5"
+    "175.5"
+    "169.5"
 
      # "178.5"
      # "166.5"
 );
-pdfeigenvectors=50 # POWHEG:NNPDF:50; MG5_aMC@NLO:NNPDF:51   # if set to 0, no variation
+pdfeigenvectors=26 # POWHEG:NNPDF:50; POWHEG:CT10:26; MG5_aMC@NLO:NNPDF:51   # if set to 0, no variation
 
 systs=("nominal"
 
+#agrohsje 
 	# for testing	
 #    "TOPMASS_up"
 #    "TOPMASS_down"
@@ -34,20 +35,19 @@ systs=("nominal"
 #   "TT_GENPOWPY_up"
 #   "TT_GENPOWPY_down"
 
-# use later for powheg herwig, file ending should be powhpp
-   # "TT_GENPOWHERW_up"
-   # "TT_GENPOWHERW_down"
+# use later for powheg herwigpp, file ending should be powhpp
+     "TT_GENPOWHERW_up"
+     "TT_GENPOWHERW_down"
 
-
-   #  "TT_GENMCATNLO_up"
-   #  "TT_GENMCATNLO_down"
+#agrohsje 
+     "TT_GENMCATNLO_up"
+     "TT_GENMCATNLO_down"
 
 #    "TT_BJESNUDEC_down"
 #    "TT_BJESNUDEC_up"
 
 #    "TT_BJESRETUNE_down"
 #    "TT_BJESRETUNE_up"
-
 
 
     "TRIGGER_up"
@@ -67,76 +67,76 @@ systs=("nominal"
 
     "JER_up"
     "JER_down"
-
-#    "JES_up"
-#    "JES_down"
+#agrohsje 
+    "JES_up"
+    "JES_down"
 
 #######JES groups according to toplhcwg use INSTEAD of global JES_up/down
 
-    "JES_AbsoluteMPFBias_up"   
+#    "JES_AbsoluteMPFBias_up"   
 
-    "JES_FlavorPureGluon_up"
-    "JES_FlavorPureQuark_up"
-    "JES_FlavorPureCharm_up"
-    "JES_FlavorPureBottom_up"
+#    "JES_FlavorPureGluon_up"
+#    "JES_FlavorPureQuark_up"
+#    "JES_FlavorPureCharm_up"
+#    "JES_FlavorPureBottom_up"
 
-    "JES_RelativeFSR_up"
+#    "JES_RelativeFSR_up"
 
-    "JES_AbsoluteStat_up"
-    "JES_AbsoluteScale_up"
-    "JES_HighPtExtra_up"
-    "JES_SinglePionECAL_up"
-    "JES_SinglePionHCAL_up"
-    "JES_Time_up"
-    "JES_RelativeJEREC1_up"
-    "JES_RelativeJEREC2_up"
-    "JES_RelativeJERHF_up"
-     "JES_RelativePtBB_up"
-    "JES_RelativePtEC1_up"
-    "JES_RelativePtEC2_up"
-    "JES_RelativePtHF_up"
-    "JES_RelativeStatEC2_up"
-    "JES_RelativeStatHF_up"
-    "JES_PileUpDataMC_up"
-    "JES_PileUpBias_up"
+#    "JES_AbsoluteStat_up"
+#    "JES_AbsoluteScale_up"
+#    "JES_HighPtExtra_up"
+#    "JES_SinglePionECAL_up"
+#    "JES_SinglePionHCAL_up"
+#    "JES_Time_up"
+#    "JES_RelativeJEREC1_up"
+#    "JES_RelativeJEREC2_up"
+#    "JES_RelativeJERHF_up"
+#     "JES_RelativePtBB_up"
+#    "JES_RelativePtEC1_up"
+#    "JES_RelativePtEC2_up"
+#    "JES_RelativePtHF_up"
+#    "JES_RelativeStatEC2_up"
+#    "JES_RelativeStatHF_up"
+#    "JES_PileUpDataMC_up"
+#    "JES_PileUpBias_up"
 
-    "JES_PileUpPtBB_up"
-    "JES_PileUpPtEC_up"
-    "JES_PileUpPtHF_up"
+#    "JES_PileUpPtBB_up"
+#    "JES_PileUpPtEC_up"
+#    "JES_PileUpPtHF_up"
 
 
 ##down
 
-      "JES_AbsoluteMPFBias_down"	
+  #    "JES_AbsoluteMPFBias_down"	
 
-    "JES_FlavorPureGluon_down"
-    "JES_FlavorPureQuark_down"
-    "JES_FlavorPureCharm_down"
-    "JES_FlavorPureBottom_down"
+#    "JES_FlavorPureGluon_down"
+#    "JES_FlavorPureQuark_down"
+#    "JES_FlavorPureCharm_down"
+#    "JES_FlavorPureBottom_down"
 
-    "JES_RelativeFSR_down"
+#    "JES_RelativeFSR_down"
 
-    "JES_AbsoluteStat_down"
-    "JES_AbsoluteScale_down"
-    "JES_HighPtExtra_down"
-    "JES_SinglePionECAL_down"
-    "JES_SinglePionHCAL_down"
-    "JES_Time_down"
-    "JES_RelativeJEREC1_down"
-    "JES_RelativeJEREC2_down"
-    "JES_RelativeJERHF_down"
-    "JES_RelativePtBB_down"
-    "JES_RelativePtEC1_down"
-    "JES_RelativePtEC2_down"
-    "JES_RelativePtHF_down"
-    "JES_RelativeStatEC2_down"
-    "JES_RelativeStatHF_down"
-    "JES_PileUpDataMC_down"
-    "JES_PileUpBias_down"
+#    "JES_AbsoluteStat_down"
+#    "JES_AbsoluteScale_down"
+#    "JES_HighPtExtra_down"
+#    "JES_SinglePionECAL_down"
+#    "JES_SinglePionHCAL_down"
+#    "JES_Time_down"
+#    "JES_RelativeJEREC1_down"
+#    "JES_RelativeJEREC2_down"
+#    "JES_RelativeJERHF_down"
+#    "JES_RelativePtBB_down"
+#    "JES_RelativePtEC1_down"
+#    "JES_RelativePtEC2_down"
+#    "JES_RelativePtHF_down"
+#    "JES_RelativeStatEC2_down"
+#    "JES_RelativeStatHF_down"
+#    "JES_PileUpDataMC_down"
+#    "JES_PileUpBias_down"
 
-    "JES_PileUpPtBB_down"
-    "JES_PileUpPtEC_down"
-    "JES_PileUpPtHF_down"
+#    "JES_PileUpPtBB_down"
+#    "JES_PileUpPtEC_down"
+#    "JES_PileUpPtHF_down"
 
 
    # "JEC_residuals_up"
