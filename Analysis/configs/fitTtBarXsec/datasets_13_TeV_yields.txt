@@ -23,25 +23,16 @@ $  the files are assumed to be located where the executable is called
 
 $everything will be gaussian except the ones specified here
 
-   TT_SCALE   =  box
-$   TT_GENPOWPY=  fixed
-$   CR         =  boxleft
-$   TT_MATCH   =  box
-$   TT_HER     =  fixed
-$   TT_GENPOWPY gauss / float
-$   CR = fixed
-$   UE = fixed
+    TT_SCALE   =  box
+    TT_GENMCATNLO =  boxright 
+$    TT_GENPOWHERW =  boxright
 
 [ end - priors ]
 
 [ full extrapolation ]
 
-   TT_SCALE
-$   TT_MATCH
-$   TT_HER
-$   TT_GENPOWPY
-$   CR
-$   UE
+    TT_SCALE
+    PDF*
 
 [ end - full extrapolation ]
 
@@ -49,8 +40,8 @@ $   UE
 [ datasets ]
 
 	[ dataset - 13TeV ]
-	  lumi  =   40.03
-	  lumiunc = 10.0
+	  lumi  =   41.6
+	  lumiunc = 12.0
 	  energy = 13      $for dynamic xsec
 	  topmass = 172.5  $for dynamic xsec
 	[ end dataset - 13TeV ]
