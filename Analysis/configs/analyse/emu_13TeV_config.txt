@@ -56,7 +56,9 @@ $without .root
 $PUFile          = /src/TtZAnalysis/Analysis/data/analyse/Legacy2012.json_PU  
 PUFile          = /src/TtZAnalysis/Analysis/data/analyse/2015.json_PU  $without .root
 
-$btagSFFile      = /src/TopAnalysis/ZTopUtils/data/CSV8TeVbreak_full.csv $CSV7TeVbreak.csv
+$ prel. 13 TeV btag SFs
+$btagSFFile      = /src/TtZAnalysis/Analysis/data/analyse/CSV_13TeV_prel.csv
+$ flat uncertainties of 5/10 % for b/c jets 
 btagSFFile      = /src/TtZAnalysis/Analysis/data/analyse/CSV_8TeV_5unc.csv
 btagFile        = btags_74
 
