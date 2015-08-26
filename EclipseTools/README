@@ -1,3 +1,37 @@
+Eclipse is an IDE that can be used to edit and compile in different frameworks. It is based on java, so it runs on Windows, Mac and Linux. Here, we need Eclipse CDT which is the version that ships with tools needed for C/C++ code development. With the setup described here, Eclipse is used to edit code and to compile within CMSSW. This way, also compilation time errors are properly indicated withing the IDE.
+All necessary steps are performed on the NAF/WGS, also Eclipse will run there.
+Set the CMSSW environment before any of the next steps (cmsenv)
+First (if not on the naf download and) untar Eclipse CDT luna directory on the naf (e.g. ~/xxl-af-cms/programs)
+cp /nfs/dust/cms/user/kiesej/Eclipse/eclipse-cpp-luna-SR2-linux-gtk-x86_64.tar.gz ~/xxl-af-cms/programs/
+cd ~/xxl-af-cms/programs
+tar xf eclipse-cpp-luna-SR2-linux-gtk-x86_64.tar.gz
+link the executable eclipse to your path, such that which eclipse points to the version you just downloaded (e.g. by a symlink to ~/bin/eclipse). If prepareEnv.sh was executed, there will be a script runEclipse.sh in the CMSSW_BASE folder. Run it and skip the welcome screen.
+Create a new project:
+File -> New -> C++ Project
+Select as project name "CMSSW" (important)
+Uncheck "Use default location" and use the path: CMSSW_BASE/src (replace with the appropriate directory. No variables)
+Chose (if not selected) Executable -> Empty Project -> Linux GCC
+Click on "Next"
+Uncheck "Debug"
+Finish
+Select the project (left panel) and uncheck Project -> Build Automatically from the upper menu
+Skip all "Refreshing workspace" etc. actions and quit eclipse again and run TtZAnalysis/EclipseTools/configureProject.sh
+Your project is set up and can be used. The first time, when the index will be built it will take a long time - just wait.
+Advanced Setup
+It is also possible to edit the files locally using eclipse. This won't allow to compile but might be beneficial in case of slow/unstable internet connection. To do this, you need to be able to access the CMSSW_BASE directory from your local machine and need to have the same eclipse version installed as on the NAF/WGS. It is easiest if the CMSSW_BASE directory has the same path on your laptop, you can achieve this by mounts/symlinks. Afs is recommended because it behaves better in case of connection losses, bur sshfs can be used, too.
+Set up the project on the NAF as described above. Now, you can simple run runEclipse.sh from your laptop. Only the CMSSW_RELEASE_BASE and the root includes will be missing. It is recommended to copy these paths to the same location on your laptop (probably /cvmfs/cms.cern.ch/....). You can just copy/paste the paths from the entries in Project->Properties->Paths and Symbols->Include.
+If there are some problems, in particular with std::string, go to Project->Properties->Preprocessor Include Paths->Providers and move "CDT Built-in Compiler Settings" one up. Rebuild the index.
+Some hints on using Eclipse
+Line numbers: If you need line numbers in your text editor, you can switch them on by Window->Preferences (Linux) or Eclipse->Preferences (Mac), then General->Editors->Text Editors: Show line numbers
+Code formatting: As a starting point, please import the formatting template: Window->Preferences (Linux) or Eclipse->Preferences (Mac), then C/C++->Code Style->Formatter: Import. Now import the file TtZAnalysis/EclipseTools/CodeFormat.xml. It is no special style, but replaces tabs with spaces. And using the same format style should prevent hundreds of line changes every commit that are just related to different auto-format options.
+Some commands:
+Auto-complete, open available  (most important command, just try a bit in the beginning): Command(Mac)/Ctr(Linux) + Space
+Indent Line/Region: Command(Mac)/Ctr(Linux) + I
+More info: Let the mouse stay over item for some time
+Go to origin of function/object: Command(Mac)/Ctr(Linux) + klick on object/function.
+Only show one Panel: double click on panel (e.g. on the name of the currently opened file). Double-click again to switch back to normal view.
+Additional include paths: To add more include paths (e.g. for ntuple analysis code in the DesyTtbarHiggsAnalysisFramework), open Project->Properties->C/C++ General->Paths and Symbols: Include, GNU C++,  (e.g. ${CWD}/TopAnalysis/Configuration/analysis/common/include). Here, $CWD is the working directory as you see it in the project browser (left main panel).
+Addmethods, 
 
 
 For more information of how to use the scripts here, please refer to:

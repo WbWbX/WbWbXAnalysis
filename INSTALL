@@ -1,0 +1,15 @@
+
+
+To install the CMSSW framework, please follow the procedure described for the DesyTtbarHiggsAnalysisFramework in the Section "Setting up the Framework in the recent Release". 
+https://twiki.cern.ch/twiki/bin/view/CMS/DesyTtbarHiggsAnalysisFramework
+No special release tag is required.
+
+Except for some data files, only the subpackage "ZTopUtils" is required. It was originally part of the TtZFramework and was migrated there for common use.
+
+On top of this, go to the CMSSW_X_Y_Z/src directory and execute
+git clone https://github.com/jkiesele/TtZAnalysis.git
+cmsenv
+cd TtZAnalysis
+./prepareEnv.sh
+to set up and prepare the remaining parts of the framework. Here, you can ignore the warnings: "ls: cannot access testUnfold*.C: No such file or directory".
+
