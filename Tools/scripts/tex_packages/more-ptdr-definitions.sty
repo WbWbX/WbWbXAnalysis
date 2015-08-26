@@ -1,0 +1,196 @@
+\def\Fileversion$#1: #2 ${\gdef\fileversion{#2}}
+\def\Filedate$#1: #2-#3-#4 #5 ${\gdef\filedate{#2/#3/#4}}
+\Fileversion$Revision: 247905 $
+\Filedate$Date: 2014-06-24 15:24:54 +0200 (Tue, 24 Jun 2014) $
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% some sytle defs
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{more-ptdr-definitions}[\filedate\space Additional Macro Definitions (\fileversion)]
+\RequirePackage{xspace}
+\RequirePackage{amsmath}
+\RequirePackage{hepnames}
+\RequirePackage{verbatim}
+\RequirePackage{fancyvrb}
+%\RequirePackage[dvipsnames]{xcolor}
+
+\newcommand{\ACERMC} {\textsc{AcerMC}\xspace}
+\newcommand{\ALPGEN} {{\textsc{alpgen}}\xspace}
+\newcommand{\CALCHEP} {{\textsc{CalcHEP}}\xspace}
+\newcommand{\CHARYBDIS} {{\textsc{charybdis}}\xspace}
+\newcommand{\CMKIN} {\textsc{cmkin}\xspace}
+\newcommand{\CMSIM} {{\textsc{cmsim}}\xspace}
+\newcommand{\CMSSW} {{\textsc{cmssw}}\xspace}
+\newcommand{\COBRA} {{\textsc{cobra}}\xspace}
+\newcommand{\COCOA} {{\textsc{cocoa}}\xspace}
+\newcommand{\COMPHEP} {\textsc{CompHEP}\xspace}
+\newcommand{\EVTGEN} {{\textsc{evtgen}}\xspace}
+\newcommand{\FAMOS} {{\textsc{famos}}\xspace}
+\newcommand{\GARCON} {\textsc{garcon}\xspace}
+\newcommand{\GARFIELD} {{\textsc{garfield}}\xspace}
+\newcommand{\GEANE} {{\textsc{geane}}\xspace}
+\newcommand{\GEANTfour} {{\textsc{Geant4}}\xspace}
+\newcommand{\GEANTthree} {{\textsc{geant3}}\xspace}
+\newcommand{\GEANT} {{\textsc{geant}}\xspace}
+\newcommand{\HDECAY} {\textsc{hdecay}\xspace}
+\newcommand{\HERWIG} {{\textsc{herwig}}\xspace}
+\newcommand{\HERWIGpp} {{\textsc{herwig++}}\xspace}
+\newcommand{\POWHEG} {{\textsc{powheg}}\xspace}
+\newcommand{\HIGLU} {{\textsc{higlu}}\xspace}
+\newcommand{\HIJING} {{\textsc{hijing}}\xspace}
+\newcommand{\IGUANA} {\textsc{iguana}\xspace}
+\newcommand{\ISAJET} {{\textsc{isajet}}\xspace}
+\newcommand{\ISAPYTHIA} {{\textsc{isapythia}}\xspace}
+\newcommand{\ISASUGRA} {{\textsc{isasugra}}\xspace}
+\newcommand{\ISASUSY} {{\textsc{isasusy}}\xspace}
+\newcommand{\ISAWIG} {{\textsc{isawig}}\xspace}
+\newcommand{\MADGRAPH} {\textsc{MadGraph}\xspace}
+\newcommand{\MADSPIN} {\textsc{MadSpin}\xspace}
+\newcommand{\MCATNLO} {\textsc{mc@nlo}\xspace}
+\newcommand{\MCFM} {\textsc{mcfm}\xspace}
+\newcommand{\MILLEPEDE} {{\textsc{millepede}}\xspace}
+\newcommand{\ORCA} {{\textsc{orca}}\xspace}
+\newcommand{\OSCAR} {{\textsc{oscar}}\xspace}
+\newcommand{\PHOTOS} {\textsc{photos}\xspace}
+\newcommand{\PROSPINO} {\textsc{prospino}\xspace}
+\newcommand{\PYTHIA} {{\textsc{pythia}}\xspace}
+\newcommand{\SHERPA} {{\textsc{sherpa}}\xspace}
+\newcommand{\TAUOLA} {\textsc{tauola}\xspace}
+\newcommand{\TOPREX} {\textsc{TopReX}\xspace}
+\newcommand{\XDAQ} {{\textsc{xdaq}}\xspace}
+
+
+\newcommand{\TOPPP} {{\textsc{top}++}\xspace}
+\newcommand{\HATHOR} {{\textsc{hathor}}\xspace}
+
+
+\newcommand{\MINUIT} {{\textsc{minuit}}\xspace}
+\newcommand{\MINOS} {{\textsc{minos}}\xspace}
+
+
+%  Experiments
+\newcommand {\DZERO}{D0\xspace}     %etc.
+
+\newcommand{\C}{\ensuremath{\,^o\text{C}}\xspace}
+\newcommand{\cm}{\ensuremath{\,\text{cm}}\xspace}
+\newcommand{\m}{\ensuremath{\,\text{m}}\xspace}
+\newcommand{\mm}{\ensuremath{\,\text{mm}}\xspace}
+\newcommand{\um}{\ensuremath{\,\mu\text{m}}\xspace}
+\newcommand{\qm}{\ensuremath{\,\text{m}^2}\xspace}
+\newcommand{\ns}{\ensuremath{\,\text{ns}}\xspace}
+\newcommand{\Tesla}{\ensuremath{\,\text{T}}\xspace}
+
+
+\newcommand{\mus}{\ensuremath{\,\mu\text{s}}\xspace}
+\newcommand{\keV}{\ensuremath{\,\text{ke\hspace{-.08em}V}}\xspace}
+\newcommand{\MeV}{\ensuremath{\,\text{Me\hspace{-.08em}V}}\xspace}
+\newcommand{\MeVns}{\ensuremath{\text{Me\hspace{-.08em}V}}\xspace} % no leading thinspace
+\newcommand{\GeV}{\ensuremath{\,\text{Ge\hspace{-.08em}V}}\xspace}
+\newcommand{\GeVns}{\ensuremath{\text{Ge\hspace{-.08em}V}}\xspace} % no leading thinspace
+\newcommand{\gev}{\GeV}
+\newcommand{\TeV}{\ensuremath{\,\text{Te\hspace{-.08em}V}}\xspace}
+\newcommand{\TeVns}{\ensuremath{\text{Te\hspace{-.08em}V}}\xspace} % no leading thinspace
+\newcommand{\PeV}{\ensuremath{\,\text{Pe\hspace{-.08em}V}}\xspace}
+\newcommand{\keVc}{\ensuremath{{\,\text{ke\hspace{-.08em}V\hspace{-0.16em}/\hspace{-0.08em}}c}}\xspace}
+\newcommand{\MeVc}{\ensuremath{{\,\text{Me\hspace{-.08em}V\hspace{-0.16em}/\hspace{-0.08em}}c}}\xspace}
+\newcommand{\GeVc}{\ensuremath{{\,\text{Ge\hspace{-.08em}V\hspace{-0.16em}/\hspace{-0.08em}}c}}\xspace}
+\newcommand{\GeVcns}{\ensuremath{{\text{Ge\hspace{-.08em}V\hspace{-0.16em}/\hspace{-0.08em}}c}}\xspace} % no leading thinspace
+\newcommand{\TeVc}{\ensuremath{{\,\text{Te\hspace{-.08em}V\hspace{-0.16em}/\hspace{-0.08em}}c}}\xspace}
+\newcommand{\keVcc}{\ensuremath{{\,\text{ke\hspace{-.08em}V\hspace{-0.16em}/\hspace{-0.08em}}c^\text{2}}}\xspace}
+\newcommand{\MeVcc}{\ensuremath{{\,\text{Me\hspace{-.08em}V\hspace{-0.16em}/\hspace{-0.08em}}c^\text{2}}}\xspace}
+\newcommand{\GeVcc}{\ensuremath{{\,\text{Ge\hspace{-.08em}V\hspace{-0.16em}/\hspace{-0.08em}}c^\text{2}}}\xspace}
+\newcommand{\GeVccns}{\ensuremath{{\text{Ge\hspace{-.08em}V\hspace{-0.16em}/\hspace{-0.08em}}c^\text{2}}}\xspace} % no leading thinspace
+\newcommand{\TeVcc}{\ensuremath{{\,\text{Te\hspace{-.08em}V\hspace{-0.16em}/\hspace{-0.08em}}c^\text{2}}}\xspace}
+
+\newcommand{\pbinv} {\mbox{\ensuremath{\,\text{pb}^\text{$-$1}}}\xspace}
+\newcommand{\fbinv} {\mbox{\ensuremath{\,\text{fb}^\text{$-$1}}}\xspace}
+\newcommand{\nbinv} {\mbox{\ensuremath{\,\text{nb}^\text{$-$1}}}\xspace}
+
+
+\newcommand{\pb} {\mbox{\ensuremath{\,\text{pb}}}\xspace}
+
+\newcommand{\mubinv} {\ensuremath{\,\mu\mathrm{b}^{-1}}\xspace}
+\newcommand{\percms}{\ensuremath{\,\text{cm}^\text{$-$2}\,\text{s}^\text{$-$1}}\xspace}
+\newcommand{\lumi}{\ensuremath{\mathcal{L}}\xspace}
+\newcommand{\Lumi}{\ensuremath{\mathcal{L}}\xspace}%both upper and lower
+
+
+\newcommand{\PT}{\ensuremath{p_{\mathrm{T}}}\xspace}
+\newcommand{\pt}{\ensuremath{p_{\mathrm{T}}}\xspace}
+\newcommand{\ET}{\ensuremath{E_{\mathrm{T}}}\xspace}
+\newcommand{\HT}{\ensuremath{H_{\mathrm{T}}}\xspace}
+\newcommand{\et}{\ensuremath{E_{\mathrm{T}}}\xspace}
+\newcommand{\Em}{\ensuremath{E\hspace{-0.6em}/}\xspace}
+\newcommand{\Pm}{\ensuremath{p\hspace{-0.5em}/}\xspace}
+\newcommand{\PTm}{\ensuremath{{p}_\mathrm{T}\hspace{-1.02em}/\kern 0.5em}\xspace}
+\newcommand{\PTslash}{\PTm}
+\newcommand{\ptvec}{\ensuremath{{\vec p}_{\mathrm{T}}}\xspace}
+
+
+\newcommand{\DeltaR}{\ensuremath{\Delta\text{R}}\xspace}
+
+\newcommand{\MGPY} {{\textsc{MadGraph}+\textsc{pythia}}\xspace}
+\newcommand{\mlb}{\ensuremath{\text{m}_{\text{lb}}}\xspace}
+\newcommand{\mlbmin}{\ensuremath{\text{m}_{\text{lb}}^{\text{min}}}\xspace}
+\newcommand{\mlbminpred}{\ensuremath{\text{m}_{\text{lb,pred}}^{\text{min}}}\xspace}
+\newcommand{\mlbstar}{\ensuremath{\text{m}_{\text{lb}}^{\text{*}}}\xspace}
+\newcommand{\mt}{\ensuremath{\text{m}_{\text{t}}}\xspace}
+\newcommand{\met}{\mbox{$\not \!\! E_T$}\xspace}
+\newcommand{\MET}{\met}
+\newcommand{\ETmiss}{\met}
+
+%particles
+\newcommand{\ttbar}    {\ensuremath{\Ptop \APtop}\xspace}
+
+\newcommand{\Ztoll} {\ensuremath{\PZ\rightarrow\Pleptonplus\Pleptonminus}\xspace}
+
+\newcommand{\tW}    {\ensuremath{\Ptop \PW}\xspace}
+
+\newcommand{\bjet}{\ensuremath{\Pbottom\,\text{jet}}\xspace}
+\newcommand{\bjets}{\ensuremath{\Pbottom\,\text{jets}}\xspace}
+
+
+\newcommand{\sEightTeV}    {\ensuremath{\sqrt{s}=8\TeV}\xspace}
+\newcommand{\sSevenTeV}    {\ensuremath{\sqrt{s}=7\TeV}\xspace}
+
+
+\newcommand{\xsecvis}    {\ensuremath{\sigma_{\Ptop \APtop,\text{vis}}}\xspace}
+\newcommand{\xsec}    {\ensuremath{\sigma_{\Ptop \APtop}}\xspace}
+\newcommand{\acc}    {\ensuremath{A_{\Pe\Pmu}}\xspace}
+
+\newcommand{\LH}    {\ensuremath{L_{H}}\xspace}
+
+%%%%%%%%%%%%%%%% TEXT MACROS %%%%%%%%%%
+
+
+
+\newcommand{\SM}{Standard Model\xspace}
+\newcommand{\MSbar}{\ensuremath{\overline{{\text{MS}}}}\xspace}
+\newcommand{\alphas}{\ensuremath{\alpha_S}\xspace}
+%\newcommand{\alpha_s}{\alphas}
+
+
+\newcommand{\mtpole}{\ensuremath{m_t^{\text{pole}}}\xspace}
+\newcommand{\mtmc}{\ensuremath{m_t^{\text{MC}}}\xspace}
+\newcommand{\mtmsbar}{\ensuremath{m_t^{\MSbar}}\xspace}
+\newcommand{\mtmsr}{\ensuremath{m_t^\text{MSR}}\xspace}
+
+
+
+
+\RecustomVerbatimCommand{\VerbatimInput}{VerbatimInput}%
+{
+ frame=lines,  % top and bottom rule only
+ framesep=2em, % separation between frame and text
+ fontsize=\small
+}
+
+
+%%%%%%%%%%%%%%%%%commenting macros%%%%%%%%%%%%%%%%%%%
+
+
+\newcommand{\wcomment}[1]{\textit{\underline{C: #1}}}
+
+\newcommand{\largepar}{\par\vspace{\baselineskip}}

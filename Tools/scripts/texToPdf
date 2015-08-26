@@ -6,6 +6,8 @@
 
 if [ `which pdflatex` ] && [ $1 ]
 then
+
+    outfile=${1:r}
     
     tmpfile=/tmp/$(date +%s%N)
     trap "rm -rf $tmpfile; exit" SIGHUP SIGINT SIGTERM
@@ -15,6 +17,9 @@ then
     printf "\\\documentclass[11pt]{article}">>| $tmpfile
 #printf "\\\usepackage{blindtext}">>| $tmpfile
     printf "\\\usepackage[active,tightpage]{preview}">>| $tmpfile
+     printf "\\\usepackage{multirow}">>| $tmpfile
+    printf "\\\usepackage{more-ptdr-definitions}">>| $tmpfile
+
     printf "\\\setlength\\\PreviewBorder{10pt}" >>| $tmpfile
     printf "\\\usepackage[utf8]{inputenc} \\\usepackage{amsmath} \\\usepackage{amsfonts} \\\usepackage{amssymb} \\\usepackage{lmodern} \\\usepackage[T1]{fontenc} \\\usepackage{textcomp} \\\usepackage{underscore}  \\\usepackage{pdflscape}" >>| $tmpfile
     
@@ -23,11 +28,13 @@ then
     cat $1 >> $tmpfile
     
     printf "\\\end{preview}\\\end{document}"  >>| $tmpfile
-    pdflatex -jobname=$1 $tmpfile
+    pdflatex -jobname=$outfile $tmpfile
+    pdftopng $outfile.pdf $outfile
+    mv $outfile-000001.png $outfile.png
     rm $tmpfile
-    rm $1.aux
-    rm $1.log
+    rm $outfile.aux
+    rm $outfile.log
 
 else
-    echo "no pdflatex found" >>| $1.pdf
+    echo "no pdflatex found" >>| $1.log
 fi
