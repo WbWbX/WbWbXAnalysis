@@ -197,22 +197,22 @@ invokeApplication(){
 	ana->getTriggerSF()->setInput(trigsffile,trigsfhisto);
 
 	if(elecEnsffile.EndsWith("DEFFILEWILDCARDDONTREMOVE")){
-	    if(energy == "7TeV" || energy == "8TeV")
-		ana->getElecEnergySF()->setGlobal(1,0.15,0.15);
-	    else if(energy == "13TeV")
-		ana->getElecEnergySF()->setGlobal(1,1.0,1.0);
+		if(energy == "7TeV" || energy == "8TeV")
+			ana->getElecEnergySF()->setGlobal(1,0.15,0.15);
+		else if(energy == "13TeV")
+			ana->getElecEnergySF()->setGlobal(1,1.0,1.0);
 	}
 	else{
-	    ana->getElecEnergySF()->setInput(elecEnsffile,elecEnsfhisto);
+		ana->getElecEnergySF()->setInput(elecEnsffile,elecEnsfhisto);
 	}
-	
+
 	if(energy == "7TeV" || energy == "8TeV")
-	    //https://twiki.cern.ch/twiki/bin/viewauth/CMS/MuonReferenceResolution
-	    //this is for muons without the corrections so it should be even better with
-	    ana->getMuonEnergySF()->setGlobal(1,0.3,0.3); //new from muon POG twiki
+		//https://twiki.cern.ch/twiki/bin/viewauth/CMS/MuonReferenceResolution
+		//this is for muons without the corrections so it should be even better with
+		ana->getMuonEnergySF()->setGlobal(1,0.3,0.3); //new from muon POG twiki
 	else if(energy == "13TeV")
-	    ana->getMuonEnergySF()->setGlobal(1,0.5,0.5);
-	
+		ana->getMuonEnergySF()->setGlobal(1,0.5,0.5);
+
 	ana->getTopPtReweighter()->setFunction(reweightfunctions::toppt);
 	ana->getTopPtReweighter()->setSystematics(reweightfunctions::nominal);
 
@@ -224,13 +224,22 @@ invokeApplication(){
 
 	//change
 	ana->getBTagSF()->setMode(NTBTagSF::randomtagging_mode);
+	BTagEntry::OperatingPoint btagop=BTagEntry::OP_TIGHT;
 	if(energy == "13TeV"){
 		//agrohsje
-	        //ana->getBTagSF()->loadSF  (btagSFFile, BTagEntry::OP_MEDIUM,"csvv2_50ns","mujets","up","down");
-	        ana->getBTagSF()->loadSF  (btagSFFile, BTagEntry::OP_TIGHT,"csvv2_50ns","mujets","up","down");
+		//ana->getBTagSF()->loadSF  (btagSFFile, BTagEntry::OP_MEDIUM,"csvv2_50ns","mujets","up","down");
+		ana->getBTagSF()->loadSF  (btagSFFile, BTagEntry::OP_TIGHT,"csvv2_50ns","mujets","up","down");
 	}else if (energy == "7TeV" || energy == "8TeV"){
-		ana->getBTagSF()->loadSF  (btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets","up","down");
+		if(mode.Contains("Btagloosewp"))
+			btagop=BTagEntry::OP_LOOSE;
+		else if(mode.Contains("Btagmediumwp"))
+			btagop=BTagEntry::OP_MEDIUM;
+		ana->getBTagSF()->loadSF  (btagSFFile, btagop,"csv","mujets","up","down");
 	}
+	bool globalbsf=false;
+	if(mode.Contains("Btagglobalsf"))
+		globalbsf=true;
+
 	//agrohsje 
 	if(energy == "13TeV") ana->getJECUncertainties()->setIs2012(false);
 	ana->getJECUncertainties()->setFile((jecfile).Data());
@@ -419,16 +428,16 @@ invokeApplication(){
 	else if(Syst=="PU_up"){
 		ana->getPUReweighter()->setDataTruePUInput(pufile+"_up.root");
 		if(energy=="7TeV" || energy=="8TeV"){
-			if(!dobtag){
-				ana->getBTagSF()->loadBCSF(btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets","up_PileUp","down_PileUp");
+			if(!dobtag&&!globalbsf){
+				ana->getBTagSF()->loadBCSF(btagSFFile, btagop,"csv","mujets","up_PileUp","down_PileUp");
 				ana->getBTagSF()->setSystematics(bTagSFBase::heavyup);}
 		}
 	}
 	else if(Syst=="PU_down"){
 		ana->getPUReweighter()->setDataTruePUInput(pufile+"_down.root");
 		if(energy=="7TeV" || energy=="8TeV"){
-			if(!dobtag){
-				ana->getBTagSF()->loadBCSF(btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets","up_PileUp","down_PileUp");
+			if(!dobtag&&!globalbsf){
+				ana->getBTagSF()->loadBCSF(btagSFFile, btagop,"csv","mujets","up_PileUp","down_PileUp");
 				ana->getBTagSF()->setSystematics(bTagSFBase::heavydown);}
 		}
 	}
@@ -436,16 +445,16 @@ invokeApplication(){
 	else if(Syst=="JER_up"){
 		ana->getJERAdjuster()->setSystematics("up");
 		if(energy=="7TeV" || energy=="8TeV"){
-			if(!dobtag){
-				ana->getBTagSF()->loadBCSF(btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets","up_JER","down_JER");
+			if(!dobtag&&!globalbsf){
+				ana->getBTagSF()->loadBCSF(btagSFFile, btagop,"csv","mujets","up_JER","down_JER");
 				ana->getBTagSF()->setSystematics(bTagSFBase::heavyup);}
 		}
 	}
 	else if(Syst=="JER_down"){
 		ana->getJERAdjuster()->setSystematics("down");
 		if(energy=="7TeV" || energy=="8TeV"){
-			if(!dobtag){
-				ana->getBTagSF()->loadBCSF(btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets","up_JER","down_JER");
+			if(!dobtag &&!globalbsf){
+				ana->getBTagSF()->loadBCSF(btagSFFile, btagop,"csv","mujets","up_JER","down_JER");
 				ana->getBTagSF()->setSystematics(bTagSFBase::heavydown);}
 		}
 	}
@@ -470,7 +479,7 @@ invokeApplication(){
 		TString btagsubstrup="up_"+btagsubstr;
 		btagsubstr="down_"+btagsubstr;
 
-		ana->getBTagSF()->loadBCSF(btagSFFile, BTagEntry::OP_TIGHT,"csv","mujets",btagsubstrup.Data(),btagsubstr.Data());
+		ana->getBTagSF()->loadBCSF(btagSFFile, btagop,"csv","mujets",btagsubstrup.Data(),btagsubstr.Data());
 
 		if(Syst.EndsWith("_up"))
 			ana->getBTagSF()->setSystematics(bTagSFBase::heavyup);
@@ -554,11 +563,11 @@ invokeApplication(){
 		ana->setFilePostfixReplace("ttbarviatau_dil.root","ttbarviatau_pow2py.root");
 	}
 	else if(Syst=="TT_GENPOWHERW_up"){
-	    //agrohsje fix after proper renaming
-	    //ana->setFilePostfixReplace("ttbar.root","ttbar_powhpp.root");
-	    //ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_powhpp.root");
-	    ana->setFilePostfixReplace("ttbar.root","ttbar_her.root");
-	    ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_her.root");
+		//agrohsje fix after proper renaming
+		//ana->setFilePostfixReplace("ttbar.root","ttbar_powhpp.root");
+		//ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_powhpp.root");
+		ana->setFilePostfixReplace("ttbar.root","ttbar_her.root");
+		ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_her.root");
 	}
 	else if(Syst=="TT_GENPOWHERW_down"){
 		//this is just default sample
@@ -576,14 +585,14 @@ invokeApplication(){
 		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_pow2py.root");
 	}
 	else if(Syst=="TT_GENMCATNLO_up"){
-	    if (energy=="7TeV" || energy=="8TeV"){
-		ana->setFilePostfixReplace("ttbar.root","ttbar_mcatnlo.root");
-		ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mcatnlo.root");
-	    }
-	    else if(energy=="13TeV"){
-		ana->setFilePostfixReplace("ttbar.root","ttbar_amc_mgbr.root");
-		ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_amc_mgbr.root");
-	    }
+		if (energy=="7TeV" || energy=="8TeV"){
+			ana->setFilePostfixReplace("ttbar.root","ttbar_mcatnlo.root");
+			ana->setFilePostfixReplace("ttbarviatau.root","ttbarviatau_mcatnlo.root");
+		}
+		else if(energy=="13TeV"){
+			ana->setFilePostfixReplace("ttbar.root","ttbar_amc_mgbr.root");
+			ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_amc_mgbr.root");
+		}
 	}
 	else if(Syst=="TT_GENMCATNLO_down"){
 		//this is just default sample
@@ -629,8 +638,8 @@ invokeApplication(){
 			ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_mt"+topmass+".root");
 		}
 		if(topmass == "178.5" || topmass == "166.5"){
-			//	ana->setFilePostfixReplace("_tWtoLL.root","_tWtoLL_mt"+topmass+ ".root");
-			//	ana->setFilePostfixReplace("_tbarWtoLL.root","_tbarWtoLL_mt"+topmass+ ".root");
+				ana->setFilePostfixReplace("_tWtoLL.root","_tWtoLL_mt"+topmass+ ".root");
+				ana->setFilePostfixReplace("_tbarWtoLL.root","_tbarWtoLL_mt"+topmass+ ".root");
 		}
 
 	}
@@ -672,40 +681,19 @@ invokeApplication(){
 		TString rmdummybtagfiles="rm -f "+outdir+"/btag_dummy*";
 		system(rmdummybtagfiles.Data());
 
-		ztop::container1DStackVector csv;
+		ztop::histoStackVector csv;
 
 		if(fullsucc>=0){
 
 			csv.readFromFile(fulloutfilepath.Data()); //DEBUG
-			vector<TString> dycontributions;
-			dycontributions << "Z#rightarrowll" << "DY#rightarrowll";
-			if(!channel.Contains("emu")){
-				rescaleDY(&csv, dycontributions);
-				if(testmode)
-					std::cout << "drawing plots..." <<std::endl;
-
-				//	std::vector<discriminatorFactory> disc=discriminatorFactory::readAllFromTFile(ana->getOutPath()+".root");
-				//	for(size_t i=0;i<disc.size();i++){
-				//		disc.at(i).extractLikelihoods(csv);
-				//	}
-				csv.writeToFile(fulloutfilepath.Data()); //recreates file
-				system(("rm -f "+ana->getOutPath()+"_discr.root").Data());
-				//	discriminatorFactory::writeAllToTFile(ana->getOutPath()+"_discr.root",disc);
 
 
-			}
-			else{
+			if(testmode){
 				std::cout << "drawing plots..." <<std::endl;
-				//	std::vector<discriminatorFactory> disc=discriminatorFactory::readAllFromTFile(ana->getOutPath()+".root");
-				//	for(size_t i=0;i<disc.size();i++){
-				//		disc.at(i).extractLikelihoods(csv);
-				//	}
-				if(testmode)
-					csv.writeAllToTFile(fulloutfilepath+"_plots.root",true,!testmode);
-				system(("rm -f "+ana->getOutPath()+"_discr.root").Data());
-				//	discriminatorFactory::writeAllToTFile(ana->getOutPath()+"_discr.root",disc);
+				csv.writeAllToTFile(fulloutfilepath+"_plots.root",true,!testmode);
 			}
 
+			system(("rm -f "+ana->getOutPath()+"_discr.root").Data());
 
 			system(("touch "+batchdir+ana->getOutFileName()+"_fin").Data());
 

@@ -61,6 +61,8 @@ JES_RelativeStatHF , JES: Relative Stat HF
 JES_SinglePionECAL , JES: Single pion ECAL
 JES_SinglePionHCAL , JES: Single pion HCAL
 JES_Time , JES: Time
+  JES_FlavorPureBottom, JES: Flavor ($b$)
+  JES_FlavorPureQuark,  JES: Flavor (light)
 
 JES, Jet energy scale
 
