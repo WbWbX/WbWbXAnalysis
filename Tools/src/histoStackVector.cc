@@ -166,7 +166,7 @@ void histoStackVector::addList1DUnfold(TString leg, int color, double norm,int l
  */
 void histoStackVector::addSignal(const TString & signame){
 	size_t size=stacks_.size();
-#pragma omp parallel for
+//#pragma omp parallel for
 	for(size_t i=0;i<size;i++){
 		stacks_.at(i).addSignal(signame);
 	}

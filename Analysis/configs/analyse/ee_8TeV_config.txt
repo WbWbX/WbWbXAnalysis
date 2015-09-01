@@ -83,7 +83,7 @@ ElecSFHisto    = GlobalSF
  ElecEnergySFHisto= sf
 
 
-TriggerSFFile  = /src/TopAnalysis/Configuration/analysis/common/data/triggerSummary_ee_tightleps.root
+TriggerSFFile  = /src/TtZAnalysis/Analysis/data/analyse/SF_one.root
 
 PUFile         = /src/TtZAnalysis/Analysis/data/analyse/Legacy2012.json_PU    $without .root
 

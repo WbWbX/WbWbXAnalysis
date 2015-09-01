@@ -52,7 +52,7 @@ histo1D::histo1D():taggedObject(taggedObject::type_container1D)
 }
 
 histo1D::histo1D(const std::vector<float>& bins,const TString& name,const TString& xaxisname,const TString& yaxisname, bool mergeufof):
-																																																																					taggedObject(taggedObject::type_container1D)
+																																																																																											taggedObject(taggedObject::type_container1D)
 
 {
 	setBins(bins);
@@ -238,6 +238,8 @@ float histo1D::getBinWidth(const size_t &bin) const{
 	else{
 		width=fabs(bins_.at(bin+1)-bins_.at(bin));
 	}
+	if(width==0)
+		throw std::runtime_error("histo1D::getBinWidth: returned 0 bin width");
 	return width;
 }
 
@@ -273,34 +275,32 @@ float histo1D::getBinStat(const size_t& bin,const int &sysLayer) const{
  * always returns a POSITIVE value
  */
 float histo1D::getBinErrorUp(const size_t & bin, bool onlystat,const TString &limittosys)const {
-	float fullerr2=0;
+	double fullerr2=0;
 	if(bin<bins_.size()){
 		fullerr2=contents_.getBin(bin).getStat2(); //stat
 		if(onlystat)
 			return std::sqrt(fullerr2);
 		if(limittosys==""){
 			// make vector of all sys stripped
-			std::vector<TString> sources;
-			for(size_t i=0;i<contents_.layerSize();i++){ //there might be room for improvement here...
-				if(debug){
-
-					{
-						std::cout << "container1D::getBinErrorUp: checking variation with index: " <<i<< "("<< contents_.layerSize() << ")"<<std::endl;
-						std::cout << "container1D::getBinErrorUp: stripping variation with name: " <<contents_.getLayerName(i)<<std::endl;
-					}
-				}
-				TString source=stripVariation(contents_.getLayerName(i));
-				if(-1==isIn(source,sources)){
-					sources.push_back(source);
-					float domvar=getDominantVariationUp(source,bin);
-					fullerr2 += sq(domvar);
-				}
+			std::vector<TString> sources=getSystNameList();
+			for(size_t i=0;i<sources.size();i++){ //there might be room for improvement here...
+				double domvar=getDominantVariationUp(sources.at(i),bin);
+				fullerr2 += domvar*(domvar);
+				if(fullerr2!=fullerr2)
+					throw std::runtime_error(("histo1D::getBinErrorUp: nan for " + sources.at(i)+": "+ getName() +": "+toTString(bin)).Data());
 			}
 		}
 		else{
-			fullerr2 += sq(getDominantVariationUp(limittosys,bin));
+			double tmppp=getDominantVariationUp(limittosys,bin);
+			fullerr2 += tmppp*tmppp;
 		}
-		return std::sqrt(fullerr2);
+
+		fullerr2=std::sqrt(fabs(fullerr2));
+		if(fullerr2!=fullerr2)
+			throw std::runtime_error(("histo1D::getBinErrorUp: nan produced somewhere for "+ getName()+": "+toTString(bin)).Data());
+
+
+		return fullerr2;
 	}
 	else{
 		if(showwarnings)std::cout << "container1D::getBinErrorUp: bin not existent!" << std::endl;
@@ -314,30 +314,33 @@ float histo1D::getBinErrorUp(const size_t & bin, bool onlystat,const TString &li
  * always returns a POSITIVE value
  */
 float histo1D::getBinErrorDown(const size_t & bin,bool onlystat,const TString & limittosys) const{
-	float fullerr2=0;
+	double fullerr2=0;
 	if(bin<bins_.size()){
 		fullerr2=contents_.getBin(bin).getStat2(); //stat
+		if(fullerr2<0)
+			throw std::runtime_error("stat<0");
 		if(onlystat)
 			return std::sqrt(fullerr2);
 		if(limittosys==""){
 			// make vector of all sys stripped
-			std::vector<TString> sources;
-			for(size_t i=0;i<contents_.layerSize();i++){ //there might be room for improvement here...
-				if(debug){
-					std::cout << "container1D::getBinErrorDown: checking variation with index: " <<i<<std::endl;
-					std::cout << "container1D::getBinErrorDown: stripping variation with name: " <<contents_.getLayerName(i)<<std::endl;
-				}
-				TString source=stripVariation(contents_.getLayerName(i));
-				if(-1==isIn(source,sources)){
-					sources.push_back(source);
-					fullerr2 += sq(getDominantVariationDown(source,bin));
-				}
+			std::vector<TString> sources=getSystNameList();
+			for(size_t i=0;i<sources.size();i++){ //there might be room for improvement here...
+				double domvar=getDominantVariationDown(sources.at(i),bin);
+				fullerr2 += sq(domvar);
+				if(fullerr2!=fullerr2)
+					throw std::runtime_error(("histo1D::getBinErrorDown: nan for " + sources.at(i)+": "+ getName()+": "+toTString(bin)).Data());
+
 			}
 		}
 		else{
-			fullerr2 += sq(getDominantVariationDown(limittosys,bin));
+			double tmppp=getDominantVariationDown(limittosys,bin);
+			fullerr2 += tmppp*tmppp;
 		}
-		return std::sqrt(fullerr2);
+		fullerr2=std::sqrt(fabs(fullerr2));
+		if(fullerr2!=fullerr2)
+			throw std::runtime_error(("histo1D::getBinErrorDown: nan produced somewhere for "+ getName()+": "+toTString(bin)).Data());
+
+		return fullerr2;
 	}
 	else{
 		if(showwarnings)std::cout << "container1D::getBinErrorDown: bin not existent!" << std::endl;
@@ -351,8 +354,12 @@ float histo1D::getBinErrorDown(const size_t & bin,bool onlystat,const TString & 
  */
 float histo1D::getBinError(const size_t & bin,bool onlystat,const TString & limittosys) const{
 	float symmerror=0;
-	if(getBinErrorUp(bin,onlystat,limittosys) > fabs(getBinErrorDown(bin,onlystat,limittosys))) symmerror=getBinErrorUp(bin,onlystat,limittosys);
-	else symmerror=fabs(getBinErrorDown(bin,onlystat,limittosys));
+	float errup=getBinErrorUp(bin,onlystat,limittosys);
+	float errdow=getBinErrorDown(bin,onlystat,limittosys);
+	if(errup > fabs(errdow))
+		symmerror=errup;
+	else symmerror=fabs(errdow);
+
 	return symmerror;
 }
 /**
@@ -410,11 +417,15 @@ void histo1D::splitSystematic(const size_t & number, const float& fracadivb,
 				" out of range(" + toTString((int)getSystSize()-1) + ")" ).Data();
 		throw std::out_of_range(errstr);
 	}
-	if(fracadivb <0 || (fracadivb)>1){
+	if(fracadivb <0 || (fracadivb)>1.){
 		throw std::out_of_range("container1D::splitSystematic: fraction needs to be between 0 and 1");
 	}
 	float weighta = std::sqrt(fracadivb);
-	float weightb = std::sqrt(1-fracadivb);
+	float weightb = 0;
+	if(!isApprox(1-fracadivb,(float)0.,0.0001))
+		weightb =	std::sqrt(1.-fracadivb);
+	if(weighta!=weighta || weightb!=weightb)
+		throw std::runtime_error("histo1D::splitSystematic: nan. check weights (0 <= w <=1.");
 
 	histo1D syscont = getSystContainer(number);
 	contents_.removeLayer(number);
@@ -691,31 +702,44 @@ void histo1D::mergeAllErrors(const TString & mergedname,bool linearly,const corr
 			cp.setBinContent(i,getBinContent(i)-std::sqrt(cdown*cdown-stat*stat) ,1);
 		}
 		else if(usecorr){
-			float cup=0;
-			float cdown=0;
+			float cup=0; //defined from direction of 0,0 entry , can also mean down
+			//float cdown=0;
 			for(size_t row=0;row<assoup.size();row++){
 				for(size_t col=0;col<assoup.size();col++){
-					double  corrcoeff=corr.getEntry(col,row);
-					if(corrcoeff){
-						float errupvara = getBinContent(i,assoup.at(row)) - getBinContent(i);
-						float errdownvara= getBinContent(i,assodown.at(row)) - getBinContent(i);
-						float errupvarb = getBinContent(i,assoup.at(col)) - getBinContent(i);
-						float errdownvarb= getBinContent(i,assodown.at(col)) - getBinContent(i);
+					double  corrcoeff=corr.getEntry(row,col);
+					float errupvara =  (getBinContent(i,assoup.at(row)) - getBinContent(i));
+					float errdownvara= (getBinContent(i,assodown.at(row)) - getBinContent(i));
+					float errupvarb =  (getBinContent(i,assoup.at(col)) - getBinContent(i));
+					float errdownvarb= (getBinContent(i,assodown.at(col)) - getBinContent(i));
 
-						cup   += corrcoeff * errupvara * errupvarb;
-						cdown += corrcoeff * errdownvara * errdownvarb;
-					}
+					//	float corra=1,corrb=1;
+					float maxa=std::max(fabs(errupvara), fabs(errdownvara));
+					//	if(errupvara<errdownvara){
+					//		corra=-1;
+					//	}
+					float maxb=std::max(fabs(errupvarb), fabs(errdownvarb));
+					//	if(errupvarb<errdownvarb){
+					//		corrb=-1;
+					//	} corra*corrb
+					cup+= corrcoeff*maxa*maxb ;
+
+					//symmetrize
+
 				}
 			}
+			//cdown=cup;
 			//cup+=stat*stat;
 			//cdown+=stat*stat;
+			//bool anticorr;
+			//float maxup=fabs(getMaxVar(true, cup, -cdown, anticorr));
+			//float maxdown=fabs(getMaxVar(false, cup, -cdown, anticorr));
 			cp.setBinContent(i,getBinContent(i)+std::sqrt(cup) ,0);
-			cp.setBinContent(i,getBinContent(i)-std::sqrt(cdown) ,1);
+			cp.setBinContent(i,getBinContent(i)-std::sqrt(cup) ,1);
 		}
 		else{ //linearly
 			float cup=0,cdown=0;
 			std::vector<TString> vars=contents_.getVariations();
-			for(size_t var=0;var<vars.size();var++){
+			for(size_t var=0;var<vars.size();var++){ //what if in same direction...?
 				cup  +=getBinContent(i,getSystErrorIndex(vars.at(var)+"_up"))   - getBinContent(i);
 				cdown+=getBinContent(i,getSystErrorIndex(vars.at(var)+"_down")) - getBinContent(i);
 			}
@@ -1012,7 +1036,7 @@ void histo1D::setAllZero(){
  * creates new TH1D and returns pointer to it
  *  getTH1D(TString name="", bool dividebybinwidth=true, bool onlystat=false)
  */
-TH1D * histo1D::getTH1D(TString name, bool dividebybinwidth, bool onlystat, bool nostat) const{
+TH1D * histo1D::getTH1D(TString name, bool dividebybinwidth, bool onlystat, bool nostat,const int& systidx) const{
 	if(name=="") name=name_;
 	name=textFormatter::makeCompatibleFileName(name.Data());
 	if(bins_.size() < 2)
@@ -1024,12 +1048,24 @@ TH1D * histo1D::getTH1D(TString name, bool dividebybinwidth, bool onlystat, bool
 	if(debug)
 		std::cout << "container1D::getTH1D: bins ok, filling TH1D bins" <<std::endl;
 	for(size_t i=0;i<=getNBins()+1;i++){ // 0 underflow, genBins+1 overflow
-		float cont=getBinContent(i);
-		if(dividebybinwidth && i>0 && i<getNBins()+1) cont=cont/getBinWidth(i);
+		float cont=getBinContent(i,systidx);
+
+		if(dividebybinwidth && i>0 && i<getNBins()+1) cont/=getBinWidth(i);
+		if(cont!=cont)
+			throw std::runtime_error(("histo1D::getTH1D: nan produced for cont somewhere "+ getName()).Data());
 		h->SetBinContent(i,cont);
-		float err=getBinError(i,onlystat);
-		if(nostat) err-=getBinError(i,true);
-		if(dividebybinwidth && i>0 && i<getNBins()+1) err=err/getBinWidth(i);
+		float err=0;
+		if(!(nostat&&onlystat)){ // only stat but nostat means without error
+			err=getBinError(i,onlystat);
+			if(nostat){
+				err=err*err -getBin(i,systidx).getStat2();
+				if(err<0)err=0;
+			}
+			if(dividebybinwidth && i>0 && i<getNBins()+1) err/=getBinWidth(i);
+		}
+		if(err!=err)
+			throw std::runtime_error(("histo1D::getTH1D: nan produced for err somewhere "+ getName()).Data());
+
 		h->SetBinError(i,err);
 		entriessum +=contents_.getBin(i).getEntries();
 	}
@@ -1079,22 +1115,7 @@ TH1D * histo1D::getAxisTH1D()const{
  * THIS IS TOTAL BULLSHIT!!!
  */
 TH1D * histo1D::getTH1DSyst(TString name, size_t systNo, bool dividebybinwidth, bool statErrors) const{
-	TH1D * h=getTH1D(name,dividebybinwidth,true); //gets everything with only stat errors
-
-	//now shift by systematic
-	for(size_t i=0;i<=getNBins()+1;i++){ // 0 underflow, genBins+1 overflow
-		float newcont=getBin(i,systNo).getContent();
-		float newstat=getBin(i,systNo).getStat();
-		if(dividebybinwidth){
-			newcont=newcont/getBinWidth(i);
-			newstat=newstat/getBinWidth(i);
-		}
-		h->SetBinContent((int)i,newcont);
-		h->SetBinError((int)i,newstat);
-		if(!statErrors)
-			h->SetBinError(i,0);
-	}
-	return h;
+	return getTH1D(name,dividebybinwidth,true,systNo); //gets everything with only stat errors
 }
 
 histo1D& histo1D::import(const graph&gin){
@@ -1539,6 +1560,32 @@ histo1D histo1D::cutRight(const float & val)const{
 	return out;
 }
 
+histo1D histo1D::cutLeft(const float & val)const{
+	size_t binno=getBinNo(val);
+	if(binno<1){
+		throw std::out_of_range("container1D::cutRight: would cut full content. Probably not intended!?");
+	}
+	std::vector<float> newbins;
+	newbins.insert(newbins.end(),bins_.begin()+binno+1,bins_.end());
+	histo1D out=*this;
+	out.setBins(newbins);
+
+	for(int i=-1;i<(int)getSystSize();i++){
+		histo1D tmp(newbins);
+		for(size_t bin=0;bin<out.bins_.size();bin++){
+			tmp.getBin(bin) = getBin(bin+binno,i);
+		}
+
+		if(i>=0){
+			out.addErrorContainer(getSystErrorName(i),tmp);
+		}
+		else{ //only first time
+			out.contents_ = tmp.contents_;
+		}
+	}
+	return out;
+}
+
 bool histo1D::operator == (const histo1D & rhs)const{
 
 	if(manualerror_!=rhs.manualerror_)
@@ -1737,7 +1784,7 @@ void histo1D::addRelSystematicsFrom(const ztop::histo1D & rhs,bool ignorestat,bo
 			//contents_.getLayer(newlayerit).removeStat();
 			//stat are definitely not correlated
 			bool isnominalequal=(!strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i),1e-2))
-																																					        																																																																				|| (strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i))) ;
+																																					        																																																																																										|| (strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i))) ;
 
 			if(isnominalequal){ //this is just a copy leave it and add no variation
 				//contents_.getLayer(newlayerit).removeStat();
@@ -2031,7 +2078,7 @@ TString histo1D::coutBinContent(size_t bin,const TString& unit) const{
 	TString lineend="\\\\ \\hline \n";
 
 	cout << "container1D::coutBinContent: bin " << bin << endl;
-	cout << content << " \t+-" << getBinStat(bin) << endl;
+	cout << content << " \t+-" << getBinStat(bin)/content*100 <<"% (stat)" << endl;
 	//out+=toTString(content) +" \t+-"+ toTString(getBinStat(bin))+"\n";
 	out+=getName()+"\n\n";
 	out.ReplaceAll("_","\\_");
@@ -2092,7 +2139,8 @@ TString histo1D::coutBinContent(size_t bin,const TString& unit) const{
 	out+=" stat. & $\\pm$" + stat.str();
 	out+=lineend;
 
-	cout << "total: -" << (totalerrdn) << " +" << totalerrup <<std::endl;
+	cout << "total: -" << (totalerrdn) << "% +" << totalerrup <<"%" <<std::endl;
+	cout << "total: -" << (totalerrdn)*content/100 << " +" << totalerrup*content/100  <<std::endl;
 
 	std::stringstream sup,sdn;
 	sup.setf(ios::fixed,ios::floatfield);
@@ -2111,39 +2159,123 @@ TString histo1D::coutBinContent(size_t bin,const TString& unit) const{
 
 
 	return out;
-	/*
-    ///old implementation
 
-    cout << "histo1D::coutBinContent: bin " << bin << endl;
-    cout << content << " \t+-" << getBinStat(bin) << endl;
-    out+=toTString(content) +" \t+-"+ toTString(getBinStat(bin))+"\n";
-
-    for(int i=0;i<(int) getSystSize();i++){
-        cout << getSystErrorName(i) << "\t" << getSystError(i,bin)/content * 100 << "% +-";
-        out+=getSystErrorName(i) + "\t" + toTString(getSystError(i,bin)/content * 100) + "% +-";
-        cout	<< getSystErrorStat(i,bin)/content * 100 << "%" << endl;
-        out+=toTString(getSystErrorStat(i,bin)/content * 100) + "%\n";
-    }
-    float totalerrdn=getBinErrorDown(bin,false,"")/content * 100;
-    float totalerrup=getBinErrorUp(bin,false,"")/content * 100;
-    cout << endl;
-    cout << "total: -" << (totalerrdn) << " +" << totalerrup <<std::endl;
-    out+="\ntotal: -" + toTString((totalerrdn)) + " +" + toTString(fabs(totalerrup));
-    return out;
-	 */
 }
 
+texTabler histo1D::makeTableFromBinContent(size_t bin,bool symmetrize,bool relative, float prec) const{
+	if(bin>=bins_.size())
+		throw std::out_of_range("histo1D::makeTableFromBinContent: bin out of range");
+	texTabler tab("l | c ");
+	float content=getBinContent(bin);
+	if(prec<0){//auto precision
+		float fullerr=getBinError(bin);
+		if(relative){
+			fullerr/=content;
+			fullerr*=100;
+		}
+		fullerr=fabs(fullerr);
+		int exp = (fullerr == 0) ? 0 : (int)(1 + std::log10(std::fabs(fullerr) ) );
+		prec= fullerr * pow(10 , (exp-2));
+	}
+	formatter fmt;
+	tab << "content "+fmt.toTString(bin) << fmt.toFixedCommaTString(content,prec/10);
+	tab << texLine(2);
+	std::vector<TString> sysnames=getSystNameList();
+	for(size_t i=0;i<sysnames.size();i++){
 
-std::vector<histo1D> histo1D::produceVariations(const TString & sysname)const{
+		float berrorup=getBinContent(bin, getSystErrorIndex(sysnames.at(i)+"_up" )) -content;
+		float berrordown=getBinContent(bin, getSystErrorIndex(sysnames.at(i)+"_down" )) -content;
+		bool anticorr;//= errordown>errorup;
+		float errorup=getMaxVar(true,berrorup,berrordown,anticorr);
+		float errordown=getMaxVar(false,berrorup,berrordown,anticorr);
+		if(relative){
+			errorup/=content;
+			errordown/=content;
+			errorup*=100;
+			errordown*=100;
+		}
+		if(symmetrize){
+			float error=std::max(fabs(errorup),fabs(errordown));
+			if(relative){
+				tab << sysnames.at(i) << fmt.toFixedCommaTString(error,prec)+"\\%";
+			}
+			else
+				tab << sysnames.at(i) << fmt.toFixedCommaTString(error,prec);
+		}
+		else{
+			//getMaxVar(true,errorup,errordown,anticorr);
+
+			TString errstr;
+			if(anticorr)
+				errstr="$\\mp^{";
+			else
+				errstr="$\\pm^{";
+			errstr+=fmt.toFixedCommaTString(fabs(errorup),prec)+"}_{"+fmt.toFixedCommaTString(fabs(errordown),prec)+"}$";
+			if(relative)
+				errstr+="\\%";
+
+			tab << sysnames.at(i) << errstr;
+		}
+	}
+	tab << texLine(2);
+	float stat=getBinStat(bin);
+	if(relative){
+		stat/=content;
+		stat*=100;
+		tab << "Stat"  << fmt.toFixedCommaTString(stat,prec)+"\\%";
+	}
+	else{
+		tab << "Stat"  << fmt.toFixedCommaTString(stat,prec);
+	}
+	tab << "Total";
+	if(symmetrize){
+		float errtot=getBinError(bin);
+		if(relative){
+			errtot/=content;
+			errtot*=100;
+			tab  << fmt.toFixedCommaTString(errtot,prec)+"\\%";
+		}
+		else{
+			tab  << fmt.toFixedCommaTString(errtot,prec);
+		}
+	}
+	else{
+		float errtotup=getBinErrorUp(bin);
+		float errtotdown=getBinErrorDown(bin);
+		if(relative){
+			errtotup/=content;
+			errtotup*=100;
+			errtotdown/=content;
+			errtotdown*=100;
+			tab  << "$\\pm^{"+fmt.toFixedCommaTString(errtotup,prec)+"}_{"+ fmt.toFixedCommaTString(errtotdown,prec) +"}$\\%";
+		}
+		else{
+			tab  << "$\\pm^{"+fmt.toFixedCommaTString(errtotup,prec)+"}_{"+ fmt.toFixedCommaTString(errtotdown,prec) +"}$";
+		}
+	}
+
+	return tab;
+}
+
+std::vector<histo1D> histo1D::produceVariations(const TString & sysname, const TString& legendnom, const TString& legendup, const TString& legenddown)const{
 	std::vector<histo1D>  out(3);
 	out.at(0) = getSystContainer(-1);
-	out.at(0).setName("nominal");
+	if(legendnom.Length()<1)
+		out.at(0).setName("nominal");
+	else
+		out.at(0).setName(legendnom);
 	size_t idxup=getSystErrorIndex(sysname+"_up");
 	size_t idxdown=getSystErrorIndex(sysname+"_down");
 	out.at(1) = getSystContainer(idxup);
-	out.at(1).setName(sysname+" up");
+	if(legendup.Length()<1)
+		out.at(1).setName(sysname+" up");
+	else
+		out.at(1).setName(legendup);
 	out.at(2) = getSystContainer(idxdown);
-	out.at(2).setName(sysname+" down");
+	if(legenddown.Length()<1)
+		out.at(2).setName(sysname+" down");
+	else
+		out.at(2).setName(legenddown);
 	return out;
 }
 
@@ -2292,7 +2424,7 @@ TString histo1D::stripVariation(const TString &in) const{
 /**
  * not protected!!
  */
-float histo1D::getDominantVariationUp( TString  sysname, const size_t& bin) const{ //copy on purpose
+float histo1D::getDominantVariationUp( const TString&  sysname, const size_t& bin, bool& anticorr) const{ //copy on purpose
 	float up=0,down=0;
 	const float & cont=contents_.getBin(bin).getContent();
 	size_t idx=contents_.getLayerIndex(sysname+"_up");
@@ -2303,14 +2435,14 @@ float histo1D::getDominantVariationUp( TString  sysname, const size_t& bin) cons
 	if(idx >= contents_.layerSize())
 		std::cout << "container1D::getDominantVariationUp: serious error: " << sysname << "_down not found" << std::endl;
 	down=contents_.getBin(bin,idx).getContent()-cont;
-
-	if(up < 0 && down < 0) return 0;
-	else if(up >= down) return up;
-	else if(down > up) return down;
-	else return 0; //never reached only for docu purposes
+	return getMaxVar(true,up,down,anticorr);
 
 }
-float histo1D::getDominantVariationDown( TString  sysname, const size_t& bin) const{//copy on purpose
+float histo1D::getDominantVariationUp(const TString&  sysname, const size_t& bin)const{
+	bool dummy;
+	return getDominantVariationUp(sysname,bin,dummy);
+}
+float histo1D::getDominantVariationDown(const TString&  sysname, const size_t& bin, bool& anticorr) const{//copy on purpose
 	float up=0,down=0;
 	const float & cont=contents_.getBin(bin).getContent();
 	size_t idx=contents_.getLayerIndex(sysname+"_up");
@@ -2322,11 +2454,11 @@ float histo1D::getDominantVariationDown( TString  sysname, const size_t& bin) co
 		std::cout << "container1D::getDominantVariationDown: serious error: " << sysname << "_down not found" << std::endl;
 	down=contents_.getBin(bin,idx).getContent()-cont;
 
-	if(up > 0 && down > 0) return 0;
-	else if(up <= down) return up;
-	else if(down < up) return down;
-	else return 0; //never reached only for docu purposes
-
+	return getMaxVar(false,up,down,anticorr);
+}
+float histo1D::getDominantVariationDown( const TString&  sysname, const size_t& bin)const{
+	bool dummy;
+	return getDominantVariationDown(sysname,bin,dummy);
 }
 /**
  * deletes all syst and creates manual entry at indices 0 and 1

@@ -16,6 +16,7 @@
 #include <iostream>
 #include "TLatex.h"
 #include "TtZAnalysis/Tools/interface/textFormatter.h"
+#include "TFile.h"
 
 namespace ztop{
 
@@ -30,6 +31,8 @@ plotterBase::plotterBase(const plotterBase& rhs): tObjectList(rhs){
 	intstyle_ = rhs.intstyle_; //start with env style
 	lastplotidx_ = rhs.lastplotidx_;
 	tmplegp_=0;
+	yspacemulti_=1.2;
+
 }
 
 TVirtualPad* plotterBase::getPad()const{
@@ -171,6 +174,27 @@ void plotterBase::printToPdf(const std::string& outname){
 	system(delcall);
 	pad_=oldpad;
 }
+void plotterBase::printToPng(const std::string& outname){
+	TVirtualPad * oldpad=pad_;
+	TCanvas c;
+	usePad(&c);
+	draw();
+	TString outnameeps=outname;
+	outnameeps+=".png";
+	c.Print(outnameeps);
+	pad_=oldpad;
+}
+void plotterBase::saveToTFile(const TString& outname){
+	TVirtualPad * oldpad=pad_;
+	TFile f(outname,"RECREATE");
+	TCanvas c;
+	usePad(&c);
+	draw();
+	c.Write();
+	f.Close();
+	pad_=oldpad;
+}
+
 void plotterBase::saveAsCanvasC(const std::string& outname){
 	TVirtualPad * oldpad=pad_;
 	TString outnametstring=textFormatter::makeCompatibleFileName(outname);

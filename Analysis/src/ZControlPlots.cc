@@ -42,14 +42,8 @@ enum etapten{
 	} ptetacategory;
  */
 bool ZControlPlots::categoryCutsFullfilled(const NTLepton* l1, const NTLepton* l2, const float& ptcutlow, const float & ptcuth,const float& etacutlow, const float & etacuth)const{
-	const NTLepton * tmp;
-	if(l2->pt()>30
-			&& fabs(l2->eta()) < 0.5
-			&& l2->pt()<60 ){
-		tmp=l1;
-		l1=l2;
-		l2=tmp;
-	}
+	//const NTLepton * tmp;
+
 
 
 	float abseta1=fabs(l1->eta());
@@ -140,12 +134,9 @@ void ZControlPlots::makeControlPlots(const size_t & step){
 	FILLSINGLE(mll);
 
 
-	SETBINSRANGE(30,89,95);
-	addPlot("mll Z Peak","m_{ll}[GeV]","Events/GeV",false);
-	FILLSINGLE(mll);
 
 	//make pt,eta plots
-	SETBINSRANGE(55,65,115);
+	SETBINSRANGE(55,85,100);
 	addPlot("mll Z Peak overview","m_{ll}[GeV]","Events/GeV",false);
 	FILLSINGLE(mll);
 	if(event())
@@ -158,12 +149,60 @@ void ZControlPlots::makeControlPlots(const size_t & step){
 		if(categoryCutsFullfilled(event()->leadinglep,event()->secleadinglep,0,100000000,0,1.5))
 			FILLSINGLE(mll);
 	}
-	SETBINSRANGE(30,89,95);
+	addPlot("mll Z Peak barrel pt40inf","m_{ll}[GeV]","Events/GeV",false);
+	if(event() && event()->leadinglep && event()->secleadinglep){
+		if(categoryCutsFullfilled(event()->leadinglep,event()->secleadinglep,40,100000,0,1.5))
+			FILLSINGLE(mll);
+	}
+	SETBINSRANGE(30,88,94);
+	addPlot("mll Z Peak barrel pt2040","m_{ll}[GeV]","Events/GeV",false);
+	if(event() && event()->leadinglep && event()->secleadinglep){
+		if(categoryCutsFullfilled(event()->leadinglep,event()->secleadinglep,0,40,0,1.5))
+			FILLSINGLE(mll);
+	}
+
+	SETBINSRANGE(15,88,95);
 	addPlot("mll Z Peak endcaps","m_{ll}[GeV]","Events/GeV",false);
 	if(event() && event()->leadinglep && event()->secleadinglep){
 		if(categoryCutsFullfilled(event()->leadinglep,event()->secleadinglep,0,100000000,1.5,2.4))
 			FILLSINGLE(mll);
 	}
+	SETBINSRANGE(15,88,94);
+	addPlot("mll Z Peak endcaps pt40inf","m_{ll}[GeV]","Events/GeV",false);
+	if(event() && event()->leadinglep && event()->secleadinglep){
+		if(categoryCutsFullfilled(event()->leadinglep,event()->secleadinglep,40,100000,1.5,2.4))
+			FILLSINGLE(mll);
+	}
+	SETBINSRANGE(10,83,97);
+	addPlot("mll Z Peak endcaps pt2040","m_{ll}[GeV]","Events/GeV",false);
+	if(event() && event()->leadinglep && event()->secleadinglep){
+		if(categoryCutsFullfilled(event()->leadinglep,event()->secleadinglep,0,40,1.5,2.4))
+			FILLSINGLE(mll);
+	}
+
+
+	SETBINSRANGE(60,75,106);
+	addPlot("mll Z Peak barrel overview","m_{ll}[GeV]","Events/GeV",false);
+	if(event() && event()->leadinglep && event()->secleadinglep){
+		if(categoryCutsFullfilled(event()->leadinglep,event()->secleadinglep,0,100000000,0,1.5))
+			FILLSINGLE(mll);
+	}
+	SETBINSRANGE(30,75,106);
+	addPlot("mll Z Peak endcaps overview","m_{ll}[GeV]","Events/GeV",false);
+	if(event() && event()->leadinglep && event()->secleadinglep){
+		if(categoryCutsFullfilled(event()->leadinglep,event()->secleadinglep,0,100000000,1.5,2.4))
+			FILLSINGLE(mll);
+	}
+
+	SETBINSRANGE(30,20,200);
+	addPlot("electron pt endcaps","p_{T} [GeV]","Events/GeV",false);
+	if(event() && event()->leadinglep && event()->secleadinglep){
+		if(categoryCutsFullfilled(event()->leadinglep,event()->secleadinglep,0,100000000,1.5,2.4)){
+			FILL(leadinglep,pt());
+			FILL(secleadinglep,pt());
+		}
+	}
+
 }
 
 }//namespace

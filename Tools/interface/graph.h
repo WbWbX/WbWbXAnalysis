@@ -108,10 +108,12 @@ public:
 	 * needs same indices for points
 	 * adds deviation of NOMINALS
 	 */
-	size_t addErrorGraph(const TString &name,const graph &); //needs to have same point indices... if not check by closest point?
+	size_t addErrorGraph(const TString &name,const graph &, float weight=1); //needs to have same point indices... if not check by closest point?
 	graph getSystGraph(const size_t sysidx)const;
 	graph getNominalGraph()const;
 	graph getRelYErrorsGraph()const;
+
+	graph addAllSysQuad(const TString& resname="sys")const;
 
 	const TString & getSystErrorName(const size_t & number) const;
 	const size_t & getSystErrorIndex(const TString & ) const;
@@ -130,6 +132,7 @@ public:
 	void removeYErrors(); //comes handy
 	void removeXErrors(); //comes handy
 	void removeAllXYSyst();
+	void removeError(const TString&);
 
 	void removeYStatFromAll(bool alsonominal);
 

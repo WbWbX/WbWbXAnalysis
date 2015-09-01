@@ -108,7 +108,7 @@ void makePseudoExperiments(ztop::mtExtractor* ex,size_t niter,float evalpoint, T
 
 		pex.fill();
 
-		ctemp.writeToTFile(f);
+		ctemp.writeToFile("pull_"+toString(i));
 
 		allpulls.push_back(ctemp);
 
@@ -250,6 +250,9 @@ int main(int argc, char* argv[]){
 
 	const float createpseudoexp = parse.getOpt<float>("-pseudo",-1,"number of pseudo eperiments to generate based on prediction input");
 
+
+	const bool debug = parse.getOpt<bool>("d",false,"switch on debug output");
+
 	std::vector<TString> inputfiles = parse.getRest< TString >();
 
 	parse.doneParsing();
@@ -286,6 +289,8 @@ int main(int argc, char* argv[]){
 	//do this for each channel independently. Right now for testing reasons skip channel asso
 	// maybe then also implement all plots.. but later
 	mtExtractor extractor;
+
+	mtExtractor::debug=debug;
 
 	extractor.setConfigFile(extconfigfile);
 	extractor.setExternalPrefix(extprefix);
@@ -514,8 +519,8 @@ int main(int argc, char* argv[]){
 
 
 		//results table
-		resultsSummary::debug=true;
-		systAdder::debug=true;
+		resultsSummary::debug=debug;
+		//systAdder::debug=true;
 		texTabler table=extractor.makeSystBreakdown();
 		table.writeToFile(outdirectory+"/sys_breakdown.tex");
 
@@ -576,7 +581,7 @@ int main(int argc, char* argv[]){
 	TString defmtfile=extractor.getDefMtopDataFile();
 	std::cout << "loading additional plots from " << defmtfile<<std::endl;
 	histoStackVector defmtvec;
-	defmtvec.loadFromTFile(defmtfile);
+	defmtvec.readFromFile(defmtfile.Data());
 	gStyle->SetOptStat(0);
 	if(onlyCP){
 		for(size_t i=0;i<plotnames.size();i++){
@@ -585,16 +590,17 @@ int main(int argc, char* argv[]){
 		system(((TString)"mkdir -p controlPlots").Data());
 
 		for(size_t i=0;i<plotnames.size();i++){
-			fileReader extraconfig;
+			std::string startmarker,endmarker;
+			/*fileReader extraconfig;
 			extraconfig.setComment("$");
-			extraconfig.setDelimiter(",");
-			extraconfig.setStartMarker("[plot - " + plotnames.at(i) +"]");
+			extraconfig.setDelimiter(",");*/
+			startmarker=("[plot - " + plotnames.at(i) +"]");
 			if(i<plotnames.size()-1)
-				extraconfig.setEndMarker("[plot - "+ plotnames.at(i+1) +"]");
+				endmarker=("[plot - "+ plotnames.at(i+1) +"]");
 			else
-				extraconfig.setEndMarker("[end additional plots]");
-			extraconfig.readFile(extconfigfile);
-			std::string tmpfile=extraconfig.dumpFormattedToTmp();
+				endmarker=("[end additional plots]");
+			//extraconfig.readFile(extconfigfile);
+			//std::string tmpfile=extraconfig.dumpFormattedToTmp();
 			histoStack stack2=defmtvec.getStack(plotnames.at(i));
 
 
@@ -605,10 +611,10 @@ int main(int argc, char* argv[]){
 			std::vector<TString> fakes; fakes << "QCD" << "t#bar{t}bg";
 
 
-			stack2.mergeLegends(dyvv,"DY/VV",868);
+		/*	stack2.mergeLegends(dyvv,"DY/VV",868);
 			stack2.mergeLegends(signals,"t#bar{t} signal",633,true);
 			stack2.mergeLegends(fakes,"non-W/Z",400);
-
+*/
 
 
 			std::cout << "plotting: " <<name <<std::endl;
@@ -619,8 +625,8 @@ int main(int argc, char* argv[]){
 				//textBoxes::debug=true;
 				pl.setTextBoxNDC(true);
 				pl.readStyleFromFileInCMSSW("/src/TtZAnalysis/Tools/styles/controlPlots_standard.txt");
-				pl.addStyleFromFile(tmpfile);
-				pl.readTextBoxesInCMSSW("/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt","CMSSplit03Left");
+				pl.addStyleFromFile(extconfigfile,startmarker,endmarker);
+				pl.readTextBoxesInCMSSW("/src/TtZAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSSplit03Left");
 				pl.setStack(&stack2);
 				pl.usePad(&cv);
 				pl.draw();
@@ -629,9 +635,9 @@ int main(int argc, char* argv[]){
 			else if(stack2.is2D()){//TBI
 
 			}
-			std::cout << "done plotting " << name << "   " << tmpfile << std::endl;
-			TString syscall="rm -f "+tmpfile;
-			system(syscall.Data());
+			std::cout << "done plotting " << name << "   "  << std::endl;
+			//TString syscall="rm -f "+tmpfile;
+			//system(syscall.Data());
 
 
 		}
@@ -732,7 +738,7 @@ int main(int argc, char* argv[]){
 	mrespth2d->GetXaxis()->SetLabelSize(0.05);
 	mrespth2d->Draw("colz");
 	textBoxes tb2d;
-	tb2d.readFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt","CMSnoSplitLeft2DSim");
+	tb2d.readFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSnoSplitLeft2DSim");
 	for(size_t i=0;i<tb2d.size();i++)
 			tb2d.at(i).setColor(0);
 	tb2d.drawToPad(c);

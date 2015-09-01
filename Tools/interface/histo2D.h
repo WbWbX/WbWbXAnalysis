@@ -155,7 +155,24 @@ public:
 	 * cuts everything on the right of the input value (bin boundary chosen accorind to getBinNo())
 	 * and returns new container.
 	 */
-	histo2D cutRightX(const float & )const;
+	histo2D cutRightX(const float & )const;/**
+	 * cuts everything on the right of the input value (bin boundary chosen accorind to getBinNo())
+	 * and returns new container.
+	 */
+	histo2D cutLeftX(const float & )const;/**
+	 * cuts everything on the right of the input value (bin boundary chosen accorind to getBinNo())
+	 * and returns new container.
+	 */
+	histo2D cutUpY(const float & )const;/**
+	 * cuts everything on the right of the input value (bin boundary chosen accorind to getBinNo())
+	 * and returns new container.
+	 */
+	histo2D cutDownY(const float & )const;
+
+	/**copies content as far as bins are overlapping. Does not create over/underflow
+	* only nominal!
+	 */
+	void copyContentFrom(const histo2D&);
 
 	int addErrorContainer(const TString & ,const histo2D &,float);  //! adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down"
 	int addErrorContainer(const TString &,const histo2D & );        //! adds deviation to (this) as systematic uncertianty with name. name must be ".._up" or ".._down"

@@ -289,7 +289,7 @@ void trigger_tightLeptons(){
 	ta_mumuMCA.setPUFile(PURunA);
 	ta_emuMCA.setPUFile(PURunA);
 
-	analyzeAll( ta_eedA,  ta_eeMCA,  ta_mumudA,  ta_mumuMCA,  ta_emudA,  ta_emuMCA,"RunA","Run A");
+	analyzeAll( ta_eedA,  ta_eeMCA,  ta_mumudA,  ta_mumuMCA,  ta_emudA,  ta_emuMCA,"RunA","7TeV");
 
 	triggerAnalyzer ta_eedB=ta_eed;
 	triggerAnalyzer ta_mumudB=ta_mumud;
@@ -308,7 +308,7 @@ void trigger_tightLeptons(){
 	ta_mumuMCB.setPUFile(PURunB);
 	ta_emuMCB.setPUFile(PURunB);
 
-	analyzeAll( ta_eedB,  ta_eeMCB,  ta_mumudB,  ta_mumuMCB,  ta_emudB,  ta_emuMCB,"RunB","Run B");
+	analyzeAll( ta_eedB,  ta_eeMCB,  ta_mumudB,  ta_mumuMCB,  ta_emudB,  ta_emuMCB,"RunB","7TeV");
 
 
 
@@ -334,7 +334,7 @@ void trigger_tightLeptons(){
 
 	triggerAnalyzer eedFull = ta_eedA + ta_eedB;
 	triggerAnalyzer eemcFull = ta_eeMCA + ta_eeMCB;
-	TString eestring= makeFullOutput(eedFull, eemcFull, "ee_Full", "ee Full 5 fb^{-1}", 0.01);
+	TString eestring= makeFullOutput(eedFull, eemcFull, "ee_Full", "7TeV", 0.01);
 
 	////
 	double mumutotal=ta_mumudA.getGlobalDen() + ta_mumudB.getGlobalDen() ;
@@ -352,7 +352,7 @@ void trigger_tightLeptons(){
 
 	triggerAnalyzer mumudFull = ta_mumudA + ta_mumudB;
 	triggerAnalyzer mumumcFull = ta_mumuMCA + ta_mumuMCB;
-	TString mumustring= makeFullOutput(mumudFull, mumumcFull, "mumu_Full", "mumu Full 5 fb^{-1}", 0.01);
+	TString mumustring= makeFullOutput(mumudFull, mumumcFull, "mumu_Full", "7TeV", 0.01);
 
 
 	///
@@ -372,7 +372,7 @@ void trigger_tightLeptons(){
 
 	triggerAnalyzer emudFull = ta_emudA + ta_emudB;
 	triggerAnalyzer emumcFull = ta_emuMCA + ta_emuMCB;
-	TString emustring=makeFullOutput(emudFull, emumcFull, "emu_Full", "emu Full 5 fb^{-1}", 0.01);
+	TString emustring=makeFullOutput(emudFull, emumcFull, "emu_Full", "7TeV", 0.01);
 
 	std::cout << "\n\nweighted output summary: " << std::endl;
 

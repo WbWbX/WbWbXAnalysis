@@ -54,6 +54,9 @@ void plotterMultiColumn::drawPlots(){
 	if(plotter_.size()!=plotter_.size())
 		throw std::out_of_range("plotterMultiColumn::drawPlots: less or more plots to draw then specified in config");
 
+	for(size_t i=0;i<plotter_.size();i++){
+		addPlotData(i);
+	}
 	if(yaxisconnects_.size()>0){
 		float  ymaxconnect=-100,yminconnect=1e20;
 		for(size_t i=0;i<yaxisconnects_.size();i++){
@@ -68,14 +71,6 @@ void plotterMultiColumn::drawPlots(){
 			if(tmpmin<yminconnect)yminconnect=tmpmin;
 		}
 
-		/*
-		 * float tmpmax=stacks_.at(yaxisconnects_.at(i))->getYMax(yaxisconnects_.at(i),dibw);
-			if(tmpmax>ymaxconnect)ymaxconnect=tmpmax;
-			float tmpmin=stacks_.at(yaxisconnects_.at(i))->getYMin(yaxisconnects_.at(i),dibw,true); //only data entries are important
-			if(tmpmin && tmpmin<yminconnect)yminconnect=tmpmin; //ignore if zero
-		}
-		 */
-
 		axisStyle* axst= plotter_.at(yaxisconnects_.at(0))->getUpperStyle().yAxisStyle(); //copy from first
 
 		if(axst->applyAxisRange()){
@@ -83,18 +78,25 @@ void plotterMultiColumn::drawPlots(){
 			yminconnect=axst->min;
 		}
 		else{
-			if(axst->log)
-				ymaxconnect*=2;
-			else
-				ymaxconnect*=1.1;
-			axst->max=ymaxconnect;
 			if(axst->log){
+				float logmax=log(ymaxconnect)/(2.30258509299404590e+00);
+				float logmin=log(yminconnect)/(2.30258509299404590e+00);
+
+				float newmax=logmax+(logmax-logmin)*(yspacemulti_-1);
+				ymaxconnect=pow(10,newmax);
+				//extend a bit downwars
+				logmin=logmin-(logmax-logmin)*0.08;
+				yminconnect=pow(10,logmin);
 				if(yminconnect<=0)
-					yminconnect=(ymaxconnect/1000);
-				axst->min=yminconnect;
+					yminconnect=(ymaxconnect)*0.0001;//avoid 0 on axis
 			}
-			else
-				axst->min=yminconnect;//0.01;//in linear it should be zero
+			else{
+				ymaxconnect*=yspacemulti_;
+				if(yminconnect==0)
+					yminconnect+=(ymaxconnect-yminconnect)*0.0001;//avoid 0 on axis
+			}
+			axst->min=yminconnect;
+			axst->max=ymaxconnect;
 		}
 
 		if(debug) std::cout << "plotterMultiColumn::drawPlots: connecting ";
@@ -119,7 +121,6 @@ void plotterMultiColumn::drawPlots(){
 
 		// .. .. specialized part
 
-		addPlotData(i);
 
 		//check margins -> that should be a (virtual) function of plotterbase
 		float xmin,xmax;
@@ -190,10 +191,10 @@ void plotterMultiColumn::printToPdf(const std::string& outname){
 	TString outnamepng=outname;
 	outnamepng+=".png";
 	c.Print(outnamepng);
-	TString syscall="convert "+outnamepng+" -density 1200 -quality 100 " + outname+".pdf" ;
+	TString syscall="convert "+outnamepng+" -density 2400 -quality 100 " + outname+".pdf" ;
 	system(syscall);
 	TString delcall="rm -f "+outnamepng;
-	system(delcall);
+	//system(delcall);
 	usePad(oldpad);
 }
 
@@ -218,6 +219,7 @@ void plotterMultiColumn::readStylePrivMarker(const std::string& infile,bool requ
 		err+=" does not exist";
 		throw std::logic_error(err);
 	}
+
 
 	size_t nplots=fr.getValue<size_t>("nplots");
 	plotter_.clear();

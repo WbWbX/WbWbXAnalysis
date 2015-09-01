@@ -15,6 +15,7 @@
 <use name="MagneticField/Engine"/>
 <use name="RecoEgamma/EgammaTools"/>
 <use name="EgammaAnalysis/ElectronTools"/>
+<use name="SimDataFormats/GeneratorProducts"/>
 <flags EDM_PLUGIN="1"/>
 <export>
    <lib name="1"/>

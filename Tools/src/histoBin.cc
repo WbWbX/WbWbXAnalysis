@@ -61,7 +61,7 @@ void histoBin::cutName(){
 		name_=TString(name_.Data(),65535);
 	}
 }
-*/
+ */
 void histoBin::copyFrom(const histoBin& rhs){
 	if(&rhs == this) return;
 	content_=rhs.content_;
@@ -81,7 +81,7 @@ void histoBins::setName(const TString & name){
 		name_=TString(name_.Data(),65535);
 	}
 }
-*/
+ */
 histoBins::histoBins(size_t Size){// : name_(""),layer_(-1){
 	setSize(Size);
 }
@@ -115,7 +115,7 @@ int histoBins::add(const histoBins& rhs,bool statCorr){
 			getBin(i).setStat(staterr);
 		}
 		else{
-			getBin(i).addToStat(rhs.getBin(i).getStat());
+			getBin(i).addToStat2(rhs.getBin(i).getStat2());
 		}
 		getBin(i).setEntries(getBin(i).getEntries()+rhs.getBin(i).getEntries());
 	}
@@ -134,10 +134,10 @@ int histoBins::subtract(const histoBins& rhs,bool statCorr){
 		float staterr=0;
 		if(statCorr){
 			staterr=getBin(i).getStat2()-rhs.getBin(i).getStat2();
-			getBin(i).setStat2(staterr);
+			getBin(i).setStat2(fabs(staterr));
 		}
 		else{
-			getBin(i).addToStat(rhs.getBin(i).getStat());
+			getBin(i).addToStat2(rhs.getBin(i).getStat2());
 		}
 		getBin(i).setEntries(getBin(i).getEntries()+rhs.getBin(i).getEntries());
 	}
@@ -164,12 +164,15 @@ int histoBins::divide(const histoBins& rhs,bool statCorr){
 		float staterr2=0;
 
 		if(divbinstatcorr){
-			staterr2=fabs(div*(1-div)/rhs.getBin(i).getContent());
-			if(staterr2!=staterr2) staterr2=0; //nan safe
+			if(rhs.getBin(i).getContent())
+				staterr2=fabs(div*(1-div)/rhs.getBin(i).getContent());
+			else
+				staterr2=0; //nan safe
 		}
 		else{
-			staterr2=getBin(i).getStat2()/(rhs.getBin(i).getContent()*rhs.getBin(i).getContent()) + div*div*rhs.getBin(i).getStat2()/(rhs.getBin(i).getContent()*rhs.getBin(i).getContent());
-			if(staterr2!=staterr2) staterr2=0; //nan safe
+			if(rhs.getBin(i).getContent())
+				staterr2=getBin(i).getStat2()/(rhs.getBin(i).getContent()*rhs.getBin(i).getContent()) + div*div*rhs.getBin(i).getStat2()/(rhs.getBin(i).getContent()*rhs.getBin(i).getContent());
+			else staterr2=0; //nan safe
 		}
 		getBin(i).setStat2(staterr2);
 		getBin(i).setContent(div);
@@ -213,7 +216,7 @@ int histoBins::multiply(const histoBins& rhs,bool statCorr){
 
 			staterr2=ca*ca*eb2+cb*cb*ea2;
 		}
-		getBin(i).setStat2(staterr2);
+		getBin(i).setStat2(fabs(staterr2));
 		getBin(i).setContent(mult);
 		getBin(i).setEntries(getBin(i).getEntries() * rhs.getBin(i).getEntries());
 	}

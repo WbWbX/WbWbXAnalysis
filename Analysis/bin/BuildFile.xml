@@ -22,5 +22,10 @@
 <bin name="makeCombination" file="makeCombination.cc" />
 <bin name="displayStatusBar" file="displayStatusBar.cc" />
 
+<bin name="predicttest" file="predicttest.cc" />
+<bin name="movecontribution" file="movecontribution.cc" />
+
+<bin name="mtFromXsec2" file="mtFromXsec2.cc" />
+
 <bin name="extractMtFromInclXsec" file="extractMtFromInclXsec.cc" />
 <Flags CXXFLAGS="-lXMLParser -lunfold -fopenmp"/>

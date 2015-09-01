@@ -20,12 +20,17 @@ namespace ztop{
 class mtFromInclXsec{
 public:
 
-	mtFromInclXsec(){}
+	mtFromInclXsec():mtexpunc_(1),mt_(0),mtup_(0),mtdown_(0){}
 
 	void readInFiles(const std::vector<std::string>&);
 	void readPrediction(const std::string& file,const std::string& id){
 		predicted_.readPrediction(file,id);
 	}
+
+	/**
+	 * can be used to remove the uncorrelated part
+	 */
+	void scaleFitUnc(const float scale, const std::string& uncname="fit");
 
 	void setEnvelopeUnc(const TString uncname){envunc_=uncname;}
 
@@ -35,6 +40,10 @@ public:
 	//void setEnergy(const float& en){energy_=en;}
 
 	void extract();
+
+	const float& getMtopCentral()const{return mt_;}
+	const float& getMtopUp()const{return mtup_;}
+	const float& getMtopDown()const{return mtdown_;}
 
 	/**
 	 * Only envelope error
@@ -48,14 +57,15 @@ public:
 
 	const graph& getExpPoints()const;
 
-	graph createOneSigmaPoints(const histo2D&)const;
-
+	graph getOneSigmaPointsJoint()const{return onesigmajoint_;}
 	/**
 	 * This will include the envelope uncertainty used for the Joint likelihood,
 	 * and variations according to the other uncertainties (for comibnation with
 	 * other results)
 	 */
 	graph getResult()const;
+
+
 
 	static bool debug;
 
@@ -68,12 +78,17 @@ private:
 	graph result_;
 	top_prediction predicted_;
 
+	float mtexpunc_;
 
 	double LH_Exp(const float& mtop,const float& xsec,const ztop::graphFitter & gf, const float& errup,const float& errdown)const;
 
 	double sq(const double& a)const{
 		return a*a;
 	}
+
+	graph createOneSigmaPoints(const histo2D&)const;
+	graph onesigmajoint_;
+	float mt_,mtup_,mtdown_;
 
 };
 

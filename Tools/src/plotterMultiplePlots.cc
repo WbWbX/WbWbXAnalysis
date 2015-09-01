@@ -15,6 +15,8 @@
 #include "../interface/fileReader.h"
 
 
+#define COPYFROMRHS(x) x=rhs.x
+
 namespace ztop{
 
 plotterMultiplePlots::plotterMultiplePlots():plotterBase(),drawlegend_(true),tightyaxis_(false),tightxaxis_(true){
@@ -23,6 +25,15 @@ plotterMultiplePlots::plotterMultiplePlots():plotterBase(),drawlegend_(true),tig
 
 }
 
+plotterMultiplePlots::plotterMultiplePlots(const plotterMultiplePlots& rhs):plotterBase(rhs){
+
+	COPYFROMRHS(pstyle_);
+	COPYFROMRHS(cstyles_);
+	COPYFROMRHS(plots_);
+	COPYFROMRHS(drawlegend_);
+	COPYFROMRHS(tightyaxis_);
+	COPYFROMRHS(tightxaxis_);
+}
 
 void plotterMultiplePlots::addPlot(const graph *c){
 	plots_.push_back(plot(c));

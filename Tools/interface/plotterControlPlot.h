@@ -28,7 +28,7 @@ public:
 
   //  void addStyleFromFile(const std::string& );
 
-    void addStyleFromFile(const std::string&,const std::string&,const std::string&    );
+    void addStyleFromFile(const std::string& file,const std::string& marker,const std::string& endmarker    );
   //  void readStyleFromFile(const std::string& );
     /*
      * expects entries:
@@ -45,6 +45,8 @@ public:
 
     void setStack(const histoStack *s){stackp_=s;}
 
+    void setMCsysStatLeg(bool set){mcsysstatleg_=set;}
+
     void clear();
     void clearPlots();
     void cleanMem();
@@ -57,7 +59,10 @@ public:
     float getXAxisLowerLimit()const;
     float getXAxisHigherLimit()const;
 
+    float getYSpaceMulti(bool logar,bool divbw)const;
+
     bool hasRatio()const{return true;}
+
 
 protected:
     void preparePad();
@@ -69,7 +74,7 @@ protected:
 
 private:
     plotterControlPlot& operator=(const plotterControlPlot&){return *this;}
-    plotterControlPlot(const plotterControlPlot&){}
+    plotterControlPlot(const plotterControlPlot&):stackp_(0){}
 
     plotStyle upperstyle_;
     plotStyle ratiostyle_;
@@ -108,6 +113,8 @@ private:
     };
 
     std::vector<legendmerge> mergelegends;
+    float yspacemulti_;
+    bool mcsysstatleg_;
 
 };
 

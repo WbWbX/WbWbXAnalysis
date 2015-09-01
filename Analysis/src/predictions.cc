@@ -37,6 +37,10 @@ std::vector<std::pair<TString, graphFitter> > errgraphs_;
  */
 
 void top_prediction::readPrediction(const std::string& infile, const std::string& idstring  ){
+
+	if(!fileExists(infile.data()))
+		throw std::runtime_error((std::string)("top_prediction::readPrediction: file " +infile+" not found"));
+
 	fileReader fr;
 	fr.setStartMarker("[pred - "+idstring+"]");
 	fr.setEndMarker("[end pred]");
@@ -44,6 +48,10 @@ void top_prediction::readPrediction(const std::string& infile, const std::string
 	fr.setComment("#");
 	fr.readFile(infile);
 
+	if(fr.nLines()>25)
+		throw std::runtime_error("top_prediction::readPrediction: read-in error. read to many lines (>25)");
+	if(fr.nLines()<3)
+		throw std::runtime_error((std::string)("top_prediction::readPrediction: read-in error for "+idstring));
 	//check if rel errors
 	const bool relerrors=fr.getValue<bool>("relerr");
 	//get parameters
@@ -73,6 +81,8 @@ void top_prediction::readPrediction(const std::string& infile, const std::string
 		fittedcurve_.setFitMode(graphFitter::fm_pol1);
 	else if(pars.size()>0)
 		fittedcurve_.setFitMode(graphFitter::fm_pol0);
+	else
+		throw std::runtime_error("top_prediction::readPrediction: no parameter identified");
 
 	std::vector<double> dummysteps(pars.size(),0.1);
 	fittedcurve_.setParameters(pars,dummysteps);//copy
@@ -108,15 +118,21 @@ double top_prediction::getError( const double& topmass,error_enum error, bool& i
 	if(error==err_nominal)
 		throw std::out_of_range("");
 
-	if((error == err_maxup || error==err_maxdown) || relerrors_.at(error) != 0){
+	if((error == err_maxup || error==err_maxdown)
+			|| error==err_gausup || error==err_gausdown || relerrors_.at(error) != 0){
+
+		bool gausonly=err_gausup || error==err_gausdown;
+
 		isrel=true;
 		if(error<err_nominal)
 			return relerrors_.at(error);
 		//calculate sum
 		double sum2=0;
 		bool dummy;
-		bool upvar=error==err_maxup;
+		bool upvar=error==err_maxup || error==err_gausup;
 		for(size_t i=0;i<err_nominal-1;i++){
+			if(gausonly && (i==err_scaledown || i==err_scaleup))
+				continue;
 			double max=getMaxVar(upvar,relerrors_.at(i),relerrors_.at(i+1),dummy);;
 			sum2+=max*max;
 			i++;
@@ -154,9 +170,7 @@ double top_prediction::getXsec(const double& topmass, error_enum error)const{
 		return err;
 
 }
-double top_prediction::scanTopMass(const double& xsec, error_enum error)const{
-	double intervalup=190;
-	double intervaldown=140;
+double top_prediction::scanTopMass(const double& xsec,  double intervaldown, double intervalup,error_enum error)const{
 
 	while(intervalup-intervaldown > 0.01){
 		double xsecup=getXsec(intervalup,error);
@@ -183,59 +197,90 @@ void top_prediction::exportLikelihood(histo2D *h,bool scalegaus)const{
 	h->removeAllSystematics();
 	double LHmax=0;
 	for(size_t i=1;i<h->getBinsX().size()-1;i++){
+		float linemax=0;
+		float centerx=h->getBinsX().at(i) +h->getBinsX().at(i+1);
+		centerx/=2;
+
+		double xsec = getXsec(centerx) ;
+		/*
+		double pdfup= getXsec(centerx,err_pdfup) - xsec;
+		double pdfdown= getXsec(centerx,err_pdfdown)- xsec;
+		double scaleup= getXsec(centerx,err_scaleup)- xsec;
+		double scaledown= getXsec(centerx,err_scaledown)- xsec;
+		double asup= getXsec(centerx,err_alphasup)- xsec;
+		double asdown= getXsec(centerx,err_alphasdown)- xsec;
+		double addgup= getXsec(centerx,err_addgausup)- xsec;
+		double addgdown= getXsec(centerx,err_addgausdown)- xsec;
+
+		bool corrdummy=true;
+		double maxscaleup=getMaxVar(true,scaleup,scaledown,corrdummy);
+		double maxscaledown=getMaxVar(false,scaleup,scaledown,corrdummy);
+
+		double maxpdfup=getMaxVar(true,pdfup,pdfdown,corrdummy);
+		double maxpdfdown=getMaxVar(false,pdfup,pdfdown,corrdummy);
+
+		double maxasup=getMaxVar(true,asup,asdown,corrdummy);
+		double maxasdown=getMaxVar(false,asup,asdown,corrdummy);
+
+		double maxaddup=getMaxVar(true,addgup,addgdown,corrdummy);
+		double maxadddown=getMaxVar(false,addgup,addgdown,corrdummy);
+		//add alpha_s errors
+		 * */
+
+		double scaleup=   getXsec(centerx,err_scaleup)- xsec;
+		double scaledown= getXsec(centerx,err_scaledown)- xsec;
+
+		bool corrdummy=true;
+		double maxscaleup=getMaxVar(true,scaleup,scaledown,corrdummy);
+		double maxscaledown=getMaxVar(false,scaleup,scaledown,corrdummy);
+
+		double totalgaussup2= getXsec(centerx,err_gausup) - xsec;//(maxasup*maxasup+maxpdfup*maxpdfup+maxaddup*maxaddup);
+		totalgaussup2*=totalgaussup2;
+		double totalgaussdown2= getXsec(centerx,err_gausdown) - xsec;//(maxasdown*maxasdown+maxpdfdown*maxpdfdown+maxadddown*maxadddown);
+		totalgaussdown2*=totalgaussdown2;
+
+
+		if(scalegaus){
+			totalgaussup2 += maxscaleup*maxscaleup;
+			totalgaussdown2 += maxscaledown*maxscaledown;
+		}
+
 		for(size_t j=1;j<h->getBinsY().size()-1;j++){
-			float centerx,centery;
+			float centery;
 			h->getBinCenter(i,j,centerx,centery);
-			double xsec = getXsec(centerx) ;
-
-
-			double pdfup= getXsec(centerx,err_pdfup) - xsec;
-			double pdfdown= getXsec(centerx,err_pdfdown)- xsec;
-			double scaleup= getXsec(centerx,err_scaleup)- xsec;
-			double scaledown= getXsec(centerx,err_scaledown)- xsec;
-			double asup= getXsec(centerx,err_alphasup)- xsec;
-			double asdown= getXsec(centerx,err_alphasdown)- xsec;
-			double addgup= getXsec(centerx,err_addgausup)- xsec;
-			double addgdown= getXsec(centerx,err_addgausdown)- xsec;
-			bool corrdummy=true;
-			double maxscaleup=getMaxVar(true,scaleup,scaledown,corrdummy);
-			double maxscaledown=getMaxVar(false,scaleup,scaledown,corrdummy);
-
-			double maxpdfup=getMaxVar(true,pdfup,pdfdown,corrdummy);
-			double maxpdfdown=getMaxVar(false,pdfup,pdfdown,corrdummy);
-
-			double maxasup=getMaxVar(true,asup,asdown,corrdummy);
-			double maxasdown=getMaxVar(false,asup,asdown,corrdummy);
-
-			double maxaddup=getMaxVar(true,addgup,addgdown,corrdummy);
-			double maxadddown=getMaxVar(false,addgup,addgdown,corrdummy);
-			//add alpha_s errors
-
-			double totalgaussup=sqrt(maxasup*maxasup+maxpdfup*maxpdfup+maxaddup*maxaddup);
-			double totalgaussdown=sqrt(maxasdown*maxasdown+maxpdfdown*maxpdfdown+maxadddown*maxadddown);
 			double likelihood  =0;
 			if(!scalegaus){
-				likelihood= 1/(2* (maxscaleup -  maxscaledown));
-				likelihood =  erf( (maxscaleup   + xsec - centery)/totalgaussup );
-				likelihood-=  erf( (maxscaledown + xsec - centery)/totalgaussdown ) ;
+				likelihood =  erf( (maxscaleup   + xsec - centery)/std::sqrt(2*totalgaussup2) );
+				likelihood-=  erf( (maxscaledown + xsec - centery)/std::sqrt(2*totalgaussdown2) ) ;
+				//likelihood*=1/(2* (maxscaleup -  maxscaledown));
+				//will be normalized to 1 anyway
 			}
 			else{
-				totalgaussup = sqrt(totalgaussup*totalgaussup + maxscaleup*maxscaleup);
-				totalgaussdown = sqrt(totalgaussdown*totalgaussdown + maxscaledown*maxscaledown);
 				double diff=xsec-centery;
 				if(diff>0)
-					likelihood = exp(-0.5 * diff*diff/(totalgaussup*totalgaussup) );
+					likelihood = exp(-0.5 * diff*diff/(totalgaussdown2) );
 				else
-					likelihood = exp(-0.5 * diff*diff/(totalgaussdown*totalgaussdown) );
+					likelihood = exp(-0.5 * diff*diff/(totalgaussup2) );
 			}
 			//likelihood=std::abs(likelihood);
-
+			if(likelihood<0 && likelihood >-0.01) //protect against small numbers
+				likelihood=0;
+			else if(likelihood<0)
+				throw std::runtime_error("top_prediction::exportLikelihood:likelihood became significantly negative, check for large asymmetric uncertainties.");
 			if(LHmax<likelihood)
 				LHmax=likelihood;
 			h->getBin(i,j).setContent(likelihood);
 		}
+		if(!scalegaus)
+			linemax=erf( (maxscaleup   )/std::sqrt(2*totalgaussup2) ) - erf( (maxscaledown )/std::sqrt(2*totalgaussdown2) ) ;
+		else
+			linemax=1;
+		for(size_t j=1;j<h->getBinsY().size()-1;j++){
+			float normedcontent=h->getBin(i,j).getContent() / linemax;
+			h->getBin(i,j).setContent(normedcontent);
+		} //avoid dagostini bias
 	}
-	*h*=1/LHmax; // make maximum 1
+	//*h*=1/LHmax; // make maximum 1
 }
 
 }

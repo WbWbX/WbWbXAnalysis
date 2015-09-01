@@ -299,10 +299,10 @@ public:
 
 		///don't change!! global needs to be the first/second entry!!
 
-		effTriple t_pt      (binspt_                 , "lepton_pt"      , "p_{T,l} [GeV]"            , "evts"   );
-		effTriple t_allpt   (binsallpt               , "all_lepton_pt"  , "p_{T,l} [GeV]"            , "evts"   );
-		effTriple t_eta     (binseta_                , "lepton_eta"     , "#eta_{l}"           , "evts"   );
-		effTriple t_eta2d   (binseta2dx_, binseta2dy_, "lepton_eta2d"   , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
+		effTriple t_pt      (binspt_                 , "lepton_pt"      , "lepton p_{T} [GeV]"            , "evts"   );
+		effTriple t_allpt   (binsallpt               , "all_lepton_pt"  , "lepton p_{T} [GeV]"            , "evts"   );
+		effTriple t_eta     (binseta_                , "lepton_eta"     , "lepton #eta"           , "evts"   );
+		effTriple t_eta2d   (binseta2dx_, binseta2dy_, "lepton_eta2d"   , "electron #eta"       , "muon #eta");
 
 		///leading lep pt
 

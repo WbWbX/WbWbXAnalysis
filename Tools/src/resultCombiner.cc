@@ -18,11 +18,11 @@ void resultCombiner::addInput(const histo1D& cont){
 		if(distributions_.at(0).bins() != cont.getBins()){
 			throw std::logic_error("resultCombiner::addInput: inputs must have same binning");
 		}
-		if(!temp_.hasSameLayers(cont)){
+		if(!temp_.hasSameLayerOrdering(cont)){
 			throw std::logic_error("resultCombiner::addInput: inputs must have same systematics and ordering!");
 		}
 	}
-
+	initialinputs_.push_back(cont);
 	temp_=cont;
 	histo1D contcp=cont;
 	binsstart_=cont.getSystNameList().size();
@@ -37,6 +37,12 @@ void resultCombiner::addInput(const histo1D& cont){
 	matrix m(distributions_.at(0).bins().size(),distributions_.at(0).bins().size());
 	m.setDiagonal();
 	statcorrelations_.push_back(m);
+}
+
+void resultCombiner::addInput(const graph&g ){
+	histo1D h;
+	h.import(g);
+	addInput(h);
 }
 
 void resultCombiner::setSystForm(const TString& sys,rc_sys_forms form){
@@ -102,7 +108,12 @@ bool resultCombiner::minimize(){
 
 
 	ROOT::Math::Functor f(this,&resultCombiner::getChi2,fitter_.getParameters()->size());
-
+	for(size_t i=0;i<sysforms_.size();i++){
+		if(sysforms_.at(i) == rc_sysf_box){
+			fitter_.setParameterUpperLimit(i,1);
+			fitter_.setParameterLowerLimit(i,-1);
+		}
+	}
 	fitter_.setMinFunction(&f);
 	fitter_.setStrategy(0);
 	fitter_.setTolerance(1);
@@ -117,6 +128,7 @@ bool resultCombiner::minimize(){
 		for(size_t i=binsstart_; i< startparas.size();i++)
 			fitter_.setAsMinosParameter(i,true);
 	}
+
 
 	fitter_.fit();
 
@@ -145,6 +157,34 @@ bool resultCombiner::minimize(){
 	return fitter_.wasSuccess();
 
 }
+void resultCombiner::produceWeightedMean(){
+	if(initialinputs_.size()<1)
+		throw std::logic_error("resultCombiner::produceWeightedMean: first read input");
+
+	size_t nbins=initialinputs_.at(0).getBins().size();
+	int nsys=initialinputs_.at(0).getSystSize();
+	histo1D output=initialinputs_.at(0);
+	for(size_t bin=0;bin<nbins;bin++){
+		for(int sys=-1;sys<nsys;sys++){
+			double weightsum=0;
+			double weightedsum=0;
+			for(size_t hist=0;hist<initialinputs_.size();hist++){
+				const float & content=initialinputs_.at(hist).getBinContent(bin,sys);
+				double weight=0;
+				if(initialinputs_.at(hist).getBin(bin).getStat2()!=0)
+					weight = 1/initialinputs_.at(hist).getBin(bin).getStat2();
+				weightedsum+=content*weight;
+				weightsum+=weight;
+			}
+			output.setBinContent(bin, weightedsum/weightsum,sys);
+			if(sys<0)
+				output.setBinStat(bin,1/weightsum);
+			else
+				output.setBinStat(bin,0,sys);
+		}
+	}
+	combined_= output;
+}
 
 void resultCombiner::coutSystBreakDownInBin(size_t idx)const{
 	if(distributions_.size()<1) return;
@@ -154,6 +194,7 @@ void resultCombiner::coutSystBreakDownInBin(size_t idx)const{
 	float avgerror=(fabs(combined_.getBinErrorUp(idx,false))+fabs(combined_.getBinErrorDown(idx,false)))/2;
 	float content=combined_.getBinContent(idx);
 
+	std::cout << "para val\tpara err\tpara name\tcontr"<<std::endl;
 	for(size_t i=0;i<getFitter()->getParameters()->size() - combined_.getBins().size();i++){
 		float breakdown=0;
 		breakdown=sqrt(sq(avgerror)-sq(avgerror * sqrt(1-sq(getFitter()->getCorrelationCoefficient(binsstart_+idx,i)))));
@@ -199,18 +240,18 @@ double resultCombiner::getChi2(const double * variations){
 			if(additionalconstraint_==rc_addc_normalized){
 				if(i<distributions_.at(0).bins().size()-1){
 					chi2+= sq( combbincontents [i] - distributions_.at(meas).getBin(i)->getValue(variations))
-													/ sq(binerror); //this is gaussian
+																			/ sq(binerror); //this is gaussian
 					binsum+=distributions_.at(meas).getBin(i)->getValue(variations);
 				}
 				else{
 					chi2+= sq( combbincontents [i] - binsum)
-													/ sq(binerror); //this is gaussian
+																			/ sq(binerror); //this is gaussian
 				}
 			}
 			else{
 				chi2+= sq( combbincontents [i] -
 						distributions_.at(meas).getBin(i)->getValue(variations)) /
-						sq(binerror) ; //this is gaussian
+								sq(binerror) ; //this is gaussian
 			}
 		}
 	}
@@ -218,11 +259,11 @@ double resultCombiner::getChi2(const double * variations){
 	//	return chi2;
 	//nuisance parameters
 	for(size_t i=0;i<binsstart_;i++){
-
 		if(sysforms_.at(i) == rc_sysf_gaus)
-			chi2+=getNuisanceLogGaus(variations[i]);
-		else if(sysforms_.at(i) == rc_sysf_box)
-			chi2+=getNuisanceLogBox(variations[i]);
+			chi2+=sq(variations[i]);
+		//replaced by limits
+		//	else if(sysforms_.at(i) == rc_sysf_box)
+		chi2+=0.01*sq(variations[i]);
 	}
 	return chi2;
 }

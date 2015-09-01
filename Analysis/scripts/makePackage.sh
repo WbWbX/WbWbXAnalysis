@@ -17,7 +17,7 @@
 
 workdir=`pwd`
 executable=$1
-option="all"
+option="" # "all" is experimental
 outputfile=$2
 if [[ "${outputfile}" == "" ]]
 then
@@ -56,10 +56,13 @@ function copylibs(){
     mkdir -p $libdir
     if [[ "${option}" == "all" ]]
     then
-       cp ${CMSLIBS}lib*.so $libdir
+       allibs=` ldd $execpath | grep so | sed -e '/^[^\t]/ d' | sed -e 's/\t//'| sed -e 's/.*=..//'| sed -e 's/ (0.*)//' `
+       for f in $allibs
+	   do
+			  cp $f $libdir
+	   done
     else
-       cp ${CMSLIBS}lib*TtZAnalysis*.so $libdir
-       cp ${CMSLIBS}lib*TopAnalysis*.so $libdir
+       cp ${CMSLIBS}lib*.so $libdir
     fi
 
     cp $EXTLIBS/libunfold.so $libdir 

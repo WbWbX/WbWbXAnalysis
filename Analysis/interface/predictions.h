@@ -30,7 +30,8 @@ public:
 		err_alphasup=4, err_alphasdown=5,
 		err_addgausup=6, err_addgausdown=7,
 		err_nominal=8,
-		err_maxup=9,err_maxdown=10
+		err_maxup=9,err_maxdown=10,
+		err_gausup=11,err_gausdown=12
 		};
 
 	top_prediction(){
@@ -54,7 +55,7 @@ public:
 
 
 	double getXsec(const double& topmass, error_enum error=err_nominal)const;
-	double scanTopMass(const double& xsec, error_enum error=err_nominal)const;
+	double scanTopMass(const double& xsec,  double intervaldown=140, double intervalup=190, error_enum error=err_nominal)const;
 
 	//can be exported to likelihood or to histo2D
 	//binning/range given by input
@@ -66,7 +67,7 @@ private:
 	double getError( const double& topmass, error_enum error, bool& isrel)const;
 
 	graphFitter fittedcurve_;
-	std::vector< graphFitter> errgraphs_; //fixed: scaleup, scaledown, pdfup, pdfdown
+	std::vector< graphFitter> errgraphs_;
 	std::vector< double > relerrors_;
 	std::string idstring_;
 

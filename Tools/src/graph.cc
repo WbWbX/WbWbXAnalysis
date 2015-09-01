@@ -105,13 +105,15 @@ size_t graph::addPoint(const float& x, const float & y,const TString & pointname
 	//add new content
 	for(int sysl=-1;sysl<(int)newxcoords.layerSize();sysl++){
 		newxcoords.getBin(oldsize,sysl).setContent(x);
-		if(sysl<0 && pointname.Length()>0)
-			setPointName(oldsize,pointname);
 		newycoords.getBin(oldsize,sysl).setContent(y);
 	}
 
 	xcoords_=newxcoords;
 	ycoords_=newycoords;
+
+
+	if(pointname.Length()>0)
+		setPointName(oldsize,pointname);
 
 	return oldsize;
 }
@@ -161,20 +163,16 @@ float   graph::getPointYStat(const size_t & point, const int & syslayer) const{
 
 
 
-size_t graph::addErrorGraph(const TString &name, const graph & errg){
+size_t graph::addErrorGraph(const TString &name, const graph & errg, float weight){
 	if(errg.getNPoints()!=getNPoints()){
 		std::cout << "graph::addErrorGraph: graphs need to have same number of points" <<std::endl;
 		throw std::logic_error("graph::addErrorGraph: graphs need to have same number of points");
 	}
-	size_t sysidx=xcoords_.addLayer(name);
-	sysidx=ycoords_.addLayer(name);
-	if(sysidx!=xcoords_.layerSize()-1){//layer not new!!
-		std::cout << "graph::addErrorGraph: error already added, what should I do??? I decide to leave" <<std::endl;
-		throw std::logic_error("graph::addErrorGraph: error already added, what should I do??? I decide to leave");
-	}
-	xcoords_.getLayer(sysidx)=errg.xcoords_.getNominal();
-	ycoords_.getLayer(sysidx)=errg.ycoords_.getNominal();
-	return sysidx;
+
+
+	xcoords_.setLayerFromNominal(name,errg.xcoords_,weight);
+	size_t ret=ycoords_.setLayerFromNominal(name,errg.ycoords_,weight);
+	return ret;
 }
 graph  graph::getSystGraph(const size_t sysidx) const{
 	if(sysidx >=ycoords_.layerSize()){
@@ -206,7 +204,47 @@ graph graph::getRelYErrorsGraph()const{
 	out.normalizeToGraph(out);
 	return out;
 }
+graph graph::addAllSysQuad(const TString& resname)const{
+	graph out(getNPoints());
+	out.addErrorGraph(resname+"_up",out);
+	out.addErrorGraph(resname+"_down",out);
+	//int nsys=getSystSize();
+	out.xcoords_.getNominal()=xcoords_.getNominal();
+	out.ycoords_.getNominal()=ycoords_.getNominal();
+	std::vector<TString> vars=xcoords_.getVariations();
+	bool dummy;
+	for(size_t p=0;p<getNPoints();p++){
+		float fullxerrup2=0;
+		float fullxerrdown2=0;
+		float fullyerrup2=0;
+		float fullyerrdown2=0;
+		const float& xcontent=xcoords_.getBinContent(p);
+		const float& ycontent=ycoords_.getBinContent(p);
+		for(size_t sys=0;sys<vars.size();sys++){
+			size_t upidx=getSystErrorIndex(vars.at(sys)+"_up");
+			size_t downidx=getSystErrorIndex(vars.at(sys)+"_down");
+			float xup  =xcoords_.getBinContent(p,upidx) -xcontent;
+			float xdown=xcoords_.getBinContent(p,downidx)-xcontent;
+			float dom=getMaxVar(true,xup,xdown,dummy );
+			fullxerrup2+=dom*dom;
+			dom=getMaxVar(false,xup,xdown,dummy );
+			fullxerrdown2+=dom*dom;
 
+			float yup  =ycoords_.getBinContent(p,upidx)-ycontent;
+			float ydown=ycoords_.getBinContent(p,downidx)-ycontent;
+			dom=getMaxVar(true,yup,ydown,dummy );
+			fullyerrup2+=dom*dom;
+			dom=getMaxVar(false,yup,ydown,dummy );
+			fullyerrdown2+=dom*dom;
+		}
+		out.xcoords_.setBinContent(p,xcontent+std::sqrt(fullxerrup2),0);
+		out.xcoords_.setBinContent(p,xcontent-std::sqrt(fullxerrdown2),1);
+		out.ycoords_.setBinContent(p,ycontent+std::sqrt(fullyerrup2),0);
+		out.ycoords_.setBinContent(p,ycontent-std::sqrt(fullyerrdown2),1);
+	}
+
+	return out;
+}
 
 const TString &graph::getSystErrorName(const size_t &number) const{
 	if(number>=xcoords_.layerSize()){
@@ -258,6 +296,12 @@ void graph::removeAllXYSyst(){
 	xcoords_.removeAdditionalLayers();
 	ycoords_.removeAdditionalLayers();
 }
+
+void graph::removeError(const TString&name){
+	xcoords_.removeLayer(name);
+	ycoords_.removeLayer(name);
+}
+
 void graph::removeYStatFromAll(bool alsonominal){
 	int start=-1;
 	if(!alsonominal) start=0;

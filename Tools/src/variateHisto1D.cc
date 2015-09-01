@@ -295,8 +295,20 @@ histo1D variateHisto1D::exportContainer(const std::vector<double> & variations)c
 	//histo1D zerotmp=out;
 	out.setName(getName());
 	for(size_t i=0;i<bins_.size();i++){
-		out.setBinContent(i,contents_.at(i).getValue(variations)  );
-		out.setBinStat(i,(errsup_.at(i)+errsdown_.at(i))/2 * contents_.at(i).getMultiplicationFactor(variations));
+		float cont=contents_.at(i).getValue(variations) ;
+		float err=fabs((errsup_.at(i)+errsdown_.at(i))/2 * contents_.at(i).getMultiplicationFactor(variations));
+		if(cont!=cont || err!=err){
+			if(!i || i==bins_.size()-1){
+				if(contents_.at(i).getNominal() != 0.) //if input was 0, dont issue warning
+					std::cout << "variateHisto1D::exportContainer: warning. detected nans in UF/OF. Will be set to 0" <<std::endl;
+				cont=0;
+				err=0;
+			}
+			else
+				throw std::runtime_error("variateHisto1D::exportContainer: nans produced");
+		}
+		out.setBinContent(i, cont);
+		out.setBinStat(i,err);
 	}
 
 

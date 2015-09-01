@@ -111,7 +111,7 @@ size_t histoContent::addLayer(const TString & name){
 
 	if(idx>=layermap_.size()){ //layer does not exist yet
 		histoBins binning(nominal_);
-	/*	binning.setName(name);
+		/*	binning.setName(name);
 		binning.setLayer(layermap_.size());*/
 		additionalbins_.push_back(binning);
 		return layermap_.push_back(name);
@@ -156,7 +156,7 @@ size_t histoContent::setLayerFromNominal(const TString & name, const histoConten
 
 	if(external.nominal_.size() != additionalbins_[idx].size())
 		throw std::out_of_range("histoContent::addLayerFromNominal: binning does not match");
-	if(devweight==1.)
+	if(devweight==(float)1.)
 		additionalbins_[idx] = external.nominal_;
 	else{ //get difference
 		histoBins difference = external.nominal_;
@@ -167,8 +167,11 @@ size_t histoContent::setLayerFromNominal(const TString & name, const histoConten
 
 			float diff=(extbin.getContent() - nombin.getContent());
 			float newcontent = diff * devweight + nombin.getContent();
-			float statscaler = newcontent/extbin.getContent();
+			float statscaler =0;
+			if(extbin.getContent())
+				statscaler = newcontent/extbin.getContent();
 			diffbin.setContent(newcontent);
+
 			diffbin.setStat2(statscaler*statscaler * extbin.getStat2());
 
 

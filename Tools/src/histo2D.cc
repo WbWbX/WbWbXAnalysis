@@ -235,20 +235,20 @@ histo2D histo2D::rebinYToBinning(const std::vector<float> & newbins) const{
 
 float histo2D::getBinErrorUp(const size_t & xbin, const size_t & ybin, bool onlystat,TString limittosys) const{
 	if(xbin>=xbins_.size() || ybin>= conts_.size()){
-			throw std::out_of_range ("histo2D::getBinErrorUp: xbin or ybin is out of range");// << std::endl;
-		}
+		throw std::out_of_range ("histo2D::getBinErrorUp: xbin or ybin is out of range");// << std::endl;
+	}
 	return conts_.at(ybin).getBinErrorUp(xbin,  onlystat, limittosys);
 }
 float histo2D::getBinErrorDown(const size_t & xbin, const size_t & ybin, bool onlystat,TString limittosys) const{
 	if(xbin>=xbins_.size() || ybin>= conts_.size()){
-				throw std::out_of_range ("histo2D::getBinErrorDown: xbin or ybin is out of range");// << std::endl;
-			}
+		throw std::out_of_range ("histo2D::getBinErrorDown: xbin or ybin is out of range");// << std::endl;
+	}
 	return conts_.at(ybin).getBinErrorDown(xbin,  onlystat, limittosys);
 }
 float histo2D::getBinError(const size_t & xbin, const size_t & ybin, bool onlystat,TString limittosys) const{
 	if(xbin>=xbins_.size() || ybin>= conts_.size()){
-					throw std::out_of_range ("histo2D::getBinError: xbin or ybin is out of range");// << std::endl;
-				}
+		throw std::out_of_range ("histo2D::getBinError: xbin or ybin is out of range");// << std::endl;
+	}
 	return conts_.at(ybin).getBinError(xbin,  onlystat, limittosys);
 }
 
@@ -808,6 +808,48 @@ histo2D histo2D::cutRightX(const float & val)const{
 	return out;
 }
 
+
+histo2D histo2D::cutLeftX(const float & val)const{
+	if(conts_.size()<1)
+		return histo2D();
+	size_t binno=getBinNoX(val);
+	if(binno<1){
+		throw std::out_of_range("container2D::cutRightX: would cut full content. Probably not intended!?");
+	}
+	histo2D out=*this;
+	for(size_t i=0;i<conts_.size();i++){
+		out.conts_.at(i) = conts_.at(i).cutLeft(val);
+		if(i==0){
+			out.xbins_=out.conts_.at(i).bins_;
+		}
+	}
+	return out;
+}
+
+histo2D histo2D::cutUpY(const float & val)const{
+	//size_t bin=getBinNoY(val);
+	throw std::logic_error("histo2D::cutUpY: TBI");
+return *this;
+
+}
+histo2D histo2D::cutDownY(const float & )const{
+	throw std::logic_error("histo2D::cutDownY: TBI");
+return *this;
+}
+
+void histo2D::copyContentFrom(const histo2D& rhs){
+	for(size_t i=1;i<getBinsX().size()-1;i++){
+		for(size_t j=1;j<getBinsY().size()-1;j++){
+			float cx,cy;
+			getBinCenter(i,j,cx,cy);
+			size_t exx=rhs.getBinNoX(cx);
+			size_t exy=rhs.getBinNoY(cy);
+			getBin(i,j)=rhs.getBin(exx,exy);
+		}
+	}
+
+}
+
 int histo2D::addErrorContainer(const TString & sysname,const histo2D & second ,float weight){
 	if(second.xbins_ != xbins_ || second.ybins_ != ybins_){
 		std::cout << "container2D::addErrorContainer "<< name_ << " and " << second.name_<<" must have same binning!"  << std::endl;
@@ -1060,10 +1102,10 @@ void histo2D::equalizeSystematicsIdxs(histo2D &rhs){ //sec
 }
 
 std::vector<TString> histo2D::getSystNameList()const{
-		if(isDummy())
-			throw std::logic_error("histo2D::getSystNameList() histo dummy");
-		return conts_.at(0).getSystNameList();
-	}
+	if(isDummy())
+		throw std::logic_error("histo2D::getSystNameList() histo dummy");
+	return conts_.at(0).getSystNameList();
+}
 
 void histo2D::copyFrom(const histo2D&rhs){
 	conts_=rhs.conts_;

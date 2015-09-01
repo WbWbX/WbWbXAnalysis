@@ -41,6 +41,7 @@ void plotter2D::readStylePriv(const std::string&file, bool requireall){
 
 	rootDrawOpt_ = fr.getValue<TString>("rootDrawOpt",rootDrawOpt_);
 
+	palette_= fr.getValue<TString>("palette",palette_);
 }
 
 void plotter2D::preparePad(){
@@ -58,14 +59,35 @@ void plotter2D::drawPlots(){
 
 	const Int_t NRGBs = 5;
 	const Int_t NCont = 255;
+	if(palette_=="bluetored"){
 
-	Double_t stops[NRGBs] = { 0.00, 0.34, 0.61, 0.84, 1.00 };
-	Double_t red[NRGBs]   = { 0.00, 0.00, 0.87, 1.00, 0.51 };
-	Double_t green[NRGBs] = { 0.00, 0.81, 1.00, 0.20, 0.00 };
-	Double_t blue[NRGBs]  = { 0.51, 1.00, 0.12, 0.00, 0.00 };
-	TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
-	gStyle->SetNumberContours(NCont);
+		Double_t stops[NRGBs] = { 0.00, 0.34, 0.61, 0.84, 1.00 };
+		Double_t red[NRGBs]   = { 0.00, 0.00, 0.87, 1.00, 0.51 };
+		Double_t green[NRGBs] = { 0.00, 0.81, 1.00, 0.20, 0.00 };
+		Double_t blue[NRGBs]  = { 0.51, 1.00, 0.12, 0.00, 0.00 };
 
+		TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
+		gStyle->SetNumberContours(NCont);
+	}
+	if(palette_=="bluewhitered"){
+
+		Double_t stops[NRGBs] = { 0.00, 0.34, 0.5, 0.84, 1.00 };
+		Double_t red[NRGBs]   = { 0.00, 0.00, 1., 1.00, 0.51 };
+		Double_t green[NRGBs] = { 0.00, 0.81, 1., 0.20, 0.00 };
+		Double_t blue[NRGBs]  = { 0.51, 1.00, 1., 0.00, 0.00 };
+
+		TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
+		gStyle->SetNumberContours(NCont);
+	}
+	else{
+		Double_t stops[NRGBs] = { 0.00, 0.34, 0.61, 0.84, 1.00 };
+		Double_t red[NRGBs]   = { 1, 0.00, 0.87, 1.00, 0.51 };
+		Double_t green[NRGBs] = { 1, 0.81, 1.00, 0.20, 0.00 };
+		Double_t blue[NRGBs]  = { 1, 1.00, 0.12, 0.00, 0.00 };
+
+		TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
+		gStyle->SetNumberContours(NCont);
+	}
 	//applt style
 	// STC!!!
 
@@ -74,13 +96,14 @@ void plotter2D::drawPlots(){
 	TH2D* h=addObject(plot_.getTH2D(plot_.getName(),dividebybinarea_,false));
 
 
-	h->GetZaxis()->SetTitleSize(0.06);
+	h->GetZaxis()->SetTitleSize(0.07);
 
-	h->GetZaxis()->SetLabelSize(0.05);
-	h->GetYaxis()->SetTitleSize(0.06);
-	h->GetYaxis()->SetLabelSize(0.05);
-	h->GetXaxis()->SetTitleSize(0.06);
-	h->GetXaxis()->SetLabelSize(0.05);
+	h->GetZaxis()->SetLabelSize(0.06);
+	h->GetYaxis()->SetTitleSize(0.07);
+	h->GetYaxis()->SetLabelSize(0.06);
+	h->GetXaxis()->SetTitleSize(0.07);
+	h->GetXaxis()->SetLabelSize(0.06);
+	h->GetXaxis()->SetTitleOffset(0.95);
 	float max=plot_.getMax();
 	float min=plot_.getMin();
 	max=floor(max)+1;
@@ -94,7 +117,7 @@ void plotter2D::drawPlots(){
 	/*
 	h->GetZaxis()->SetTitle(plot_.getZAxisName()); */
 	h->Draw("colz");
-
+	gPad->RedrawAxis();
 
 }
 // void drawTextBoxes();

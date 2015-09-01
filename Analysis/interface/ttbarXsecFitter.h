@@ -40,7 +40,8 @@ public:
 		useMConly_(false),removesyst_(false),nominos_(false),
 		parameterwriteback_(true),
 		nosystbd_(false),silent_(false),nopriors_(false),topmassrepl_(-100),pseudodatarun_(false),
-		wjetsrescalefactor_(1)
+		wjetsrescalefactor_(1),
+		topontop_(false)
 	{
 	} //one for each energy
 
@@ -88,7 +89,7 @@ public:
 	void setSilent(bool silent){silent_=silent;}
 
 
-
+	void setTopOnTop(bool set){topontop_=set;}
 	/**
 	 *
 	 */
@@ -147,10 +148,10 @@ public:
 	 */
 	void getParaErrorContributionToXsec(int idx, size_t  datasetidx,double& up,double&down,bool& anticorr);
 
-	void createSystematicsBreakdowns();
+	void createSystematicsBreakdowns( const TString& paraname="");
 	void createSystematicsBreakdownsMerged();
 
-	texTabler makeSystBreakDownTable(size_t datasetidx,bool detailed=true);
+	texTabler makeSystBreakDownTable(size_t datasetidx,bool detailed=true,const TString& para="");
 
 	texTabler makeCorrTable() const;
 
@@ -186,10 +187,11 @@ public:
 
 
 	std::vector<float> tempdata;
+	void createSystematicsBreakdown(size_t datasetidx, const TString& paraname="");
+
 
 private:
 
-	void createSystematicsBreakdown(size_t datasetidx);
 
 
 
@@ -205,12 +207,18 @@ private:
 	class dataset{
 	public:
 
-		struct systematic_unc{
+		class systematic_unc{
+		public:
 			TString name;
 			double pull;
 			double constr;
 			double errup;
 			double errdown;
+
+			void symmetrize(){
+				errup=std::max(fabs(errup),fabs(errdown));
+				errdown=-errup;
+			}
 		};
 
 		dataset(double lumi,double lumiunc, double xsecin, TString name, ttbarXsecFitter* par):
@@ -422,6 +430,8 @@ private:
 
 	float wjetsrescalefactor_;
 	std::string mergesystfile_;
+	//std::string textboxesfile_;
+	bool topontop_;
 };
 
 }

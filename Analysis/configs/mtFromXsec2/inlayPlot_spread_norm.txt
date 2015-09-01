@@ -178,7 +178,7 @@ externalMarker = CMSnoSplitLeft
   lineColor    = 632 
     fillStyle    = 1001 %3002
     fillColor    = 632
-    rootDrawOpt  = e3
+    rootDrawOpt  = L4
     sysRootDrawOpt  = none
  [end containerStyle]  
  
@@ -187,7 +187,7 @@ externalMarker = CMSnoSplitLeft
   lineColor    = 416 
     fillStyle    = 1001
     fillColor    = 416
-    rootDrawOpt  = e3
+    rootDrawOpt  = L4
     sysRootDrawOpt  = none 
  [end containerStyle] 
   
@@ -199,7 +199,7 @@ externalMarker = CMSnoSplitLeft
   lineColor    = 600 
     fillStyle    = 1001
     fillColor    = 600
-    rootDrawOpt  = e3
+    rootDrawOpt  = L4
     sysRootDrawOpt  = none
  [end containerStyle]  
  

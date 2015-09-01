@@ -3,8 +3,8 @@
 #include "TTreePerfStats.h"
 #include "FWCore/FWLite/interface/AutoLibraryLoader.h"
 
-#define DEF_ELEC_PT 30
-#define DEF_MUON_PT 30
+#define DEF_ELEC_PT 20
+#define DEF_MUON_PT 20
 
 double 
 triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::vector<ztop::NTElectron> * inputElectrons){
@@ -359,7 +359,7 @@ void trigger_tightLeptons(){
 
 	triggerAnalyzer eedFull = ta_eedA + ta_eedB + ta_eedC + ta_eedD;
 	triggerAnalyzer eemcFull = ta_eeMCA + ta_eeMCB + ta_eeMCC + ta_eeMCD;
-	TString eestring= makeFullOutput(eedFull, eemcFull, "ee_Full", "ee Full 19 fb^{-1}", 0.01);
+	TString eestring= makeFullOutput(eedFull, eemcFull, "ee_Full", "8TeV", 0.01);
 
 	////
 	double mumutotal=ta_mumudA.getGlobalDen() + ta_mumudB.getGlobalDen() + ta_mumudC.getGlobalDen() + ta_mumudD.getGlobalDen();
@@ -385,7 +385,7 @@ void trigger_tightLeptons(){
 
 	triggerAnalyzer mumudFull = ta_mumudA + ta_mumudB + ta_mumudC + ta_mumudD;
 	triggerAnalyzer mumumcFull = ta_mumuMCA + ta_mumuMCB + ta_mumuMCC + ta_mumuMCD;
-	TString mumustring= makeFullOutput(mumudFull, mumumcFull, "mumu_Full", "mumu Full 19 fb^{-1}", 0.01);
+	TString mumustring= makeFullOutput(mumudFull, mumumcFull, "mumu_Full", "8TeV", 0.01);
 
 
 	///
@@ -413,7 +413,7 @@ void trigger_tightLeptons(){
 
 	triggerAnalyzer emudFull = ta_emudA + ta_emudB + ta_emudC + ta_emudD;
 	triggerAnalyzer emumcFull = ta_emuMCA + ta_emuMCB + ta_emuMCC + ta_emuMCD;
-	TString emustring=makeFullOutput(emudFull, emumcFull, "emu_Full", "emu Full 19 fb^{-1}", 0.01);
+	TString emustring=makeFullOutput(emudFull, emumcFull, "emu_Full", "8TeV", 0.01);
 
 	std::cout << "\n\nweighted output summary: " << std::endl;
 

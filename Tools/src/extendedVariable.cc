@@ -493,7 +493,10 @@ double extendedVariable::getMultiplicationFactor(const std::vector<double> * var
 			throw std::runtime_error("extendedVariable::getValue: nan produced");
 		}
 	}
-	outd/=(thisvar+nominal_);
+	if(thisvar+nominal_ !=0)
+		outd/=(thisvar+nominal_);
+	else
+		outd=0;
 	return outd;
 }
 double extendedVariable::getMultiplicationFactor(const std::vector<double> &variations)const{

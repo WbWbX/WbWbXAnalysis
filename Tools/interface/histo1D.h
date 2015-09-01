@@ -18,7 +18,7 @@
 #include "TRandom3.h"
 #include "../interface/serialize.h"
 #include "corrMatrix.h"
-
+#include "texTabler.h"
 
 
 
@@ -201,7 +201,7 @@ public:
 	 */
 	void setAllZero();
 
-	TH1D * getTH1D(TString name="", bool dividebybinwidth=true, bool onlystat=false, bool nostat=false) const; //! returns a TH1D pointer with symmetrized errors (TString name); small bug with content(bin)=0 and error(bin)=0
+	TH1D * getTH1D(TString name="", bool dividebybinwidth=true, bool onlystat=false, bool nostat=false,const int& systidx=-1) const; //! returns a TH1D pointer with symmetrized errors (TString name); small bug with content(bin)=0 and error(bin)=0
 	TH1D * getTH1DSyst(TString name, size_t systNo, bool dividebybinwidth=true, bool statErrors=false) const;
 	TH1D * getAxisTH1D()const;
 
@@ -255,6 +255,7 @@ public:
 	 * and returns new container.
 	 */
 	histo1D cutRight(const float & )const;
+	histo1D cutLeft(const float & )const;
 
 	/**
 	 * compares bins, bin contents and all uncertainties
@@ -444,10 +445,12 @@ public:
 	 */
 	TString coutBinContent(size_t bin,const TString & unit="") const;
 
+	texTabler makeTableFromBinContent(size_t bin,bool symmetrize=true,bool relative=true, float prec=-1) const;
+
 	/**
 	 * output: variation_nominal, variation_up, variation_down
 	 */
-	std::vector<histo1D> produceVariations(const TString & sysname)const;
+	std::vector<histo1D> produceVariations(const TString & sysname, const TString& legendnom="", const TString& legendup="", const TString& legenddown="")const;
 
 	/*
 	 * high level stuff e.g. transforming particular systematic to a container y(x)=y(variation)
@@ -534,8 +537,10 @@ protected:
 	TH1D * hp_;//!< this is only for interactive usage to keep track on newly created plots
 
 	TString stripVariation(const TString&) const;//!< strips the <up> or <down>
-	float getDominantVariationUp( TString ,const size_t &) const;//!< gets dominant variation larger than nominal content for syst = para1, bin=para2
-	float getDominantVariationDown( TString ,const size_t &) const;//!< gets dominant variation smaller than nominal content for syst = para1, bin=para2
+	float getDominantVariationUp( const TString& ,const size_t &, bool& ) const;//!< gets dominant variation larger than nominal content for syst = para1, bin=para2
+	float getDominantVariationDown( const TString& ,const size_t &, bool& ) const;//!< gets dominant variation smaller than nominal content for syst = para1, bin=para2
+	float getDominantVariationUp( const TString& ,const size_t &) const;//!< gets dominant variation larger than nominal content for syst = para1, bin=para2
+	float getDominantVariationDown( const TString& ,const size_t &) const;//!< gets dominant variation smaller than nominal content for syst = para1, bin=para2
 
 	float sq(const float&) const; //!< helper
 
@@ -593,6 +598,8 @@ inline void ztop::histo1D::fill(const float & what, const float & weight){
 	if(what>bins_.at(bins_.size()-1))
 		wasoverflow_=true;
 	histoBin * b=&contents_.getBin(bin);
+	if(weight!= weight)
+		throw std::runtime_error("ztop::histo1D::fill: tried to fill NAN or INF");
 	b->addToContent(weight);
 	b->addEntry();
 	b->addToStat(weight);

@@ -9,7 +9,7 @@
 
  Implementation:
      [Notes on implementation]
-*/
+ */
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
@@ -24,6 +24,9 @@
 // user include files
 #include "PhysicsTools/SelectorUtils/interface/JetIDSelectionFunctor.h"
 #include "PhysicsTools/SelectorUtils/interface/PFJetIDSelectionFunctor.h"
+#include "SimDataFormats/GeneratorProducts/interface/LHERunInfoProduct.h"
+#include "FWCore/Framework/interface/Run.h"
+#include "TtZAnalysis/Configuration/interface/version.h"
 
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
@@ -76,37 +79,37 @@
 //
 
 class PUInfo : public edm::EDAnalyzer {
-   public:
-      explicit PUInfo(const edm::ParameterSet&);
-      ~PUInfo();
+public:
+	explicit PUInfo(const edm::ParameterSet&);
+	~PUInfo();
 
-      static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
-
-
-   private:
- 
-      virtual void beginJob() ;
-      virtual void analyze(const edm::Event&, const edm::EventSetup&);
-      virtual void endJob() ;
-
-      virtual void beginRun(edm::Run const&, edm::EventSetup const&);
-      virtual void endRun(edm::Run const&, edm::EventSetup const&);
-      virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
-      virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
-
-      // ----------member data ---------------------------
-
-  bool checkJetID(std::vector<pat::Jet>::const_iterator);
+	static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
 
-  edm::InputTag puinfo_, vertices_,pdfweights_;
-  TTree* Ntuple;
- 
-  bool includepdfweights_;
+private:
 
-  ztop::NTEvent ntevent;
+	virtual void beginJob() ;
+	virtual void analyze(const edm::Event&, const edm::EventSetup&);
+	virtual void endJob() ;
 
-  std::string treename_;
+	virtual void beginRun(edm::Run const&, edm::EventSetup const&);
+	virtual void endRun(edm::Run const&, edm::EventSetup const&);
+	virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
+	virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
+
+	// ----------member data ---------------------------
+
+	bool checkJetID(std::vector<pat::Jet>::const_iterator);
+
+
+	edm::InputTag puinfo_, vertices_,pdfweights_;
+	TTree* Ntuple;
+
+	bool includepdfweights_,printLHE_;
+
+	ztop::NTEvent ntevent;
+
+	std::string treename_;
 
 
 };
@@ -124,29 +127,29 @@ class PUInfo : public edm::EDAnalyzer {
 //
 PUInfo::PUInfo(const edm::ParameterSet& iConfig)
 {
-   //now do what ever initialization is needed
-  treename_  =iConfig.getParameter<std::string> ("treeName");
-  puinfo_       =iConfig.getParameter<edm::InputTag>    ( "PUInfo" );
-  vertices_       =iConfig.getParameter<edm::InputTag>    ( "vertexSrc" );
-  includepdfweights_ = iConfig.getParameter<bool>             ( "includePDFWeights" );
-  pdfweights_  =iConfig.getParameter<edm::InputTag>    ( "pdfWeights"          );
+	//now do what ever initialization is needed
+	treename_  =iConfig.getParameter<std::string> ("treeName");
+	puinfo_       =iConfig.getParameter<edm::InputTag>    ( "PUInfo" );
+	vertices_       =iConfig.getParameter<edm::InputTag>    ( "vertexSrc" );
+	includepdfweights_ = iConfig.getParameter<bool>             ( "includePDFWeights" );
+	pdfweights_  =iConfig.getParameter<edm::InputTag>    ( "pdfWeights"          );
 
-   std::cout << "n\n################## PUInfo writer ######################" 
-             <<  "\n#" << treename_
-             <<  "\n#     includes pdfWeights : " << includepdfweights_    <<"                         #" 
-             <<  "\n#######################################################" << std::endl;
+	std::cout << "n\n################## PUInfo writer ######################"
+			<<  "\n#" << treename_
+			<<  "\n#     includes pdfWeights : " << includepdfweights_    <<"                         #"
+			<<  "\n#######################################################" << std::endl;
 
 
-
+	printLHE_=false;
 
 }
 
 
 PUInfo::~PUInfo()
 {
- 
-   // do anything here that needs to be done at desctruction time
-   // (e.g. close files, deallocate resources etc.)
+
+	// do anything here that needs to be done at desctruction time
+	// (e.g. close files, deallocate resources etc.)
 
 }
 
@@ -159,63 +162,63 @@ PUInfo::~PUInfo()
 void
 PUInfo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
-   using namespace edm;
+	using namespace edm;
 
-  bool IsRealData = false;
-  edm::Handle <reco::GenParticleCollection> genParticles;
-  try {
-    iEvent.getByLabel("genParticles", genParticles);
-    int aux = genParticles->size();
-    aux = 0+aux;
-  }
-  catch(...) {IsRealData = true;} 
-
-
-
-   Handle<std::vector<reco::Vertex> > vertices;
-   iEvent.getByLabel(vertices_, vertices);
-   const reco::VertexCollection vtxs  = *(vertices.product());
+	bool IsRealData = false;
+	edm::Handle <reco::GenParticleCollection> genParticles;
+	try {
+		iEvent.getByLabel("genParticles", genParticles);
+		int aux = genParticles->size();
+		aux = 0+aux;
+	}
+	catch(...) {IsRealData = true;}
 
 
- 
-   std::vector<std::string> firedtriggers;
 
-   ntevent.setRunNo(iEvent.id().run());
-   ntevent.setLumiBlock(iEvent.id().luminosityBlock());
-   ntevent.setEventNo(iEvent.id().event());
-   ntevent.setVertexMulti(vertices->size());
-   ntevent.setFiredTriggers(firedtriggers);
+	Handle<std::vector<reco::Vertex> > vertices;
+	iEvent.getByLabel(vertices_, vertices);
+	const reco::VertexCollection vtxs  = *(vertices.product());
 
-   float BXminus=0;
-   float BXzero=0;
-   float BXplus=0;
 
-   //   if(!IsRealData){
-   edm::Handle<std::vector<PileupSummaryInfo> > PUSInfo;
-   try{
-     iEvent.getByLabel(puinfo_, PUSInfo);
-     for(std::vector<PileupSummaryInfo>::const_iterator PUI=PUSInfo->begin(); PUI<PUSInfo->end();PUI++){
-       if(PUI->getBunchCrossing()==-1)
-	 BXminus=PUI->getTrueNumInteractions();
-       else if(PUI->getBunchCrossing()==0)
-	 BXzero=PUI->getTrueNumInteractions();
-       else if(PUI->getBunchCrossing()==1)
-	 BXplus=PUI->getTrueNumInteractions();
-     }
-   }catch(...){}
-   // }
-   ntevent.setTruePU(BXminus,BXzero,BXplus);
-   if(includepdfweights_ && !IsRealData){
-     edm::Handle<std::vector<double> > weightHandle;
-     iEvent.getByLabel(pdfweights_, weightHandle);
-     std::vector<float> pdfweights;
-     for(size_t i=0;i<weightHandle->size();i++)
-     pdfweights.push_back(weightHandle->at(i));
-     
-     ntevent.setPDFWeights(pdfweights);
-   }
 
-   Ntuple ->Fill();
+	std::vector<std::string> firedtriggers;
+
+	ntevent.setRunNo(iEvent.id().run());
+	ntevent.setLumiBlock(iEvent.id().luminosityBlock());
+	ntevent.setEventNo(iEvent.id().event());
+	ntevent.setVertexMulti(vertices->size());
+	ntevent.setFiredTriggers(firedtriggers);
+
+	float BXminus=0;
+	float BXzero=0;
+	float BXplus=0;
+
+	//   if(!IsRealData){
+	edm::Handle<std::vector<PileupSummaryInfo> > PUSInfo;
+	try{
+		iEvent.getByLabel(puinfo_, PUSInfo);
+		for(std::vector<PileupSummaryInfo>::const_iterator PUI=PUSInfo->begin(); PUI<PUSInfo->end();PUI++){
+			if(PUI->getBunchCrossing()==-1)
+				BXminus=PUI->getTrueNumInteractions();
+			else if(PUI->getBunchCrossing()==0)
+				BXzero=PUI->getTrueNumInteractions();
+			else if(PUI->getBunchCrossing()==1)
+				BXplus=PUI->getTrueNumInteractions();
+		}
+	}catch(...){}
+	// }
+	ntevent.setTruePU(BXminus,BXzero,BXplus);
+	if(includepdfweights_ && !IsRealData){
+		edm::Handle<std::vector<double> > weightHandle;
+		iEvent.getByLabel(pdfweights_, weightHandle);
+		std::vector<float> pdfweights;
+		for(size_t i=0;i<weightHandle->size();i++)
+			pdfweights.push_back(weightHandle->at(i));
+
+		ntevent.setPDFWeights(pdfweights);
+	}
+
+	Ntuple ->Fill();
 
 }
 
@@ -224,17 +227,20 @@ PUInfo::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 void 
 PUInfo::beginJob()
 {
-  edm::Service<TFileService> fs;
+	edm::Service<TFileService> fs;
 
-  if( !fs ){
-    throw edm::Exception( edm::errors::Configuration,
-                          "TFile Service is not registered in cfg file" );
-  }
-  char * tempname = new char[treename_.length()];
-  strcpy(tempname, treename_.c_str());
-  Ntuple=fs->make<TTree>(tempname ,tempname );
-  
-  Ntuple->Branch("NTEvent", "ztop::NTEvent", &ntevent);
+	if( !fs ){
+		throw edm::Exception( edm::errors::Configuration,
+				"TFile Service is not registered in cfg file" );
+	}
+	char * tempname = new char[treename_.length()];
+	strcpy(tempname, treename_.c_str());
+	Ntuple=fs->make<TTree>(tempname ,tempname );
+
+	Ntuple->Branch("NTEvent", "ztop::NTEvent", &ntevent);
+
+
+
 
 }
 
@@ -246,8 +252,28 @@ PUInfo::endJob()
 
 // ------------ method called when starting to processes a run  ------------
 void 
-PUInfo::beginRun(edm::Run const&, edm::EventSetup const&)
+PUInfo::beginRun(edm::Run const& run, edm::EventSetup const& evts)
 {
+#ifdef CMSSW_LEQ_5
+	if(!printLHE_) return;
+	//	genEventInfoTag=cms.InputTag("generator"),
+	//	lheEventInfoTag=cms.InputTag("externalLHEProducer"),
+	edm::Handle<LHERunInfoProduct> lheRunInfo;
+	typedef std::vector<LHERunInfoProduct::Header>::const_iterator headers_const_iterator;
+	try {run.getByLabel("externalLHEProducer", lheRunInfo);}
+	catch (...) {;}
+	if(lheRunInfo.isValid()){
+		LHERunInfoProduct lheRunInfoProd = *(lheRunInfo.product());
+		for (headers_const_iterator iter=lheRunInfoProd.headers_begin(); iter!=lheRunInfoProd.headers_end(); iter++){
+			std::cout << iter->tag() << std::endl;
+			std::vector<std::string> lines (iter-> begin(),iter->end());
+			for(size_t i=0;i<lines.size();i++)
+			std::cout << lines.at(i) << std::endl;
+		}
+	}else{
+		edm::LogWarning ("PUInfo") << "Can't get LHE header!" ;
+	}
+#endif
 }
 
 // ------------ method called when ending the processing of a run  ------------
@@ -271,11 +297,11 @@ PUInfo::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
 void
 PUInfo::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
-  //The following says we do not know what parameters are allowed so do no validation
-  // Please change this to state exactly what you do use, even if it is no parameters
-  edm::ParameterSetDescription desc;
-  desc.setUnknown();
-  descriptions.addDefault(desc);
+	//The following says we do not know what parameters are allowed so do no validation
+	// Please change this to state exactly what you do use, even if it is no parameters
+	edm::ParameterSetDescription desc;
+	desc.setUnknown();
+	descriptions.addDefault(desc);
 }
 
 

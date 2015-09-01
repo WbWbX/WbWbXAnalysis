@@ -339,7 +339,7 @@ int MainAnalyzer::start(){
 		for(size_t i=0;i<succ.size();i++){
 			//check if everything went fine
 			std::cout << succ.at(i) << "\t" << infiles_.at(i) << std::endl;
-			if(succ.at(i) < 0)
+			if(succ.at(i) <= 0)
 				nonefailed=false;
 		}
 		if(nonefailed)

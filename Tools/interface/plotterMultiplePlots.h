@@ -22,6 +22,7 @@ namespace ztop{
 class plotterMultiplePlots : public plotterBase{
 public:
     plotterMultiplePlots();
+    plotterMultiplePlots(const plotterMultiplePlots&);
 
     void addPlot(const graph *c);
     void addPlot(const histo1D *c,bool divbw=true);
@@ -57,6 +58,7 @@ public:
 
     float getXAxisLowerLimit()const;
     float getXAxisHigherLimit()const;
+    float getYSpaceMulti(bool logar,bool divbw)const{return yspacemulti_;}
 
 protected:
 

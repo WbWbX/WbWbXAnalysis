@@ -13,27 +13,21 @@
 #  or
 #    b-jetcat: plotname = plot1 + plot2 + ... (: opt plotformatfile)  FIXME!
 #  the latter if (same binned) plots should be merged to one afterwards
-#  here, if categories are merged, b-jetcat must be set to 3
+#  here, if categories are merged, b-jetcat can be set to a starting value
 #
 # keep in mind that bjet category 0 also includes 3+ bjets
 #  
 
 
+0: selected b-jet multi step 8 = selected b-jet multi 0 b-jets step 8 + selected b-jet multi 1 b-jets step 8 + selected b-jet multi 2 b-jets step 8
 
-0: mll 0 b-jets step 8
-1: mll 1 b-jets step 8
-2: mll 2 b-jets step 8
 
-0: lead lep pt 0 b-jets step 8
-1: lead lep pt 1 b-jets step 8
-2: lead lep pt 2 b-jets step 8
 
-0: sec lep pt 0 b-jets step 8
-1: sec lep pt 1 b-jets step 8
-2: sec lep pt 2 b-jets step 8
+0: lead lep pt step 8 = lead lep pt 0 b-jets step 8 + lead lep pt 1 b-jets step 8 + lead lep pt 2 b-jets step 8
 
-#merged ones
 
-# 3: lead lep pt step 8 = sec lep pt 0 b-jets step 8 + sec lep pt 1 b-jets step 8 + sec lep pt 2 b-jets step 8
+0: sec lep pt step 8 =  sec lep pt 0 b-jets step 8 + sec lep pt 1 b-jets step 8 + sec lep pt 2 b-jets step 8
 
-# 3: sec lep pt 0 b-jets step 8
+
+
+1: m_lb min step 8 =  m_lb min 1 b-jets step 8 + m_lb min 2 b-jets step 8

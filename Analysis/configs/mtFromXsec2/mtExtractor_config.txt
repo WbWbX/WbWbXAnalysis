@@ -259,15 +259,15 @@ $$no specific end markers per plot to keep overview
 	
  [end legendStyle]
  
-[plot - mll Range step 8]
-
-  
-   
-   [plotStyle - Upper]
-		 yaxis.min        = 0
-		 yaxis.max      = 350
-    [end plotStyle]
- 
+$[plot - mll Range step 8]
+$
+$  
+$   
+$   [plotStyle - Upper]
+$		 yaxis.min        = 0
+$		 yaxis.max      = 350
+$    [end plotStyle]
+$ 
 
 [plot - m_lb step 8]
 
@@ -293,6 +293,11 @@ compareAllMassesMC   =  /src/TtZAnalysis/Analysis/configs/mtFromXsec2/comparePlo
 compareAllMassesMCnormd   =  /src/TtZAnalysis/Analysis/configs/mtFromXsec2/comparePlots_mlbMCvsmt_fold_norm.txt       
 compareAllMassesData =  /src/TtZAnalysis/Analysis/configs/mtFromXsec2/comparePlots_mlbDatavsmt_fold.txt 
 
+
+$compareAllMassesMC   =  /src/TtZAnalysis/Analysis/configs/mtFromXsec2/comparePlots_mlbMCvsmt_fold2.txt   
+$compareAllMassesMCnormd   =  /src/TtZAnalysis/Analysis/configs/mtFromXsec2/comparePlots_mlbMCvsmt_fold_norm2.txt       
+$compareAllMassesData =  /src/TtZAnalysis/Analysis/configs/mtFromXsec2/comparePlots_mlbDatavsmt_fold2.txt 
+
 binDependencies         =  /src/TtZAnalysis/Analysis/configs/mtFromXsec2/multiplePlots_mlbbins.txt          
 binDependenciesPlusFits =  /src/TtZAnalysis/Analysis/configs/mtFromXsec2/multiplePlots_mlbbinsPlusFit.txt   
 totalDependencePlusFit  =  /src/TtZAnalysis/Analysis/configs/mtFromXsec2/multiplePlots_totalPlusFit.txt  
@@ -305,7 +310,7 @@ spreadWithInlay        =  /src/TtZAnalysis/Analysis/configs/mtFromXsec2/inlayPlo
 spreadWithInlaynormd   =  /src/TtZAnalysis/Analysis/configs/mtFromXsec2/inlayPlot_spread_norm.txt
 results                =  /src/TtZAnalysis/Analysis/configs/mtFromXsec2/multiplePlots_mlbbinsTotalSyst.txt
 
-textBoxesFile          = none $ /src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt
+textBoxesFile          =  /src/TtZAnalysis/Analysis/configs/general/noCMS_boxes.txt
 
 [end plotter styles]
 

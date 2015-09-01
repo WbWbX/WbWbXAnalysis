@@ -47,6 +47,7 @@ public:
 
 
     bool hasRatio()const{return true;}
+    float getYSpaceMulti(bool logar,bool divbw)const{return yspacemulti_;}
 
 protected:
 

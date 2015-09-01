@@ -28,10 +28,20 @@ tree_7TeV_ww.root,		   VV,			390,	  43.0,	  5
 tree_7TeV_zz.root,		   VV,			390,	  5.9,	  5
 tree_7TeV_wz.root,		   VV,			390,	  18.0,	  5
 tree_7TeV_wjets.root,		   QCD/Wjets,	   	413,	  31314,  6
-tree_7TeV_dytautau1050.root,	   DY,868,	  740,	  7
-tree_7TeV_dyall50inf.root,	   DY ,868,	  3048, 7
-tree_7TeV_dyee1050.root,	   DY,	858,	  740,	  8
-tree_7TeV_dymumu1050.root,	   DY,	858,	  740,	  8
+
+tree_7TeV_dytautau1050.root,	    DY#rightarrow#tau#tau,868,	  3048,	  7
+tree_7TeV_dytautau50inf.root,	   DY#rightarrow#tau#tau ,868,	  3048, 7
+
+$tree_7TeV_dyee1050.root,	   DY#rightarrowll,	852,	  3048,	  80
+$tree_7TeV_dyee5060.root,	   DY#rightarrowll,	852,	  3048, 8
+$tree_7TeV_dyee60120.root,      DY#rightarrowll, 852,	  3048, 8
+$tree_7TeV_dyee120inf.root,	   DY#rightarrowll,	852,	  3048, 8
+
+tree_7TeV_dymumu1050.root,	   DY#rightarrowll		,	852,	  3048,	  8
+tree_7TeV_dymumu5060.root,	   DY#rightarrowll,	852,	  3048, 8
+tree_7TeV_dymumu60120.root,    DY#rightarrowll, 	852,	3048, 8
+tree_7TeV_dymumu120inf.root,   DY#rightarrowll,	852,	  3048, 8
+
 
 $tree_7TeV_qcdem2030.root,	   QCD,			400,	  2914860,9
 $tree_7TeV_qcdem3080.root,	   QCD,			400,	  4615893,9

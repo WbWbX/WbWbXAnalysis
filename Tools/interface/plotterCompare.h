@@ -31,7 +31,11 @@ namespace ztop{
 class plotterCompare : public plotterBase{
 public:
     plotterCompare();
+
+    plotterCompare(const plotterCompare &);
     ~plotterCompare(){cleanMem();}
+
+
 
     void setNominalPlot(const histo1D *c,bool divbw=true);
     void setComparePlot(const histo1D *c,size_t idx,bool divbw=true);
@@ -84,6 +88,7 @@ public:
     float getXAxisLowerLimit()const;
     float getXAxisHigherLimit()const;
 
+    float getYSpaceMulti(bool logar,bool divbw)const{return yspacemulti_;}
     float getMaxMinUpper(bool max=true);
 
 protected:

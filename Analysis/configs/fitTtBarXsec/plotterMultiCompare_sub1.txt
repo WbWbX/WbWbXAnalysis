@@ -7,6 +7,7 @@
     rightMargin   = 0.0
     yaxis.log         = true
     
+    
     yaxis.titleOffset = 1.4
     yaxis.labelOffset = 0.005
     yaxis.tickLength  = 0.03

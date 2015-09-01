@@ -41,7 +41,7 @@ $everything will be gaussian except the ones specified here
 
 [ full extrapolation ]
 
-   TT_SCALE
+   TT_SCALE,-1,1
    TT_MATCH
    PDF*
    TOPPT,0,1
@@ -78,7 +78,7 @@ $$following the top-mass combination PAS
  $ all PDF = 1
  $ TOPPT = 0
  $ TT_MATCH = 1
- $ TT_SCALE = 1
+ $ TT_SCALE = 0.9
  $ UE = 1
  $ CR = 1
  $ TT_BJESNUDEC = 1
@@ -128,14 +128,16 @@ $$following the top-mass combination PAS
    
    TRIGGER= 0.8
    
-   PU = 0.5
+   PU = 0.2
    
    
    BG_tW/#bar{t}W#rightarrowll= 0.9
    BG_VV            = 0.9
    BG_t#bar{t}bg   = 0.9
    BG_QCD/Wjets   = 0.9
-   BG_t#bar{t}V = 0.9
+   
+   BG_t#bar{t}V = 0.2
+   
    BG_0_bjets_DY = 0.9
    BG_1_bjets_DY = 0.9
    BG_2_bjets_DY = 0.9

@@ -4,18 +4,19 @@
 
     divideat = 0.3
     invertplots = false
-    PSMigThreshold =  0.1   $this is not %!
-    ySpaceMulti=1.35
+    PSMigThreshold =  0.001   $this is not %!
 
 [end - plotterControlPlot]
  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  
+[textBoxes - boxes]
 
+[end - textBoxes]
 
  [legendStyle]
 
-        x0  =  0.55
-	y0  =  0.30
-	x1  =  0.9
+        x0  =  0.62
+	y0  =  0.22
+	x1  =  0.86
 	y1  =  0.88
 
 	
@@ -99,7 +100,7 @@
     fillStyle    = 1001
     fillColor    = 1 $ will be changed for each sample
     
-    sysFillStyle = 3005
+    sysFillStyle = 3345
     sysFillColor = 1
 
     rootDrawOpt  = q  $ q does nothing
@@ -123,7 +124,7 @@
     fillStyle    = 1001 $3004
     fillColor    = 920 
 
-    sysFillStyle = 3005 $3005
+    sysFillStyle = 3345
     sysFillColor = 1
 
     rootDrawOpt  = e2 
@@ -152,7 +153,7 @@
     
     $$ axis styles
     
-    xaxis.titleSize   = 0.06
+    xaxis.titleSize   = 0.07
     xaxis.labelSize   = 0.0
     xaxis.titleOffset = 0.8
     xaxis.labelOffset = 0.005
@@ -164,14 +165,14 @@
     xaxis.name        = USEDEF
     
     
-    yaxis.titleSize   = 0.07
-    yaxis.labelSize   = 0.06
+    yaxis.titleSize   = 0.065
+    yaxis.labelSize   = 0.055
     yaxis.titleOffset = 1
     yaxis.labelOffset = 0.005
     yaxis.tickLength  = 0.03
     yaxis.ndiv        = 510
-    yaxis.max         = -1
-    yaxis.min         = 1
+    yaxis.max         = -2
+    yaxis.min         = -1
     yaxis.log         = false
     yaxis.name        = USEDEF
     
@@ -191,8 +192,8 @@
     
     $$ axis styles
     
-    xaxis.titleSize   = 0.07
-    xaxis.labelSize   = 0.06
+    xaxis.titleSize   = 0.065
+    xaxis.labelSize   = 0.055
     xaxis.titleOffset = 0.85
     xaxis.labelOffset = 0.005
     xaxis.tickLength  = 0.03
@@ -202,15 +203,15 @@
     xaxis.log         = false
     xaxis.name        = USEDEF
     
-    yaxis.titleSize   = 0.07
-    yaxis.labelSize   = 0.06
+    yaxis.titleSize   = 0.065
+    yaxis.labelSize   = 0.055
     yaxis.titleOffset = 0.95
     yaxis.labelOffset = 0.005
     yaxis.tickLength  = 0.03
     yaxis.ndiv        = 505
-    yaxis.max         = 1.35
+    yaxis.max         = 1.65
     yaxis.log         = false
-    yaxis.min         = 0.65
+    yaxis.min         = 0.35
     yaxis.name        = #frac{obs}{pred}
     
 [end plotStyle]

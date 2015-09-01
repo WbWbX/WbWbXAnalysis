@@ -33,7 +33,7 @@ $everything will be gaussian except the ones specified here
    UE = box
    CR         =  boxleft
 
-   TOPPT = float
+   TOPPT = boxright
    
   $ Lumi = fixed
 

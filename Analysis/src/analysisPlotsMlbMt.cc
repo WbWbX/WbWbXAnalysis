@@ -68,9 +68,14 @@ void analysisPlotsMlbMt::bookPlots(){
 	ivangen_mlbbins << 0 << 70 << 116 << 150 <<400;
 	//vector<float> mlb_bins=ztop::subdivide<float>(genmlb_bins,2);
 	vector<float> ivan_mlbbins=subdivide<float>(ivangen_mlbbins,5);
-
-	vector<float> semicoarsebins=histo1D::createBinning(20,20,160);
-	vector<float> coarsebins=histo1D::createBinning(10,20,160);
+	vector<float> semicoarsebins;
+	//if(finemlbbinning)
+	semicoarsebins=histo1D::createBinning(10,20,160);
+	vector<float> finebins=histo1D::createBinning(18,20,160);
+	//extraplots2_
+	//else
+	//	semicoarsebins=histo1D::createBinning(10,20,160);
+	vector<float> coarsebins=histo1D::createBinning(5,20,160);
 	vector<float> verycoarsebins=histo1D::createBinning(3,20,160);
 
 	Mlb=addPlot(genmlb_bins,genmlb_bins,"m_lb leading unfold","M_{lb} [GeV]", "Events/GeV");
@@ -83,12 +88,18 @@ void analysisPlotsMlbMt::bookPlots(){
 		for(size_t nadd=0;nadd<4;nadd++){
 			setJetCategory(nbjet,nadd);
 			if(nbjet>0){
-				if(nbjet<2 && nadd < 3)
+				if(nbjet<2 && nadd < 3){
 					extraplots_.at(jetcategory)=addPlot(semicoarsebins,semicoarsebins,"m_lb min "+toTString(nbjet)+","+toTString(nadd)+ " b-jets","m_{lb}^{min} [GeV]", "Events/GeV");
-				else if(nadd < 3 || nbjet<2)
+					extraplots2_.at(jetcategory)=addPlot(finebins,finebins,"m_lb min fine "+toTString(nbjet)+","+toTString(nadd)+ " b-jets","m_{lb}^{min} [GeV]", "Events/GeV");
+				}
+				else if(nadd < 2){
 					extraplots_.at(jetcategory)=addPlot(coarsebins,coarsebins,"m_lb min "+toTString(nbjet)+","+toTString(nadd)+ " b-jets","m_{lb}^{min} [GeV]", "Events/GeV");
-				else
+					extraplots2_.at(jetcategory)=addPlot(semicoarsebins,semicoarsebins,"m_lb min fine "+toTString(nbjet)+","+toTString(nadd)+ " b-jets","m_{lb}^{min} [GeV]", "Events/GeV");
+				}
+				else{
 					extraplots_.at(jetcategory)=addPlot(verycoarsebins,verycoarsebins,"m_lb min "+toTString(nbjet)+","+toTString(nadd)+ " b-jets","m_{lb}^{min} [GeV]", "Events/GeV");
+					extraplots2_.at(jetcategory)=addPlot(semicoarsebins,semicoarsebins,"m_lb min fine "+toTString(nbjet)+","+toTString(nadd)+ " b-jets","m_{lb}^{min} [GeV]", "Events/GeV");
+				}
 			}
 		}
 	}
@@ -116,6 +127,8 @@ void analysisPlotsMlbMt::bookPlots(){
 	vistotal=addPlot(inclbins,inclbins,"vis total","bin","Events");
 	vistotal->setBinByBin(true); //independent bins
 	vistotal->addTag(taggedObject::dontDivByBW_tag);
+
+	mll0b=addPlot(tmpbins,tmpbins,"dilepton mass 0,0 b-jets ","m_{ll} [GeV]", "Events/GeV");
 }
 
 
@@ -231,9 +244,12 @@ void analysisPlotsMlbMt::fillPlotsGen(){
 
 	if(genvisleptons1.size()>1){
 		for(size_t i=0;i<extraplots_.size();i++){
-			if(extraplots_.at(i))
+			if(extraplots_.at(i)){
 				extraplots_.at(i)->fillGen(20.5,puweight()); //same as for incl xsec
+				extraplots2_.at(i)->fillGen(20.5,puweight());
+			}
 		}
+		mll0b->fillGen(20.5,puweight());
 	}
 
 
@@ -280,16 +296,20 @@ void analysisPlotsMlbMt::fillPlotsReco(){
 
 
 			mlbivansbins->fillReco(fmlb,puweight());
-			if(extraplots_.at(jetcategory))
+			if(extraplots_.at(jetcategory)){
 				extraplots_.at(jetcategory)->fillReco(fmlbmin,puweight());
+				extraplots2_.at(jetcategory)->fillReco(fmlbmin,puweight());
+			}
 		}
 	}
 	if(event()->leadinglep)
 		leadleppt->fillReco(event()->leadinglep->pt(),puweight());
 
-	if(event()->mll)
+	if(event()->mll){
 		mll->fillReco(*event()->mll,puweight());
-
+		if(jetcategory==cat_0bjet0jet)
+			mll0b->fillReco(*event()->mll,puweight());
+	}
 }
 
 }//ns

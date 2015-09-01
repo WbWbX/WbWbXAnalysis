@@ -12,7 +12,7 @@
 #include "TtZAnalysis/Tools/interface/fileReader.h"
 #include "TtZAnalysis/Tools/interface/textFormatter.h"
 #include "TCanvas.h"
-
+#include "TFile.h"
 /**
  * Small application to plot a control plot in a fast and efficient way. Returns a pdf file
  */
@@ -27,7 +27,9 @@ invokeApplication(){
 	const std::string inlist=parser->getOpt<std::string>("-list","","specify a file that represents a list of all plots to be plotted.\n     one line for each plot or %% as delimiter");
 	const std::string suffix=parser->getOpt<std::string>("s","","specify a suffix.");
 	const std::string outdir=parser->getOpt<std::string>("d",".","specify an optional output directory.");
-        const bool normToInt=parser->getOpt<bool>("int",false,"specify whether you want to normalize to the integral of the data or to the lumi.");
+	const bool normToInt=parser->getOpt<bool>("int",false,"specify whether you want to normalize to the integral of the data or to the lumi.");
+
+	const bool printToRoot = parser->getOpt<bool>("-root",false,"creates a root file with a TCanvas instead of a pdf");
 
 	std::vector<TString> tmpv=parser->getRest<TString>();
 	parser->doneParsing();
@@ -73,6 +75,7 @@ invokeApplication(){
 	if(outdir.length()>0)
 		system(("mkdir -p "+ outdir).data());
 
+
 	for(size_t i=0;i<allnames.size();i++){
 		histoStack  stack;
 		TString plotname=allnames.at(i);
@@ -91,21 +94,33 @@ invokeApplication(){
 			delete csv;
 			return -3;
 		}
-                if(normToInt){
-                        double integral_data = stack.getDataContainer().integral();
-                        double integral_mc   = stack.getFullMCContainer().integral();
-                        stack.multiplyAllMCNorms(integral_data/integral_mc);
-                }
-		TCanvas cv;
-		pl.usePad(&cv);
-		pl.setStack(&stack);
+		if(normToInt){
+			double integral_data = stack.getDataContainer().integral();
+			double integral_mc   = stack.getFullMCContainer().integral();
+			stack.multiplyAllMCNorms(integral_data/integral_mc);
+		}
+
+
+
 
 		TString outname=stack.getFormattedName();
 		outname+=suffix;
-		outname+=".pdf";
+		TCanvas cv(outname);
 		outname=(TString)outdir.data()+"/"+outname;
+		pl.usePad(&cv);
+		pl.setStack(&stack);
 		pl.draw();
-		cv.Print(outname);
+		if(printToRoot){
+			TFile *f=new TFile(outname+".root","RECREATE");
+			cv.Write();
+			f->Close();
+			delete f;
+		}
+		else{
+			outname+=".pdf";
+			cv.Print(outname);
+		}
+
 	}
 	if(notfound.size()>0){
 		std::cout << "Plots not found:\n";

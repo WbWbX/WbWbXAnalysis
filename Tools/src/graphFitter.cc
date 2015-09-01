@@ -127,6 +127,10 @@ graph graphFitter::exportFittedCurve(size_t npoints) const{
 	size_t dummy=0;
 	float minx=savedinput_.getXMin(dummy,true);
 	float maxx=savedinput_.getXMax(dummy,true);
+	if(shiftxy_){
+		minx+=shiftx_;
+		maxx+=shiftx_;
+	}
 
 	float gran=(maxx-minx)/(float)npoints;
 	size_t point=0;

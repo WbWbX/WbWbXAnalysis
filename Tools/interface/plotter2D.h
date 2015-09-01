@@ -32,6 +32,7 @@ public:
 
 
     bool hasRatio()const{return false;}
+    float getYSpaceMulti(bool logar,bool divbw)const{return 1.;}
 
 protected:
     void preparePad();
@@ -58,6 +59,7 @@ private:
 
     float zaxismin_,zaxismax_;
     TString rootDrawOpt_;//,zaxistitle_;
+    TString palette_;
 
 };
 

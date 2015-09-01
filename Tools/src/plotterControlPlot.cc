@@ -15,7 +15,7 @@
 namespace ztop{
 
 plotterControlPlot::plotterControlPlot(): plotterBase(), divideat_(0),
-		stackp_(0),/*tempdataentry_(0),*/invertplots_(false),psmigthresh_(0){
+		stackp_(0),/*tempdataentry_(0),*/invertplots_(false),psmigthresh_(0),mcsysstatleg_(true){
 	readStyleFromFileInCMSSW("/src/TtZAnalysis/Tools/styles/controlPlots_standard.txt");
 	gStyle->SetOptStat(0);
 }
@@ -72,6 +72,7 @@ void plotterControlPlot::readStylePriv(const std::string& infile,bool requireall
 		invertplots_  = fr.getValue<bool>("invertplots",invertplots_);
 		psmigthresh_  = fr.getValue<float>("PSMigThreshold",psmigthresh_);
 	}
+	yspacemulti_= fr.getValue<float>("ySpaceMulti",yspacemulti_);
 	//merges are never required
 	fr.clear();
 	fr.setStartMarker("[merge legends]");
@@ -150,6 +151,25 @@ float plotterControlPlot::getXAxisHigherLimit()const{
 	return stackp_->getDataContainer().getBins().at(stackp_->getDataContainer().getBins().size()-1);
 }
 
+
+float plotterControlPlot::getYSpaceMulti(bool logar,bool divbw)const{
+	if(!logar)
+		return yspacemulti_;
+
+	if(!stackp_)
+		throw std::logic_error("plotterControlPlot::getYSpaceMulti: cannot derive if no stack assiciated");
+
+	float ymax=stackp_->getYMax(divbw);
+	float ymin=stackp_->getYMin(divbw);
+
+	//float logofdiff=log(ymax-ymin)/(2.30258509299404590e+00);
+	float logmax=log(ymax)/(2.30258509299404590e+00);
+	float logmin=log(ymin)/(2.30258509299404590e+00);
+
+	logmax+=(logmax-logmin)*(yspacemulti_-1);
+
+	return pow(10,logmax)/ymax;
+}
 
 ///plotting
 
@@ -235,11 +255,16 @@ void plotterControlPlot::drawControlPlot(){
 
 	upperstyle.absorbXScaling(getSubPadXScale(1));
 
-	axish->Draw("AXIS");
+	float ymin=usestack->getYMin(divbbw);
 	float ymax=usestack->getYMax(divbbw);
+
+	if(upperstyle.yAxisStyle()->applyAxisRange() && upperstyle.yAxisStyle()->min<0)
+		upperstyle.yAxisStyle()->min=(ymax-ymin)/10000;
+
+	axish->Draw("AXIS");
 	if(ymax<=0)
 		ymax=1/1.2;
-	axish->GetYaxis()->SetRangeUser(0.0001,ymax*1.2);
+	axish->GetYaxis()->SetRangeUser(0.0001,ymax*getYSpaceMulti(upperstyle.yAxisStyle()->log,divbbw));
 	upperstyle.applyAxisStyle(axish);
 	axish->Draw("AXIS");
 	if(debug)std::cout <<  "axis drawn" <<std::endl;
@@ -349,7 +374,7 @@ void plotterControlPlot::drawControlPlot(){
 		//draw in inverse order
 
 
-		for(size_t i=stackedhistos.size()-1; i+1>0;i--){
+		for(size_t i=stackedhistos.size()-1; true;i--){
 
 			if(stackedhistos.at(i)){ //not data
 
@@ -360,6 +385,8 @@ void plotterControlPlot::drawControlPlot(){
 					std::cout << "plotterControlPlot::drawControlPlot: drawn: " << legendentries.at(i) <<std::endl;
 
 			}
+			if(!i)
+				break;
 
 		}
 		//make errors (use sumcont)
@@ -367,8 +394,8 @@ void plotterControlPlot::drawControlPlot(){
 			sumcont.mergeAllErrors("mergederr",false,*corrm_);
 		TG * mcerr=addObject(sumcont.getTGraph(usestack->getName()+"mcerr_cp",divbbw,false,false,false));
 		mcstyleupper_.applyContainerStyle(mcerr,true);
-
-		tmplegp_->AddEntry(mcerr,"MC syst+stat","f");
+		if(mcsysstatleg_)
+		   tmplegp_->AddEntry(mcerr,"MC syst+stat","f");
 		if(usestack->is1DUnfold() && foundPSmig){ //
 			TH1D * dummy=addObject(new TH1D());
 			mcstylepsmig_.applyContainerStyle(dummy,false);

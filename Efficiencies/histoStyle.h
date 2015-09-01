@@ -8,6 +8,7 @@
 #include "TPad.h"
 #include "TPaveText.h"
 #include <vector>
+#include "TtZAnalysis/Tools/interface/histoStyle.h"
 
 #ifndef histoStyle_h
 #define histoStyle_h
@@ -178,11 +179,20 @@ void plotRaw(std::vector<ztop::effTriple> trips, TString add="", TString addlabe
 	label -> SetX2NDC(1.0-gStyle->GetPadRightMargin());
 	label -> SetY2NDC(1.0);
 	label -> SetTextFont(42);
-	label -> AddText(Form(addlabel));
+	//
 
 	label->SetFillStyle(0);
 	label->SetBorderSize(0);
 	label->SetTextAlign(22);
+
+
+	textBoxes txs;
+	if(addlabel.Contains("8TeV"))
+		txs.readFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSnoSplitLeft");
+	else if(addlabel.Contains("7TeV"))
+		txs.readFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSnoSplitLeft7TeV");
+	else
+		label -> AddText(Form(addlabel));
 
 	for(size_t i=0;i<trips.size();i++){
 		c->Clear();
@@ -207,13 +217,15 @@ void plotRaw(std::vector<ztop::effTriple> trips, TString add="", TString addlabe
 			leg->AddEntry(h,"denominator"  ,"pe");
 			h->Draw("e1,same");
 			leg->Draw("same");
-			label->Draw("same");
+			//label->Draw("same");
+
 
 			TString canvasname=num.getName();
 			canvasname.ReplaceAll("_num","");
 			canvasname.ReplaceAll(add,"");
 			c->SetName(canvasname+"_numden"+add);
 			c->SetTitle(canvasname+"_numden"+add);
+			txs.drawToPad(c);
 			c->Write();
 			c->Print(dir+canvasname+"_numden"+add+".pdf");
 			c->Clear();
@@ -229,10 +241,10 @@ void plotRaw(std::vector<ztop::effTriple> trips, TString add="", TString addlabe
 			c->SetName(canvasname+"_c");
 			c->SetTitle(canvasname+"_c");
 			h->Draw("colz,text,e");
-			label->Draw("same");
+			//label->Draw("same");
 			c->Write();
 			c->Print(dir+canvasname+".pdf");
-
+			txs.drawToPad(c);
 			c->Clear();
 			h=&(den.getTH2D());
 			if(den.getFormatInfo().Contains("smallmarkers"))
@@ -285,7 +297,17 @@ void plotAll(std::vector<ztop::histWrapper>  hvec, TString addlabel="", TString 
 	label -> SetX2NDC(1.0-gStyle->GetPadRightMargin());
 	label -> SetY2NDC(1.0);
 	label -> SetTextFont(42);
-	label -> AddText(Form(addlabel));
+
+std::cout << "label:" << addlabel << std::endl;
+	ztop::textBoxes txs;
+	if(addlabel.Contains("8TeV"))
+		txs.readFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSnoSplitLeft");
+	else if(addlabel.Contains("7TeV"))
+		txs.readFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSnoSplitLeft7TeV");
+	else
+		label -> AddText(Form(addlabel));
+
+
 
 	label->SetFillStyle(0);
 	label->SetBorderSize(0);
@@ -319,8 +341,8 @@ void plotAll(std::vector<ztop::histWrapper>  hvec, TString addlabel="", TString 
 			c->SetTitle(canvasname);
 
 			leg->Draw("same");
-			label->Draw("same");
-
+			//label->Draw("same");
+			txs.drawToPad(c);
 			c->Write();
 			c->Print(dir+canvasname+".pdf");
 
@@ -341,11 +363,12 @@ void plotAll(std::vector<ztop::histWrapper>  hvec, TString addlabel="", TString 
 				}
 				c->SetTitle(canvasname);
 				h->Draw("colz,text,e");
+				txs.drawToPad(c);
 				label->Draw("same");
 				c->Write();
 				c->Print(dir+canvasname+".pdf");
 				label -> Clear();
-				label -> AddText(Form(addlabel));
+				//label -> AddText(Form(addlabel));
 				j++;
 			}
 			i+=3; //next

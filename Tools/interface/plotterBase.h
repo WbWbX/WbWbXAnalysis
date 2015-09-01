@@ -30,7 +30,7 @@ namespace ztop{
 class plotterBase :protected tObjectList{
 public:
     plotterBase():tObjectList(), title_(""),tbndc_(true),lastplotidx_(0),
-tmplegp_(0),corrm_(0),pad_(0),drawlegend_(true),preparepad_(true){
+tmplegp_(0),corrm_(0),yspacemulti_(1.3),pad_(0),drawlegend_(true),preparepad_(true){
     	TGaxis::SetMaxDigits(4);
     	gStyle->SetOptStat(0);
     }
@@ -44,7 +44,10 @@ tmplegp_(0),corrm_(0),pad_(0),drawlegend_(true),preparepad_(true){
 
     void setLastNoLegend(){nolegendidx_.push_back(lastplotidx_);}
 
-    void usePad(TVirtualPad* pad){pad_=pad;}
+    void usePad(TVirtualPad* pad){pad_=pad;
+   // gStyle->SetHatchesLineWidth(2);
+    //gStyle->SetHatchesSpacing(1);}
+    }
     TVirtualPad* getPad()const; //throws if 0
     bool padAssociated()const{return pad_;}
     /**
@@ -83,6 +86,8 @@ tmplegp_(0),corrm_(0),pad_(0),drawlegend_(true),preparepad_(true){
      void readTStyleFromFile(const std::string& pathtofile);
 
      void printToPdf(const std::string& outname);
+void printToPng(const std::string& outname);
+     void saveToTFile(const TString& outname);
 
      /**
       * Try to avoid this function whereever possible! This is NOT the recommended way
@@ -94,6 +99,9 @@ tmplegp_(0),corrm_(0),pad_(0),drawlegend_(true),preparepad_(true){
      virtual bool hasRatio()const=0;
 
      void associateCorrelationMatrix(const corrMatrix& m){corrm_=&m;}
+
+
+     virtual float getYSpaceMulti(bool logarithmic,bool divbybw)const=0;
 
 
      virtual plotStyle& getUpperStyle() =0;
@@ -140,6 +148,8 @@ protected:
 
     TLegend * tmplegp_;
     const corrMatrix* corrm_;
+
+    float yspacemulti_;
 
 private:
     TVirtualPad * pad_;

@@ -86,9 +86,27 @@ void ttXsecPlots::makeControlPlots(const size_t& step){
 	if(nbjets==2)
 		FILL(secleadinglep,pt());
 
+	SETBINS << 20 << 35 << 50 << 65 << 80 << 95 << 110 << 125 << 140 << 155 << 250;
+	addPlot("m_lb min 0 b-jets","m_{lb}^{min} [GeV]","Events/GeV");
+	if(nbjets==0 || nbjets>2)
+		FILLSINGLE(mlbmin);
+	addPlot("m_lb min 1 b-jets","m_{lb}^{min} [GeV]","Events/GeV");
+	if(nbjets==1)
+		FILLSINGLE(mlbmin);
+	addPlot("m_lb min 2 b-jets","m_{lb}^{min} [GeV]","Events/GeV");
+	if(nbjets==2)
+		FILLSINGLE(mlbmin);
 
-
-
+	SETBINSRANGE(4,-0.5,3.5);
+	addPlot("selected b-jet multi 0 b-jets","b jet multiplicity","Events",true);
+	if(nbjets==0 || nbjets>2)
+		FILL(selectedbjets,size());
+	addPlot("selected b-jet multi 1 b-jets","b jet multiplicity","Events",true);
+	if(nbjets==1)
+		FILL(selectedbjets,size());
+	addPlot("selected b-jet multi 2 b-jets","b jet multiplicity","Events",true);
+	if(nbjets==2)
+		FILL(selectedbjets,size());
 
 }
 

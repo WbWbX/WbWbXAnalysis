@@ -16,17 +16,42 @@
 #include "TStyle.h"
 #include "TLine.h"
 
+#define COPYFROMRHS(x) x=rhs.x
+
 namespace ztop{
 
 plotterCompare::plotterCompare(): plotterBase(),
 		divideat_(0.5),memnom_(0),memratio_(0),size_(0){
 	readStyleFromFileInCMSSW("/src/TtZAnalysis/Tools/styles/comparePlots_3MC.txt");
 }
+plotterCompare::plotterCompare(const plotterCompare &rhs): plotterBase(rhs){
+	COPYFROMRHS(upperstyle_);
+	COPYFROMRHS(ratiostyle_);
+	COPYFROMRHS (nomstyleupper_);
+	COPYFROMRHS (nomstyleratio_);
+	COPYFROMRHS(compstylesupper_);
+	COPYFROMRHS(compstylesratio_);
+
+	COPYFROMRHS(nominalid_);
+	COPYFROMRHS(compids_);
+
+	COPYFROMRHS(divideat_);
+
+	COPYFROMRHS(nominalplot_);
+	COPYFROMRHS(memnom_);
+	COPYFROMRHS(compareplots_);
+	COPYFROMRHS(memratio_);
+	COPYFROMRHS(size_);
+
+}
+
+#undef COPYFROMRHS
 
 void plotterCompare::setNominalPlot(const histo1D *c,bool divbw){
 	if(debug) std::cout <<"plotterCompare::setNominalPlot" << std::endl;
 	nominalplot_.createFrom(c,divbw);
 	lastplotidx_=0;
+
 }
 void plotterCompare::setComparePlot(const histo1D *c,size_t idx,bool divbw){
 	if(debug) std::cout <<"plotterCompare::setComparePlot" << std::endl;
@@ -168,8 +193,10 @@ void plotterCompare::readStylePriv(const std::string& infile, bool requireall){
 	else{
 		divideat_  = fr.getValue<float>("divideat",divideat_);
 		size_      = fr.getValue<size_t>("size",size_);
-
 	}
+	//never require explicitely
+	yspacemulti_ = fr.getValue<float>("ySpaceMulti",yspacemulti_);
+
 	if(compids_.size()>1 && compids_.size()<size())
 		throw std::runtime_error("plotterCompare::readStyleFromFile: compare plot ids set but trying to plot more plots than ids set");
 
@@ -318,7 +345,11 @@ void plotterCompare::drawAllPlots(const plotStyle* ps, const histoStyle * cs, co
 	if(isratio){
 		axish->GetYaxis()->CenterTitle(true);
 		axish->Draw("AXIS");
-		TLine *line=addObject(new TLine(axish->GetXaxis()->GetBinLowEdge(1), 1, axish->GetXaxis()->GetBinLowEdge(axish->GetNbinsX()),1));
+		TLine *line=0;
+		if(ps->xAxisStyle()->applyAxisRange())
+			line=addObject(new TLine(ps->xAxisStyle()->min, 1, ps->xAxisStyle()->max,1));
+		else
+			line=addObject(new TLine(axish->GetXaxis()->GetBinLowEdge(1), 1, axish->GetXaxis()->GetBinLowEdge(axish->GetNbinsX()),1));
 		line->Draw("same");
 	}
 	if(!nomlast){

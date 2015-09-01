@@ -208,6 +208,13 @@ void  analyzer_run1::analyze(size_t anaid){
 		std::cout << inputfile<<": applying dileptonic BR: "<<normmultiplier <<std::endl;
 	}
 
+	if(!inputfile.Contains("TeV")){
+		std::cout << "this file does not contain an energy specifier. It will be assumed that"
+				<<" it is an 8TeV sample used for 7TeV. the PU reweighting will be adjusted" <<std::endl;
+		getPUReweighter()->setMCDistrSum12();
+		is7TeV_=false;
+	}
+
 
 
 	bool fakedata=false,isfakedatarun=false;
@@ -335,6 +342,10 @@ void  analyzer_run1::analyze(size_t anaid){
 
 
 	analysisPlotsMlbMt mlbmtplots_step8(8);
+	if(is7TeV_)
+		mlbmtplots_step8.finemlbbinning=false;
+	else
+		mlbmtplots_step8.finemlbbinning=true;
 	analysisPlotsTtbarXsecFit xsecfitplots_step8(8);
 
 	//xsecfitplots_step8.enable();
@@ -358,7 +369,7 @@ void  analyzer_run1::analyze(size_t anaid){
 	plots.linkEvent(evt);
 	zplots.linkEvent(evt);
 	ttXsecPlots xsecplots;
-	xsecplots.enable(false);
+	xsecplots.enable(true);
 	xsecplots.linkEvent(evt);
 	xsecplots.limitToStep(8);
 	xsecplots.initSteps(8);
@@ -836,7 +847,8 @@ void  analyzer_run1::analyze(size_t anaid){
 		plots.makeControlPlots(step);
 		zplots.makeControlPlots(step);
 
-
+		if(puweight != puweight)
+			throw std::runtime_error("MainAnalyzer: nan in weight");
 
 		//////// require two iso leptons  STEP 2  //////////////////////////
 		step++;
@@ -931,10 +943,12 @@ void  analyzer_run1::analyze(size_t anaid){
 		//just a quick faety net against very weird weights
 		if(isMC && fabs(puweight) > 99999){
 			reportError(-88,anaid);
+			throw std::runtime_error("large pu weight");
 			return;
 		}
 		if(isMC && fabs(lepweight) > 99999){
 			reportError(-89,anaid);
+			throw std::runtime_error("large lepton weight");
 			return;
 		}
 		puweight*=lepweight;
@@ -951,6 +965,10 @@ void  analyzer_run1::analyze(size_t anaid){
 
 		if(mll < 20)
 			continue;
+
+
+		if(puweight != puweight)
+			throw std::runtime_error("MainAnalyzer: nan in weight");
 
 		// create jec jets for met and ID jets
 		// create ID Jets and correct JER
@@ -1256,6 +1274,8 @@ void  analyzer_run1::analyze(size_t anaid){
 		////////////////////Z Veto Cut STEP 4 (incl. hard jets)////////////////////////////////////
 
 
+		if(puweight != puweight)
+			throw std::runtime_error("MainAnalyzer: nan in weight");
 
 		if(analysisMllRange){
 

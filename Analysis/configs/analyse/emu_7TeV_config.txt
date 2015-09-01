@@ -21,8 +21,8 @@ tree_7TeV_emuttbarviatau_dil.root, t#bar{t}, 	633,	  251.7,	  1, true
 tree_7TeV_emuttbarbg.root,         t#bar{t}bg,	   	634,	  170,	  3
 
 $ cross section automatic
-tree_7TeV_tW.root,             tW/#bar{t}W#rightarrowll,	   		616,	  11.1,	  4
-tree_7TeV_tbarW.root,	   tW/#bar{t}W#rightarrowll,	   		616,	  11.1,	  4
+tree_7TeV_tWtoLL.root,             tW/#bar{t}W#rightarrowll,	   		616,	  11.1,	  4
+tree_7TeV_tbarWtoLL.root,	   tW/#bar{t}W#rightarrowll,	   		616,	  11.1,	  4
 
 tree_7TeV_ww.root,		   VV,			390,	  43.0,	  5
 tree_7TeV_zz.root,		   VV,			390,	  5.9,	  5

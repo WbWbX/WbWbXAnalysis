@@ -48,6 +48,7 @@ public:
 
 	void addToContent(const float &);
 	void addToStat(const float &);
+	void addToStat2(const float &);
 	void addEntry();
 
 	void add(const histoBin&);
@@ -113,6 +114,9 @@ inline void histoBin::addToContent(const float & val){
  */
 inline void histoBin::addToStat(const float & val){
 	stat2_+=val*val;
+}
+inline void histoBin::addToStat2(const float & val){
+	stat2_+=val;
 }
 inline void histoBin::addEntry(){
 	entries_++;

@@ -13,8 +13,8 @@
     
     xaxis.ndiv        = 100
     
-    yaxis.titleSize   = 0.06
-    yaxis.labelSize   = 0.05
+    yaxis.titleSize   = 0.07
+    yaxis.labelSize   = 0.06
     yaxis.titleOffset = 1.5
     yaxis.labelOffset = 0.005
     yaxis.tickLength  = 0.03

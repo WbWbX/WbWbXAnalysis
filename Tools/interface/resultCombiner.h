@@ -63,11 +63,19 @@ public:
 
 
 	void addInput(const histo1D& ); //reset success here, check binning
+	void addInput(const graph& ); //reset success here, check binning
 
 	void setLastCorrMatrix(double content, size_t i,size_t j);
 
 	bool minimize();
 	/* invoke a fitter temporarily? -> no access to correlations etc */
+
+	/**
+	 * Instead of minimizing the likelihood, a weighted mean is produced
+	 * bin-by-bin using the stat uncertianties
+	 * output accessible via getOutput()
+	 */
+    void produceWeightedMean();
 
 	void setCombinedMinos(bool set){combminos_=set;}
 
@@ -87,6 +95,7 @@ private:
 
 	double getChi2(const double * variations); //main functione
 
+	std::vector<histo1D> initialinputs_; //used for weighted mean
 	std::vector<variateHisto1D> distributions_;
 	std::vector<matrix>  statcorrelations_;
 

@@ -43,13 +43,16 @@ invokeApplication(){
 	const bool onlycontrolplots = parser->getOpt<bool>("-onlycontrol",false,"only control plots");
 	const bool nominos = parser->getOpt<bool>("-nominos",false,"switches off systematics breakdown");
 	const float topmass = parser->getOpt<float>("-topmass",0,"Set top mass");
-	const float tmpcheck = parser->getOpt<bool>("M",false,"Quick temp check");
+	const bool tmpcheck = parser->getOpt<bool>("M",false,"Quick temp check");
 	const bool candc = parser->getOpt<bool>("-cutandcount",false,"also produce fast cut and count (2 jets 1 b-tag) result");
 
 	const bool printplots = ! parser->getOpt<bool>("-noplots",false,"switches off all plotting");
 	const bool dummyrun =  parser->getOpt<bool>("-dummyrun",false,"fit will not be performed, only dummy values will be returned (for testing of plots etc)");
 
 	const bool variationplots = parser->getOpt<bool>("-varplots",false,"switches on variation plots");
+
+	const bool topontop =  parser->getOpt<bool>("-topontop",false,"plots ttbar signal on top");
+
 
 	TString outfile;
 
@@ -70,6 +73,7 @@ invokeApplication(){
 	}
 
 	ttbarXsecFitter mainfitter;
+	mainfitter.setTopOnTop(topontop);
 	mainfitter.setDummyFit(dummyrun);
 
 	if(lhmode=="chi2datamc")
@@ -172,6 +176,15 @@ invokeApplication(){
 
 			std::string fracfile=specialcplots.dumpFormattedToTmp();
 
+			std::vector<size_t> namemulti(plotnames.size(),0);
+			//check for doubles
+			for(size_t pln=0;pln<plotnames.size();pln++){
+				if(std::find(plotnames.begin()+pln+1,plotnames.end(),plotnames.at(pln))!=plotnames.end()){
+					namemulti.at(pln)++;
+					std::cout << "found plot "<< plotnames.at(pln) << "twice. will add to outname "<<std::endl;
+				}
+			}
+
 			for(size_t stackit=0;stackit<plotnames.size();stackit++){
 				histoStack stack=vec.getStack(plotnames.at(stackit).data());
 				plotterControlPlot pl;
@@ -189,8 +202,12 @@ invokeApplication(){
 				size_t datasetidx=mainfitter.getDatasetIndex(datasets.at(file).data() );
 				mainfitter.addUncertainties(&stack, datasetidx);
 				pl.setStack(&stack);
-				pl.printToPdf((ctrplotsoutir+"/"+stack.getFormattedName()+"_"+datasets.at(file)).Data());
-				pl.saveAsCanvasC((ctrplotsoutir+"/"+stack.getFormattedName()+"_"+datasets.at(file)).Data());
+				std::string outname=(ctrplotsoutir+"/"+stack.getFormattedName()+"_"+datasets.at(file)).Data();
+				if(namemulti.at(stackit)>0)
+					outname+=toString(namemulti.at(stackit));
+				pl.printToPdf(outname);
+				//pl.saveAsCanvasC((ctrplotsoutir+"/"+stack.getFormattedName()+"_"+datasets.at(file)).Data());
+				pl.printToPng(outname);
 			}
 			system(("rm -f "+fracfile).data());
 		}
@@ -368,6 +385,8 @@ invokeApplication(){
 		TCanvas c;
 		c.Print(outfile+".pdf(");
 		//pl.usePad(&c);
+		if(debug)
+			std::cout << "printing pre/postfit fit-distributions" << std::endl;
 		for(size_t ndts=0;ndts<mainfitter.nDatasets();ndts++){
 			TString dir=outfile+"_vars/";
 			system( ("mkdir -p "+dir).Data());
@@ -378,16 +397,18 @@ invokeApplication(){
 
 				if(variationplots){
 					mainfitter.printVariations(nbjet,ndts,dir.Data());
-					mainfitter.printVariations(nbjet,ndts,dir.Data(),true);
+					if(!dummyrun)
+						mainfitter.printVariations(nbjet,ndts,dir.Data(),true);
 				}
 			}
-
 		}
 
 
+		if(debug)
+			std::cout << "printing correlations" << std::endl;
 		c.SetName("correlations");
 		plotter2D pl2d;
-		pl2d.readStyleFromFileInCMSSW("src/TtZAnalysis/Analysis/configs/mtFromXsec2/plot2D_0to1.txt");
+		pl2d.readStyleFromFileInCMSSW("src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plot2D_-1to1.txt");
 		pl2d.usePad(&c);
 		histo2D corr2d=mainfitter.getCorrelations();
 		pl2d.setPlot(&corr2d);
@@ -399,6 +420,8 @@ invokeApplication(){
 
 		c.Print(outfile+".pdf)");
 	}
+	if(debug)
+		std::cout << "producing tables" << std::endl;
 	for(size_t ndts=0;ndts<mainfitter.nDatasets();ndts++){
 		TString dtsname=mainfitter.datasetName(ndts);
 		texTabler tab;
@@ -412,10 +435,13 @@ invokeApplication(){
 		tab.writeToPdfFile(outfile+"_tab_simple" +dtsname + ".pdf");
 		std::cout << tab.getTable() <<std::endl;
 
+
+
 		//graph out
 		graph resultsgraph=mainfitter.getResultsGraph(ndts,topmass);
 		if(fitsucc)
 			resultsgraph.writeToFile((outfile+"_graph" +dtsname + ".ztop").Data());
+
 
 	}
 	if(mainfitter.nDatasets()>1 && fitsucc){
@@ -441,6 +467,16 @@ invokeApplication(){
 	corr.writeToFile(outfile+"_tabCorr.tex");
 	corr.writeToPdfFile(outfile+"_tabCorr.pdf");
 	//std::cout << corr.getTable() <<std::endl;
+
+	if(tmpcheck){
+		mainfitter.createSystematicsBreakdown(0,"TOPMASS");
+		texTabler tab=mainfitter.makeSystBreakDownTable(0,true,"TOPMASS"); //vis PS
+		tab.writeToFile(outfile+"_tab_TOPMASS.tex");
+		tab.writeToPdfFile(outfile+"_tab_TOPMASS.pdf");
+		tab=mainfitter.makeSystBreakDownTable(0,false,"TOPMASS"); //vis PS
+		tab.writeToFile(outfile+"_tab_simple_TOPMASS.tex");
+		tab.writeToPdfFile(outfile+"_tab_simple_TOPMASS.pdf");
+	}
 
 	f->Close();
 	delete f;

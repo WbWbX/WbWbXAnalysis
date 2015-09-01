@@ -14,7 +14,7 @@ namespace ztop{
 
 class analysisPlotsMlbMt : public analysisPlots{
 public:
-	analysisPlotsMlbMt(size_t step):analysisPlots(step),
+	analysisPlotsMlbMt(size_t step):analysisPlots(step),finemlbbinning(false),
 	Mlb(0),
 	mlb(0),
 	mlbmin(0),
@@ -26,7 +26,7 @@ public:
 	vistotal(0),
 	mlbcombthresh_(165),
 	rightassocounter_(0),totalcounter_(0)
-{extraplots_.resize(cat_bjetjetmax,0);}
+{extraplots_.resize(cat_bjetjetmax,0);extraplots2_.resize(cat_bjetjetmax,0);}
 
 	~analysisPlotsMlbMt(){/* destruction is handled in base class! */
 		if(totalcounter_)
@@ -39,6 +39,8 @@ public:
 	void fillPlotsReco();
 	void fillPlotsGen();
 
+	bool finemlbbinning;
+
 private:
 
 	enum bjetnjetscategories{
@@ -50,6 +52,9 @@ private:
 	void setJetCategory(size_t nbjets,size_t njets);
 
 	std::vector<histo1DUnfold*> extraplots_;
+	std::vector<histo1DUnfold*> extraplots2_;
+
+
 
 	histo1DUnfold
 	*Mlb,
@@ -62,7 +67,9 @@ private:
 	*mll,
 
 	*total,
-	*vistotal;
+	*vistotal,
+
+	*mll0b;
 
 	float mlbcombthresh_;
 	float rightassocounter_,totalcounter_;

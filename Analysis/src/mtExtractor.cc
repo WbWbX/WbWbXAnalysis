@@ -170,6 +170,7 @@ void mtExtractor::drawXsecDependence(TCanvas *c, bool fordata){
 	std::vector<histo1D> * conts=&mccont_;
 	if(fordata) conts=&datacont_;
 
+
 	for(size_t i=0;i<mtvals_.size();i++){
 		//if(fabs(DEFTOPMASSFORNNLOMASSDEP - mtvals_.at(i))<0.1) continue;
 		formatter ftm;
@@ -246,7 +247,7 @@ void mtExtractor::drawIndivBins(TCanvas *c,int syst){
 		c->Divide(vdivs,hdivs);
 	}
 
-	gStyle->SetOptTitle(1);
+	//gStyle->SetOptTitle(1);
 	for(size_t i=0;i<databingraphs_.size();i++){
 		plotterMultiplePlots * pl=new plotterMultiplePlots(plotterdef);
 		pltrptrs_.push_back(pl);
@@ -271,6 +272,7 @@ void mtExtractor::drawIndivBins(TCanvas *c,int syst){
 		pl->setTitle(databingraphs_.at(i).getName());
 		pl->addPlot(&td);
 		pl->addPlot(&tmc);
+		pl->setPreparePad(true);
 		pl->draw();
 	}
 
@@ -509,9 +511,12 @@ void mtExtractor::readFiles(){
 	mccont_.clear();
 
 	for(size_t i=0;i<cufinputfiles_.size();i++){
-
+		if(!debug)
+		displayStatusBar(i,cufinputfiles_.size());
 		histoStackVector * csv=new histoStackVector();
-		csv->loadFromTFile(cufinputfiles_.at(i));
+		//////NEWFORMAT
+		//csv->loadFromTFile(cufinputfiles_.at(i));
+		csv->readFromFile(cufinputfiles_.at(i).Data());
 		//  allanalysisplots_.push_back(*csv);
 		histoStack stack=csv->getStack(plotnamedata_);
 		delete csv;
@@ -521,25 +526,28 @@ void mtExtractor::readFiles(){
 		stack.mergePartialVariations("BG"); //-> no data containers>!
 		//stack.mergePartialVariations("JES",false);
 
-
-		histo1DUnfold tempcuf=stack.produceUnfoldingContainer();
-
-
+	//	histoStack::debug=true;
+		histo1DUnfold unfoldHisto=stack.produceUnfoldingContainer();
+		histo1DUnfold signalHisto=stack.getSignalContainer1DUnfold();
+	/*	plotterMultiplePlots pltmp;
+		pltmp.addPlot(& tempcuf.getGenContainer());
+		pltmp.printToPdf((cufinputfiles_.at(i) + "_gen").Data());
+*/
 		if(ignorebgstat_){
-			histo1D background=tempcuf.getBackground();
+			histo1D background=unfoldHisto.getBackground();
 			background.removeStatFromAll();
-			tempcuf.setBackground(background);
+			unfoldHisto.setBackground(background);
 		}
 		if(ignoredatastat_){
-			histo1D tmpdata=tempcuf.getRecoContainer();
+			histo1D tmpdata=unfoldHisto.getRecoContainer();
 			tmpdata.removeStatFromAll();
-			tempcuf.setRecoContainer(tmpdata);
+			unfoldHisto.setRecoContainer(tmpdata);
 		}
 
 
 		// tempcuf.loadFromTFile(cufinputfiles_.at(i),plotnamedata_);
-		if(debug) std::cout << "mtExtractor::readFiles: read " << tempcuf.getName() <<std::endl;
-		if(tempcuf.isDummy())
+		if(debug) std::cout << "mtExtractor::readFiles: read " << unfoldHisto.getName() <<std::endl;
+		if(unfoldHisto.isDummy())
 			throw std::runtime_error("mtExtractor::readFiles: at least one file without container1DUnfold");
 
 		histo1D datareference;
@@ -548,7 +556,7 @@ void mtExtractor::readFiles(){
 			//unfold here
 
 
-			datareference=tempcuf.getUnfolded();
+			datareference=unfoldHisto.getUnfolded();
 			if(datareference.isDummy()){
 				throw std::runtime_error("mtExtractor::readFiles: cannot find an unfolded distribution even though \
             			 folding option was not selected.");
@@ -556,7 +564,7 @@ void mtExtractor::readFiles(){
 			}
 		}
 		else{
-			histo1D temp=tempcuf.getRecoContainer();
+			histo1D temp=unfoldHisto.getRecoContainer();
 
 			datareference=temp; // NEW POISSON NO BG SUBTRACTION! -tempcuf.getBackground();
 			if(usenormalized_)
@@ -569,21 +577,21 @@ void mtExtractor::readFiles(){
 		datacont_.push_back(datareference);
 
 		TString extfilename;
-		histo1D gen,genbg;
+		histo1D gen,backgrounds;
 		if(mciscuf){
 			isexternalgen_=false;
 			if(!dofolding_){
-				gen=tempcuf.getBinnedGenContainer();
-				gen*= (1/tempcuf.getLumi());
+				gen=unfoldHisto.getBinnedGenContainer();
+				gen*= (1/unfoldHisto.getLumi());
 			}
 			else{
-				gen=tempcuf.getVisibleSignal();
+				gen=signalHisto.getVisibleSignal();
 				if(unfoldfolded){
-					gen=tempcuf.getGenContainer(); //
+					gen=signalHisto.getGenContainer(); //
 					//gen*= (1/tempcuf.getLumi());
-					gen=tempcuf.fold(gen,false); //!!!FIXME
+					gen=unfoldHisto.fold(gen,false); //!!!FIXME
 				}
-				genbg=tempcuf.getBackground();
+				backgrounds=unfoldHisto.getBackground(); //MARKER
 				TString oldaxisname=gen.getXAxisName();
 				oldaxisname.ReplaceAll("_gen","");
 				gen.setXAxisName(oldaxisname);
@@ -591,7 +599,9 @@ void mtExtractor::readFiles(){
 				gen=gen.rebinToBinning(datareference);
 			}
 			mcsignalcont_.push_back(gen);
-			mcbgcont_.push_back(genbg);
+			if(debug)
+				std::cout << "mtExtractor::readFiles: read "<< i << ' ' << gen.getName() <<std::endl;
+			mcbgcont_.push_back(backgrounds);
 		}
 		else{ //external input for gen
 			//find right file
@@ -686,12 +696,12 @@ void mtExtractor::readFiles(){
 
 			}
 			if(dofolding_){
-				nominal*=tempcuf.getLumi();
-				nominal=tempcuf.fold(nominal,false);
+				nominal*=unfoldHisto.getLumi();
+				nominal=unfoldHisto.fold(nominal,false);
 				nominal=nominal.rebinToBinning(datareference);
 			}
 			mcsignalcont_.push_back(nominal);
-			mcbgcont_.push_back(tempcuf.getBackground() );
+			mcbgcont_.push_back(unfoldHisto.getBackground() );
 			delete fin;
 		} //external
 		if(debug){
@@ -1124,8 +1134,8 @@ void mtExtractor::drawBinsPlusFits(TCanvas *c,int syst){
 			td.setName("data_bin_"+toTString(i));
 			tmc.setName("mc_bin_"+toTString(i));
 
-			td.writeToTFile(mcgraphsoutfile_);
-			tmc.writeToTFile(mcgraphsoutfile_);
+			// depr td.writeToTFile(mcgraphsoutfile_);
+			// depr tmc.writeToTFile(mcgraphsoutfile_);
 		}
 
 		pl->draw();
@@ -1538,7 +1548,7 @@ texTabler  mtExtractor::makeSystBreakdown(bool merge,bool removeneg,float prec,b
 	if(results_.nEntries()<1){
 		throw std::runtime_error("mtExtractor::makeSystBreakdown: first create syst vars");
 	}
-	std::string sysnamesfile=(std::string)getenv("CMSSW_BASE") + (std::string)"/src/TtZAnalysis/Analysis/configs/general/SystNames.txt";
+	std::string sysnamesfile=(std::string)getenv("CMSSW_BASE") + (std::string)"/src/TtZAnalysis/Analysis/configs/mtFromXsec2/mergeForSystBreak.txt";
 	resultsSummary cp=results_;
 
 	if(merge)
@@ -1548,7 +1558,8 @@ texTabler  mtExtractor::makeSystBreakdown(bool merge,bool removeneg,float prec,b
 
 	formatter fmt;
 
-	fmt.readInNameTranslateFile(sysnamesfile);
+
+	fmt.readInNameTranslateFile((std::string)getenv("CMSSW_BASE") + (std::string)"/src/TtZAnalysis/Analysis/configs/general/SystNames.txt");
 	//formatter::debug=true;
 
 

@@ -29,21 +29,18 @@ tree_7TeV_zz.root,		   VV,			390,	  5.9,	  5
 tree_7TeV_wz.root,		   VV,			390,	  18.0,	  5
 tree_7TeV_wjets.root,		   QCD/Wjets,	   	413,	  31314,  6
 
-$ tree_7TeV_dytautau1050.root,	    DY#rightarrow#tau#taulow,869,	  740,	  70
-tree_7TeV_dytautau1050.root,	    DY#rightarrow#tau#taulow,869,	  3048,	  70
-tree_7TeV_dytautau50inf.root,	   DY#rightarrow#tau#tau,868,	  3048, 7
+tree_7TeV_dytautau1050.root,	    DY#rightarrow#tau#tau,868,	  3048,	  7
+tree_7TeV_dytautau50inf.root,	   DY#rightarrow#tau#tau ,868,	  3048, 7
 
-$ tree_7TeV_dyee1050.root,	   DY#rightarrowlow,	858,	  740,	  80
-tree_7TeV_dyee1050.root,	   DY#rightarrowlow,	858,	  3048,	  80
+tree_7TeV_dyee1050.root,	   DY#rightarrowll,	852,	  3048,	  80
 tree_7TeV_dyee5060.root,	   DY#rightarrowll,	852,	  3048, 8
 tree_7TeV_dyee60120.root,      DY#rightarrowll, 852,	  3048, 8
 tree_7TeV_dyee120inf.root,	   DY#rightarrowll,	852,	  3048, 8
 
-$ tree_7TeV_dymumu1050.root,	   DY#rightarrowlow		,	852,	  740,	  80
-tree_7TeV_dymumu1050.root,	   DY#rightarrowlow		,	852,	  3048,	  80
-tree_7TeV_dymumu5060.root,	   DY#rightarrowll,	852,	  3048, 8
-tree_7TeV_dymumu60120.root,    DY#rightarrowll, 	852,	3048, 8
-tree_7TeV_dymumu120inf.root,   DY#rightarrowll,	852,	  3048, 8
+$tree_7TeV_dymumu1050.root,	   DY#rightarrowll		,	852,	  3048,	  8
+$tree_7TeV_dymumu5060.root,	   DY#rightarrowll,	852,	  3048, 8
+$tree_7TeV_dymumu60120.root,    DY#rightarrowll, 	852,	3048, 8
+$tree_7TeV_dymumu120inf.root,   DY#rightarrowll,	852,	  3048, 8
 
 
 
@@ -55,8 +52,8 @@ $tree_7TeV_qcdmu15.root,		   QCD,			400,	  134680, 9
 $ rare tt processes
 
 $tree_ttbarg.root,                  t#bar{t}V/#gamma,    798,      1.8,   10
-$tree_ttbarw.root,                  t#bar{t}V,    798,      0.17, 10
-$tree_ttbarz.root,                  t#bar{t}V,    798,      0.14,10
+tree_ttbarw.root,                  t#bar{t}V,    798,      0.17, 10
+tree_ttbarz.root,                  t#bar{t}V,    798,      0.14,10
 
 [inputfiles-end]
 
@@ -84,7 +81,7 @@ ElecSFHisto    = GlobalSF
 ElecEnergySFFile = /src/TtZAnalysis/Analysis/data/analyse/ElecEnergySF_7TeV.root
 ElecEnergySFHisto= sf
 
-TriggerSFFile  = /src/TtZAnalysis/Analysis/data/analyse/triggerSummary_emu_7TeV_tight20.root
+TriggerSFFile  = /src/TtZAnalysis/Analysis/data/analyse/SF_one.root
 
 PUFile         = /src/TtZAnalysis/Analysis/data/analyse/Legacy2011.json_PU    $without .root
 
