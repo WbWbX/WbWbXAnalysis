@@ -553,7 +553,7 @@ int main(int argc, char* argv[]){
 		c->cd();
 
 		TString texttoadd="Extracted mass: +" + toTString(nom) + " +" + toTString(errup) + " -" + toTString(errdown) + " (stat) +" + toTString(totup) +" -" + toTString(totdown) +" (total)";
-		ofstream outs;
+		std::ofstream outs;
 		outs.open((outdirectory+"/resulttext.txt").Data());
 		outs << texttoadd;
 		outs.close();
