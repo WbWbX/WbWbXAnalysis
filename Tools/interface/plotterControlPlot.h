@@ -63,6 +63,7 @@ public:
 
     bool hasRatio()const{return true;}
 
+    void setSystLabel(const TString lab){systlabel_=lab;}
 
 protected:
     void preparePad();
@@ -115,7 +116,8 @@ private:
     std::vector<legendmerge> mergelegends;
     float yspacemulti_;
     bool mcsysstatleg_;
-
+    bool nolegend_;
+    TString systlabel_;
 };
 
 

@@ -80,21 +80,21 @@ void extract(const float & corrcoeff, const bool& seventev, const bool& onlycorr
 	//put here mtmc parameter by hand quick and dirty 0.0505087+0.11111--0.11092,
 
 
-	float mtmc=172.8030522;
-	float mtmcerrup=6*0.11111; //in GeV
+	float mtmc=172.733313;
+	float mtmcerrup=6*0.106637; //in GeV
 	mtmcerrup*=mtmcerrup;
 	mtmcerrup+= 0.07*0.07 + 0.06*0.06 + 0.18*0.18;//add para + 3 mass points unc + add stat
 	mtmcerrup=std::sqrt(mtmcerrup);
 
-	float mtmcerrdown=6*0.11092; //inGeV, positive!
+	float mtmcerrdown=6*0.105873; //inGeV, positive!
 	mtmcerrdown*=mtmcerrdown;
 	mtmcerrdown+= 0.07*0.07 + 0.06*0.06 + 0.18*0.18; //add para + 3 mass points unc
 	mtmcerrdown=std::sqrt(mtmcerrdown);
 
-	float corrwithxsec=0.09;
+	float corrwithxsec=0.10;
 
 	if(seventev)
-		corrwithxsec=0.01;
+		corrwithxsec=0.02;
 
 
 	graph ingraph;
@@ -107,29 +107,31 @@ void extract(const float & corrcoeff, const bool& seventev, const bool& onlycorr
 		//predfile=getenv("CMSSW_BASE")+(std::string)"/src/TtZAnalysis/Analysis/data/predicitions/toppp_pole.txt";
 
 		if(seventev){
-			if(onlynnlo)
+			if(onlynnlo){
 				preds.at(0).readPrediction(predfile,nnlopred);
-			else
+			}
+			else{
 				preds.at(0).readPrediction(predfile,"Top++_NNPDF30_nnlo_as_0118NNLO7000_pole");
 
 			preds.at(1).readPrediction(predfile,"Top++_NNPDF30_nnlo_as_0118NLO7000_pole");
-			preds.at(2).readPrediction(predfile,"Top++_NNPDF30_nnlo_as_0118LO7000_pole");
+			preds.at(2).readPrediction(predfile,"Top++_NNPDF30_nnlo_as_0118LO7000_pole");}
 		}
 		else{
 			if(onlynnlo)
 				preds.at(0).readPrediction(predfile,nnlopred);
-			else
+			else{
 				preds.at(0).readPrediction(predfile,"Top++_NNPDF30_nnlo_as_0118NNLO8000_pole");
 
 			preds.at(1).readPrediction(predfile,"Top++_NNPDF30_nnlo_as_0118NLO8000_pole");
-			preds.at(2).readPrediction(predfile,"Top++_NNPDF30_nnlo_as_0118LO8000_pole");
+			preds.at(2).readPrediction(predfile,"Top++_NNPDF30_nnlo_as_0118LO8000_pole");}
 		}
 	}
 	else{
 		if(seventev){
 
-			if(onlynnlo)
+			if(onlynnlo){
 				preds.at(0).readPrediction(predfile,nnlopred);
+			}
 			else
 				preds.at(0).readPrediction(predfile,"Hathor_NNPDF30_nnlo_as_0118_NNLO_7000_MSbar");
 
@@ -138,26 +140,21 @@ void extract(const float & corrcoeff, const bool& seventev, const bool& onlycorr
 		}
 		else{
 
-			if(onlynnlo)
+			if(onlynnlo){
 				preds.at(0).readPrediction(predfile,nnlopred);
-			else
+			}
+			else{
 				preds.at(0).readPrediction(predfile,"Hathor_NNPDF30_nnlo_as_0118_NNLO_8000_MSbar");
 
 			preds.at(1).readPrediction(predfile,"Hathor_NNPDF30_nnlo_as_0118_NLO_8000_MSbar");
 			preds.at(2).readPrediction(predfile,"Hathor_NNPDF30_nnlo_as_0118_LO_8000_MSbar");
+			}
 		}
 	}
-	if(0 && onlynnlo){ //testing
+	if(onlynnlo){ //testing
 		preds.resize(1);
 		preds.at(0).readPrediction(predfile,nnlopred);
-		top_prediction ttttt;
-		ttttt.readPrediction(predfile,nnlopred);
-		histo2D htmp;
-		htmp.setBinning(histo1D::createBinning(140,120,190), histo1D::createBinning(100,120,300));
-		ttttt.exportLikelihood(&htmp);
-		plotter2D pl2dtml;
-		pl2dtml.setPlot(&htmp);
-		//	pl2dtml.printToPdf("test");
+
 	}
 	std::vector<graph> contourgraphs,maxgraphs;
 	histo2D exphist;
@@ -428,29 +425,31 @@ void extract(const float & corrcoeff, const bool& seventev, const bool& onlycorr
 				label="NNLO";
 				if(pole)
 					label+="+NNLL";
-				color=kGreen;
+				color=kBlue;
 			}
 			else if(((TString)preds.at(i).idString()).Contains("NLO")){
 				label="NLO";
 				if(pole)
 					label+="+NLL";
-				color=kYellow;
+				color=kRed;
 			}
 			else if(((TString)preds.at(i).idString()).Contains("LO")){
 				label="LO";
 				if(pole)
 					label+="+LL";
-				color=kRed;
+				color=kMagenta;
 			}
 			tg->SetLineColor(color);
 			tg->SetMarkerColor(color);
+			tg->SetLineWidth(2);
 			tg->SetMarkerSize(0.5);
 			tg->Draw("L");
 			TGraphAsymmErrors *tg2=maxgraphs.at(i).getTGraph();
 			tg2->SetMarkerColor(color);
 
-			TLegendEntry* entr=leg->AddEntry(tg2,label,"pe");
-			entr->SetTextColor(10);
+			//TLegendEntry* entr=
+					leg->AddEntry(tg2,label,"pe");
+			//entr->SetTextColor(10);
 
 
 			tg2->Draw("P");

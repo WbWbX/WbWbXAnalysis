@@ -15,7 +15,9 @@
 namespace ztop{
 
 plotterControlPlot::plotterControlPlot(): plotterBase(), divideat_(0),
-		stackp_(0),/*tempdataentry_(0),*/invertplots_(false),psmigthresh_(0),mcsysstatleg_(true){
+		stackp_(0),/*tempdataentry_(0),*/invertplots_(false),psmigthresh_(0),mcsysstatleg_(true),nolegend_(false),
+		systlabel_("MC syst+stat"){
+
 	readStyleFromFileInCMSSW("/src/TtZAnalysis/Tools/styles/controlPlots_standard.txt");
 	gStyle->SetOptStat(0);
 }
@@ -72,7 +74,9 @@ void plotterControlPlot::readStylePriv(const std::string& infile,bool requireall
 		invertplots_  = fr.getValue<bool>("invertplots",invertplots_);
 		psmigthresh_  = fr.getValue<float>("PSMigThreshold",psmigthresh_);
 	}
+	//never required
 	yspacemulti_= fr.getValue<float>("ySpaceMulti",yspacemulti_);
+	nolegend_= fr.getValue<bool>("nolegend",nolegend_);
 	//merges are never required
 	fr.clear();
 	fr.setStartMarker("[merge legends]");
@@ -210,6 +214,7 @@ void plotterControlPlot::drawPlots(){
 }
 // void drawTextBoxes(); // by base class
 void plotterControlPlot::drawLegends(){
+	if(nolegend_) return;
 	if(debug) std::cout <<"plotterCompare::drawLegends" << std::endl;
 	getPad()->cd(1);
 	legstyle_.applyLegendStyle(tmplegp_);
@@ -395,7 +400,7 @@ void plotterControlPlot::drawControlPlot(){
 		TG * mcerr=addObject(sumcont.getTGraph(usestack->getName()+"mcerr_cp",divbbw,false,false,false));
 		mcstyleupper_.applyContainerStyle(mcerr,true);
 		if(mcsysstatleg_)
-		   tmplegp_->AddEntry(mcerr,"MC syst+stat","f");
+		   tmplegp_->AddEntry(mcerr,systlabel_,"f");
 		if(usestack->is1DUnfold() && foundPSmig){ //
 			TH1D * dummy=addObject(new TH1D());
 			mcstylepsmig_.applyContainerStyle(dummy,false);

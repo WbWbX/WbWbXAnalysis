@@ -1223,6 +1223,8 @@ void ttbarXsecFitter::printAdditionalControlplots(const std::string& inputfile, 
 	std::vector< std::vector<std::string> > plotnames; //0: main, 1+ add
 	std::vector<size_t> nbjets;
 	std::vector<std::string> stylefiles;
+	std::vector<TString> allsys=datasets_.at(0).getSystNames();
+	bool hasmtvar=std::find(allsys.begin(),allsys.end(),"TOPMASS")!=allsys.end();
 	fr.readFile(configfile);
 	for(size_t line=0;line<fr.nLines();line++){
 		if(fr.nEntries(line)>1){
@@ -1254,11 +1256,12 @@ void ttbarXsecFitter::printAdditionalControlplots(const std::string& inputfile, 
 		if(plotnames.at(i).size()<1)continue;
 		plotterControlPlot pl;
 		if( inputfile.find("8TeV")!=std::string::npos)
-			pl.readTextBoxesInCMSSW("/src/TtZAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSnoSplitLeft");
+			pl.readTextBoxesInCMSSW("/src/TtZAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSSplit03Left");
 		else if(inputfile.find("7TeV")!=std::string::npos)
-			pl.readTextBoxesInCMSSW("/src/TtZAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSnoSplitLeft7TeV");
+			pl.readTextBoxesInCMSSW("/src/TtZAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSSplit03Left7TeV");
 
-
+		if(hasmtvar)
+			pl.setSystLabel("#splitline{MC stat+syst}{+#Deltam_{t}^{MC}}");
 		histoStack stack,poststack;
 		size_t bjets=nbjets.at(i);
 		if(bjets>2)
@@ -1267,7 +1270,7 @@ void ttbarXsecFitter::printAdditionalControlplots(const std::string& inputfile, 
 		for(size_t j=0;j<plotnames.at(i).size();j++){
 			std::cout << plotnames.at(i).at(j) << std::endl;
 			if(plotnames.at(i).size()==1){
-				const histoStack& tmp=stack=hsv.getStack(plotnames.at(i).at(j).data());
+				const histoStack& tmp=hsv.getStack(plotnames.at(i).at(j).data());
 				stack=applyParametersToStack(tmp,bjets,0,false, correlations);
 				std::cout << "created single a" <<std::endl;
 				poststack=applyParametersToStack(tmp,bjets,0,true, correlations);
@@ -1287,10 +1290,10 @@ void ttbarXsecFitter::printAdditionalControlplots(const std::string& inputfile, 
 				std::cout << "added  "<< plotnames.at(i).at(j) <<std::endl;
 			}
 		}
-		if(plotnames.at(i).size()!=1){
+		//if(plotnames.at(i).size()!=1){
 			stack.setName(plotnames.at(i).at(0).data());
 			poststack.setName(stack.getName()+"_postfit");
-		}
+		//}
 		TString name=stack.getName();
 		name.ReplaceAll(" ","_");
 		stack.setName(name);

@@ -289,7 +289,11 @@ invokeApplication(){
 			const std::vector<float> & par=mainfitter.tempdata;
 			for(size_t i=0;i<par.size();i++){
 				abspull.fill(par.at(i)*6); //HARDCODED
-				double pull = par.at(i) / (std::max(fabs(par.at(i+1)),fabs(par.at(i+2))));
+				double stat=(std::max(fabs(par.at(i+1)),fabs(par.at(i+2))));
+				double pull = par.at(i) / stat;
+				if(!i){
+					std::cout << "parameter stat error: " << stat << std::endl;
+				}
 
 				++i;++i;
 				for(size_t ndts=0;ndts<ndatasets;ndts++){
