@@ -33,6 +33,13 @@ public:
 		err_maxup=9,err_maxdown=10,
 		err_gausup=11,err_gausdown=12
 		};
+	enum error_names{
+		errn_scale,
+		errn_pdf,
+		errn_alphas,
+		errn_addgaus,
+		errn_nom
+	};
 
 	top_prediction(){
 		errgraphs_.resize(err_nominal,graphFitter());
@@ -59,7 +66,7 @@ public:
 
 	//can be exported to likelihood or to histo2D
 	//binning/range given by input
-	void exportLikelihood(histo2D *,bool scalegaus=false)const;
+	void exportLikelihood(histo2D *,bool scalegaus=false, bool ignoreunc=false, error_names tobeign=errn_nom)const;
 
 
 private:

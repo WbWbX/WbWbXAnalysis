@@ -488,7 +488,7 @@ void ttbarXsecFitter::printVariations(size_t bjetcat,size_t datasetidx,const std
 		displayStatusBar(stacks.size()+j,stacks.size()+sys.size());
 		const TString& sysname=sys.at(j);
 
-		if(sysname != "TOPMASS")continue; //DEBUGHERE
+		//if(sysname != "TOPMASS")continue; //DEBUGHERE
 
 		std::vector<histo1D> nominals;
 		std::vector<histo1D> ups;

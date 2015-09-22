@@ -65,6 +65,8 @@ public:
     void setDefMTop(float inmt){defmtop_=inmt;}
     float getDefMTop()const{return defmtop_;}
 
+    void setRemovePredStat(bool remove){removepredstat_=remove;}
+
     /**
      * style file should incorporate styles for plotterCompare (MC/data dependence)
      * and styles for plotterSimple for chi2 plots
@@ -262,7 +264,7 @@ private:
 
     std::vector<TString> systidentifiers_tobeaddedWithoutstat;
 
-    bool ignoredatastat_,ignorebgstat_;
+    bool ignoredatastat_,ignorebgstat_,removepredstat_;
 
     template<class T>
     T tryToGet(TFile * f,const TString& name)const{
@@ -277,6 +279,8 @@ private:
     }
 
     void addSignalAndBackground();
+
+    void removeStat(TH1F* h)const;
 
 };
 

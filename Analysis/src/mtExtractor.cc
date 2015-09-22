@@ -37,7 +37,7 @@ mtExtractor::mtExtractor():plotnamedata_(""),plotnamemc_(""),plottypemc_("cuf"),
 		minbin_(-1),maxbin_(-1),excludebin_(-1),tmpglgraph_(0),tfitf_(0),
 		iseighttev_(true),defmtop_(172.5),setup_(false),textboxesmarker_("CMS"),syspidx_(1),
 		dofolding_(false),isexternalgen_(false),rescalepreds_(false),usenormalized_(false),defmtidx_(0),
-		mcgraphsoutfile_(0),ignoredatastat_(false),ignorebgstat_(false)
+		mcgraphsoutfile_(0),ignoredatastat_(false),ignorebgstat_(false),removepredstat_(false)
 {
 	reset();
 }
@@ -662,6 +662,9 @@ void mtExtractor::readFiles(){
 			histo1D nominal;
 			TH1F h=tryToGet<TH1F>(fin,histnames.at(nompos));
 
+			if(removepredstat_)
+				removeStat(&h);
+
 			nominal.import(&h,isdivbbw);
 			TString newname=histnames.at(nompos);
 			newname.ReplaceAll("central","");
@@ -671,7 +674,7 @@ void mtExtractor::readFiles(){
 			TString yaxis=nominal.getYAxisName();
 			yaxis.ReplaceAll("["+previousxsecunits+"]","["+newxsecunits+"]");
 			formatter formatsys;
-			formatsys.readInNameTranslateFile((std::string)getenv("CMSSW_BASE")+"/src/TtZAnalysis/Analysis/configs/topmass/MCFM_SystNames.txt");
+			formatsys.readInNameTranslateFile((std::string)getenv("CMSSW_BASE")+"/src/TtZAnalysis/Analysis/configs/mtFromXsec2/MCFM_SystNames.txt");
 
 			for(size_t histpos=0;histpos<histnames.size();histpos++){
 				if(histpos==nompos) continue;
@@ -1675,6 +1678,9 @@ void mtExtractor::addSignalAndBackground(){
 	for(size_t i=0;i<mcsignalcont_.size();i++)
 		mccont_.at(i) = mcsignalcont_.at(i) + mcbgcont_.at(i);
 }
-
+void mtExtractor::removeStat(TH1F* h)const{
+	for(int i=0;i<=h->GetNbinsX();i++)
+		h->SetBinError(i,0);
+}
 
 }

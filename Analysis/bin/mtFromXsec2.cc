@@ -250,6 +250,7 @@ int main(int argc, char* argv[]){
 
 	const float createpseudoexp = parse.getOpt<float>("-pseudo",-1,"number of pseudo eperiments to generate based on prediction input");
 
+	const bool removepredstat=parse.getOpt<bool>   ("-removeprestat",false,"removes stat from external prediction (for correlation studies)");
 
 	const bool debug = parse.getOpt<bool>("d",false,"switch on debug output");
 
@@ -294,7 +295,7 @@ int main(int argc, char* argv[]){
 
 	extractor.setConfigFile(extconfigfile);
 	extractor.setExternalPrefix(extprefix);
-
+	extractor.setRemovePredStat(removepredstat);
 
 	extractor.setDefMTop(defmtop);
 	extractor.setUseNormalized(normalize);

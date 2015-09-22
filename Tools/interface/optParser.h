@@ -98,6 +98,8 @@ public:
 		std::vector<T> vec=getRest<T>();
 		if(idx<vec.size())
 			return vec.at(idx);
+		else
+			coutHelp();
 		return out;
 	}
 

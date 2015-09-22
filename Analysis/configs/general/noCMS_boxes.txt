@@ -53,6 +53,10 @@
 	   0.8,   0.91,   19.7 fb^{-1} (8 TeV),   0.048,  42, 31
 [end - textBoxes]
 
+[textBoxes - nodataCMSnoSplitRight2D]
+	   0.8,   0.91,   (8 TeV),   0.048,  42, 31
+[end - textBoxes]
+
 [textBoxes - CMSPaperNoSplitRight2D]
 	   0.8,   0.91,   19.7 fb^{-1} (8 TeV),   0.048,  42, 31
 [end - textBoxes]
@@ -127,6 +131,10 @@ $$$ 7 TeV 5.1fb
 
 [textBoxes - CMSnoSplitRight2D7TeV]
 	   0.8,   0.91,   5.0 fb^{-1} (7 TeV),   0.048,  42, 31
+[end - textBoxes]
+
+[textBoxes - nodataCMSnoSplitRight2D7TeV]
+	   0.8,   0.91,   (7 TeV),   0.048,  42, 31
 [end - textBoxes]
 
 [textBoxes - CMSPaperNoSplitRight2D7TeV]

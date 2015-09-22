@@ -61,7 +61,7 @@ void createExpLikelihood(ztop::histo2D & h, const float& xsec, const float& xsec
 void extract(const float & corrcoeff, const bool& seventev, const bool& onlycorr,
 		const bool& pole, const bool& onlynnlo,
 		float& mt, float& mterrup, float& mterrd, float& dmt, float&dmtup, float& dmtdown, const std::string& nnlopred,
-		const TString& addtoplots,bool noplots){
+		const TString& addtoplots,bool noplots, bool noalphas=false){
 
 	using namespace ztop;
 
@@ -113,8 +113,8 @@ void extract(const float & corrcoeff, const bool& seventev, const bool& onlycorr
 			else{
 				preds.at(0).readPrediction(predfile,"Top++_NNPDF30_nnlo_as_0118NNLO7000_pole");
 
-			preds.at(1).readPrediction(predfile,"Top++_NNPDF30_nnlo_as_0118NLO7000_pole");
-			preds.at(2).readPrediction(predfile,"Top++_NNPDF30_nnlo_as_0118LO7000_pole");}
+				preds.at(1).readPrediction(predfile,"Top++_NNPDF30_nnlo_as_0118NLO7000_pole");
+				preds.at(2).readPrediction(predfile,"Top++_NNPDF30_nnlo_as_0118LO7000_pole");}
 		}
 		else{
 			if(onlynnlo)
@@ -122,8 +122,8 @@ void extract(const float & corrcoeff, const bool& seventev, const bool& onlycorr
 			else{
 				preds.at(0).readPrediction(predfile,"Top++_NNPDF30_nnlo_as_0118NNLO8000_pole");
 
-			preds.at(1).readPrediction(predfile,"Top++_NNPDF30_nnlo_as_0118NLO8000_pole");
-			preds.at(2).readPrediction(predfile,"Top++_NNPDF30_nnlo_as_0118LO8000_pole");}
+				preds.at(1).readPrediction(predfile,"Top++_NNPDF30_nnlo_as_0118NLO8000_pole");
+				preds.at(2).readPrediction(predfile,"Top++_NNPDF30_nnlo_as_0118LO8000_pole");}
 		}
 	}
 	else{
@@ -146,8 +146,8 @@ void extract(const float & corrcoeff, const bool& seventev, const bool& onlycorr
 			else{
 				preds.at(0).readPrediction(predfile,"Hathor_NNPDF30_nnlo_as_0118_NNLO_8000_MSbar");
 
-			preds.at(1).readPrediction(predfile,"Hathor_NNPDF30_nnlo_as_0118_NLO_8000_MSbar");
-			preds.at(2).readPrediction(predfile,"Hathor_NNPDF30_nnlo_as_0118_LO_8000_MSbar");
+				preds.at(1).readPrediction(predfile,"Hathor_NNPDF30_nnlo_as_0118_NLO_8000_MSbar");
+				preds.at(2).readPrediction(predfile,"Hathor_NNPDF30_nnlo_as_0118_LO_8000_MSbar");
 			}
 		}
 	}
@@ -303,8 +303,10 @@ void extract(const float & corrcoeff, const bool& seventev, const bool& onlycorr
 		std::cout << selectedpred->idString() <<std::endl;
 		//produce the exp likelihood as func of msbar
 
-
-		selectedpred->exportLikelihood(&predmsbar,false);
+		if(noalphas)
+			selectedpred->exportLikelihood(&predmsbar,false,true,top_prediction::errn_alphas);
+		else
+			selectedpred->exportLikelihood(&predmsbar,false);
 		if(!noplots){
 			pl.setPlot(&predmsbar);
 			pl.printToPdf("2DLH_pred_"+selectedpred->idString());
@@ -385,6 +387,8 @@ void extract(const float & corrcoeff, const bool& seventev, const bool& onlycorr
 		errdiffup  =sqrt(mterrfromtheoup*mterrfromtheoup     + mterrfromxsecup*mterrfromxsecup     + mtmcexperrdown*mtmcexperrdown
 				+2*corrwithxsec * mterrfromxsecup * fabs(mtmcexperrdown));//  +0.2 * errup*mtmcexperrdown) ;
 
+		std::cout << "contribution of correlated part to uncertainty (in sq scale): \n+" << std::sqrt(2*corrwithxsec * mterrfromxsecup * fabs(mtmcexperrdown) )<<std::endl;
+		std::cout << "-"<<std::sqrt(2*corrwithxsec * fabs(mterrfromxsecdown) * mtmcexperrup) <<std::endl;
 		//corr coeff is positive, corr of mterrfromxsec and xsec negative, error prop should be with "-2" -> +2
 
 		//std::cout << "calibration to MC mass: "
@@ -394,6 +398,8 @@ void extract(const float & corrcoeff, const bool& seventev, const bool& onlycorr
 		dmt=diff;
 		dmtup=errdiffup;
 		dmtdown=fabs(errdiffdown);
+
+		std::cout << "extracted mass for " << selectedpred->idString() << "\n"<< mt << " +" << mterrup<<" -" << mterrd << std::endl;
 
 		maxgraphs.push_back(gp);
 		//std::cout << g.getNPoints() << std::endl;
@@ -448,7 +454,7 @@ void extract(const float & corrcoeff, const bool& seventev, const bool& onlycorr
 			tg2->SetMarkerColor(color);
 
 			//TLegendEntry* entr=
-					leg->AddEntry(tg2,label,"pe");
+			leg->AddEntry(tg2,label,"pe");
 			//entr->SetTextColor(10);
 
 
@@ -485,6 +491,7 @@ invokeApplication(){
 
 	const bool noplots =  parser->getOpt<bool>("-noplots",false,"no plots");
 
+	const bool noalphas = parser->getOpt<bool>("-noalphas",false,"no alphas uncertainty");
 	parser->doneParsing();
 
 	using namespace ztop;
@@ -493,12 +500,12 @@ invokeApplication(){
 	float mt, mtup,mtdown,dmt,dmtup,dmtd;
 	//pole mass convergence
 	if(convtest){
-		extract(corrcoeff,seventev,false,pole,false,mt, mtup,mtdown,dmt,dmtup,dmtd, pred, outid, noplots);
+		extract(corrcoeff,seventev,false,pole,false,mt, mtup,mtdown,dmt,dmtup,dmtd, pred, outid, noplots,noalphas);
 		return 1;
 	}
 	else{
 		//get full tot unc
-		extract(corrcoeff,true,false,pole,true,mt, mtup,mtdown,dmt,dmtup,dmtd, pred, outid, noplots);
+		extract(corrcoeff,true,false,pole,true,mt, mtup,mtdown,dmt,dmtup,dmtd, pred, outid, noplots,noalphas);
 		float mtex=mt,
 				mttotup=mtup,
 				mttotd=mtdown,
@@ -506,7 +513,7 @@ invokeApplication(){
 				dmttotup=dmtup,
 				dmttotd=dmtd;
 		//only correlated parts
-		extract(corrcoeff,true,true,pole,true,mt, mtup,mtdown,dmt,dmtup,dmtd, pred, outid+"corr", noplots);
+		extract(corrcoeff,true,true,pole,true,mt, mtup,mtdown,dmt,dmtup,dmtd, pred, outid+"corr", noplots,noalphas);
 		float mtcorrup=mtup,
 				mtcorrd=mtdown,
 				dmtcorrup=dmtup,
@@ -556,7 +563,7 @@ invokeApplication(){
 		g7tevdmt.setPointYContent(0,dmtex-dmtcorrd,1);
 
 		outid+="8TeV";
-		extract(corrcoeff,false,false,pole,true,mt, mtup,mtdown,dmt,dmtup,dmtd, predextr, outid, noplots);
+		extract(corrcoeff,false,false,pole,true,mt, mtup,mtdown,dmt,dmtup,dmtd, predextr, outid, noplots,noalphas);
 		float emtex=mt,
 				emttotup=mtup,
 				emttotd=mtdown,
@@ -564,7 +571,7 @@ invokeApplication(){
 				edmttotup=dmtup,
 				edmttotd=dmtd;
 		//only correlated parts
-		extract(corrcoeff,false,true,pole,true,mt, mtup,mtdown,dmt,dmtup,dmtd, predextr, outid+"corr", noplots);
+		extract(corrcoeff,false,true,pole,true,mt, mtup,mtdown,dmt,dmtup,dmtd, predextr, outid+"corr", noplots,noalphas);
 		float emtcorrup=mtup,
 				emtcorrd=mtdown,
 				edmtcorrup=dmtup,

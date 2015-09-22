@@ -107,11 +107,20 @@ invokeApplication(){
 
 
 
-
+			textBoxes tbtheo;
 			pl.readStyleFromFileInCMSSW("src/TtZAnalysis/Analysis/configs/mtFromXsec2/plot2D_0to1.txt");
 			//pl.setZAxis("L_{pred}(m_{t},#sigma_{t#bar{t}})");
+			if(energies.at(ergy).find("8TeV") != std::string::npos){
+				tbtheo.readFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt","nodataCMSnoSplitRight2D");
+			}else{
+				tbtheo.readFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt","nodataCMSnoSplitRight2D7TeV");
+			}
+			pl.usePad(&cv);
 			pl.setPlot(&ex.getTheoLikelihood());
-			pl.printToPdf(("theoOnly" +nrgstr).Data());
+			pl.draw();
+			tbtheo.drawToPad(&cv);
+			cv.Print(("theoOnly" +nrgstr+".pdf").Data());
+			//cv.Print("expOnly" +nrgstr+".pdf");
 			pl.cleanMem();
 
 
@@ -240,16 +249,16 @@ invokeApplication(){
 		std::cout << "\"stat\" is the uncorrelated part of the combined uncertainty " <<std::endl;
 		formatter fmt;
 		std::cout << "combined mt= $"<< fmt.toFixedCommaTString(out.getBinContent(1),0.1)
-						<< "\\pm^{" << fmt.toFixedCommaTString(out.getBinErrorUp(1),0.1)
-						<< "}_{"     <<fmt.toFixedCommaTString(out.getBinErrorDown(1),0.1)
-						<< "}\\GeV$" <<std::endl;
+								<< "\\pm^{" << fmt.toFixedCommaTString(out.getBinErrorUp(1),0.1)
+								<< "}_{"     <<fmt.toFixedCommaTString(out.getBinErrorDown(1),0.1)
+								<< "}\\GeV$" <<std::endl;
 
 	}
 	if(!noplots){
 		std::cout << "performing some post-processing to limit plot size..." <<std::endl;
 		//some stupid post processing
 
-			system("for f in expOnly_8TeV expOnly_7TeV expTheo_7TeV expTheo_8TeV theoOnly_7TeV theoOnly_8TeV; do pdftopng $f.pdf $f;convert $f-000001.png  -density 1200 -quality 100 $f.pdf; mv $f-000001.png $f.png; done");
+		system("for f in expOnly_8TeV expOnly_7TeV expTheo_7TeV expTheo_8TeV theoOnly_7TeV theoOnly_8TeV; do pdftopng $f.pdf $f;convert $f-000001.png  -density 1200 -quality 100 $f.pdf; mv $f-000001.png $f.png; done");
 	}
 	return 0;
 

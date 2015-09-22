@@ -190,9 +190,13 @@ double top_prediction::scanTopMass(const double& xsec,  double intervaldown, dou
 	return out;
 }
 
-void top_prediction::exportLikelihood(histo2D *h,bool scalegaus)const{
+void top_prediction::exportLikelihood(histo2D *h,bool scalegaus, bool ignoreunc, error_names tobeignored)const{
 	if(!h)
 		throw std::logic_error("top_prediction::exportLikelihood: pointer NULL");
+
+	if(!ignoreunc)
+		tobeignored=errn_nom; //will have no effect
+
 
 	h->removeAllSystematics();
 	double LHmax=0;
@@ -234,13 +238,49 @@ void top_prediction::exportLikelihood(histo2D *h,bool scalegaus)const{
 		double maxscaleup=getMaxVar(true,scaleup,scaledown,corrdummy);
 		double maxscaledown=getMaxVar(false,scaleup,scaledown,corrdummy);
 
-		double totalgaussup2= getXsec(centerx,err_gausup) - xsec;//(maxasup*maxasup+maxpdfup*maxpdfup+maxaddup*maxaddup);
-		totalgaussup2*=totalgaussup2;
-		double totalgaussdown2= getXsec(centerx,err_gausdown) - xsec;//(maxasdown*maxasdown+maxpdfdown*maxpdfdown+maxadddown*maxadddown);
-		totalgaussdown2*=totalgaussdown2;
+		double totalgaussup2= 0;
+		double totalgaussdown2= 0;
+		if(!ignoreunc){
+			totalgaussup2= getXsec(centerx,err_gausup) - xsec;//(maxasup*maxasup+maxpdfup*maxpdfup+maxaddup*maxaddup);
+			totalgaussup2*=totalgaussup2;
+			totalgaussdown2= getXsec(centerx,err_gausdown) - xsec;//(maxasdown*maxasdown+maxpdfdown*maxpdfdown+maxadddown*maxadddown);
+			totalgaussdown2*=totalgaussdown2;
+		}
+		else{
+			double pdfup= getXsec(centerx,err_pdfup) - xsec;
+			double pdfdown= getXsec(centerx,err_pdfdown)- xsec;
+			double asup= getXsec(centerx,err_alphasup)- xsec;
+			double asdown= getXsec(centerx,err_alphasdown)- xsec;
+			double addgup= getXsec(centerx,err_addgausup)- xsec;
+			double addgdown= getXsec(centerx,err_addgausdown)- xsec;
+
+			bool corrdummy=true;
+
+			double maxpdfup=getMaxVar(true,pdfup,pdfdown,corrdummy);
+			double maxpdfdown=getMaxVar(false,pdfup,pdfdown,corrdummy);
+
+			double maxasup=getMaxVar(true,asup,asdown,corrdummy);
+			double maxasdown=getMaxVar(false,asup,asdown,corrdummy);
+
+			double maxaddup=getMaxVar(true,addgup,addgdown,corrdummy);
+			double maxadddown=getMaxVar(false,addgup,addgdown,corrdummy);
+
+			if(tobeignored!=errn_pdf){
+				totalgaussup2+=maxpdfup*maxpdfup;
+				totalgaussdown2+=maxpdfdown*maxpdfdown;
+			}
+			if(tobeignored!=errn_alphas){
+				totalgaussup2+=maxasup*maxasup;
+				totalgaussdown2+=maxasdown*maxasdown;
+			}
+			if(tobeignored!=errn_addgaus){
+				totalgaussup2+=maxaddup*maxaddup;
+				totalgaussdown2+=maxadddown*maxadddown;
+			}
+		}
 
 
-		if(scalegaus){
+		if(scalegaus && tobeignored!=errn_scale){
 			totalgaussup2 += maxscaleup*maxscaleup;
 			totalgaussdown2 += maxscaledown*maxscaledown;
 		}
@@ -250,6 +290,9 @@ void top_prediction::exportLikelihood(histo2D *h,bool scalegaus)const{
 			h->getBinCenter(i,j,centerx,centery);
 			double likelihood  =0;
 			if(!scalegaus){
+				if(((tobeignored==errn_scale)))
+					throw std::runtime_error("top_prediction::exportLikelihood: scale uncertainty must not be ignored when using a box prior for it.");
+
 				likelihood =  erf( (maxscaleup   + xsec - centery)/std::sqrt(2*totalgaussup2) );
 				likelihood-=  erf( (maxscaledown + xsec - centery)/std::sqrt(2*totalgaussdown2) ) ;
 				//likelihood*=1/(2* (maxscaleup -  maxscaledown));
