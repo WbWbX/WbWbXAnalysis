@@ -16,12 +16,14 @@ namespace ztop{
  */
 class analysisPlotsTtbarXsecFit : public analysisPlots{
 public:
-	analysisPlotsTtbarXsecFit(size_t step):analysisPlots(step),jetcategory(cat_0bjet0jet),totevts_(0),vispsevts_(0),totevtsw_(0),vispsevtsw_(0)
+    analysisPlotsTtbarXsecFit(size_t step):analysisPlots(step),jetcategory(cat_0bjet0jet),bjetcategory(cat_0bjet),totevts_(0),vispsevts_(0),totevtsw_(0),vispsevtsw_(0)
 {
-		leadjetpt_plots.resize(cat_bjetjetmax,0);
+	        leadjetpt_plots.resize(cat_bjetjetmax,0);
 		secondjetpt_plots.resize(cat_bjetjetmax,0);
 		thirdjetpt_plots.resize(cat_bjetjetmax,0);
 		total_plots.resize(cat_bjetjetmax,0);
+		htalljets_plots.resize(cat_bjetmax,0); 
+		jetmulti_plots.resize(cat_bjetmax,0);
 }
 
 	~analysisPlotsTtbarXsecFit(){/* destruction is handled in base class! */
@@ -42,6 +44,10 @@ private:
 		cat_2bjet0jet,cat_2bjet1jet,cat_2bjet2jet,cat_2bjet3jet,cat_bjetjetmax}
 	jetcategory;
 
+	enum bjetcategories{
+	    cat_0bjet,cat_1bjet,cat_2bjet,cat_bjetmax}
+	bjetcategory;
+
 	void setJetCategory(size_t nbjets,size_t njets);
 
 	size_t totevts_,vispsevts_;
@@ -49,7 +55,7 @@ private:
 
 
 	std::vector<histo1DUnfold*>
-	leadjetpt_plots, secondjetpt_plots, thirdjetpt_plots, total_plots;
+	leadjetpt_plots, secondjetpt_plots, thirdjetpt_plots, total_plots, htalljets_plots, jetmulti_plots;
 
 };
 

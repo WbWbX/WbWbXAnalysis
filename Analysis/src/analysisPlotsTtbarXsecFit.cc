@@ -103,7 +103,23 @@ void analysisPlotsTtbarXsecFit::bookPlots(){
 	bins << 30    << 50  <<  200;
 	thirdjetpt_plots.at(cat_2bjet3jet) = addPlot(bins,bins,"third jet pt 2,3 b-jets","p_{T} [GeV]","Events/GeV");
 
-
+	//agrohsje combined jet multi 
+	bins.clear();
+	bins=histo1D::createBinning(4,-0.5,3.5);
+	jetmulti_plots.at(cat_0bjet) = addPlot(bins,bins,"jet multi 0x b-jets","","Events");
+	jetmulti_plots.at(cat_1bjet) = addPlot(bins,bins,"jet multi 1x b-jets","","Events");
+	bins.clear();
+	//agrohsje
+	//bins=histo1D::createBinning(4,-0.5,3.5);
+	bins=histo1D::createBinning(3,-0.5,2.5);
+	jetmulti_plots.at(cat_2bjet) = addPlot(bins,bins,"jet multi 2x b-jets","","Events");
+	
+	//agrohsje ht 
+	bins.clear();
+	bins<< 30 << 70 << 110 << 150 << 200 <<250;
+	htalljets_plots.at(cat_0bjet) = addPlot(bins,bins,"ht all jets 0x b-jets","h_{T} [GeV]","Events/GeV");
+	htalljets_plots.at(cat_1bjet) = addPlot(bins,bins,"ht all jets 1x b-jets","h_{T} [GeV]","Events/GeV");
+	htalljets_plots.at(cat_2bjet) = addPlot(bins,bins,"ht all jets 2x b-jets","h_{T} [GeV]","Events/GeV");
 }
 
 
@@ -124,11 +140,16 @@ void analysisPlotsTtbarXsecFit::fillPlotsGen(){
 	//only fill one bin in some visible part of the histogram to get the total
 	// n_gen and a nice display of PS migrations
 	if(genvisleptons1.size()>1){
-		for(size_t i=0;i<total_plots.size();i++){
+	        for(size_t i=0;i<total_plots.size();i++){
 			total_plots.at(i)->fillGen(0.5,puweight());
-			leadjetpt_plots.at(i)->fillGen(20.5,puweight());
-			secondjetpt_plots.at(i)->fillGen(20.5,puweight());
-			thirdjetpt_plots.at(i)->fillGen(20.5,puweight());
+			//agrohsje changed from 20.5 to 30.5 checked with Jan 
+			leadjetpt_plots.at(i)->fillGen(30.5,puweight());
+			secondjetpt_plots.at(i)->fillGen(30.5,puweight());
+			thirdjetpt_plots.at(i)->fillGen(30.5,puweight());
+		}
+		for(size_t i=0;i<jetmulti_plots.size();i++){
+		    jetmulti_plots.at(i)->fillGen(0,puweight());
+		    htalljets_plots.at(i)->fillGen(30.5,puweight()); 
 		}
 		vispsevts_++;
 		vispsevtsw_+=puweight();
@@ -149,6 +170,7 @@ void analysisPlotsTtbarXsecFit::fillPlotsReco(){
 		naddjets=event()->selectedjets->size() - nbjets;
 
 		setJetCategory(nbjets,naddjets);
+		//agrohsje 
 		//if(naddjets==0)
 		total_plots.at(jetcategory)->fillReco(0.5,puweight());
 		if(naddjets==1)
@@ -158,13 +180,26 @@ void analysisPlotsTtbarXsecFit::fillPlotsReco(){
 		else if(naddjets>2){
 			thirdjetpt_plots.at(jetcategory)->fillReco(event()->selectedjets->at(event()->selectedjets->size()-1)->pt(),puweight());
 		}
+		//agrohsje fill jet multi in one plot, limit to 2 jets at most 
+	        if (bjetcategory==cat_2bjet)
+		    if(naddjets>=2) jetmulti_plots.at(bjetcategory)->fillReco(2,puweight());
+		    //if(naddjets>=3) jetmulti_plots.at(bjetcategory)->fillReco(3,puweight());
+		    else jetmulti_plots.at(bjetcategory)->fillReco(naddjets,puweight());
+		else
+		    if(naddjets>=3) jetmulti_plots.at(bjetcategory)->fillReco(3,puweight());
+		    else jetmulti_plots.at(bjetcategory)->fillReco(naddjets,puweight());
+		//agrohsje fill ht including all light and b quark jets 
+		double ht(0.);
+		for(size_t i=0;i<event()->selectedjets->size();i++) ht+=event()->selectedjets->at(i)->pt();
+		htalljets_plots.at(bjetcategory)->fillReco(ht,puweight());
 	}
 }
 
 
 void analysisPlotsTtbarXsecFit::setJetCategory(size_t nbjets,size_t njets){
 	if(nbjets < 1 || nbjets>2){
-		if(njets<1)
+	        bjetcategory=cat_0bjet; 
+	        if(njets<1)
 			jetcategory=cat_0bjet0jet;
 		else if(njets<2)
 			jetcategory=cat_0bjet1jet;
@@ -174,6 +209,7 @@ void analysisPlotsTtbarXsecFit::setJetCategory(size_t nbjets,size_t njets){
 			jetcategory=cat_0bjet3jet;
 	}
 	else if(nbjets < 2){
+	        bjetcategory=cat_1bjet; 
 		if(njets<1)
 			jetcategory=cat_1bjet0jet;
 		else if(njets<2)
@@ -184,6 +220,7 @@ void analysisPlotsTtbarXsecFit::setJetCategory(size_t nbjets,size_t njets){
 			jetcategory=cat_1bjet3jet;
 	}
 	else if(nbjets < 3){
+	        bjetcategory=cat_2bjet; 
 		if(njets<1)
 			jetcategory=cat_2bjet0jet;
 		else if(njets<2)
