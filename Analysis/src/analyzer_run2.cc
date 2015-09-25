@@ -651,7 +651,6 @@ void  analyzer_run2::analyze(size_t anaid){
 
 		if(!checkTrigger(b_TriggerBools.content(),b_Event.content(), isMC,anaid)) continue;
 
-
 		/*
 		 * Muons
 		 */
@@ -1333,6 +1332,8 @@ void  analyzer_run2::analyze(size_t anaid){
 		// if(usetopdiscr && topdiscr3<0.9) continue;
 		if(usetopdiscr && lh_toplh<0.3) continue;
 
+		//agrohsje print run and event numbers 
+		//std::cout<< *b_EventNumber.content()<< "  "<< *b_RunNumber.content() <<std::endl;
 
 		if(apllweightsone) puweight=1;
 

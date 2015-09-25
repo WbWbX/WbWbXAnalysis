@@ -11,13 +11,15 @@ topmasses=( "172.5"
      # "171.5"
      # "173.5"
 #agrohsje 
-    "175.5"
-    "169.5"
+#    "175.5"
+#    "169.5"
 
      # "178.5"
      # "166.5"
 );
+#agrohsje 
 pdfeigenvectors=26 # POWHEG:NNPDF:50; POWHEG:CT10:26; MG5_aMC@NLO:NNPDF:51   # if set to 0, no variation
+#pdfeigenvectors=0 # POWHEG:NNPDF:50; POWHEG:CT10:26; MG5_aMC@NLO:NNPDF:51   # if set to 0, no variation
 
 systs=("nominal"
 

@@ -25,7 +25,7 @@ $everything will be gaussian except the ones specified here
 
     TT_SCALE   =  box
     TT_GENMCATNLO =  boxright 
-$   TT_GENPOWHERW =  boxright
+    TT_GENPOWHERW =  boxright
 
 [ end - priors ]
 
