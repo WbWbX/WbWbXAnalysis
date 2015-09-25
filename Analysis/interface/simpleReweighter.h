@@ -20,7 +20,7 @@ public:
 
     void reWeight( float &oldweight);
 
-    float getRenormalization()const;
+    double getRenormalization()const;
 
 
     void switchOff(bool switchoff){switchedoff_=switchoff;}
@@ -29,7 +29,7 @@ public:
 
 private:
     float tmpweight_;
-    float unwcounter_,wcounter_;
+    double unwcounter_,wcounter_;
 protected:
     bool switchedoff_;
 };
