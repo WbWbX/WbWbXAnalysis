@@ -21,7 +21,7 @@ namespace ztop{
  */
 class extendedVariable{
 public:
-   explicit extendedVariable():nominal_(-100000),name_(""),operatedon_(0),operation_(op_plus),constant_(false),constval_(0){}
+    explicit extendedVariable():nominal_(-100000),name_(""),operatedon_(0),operation_(op_plus),constant_(false),constval_(0),extrapolatelinear_(true){}
     extendedVariable(const TString & name):nominal_(-100000),name_(name),operatedon_(0),
     		operation_(op_plus),constant_(false),constval_(0),extrapolatelinear_(true){}
     ~extendedVariable(){
