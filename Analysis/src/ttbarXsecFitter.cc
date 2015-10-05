@@ -1171,15 +1171,29 @@ histoStack ttbarXsecFitter::applyParametersToStack(const histoStack& stack, size
 
 	if(debug)
 		std::cout << "ttbarXsecFitter::applyParametersToStack: normalization" << std::endl;
-	double multi = cpdts.lumi() * getXsec(datasetidx);
 
+	double multi = 1;
+	if(fitted)
+		multi = cpdts.lumi() * getXsec(datasetidx);
+	else
+		multi = cpdts.lumi() * datasets_.at(datasetidx).xsecOffset();
 	//adapt for indicies consistency!
 
 	tmpvar *= multi ; //add xsec and lumi
 	tmpvar *= datasets_.at(datasetidx).acceptance() ; //in case this wasnt a unfold histo
 	tmpvar *= datasets_.at(datasetidx).eps_emu() ;//to get right reco
 	tmpvar *= datasets_.at(datasetidx).omega_b(bjetcat); //add bjet norm
-	tmpvar *= stack.getSignalContainer().integral(true) /  datasets_.at(datasetidx).signalIntegral(bjetcat);
+
+	//get part of b-jet norm
+	extendedVariable subpart;
+	histo1D sigintstack=cpdts.getSignalCont()->at(bjetcat).getIntegralBin(true);
+	histo1D sigcontint=datasets_.at(datasetidx).getSignalCont()->at(bjetcat).getIntegralBin(true);
+
+	histo1D subparth=sigintstack/sigcontint;
+	subparth.removeStatFromAll(true);
+	variateHisto1D tmptmp;tmptmp.import(subparth);
+	subpart=*tmptmp.getBin(1);
+	tmpvar *= subpart;// stack.getSignalContainer().integral(true) /  datasets_.at(datasetidx).signalIntegral(bjetcat);
 
 	if(fullmc)
 		*fullmc=cpdts.background(bjetcat) + tmpvar;

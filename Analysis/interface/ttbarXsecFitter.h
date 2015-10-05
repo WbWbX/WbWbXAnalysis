@@ -298,6 +298,9 @@ private:
 
 		const std::vector<histoStack>& getOriginalInputStacks(const size_t & nbjet)const;
 
+
+		const std::vector<histo1D>* getSignalCont()const{return &signalconts_nbjets_;}
+
 	private:
 
 		variateHisto1D createLeptonJetAcceptance(const std::vector<histo1D>& signals,
