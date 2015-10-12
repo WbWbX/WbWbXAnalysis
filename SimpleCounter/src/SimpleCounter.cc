@@ -83,6 +83,9 @@ SimpleCounter::SimpleCounter(const edm::ParameterSet& iConfig)
     oppoQ_ = iConfig.getParameter<bool> ("requireOppoQ");
     debug_ = iConfig.getParameter<bool> ("debug");
     sfc_=0;
+    #ifndef CMSSW_LEQ_5
+    produces<bool>();
+    #endif
 }
 
 
@@ -139,6 +142,11 @@ SimpleCounter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
         }
         if(enough) break;
     }
+    #ifndef CMSSW_LEQ_5
+    std::auto_ptr<bool> skim =std::auto_ptr<bool>(new bool);
+    *skim=enough;
+    iEvent.put(skim);
+    #endif
     return enough;
 }
 
