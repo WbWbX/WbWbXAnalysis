@@ -893,7 +893,12 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	runno_=iEvent.id().run();
 	lumiblock_=iEvent.id().luminosityBlock();
 	eventno_=iEvent.id().event();
-
+        #ifndef CMSSW_LEQ_5 
+        edm::Handle<bool>skim;
+        iEvent.getByLabel("filterkinLeptons",skim);
+        skim_= *skim;
+        //catch (...) {skim_=1;}
+        #endif
 	/*ZTOP_COUTVAR(iEvent.id().run());
 	ZTOP_COUTVAR(runno_);
 	ZTOP_COUTVAR(iEvent.id().luminosityBlock());
@@ -1070,9 +1075,10 @@ TreeWriterBase::beginJob()
 	Ntuple->Branch("RunNumber",      &runno_);
 	Ntuple->Branch("LumiBlock",      &lumiblock_);
 	Ntuple->Branch("EventNumber",   &eventno_);
-
-
-
+        
+        #ifndef CMSSW_LEQ_5
+        Ntuple->Branch("Skim", &skim_);
+        #endif
 
 	if(debugmode) std::cout <<"branches set" << std::endl;
 
