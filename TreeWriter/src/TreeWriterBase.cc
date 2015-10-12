@@ -251,6 +251,8 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                 ztop::topDecaySelector::partonShowers ps;
                 if(partonShower_ == "pythia6")  ps = ztop::topDecaySelector::ps_pythia6;
                 else if (partonShower_ == "pythia8") ps = ztop::topDecaySelector::ps_pythia8;
+                else if (partonShower_ == "herwig")  ps = ztop::topDecaySelector::ps_herwig;
+                else if (partonShower_ == "herwigpp") ps= ztop::topDecaySelector::ps_herwigpp;
                 else  throw std::logic_error("TreeWriterBase::analyze: Wrong partonShower set in Config.");      
                 topDecay->setPartonShower(ps);
 		if(debugmode) std::cout << "Filling tops" << std::endl;

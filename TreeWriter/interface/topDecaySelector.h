@@ -21,7 +21,7 @@ namespace ztop{
 
 class topDecaySelector {
 public:
-	enum partonShowers{ps_pythia6,ps_pythia8,ps_herwig};
+	enum partonShowers{ps_pythia6,ps_pythia8,ps_herwig,ps_herwigpp};
 
 	//C++: constructor. initialize private members!
 	topDecaySelector();
