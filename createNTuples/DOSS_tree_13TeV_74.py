@@ -162,19 +162,19 @@ if runOnAOD:
 
 
 process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
-process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
+process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff') # contains https://cmssdt.cern.ch/SDT/lxr/source/Configuration/StandardSequences/python/MagneticField_cff.py MagneticField_38T_cff
 
 if globalTag != '':
     print "Setting global tag to the command-line value"
-    process.GlobalTag.globaltag = cms.string(globalTag + '::All')
+    process.GlobalTag.globaltag = cms.string(globalTag  )
 else:
     print "Determine global tag automatically"
     if options.runOnMC:
-        process.GlobalTag.globaltag = cms.string('MCRUN2_74_V9A::All')
+        process.GlobalTag.globaltag = cms.string('MCRUN2_74_V9A')
         #agrohsje process.GlobalTag.globaltag = cms.string('PHYS14_50_V2::All') 
     else:
-        process.GlobalTag.globaltag = cms.string('GR_P_V56::All')
+        process.GlobalTag.globaltag = cms.string('74X_dataRun2_Prompt_v1')
         
 print "Using global tag: ", process.GlobalTag.globaltag
 
