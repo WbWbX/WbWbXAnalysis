@@ -24,7 +24,7 @@ invokeApplication(){
     using namespace std;
 
     parser->setAdditionalDesciption("just compares the content of two ntuples. \
-             Processed events and events in ntuple\n \
+             Processed events and events in ntuple \
             needs two input files");
     //  TString outputadd=parser->getOpt<TString>("o","","additional string to be added to output file names");
     // TString inputadd =parser->getOpt<TString>("i","","additional string to be added to input file names");

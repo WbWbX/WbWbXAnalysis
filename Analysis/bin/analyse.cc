@@ -19,7 +19,7 @@
 invokeApplication(){
 	using namespace ztop;
 
-	TString channel= parser->getOpt<TString>   ("c","emu","channel (ee, emu, mumu), default: emu\n");         //-c channel
+	TString channel= parser->getOpt<TString>   ("c","emu","channel (ee, emu, mumu), default: emu");         //-c channel
 	TString Syst   = parser->getOpt<TString>   ("s","nominal","systematic variation <var>_<up/down>, default: nominal");     //-s <syst>
 	TString energy = parser->getOpt<TString>   ("e","8TeV","energy (8TeV, 7 TeV), default: 8TeV");        //-e default 8TeV
 	double lumi    = parser->getOpt<float>     ("l",-1,"luminosity, default -1 (= read from config file)");            //-l default -1
@@ -28,8 +28,10 @@ invokeApplication(){
 	//const float wpval = parser->getOpt<float>     ("bwp",-100,"btag discriminator cut value (default: not use)");            //-l default -1
 
 	TString outfileadd= parser->getOpt<TString>   ("o","","additional output id");            //-o <outfile> should be something like channel_energy_syst.root // only for plots
+
 	bool status    = parser->getOpt<bool>      ("S",false,"show regular status update (switch)");         //-S enables default false
 	bool testmode  = parser->getOpt<bool>      ("T",false,"enable testmode: 8% of stat, more printout");         //-T enables default false
+
 	bool tickonce  = parser->getOpt<bool>      ("TO",false,"enable tick once: breaks as soon as 1 event survived full selection (for software testing)");         //-T enables default false
 	TString mode   = parser->getOpt<TString>   ("m","xsec","additional mode options");        //-m (xsec,....) default xsec changes legends? to some extend
 	TString maninputfile= parser->getOpt<TString> ("i","","specify configuration file input manually (default is configs/analyse/<channel>_<energy>_config.txt");          //-i empty will use automatic

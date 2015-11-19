@@ -16,13 +16,14 @@
 #include "TStyle.h"
 #include  "TtZAnalysis/Tools/interface/formatter.h"
 #include "TFile.h"
+#include "TLegend.h"
 #include "TtZAnalysis/Tools/interface/fileReader.h"
 invokeApplication(){
 
 	using namespace ztop;
 	const float corrcoeff=parser->getOpt<float>("c",-100,"correlation coefficient between fitted cross sections");
 	const bool noplots=parser->getOpt<bool>("-noplots",false,"don't create plots");
-	//const bool nocmslogo=parser->getOpt<bool>("-nologo",false,"don't add CMS logo");
+	const bool nocmslogo=parser->getOpt<bool>("-nologo",false,"don't add CMS logo");
 	//const float energy = parser->getOpt<float>("e",8,"energy -  TESTMODE!");
 	const std::vector<std::string> in=parser->getRest<std::string>();
 
@@ -31,6 +32,7 @@ invokeApplication(){
 	const std::string predids=parser->getOpt<std::string>("p","8TeV:Top++_NNPDF30_nnlo_as_0118NNLO8000_pole,7TeV:Top++_NNPDF30_nnlo_as_0118NNLO7000_pole","prediction ids <energy>:<id>");
 
 	parser->doneParsing();
+
 
 	std::vector<std::string> energies;
 	std::vector<std::vector<std::string> > splitfiles;
@@ -75,10 +77,24 @@ invokeApplication(){
 	if(ids.size()!=energies.size())
 		throw std::out_of_range("Needs a prediction id for each energy");
 
+
+	//rather hard-coded
+	const float topmassmin=170,topmassmax=178.,xsecmin=143,xsecmax=287;
+	histo2D alljoint = histo2D(histo1D::createBinning(800,topmassmin,topmassmax),histo1D::createBinning(500,xsecmin,xsecmax),"","m_{t}^{pole} [GeV]",
+			"#sigma_{t#bar{t}} [pb]", "L_{pred}(m_{t}^{pole},#sigma_{t#bar{t}})");
+
+	std::vector<TGraphAsymmErrors*> forfinalLine,forfinalPoint;
+
+	int predstyle=9;
+	int predcolor=kBlue;
+
 	for(size_t ergy=0;ergy<energies.size();ergy++){
 		std::string energy=energies.at(ergy);
 
 		std::vector<std::string> files=splitfiles.at(ergy);
+		for(size_t filesi=0;filesi<files.size();filesi++)
+			std::cout << files.at(filesi)<< " " ;
+		std::cout << std::endl;
 		mtFromInclXsec ex;
 		mtFromInclXsec::debug=true;
 		//ex.setEnergy(energy);
@@ -100,9 +116,9 @@ invokeApplication(){
 			textBoxes tb2d,tb22d;;
 
 			if(energies.at(ergy).find("8TeV") != std::string::npos){
-				tb2d.readFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt","CMSnoSplitRight2D");
+				tb2d.readFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt","CMSPaperNoSplitRight2D");
 			}else{
-				tb2d.readFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt","CMSnoSplitRight2D7TeV");
+				tb2d.readFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt","CMSPaperNoSplitRight2D7TeV");
 			}
 
 
@@ -144,6 +160,11 @@ invokeApplication(){
 
 			histo2D joint=ex.getJointLikelihood();
 
+			histo2D tmpjoint=alljoint;
+			ex.getPrediction()->exportLikelihood(&tmpjoint);
+			//tmpjoint.copyContentFrom(joint);
+			alljoint+=tmpjoint;
+
 			pl.setPlot(&joint);
 			pl.usePad(&cv);
 			//pl.setZAxis("L_{exp} L_{pred}");
@@ -153,7 +174,7 @@ invokeApplication(){
 			//	g2->Draw("P,same");
 			//g->Draw("P,same");
 			graph onesigma=ex.getOneSigmaPointsJoint();
-			TGraph *tg=onesigma.getTGraph();
+			TGraphAsymmErrors *tg=onesigma.getTGraph();
 			tg->SetMarkerSize(0.2);
 			tg->Draw("P");
 			tb2d.drawToPad(&cv);
@@ -161,6 +182,62 @@ invokeApplication(){
 			pl.cleanMem();
 
 
+
+
+			forfinalPoint.push_back(tg);
+
+
+			tg=ex.getMassDependence("total_up").exportFittedCurve(20,topmassmin,topmassmax+20).getTGraph();
+			tg->SetLineStyle(3);
+			forfinalLine.push_back(tg);
+			tg=ex.getMassDependence("total_down").exportFittedCurve(20,topmassmin,topmassmax+20).getTGraph();
+			tg->SetLineStyle(3);
+			tg->SetName("measerr");
+			forfinalLine.push_back(tg);
+			tg=ex.getMassDependence().exportFittedCurve(20,topmassmin,topmassmax+20).getTGraph();
+			tg->SetLineStyle(7);
+			tg->SetLineColor(kGreen+4);
+			tg->SetLineWidth(2);
+			tg->SetName("meas");
+			forfinalLine.push_back(tg);
+
+			likelihood2D lhtheo;
+			lhtheo.import(ex.getTheoLikelihood());
+			tg=lhtheo.getMaxLine(20).getTGraph();
+			//tg=ex.getMassDepGraphTheo(mtFromInclXsec::sys_nominal,20).getTGraph();
+			tg->SetLineStyle(predstyle);
+			tg->SetLineColor(predcolor);
+			tg->SetLineWidth(2);
+			tg->SetName("predic");
+			//forfinalLine.push_back(tg);
+
+			graph respoint;
+			respoint.addPoint(ex.getMtopCentral(),ex.getXsec());
+			tg=respoint.getTGraph();
+			forfinalPoint<<tg;
+
+//
+//			pl.setPlot(&ex.getJointLikelihood());
+//			pl.usePad(&cv);
+//			pl.draw();
+//			tg->Draw("P");
+//
+//			tg->SetMarkerSize(0.2);
+//			tg->Draw("P");
+//			graph theonom=ex.getMassDepGraphTheo(mtFromInclXsec::sys_nominal,20);
+//			float xmin=theonom.getXMin();
+//			float xmax=theonom.getXMax();
+//			graph nominal=ex.getMassDependence().exportFittedCurve(20,xmin,xmax);
+//			tg=nominal.getTGraph();
+//			tg->SetMarkerSize(0.);
+//			tg->Draw("L");
+//			tg=theonom.getTGraph();
+//			tg->SetMarkerSize(0.);
+//			tg->Draw("L");
+//			ex.getExpPoints().getTGraph()->Draw("P");
+//
+//			tb2d.drawToPad(&cv);
+//			cv.Print("expTheo2" +nrgstr+".pdf");
 
 		}
 
@@ -202,6 +279,9 @@ invokeApplication(){
 
 		results.push_back(res);
 	}
+
+
+	//alljoint
 
 	if(results.size()==2 ){
 
@@ -249,16 +329,73 @@ invokeApplication(){
 		std::cout << "\"stat\" is the uncorrelated part of the combined uncertainty " <<std::endl;
 		formatter fmt;
 		std::cout << "combined mt= $"<< fmt.toFixedCommaTString(out.getBinContent(1),0.1)
-								<< "\\pm^{" << fmt.toFixedCommaTString(out.getBinErrorUp(1),0.1)
-								<< "}_{"     <<fmt.toFixedCommaTString(out.getBinErrorDown(1),0.1)
-								<< "}\\GeV$" <<std::endl;
+												<< "\\pm^{" << fmt.toFixedCommaTString(out.getBinErrorUp(1),0.1)
+												<< "}_{"     <<fmt.toFixedCommaTString(out.getBinErrorDown(1),0.1)
+												<< "}\\GeV$" <<std::endl;
+
+
+
+		TCanvas cvfin;
+		plotter2D pl;
+		pl.usePad(&cvfin);
+		pl.setPlot(&alljoint);
+		pl.readStyleFromFileInCMSSW("src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plotCombinedMpole.txt");
+		pl.draw();
+		for(size_t i=0;i<forfinalPoint.size();i++){
+			forfinalPoint.at(i)->Draw("P");
+		}
+		TGraphAsymmErrors * meas=0, *measerr=0, *pred=0;
+		for(size_t i=0;i<forfinalLine.size();i++){
+			forfinalLine.at(i)->Draw("L");
+			TString name=forfinalLine.at(i)->GetName();
+			if(name=="meas"){
+				meas=forfinalLine.at(i);
+			}
+			else if(name=="measerr"){
+				measerr=forfinalLine.at(i);
+			}
+			else if(name=="predic"){
+				pred=forfinalLine.at(i);
+			}
+		}
+		graph combined;
+		combined.addPoint(out.getBinContent(1),210,"combined");
+		combined.addErrorGraph("tot_up",combined);
+		combined.addErrorGraph("tot_down",combined);
+		combined.setPointXContent(0,out.getBinErrorUp(1)+out.getBinContent(1),0);
+		combined.setPointXContent(0,-out.getBinErrorDown(1)+out.getBinContent(1),1);
+		//combined.getTGraph()->Draw("P");
+		//combined.getTextBoxesFromPoints().drawToPad(&cvfin);
+
+		TFile * fcomb = new TFile("mass_ex.root","RECREATE");
+		TLegend * leg=new TLegend(0.18,0.48,0.45,0.64);
+		if(meas)
+		leg->AddEntry(meas,"Measured","l");
+		if(pred)
+		leg->AddEntry(pred,"Predicted","l");
+		if(measerr)
+		leg->AddEntry(measerr,"Uncertainty","l");
+		//TLine * line= new TLine(topmassmin,212,topmassmax,212);
+		//line->Draw("same");
+		leg->SetFillColor(kWhite);
+		//leg->SetFillStyle(1);
+		//leg->Draw("same");
+		textBoxes tb;
+		tb.add(0.20,0.58,"19.7 fb^{-1} (8 TeV)",0.045,42,11,1);
+		tb.add(0.20,0.22,"5.0 fb^{-1} (7 TeV)",0.045,42,11,1);
+		if(!nocmslogo)
+			tb.add(0.78,   0.83,   "CMS",   0.06, 61, 31);
+		tb.drawToPad(&cvfin);
+		cvfin.Write();
+		cvfin.Print("massex_combined.pdf");
+		fcomb->Close();
 
 	}
 	if(!noplots){
 		std::cout << "performing some post-processing to limit plot size..." <<std::endl;
 		//some stupid post processing
 
-		system("for f in expOnly_8TeV expOnly_7TeV expTheo_7TeV expTheo_8TeV theoOnly_7TeV theoOnly_8TeV; do pdftopng $f.pdf $f;convert $f-000001.png  -density 1200 -quality 100 $f.pdf; mv $f-000001.png $f.png; done");
+		system("for f in massex_combined expOnly_8TeV expOnly_7TeV expTheo_7TeV expTheo_8TeV theoOnly_7TeV theoOnly_8TeV; do pdftopng $f.pdf $f;convert $f-000001.png  -density 1200 -quality 100 $f.pdf; mv $f-000001.png $f.png; done");
 	}
 	return 0;
 

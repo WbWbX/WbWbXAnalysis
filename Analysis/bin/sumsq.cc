@@ -14,10 +14,11 @@
 
 invokeApplication(){
 	using namespace ztop;
-
+	parser->setAdditionalDesciption("Just sums or subtracts numbers in quadrature.");
 	parser->bepicky=false;
-	std::vector<float> nums=parser->getRest<float>();
 
+	std::vector<float> nums=parser->getRest<float>();
+	parser->doneParsing();
 	float sum2=0;
 	for(size_t i=0;i<nums.size();i++)
 		if(nums.at(i)>0)
