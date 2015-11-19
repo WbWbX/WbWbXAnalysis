@@ -188,4 +188,75 @@ std::string textFormatter::makeCompatibleFileName(const std::string &in){
 	return out;
 }
 
+
+
+std::string textFormatter::splitIntoLines(const std::string  &in,const size_t& maxchars, const size_t& leftoffset, size_t skipoffset){
+	std::string out;
+	const size_t& fullsize=in.length();
+
+	size_t pos0=in.find_first_not_of(' ')+1,
+			pos1=pos0,
+			lastbreak=0;
+	std::string offsetstring(leftoffset,' ');
+	size_t iter=0;
+	size_t nsplitchars=0;
+	bool wordsplit=false;
+	while(1){
+		iter++;
+		if(iter>=in.length()){
+			//failure
+			break;
+		}
+		if(fullsize-lastbreak < maxchars){
+			if(lastbreak){
+				out+="\n";
+				out+=offsetstring;
+				out+=in.substr(lastbreak+1,fullsize);
+			}
+			else{
+				if(!skipoffset)
+					out+=offsetstring;
+				out+=in;
+			}
+			break;
+		}
+
+		pos0=in.find(' ',pos0+1);
+		pos1=in.find(' ',pos0+1);
+
+
+		if(pos0 - lastbreak < maxchars && pos1 - lastbreak >= maxchars){//add break
+			nsplitchars=pos0-lastbreak;
+		}
+		else if(pos0-lastbreak >= maxchars-1){
+			nsplitchars=maxchars-1;
+			wordsplit=true;
+		}
+
+		if(nsplitchars){
+			if(lastbreak)
+				out+="\n";
+			if(!skipoffset)
+				out+=offsetstring;
+			else
+				skipoffset--;
+			if(lastbreak)
+				out+=in.substr(lastbreak+1,nsplitchars);
+			else
+				out+=in.substr(lastbreak,nsplitchars);
+
+			if(wordsplit)
+				out+="-";
+			pos0=lastbreak+nsplitchars;
+			lastbreak=pos0;
+			nsplitchars=0;
+			wordsplit=false;
+		}
+
+
+		//pos0=pos1;
+	}
+	return out;
+}
+
 }//ns
