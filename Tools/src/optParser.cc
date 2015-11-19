@@ -19,15 +19,30 @@ bool optParser::debug=false;
 
 std::string optParser::optionParsed(const std::string& opt, bool& found){
 	std::string out="";
+	found=false;
 	for(size_t i=0;i<temp_.size();i++){
 		if(temp_.at(i) == "-"+opt){
 			found=true;
 			if (i + 1 != temp_.size()){
 				out=temp_.at(i+1);
-				if(debug) std::cout << "optparser::getOpt: got "<< temp_.at(i) << " " << temp_.at(i+1) <<std::endl;
-				temp_.erase(temp_.begin()+i, temp_.begin()+i+2);
+				if(out.find("-")!=0) //also an option
+					temp_.erase(temp_.begin()+i, temp_.begin()+i+2);
+				else
+					temp_.erase(temp_.begin()+i);
+				break;
+			}
+			else{
+				temp_.erase(temp_.begin()+i);
+				break;
 			}
 		}
+	}
+	if(debug){
+		std::cout << "parsed " << opt <<": "<< out << " "<< toStdString(found) <<std::endl;
+		std::cout << "remaining to parse: ";
+		for(size_t i=0;i<temp_.size();i++)
+			std::cout << " " <<temp_.at(i);
+		std::cout << std::endl;
 	}
 	return out;
 }
@@ -45,7 +60,7 @@ void optParser::coutHelp()const{
 	std::cout << '\n'<< progname_ << ":\n" << adddescr_ << "\n\nOPTIONS: "<<std::endl;
 	for(size_t i=0;i<help_.size();i++){
 		std::cout  << std::endl;
-			std::cout  << help_.at(i) << std::endl;
+		std::cout  << help_.at(i) << std::endl;
 	}
 	std::cout  << std::endl;
 	exit(EXIT_SUCCESS);
@@ -65,12 +80,13 @@ std::string optParser::createDescription(const std::string& opt, const std::stri
 	else
 		out+=" ";
 	//out+=in;
-	std::string desc;
-	if(def.length())
-		desc+="default: "+def;
 	out+=textFormatter::splitIntoLines(in,65,15,1);
-	out+="\n";
-	out+=textFormatter::splitIntoLines(desc,65,15,0);
+
+	if(def.length()){
+		std::string desc="default: "+def;
+		out+="\n";
+		out+=textFormatter::splitIntoLines(desc,65,15,0);
+	}
 	return out;
 
 }
