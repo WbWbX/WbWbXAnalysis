@@ -68,6 +68,7 @@ public:
 	//binning/range given by input
 	void exportLikelihood(histo2D *,bool scalegaus=false, bool ignoreunc=false, error_names tobeign=errn_nom)const;
 
+	graph getDependence(double intervaldown=140, double intervalup=190, size_t npoints=20,error_enum error=err_nominal)const;
 
 private:
 

@@ -5,4 +5,4 @@ $comments
   zaxis.min = -0.001
   zaxis.max = 1.0
   rootDrawOpt =colz
-  palette=bluetored
+  palette=standard

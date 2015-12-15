@@ -362,6 +362,9 @@ void  analyzer_run1::analyze(size_t anaid){
 
 	//setup everything for control plots
 
+	if(testmode_)
+		std::cout << "testmode("<< anaid << "): preparing control plots" << std::endl;
+
 	ttbarControlPlots plots;//for the Z part just make another class (or add a boolian)..
 	////FIX!!
 	//plots.limitToStep(8);
@@ -378,6 +381,9 @@ void  analyzer_run1::analyze(size_t anaid){
 	mlbmtplots_step8.setEvent(evt);
 	xsecfitplots_step8.setEvent(evt);
 
+
+	if(testmode_)
+		std::cout << "testmode("<< anaid << "): control plots prepared" << std::endl;
 
 	if(!fileExists((datasetdirectory_+inputfile).Data())){
 		std::cout << datasetdirectory_+inputfile << " not found!!" << std::endl;
@@ -1533,9 +1539,9 @@ void  analyzer_run1::analyze(size_t anaid){
 
 
 
-		std::cout << "\nEvents total (normalized): "
+		std::cout << "\nEvents total in tree (normalized): "
 				<< nEntries*norm << "\n"
-				"nEvents_selected normd: "<< sel_step[8]*norm<< " " << inputfile<< std::endl;
+				"norm factor: "<< norm<< " " << inputfile<< std::endl;
 
 
 		if(singlefile_) return;

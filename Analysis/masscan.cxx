@@ -23,7 +23,9 @@ invokeApplication(){
 	double renmulti=parser->getOpt<float>("-renmulti",1.,"");
 	double facmulti=parser->getOpt<float>("-facmulti",1.,"");
 	std::string order=parser->getOpt<std::string>("a","NNLO","Order in QCD (LO,NLO,NNLO)");
-	const bool onlypdfscan =parser->getOpt<bool>("--pdfscan",false,"");
+	const bool onlypdfscan =parser->getOpt<bool>("-pdfscan",false,"");
+	const bool polemass=parser->getOpt<bool>("-polemass",false,"");
+
 	parser->doneParsing();
 
 	bool nnlob= order == (std::string)"NNLO";
@@ -45,32 +47,41 @@ invokeApplication(){
 	Hathor XS(lhapdf);
 
 
-
+	Hathor::MASSRENORMALISATIONSCHEME massscheme=Hathor::MS_MASS;
+	if(polemass)
+		massscheme=Hathor::POLE_MASS;
 
 	if(nlob){
-		XS.setScheme(Hathor::LO | Hathor::NLO | Hathor::MS_MASS);
+		XS.setScheme(Hathor::LO | Hathor::NLO | massscheme);
 	}
 	else if(lob){
-		XS.setScheme(Hathor::LO | Hathor::MS_MASS);
+		XS.setScheme(Hathor::LO | massscheme);
 	}
 	else{
 		nnlob=true;
-		XS.setScheme(Hathor::LO | Hathor::NLO | Hathor::NNLO | Hathor::MS_MASS);
+		XS.setScheme(Hathor::LO | Hathor::NLO | Hathor::NNLO | massscheme);
 	}
 
 	XS.setPrecision(Hathor::HIGH); //DEBUG
 
 
 	std::vector<double> mts;
-	mts.push_back(140);
-	mts.push_back(145);
-	mts.push_back(150);
+	if(!polemass){
+		mts.push_back(140);
+		mts.push_back(145);
+		mts.push_back(150);
+	}
 	mts.push_back(155);
 	mts.push_back(160);
 	mts.push_back(165);
 	mts.push_back(170);
 	mts.push_back(175);
 	mts.push_back(180);
+	if(polemass){
+		mts.push_back(185);
+		mts.push_back(190);
+		mts.push_back(195);
+	}
 	size_t pickedpoint=5;
 
 	ztop::graph outgraph;
@@ -173,8 +184,10 @@ invokeApplication(){
 	//std::ostringstream oss;
 	file.flags (std::ios::scientific);
 	file.precision (std::numeric_limits<double>::digits10 + 1);
-
-	file << "[pred - Hathor_" << pdf << "_" << order << "_"<<toString(energy)<<"_MSbar]\n";
+	if(polemass)
+		file << "[pred - Hathor_" << pdf << "_" << order << "_"<<toString(energy)<<"_pole]\n";
+	else
+		file << "[pred - Hathor_" << pdf << "_" << order << "_"<<toString(energy)<<"_MSbar]\n";
 	file << "central for mt "<< mts.at(pickedpoint) <<" = " << oneres  << "\n";
 	file << "xshift   = " << fitter.getXShift() << "\n";
 	file << "yshift   = " << fitter.getYShift() << "\n";

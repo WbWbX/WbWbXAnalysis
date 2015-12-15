@@ -10,11 +10,11 @@
 #include "../interface/plotter2D.h"
 #include "TColor.h"
 #include "../interface/fileReader.h"
-
+#include "TPaletteAxis.h"
 namespace ztop{
 
 
-plotter2D::plotter2D(): plotterBase(),dividebybinarea_(false),zaxismin_(1),zaxismax_(-1){
+plotter2D::plotter2D(): plotterBase(),dividebybinarea_(false),zaxismin_(1),zaxismax_(-1),nozaxis_(false){
 	// not here, defaults set by constr : readStyleFromFileInCMSSW("/src/TtZAnalysis/Tools/styles/plot2D_default.txt");
 }
 plotter2D::~plotter2D(){}
@@ -42,6 +42,8 @@ void plotter2D::readStylePriv(const std::string&file, bool requireall){
 	rootDrawOpt_ = fr.getValue<TString>("rootDrawOpt",rootDrawOpt_);
 
 	palette_= fr.getValue<TString>("palette",palette_);
+
+	nozaxis_= fr.getValue<bool>("nozaxis",nozaxis_);
 }
 
 void plotter2D::preparePad(){
@@ -50,7 +52,10 @@ void plotter2D::preparePad(){
 	c->SetLogy(0);
 	c->SetBottomMargin(0.15);
 	c->SetLeftMargin(0.15);
-	c->SetRightMargin(0.2);
+	if(!nozaxis_)
+		c->SetRightMargin(0.2);
+	else
+		c->SetRightMargin(0.05);
 }
 void plotter2D::drawPlots(){
 
@@ -69,7 +74,7 @@ void plotter2D::drawPlots(){
 		TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
 		gStyle->SetNumberContours(NCont);
 	}
-	if(palette_=="bluewhitered"){
+	else if(palette_=="bluewhitered"){
 
 		Double_t stops[NRGBs] = { 0.00, 0.34, 0.5, 0.84, 1.00 };
 		Double_t red[NRGBs]   = { 0.00, 0.00, 1., 1.00, 0.51 };
@@ -77,6 +82,24 @@ void plotter2D::drawPlots(){
 		Double_t blue[NRGBs]  = { 0.51, 1.00, 1., 0.00, 0.00 };
 
 		TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
+		gStyle->SetNumberContours(NCont);
+	}
+	else if(palette_=="whiteblack"){
+		const int NRGBs2=2;
+		Double_t stops[NRGBs2] = { 0.00, 1 };
+		Double_t red[NRGBs2]   = { 1, 0 };
+		Double_t green[NRGBs2] = { 1, 0 };
+		Double_t blue[NRGBs2]  = { 1, 0 };
+
+		TColor::CreateGradientColorTable(NRGBs2, stops, red, green, blue, NCont);
+		gStyle->SetNumberContours(NCont);
+	}
+	else if(palette_=="darkbody"){
+		Double_t stops[9] = { 0.0000, 0.1250, 0.2500, 0.3750, 0.5000, 0.6250, 0.7500, 0.8750, 1.0000};
+		Double_t red[9]   = { 242./255., 234./255., 237./255., 230./255., 212./255., 156./255., 99./255., 45./255., 0./255.};
+		Double_t green[9] = { 243./255., 238./255., 238./255., 168./255., 101./255.,  45./255.,  0./255.,  0./255., 0./255.};
+		Double_t blue[9]  = { 230./255.,  95./255.,  11./255.,   8./255.,   9./255.,   3./255.,  1./255.,  1./255., 0./255.};
+		TColor::CreateGradientColorTable(9, stops, red, green, blue, 255);
 		gStyle->SetNumberContours(NCont);
 	}
 	else{
@@ -113,10 +136,20 @@ void plotter2D::drawPlots(){
 		h->GetZaxis()->SetRangeUser(min,max);
 	else
 		h->GetZaxis()->SetRangeUser(zaxismin_,zaxismax_);
+	if(nozaxis_){
+		h->GetZaxis()->SetLabelSize(0.);
+		h->GetZaxis()->SetTickLength(0.);
+		h->GetZaxis()->SetTitle("");
+	}
+	h->Draw("colz"+rootDrawOpt_);
+	gPad->RedrawAxis();
 
-	/*
-	h->GetZaxis()->SetTitle(plot_.getZAxisName()); */
-	h->Draw("colz");
+	if(nozaxis_){
+		gPad->Update();
+		TPaletteAxis *palette = (TPaletteAxis*)h->GetListOfFunctions()->FindObject("palette");
+		palette->SetX1NDC(0.15 -1e-4);
+		palette->SetX2NDC(0.15 +1e-4); //just hide it in the y axis
+	}
 	gPad->RedrawAxis();
 
 }

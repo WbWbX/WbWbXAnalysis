@@ -19,15 +19,18 @@
 #  
 
 
+
+
+
+
+
+
+1: m_lb min step 8 =  m_lb min 1 b-jets step 8 + m_lb min 2 b-jets step 8
+
+
 0: selected b-jet multi step 8 = selected b-jet multi 0 b-jets step 8 + selected b-jet multi 1 b-jets step 8 + selected b-jet multi 2 b-jets step 8
-
-
 
 0: lead lep pt step 8 = lead lep pt 0 b-jets step 8 + lead lep pt 1 b-jets step 8 + lead lep pt 2 b-jets step 8
 
 
 0: sec lep pt step 8 =  sec lep pt 0 b-jets step 8 + sec lep pt 1 b-jets step 8 + sec lep pt 2 b-jets step 8
-
-
-
-1: m_lb min step 8 =  m_lb min 1 b-jets step 8 + m_lb min 2 b-jets step 8

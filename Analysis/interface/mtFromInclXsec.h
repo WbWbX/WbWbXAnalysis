@@ -20,7 +20,7 @@ namespace ztop{
 class mtFromInclXsec{
 public:
 
-	mtFromInclXsec():mtexpunc_(1),mt_(0),mtup_(0),mtdown_(0){}
+	mtFromInclXsec():mtexpunc_(1),mt_(0),mtup_(0),mtdown_(0),intxsec_(0){}
 
 	void readInFiles(const std::vector<std::string>&);
 	void readPrediction(const std::string& file,const std::string& id){
@@ -36,6 +36,9 @@ public:
 
 	graphFitter getMassDependence(const TString& syst="")const;
 
+	enum sys_enum{sys_nominal,sys_totup,sys_totdown};
+
+	graph getMassDepGraphTheo(sys_enum sys, size_t npoints=20)const;
 
 	//void setEnergy(const float& en){energy_=en;}
 
@@ -44,6 +47,8 @@ public:
 	const float& getMtopCentral()const{return mt_;}
 	const float& getMtopUp()const{return mtup_;}
 	const float& getMtopDown()const{return mtdown_;}
+
+	const float getXsec()const{return intxsec_;}
 
 	/**
 	 * Only envelope error
@@ -63,9 +68,11 @@ public:
 	 * and variations according to the other uncertainties (for comibnation with
 	 * other results)
 	 */
+
+
 	graph getResult()const;
 
-
+	const top_prediction* getPrediction()const{return &predicted_;}
 
 	static bool debug;
 
@@ -88,7 +95,7 @@ private:
 
 	graph createOneSigmaPoints(const histo2D&)const;
 	graph onesigmajoint_;
-	float mt_,mtup_,mtdown_;
+	float mt_,mtup_,mtdown_,intxsec_;
 
 };
 

@@ -80,8 +80,8 @@ histo1D::histo1D(const histo1D &c): taggedObject(c){
 	copyFrom(c);
 }
 histo1D& histo1D::operator=(const histo1D& c) {
-	copyFrom(c);
 	taggedObject::operator = (c);
+	copyFrom(c);
 	return *this;
 }
 
@@ -918,6 +918,13 @@ histo1D histo1D::getIntegralBin(const bool& includeUFOF)const{
 			out.contents_.getBin(2,sys).multiply(0);
 		}
 	}
+	float debugtesta=integral(includeUFOF);
+	float debugtestb=out.integral(includeUFOF);
+
+	if(fabs((debugtesta-debugtestb)/debugtestb)>0.0001){
+		throw std::logic_error("histo1D::getIntegralBin: failed!");
+	}
+
 	return out;
 }
 

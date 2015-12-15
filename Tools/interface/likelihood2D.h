@@ -39,9 +39,16 @@ public:
 	float getYErrorDown(const size_t& xbin,const size_t& ybin,const float& sigma=1)const;
 
 	//get around this bin
+	//algorthmic scan. watch out if it hits borders. to be refined
 	graph getSigmaContour(const size_t& xbin,const size_t& ybin,const float sigma=1)const;
+
+
 	graph getMaxPoint(const TString& pointname="");
 
+	/*
+	 * returns npoints corresponding to maximum points (only approximate +-1)
+	 */
+	graph getMaxLine(size_t npoints)const;
 
 	void getBinCenter(const size_t binx,const size_t biny, float& centerx,float& centery)const{
 		histo2D::getBinCenter(binx,biny,centerx,centery);
@@ -90,9 +97,13 @@ private:
 			threshold_(thresh),
 			tmpcont_(0),
 			valid_(false),done_(false),first_(true),
-			visited_(0){}
+			visited_(0),espilon_(0){}
 
+		void setEpsilon(const double& eps){espilon_=eps;}
+
+		//finds next using threshold cross if epsilon =0
 		bool findNext();
+
 		bool isValid()const{return valid_;}
 		void getCoordinates(size_t & x, size_t& y)const;
 
@@ -101,7 +112,7 @@ private:
 		bool done()const{return done_;}
 
 	private:
-		contourfinder(){}
+		contourfinder():espilon_(0){}
 		const likelihood2D* lh_;
 		size_t xstart_,ystart_;
 		size_t xpos_,ypos_;
@@ -113,6 +124,8 @@ private:
 		size_t visited_;
 		bool moveNext();
 		void rotate(const bool& reverse=false);
+		double espilon_;
+
 	};
 
 

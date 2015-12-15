@@ -906,3 +906,115 @@ adderrdown   = -1.79e-2
 [end pred]
 
 
+
+[pred - Hathor_CT14nnlo_LO_8000_pole]
+central for mt 1.8000000000000000e+02 = 1.2241876403163694e+02
+xshift   = 1.7500000000000000e+02
+yshift   = 1.6950892639160156e+02
+par0     = -2.8463032948302043e+01
+par1     = -4.0420572407319639e+00
+par2     = 6.7360799210547384e-02
+par3     = -8.5531659147042305e-04
+par4     = 9.0122588427554717e-06
+par5     = -9.5334446602660106e-08
+par6     = 1.1996646313069265e-09
+relerr   = true
+scaleerrup = 3.3981776951086667e-01
+scaleerrdown = -2.3599136950773886e-01
+pdferrup   = 4.0779045585e-02
+pdferrdown   = -3.4840793717e-02
+alphaserrup   = 0 
+alphaserrdown   = 0 
+adderrup   = 1.72e-2 
+adderrdown   = -1.72e-2 
+[end pred]
+
+
+[pred - Hathor_CT14nnlo_NLO_8000_pole]
+central for mt 1.8000000000000000e+02 = 1.8081291460617319e+02
+xshift   = 1.7500000000000000e+02
+yshift   = 2.5203143310546875e+02
+par0     = -4.3296890052807157e+01
+par1     = -6.0651008940901647e+00
+par2     = 1.0232029504038564e-01
+par3     = -1.3138812396311650e-03
+par4     = 1.4131081635726517e-05
+par5     = -1.5080829003817631e-07
+par6     = 1.6847732759676243e-09
+relerr   = true
+scaleerrup = 1.1825075920322828e-01
+scaleerrdown = -1.2781390863873074e-01
+pdferrup   = 3.6920675458e-02
+pdferrdown   = -3.1221411421e-02
+alphaserrup   = 0 
+alphaserrdown   = 0 
+adderrup   = 1.72e-2 
+adderrdown   = -1.72e-2 
+[end pred]
+
+[pred - Hathor_CT14nnlo_NNLO_8000_pole]
+central for mt 1.8000000000000000e+02 = 2.0263925165716580e+02
+xshift   = 1.7500000000000000e+02
+yshift   = 2.8280087280273438e+02
+par0     = -4.8786570940804268e+01
+par1     = -6.8162459173886418e+00
+par2     = 1.1525971018738801e-01
+par3     = -1.4844532615265749e-03
+par4     = 1.5852015382789020e-05
+par5     = -1.7066822006681082e-07
+par6     = 2.2862894251407528e-09
+relerr   = true
+scaleerrup = 3.9077262425863783e-02
+scaleerrdown = -6.2663651543908613e-02
+pdferrup   = 3.3915511612e-02
+pdferrdown   = -2.8759539477e-02
+alphaserrup   = 2.07e-2 
+alphaserrdown   = -2.017e-2 
+adderrup   = 1.72e-2 
+adderrdown   = -1.72e-2 
+[end pred]
+
+[pred - Hathor_CT14nnlo_NLO_8000_MSbar]
+central for mt 1.6500000000000000e+02 = 2.4143094188624116e+02
+xshift   = 1.6000000000000000e+02
+yshift   = 3.5100921630859375e+02
+par0     = -6.9105191974559602e+01
+par1     = -8.8501667260958357e+00
+par2     = 1.6166025597129874e-01
+par3     = -2.2522976301706521e-03
+par4     = 2.6480471763123958e-05
+par5     = -3.0160427964658065e-07
+par6     = 3.1914418395333211e-09
+relerr   = true
+scaleerrup = 6.5810998508385288e-02
+scaleerrdown = -1.0114446321219901e-01
+pdferrup   = 6.5577222343256122e-02
+pdferrdown   = -5.7254840865679030e-02
+alphaserrup   = 0 
+alphaserrdown   = 0 
+adderrup   = 1.72e-2 
+adderrdown   = -1.72e-2 
+[end pred]
+
+[pred - Hathor_CT14nnlo_LO_8000_MSbar]
+central for mt 1.6500000000000000e+02 = 1.8915815517614013e+02
+xshift   = 1.6000000000000000e+02
+yshift   = 2.7237670898437500e+02
+par0     = -5.2115860039332347e+01
+par1     = -6.7919095826188709e+00
+par2     = 1.2216223896717793e-01
+par3     = -1.6779692545814129e-03
+par4     = 1.9284660242480101e-05
+par5     = -2.1841193134294890e-07
+par6     = 2.5852223044589562e-09
+relerr   = true
+scaleerrup = 3.3570152972747114e-01
+scaleerrdown = -2.3400855562594261e-01
+pdferrup   = 6.2227104070629660e-02
+pdferrdown   = -5.4592038319643939e-02
+alphaserrup   = 0 
+alphaserrdown   = 0 
+adderrup   = 1.72e-2 
+adderrdown   = -1.72e-2 
+[end pred]
+

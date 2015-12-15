@@ -120,13 +120,17 @@ void graphFitter::fit(){
 	}
 }
 
-graph graphFitter::exportFittedCurve(size_t npoints) const{
+graph graphFitter::exportFittedCurve(size_t npoints, float xmin, float xmax) const{
 	//produce out
 
 	graph out(npoints);
 	size_t dummy=0;
-	float minx=savedinput_.getXMin(dummy,true);
-	float maxx=savedinput_.getXMax(dummy,true);
+	float minx=xmin;
+	float maxx=xmax;
+	if(xmax<xmin){
+		 minx=savedinput_.getXMin(dummy,true);
+		 maxx=savedinput_.getXMax(dummy,true);
+	}
 	if(shiftxy_){
 		minx+=shiftx_;
 		maxx+=shiftx_;

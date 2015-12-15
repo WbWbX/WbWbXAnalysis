@@ -39,7 +39,7 @@ public:
 	bool is1D()const{if(mode==dim1) return true; else return false;}
 	bool is1DUnfold()const{if(mode==unfolddim1) return true; else return false;}
 
-	void push_back(const ztop::histo1D&,const TString&, int, double, int legord= 99999); //! adds container with, name, colour, norm to stack
+	void push_back(const ztop::histo1D& cont,const TString& legend, int color, double norm, int legord= 99999); //! adds container with, name, colour, norm to stack
 	void push_back(const ztop::histo2D&,const TString&, int, double, int legord=99999); //! adds container with, name, colour, norm to stack
 	void push_back(const ztop::histo1DUnfold&,const TString&, int, double, int legord=99999); //! adds container with, name, colour, norm to stack
 	void removeContribution(TString); //! removes contribution

@@ -131,6 +131,8 @@ graph likelihood2D::getSigmaContour(const size_t& xmax,const size_t& ymax,const 
 	return out;
 
 }
+
+
 graph likelihood2D::getMaxPoint(const TString& pointname){
 	size_t x,y;
 	getGlobalMax(x,y);
@@ -138,6 +140,36 @@ graph likelihood2D::getMaxPoint(const TString& pointname){
 	getBinCenter(x,y,cx,cy);
 	graph out(1);
 	out.setPointContents(0,true,cx,cy);
+	return out;
+}
+
+graph likelihood2D::getMaxLine(size_t npoints)const{
+
+	std::vector<float > xcoords;
+	std::vector<float > ycoords;
+	//gets max from each row and then select npoints, without UF OF
+	for(size_t y=1;y<conts_.size()-1;y++){
+		float cx,cy;
+		size_t xbin;
+		conts_.at(y).getYMax(xbin,false);
+		getBinCenter(xbin,y,cx,cy);
+		xcoords.push_back(cx);
+		ycoords.push_back(cy);
+	}
+	graph out;
+	size_t skipmult=1;
+	if(npoints*2<=xcoords.size())
+		skipmult=(double)xcoords.size()/(double)npoints;
+	size_t j=0;
+	for(size_t i=0;i<xcoords.size();i++){
+		if(i%skipmult) continue;
+		j=i;
+		out.addPoint(xcoords.at(i),ycoords.at(i));
+	}
+	if(j!=xcoords.size()-1)
+		out.addPoint(xcoords.at(xcoords.size()-1),ycoords.at(xcoords.size()-1));
+
+
 	return out;
 }
 /*
@@ -202,7 +234,13 @@ bool likelihood2D::contourfinder::findNext(){
 		const float& content=lh_->getBinContent(xpos_+xsearch_,ypos_+ysearch_);
 		rotate();
 		const float& nextcontent=lh_->getBinContent(xpos_+xsearch_,ypos_+ysearch_);
-		if(content < threshold_ && nextcontent>=threshold_){
+		bool validpoint=false;
+		if(espilon_)
+			validpoint=fabs(content-threshold_)<espilon_;
+		else
+			validpoint=content < threshold_ && nextcontent>=threshold_;
+
+		if(validpoint){
 			rotate(true); //get back to previous
 			valid_=true;
 			//std::cout << " hit: " << xpos_+xsearch_ <<","<< ypos_+ysearch_<< std::endl;

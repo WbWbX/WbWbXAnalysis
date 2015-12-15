@@ -536,6 +536,8 @@ float MainAnalyzer::createNormalizationInfo(TFile *f, bool isMC,size_t anaid){
 		if(infiles_.at(anaid).Contains("_tW.root") || infiles_.at(anaid).Contains("_tbarW.root")
 				|| infiles_.at(anaid).Contains("_tbarWtoLL")|| infiles_.at(anaid).Contains("_tWtoLL")){
 			float xsec=getTWXsec(sampletopmass,energy);
+			std::cout << "GetNorm: File " << infiles_.at(anaid) << "\tis a tW sample , top mass is "
+					<< sampletopmass << " xsec: " << xsec <<std::endl;
 			norms_.at(anaid)=xsec;
 		}
 		//}

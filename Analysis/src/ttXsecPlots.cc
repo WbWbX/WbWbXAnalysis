@@ -88,8 +88,10 @@ void ttXsecPlots::makeControlPlots(const size_t& step){
 
 	SETBINS << 20 << 35 << 50 << 65 << 80 << 95 << 110 << 125 << 140 << 155 << 250;
 	addPlot("m_lb min 0 b-jets","m_{lb}^{min} [GeV]","Events/GeV");
-	if(nbjets==0 || nbjets>2)
-		FILLSINGLE(mlbmin);
+	//if(nbjets==0 || nbjets>2)
+	//	FILLSINGLE(mlbmin);
+	//mlb is not defined for no b-jet added plot for consistency
+
 	addPlot("m_lb min 1 b-jets","m_{lb}^{min} [GeV]","Events/GeV");
 	if(nbjets==1)
 		FILLSINGLE(mlbmin);
@@ -97,16 +99,19 @@ void ttXsecPlots::makeControlPlots(const size_t& step){
 	if(nbjets==2)
 		FILLSINGLE(mlbmin);
 
-	SETBINSRANGE(4,-0.5,3.5);
-	addPlot("selected b-jet multi 0 b-jets","b jet multiplicity","Events",true);
+	SETBINSRANGE(4,-0.5,2.5);
+	addPlot("selected b-jet multi 0 b-jets","b jet multiplicity","Events");
 	if(nbjets==0 || nbjets>2)
-		FILL(selectedbjets,size());
-	addPlot("selected b-jet multi 1 b-jets","b jet multiplicity","Events",true);
+		if(event() && event()->puweight)
+			last()->fill(0,*event()->puweight);
+	addPlot("selected b-jet multi 1 b-jets","b jet multiplicity","Events");
 	if(nbjets==1)
-		FILL(selectedbjets,size());
-	addPlot("selected b-jet multi 2 b-jets","b jet multiplicity","Events",true);
+		if(event() && event()->puweight)
+			last()->fill(1,*event()->puweight);
+	addPlot("selected b-jet multi 2 b-jets","b jet multiplicity","Events");
 	if(nbjets==2)
-		FILL(selectedbjets,size());
+		if(event() && event()->puweight)
+			last()->fill(2,*event()->puweight);
 
 }
 

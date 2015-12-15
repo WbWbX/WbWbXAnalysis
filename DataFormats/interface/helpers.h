@@ -30,11 +30,12 @@ std::vector<ztop::NTGenParticle*> produceCollection(std::vector<ztop::NTGenParti
 		 std::vector<ztop::NTGenParticle*>* mothercollection) ;
 
 
-
 template <class T>
 std::vector< T*> produceCollection( std::vector<T> * t, float minpt=-1, float maxabseta=-1);
 template <class T>
 std::vector< T*> produceCollection( std::vector<T*> * t, float minpt=-1, float maxabseta=-1);
+
+
 
 template <class T>
 bool comparePt(T a, T b);

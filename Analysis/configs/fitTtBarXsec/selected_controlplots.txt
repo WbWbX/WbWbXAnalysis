@@ -17,14 +17,14 @@ defaultStyle = src/TtZAnalysis/Analysis/configs/fitTtBarXsec/controlPlots_standa
        
        [textBoxes - boxes]
           externalFile = CMSSW_BASE/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt
-          externalMarker = CMSSplit03Left7TeV
+          externalMarker = CMSPaperSplit03Left7TeV
        [end - textBoxes]
 
 [plot - mll step 8]
        
        [textBoxes - boxes]
           externalFile = CMSSW_BASE/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt
-          externalMarker = CMSSplit03Left7TeV
+          externalMarker = CMSPaperSplit03Left7TeV
        [end - textBoxes]
 
 [plot - lead lepton eta step 8]
@@ -50,7 +50,7 @@ defaultStyle = src/TtZAnalysis/Analysis/configs/fitTtBarXsec/controlPlots_standa
        
        [textBoxes - boxes]
           externalFile = CMSSW_BASE/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt
-          externalMarker = CMSSplit03Left7TeV
+          externalMarker = CMSPaperSplit03Left7TeV
        [end - textBoxes]
 
 
@@ -78,7 +78,7 @@ defaultStyle = src/TtZAnalysis/Analysis/configs/fitTtBarXsec/controlPlots_standa
        
        [textBoxes - boxes]
           externalFile = CMSSW_BASE/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt
-          externalMarker = CMSSplit03Left7TeV
+          externalMarker = CMSPaperSplit03Left7TeV
        [end - textBoxes]
 
 
@@ -91,7 +91,7 @@ defaultStyle = src/TtZAnalysis/Analysis/configs/fitTtBarXsec/controlPlots_standa
       [end plotStyle]
        [textBoxes - boxes]
           externalFile = CMSSW_BASE/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt
-          externalMarker = CMSSplit03Left7TeV
+          externalMarker = CMSPaperSplit03Left7TeV
        [end - textBoxes]
 
 [plot - seclead lepton pt step 8]
@@ -104,7 +104,7 @@ defaultStyle = src/TtZAnalysis/Analysis/configs/fitTtBarXsec/controlPlots_standa
 
       [textBoxes - boxes]
           externalFile = CMSSW_BASE/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt
-          externalMarker = CMSSplit03Left7TeV
+          externalMarker = CMSPaperSplit03Left7TeV
        [end - textBoxes]
        
 
@@ -114,7 +114,7 @@ defaultStyle = src/TtZAnalysis/Analysis/configs/fitTtBarXsec/controlPlots_standa
 [plot - selected b-jet multi step 8]
         [textBoxes - boxes]
           externalFile = CMSSW_BASE/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt
-          externalMarker = CMSSplit03Left7TeV
+          externalMarker = CMSPaperSplit03Left7TeV
           0.795,   0.125,   #geq,   0.045,  42, 33
        [end - textBoxes]
 
@@ -148,14 +148,14 @@ nolegend = true
        
        [textBoxes - boxes]
           externalFile = CMSSW_BASE/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt
-          externalMarker = CMSSplit03Left
+          externalMarker = CMSPaperSplit03Left
        [end - textBoxes]
 
 [plot - mll step 8]
        
        [textBoxes - boxes]
           externalFile = CMSSW_BASE/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt
-          externalMarker = CMSSplit03Left
+          externalMarker = CMSPaperSplit03Left
        [end - textBoxes]
 
 [plot - lead lepton eta step 8]
@@ -181,7 +181,7 @@ nolegend = true
        
        [textBoxes - boxes]
           externalFile = CMSSW_BASE/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt
-          externalMarker = CMSSplit03Left
+          externalMarker = CMSPaperSplit03Left
        [end - textBoxes]
 
 
@@ -209,7 +209,7 @@ nolegend = true
        
        [textBoxes - boxes]
           externalFile = CMSSW_BASE/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt
-          externalMarker = CMSSplit03Left
+          externalMarker = CMSPaperSplit03Left
        [end - textBoxes]
 
 
@@ -222,7 +222,7 @@ nolegend = true
       [end plotStyle]
        [textBoxes - boxes]
           externalFile = CMSSW_BASE/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt
-          externalMarker = CMSSplit03Left
+          externalMarker = CMSPaperSplit03Left
        [end - textBoxes]
 
 [plot - seclead lepton pt step 8]
@@ -235,7 +235,7 @@ nolegend = true
       [end plotStyle]
       [textBoxes - boxes]
           externalFile = CMSSW_BASE/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt
-          externalMarker = CMSSplit03Left
+          externalMarker = CMSPaperSplit03Left
        [end - textBoxes]
        
        
@@ -244,7 +244,7 @@ nolegend = true
 [plot - selected b-jet multi step 8]
         [textBoxes - boxes]
           externalFile = CMSSW_BASE/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt
-          externalMarker = CMSSplit03Left
+          externalMarker = CMSPaperSplit03Left
            0.795,   0.125,   #geq,   0.045,  42, 33
        [end - textBoxes]
        
@@ -269,7 +269,7 @@ some temps here
 [plot - selected b-jet multi step 8]
         [textBoxes - boxes]
           externalFile = CMSSW_BASE/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt
-          externalMarker = CMSSplit03Left7TeV
+          externalMarker = CMSPaperSplit03Left7TeV
           0.795,   0.125,   #geq,   0.045,  42, 33
        [end - textBoxes]
        
@@ -301,7 +301,7 @@ some temps here
 [plot - selected b-jet multi step 8]
         [textBoxes - boxes]
           externalFile = CMSSW_BASE/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt
-          externalMarker = CMSSplit03Left
+          externalMarker = CMSPaperSplit03Left
           0.795,   0.125,   #geq,   0.045,  42, 33
        [end - textBoxes]
        
