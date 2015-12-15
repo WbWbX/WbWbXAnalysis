@@ -25,7 +25,8 @@ $everything will be gaussian except the ones specified here
 
     TT_SCALE   =  box
     TT_GENMCATNLO =  boxright 
-$   TT_GENPOWHERW =  boxright
+   TT_GENPOWHERW =  boxright
+   Lumi = fixed
 
 [ end - priors ]
 
@@ -39,8 +40,8 @@ $   TT_GENPOWHERW =  boxright
 [ datasets ]
 
 	[ dataset - 13TeV ]
-	  lumi  =   41.6
-	  lumiunc = 12.0
+	  lumi  =   2109
+	  lumiunc = 2.
 	  energy = 13      $for dynamic xsec
 	  topmass = 172.5  $for dynamic xsec
 	[ end dataset - 13TeV ]

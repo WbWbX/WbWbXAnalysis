@@ -1210,11 +1210,11 @@ void TreeWriterBase::setTriggers(){
 	// agrohsje added triggers for upcoming 13 TeV run 
 	//mumu
 	triggers_.push_back("HLT_Mu17_Mu8_DZ_v"); //27
-	triggers_.push_back("HLT_Mu17_TkMu8_DZ_v2"); //28
+	triggers_.push_back("HLT_Mu17_TkMu8_DZ_v"); //28
 	triggers_.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v"); //29
 	triggers_.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v"); //30
         triggers_.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");//31
-        triggers_.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2");//32
+        triggers_.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v");//32
 	triggers_.push_back("HLT_DoubleMu18NoFiltersNoVtx_v"); //33
 	//ee 
 	triggers_.push_back("HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"); //34
@@ -1223,9 +1223,33 @@ void TreeWriterBase::setTriggers(){
         triggers_.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"); //37
 	//emu
 	triggers_.push_back("HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v"); //38
-	triggers_.push_back("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v2"); //39
-        triggers_.push_back("HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v2"); //40
-        triggers_.push_back("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v2"); //41
+	triggers_.push_back("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v"); //39
+        triggers_.push_back("HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v"); //40
+        triggers_.push_back("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v"); //41
+
+        //Single Mu 
+        triggers_.push_back("HLT_IsoMu20_v"); //42
+        triggers_.push_back("HLT_IsoTkMu20_v"); //43
+
+        //Single Ele
+        triggers_.push_back("HLT_Ele23_WPLoose_Gsf_v");//44
+        triggers_.push_back("HLT_Ele22_eta2p1_WP75_Gsf_v");//45
+
+        //MET Triggers
+        triggers_.push_back("HLT_CaloMHTNoPU90_PFMET90_PFMHT90_IDTight_BTagCSV0p72_v");//46
+        triggers_.push_back("HLT_CaloMHTNoPU90_PFMET90_PFMHT90_IDLoose_BTagCSV0p7_v");//47
+        triggers_.push_back("HLT_PFMET120_PFMHT120_IDLoose_v");//48
+        triggers_.push_back("HLT_PFMET90_PFMHT90_IDLoose_v");//49
+        triggers_.push_back("HLT_PFMETNoMu90_JetIdCleaned_PFMHTNoMu90_IDTight_v");//50
+        triggers_.push_back("HLT_PFMETNoMu90_NoiseCleaned_PFMHTNoMu90_IDTight_v");//51
+        triggers_.push_back("HLT_MonoCentralPFJet80_PFMETNoMu90_JetIdCleaned_PFMHTNoMu90_IDTight_v");//52
+        triggers_.push_back("HLT_MonoCentralPFJet80_PFMETNoMu120_JetIdCleaned_PFMHTNoMu120_IDTight_v");//53
+        triggers_.push_back("HLT_MonoCentralPFJet80_PFMETNoMu90_NoiseCleaned_PFMHTNoMu90_IDTight_v");//54
+        triggers_.push_back("HLT_PFMET90_PFMHT90_IDTight_v");//55
+        triggers_.push_back("HLT_MET200_JetIdCleaned_v");//56
+        triggers_.push_back("HLT_CaloMET200_NoiseCleaned_v");//57
+                
+
 	//triggers_.push_back("");
 
 }

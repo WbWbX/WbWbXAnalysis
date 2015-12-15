@@ -252,7 +252,7 @@ void  analyzer_run2::analyze(size_t anaid){
 		// getPUReweighter()-> //setSystematics("nom");
 		getBTagSF()->setSystematics(NTBTagSF::nominal);
 		getJECUncertainties()->setSystematics("no");
-		getJERAdjuster()->setSystematics("def");
+		getJERAdjuster()->setSystematics("def_2015");
 
 		getTopPtReweighter()->setSystematics(reweightfunctions::nominal); //setSystematics("nom");
 
@@ -384,10 +384,10 @@ void  analyzer_run2::analyze(size_t anaid){
 	//agrohsje/tarndt include jes at ana level for testing 
 	NTJES jescorr = NTJES();
 	//took files from https://twiki.cern.ch/twiki/bin/view/CMS/JECDataMC
-	const TString* dataJECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Analysis/data/analyse/Summer15_50nsV2_DATA_L2L3Residual_AK4PFchs.txt");
-	const TString* mcL1JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Analysis/data/analyse/Summer15_50nsV2_MC_L1FastJet_AK4PFchs.txt");
-	const TString* mcL2JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Analysis/data/analyse/Summer15_50nsV2_MC_L2Relative_AK4PFchs.txt");
-	const TString* mcL3JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Analysis/data/analyse/Summer15_50nsV2_MC_L3Absolute_AK4PFchs.txt");
+	const TString* dataJECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Analysis/data/analyse/Summer15_25nsV6_DATA_L2L3Residual_AK4PFchs.txt");
+	const TString* mcL1JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Analysis/data/analyse/Summer15_25nsV6_MC_L1FastJet_AK4PFchs.txt");
+	const TString* mcL2JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Analysis/data/analyse/Summer15_25nsV6_MC_L2Relative_AK4PFchs.txt");
+	const TString* mcL3JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Analysis/data/analyse/Summer15_25nsV6_MC_L3Absolute_AK4PFchs.txt");
 
 	jescorr.setFilesCorrection(mcL1JECFile,mcL2JECFile,
 				   mcL3JECFile,dataJECFile,(const bool) isMC);
@@ -634,7 +634,7 @@ void  analyzer_run2::analyze(size_t anaid){
 
                 //agrohsje : check if event fails preselection and should be skipped 
 		//std::cout<<" agrohsje check flag " << *b_AnalyseEvent.content()<<std::endl;
-		if (*b_AnalyseEvent.content()!=1) continue;
+		if (b_emu_ && *b_AnalyseEvent.content()!=1) continue;
 
 		/////////////////////////////////////////////////////////////
 		/////////////////////////////////////////////////////////////
@@ -710,8 +710,8 @@ void  analyzer_run2::analyze(size_t anaid){
 		}
 		for(size_t i=0;i<idmuons.size();i++){
 		        NTMuon * muon =  idmuons.at(i);
-			if(!mode_invertiso && fabs(muon->isoVal()) > 0.12) continue;
-			if(mode_invertiso && muon->isoVal() < 0.12) continue;
+			if(!mode_invertiso && fabs(muon->isoVal()) > 0.15) continue;
+			if(mode_invertiso && muon->isoVal() < 0.15) continue;
 			isomuons <<  muon;
 			isoleptons << muon;
 		}
@@ -730,17 +730,18 @@ void  analyzer_run2::analyze(size_t anaid){
 				ensf=getElecEnergySF()->getScalefactor(elec->eta());
 
 			//elec->setECalP4(elec->ECalP4() * ensf);
-			elec->setP4(elec->ECalP4() * ensf); //both the same now!!
-			
-			/*
+			elec->setP4(elec->p4() * ensf); //both the same now!!
+			/*if (*b_EventNumber.content() == 898269822) {
 			    std::cout<<" agrohsje check electrons "
 				     <<*b_EventNumber.content()
 				     <<" elec->pt() " <<elec->pt()
 				     <<" fabs(elec->eta()) " <<fabs(elec->eta())  
 				     <<" fabs(elec->suClu().eta()) " <<fabs(elec->suClu().eta()) 
 				     <<" elec->storedId() " <<elec->storedId()
+                                     <<" elec->q() "<<elec->q()
+                                   //  <<" mll: " << (b_Electrons.content()->at(0).p4() + b_Electrons.content()->at(1).p4()).m()
 				     <<std::endl;
-			*/
+			}*/
 			//selection fully following https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopEGM l+jets except for pt cut
 			allleps << elec;
 			if(elec->pt() < lepptthresh)  continue;
@@ -1509,11 +1510,17 @@ void  analyzer_run2::analyze(size_t anaid){
 
 bool analyzer_run2::checkTrigger(std::vector<bool> * p_TriggerBools,ztop::NTEvent * pEvent, bool isMC,size_t anaid)
 {
-    if(isMC) return true;
+    //if(isMC) return true;
     if(b_emu_){
 	if(!(p_TriggerBools->at(38) || p_TriggerBools->at(40)))
 	    return false;
     }
+    //else if(b_mumu_){
+    //    if(! p_TriggerBools->at(29)) return false;
+    //}
+   // else if(b_ee_){
+   //     if(! p_TriggerBools->at(34)) return false;
+   // }
     return true;
 }
 

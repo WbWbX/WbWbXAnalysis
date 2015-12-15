@@ -10,10 +10,11 @@ options = VarParsing.VarParsing()#'standard')
 options.register('runOnAOD', False, VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.bool, "run on AOD")
 options.register('runOnMC',True,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"run on MC")
 options.register('channel', 'emu', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "which final state")
+options.register('dataset', 'emu',VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "which data stream")
 options.register('isSignal',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"is SignalMC")
 options.register('maxEvents',-1,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.int,"maximum events")
 options.register('skipEvents', 0, VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, "skip N events")
-options.register('inputScript','TopAnalysis.Configuration.Spring15.miniAOD.TT_TuneCUETP8M1_13TeV_powheg_pythia8_RunIISpring15DR74_Asympt50ns_MCRUN2_74_V9A_v4_cff',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"input Script")
+options.register('inputScript','TopAnalysis.Configuration.MC.Spring15.miniAODv2.TT_TuneCUETP8M1_13TeV_powheg_pythia8_RunIISpring15MiniAODv2_74X_mcRun2_asymptotic_v2_ext3_v1_and_v1_cff',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"input Script")
 #options.register('inputScript', '', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "python file with input source")
 options.register('json','nojson',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"json files")
 options.register('outputFile','def_out',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"output File (w/o .root)")
@@ -49,6 +50,7 @@ runOnMC=options.runOnMC                     # True
 isSignal=options.isSignal
 if not runOnMC:
     isSignal=False     
+dataset=options.dataset                     # emu
 globalTag=options.globalTag                 # START53_V11
 reportEvery=options.reportEvery             # 1000
 maxEvents=options.maxEvents                 # -1. overwrites the one specified in input script. be careful!!
@@ -101,7 +103,7 @@ opt.muonOptions={'inputCollectionAod':'selectedPatMuons'+pfpostfix,
 opt.electronOptions={'inputCollectionAod':'selectedPatElectrons'+pfpostfix,
                  'inputCollectionMiniAod':'slimmedElectrons',
                  'outputCollection':'',
-                 'idName':'Phys14-medium', # Name of the Id in the IdVector (on the Electrons)
+                 'idName':'Spring15-medium', # Name of the Id in the IdVector (on the Electrons)
                  'Cuts':False}
 
 ####################################################################
@@ -171,10 +173,10 @@ if globalTag != '':
 else:
     print "Determine global tag automatically"
     if options.runOnMC:
-        process.GlobalTag.globaltag = cms.string('MCRUN2_74_V9A')
+        process.GlobalTag.globaltag = cms.string('MCRUN2_74_V9')
         #agrohsje process.GlobalTag.globaltag = cms.string('PHYS14_50_V2::All') 
     else:
-        process.GlobalTag.globaltag = cms.string('74X_dataRun2_Prompt_v1')
+        process.GlobalTag.globaltag = cms.string('74X_dataRun2_Prompt_v2')
         
 print "Using global tag: ", process.GlobalTag.globaltag
 
@@ -352,8 +354,52 @@ else :
 ## Prefilter sequence
 
 
-if runOnMC or not runOnAOD:
+if runOnMC :
      process.prefilterSequence = cms.Sequence()
+
+
+elif not runOnAOD:
+     from TopAnalysis.ZTopUtils.noiseFilter_cff import noiseFilter
+     process.cscFilter=noiseFilter.clone(src = cms.InputTag('TriggerResults','','RECO'),flag=cms.string("Flag_CSCTightHaloFilter"))
+     process.vertexFilter=noiseFilter.clone(src = cms.InputTag('TriggerResults','','RECO'),flag=cms.string("Flag_goodVertices"))
+     process.badSCFilter=noiseFilter.clone(src=cms.InputTag('TriggerResults','','RECO'),flag=cms.string("Flag_eeBadScFilter"))
+     process.load('CommonTools.RecoAlgos.HBHENoiseFilterResultProducer_cfi')
+     process.HBHENoiseFilterResultProducer.minZeros = cms.int32(99999)
+     process.HBHENoiseFilterResultProducer.IgnoreTS4TS5ifJetInLowBVRegion=cms.bool(False) 
+     process.HBHENoiseFilterResultProducer.defaultDecision = cms.string("HBHENoiseFilterResultRun2Loose")
+
+
+     process.ApplyBaselineHBHENoiseFilter = cms.EDFilter('BooleanFlagFilter',
+         inputLabel = cms.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResult'),
+         reverseDecision = cms.bool(False)
+     )
+
+     from TopAnalysis.ZTopUtils.triggerFilter_cff import triggerOrFilter
+     
+     process.emuTriggerFilter=triggerOrFilter.clone(trigger=cms.vstring("HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v","HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v"),src = cms.InputTag('TriggerResults','','HLT'),invert=cms.bool(False))
+     process.noEmuTriggerFilter=process.emuTriggerFilter.clone(invert=cms.bool(True))
+    # process.singleMuTriggerFilter=process.emuTriggerFilter.clone(trigger=cms.vstring("HLT_IsoMu20_v3","HLT_IsoTkMu20_v4"),invert=cms.bool(False))
+     process.singleMuTriggerFilter=process.emuTriggerFilter.clone(trigger=cms.vstring("HLT_IsoMu20_v","HLT_IsoTkMu20_v"),invert=cms.bool(False)) 
+     process.noSingleMuTriggerFilter=process.singleMuTriggerFilter.clone(invert=cms.bool(True))
+     process.singleEleTriggerFilter=process.emuTriggerFilter.clone(trigger=cms.vstring("HLT_Ele23_WPLoose_Gsf_v"),invert=cms.bool(False))
+     process.noSingleEleTriggerFilter=process.singleEleTriggerFilter.clone(invert=cms.bool(True))
+     process.prefilterSequence=cms.Sequence(
+         process.HBHENoiseFilterResultProducer* 
+         process.ApplyBaselineHBHENoiseFilter*    
+         process.cscFilter*
+         process.vertexFilter*
+         process.badSCFilter
+     )
+     if dataset== "emu":
+         process.prefilterSequence+=process.emuTriggerFilter
+     elif dataset== "singleMu":
+         process.prefilterSequence+=process.noEmuTriggerFilter
+         process.prefilterSequence+=process.singleMuTriggerFilter
+     elif dataset=="singleEle":
+         process.prefilterSequence+=process.noEmuTriggerFilter
+         process.prefilterSequence+=process.noSingleMuTriggerFilter
+         process.prefilterSequence+=process.singleEleTriggerFilter
+
 else:
     ## HCAL noise filter
     process.load('CommonTools/RecoAlgos/HBHENoiseFilter_cfi')
@@ -595,7 +641,7 @@ process.PFTree   = cms.EDAnalyzer('TreeWriterTtZ',
                                   #general input collections
                                   treeName = cms.string('pfTree'),
                                   muonSrc = cms.InputTag(muonTag),
-                                  keepElecIdOnly = cms.string("Phys14-medium"),
+                                  keepElecIdOnly = cms.string("Spring15-medium"),
                                   elecGSFSrc = cms.InputTag(opt.electronOptions["outputCollection"]), #just the same here to make it run. this can be prevented by a try{}catch(...){} in treewriter for getByLabel
                                   elecPFSrc = cms.InputTag(opt.electronOptions["outputCollection"]),
                                   jetSrc = cms.InputTag('treeJets'),  #jetTag), # ('treeJets'),
@@ -624,7 +670,7 @@ process.PFTree   = cms.EDAnalyzer('TreeWriterTtZ',
                                   triggerObjects = cms.vstring(""),
                                   
                                   #block for event information.  Essential (PU)
-                                  PUInfo = cms.InputTag('addPileupInfo'),
+                                  PUInfo = cms.InputTag('slimmedAddPileupInfo'),
                                   includePDFWeights = cms.bool(includePDFWeights),
                                   pdfWeights = cms.InputTag("pdfWeights:"+PDF),
                                   additionalWeights = additionalWeights, #can be any vector of strings, generated by EDProducer: EventWeightMCSystematic
@@ -661,7 +707,7 @@ process.PFTree   = cms.EDAnalyzer('TreeWriterTtZ',
                                   isJPsi = cms.bool(False),
 
                                   #setting PartonShower to Pythia8
-                                  partonShower = cms.string("pythia8"),
+                                  partonShower = cms.string("pythia6"),
                                   )
 
 
