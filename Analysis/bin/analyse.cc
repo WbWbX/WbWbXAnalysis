@@ -188,7 +188,7 @@ invokeApplication(){
 		ana->getPUReweighter()->setMCDistrSum12();
 	}
 	else if(energy == "13TeV"){
-		ana->getPUReweighter()->setMCDistrSum15("50ns_poisson");
+		ana->getPUReweighter()->setMCDistrSum15("25ns_poisson");
 	}	   
 
 	ana->getElecSF()->setInput(elecsffile,elecsfhisto);
@@ -443,20 +443,23 @@ invokeApplication(){
 	}
 	//btag uncertainties are correlated
 	else if(Syst=="JER_up"){
-		ana->getJERAdjuster()->setSystematics("up");
 		if(energy=="7TeV" || energy=="8TeV"){
+                        ana->getJERAdjuster()->setSystematics("up");
 			if(!dobtag&&!globalbsf){
+                                
 				ana->getBTagSF()->loadBCSF(btagSFFile, btagop,"csv","mujets","up_JER","down_JER");
 				ana->getBTagSF()->setSystematics(bTagSFBase::heavyup);}
 		}
+                else if(energy=="13TeV")ana->getJERAdjuster()->setSystematics("up_2015");
 	}
 	else if(Syst=="JER_down"){
-		ana->getJERAdjuster()->setSystematics("down");
 		if(energy=="7TeV" || energy=="8TeV"){
+                        ana->getJERAdjuster()->setSystematics("down")
 			if(!dobtag &&!globalbsf){
 				ana->getBTagSF()->loadBCSF(btagSFFile, btagop,"csv","mujets","up_JER","down_JER");
 				ana->getBTagSF()->setSystematics(bTagSFBase::heavydown);}
 		}
+                else if(energy=="13TeV")ana->getJERAdjuster()->setSystematics("down_2015");
 	}
 	/////////btag
 	else if(Syst=="BTAGH_up"){
@@ -520,8 +523,8 @@ invokeApplication(){
 		else if(energy=="13TeV"){
 			ana->addWeightBranch("NTWeight_scaleUp");
 			//agrohsje pure ME variation
-			//ana->setFilePostfixReplace("ttbar.root","ttbar_ttscaleup.root");
-			//ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_ttscaleup.root");
+			ana->setFilePostfixReplace("ttbar.root","ttbar_ttscaleup.root");
+			ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_ttscaleup.root");
 		}
 	}
 	else if(Syst=="TT_SCALE_down"){
@@ -534,8 +537,8 @@ invokeApplication(){
 		else if(energy=="13TeV"){
 			ana->addWeightBranch("NTWeight_scaleDown");
 			//agrohsje pure ME variation
-			//ana->setFilePostfixReplace("ttbar.root","ttbar_ttscaledown.root");
-			//ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_ttscaledown.root");
+			ana->setFilePostfixReplace("ttbar.root","ttbar_ttscaledown.root");
+			ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_ttscaledown.root");
 
 		}
 
@@ -566,8 +569,8 @@ invokeApplication(){
 		//agrohsje fix after proper renaming
 		//ana->setFilePostfixReplace("ttbar.root","ttbar_powhpp.root");
 		//ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_powhpp.root");
-		ana->setFilePostfixReplace("ttbar.root","ttbar_her.root");
-		ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_her.root");
+		ana->setFilePostfixReplace("ttbar.root","ttbar_p6.root");
+		ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_p6.root");
 	}
 	else if(Syst=="TT_GENPOWHERW_down"){
 		//this is just default sample
