@@ -11,7 +11,7 @@
 
 invokeApplication(){
 	using namespace ztop;
-	parser->setAdditionalDesciption("adds relative systematics from containerStackVector in first file to second file\nprovide exactly 2 files!");
+	parser->setAdditionalDesciption("adds relative systematics from containerStackVector in first file to second file provide exactly 2 files!");
 	const bool arenotcorrelated = parser->getOpt("C",false,"nominal entries are not correlated (default: false)");
 	const bool plotplots = parser->getOpt("P",false,"directly produces plots (default: false)");
 	const bool strict=! parser->getOpt<bool>("-approx",false,"allow a certain small difference not to count as real variation. (default false)");

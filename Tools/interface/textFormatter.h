@@ -98,8 +98,12 @@ public:
 	 */
 	static std::string addFilenameSuffix(const std::string& pathtofile, const std::string& suffix);
 
-
+	/**
+	 * left offset does not count to the number of max chars before linebreak
+	 */
 	static std::string makeCompatibleFileName(const std::string &);
+
+	static std::string splitIntoLines(const std::string &,const size_t& maxchars, const size_t& leftoffset, size_t skipoffset=0);
 
 	/**
 	 * switch for more output

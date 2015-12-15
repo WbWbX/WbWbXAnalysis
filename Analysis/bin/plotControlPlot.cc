@@ -18,13 +18,13 @@
  */
 invokeApplication(){
 	using namespace ztop;
-	parser->setAdditionalDesciption("Small application to plot control plots in a fast and efficient way.\nSeparate with \"%%\". Returns pdf files");
+	parser->setAdditionalDesciption("Small application to plot control plots in a fast and efficient way.Separate with \"%%\". Returns pdf files");
 
 	const std::string stylefile=parser->getOpt<std::string>("i",
 			getenv("CMSSW_BASE")+(std::string)"/src/TtZAnalysis/Tools/styles/controlPlots_standard.txt",
 			"Specify (optional) control plot style file");
 	const std::string plotnames=parser->getOpt<std::string>("p","","specify plot names as list plot1 %% plot2 %% ...");
-	const std::string inlist=parser->getOpt<std::string>("-list","","specify a file that represents a list of all plots to be plotted.\n     one line for each plot or %% as delimiter");
+	const std::string inlist=parser->getOpt<std::string>("-list","","specify a file that represents a list of all plots to be plotted. One line for each plot or %% as delimiter");
 	const std::string suffix=parser->getOpt<std::string>("s","","specify a suffix.");
 	const std::string outdir=parser->getOpt<std::string>("d",".","specify an optional output directory.");
 	const bool normToInt=parser->getOpt<bool>("int",false,"specify whether you want to normalize to the integral of the data or to the lumi.");

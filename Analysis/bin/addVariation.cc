@@ -24,12 +24,12 @@
 invokeApplication(){
 	using namespace ztop;
 	parser->setAdditionalDesciption(
-			"* Simple program to add a systematic variation to a file containing \n\
-* the nominal points (other systematics allowed) \n\
-* Don\'t use this to add large bunches of systematics, for this purpose use \n\
-* mergeSyst with the appropriate naming conventions. \n\
-* This program is only meant for small checks. \n\
-*  \n\
+			"* Simple program to add a systematic variation to a file containing  \
+* the nominal points (other systematics allowed)  \
+* Don\'t use this to add large bunches of systematics, for this purpose use  \
+* mergeSyst with the appropriate naming conventions.  \
+* This program is only meant for small checks.  \
+*   \
 * To execute: addVariation <var_name> <nominal file> <up_file> <down_file>");
 	TString output=parser->getOpt<TString>("o","","specify output file name, otherwise nominal will be overwritten.");
 

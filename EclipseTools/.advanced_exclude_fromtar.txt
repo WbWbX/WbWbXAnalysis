@@ -1,0 +1,12 @@
+.?*
+*.pyc
+*.root
+*.txt
+*.dat
+*.edmplugin
+*.so
+*.a
+*.o
+*.gz
+Geant4-10.0.2
+external/*

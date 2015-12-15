@@ -14,8 +14,8 @@
 
 invokeApplication(){
 	using namespace ztop;
-	parser->setAdditionalDesciption("small program to add pseudo-data on a full pure-MC HistoStackVector.\nOnly works if no data is present!\
-\nusage: addPseudodata <inputfile>.\n will scan all control, 2d, unfold plots included and add pseudodata to it.\nOutput can be specified, otherwise input will be overwritten");
+	parser->setAdditionalDesciption("small program to add pseudo-data on a full pure-MC HistoStackVector. Only works if no data is present!\
+ usage: addPseudodata <inputfile>.  will scan all control, 2d, unfold plots included and add pseudodata to it. Output can be specified, otherwise input will be overwritten");
 	const TString output=parser->getOpt<TString>("o","","output file name. Default: Overwrite input file.");
 	const bool makecanvases=parser->getOpt<bool>("P",false,"plots canvases directly using default plotting style. (default false). Produces additional .root file");
 	const int randomseed=parser->getOpt<int>("r",1234,"Specify random seed. (default 1234)");

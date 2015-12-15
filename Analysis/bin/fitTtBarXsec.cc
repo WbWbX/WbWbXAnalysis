@@ -26,7 +26,7 @@ invokeApplication(){
 
 	parser->bepicky=true;
 	const TString lhmode = parser->getOpt<TString>("m","poissondata",
-			"modes for the likelihood assumption in the fit.\n possible: chi2data, chi2datamc, poissondata\ndefault: poissondata");
+			"modes for the likelihood assumption in the fit.  possible: chi2data, chi2datamc, poissondata default: poissondata");
 	const TString inputconfig = parser->getOpt<TString>("i","ttbarXsecFitter_mll.txt","input config (located in TtZAnalysis/Analysis/configs");
 	const bool onlyMC=parser->getOpt<bool>("-onlyMC",false,"use plain MC, no data. Compare sum(MC) to MC. useful to check if a fit could work theoretically");
 	if(lhmode!="chi2datamc" && lhmode!="chi2data" && lhmode!="poissondata"){
@@ -37,7 +37,7 @@ invokeApplication(){
 	const int npseudoexp = parser->getOpt<int>("p",0,"number of pseudo experiments");
 	const bool debug = parser->getOpt<bool>("d",false,"switches on debug output");
 	const TString pseudoOpts = parser->getOpt<TString>("-pdopts","",
-			"additional options for pseudodata:\nGaus: use Gaussian random distribution\n");
+			"additional options for pseudodata: Gaus: use Gaussian random distribution ");
 	const bool fitsystematics =! parser->getOpt<bool>("-nosyst",false,"removes systematics");
 	const bool onlytotalerror = parser->getOpt<bool>("-onlytotal",false,"no syst breakdown");
 	const bool onlycontrolplots = parser->getOpt<bool>("-onlycontrol",false,"only control plots");
@@ -52,6 +52,7 @@ invokeApplication(){
 	const bool variationplots = parser->getOpt<bool>("-varplots",false,"switches on variation plots");
 
 	const bool topontop =  parser->getOpt<bool>("-topontop",false,"plots ttbar signal on top");
+	const bool likelihoodscan =  parser->getOpt<bool>("-scan",false,"Maps the likelihood around the minimum as a function of the cross section(s). Needs a lot of CPU time!");
 
 
 	TString outfile;
@@ -198,7 +199,7 @@ invokeApplication(){
 					pl.addStyleFromFile(fracfile,  "[plot - " + plotnames.at(stackit)+"]", "[plot - "+ plotnames.at(stackit+1) +"]" );
 				else
 					pl.addStyleFromFile(fracfile,  "[plot - " + plotnames.at(stackit) +"]","[end - additional plots]");
-				//pl.readTextBoxesInCMSSW("/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt","CMSSplit03Left");
+				//pl.readTextBoxesInCMSSW("/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt","CMSPaperSplit03Left");
 				size_t datasetidx=mainfitter.getDatasetIndex(datasets.at(file).data() );
 				mainfitter.addUncertainties(&stack, datasetidx);
 				pl.setStack(&stack);
@@ -383,6 +384,10 @@ invokeApplication(){
 	//compare input stacks before and after
 
 	if(printplots){
+
+
+
+
 		histoStack stack;
 		//plotterControlPlot pl;
 		//pl.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/controlPlots_combined.txt");
@@ -392,6 +397,9 @@ invokeApplication(){
 		if(debug)
 			std::cout << "printing pre/postfit fit-distributions" << std::endl;
 		for(size_t ndts=0;ndts<mainfitter.nDatasets();ndts++){
+			if(likelihoodscan)
+				mainfitter.printXsecScan(ndts,outfile.Data());
+
 			TString dir=outfile+"_vars/";
 			system( ("mkdir -p "+dir).Data());
 			for(size_t nbjet=0;nbjet<3;nbjet++){
