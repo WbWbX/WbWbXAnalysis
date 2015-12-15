@@ -8,6 +8,7 @@
 
 #include <TtZAnalysis/Tools/interface/plotterMultiStack.h>
 #include <TtZAnalysis/Tools/interface/plotterMultiCompare.h>
+#include <TtZAnalysis/Tools/interface/plotterMultiplePlots.h>
 #include "../interface/ttbarXsecFitter.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 #include "TtZAnalysis/Tools/interface/histoStack.h"
@@ -1195,6 +1196,16 @@ histoStack ttbarXsecFitter::applyParametersToStack(const histoStack& stack, size
 	subpart=*tmptmp.getBin(1);
 	tmpvar *= subpart;// stack.getSignalContainer().integral(true) /  datasets_.at(datasetidx).signalIntegral(bjetcat);
 
+	if(debug){
+		float contr=subparth.getBinContent(1);
+		std::cout << "ttbarXsecFitter::applyParametersToStack: <"<< stack.getName()<<"> contr in b-jet cat "<<bjetcat <<": "<<
+				sigintstack.getBinContent(1) <<"/" << sigcontint.getBinContent(1) <<"="<<contr<<std::endl;
+		std::cout << sigintstack.integral(true) <<std::endl;
+		std::cout << cpdts.getSignalCont()->at(bjetcat).integral(true) <<std::endl;
+		std::cout << stack.getSignalContainer().integral(true) <<std::endl;
+		std::cout << stack.getSignalContainer().getIntegralBin(true).integral(true) <<std::endl;
+	}
+
 	if(fullmc)
 		*fullmc=cpdts.background(bjetcat) + tmpvar;
 
@@ -1328,6 +1339,42 @@ void ttbarXsecFitter::printAdditionalControlplots(const std::string& inputfile, 
 		}
 		f.Close();
 	}
+}
+
+
+
+void ttbarXsecFitter::printXsecScan(size_t datasetidx, const std::string & outname){//const{
+	if(datasetidx>=datasets_.size())
+		throw std::out_of_range("ttbarXsecFitter::createSystematicsBreakdown: dataset index out of range");
+
+	//simpleFitter newfitter(fitter_);
+	size_t xscidx=datasets_.at(datasetidx).xsecIdx();
+	double xsecerrdo=fitter_.getParameterErrDown()->at(xscidx);
+	double xsecerrup=fitter_.getParameterErrUp()->at(xscidx);
+	//double xsec=getXsec(datasetidx);
+	double priorxsec=datasets_.at(datasetidx).xsecOffset();
+	double xsecparashift=fitter_.getParameter(xscidx);
+	graph g=fitter_.scan( xscidx, xsecparashift + 3* xsecerrdo, xsecparashift+ 3*xsecerrup ,12);
+	g.shiftAllXCoordinates(priorxsec);
+
+	g.setXAxisName("#sigma_{t#bar{t}} ("+datasets_.at(datasetidx).getName()+") [pb]");
+	g.setYAxisName("-2 ln(L)");
+
+    std::string outfile=outname;
+    outfile+="_LHScan_";
+    outfile+=datasets_.at(datasetidx).getName().Data();
+
+	TFile f((TString)outfile.data()+".root","RECREATE");
+	TCanvas cv;
+	plotterMultiplePlots pl;
+	pl.usePad(&cv);
+	pl.addPlot(&g);
+	pl.setLastNoLegend();
+	pl.draw();
+	cv.Write();
+
+	pl.printToPdf(outfile);
+
 }
 
 
@@ -1851,9 +1898,9 @@ double ttbarXsecFitter::toBeMinimized(const double * variations){
 				double datastat = set->data(nbjet).getBinErr(bin);
 
 				//this  might happen for some variations, fix it to physics values
-
+				if(signal<0)     signal=0;
+				if(nbackground<0)nbackground=0;
 				double predicted = signal+nbackground;
-				if(predicted<0)predicted=0;
 
 				if(lhmode_ == lhm_poissondatastat)   {
 					if(data<0)data=0; //safety
@@ -2336,7 +2383,7 @@ void ttbarXsecFitter::dataset::readStackVec(const std::vector<histoStack> & in,s
 	if(debug)
 		std::cout << "ttbarXsecFitter::dataset::readStackVec: " << nbjet <<std::endl;
 
-	size_t maxnbjetcat=3;
+	size_t maxnbjetcat=dataset::nBjetCat();
 	signalconts_nbjets_.resize(maxnbjetcat);
 	signalvisgenconts_nbjets_.resize(maxnbjetcat);
 	signalpsmigconts_nbjets_.resize(maxnbjetcat);
@@ -2355,6 +2402,8 @@ void ttbarXsecFitter::dataset::readStackVec(const std::vector<histoStack> & in,s
 			signvisps     =signvisps.append(in.at(j).getSignalContainer());
 			signvisps.setAllZero();
 			signpsmig     =sign;
+			if(debug)
+				std::cout << "read 1D histo" <<std::endl;
 		}
 		backgr      =backgr.append(in.at(j).getBackgroundContainer());
 		data          =data.append(in.at(j).getDataContainer());

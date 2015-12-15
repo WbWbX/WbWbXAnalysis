@@ -25,6 +25,7 @@
 #include "Math/GSLSimAnMinimizer.h"
 #include <limits>
 #include <cfloat>
+#include <omp.h>
 //use TMinuit
 //define all the functions - nee dto be c-stylish
 
@@ -379,7 +380,53 @@ corrMatrix simpleFitter::getCorrelationMatrix()const{
 	return out;
 }
 graph simpleFitter::getContourScan(size_t i, size_t j)const{
+
 	return graph();
+
+}
+
+
+graph simpleFitter::scan(size_t paraidx,const double& from, const double& to, size_t npoints)const{
+	if(! minsuccessful_)
+		throw std::logic_error("simpleFitter::scan: first perform successful minimization");
+	if(paraidx>= paras_.size())
+		throw std::out_of_range("simpleFitter::scan: parameter index out of range");
+	if(!pminimizer_)
+		throw std::logic_error("simpleFitter::scan: can only be called after fit (minimizer pointer 0) IF YOU SEE THIS< SOMETHING IS SERIOUSLY WRONG");
+	graph out(npoints);
+	std::vector<double> outx(npoints);
+	std::vector<double> outy(npoints);
+	double interval=(to-from)/(double)(npoints-1);
+	for(size_t i=0;i<npoints;i++)
+		outx.at(i)= (double)i * interval + from;
+	ROOT::Math::Functor fcn(chi2func_,paras_.size());
+	ROOT::Math::Minimizer * allmins[npoints];
+	std::vector<bool> succ(npoints);
+	//try if this works..
+	for(size_t i=0;i<npoints;i++){
+
+		allmins[i]=invokeMinimizer();
+		if(functobemin_){
+			allmins[i]->SetFunction(*functobemin_);
+		}
+		else{
+			allmins[i]->SetFunction(fcn);
+		}
+		allmins[i]->SetFixedVariable(paraidx,paranames_.at(paraidx).Data(),outx.at(i));
+		allmins[i]->SetStrategy(1); //suffices for this purpose
+
+	}
+#pragma omp parallel for
+	for(size_t i=0;i<npoints;i++){
+		succ.at(i)=allmins[i]->Minimize();
+	}
+	for(size_t i=0;i<npoints;i++){
+		if(succ.at(i))
+			out.setPointContents(i,true,outx.at(i), allmins[i]->MinValue());
+		delete allmins[i];
+	}
+
+	return out;
 }
 
 /**
@@ -727,7 +774,6 @@ ROOT::Math::Minimizer * simpleFitter::invokeMinimizer()const{
 		min = new ROOT::Minuit2::Minuit2Minimizer();
 
 	////
-
 
 	min->SetMaxFunctionCalls(maxcalls_); // for Minuit/Minuit2
 	min->SetMaxIterations(maxcalls_);  // for GSL

@@ -59,7 +59,9 @@ private:
 
     float zaxismin_,zaxismax_;
     TString rootDrawOpt_;//,zaxistitle_;
+  //  public:
     TString palette_;
+    bool nozaxis_;
 
 };
 

@@ -83,7 +83,17 @@ graphFitter mtFromInclXsec::getMassDependence(const TString& syst)const{
 	//gf.setStrategy(2);
 
 	graph fitgr;
-	if(syst.Length()>0){
+	if(syst == "total_up"){
+		fitgr=exppoints_;
+		fitgr=fitgr.addAllSysQuad("tot");
+		fitgr=fitgr.getSystGraph(fitgr.getSystErrorIndex("tot_up"));
+	}
+	else if(syst == "total_down"){
+		fitgr=exppoints_;
+		fitgr=fitgr.addAllSysQuad("tot");
+		fitgr=fitgr.getSystGraph(fitgr.getSystErrorIndex("tot_down"));
+	}
+	else if(syst.Length()>0){
 		fitgr=exppoints_.getSystGraph(exppoints_.getSystErrorIndex(syst));
 	}
 	else{
@@ -94,8 +104,10 @@ graphFitter mtFromInclXsec::getMassDependence(const TString& syst)const{
 	//fitgr.addErrorGraph(exppoints_.getSystErrorName(idxdown),exppoints_.getSystGraph(idxdown));
 	gf.readGraph(&fitgr);
 
-
+	gf.setStrategy(0);
 	gf.fit();
+	gf.feedErrorsToSteps();
+	gf.setStrategy(1);
 	if(syst.Length()<1)
 		std::cout << "fitted curve: xsec(m_t) = "
 		<< "\\text{exp}\\left(" << gf.getParameter(2) << "\\cdot (m_t/\\GeV + " << gf.getParameter(1) <<" ) " << "\\right)+"<< gf.getParameter(0)<<std::endl;
@@ -103,6 +115,21 @@ graphFitter mtFromInclXsec::getMassDependence(const TString& syst)const{
 	if(!gf.wasSuccess())
 		throw std::runtime_error("mtFromInclXsec::getMassDependence: fit failed");
 	return gf;
+}
+
+graph mtFromInclXsec::getMassDepGraphTheo(sys_enum sys, size_t npoints)const{
+	graph out;
+
+	const float mintopmass=165.5 ;//169;// 165.5;
+	const float maxtopmass= 179.5 ;//178;// 179.5;
+	if(sys==sys_nominal)
+		out= predicted_.getDependence(mintopmass, maxtopmass, npoints, top_prediction::err_nominal);
+	else if(sys==sys_totdown)
+		out= predicted_.getDependence(mintopmass, maxtopmass, npoints, top_prediction::err_maxdown);
+	else if(sys==sys_totup)
+		out= predicted_.getDependence(mintopmass, maxtopmass, npoints, top_prediction::err_maxup);
+
+	return out;
 }
 
 void  mtFromInclXsec::extract(){
@@ -166,11 +193,12 @@ void  mtFromInclXsec::extract(){
 
 	size_t ybin,xbin;
 	jointlh_.getMax(xbin,ybin);
-	float dummy;
-	jointlh_.getBinCenter(xbin,ybin,mt_,dummy);
+
+	jointlh_.getBinCenter(xbin,ybin,mt_,intxsec_);
 
 	mtup_=onesigmajoint_.getXMax() -mt_;
 	mtdown_=mt_- onesigmajoint_.getXMin() ;
+
 
 
 	size_t xdown=jointlh_.getBinNoX(mt_-mtdown_*2)+1;

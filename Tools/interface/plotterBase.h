@@ -63,7 +63,7 @@ tmplegp_(0),corrm_(0),yspacemulti_(1.3),pad_(0),drawlegend_(true),preparepad_(tr
      size_t size(){return 0;} //to be overwritten by inheriting classes
 
      static bool debug;
-     void addTextBox(float x,float y,const TString & text,float textsize=0.05);
+     void addTextBox(float x,float y,const TString & text,float textsize=0.05,int align=11,int color=1);
      void setTextBoxes(textBoxes tb){textboxes_=tb;}
      void setTextBoxNDC(bool p){tbndc_=p;}
      void removeTextBoxes(){textboxes_.clear();}

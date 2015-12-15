@@ -13,7 +13,7 @@
 
         x0  =  0.55
 	y0  =  0.30
-	x1  =  0.9
+	x1  =  0.85
 	y1  =  0.88
 
 	
@@ -40,7 +40,7 @@
     
     xaxis.titleSize   = 0.06
     xaxis.labelSize   = 0.05
-    xaxis.titleOffset = 0.8
+    xaxis.titleOffset = 1.
     xaxis.labelOffset = 0.005
     xaxis.tickLength  = 0.03
     xaxis.ndiv        = 510
@@ -68,7 +68,7 @@
  
 [containerStyle - Default]
  
-    markerSize   = 0.5
+    markerSize   = 1
     markerStyle  = 20
     markerColor  = 632
  
@@ -83,7 +83,7 @@
     sysFillColor = 632
 
     rootDrawOpt  = Pe1 
-    sysRootDrawOpt  = e2
+    sysRootDrawOpt  = e1
     drawStyle    = normal $ can be other options (TBI)
     
     legendDrawStyle = lp

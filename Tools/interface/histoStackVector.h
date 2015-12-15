@@ -50,6 +50,9 @@ public:
 	const std::vector<ztop::histoStack>& getVector()const{return stacks_;}
 	std::vector<ztop::histoStack>& getVector(){return stacks_;}
 	const ztop::histoStack & getStack(const TString&,size_t startidx=0)const;
+	/**
+	 * Start index is only a way of increasing the performance - no need to be set
+	 */
 	ztop::histoStack & getStack(const TString&,size_t startidx=0);
 	const ztop::histoStack & getStack(unsigned int n)const{return stacks_.at(n);}
 	ztop::histoStack & getStack(unsigned int n){return stacks_.at(n);}

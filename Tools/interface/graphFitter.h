@@ -50,7 +50,7 @@ public:
 	void setXShift(const float& shift){ shiftx_=shift;}
 	void setYShift(const float& shift){ shifty_=shift;}
 
-	graph exportFittedCurve(size_t npoints=100) const;
+	graph exportFittedCurve(size_t npoints=100, float xmin=-1, float xmax=1) const;
 
 	double getFitOutput(const double& xin)const;
 

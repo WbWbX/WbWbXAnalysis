@@ -177,6 +177,8 @@ public:
 
 	void printAdditionalControlplots(const std::string& inputfile, const std::string & configfile,const std::string& prependToOutput)const;
 
+	void printXsecScan(size_t datasetidx, const std::string & outname);//const;
+
 	/**
 	 * just append all in one
 	 */

@@ -121,7 +121,7 @@ double top_prediction::getError( const double& topmass,error_enum error, bool& i
 	if((error == err_maxup || error==err_maxdown)
 			|| error==err_gausup || error==err_gausdown || relerrors_.at(error) != 0){
 
-		bool gausonly=err_gausup || error==err_gausdown;
+		bool gausonly=error==err_gausup || error==err_gausdown;
 
 		isrel=true;
 		if(error<err_nominal)
@@ -324,6 +324,21 @@ void top_prediction::exportLikelihood(histo2D *h,bool scalegaus, bool ignoreunc,
 		} //avoid dagostini bias
 	}
 	//*h*=1/LHmax; // make maximum 1
+}
+
+
+graph top_prediction::getDependence(double intervaldown, double intervalup, size_t npoints,error_enum error)const{
+	if(npoints<1)
+		return graph();
+	graph out(npoints);
+	double increaseint=(intervalup-intervaldown)/((double) npoints-1);
+	for(size_t i=0;i<npoints;i++){
+		double topmass=intervaldown + (double)i*increaseint;
+		double xsec=getXsec(topmass, error);
+		out.setPointXContent(i,topmass);
+		out.setPointYContent(i,xsec);
+	}
+	return out;
 }
 
 }

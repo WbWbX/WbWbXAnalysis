@@ -94,7 +94,8 @@ void plotterMultiplePlots::readStylePriv(const std::string& infile,bool requirea
 			}
 		}
 	}
-	cstyles_.clear();
+	if(requireall)
+		cstyles_.clear();
 	for(size_t i=0;i<ncstyles;i++){ //read until nothing found anymore (exception thrown) - should be done differently..
 		histoStyle temp=defaults;
 		std::string add=toString(i);
@@ -106,13 +107,16 @@ void plotterMultiplePlots::readStylePriv(const std::string& infile,bool requirea
                     << i<< " styles" <<std::endl;
             break;
         } */
-		cstyles_.push_back(temp);
+		if(i<cstyles_.size())
+			cstyles_.at(i)=temp;
+		else
+			cstyles_.push_back(temp);
 	}
 	if(requireall)
 		textboxes_.clear();
 
 	textboxes_.readFromFile(infile,"boxes");
-	legstyle_.readFromFile(infile,"",true);
+	legstyle_.readFromFile(infile,"",requireall);
 
 
 
@@ -133,6 +137,11 @@ float plotterMultiplePlots::getXAxisLowerLimit()const{
 		throw std::out_of_range("plotterMultiplePlots::getXAxisLowerLimit(): plot empty");
 	float min,max;
 	plots_.at(0).getXRange(min,max);
+	for(size_t i=1;i<plots_.size();i++){
+		float tmpmx,tmpmn;
+		plots_.at(i).getXRange(tmpmn,tmpmx);
+		if(tmpmn<min)min=tmpmn;
+	}
 	return min;
 }
 float plotterMultiplePlots::getXAxisHigherLimit()const{
@@ -142,6 +151,11 @@ float plotterMultiplePlots::getXAxisHigherLimit()const{
 		throw std::out_of_range("plotterMultiplePlots::getXAxisHigherLimit(): plot empty");
 	float min,max;
 	plots_.at(0).getXRange(min,max);
+	for(size_t i=1;i<plots_.size();i++){
+		float tmpmx,tmpmn;
+		plots_.at(i).getXRange(tmpmn,tmpmx);
+		if(max<tmpmx)max=tmpmx;
+	}
 	return max;
 }
 
@@ -184,8 +198,11 @@ void plotterMultiplePlots::drawPlots(){
 		tempstyle.yAxisStyle()->min=min;
 	}
 	TH1 * axish=0;
+	graph foraxis=plots_.at(0).getInputGraph();
+	foraxis.addPoint(getXAxisLowerLimit(),foraxis.getYMin(true));
+	foraxis.addPoint(getXAxisHigherLimit(),foraxis.getYMax(true));
 
-	axish=addObject(plots_.at(0).getInputGraph().getAxisTH1(tightyaxis_,tightxaxis_));
+	axish=addObject(foraxis.getAxisTH1(tightyaxis_,tightxaxis_));
 	//  axish->GetYaxis() -> SetRangeUser(ymin,axish->GetYaxis() -> GetXmax()));
 	tempstyle.applyAxisStyle(axish);
 	axish->Draw("AXIS");

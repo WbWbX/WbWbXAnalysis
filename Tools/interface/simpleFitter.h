@@ -145,6 +145,14 @@ public:
 	corrMatrix getCorrelationMatrix()const;
 
 	graph getContourScan(size_t i, size_t j)const;
+	/**
+	 * This is not the same as the minuit scan method!
+	 * The function fixes the parameter to a certain value and then
+	 * minimizes the function.
+	 * This function is multi-threaded. However, it can take a long time to get all
+	 * the points. Try to keep the number as low as feasible
+	 */
+	graph scan(size_t paraidx,const double& from, const double& to, size_t npoints=12)const;
 
 	/**
 	 * gets the contribution of a to b by fixing the parameter a, repeating minos and returning the changes in errup and errdown
