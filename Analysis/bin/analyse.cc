@@ -456,7 +456,7 @@ invokeApplication(){
 	}
 	else if(Syst=="JER_down"){
 		if(energy=="7TeV" || energy=="8TeV"){
-                        ana->getJERAdjuster()->setSystematics("down")
+                        ana->getJERAdjuster()->setSystematics("down");
 			if(!dobtag &&!globalbsf){
 				ana->getBTagSF()->loadBCSF(btagSFFile, btagop,"csv","mujets","up_JER","down_JER");
 				ana->getBTagSF()->setSystematics(bTagSFBase::heavydown);}
