@@ -9,7 +9,9 @@ $  [parameters-begin] until [parameters-end]
 
 $ inputfile,                       legend entry,        color,   xsection,   legendNumber (for sorting,- allows for gaps),  (opt) isSignal
 
-tree_13TeV_emu.root,              data,                1,        1,              99
+tree_13TeV_data_emu.root,              data,                1,        1,              99
+tree_13TeV_data_emu_oct5.root,              data,                1,        1,              99
+tree_13TeV_data_emu_runc.root,              data,                1,        1,              99
 $MuonEG_Trigger.root,               data,                1,        1,              99
 $SingleMu_Trigger.root,             data,                1,        1,              99
 $SingleMu_Trigger2.root,            data,                1,        1,              99
@@ -25,10 +27,10 @@ tree_13TeV_emuttbarbg.root,        t#bar{t}bg,	   	634,	  831.76,	  1
 tree_13TeV_tW.root,                tW/#bar{t}W,	   	616,	  35.6,	          4
 tree_13TeV_tbarW.root,	           tW/#bar{t}W,	   	616,	  35.6,	          4
 
-tree_13TeV_dy1050.root,            DY,                  852,      22635.1,        5  
-tree_13TeV_dy50inf.root,           DY,                  852,      6025.2,         5 
+tree_13TeV_dy1050_lo.root,            DY,                  852,      22635.1,        5  
+tree_13TeV_dy50inf_lo.root,           DY,                  852,      6025.2,         5 
 
-tree_13TeV_wjets.root,		   Wjets,		413,	  61526,	  2
+tree_13TeV_wjets_lo.root,		   Wjets,		413,	  61526,	  2
 
 tree_13TeV_ww.root,		   VV,			390,      118.7,   	  3
 tree_13TeV_wz.root,		   VV,			390,	  44.9,   	  3
@@ -41,12 +43,12 @@ tree_13TeV_zz.root,		   VV,			390,	  15.4,	          3
 [parameters-begin] 
 $$ all directories except for inputfiles are relative to $CMSSW_BASE
 
-inputFilesDir   = /nfs/dust/cms/user/agrohsje/samples/cms/ttxsec_2015_allvtx/ 
+inputFilesDir   = /nfs/dust/cms/user/tarndt/NTuples/Prod_7414/ 
 $inputFilesDir  = /nfs/dust/cms/user/agrohsje/samples/cms/ttxsec_2015_goodvtx/ 
 
-Lumi            = 41.6  $64.78  41.6
+Lumi            = 2109  $64.78  41.6
 
-JECFile         = /src/TtZAnalysis/Analysis/data/analyse/Summer15_50nsV2_DATA_UncertaintySources_AK4PFchs.txt 
+JECFile         = /src/TtZAnalysis/Analysis/data/analyse/Summer15_25nsV6_DATA_UncertaintySources_AK4PFchs.txt 
                                                          
 MuonSFFile      = /src/TtZAnalysis/Analysis/data/analyse/muon_tight_sf2D_13TeV.root
 MuonSFHisto     = SF_totErr  $SF_statErr
@@ -54,21 +56,21 @@ TrackingSFFile  = /src/TtZAnalysis/Analysis/data/analyse/muon_trackSF_8TeV.root
 TrackingSFHisto = tracking_eff
 
 $elec_tight_sf2D_13TeV.root, elec_tight_sf2D_13TeV_1p7systematics.root, elec_tight_sf2D_13TeV_4psystematics.root
-ElecSFFile      = /src/TtZAnalysis/Analysis/data/analyse/elec_tight_sf2D_13TeV.root
+ElecSFFile      = /src/TtZAnalysis/Analysis/data/analyse/elec_tight_sf2D_13TeV_RunD.root
 ElecSFHisto     = GlobalSF
 
-TriggerSFFile   = /src/TtZAnalysis/Analysis/data/analyse/triggerSummary_emu_13TeV.root
+TriggerSFFile   = /src/TtZAnalysis/Analysis/data/analyse/triggerSummary_emu_13TeV_RunD.root
 
 $without .root
 $PUFile         = /src/TtZAnalysis/Analysis/data/analyse/Legacy2012.json_PU  
-PUFile          = /src/TtZAnalysis/Analysis/data/analyse/2015.json_PU 
+PUFile          = /src/TtZAnalysis/Analysis/data/analyse/2015D.json_PU 
 $PUFile         = /src/TtZAnalysis/Analysis/data/analyse/nvtx_data_2015 
 $PUFile         = /src/TtZAnalysis/Analysis/data/analyse/ngoodvtx_data_2015 
 
 $ flat uncertainties of 5/10 % for b/c jets 
 $btagSFFile     = /src/TtZAnalysis/Analysis/data/analyse/CSV_8TeV_5unc.csv
 $ prel. 13 TeV btag SFs
-btagSFFile      = /src/TtZAnalysis/Analysis/data/analyse/CSV_13TeV_prel.csv
+btagSFFile      = /src/TtZAnalysis/Analysis/data/analyse/CSV_13TeV_25ns.csv
 btagFile        = btags_74
 
 $modeOptions = GsfelectronsNotoppt
