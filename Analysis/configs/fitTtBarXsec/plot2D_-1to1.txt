@@ -1,7 +1,7 @@
 $comments
 
 
-
+  nozaxis=false
   zaxis.min = -1.001
   zaxis.max = 1.001
   rootDrawOpt =colz
