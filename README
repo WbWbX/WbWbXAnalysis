@@ -1,5 +1,9 @@
 
 This package contains the TtZAnalysis Framework. 
+
+(For the impatient user: A doxygen documentation can be created with TtZAnalysis/Doxygen/create_docu.sh <optional output directory>)
+
+
 The structure is as follows:
 
 TtZAnalysis/Tools

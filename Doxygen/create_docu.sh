@@ -6,11 +6,32 @@ echo "Must be run in CMSSW environment"
 exit -2
 fi
 
-cd $CMSSW_BASE/src/TtZAnalysis/Doxygen
-rm -rf docu
-mkdir docu
-doxygen config/doxy_config
+DOXYOUT=$CMSSW_BASE/src/TtZAnalysis/Doxygen/docu
+if [[ $1 != "" ]]
+then
+echo "creating documentation in: ${1}"
+DOXYOUT=$1
+else
+echo "using default output directory: ${DOXYOUT}"
+mkdir -p $DOXYOUT
+fi
+
+if [ ! -d $DOXYOUT ]
+then
+echo specified output directory is not a directory
+exit -1
+fi
+
+
+DOXYOUT=`readlink -f $DOXYOUT`
+rm -rf   $DOXYOUT
+mkdir -p $DOXYOUT
+cd $DOXYOUT
+export DOXYOUT=$DOXYOUT
+
+doxygen $CMSSW_BASE/src/TtZAnalysis/Doxygen/config/doxy_config
 
 echo Documentation created. The documentation for the browser can be opened with:
-echo "file://${CMSSW_BASE}/src/TtZAnalysis/Doxygen/docu/html/index.html"
+
+echo "file://${DOXYOUT}/html/index.html"
 
