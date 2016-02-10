@@ -6,25 +6,23 @@ echo "Must be run in CMSSW environment"
 exit -2
 fi
 
+
+
 DOXYOUT=$CMSSW_BASE/src/TtZAnalysis/Doxygen/docu
 if [[ $1 != "" ]]
 then
-echo "creating documentation in: ${1}"
 DOXYOUT=$1
-else
-echo "using default output directory: ${DOXYOUT}"
-mkdir -p $DOXYOUT
 fi
 
-if [ ! -d $DOXYOUT ]
+DOXYOUT=`readlink -f $DOXYOUT`
+
+if [ ! -d `dirname $DOXYOUT` ]
 then
-echo specified output directory is not a directory
+echo specified output is not in a directory
 exit -1
 fi
 
-
-DOXYOUT=`readlink -f $DOXYOUT`
-rm -rf   $DOXYOUT
+rm -rf $DOXYOUT
 mkdir -p $DOXYOUT
 cd $DOXYOUT
 export DOXYOUT=$DOXYOUT
