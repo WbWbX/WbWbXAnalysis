@@ -44,7 +44,7 @@ public:
 
 	void cleanMem();
 	void printToPdf(const std::string& outname);
-
+	void printToPng(const std::string& outname);
 
     bool hasRatio()const{return true;}
     float getYSpaceMulti(bool logar,bool divbw)const{return yspacemulti_;}
@@ -57,7 +57,7 @@ protected:
 	// void drawTextBoxes();
 	void drawLegends();
 	void refreshPad();
-
+	void adjustCanvas(TCanvas *p);
 
 	std::vector<plotterBase*> plotter_;
 
@@ -94,7 +94,7 @@ private:
 	/*
 	float bottommarg_,topmarg_,leftmarg_,rightmarg_;*/
 
-
+	float resolutionmultiplier_;
 
 };
 

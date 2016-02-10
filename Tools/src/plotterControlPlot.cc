@@ -373,7 +373,7 @@ void plotterControlPlot::drawControlPlot(){
 			}
 			else{
 				stackedhistos.push_back(0);
-				legendentries.push_back("data");
+				legendentries.push_back(usestack->dataleg_);
 			}
 		}
 		//draw in inverse order

@@ -10,6 +10,8 @@ $$ merged name, merged color, contrA, contrB, ...
   $$ VV/t#bar{t}V, 390, t#bar{t}V, VV
    
    tW/#bar{t}W, 616, tW/#bar{t}W#rightarrowll
+  
+   Data , 0 , data
 
 [end - merge legends]
 
@@ -18,7 +20,13 @@ $$ merged name, merged color, contrA, contrB, ...
 [merge for pre-fit plots]
 [merge legends]
 
+ tW/#bar{t}W, 616, tW/#bar{t}W#rightarrowll
  DY      ,     868, DY#rightarrowll, DY#rightarrow#tau#tau
+ QCD/W+jets , 413, QCD/Wjets
+ Data , 0 , data
+ 
+  t#bar{t} bkg. , 634 , t#bar{t}bg
+ 
  [end - merge legends]
 [end - merge for pre-fit plots]
 

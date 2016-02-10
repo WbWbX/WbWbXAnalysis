@@ -371,12 +371,12 @@ void  ttbarXsecFitter::printControlStack(bool fittedvalues,size_t bjetcat,size_t
 	}
 	plotterMultiStack plm;
 	plm.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiStack_standard.txt");
-	/* if(!fittedvalues)
+	 if(!fittedvalues)
 		plm.addStyleForAllPlots(getenv("CMSSW_BASE")
 				+(std::string)"/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/controlPlots_mergeleg.txt",
 				"[merge for pre-fit plots]",
 				"[end - merge for pre-fit plots]");
-	 */
+
 	plm.readTextBoxesInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiStack_standard.txt",
 			toString(bjetcat)+"btag"+toString( datasets_.at(datasetidx).getName()));
 
@@ -425,6 +425,7 @@ void  ttbarXsecFitter::printControlStack(bool fittedvalues,size_t bjetcat,size_t
 
 
 	plm.printToPdf(add.Data());
+	plm.printToPng(add.Data());
 
 	//TCanvas cv;
 	//plm.usePad(&cv);
@@ -1218,13 +1219,13 @@ histoStack ttbarXsecFitter::applyParametersToStack(const histoStack& stack, size
 	background.setXAxisName(stack.getSignalContainer().getXAxisName());
 
 	out=histoStack();
-
-	out.push_back(data,"data",1,1,99);
-	out.push_back(background,"background",kGreen-9,1,2);
+	out.setDataLegend("Data");
+	out.push_back(data,"Data",1,1,99);
+	out.push_back(background,"Background",kGreen-9,1,2);
 	if(topontop_)
-		out.push_back(signal,"signal",633,1,3);
+		out.push_back(signal,"Signal",633,1,3);
 	else
-		out.push_back(signal,"signal",633,1,1);
+		out.push_back(signal,"Signal",633,1,1);
 
 	out.setName(stack.getName() + "_" + datasets_.at(datasetidx).getName());
 

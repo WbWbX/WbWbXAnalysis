@@ -14,7 +14,7 @@
 
 namespace ztop{
 
-plotterMultiColumn::plotterMultiColumn():plotterBase(), corrm_(0),globalleg_(0)/*,bottommarg_(.1),topmarg_(.1),leftmarg_(.1),rightmarg_(.1)*/{
+plotterMultiColumn::plotterMultiColumn():plotterBase(), corrm_(0),globalleg_(0),resolutionmultiplier_(1.5)/*,bottommarg_(.1),topmarg_(.1),leftmarg_(.1),rightmarg_(.1)*/{
 
 }
 
@@ -26,17 +26,10 @@ void plotterMultiColumn::preparePad(){
 	size_t cols=plotter_.size();
 
 	p->Divide(cols,1);
-
-	int w=0;//p->GetWw() * (int)plotter_.size();
 	float totallength=0;
 	for(size_t i=0;i<separators_.size();i++){
-		w+=separators_.at(i)*p->GetWw();
 		totallength+=separators_.at(i);
 	}
-	int h=p->GetWh();
-	p->SetCanvasSize(w,h); //add some resolution for png conversion
-
-
 	p->cd(1)->SetPad(0,0,separators_.at(0)/totallength,1);
 	float sepsum=separators_.at(0)/totallength;
 	for(size_t i=1;i<separators_.size()-1;i++){
@@ -46,9 +39,19 @@ void plotterMultiColumn::preparePad(){
 	p->cd(separators_.size())->SetPad(sepsum,0,1,1);
 
 
-
-
 }
+void plotterMultiColumn::adjustCanvas(TCanvas *p){
+	if(!p)return;
+	int w=0;//p->GetWw() * (int)plotter_.size();
+	float totallength=0;
+	for(size_t i=0;i<separators_.size();i++){
+		w+=separators_.at(i)*p->GetWw();
+		totallength+=separators_.at(i);
+	}
+	int h=p->GetWh();
+	p->SetCanvasSize(w,h); //add some resolution for png conversion //DEBUG
+}
+
 void plotterMultiColumn::drawPlots(){
 
 	if(plotter_.size()!=plotter_.size())
@@ -179,6 +182,17 @@ void plotterMultiColumn::refreshPad(){
  * goes via bitmap to overcome roots PS processor restrictions
  */
 void plotterMultiColumn::printToPdf(const std::string& outname){
+	std::string outnamepng=(std::string)std::tmpnam(nullptr)+outname;
+	printToPng(outnamepng);
+	outnamepng+=".png";
+	TString syscall="convert "+outnamepng+" -quality 100 " + outname+".pdf" ;
+	system(syscall);
+	TString delcall="rm -f "+outnamepng;
+	system(delcall);
+}
+
+
+void plotterMultiColumn::printToPng(const std::string& outname){
 	TVirtualPad * oldpad=0;
 	try{
 		oldpad=getPad();
@@ -187,19 +201,13 @@ void plotterMultiColumn::printToPdf(const std::string& outname){
 
 
 	usePad(&c);
+	adjustCanvas(&c);
 	draw();
 	TString outnamepng=outname;
 	outnamepng+=".png";
 	c.Print(outnamepng);
-	TString syscall="convert "+outnamepng+" -density 2400 -quality 100 " + outname+".pdf" ;
-	system(syscall);
-	TString delcall="rm -f "+outnamepng;
-	//system(delcall);
 	usePad(oldpad);
 }
-
-
-
 
 void plotterMultiColumn::readStylePrivMarker(const std::string& infile,bool requireall,const std::string& marker){
 	fileReader fr;

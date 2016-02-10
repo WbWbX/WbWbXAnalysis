@@ -33,7 +33,9 @@ defaultStyle = src/TtZAnalysis/Analysis/configs/fitTtBarXsec/controlPlots_standa
 		 yaxis.max      = 10000
       [end plotStyle]
       [plotStyle - Ratio]
-		 xaxis.name = leading lepton #eta
+		 xaxis.name = Leading lepton #eta
+		 yaxis.max=1.3
+		 yaxis.min=0.7
       [end plotStyle]
       
        [legendStyle]
@@ -61,7 +63,9 @@ defaultStyle = src/TtZAnalysis/Analysis/configs/fitTtBarXsec/controlPlots_standa
 		 yaxis.max      = 10000
       [end plotStyle]
       [plotStyle - Ratio]
-		 xaxis.name = subleading lepton #eta
+		 xaxis.name = Subleading lepton #eta
+		 yaxis.max=1.3
+		 yaxis.min=0.7
       [end plotStyle]
 
        [legendStyle]
@@ -85,9 +89,12 @@ defaultStyle = src/TtZAnalysis/Analysis/configs/fitTtBarXsec/controlPlots_standa
 [plot - lead lepton pt step 8]
         [plotStyle - Upper]
             yaxis.max=580
+            yaxis.ndiv        = 507
        [end plotStyle]
       [plotStyle - Ratio]
-		 xaxis.name = leading lepton p_{T} [GeV]
+		 xaxis.name = Leading lepton p_{T} [GeV]
+		 yaxis.max=1.3
+		 yaxis.min=0.7
       [end plotStyle]
        [textBoxes - boxes]
           externalFile = CMSSW_BASE/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt
@@ -97,9 +104,12 @@ defaultStyle = src/TtZAnalysis/Analysis/configs/fitTtBarXsec/controlPlots_standa
 [plot - seclead lepton pt step 8]
         [plotStyle - Upper]
             yaxis.max=1350
+            yaxis.ndiv        = 508
        [end plotStyle]
       [plotStyle - Ratio]
-		 xaxis.name = subleading lepton p_{T} [GeV]
+		 xaxis.name = Subleading lepton p_{T} [GeV]
+		 yaxis.max=1.3
+		 yaxis.min=0.7
       [end plotStyle]
 
       [textBoxes - boxes]
@@ -119,10 +129,12 @@ defaultStyle = src/TtZAnalysis/Analysis/configs/fitTtBarXsec/controlPlots_standa
        [end - textBoxes]
 
   [plotStyle - Upper]
+        $ yaxis.ndiv        = 508
 		 xaxis.ndiv        = 504
 		 yaxis.max=17100
       [end plotStyle]
        [plotStyle - Ratio]
+		 xaxis.name = Number of b-tagged jets
 		 xaxis.ndiv        = 504
 		 yaxis.max=1.95
 		 yaxis.min=0.45
@@ -164,7 +176,9 @@ nolegend = true
 		 yaxis.max      = 50000
       [end plotStyle]
       [plotStyle - Ratio]
-		 xaxis.name = leading lepton #eta
+		 xaxis.name = Leading lepton #eta
+		 yaxis.max=1.3
+		 yaxis.min=0.7
       [end plotStyle]
 
        [legendStyle]
@@ -192,7 +206,9 @@ nolegend = true
 		 yaxis.max      = 50000
       [end plotStyle]
       [plotStyle - Ratio]
-		 xaxis.name = subleading lepton #eta
+		 xaxis.name = Subleading lepton #eta
+		 yaxis.max=1.3
+		 yaxis.min=0.7
       [end plotStyle]
 
        [legendStyle]
@@ -218,7 +234,9 @@ nolegend = true
             yaxis.max=2400
        [end plotStyle]
       [plotStyle - Ratio]
-		 xaxis.name = leading lepton p_{T} [GeV]
+		 xaxis.name = Leading lepton p_{T} [GeV]
+		 yaxis.max=1.3
+		 yaxis.min=0.7
       [end plotStyle]
        [textBoxes - boxes]
           externalFile = CMSSW_BASE/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt
@@ -229,9 +247,12 @@ nolegend = true
 
         [plotStyle - Upper]
             yaxis.max=6000
+            yaxis.ndiv        = 508
        [end plotStyle]
       [plotStyle - Ratio]
-		 xaxis.name = subleading lepton p_{T} [GeV]
+		 xaxis.name = Subleading lepton p_{T} [GeV]
+		 yaxis.max=1.3
+		 yaxis.min=0.7
       [end plotStyle]
       [textBoxes - boxes]
           externalFile = CMSSW_BASE/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt
@@ -251,8 +272,10 @@ nolegend = true
         [plotStyle - Upper]
 		 xaxis.ndiv        = 504
 		 yaxis.max=77300
+          $  yaxis.ndiv        = 508
       [end plotStyle]
        [plotStyle - Ratio]
+		 xaxis.name = Number of b-tagged jets
 		 xaxis.ndiv        = 504
 		 yaxis.max=1.95
 		 yaxis.min=0.45
@@ -292,6 +315,7 @@ some temps here
 		 yaxis.log =true
       [end plotStyle]
        [plotStyle - Ratio]
+		 xaxis.name = Number of b-tagged jets
 		 xaxis.ndiv        = 504
 		 yaxis.max=1.95
 		 yaxis.min=0.45
@@ -324,6 +348,7 @@ some temps here
 		 yaxis.log =true
       [end plotStyle]
        [plotStyle - Ratio]
+		 xaxis.name = Number of b-tagged jets
 		 xaxis.ndiv        = 504
 		 yaxis.max=1.95
 		 yaxis.min=0.45

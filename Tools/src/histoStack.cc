@@ -146,6 +146,12 @@ void histoStack::push_back(const ztop::histo1DUnfold& cont,const TString& legend
 	}
 
 }
+void histoStack::setDataLegend(TString leg){
+	std::vector<TString>::iterator datapos=std::find(legends_.begin(),legends_.end(),dataleg_);
+	if(datapos != legends_.end())
+		*datapos=leg;
+	dataleg_=leg;
+}
 
 void histoStack::setLegendOrder(const TString &leg, const size_t& no){
 	for(size_t i=0;i<legends_.size();i++){
@@ -184,7 +190,10 @@ void histoStack::mergeLegends(const std::vector<TString>& tobemerged,const TStri
 
 
 	if(idxstbm.size()<2){
-		if(idxstbm.size()>0)
+		if(std::find(tobemerged.begin(),tobemerged.end(), dataleg_ ) != tobemerged.end()){
+			setDataLegend(mergedname);
+		}
+		else if(idxstbm.size()>0)
 			legends_.at(idxstbm.at(0)) = mergedname;
 		return;
 	}
@@ -288,6 +297,9 @@ void histoStack::mergeLegends(const std::vector<TString>& tobemerged,const TStri
 	signals_=newsignals;
 
 
+	if(std::find(tobemerged.begin(),tobemerged.end(), dataleg_ ) != tobemerged.end()){
+		setDataLegend(mergedname);
+	}
 }
 void histoStack::mergeLegends(const TString& tobemergeda,const TString & tobemergedb,const TString & mergedname, int mergedColor, bool allowsignal){
 	std::vector<TString> tbm;
@@ -1733,6 +1745,7 @@ size_t histoStack::getDataIdx()const{
 			return i;
 		}
 	}
+	std::cout << "was searching for " << dataleg_ << std::endl;
 	throw std::runtime_error("containerStack::getDataIdx: no data index!");
 }
 

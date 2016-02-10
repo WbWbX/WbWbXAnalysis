@@ -19,10 +19,10 @@ $$$ comments
 	  $  frac2=0.75
 	  $  frac3=0.85
 	  
-	    frac0=0.7
-	    frac1=0.7
-	    frac2=0.583
-	    frac3=0.66
+	    frac0=0.6
+	    frac1=0.8
+	    frac2=0.6
+	    frac3=0.666667
 	    
 	    connectUpperYAxis = 1|2|3
 	 
@@ -31,12 +31,12 @@ $$$ comments
 
 [textBoxes - boxes]
 
-	   0.127 , 0.865, 0 add. jets,   0.048,  42, 31
-	   0.445  , 0.865, 1 add. jet,   0.048,  42, 31
-	   0.665 , 0.865, 2 add. jet,   0.048,  42, 31
-	   0.89 , 0.865, #geq3 add. jet,   0.048,  42, 31
+	   0.127 , 0.865, 0 add. jets,         0.048,  42, 31
+	   0.417 , 0.865, 1 additional jet,    0.048,  42, 21
+	   0.638 , 0.865, 2 additional jets,    0.048,  42, 21
+	   0.862 , 0.865, #geq3 additional jets, 0.048,  42, 21
 	   
-$	   0.965,   0.85,   CMS,   0.06, 61, 31
+	   0.965,   0.85,   CMS,   0.06, 61, 31
 $	   0.965,   0.79,   Preliminary,   0.0456, 52, 31
 [end - textBoxes]
 

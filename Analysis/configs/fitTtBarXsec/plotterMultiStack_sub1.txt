@@ -7,14 +7,14 @@
 
     bottomMargin  = 0.03
     topMargin     = 0.1
-    leftMargin    = 0.15
+    leftMargin    = 0.25
     rightMargin   = 0.0
     
     
     
     yaxis.titleSize   = 0.07
     yaxis.labelSize   = 0.06
-    yaxis.titleOffset = 1.4
+    yaxis.titleOffset = 1.225
     yaxis.labelOffset = 0.005
     yaxis.tickLength  = 0.03
     yaxis.ndiv        = 510
@@ -29,12 +29,12 @@
     
     bottomMargin  = 0.45
     topMargin     = 0.01
-    leftMargin    = 0.15
+    leftMargin    = 0.25
     rightMargin   = 0.0
     
     yaxis.titleSize   = 0.07
     yaxis.labelSize   = 0.06
-    yaxis.titleOffset = 1.4
+    yaxis.titleOffset = 1.225
     yaxis.labelOffset = 0.005
 
     

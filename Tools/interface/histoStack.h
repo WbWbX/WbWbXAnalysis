@@ -44,7 +44,7 @@ public:
 	void push_back(const ztop::histo1DUnfold&,const TString&, int, double, int legord=99999); //! adds container with, name, colour, norm to stack
 	void removeContribution(TString); //! removes contribution
 
-	void setDataLegend(TString leg="data"){dataleg_=leg;}
+	void setDataLegend(TString leg="data");
 
 	void setLegendOrder(const TString &leg, const size_t& no);
 
