@@ -9,15 +9,13 @@ $  [parameters-begin] until [parameters-end]
 
 $ inputfile,                       legend entry,        color,   xsection,   legendNumber (for sorting,- allows for gaps),  (opt) isSignal
 
-   tree_13TeV_data_emu.root,              data,                1,        1,              99
-   tree_13TeV_data_emu_RunC.root,              data,                1,        1,              99
+  tree_13TeV_data_mumu.root,              data,                1,        1,              99
+  tree_13TeV_data_mumu_RunC.root,              data,                1,        1,              99
 $tree_13Tev_data_MET_RunC.root,              data,                1,        1,              99
 $tree_13Tev_data_MET.root,              data,                1,        1,              99
 $MuonEG_Trigger.root,               data,                1,        1,              99
-    tree_13TeV_data_singleEle.root,             data,                1,        1,              99
-    tree_13TeV_data_singleEle_RunC.root,            data,                1,        1,              99
-    tree_13TeV_data_singleMu.root,            data,                1,        1,              99
-    tree_13TeV_data_singleMu_RunC.root,            data,                1,        1,              99
+   tree_13TeV_data_singleMu_mumu.root,             data,                1,        1,              99
+   tree_13TeV_data_singleMu_mumu_RunC.root,            data,                1,        1,              99
 
 $ add tag "_mgbr" if W->lnu BR is 11.104% and not 10.620% 
 $tree_13TeV_emuttbar_amc_mgbr.root,     t#bar{t},		633,	  831.76,	  0,      true   
@@ -63,9 +61,9 @@ TrackingSFHisto = tracking_eff
 
 $elec_tight_sf2D_13TeV.root, elec_tight_sf2D_13TeV_1p7systematics.root, elec_tight_sf2D_13TeV_4psystematics.root
 ElecSFFile      = /src/TtZAnalysis/Analysis/data/analyse/elec_tight_sf2D_13TeV_RunD.root
-ElecSFHisto     = EGamma_SF2D  $GlobalSF
+ElecSFHisto     = EGamma_SF2D
 
-TriggerSFFile   = /src/TtZAnalysis/Analysis/data/analyse/triggerSummary_emu_13TeV_2015_siLep.root
+TriggerSFFile   = /src/TtZAnalysis/Analysis/data/analyse/triggerSummary_mumu_13TeV_2015_siLep.root
 
 $without .root
 $PUFile         = /src/TtZAnalysis/Analysis/data/analyse/Legacy2012.json_PU  
