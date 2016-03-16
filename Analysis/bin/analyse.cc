@@ -190,7 +190,7 @@ invokeApplication(){
 		ana->getPUReweighter()->setMCDistrSum12();
 	}
 	else if(energy == "13TeV"){
-		ana->getPUReweighter()->setMCDistrSum15("25ns_poisson");
+		ana->getPUReweighter()->setMCDistrFall15("25ns_poisson");
 	}	   
 
 	ana->getElecSF()->setInput(elecsffile,elecsfhisto);
@@ -229,8 +229,8 @@ invokeApplication(){
 	BTagEntry::OperatingPoint btagop=BTagEntry::OP_TIGHT;
 	if(energy == "13TeV"){
 		//agrohsje
-		//ana->getBTagSF()->loadSF  (btagSFFile, BTagEntry::OP_MEDIUM,"csvv2_50ns","mujets","up","down");
-		ana->getBTagSF()->loadSF  (btagSFFile, BTagEntry::OP_TIGHT,"csvv2_50ns","mujets","up","down");
+		ana->getBTagSF()->loadSF  (btagSFFile, BTagEntry::OP_MEDIUM,"csvv2","mujets","up","down");
+		//ana->getBTagSF()->loadSF  (btagSFFile, BTagEntry::OP_TIGHT,"csvv2","mujets","up","down");
 	}else if (energy == "7TeV" || energy == "8TeV"){
 		if(mode.Contains("Btagloosewp"))
 			btagop=BTagEntry::OP_LOOSE;
@@ -569,10 +569,8 @@ invokeApplication(){
 	}
 	else if(Syst=="TT_GENPOWHERW_up"){
 		//agrohsje fix after proper renaming
-		//ana->setFilePostfixReplace("ttbar.root","ttbar_powhpp.root");
-		//ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_powhpp.root");
-		ana->setFilePostfixReplace("ttbar.root","ttbar_p6.root");
-		ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_p6.root");
+		ana->setFilePostfixReplace("ttbar.root","ttbar_powher.root");
+		ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_powher.root");
 	}
 	else if(Syst=="TT_GENPOWHERW_down"){
 		//this is just default sample
@@ -641,6 +639,8 @@ invokeApplication(){
 		else if (energy == "13TeV"){
 			ana->setFilePostfixReplace("ttbar.root","ttbar_mt"+topmass+".root");
 			ana->setFilePostfixReplace("ttbarbg.root","ttbarbg_mt"+topmass+".root");
+                        ana->setFilePostfixReplace("tW.root","tW_mt"+topmass+".root" );
+                        ana->setFilePostfixReplace("tbarW.root","tbarW_mt"+topmass+".root" );
 		}
 		if(topmass == "178.5" || topmass == "166.5"){
 				ana->setFilePostfixReplace("_tWtoLL.root","_tWtoLL_mt"+topmass+ ".root");
