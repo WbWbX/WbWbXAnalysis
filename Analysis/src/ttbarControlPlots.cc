@@ -93,6 +93,32 @@ void ttbarControlPlots::makeControlPlots(const size_t & step){
 	FILLFOREACH(genleptons3,eta());
 
 
+
+
+        SETBINSRANGE(40,0,400);
+        addPlot("gen top pt", "p_{T}[GeV]","N_{l}/GeV");
+        FILLFOREACH(gentops,pt());
+
+        SETBINSRANGE(40,-4,4);
+        addPlot("gen top eta", "#eta_{t}]","N_{l}/bw");
+        FILLFOREACH(gentops,eta());
+   
+        SETBINSRANGE(40,0,200);
+        addPlot("gen pt ttbar", "p_{T}[GeV]","N_{l}/GeV");
+        if(event()->gentops && event()->gentops->size() > 1) {
+                float pttt= (event()->gentops->at(0)->p4() + event()->gentops->at(1)->p4()).pt();
+                last()->fill(pttt);
+        }
+
+        SETBINSRANGE(40,0,200);
+        addPlot("gen m ttbar ", "#m_{tt}]","N_{l}/bw");
+        if(event()->gentops && event()->gentops->size() > 1) {
+                float mtt= (event()->gentops->at(0)->p4() + event()->gentops->at(1)->p4()).m();
+                last()->fill(mtt);
+        }
+
+
+
 	///LEPTONS
 
 	SETBINS << -2.4 << -2.1 << -1.47 << -0.8 << 0.8 << 1.47 << 2.1 << 2.4;
