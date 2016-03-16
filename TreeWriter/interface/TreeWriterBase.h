@@ -166,6 +166,7 @@ public:
   std::vector<unsigned int> triggerPrescales_;
   std::map<std::string,unsigned int> alltriggerswithprescales_;
   std::vector<std::string> firedtriggers_;//not used, but left for comparisons 
+  std::string triggerProcess_;
 
   void setTriggers();
   void runTriggerAOD(const edm::Event&);
