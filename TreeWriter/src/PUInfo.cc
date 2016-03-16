@@ -151,7 +151,7 @@ PUInfo::PUInfo(const edm::ParameterSet& iConfig)
 		consumeTemplate<std::vector<double>>(pdfweights_);
 	}
 	#ifdef CMSSW_LEQ_5
-		consumeTemplate<LHERunInfoProduct>(InputTag("externalLHEProducer"));
+		consumeTemplate<LHERunInfoProduct>(edm::InputTag("externalLHEProducer"));
 	#endif
 
 }
