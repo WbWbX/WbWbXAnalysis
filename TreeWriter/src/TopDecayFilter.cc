@@ -12,6 +12,7 @@
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 #include "../../DataFormats/interface/mathdefs.h"
 
+#include "TopAnalysis/ZTopUtils/interface/consumeTemplate.h"
 
 /**
   \class   TopDecayFilter TopDecayFilter.cc "TtZAnalysis/Treewriter/src/TopDecayFilter.cc"
@@ -26,7 +27,7 @@ using namespace std;
 
 
 
-class TopDecayFilter : public edm::EDFilter {
+class TopDecayFilter : public FilterTemplate {
  public:
   /// default constructor
   explicit TopDecayFilter(const edm::ParameterSet&);
@@ -59,6 +60,7 @@ TopDecayFilter::TopDecayFilter(const edm::ParameterSet& cfg) :
   src_              (cfg.getParameter<edm::InputTag>("src"       )),
   invert_           (cfg.getParameter<bool>("invert"   ))              
 {
+	consumeTemplate<reco::GenParticleCollection>(src_);
 }
 
 

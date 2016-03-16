@@ -24,6 +24,7 @@
 #define TREEWRITERBASE_H
 
 #include "TtZAnalysis/Configuration/interface/version.h"
+#include "TopAnalysis/ZTopUtils/interface/consumeTemplate.h"
 
 #include <memory>
 
@@ -120,7 +121,7 @@
 // class declaration
 //
 
-class TreeWriterBase : public edm::EDAnalyzer {
+class TreeWriterBase : public AnalyzerTemplate {
 public:
   // explicit TreeWriterBase(){};
   explicit TreeWriterBase(const edm::ParameterSet&);

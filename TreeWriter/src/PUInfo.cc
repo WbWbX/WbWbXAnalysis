@@ -74,11 +74,13 @@
 
 #include <cstring>
 
+#include "TopAnalysis/ZTopUtils/interface/consumeTemplate.h"
+
 //
 // class declaration
 //
 
-class PUInfo : public edm::EDAnalyzer {
+class PUInfo : public AnalyzerTemplate {
 public:
 	explicit PUInfo(const edm::ParameterSet&);
 	~PUInfo();
@@ -141,6 +143,16 @@ PUInfo::PUInfo(const edm::ParameterSet& iConfig)
 
 
 	printLHE_=false;
+
+	consumeTemplate<reco::GenParticleCollection>(edm::InputTag("genParticles"));
+	consumeTemplate<std::vector<reco::Vertex>>(vertices_);
+	consumeTemplate<std::vector<PileupSummaryInfo>>(puinfo_);
+	if(includepdfweights_){
+		consumeTemplate<std::vector<double>>(pdfweights_);
+	}
+	#ifdef CMSSW_LEQ_5
+		consumeTemplate<LHERunInfoProduct>(InputTag("externalLHEProducer"));
+	#endif
 
 }
 

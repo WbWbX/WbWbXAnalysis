@@ -33,11 +33,13 @@
 
 #include <iostream>
 
+#include "TopAnalysis/ZTopUtils/interface/consumeTemplate.h"
+
 //
 // class declaration
 //
 
-class SimpleCounter : public edm::EDFilter {
+class SimpleCounter : public FilterTemplate {
 public:
     explicit SimpleCounter(const edm::ParameterSet&);
     ~SimpleCounter();
@@ -86,6 +88,9 @@ SimpleCounter::SimpleCounter(const edm::ParameterSet& iConfig)
     #ifndef CMSSW_LEQ_5
     produces<bool>();
     #endif
+    for(std::vector<edm::InputTag>::const_iterator input=inputs_.begin(); input<inputs_.end();++input){
+        consumeTemplate<reco::CandidateView>(*input);
+    }
 }
 
 

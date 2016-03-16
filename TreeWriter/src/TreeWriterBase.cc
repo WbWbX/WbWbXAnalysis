@@ -98,6 +98,8 @@ TreeWriterBase::TreeWriterBase(const edm::ParameterSet& iConfig)
 	std::cout << "writing GSF: " << gsfelecs_ << std::endl;
 	std::cout << "writing PFElecs: " << pfelecs_ << std::endl;
 
+	triggerProcess_="HLT";
+
 	if(triggerObjects_.size() > 0 && includetrigger_){
 		std::cout << "writing trigger objects: " << std::endl;
 		for(size_t i=0;i<triggerObjects_.size();i++)
@@ -125,6 +127,76 @@ TreeWriterBase::TreeWriterBase(const edm::ParameterSet& iConfig)
 	//set trigger bools
 	setTriggers();
 
+	consumeTemplate<std::vector<pat::Muon >>(muons_);
+	consumeTemplate<std::vector<pat::Electron >>(gsfelecs_);
+	consumeTemplate<std::vector<pat::Electron >>(pfelecs_);
+	consumeTemplate<std::vector<pat::Jet>>(jets_);
+	consumeTemplate<std::vector<pat::MET>>(met_);
+	consumeTemplate<std::vector<pat::MET>>(mvamet_);
+	consumeTemplate<std::vector<pat::MET>>(t1met_);
+	consumeTemplate<std::vector<pat::MET>>(t0t1txymet_);
+	consumeTemplate<std::vector<pat::MET>>(t0t1met_);
+	consumeTemplate<std::vector<pat::MET>>(t1txymet_);
+        consumeTemplate<std::vector<reco::Vertex>>(vertices_);
+        consumeTemplate<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"));
+        consumeTemplate<bool>(edm::InputTag("filterkinLeptons"));
+	if(includereco_){
+		if(pfElecCands_)
+			consumeTemplate<std::vector<reco::PFCandidate>>(recoelecs_);
+		else
+			consumeTemplate<std::vector<reco::GsfElectron>>(recoelecs_);
+
+		if(pfMuonCands_)
+			consumeTemplate<std::vector<reco::PFCandidate>>(recomuons_);
+		else
+			consumeTemplate<std::vector<reco::Muon>>(recomuons_);
+
+		consumeTemplate<std::vector<reco::Track>>(recotracks_);
+		consumeTemplate<std::vector<reco::SuperCluster>>(recosuclus_);
+	}
+	if(runonaod_){
+		consumeTemplate<pat::TriggerEvent>(pattriggerevent_);
+		if(includetrigger_){
+			consumeTemplate<trigger::TriggerEvent>(edm::InputTag("hltTriggerSummaryAOD", "", triggerProcess_));
+			consumeTemplate<edm::TriggerResults>(trigresults_);
+		}
+	}
+    #ifndef CMSSW_LEQ_5
+		else if (includetrigger_){
+			consumeTemplate<edm::TriggerResults>(trigresults_);
+			consumeTemplate<pat::TriggerObjectStandAloneCollection>(edm::InputTag("selectedPatTrigger"));
+			consumeTemplate<pat::PackedTriggerPrescales>(edm::InputTag("patTrigger"));
+		}
+	#endif
+	consumeTemplate<std::vector<PileupSummaryInfo>>(puinfo_);
+	consumeTemplate<double>(rhoiso_);
+	if(includepdfweights_ ){
+		consumeTemplate<std::vector<double>>(pdfweights_);
+	}
+	consumeTemplate<reco::GenParticleCollection>(genparticles_);
+	if(includegen_){
+		consumeTemplate<reco::GenJetCollection>(genjets_);
+	}
+	edm::Handle<std::vector<std::vector<int> > > genBHadPlusMothersIndices;
+	edm::Handle<std::vector<int> > genBHadFlavour;
+	edm::Handle<std::vector<int> > genBHadJetIndex;
+	edm::Handle<std::vector<reco::GenParticle> > genBHadPlusMothers;
+	edm::Handle<std::vector<int> > genBHadIndex;
+
+	if(useBHadrons_){
+
+		consumeTemplate<std::vector<std::vector<int> >>(genBHadPlusMothersIndices_);
+		consumeTemplate<std::vector<int>>(genBHadFlavour_);
+		consumeTemplate<std::vector<int>>(genBHadJetIndex_);
+		consumeTemplate<std::vector<reco::GenParticle>>(genBHadPlusMothers_);
+		consumeTemplate<std::vector<int>>(genBHadIndex_);
+	}
+	if(weightnames_.size()>0){
+		for(size_t i=0;i<weightnames_.size();i++){
+			edm::Handle<double> weight;
+			consumeTemplate<double>(edm::InputTag(weightnames_.at(i)));
+		}
+	}
 }
 
 
@@ -1256,9 +1328,9 @@ void TreeWriterBase::setTriggers(){
 
 void TreeWriterBase::runTriggerAOD(const edm::Event& iEvent){
 
-    edm::Handle< pat::TriggerEvent > triggerEvent;
-    iEvent.getByLabel(pattriggerevent_ , triggerEvent );
-    const std::vector< pat::TriggerPath > * paths=triggerEvent->paths();
+    edm::Handle< pat::TriggerEvent > patTriggerEvent;
+    iEvent.getByLabel(pattriggerevent_ , patTriggerEvent );
+    const std::vector< pat::TriggerPath > * paths=patTriggerEvent->paths();
     if(!paths){
 	std::cout << "paths pointer=0; exit" << std::endl;
 	std::exit(EXIT_FAILURE);
@@ -1280,7 +1352,7 @@ void TreeWriterBase::runTriggerAOD(const edm::Event& iEvent){
     }
     //////////////// TRIGGER OBJECTS!!!! ////////
     if(includetrigger_){
-	std::string triggerProcess_="HLT";
+
 	if(debugmode) std::cout << "starting trigger object loops (HLT)" << std::endl;
 	edm::Handle<trigger::TriggerEvent> triggerEvent;
 	iEvent.getByLabel(edm::InputTag("hltTriggerSummaryAOD", "", triggerProcess_), triggerEvent);

@@ -41,10 +41,12 @@
 
 #include <iostream>
 
+#include "TopAnalysis/ZTopUtils/interface/consumeTemplate.h"
+
 // class declaration
 //
 
-class genInfoTreeWriter : public edm::EDAnalyzer {
+class genInfoTreeWriter : public AnalyzerTemplate {
    public:
       explicit genInfoTreeWriter(const edm::ParameterSet&);
       ~genInfoTreeWriter();
@@ -91,6 +93,7 @@ genInfoTreeWriter::genInfoTreeWriter(const edm::ParameterSet& iConfig)
 
    std::cout << "n\n################## genInfoTreeWriter writer ######################" 
 	     << std::endl;
+   consumeTemplate<GenEventInfoProduct>(edm::InputTag("generator"));
 
 
 
