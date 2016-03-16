@@ -24,6 +24,9 @@ public:
 		total_plots.resize(cat_bjetjetmax,0);
 		htalljets_plots.resize(cat_bjetmax,0); 
 		jetmulti_plots.resize(cat_bjetmax,0);
+                mll_plots.resize(cat_bjetjetmax,0);
+                dxi_plots.resize(cat_bjetjetmax,0);
+
 }
 
 	~analysisPlotsTtbarXsecFit(){/* destruction is handled in base class! */
@@ -55,7 +58,7 @@ private:
 
 
 	std::vector<histo1DUnfold*>
-	leadjetpt_plots, secondjetpt_plots, thirdjetpt_plots, total_plots, htalljets_plots, jetmulti_plots;
+	leadjetpt_plots, secondjetpt_plots, thirdjetpt_plots, total_plots, htalljets_plots,mll_plots,dxi_plots, jetmulti_plots;
 
 };
 

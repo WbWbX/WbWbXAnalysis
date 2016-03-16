@@ -120,6 +120,39 @@ void analysisPlotsTtbarXsecFit::bookPlots(){
 	htalljets_plots.at(cat_0bjet) = addPlot(bins,bins,"ht all jets 0x b-jets","h_{T} [GeV]","Events/GeV");
 	htalljets_plots.at(cat_1bjet) = addPlot(bins,bins,"ht all jets 1x b-jets","h_{T} [GeV]","Events/GeV");
 	htalljets_plots.at(cat_2bjet) = addPlot(bins,bins,"ht all jets 2x b-jets","h_{T} [GeV]","Events/GeV");
+
+        bins.clear();
+        bins<<50<<70<<90<<110;
+        mll_plots.at(cat_0bjet0jet) = addPlot(bins,bins,"mll zero jets zero bjets","m_{ll} [GeV]","Events/GeV");
+        mll_plots.at(cat_0bjet1jet) = addPlot(bins,bins,"mll one jets zero bjets","m_{ll} [GeV]","Events/GeV");
+        mll_plots.at(cat_0bjet2jet) = addPlot(bins,bins,"mll two jets zero bjets","m_{ll} [GeV]","Events/GeV");
+        mll_plots.at(cat_0bjet3jet) = addPlot(bins,bins,"mll three jets zero bjets","m_{ll} [GeV]","Events/GeV");
+        mll_plots.at(cat_1bjet0jet) = addPlot(bins,bins,"mll zero jets one bjets","m_{ll} [GeV]","Events/GeV");
+        mll_plots.at(cat_1bjet1jet) = addPlot(bins,bins,"mll one jets one bjets","m_{ll} [GeV]","Events/GeV");
+        mll_plots.at(cat_1bjet2jet) = addPlot(bins,bins,"mll two jets one bjets","m_{ll} [GeV]","Events/GeV");
+        mll_plots.at(cat_1bjet3jet) = addPlot(bins,bins,"mll three jets one bjets","m_{ll} [GeV]","Events/GeV");
+        mll_plots.at(cat_2bjet0jet) = addPlot(bins,bins,"mll zero jets two bjets","m_{ll} [GeV]","Events/GeV"); 
+        mll_plots.at(cat_2bjet1jet) = addPlot(bins,bins,"mll one jets two bjets","m_{ll} [GeV]","Events/GeV");
+        mll_plots.at(cat_2bjet2jet) = addPlot(bins,bins,"mll two jets two bjets","m_{ll} [GeV]","Events/GeV");
+        mll_plots.at(cat_2bjet3jet) = addPlot(bins,bins,"mll three jets two bjets","m_{ll} [GeV]","Events/GeV");
+
+
+        bins.clear();
+        bins<<-150<<-60<<100;
+        dxi_plots.at(cat_0bjet0jet) = addPlot(bins,bins,"DXi zero jets zero bjets","D_{#xi}","Events/bw");
+        dxi_plots.at(cat_0bjet1jet) = addPlot(bins,bins,"DXi one jets zero bjets","D_{#xi}","Events/bw");
+        dxi_plots.at(cat_0bjet2jet) = addPlot(bins,bins,"DXi two jets zero bjets","D_{#xi}","Events/bw");
+        dxi_plots.at(cat_0bjet3jet) = addPlot(bins,bins,"DXi three jets zero bjets","D_{#xi}","Events/bw");
+        dxi_plots.at(cat_1bjet0jet) = addPlot(bins,bins,"DXi zero jets one bjets","D_{#xi}","Events/bw");
+        dxi_plots.at(cat_1bjet1jet) = addPlot(bins,bins,"DXi one jets one bjets","D_{#xi}","Events/bw");
+        dxi_plots.at(cat_1bjet2jet) = addPlot(bins,bins,"DXi two jets one bjets","D_{#xi}","Events/bw");
+        dxi_plots.at(cat_1bjet3jet) = addPlot(bins,bins,"DXi three jets one bjets","D_{#xi}","Events/bw");
+        dxi_plots.at(cat_2bjet0jet) = addPlot(bins,bins,"DXi zero jets two bjets","D_{#xi}","Events/bw");
+        dxi_plots.at(cat_2bjet1jet) = addPlot(bins,bins,"DXi one jets two bjets","D_{#xi}","Events/bw");
+        dxi_plots.at(cat_2bjet2jet) = addPlot(bins,bins,"DXi two jets two bjets","D_{#xi}","Events/bw");
+        dxi_plots.at(cat_2bjet3jet) = addPlot(bins,bins,"DXi three jets two bjets","D_{#xi}","Events/bw");
+
+
 }
 
 
@@ -139,7 +172,7 @@ void analysisPlotsTtbarXsecFit::fillPlotsGen(){
 	totevtsw_+=puweight();
 	//only fill one bin in some visible part of the histogram to get the total
 	// n_gen and a nice display of PS migrations
-	if(genvisleptons1.size()>1){
+	if(genvisleptons1.size()>1 ){
 	        for(size_t i=0;i<total_plots.size();i++){
 			total_plots.at(i)->fillGen(0.5,puweight());
 			//agrohsje changed from 20.5 to 30.5 checked with Jan 
@@ -151,6 +184,10 @@ void analysisPlotsTtbarXsecFit::fillPlotsGen(){
 		    jetmulti_plots.at(i)->fillGen(0,puweight());
 		    htalljets_plots.at(i)->fillGen(30.5,puweight()); 
 		}
+                for(size_t i=0;i<mll_plots.size();i++){
+                    mll_plots.at(i)->fillGen(50.5,puweight());
+                    dxi_plots.at(i)->fillGen(50.5,puweight());
+                }
 		vispsevts_++;
 		vispsevtsw_+=puweight();
 	}
@@ -192,7 +229,23 @@ void analysisPlotsTtbarXsecFit::fillPlotsReco(){
 		double ht(0.);
 		for(size_t i=0;i<event()->selectedjets->size();i++) ht+=event()->selectedjets->at(i)->pt();
 		htalljets_plots.at(bjetcategory)->fillReco(ht,puweight());
-	}
+                mll_plots.at(jetcategory)->fillReco(*(event()->mll),puweight());
+
+                if(event()->leadinglep && event()->secleadinglep && event()->adjustedmet){
+                /*
+ *                  * from alexei
+ *                                   */
+                    NTVector lep1p=event()->leadinglep->p4().getNTVector();
+                    NTVector lep2p=event()->secleadinglep->p4().getNTVector();
+                    NTVector metp=event()->adjustedmet->p4().getNTVector();
+                    NTVector bis=bisector(lep1p,lep2p);
+                    float pxivis=(lep1p + lep2p) * bis;
+                    float pnots=metp*bis;
+
+                    float dxi=pnots- 0.85* pxivis;
+                    dxi_plots.at(jetcategory)->fillReco(dxi,puweight());
+	        }
+       }
 }
 
 
