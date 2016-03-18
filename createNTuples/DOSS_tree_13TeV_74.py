@@ -32,6 +32,8 @@ options.register('endPDFVar','2052',VarParsing.VarParsing.multiplicity.singleton
 options.register('reportEvery',1000,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.int,"report every")
 options.register('wantSummary',True,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"prints trigger summary")
 options.register('debug',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"enters debug mode")
+options.register('partonShower','pythia8',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,'parton shower used in MC')
+
 
 print '\nStart generating ntuple\n***********************\n'
 
@@ -71,6 +73,8 @@ print 'Using json path: ', json
 wantSummary=options.wantSummary
 debug=options.debug
 useBHadrons=False                           #will be changes for top filter sequence!
+partonShower= options.partonShower
+
 
 print '\nDone with reading command line!\n'
 
@@ -104,7 +108,8 @@ opt.electronOptions={'inputCollectionAod':'selectedPatElectrons'+pfpostfix,
                  'inputCollectionMiniAod':'slimmedElectrons',
                  'outputCollection':'',
                  'idName':'Spring15-medium', # Name of the Id in the IdVector (on the Electrons)
-                 'Cuts':False}
+                 'Cuts':False,
+                 'MVA':False}
 
 ####################################################################
 ## Define the process
@@ -173,28 +178,28 @@ if globalTag != '':
 else:
     print "Determine global tag automatically"
     if options.runOnMC:
-        process.GlobalTag.globaltag = cms.string('MCRUN2_74_V9')
+        process.GlobalTag.globaltag = cms.string('76X_mcRun2_asymptotic_v12')
         #agrohsje process.GlobalTag.globaltag = cms.string('PHYS14_50_V2::All') 
     else:
-        process.GlobalTag.globaltag = cms.string('74X_dataRun2_Prompt_v2')
+        process.GlobalTag.globaltag = cms.string('76X_dataRun2_v15')
         
 print "Using global tag: ", process.GlobalTag.globaltag
 
 
-jecFile=os.path.relpath( os.environ['CMSSW_BASE']+'/src/TtZAnalysis/Data/Run2/PY8_RunIISpring15DR74_bx50_MC.db')
-from CondCore.DBCommon.CondDBSetup_cfi import *
-process.jec = cms.ESSource("PoolDBESSource",CondDBSetup,
-    connect = cms.string('sqlite_file:'+jecFile),
-    toGet =  cms.VPSet(
-    cms.PSet(record = cms.string("JetCorrectionsRecord"),
-        tag = cms.string("JetCorrectorParametersCollection_PY8_RunIISpring15DR74_bx50_MC_AK4PF"),
-        Label = cms.untracked.string("AK4PF")),
-        cms.PSet(record = cms.string("JetCorrectionsRecord"),
-        tag =cms.string("JetCorrectorParametersCollection_PY8_RunIISpring15DR74_bx50_MC_AK4PFchs"),
-        Label = cms.untracked.string("AK4PFchs"))
-    )
-)
-process.es_prefer_jec = cms.ESPrefer("PoolDBESSource","jec")
+#jecFile=os.path.relpath( os.environ['CMSSW_BASE']+'/src/TtZAnalysis/Data/Run2/PY8_RunIISpring15DR74_bx50_MC.db')
+#from CondCore.DBCommon.CondDBSetup_cfi import *
+#process.jec = cms.ESSource("PoolDBESSource",CondDBSetup,
+#    connect = cms.string('sqlite_file:'+jecFile),
+#    toGet =  cms.VPSet(
+#    cms.PSet(record = cms.string("JetCorrectionsRecord"),
+#        tag = cms.string("JetCorrectorParametersCollection_PY8_RunIISpring15DR74_bx50_MC_AK4PF"),
+#        Label = cms.untracked.string("AK4PF")),
+#        cms.PSet(record = cms.string("JetCorrectionsRecord"),
+#        tag =cms.string("JetCorrectorParametersCollection_PY8_RunIISpring15DR74_bx50_MC_AK4PFchs"),
+#        Label = cms.untracked.string("AK4PFchs"))
+#    )
+#)
+#process.es_prefer_jec = cms.ESPrefer("PoolDBESSource","jec")
 
 
 
@@ -346,6 +351,7 @@ if genFilter == "ttbar":
     process.load('TtZAnalysis.TreeWriter.topDecayFilter_cff')
     process.topDecayFilter.src=genParticleCollection
     process.topDecayFilter.invert=genFilterInvert
+    process.topDecayFilter.partonShower=partonShower
     process.fsFilterSequence = cms.Sequence(process.topDecayFilter)
 else :
     process.fsFilterSequence = cms.Sequence()
@@ -359,36 +365,38 @@ if runOnMC :
 
 
 elif not runOnAOD:
-     from TopAnalysis.ZTopUtils.noiseFilter_cff import noiseFilter
-     process.cscFilter=noiseFilter.clone(src = cms.InputTag('TriggerResults','','RECO'),flag=cms.string("Flag_CSCTightHaloFilter"))
+     from TopAnalysis.ZTopUtils.NoiseFilter_cfi import noiseFilter
+     process.cscFilter=noiseFilter.clone(src = cms.InputTag('TriggerResults','','RECO'),flag=cms.string("Flag_CSCTightHalo2015Filter"))
      process.vertexFilter=noiseFilter.clone(src = cms.InputTag('TriggerResults','','RECO'),flag=cms.string("Flag_goodVertices"))
      process.badSCFilter=noiseFilter.clone(src=cms.InputTag('TriggerResults','','RECO'),flag=cms.string("Flag_eeBadScFilter"))
-     process.load('CommonTools.RecoAlgos.HBHENoiseFilterResultProducer_cfi')
-     process.HBHENoiseFilterResultProducer.minZeros = cms.int32(99999)
-     process.HBHENoiseFilterResultProducer.IgnoreTS4TS5ifJetInLowBVRegion=cms.bool(False) 
-     process.HBHENoiseFilterResultProducer.defaultDecision = cms.string("HBHENoiseFilterResultRun2Loose")
+     process.HBHENoiseFilter=noiseFilter.clone(src=cms.InputTag('TriggerResults','','RECO'),flag=cms.string("Flag_HBHENoiseFilter"))
+     process.HBHENoiseIsoFilter=noiseFilter.clone(src=cms.InputTag('TriggerResults','','RECO'),flag=cms.string("Flag_HBHENoiseIsoFilter"))
+     process.ecalDeadCellFilter=noiseFilter.clone(src=cms.InputTag('TriggerResults','','RECO'),flag=cms.string("Flag_EcalDeadCellTriggerPrimitiveFilter"))
+     process.chargedHadronTrackFilter=noiseFilter.clone(src=cms.InputTag('TriggerResults','','RECO'),flag=cms.string("Flag_chargedHadronTrackResolutionFilter"))
+     process.muonBadTrackFilter=noiseFilter.clone(src=cms.InputTag('TriggerResults','','RECO'),flag=cms.string("Flag_muonBadTrackFilter"))
 
 
-     process.ApplyBaselineHBHENoiseFilter = cms.EDFilter('BooleanFlagFilter',
-         inputLabel = cms.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResult'),
-         reverseDecision = cms.bool(False)
-     )
-
-     from TopAnalysis.ZTopUtils.triggerFilter_cff import triggerOrFilter
+     from TopAnalysis.ZTopUtils.TriggerFilter_cfi import triggerOrFilter
      
      process.emuTriggerFilter=triggerOrFilter.clone(trigger=cms.vstring("HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v","HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v"),src = cms.InputTag('TriggerResults','','HLT'),invert=cms.bool(False))
      process.noEmuTriggerFilter=process.emuTriggerFilter.clone(invert=cms.bool(True))
-    # process.singleMuTriggerFilter=process.emuTriggerFilter.clone(trigger=cms.vstring("HLT_IsoMu20_v3","HLT_IsoTkMu20_v4"),invert=cms.bool(False))
+     process.mumuTriggerFilter=triggerOrFilter.clone(trigger=cms.vstring("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v","HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v"),src = cms.InputTag('TriggerResults','','HLT'),invert=cms.bool(False))
+     process.noMumuTriggerFilter=process.mumuTriggerFilter.clone(invert=cms.bool(True))
+     process.eeTriggerFilter=triggerOrFilter.clone(trigger=cms.vstring("HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"),src = cms.InputTag('TriggerResults','','HLT'),invert=cms.bool(False))
+     process.noEeTriggerFilter= process.eeTriggerFilter.clone(invert=cms.bool(True))
      process.singleMuTriggerFilter=process.emuTriggerFilter.clone(trigger=cms.vstring("HLT_IsoMu20_v","HLT_IsoTkMu20_v"),invert=cms.bool(False)) 
      process.noSingleMuTriggerFilter=process.singleMuTriggerFilter.clone(invert=cms.bool(True))
      process.singleEleTriggerFilter=process.emuTriggerFilter.clone(trigger=cms.vstring("HLT_Ele23_WPLoose_Gsf_v"),invert=cms.bool(False))
      process.noSingleEleTriggerFilter=process.singleEleTriggerFilter.clone(invert=cms.bool(True))
      process.prefilterSequence=cms.Sequence(
-         process.HBHENoiseFilterResultProducer* 
-         process.ApplyBaselineHBHENoiseFilter*    
+         process.HBHENoiseFilter* 
+         process.HBHENoiseIsoFilter*    
          process.cscFilter*
          process.vertexFilter*
-         process.badSCFilter
+         process.badSCFilter*
+         process.ecalDeadCellFilter*
+         process.chargedHadronTrackFilter*
+         process.muonBadTrackFilter
      )
      if dataset== "emu":
          process.prefilterSequence+=process.emuTriggerFilter
@@ -399,6 +407,21 @@ elif not runOnAOD:
          process.prefilterSequence+=process.noEmuTriggerFilter
          process.prefilterSequence+=process.noSingleMuTriggerFilter
          process.prefilterSequence+=process.singleEleTriggerFilter
+     elif dataset=="mumu":
+         process.prefilterSequence+=process.mumuTriggerFilter
+     elif dataset== "singleMu_mumu":
+         process.prefilterSequence+=process.noMumuTriggerFilter
+         process.prefilterSequence+=process.singleMuTriggerFilter
+     elif dataset=="ee":
+         process.prefilterSequence+=process.eeTriggerFilter
+     elif dataset=="singleEle_ee":
+         process.prefilterSequence+=process.noEeTriggerFilter
+         process.prefilterSequence+=process.singleEleTriggerFilter
+
+
+
+
+
 
 else:
     ## HCAL noise filter
@@ -530,7 +553,7 @@ if runOnAOD:
 else:
     jetSource = 'ak4PFJetsCHS' 
     pfCandidates = 'packedPFCandidates'
-    pvSource = 'offlineSlimmedPrimaryVertices'
+    pvSource = opt.primaryVertexOptions['outputCollection']
     svSource = cms.InputTag('slimmedSecondaryVertices')
     electronSource=cms.InputTag(opt.electronOptions['inputCollectionMiniAod'])
     muonSource=cms.InputTag(opt.muonOptions['inputCollectionMiniAod'])
@@ -707,7 +730,7 @@ process.PFTree   = cms.EDAnalyzer('TreeWriterTtZ',
                                   isJPsi = cms.bool(False),
 
                                   #setting PartonShower to Pythia8
-                                  partonShower = cms.string("pythia6"),
+                                  partonShower = cms.string(partonShower),
                                   )
 
 
