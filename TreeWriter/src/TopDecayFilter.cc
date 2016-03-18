@@ -51,6 +51,8 @@ class TopDecayFilter : public FilterTemplate {
   /// bool from config: invert the selection?
   bool invert_;   
   
+  // string for partonshower
+  std::string partonShower_;
       
 };
 
@@ -58,7 +60,8 @@ class TopDecayFilter : public FilterTemplate {
 
 TopDecayFilter::TopDecayFilter(const edm::ParameterSet& cfg) :
   src_              (cfg.getParameter<edm::InputTag>("src"       )),
-  invert_           (cfg.getParameter<bool>("invert"   ))              
+  invert_           (cfg.getParameter<bool>("invert"   )),
+  partonShower_     (cfg.getParameter<std::string>("partonShower"))              
 {
 	consumeTemplate<reco::GenParticleCollection>(src_);
 }
@@ -85,20 +88,36 @@ bool TopDecayFilter::analyze(edm::Event& evt, const edm::EventSetup& es) {
     using namespace ztop;
     using namespace std;
 
+    ztop::topDecaySelector::partonShowers ps;
+    if(partonShower_ == "pythia6")  ps = ztop::topDecaySelector::ps_pythia6;
+    else if (partonShower_ == "pythia8") ps = ztop::topDecaySelector::ps_pythia8;
+    else if (partonShower_ == "herwig")  ps = ztop::topDecaySelector::ps_herwig;
+    else if (partonShower_ == "herwigpp") ps= ztop::topDecaySelector::ps_herwigpp;
+    else  throw std::logic_error("TreeWriterBase::analyze: Wrong partonShower set in Config.");
+
+
+
     edm::Handle <reco::GenParticleCollection> genParticles;
     evt.getByLabel(src_, genParticles);
     std::vector<const reco::GenParticle *> allgen, leps;
     for(size_t i=0;i<genParticles->size();i++){
         allgen << &genParticles->at(i);
     }
+    if (partonShower_ == "herwigpp"){
+        for(size_t i=0;i<genParticles->size();i++){
+               if ((genParticles->at(i).isPromptFinalState() || genParticles->at(i).isDirectPromptTauDecayProductFinalState()) && (std::abs(genParticles->at(i).pdgId()) == 11 ||std::abs(genParticles->at(i).pdgId()) == 13 ) ) {
+                      leps<<&genParticles->at(i);
+              }
+         }
+    }
+    else{
     std::vector<const reco::GenParticle *>* allgenForDec(&allgen);
     ztop::topDecaySelector * topDecay = new topDecaySelector();
     topDecay->setGenCollection(allgenForDec);
-    ztop::topDecaySelector::partonShowers ps;
-    ps = ztop::topDecaySelector::ps_pythia8;
     topDecay->setPartonShower(ps);
     topDecay->process();
     leps=topDecay->getFinalStateLeptonsFromW();
+    }
     int elcounter= 0;
     int mucounter = 0;
     for(size_t i=0;i<leps.size();i++){
