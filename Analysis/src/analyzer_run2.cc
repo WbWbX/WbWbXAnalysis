@@ -1510,17 +1510,16 @@ void  analyzer_run2::analyze(size_t anaid){
 
 bool analyzer_run2::checkTrigger(std::vector<bool> * p_TriggerBools,ztop::NTEvent * pEvent, bool isMC,size_t anaid)
 {
-    //if(isMC) return true;
     if(b_emu_){
-	if(!(p_TriggerBools->at(38) || p_TriggerBools->at(40)))
+	if(!(p_TriggerBools->at(35) || p_TriggerBools->at(37) || p_TriggerBools->at(39) || p_TriggerBools->at(40) || p_TriggerBools->at(41)) )
 	    return false;
     }
-    //else if(b_mumu_){
-    //    if(! p_TriggerBools->at(29)) return false;
-    //}
-   // else if(b_ee_){
-   //     if(! p_TriggerBools->at(34)) return false;
-   // }
+    else if(b_mumu_){
+        if(! (p_TriggerBools->at(29)||p_TriggerBools->at(27)|| p_TriggerBools->at(39) || p_TriggerBools->at(40)  )) return false;
+    }
+    else if(b_ee_){
+        if(! p_TriggerBools->at(31)|| p_TriggerBools->at(41)) return false;
+    }
     return true;
 }
 
