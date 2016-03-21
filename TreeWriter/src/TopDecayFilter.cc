@@ -103,12 +103,15 @@ bool TopDecayFilter::analyze(edm::Event& evt, const edm::EventSetup& es) {
     for(size_t i=0;i<genParticles->size();i++){
         allgen << &genParticles->at(i);
     }
+    
     if (partonShower_ == "herwigpp"){
+        #ifndef CMSSW_LEQ_5
         for(size_t i=0;i<genParticles->size();i++){
                if ((genParticles->at(i).isPromptFinalState() || genParticles->at(i).isDirectPromptTauDecayProductFinalState()) && (std::abs(genParticles->at(i).pdgId()) == 11 ||std::abs(genParticles->at(i).pdgId()) == 13 ) ) {
                       leps<<&genParticles->at(i);
               }
          }
+         #endif
     }
     else{
     std::vector<const reco::GenParticle *>* allgenForDec(&allgen);
