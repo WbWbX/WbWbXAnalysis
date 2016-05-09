@@ -50,7 +50,7 @@
     sysFillStyle = 1001
     sysFillColor = 1
 
-    rootDrawOpt  = P,0e1 
+    rootDrawOpt  = PX0
     sysRootDrawOpt  = 0e1
     drawStyle    = normal $ can be other options (TBI)
     
@@ -74,7 +74,7 @@
     sysFillStyle = 1001
     sysFillColor = 1
 
-    rootDrawOpt  = 0Pe1  
+    rootDrawOpt  = 0Pe1X0  
     sysRootDrawOpt  = 0e1 
     
     drawStyle    = normal $ can be other options (TBI)

@@ -80,8 +80,8 @@ invokeApplication(){
 
 	//rather hard-coded
 	const float topmassmin=170,topmassmax=178.,xsecmin=143,xsecmax=287;
-	histo2D alljoint = histo2D(histo1D::createBinning(800,topmassmin,topmassmax),histo1D::createBinning(500,xsecmin,xsecmax),"","m_{t}^{pole} [GeV]",
-			"#sigma_{t#bar{t}} [pb]", "L_{pred}(m_{t}^{pole},#sigma_{t#bar{t}})");
+	histo2D alljoint = histo2D(histo1D::createBinning(800,topmassmin,topmassmax),histo1D::createBinning(500,xsecmin,xsecmax),"","m_{t} [GeV]",
+			"#sigma_{t#bar{t}} [pb]", "L_{pred}(m_{t}, #sigma_{t#bar{t}})");
 
 	std::vector<TGraphAsymmErrors*> forfinalLine,forfinalPoint;
 
@@ -394,7 +394,7 @@ invokeApplication(){
 	if(!noplots){
 		std::cout << "performing some post-processing to limit plot size..." <<std::endl;
 		//some stupid post processing
-
+		system("cp massex_combined.pdf massex_combined_hires.pdf");
 		system("for f in massex_combined expOnly_8TeV expOnly_7TeV expTheo_7TeV expTheo_8TeV theoOnly_7TeV theoOnly_8TeV; do pdftopng $f.pdf $f;convert $f-000001.png  -density 1200 -quality 100 $f.pdf; mv $f-000001.png $f.png; done");
 	}
 	return 0;

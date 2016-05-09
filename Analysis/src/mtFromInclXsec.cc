@@ -165,8 +165,8 @@ void  mtFromInclXsec::extract(){
 
 	std::vector<float> bins=histo1D::createBinning(ndiv,mintopmass,maxtopmass);
 	std::vector<float> binsy=histo1D::createBinning(ndiv,minxsec,maxxsec);
-	theolh_=  histo2D(bins,binsy,"","m_{t}^{pole} [GeV]","#sigma_{t#bar{t}} [pb]","L_{pred}(m_{t}^{pole},#sigma_{t#bar{t}})");
-	explh_ =  histo2D(bins,binsy,"","m_{t}^{pole} [GeV]","#sigma_{t#bar{t}} [pb]","L_{exp}(m_{t}^{pole},#sigma_{t#bar{t}})");
+	theolh_=  histo2D(bins,binsy,"","m_{t} [GeV]","#sigma_{t#bar{t}} [pb]","L_{pred}(m_{t},#sigma_{t#bar{t}})");
+	explh_ =  histo2D(bins,binsy,"","m_{t} [GeV]","#sigma_{t#bar{t}} [pb]","L_{exp}(m_{t},#sigma_{t#bar{t}})");
 	//jointlh_ =  histo2D(bins,binsy,"","m_{t} [GeV]","#sigma_{t#bar{t}} [pb]","L_{joint}(m_{t},#sigma_{t#bar{t}})");
 
 	predicted_.exportLikelihood(&theolh_,false);
@@ -183,7 +183,7 @@ void  mtFromInclXsec::extract(){
 		}
 	}
 	jointlh_=theolh_*explh_;
-	jointlh_.setZAxisName("L_{joint}(m_{t}^{pole},#sigma_{t#bar{t}})");
+	jointlh_.setZAxisName("L_{joint}(m_{t},#sigma_{t#bar{t}})");
 	jointlh_*= 1/jointlh_.getMax();
 
 

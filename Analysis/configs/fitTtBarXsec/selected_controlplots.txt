@@ -31,6 +31,7 @@ defaultStyle = src/TtZAnalysis/Analysis/configs/fitTtBarXsec/controlPlots_standa
 
       [plotStyle - Upper]
 		 yaxis.max      = 10000
+		 yaxis.name = Events/0.24
       [end plotStyle]
       [plotStyle - Ratio]
 		 xaxis.name = Leading lepton #eta
@@ -61,6 +62,7 @@ defaultStyle = src/TtZAnalysis/Analysis/configs/fitTtBarXsec/controlPlots_standa
 
       [plotStyle - Upper]
 		 yaxis.max      = 10000
+		 yaxis.name = Events/0.24
       [end plotStyle]
       [plotStyle - Ratio]
 		 xaxis.name = Subleading lepton #eta
@@ -174,6 +176,7 @@ nolegend = true
 
       [plotStyle - Upper]
 		 yaxis.max      = 50000
+		 yaxis.name = Events/0.24
       [end plotStyle]
       [plotStyle - Ratio]
 		 xaxis.name = Leading lepton #eta
@@ -204,6 +207,7 @@ nolegend = true
 
       [plotStyle - Upper]
 		 yaxis.max      = 50000
+		 yaxis.name = Events/0.24
       [end plotStyle]
       [plotStyle - Ratio]
 		 xaxis.name = Subleading lepton #eta

@@ -6,3 +6,4 @@ $comments
   zaxis.max = 1.0
   rootDrawOpt =colz
   palette=standard
+  nozaxis=false

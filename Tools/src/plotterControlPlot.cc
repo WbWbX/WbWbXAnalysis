@@ -412,6 +412,8 @@ void plotterControlPlot::drawControlPlot(){
 		histoContent::addStatCorrelated=tmpaddStatCorrelated;
 	}
 	//plot data now
+        if(datastyleupper_.rootDrawOpt.Contains("X0"))
+            dataplottemp->removeXErrors();
 	dataplottemp->getSystGraph()->Draw(datastyleupper_.sysRootDrawOpt+"same");
 	dataplottemp->getStatGraph()->Draw(datastyleupper_.rootDrawOpt+"same");
 
@@ -473,8 +475,10 @@ void plotterControlPlot::drawRatioPlot(){
 	datac.normalizeToContainer(fullmc);
 
 	plot * datar=new plot(&datac,false);
+	if(datastyleratio_.rootDrawOpt.Contains("X0"))
+           datar->removeXErrors();
+
 	tempplots_.push_back(datar);
-	datar->removeXErrors();
 	datastyleratio_.applyContainerStyle(datar);
 	g =datar->getStatGraph();
 	gs=datar->getSystGraph();
