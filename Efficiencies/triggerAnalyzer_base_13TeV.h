@@ -23,6 +23,8 @@
 #include <map>
 #include <stdlib.h>
 #include "histoStyle.h"
+#include "TEfficiency.h"
+#include <cmath>
 
 #include "TtZAnalysis/Tools/interface/effTriple.h"
 #include "TtZAnalysis/Tools/interface/namedPairs.h" 
@@ -66,10 +68,14 @@ class triggerAnalyzer{
 public:
 	triggerAnalyzer(){
 		binseta_.push_back(-2.5);binseta_.push_back(-1.5);binseta_.push_back(-0.8);binseta_.push_back(0.8);binseta_.push_back(1.5);binseta_.push_back(2.5); // ee standard
-		binspt_ << 30 << 35 << 40 << 50 << 60 << 100 << 200;
+		//binspt_<<20<<25 << 30 << 35 << 40 << 50 << 60 << 100 << 200<<300;
+		binspt_<<15<<20<<30<<40<<60<<80<<100<<200<<300;
 		binseta2dx_ << 0 << 0.9 << 1.2 << 2.1 << 2.4; //mu standard
 		binseta2dy_=binseta2dx_;
 		whichelectrons_="NTElectrons";
+
+                binsetasfmu_ << 0 << 1.2 << 2.4 ;                  
+
 
 		checktriggerpaths_=false;
 		coutalltriggerpaths_=false;
@@ -216,7 +222,7 @@ public:
 		for(float i=0;i<=10;i++){
 			binsdphi.push_back(2*3.1415 * i/10);
 		}
-		for(float i=0.5;i<=30.5;i++) binsvmulti << i;
+		for(float i=0.5;i<=24.5;i+=2) binsvmulti << i;
 		for(float i=-0.5;i<=7.5;i++) binsjetmulti << i;
 		for(float i=0 ;i<15 ;i++) binsdrll << 2 * i /15;
 
@@ -243,7 +249,7 @@ public:
 		binsetafine << -2.4 << -2.1 << -1.7 << -1.2 << -0.9 << -0.6 << -0.3 << -0.1 << 0.1 << 0.3 << 0.6 << 0.9 << 1.2 << 1.7 << 2.1 << 2.4;
 
 		vector<float> binseta2dfineX,binseta2dfineY;
-		binseta2dfineX << 0 << 0.1 << 0.3 << 0.6 << 0.9 << 1.2 << 1.7 << 2.4;
+		binseta2dfineX << 0 << 0.3 << 0.6 << 1.2 << 1.7 << 2.4;
 		binseta2dfineY=binseta2dfineX;
 
 		vector<float> binseta2jetmultiX,binseta2jetmultiY;
@@ -251,7 +257,7 @@ public:
 		binseta2jetmultiY << 0 << 0.9 << 1.2 << 2.1 << 2.4;
 
 		vector<float> binsiso;
-		for(float i=0;i<20;i++)
+		for(float i=0;i<14;i++)
 			binsiso << i/100;
 
 		vector<float> selectionbins; selectionbins << -0.5 << 0.5 << 1.5 << 2.5 << 3.5 << 4.5;
@@ -266,9 +272,11 @@ public:
 		vector<float> binsdrtrig;
 		binsdrtrig << 0 << 0.05 << 0.1 << 0.15 << 0.2 << 0.3 << 0.4 << 0.6 << 1 << 2 << 5;
 
-                vector<float> binsmet;
-                for (float i=0;i<30;i++) binsmet<< i*10;
-
+                vector<float> binsmet,binspt2d,binspt2d_lead,binspt2d_selead;
+                binsmet<< 0<<20<<40<<60<<80<<100<<125<<150<<175<<200;
+                binspt2d<<15<<20<<30<<40<<60<<80<<100;
+                binspt2d_lead<<15<<20<<40<<70<<100;
+                binspt2d_selead<<15<<40<<70<<100;
 		//pt
 		//eta
 		//et2d
@@ -295,7 +303,26 @@ public:
 		effTriple t_pt      (binspt_                 , "lepton_pt"      , "p_{T,l} [GeV]"            , "evts"   );
 		effTriple t_allpt   (binsallpt               , "all_lepton_pt"  , "p_{T,l} [GeV]"            , "evts"   );
 		effTriple t_eta     (binseta_                , "lepton_eta"     , "#eta_{l}"           , "evts"   );
-		effTriple t_eta2d   (binseta2dx_, binseta2dy_, "lepton_eta2d"   , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
+		effTriple t_eta2d   (binsetasfmu_, binsetasfmu_, "lepton_eta2d"   , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
+
+
+                
+                effTriple t_eta2d_jetlow   (binsetasfmu_, binsetasfmu_, "lepton_eta2d_jetlow"   , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
+                effTriple t_eta2d_jethigh   (binsetasfmu_, binsetasfmu_, "lepton_eta2d_jethigh"   , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
+                effTriple t_eta2d_vertlow   (binsetasfmu_, binsetasfmu_, "lepton_eta2d_vertlow"   , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
+                effTriple t_eta2d_verthigh   (binsetasfmu_, binsetasfmu_, "lepton_eta2d_verthigh"   , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
+                // Additional histos for eta and pt
+
+                effTriple t_pt_ele       (binspt_  , "electron_pt"   , "p_{T,e} [GeV]"            , "evts" );
+                effTriple t_pt_muon      (binspt_  , "muon_pt"       , "p_{T,#mu} [GeV]"          , "evts" );
+                effTriple t_pt_lead      (binspt_  , "leading_pt"    , "p_{T,l_{1}} [GeV]"        , "evts" );
+                effTriple t_pt_selead    (binspt_  , "seleading_pt"  , "p_{T,l_{2}} [GeV]"        , "evts" );
+                effTriple t_eta_ele      (binseta_ , "electron_eta"  , "#eta_{e} [GeV]"           , "evts" );
+                effTriple t_eta_muon     (binseta_ , "muon_eta"      , "#eta_{#mu} [GeV]"         , "evts" );
+                effTriple t_eta_lead     (binseta_ , "leading_eta"   , "#eta_{l_{1}} [GeV]"       , "evts" );
+                effTriple t_eta_selead   (binseta_ , "seleading_eta" , "#eta_{l_{2}} [GeV]"       , "evts" );
+         
+                effTriple t_pt2d (binspt2d_lead,binspt2d_selead,"lepton_pt_2D","p_{T,l_{1}}","p_{T,l_{2}}"); 
 
 		///leading lep pt
 
@@ -339,6 +366,7 @@ public:
 		effTriple::makelist=false;
 
 		//all this trigger stuff starts here
+		
 
 		TH1D *datapileup=0;
 		if(isMC_){
@@ -352,21 +380,45 @@ public:
 
 		if(mode_<-0.1){
 			//  pair<string, double> trig2("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999.);
-			dileptriggers.push_back("HLT_Ele23_Ele12_CaloId_TrackId_Iso_v");
+                        dileptriggers.push_back("HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");
+                        dileptriggers.push_back("HLT_Ele32_eta2p1_WPTight_Gsf_v");
+                        //dileptriggers.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v");
+                        //dileptriggers.push_back("HLT_Ele27_eta2p1_WP75_Gsf_v");
+
+
 
 		}
 		if(mode_>0.1){
 			//   pair<string, double> trig3("HLT_Mu17_Mu8_v",999999);
-			dileptriggers.push_back("HLT_Mu17_Mu8_v");
+			//dileptriggers.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v");
+                        //dileptriggers.push_back("HLT_Mu17_TkMu8_DZ_v");
+                        //dileptriggers.push_back("HLT_Mu17_Mu8_DZ_v");
+                        //dileptriggers.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v");
+                        dileptriggers.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v");
+                        dileptriggers.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");
+                        dileptriggers.push_back("HLT_IsoTkMu22_v");
+                        dileptriggers.push_back("HLT_IsoMu22_v");
+
+                        //dileptriggers.push_back("HLT_IsoMu18_v");
+                        //dileptriggers.push_back("HLT_IsoMu17_eta2p1_v");
+                        //dileptriggers.push_back("HLT_IsoMu17_eta2p1_v");
+                        //dileptriggers.push_back("HLT_IsoTkMu20_v");
+                        //dileptriggers.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v");
 			// pair<string, double> trig4("HLT_Mu17_TkMu8_v",999999);
-			dileptriggers.push_back("HLT_Mu17_TkMu8_v");
 		}
 
 		if(mode_==0){
 			//  pair<string, double> trig3("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999);
-			dileptriggers.push_back("HLT_Mu23_TrkIsoVVL_Ele12_Gsf_CaloId_TrackId_Iso_MediumWP_v");
+			dileptriggers.push_back("HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v");
 			//  pair<string, double> trig4("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999);
-			dileptriggers.push_back("HLT_Mu8_TrkIsoVVL_Ele23_Gsf_CaloId_TrackId_Iso_MediumWP_v");
+			dileptriggers.push_back("HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v");
+                        dileptriggers.push_back("HLT_IsoTkMu22_v");
+                       dileptriggers.push_back("HLT_IsoMu22_v");
+                        dileptriggers.push_back("HLT_Ele32_eta2p1_WPTight_Gsf_v");
+                    //    dileptriggers.push_back("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v");
+                        //dileptriggers.push_back("HLT_IsoTkMu20_v");
+                        //dileptriggers.push_back("HLT_IsoMu20_v");
+                        //dileptriggers.push_back("HLT_Ele27_eta2p1_WPLoose_Gsf_v");
 		}
 
 		if(trigs_.size()>0){   //manually set
@@ -380,15 +432,32 @@ public:
 		vector<string> dileptriggersMC; // the version numbers where set as wildcards, so if statement obsolete!
 
 		if(mode_<-0.1){
-			dileptriggersMC.push_back("HLT_Ele23_Ele12_CaloId_TrackId_Iso_v");
+			dileptriggersMC.push_back("HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");
+                        dileptriggersMC.push_back("HLT_Ele32_eta2p1_WPTight_Gsf_v");            
+            //dileptriggersMC.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v");
+                      //  dileptriggersMC.push_back("HLT_Ele27_eta2p1_WP75_Gsf_v");
 		}
 		if(mode_>0.1){
-			dileptriggersMC.push_back("HLT_Mu17_Mu8_v");
-			dileptriggersMC.push_back("HLT_Mu17_TkMu8_v");
+			dileptriggersMC.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v");
+                        dileptriggersMC.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");
+                        dileptriggersMC.push_back("HLT_IsoTkMu22_v");
+                        dileptriggersMC.push_back("HLT_IsoMu22_v");
+
+                        //dileptriggersMC.push_back("HLT_IsoMu17_eta2p1_v");
+                        //dileptriggersMC.push_back("HLT_IsoTkMu20_v");
+
 		}
 		if(mode_==0){
-			dileptriggersMC.push_back("HLT_Mu23_TrkIsoVVL_Ele12_Gsf_CaloId_TrackId_Iso_MediumWP_v");
-			dileptriggersMC.push_back("HLT_Mu8_TrkIsoVVL_Ele23_Gsf_CaloId_TrackId_Iso_MediumWP_v");
+			dileptriggersMC.push_back("HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v");
+			dileptriggersMC.push_back("HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v");
+                       dileptriggersMC.push_back("HLT_IsoTkMu22_v");
+                        dileptriggersMC.push_back("HLT_IsoMu22_v");
+                        dileptriggersMC.push_back("HLT_Ele32_eta2p1_WPTight_Gsf_v");
+                        //dileptriggersMC.push_back("HLT_IsoMu17_eta2p1_v");
+                       // dileptriggersMC.push_back("HLT_IsoMu17_eta2p1_v");
+                        //dileptriggersMC.push_back("HLT_IsoTkMu20_v");
+                       // dileptriggersMC.push_back("HLT_Ele27_eta2p1_WPLoose_Gsf_v");
+
 		}
 		if(trigsMC_.size()>0){   //manually set
 			dileptriggersMC.clear();
@@ -396,13 +465,29 @@ public:
 				dileptriggersMC.push_back(trigsMC_.at(i));
 			}
 		}
-
+                TString fileName;
+                TH2D* h_TrigSFeta= new TH2D;
+                if(mode_>0.1 && isMC_) fileName= "/afs/desy.de/user/t/tarndt/xxl/TTZ/CMSSW_7_2_2_patch2/src/TtZAnalysis/Efficiencies/triggerSummary_mumu.root";
+                if(mode_<0.1 && isMC_) fileName= "/afs/desy.de/user/t/tarndt/xxl/TTZ/CMSSW_7_2_2_patch2/src/TtZAnalysis/Efficiencies/triggerSummary_ee.root";
+                if(mode_==0 && isMC_) fileName= "/afs/desy.de/user/t/tarndt/xxl/TTZ/CMSSW_7_2_2_patch2/src/TtZAnalysis/Efficiencies/triggerSummary_emu.root";
+                if(isMC_){
+                       TFile trigEfficiencies(fileName);
+                       std::ifstream inputfile(fileName);
+                       if(!inputfile.is_open()){
+                           std::cerr<<"Error in LeptonScaleFactors::prepareSF()! File containing lepton ID/iso scale factors not found: "<<fileName
+                           <<"\n...break\n"<<std::endl;
+                           exit(39);
+                       }
+                       inputfile.close();
+                            const TString histoName("scalefactor_eta2d_with_syst");
+                            h_TrigSFeta = dynamic_cast<TH2D*>(trigEfficiencies.Get(histoName));
+                        }
 		///////////PU reweighting
 
 		PUReweighter PUweight;
-		//if(isMC_) PUweight.setDataTruePUInput(datapileup);
+		if(isMC_) PUweight.setDataTruePUInput(datapileup);
 		if(isMC_ && mcpufile_==""){
-			PUweight.setMCDistrSum12();
+			PUweight.setMCDistrFall15("25ns_poisson");
 		}
 		else if(isMC_ && mcpufile_!=""){
 			if(mcpufile_=="Summer11_Leg")
@@ -423,6 +508,8 @@ public:
 		t_->SetBranchAddress("NTEvent",&pEvent);
 		map<string,unsigned int> * pTriggersWithPrescales=0;
 		t_->SetBranchAddress("AllTriggersWithPrescales",&pTriggersWithPrescales);
+                NTWeight * pWeight = 0;
+                t_->SetBranchAddress("NTWeight_nominal",&pWeight);
 
 		vector<NTTriggerObject> * pTriggerobjects[]={0,0,0,0,0,0,0,0,0,0};
 		const size_t pTriggerobjectsSize=10;
@@ -500,26 +587,30 @@ public:
 
 		Long64_t n = t_->GetEntries();
 		cout  << "Entries in tree: " << n ;
-
-
+                
+                int foo = 1;
 		if(testmode){
-			n*=0.01;
+			//n*=0.01;
+			foo=100;
 			cout  << " reduced to: " << n;
 		}
 		if(lowMCStat && isMC_){
-			n*=0.01;
+			//n*=0.01;
+			foo=100;
 			cout  << " reduced to: " << n;
 		}
 		if(lowDataStat && !isMC_){
-			n*=0.001;
+			//n*=0.001;
+			foo=1000;
 			cout  << " reduced to: " << n;
 		}
 		cout << std::endl;
 		if(skip)
 			n=1;
-		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//n=170000;
+                ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		if(testmode) std::cout << "entering main loop" << std::endl;
-		for(Long64_t i=0;i<n;i++){  //main loop
+		for(Long64_t i=0;i<n;i+=foo){  //main loop
 
 			selectedElecs_.clear();
 			selectedMuons_.clear();
@@ -545,8 +636,8 @@ public:
 				displayStatusBar(i,n,10);
 
 
-			double puweight=1;
-			if(isMC_) puweight=PUweight.getPUweight(pEvent->truePU());
+			double puweight=1.;//pWeight->getWeight()*PUweight.getPUweight(pEvent->truePU());
+			if(isMC_) puweight*=PUweight.getPUweight(pEvent->truePU());
 			//puweight=1;
 
 
@@ -554,8 +645,8 @@ public:
 
 			if(mode_<-0.1 && pElectrons->size()<2) continue;
 
-			if(mode_==0 &&  (pElectrons->size() < 1 || pMuons->size()< 1)) continue;
-
+ 			if(mode_==0 &&  (pElectrons->size() < 1 || pMuons->size()< 1)) continue;
+                        
 
 			//select dileptons
 			double mass=selectDileptons(pMuons,pElectrons);
@@ -781,13 +872,32 @@ public:
 				dzbs1=selectedElecs_[0]->dZBs();
 				dzbs2=selectedMuons_[0]->dZBs();
 			}
-
+                        //if(isMC_) puweight*=h_TrigSFeta->GetBinContent(fabs(eta1),fabs(eta2));
 			if(b_dilepton){// && b_twoJets){
 				sel_woTrig[0].second      +=puweight; //global
 				t_global.fillDen(0,puweight);
 
 				t_pt.fillDen(pt1,puweight);
 				t_pt.fillDen(pt2,puweight);
+                                
+                                if (mode_ == 0){
+                                t_pt_ele.fillDen(pt1,puweight);
+                                t_pt_muon.fillDen(pt2,puweight);
+                                t_eta_ele.fillDen(eta1,puweight);
+                                t_eta_muon.fillDen(eta2,puweight);
+                                }
+                                if (pt1 > pt2){
+                                        t_pt_lead.fillDen(pt1,puweight);
+                                        t_pt_selead.fillDen(pt2,puweight);
+                                        t_eta_lead.fillDen(eta1,puweight);
+                                        t_eta_selead.fillDen(eta2,puweight);
+                                }
+                                else {
+                                        t_pt_lead.fillDen(pt2,puweight);
+                                        t_pt_selead.fillDen(pt1,puweight);
+                                        t_eta_lead.fillDen(eta2,puweight);
+                                        t_eta_selead.fillDen(eta1,puweight);
+                                }
 
 				//	t_allpt.fillDen();
 				//	t_allpt.fillDen();
@@ -837,12 +947,17 @@ public:
 
 				t_eta .fillDen(eta1,puweight);
 				t_eta .fillDen(eta2,puweight);
+                                t_pt2d.fillDen(pt1,pt2,puweight);                                
 
 				t_eta2d.fillDen(fabs(eta1),fabs(eta2),puweight);
 				t_dphi.fillDen(dphi,puweight);
 				t_vmulti.fillDen(vmulti,puweight);
 				t_drll.fillDen(dRll,puweight);
-				t_jetmulti.fillDen(jetmulti,puweight);
+		                t_jetmulti.fillDen(jetmulti,puweight);
+                                if (jetmulti < 3) t_eta2d_jetlow.fillDen(fabs(eta1),fabs(eta2),puweight);
+                                else t_eta2d_jethigh.fillDen(fabs(eta1),fabs(eta2),puweight);
+                                if (vmulti < 11) t_eta2d_vertlow.fillDen(fabs(eta1),fabs(eta2),puweight);
+                                else t_eta2d_verthigh.fillDen(fabs(eta1),fabs(eta2),puweight); 
 
 				t_invmass.fillDen(mass,puweight);
 				t_lepmulti.fillDen(lepmulti,puweight);
@@ -855,7 +970,7 @@ public:
 				t_iso.fillDen(iso2,puweight);
 				t_eta2dfine.fillDen(fabs(eta1),fabs(eta2),puweight);
                                    
-                                t_met.fillDen(met);
+                                t_met.fillDen(met,puweight);
                                   
 				t_dzlepton.fillDen(fabs(dz1),puweight);
 				t_dzlepton.fillDen(fabs(dz2),puweight);
@@ -870,7 +985,20 @@ public:
 						t_allpt.fillDen(pMuons->at(j).pt(),puweight);
 						t_dzbsalllepton.fillDen(fabs(pMuons->at(j).dZBs()),puweight);
 					}
-				}
+                                }
+                                        else if (mode_==0){
+                                                for(size_t j=0;j<pMuons->size();j++){
+                                                        t_allpt.fillNum(pMuons->at(j).pt(),puweight);
+                                                        if (j > 0) continue;
+                                                }
+                                                for(size_t j=0;j<pElectrons->size();j++){
+                                                        t_allpt.fillNum(pElectrons->at(j).pt(),puweight);
+                                                        if(j>0) continue;
+                                                }
+
+                                        }
+
+				
 				t_drleptrig.fillDen(dRlt1,puweight);
 				t_drleptrig.fillDen(dRlt2,puweight);
 
@@ -883,11 +1011,35 @@ public:
 
 			if(firedDilepTrigger){
 				if(b_dilepton){// && b_twoJets){
+                                        //if(isMC_ ) puweight*=h_TrigSFeta->GetBinContent(h_TrigSFeta->FindFixBin(fabs(eta1),fabs(eta2)));
+                                        //if(isMC_ && (pt2 > pt1)) puweight*=h_TrigSFeta->GetBinContent(h_TrigSFeta->FindFixBin(pt2,pt1));
+                                        //if(isMC_) std::cout<<h_TrigSFeta->GetBinContent(fabs(eta1),fabs(eta2))<<std::endl;
 					sel_Trig[0].second  +=puweight;
 					t_global.fillNum(0,puweight);
 
 					t_pt.fillNum(pt1,puweight);
 					t_pt.fillNum(pt2,puweight);
+                                        
+                                        if(mode_==0){
+                                        t_pt_ele.fillNum(pt1,puweight);
+                                        t_pt_muon.fillNum(pt2,puweight);
+                                        t_eta_ele.fillNum(eta1,puweight);
+                                        t_eta_muon.fillNum(eta2,puweight);
+                                        }
+                                        
+                                        if (pt1 > pt2){
+                                                t_pt_lead.fillNum(pt1,puweight);
+                                                t_pt_selead.fillNum(pt2,puweight);
+                                                t_eta_lead.fillNum(eta1,puweight);
+                                                t_eta_selead.fillNum(eta2,puweight);
+                                        }
+                                        else {
+                                                t_pt_lead.fillNum(pt2,puweight);
+                                                t_pt_selead.fillNum(pt1,puweight);
+                                                t_eta_lead.fillNum(eta2,puweight);
+                                                t_eta_selead.fillNum(eta1,puweight);
+                                        } 
+
 
 					//	t_allpt.fillNum();
 					//	t_allpt.fillNum();
@@ -936,12 +1088,19 @@ public:
 
 					t_eta .fillNum(eta1,puweight);
 					t_eta .fillNum(eta2,puweight);
+                                        t_pt2d.fillNum(pt1,pt2,puweight);
 
 					t_eta2d.fillNum(fabs(eta1),fabs(eta2),puweight);
 					t_dphi.fillNum(dphi,puweight);
 					t_vmulti.fillNum(vmulti,puweight);
 					t_drll.fillNum(dRll,puweight);
 					t_jetmulti.fillNum(jetmulti,puweight);
+                                        if (jetmulti < 3) t_eta2d_jetlow.fillNum(fabs(eta1),fabs(eta2),puweight);
+                                        else t_eta2d_jethigh.fillNum(fabs(eta1),fabs(eta2),puweight);
+                                        if (vmulti < 11) t_eta2d_vertlow.fillNum(fabs(eta1),fabs(eta2),puweight);
+                                        else t_eta2d_verthigh.fillNum(fabs(eta1),fabs(eta2),puweight);
+
+
 
 
 					t_invmass.fillNum(mass,puweight);
@@ -955,7 +1114,7 @@ public:
 					t_iso.fillNum(iso2,puweight);
 					t_eta2dfine.fillNum(fabs(eta1),fabs(eta2),puweight);
 
-                                        t_met.fillNum(met);                                       
+                                        t_met.fillNum(met,puweight);                                       
  
 					t_dzlepton.fillNum(fabs(dz1),puweight);
 					t_dzlepton.fillNum(fabs(dz2),puweight);
@@ -971,6 +1130,15 @@ public:
 							t_dzbsalllepton.fillNum(fabs(pMuons->at(j).dZBs()),puweight);
 						}
 					}
+                                        else if (mode_==0){
+                                                for(size_t j=0;j<pMuons->size();j++){
+                                                        t_allpt.fillNum(pMuons->at(j).pt(),puweight);
+                                                }
+                                                for(size_t j=0;j<pElectrons->size();j++){
+                                                        t_allpt.fillNum(pElectrons->at(j).pt(),puweight);
+                                                }
+
+                                        }
 
 					t_drleptrig.fillNum(dRlt1,puweight);
 					t_drleptrig.fillNum(dRlt2,puweight);
@@ -1049,7 +1217,12 @@ public:
 			storedOut_.push_back(sel_BothTrig[i].second);
 
 			double eff=sel_Trig[i].second / sel_woTrig[i].second;
-			double erreff=sqrt(eff*(1-eff)/sel_Trig[i].second);
+			//double erreff=sqrt(eff*(1-eff)/sel_Trig[i].second);
+                        Double_t (*pBound)(Int_t,Int_t,Double_t,Bool_t) = &TEfficiency::ClopperPearson;
+                        
+
+                        std::cout<<pBound(sel_woTrig[i].second,sel_Trig[i].second,0.68,true)<< "  "<< pBound(sel_woTrig[i].second,sel_Trig[i].second,0.68,false)<<std::endl;
+                        double erreff = std::max(pBound(sel_woTrig[i].second,sel_Trig[i].second,0.68,true) -eff, eff -pBound(sel_woTrig[i].second,sel_Trig[i].second,0.68,false));
 
 			double ratio= (eff * sel_MetTrig[i].second/sel_woTrig[i].second ) /(sel_BothTrig[i].second/ sel_woTrig[i].second) -1;
 			//double ratiostat=sel_BothTrig[i].second ;
@@ -1172,24 +1345,20 @@ public:
 
 	std::vector<string> initTriggers(){
 		std::vector<string> mettriggers;
-
-
-		mettriggers.push_back("HLT_PFHT350_PFMET120_NoiseCleaned_v1");
-		mettriggers.push_back("HLT_PFMET170_NoiseCleaned_v1");
-		mettriggers.push_back("HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v1");
-		mettriggers.push_back("HLT_PFMET120_NoiseCleaned_BTagCSV07_v1");
-		/*mettriggers.push_back("HLT_Photon250_NoHE_PFMET40_v1");
-		mettriggers.push_back("HLT_Photon300_NoHE_PFMET40_v1");
-		mettriggers.push_back("HLT_Photon160_PFMET40_v1");
-		mettriggers.push_back("HLT_Photon150_PFMET40_v1");
-		mettriggers.push_back("HLT_Photon135_PFMET40_v1");
-		mettriggers.push_back("HLT_Photon22_R9Id90_HE10_Iso40_EBOnly_PFMET40_v1");
-		mettriggers.push_back("HLT_Photon36_R9Id90_HE10_Iso40_EBOnly_PFMET40_v1");
-		mettriggers.push_back("HLT_Photon50_R9Id90_HE10_Iso40_EBOnly_PFMET40_v1");
-		mettriggers.push_back("HLT_Photon75_R9Id90_HE10_Iso40_EBOnly_PFMET40_v1");
-		mettriggers.push_back("HLT_Photon90_R9Id90_HE10_Iso40_EBOnly_PFMET40_v");
-                */ 
-
+                //mettriggers.push_back("HLT_PFMET100_PFMHT100_IDLoose_v");
+                //mettriggers.push_back("HLT_MonoCentralPFJet80_PFMETNoMu120_JetIdCleaned_PFMHTNoMu120_IDTight_v");
+                mettriggers.push_back("HLT_PFMET120_PFMHT120_IDTight_v");
+                //mettriggers.push_back("HLT_PFMET90_PFMHT90_IDTight_v");
+                //mettriggers.push_back("HLT_PFMETNoMu120_JetIdCleaned_PFMHTNoMu120_IDTight_v");
+                //mettriggers.push_back("HLT_CaloMHTNoPU90_PFMET90_PFMHT90_IDTight_BTagCSV0p72_v2");
+                //mettriggers.push_back("HLT_MET200_JetIdCleaned_v");
+                //mettriggers.push_back("HLT_PFMETNoMu90_JetIdCleaned_PFMHTNoMu90_IDTight_v");
+                mettriggers.push_back("HLT_PFMET170_JetIdCleaned_v");
+                mettriggers.push_back("HLT_MET250_v"); 
+                mettriggers.push_back("HLT_PFMET170_HBHECleaned_v"); 
+                mettriggers.push_back("HLT_PFHT350_PFMET100_v");
+                mettriggers.push_back("HLT_PFHT750_4JetPt50_v");
+                mettriggers.push_back("HLT_PFHT800_v");
 		//just for testing
 		// mettriggers.clear();
 		//mettriggers.push_back("HLT_MET120_v10");
@@ -1209,7 +1378,7 @@ public:
 			if(isOk) out.push_back(mettriggers[j]);
 		}
 
-		if(checktriggerpaths_){
+		if(true){
 			cout << "used MET triggers: " << endl;
 			for(unsigned int i=0;i<out.size();i++){
 				std::cout << out.at(i) << std::endl;
@@ -1229,6 +1398,8 @@ protected:
 	std::vector<float> binseta2dx_;
 	std::vector<float> binseta2dy_;
 	std::vector<float> binspt_;
+
+       std::vector<float> binsetasfmu_;
 
 	bool match_;
 
@@ -1513,7 +1684,7 @@ void analyzeAll(triggerAnalyzer &ta_eed, triggerAnalyzer &ta_eeMC, triggerAnalyz
 	cout << "\n\nsummary tablenew style" << endl;
 
 	TString eestring= makeFullOutput(ta_eed, ta_eeMC, "ee_"+dir, "ee"+label, 0.01);
-	TString mumustring= makeFullOutput(ta_mumud, ta_mumuMC, "mumu_"+dir, "#mu#mu"+label, 0.01);
+	TString mumustring= makeFullOutput(ta_mumud, ta_mumuMC, "mumu_"+dir, "#mu#mu"+label, 0.02);
 	TString emustring= makeFullOutput(ta_emud, ta_emuMC, "emu_"+dir, "e#mu"+label, 0.01);
 
 	std::cout << "channel  & $\\epsilon_{data}$ & $\\epsilon_{MC}$ & SF & $\\alpha$ \\\\ " << std::endl;
