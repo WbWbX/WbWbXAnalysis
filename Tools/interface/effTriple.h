@@ -180,7 +180,7 @@ private:
 					//double N_num=h1.GetBinContent(binx);
 
 					//err=d_num2 * sq( N_den - N_num) +(d_den2-d_num2) * sq(N_num);
-					Double_t (*pBound)(Int_t,Int_t,Double_t,Bool_t) = &TEfficiency::ClopperPearson;
+					Double_t (*pBound)(Double_t,Double_t,Double_t,Bool_t) = &TEfficiency::ClopperPearson;
 
 					//err=sqrt(err) / sq(N_den);
 					//std::cout<<pBound(h1.GetBinContent(binx),h2.GetBinContent(binx),0.68,true)<<std::endl;
