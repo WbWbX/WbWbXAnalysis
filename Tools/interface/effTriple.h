@@ -12,6 +12,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <cmath>
+#include "TEfficiency.h"
 
 namespace ztop{
 
@@ -173,14 +174,17 @@ private:
 				double err1=h1.GetBinError(binx)/h2.GetBinContent(binx);
 				double err2=cont/h2.GetBinContent(binx) * h2.GetBinError(binx);
 				if(binomial){
-					double d_num2=sq(h1.GetBinError(binx));
-					double d_den2=sq(h2.GetBinError(binx));
-					double N_den=h2.GetBinContent(binx);
-					double N_num=h1.GetBinContent(binx);
+					//double d_num2=sq(h1.GetBinError(binx));
+					//double d_den2=sq(h2.GetBinError(binx));
+					//double N_den=h2.GetBinContent(binx);
+					//double N_num=h1.GetBinContent(binx);
 
-					err=d_num2 * sq( N_den - N_num) +(d_den2-d_num2) * sq(N_num);
+					//err=d_num2 * sq( N_den - N_num) +(d_den2-d_num2) * sq(N_num);
+					Double_t (*pBound)(Int_t,Int_t,Double_t,Bool_t) = &TEfficiency::ClopperPearson;
 
-					err=sqrt(err) / sq(N_den);
+					//err=sqrt(err) / sq(N_den);
+					//std::cout<<pBound(h1.GetBinContent(binx),h2.GetBinContent(binx),0.68,true)<<std::endl;
+					err = std::max(pBound(h2.GetBinContent(binx),h1.GetBinContent(binx),0.68,true) -cont, cont -pBound(h2.GetBinContent(binx),h1.GetBinContent(binx),0.68,false));
 					//err=sqrt(cont*(1-cont)* h1.GetBinError(binx))/h1.GetBinContent(binx); //scale and weight safe
 				}
 				else{
