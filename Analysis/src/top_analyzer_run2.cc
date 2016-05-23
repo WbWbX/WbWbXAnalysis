@@ -10,8 +10,7 @@
  *      Do not include it in any other file than MainAnalyzer.cc
  */
 
-#include "../interface/analyzer_run2.h"
-// agrohsje/tarndt 
+#include <TtZAnalysis/Analysis/interface/top_analyzer_run2.h>
 #include "../../DataFormats/interface/NTJES.h"
 
 /*
@@ -36,29 +35,21 @@
  *
  * Please indicate the meaning of the error code in the cout at the end of ../app_src/analyse.cc
  */
-void  analyzer_run2::analyze(size_t anaid){
+void  top_analyzer_run2::analyze(size_t anaid){
 
 
 	using namespace std;
 	using namespace ztop;
 
-	TString inputfile=infiles_.at(anaid); //modified in some mode options
-	const TString& legendname=legentries_.at(anaid);
-	const int &    color=colz_.at(anaid);
-	const size_t & legord=legord_.at(anaid);
-	//const TString& extraopts=extraopts_.at(anaid); //not used right now
 
 
-
-
-	bool issignal=issignal_.at(anaid);
 
 	bool isMC=true;
-	if(legendname==dataname_) isMC=false;
+	if(legendname_==dataname_) isMC=false;
 
-	if(!isMC || !issignal)
-	        getPdfReweighter()->switchOff(true);
-	
+	if(!isMC || !signal_)
+		getPdfReweighter()->switchOff(true);
+
 	//some mode options
 	/* implement here not to overload MainAnalyzer class with private members
 	 *  they are even allowed to overwrite existing configuration
@@ -90,7 +81,7 @@ void  analyzer_run2::analyze(size_t anaid){
 		mode_samesign=true;
 		std::cout << "entering same sign mode" <<std::endl;
 	}
-	
+
 	if(mode_.Contains("Invertiso")){
 		mode_invertiso=true;
 		std::cout << "entering invert iso mode" <<std::endl;
@@ -147,35 +138,35 @@ void  analyzer_run2::analyze(size_t anaid){
 	}
 	//agrohsje: taken from Jan analyzer_run1 
 	bool isdileptonexcl=false;
-	if(inputfile.Contains("ttbar_dil") || inputfile.Contains("ttbarviatau_dil"))
+	if(inputfile_.Contains("ttbar_dil") || inputfile_.Contains("ttbarviatau_dil"))
 		isdileptonexcl=true;
 
 	//adapt wrong MG BR for madspin and syst samples
-	if((inputfile.Contains("ttbar.root")
-	    || inputfile.Contains("ttbarviatau.root")
-	    || inputfile.Contains("ttbar_")
-	    || inputfile.Contains("ttbarviatau_") )
-	   &&! isdileptonexcl 
-	   //agrohsje 
-	   && inputfile.Contains("_mgbr")){
-	    //agrohsje uncomment
-	    //if(  ! (syst_.BeginsWith("TT_GEN") && syst_.EndsWith("_up"))  ) //other generator
-	    normmultiplier=(0.104976/0.11104);//correct both W
-	    /*
-	     * BR W-> lnu: 0.1086 take 0.108 as default is Powheg in run ii 
-	     * n_comb for leptonic: 1+1+1+2+2+2 (incl taus)
-	     * total lept branching fraction for WW: 0.1086^2 * 9 = 0.1062 // 0.108^2 * 9 = 0.104976
-	     * In Madgraph: 0.11104
-	     */
+	if((inputfile_.Contains("ttbar.root")
+			|| inputfile_.Contains("ttbarviatau.root")
+			|| inputfile_.Contains("ttbar_")
+			|| inputfile_.Contains("ttbarviatau_") )
+			&&! isdileptonexcl
+			//agrohsje
+			&& inputfile_.Contains("_mgbr")){
+		//agrohsje uncomment
+		//if(  ! (syst_.BeginsWith("TT_GEN") && syst_.EndsWith("_up"))  ) //other generator
+		normmultiplier=(0.104976/0.11104);//correct both W
+		/*
+		 * BR W-> lnu: 0.1086 take 0.108 as default is Powheg in run ii
+		 * n_comb for leptonic: 1+1+1+2+2+2 (incl taus)
+		 * total lept branching fraction for WW: 0.1086^2 * 9 = 0.1062 // 0.108^2 * 9 = 0.104976
+		 * In Madgraph: 0.11104
+		 */
 	}
 	// for pure dileptonic samples 
-	if(isdileptonexcl || inputfile.Contains("_mgdecays_") || inputfile.Contains("_tbarWtoLL")|| inputfile.Contains("_tWtoLL")){
+	if(isdileptonexcl || inputfile_.Contains("_mgdecays_") || inputfile_.Contains("_tbarWtoLL")|| inputfile_.Contains("_tWtoLL")){
 		normmultiplier=0.1062; //fully leptonic branching fraction for both Ws
 	}
 
 	bool fakedata=false,isfakedatarun=false;
 	if(mode_.Contains("Fakedata")){
-		if(legendname ==  dataname_)
+		if(legendname_ ==  dataname_)
 			fakedata=true;
 		isfakedatarun=true;
 		isMC=true;
@@ -225,9 +216,9 @@ void  analyzer_run2::analyze(size_t anaid){
 	else{
 		jetptcut=30;
 	}
-	
+
 	float mllcut = 20.;
-	
+
 	/*
 	 * end of mode switches
 	 */
@@ -272,9 +263,9 @@ void  analyzer_run2::analyze(size_t anaid){
 		// not needed anymore
 		//re-adjust systematic filenames
 		for(size_t i=0;i<ftorepl_.size();i++){
-			if(inputfile.EndsWith(ftorepl_.at(i))){
+			if(inputfile_.EndsWith(ftorepl_.at(i))){
 				std::cout << "replacing fakedata syst names " << fwithfix_.at(i) << " with " << ftorepl_.at(i) << std::endl;
-				//	inputfile.ReplaceAll(fwithfix_.at(i),ftorepl_.at(i));
+				//	inputfile_.ReplaceAll(fwithfix_.at(i),ftorepl_.at(i));
 			}
 		}
 
@@ -287,7 +278,7 @@ void  analyzer_run2::analyze(size_t anaid){
 
 	//check if file exists
 	if(testmode_)
-		std::cout << "testmode("<< anaid << "): check input file "<<inputfile << " (isMC)"<< isMC << std::endl;
+		std::cout << "testmode("<< anaid << "): check input file "<<inputfile_ << " (isMC)"<< isMC << std::endl;
 
 
 
@@ -334,20 +325,20 @@ void  analyzer_run2::analyze(size_t anaid){
 	mlbmtplots_step8.setEvent(evt);
 	xsecfitplots_step8.setEvent(evt);
 
-	if(!fileExists((datasetdirectory_+inputfile).Data())){
-	    std::cout << datasetdirectory_+inputfile << " not found!!" << std::endl;
-	    reportError(-1,anaid);
-	    return;
-        }
-        TFile *intfile;
-	intfile=TFile::Open(datasetdirectory_+inputfile);
-        //get normalization - switch on or off pdf weighter before!!!                                                                                                                                              
-        double norm=createNormalizationInfo(intfile,isMC,anaid);
-        intfile->Close();
-        delete intfile;
-	
+	if(!fileExists((datasetdirectory_+inputfile_).Data())){
+		std::cout << datasetdirectory_+inputfile_ << " not found!!" << std::endl;
+		reportError(-1,anaid);
+		return;
+	}
+	TFile *intfile;
+	intfile=TFile::Open(datasetdirectory_+inputfile_);
+	//get normalization - switch on or off pdf weighter before!!!
+	double norm=createNormalizationInfo(intfile,isMC,anaid);
+	intfile->Close();
+	delete intfile;
+
 	if(testmode_)
-		std::cout << "testmode("<< anaid << "): multiplying norm with "<< normmultiplier <<" file: " << inputfile<< std::endl;
+		std::cout << "testmode("<< anaid << "): multiplying norm with "<< normmultiplier <<" file: " << inputfile_<< std::endl;
 	norm*= normmultiplier;
 
 	//init b-tag scale factor utility
@@ -355,13 +346,13 @@ void  analyzer_run2::analyze(size_t anaid){
 		std::cout << "testmode("<< anaid << "): preparing btag SF" << std::endl;
 
 	TString btagfile=btagefffile_;
-	btagfile+="_"+inputfile;
+	btagfile+="_"+inputfile_;
 	getBTagSF()->setIsMC(isMC);
 	if(!getBTagSF()->getMakeEff())
 		getBTagSF()->readFromFile(btagfile.Data());
 
 	//  if(testmode_)
-	//    std::cout << "testmode(" <<anaid << ") setBtagSmaplename " <<channel_+"_"+btagSysAdd+"_"+toString(inputfile)).Data() <<std::endl;
+	//    std::cout << "testmode(" <<anaid << ") setBtagSmaplename " <<channel_+"_"+btagSysAdd+"_"+toString(inputfile_)).Data() <<std::endl;
 
 	//range check switched off because of different ranges in bins compared to diff Xsec (leps)
 	getTriggerSF()->setRangeCheck(false);
@@ -390,16 +381,16 @@ void  analyzer_run2::analyze(size_t anaid){
 	const TString* mcL3JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Analysis/data/analyse/Fall15_25nsV2_MC_L3Absolute_AK4PFchs.txt");
 
 	jescorr.setFilesCorrection(mcL1JECFile,mcL2JECFile,
-				   mcL3JECFile,dataJECFile,(const bool) isMC);
-	
+			mcL3JECFile,dataJECFile,(const bool) isMC);
+
 	/*
 	 * Open Main tree,
 	 * Set branches
 	 * the handler is only a small wrapper
 	 */
-	tTreeHandler tree( datasetdirectory_+inputfile ,"PFTree/PFTree");
+	tTreeHandler tree( datasetdirectory_+inputfile_ ,"PFTree/PFTree");
 	tTreeHandler *t =&tree;
-	
+
 	tBranchHandler<std::vector<bool> >     b_TriggerBools(t,"TriggerBools");
 	tBranchHandler<vector<NTElectron> >    b_Electrons(t,electrontype);
 	tBranchHandler<vector<NTMuon> >        b_Muons(t,"NTMuons");
@@ -427,7 +418,7 @@ void  analyzer_run2::analyze(size_t anaid){
 	tBranchHandler<ULong64_t> b_RunNumber(t,"RunNumber");
 	tBranchHandler<ULong64_t> b_LumiBlock(t,"LumiBlock");
 	tBranchHandler<ULong64_t> b_AnalyseEvent(t,"Skim");
-	
+
 	std::vector<ztop::simpleReweighter> mcreweighters;
 
 	for(size_t i=0;i<additionalweights_.size();i++){
@@ -480,7 +471,7 @@ void  analyzer_run2::analyze(size_t anaid){
 
 				if(testmode_)
 					std::cout << "testmode("<< anaid << "):\t splitted MC fraction off for MC          "<< splitfractionMC
-					<< " old norm: " << norm << " to " << norm*normmultif << " file: " << inputfile<< std::endl;
+					<< " old norm: " << norm << " to " << norm*normmultif << " file: " << inputfile_<< std::endl;
 				norm*= normmultif;
 			}
 			else{// if(){
@@ -489,7 +480,7 @@ void  analyzer_run2::analyze(size_t anaid){
 				float normmultif=1/(1-splitfractionMC);
 				if(testmode_)
 					std::cout << "testmode("<< anaid << "):\t splitted MC fraction off for pseudo data "<< 1-splitfractionMC
-					<< " old norm: " << norm << " to " << norm*normmultif << " file: " << inputfile<< std::endl;
+					<< " old norm: " << norm << " to " << norm*normmultif << " file: " << inputfile_<< std::endl;
 				norm*=normmultif;
 
 			}
@@ -509,7 +500,7 @@ void  analyzer_run2::analyze(size_t anaid){
 	///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
 
 	if(testmode_)
-		std::cout << "testmode("<< anaid << "): starting mainloop with file "<< inputfile << " norm " << norm << " entries: "<<nEntries << " fakedata: " <<  fakedata<<std::endl;
+		std::cout << "testmode("<< anaid << "): starting mainloop with file "<< inputfile_ << " norm " << norm << " entries: "<<nEntries << " fakedata: " <<  fakedata<<std::endl;
 	//agrohsje 
 	float pusum(0.); 
 	float pusum_sel(0.);
@@ -517,20 +508,20 @@ void  analyzer_run2::analyze(size_t anaid){
 	float mcwsum(0.);
 	for(Long64_t entry=firstentry;entry<nEntries;entry++){
 
-	    //for fakedata
-	    if(skipregion){
-		if(entry >= regionlowerbound && entry <= regionupperbound)
-		    continue;
-	    }
-	    else{//one case includes the entries, this is always true for non fakedata
-		// and lowerbound is 0, upper bound nEntries+1 -> no effect
-		if(entry < regionlowerbound || entry > regionupperbound)
-		    continue;
-	    }
-	    
-	    t->setEntry(entry);
-	    
-	    
+		//for fakedata
+		if(skipregion){
+			if(entry >= regionlowerbound && entry <= regionupperbound)
+				continue;
+		}
+		else{//one case includes the entries, this is always true for non fakedata
+			// and lowerbound is 0, upper bound nEntries+1 -> no effect
+			if(entry < regionlowerbound || entry > regionupperbound)
+				continue;
+		}
+
+		t->setEntry(entry);
+
+
 		////////////////////////////////////////////////////
 		////////////////////  INIT EVENT ///////////////////
 		/////////////////////////////////////////////////////////////
@@ -544,15 +535,15 @@ void  analyzer_run2::analyze(size_t anaid){
 
 		//reports current status to parent
 		reportStatus(entry,nEntries,anaid);
-		
+
 		float puweight=1;
 		if (isMC) puweight = getPUReweighter()->getPUweight(b_Event.content()->truePU());
 		//agrohsje
 		pusum+=puweight;
 		if(apllweightsone) puweight=1;
 		if(testmode_ && entry==0)
-		    std::cout << "testmode("<< anaid << "): got first event entry" << std::endl;
-		
+			std::cout << "testmode("<< anaid << "): got first event entry" << std::endl;
+
 		evt.puweight=&puweight;
 
 		getPdfReweighter()->setNTEvent(b_Event.content());
@@ -560,12 +551,12 @@ void  analyzer_run2::analyze(size_t anaid){
 		if(apllweightsone) puweight=1;
 		//agrohsje loop over additional weightbranches 
 		for(size_t i=0;i<weightbranches.size();i++){
-		    //puweight*=weightbranches.at(i)->content()->getWeight();
-		    //std::cout<<"check weight for " << additionalweights_.at(i)<<":"
-		    //<<weightbranches.at(i)->content()->getWeight() <<std::endl;
-		    mcreweighters.at(i).setNewWeight(weightbranches.at(i)->content()->getWeight());
-		    mcreweighters.at(i).reWeight(puweight);
-		    if(apllweightsone) puweight=1;		
+			//puweight*=weightbranches.at(i)->content()->getWeight();
+			//std::cout<<"check weight for " << additionalweights_.at(i)<<":"
+			//<<weightbranches.at(i)->content()->getWeight() <<std::endl;
+			mcreweighters.at(i).setNewWeight(weightbranches.at(i)->content()->getWeight());
+			mcreweighters.at(i).reWeight(puweight);
+			if(apllweightsone) puweight=1;
 		}
 		mcwsum += weightbranches.at(0)->content()->getWeight();
 		/////////////////////////////////////////////////////////////
@@ -632,7 +623,7 @@ void  analyzer_run2::analyze(size_t anaid){
 			}
 		} /// isMC ends
 
-                //agrohsje : check if event fails preselection and should be skipped 
+		//agrohsje : check if event fails preselection and should be skipped
 		//std::cout<<" agrohsje check flag " << *b_AnalyseEvent.content()<<std::endl;
 		if (b_emu_ && *b_AnalyseEvent.content()!=1) continue;
 
@@ -641,7 +632,7 @@ void  analyzer_run2::analyze(size_t anaid){
 		///////////////////       Reco Part      ////////////////////
 		/////////////////////////////////////////////////////////////
 		/////////////////////////////////////////////////////////////
-		
+
 		/*
 		 *  Trigger
 		 */
@@ -686,36 +677,36 @@ void  analyzer_run2::analyze(size_t anaid){
 			  <<" muon->muonHits() "<<muon->muonHits()
 			  <<" fabs(muon->isoVal()) "<<fabs(muon->isoVal())
 			  <<std::endl;
-			*/
+			 */
 			if(muon->pt() < lepptthresh)       continue;
 			if(fabs(muon->eta())>2.4) continue;
 			kinmuons << &(b_Muons.content()->at(i));
 
 			//tight muon selection: https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideMuonId#Tight_Muon
 			//agrohsje isPF requirement already at ntuple level 
-			
+
 			if(muon->isGlobal()
-                           && muon->isPf()
-			   && muon->matchedStations()>1
-			   && muon->pixHits()>0
-			   && muon->muonHits()>0
-			   && muon->normChi2()<10.
-			   && muon->trkHits()>5
-			   && fabs(muon->d0V())<0.2
-			   && fabs(muon->dzV())<0.5)
-			    {
+					&& muon->isPf()
+					&& muon->matchedStations()>1
+					&& muon->pixHits()>0
+					&& muon->muonHits()>0
+					&& muon->normChi2()<10.
+					&& muon->trkHits()>5
+					&& fabs(muon->d0V())<0.2
+					&& fabs(muon->dzV())<0.5)
+			{
 				idmuons <<  &(b_Muons.content()->at(i));
-			    }
-			
+			}
+
 		}
 		for(size_t i=0;i<idmuons.size();i++){
-		        NTMuon * muon =  idmuons.at(i);
+			NTMuon * muon =  idmuons.at(i);
 			if(!mode_invertiso && fabs(muon->isoVal()) > 0.15) continue;
 			if(mode_invertiso && muon->isoVal() < 0.15) continue;
 			isomuons <<  muon;
 			isoleptons << muon;
 		}
-		
+
 		/*
 		 * Electrons
 		 */
@@ -758,7 +749,7 @@ void  analyzer_run2::analyze(size_t anaid){
 				isoleptons << elec;
 			}
 		}
-		
+
 		/*
 		 * make all lepton collection (merged muons and electrons)
 		 */
@@ -778,7 +769,7 @@ void  analyzer_run2::analyze(size_t anaid){
 
 		//////////two ID leptons STEP 1///////////////////////////////
 		step++;
-		
+
 		if(b_ee_ && idelectrons.size() < 2) continue;
 		if(b_mumu_ && (idmuons.size() < 2 )) continue;
 		if(b_emu_ && (idmuons.size() + idelectrons.size() < 2 )) continue;
@@ -791,46 +782,46 @@ void  analyzer_run2::analyze(size_t anaid){
 
 		//////// require two iso leptons  STEP 2  //////////////////////////
 		step++;
-                vector<NTElectron*> channelelectrons;
-                vector<NTMuon*> channelmuons;
+		vector<NTElectron*> channelelectrons;
+		vector<NTMuon*> channelmuons;
 		if(b_ee_ ){
-                        if(isoelectrons.size() < 2) continue;
-                        else if (isomuons.size()>0 ){
-                                if (isomuons.at(0)->pt() > isoelectrons.at(1)->pt()) continue;
-                        }
-                        channelelectrons << isoelectrons.at(0) << isoelectrons.at(1);
-                }
+			if(isoelectrons.size() < 2) continue;
+			else if (isomuons.size()>0 ){
+				if (isomuons.at(0)->pt() > isoelectrons.at(1)->pt()) continue;
+			}
+			channelelectrons << isoelectrons.at(0) << isoelectrons.at(1);
+		}
 		if(b_mumu_ ){
-                        if(isomuons.size() < 2) continue;
-                        else if (isoelectrons.size()>0 ){
-                                if (isoelectrons.at(0)->pt() > isomuons.at(1)->pt()) continue;
-                        }
-                        channelmuons << isomuons.at(0) << isomuons.at(1);
-                }
+			if(isomuons.size() < 2) continue;
+			else if (isoelectrons.size()>0 ){
+				if (isoelectrons.at(0)->pt() > isomuons.at(1)->pt()) continue;
+			}
+			channelmuons << isomuons.at(0) << isomuons.at(1);
+		}
 		if(b_emu_ ){
-                        if(isomuons.size() < 1 || isoelectrons.size() < 1) continue;
-                        else{ 
-                                if (isoelectrons.size()>1 ){
-                                        if (isoelectrons.at(1)->pt() > isomuons.at(0)->pt()) continue;
-                                }
-                                if (isomuons.size()>1){
-                                        if (isomuons.at(1)->pt() > isoelectrons.at(0)->pt()) continue;
-                                }
-                        }
-                        channelmuons << isomuons.at(0);
-                        channelelectrons << isoelectrons.at(0);
-                }
+			if(isomuons.size() < 1 || isoelectrons.size() < 1) continue;
+			else{
+				if (isoelectrons.size()>1 ){
+					if (isoelectrons.at(1)->pt() > isomuons.at(0)->pt()) continue;
+				}
+				if (isomuons.size()>1){
+					if (isomuons.at(1)->pt() > isoelectrons.at(0)->pt()) continue;
+				}
+			}
+			channelmuons << isomuons.at(0);
+			channelelectrons << isoelectrons.at(0);
+		}
 
 		//make pair
 		pair<vector<NTElectron*>, vector<NTMuon*> > oppopair,sspair;
 		//oppopair = ztop::getOppoQHighestPtPair(isoelectrons, isomuons);
 		//sspair = ztop::getOppoQHighestPtPair(isoelectrons, isomuons,-1);
-                //tarndt : Require the lepton pair to be the two highest pt leptons
-                oppopair = ztop::getOppoQHighestPtPair(channelelectrons, channelmuons);
-                sspair = ztop::getOppoQHighestPtPair(channelelectrons, channelmuons,-1);
-                
+		//tarndt : Require the lepton pair to be the two highest pt leptons
+		oppopair = ztop::getOppoQHighestPtPair(channelelectrons, channelmuons);
+		sspair = ztop::getOppoQHighestPtPair(channelelectrons, channelmuons,-1);
 
-                 
+
+
 		pair<vector<NTElectron*>, vector<NTMuon*> > *leppair=&oppopair;
 		if(mode_samesign)
 			leppair=&sspair;
@@ -878,8 +869,8 @@ void  analyzer_run2::analyze(size_t anaid){
 			lepweight*=getTriggerSF()->getScalefactor(fabs(firstlep->eta()),fabs(seclep->eta()));
 		}
 		else if(b_emu_){
-		    if(leppair->first.size() < 1 || leppair->second.size() < 1) continue;
-		        dilp4=leppair->first[0]->p4() + leppair->second[0]->p4();
+			if(leppair->first.size() < 1 || leppair->second.size() < 1) continue;
+			dilp4=leppair->first[0]->p4() + leppair->second[0]->p4();
 			mll=dilp4.M();
 			firstlep=leppair->first[0];
 			seclep=leppair->second[0];
@@ -918,7 +909,7 @@ void  analyzer_run2::analyze(size_t anaid){
 			reportError(-88,anaid);
 			return;
 		}
-		*/
+		 */
 		sel_step[2]+=puweight;
 		plots.makeControlPlots(step);
 		zplots.makeControlPlots(step);
@@ -926,7 +917,7 @@ void  analyzer_run2::analyze(size_t anaid){
 		///////// cut on invariant mll mass /// STEP 3 ///////////////////////////////////////
 		step++;
 		if(mll < mllcut)
-		    continue;
+			continue;
 
 		//now agrohsje added for debugging
 		//		std::cout<<*b_EventNumber.content()<</*" "<<leadingptlep->pt()<<" "<<leadingptlep->eta()<<" "<<secleadingptlep->pt()<<" "<<secleadingptlep->eta()<<*/std::endl;
@@ -950,24 +941,24 @@ void  analyzer_run2::analyze(size_t anaid){
 			NTLorentzVector<float>  oldp4=treejets.at(i)->p4();
 			bool useJetForMet=false;
 			if(treejets.at(i)->emEnergyFraction() < 0.9 && treejets.at(i)->pt() > 10)
-			    useJetForMet=true; //dont even do something
+				useJetForMet=true; //dont even do something
 			//agrohsje/tarndt just for testing REMOVE
 			//std::cout<<"jet["<<i<<"] in event "<<*b_EventNumber.content()<<std::endl;
 			//std::cout<<"agrohsje jet pt before: pt="<<treejets.at(i)->pt()<<" rho=" <<b_Event.content()->isoRho(0)<< " area="<< treejets.at(i)->getMember(0) <<std::endl;
 			jescorr.correctJet(treejets.at(i), treejets.at(i)->getMember(0),b_Event.content()->isoRho(0));
 			//std::cout<<"agrohsje jet pt after jes: pt="<<treejets.at(i)->pt()<<" eta="<<treejets.at(i)->eta()<<std::endl;
 			if(isMC){
-			    //agrohsje global 4% scaling for JESup/JESdown can be added to ZTopUtils/src/JECBase.cc
-			    //use NTJES w./ ZTopUtils/src/JESBase.cc for both correction/uncertainties 
-			    getJECUncertainties()->applyToJet(treejets.at(i));
-			    //std::cout<<"agrohsje jet pt after sys var: pt="<<treejets.at(i)->pt()<<" eta="<<treejets.at(i)->eta()<<std::endl;
-			    getJERAdjuster()->correctJet(treejets.at(i));
-			    //std::cout<<"agrohsje jet pt after jer "<<treejets.at(i)->pt()<<" eta "<<treejets.at(i)->eta()<<std::endl;
-			    //corrected
+				//agrohsje global 4% scaling for JESup/JESdown can be added to ZTopUtils/src/JECBase.cc
+				//use NTJES w./ ZTopUtils/src/JESBase.cc for both correction/uncertainties
+				getJECUncertainties()->applyToJet(treejets.at(i));
+				//std::cout<<"agrohsje jet pt after sys var: pt="<<treejets.at(i)->pt()<<" eta="<<treejets.at(i)->eta()<<std::endl;
+				getJERAdjuster()->correctJet(treejets.at(i));
+				//std::cout<<"agrohsje jet pt after jer "<<treejets.at(i)->pt()<<" eta "<<treejets.at(i)->eta()<<std::endl;
+				//corrected
 			}
 			if(useJetForMet){
-			    dpx += oldp4.Px() - treejets.at(i)->p4().Px();
-			    dpy += oldp4.Py() - treejets.at(i)->p4().Py();
+				dpx += oldp4.Px() - treejets.at(i)->p4().Px();
+				dpy += oldp4.Py() - treejets.at(i)->p4().Py();
 			}
 			if(!(treejets.at(i)->id())) continue;
 			//agrohsje changed cut to 0.4 instead of 0.5 
@@ -1089,9 +1080,9 @@ void  analyzer_run2::analyze(size_t anaid){
 
 		getBTagSF()->changeNTJetTags(selectedjets);
 		for(size_t i=0;i<hardjets.size();i++){
-		        if(selectedjets->at(i)->btag() < getBTagSF()->getWPDiscrValue()){
-			    //std::cout<<"agrohsje btagging in event " << *b_EventNumber.content() <<" "<<selectedjets->at(i)->pt()<<"  "<<selectedjets->at(i)->btag() <<std::endl;
-			    selectednonbjets.push_back(selectedjets->at(i));
+			if(selectedjets->at(i)->btag() < getBTagSF()->getWPDiscrValue()){
+				//std::cout<<"agrohsje btagging in event " << *b_EventNumber.content() <<" "<<selectedjets->at(i)->pt()<<"  "<<selectedjets->at(i)->btag() <<std::endl;
+				selectednonbjets.push_back(selectedjets->at(i));
 				continue;
 			}
 			selectedbjets.push_back(selectedjets->at(i));
@@ -1283,14 +1274,14 @@ void  analyzer_run2::analyze(size_t anaid){
 		    }
 		    std::cout<<"######################################################################"<<std::endl;
 		}
-		*/
+		 */
 		/////////////////////// at least two jets STEP 6 /////////////
 		step++;
-		
+
 		//if(midphi && dphiplushardjets.size()<2) continue;
 		if(!zerojet && !onejet && selectedjets->size() < 2) continue;
-		
-	
+
+
 		if(analysisMllRange){
 
 			plots.makeControlPlots(step);
@@ -1373,7 +1364,7 @@ void  analyzer_run2::analyze(size_t anaid){
 	}
 	//clear input tree and close
 	tree.clear();
-	
+
 	///////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////
 	///////////////////////    MAIN LOOP ENDED    /////////////////////////
@@ -1383,7 +1374,7 @@ void  analyzer_run2::analyze(size_t anaid){
 	///////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////
 
-	
+
 	//renorm for topptreweighting
 	double renormfact=getTopPtReweighter()->getRenormalization();
 	norm *= renormfact;
@@ -1394,14 +1385,14 @@ void  analyzer_run2::analyze(size_t anaid){
 	renormfact=getPdfReweighter()->getRenormalization();
 	norm *= renormfact;
 	if(testmode_ )
-	        std::cout << "testmode("<< anaid << "): finished main loop, renorm factor pdf weights: " <<renormfact  << std::endl;
+		std::cout << "testmode("<< anaid << "): finished main loop, renorm factor pdf weights: " <<renormfact  << std::endl;
 
 	//renorm all mc weights 
 	for(size_t i=0;i<weightbranches.size();i++){
-	    renormfact=mcreweighters.at(i).getRenormalization();
-	    norm *= renormfact;
-	    if(testmode_ )
-		std::cout << "testmode("<< anaid << "): finished main loop, renorm factor for mc reweighting["<<i<<"]: " <<renormfact  << std::endl;
+		renormfact=mcreweighters.at(i).getRenormalization();
+		norm *= renormfact;
+		if(testmode_ )
+			std::cout << "testmode("<< anaid << "): finished main loop, renorm factor for mc reweighting["<<i<<"]: " <<renormfact  << std::endl;
 	}
 
 	histo1DUnfold::flushAllListed(); // call once again after last event processed
@@ -1417,110 +1408,57 @@ void  analyzer_run2::analyze(size_t anaid){
 	///////////////////////////////
 	///////////////////////////////
 
-	if(!singlefile_)
-		p_askwrite.get(anaid)->pwrite(anaid);
-	//std::cout << anaid << " (" << inputfile << ")" << " asking for write permissions to " <<getOutPath() << endl;
-	int canwrite=0;
-	if(!singlefile_)
-		canwrite=p_allowwrite.get(anaid)->pread();
-	if(canwrite>0 || singlefile_){ //wait for permission
 
-		if(testmode_ )
-			std::cout << "testmode("<< anaid << "): allowed to write to file " << getOutPath()+".root"<< std::endl;
-
-		ztop::histoStackVector * csv=&allplotsstackvector_;
-
-		if(fileExists((getOutPath()+".ztop").Data())) {
-			csv->readFromFile((getOutPath()+".ztop").Data());
-		}
-		csv->addList1DUnfold(legendname,color,norm,legord);
-		if(testmode_ )
-			std::cout << "testmode("<< anaid << "): added 1DUnfold List"<< std::endl;
-		csv->addList2D(legendname,color,norm,legord);
-		if(testmode_ )
-			std::cout << "testmode("<< anaid << "): added 2D List"<< std::endl;
-		csv->addList(legendname,color,norm,legord);
-		if(testmode_ )
-			std::cout << "testmode("<< anaid << "): added 1D List"<< std::endl;
-
-		if(issignal)
-			csv->addSignal(legendname);
-
-		csv->writeToFile((getOutPath()+".ztop").Data());
-
-
-
-		if(testmode_ )
-			std::cout << "testmode("<< anaid << "): written main output"<< std::endl;
-
-
-		///btagsf
-		if(btagsf_.makesEff()){
-			if(testmode_ )
-				std::cout << "testmode("<< anaid << "): writing btag file"<< std::endl;
-
-			getBTagSF()->writeToFile((std::string)btagfile.Data()); //recreates the file
-
-		}///makes eff
-
-		std::cout << inputfile << ": " << std::endl;
-		for(unsigned int i=0;i<9;i++){
-			std::cout << "selection step "<< toTString(i)<< " "  << sel_step[i];
-			if(i==3)
-			        cout << "  => sync step 1 \tmll>" << mllcut;
-			if(i==4)
-				cout << "  => sync step 2 \tZVeto";
-			if(i==6)
-				cout << "  => sync step 3 \t2 Jets";
-			if(i==7)
-				cout << "  => sync step 4 \tMET";
-			if(i==8)
-				cout << "  => sync step 5 \t1btag";
-			std::cout  << std::endl;
-		}
-
-
-		std::cout << "\nEvents total (normalized): "<< nEntries*norm 
-			  << "\n nEvents_selected normd: "<< sel_step[8]*norm
-			  << " with norm " << norm << " for " << inputfile<< std::endl;
-		//agrohsje check phase space bias in weights
-		std::cout<<"selection bias for PU?: \n"
-			 <<"pusum=" << pusum << " for all nEntries=" << nEntries
-			 << ", pusum_sel normd=" << pusum_sel*norm << " for selected events normd=" << nEntries_sel*norm <<"\n" 
-			 <<"selection bias for mc weight? \n"
-			 <<"mcwsum="<< mcwsum << " for all nEntries=" << nEntries 
-			 << std::endl;
-
-		if(singlefile_) return;
-
-		//all operations done
-		//check if everything was written correctly
-		bool outputok=true;
-
-		if(outputok)
-			p_finished.get(anaid)->pwrite(1); //turns of write blocking, too
+	std::cout << inputfile_ << ": " << std::endl;
+	for(unsigned int i=0;i<9;i++){
+		std::cout << "selection step "<< toTString(i)<< " "  << sel_step[i];
+		if(i==3)
+			cout << "  => sync step 1 \tmll>" << mllcut;
+		if(i==4)
+			cout << "  => sync step 2 \tZVeto";
+		if(i==6)
+			cout << "  => sync step 3 \t2 Jets";
+		if(i==7)
+			cout << "  => sync step 4 \tMET";
+		if(i==8)
+			cout << "  => sync step 5 \t1btag";
+		std::cout  << std::endl;
 	}
-	else{
-		std::cout << "testmode("<< anaid << "): failed to write to file " << getOutPath()+".root"<< std::endl;
-		p_finished.get(anaid)->pwrite(-2); //write failed
-	}
+
+
+	std::cout << "\nEvents total (normalized): "<< nEntries*norm
+			<< "\n nEvents_selected normd: "<< sel_step[8]*norm
+			<< " with norm " << norm << " for " << inputfile_<< std::endl;
+	//agrohsje check phase space bias in weights
+	std::cout<<"selection bias for PU?: \n"
+			<<"pusum=" << pusum << " for all nEntries=" << nEntries
+			<< ", pusum_sel normd=" << pusum_sel*norm << " for selected events normd=" << nEntries_sel*norm <<"\n"
+			<<"selection bias for mc weight? \n"
+			<<"mcwsum="<< mcwsum << " for all nEntries=" << nEntries
+			<< std::endl;
+	//all operations done
+	//check if everything was written correctly
+
+
+	processEndFunction();
+
 }
 
 
 
-bool analyzer_run2::checkTrigger(std::vector<bool> * p_TriggerBools,ztop::NTEvent * pEvent, bool isMC,size_t anaid)
+bool top_analyzer_run2::checkTrigger(std::vector<bool> * p_TriggerBools,ztop::NTEvent * pEvent, bool isMC,size_t anaid)
 {
-    if(b_emu_){
-	if(!(p_TriggerBools->at(35) || p_TriggerBools->at(37) || p_TriggerBools->at(39) || p_TriggerBools->at(40) || p_TriggerBools->at(41)) )
-	    return false;
-    }
-    else if(b_mumu_){
-        if(! (p_TriggerBools->at(29)||p_TriggerBools->at(27)|| p_TriggerBools->at(39) || p_TriggerBools->at(40)  )) return false;
-    }
-    else if(b_ee_){
-        if(! p_TriggerBools->at(31)|| p_TriggerBools->at(41)) return false;
-    }
-    return true;
+	if(b_emu_){
+		if(!(p_TriggerBools->at(35) || p_TriggerBools->at(37) || p_TriggerBools->at(39) || p_TriggerBools->at(40) || p_TriggerBools->at(41)) )
+			return false;
+	}
+	else if(b_mumu_){
+		if(! (p_TriggerBools->at(29)||p_TriggerBools->at(27)|| p_TriggerBools->at(39) || p_TriggerBools->at(40)  )) return false;
+	}
+	else if(b_ee_){
+		if(! p_TriggerBools->at(31)|| p_TriggerBools->at(41)) return false;
+	}
+	return true;
 }
 
 

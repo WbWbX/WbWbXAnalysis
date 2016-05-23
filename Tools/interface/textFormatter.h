@@ -105,6 +105,12 @@ public:
 
 	static std::string splitIntoLines(const std::string &,const size_t& maxchars, const size_t& leftoffset, size_t skipoffset=0);
 
+
+	/**
+	 * returns a string of fixed length
+	 */
+	static std::string fixLength(const std::string &, size_t);
+
 	/**
 	 * switch for more output
 	 */

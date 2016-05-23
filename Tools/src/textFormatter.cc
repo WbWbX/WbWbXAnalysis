@@ -259,4 +259,13 @@ std::string textFormatter::splitIntoLines(const std::string  &in,const size_t& m
 	return out;
 }
 
+ std::string textFormatter::fixLength(const std::string & in, size_t l){
+	if(in.length()==l)
+		return in;
+	else if(in.length()>l)
+		return std::string(in.begin(),in.begin()+l);
+	else
+		return in+std::string(l-in.length(),' ');
+}
+
 }//ns

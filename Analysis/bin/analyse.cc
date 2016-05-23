@@ -1,10 +1,10 @@
-#include "TtZAnalysis/Analysis/interface/MainAnalyzer.h"
-#include "TtZAnalysis/Analysis/interface/analyzer_run1.h"
-#include "TtZAnalysis/Analysis/interface/analyzer_run2.h"
 #include "TtZAnalysis/Analysis/interface/AnalysisUtils.h"
 #include "TtZAnalysis/Tools/interface/fileReader.h"
 #include "../interface/discriminatorFactory.h"
 #include <time.h>
+#include <TtZAnalysis/Analysis/interface/top_analyzer_run1.h>
+#include <TtZAnalysis/Analysis/interface/top_analyzer_run2.h>
+#include <TtZAnalysis/Analysis/interface/topAnalyzer.h>
 
 #include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
 //#include "Analyzer.cc"
@@ -146,12 +146,12 @@ invokeApplication(){
 	///set input files list etc (common)
 
 
-	MainAnalyzer* ana;
+	topAnalyzer* ana;
 	if(energy=="7TeV" || energy=="8TeV"){
-		ana= new analyzer_run1();
+		ana= new top_analyzer_run1();
 	}
 	else if(energy=="13TeV"){
-		ana= new analyzer_run2();
+		ana= new top_analyzer_run2();
 		ana->addWeightBranch("NTWeight_nominal");
 	}
 	else

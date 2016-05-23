@@ -12,10 +12,10 @@
  *      Do not include it in any other file than MainAnalyzer.cc
  */
 
-#include "../interface/analyzer_run1.h"
+#include <TtZAnalysis/Analysis/interface/top_analyzer_run1.h>
 
 
-bool analyzer_run1::passesLeptonId(const ztop::NTLepton* lep, bool ismuon)const{
+bool top_analyzer_run1::passesLeptonId(const ztop::NTLepton* lep, bool ismuon)const{
 	if(ismuon){
 		ztop::NTMuon * muon=(ztop::NTMuon*)lep;
 		if(!      (muon->isGlobal()
@@ -66,26 +66,17 @@ bool analyzer_run1::passesLeptonId(const ztop::NTLepton* lep, bool ismuon)const{
  *
  * Please indicate the meaning of the error code in the cout at the end of ../app_src/analyse.cc
  */
-void  analyzer_run1::analyze(size_t anaid){
+void  top_analyzer_run1::analyze(size_t anaid){
 
 	using namespace std;
 	using namespace ztop;
 
-	TString inputfile=infiles_.at(anaid); //modified in some mode options
-	const TString& legendname=legentries_.at(anaid);
-	const int &    color=colz_.at(anaid);
-	const size_t & legord=legord_.at(anaid);
-	//const TString& extraopts=extraopts_.at(anaid); //not used right now
 
-
-
-
-	bool issignal=issignal_.at(anaid);
 
 	bool isMC=true;
-	if(legendname==dataname_) isMC=false;
+	if(legendname_==dataname_) isMC=false;
 
-	if(!isMC || !issignal)
+	if(!isMC || !signal_)
 		getPdfReweighter()->switchOff(true);
 
 	//some mode options
@@ -182,14 +173,14 @@ void  analyzer_run1::analyze(size_t anaid){
 		std::cout << "entering Topdiscr mode" <<std::endl;
 	}
 	bool isdileptonexcl=false;
-	if(inputfile.Contains("ttbar_dil") || inputfile.Contains("ttbarviatau_dil"))
+	if(inputfile_.Contains("ttbar_dil") || inputfile_.Contains("ttbarviatau_dil"))
 		isdileptonexcl=true;
 
 	//adapt wrong MG BR for madspin and syst samples
-	if((inputfile.Contains("ttbar.root")
-			|| inputfile.Contains("ttbarviatau.root")
-			|| inputfile.Contains("ttbar_")
-			|| inputfile.Contains("ttbarviatau_") )
+	if((inputfile_.Contains("ttbar.root")
+			|| inputfile_.Contains("ttbarviatau.root")
+			|| inputfile_.Contains("ttbar_")
+			|| inputfile_.Contains("ttbarviatau_") )
 			&&! isdileptonexcl){
 		/*
 		 * BR W-> lnu: 0.1086
@@ -199,16 +190,16 @@ void  analyzer_run1::analyze(size_t anaid){
 		 */
 		if(  ! (syst_.BeginsWith("TT_GEN") && syst_.EndsWith("_up"))  ){ //other generator
 			normmultiplier*=(0.1062/((0.11112*0.11112 )*9));//correct both W
-			std::cout << inputfile<<": applying correction to MG BR: "<<normmultiplier <<std::endl;
+			std::cout << inputfile_<<": applying correction to MG BR: "<<normmultiplier <<std::endl;
 		}
 	}
 
-	if(isdileptonexcl || inputfile.Contains("_mgdecays_") || inputfile.Contains("_tbarWtoLL")|| inputfile.Contains("_tWtoLL")){
+	if(isdileptonexcl || inputfile_.Contains("_mgdecays_") || inputfile_.Contains("_tbarWtoLL")|| inputfile_.Contains("_tWtoLL")){
 		normmultiplier*=0.1062; //fully leptonic branching fraction for both Ws
-		std::cout << inputfile<<": applying dileptonic BR: "<<normmultiplier <<std::endl;
+		std::cout << inputfile_<<": applying dileptonic BR: "<<normmultiplier <<std::endl;
 	}
 
-	if(!inputfile.Contains("TeV")){
+	if(!inputfile_.Contains("TeV")){
 		std::cout << "this file does not contain an energy specifier. It will be assumed that"
 				<<" it is an 8TeV sample used for 7TeV. the PU reweighting will be adjusted" <<std::endl;
 		getPUReweighter()->setMCDistrSum12();
@@ -219,7 +210,7 @@ void  analyzer_run1::analyze(size_t anaid){
 
 	bool fakedata=false,isfakedatarun=false;
 	if(mode_.Contains("Fakedata")){
-		if(legendname ==  dataname_)
+		if(legendname_ ==  dataname_)
 			fakedata=true;
 		isfakedatarun=true;
 		isMC=true;
@@ -313,7 +304,7 @@ void  analyzer_run1::analyze(size_t anaid){
 		// not needed anymore
 		//re-adjust systematic filenames
 		for(size_t i=0;i<ftorepl_.size();i++){
-			if(inputfile.EndsWith(ftorepl_.at(i))){
+			if(inputfile_.EndsWith(ftorepl_.at(i))){
 				std::cout << "replacing fakedata syst names " << fwithfix_.at(i) << " with " << ftorepl_.at(i) << std::endl;
 				//	inputfile.ReplaceAll(fwithfix_.at(i),ftorepl_.at(i));
 			}
@@ -328,7 +319,7 @@ void  analyzer_run1::analyze(size_t anaid){
 
 	//check if file exists
 	if(testmode_)
-		std::cout << "testmode("<< anaid << "): check input file "<<inputfile << " (isMC)"<< isMC << std::endl;
+		std::cout << "testmode("<< anaid << "): check input file "<<inputfile_ << " (isMC)"<< isMC << std::endl;
 
 
 
@@ -373,6 +364,8 @@ void  analyzer_run1::analyze(size_t anaid){
 	zplots.linkEvent(evt);
 	ttXsecPlots xsecplots;
 	xsecplots.enable(true);
+	plots.enable(true);
+	zplots.enable(false);
 	xsecplots.linkEvent(evt);
 	xsecplots.limitToStep(8);
 	xsecplots.initSteps(8);
@@ -385,21 +378,21 @@ void  analyzer_run1::analyze(size_t anaid){
 	if(testmode_)
 		std::cout << "testmode("<< anaid << "): control plots prepared" << std::endl;
 
-	if(!fileExists((datasetdirectory_+inputfile).Data())){
-		std::cout << datasetdirectory_+inputfile << " not found!!" << std::endl;
+	if(!fileExists((datasetdirectory_+inputfile_).Data())){
+		std::cout << datasetdirectory_+inputfile_ << " not found!!" << std::endl;
 		reportError(-1,anaid);
 		return;
 	}
 	TFile *intfile;
-	intfile=TFile::Open(datasetdirectory_+inputfile);
+	intfile=TFile::Open(datasetdirectory_+inputfile_);
 	//get normalization - switch on or off pdf weighter before!!!
-	double norm=createNormalizationInfo(intfile,isMC,anaid);
+	norm_=createNormalizationInfo(intfile,isMC,anaid);
 	intfile->Close();
 	delete intfile;
 
 	if(testmode_)
-		std::cout << "testmode("<< anaid << "): multiplying norm with "<< normmultiplier <<" file: " << inputfile<< std::endl;
-	norm*= normmultiplier;
+		std::cout << "testmode("<< anaid << "): multiplying norm with "<< normmultiplier <<" file: " << inputfile_<< std::endl;
+	norm_*= normmultiplier;
 	/////////////////////////// configure scalefactors ////
 
 
@@ -409,11 +402,11 @@ void  analyzer_run1::analyze(size_t anaid){
 
 
 
-	TString btagfile=btagefffile_;
-	btagfile+="_"+inputfile;
+
+	btagefffile_+="_"+inputfile_;
 	getBTagSF()->setIsMC(isMC);
 	if(!getBTagSF()->getMakeEff())
-		getBTagSF()->readFromFile(btagfile.Data());
+		getBTagSF()->readFromFile(btagefffile_.Data());
 
 	//  if(testmode_)
 	//    std::cout << "testmode(" <<anaid << ") setBtagSmaplename " <<channel_+"_"+btagSysAdd+"_"+toString(inputfile)).Data() <<std::endl;
@@ -446,7 +439,7 @@ void  analyzer_run1::analyze(size_t anaid){
 	 */
 	//TTree * t = (TTree*) f->Get("PFTree/PFTree");
 
-	tTreeHandler tree( datasetdirectory_+inputfile ,"PFTree/PFTree");
+	tTreeHandler tree( datasetdirectory_+inputfile_ ,"PFTree/PFTree");
 	tTreeHandler *t =&tree;
 
 
@@ -502,7 +495,7 @@ void  analyzer_run1::analyze(size_t anaid){
 	}
 
 	Long64_t nEntries=t->entries();
-	if(norm==0) nEntries=0; //skip for norm0
+	if(norm_==0) nEntries=0; //skip for norm0
 	if(testmode_ && ! tickoncemode_) nEntries*=0.08;
 
 	Long64_t firstentry=0;
@@ -531,8 +524,8 @@ void  analyzer_run1::analyze(size_t anaid){
 
 				if(testmode_)
 					std::cout << "testmode("<< anaid << "):\t splitted MC fraction off for MC          "<< splitfractionMC
-					<< " old norm: " << norm << " to " << norm*normmultif << " file: " << inputfile<< std::endl;
-				norm*= normmultif;
+					<< " old norm: " << norm_ << " to " << norm_*normmultif << " file: " << inputfile_<< std::endl;
+				norm_*= normmultif;
 			}
 			else{// if(){
 				skipregion=false;
@@ -540,8 +533,8 @@ void  analyzer_run1::analyze(size_t anaid){
 				float normmultif=1/(1-splitfractionMC);
 				if(testmode_)
 					std::cout << "testmode("<< anaid << "):\t splitted MC fraction off for pseudo data "<< 1-splitfractionMC
-					<< " old norm: " << norm << " to " << norm*normmultif << " file: " << inputfile<< std::endl;
-				norm*=normmultif;
+					<< " old norm: " << norm_ << " to " << norm_*normmultif << " file: " << inputfile_<< std::endl;
+				norm_*=normmultif;
 
 			}
 		}
@@ -559,7 +552,7 @@ void  analyzer_run1::analyze(size_t anaid){
 	///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
 
 	if(testmode_)
-		std::cout << "testmode("<< anaid << "): starting mainloop with file "<< inputfile << " norm " << norm << " entries: "<<nEntries << " fakedata: " <<  fakedata<<std::endl;
+		std::cout << "testmode("<< anaid << "): starting mainloop with file "<< inputfile_ << " norm " << norm_ << " entries: "<<nEntries << " fakedata: " <<  fakedata<<std::endl;
 
 	double elecid=0,eleciso=0,muonsid=0,muonsiso=0;
 
@@ -853,6 +846,7 @@ void  analyzer_run1::analyze(size_t anaid){
 		plots.makeControlPlots(step);
 		zplots.makeControlPlots(step);
 
+
 		if(puweight != puweight)
 			throw std::runtime_error("MainAnalyzer: nan in weight");
 
@@ -945,6 +939,7 @@ void  analyzer_run1::analyze(size_t anaid){
 		evt.cosleplepangle=&cosleplepangle;
 
 
+
 		if(apllweightsone) puweight=1;
 		//just a quick faety net against very weird weights
 		if(isMC && fabs(puweight) > 99999){
@@ -987,7 +982,7 @@ void  analyzer_run1::analyze(size_t anaid){
 				|| *b_EventNumber.content() == 159515
 				|| *b_EventNumber.content() == 159517){
 			std::cout <<*b_EventNumber.content() <<": " <<leadingptlep->pt() <<" "<< leadingptlep->eta() << " " << secleadingptlep->pt() << ' ' << secleadingptlep->eta()
-					<< std::endl;
+									<< std::endl;
 			for(size_t i=0;i<isomuons.size();i++)
 				if(leadingptlep==isomuons.at(i))
 					std::cout << "lead muon" <<std::endl;
@@ -1430,20 +1425,20 @@ void  analyzer_run1::analyze(size_t anaid){
 
 	//renorm for topptreweighting
 	double renormfact=getTopPtReweighter()->getRenormalization();
-	norm *= renormfact;
+	norm_ *= renormfact;
 	if(testmode_ )
 		std::cout << "testmode("<< anaid << "): finished main loop, renorm factor top pt: " <<renormfact  << std::endl;
 
 	//renorm after pdf reweighting (only acceptance effects!
 	renormfact=getPdfReweighter()->getRenormalization();
-	norm *= renormfact;
+	norm_ *= renormfact;
 	if(testmode_ )
 		std::cout << "testmode("<< anaid << "): finished main loop, renorm factor pdf weights: " <<renormfact  << std::endl;
 
 	//renorm all mc weights 
 	for(size_t i=0;i<weightbranches.size();i++){
 		renormfact=mcreweighters.at(i).getRenormalization();
-		norm *= renormfact;
+		norm_ *= renormfact;
 		if(testmode_ )
 			std::cout << "testmode("<< anaid << "): finished main loop, renorm factor for mc reweighting["<<i<<"]: " <<renormfact  << std::endl;
 	}
@@ -1465,99 +1460,38 @@ void  analyzer_run1::analyze(size_t anaid){
 			delete testconts.at(i);
 	 */
 
-	///////////////////////////////
-	///////////////////////////////
-	///////////////////////////////
+
+
+
+	std::cout << inputfile_ << ": " << std::endl;
+	for(unsigned int i=0;i<9;i++){
+		std::cout << "selection step "<< toTString(i)<< " "  << sel_step[i];
+		if(i==3)
+			cout << "  => sync step 1 \tmll>20";
+		if(i==4)
+			cout << "  => sync step 2 \tZVeto";
+		if(i==6)
+			cout << "  => sync step 3 \t2 Jets";
+		if(i==7)
+			cout << "  => sync step 4 \tMET";
+		if(i==8)
+			cout << "  => sync step 5 \t1btag";
+		std::cout  << std::endl;
+	}
+
+
+
+	std::cout << "\nEvents total in tree (normalized): "
+			<< nEntries*norm_ << "\n"
+			"norm factor: "<< norm_<< " " << inputfile_<< std::endl;
+
+
 	///////////////////////////////
 	//     WRITE OUTPUT PART     //
 	///////////////////////////////
-	///////////////////////////////
-	///////////////////////////////
-	///////////////////////////////
-
-	if(!singlefile_)
-		p_askwrite.get(anaid)->pwrite(anaid);
-	//std::cout << anaid << " (" << inputfile << ")" << " asking for write permissions to " <<getOutPath() << endl;
-	int canwrite=0;
-	if(!singlefile_)
-		canwrite=p_allowwrite.get(anaid)->pread();
-	if(canwrite>0 || singlefile_){ //wait for permission
-
-		if(testmode_ )
-			std::cout << "testmode("<< anaid << "): allowed to write to file " << getOutPath()+".root"<< std::endl;
-
-		ztop::histoStackVector * csv=&allplotsstackvector_;
-
-		if(fileExists((getOutPath()+".ztop").Data())) {
-			csv->readFromFile((getOutPath()+".ztop").Data());
-		}
-		csv->addList1DUnfold(legendname,color,norm,legord);
-		if(testmode_ )
-			std::cout << "testmode("<< anaid << "): added 1DUnfold List"<< std::endl;
-		csv->addList2D(legendname,color,norm,legord);
-		if(testmode_ )
-			std::cout << "testmode("<< anaid << "): added 2D List"<< std::endl;
-		csv->addList(legendname,color,norm,legord);
-		if(testmode_ )
-			std::cout << "testmode("<< anaid << "): added 1D List"<< std::endl;
-
-		if(issignal)
-			csv->addSignal(legendname);
-
-		csv->writeToFile((getOutPath()+".ztop").Data());
 
 
-
-		if(testmode_ )
-			std::cout << "testmode("<< anaid << "): written main output"<< std::endl;
-
-
-		///btagsf
-		if(btagsf_.makesEff()){
-			if(testmode_ )
-				std::cout << "testmode("<< anaid << "): writing btag file"<< std::endl;
-
-			getBTagSF()->writeToFile((std::string)btagfile.Data()); //recreates the file
-
-		}///makes eff
-
-		std::cout << inputfile << ": " << std::endl;
-		for(unsigned int i=0;i<9;i++){
-			std::cout << "selection step "<< toTString(i)<< " "  << sel_step[i];
-			if(i==3)
-				cout << "  => sync step 1 \tmll>20";
-			if(i==4)
-				cout << "  => sync step 2 \tZVeto";
-			if(i==6)
-				cout << "  => sync step 3 \t2 Jets";
-			if(i==7)
-				cout << "  => sync step 4 \tMET";
-			if(i==8)
-				cout << "  => sync step 5 \t1btag";
-			std::cout  << std::endl;
-		}
-
-
-
-		std::cout << "\nEvents total in tree (normalized): "
-				<< nEntries*norm << "\n"
-				"norm factor: "<< norm<< " " << inputfile<< std::endl;
-
-
-		if(singlefile_) return;
-
-		//all operations done
-		//check if everything was written correctly
-		bool outputok=true;
-
-		if(outputok)
-			p_finished.get(anaid)->pwrite(1); //turns of write blocking, too
-	}
-	else{
-		std::cout << "testmode("<< anaid << "): failed to write to file " << getOutPath()+".root"<< std::endl;
-		p_finished.get(anaid)->pwrite(-2); //write failed
-	}
-
+	processEndFunction();
 
 
 
@@ -1565,7 +1499,7 @@ void  analyzer_run1::analyze(size_t anaid){
 
 
 
-bool analyzer_run1::checkTrigger(std::vector<bool> * p_TriggerBools,ztop::NTEvent * pEvent, bool isMC,size_t anaid){
+bool top_analyzer_run1::checkTrigger(std::vector<bool> * p_TriggerBools,ztop::NTEvent * pEvent, bool isMC,size_t anaid){
 
 
 	//do trigger stuff - onlye 8TeV for now

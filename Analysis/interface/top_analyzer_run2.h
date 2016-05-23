@@ -8,13 +8,13 @@
 #ifndef ANALYZER_RUN2_H_
 #define ANALYZER_RUN2_H_
 
-#include "../interface/MainAnalyzer.h"
+#include "../interface/topAnalyzer.h"
 
-class analyzer_run2 : public MainAnalyzer{
+class top_analyzer_run2 : public ztop::topAnalyzer{
 public:
 
 
-	analyzer_run2():MainAnalyzer(){}
+	top_analyzer_run2():topAnalyzer(){}
 
 
 	void analyze(size_t i);
@@ -22,8 +22,8 @@ public:
 
 	//no copy
 private:
-	analyzer_run2(const analyzer_run2 &);
-	analyzer_run2& operator = (const analyzer_run2 &);
+	top_analyzer_run2(const top_analyzer_run2 &);
+	top_analyzer_run2& operator = (const top_analyzer_run2 &);
 
 
 

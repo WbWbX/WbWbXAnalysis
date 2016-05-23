@@ -8,7 +8,6 @@
 #include "TtZAnalysis/DataFormats/interface/NTJECUncertainties.h"
 #include "TtZAnalysis/DataFormats/interface/NTBTagSF.h"
 #include "pdfReweighter.h"
-#include "Pipes.h"
 #include "scalefactors.h"
 #include "reweightfunctions.h"
 #include <cstdlib>
@@ -67,6 +66,8 @@
 #include <sys/stat.h>
 #include "../interface/tBranchHandler.h"
 
+#include "basicAnalyzer.h"
+
 namespace ztop{class NTEvent;}
 
 ///// now available: removeContribution; use it to run on the systematics etc (only signal) or pdf stuff (remove nominal,for(i) add pdf[i], xsec, remove pdf[i])
@@ -82,14 +83,15 @@ namespace ztop{class NTEvent;}
  *
  */
 
+namespace ztop{
 
-class MainAnalyzer{
+class topAnalyzer: public basicAnalyzer{
 
 public:
-	MainAnalyzer();
+	topAnalyzer();
 
 
-	virtual ~MainAnalyzer();
+	virtual ~topAnalyzer();
 
 	//goes to higher level
 	void setChannel(const TString& chan);
@@ -128,11 +130,11 @@ public:
 		if(outfileadd_=="") return channel_+"_"+energy_+"_"+topmass_+"_"+syst_;
 		else return channel_+"_"+energy_+"_"+topmass_+"_"+syst_+"_"+outfileadd_;
 	}
-	/////////////////////////// interface to higher levels
-	const size_t ownChildIndex()const{return ownchildindex_;}
+	/////////////////////////// interface to lower levels
 
 
-
+	fileForker::fileforker_status writeOutput();
+public:
 	/////////////////////////// remain in base
 
 	virtual void analyze(size_t i)=0;
@@ -146,7 +148,7 @@ public:
 
 	void setOutDir(const TString& dir);
 	float createNormalizationInfo(TFile *f,bool isMC,size_t anaid);
-	void setMaxChilds(size_t childs){maxchilds_=childs;}
+
 
 
 	void setFileList(TString fl){filelist_=fl;}
@@ -169,7 +171,7 @@ public:
 	void clear(){allplotsstackvector_.clear();}
 
 
-	MainAnalyzer & operator= (const MainAnalyzer &);
+	topAnalyzer & operator= (const topAnalyzer &);
 
 	void setFakeDataStartNEntries(float startdiv){fakedata_startentries_=startdiv;}
 
@@ -203,7 +205,7 @@ public:
 protected:
 
 
-	void copyAll(const MainAnalyzer &);
+	void copyAll(const topAnalyzer &);
 	void readFileList(); //run automatically when start() is called
 
 	TString replaceExtension(TString filename );
@@ -233,7 +235,6 @@ protected:
 
 	ztop::pdfReweighter pdfweighter_;
 
-	ztop::histoStackVector  allplotsstackvector_;
 
 	size_t filecount_;
 	TString outfileadd_;
@@ -247,37 +248,9 @@ protected:
 
 	//for parallel stuff
 
-	std::vector<TString> infiles_,legentries_;
-	std::vector<int> colz_;
-	std::vector<double> norms_;
-	std::vector<size_t> legord_;
-	std::vector<bool> issignal_;
-	std::vector<TString> extraopts_;
-
-	///communication pipes
-
-	IPCPipes<int> p_idx;
-	IPCPipes<int> p_finished;
-
-	IPCPipes<int> p_allowwrite;
-	IPCPipes<int> p_askwrite;
-
-	IPCPipes<int> p_status; //not  implemented, yet
-
-	bool writeAllowed_;
 	int usepdfw_;
 
-	// bool askForWrite();
-	int  checkForWriteRequest();
-	// void blockWrite();
-	// void freeWrite();
 
-	size_t maxchilds_;
-	pid_t PID_;
-private: //make all these here private later
-	size_t ownchildindex_;
-protected:
-	std::vector<pid_t> daughPIDs_;
 
 	TString topmass_;
 
@@ -294,10 +267,7 @@ protected:
 
 
 
-	void setCacheProperties(TTree * t,const TString& inputtree)const;
-
-
 };
-
+}
 
 #endif

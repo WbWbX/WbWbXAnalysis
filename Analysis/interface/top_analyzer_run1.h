@@ -8,20 +8,20 @@
 #ifndef ANALYZER_RUN1_H_
 #define ANALYZER_RUN1_H_
 
-#include "../interface/MainAnalyzer.h"
+#include "../interface/topAnalyzer.h"
 #include "TtZAnalysis/DataFormats/interface/NTLepton.h"
-class analyzer_run1 : public MainAnalyzer{
+class top_analyzer_run1 : public ztop::topAnalyzer{
 public:
 
-	analyzer_run1():MainAnalyzer(){}
+	top_analyzer_run1():topAnalyzer(){}
 
 	void analyze(size_t i);
 	bool checkTrigger(std::vector<bool> * ,ztop::NTEvent * , bool , size_t);
 
 	//no copy
 private:
-	analyzer_run1(const analyzer_run1 &);
-	analyzer_run1& operator = (const analyzer_run1 &);
+	top_analyzer_run1(const top_analyzer_run1 &);
+	top_analyzer_run1& operator = (const top_analyzer_run1 &);
 
 	bool passesLeptonId(const ztop::NTLepton* , bool )const;
 

@@ -7,7 +7,7 @@
 
 #ifndef EVENTLOOP_H_
 #define EVENTLOOP_H_
-#include "../interface/MainAnalyzer.h"
+#include <TtZAnalysis/Analysis/interface/topAnalyzer.h>
 
 
 /**
@@ -15,7 +15,7 @@
  * legord describes the legend order value
  * don't touch anaid
  */
-void  MainAnalyzer::analyze(TString inputfile, TString legendname, int color, double norm,size_t legord,size_t anaid){
+void  topAnalyzer::analyze(TString inputfile, TString legendname, int color, double norm,size_t legord,size_t anaid){
 
 
   using namespace std;
