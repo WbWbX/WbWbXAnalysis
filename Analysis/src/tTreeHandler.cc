@@ -31,7 +31,7 @@ tTreeHandler::~tTreeHandler(){
 void tTreeHandler::load(const TString & filename, const TString &treename){
 	clear();
 	std::ifstream FileTest(filename.Data());
-	bool exists = FileTest;
+	bool exists = (bool) FileTest;
 	FileTest.close();
 	if(!exists){
 		std::string errstr="tTreeHandler::load: file does not exist: ";

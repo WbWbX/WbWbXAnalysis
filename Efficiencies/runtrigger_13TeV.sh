@@ -13,7 +13,6 @@ cp ../triggerAnalyzer_base_13TeV.h .
 cp ../trigger_13TeV.C .
 cp ../histoStyle.h .
 cp ../getSubSetRoot.C .
-cp ../fastCompile.sh .
 touch $HOSTNAME
-nohup ./fastCompile.sh trigger_13TeV.C > output.txt 
+nohup fastCompile.sh trigger_13TeV.C > output.txt 
 echo "done with ${dirstring}"
