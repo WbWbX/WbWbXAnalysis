@@ -139,7 +139,7 @@ int topAnalyzer::start(){
 	}
 
 
-
+	setOutputFileName((getOutPath()+".ztop").Data());
 
 	allplotsstackvector_.setName(getOutFileName());
 	allplotsstackvector_.setSyst(getSyst());
@@ -320,35 +320,9 @@ float topAnalyzer::createNormalizationInfo(TFile *f, bool isMC,size_t anaid){
 
 
 fileForker::fileforker_status topAnalyzer::writeOutput(){
-	ztop::histoStackVector * csv=&allplotsstackvector_;
-
-	size_t anaid=ownChildIndex();
-
-	if(fileExists((getOutPath()+".ztop").Data())) {
-		csv->readFromFile((getOutPath()+".ztop").Data());
-	}
-	csv->addList1DUnfold(legendname_,col_,norm_,legorder_);
-	if(testmode_ )
-		std::cout << "testmode("<< anaid << "): added 1DUnfold List"<< std::endl;
-	csv->addList2D(legendname_,col_,norm_,legorder_);
-	if(testmode_ )
-		std::cout << "testmode("<< anaid << "): added 2D List"<< std::endl;
-	csv->addList(legendname_,col_,norm_,legorder_);
-	if(testmode_ )
-		std::cout << "testmode("<< anaid << "): added 1D List"<< std::endl;
-
-	if(signal_)
-		csv->addSignal(legendname_);
-
-	csv->writeToFile((getOutPath()+".ztop").Data());
-
-
+	writeHistos();
 	if(btagsf_.makesEff()){
-		if(testmode_ )
-			std::cout << "testmode("<< anaid << "): writing btag file"<< std::endl;
-
 		getBTagSF()->writeToFile((std::string)btagefffile_.Data()); //recreates the file
-
 	}///makes eff
 
 	return ff_status_child_success;

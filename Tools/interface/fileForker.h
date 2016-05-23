@@ -60,7 +60,7 @@ public:
 
 	void setMaxChilds(size_t max){maxchilds_=max;}
 
-
+	void setOutputFileName(std::string outname){outputfile_=outname;}
 	const std::string& getOutputFileName()const{return outputfile_;}
 	void setInputFiles(const std::vector<std::string>& in){inputfiles_=in;}
 

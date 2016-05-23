@@ -8,6 +8,7 @@
 
 #include "../interface/basicAnalyzer.h"
 #include "TtZAnalysis/Tools/interface/fileReader.h"
+#include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 
 namespace ztop{
 
@@ -81,6 +82,26 @@ void basicAnalyzer::readFileList(const std::string& inputfile){
 	setInputFiles(infiles);
 
 
+}
+
+
+fileForker::fileforker_status basicAnalyzer::writeHistos(){
+	ztop::histoStackVector * csv=&allplotsstackvector_;
+
+	if(fileExists(getOutputFileName().data())) {
+		csv->readFromFile(getOutputFileName());
+	}
+	csv->addList1DUnfold(legendname_,col_,norm_,legorder_);
+	csv->addList2D(legendname_,col_,norm_,legorder_);
+	csv->addList(legendname_,col_,norm_,legorder_);
+	if(signal_)
+		csv->addSignal(legendname_);
+
+	csv->writeToFile(getOutputFileName());
+
+	csv->clear();//frees mem
+
+	return ff_status_child_success;
 }
 
 

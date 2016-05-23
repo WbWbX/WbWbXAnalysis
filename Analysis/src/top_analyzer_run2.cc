@@ -333,13 +333,13 @@ void  top_analyzer_run2::analyze(size_t anaid){
 	TFile *intfile;
 	intfile=TFile::Open(datasetdirectory_+inputfile_);
 	//get normalization - switch on or off pdf weighter before!!!
-	double norm=createNormalizationInfo(intfile,isMC,anaid);
+	norm_=createNormalizationInfo(intfile,isMC,anaid);
 	intfile->Close();
 	delete intfile;
 
 	if(testmode_)
 		std::cout << "testmode("<< anaid << "): multiplying norm with "<< normmultiplier <<" file: " << inputfile_<< std::endl;
-	norm*= normmultiplier;
+	norm_*= normmultiplier;
 
 	//init b-tag scale factor utility
 	if(testmode_)
@@ -442,7 +442,7 @@ void  top_analyzer_run2::analyze(size_t anaid){
 	}
 
 	Long64_t nEntries=t->entries();
-	if(norm==0) nEntries=0; //skip for norm0
+	if(norm_==0) nEntries=0; //skip for norm0
 	if(testmode_ && ! tickoncemode_) nEntries*=0.08;
 
 	Long64_t firstentry=0;
@@ -471,8 +471,8 @@ void  top_analyzer_run2::analyze(size_t anaid){
 
 				if(testmode_)
 					std::cout << "testmode("<< anaid << "):\t splitted MC fraction off for MC          "<< splitfractionMC
-					<< " old norm: " << norm << " to " << norm*normmultif << " file: " << inputfile_<< std::endl;
-				norm*= normmultif;
+					<< " old norm: " << norm_ << " to " << norm_*normmultif << " file: " << inputfile_<< std::endl;
+				norm_*= normmultif;
 			}
 			else{// if(){
 				skipregion=false;
@@ -480,8 +480,8 @@ void  top_analyzer_run2::analyze(size_t anaid){
 				float normmultif=1/(1-splitfractionMC);
 				if(testmode_)
 					std::cout << "testmode("<< anaid << "):\t splitted MC fraction off for pseudo data "<< 1-splitfractionMC
-					<< " old norm: " << norm << " to " << norm*normmultif << " file: " << inputfile_<< std::endl;
-				norm*=normmultif;
+					<< " old norm: " << norm_ << " to " << norm_*normmultif << " file: " << inputfile_<< std::endl;
+				norm_*=normmultif;
 
 			}
 		}
@@ -500,7 +500,7 @@ void  top_analyzer_run2::analyze(size_t anaid){
 	///////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
 
 	if(testmode_)
-		std::cout << "testmode("<< anaid << "): starting mainloop with file "<< inputfile_ << " norm " << norm << " entries: "<<nEntries << " fakedata: " <<  fakedata<<std::endl;
+		std::cout << "testmode("<< anaid << "): starting mainloop with file "<< inputfile_ << " norm " << norm_ << " entries: "<<nEntries << " fakedata: " <<  fakedata<<std::endl;
 	//agrohsje 
 	float pusum(0.); 
 	float pusum_sel(0.);
@@ -1377,20 +1377,20 @@ void  top_analyzer_run2::analyze(size_t anaid){
 
 	//renorm for topptreweighting
 	double renormfact=getTopPtReweighter()->getRenormalization();
-	norm *= renormfact;
+	norm_ *= renormfact;
 	if(testmode_ )
 		std::cout << "testmode("<< anaid << "): finished main loop, renorm factor top pt: " <<renormfact  << std::endl;
 
 	//renorm after pdf reweighting (only acceptance effects!
 	renormfact=getPdfReweighter()->getRenormalization();
-	norm *= renormfact;
+	norm_ *= renormfact;
 	if(testmode_ )
 		std::cout << "testmode("<< anaid << "): finished main loop, renorm factor pdf weights: " <<renormfact  << std::endl;
 
 	//renorm all mc weights 
 	for(size_t i=0;i<weightbranches.size();i++){
 		renormfact=mcreweighters.at(i).getRenormalization();
-		norm *= renormfact;
+		norm_ *= renormfact;
 		if(testmode_ )
 			std::cout << "testmode("<< anaid << "): finished main loop, renorm factor for mc reweighting["<<i<<"]: " <<renormfact  << std::endl;
 	}
@@ -1426,13 +1426,13 @@ void  top_analyzer_run2::analyze(size_t anaid){
 	}
 
 
-	std::cout << "\nEvents total (normalized): "<< nEntries*norm
-			<< "\n nEvents_selected normd: "<< sel_step[8]*norm
-			<< " with norm " << norm << " for " << inputfile_<< std::endl;
+	std::cout << "\nEvents total (normalized): "<< nEntries*norm_
+			<< "\n nEvents_selected normd: "<< sel_step[8]*norm_
+			<< " with norm " << norm_ << " for " << inputfile_<< std::endl;
 	//agrohsje check phase space bias in weights
 	std::cout<<"selection bias for PU?: \n"
 			<<"pusum=" << pusum << " for all nEntries=" << nEntries
-			<< ", pusum_sel normd=" << pusum_sel*norm << " for selected events normd=" << nEntries_sel*norm <<"\n"
+			<< ", pusum_sel normd=" << pusum_sel*norm_ << " for selected events normd=" << nEntries_sel*norm_ <<"\n"
 			<<"selection bias for mc weight? \n"
 			<<"mcwsum="<< mcwsum << " for all nEntries=" << nEntries
 			<< std::endl;

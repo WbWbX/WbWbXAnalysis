@@ -92,7 +92,7 @@ public:
 
 	size_t size(){return stacks_.size();}
 
-	void clear(){stacks_.clear();name_="";}
+	void clear(){stacks_.clear();}
 	static std::vector<histoStackVector*> csv_list;
 	static bool csv_makelist;
 	static void csv_clearlist(){csv_list.clear();}

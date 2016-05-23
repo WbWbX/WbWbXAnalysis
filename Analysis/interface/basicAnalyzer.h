@@ -26,10 +26,14 @@ public:
 	void readFileList(const std::string& );
 	virtual void analyze(size_t )=0;
 
+
+
 private:
 	void process();
 
 protected:
+
+	fileForker::fileforker_status writeHistos();
 
 	ztop::histoStackVector  allplotsstackvector_;
 

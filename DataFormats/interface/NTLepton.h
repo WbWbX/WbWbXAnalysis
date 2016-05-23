@@ -11,6 +11,7 @@ namespace ztop{
 class NTLepton{
  public:
   explicit NTLepton(){q_=0;};
+  explicit NTLepton(const NTLorentzVector<float>& p4in,int charge):p4_(p4in),q_(charge){}
    ~NTLepton(){};
 
   //sets

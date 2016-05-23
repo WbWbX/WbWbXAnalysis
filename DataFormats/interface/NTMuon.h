@@ -18,7 +18,8 @@ namespace ztop{
 
 class NTMuon : public NTLepton {
 public:
-    explicit NTMuon(){q_=0;};
+    explicit NTMuon():NTLepton(){q_=0;};
+    explicit NTMuon(const NTLorentzVector<float>& p4in,int charge):NTLepton(p4in,charge){}
     ~NTMuon(){};
 
 

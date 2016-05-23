@@ -206,7 +206,7 @@ protected:
 
 
 	void copyAll(const topAnalyzer &);
-	void readFileList(); //run automatically when start() is called
+	void readFileList(); //some extras compared to basic impl
 
 	TString replaceExtension(TString filename );
 

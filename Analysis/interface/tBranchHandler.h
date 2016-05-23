@@ -22,9 +22,11 @@ namespace ztop{
 class tBranchHandlerBase{
 public:
 	tBranchHandlerBase():gotentry_(false){}
-	~tBranchHandlerBase(){}
+	virtual ~tBranchHandlerBase(){}
 
 	void newEntry(){gotentry_=false;}
+
+	const bool& gotEntry()const{return gotentry_;}
 
 protected:
 	void addTreeAndBranch(tTreeHandler * t, const TString& branchname);
@@ -50,7 +52,7 @@ public:
 	}
 	tBranchHandler(tTreeHandler * t, const TString& branchname):tBranchHandlerBase(),
 			t_(t),content_(0),copied_(false),
-			branch_(0),branchname_(branchname),missingbranch_(false){
+			branch_(0),branchname_(branchname),missingbranch_(false),isPrimitive_(false){
 		if(!t){
 			throw std::runtime_error("tBranchHandler: tree pointer is NULL!");
 		}
@@ -118,6 +120,8 @@ public:
 	 * Allows missing and just returns an empty vector
 	 */
 	static bool allow_missing;
+
+
 
 private:
 
