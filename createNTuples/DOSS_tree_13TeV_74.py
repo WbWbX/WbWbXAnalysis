@@ -178,10 +178,9 @@ if globalTag != '':
 else:
     print "Determine global tag automatically"
     if options.runOnMC:
-        process.GlobalTag.globaltag = cms.string('76X_mcRun2_asymptotic_v12')
-        #agrohsje process.GlobalTag.globaltag = cms.string('PHYS14_50_V2::All') 
+        process.GlobalTag.globaltag = cms.string('80X_mcRun2_asymptotic_2016_miniAODv2')
     else:
-        process.GlobalTag.globaltag = cms.string('76X_dataRun2_v15')
+        process.GlobalTag.globaltag = cms.string('80X_dataRun2_Prompt_v8')
         
 print "Using global tag: ", process.GlobalTag.globaltag
 
@@ -372,8 +371,8 @@ elif not runOnAOD:
      process.HBHENoiseFilter=noiseFilter.clone(src=cms.InputTag('TriggerResults','','RECO'),flag=cms.string("Flag_HBHENoiseFilter"))
      process.HBHENoiseIsoFilter=noiseFilter.clone(src=cms.InputTag('TriggerResults','','RECO'),flag=cms.string("Flag_HBHENoiseIsoFilter"))
      process.ecalDeadCellFilter=noiseFilter.clone(src=cms.InputTag('TriggerResults','','RECO'),flag=cms.string("Flag_EcalDeadCellTriggerPrimitiveFilter"))
-     process.chargedHadronTrackFilter=noiseFilter.clone(src=cms.InputTag('TriggerResults','','RECO'),flag=cms.string("Flag_chargedHadronTrackResolutionFilter"))
-     process.muonBadTrackFilter=noiseFilter.clone(src=cms.InputTag('TriggerResults','','RECO'),flag=cms.string("Flag_muonBadTrackFilter"))
+#     process.chargedHadronTrackFilter=noiseFilter.clone(src=cms.InputTag('TriggerResults','','RECO'),flag=cms.string("Flag_chargedHadronTrackResolutionFilter"))
+ #    process.muonBadTrackFilter=noiseFilter.clone(src=cms.InputTag('TriggerResults','','RECO'),flag=cms.string("Flag_muonBadTrackFilter"))
 
 
      from TopAnalysis.ZTopUtils.TriggerFilter_cfi import triggerOrFilter
@@ -394,9 +393,9 @@ elif not runOnAOD:
          process.cscFilter*
          process.vertexFilter*
          process.badSCFilter*
-         process.ecalDeadCellFilter*
-         process.chargedHadronTrackFilter*
-         process.muonBadTrackFilter
+         process.ecalDeadCellFilter
+  #       process.chargedHadronTrackFilter*
+   #      process.muonBadTrackFilter
      )
      if dataset== "emu":
          process.prefilterSequence+=process.emuTriggerFilter
@@ -622,20 +621,6 @@ from PhysicsTools.PatAlgos.tools.jetTools import switchJetCollection
 #        print "Switching 'addJetFlavourInfo' for " + m + " to 'True'"
 #        setattr( getattr(process,m), 'addJetFlavourInfo', cms.bool(True) )
 
-if not options.runOnAOD:
-    from PhysicsTools.PatAlgos.producersLayer1.jetUpdater_cff import patJetCorrFactorsUpdated
-    process.patJetCorrFactorsReapplyJEC = patJetCorrFactorsUpdated.clone(
-      src = cms.InputTag("slimmedJets"),
-      levels = ['L1FastJet', 
-            'L2Relative', 
-            'L3Absolute'],
-      payload = 'AK4PFchs' ) # Make sure to choose the appropriate levels and payload here!
-
-    from PhysicsTools.PatAlgos.producersLayer1.jetUpdater_cff import patJetsUpdated
-    process.patJetsReapplyJEC = patJetsUpdated.clone(
-      jetSource = cms.InputTag("slimmedJets"),
-      jetCorrFactorsSource = cms.VInputTag(cms.InputTag("patJetCorrFactorsReapplyJEC"))
-    )
 
 
 
@@ -647,7 +632,7 @@ if not options.runOnAOD:
 if options.runOnAOD:
     jetColl= 'patJets'+pfpostfix
 else :
-    jetColl= "patJetsReapplyJEC"
+    jetColl= "slimmedJets"
 
 process.treeJets = selectedPatJets.clone( 
     src=jetColl,   #'patJets'+pfpostfix, 
