@@ -57,8 +57,12 @@ Historically data files were located here, and some still are. New files should 
 
 
 
+TtZAnalysis /Obsolete
 
-
+Place to put classes/code that is not used anymore or not used yet (with an unspecified date of implementation).
+If the code put here is indeed obsolete, it has to have some parts that might be usable in the future.
+Don't just trash here!
+The rest of the code MUST NOT have any dependence to this package.
 
 
 

@@ -36,6 +36,8 @@ void basicAnalyzer::process(){
 
 
 void basicAnalyzer::readFileList(const std::string& inputfile){
+	if(debug)
+		std::cout << "basicAnalyzer::readFileList" << std::endl;
 	using namespace ztop;
 	using namespace std;
 
@@ -64,6 +66,8 @@ void basicAnalyzer::readFileList(const std::string& inputfile){
 			continue;
 		}
 		infiles_.push_back   ((fr.getData<TString>(line,0)));
+		if(debug)
+			std::cout << "basicAnalyzer::readFileList: " << infiles_.at(infiles_.size()-1) << std::endl;
 		legentries_.push_back(fr.getData<TString>(line,1));
 		colz_.push_back      (fr.getData<int>    (line,2));
 		norms_.push_back     (fr.getData<double> (line,3));
@@ -78,14 +82,33 @@ void basicAnalyzer::readFileList(const std::string& inputfile){
 			extraopts_.push_back("");
 
 	}
-
+	for(size_t i=0;i<infiles_.size();i++)
+		infiles.push_back(infiles_.at(i).Data());
 	setInputFiles(infiles);
 
 
 }
 
+fileForker::fileforker_status basicAnalyzer::runParallels(int interval){
+	prepareSpawn();
+	fileForker::fileforker_status stat=fileForker::ff_status_parent_busy;
+	while(stat==fileForker::ff_status_parent_busy || stat== fileForker::ff_status_parent_childstospawn){
+
+		spawnChilds();
+		stat=getStatus();
+		std::cout << textFormatter::fixLength("Filename",30)                << " statuscode " << " progress " <<std::endl;
+		for(size_t i=0;i<infiles_.size();i++)
+			std::cout << textFormatter::fixLength(infiles_.at(i).Data(),30) << "     " << getStatus(i) <<"     " << "   " << getBusyStatus(i)<<"%"<<std::endl;
+		std::cout << std::endl;
+		sleep (interval);
+	}
+	return stat;
+}
+
 
 fileForker::fileforker_status basicAnalyzer::writeHistos(){
+	if(debug)
+		std::cout << "basicAnalyzer::writeHistos" <<std::endl;
 	ztop::histoStackVector * csv=&allplotsstackvector_;
 
 	if(fileExists(getOutputFileName().data())) {
@@ -97,12 +120,19 @@ fileForker::fileforker_status basicAnalyzer::writeHistos(){
 	if(signal_)
 		csv->addSignal(legendname_);
 
-	csv->writeToFile(getOutputFileName());
+	if(debug)
+		std::cout << "basicAnalyzer::writeHistos: writing" <<std::endl;
+	if(csv->size())
+		csv->writeToFile(getOutputFileName());
 
 	csv->clear();//frees mem
 
+	if(debug)
+		std::cout << "basicAnalyzer::writeHistos: done" <<std::endl;
 	return ff_status_child_success;
 }
 
-
+bool basicAnalyzer::createOutFile()const{
+	return true;
+}
 }

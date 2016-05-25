@@ -157,7 +157,6 @@ public:
 	void setFilePostfixReplace(const std::vector<TString>& files,const std::vector<TString>& pf);
 
 
-	void setDataSetDirectory(TString dir){datasetdirectory_=dir;}
 	void setShowStatus(bool show){showstatus_=show;}
 	void setOnlySummary(bool show){onlySummary_=show;}
 	void setTestMode(bool test){testmode_=test;}
@@ -214,7 +213,6 @@ protected:
 
 	TString name_,dataname_,channel_,syst_,energy_;
 	bool b_ee_,b_emu_,b_mumu_,is7TeV_;
-	TString datasetdirectory_;
 	double lumi_;
 	/**
 	 * default: NTEvent, can be changed e.g. to use weights of different pdfs

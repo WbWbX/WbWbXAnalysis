@@ -21,12 +21,16 @@ namespace ztop{
 
 class tBranchHandlerBase{
 public:
-	tBranchHandlerBase():gotentry_(false){}
+	tBranchHandlerBase():gotentry_(false),t_(0){}
 	virtual ~tBranchHandlerBase(){}
 
-	void newEntry(){gotentry_=false;}
 
 	const bool& gotEntry()const{return gotentry_;}
+	void newEntry(){gotentry_=false;}
+
+	static bool debug;
+
+	virtual void removeTree(tTreeHandler * )=0;
 
 protected:
 	void addTreeAndBranch(tTreeHandler * t, const TString& branchname);
@@ -34,6 +38,7 @@ protected:
 	//avoids double setting
 	static std::map< tTreeHandler* ,std::vector<TString> > branchesfortree_;
 	bool gotentry_;
+	tTreeHandler *t_;
 };
 
 
@@ -43,26 +48,30 @@ protected:
  * and easier
  */
 template<class T>
-class tBranchHandler : private tBranchHandlerBase{
+class tBranchHandler : public tBranchHandlerBase{
 public:
-	tBranchHandler():tBranchHandlerBase(),t_(0),content_(0),copied_(false),branch_(0),
-	branchname_(""),missingbranch_(true){
+	tBranchHandler():tBranchHandlerBase(),content_(0),copied_(false),branch_(0),
+	branchname_(""),missingbranch_(true),isPrimitive_(false){
 		// doesn't do anything
 		throw std::logic_error("tBranchHandler: default constructor should not be used");
 	}
 	tBranchHandler(tTreeHandler * t, const TString& branchname):tBranchHandlerBase(),
-			t_(t),content_(0),copied_(false),
+			content_(0),copied_(false),
 			branch_(0),branchname_(branchname),missingbranch_(false),isPrimitive_(false){
 		if(!t){
 			throw std::runtime_error("tBranchHandler: tree pointer is NULL!");
 		}
-
+		t_=t;
+		if(debug)
+			std::cout << "tBranchHandler: " << branchname_<< std::endl;
 		int ret=0;
-		bool isPrimitive_ = boost::is_fundamental<T>::value;
+		isPrimitive_ = boost::is_fundamental<T>::value;
 		//WHY does root do that?!?!
 		if(isPrimitive_){
 			content_=new T();
 			ret=t->tree()->SetBranchAddress(branchname_,content_,&branch_);
+			if(debug)
+				std::cout << "tBranchHandler: " << branchname_<< " is primitive type" << std::endl;
 		}
 		else
 			ret=t->tree()->SetBranchAddress(branchname_,&content_,&branch_);
@@ -90,15 +99,28 @@ public:
 				throw std::runtime_error("tBranchHandler: branch does not exists!");
 			}
 		}
+		if(debug)
+			std::cout << "tBranchHandler: loaded " << branchname_<< std::endl;
 		addTreeAndBranch(t,branchname);
+		if(debug)
+			std::cout << "tBranchHandler: associated " << branchname_ << " with " << t->tree()->GetName()<< std::endl;
 
 	}
 	~tBranchHandler(){
-		if(content_) delete content_;content_=0; /*obsolete but in case some sharing is done at some point*/
-		removeTreeAndBranch(t_,branchname_);
+		if(debug)
+			std::cout << "~tBranchHandler: " << branchname_<< std::endl;
+	    removeTreeAndBranch(t_,branchname_);
+		if(content_){if(!isPrimitive_) delete content_;content_=0;} /*obsolete but in case some sharing is done at some point*/
+		t_=0;
+
 	}
 
-
+	void removeTree(tTreeHandler * t){
+		if(t && t == t_){
+			t_->tree()->ResetBranchAddress(branch_);
+			t_=0;
+		}
+	}
 
 	/**
 	 * always copy | safer
@@ -133,7 +155,6 @@ private:
 		gotentry_=true;
 	}
 
-	tTreeHandler *t_;
 	T* content_;
 	T realcontent_;
 	bool copied_;

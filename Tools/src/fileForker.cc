@@ -59,8 +59,13 @@
 #include <stdexcept>
 
 namespace ztop{
-fileForker::fileForker():debug(false),
-		ischild_(false),spawnready_(false),
+
+
+
+bool fileForker::debug=false;
+
+
+fileForker::fileForker():ischild_(false),spawnready_(false),
 		maxchilds_(12),
 		runningchilds_(0),
 		donechilds_(0),
@@ -85,6 +90,8 @@ fileForker::fileforker_status fileForker::prepareSpawn(){
 		return ff_status_parent_generror;
 	lastspawned_=-1;
 	size_t filenumber=inputfiles_.size();
+	if(!filenumber)
+		throw std::logic_error("fileForker::prepareSpawn: no input");
 	p_idx.open(filenumber);
 	p_allowwrite.open(filenumber);
 	p_askwrite.open(filenumber);
@@ -95,13 +102,14 @@ fileForker::fileforker_status fileForker::prepareSpawn(){
 
 	busystatus_.resize(filenumber,0);
 	childstatus_.resize(filenumber,ff_status_child_hold);
+	ischild_=false;
 	spawnready_=true;
 	return ff_status_parent_success;
 }
 
 fileForker::fileforker_status fileForker::spawnChilds(){
 	if(debug)
-		std::cout << "fileForker::spawnChilds" << std::endl;
+		std::cout << "fileForker::spawnChilds: " << inputfiles_.size()<<std::endl;
 	using namespace std;
 	using namespace ztop;
 	if(!spawnready_)
@@ -124,6 +132,7 @@ fileForker::fileforker_status fileForker::spawnChilds(){
 				std::cout << "last: " << lastspawned_<< " i: "<< i << std::endl;
 			childPids_.at(i)=fork();
 			if(childPids_.at(i)==0){//child process
+				ischild_=true;
 				try{
 					if(debug)
 						std::cout << "fileForker::spawnChilds child "<<i << std::endl;
@@ -176,7 +185,12 @@ fileForker::fileforker_status fileForker::spawnChilds(){
 
 	}
 	else{ //only one process
+		if(debug)
+			std::cout << "fileForker::spawnChilds: only one process, running in main thread"  << std::endl;
 		ownchildindex_=0;
+		ischild_=false;
+		donechilds_++;
+		lastspawned_=1;
 		process();
 	}
 
@@ -188,7 +202,8 @@ fileForker::fileforker_status fileForker::spawnChilds(){
 }
 
 fileForker::fileforker_status fileForker::getStatus(const size_t& childindex)const{
-
+	if(!ischild_)
+		return ff_status_parent_busy;
 	return childstatus_.at(childindex);
 
 }
@@ -220,15 +235,23 @@ int fileForker::getBusyStatus(const size_t& childindex){
 }
 
 bool fileForker::writeReady_block(){
-	if(ownchildindex_==FF_PARENTINDEX)
-		return false;
+	if(debug)
+		std::cout << "fileForker::writeReady_block: ischild: "<< ischild_ << std::endl;
+	if(!ischild_)
+		return true;
 
 	p_askwrite.get(ownchildindex_)->pwrite(ownchildindex_);
 	p_allowwrite.get(ownchildindex_)->pread();
+	if(debug)
+		std::cout << "fileForker::writeReady_block: done" << std::endl;
 	return true;
 
 }
 void fileForker::writeDone(fileforker_status stat){
+	if(debug)
+		std::cout << "fileForker::writeDone" << std::endl;
+	if(!ischild_)
+		return;
 	p_status.get(ownchildindex_)->pwrite(stat);
 
 }
@@ -241,6 +264,8 @@ void fileForker::reportBusyStatus(int bstat){
 }
 
 void fileForker::processEndFunction(){
+	if(debug)
+		std::cout << "fileForker::processEndFunction" << std::endl;
 	processendcalled_=true;
 	writeReady_block() ;
 	fileforker_status stat=writeOutput();

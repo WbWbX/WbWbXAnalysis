@@ -44,6 +44,8 @@ public:
 	 */
 	void setPreCache();
 
+	static bool debug;
+
 protected:
 
 

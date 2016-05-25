@@ -1,0 +1,20 @@
+
+
+[inputfiles-begin]
+
+
+$ inputfile,     legend entry,        color,   xsection,   legendNumber (for sorting,- allows for gaps),  (opt) isSignal
+
+test1.root,              data,                   1,        200,              99 
+test12.root,              signal,               432,        150,              1
+test123.root,              background,           632,        100,              2
+  
+  
+[inputfiles-end]
+
+[parameters-begin] 
+
+inputFilesDir = /afs/desy.de/user/k/kiesej/xxl-af-cms/recProjects/CMSSW_5_3_27/src/TtZAnalysis/Analysis/test/
+
+
+[parameters-end]

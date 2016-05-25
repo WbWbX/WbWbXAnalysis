@@ -81,7 +81,7 @@ public:
 	//a number between 0 and 100 (%)
 	int getBusyStatus(const size_t& childindex);
 
-	bool debug;
+	static bool debug;
 
 protected:
 	/**

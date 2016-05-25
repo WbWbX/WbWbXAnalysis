@@ -18,6 +18,9 @@
 #include "FWCore/FWLite/interface/AutoLibraryLoader.h"
 
 namespace ztop{
+
+bool  tTreeHandler::debug=false;
+
 tTreeHandler::tTreeHandler(const TString & filename, const TString &treename):file_(0), t_(0),entry_(0),entries_(0){
 	load(filename,treename);
 }
@@ -54,16 +57,32 @@ void tTreeHandler::load(const TString & filename, const TString &treename){
 	entries_=t_->GetEntries();
 }
 void tTreeHandler::clear(){
-
+	if(debug)
+		std::cout << "tTreeHandler::clear" << std::endl;
+	for(size_t i=0;i<assobranches_.size();i++){
+		assobranches_.at(i)->removeTree(this);
+	}
+	if(debug)
+		std::cout << "tTreeHandler::clear: removed tree from branches" << std::endl;
+	assobranches_.clear(); //just remove asso
+	if(debug)
+		std::cout << "tTreeHandler::clear: removed branches from tree" << std::endl;
 	if(t_)
-		delete t_;
+		{delete t_;
+		t_=0;}
+	if(debug)
+		std::cout << "tTreeHandler::clear: deleted tree" << std::endl;
 	t_=0;
 	if(file_){
-		file_->Close();
+		if(file_->IsOpen())
+			file_->Close();
+		if(debug)
+			std::cout << "tTreeHandler::clear: closed TFile" << std::endl;
 		delete file_;
+		if(debug)
+			std::cout << "tTreeHandler::clear: deleted TFile" << std::endl;
 		file_=0;
 	}
-	assobranches_.clear(); //just remove asso
 }
 void tTreeHandler::associate( tBranchHandlerBase*tb){
 	assobranches_.push_back(tb);

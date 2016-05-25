@@ -27,6 +27,9 @@ public:
 	virtual void analyze(size_t )=0;
 
 
+	void setDataSetDirectory(const TString& dir){datasetdirectory_=dir;}
+
+	fileForker::fileforker_status  runParallels(int interval);
 
 private:
 	void process();
@@ -37,7 +40,7 @@ protected:
 
 	ztop::histoStackVector  allplotsstackvector_;
 
-	bool createOutFile()const{return true;}
+	bool createOutFile()const;
 
 	std::vector<TString> infiles_,legentries_;
 	std::vector<int> colz_;
@@ -53,6 +56,8 @@ protected:
 	double norm_;
 	size_t legorder_;
 	bool signal_;
+
+	TString datasetdirectory_;
 };
 
 

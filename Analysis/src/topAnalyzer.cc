@@ -151,20 +151,8 @@ int topAnalyzer::start(){
 	}
 
 //debug=true;
-	prepareSpawn();
-	fileForker::fileforker_status stat=fileForker::ff_status_parent_busy;
-	while(stat==fileForker::ff_status_parent_busy || stat== fileForker::ff_status_parent_childstospawn){
 
-		spawnChilds();
-		stat=getStatus();
-		std::cout << textFormatter::fixLength("Filename",30)                << " statuscode " << " progress " <<std::endl;
-		for(size_t i=0;i<infiles_.size();i++)
-			std::cout << textFormatter::fixLength(infiles_.at(i).Data(),30) << "     " << getStatus(i) <<"     " << "   " << getBusyStatus(i)<<"%"<<std::endl;
-		std::cout << std::endl;
-		sleep (2);
-	}
-
-	if(stat==fileForker::ff_status_parent_success)
+	if(runParallels(3)==fileForker::ff_status_parent_success)
 		return 1;
 	else return -99;
 }

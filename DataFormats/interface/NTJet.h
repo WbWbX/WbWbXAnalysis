@@ -10,6 +10,7 @@ namespace ztop{
 
 
 class NTJet{
+	friend class wNTJetInterface;
 public:
 	explicit NTJet():
 	genid_(0),
