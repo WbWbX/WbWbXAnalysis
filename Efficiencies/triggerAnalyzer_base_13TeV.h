@@ -381,7 +381,7 @@ public:
 		if(mode_<-0.1){
 			//  pair<string, double> trig2("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999.);
                         dileptriggers.push_back("HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");
-                        dileptriggers.push_back("HLT_Ele32_eta2p1_WPTight_Gsf_v");
+                 //       dileptriggers.push_back("HLT_Ele32_eta2p1_WPTight_Gsf_v");
                         //dileptriggers.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v");
                         //dileptriggers.push_back("HLT_Ele27_eta2p1_WP75_Gsf_v");
 
@@ -396,8 +396,8 @@ public:
                         //dileptriggers.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v");
                         dileptriggers.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v");
                         dileptriggers.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");
-                        dileptriggers.push_back("HLT_IsoTkMu22_v");
-                        dileptriggers.push_back("HLT_IsoMu22_v");
+                   //     dileptriggers.push_back("HLT_IsoTkMu22_v");
+                     //   dileptriggers.push_back("HLT_IsoMu22_v");
 
                         //dileptriggers.push_back("HLT_IsoMu18_v");
                         //dileptriggers.push_back("HLT_IsoMu17_eta2p1_v");
@@ -412,9 +412,9 @@ public:
 			dileptriggers.push_back("HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v");
 			//  pair<string, double> trig4("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999);
 			dileptriggers.push_back("HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v");
-                        dileptriggers.push_back("HLT_IsoTkMu22_v");
-                       dileptriggers.push_back("HLT_IsoMu22_v");
-                        dileptriggers.push_back("HLT_Ele32_eta2p1_WPTight_Gsf_v");
+                        //dileptriggers.push_back("HLT_IsoTkMu22_v");
+                       //dileptriggers.push_back("HLT_IsoMu22_v");
+                        //dileptriggers.push_back("HLT_Ele32_eta2p1_WPTight_Gsf_v");
                     //    dileptriggers.push_back("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v");
                         //dileptriggers.push_back("HLT_IsoTkMu20_v");
                         //dileptriggers.push_back("HLT_IsoMu20_v");
@@ -433,15 +433,15 @@ public:
 
 		if(mode_<-0.1){
 			dileptriggersMC.push_back("HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");
-                        dileptriggersMC.push_back("HLT_Ele32_eta2p1_WPTight_Gsf_v");            
+                     //   dileptriggersMC.push_back("HLT_Ele32_eta2p1_WPTight_Gsf_v");            
             //dileptriggersMC.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v");
                       //  dileptriggersMC.push_back("HLT_Ele27_eta2p1_WP75_Gsf_v");
 		}
 		if(mode_>0.1){
 			dileptriggersMC.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v");
                         dileptriggersMC.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");
-                        dileptriggersMC.push_back("HLT_IsoTkMu22_v");
-                        dileptriggersMC.push_back("HLT_IsoMu22_v");
+                        //dileptriggersMC.push_back("HLT_IsoTkMu22_v");
+                        //dileptriggersMC.push_back("HLT_IsoMu22_v");
 
                         //dileptriggersMC.push_back("HLT_IsoMu17_eta2p1_v");
                         //dileptriggersMC.push_back("HLT_IsoTkMu20_v");
@@ -450,9 +450,9 @@ public:
 		if(mode_==0){
 			dileptriggersMC.push_back("HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v");
 			dileptriggersMC.push_back("HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v");
-                       dileptriggersMC.push_back("HLT_IsoTkMu22_v");
-                        dileptriggersMC.push_back("HLT_IsoMu22_v");
-                        dileptriggersMC.push_back("HLT_Ele32_eta2p1_WPTight_Gsf_v");
+                       //dileptriggersMC.push_back("HLT_IsoTkMu22_v");
+                       // dileptriggersMC.push_back("HLT_IsoMu22_v");
+                       // dileptriggersMC.push_back("HLT_Ele32_eta2p1_WPTight_Gsf_v");
                         //dileptriggersMC.push_back("HLT_IsoMu17_eta2p1_v");
                        // dileptriggersMC.push_back("HLT_IsoMu17_eta2p1_v");
                         //dileptriggersMC.push_back("HLT_IsoTkMu20_v");
@@ -484,17 +484,17 @@ public:
                         }
 		///////////PU reweighting
 
-		PUReweighter PUweight;
-		if(isMC_) PUweight.setDataTruePUInput(datapileup);
-		if(isMC_ && mcpufile_==""){
-			PUweight.setMCDistrFall15("25ns_poisson");
-		}
-		else if(isMC_ && mcpufile_!=""){
-			if(mcpufile_=="Summer11_Leg")
-				PUweight.setMCDistrSummer11Leg();
-			else
-				PUweight.setMCTruePUInput(mcpufile_.Data());
-		}
+		//PUReweighter PUweight;
+		//if(isMC_) PUweight.setDataTruePUInput(datapileup);
+		//if(isMC_ && mcpufile_==""){
+		//	PUweight.setMCDistrFall15("25ns_poisson");
+		//}
+		//else if(isMC_ && mcpufile_!=""){
+		//	if(mcpufile_=="Summer11_Leg")
+	//			PUweight.setMCDistrSummer11Leg();
+//			else
+//				PUweight.setMCTruePUInput(mcpufile_.Data());
+//		}
 
 		vector<NTMuon> * pMuons = 0;
 		t_->SetBranchAddress("NTMuons",&pMuons);//, &b_NTMuons);
@@ -637,8 +637,8 @@ public:
 
 
 			double puweight=1.;//pWeight->getWeight()*PUweight.getPUweight(pEvent->truePU());
-			if(isMC_) puweight*=PUweight.getPUweight(pEvent->truePU());
-			//puweight=1;
+			//if(isMC_) puweight*=PUweight.getPUweight(pEvent->truePU());
+			puweight=1;
 
 
 			if(mode_>0.1 && pMuons->size()<2) continue;
@@ -704,7 +704,7 @@ public:
 
 						firedidx.push_back(tmpidx);
 
-						if(trigP->second < prescale)
+						if(trigP->second < prescale && trigP->second > 0)
 							prescale=trigP->second;
 						if(trigP->second > largestprescale)
 							largestprescale=trigP->second;
@@ -713,7 +713,6 @@ public:
 					tmpidx++;
 				}
 			}
-
 			if(!firedMet)
 				prescale = 1;
 
@@ -1218,7 +1217,7 @@ public:
 
 			double eff=sel_Trig[i].second / sel_woTrig[i].second;
 			//double erreff=sqrt(eff*(1-eff)/sel_Trig[i].second);
-                        Double_t (*pBound)(Int_t,Int_t,Double_t,Bool_t) = &TEfficiency::ClopperPearson;
+                        Double_t (*pBound)(Double_t,Double_t,Double_t,Bool_t) = &TEfficiency::ClopperPearson;
                         
 
                         std::cout<<pBound(sel_woTrig[i].second,sel_Trig[i].second,0.68,true)<< "  "<< pBound(sel_woTrig[i].second,sel_Trig[i].second,0.68,false)<<std::endl;
@@ -1345,20 +1344,15 @@ public:
 
 	std::vector<string> initTriggers(){
 		std::vector<string> mettriggers;
-                //mettriggers.push_back("HLT_PFMET100_PFMHT100_IDLoose_v");
-                //mettriggers.push_back("HLT_MonoCentralPFJet80_PFMETNoMu120_JetIdCleaned_PFMHTNoMu120_IDTight_v");
-                mettriggers.push_back("HLT_PFMET120_PFMHT120_IDTight_v");
-                //mettriggers.push_back("HLT_PFMET90_PFMHT90_IDTight_v");
-                //mettriggers.push_back("HLT_PFMETNoMu120_JetIdCleaned_PFMHTNoMu120_IDTight_v");
-                //mettriggers.push_back("HLT_CaloMHTNoPU90_PFMET90_PFMHT90_IDTight_BTagCSV0p72_v2");
-                //mettriggers.push_back("HLT_MET200_JetIdCleaned_v");
-                //mettriggers.push_back("HLT_PFMETNoMu90_JetIdCleaned_PFMHTNoMu90_IDTight_v");
                 mettriggers.push_back("HLT_PFMET170_JetIdCleaned_v");
-                mettriggers.push_back("HLT_MET250_v"); 
-                mettriggers.push_back("HLT_PFMET170_HBHECleaned_v"); 
-                mettriggers.push_back("HLT_PFHT350_PFMET100_v");
+                mettriggers.push_back("HLT_PFMET120_PFMHT120_IDTight_v");
+                mettriggers.push_back("HLT_PFMET170_HBHECleaned_v");
+                //mettriggers.push_back("HLT_PFMETNoMu90_PFMHTNoMu90_IDTight_v");
+                mettriggers.push_back("HLT_PFHT300_PFMET110_v");
+                mettriggers.push_back("HLT_CaloMHTNoPU90_PFMET90_PFMHT90_IDTight_BTagCSV_p067_v"); 
                 mettriggers.push_back("HLT_PFHT750_4JetPt50_v");
                 mettriggers.push_back("HLT_PFHT800_v");
+                mettriggers.push_back("HLT_MET250_v");
 		//just for testing
 		// mettriggers.clear();
 		//mettriggers.push_back("HLT_MET120_v10");

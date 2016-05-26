@@ -4,8 +4,8 @@
 #include "TTreePerfStats.h"
 #include "FWCore/FWLite/interface/AutoLibraryLoader.h"
 
-#define DEF_ELEC_PT 30
-#define DEF_MUON_PT 30
+#define DEF_ELEC_PT 20
+#define DEF_MUON_PT 20
 
 double 
 triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::vector<ztop::NTElectron> * inputElectrons){
@@ -34,7 +34,7 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
 				&& fabs(muon->dzV())<0.5
 				&& muon->pixHits()>0
 				&& muon->trkHits()>5
-				&& fabs(muon->isoVal()) < 0.12){
+				&& fabs(muon->isoVal()) < 0.15){
 			tempmuons << muon;
 
 		}
@@ -144,8 +144,8 @@ void trigger_tightLeptons(){
 	ta_emud.setMode("emu");
 	ta_emud.setMassCutLow(20);
 	ta_emud.setIncludeCorr(includecorr);
-	ta_emud.setDileptonTrigger("HLT_Mu23_TrkIsoVVL_Ele12_Gsf_CaloId_TrackId_Iso_MediumWP_v");
-	ta_emud.setDileptonTrigger("HLT_Mu8_TrkIsoVVL_Ele23_Gsf_CaloId_TrackId_Iso_MediumWP_v"); //HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v
+	//ta_emud.setDileptonTrigger("HLT_Mu23_TrkIsoVVL_Ele12_Gsf_CaloId_TrackId_Iso_MediumWP_v");
+	//ta_emud.setDileptonTrigger("HLT_Mu8_TrkIsoVVL_Ele23_Gsf_CaloId_TrackId_Iso_MediumWP_v"); //HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v
 
 
 	ta_mumud.setMode("mumu");
@@ -175,7 +175,7 @@ void trigger_tightLeptons(){
         //ta_mumuMC.setIncludeCorr(false);
         //ta_emuMC.setIncludeCorr(false);
 
-	TString dir="/afs/desy.de/user/t/tarndt/xxl/TTZ/CMSSW_7_2_2_patch2/src/TtZAnalysis/createNTuples/";
+	TString dir="/nfs/dust/cms/user/tarndt/NTuples/Prod_806/";
 
 	TString cmssw_base=getenv("CMSSW_BASE");
 
@@ -184,15 +184,15 @@ void trigger_tightLeptons(){
 
 	std::vector<TString> mumumcfiles, eemcfiles, emumcfiles, datafilesFull,datafilesRunB,datafilesRunAB,datafilesRunC, datafilesRunA, datafilesRunD;
 
-	mumumcfiles << dir+"def_out.root" ;
+	//mumumcfiles << dir+"def_out.root" ;
 
-	eemcfiles << dir+"def_out.root" ;
+	//eemcfiles << dir+"def_out.root" ;
 
-	emumcfiles <<dir+"def_out.root" ;
+	//emumcfiles <<dir+"def_out.root" ;
 
-	datafilesFull  << dir + "dy.root";
+	datafilesFull  << dir + "tree_13Tev_data_MET_v2.root";
 
-	TString pileuproot = cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13.json.txt_PU.root";
+	TString pileuproot = cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13RunD.json.txt_PU.root";
 
 	//for others just copy data and mc, change input and pu file
 
@@ -225,9 +225,9 @@ void trigger_tightLeptons(){
 
 	triggerAnalyzer emudFull = ta_emud;
 	triggerAnalyzer emumcFull = ta_emuMC;
-	TString emustring=makeFullOutput(emudFull, emumcFull, "emu_Full", "emu Full", 0.01);
-        TString eestring=makeFullOutput(ta_eed,ta_eeMC,"ee_Full","ee Full",0.01);
-        TString mumustring=makeFullOutput(ta_mumud,ta_mumuMC,"mumu_Full","mumu_Full",0.01);
+	TString emustring=makeFullOutput(emudFull, emumcFull, "emu_Full", "emu Full", 0.0);
+        TString eestring=makeFullOutput(ta_eed,ta_eeMC,"ee_Full","ee Full",0.0);
+        TString mumustring=makeFullOutput(ta_mumud,ta_mumuMC,"mumu_Full","mumu_Full",0.0);
 
 	std::cout << "\n\nweighted output summary: " << std::endl;
 

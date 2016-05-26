@@ -168,7 +168,7 @@ private:
 	TH1D divideTH1D(const TH1D &h1, const TH1D &h2, bool binomial=true){ //! out = h1 / h2
 		TH1D out=h1;
 		for(int binx=1;binx<=h1.GetNbinsX()+1;binx++){
-			double cont=1;
+			double cont=0;
 			double err=0;
 			if(h2.GetBinContent(binx) !=0){
 				cont=h1.GetBinContent(binx) / h2.GetBinContent(binx);
@@ -208,7 +208,7 @@ private:
 		TH2D out=h1;
 		for(int binx=1;binx<=h1.GetNbinsX()+1;binx++){
 			for(int biny=1;biny<=h1.GetNbinsY()+1;biny++){
-				double cont=1;
+				double cont=0;
 				double err=0;
 				if(h2.GetBinContent(binx,biny) !=0){
 					cont=h1.GetBinContent(binx,biny) / h2.GetBinContent(binx,biny);
@@ -216,14 +216,22 @@ private:
 					double err2=cont/h2.GetBinContent(binx,biny) * h2.GetBinError(binx,biny);
 					if(binomial){
 						//err=sqrt(cont*(1-cont) * h1.GetBinError(binx,biny))/h1.GetBinContent(binx,biny);
-						double d_num2=sq(h1.GetBinError(binx,biny));
-						double d_den2=sq(h2.GetBinError(binx,biny));
-						double N_den=h2.GetBinContent(binx,biny);
-						double N_num=h1.GetBinContent(binx,biny);
+						//double d_num2=sq(h1.GetBinError(binx,biny));
+						//double d_den2=sq(h2.GetBinError(binx,biny));
+						//double N_den=h2.GetBinContent(binx,biny);
+						//double N_num=h1.GetBinContent(binx,biny);
 
-						err=d_num2 * sq( N_den - N_num) +(d_den2-d_num2) * sq(N_num);
+						//err=d_num2 * sq( N_den - N_num) +(d_den2-d_num2) * sq(N_num);
 
-						err=sqrt(err) / sq(N_den);
+						//err=sqrt(err) / sq(N_den);
+	                                        #ifndef CMSSW_LEQ_5
+                                                Double_t (*pBound)(Double_t,Double_t,Double_t,Bool_t) = &TEfficiency::ClopperPearson;
+                                                #else
+                                                Double_t (*pBound)(Int_t,Int_t,Double_t,Bool_t) = &TEfficiency::ClopperPearson;
+                                                #endif
+                                                err = std::max(pBound(h2.GetBinContent(binx,biny),h1.GetBinContent(binx,biny),0.68,true) -cont, cont -pBound(h2.GetBinContent(binx,biny),h1.GetBinContent(binx,biny),0.68,false));
+
+
 					}
 					else{
 						err=sqrt(err1*err1 + err2*err2);
