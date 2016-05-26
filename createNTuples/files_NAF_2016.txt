@@ -1,6 +1,6 @@
 ####Trigger Data
 
-#60    /MET/Run2016B-PromptReco-v2/MINIAOD        tree_13Tev_data_MET_v2       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_806/CMSSW_8_0_6/src/TtZAnalysis/createNTuples/jsonfiles/Cert_271036-273450_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt
+60    /MET/Run2016B-PromptReco-v2/MINIAOD        tree_13Tev_data_MET_v2       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_806/CMSSW_8_0_6/src/TtZAnalysis/createNTuples/jsonfiles/Cert_271036-273450_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt
 
 
 
@@ -8,22 +8,28 @@
 
 
 
-#60    /DoubleEG/Run2016B-PromptReco-v2/MINIAOD        tree_13Tev_data_DoubleEG_trigger_v2       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_806/CMSSW_8_0_6/src/TtZAnalysis/createNTuples/jsonfiles/Cert_271036-273450_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt
+60    /DoubleEG/Run2016B-PromptReco-v2/MINIAOD        tree_13Tev_data_DoubleEG_trigger_v2       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_806/CMSSW_8_0_6/src/TtZAnalysis/createNTuples/jsonfiles/Cert_271036-273450_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt
 
 
 
-#60    /DoubleMuon/Run2016B-PromptReco-v2/MINIAOD        tree_13Tev_data_DoubleMuon_trigger_v2       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_806/CMSSW_8_0_6/src/TtZAnalysis/createNTuples/jsonfiles/Cert_271036-273450_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt
+60    /DoubleMuon/Run2016B-PromptReco-v2/MINIAOD        tree_13Tev_data_DoubleMuon_trigger_v2       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_806/CMSSW_8_0_6/src/TtZAnalysis/createNTuples/jsonfiles/Cert_271036-273450_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt
 
 
 
-#60    /SingleMuon/Run2016B-PromptReco-v2/MINIAOD        tree_13Tev_data_SingleMuon_trigger_v2       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_806/CMSSW_8_0_6/src/TtZAnalysis/createNTuples/jsonfiles/Cert_271036-273450_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt
+60    /SingleMuon/Run2016B-PromptReco-v2/MINIAOD        tree_13Tev_data_SingleMuon_trigger_v2       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_806/CMSSW_8_0_6/src/TtZAnalysis/createNTuples/jsonfiles/Cert_271036-273450_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt
 
 
 
-#60    /SingleElectron/Run2016B-PromptReco-v2/MINIAOD        tree_13Tev_data_SingleElectron_trigger_v2       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_806/CMSSW_8_0_6/src/TtZAnalysis/createNTuples/jsonfiles/Cert_271036-273450_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt
+60    /SingleElectron/Run2016B-PromptReco-v2/MINIAOD        tree_13Tev_data_SingleElectron_trigger_v2       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_806/CMSSW_8_0_6/src/TtZAnalysis/createNTuples/jsonfiles/Cert_271036-273450_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt
 
 
 ######TTBar
+
+#450  /TT_TuneCUETP8M1_13TeV-powheg-pythia8/RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext3-v1/MINIAODSIM    tree_13TeV_emuttbar            runOnAOD=False isSignal=True includePDFWeights=True PDF=CT10 nominalPDF=3001 beginPDFVar=3002 endPDFVar=3053 genFilter=ttbar
+
+#750   /TT_TuneCUETP8M1_13TeV-powheg-pythia8/RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext3-v1/MINIAODSIM    tree_13TeV_emuttbarbg            runOnAOD=False isSignal=True includePDFWeights=True PDF=CT10 nominalPDF=3001 beginPDFVar=3002 endPDFVar=3053 genFilter=ttbar genFilterInvert=True
+
+
 
 
 #300    /TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv1-PUSpring16RAWAODSIM_80X_mcRun2_asymptotic_2016_v3-v2/MINIAODSIM      tree_13TeV_emuttbar_amc_mgbr    runOnAOD=False isSignal=True genFilter=ttbar
