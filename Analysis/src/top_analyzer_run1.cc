@@ -73,8 +73,7 @@ void  top_analyzer_run1::analyze(size_t anaid){
 
 
 
-	bool isMC=true;
-	if(legendname_==dataname_) isMC=false;
+	bool isMC=isMC_;
 
 	if(!isMC || !signal_)
 		getPdfReweighter()->switchOff(true);
@@ -210,7 +209,7 @@ void  top_analyzer_run1::analyze(size_t anaid){
 
 	bool fakedata=false,isfakedatarun=false;
 	if(mode_.Contains("Fakedata")){
-		if(legendname_ ==  dataname_)
+		if(legendname_ ==  datalegend_)
 			fakedata=true;
 		isfakedatarun=true;
 		isMC=true;
@@ -387,8 +386,8 @@ void  top_analyzer_run1::analyze(size_t anaid){
 	intfile=TFile::Open(datasetdirectory_+inputfile_);
 	//get normalization - switch on or off pdf weighter before!!!
 	norm_=createNormalizationInfo(intfile,isMC,anaid);
-	intfile->Close();
-	delete intfile;
+	//intfile->Close();
+	//delete intfile;
 
 	if(testmode_)
 		std::cout << "testmode("<< anaid << "): multiplying norm with "<< normmultiplier <<" file: " << inputfile_<< std::endl;
@@ -443,7 +442,6 @@ void  top_analyzer_run1::analyze(size_t anaid){
 	tTreeHandler *t =&tree;
 
 
-
 	tBranchHandler<std::vector<bool> >     b_TriggerBools(t,"TriggerBools");
 	tBranchHandler<std::vector<NTElectron> >    b_Electrons(t,electrontype);
 	tBranchHandler<std::vector<NTMuon> >        b_Muons(t,"NTMuons");
@@ -460,8 +458,11 @@ void  top_analyzer_run1::analyze(size_t anaid){
 	tBranchHandler<std::vector<NTGenJet> >      b_GenJets(t,"NTGenJets");
 	tBranchHandler<std::vector<NTGenParticle> > b_GenNeutrinos(t,"NTGenNeutrinos");
 
+
+
 	//additional weights
 	std::vector<tBranchHandler<NTWeight>*> weightbranches;
+	/*
 	tBranchHandler<NTWeight>::allow_missing =true;
 	tBranchHandler<std::vector<NTGenParticle> >::allow_missing =true;
 	tBranchHandler<std::vector<NTGenParticle> > b_GenBsRad(t,"NTGenBsRad");
@@ -470,9 +471,13 @@ void  top_analyzer_run1::analyze(size_t anaid){
 	tBranchHandler<ULong64_t> b_EventNumber(t,"EventNumber");
 	tBranchHandler<ULong64_t> b_RunNumber(t,"RunNumber");
 	tBranchHandler<ULong64_t> b_LumiBlock(t,"LumiBlock");
+*/
 
 	std::vector<ztop::simpleReweighter> mcreweighters;
+	if(testmode_)
+		std::cout << "testmode("<< anaid << ") branches set up" << std::endl;
 
+/*
 	for(size_t i=0;i<additionalweights_.size();i++){
 		std::cout << "adding weight " << additionalweights_.at(i) << std::endl;
 		tBranchHandler<NTWeight> * weight = new tBranchHandler<NTWeight>(t,additionalweights_.at(i));
@@ -480,8 +485,7 @@ void  top_analyzer_run1::analyze(size_t anaid){
 		ztop::simpleReweighter mcreweighter; 
 		mcreweighters.push_back(mcreweighter);
 	}
-
-
+*/
 
 	//some helpers
 	double sel_step[]={0,0,0,0,0,0,0,0,0};
@@ -496,7 +500,7 @@ void  top_analyzer_run1::analyze(size_t anaid){
 
 	Long64_t nEntries=t->entries();
 	if(norm_==0) nEntries=0; //skip for norm0
-	if(testmode_ && ! tickoncemode_) nEntries*=0.08;
+	if(testmode_ && ! tickoncemode_) nEntries*=0.008;
 
 	Long64_t firstentry=0;
 	//for fake data all signal samples are assumed to be used as fake data
@@ -585,7 +589,7 @@ void  top_analyzer_run1::analyze(size_t anaid){
 		histo1DUnfold::flushAllListed(); //important to call each event
 
 		//reports current status to parent
-		reportStatus(entry,nEntries,anaid);
+		reportStatus(entry,nEntries);
 
 
 		float puweight=1;
@@ -649,17 +653,19 @@ void  top_analyzer_run1::analyze(size_t anaid){
 
 			//if(b_GenLeptons3.content()->size()>1){ //gen info there
 
+
 			///////////////TOPPT REWEIGHTING////////
 			if(b_GenTops.content()->size()>1){ //ttbar sample
 				getTopPtReweighter()->reWeight(b_GenTops.content()->at(0).pt(),b_GenTops.content()->at(1).pt() ,puweight);
 				if(apllweightsone) puweight=1;
 				gentops.push_back(&b_GenTops.content()->at(0));
 				gentops.push_back(&b_GenTops.content()->at(1));
+			//	b_GenTops.content()->at(1).motherIts().push_back(2);
 			}
 
 			//recreate dependencies
 			genbs=produceCollection(b_GenBs.content(), &gentops);
-			genbsrad=produceCollection(b_GenBsRad.content(), &genbs);//,-1,-1,&genbs);
+		//	genbsrad=produceCollection(b_GenBsRad.content(), &genbs);//,-1,-1,&genbs);
 			genws=produceCollection(b_GenWs.content(), &gentops);
 
 			genleptons3=produceCollection(b_GenLeptons3.content(),&genws);
@@ -704,6 +710,8 @@ void  top_analyzer_run1::analyze(size_t anaid){
 			std::cout << "testmode("<< anaid << "): got trigger boolians" << std::endl;
 		if(!notrigger)
 			if(!checkTrigger(b_TriggerBools.content(),b_Event.content(), isMC,anaid)) continue;
+		if(testmode_ && entry==0)
+			std::cout << "testmode("<< anaid << "): got trigger boolians: done" << std::endl;
 
 
 		/*
@@ -977,7 +985,7 @@ void  top_analyzer_run1::analyze(size_t anaid){
 
 
 		///////DEBUG run lumi event
-		if(*b_EventNumber.content() == 159496
+	/*	if(*b_EventNumber.content() == 159496
 				|| *b_EventNumber.content() == 159504
 				|| *b_EventNumber.content() == 159515
 				|| *b_EventNumber.content() == 159517){
@@ -986,7 +994,7 @@ void  top_analyzer_run1::analyze(size_t anaid){
 			for(size_t i=0;i<isomuons.size();i++)
 				if(leadingptlep==isomuons.at(i))
 					std::cout << "lead muon" <<std::endl;
-		}
+		} */
 
 
 		vector<NTJet *> treejets,idjets,medjets,hardjets;

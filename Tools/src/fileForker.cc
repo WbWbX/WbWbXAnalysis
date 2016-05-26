@@ -81,7 +81,7 @@ fileForker::fileForker():ischild_(false),spawnready_(false),
 
 
 fileForker::~fileForker(){
-	//nothing to be done
+
 }
 
 
@@ -99,7 +99,7 @@ fileForker::fileforker_status fileForker::prepareSpawn(){
 	p_busystatus.open(filenumber);
 
 	childPids_.resize(filenumber,0);
-
+	runningchilds_=0;
 	busystatus_.resize(filenumber,0);
 	childstatus_.resize(filenumber,ff_status_child_hold);
 	ischild_=false;
@@ -107,7 +107,7 @@ fileForker::fileforker_status fileForker::prepareSpawn(){
 	return ff_status_parent_success;
 }
 
-fileForker::fileforker_status fileForker::spawnChilds(){
+fileForker::fileforker_status fileForker::spawnChildsAndUpdate(){
 	if(debug)
 		std::cout << "fileForker::spawnChilds: " << inputfiles_.size()<<std::endl;
 	using namespace std;
@@ -133,10 +133,13 @@ fileForker::fileforker_status fileForker::spawnChilds(){
 			childPids_.at(i)=fork();
 			if(childPids_.at(i)==0){//child process
 				ischild_=true;
+
 				try{
 					if(debug)
 						std::cout << "fileForker::spawnChilds child "<<i << std::endl;
 					ownchildindex_=p_idx.get(i)->pread(); //wait until parent got ok
+					p_status.get(ownchildindex_)->pwrite((int)ff_status_child_busy);
+					reportBusyStatus(0);
 					processendcalled_=false;
 					process();
 					if(!processendcalled_){
@@ -157,7 +160,7 @@ fileForker::fileforker_status fileForker::spawnChilds(){
 					std::cout << "fileForker::spawnChilds parent "<< std::endl;
 				ownchildindex_=FF_PARENTINDEX;//start processing
 				p_idx.get(i)->pwrite(i); //send start signal
-				childstatus_.at(i)=ff_status_child_busy;
+				childstatus_.at(i)=(fileforker_status)p_status.get(i)->pread();
 				runningchilds_++;
 				lastspawned_=i;
 
@@ -179,9 +182,17 @@ fileForker::fileforker_status fileForker::spawnChilds(){
 			donechilds_++;
 		}
 
+
+		for(size_t c=0;c<inputfiles_.size();c++){//update the status
+			if(p_status.get(c)->preadready())
+				childstatus_.at(c)=(fileforker_status)p_status.get(c)->pread();
+		}
+
 		if(donechilds_ == filenumber)
 			return ff_status_parent_success;
 
+		if(it_readytowrite>=0)
+			return ff_status_parent_filewritten;
 
 	}
 	else{ //only one process
@@ -195,22 +206,21 @@ fileForker::fileforker_status fileForker::spawnChilds(){
 	}
 
 
-	for(size_t c=0;c<filenumber;c++){
-
-	}
 	return ff_status_parent_busy;
 }
 
 fileForker::fileforker_status fileForker::getStatus(const size_t& childindex)const{
-	if(!ischild_)
-		return ff_status_parent_busy;
+
 	return childstatus_.at(childindex);
 
 }
 
 fileForker::fileforker_status fileForker::getStatus()const{
+	//update child status
+
 	if(debug){
-		std::cout << "fileForker::getStatus: "<< donechilds_<<"/"<< inputfiles_.size()<< std::endl;
+		std::cout << "fileForker::getStatus: "<< donechilds_<<"("<< runningchilds_<< ")/"<< inputfiles_.size()<<
+		" last "<< lastspawned_<< std::endl;
 		std::cout << "child stats: " <<std::endl;
 		for(size_t c=0;c<inputfiles_.size();c++){
 			std::cout << c << "\t"  << (int)childstatus_.at(c) <<"\t"<<inputfiles_.at(c) <<std::endl;

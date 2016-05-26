@@ -52,9 +52,10 @@ public:
 		ff_status_parent_busy=8,
 		ff_status_parent_generror=9,
 		ff_status_parent_exception=10,
+		ff_status_parent_filewritten=11,
 
-		ff_status_allowwrite=11,
-		ff_status_askwrite=12
+		ff_status_allowwrite=12,
+		ff_status_askwrite=13
 	};
 
 
@@ -72,7 +73,7 @@ public:
 	 * the following functions should remain in a loop until getStatus() returns a value different
 	 * from ff_status_childstospawn or ff_status_busy
 	 */
-	fileforker_status spawnChilds();
+	fileforker_status spawnChildsAndUpdate();
 	fileforker_status getStatus()const;
 
 
@@ -110,6 +111,7 @@ protected:
 	 */
 	virtual fileforker_status writeOutput()=0;
 
+	const std::vector<pid_t>& getChildPids()const{return childPids_;}
 
 private:
 	int checkForWriteRequest();

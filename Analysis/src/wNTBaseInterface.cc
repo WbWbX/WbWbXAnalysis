@@ -22,10 +22,10 @@ namespace ztop{
 
 bool wNTBaseInterface::debug=false;
 
-wNTBaseInterface::wNTBaseInterface():read_(false),t_(0){
+wNTBaseInterface::wNTBaseInterface():read_(false),firstread_(false),t_(0){
 
 }
-wNTBaseInterface::wNTBaseInterface(tTreeHandler * t):read_(false),t_(t){
+wNTBaseInterface::wNTBaseInterface(tTreeHandler * t):read_(false),firstread_(false),t_(t){
 
 }
 

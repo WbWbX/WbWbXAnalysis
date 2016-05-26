@@ -54,6 +54,9 @@ invokeApplication(){
 	TString scram_arch=getenv("SCRAM_ARCH");
 	TString batchbase = getenv("ANALYSE_BATCH_BASE");
 
+
+
+
 	TString database="data/analyse/";
 	TString configbase="configs/analyse/";
 

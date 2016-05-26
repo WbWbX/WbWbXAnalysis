@@ -39,21 +39,14 @@ void topAnalyzer::setChannel(const TString& chan){
 void topAnalyzer::reportError(int errorno, size_t anaid){
 	anaid++; // doesnt matter
 	errorno++; //doenst matter anymore
-	basicAnalyzer::reportStatus(basicAnalyzer::ff_status_child_generror);
+	fileForker::reportStatus(basicAnalyzer::ff_status_child_generror);
 }
 
-void topAnalyzer::reportStatus(Long64_t entry,Long64_t nEntries,size_t anaid){
-	if((entry +1)* 100 % nEntries <100){
-		int status=(entry+1) * 100 / nEntries;
-		reportBusyStatus(status);
-	}
-}
 
 topAnalyzer::topAnalyzer():basicAnalyzer(){
 
 	AutoLibraryLoader::enable();
 	freplaced_=0;
-	dataname_="data";
 	b_ee_=false;
 	b_mumu_=false;
 	b_emu_=false;
@@ -97,17 +90,6 @@ void topAnalyzer::setOutDir(const TString& dir){
 		outdir_=dir+"/";
 }
 
-void topAnalyzer::setFilePostfixReplace(const TString& file,const TString& pf,bool clear){
-	if(clear){ fwithfix_.clear();ftorepl_.clear();}
-	ftorepl_.push_back(file); fwithfix_.push_back(pf);
-}
-void topAnalyzer::setFilePostfixReplace(const std::vector<TString>& files,const std::vector<TString>& pf){
-	if(files.size() != pf.size()){
-		std::string errstr= "setFilePostfixReplace: vectors have to be same size!";
-		throw std::logic_error(errstr);
-	}
-	ftorepl_=files;fwithfix_=pf;
-}
 
 
 /**
@@ -150,39 +132,18 @@ int topAnalyzer::start(){
 		usepdfw_ = getPdfReweighter()->getConfIndex();
 	}
 
-//debug=true;
+	int interval=-1;
+	if(showstatus_)
+		interval=5;
 
-	if(runParallels(3)==fileForker::ff_status_parent_success)
+	if(runParallels(interval)==fileForker::ff_status_parent_success)
 		return 1;
 	else return -99;
 }
 
-TString topAnalyzer::replaceExtension(TString filename){
-
-
-	for(size_t i=0;i<ftorepl_.size();i++){
-		if(filename.Contains(ftorepl_.at(i))){
-
-			freplaced_++;
-
-			return filename.ReplaceAll(ftorepl_.at(i),fwithfix_.at(i));
-		}
-	}
-	return filename;
-}
 
 void topAnalyzer::readFileList(){
 	basicAnalyzer::readFileList(filelist_.Data());
-	std::vector<std::string > newinfiles;
-	for(size_t i=0;i<infiles_.size();i++){
-		//if(legentries_.at(i) == dataname_)
-		//	continue;
-		infiles_.at(i) =   replaceExtension(infiles_.at(i));
-		///load pdf files
-		newinfiles.push_back(infiles_.at(i).Data());
-
-	}
-	fileForker::setInputFiles(newinfiles);
 }
 
 float topAnalyzer::createNormalizationInfo(TFile *f, bool isMC,size_t anaid){
@@ -224,41 +185,6 @@ float topAnalyzer::createNormalizationInfo(TFile *f, bool isMC,size_t anaid){
 				generated2->setBinStat(i, sqrt(genentries));
 			}
 		}
-		//for PDF weights to keep normalization the same
-
-		/*
-		if(usepdfw_>-1
-				&& ! getPdfReweighter()->switchedOff()
-				&& ! getPdfReweighter()->getReweightToNominalEigenvector()){
-
-			std::cout << "warning: using pdf weights is implemented, but there are pitfalls:\n"
-					<< " - the nominal pdf weight (idx 0) can be different from 1 depending on\n"
-					<< "   which pdf set is used to produce the MC sample and which to reweight.\n"
-					<< "   CHECKCHECKCHECK!!! TBI properly" ;
-
-			size_t pdfw=0;//usepdfw_;
-			//use central weight to renormalize
-			float wgenentries=0;
-
-			tBranchHandler<NTEvent> b_Event(tnorm,eventbranch_);
-			Long64_t nEntries=tnorm->GetEntries();
-			for(Long64_t entry=0;entry<nEntries;entry++){
-				b_Event.getEntry(entry);
-				if(pdfw < b_Event.content()->PDFWeightsSize()){
-					wgenentries+=b_Event.content()->PDFWeight(pdfw);
-				}
-				else{
-					throw std::out_of_range("PDF weight index not found for at least one event. Check input!");
-				}
-			}
-			for(size_t i=1;i<=generated->getNBins();i++){
-				generated->setBinContent(i, (float)wgenentries);
-				generated->setBinStat(i,sqrt(wgenentries));
-			}
-			norm = lumi_  * wgenentries;
-
-		} */
-
 	}
 	else{//not mc
 		for(size_t i=1;i<=generated->getNBins();i++){
@@ -273,7 +199,7 @@ float topAnalyzer::createNormalizationInfo(TFile *f, bool isMC,size_t anaid){
 	}
 	//check for top mass scaling
 	//if(infiles_.at(anaid).Contains("ttbar") && ! infiles_.at(anaid).Contains("_ttbar")){ //selects all ttbar samples but not ttbarg/w/z
-	if(legentries_.at(anaid) != dataname_){ //don't automatically rescale pseudodata
+	if(legentries_.at(anaid) != datalegend_){ //don't automatically rescale pseudodata
 		float sampletopmass = atof(topmass_.Data());
 		//subtract TeV in string and convert to float 
 		TString tmp(energy_);
@@ -299,7 +225,6 @@ float topAnalyzer::createNormalizationInfo(TFile *f, bool isMC,size_t anaid){
 	}
 
 	norm*=norms_.at(anaid);
-
 	return norm;
 }
 

@@ -95,12 +95,12 @@ public:
 
 	//goes to higher level
 	void setChannel(const TString& chan);
-	void setSyst(TString syst){syst_=syst;}
+	//void setSyst(TString syst){syst_=syst;}
 	void setEnergy(TString e){if(e.Contains("7TeV")) is7TeV_=true; energy_=e;}
 	void setTopMass(TString topmass){topmass_=topmass;}
 	void setBTagMCEffFile(TString file){btagefffile_=file;}
 	TString getChannel(){return channel_;}
-	TString getSyst(){return syst_;}
+	//TString getSyst(){return syst_;}
 	TString Energy(){return energy_;}
 
 	void setDiscriminatorInputFile(const std::string filename){discrInput_=filename;}
@@ -138,7 +138,6 @@ public:
 	/////////////////////////// remain in base
 
 	virtual void analyze(size_t i)=0;
-	void setLumi(double Lumi){lumi_=Lumi;}
 
 	void setMode(TString mode){mode_=mode;} //will only set the mode, reading will be done at higher level
 
@@ -152,14 +151,10 @@ public:
 
 
 	void setFileList(TString fl){filelist_=fl;}
-	void setFilePostfixReplace(const TString& file,const TString& pf,bool clear=false);
-
-	void setFilePostfixReplace(const std::vector<TString>& files,const std::vector<TString>& pf);
 
 
 	void setShowStatus(bool show){showstatus_=show;}
 	void setOnlySummary(bool show){onlySummary_=show;}
-	void setTestMode(bool test){testmode_=test;}
 	void setTickOnceMode(bool test){tickoncemode_=test;}
 
 
@@ -185,12 +180,6 @@ public:
 	 * to the analyse executable
 	 */
 	void reportError(int , size_t );
-	/**
-	 * for child processes
-	 * reports the Status (% of events already processed) to the main program
-	 */
-	void reportStatus(Long64_t entry,Long64_t nEntries, size_t anaid);
-
 
 	/**
 	 * set the path to the inital configuration file (if any) to use it for further input to
@@ -207,13 +196,12 @@ protected:
 	void copyAll(const topAnalyzer &);
 	void readFileList(); //some extras compared to basic impl
 
-	TString replaceExtension(TString filename );
 
-	bool showstatus_,onlySummary_,testmode_,tickoncemode_,singlefile_;
+	bool showstatus_,onlySummary_,tickoncemode_,singlefile_;
 
-	TString name_,dataname_,channel_,syst_,energy_;
+	TString name_,channel_,energy_;
 	bool b_ee_,b_emu_,b_mumu_,is7TeV_;
-	double lumi_;
+
 	/**
 	 * default: NTEvent, can be changed e.g. to use weights of different pdfs
 	 * incorporated in the same ntuple
@@ -223,8 +211,6 @@ protected:
 	TString mode_;
 
 	TString filelist_;
-	std::vector<TString> fwithfix_,ftorepl_;
-	int freplaced_;
 
 	ztop::PUReweighter  puweighter_;
 	ztop::NTJERAdjuster  jeradjuster_;

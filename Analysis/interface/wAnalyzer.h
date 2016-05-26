@@ -12,18 +12,23 @@
 #include "TString.h"
 
 namespace ztop{
+
+class tTreeHandler;
+
 class wAnalyzer : public basicAnalyzer{
 public:
 	wAnalyzer():basicAnalyzer(){}
 	~wAnalyzer(){}
 
+	fileForker::fileforker_status  start();
 
 private:
+
 	fileForker::fileforker_status writeOutput();
 
 	void analyze(size_t id);
 
-
+	void createNormalizationInfo(tTreeHandler* );
 
 };
 

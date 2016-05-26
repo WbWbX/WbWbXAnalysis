@@ -27,20 +27,55 @@ public:
 	virtual void analyze(size_t )=0;
 
 
+
+
+
 	void setDataSetDirectory(const TString& dir){datasetdirectory_=dir;}
 
-	fileForker::fileforker_status  runParallels(int interval);
+
+
+	//setters
+	void setLumi(double Lumi){lumi_=Lumi;}
+	void setSyst(TString syst){syst_=syst;}
+
+	void setFilePostfixReplace(const TString& file,const TString& pf,bool clear=false);
+	void setFilePostfixReplace(const std::vector<TString>& files,const std::vector<TString>& pf);
+
+	void setTestMode(bool test){testmode_=test;}
+
+	//getters
+	TString getSyst(){return syst_;}
+
+
+	TString getOutFileName(){
+		if(syst_.Length())
+			return  (TString)getOutputFileName()+"_"+syst_;
+		else
+			return getOutputFileName();
+	}
 
 private:
 	void process();
 
 protected:
 
+	fileForker::fileforker_status  runParallels(int displaystatusinterval);
+
+	/**
+	 * for child processes
+	 * reports the Status (% of events already processed) to the main program
+	 */
+	void reportStatus(const Long64_t& entry,const Long64_t& nEntries);
+
+
 	fileForker::fileforker_status writeHistos();
 
 	ztop::histoStackVector  allplotsstackvector_;
 
 	bool createOutFile()const;
+
+	TString replaceExtension(TString filename );
+
 
 	std::vector<TString> infiles_,legentries_;
 	std::vector<int> colz_;
@@ -58,6 +93,16 @@ protected:
 	bool signal_;
 
 	TString datasetdirectory_;
+
+	TString syst_;
+	double lumi_;
+	std::vector<TString> fwithfix_,ftorepl_;
+	int freplaced_;
+	bool testmode_;
+
+	bool isMC_;
+
+	TString datalegend_;
 };
 
 

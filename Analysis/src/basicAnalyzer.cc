@@ -18,7 +18,12 @@ basicAnalyzer::basicAnalyzer():fileForker(),
 		col_(0),
 		norm_(1),
 		legorder_(0),
-		signal_(false)
+		signal_(false),
+		lumi_(0),
+		freplaced_(0),
+		testmode_(false),
+		isMC_(true),
+		datalegend_("data")
 {
 
 
@@ -31,6 +36,7 @@ void basicAnalyzer::process(){
 	col_=colz_.at(anaid);
 	legorder_=legords_.at(anaid);
 	signal_=issignal_.at(anaid);
+	isMC_ = legendname_ != datalegend_;
 	analyze(anaid);
 }
 
@@ -82,26 +88,56 @@ void basicAnalyzer::readFileList(const std::string& inputfile){
 			extraopts_.push_back("");
 
 	}
-	for(size_t i=0;i<infiles_.size();i++)
-		infiles.push_back(infiles_.at(i).Data());
-	setInputFiles(infiles);
+	std::vector<std::string > newinfiles;
+	for(size_t i=0;i<infiles_.size();i++){
+		//if(legentries_.at(i) == dataname_)
+		//	continue;
+		infiles_.at(i) =   replaceExtension(infiles_.at(i));
+		///load pdf files
+		newinfiles.push_back(infiles_.at(i).Data());
+
+	}
+	fileForker::setInputFiles(newinfiles);
 
 
+}
+
+
+TString basicAnalyzer::replaceExtension(TString filename){
+	for(size_t i=0;i<ftorepl_.size();i++){
+		if(filename.Contains(ftorepl_.at(i))){
+			freplaced_++;
+			return filename.ReplaceAll(ftorepl_.at(i),fwithfix_.at(i));
+		}
+	}
+	return filename;
 }
 
 fileForker::fileforker_status basicAnalyzer::runParallels(int interval){
 	prepareSpawn();
 	fileForker::fileforker_status stat=fileForker::ff_status_parent_busy;
+	int counter=0;
+	interval*=4; //to make it seconds
 	while(stat==fileForker::ff_status_parent_busy || stat== fileForker::ff_status_parent_childstospawn){
 
-		spawnChilds();
+		fileForker::fileforker_status writestat=spawnChildsAndUpdate();
 		stat=getStatus();
-		std::cout << textFormatter::fixLength("Filename",30)                << " statuscode " << " progress " <<std::endl;
-		for(size_t i=0;i<infiles_.size();i++)
-			std::cout << textFormatter::fixLength(infiles_.at(i).Data(),30) << "     " << getStatus(i) <<"     " << "   " << getBusyStatus(i)<<"%"<<std::endl;
-		std::cout << std::endl;
-		sleep (interval);
+		if(writestat == ff_status_parent_filewritten || (interval>0  && counter>interval)){
+			std::cout << "PID    "<< textFormatter::fixLength("Filename",30)                << " statuscode " << " progress " <<std::endl;
+			for(size_t i=0;i<infiles_.size();i++)
+				std::cout << textFormatter::fixLength(toString(getChildPids().at(i)),6)  << " "<< textFormatter::fixLength(infiles_.at(i).Data(),30) << "     " << getStatus(i) <<"     " << "   " << getBusyStatus(i)<<"%"<<std::endl;
+			std::cout << std::endl;
+			counter=0;
+		}
+		counter++;
+		usleep (250e3);
 	}
+	std::cout << "End report:" <<std::endl;
+	std::cout << textFormatter::fixLength("Filename",30)                << " statuscode " << " progress " <<std::endl;
+	for(size_t i=0;i<infiles_.size();i++)
+		std::cout << textFormatter::fixLength(infiles_.at(i).Data(),30) << "     " << getStatus(i) <<"     " << "   " << getBusyStatus(i)<<"%"<<std::endl;
+	std::cout << std::endl;
+
 	return stat;
 }
 
@@ -132,7 +168,28 @@ fileForker::fileforker_status basicAnalyzer::writeHistos(){
 	return ff_status_child_success;
 }
 
+
+void basicAnalyzer::reportStatus(const Long64_t& entry,const Long64_t& nEntries){
+	if((entry +1)* 100 % nEntries <100){
+		int status=(entry+1) * 100 / nEntries;
+		reportBusyStatus(status);
+	}
+}
+
+void basicAnalyzer::setFilePostfixReplace(const TString& file,const TString& pf,bool clear){
+	if(clear){ fwithfix_.clear();ftorepl_.clear();}
+	ftorepl_.push_back(file); fwithfix_.push_back(pf);
+}
+void basicAnalyzer::setFilePostfixReplace(const std::vector<TString>& files,const std::vector<TString>& pf){
+	if(files.size() != pf.size()){
+		std::string errstr= "setFilePostfixReplace: vectors have to be same size!";
+		throw std::logic_error(errstr);
+	}
+	ftorepl_=files;fwithfix_=pf;
+}
+
 bool basicAnalyzer::createOutFile()const{
+	//make it compatible
 	return true;
 }
 }

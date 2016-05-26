@@ -14,7 +14,8 @@
 #include <iostream>
 #include <map>
 #include "tTreeHandler.h"
-#include  <boost/type_traits/is_fundamental.hpp>
+//#include  <boost/type_traits/is_fundamental.hpp>
+#include  <boost/type_traits.hpp>
 
 namespace ztop{
 
@@ -24,6 +25,7 @@ public:
 	tBranchHandlerBase():gotentry_(false),t_(0){}
 	virtual ~tBranchHandlerBase(){}
 
+	const TString& getBranchName()const{return branchname_;}
 
 	const bool& gotEntry()const{return gotentry_;}
 	void newEntry(){gotentry_=false;}
@@ -33,15 +35,77 @@ public:
 	virtual void removeTree(tTreeHandler * )=0;
 
 protected:
+
+	void handleReturns(int,bool&,bool)const;
+
 	void addTreeAndBranch(tTreeHandler * t, const TString& branchname);
 	void removeTreeAndBranch(tTreeHandler * t, const TString& branchname);
 	//avoids double setting
 	static std::map< tTreeHandler* ,std::vector<TString> > branchesfortree_;
 	bool gotentry_;
 	tTreeHandler *t_;
+	TString branchname_;
 };
 
+template<class T>
+class tBranchHandler;
+namespace tBranchHandlerHelpers{
+template<class T>
+int tBranchHandler_createContentsAndAssociate(tBranchHandler<T>*bh, T &rc, T*& rcp, TBranch*& br, bool& isprimitive, bool& ispointer){
+	if(tBranchHandlerBase::debug)
+		std::cout << "tBranchHandler_createContents: non-array type for "<<bh->getBranchName()<<std::endl;
+	ispointer=false;
+	isprimitive = (boost::is_fundamental<T>::value && ! boost::is_void<T>::value)
+									||(boost::is_pointer<T>::value && boost::is_fundamental<typename boost::remove_pointer<T>::type>::value);
 
+	if(tBranchHandlerBase::debug && isprimitive)
+		std::cout << "tBranchHandler: " << bh->getBranchName() << ": primitive type"<<std::endl;
+	rc=  T();
+	rcp=&rc;
+	if(isprimitive){
+		return bh->tree()->tree()->SetBranchAddress(bh->getBranchName(),rcp,&br);
+	}
+	else{
+		rcp=0;
+		return bh->tree()->tree()->SetBranchAddress(bh->getBranchName(),&rcp,&br);
+	}
+}
+template<class T>
+int tBranchHandler_createContentsAndAssociate(tBranchHandler<T*>*bh, T* &rc, T** & rcp, TBranch*& br, bool& isprimitive, bool& ispointer){
+	if(tBranchHandlerBase::debug)
+		std::cout << "tBranchHandler_createContents: array type for "<<bh->getBranchName() <<" buffer: "<<bh->buffMax() <<std::endl;
+	if(bh->buffMax()<1)
+		throw std::out_of_range("tBranchHandler_createContents: buffer size below 1 not allowed");
+	ispointer=true;
+	rc= new T[bh->buffMax()];
+	isprimitive = (boost::is_fundamental<T>::value && ! boost::is_void<T>::value)
+										||(boost::is_pointer<T>::value && boost::is_fundamental<typename boost::remove_pointer<T>::type>::value);
+
+	if(tBranchHandlerBase::debug && isprimitive)
+		std::cout << "tBranchHandler: " << bh->getBranchName() << ": primitive type"<<std::endl;
+	if(isprimitive){
+		rcp=&rc;
+		return bh->tree()->tree()->SetBranchAddress(bh->getBranchName(),rc,&br);
+	}
+	else
+		throw std::runtime_error("tBranchHandler_createContentsAndAssociate: pointer to non-primitive not implemented"); //return bh->tree()->tree()->SetBranchAddress(bh->getBranchName(),&rcp,&br);
+
+}
+
+template<class T>
+void tBranchHandler_removeContents(tBranchHandler<T>*b, T &t){
+	if(tBranchHandlerBase::debug)
+		std::cout << "tBranchHandler_removeContents: non-array type for "<<b->getBranchName()<<std::endl;
+	return;
+}
+
+template<class T>
+void tBranchHandler_removeContents(tBranchHandler<T*>*b, T* &t){
+	if(tBranchHandlerBase::debug)
+		std::cout << "tBranchHandler_removeContents: array type for "<<b->getBranchName()<<std::endl;
+	 delete t;
+}
+}
 
 /**
  * This is just a small wrapper to make TBranch reading and access less ambiguous
@@ -50,55 +114,29 @@ protected:
 template<class T>
 class tBranchHandler : public tBranchHandlerBase{
 public:
-	tBranchHandler():tBranchHandlerBase(),content_(0),copied_(false),branch_(0),
-	branchname_(""),missingbranch_(true),isPrimitive_(false){
+	tBranchHandler():tBranchHandlerBase(),pcontent_(0),branch_(0),
+	missingbranch_(true),isPrimitive_(false),isPrimitiveArray_(false),buf_max_(0){
 		// doesn't do anything
 		throw std::logic_error("tBranchHandler: default constructor should not be used");
 	}
-	tBranchHandler(tTreeHandler * t, const TString& branchname):tBranchHandlerBase(),
-			content_(0),copied_(false),
-			branch_(0),branchname_(branchname),missingbranch_(false),isPrimitive_(false){
+	tBranchHandler(tTreeHandler * t, const TString& branchname,  size_t buf_max=1 ):tBranchHandlerBase(),
+			branch_(0),missingbranch_(false),isPrimitive_(false),isPrimitiveArray_(false),buf_max_(buf_max){
 		if(!t){
 			throw std::runtime_error("tBranchHandler: tree pointer is NULL!");
 		}
-		t_=t;
 		if(debug)
 			std::cout << "tBranchHandler: " << branchname_<< std::endl;
-		int ret=0;
-		isPrimitive_ = boost::is_fundamental<T>::value;
-		//WHY does root do that?!?!
-		if(isPrimitive_){
-			content_=new T();
-			ret=t->tree()->SetBranchAddress(branchname_,content_,&branch_);
-			if(debug)
-				std::cout << "tBranchHandler: " << branchname_<< " is primitive type" << std::endl;
-		}
-		else
-			ret=t->tree()->SetBranchAddress(branchname_,&content_,&branch_);
 
-		// Error handling
 
-		if(ret == -2 || ret == -1){
-			std::cout << "tBranchHandler: Class type given for branch " << branchname_
-					<< " does not match class type in tree. (root CheckBranchAddressType returned " << ret << ")" <<std::endl;
-			throw std::runtime_error("tBranchHandler: Class type does not match class type in branch");
-		}
-		else if(ret == -4 || ret == -3){
-			std::cout << "tBranchHandler: Internal error in branch " << branchname_
-					<< " (root CheckBranchAddressType returned " << ret << ")" <<std::endl;
-			throw std::runtime_error("tBranchHandler: Internal error in branch");
-		}
-		else if( ret == -5){
-			if(allow_missing){
-				content_      = new T();
-				missingbranch_= true;
-				std::cout << "tBranchHandler: branch " << branchname_ << " does not exists - created empty content" << std::endl;
-			}
-			else{
-				std::cout << "tBranchHandler: branch " << branchname_ << " does not exists!" << std::endl;
-				throw std::runtime_error("tBranchHandler: branch does not exists!");
-			}
-		}
+		branchname_=branchname;
+		t_=t;
+
+
+		int ret= tBranchHandlerHelpers::tBranchHandler_createContentsAndAssociate
+				(this,realcontent_,pcontent_,branch_,isPrimitive_,isPrimitiveArray_);
+
+
+		handleReturns(ret,missingbranch_,allow_missing);
 		if(debug)
 			std::cout << "tBranchHandler: loaded " << branchname_<< std::endl;
 		addTreeAndBranch(t,branchname);
@@ -109,8 +147,16 @@ public:
 	~tBranchHandler(){
 		if(debug)
 			std::cout << "~tBranchHandler: " << branchname_<< std::endl;
-	    removeTreeAndBranch(t_,branchname_);
-		if(content_){if(!isPrimitive_) delete content_;content_=0;} /*obsolete but in case some sharing is done at some point*/
+		removeTreeAndBranch(t_,branchname_);
+		if(pcontent_){
+			if(!isPrimitive_)
+				delete pcontent_;
+			 if(isPrimitiveArray_){
+				tBranchHandlerHelpers::tBranchHandler_removeContents(this,realcontent_);
+			}
+
+			pcontent_=0;
+		} /*obsolete but in case some sharing is done at some point*/
 		t_=0;
 
 	}
@@ -126,17 +172,14 @@ public:
 	 * always copy | safer
 	 */
 	T  * content(){
+		if(!t_)
+			throw std::out_of_range("tBranchHandler::content: no tree associated");
 		if(!gotentry_){
 			getEntry(t_->currentEntry());
+			if(!isPrimitive_)
+				realcontent_=*pcontent_;//copy high level objects
 		}
-		if(content_){
-			if(!copied_){
-				realcontent_=*content_;
-				copied_=true;
-			}
-			return &realcontent_;
-		}
-		throw std::runtime_error("tBranchHandler::content() pointer NULL!");
+		return &realcontent_;
 	}
 	/**
 	 * Allows missing and just returns an empty vector
@@ -144,29 +187,35 @@ public:
 	static bool allow_missing;
 
 
+	tTreeHandler* tree(){return t_;}
+	const tTreeHandler* tree()const {return t_;}
+
+	const size_t& buffMax()const{return buf_max_;}
 
 private:
 
 	void getEntry(const Long64_t& entry){
-		realcontent_=T();
-		copied_=false;
-		if(!missingbranch_)
+		if(!missingbranch_){
+			if(!branch_)
+				throw std::logic_error("tBranchHandler::getEntry: branch NULL");
 			branch_->GetEntry(entry);
+		}
 		gotentry_=true;
 	}
 
-	T* content_;
-	T realcontent_;
-	bool copied_;
+	T* pcontent_;
+	T  realcontent_;
 	TBranch * branch_;
-	TString branchname_;
 	bool missingbranch_;
 	bool isPrimitive_ ;
+	bool isPrimitiveArray_ ;
+	const size_t buf_max_;
 
 };
 
 template <typename T>
 bool tBranchHandler<T>::allow_missing=false;
+
 
 
 }

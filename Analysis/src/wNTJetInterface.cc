@@ -9,6 +9,7 @@
 
 namespace ztop{
 wNTJetInterface::wNTJetInterface(tTreeHandler * t,
+		const TString& size_branch,
 		const TString& pt_branch,
 		const TString& eta_branch,
 		const TString& phi_branch,
@@ -16,28 +17,40 @@ wNTJetInterface::wNTJetInterface(tTreeHandler * t,
 		const TString& btag_branch,
 		const TString& id_branch): wNTBaseInterface(t){
 
-	addBranch<float>(pt_branch);
-	addBranch<float>(eta_branch);
-	addBranch<float>(phi_branch);
-	addBranch<float>(m_branch);
-	addBranch<float>(btag_branch);
-	addBranch<int>  (id_branch);
+	/*
+	 * order defines the order the branches can be read later!
+	 */
+	addBranch<int>   (size_branch);
+	addBranch<float*>(pt_branch,64);
+	addBranch<float*>(eta_branch,64);
+	addBranch<float*>(phi_branch,64);
+	addBranch<float*>(m_branch,64);
+	addBranch<float*>(btag_branch,64);
+	addBranch<int*>  (id_branch,64);
 
 
 }
-
-NTJet * wNTJetInterface::content(){
+/**
+ * descr
+ *
+ * for performance reasons, wNTJetInterface is friend class of NTJet
+ * allowing to set members directly
+ */
+std::vector<NTJet> * wNTJetInterface::content(){
 	if(isNewEntry()){
-		content_.p4_.setPt( * getBranchContent<float>(0));
-		content_.p4_.setEta(* getBranchContent<float>(1));
-		content_.p4_.setPhi(* getBranchContent<float>(2));
-		content_.p4_.setM(  * getBranchContent<float>(3));
-		content_.setBtag(   * getBranchContent<float>(4));
-		if(* getBranchContent<int>(5) == 1)
-			content_.setId(true);
-		else
-			content_.setId(false);
+		size_t njet=*getBranchContent<int>(0);
+		content_.resize(njet);
+		for(size_t i=0;i<njet;i++){
+			NTJet & jet=content_.at(i);
 
+			jet.p4_.setPt( (* getBranchContent<float*>(1))[i]);
+			jet.p4_.setEta((* getBranchContent<float*>(2))[i]);
+			jet.p4_.setPhi((* getBranchContent<float*>(3))[i]);
+			jet.p4_.setM(  (* getBranchContent<float*>(4))[i]);
+			jet.btag_ =    (* getBranchContent<float*>(5))[i];
+			jet.id_   =  1 ==  (*getBranchContent<int*>(6))[i];
+
+		}
 	}
 	return &content_;
 }

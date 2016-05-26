@@ -10,12 +10,15 @@
 
 #include "TtZAnalysis/Analysis/interface/wNTBaseInterface.h"
 #include "TtZAnalysis/DataFormats/interface/NTJet.h"
+#include <vector>
+
 namespace ztop{
 class tTreeHandler;
 
 class wNTJetInterface: public wNTBaseInterface{
 public:
 	wNTJetInterface(tTreeHandler * t,
+			const TString& size_branch="",
 			const TString& pt_branch="",
 			const TString& eta_branch="",
 			const TString& phi_branch="",
@@ -24,14 +27,14 @@ public:
 			const TString& id_branch="");
 	~wNTJetInterface();
 
-	NTJet * content();
+	std::vector<NTJet> * content();
 
 
 private:
 	wNTJetInterface(){}
 
 
-	NTJet content_;
+	std::vector<NTJet> content_;
 
 
 };

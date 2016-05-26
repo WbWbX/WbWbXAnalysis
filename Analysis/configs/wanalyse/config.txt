@@ -5,16 +5,16 @@
 
 $ inputfile,     legend entry,        color,   xsection,   legendNumber (for sorting,- allows for gaps),  (opt) isSignal
 
-test1.root,              data,                   1,        200,              99 
-test12.root,              signal,               432,        150,              1
-test123.root,              background,           632,        100,              2
+treeProducerA7W_tree.root,              data,                   1,         1,              99 
+treeProducerA7W_tree1.root,             signal,                 432,       440,              1
+treeProducerA7W_tree.root,              background,             632,       200,              2
   
   
 [inputfiles-end]
 
 [parameters-begin] 
 
-inputFilesDir = /afs/desy.de/user/k/kiesej/xxl-af-cms/recProjects/CMSSW_5_3_27/src/TtZAnalysis/Analysis/test/
-
+inputFilesDir = /nfs/dust/cms/user/kiesej/
+Lumi = 20000
 
 [parameters-end]

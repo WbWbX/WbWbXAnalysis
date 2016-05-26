@@ -17,7 +17,11 @@ invokeApplication(){
 	std::string configfile=parser->getOpt<std::string>
 	("i","config.txt","specify configuration file input manually (all in configs/wanalyse)");
 
-	size_t maxchilds=parser->getOpt<int>("m",6,"max childs");
+	const bool testmode=parser->getOpt<bool>("T",false,"testmode");
+
+	const size_t maxchilds=parser->getOpt<int>("m",6,"max childs");
+
+	const TString syst=parser->getOpt<TString>("s","nominal","systematics string");
 
 	parser->doneParsing();
 
@@ -47,20 +51,27 @@ invokeApplication(){
 	fr.setStartMarker("[parameters-begin]");
 	fr.setEndMarker("[parameters-end]");
 	fr.readFile(configfile);
-	maxchilds++;
+
 
 	std::string treedir=              fr.getValue<std::string>("inputFilesDir");
+	const double luminosity = fr.getValue<double>("Lumi");
 	//fileForker::debug=true;
 	//basicAnalyzer::debug=true;
 
 	//fileForker::debug=true;
 	wAnalyzer ana;
+	ana.setLumi(luminosity);
+	ana.setTestMode(testmode);
 	ana.setDataSetDirectory(treedir);
-	ana.setOutputFileName("wout.ztop");
+	ana.setOutputFileName("mu_8TeV_80");
 	ana.readFileList(configfile);
-	ana.setMaxChilds(1);
+	ana.setMaxChilds(maxchilds);
 
-	ana.runParallels(2);
+	ana.setSyst(syst);
+
+
+
+	ana.start();
 
 
 	return 0;

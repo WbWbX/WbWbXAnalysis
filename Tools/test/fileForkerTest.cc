@@ -70,7 +70,7 @@ int main(){
 	fileForker::fileforker_status stat=fileForker::ff_status_parent_busy;
 	while(stat==fileForker::ff_status_parent_busy || stat== fileForker::ff_status_parent_childstospawn){
 
-		f.spawnChilds();
+		f.spawnChildsAndUpdate();
 		stat=f.getStatus();
 		for(size_t i=0;i<ins.size();i++)
 			std::cout << textFormatter::fixLength(ins.at(i),10) << ' ' << f.getStatus(i) << "  " << f.getBusyStatus(i)<<std::endl;

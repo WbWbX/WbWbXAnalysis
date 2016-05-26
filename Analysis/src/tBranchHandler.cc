@@ -18,6 +18,30 @@ std::map< tTreeHandler* ,std::vector<TString> > tBranchHandlerBase::branchesfort
 
 bool tBranchHandlerBase::debug=false;
 
+void tBranchHandlerBase::handleReturns(int ret,bool& missing,bool allowmissing)const{
+	if(ret == -2 || ret == -1){
+		std::cout << "tBranchHandler: Class type given for branch " << branchname_
+				<< " does not match class type in tree. (root CheckBranchAddressType returned " << ret << ")" <<std::endl;
+		throw std::runtime_error("tBranchHandler: Class type does not match class type in branch");
+	}
+	else if(ret == -4 || ret == -3){
+		std::cout << "tBranchHandler: Internal error in branch " << branchname_
+				<< " (root CheckBranchAddressType returned " << ret << ")" <<std::endl;
+		throw std::runtime_error("tBranchHandler: Internal error in branch");
+	}
+	else if( ret == -5){
+		if(allowmissing){
+			missing= true;
+			std::cout << "tBranchHandler: branch " << branchname_ << " does not exists - created empty content" << std::endl;
+
+		}
+		else{
+			std::cout << "tBranchHandler: branch " << branchname_ << " does not exists!" << std::endl;
+			throw std::runtime_error("tBranchHandler: branch does not exists!");
+		}
+	}
+
+}
 
 void tBranchHandlerBase::addTreeAndBranch(tTreeHandler * t, const TString& branchname){
 

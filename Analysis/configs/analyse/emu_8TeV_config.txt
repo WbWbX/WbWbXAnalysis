@@ -16,6 +16,8 @@ $   (optional:bool) isSignal (for containerUnfold classes),
 
 $data
 $
+tree_8TeV_emuttbarviatau.root, t#bar{t},	 	633,	  251.7,	  1, true
+
 tree_8TeV_emu_runA_22Jan.root,     data,1,1,99
 tree_8TeV_emu_runB_22Jan.root,data,1,1,99
 tree_8TeV_emu_runC_22Jan.root,data,1,1,99
@@ -23,7 +25,6 @@ tree_8TeV_emu_runD_22Jan.root,data,1,1,99
 
 
 tree_8TeV_emuttbar.root,       t#bar{t},		633,	  251.7,	  0, true
-tree_8TeV_emuttbarviatau.root, t#bar{t},	 	633,	  251.7,	  1, true
 tree_8TeV_emuttbarbg.root,         t#bar{t}bg,	   	634,	  248.5,	  3
 
 tree_8TeV_tWtoLL.root,             tW/#bar{t}W#rightarrowll,	   		616,	  11.1,	  4

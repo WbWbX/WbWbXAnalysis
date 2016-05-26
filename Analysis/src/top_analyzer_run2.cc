@@ -45,7 +45,7 @@ void  top_analyzer_run2::analyze(size_t anaid){
 
 
 	bool isMC=true;
-	if(legendname_==dataname_) isMC=false;
+	if(legendname_==datalegend_) isMC=false;
 
 	if(!isMC || !signal_)
 		getPdfReweighter()->switchOff(true);
@@ -166,7 +166,7 @@ void  top_analyzer_run2::analyze(size_t anaid){
 
 	bool fakedata=false,isfakedatarun=false;
 	if(mode_.Contains("Fakedata")){
-		if(legendname_ ==  dataname_)
+		if(legendname_ ==  datalegend_)
 			fakedata=true;
 		isfakedatarun=true;
 		isMC=true;
@@ -534,7 +534,7 @@ void  top_analyzer_run2::analyze(size_t anaid){
 		histo1DUnfold::flushAllListed(); //important to call each event
 
 		//reports current status to parent
-		reportStatus(entry,nEntries,anaid);
+		reportStatus(entry,nEntries);
 
 		float puweight=1;
 		if (isMC) puweight = getPUReweighter()->getPUweight(b_Event.content()->truePU());
