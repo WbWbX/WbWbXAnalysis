@@ -323,17 +323,18 @@ std::cout << "label:" << addlabel << std::endl;
 			TH1D * h=&(hvec.at(i).getTH1D());
 			leg->AddEntry(h,"data efficiency"  ,"pe");
 			h->GetYaxis()->SetTitle("#epsilon,SF");
+                        h->GetYaxis()->SetRangeUser(0,1.1);
 			if(hvec.at(i).getFormatInfo().Contains("smallmarkers"))
 				h->SetMarkerSize(h->GetMarkerSize()*0.5);
 			h->Draw("e1");
 			i++;
 			h=&(hvec.at(i).getTH1D());
-			leg->AddEntry(h,"MC efficiency"  ,"pe");
-			h->Draw("e1,same");
+			//leg->AddEntry(h,"MC efficiency"  ,"pe");
+			//h->Draw("e1,same");
 			i++;
 			h=&(hvec.at(i).getTH1D());
-			leg->AddEntry(h,"scale factor"  ,"pe");
-			h->Draw("e1,same");
+			//leg->AddEntry(h,"scale factor"  ,"pe");
+			//h->Draw("e1,same");
 
 			TString canvasname=hvec.at(i).getName();
 			canvasname.ReplaceAll("_eff","");
