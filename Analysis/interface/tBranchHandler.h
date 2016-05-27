@@ -137,6 +137,9 @@ public:
 
 
 		handleReturns(ret,missingbranch_,allow_missing);
+		if(missingbranch_){
+			pcontent_=&realcontent_;
+		}
 		if(debug)
 			std::cout << "tBranchHandler: loaded " << branchname_<< std::endl;
 		addTreeAndBranch(t,branchname);
@@ -148,7 +151,7 @@ public:
 		if(debug)
 			std::cout << "~tBranchHandler: " << branchname_<< std::endl;
 		removeTreeAndBranch(t_,branchname_);
-		if(pcontent_){
+		if(pcontent_ && !missingbranch_){
 			if(!isPrimitive_)
 				delete pcontent_;
 			 if(isPrimitiveArray_){
