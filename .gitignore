@@ -7,7 +7,7 @@ __init__.pyc
 
 # Analysis/bin/ #
 #################
-#Analysis/bin/*
+Analysis/output
 
 
 # ROOT #
