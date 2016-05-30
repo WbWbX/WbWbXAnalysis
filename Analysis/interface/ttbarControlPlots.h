@@ -17,9 +17,10 @@ public:
 	ttbarControlPlots():controlPlotBasket(),jetcategory(cat_0bjet0jet){}
 	~ttbarControlPlots(){}
 
-	void makeControlPlots(const size_t& step);
 
 protected:
+	void makeControlPlotsPriv();
+
 	enum bjetnjetscategories{
 		cat_0bjet0jet,cat_0bjet1jet,cat_0bjet2jet,cat_0bjet3jet,
 		cat_1bjet0jet,cat_1bjet1jet,cat_1bjet2jet,cat_1bjet3jet,

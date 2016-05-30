@@ -22,7 +22,8 @@ namespace ztop{
 
 class tBranchHandlerBase{
 public:
-	tBranchHandlerBase():gotentry_(false),t_(0){}
+	tBranchHandlerBase():gotentry_(false),t_(0),buf_max_(1){}
+	tBranchHandlerBase(size_t buf):gotentry_(false),t_(0),buf_max_(buf){}
 	virtual ~tBranchHandlerBase(){}
 
 	const TString& getBranchName()const{return branchname_;}
@@ -33,6 +34,8 @@ public:
 	static bool debug;
 
 	virtual void removeTree(tTreeHandler * )=0;
+
+	const size_t & getBufMax()const{return buf_max_;}
 
 protected:
 
@@ -45,6 +48,7 @@ protected:
 	bool gotentry_;
 	tTreeHandler *t_;
 	TString branchname_;
+	const size_t buf_max_;
 };
 
 template<class T>
@@ -115,12 +119,12 @@ template<class T>
 class tBranchHandler : public tBranchHandlerBase{
 public:
 	tBranchHandler():tBranchHandlerBase(),pcontent_(0),branch_(0),
-	missingbranch_(true),isPrimitive_(false),isPrimitiveArray_(false),buf_max_(0){
+	missingbranch_(true),isPrimitive_(false),isPrimitiveArray_(false){
 		// doesn't do anything
 		throw std::logic_error("tBranchHandler: default constructor should not be used");
 	}
-	tBranchHandler(tTreeHandler * t, const TString& branchname,  size_t buf_max=1 ):tBranchHandlerBase(),
-			branch_(0),missingbranch_(false),isPrimitive_(false),isPrimitiveArray_(false),buf_max_(buf_max){
+	tBranchHandler(tTreeHandler * t, const TString& branchname,  size_t buf_max=1 ):tBranchHandlerBase(buf_max),
+			branch_(0),missingbranch_(false),isPrimitive_(false),isPrimitiveArray_(false){
 		if(!t){
 			throw std::runtime_error("tBranchHandler: tree pointer is NULL!");
 		}
@@ -212,7 +216,6 @@ private:
 	bool missingbranch_;
 	bool isPrimitive_ ;
 	bool isPrimitiveArray_ ;
-	const size_t buf_max_;
 
 };
 

@@ -14,9 +14,10 @@
 
 namespace ztop{
 
-
+class wNTLeptonsInterface;
 
 class NTElectron : public NTLepton {
+	friend class wNTLeptonsInterface;
 public:
 
 	explicit NTElectron(){q_=0;rhoIso_=-99;};

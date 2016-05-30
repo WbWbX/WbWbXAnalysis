@@ -18,7 +18,8 @@ public:
 	ZControlPlots():controlPlotBasket(){}
 	~ZControlPlots(){}
 
-	void makeControlPlots(const size_t& step);
+private:
+	void makeControlPlotsPriv();
 
 	enum etapten{
 		pt2030_eta05   =0,

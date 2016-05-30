@@ -142,10 +142,7 @@ public:
 	void setMode(TString mode){mode_=mode;} //will only set the mode, reading will be done at higher level
 
 	void setOutFileAdd(TString o){outfileadd_=o;}
-	TString getOutPath(){return outdir_+getOutFileName();}
-	TString getOutDir(){return outdir_;}
 
-	void setOutDir(const TString& dir);
 	float createNormalizationInfo(TFile *f,bool isMC,size_t anaid);
 
 
@@ -222,7 +219,6 @@ protected:
 
 	size_t filecount_;
 	TString outfileadd_;
-	TString outdir_;
 
 	TString btagefffile_;
 

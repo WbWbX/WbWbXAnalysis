@@ -142,6 +142,13 @@ fileForker::fileforker_status basicAnalyzer::runParallels(int interval){
 }
 
 
+void basicAnalyzer::setOutDir(const TString& dir){
+	if(dir.EndsWith("/"))
+		outdir_=dir;
+	else
+		outdir_=dir+"/";
+}
+
 fileForker::fileforker_status basicAnalyzer::writeHistos(){
 	if(debug)
 		std::cout << "basicAnalyzer::writeHistos" <<std::endl;
@@ -189,7 +196,8 @@ void basicAnalyzer::setFilePostfixReplace(const std::vector<TString>& files,cons
 }
 
 bool basicAnalyzer::createOutFile()const{
-	//make it compatible
+	if(outdir_.Length())
+		system(("mkdir -p "+outdir_).Data());
 	return true;
 }
 }

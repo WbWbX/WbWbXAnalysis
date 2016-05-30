@@ -32,6 +32,10 @@ public:
 
 	void setDataSetDirectory(const TString& dir){datasetdirectory_=dir;}
 
+	void setOutDir(const TString& dir);
+	TString getOutDir(){return outdir_;}
+
+	TString getOutPath(){return outdir_+getOutFileName();}
 
 
 	//setters
@@ -103,6 +107,7 @@ protected:
 	bool isMC_;
 
 	TString datalegend_;
+	TString outdir_;
 };
 
 

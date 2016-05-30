@@ -58,13 +58,9 @@ void ttbarControlPlots::setJetCategory(size_t nbjets,size_t njets){
  * Otherwise safe
  *
  */
-void ttbarControlPlots::makeControlPlots(const size_t & step){
+void ttbarControlPlots::makeControlPlotsPriv(){
 
-	if(!switchedon_) return;
 
-	initStep(step);
-	if(limittostep_>-1 && (size_t)limittostep_!=step)
-		return;
 	using namespace std;
 
 	bool middphi=false;

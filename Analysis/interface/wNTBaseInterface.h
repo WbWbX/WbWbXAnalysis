@@ -48,6 +48,7 @@ protected:
 		throw std::logic_error("wNTBaseInterface:getBranchContent: branch not associated");;}
 
 	bool isNewEntry()const;
+	size_t getBranchBuffer(const size_t & idx)const;
 
 	const std::vector<tBranchHandlerBase*>& associatedBranches()const{return associatedBranches_;}
 

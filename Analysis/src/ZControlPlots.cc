@@ -124,8 +124,8 @@ void ZControlPlots::setCategory(const NTLepton* l1, const NTLepton* l2){
 /**
  * setbins, addplot, FILL
  */
-void ZControlPlots::makeControlPlots(const size_t & step){
-	initStep(step);
+void ZControlPlots::makeControlPlotsPriv(){
+
 	using namespace std;
 
 

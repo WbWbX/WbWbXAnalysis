@@ -11,12 +11,14 @@
 #include <map>
 #include "NTLorentzVector.h"
 
+#define NTMUON_TIGHTID_MEMIDX 99
 
 namespace ztop{
 
-
+class wNTLeptonsInterface;
 
 class NTMuon : public NTLepton {
+	friend class wNTLeptonsInterface;
 public:
     explicit NTMuon():NTLepton(){q_=0;};
     explicit NTMuon(const NTLorentzVector<float>& p4in,int charge):NTLepton(p4in,charge){}
@@ -36,6 +38,10 @@ public:
     void setTrackP4(ztop::NTLorentzVector<float> trkp4in){trkP4_=trkp4in;}
     void setIsPf(bool ispf){ispf_=ispf;}
 
+    void setIsTightID(bool istight){
+    	if(istight) setMember(NTMUON_TIGHTID_MEMIDX,1);
+    	else setMember(NTMUON_TIGHTID_MEMIDX,0);
+    }
 
     //gets
 
@@ -55,12 +61,14 @@ public:
     const NTLorentzVector<float> &trackP4()const{return trkP4_;}
     const bool &isPf()const{return ispf_;}
 
+    bool isTightID()const{return getMember((int)NTMUON_TIGHTID_MEMIDX) >0;}
+
     //extra
 
     void setMember(std::string Membername, float value){
         memberss_[Membername]=value;
     }
-    float getMember(std::string membername){
+    float getMember(std::string membername)const{
         if(memberss_.find(membername) != memberss_.end())
             return memberss_.find(membername)->second;
         else
@@ -69,7 +77,7 @@ public:
     void setMember(int Memberidx, float value){
         members_[Memberidx]=value;
     }
-    float getMember(int memberidx){
+    float getMember(int memberidx)const{
         if(members_.find(memberidx) != members_.end())
             return members_.find(memberidx)->second;
         else

@@ -13,6 +13,7 @@
 
 invokeApplication(){
 	using namespace ztop;
+	using namespace std;
 
 	std::string configfile=parser->getOpt<std::string>
 	("i","config.txt","specify configuration file input manually (all in configs/wanalyse)");
@@ -34,8 +35,9 @@ invokeApplication(){
 	TString database="data/wanalyse/";
 	TString configbase="configs/wanalyse/";
 	if(batchbase.Length()>0){
-		database=batchbase+"/"+database;
-		configbase=batchbase+"/"+configbase;
+		batchbase+="/";
+		database=batchbase+database;
+		configbase=batchbase+configbase;
 		std::cout << "Batch run from " << batchbase << std::endl;
 	}
 	else{
@@ -64,15 +66,25 @@ invokeApplication(){
 	ana.setTestMode(testmode);
 	ana.setDataSetDirectory(treedir);
 	ana.setOutputFileName("mu_8TeV_80");
+	ana.setOutDir(batchbase+"output");
 	ana.readFileList(configfile);
 	ana.setMaxChilds(maxchilds);
 
 	ana.setSyst(syst);
+	system(("rm -f "+ana.getOutPath()+".ztop").Data());
 
+	/*
+	 * Systematics configuration. Will use some code space!
+	 */
 
+	if(syst == "SCALE_up"){
+		ana.addWeightIndex(1); //just dummy
+	}
+	else if(syst == "SCALE_down"){
+		ana.addWeightIndex(2); //just dummy
+	}
 
 	ana.start();
-
 
 	return 0;
 }

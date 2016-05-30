@@ -9,6 +9,7 @@
 #define CONTROLPLOTBASKET_H_
 
 #include "TtZAnalysis/Tools/interface/histo1D.h"
+#include "TtZAnalysis/Analysis/interface/NTFullEvent.h"
 #include <vector>
 
 //helper
@@ -22,7 +23,6 @@
         getBins().push_back(i);}
 
 namespace ztop{
-class NTFullEvent;
 /**
  * Warning undefined behaviour when getting copied. needs to be fixed
  * or prohibited, because it would result in same named containers
@@ -36,7 +36,7 @@ public:
     void linkEvent(const NTFullEvent & evt){evt_=&evt;}
 
 
-    virtual void makeControlPlots(const size_t& step)=0;
+    void makeControlPlots(const size_t & step);
     /**
      * this is an optional function. But it helps to keep a particular ordering of the plots!
      */
@@ -48,6 +48,10 @@ public:
 
 protected:
     const NTFullEvent * event(){return evt_;}
+    /**
+     * Implements the plots. Only function that needs to be specified by inheriting class
+     */
+    virtual void makeControlPlotsPriv()=0;
 
     histo1D *addPlot(const TString & name, const TString & xaxisname,const TString & yaxisname, const bool & mergeufof=true);
 

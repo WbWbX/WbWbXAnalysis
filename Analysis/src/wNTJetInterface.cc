@@ -39,6 +39,7 @@ wNTJetInterface::wNTJetInterface(tTreeHandler * t,
 std::vector<NTJet> * wNTJetInterface::content(){
 	if(isNewEntry()){
 		size_t njet=*getBranchContent<int>(0);
+		if(njet>getBranchBuffer(1))njet=getBranchBuffer(1);
 		content_.resize(njet);
 		for(size_t i=0;i<njet;i++){
 			NTJet & jet=content_.at(i);

@@ -6,7 +6,7 @@
 $ inputfile,     legend entry,        color,   xsection,   legendNumber (for sorting,- allows for gaps),  (opt) isSignal
 
 treeProducerA7W_tree.root,              data,                   1,         1,              99 
-treeProducerA7W_tree1.root,             signal,                 432,       440,              1
+treeProducerA7W_tree1.root,             signal,                 432,       440,              1, true
 treeProducerA7W_tree.root,              background,             632,       200,              2
   
   

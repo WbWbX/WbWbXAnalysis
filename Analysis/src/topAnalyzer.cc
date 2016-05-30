@@ -83,12 +83,6 @@ topAnalyzer::~topAnalyzer(){
 }
 
 
-void topAnalyzer::setOutDir(const TString& dir){
-	if(dir.EndsWith("/"))
-		outdir_=dir;
-	else
-		outdir_=dir+"/";
-}
 
 
 

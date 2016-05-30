@@ -55,4 +55,11 @@ bool wNTBaseInterface::isNewEntry()const{
 	return true;
 }
 
+size_t wNTBaseInterface::getBranchBuffer(const size_t & idx)const{
+	if(idx>associatedBranches_.size())
+		throw std::out_of_range("wNTBaseInterface::getBranchBuffer: index out of range");
+
+	return associatedBranches_.at(idx)->getBufMax();
+}
+
 }

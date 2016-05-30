@@ -22,6 +22,8 @@ public:
 
 	fileForker::fileforker_status  start();
 
+	void addWeightIndex(size_t idx){weightindicies_.push_back(idx);}
+
 private:
 
 	fileForker::fileforker_status writeOutput();
@@ -30,6 +32,7 @@ private:
 
 	void createNormalizationInfo(tTreeHandler* );
 
+	std::vector<size_t> weightindicies_;
 };
 
 }

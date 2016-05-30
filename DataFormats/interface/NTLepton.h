@@ -6,9 +6,10 @@
 
 namespace ztop{
 
-
+class wNTLeptonsInterface;
 
 class NTLepton{
+	friend class wNTLeptonsInterface;
  public:
   explicit NTLepton(){q_=0;};
   explicit NTLepton(const NTLorentzVector<float>& p4in,int charge):p4_(p4in),q_(charge){}
