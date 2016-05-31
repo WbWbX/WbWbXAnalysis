@@ -1097,7 +1097,10 @@ TH1D * histo1D::getTH1D(TString name, bool dividebybinwidth, bool onlystat, bool
 
 TH1D * histo1D::getAxisTH1D()const{
 
-	std::vector<float> bins=createBinning(getNBins()*100,bins_.at(1),bins_.at(bins_.size()-1));
+	size_t nbins=getNBins();
+	if(nbins<100) nbins*=100;
+	if(nbins<1000) nbins*=10;
+	std::vector<float> bins=createBinning(nbins,bins_.at(1),bins_.at(bins_.size()-1));
 
 	TH1D *  h = new TH1D((TString)textFormatter::makeCompatibleFileName(name_.Data())+"_axis","",bins.size()-1,&(bins.at(0)));
 	h->GetYaxis()->SetTitleSize(0.06);

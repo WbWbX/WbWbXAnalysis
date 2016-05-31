@@ -33,7 +33,7 @@ public:
     genjets(0),
     idjets(0),medjets(0),hardjets(0),medbjets(0),hardbjets(0),dphilljjets(0),dphiplushardjets(0),
     selectedjets(0),selectedbjets(0),selectednonbjets(0),
-    allmuons(0),kinmuons(0),idmuons(0),isomuons(0),vetomuons(0),
+    allmuons(0),kinmuons(0),idmuons(0),isomuons(0),vetomuons(0),nonisomuons(0),
     allelectrons(0),kinelectrons(0),idelectrons(0),isoelectrons(0),
     allleptons(0),kinleptons(0),idleptons(0),isoleptons(0),
     leadinglep(0),secleadinglep(0),
@@ -87,7 +87,7 @@ public:
 
         idjets=0;medjets=0;hardjets=0;medbjets=0;hardbjets=0;dphilljjets=0;dphiplushardjets=0;
         selectedjets=0;selectedbjets=0,selectednonbjets=0;
-        allmuons=0;kinmuons=0;idmuons=0;isomuons=0;vetomuons=0;
+        allmuons=0;kinmuons=0;idmuons=0;isomuons=0;vetomuons=0;nonisomuons=0;
         allelectrons=0;kinelectrons=0;idelectrons=0;isoelectrons=0;
         allleptons=0;kinleptons=0;idleptons=0;isoleptons=0;
         leadinglep=0;secleadinglep=0;
@@ -160,6 +160,7 @@ public:
     std::vector<ztop::NTMuon*> * idmuons;
     std::vector<ztop::NTMuon*> * isomuons;
     std::vector<ztop::NTMuon*> * vetomuons;
+    std::vector<ztop::NTMuon*> * nonisomuons;
 
     std::vector<ztop::NTElectron*> * allelectrons;
     std::vector<ztop::NTElectron*> * kinelectrons;

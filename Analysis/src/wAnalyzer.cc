@@ -46,6 +46,8 @@ void wAnalyzer::analyze(size_t id){
 	NTFullEvent evt;
 	wControlPlots c_plots;
 	c_plots.linkEvent(evt);
+	c_plots.initSteps(6);
+
 	analysisPlotsW anaplots(4);
 	anaplots.setEvent(evt);
 	anaplots.enable();
@@ -84,6 +86,8 @@ void wAnalyzer::analyze(size_t id){
 	if(testmode_)
 		entries/=10;
 
+	///////////////////////////////// Event loop //////////////////////////////
+
 	for(Long64_t event=0;event<entries;event++){
 		/*
 		 * Init event
@@ -108,11 +112,12 @@ void wAnalyzer::analyze(size_t id){
 		evt.allmuons=&allgoodmuons;
 		evt.allelectrons=&allgoodelecs;
 
-		std::vector<NTMuon*> kinmuons,idmuons,isomuons,vetomuons;
+		std::vector<NTMuon*> kinmuons,idmuons,isomuons,vetomuons, nonisomuons;
 		evt.kinmuons=&kinmuons;
 		evt.idmuons=&idmuons;
 		evt.isomuons=&isomuons;
 		evt.vetomuons=&vetomuons;
+		evt.nonisomuons=&nonisomuons;
 
 		std::vector<NTJet*> idjets, hardjets;
 		evt.idjets=&idjets;
@@ -132,6 +137,7 @@ void wAnalyzer::analyze(size_t id){
 			if(muon->pt()<15) continue;
 			if(fabs(muon->eta())>2.4)continue;
 			vetomuons << muon;
+
 			if(muon->pt()<25) continue;
 			if(fabs(muon->eta())>2.1) continue;
 			kinmuons << muon;
@@ -139,8 +145,12 @@ void wAnalyzer::analyze(size_t id){
 			if(! muon->isTightID()) continue;
 			idmuons << muon;
 
-			if(muon->isoVal() > 0.12) continue; ///INVERT SWITCH
-			isomuons << muon;
+			if(muon->isoVal() < 0.12) { ///INVERT SWITCH
+				isomuons << muon;
+			}
+			else if(muon->isoVal() < 0.5){
+				nonisomuons << muon;
+			}
 
 		}
 
@@ -150,13 +160,13 @@ void wAnalyzer::analyze(size_t id){
 		if(*b_trigger.content()<1) continue;
 		c_plots.makeControlPlots(step++);
 
-		//at least one iso muon: step 2
-		if(isomuons.size()<1) continue;
+		//at least one id muon: step 2
+		if(idmuons.size()<1) continue;
 		if(isMC_) puweight*= *b_lep1weight.content();
 		c_plots.makeControlPlots(step++);
 
 		//veto step: step 3
-		if(vetomuons.size()>1)continue; //one is the iso muon
+		if(vetomuons.size()>1)continue; //one is the id muon
 
 		/*
 		 * Jet selection
@@ -178,10 +188,25 @@ void wAnalyzer::analyze(size_t id){
 		if(hardjets.size()<1) continue;
 		c_plots.makeControlPlots(step++);
 
-		// final step. create the observables
+
+		//add control plots for iso muon and noniso muon areas
+		if(isomuons.size()>0){
+			anaplots.setIsIso(true);
+			//step 5
+			c_plots.makeControlPlots(step);
+		}
+		else if(nonisomuons.size()>0){
+			anaplots.setIsIso(false);
+			step++;
+			//step 6
+			c_plots.makeControlPlots(step);
+		}
+		else{
+			continue;
+		}
+
+		//the class is protected internally against the latter case
 		anaplots.fillPlotsReco();
-
-
 
 	}
 	////////////////////// Event loop end ///////////////////

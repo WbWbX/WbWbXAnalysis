@@ -266,7 +266,7 @@ void plotterControlPlot::drawControlPlot(){
 	if(upperstyle.yAxisStyle()->applyAxisRange() && upperstyle.yAxisStyle()->min<0)
 		upperstyle.yAxisStyle()->min=(ymax-ymin)/10000;
 
-	axish->Draw("AXIS");
+	//axish->Draw("AXIS");
 	if(ymax<=0)
 		ymax=1/1.2;
 	axish->GetYaxis()->SetRangeUser(0.0001,ymax*getYSpaceMulti(upperstyle.yAxisStyle()->log,divbbw));
@@ -382,7 +382,8 @@ void plotterControlPlot::drawControlPlot(){
 		for(size_t i=stackedhistos.size()-1; true;i--){
 
 			if(stackedhistos.at(i)){ //not data
-
+				stackedhistos.at(i)->GetXaxis()->SetTickLength(0);
+				stackedhistos.at(i)->GetXaxis()->SetLabelSize(0);
 				stackedhistos.at(i)->Draw(mcstyleupper_.rootDrawOpt+"same");
 				if(legendentries.at(i)!="" && mcstyleupper_.legendDrawStyle != "none")
 					tmplegp_->AddEntry(stackedhistos.at(i),legendentries.at(i),mcstyleupper_.legendDrawStyle);
@@ -399,6 +400,7 @@ void plotterControlPlot::drawControlPlot(){
 			sumcont.mergeAllErrors("mergederr",false,*corrm_);
 		TG * mcerr=addObject(sumcont.getTGraph(usestack->getName()+"mcerr_cp",divbbw,false,false,false));
 		mcstyleupper_.applyContainerStyle(mcerr,true);
+		mcerr->GetXaxis()->SetTickLength(0);
 		if(mcsysstatleg_)
 		   tmplegp_->AddEntry(mcerr,systlabel_,"f");
 		if(usestack->is1DUnfold() && foundPSmig){ //

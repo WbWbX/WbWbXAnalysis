@@ -17,13 +17,13 @@ namespace ztop{
 bool optParser::debug=false;
 
 
-std::string optParser::optionParsed(const std::string& opt, bool& found){
+std::string optParser::optionParsed(const std::string& opt, bool& found,bool noerase){
 	std::string out="";
 	found=false;
 	for(size_t i=0;i<temp_.size();i++){
 		if(temp_.at(i) == "-"+opt){
 			found=true;
-			if (i + 1 != temp_.size()){
+			if (i + 1 != temp_.size() && !noerase){
 				out=temp_.at(i+1);
 				if(out.find("-")!=0) //also an option
 					temp_.erase(temp_.begin()+i, temp_.begin()+i+2);

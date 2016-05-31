@@ -4,7 +4,8 @@
 #include "TString.h"
 #include "TFile.h"
 #include "FWCore/FWLite/interface/AutoLibraryLoader.h"
-#define __CINT__
+#include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
+#include "TtZAnalysis/Tools/interface/plotterControlPlot.h"
 
 TString stripRoot(TString s){
 	if(s.EndsWith(".root")){ //cut ".root"
@@ -49,21 +50,27 @@ ztop::container1DStackVector getFromFile(TString filename)
 	}
 	return vtemp;
 }
-int main(int argc, char* argv[]){
+invokeApplication(){
 	using namespace ztop;
 	using namespace std;
 	AutoLibraryLoader::enable();
 
+	const bool debug=parser->getOpt<bool>("d",false,"debug switch");
+	const std::vector<TString> files=parser->getRest<TString> ();
 
+	parser->doneParsing();
+	if(debug){
+		std::cout << "debug mode" << std::endl;
+		plotterControlPlot::debug=true;
+	}
 	//std::vector<TString> filenames,containerNames;
-	for(int i=1;i<argc;i++){
-		//  std::cout << argv[i] << std::endl;;
-		TString filename=(TString)argv[i];
-		//filenames.push_back(filename);
-		//containerNames.push_back(cname);
+	for(size_t i=0;i<files.size();i++){
+		TString filename=files.at(i);
+
+		std::cout << filename << std::endl;
 		histoStackVector c=getFromFile(filename);
-		filename.ReplaceAll(".ztop","_plots.root");
 		filename.ReplaceAll(".root","_plots.root");
+		filename.ReplaceAll(".ztop","_plots.root");
 		c.writeAllToTFile(filename,true);
 	}
 

@@ -14,25 +14,43 @@ namespace ztop{
 class analysisPlotsW: public analysisPlots{
 public:
 	analysisPlotsW(size_t step):analysisPlots(step),
-	asymm(0){}
+	isiso_(false)
+	{
+		etaRanges_ << 0 << 0.4 << 0.8 << 1.2 << 1.6 << 2. << 2.4 << 2.8 << 3.2 << 3.6; //just for testing use only one
+
+	}
 
 
 	void bookPlots();
 	void fillPlotsReco();
 	void fillPlotsGen();
 
+	void setIsIso(const bool & is){isiso_=is;}
 
 private:
-	histo1DUnfold*
-	asymm;
+	bool isiso_;
+
+	std::vector< histo1DUnfold* >
+	asymmiso_;
+	std::vector< histo1DUnfold* >
+	mTnoniso_;
+
 	static double WMASS;
 
-	float calcAsymmReco()const;
-	float calcAsymmGen()const;
+	float calcAsymmReco(float& absdeta)const;
+	float calcAsymmGen(float& absdeta)const;
+
+	float calcMTReco(float& absdeta)const;
 
 	template <class T, class U>
 	float asymmValue(T,U)const;
 
+	size_t getEtaIndex(const float & deta)const;
+	std::vector<float> etaRanges_;
+
+	TString produceDEtaString(size_t i)const;
+
+	bool checkEventContentReco()const;
 
 };
 
@@ -53,6 +71,12 @@ float analysisPlotsW::asymmValue(T muon,U jet)const{
 
 }
 
+/*
+ *
+ *
+ *
+ *
+ */
 
 
 #endif /* TTZANALYSIS_ANALYSIS_INTERFACE_ANALYSISPLOTSW_H_ */

@@ -112,7 +112,7 @@ private:
 	std::string progname_;
 	std::string adddescr_;
 
-	std::string optionParsed(const std::string& opt, bool& found);
+	std::string optionParsed(const std::string& opt, bool& found,bool noerase=false);
 	std::string createDescription(const std::string& opt, const std::string& desc, const std::string& def)const;
 
 	template <class T>
@@ -142,7 +142,7 @@ template<>
 inline bool optParser::getOpt<bool>(const std::string& opt,const bool & def, const std::string & description){
 	help_.push_back(createDescription(opt, description, toStdString(def)));
 	bool dummy;
-	std::string optval=optionParsed(opt,dummy);
+	std::string optval=optionParsed(opt,dummy,true); //bools have no values
 	if(dummy)
 		return !def;
 	else
