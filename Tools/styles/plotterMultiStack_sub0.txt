@@ -1,4 +1,4 @@
-
+$?cfg
 
 
  
@@ -17,7 +17,7 @@
     divideByBinWidth  = true
     horizontal        = false
     
-    $$ axis styles
+    $axis styles
     
     xaxis.titleSize   = 0.06
     xaxis.labelSize   = 0.0

@@ -1,0 +1,71 @@
+scope_to_color_name: {
+  tag: keyword,
+  default: background,
+  comment: singleLineComment,
+  close_tag: bracket,
+  open_tag: bracket,
+  def: field,
+  subcomment: singleLineComment
+}
+scope_definition_rules:
+  - {type: MultiLineRule, scope: tag, start: '[', end: ']', escapeCharacter: '\0'}
+  - {type: SingleLineRule, scope: def, sequence: '=', escapeCharacter: \ ,escapeContinuesLine: false}
+  - {type: EndOfLineRule, scope: comment, start: '$'}
+  
+scope:
+
+
+  tag:
+    operator: ['=']
+    bracket: ['[', ']'] 
+    sub_rules: [
+
+      {type: CompositeRule, sub_rules: [
+        { type: SequenceRule, scope: open_tag, sequence: '['}]
+      },
+      {type: CompositeRule, sub_rules: [
+        { type: SequenceRule, scope: close_tag, sequence: ']'}]
+      },
+      
+    ]
+    
+  
+
+  def:
+    operator: ['=']
+   
+ 
+
+ 
+file_extensions: [cfg]
+
+shebang: "$?cfg"
+
+indent: {
+    type: scopes, #scopes define increasing or decreasing a level
+    scope: tag, #Only 'see' tag scopes when parsing.
+    scope_start: [tag.close_tag], #on open tag raise the indent level
+    scope_end: [tag.open_tag], #on close tag lower the indent level
+  #  outline_scopes: [class], #Scopes are created where the outline defines a class
+}
+
+
+comment: {type: singleLine, sequence: '$'}
+
+name: TtZAnalysis_cfg
+
+auto_edit:
+  - {auto_close_scopes: [tag], scope: default} #To work, the scopes must be: SingleLineRule(sequence used for start/end)
+  - {auto_close_parens: ['['], scope: default} #Will close the parens if it's not properly balanced
+  - {auto_skip_parens: [']'], scope: tag} #Will skip the close parens if it's properly balanced
+  - {after: ']', trigger: '\n', action: indent, scope: default}
+
+templates:
+- name: 'surround with tag'
+  description: "Surround with tag"
+  pattern:  "[${tag}]\n${indented_block}${cursor}\n[end ${tag}]"
+
+- name: ''
+  description: "Convert previous word to a tag."
+  pattern: "[${previous_word}]\n    ${cursor}\n[end ${previous_word}]"
+

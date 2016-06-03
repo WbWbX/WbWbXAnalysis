@@ -110,6 +110,8 @@ protected:
     std::map<int, float> members_;
 };
 
+
+#undef NTMUON_TIGHTID_MEMIDX
 }
 
 #endif

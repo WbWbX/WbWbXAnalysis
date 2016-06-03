@@ -17,6 +17,11 @@ void wControlPlots::makeControlPlotsPriv(){
 
 	using namespace std;
 
+
+	SETBINSRANGE(41,-0.5,40.5);
+	addPlot("vertex multi","Vertex multiplicity", "Events");
+	FILL(event,vertexMulti());
+
 	SETBINSRANGE(500,-1000,1000);
 	addPlot("event weight","Weight", "Events");
 	FILLSINGLE(puweight);

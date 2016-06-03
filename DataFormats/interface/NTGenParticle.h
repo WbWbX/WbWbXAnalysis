@@ -10,9 +10,13 @@
 //debug
 #include <iostream>
 
+#define NTGENPARTICLE_MOTHERPDGID_MEMIDX 99
+#define NTGENPARTICLE_GRANDMOTHERPDGID_MEMIDX 100
+
 namespace ztop{
 
 class NTGenParticle{
+	friend class wNTGenParticleInterface;
 public:
 	explicit NTGenParticle():pdgid_(0),status_(9999),genid_(0),q_(0){}
 	~NTGenParticle(){
@@ -106,7 +110,7 @@ public:
 	void setMember(std::string Membername, float value){
 		memberss_[Membername]=value;
 	}
-	float getMember(std::string membername){
+	float getMember(std::string membername)const{
 		if(memberss_.find(membername) != memberss_.end())
 			return memberss_.find(membername)->second;
 		else
@@ -115,14 +119,18 @@ public:
 	void setMember(int Memberidx, float value){
 		members_[Memberidx]=value;
 	}
-	float getMember(int memberidx){
+	float getMember(int memberidx)const {
 		if(members_.find(memberidx) != members_.end())
 			return members_.find(memberidx)->second;
 		else
 			return -99999999999;
 	}
 
-
+	//extra W analysis
+	void setMotherPdgID(int id){setMember((int)NTGENPARTICLE_MOTHERPDGID_MEMIDX,id);}
+	int motherPdgID()const{return (int)getMember(NTGENPARTICLE_MOTHERPDGID_MEMIDX);}
+	void setGrandMotherPdgID(int id){setMember((int)NTGENPARTICLE_GRANDMOTHERPDGID_MEMIDX,id);}
+	int grandMotherPdgID()const{return (int)getMember(NTGENPARTICLE_GRANDMOTHERPDGID_MEMIDX);}
 
 
 protected:
@@ -172,5 +180,7 @@ protected:
 };
 }
 
+#undef NTGENPARTICLE_MOTHERPDGID_MEMIDX
+#undef NTGENPARTICLE_GRANDMOTHERPDGID_MEMIDX
 
 #endif

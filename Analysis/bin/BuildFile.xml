@@ -11,6 +11,7 @@
 
 <bin name="analyse" file="analyse.cc" />
 <bin name="wanalyse" file="wanalyse.cc" />
+<bin name="submitjobs" file="submitjobs.cc" />
 <bin name="sumsq" file="sumsq.cc" />
 <bin name="plotCSV" file="plotCSV.cc" />
 <bin name="mergeSyst" file="mergeSyst.cc" />

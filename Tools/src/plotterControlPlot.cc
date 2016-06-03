@@ -316,12 +316,13 @@ void plotterControlPlot::drawControlPlot(){
 			if(i != dataentry){
 				histo1D tempcont;
 				if(usestack->is1DUnfold()){ //special treatment
-					tempcont = usestack->getContainer1DUnfold(i).getBackground();
-					sumcont+=tempcont;
+					tempcont = usestack->getContainer1DUnfold(i).getRecoContainer();
+
 					//is not signal
 
 
 					if(std::find(signalidxs.begin(),signalidxs.end(),i)==signalidxs.end()){//is not signal
+						sumcont+=tempcont;
 						TH1D * h=addObject(sumcont.getTH1D(usestack->getLegend(i)+" "+usestack->getName()+"_stack_h",divbbw,true,true)); //no errors
 						if(!h)
 							continue;
@@ -331,6 +332,8 @@ void plotterControlPlot::drawControlPlot(){
 						legendentries.push_back(usestack->getLegend(i));
 					}
 					else{//this is signal but PS migrations!
+						tempcont = usestack->getContainer1DUnfold(i).getBackground();
+						sumcont+=tempcont;
 						histo1D visSig=usestack->getContainer1DUnfold(i).getVisibleSignal();
 						if(tempcont.integral(true) / visSig.integral(true) >psmigthresh_){
 							foundPSmig=true;

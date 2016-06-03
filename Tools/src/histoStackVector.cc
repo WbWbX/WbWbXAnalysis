@@ -155,6 +155,7 @@ void histoStackVector::addList2D(TString leg, int color, double norm,int legor){
 }
 void histoStackVector::addList1DUnfold(TString leg, int color, double norm,int legor){
 	for(unsigned int i=0;i<histo1DUnfold::c_list.size();i++){
+		//just to be sure
 		histo1DUnfold::c_list[i]->flush();
 		add(*histo1DUnfold::c_list[i],leg,color,norm,legor);
 	}

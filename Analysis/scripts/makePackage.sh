@@ -30,8 +30,13 @@ then
 	exit 1
 fi
 
-
 execpath=`which $1`
+if [[ "${execpath}" == "" ]]
+then
+	echo "executable not found in PATH"
+	exit 2
+fi
+	
 tmpdir=`mktemp -d`
 trap "rm -rf $tmpdir; exit" SIGHUP SIGINT SIGTERM
 cd $tmpdir

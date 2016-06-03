@@ -74,7 +74,7 @@ public:
 	/**
 	 * returns file name with extension but without path
 	 */
-	static std::string getFilename(const std::string& pathtofile);
+	static std::string getFilename(const std::string& pathtofile, bool withoutextension=false);
 	/**
 	 * returns file extension or empty string if none
 	 */

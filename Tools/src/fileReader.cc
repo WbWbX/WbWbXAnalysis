@@ -221,10 +221,9 @@ std::vector<std::string> fileReader::getMarkerValues(const std::string& markerna
 
 
 
-std::vector<std::string> fileReader::getData(const size_t &line) const{
+const std::vector<std::string>& fileReader::getData(const size_t &line) const{
 	if(line>=lines_.size()){
-		std::cout << "fileReader::getData: line out of range" <<std::endl;
-		return std::vector<std::string>();
+		throw std::out_of_range( "fileReader::getData: line out of range");
 	}
 	return lines_.at(line);
 }
@@ -303,5 +302,26 @@ std::string fileReader::dumpFormattedToTmp()const{
 	return filename;
 }
 
+std::vector<std::string> fileReader::readList(const std::string& infile,
+		const std::string& startmarker, const std::string& endmarker, const std::string& comment, const std::string& delimiter)const{
+	fileReader fr;
+	fr.setStartMarker(startmarker);
+	fr.setEndMarker(endmarker);
+	if(comment.length()<1)
+		fr.setComment(comment_);
+	else
+		fr.setComment(comment);
+	if(delimiter.length())
+		fr.setDelimiter(delimiter);
+	else
+		fr.setDelimiter(delimiter_);
+	fr.readFile(infile);
+	size_t nlines=fr.nLines();
+	std::vector<std::string> out;
+	for(size_t i=0;i<nlines;i++){
+		out.insert(out.end(),   fr.getData(i).begin(), fr.getData(i).end());
+	}
+	return out;
+}
 
 }//ztop

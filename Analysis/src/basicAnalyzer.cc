@@ -152,6 +152,9 @@ void basicAnalyzer::setOutDir(const TString& dir){
 fileForker::fileforker_status basicAnalyzer::writeHistos(){
 	if(debug)
 		std::cout << "basicAnalyzer::writeHistos" <<std::endl;
+
+	histo1DUnfold::flushAllListed(); //just to be sure
+
 	ztop::histoStackVector * csv=&allplotsstackvector_;
 
 	if(fileExists(getOutputFileName().data())) {

@@ -84,7 +84,15 @@ invokeApplication(){
 		ana.addWeightIndex(2); //just dummy
 	}
 
-	ana.start();
+	fileForker::fileforker_status status= ana.start();
 
+	if(batchbase.Length()){
+		std::string filename=textFormatter::getFilename(ana.getOutPath().Data(),true);
+
+		if(status == fileForker::ff_status_parent_success)
+			system(("touch "+batchbase+"/batch/"+filename+"_fin").Data());
+		else
+			system(("touch "+batchbase+"/batch/"+filename+"_failed").Data());
+	}
 	return 0;
 }

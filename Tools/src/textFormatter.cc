@@ -87,7 +87,7 @@ std::string &textFormatter::trim(std::string &s) const {
 
 //static member functions
 
-std::string textFormatter::getFilename(const std::string& pathtofile){
+std::string textFormatter::getFilename(const std::string& pathtofile, bool withoutextension){
 	std::string out;
 	using namespace std;
 	string s=pathtofile;
@@ -102,6 +102,9 @@ std::string textFormatter::getFilename(const std::string& pathtofile){
 			out = s2;
 	} //just keep last
 
+	if(withoutextension){
+		out = out.substr(0, out.find_last_of("."));
+	}
 	return out;
 }
 

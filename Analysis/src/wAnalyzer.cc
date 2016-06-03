@@ -14,10 +14,13 @@
 #include "../interface/wNTLeptonsInterface.h"
 #include "../interface/NTFullEvent.h"
 #include "../interface/wReweighterInterface.h"
+#include "../interface/wNTGenJetInterface.h"
+#include "../interface/wNTGenParticleInterface.h"
 
 #include "../interface/wControlPlots.h"
 #include "../interface/analysisPlotsW.h"
 #include "TtZAnalysis/DataFormats/interface/helpers.h"
+#include "TtZAnalysis/DataFormats/interface/NTEvent.h"
 
 namespace ztop{
 
@@ -58,17 +61,27 @@ void wAnalyzer::analyze(size_t id){
 
 
 	wNTJetInterface b_Jets
-	(&t, "nJet", "Jet_pt", "Jet_eta", "Jet_phi","Jet_mass","Jet_btagCSV","Jet_id");
+	(&t, "nJet", "Jet_pt", "Jet_eta", "Jet_phi","Jet_mass","Jet_btagCSV","Jet_puId");
 
 	wNTLeptonsInterface b_goodLeptons=wNTLeptonsInterface
 			(&t,"nLepGood","LepGood_pdgId","LepGood_pt","LepGood_eta","LepGood_phi","LepGood_mass",
 					"LepGood_charge","LepGood_tightId","LepGood_relIso04");
 
+	wNTLeptonsInterface b_otherLeptons=wNTLeptonsInterface
+			(&t,"nLepOther","LepOther_pdgId","LepOther_pt","LepOther_eta","LepOther_phi","LepOther_mass",
+					"LepOther_charge","LepOther_tightId","LepOther_relIso04");
+
+	wNTGenJetInterface b_genjets(&t, "nGenJet", "GenJet_pt", "GenJet_eta", "GenJet_phi", "GenJet_mass");
+	wNTGenParticleInterface b_genparticles(&t, "nGenP6StatusThree", "GenP6StatusThree_pt", "GenP6StatusThree_eta", "GenP6StatusThree_phi",
+			"GenP6StatusThree_mass","GenP6StatusThree_pdgId","GenP6StatusThree_charge","GenP6StatusThree_status", "GenP6StatusThree_motherId",
+			"GenP6StatusThree_grandmaId");
 
 	wReweighterInterface mcweights=wReweighterInterface(&t,"ntheoryWeightsValue","theoryWeightsValue_weight");
 	if(signal_)
 		for(size_t i=0;i<weightindicies_.size();i++)
 			mcweights.addWeightIndex(weightindicies_.at(i));
+
+
 
 	if(!isMC_)
 		mcweights.enable(false);
@@ -77,7 +90,7 @@ void wAnalyzer::analyze(size_t id){
 	tBranchHandler<float> b_lep2weight(&t, "LepEff_2lep");
 
 	tBranchHandler<int> b_trigger(&t, "HLT_SingleMu");
-
+	tBranchHandler<int> b_vertices(&t, "nVert");
 
 
 
@@ -106,8 +119,12 @@ void wAnalyzer::analyze(size_t id){
 		if(isMC_)puweight*=* b_puweight.content();
 		evt.puweight=&puweight;
 		mcweights.reWeight(puweight);
+		NTEvent ntevt;
+		evt.event=&ntevt;
+		ntevt.setVertexMulti((float) (* b_vertices.content()) );
 
 		std::vector<NTMuon*>     allgoodmuons=produceCollection<NTMuon>    (b_goodLeptons.mu_content());
+		std::vector<NTMuon*>     allothermuons=produceCollection<NTMuon>    (b_otherLeptons.mu_content());
 		std::vector<NTElectron*> allgoodelecs=produceCollection<NTElectron>(b_goodLeptons.e_content());
 		evt.allmuons=&allgoodmuons;
 		evt.allelectrons=&allgoodelecs;
@@ -119,12 +136,17 @@ void wAnalyzer::analyze(size_t id){
 		evt.vetomuons=&vetomuons;
 		evt.nonisomuons=&nonisomuons;
 
+
 		std::vector<NTJet*> idjets, hardjets;
 		evt.idjets=&idjets;
 		evt.hardjets=&hardjets;
 		/*
 		 * Generator part
 		 */
+		std::vector<NTGenJet *> genjets=produceCollection(b_genjets.content() );
+		evt.genjets=&genjets;
+		std::vector<NTGenParticle*> allgenparticles=produceCollection(b_genparticles.content());
+		evt.allgenparticles=&allgenparticles;
 
 		//(at the end)
 		anaplots.fillPlotsGen();
@@ -132,12 +154,15 @@ void wAnalyzer::analyze(size_t id){
 		/*
 		 * Lepton selection
 		 */
-		for(size_t i=0;i<allgoodmuons.size();i++){
-			NTMuon* muon=allgoodmuons.at(i);
+		for(size_t i=0;i<allothermuons.size();i++){
+			NTMuon* muon=allothermuons.at(i);
 			if(muon->pt()<15) continue;
 			if(fabs(muon->eta())>2.4)continue;
 			vetomuons << muon;
+		}
 
+		for(size_t i=0;i<allgoodmuons.size();i++){
+			NTMuon* muon=allgoodmuons.at(i);
 			if(muon->pt()<25) continue;
 			if(fabs(muon->eta())>2.1) continue;
 			kinmuons << muon;
@@ -166,14 +191,15 @@ void wAnalyzer::analyze(size_t id){
 		c_plots.makeControlPlots(step++);
 
 		//veto step: step 3
-		if(vetomuons.size()>1)continue; //one is the id muon
+		//the veto muons exclude the good muons
+		if(vetomuons.size()>0)continue;
 
 		/*
 		 * Jet selection
 		 */
 		for(size_t i=0;i<b_Jets.content()->size();i++){
 			NTJet* jet=&b_Jets.content()->at(i);
-			//if(! jet->id()) continue;
+			if(! jet->id()) continue;
 			idjets << jet;
 
 			if(jet->pt()<25)continue;
@@ -210,7 +236,7 @@ void wAnalyzer::analyze(size_t id){
 
 	}
 	////////////////////// Event loop end ///////////////////
-	histo1DUnfold::flushAllListed();
+
 
 
 	/*

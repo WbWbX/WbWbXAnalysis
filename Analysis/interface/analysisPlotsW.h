@@ -14,7 +14,7 @@ namespace ztop{
 class analysisPlotsW: public analysisPlots{
 public:
 	analysisPlotsW(size_t step):analysisPlots(step),
-	isiso_(false)
+	isiso_(false),asymdeta_(0)
 	{
 		etaRanges_ << 0 << 0.4 << 0.8 << 1.2 << 1.6 << 2. << 2.4 << 2.8 << 3.2 << 3.6; //just for testing use only one
 
@@ -34,6 +34,8 @@ private:
 	asymmiso_;
 	std::vector< histo1DUnfold* >
 	mTnoniso_;
+	histo1DUnfold *
+	asymdeta_;
 
 	static double WMASS;
 
@@ -64,6 +66,8 @@ float analysisPlotsW::asymmValue(T muon,U jet)const{
 	if(muon->eta()<0)
 		signeta=-1;
 	float chargefloat=muon->q();
+	if(!muon->q())
+		throw std::logic_error("analysisPlotsW::asymmValue: muon with 0 charge!");
 	double asymm= muon->pt()*2 / WMASS * sindphi * chargefloat * signeta ;
 	return asymm;
 }

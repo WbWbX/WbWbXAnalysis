@@ -52,7 +52,7 @@ public:
 	bool isEmpty()const{return lines_.size()<1;}
 	size_t nLines()const{return lines_.size();}
 	size_t nEntries(const size_t &line)const{return getData(line).size();}
-	std::vector<std::string> getData(const size_t &line) const;
+	const std::vector<std::string>& getData(const size_t &line) const;
 	template<class T>
 	T getData(const size_t &line,const size_t &entry) const{
 		if(line>=lines_.size()){
@@ -114,6 +114,9 @@ public:
 	 */
 	std::string dumpFormattedToTmp()const;
 
+	std::vector<std::string> readList(const std::string& infile,
+			const std::string& startmarker, const std::string& endmarker,
+			 const std::string& comment="", const std::string& delimiter="")const;
 
 private:
 	std::string start_,end_;

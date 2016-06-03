@@ -24,6 +24,7 @@ class NTGenJet;
 class NTFullEvent{
 public:
     NTFullEvent(): event(0),
+	allgenparticles(0),
     gentops(0),
     genbs(0),
     genbsrad(0),
@@ -76,7 +77,7 @@ public:
 
     void reset(){
         event=0;
-
+        allgenparticles=0;
         gentops=0;
         genbs=0;
         genbsrad=0;
@@ -128,6 +129,7 @@ public:
     }
 
    const ztop::NTEvent * event;
+   std::vector<ztop::NTGenParticle *> * allgenparticles;
     ///generator info
     std::vector<ztop::NTGenParticle *> * gentops;
     // ONLY contains bs before possible radiation from top! ordered by pt

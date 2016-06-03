@@ -11,6 +11,7 @@
 #include "TtZAnalysis/DataFormats/interface/NTMuon.h"
 #include "TtZAnalysis/DataFormats/interface/NTGenParticle.h"
 #include "TtZAnalysis/DataFormats/interface/NTGenJet.h"
+#include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 
 namespace ztop{
 
@@ -37,17 +38,45 @@ float analysisPlotsW::calcAsymmReco(float& absdeta)const{
 }
 float analysisPlotsW::calcAsymmGen(float& absdeta)const{
 	if(!((event()->genjets && event()->genjets->size())
-			&& event()->genleptons3 && event()->genleptons3->size() ))
+			&& event()->allgenparticles ))
 		return -99;
 	//what do we exactly want? jets, W on truth level?
+	NTGenParticle * muon=0;
+	//get the muon, and maybe other stuff
+	for(size_t i=0;i<event()->allgenparticles->size();i++){
+		NTGenParticle * p=event()->allgenparticles->at(i);
+		if(!(p->pdgId() == 13 || p->pdgId() == -13)) continue; //only muons
+		// matching to W? --> doensnt work like this
+		//if( p->motherPdgID() != -24 && p->motherPdgID() !=24
+		//	&& p->grandMotherPdgID() != 24 && p->grandMotherPdgID() !=-24 ) continue;
+		//here is status code stuff here
+
+		if(p->pt()<25)continue;
+		if(fabs(p->eta())>2.1)continue;
+		if(p->status() != 23) continue; //?
+
+		muon=p; //directly take the first one
+		break;
+	}
+	if(!muon)
+		return -99;
+
+	NTGenJet *     sjet=0;
+	for(size_t i=0;i<event()->genjets->size();i++){
+		NTGenJet *     jet=event()->genjets->at(i);
+		if(jet->pt()<25) continue;
+		if(dR(muon,jet)<0.1) continue;
+		if(fabs(jet->eta())>2.5) continue;
+		sjet=jet;
+		break;
+	}
 
 
-	NTGenParticle * muon=event()->genleptons3->at(0);
-	NTGenJet *     jet=event()->genjets->at(0);
+	if(!sjet)
+		return -99;
+	absdeta=std::abs(muon->eta() - sjet->eta());
 
-	absdeta=std::abs(muon->eta() - jet->eta());
-
-	return asymmValue(muon,jet);
+	return asymmValue(muon,sjet);
 }
 
 float analysisPlotsW::calcMTReco(float& absdeta)const{
@@ -100,6 +129,9 @@ void analysisPlotsW::bookPlots(){
 		TString etastring=produceDEtaString(i);
 		mTnoniso_.push_back(addPlot(mTbins,mTbins,"mT"+etastring,"M_{T} [GeV]","Events"));
 	}
+
+	std::vector<float> etabins=etaRanges_;
+	asymdeta_ = addPlot(etabins,etabins,"jet muon delta eta", "#Delta#eta","Events");
 }
 
 void analysisPlotsW::fillPlotsReco(){
@@ -110,8 +142,13 @@ void analysisPlotsW::fillPlotsReco(){
 		float deta=0;
 		float asymmval=calcAsymmReco(deta);
 		size_t detabin=getEtaIndex(deta );
-		if(asymmval>-98)
+		if(asymmval>-98){
 			asymmiso_.at(detabin)->fillReco(asymmval, puweight());
+
+			if(asymmval>0.5)
+				asymdeta_->fillReco(deta,puweight());
+
+		}
 	}
 	else{
 		float deta=0;
@@ -129,8 +166,12 @@ void analysisPlotsW::fillPlotsGen(){
 	float deta;
 	float asymmval=calcAsymmGen(deta);
 	size_t detabin=getEtaIndex(deta );
-	if(asymmval>-98)
+	if(asymmval>-98){
 		asymmiso_.at(detabin)->fillGen(asymmval,puweight());
+
+		if(asymmval>0.5)//test
+			asymdeta_->fillGen(deta,puweight());
+	}
 }
 
 
