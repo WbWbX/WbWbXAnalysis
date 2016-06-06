@@ -18,6 +18,9 @@
 
 invokeApplication(){
 	using namespace ztop;
+
+	parser->setAdditionalDesciption("<options> -i <configfile> <workdir name> <options to be parser to executable to be submitted>\nprogram to submit jobs to a cluster (e.g. NAF or lxbatch).\nUsage");
+
 	const std::string CMSSWBASE=getenv("CMSSW_BASE");
 
 	const std::string config=CMSSWBASE+"/src/TtZAnalysis/Analysis/configs/submitjobs/"+
