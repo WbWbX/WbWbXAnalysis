@@ -193,7 +193,7 @@ invokeApplication(){
 		ana->getPUReweighter()->setMCDistrSum12();
 	}
 	else if(energy == "13TeV"){
-		ana->getPUReweighter()->setMCDistrFall15("25ns_poisson");
+		ana->getPUReweighter()->setMCDistrSum16("25ns_poisson");
 	}	   
 
 	ana->getElecSF()->setInput(elecsffile,elecsfhisto);
