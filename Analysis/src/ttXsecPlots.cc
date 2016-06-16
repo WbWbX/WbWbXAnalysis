@@ -19,7 +19,7 @@
 
 namespace ztop{
 
-void ttXsecPlots::makeControlPlots(const size_t& step){
+void ttXsecPlots::makeControlPlotsPriv(const size_t& step){
 	if(!switchedon_) return;
 
 	initStep(step);

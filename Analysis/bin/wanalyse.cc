@@ -57,6 +57,7 @@ invokeApplication(){
 
 	std::string treedir=              fr.getValue<std::string>("inputFilesDir");
 	const double luminosity = fr.getValue<double>("Lumi");
+	const TString jecfile = cmssw_base+fr.getValue<TString>("JECUncertainties");
 	//fileForker::debug=true;
 	//basicAnalyzer::debug=true;
 
@@ -69,6 +70,7 @@ invokeApplication(){
 	ana.setOutDir(batchbase+"output");
 	ana.readFileList(configfile);
 	ana.setMaxChilds(maxchilds);
+	ana.getJecUnc()->setFile(jecfile.Data());
 
 	ana.setSyst(syst);
 	system(("rm -f "+ana.getOutPath()+".ztop").Data());
@@ -76,13 +78,23 @@ invokeApplication(){
 	/*
 	 * Systematics configuration. Will use some code space!
 	 */
-
-	if(syst == "SCALE_up"){
+	if(syst == "nominal"){
+		//do nothing or?
+	}
+	else if(syst == "SCALE_up"){
 		ana.addWeightIndex(1); //just dummy
 	}
 	else if(syst == "SCALE_down"){
 		ana.addWeightIndex(2); //just dummy
 	}
+	else if(syst == "JES_up"){
+		ana.getJecUnc()->setSystematics("up");
+	}
+	else if(syst == "JES_down"){
+		ana.getJecUnc()->setSystematics("down");
+	}
+
+
 
 	fileForker::fileforker_status status= ana.start();
 

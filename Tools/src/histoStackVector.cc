@@ -89,7 +89,7 @@ void histoStackVector::add(ztop::histo1D & container, TString leg , int color , 
 	bool found=false;
 	for(std::vector<ztop::histoStack>::iterator s=stacks_.begin();s<stacks_.end();++s){
 		if(s->getName() == container.getName()){
-			if(histo1D::debug)
+			if(histoStackVector::debug)
 				std::cout << "histoStackVector::add: adding " << s->getName() << " to existing stack"  <<std::endl;
 			s->push_back(container, leg, color, norm,legor);
 			found=true;
@@ -97,7 +97,7 @@ void histoStackVector::add(ztop::histo1D & container, TString leg , int color , 
 		}
 	}
 	if(!found){
-		if(histo1D::debug)
+		if(histoStackVector::debug)
 			std::cout << "histoStackVector::add: creating new stack " << container.getName()  <<std::endl;
 		ztop::histoStack newstack(container.getName());
 		newstack.push_back(container, leg, color, norm,legor);
@@ -108,7 +108,7 @@ void histoStackVector::add(ztop::histo2D & container, TString leg , int color , 
 	bool found=false;
 	for(std::vector<ztop::histoStack>::iterator s=stacks_.begin();s<stacks_.end();++s){
 		if(s->getName() == container.getName()){
-			if(histo1D::debug)
+			if(histoStackVector::debug)
 				std::cout << "histoStackVector::add: adding " << s->getName() << " to existing stack"  <<std::endl;
 			s->push_back(container, leg, color, norm,legor);
 			found=true;
@@ -116,7 +116,7 @@ void histoStackVector::add(ztop::histo2D & container, TString leg , int color , 
 		}
 	}
 	if(!found){
-		if(histo1D::debug)
+		if(histoStackVector::debug)
 			std::cout << "histoStackVector::add: creating new stack " << container.getName()  <<std::endl;
 		ztop::histoStack newstack(container.getName());
 		newstack.push_back(container, leg, color, norm,legor);
@@ -127,7 +127,7 @@ void histoStackVector::add(ztop::histo1DUnfold & container, TString leg , int co
 	bool found=false;
 	for(std::vector<ztop::histoStack>::iterator s=stacks_.begin();s<stacks_.end();++s){
 		if(s->getName() == container.getName()){
-			if(histo1D::debug)
+			if(histoStackVector::debug)
 				std::cout << "histoStackVector::add: adding " << s->getName() << " to existing stack"  <<std::endl;
 			s->push_back(container, leg, color, norm,legor);
 			found=true;
@@ -135,7 +135,7 @@ void histoStackVector::add(ztop::histo1DUnfold & container, TString leg , int co
 		}
 	}
 	if(!found){
-		if(histo1D::debug)
+		if(histoStackVector::debug)
 			std::cout << "histoStackVector::add: creating new stack " << container.getName()  <<std::endl;
 		ztop::histoStack newstack(container.getName());
 		newstack.push_back(container, leg, color, norm,legor);
@@ -646,10 +646,10 @@ void histoStackVector::writeAllToTFile(TString filename, bool recreate, bool onl
 				tdir=dirpv.at(diridx);
 				tdir->cd();
 				fr.trim(stepname);
-
-				TDirectory * stdir=tdir->mkdir(stepname.data(),stepname.data());
-				stdir->cd();
-
+				if(stepname.length()){
+					TDirectory * stdir=tdir->mkdir(stepname.data(),stepname.data());
+					stdir->cd();
+				}
 				for(size_t plot=0;plot<stack->size();plot++){
 
 					///replace with proper plotting tool at some point

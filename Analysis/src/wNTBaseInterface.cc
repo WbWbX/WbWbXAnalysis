@@ -22,10 +22,11 @@ namespace ztop{
 
 bool wNTBaseInterface::debug=false;
 
-wNTBaseInterface::wNTBaseInterface():read_(false),firstread_(false),t_(0){
+wNTBaseInterface::wNTBaseInterface():read_(false),firstread_(false),enabled_(false),t_(0){
 
 }
-wNTBaseInterface::wNTBaseInterface(tTreeHandler * t):read_(false),firstread_(false),t_(t){
+wNTBaseInterface::wNTBaseInterface(tTreeHandler * t, bool en):read_(false),firstread_(false),enabled_(en),t_(t){
+
 
 }
 
@@ -42,7 +43,20 @@ wNTBaseInterface::~wNTBaseInterface(){
 		}
 }
 
+
+void wNTBaseInterface::disable(){
+	enabled_=false;
+	for(size_t i=0;i<associatedBranches_.size();i++)
+		if(associatedBranches_.at(i)){
+			delete associatedBranches_.at(i);
+			associatedBranches_.at(i)=0;
+		}
+	associatedBranches_.clear();
+}
+
 bool wNTBaseInterface::isNewEntry()const{
+	if(!enabled_)
+		return false; //never new if disabled
 	if(associatedBranches_.size()<1)
 		throw std::logic_error("flatBranchesWrapper: can't read entry with no branches associated");
 	for(size_t i=0;i<associatedBranches_.size();i++)

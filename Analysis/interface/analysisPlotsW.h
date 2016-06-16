@@ -14,7 +14,9 @@ namespace ztop{
 class analysisPlotsW: public analysisPlots{
 public:
 	analysisPlotsW(size_t step):analysisPlots(step),
-	isiso_(false),asymdeta_(0)
+	isiso_(false),
+	asymmisofull_(0),asymmnonisofull_(0),
+	mTnonisofull_(0)
 	{
 		etaRanges_ << 0 << 0.4 << 0.8 << 1.2 << 1.6 << 2. << 2.4 << 2.8 << 3.2 << 3.6; //just for testing use only one
 
@@ -27,15 +29,22 @@ public:
 
 	void setIsIso(const bool & is){isiso_=is;}
 
+
+	template <class T, class U>
+	static float asymmValue(T,U,bool invert=true);
+
 private:
 	bool isiso_;
 
 	std::vector< histo1DUnfold* >
 	asymmiso_;
+	histo1DUnfold* asymmisofull_;
+	std::vector< histo1DUnfold* >
+	asymmnoniso_;
+	histo1DUnfold* asymmnonisofull_;
 	std::vector< histo1DUnfold* >
 	mTnoniso_;
-	histo1DUnfold *
-	asymdeta_;
+	histo1DUnfold* mTnonisofull_;
 
 	static double WMASS;
 
@@ -44,8 +53,6 @@ private:
 
 	float calcMTReco(float& absdeta)const;
 
-	template <class T, class U>
-	float asymmValue(T,U)const;
 
 	size_t getEtaIndex(const float & deta)const;
 	std::vector<float> etaRanges_;
@@ -58,8 +65,19 @@ private:
 
 
 template <class T, class U>
-float analysisPlotsW::asymmValue(T muon,U jet)const{
-	double deltaphi=deltaPhi(muon->phi(),jet->phi() );
+float analysisPlotsW::asymmValue(T muon,U jet, bool invert){
+
+	double deltaphi=0;
+	if(invert){
+		float jetphi=jet->phi();
+		jetphi+= M_PI;
+		while(jetphi >= M_PI) jetphi-=2*M_PI;
+		while(jetphi < -M_PI) jetphi+=2*M_PI;
+		deltaphi=deltaPhi(muon->phi(), jetphi);
+	}
+	else{
+		deltaphi=deltaPhi(muon->phi(),jet->phi() );
+	}
 	double sindphi=std::sin(deltaphi);
 
 	double signeta=1;

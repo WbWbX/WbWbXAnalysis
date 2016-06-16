@@ -44,10 +44,12 @@ void tTreeHandler::load(const TString & filename, const TString &treename){
 	AutoLibraryLoader::enable();
 	TFile* f=new TFile(filename,"READ");
 	if(!f || f->IsZombie()){
+		clear();
 		throw std::runtime_error("tTreeHandler::load: file not ok.");
 	}
 	TTree * t = (TTree*)f->Get(treename);
 	if(!t || t->IsZombie()){
+		clear();
 		throw std::runtime_error("tTreeHandler::load: tree not ok");
 	}
 	//all ok
@@ -68,11 +70,11 @@ void tTreeHandler::clear(){
 	if(debug)
 		std::cout << "tTreeHandler::clear: removed branches from tree" << std::endl;
 	if(t_)
-		{delete t_;
-		t_=0;}
+		delete t_;
+	t_=0;
 	if(debug)
 		std::cout << "tTreeHandler::clear: deleted tree" << std::endl;
-	t_=0;
+
 	if(file_){
 		if(file_->IsOpen())
 			file_->Close();
@@ -81,8 +83,8 @@ void tTreeHandler::clear(){
 		delete file_;
 		if(debug)
 			std::cout << "tTreeHandler::clear: deleted TFile" << std::endl;
-		file_=0;
 	}
+	file_=0;
 }
 void tTreeHandler::associate( tBranchHandlerBase*tb){
 	assobranches_.push_back(tb);

@@ -9,15 +9,17 @@
 
 namespace ztop{
 wNTGenJetInterface::wNTGenJetInterface(tTreeHandler * t,
+		bool enable,
 		const TString& size_branch,
 		const TString& pt_branch,
 		const TString& eta_branch,
 		const TString& phi_branch,
-		const TString& m_branch): wNTBaseInterface(t){
+		const TString& m_branch): wNTBaseInterface(t,enable){
 
 	/*
 	 * order defines the order the branches can be read later!
 	 */
+
 	addBranch<int>   (size_branch);
 	addBranch<float*>(pt_branch,64);
 	addBranch<float*>(eta_branch,64);
@@ -33,6 +35,7 @@ wNTGenJetInterface::wNTGenJetInterface(tTreeHandler * t,
  * allowing to set members directly
  */
 std::vector<NTGenJet> * wNTGenJetInterface::content(){
+
 	if(isNewEntry()){
 		size_t njet=*getBranchContent<int>(0);
 		if(njet>getBranchBuffer(1))njet=getBranchBuffer(1);

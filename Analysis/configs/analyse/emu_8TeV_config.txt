@@ -1,3 +1,4 @@
+$?cfg
 $ comments begin with "$"
 $ This file incorporates inputfiles in [inputfiles-begin] until [inputfiles-end]
 $  some steering parameters and inputs linke energy JECfile etc in 

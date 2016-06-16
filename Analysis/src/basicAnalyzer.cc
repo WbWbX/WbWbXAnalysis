@@ -117,15 +117,49 @@ fileForker::fileforker_status basicAnalyzer::runParallels(int interval){
 	prepareSpawn();
 	fileForker::fileforker_status stat=fileForker::ff_status_parent_busy;
 	int counter=0;
-	interval*=4; //to make it seconds
+	interval*=4; //to make it roughly seconds
+
+	double killthreshold=300;
+
+	time_t now;
+	time_t started;
+	time(&started);
+	time(&now);
+	std::vector<double> lastAliveSignals(infiles_.size());
+	std::vector<int>    lastBusyStatus(infiles_.size());
 	while(stat==fileForker::ff_status_parent_busy || stat== fileForker::ff_status_parent_childstospawn){
 
 		fileForker::fileforker_status writestat=spawnChildsAndUpdate();
 		stat=getStatus();
 		if(writestat == ff_status_parent_filewritten || (interval>0  && counter>interval)){
-			std::cout << "PID    "<< textFormatter::fixLength("Filename",30)                << " statuscode " << " progress " <<std::endl;
-			for(size_t i=0;i<infiles_.size();i++)
-				std::cout << textFormatter::fixLength(toString(getChildPids().at(i)),6)  << " "<< textFormatter::fixLength(infiles_.at(i).Data(),30) << "     " << getStatus(i) <<"     " << "   " << getBusyStatus(i)<<"%"<<std::endl;
+			time(&now);
+			double runningseconds = fabs(difftime(started,now));
+			std::cout << "PID    "<< textFormatter::fixLength("Filename",50)                << " statuscode " << " progress " <<std::endl;
+			for(size_t i=0;i<infiles_.size();i++){
+
+				double percentpersecond=getBusyStatus(i)/runningseconds;
+				double estimate=(100-getBusyStatus(i))/percentpersecond;
+				std::cout << textFormatter::fixLength(toString(getChildPids().at(i)),6)
+				<< " "<< textFormatter::fixLength(infiles_.at(i).Data(),50)
+				<< "     " << getStatus(i) <<"     "
+				<< "   " << textFormatter::fixLength(toString(getBusyStatus(i))+"%",4,false);
+				if(getBusyStatus(i)>4 && getStatus(i) == ff_status_child_busy){
+					std::cout  <<" ETA: ";
+					int minutes=estimate/60;
+					std::cout << std::setw(2) << std::setfill('0')<< minutes << ":" <<
+							std::setw(2) << std::setfill('0')<<(int)(estimate - minutes*60) ;
+				}
+				std::cout <<std::endl;
+				if(lastBusyStatus.at(i)!=getBusyStatus(i))
+					lastAliveSignals.at(i)=runningseconds;
+				else if(getStatus(i) == ff_status_child_busy){
+					if(runningseconds-lastAliveSignals.at(i) > killthreshold){
+						//for a long time no signal, but "busy" something is very likely wrong
+						std::cout << "-> seems to be hanging. Process will be killed." <<std::endl;
+						abortChild(i);
+					}
+				}
+			}
 			std::cout << std::endl;
 			counter=0;
 		}
@@ -135,7 +169,7 @@ fileForker::fileforker_status basicAnalyzer::runParallels(int interval){
 	std::cout << "End report:" <<std::endl;
 	std::cout << textFormatter::fixLength("Filename",30)                << " statuscode " << " progress " <<std::endl;
 	for(size_t i=0;i<infiles_.size();i++)
-		std::cout << textFormatter::fixLength(infiles_.at(i).Data(),30) << "     " << getStatus(i) <<"     " << "   " << getBusyStatus(i)<<"%"<<std::endl;
+		std::cout << textFormatter::fixLength(infiles_.at(i).Data(),50) << "     " << getStatus(i) <<"     " << "   " << getBusyStatus(i)<<"%"<<std::endl;
 	std::cout << std::endl;
 
 	return stat;
@@ -180,7 +214,13 @@ fileForker::fileforker_status basicAnalyzer::writeHistos(){
 
 
 void basicAnalyzer::reportStatus(const Long64_t& entry,const Long64_t& nEntries){
-	if((entry +1)* 100 % nEntries <100){
+	static Long64_t step=0;
+	static Long64_t next=0;
+	if(!step){
+		step=nEntries/400;
+	}
+	if(entry==next || entry==nEntries-1){
+		next+=step;
 		int status=(entry+1) * 100 / nEntries;
 		reportBusyStatus(status);
 	}

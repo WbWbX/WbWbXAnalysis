@@ -32,12 +32,12 @@ public:
 	const std::vector<ztop::NTGenParticle *> & mothers()const{return motherPs_;}
 
 	const NTLorentzVector<float>  & p4()const{return p4_;}
-	float pt()const{return p4_.Pt();}
+	const float& pt()const{return p4_.Pt();}
 	float E()const {return p4_.e();}
 	float e()const {return p4_.e();}
-	float phi()const{return p4_.Phi();}
-	float eta()const{return p4_.Eta();}
-	float m()const{return p4_.M();}
+	const float& phi()const{return p4_.Phi();}
+	const float& eta()const{return p4_.Eta();}
+	const float& m()const{return p4_.M();}
 
 	//extra
 

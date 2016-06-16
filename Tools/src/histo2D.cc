@@ -38,9 +38,12 @@ histo2D::~histo2D(){
 }
 histo2D::histo2D(const histo2D&rhs){
 	copyFrom(rhs);
+	if(histo2D::c_makelist)
+			c_list.push_back(this);
 }
 histo2D& histo2D::operator=(const histo2D&rhs){
 	copyFrom(rhs);
+
 	return *this;
 }
 

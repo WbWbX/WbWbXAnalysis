@@ -12,17 +12,24 @@ namespace ztop{
 class NTJECUncertainties{
 
 public:
-	NTJECUncertainties(){}
+	NTJECUncertainties():enabled_(false){}
 	~NTJECUncertainties(){}
 
 	void setFile(std::string pathToFile){JecBase_.setFile(pathToFile);}
-	void setSystematics(std::string syst){JecBase_.setSystematics(syst);} //! up, down, no
-        void setIs2012(bool is){JecBase_.setIs2012(is);}//use to distinguish run i and ii
+	void setSystematics(std::string syst){
+		JecBase_.setSystematics(syst);
+	if(syst.length() ==2 && syst.find("no") != std::string::npos)
+		enabled_=false;
+	else
+		enabled_=true;
+	} //! up, down, no
+
+	void setIs2012(bool is){JecBase_.setIs2012(is);}//use to distinguish run i and ii
     
 	/**
 	 * Adds a source with name to the sources to be varied
 	 */
-	void setSource(const std::string& str){JecBase_.setSource(str);}
+	void setSource(const std::string& str){JecBase_.setSource(str);enabled_=true;}
 
 	std::vector<std::string> getSourceNames(){return JecBase_.getSourceNames();}
 
@@ -42,6 +49,7 @@ public:
 
 
 	void applyToJet(ztop::NTJet * jet ){
+		if(!enabled_) return;
 		float recopt=jet->pt();
 		float recoeta=jet->eta();
 		float recophi=jet->phi();
@@ -56,7 +64,7 @@ public:
 
 protected:
 	JECBase JecBase_;
-
+	bool enabled_;
 
 };
 

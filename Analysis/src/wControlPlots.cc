@@ -9,6 +9,7 @@
 
 
 #include "../interface/wControlPlots.h"
+#include "../interface/analysisPlotsW.h"
 #include "TtZAnalysis/DataFormats/src/classes.h"
 
 namespace ztop{
@@ -18,17 +19,20 @@ void wControlPlots::makeControlPlotsPriv(){
 	using namespace std;
 
 
+
+
+//reco plots
 	SETBINSRANGE(41,-0.5,40.5);
 	addPlot("vertex multi","Vertex multiplicity", "Events");
 	FILL(event,vertexMulti());
 
-	SETBINSRANGE(500,-1000,1000);
+	SETBINSRANGE(120,-30,30);
 	addPlot("event weight","Weight", "Events");
-	FILLSINGLE(puweight);
+	if(event()->puweight)last()->fill(*(event()->puweight),fabs(*event()->puweight));
 
-	SETBINSRANGE(400,-2,2);
+	SETBINSRANGE(200,-3,3);
 	addPlot("event weight narrow","Weight", "Events");
-	FILLSINGLE(puweight);
+	if(event()->puweight)last()->fill(*(event()->puweight),fabs(*event()->puweight));
 
 	SETBINSRANGE(40,0,400);
 	addPlot("good muon pt","p_{T} [GeV]", "N_{#mu}");
@@ -55,6 +59,11 @@ void wControlPlots::makeControlPlotsPriv(){
 	SETBINSRANGE(50,0,3);
 	addPlot("kin muon iso","Muon isolation", "N_{#mu}");
 	FILLFOREACH(kinmuons,isoVal());
+
+
+	SETBINSRANGE(100,0,0.1);
+	addPlot("kin muon d0","d_{0} [cm]", "N_{#mu}");
+	FILLFOREACH(kinmuons,d0V());
 
 
 	SETBINSRANGE(5,-0.5,4.5);
@@ -101,6 +110,7 @@ void wControlPlots::makeControlPlotsPriv(){
 	addPlot("veto muon pt","Muon p_{T} [GeV]", "N_{#mu}");
 	FILLFOREACH(vetomuons,pt());
 
+	/*
 	SETBINSRANGE(8,-.5,7.5);
 	addPlot("id jet multi","N_{j}", "Events");
 	FILL(idjets,size());
@@ -112,6 +122,7 @@ void wControlPlots::makeControlPlotsPriv(){
 	SETBINSRANGE(40,-4,4);
 	addPlot("id jet eta","#eta", "N_{j}");
 	FILLFOREACH(idjets,eta());
+	 */
 
 	SETBINSRANGE(8,-.5,7.5);
 	addPlot("hard jet multi","Jet multiplicity", "Events");
@@ -129,8 +140,46 @@ void wControlPlots::makeControlPlotsPriv(){
 	addPlot("hard jet phi","Jet #phi", "N_{j}");
 	FILLFOREACH(hardjets,phi());
 
+	SETBINSRANGE(60,0,300);
+	addPlot("leading jet pt","Leading jet p_{T} [GeV]", "Events");
+	FILL(leadingjet,pt());
 
+	SETBINSRANGE(40,-4,4);
+	addPlot("leading jet eta","Leading et #eta", "Events");
+	FILL(leadingjet,eta());
 
+	SETBINSRANGE(40,-1.4,1.4);
+	addPlot("asymm full deta cp","2 p_{T}^{T} / M_{W}", "Events");
+	if(event()->leadinglep && event()->leadingjet){
+		float val=analysisPlotsW::asymmValue(event()->leadinglep,event()->leadingjet);
+		last()->fill(val,* event()->puweight);
+	}
+
+	SETBINS << -1.5 << -0.5 << 0.5 << 1.5;
+	addPlot("asymm full deta coarse","2 p_{T}^{T} / M_{W}", "Events");
+	if(event()->leadinglep && event()->leadingjet){
+		float val=analysisPlotsW::asymmValue(event()->leadinglep,event()->leadingjet);
+		last()->fill(val,* event()->puweight);
+	}
+	float deta=0;
+	if(event()->leadinglep && event()->leadingjet){
+		deta=fabs(event()->leadinglep->eta()-event()->leadingjet->eta());
+	}
+	addPlot("asymm deta geq 1 coarse","2 p_{T}^{T} / M_{W}", "Events");
+	if(deta > 1.){
+		float val=analysisPlotsW::asymmValue(event()->leadinglep,event()->leadingjet);
+		last()->fill(val,* event()->puweight);
+	}
+	addPlot("asymm full geq 2 coarse","2 p_{T}^{T} / M_{W}", "Events");
+	if(deta > 2.){
+		float val=analysisPlotsW::asymmValue(event()->leadinglep,event()->leadingjet);
+		last()->fill(val,* event()->puweight);
+	}
+	addPlot("asymm full geq 2.5 coarse","2 p_{T}^{T} / M_{W}", "Events");
+	if(deta > 2.5){
+		float val=analysisPlotsW::asymmValue(event()->leadinglep,event()->leadingjet);
+		last()->fill(val,* event()->puweight);
+	}
 }
 
 

@@ -109,7 +109,7 @@ public:
 	/**
 	 * returns a string of fixed length
 	 */
-	static std::string fixLength(const std::string &, size_t);
+	static std::string fixLength(const std::string &, size_t, bool truncate=true);
 
 	/**
 	 * switch for more output

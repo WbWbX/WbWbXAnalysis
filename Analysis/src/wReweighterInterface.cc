@@ -11,28 +11,29 @@
 namespace ztop{
 wReweighterInterface::wReweighterInterface(
 		tTreeHandler* t,
+		bool enable,
 		const TString& size_branch,
-		const TString& weightsbranch):wNTBaseInterface(t),enabled_(true){
+		const TString& weightsbranch):wNTBaseInterface(t,enable){
 
 	if(size_branch.Length()){
 		addBranch<int>(size_branch);
 		addBranch<float*>(weightsbranch,128);
 	}
-	else{
-		enabled_=false;
-	}
+
 
 	//create the default one
 
 
 }
 void wReweighterInterface::addWeightIndex(const size_t index){
+	if(!enabled())
+		return;
 	indicies_.push_back(index);
 	reweighter_.resize(indicies_.size());
 }
 
 void wReweighterInterface::reWeight(float & old){
-	if(associatedBranches().size() <1 || !enabled_)
+	if(associatedBranches().size() <1 || !enabled())
 		return ;
 	const size_t brsize = *getBranchContent<int>(0);
 	if(brsize> associatedBranches().at(1)->getBufMax()){
@@ -53,7 +54,7 @@ void wReweighterInterface::reWeight(float & old){
 }
 
 double wReweighterInterface::getRenormalization()const{
-	if(associatedBranches().size() <1 || !enabled_)
+	if(associatedBranches().size() <1 || !enabled())
 		return 1.;
 	double out=1;
 	for(size_t i=0;i<reweighter_.size();i++)

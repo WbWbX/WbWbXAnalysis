@@ -57,6 +57,7 @@
 #include <iostream>
 #include <sys/types.h>
 #include <stdexcept>
+#include "TopAnalysis/ZTopUtils/interface/miscUtils.h" //only for toString. maybe replace
 
 namespace ztop{
 
@@ -196,8 +197,7 @@ fileForker::fileforker_status fileForker::spawnChildsAndUpdate(){
 
 	}
 	else{ //only one process
-		if(debug)
-			std::cout << "fileForker::spawnChilds: only one process, running in main thread"  << std::endl;
+		std::cout << "fileForker::spawnChilds: only one process, running in main thread. No progress information will be available"  << std::endl;
 		ownchildindex_=0;
 		ischild_=false;
 		donechilds_++;
@@ -290,6 +290,19 @@ int fileForker::checkForWriteRequest(){
 		}
 	}
 	return -1;
+}
+
+void fileForker::abortChild(size_t idx){
+	if(idx>=childPids_.size())
+		throw std::out_of_range("fileForker::abortChild: index");
+
+	//make nasty system call
+	std::string syscall="kill -9 ";
+	syscall+=toString(childPids_.at(idx));
+	system(syscall.data());
+	childstatus_.at(idx)=ff_status_child_generror;
+	runningchilds_--;
+	donechilds_++;
 }
 
 }

@@ -23,7 +23,9 @@ class NTGenJet;
 
 class NTFullEvent{
 public:
-    NTFullEvent(): event(0),
+    NTFullEvent()
+/*
+: event(0),
 	allgenparticles(0),
     gentops(0),
     genbs(0),
@@ -32,8 +34,13 @@ public:
     genleptons1(0),
     genleptons3(0),
     genjets(0),
+    genlepton(0),
+    genneutrino(0),
+    genW(0),
+
     idjets(0),medjets(0),hardjets(0),medbjets(0),hardbjets(0),dphilljjets(0),dphiplushardjets(0),
     selectedjets(0),selectedbjets(0),selectednonbjets(0),
+	leadingjet(0),
     allmuons(0),kinmuons(0),idmuons(0),isomuons(0),vetomuons(0),nonisomuons(0),
     allelectrons(0),kinelectrons(0),idelectrons(0),isoelectrons(0),
     allleptons(0),kinleptons(0),idleptons(0),isoleptons(0),
@@ -72,7 +79,10 @@ public:
 
     S4(0),
     allobjects4(0),
-    puweight(0){};
+    puweight(0)*/
+{
+    	reset();
+    };
     ~NTFullEvent(){}
 
     void reset(){
@@ -85,9 +95,15 @@ public:
         genleptons1=0;
         genleptons3=0;
         genjets=0;
+        genlepton=0;
+        genneutrino=0;
+        genW=0;
+        costheta_cs=0;
+        phi_cs=0;
 
         idjets=0;medjets=0;hardjets=0;medbjets=0;hardbjets=0;dphilljjets=0;dphiplushardjets=0;
         selectedjets=0;selectedbjets=0,selectednonbjets=0;
+        leadingjet=0;
         allmuons=0;kinmuons=0;idmuons=0;isomuons=0;vetomuons=0;nonisomuons=0;
         allelectrons=0;kinelectrons=0;idelectrons=0;isoelectrons=0;
         allleptons=0;kinleptons=0;idleptons=0;isoleptons=0;
@@ -125,6 +141,11 @@ public:
         midphi=0;
         S4=0;
         allobjects4=0;
+
+        pttrans=0;
+        pttrans_gen=0;
+        A7=0;
+
         puweight=0;
     }
 
@@ -140,8 +161,9 @@ public:
     std::vector<ztop::NTGenParticle *> * genleptons1;
     std::vector<ztop::NTGenParticle *> * genleptons3;
     std::vector<ztop::NTGenJet *> * genjets;
-
-
+    ztop::NTGenParticle * genlepton;
+    ztop::NTGenParticle * genneutrino;
+    ztop::NTGenParticle * genW;
 
 
     ///reco info
@@ -155,7 +177,7 @@ public:
     std::vector<ztop::NTJet*> * selectedjets;
     std::vector<ztop::NTJet*> * selectedbjets;
     std::vector<ztop::NTJet*> * selectednonbjets;
-
+    ztop::NTJet* leadingjet;
 
     std::vector<ztop::NTMuon*> * allmuons;
     std::vector<ztop::NTMuon*> * kinmuons;
@@ -231,8 +253,14 @@ public:
     NTLorentzVector<float> * S4;
     NTLorentzVector<float>  * allobjects4;
 
+    //W analysis
+    float * costheta_cs;
+    float * phi_cs;
+    float * pttrans;
+    float * pttrans_gen;
+    float * A7;
 
-
+    //PU weight
     float * puweight;
 
 };

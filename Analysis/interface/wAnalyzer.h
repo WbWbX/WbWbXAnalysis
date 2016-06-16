@@ -10,6 +10,7 @@
 
 #include "basicAnalyzer.h"
 #include "TString.h"
+#include "TtZAnalysis/DataFormats/interface/NTJECUncertainties.h"
 
 namespace ztop{
 
@@ -24,6 +25,11 @@ public:
 
 	void addWeightIndex(size_t idx){weightindicies_.push_back(idx);}
 
+	NTJECUncertainties * getJecUnc(){return &jecunc_;}
+	const NTJECUncertainties * getJecUnc()const{return &jecunc_;}
+
+
+
 private:
 
 	fileForker::fileforker_status writeOutput();
@@ -33,6 +39,9 @@ private:
 	void createNormalizationInfo(tTreeHandler* );
 
 	std::vector<size_t> weightindicies_;
+
+	NTJECUncertainties jecunc_;
+
 };
 
 }

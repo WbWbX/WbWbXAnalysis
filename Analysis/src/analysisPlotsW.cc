@@ -53,7 +53,7 @@ float analysisPlotsW::calcAsymmGen(float& absdeta)const{
 
 		if(p->pt()<25)continue;
 		if(fabs(p->eta())>2.1)continue;
-		if(p->status() != 23) continue; //?
+		if(p->status() != 23 && p->status() != 3) continue; //?
 
 		muon=p; //directly take the first one
 		break;
@@ -117,12 +117,13 @@ void analysisPlotsW::bookPlots(){
 	if(etaRanges_.size()<2)
 		throw std::out_of_range("analysisPlotsW::bookPlots: no deta range defined!");
 
-	std::vector<float> asymmgenbins=histo1D::createBinning(100,-1.4,1.4);
-	std::vector<float> mTbins      =histo1D::createBinning(100,10,130);
+	std::vector<float> asymmgenbins=histo1D::createBinning(40,-1.4,1.4);
+	std::vector<float> mTbins      =histo1D::createBinning(50,10,130);
 
 	for(size_t i=0;i<etaRanges_.size()-1;i++){
 		TString etastring=produceDEtaString(i);
-		asymmiso_.push_back(addPlot(asymmgenbins,asymmgenbins,"aymm"+etastring,"asymm","Events"));
+		asymmiso_.push_back(addPlot(asymmgenbins,asymmgenbins,"asymm"+etastring,"asymm","Events"));
+		asymmnoniso_.push_back(addPlot(asymmgenbins,asymmgenbins,"asymm_noiso"+etastring,"asymm","Events"));
 	}
 
 	for(size_t i=0;i<etaRanges_.size()-1;i++){
@@ -131,31 +132,32 @@ void analysisPlotsW::bookPlots(){
 	}
 
 	std::vector<float> etabins=etaRanges_;
-	asymdeta_ = addPlot(etabins,etabins,"jet muon delta eta", "#Delta#eta","Events");
+	asymmisofull_ = addPlot(asymmgenbins,asymmgenbins,"asymm full deta", "asymm","Events");
+	asymmnonisofull_ = addPlot(asymmgenbins,asymmgenbins,"asymm_noiso full deta", "asymm","Events");
+	mTnonisofull_ = addPlot(mTbins,mTbins,"mT full deta","M_{T} [GeV]","Events") ;
 }
 
 void analysisPlotsW::fillPlotsReco(){
 	if(!use()) return;
 	if(!event()) return;
 
+	float deta=0;
+	float asymmval=calcAsymmReco(deta);
+	size_t detabin=getEtaIndex(deta );
 	if(isiso_){
-		float deta=0;
-		float asymmval=calcAsymmReco(deta);
-		size_t detabin=getEtaIndex(deta );
 		if(asymmval>-98){
 			asymmiso_.at(detabin)->fillReco(asymmval, puweight());
-
-			if(asymmval>0.5)
-				asymdeta_->fillReco(deta,puweight());
-
+			asymmisofull_->fillReco(asymmval, puweight());
 		}
 	}
 	else{
 		float deta=0;
 		float mT=calcMTReco(deta);
-		if(mT>0)
-			mTnoniso_.at(getEtaIndex(deta))->fillReco(mT,puweight());
-
+		if(mT>0){
+			mTnoniso_.at(detabin)->fillReco(mT,puweight());
+			asymmnoniso_.at(detabin)->fillReco(asymmval, puweight());
+			asymmnonisofull_->fillReco(asymmval, puweight());
+		}
 	}
 }
 
@@ -166,11 +168,21 @@ void analysisPlotsW::fillPlotsGen(){
 	float deta;
 	float asymmval=calcAsymmGen(deta);
 	size_t detabin=getEtaIndex(deta );
-	if(asymmval>-98){
-		asymmiso_.at(detabin)->fillGen(asymmval,puweight());
+	if(isiso_){
+		if(asymmval>-98){
+			asymmiso_.at(detabin)->fillGen(asymmval, puweight());
+			asymmisofull_->fillGen(asymmval, puweight());
+		}
+	}
+	else{
+		//float deta=0;
+		//float mT=calcMTReco(deta);
 
-		if(asymmval>0.5)//test
-			asymdeta_->fillGen(deta,puweight());
+		//	mTnoniso_.at(detabin)->fillGen(mT,puweight());
+		asymmnoniso_.at(detabin)->fillGen(asymmval, puweight());
+		asymmnonisofull_->fillGen(asymmval, puweight());
+		//	mTnonisofull_->fillGen(mT, puweight());
+
 	}
 }
 

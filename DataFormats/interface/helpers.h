@@ -40,6 +40,9 @@ std::vector< T*> produceCollection( std::vector<T*> * t, float minpt=-1, float m
 template <class T>
 bool comparePt(T a, T b);
 
+template <class T>
+bool removeEntry( T*, std::vector< T*>& );
+
 
 ////////definitions
 
@@ -97,5 +100,17 @@ template <class T>
 inline bool comparePt(T a, T b){
     return (a->pt() > b->pt());
 }
+
+template <class T>
+inline bool removeEntry( T* e, std::vector< T*>& v){
+	typename std::vector< T*>::iterator p=std::find(v.begin(),v.end(),e);
+	if(p!=v.end()){
+		v.erase(p);
+		return true;
+	}
+	return false;
+}
+
+
 }
 #endif /* DATAFORMATHELPERS_H_ */

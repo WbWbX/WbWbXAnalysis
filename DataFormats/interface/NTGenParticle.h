@@ -74,12 +74,12 @@ public:
 	const int& status()const{return status_;}
 
 	const NTLorentzVector<float> & p4(){return p4_;}
-	float pt()const{return p4_.Pt();}
+	const float& pt()const{return p4_.Pt();}
 	float  E()const {return p4_.E();}
 	float  e()const {return p4_.E();}
-	float  phi()const{return p4_.Phi();}
-	float  eta()const{return p4_.Eta();}
-	float  m()const{return p4_.M();}
+	const float&  phi()const{return p4_.Phi();}
+	const float&  eta()const{return p4_.Eta();}
+	const float&  m()const{return p4_.M();}
 	const int& q()const{return q_;}
 
 

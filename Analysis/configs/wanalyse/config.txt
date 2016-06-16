@@ -1,20 +1,53 @@
-
+$?cfg#
 
 [inputfiles-begin]
 
 
 $ inputfile,     legend entry,        color,   xsection,   legendNumber (for sorting,- allows for gaps),  (opt) isSignal
 
-treeProducerA7W_tree.root,              data,                   1,         1,              99 
-treeProducerA7W_tree1.root,             signal,                 432,       440,              1, true
-treeProducerA7W_tree.root,              background,             632,       200,              2
+
+$treeProducerA7W_WJets.root,             signal,                     413,       37509,       1 ,true
+
+new/tree_W0JetsLN_Part1.root,             signal0,                     413,       27043, 1 , true $15409.3,       1 ,true  $xsec: 30320, scaled by fraction 
+$new/tree_W0JetsLN_Part2.root,             signal,                     413,       11436.5,       1 ,true
+$new/tree_W0JetsLN_Part3.root,             signal,                     413,       3474.2,       1 ,true
+$new/more/W0JetsTN_tree.root,              signal,                     413,       10107,       1 ,true
+
+new/more/W1JetsLN_tree_Part1.root,        signal1,                     414,       6692,   2, true $3510,       1 ,true $xsec: 7503, scaled by fraction 
+$new/more/W1JetsLN_tree_Part2.root,        signal,                     413,       3993,       1 ,true
+$new/more/W1JetTN_tree.root,               signal,                     413,       2501,       1 ,true
+
+new/more/W2JetLN_tree.root,        signal2,                     415,       3772,       3 ,true
+$new/more/W2JetsTN_tree.root,       signal,                     413,       4230,        1 ,true
+
+
+treeProducerSusySoftlepton_SingleMuAB.root,    data,                   1,         1,              99 
+new/tree_SingleMuC.root,                       data,                   1,         1,              99
+new/tree_SingleMuDI.root,                       data,                   1,         1,              99
+new/tree_SingleMuDII.root,                       data,                   1,         1,              99
+
+$ backgrounds
+
+treeProducerA7W_TTJetsSem.root,         t#bar{t} ,               632,       106.15,      4
+treeProducerA7W_TTfullyLep.root,        t#bar{t} ,               632,       26.80,       4
+
+treeProducerA7W_DYJetsM50.root,         DY,                         868,       3532.8,      7
+
+
+treeProducerA7W_QCDMuPt15.root,         QCD,                        400,	  134680,       9
+
   
   
 [inputfiles-end]
 
 [parameters-begin] 
 
-inputFilesDir = /nfs/dust/cms/user/kiesej/
-Lumi = 20000
+inputFilesDir = /nfs/dust/cms/user/kiesej/trees_WA7/
+Lumi = 19710
+JECUncertainties = /src/TtZAnalysis/Analysis/data/analyse/Summer13_V5_DATA_UncertaintySources_AK5PFchs.txt
+
 
 [parameters-end]
+
+
+

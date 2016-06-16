@@ -19,7 +19,8 @@ public:
 	ttXsecPlots():ttbarControlPlots(){}
 	~ttXsecPlots(){}
 
-	void makeControlPlots(const size_t& step);
+private:
+	void makeControlPlotsPriv(const size_t& step);
 
 
 

@@ -16,6 +16,7 @@ namespace ztop{
 class wNTGenJetInterface: public wNTBaseInterface{
 public:
 	wNTGenJetInterface(tTreeHandler * t,
+			bool enabled,
 			const TString& size_branch="",
 			const TString& pt_branch="",
 			const TString& eta_branch="",

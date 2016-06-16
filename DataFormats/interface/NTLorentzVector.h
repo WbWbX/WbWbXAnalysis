@@ -180,7 +180,7 @@ bool NTLorentzVector<T>::bepicky=false;
 template<class T>
 float dR_3d(const NTLorentzVector<T>& a,const NTLorentzVector<T>& b){
     T deta2=(a.eta() - b.eta())*(a.eta() - b.eta());
-    T dphi2=(a.phi() - b.phi())*(a.phi() - b.phi());
+    T dphi2=absNormDPhi(a,b);
     return sqrt(deta2+dphi2);
 }
 

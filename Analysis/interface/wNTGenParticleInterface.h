@@ -17,6 +17,7 @@ namespace ztop{
 class wNTGenParticleInterface: public wNTBaseInterface{
 public:
 	wNTGenParticleInterface(tTreeHandler * t,
+			bool enable,
 			const TString& size_branch,
 			const TString& pt_branch,
 			const TString& eta_branch,
@@ -37,7 +38,7 @@ private:
 
 
 	std::vector<NTGenParticle> content_;
-
+	bool missingstatusbranch_;
 
 };
 

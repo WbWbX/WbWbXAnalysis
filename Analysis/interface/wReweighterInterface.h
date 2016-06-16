@@ -15,11 +15,11 @@ namespace ztop{
 class wReweighterInterface: public wNTBaseInterface{
 public:
 	wReweighterInterface(tTreeHandler* t,
+			bool enable,
 			const TString& size_branch="",
 			const TString& weightsbranch="");
 	~wReweighterInterface(){}
 
-	void enable(bool en){enabled_=en;}
 
 	/**
 	 * Allows duplicate entries on purpose to apply weights twice!
@@ -37,7 +37,6 @@ private:
 	std::vector<size_t> indicies_;
 	std::vector<simpleReweighter> reweighter_;
 
-	bool enabled_;
 };
 
 }

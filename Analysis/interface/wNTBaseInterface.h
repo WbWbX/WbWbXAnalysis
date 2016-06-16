@@ -18,10 +18,12 @@ class tTreeHandler;
 class wNTBaseInterface {
 public:
 	wNTBaseInterface();
-	wNTBaseInterface(tTreeHandler * t);
+	wNTBaseInterface(tTreeHandler * t, bool enable=true);
 	~wNTBaseInterface();
 
 	void setTree(tTreeHandler * t){t_=t;}
+	void disable();
+	const bool& enabled()const{return enabled_;}
 
 	static bool debug;
 protected:
@@ -45,18 +47,23 @@ protected:
 				}
 			}
 		}
-		throw std::logic_error("wNTBaseInterface:getBranchContent: branch not associated");;}
+
+		throw std::logic_error("wNTBaseInterface:getBranchContent: branch not associated");;
+	}
 
 	bool isNewEntry()const;
 	size_t getBranchBuffer(const size_t & idx)const;
 
 	const std::vector<tBranchHandlerBase*>& associatedBranches()const{return associatedBranches_;}
 
+
+
+
 private:
 
 	bool read_;
 	bool firstread_;
-
+	bool enabled_;
 	std::vector<tBranchHandlerBase*> associatedBranches_;
 
 	tTreeHandler * t_;
@@ -66,6 +73,8 @@ private:
 
 template<class T>
 tBranchHandler<T>* wNTBaseInterface::addBranch(const TString& branchname, size_t buffer){
+	if(!enabled())
+		return 0;
 	if(!t_)
 		throw std::logic_error("wNTBaseInterface::addBranch: first associate tree");
 	tBranchHandler<T>* p;

@@ -31,9 +31,8 @@ void tBranchHandlerBase::handleReturns(int ret,bool& missing,bool allowmissing)c
 	}
 	else if( ret == -5){
 		if(allowmissing){
+			std::cout << "tBranchHandler: allowed missing branch "<<branchname_<<std::endl;
 			missing= true;
-			std::cout << "tBranchHandler: branch " << branchname_ << " does not exists - created empty content" << std::endl;
-
 		}
 		else{
 			std::cout << "tBranchHandler: branch " << branchname_ << " does not exists!" << std::endl;
@@ -64,7 +63,8 @@ void tBranchHandlerBase::removeTreeAndBranch( tTreeHandler * t, const TString& b
 	}
 	if(t_)
 		t->removeAsso(this);
-	removeTree(t);
+	if(!missingbranch_)
+		removeTree(t);
 }
 
 

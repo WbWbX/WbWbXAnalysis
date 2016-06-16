@@ -113,6 +113,8 @@ protected:
 
 	const std::vector<pid_t>& getChildPids()const{return childPids_;}
 
+	void abortChild(size_t idx);
+
 private:
 	int checkForWriteRequest();
 	bool writeReady_block();

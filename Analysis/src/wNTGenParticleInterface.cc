@@ -11,6 +11,7 @@
 namespace ztop{
 
 wNTGenParticleInterface::wNTGenParticleInterface(tTreeHandler * t,
+		bool enable,
 		const TString& size_branch,
 		const TString& pt_branch,
 		const TString& eta_branch,
@@ -20,7 +21,7 @@ wNTGenParticleInterface::wNTGenParticleInterface(tTreeHandler * t,
 		const TString& charge_branch,
 		const TString& status_branch,
 		const TString& motherpdgid_branch,
-		const TString& grandmotherpdgid_branch) : wNTBaseInterface(t){
+		const TString& grandmotherpdgid_branch) : wNTBaseInterface(t,enable),missingstatusbranch_(false){
 
 	const size_t bufsize=128;
 	addBranch<int>(size_branch);
@@ -30,7 +31,11 @@ wNTGenParticleInterface::wNTGenParticleInterface(tTreeHandler * t,
 	addBranch<float*>(m_branch,bufsize);
 	addBranch<int*>(pdgid_branch,bufsize);
 	addBranch<float*>(charge_branch,bufsize);
-	addBranch<int*>(status_branch,bufsize);
+	tBranchHandler<int*>::allow_missing=true;
+	tBranchHandler<int*> * b=addBranch<int*>(status_branch,bufsize);
+	if(b)
+		missingstatusbranch_=b->ismissing();
+	tBranchHandler<int*>::allow_missing=false;
 	addBranch<int*>(motherpdgid_branch,bufsize);
 	addBranch<int*>(grandmotherpdgid_branch,bufsize);
 
@@ -38,6 +43,7 @@ wNTGenParticleInterface::wNTGenParticleInterface(tTreeHandler * t,
 }
 
 std::vector<NTGenParticle> * wNTGenParticleInterface::content(){
+
 	if(isNewEntry()){
 		size_t npart=*getBranchContent<int>(0);
 		if(npart>getBranchBuffer(1))npart=getBranchBuffer(1);//just check
@@ -52,7 +58,10 @@ std::vector<NTGenParticle> * wNTGenParticleInterface::content(){
 
 			part.setPdgId(  (* getBranchContent<int*>(5))[i] );
 			part.setQ(      (* getBranchContent<float*>(6))[i] );
-			part.setStatus( (* getBranchContent<int*>(7))[i] );
+			if(!missingstatusbranch_)
+				part.setStatus( (* getBranchContent<int*>(7))[i] );
+			else
+				part.setStatus(3);
 			part.setMotherPdgID(  (* getBranchContent<int*>(8))[i] );
 			part.setGrandMotherPdgID(  (* getBranchContent<int*>(9))[i] );
 

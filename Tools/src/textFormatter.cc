@@ -262,13 +262,21 @@ std::string textFormatter::splitIntoLines(const std::string  &in,const size_t& m
 	return out;
 }
 
- std::string textFormatter::fixLength(const std::string & in, size_t l){
+std::string textFormatter::fixLength(const std::string & in, size_t l, bool truncate){
 	if(in.length()==l)
 		return in;
-	else if(in.length()>l)
-		return std::string(in.begin(),in.begin()+l);
-	else
-		return in+std::string(l-in.length(),' ');
+	if(truncate){
+		if(in.length()>l)
+			return std::string(in.begin(),in.begin()+l);
+		else
+			return in+std::string(l-in.length(),' ');
+	}
+	else{
+		if(in.length()>l)
+			return std::string(in.begin()+(in.length()-l),in.end());
+		else
+			return std::string(l-in.length(),' ')+in;
+	}
 }
 
 }//ns
