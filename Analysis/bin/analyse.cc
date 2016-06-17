@@ -7,6 +7,8 @@
 #include <TtZAnalysis/Analysis/interface/topAnalyzer.h>
 
 #include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
+
+#include "TopAnalysis/ZTopUtils/interface/version.h"
 //#include "Analyzer.cc"
 //should be taken care of by the linker!
 
@@ -27,7 +29,7 @@ invokeApplication(){
 	TString btagfile = parser->getOpt<TString> ("b","all_btags","use btagfile (default files in dir all_btags)");        //-b btagfile default all_btags.root
 	//const float wpval = parser->getOpt<float>     ("bwp",-100,"btag discriminator cut value (default: not use)");            //-l default -1
 
-	TString outfileadd= parser->getOpt<TString>   ("o","","additional output id");            //-o <outfile> should be something like channel_energy_syst.root // only for plots
+	TString outfileadd= parser->getOpt<TString>("o","","additional output id");            //-o <outfile> should be something like channel_energy_syst.root // only for plots
 
 	bool status    = parser->getOpt<bool>      ("S",false,"show regular status update (switch)");         //-S enables default false
 	bool testmode  = parser->getOpt<bool>      ("T",false,"enable testmode: 8% of stat, more printout");         //-T enables default false
@@ -167,7 +169,6 @@ invokeApplication(){
 	///some checks
 
 
-
 	ana->setMaxChilds(6);
 	if(testmode)
 		ana->setMaxChilds(1);
@@ -193,7 +194,10 @@ invokeApplication(){
 		ana->getPUReweighter()->setMCDistrSum12();
 	}
 	else if(energy == "13TeV"){
+#ifndef CMSSW_LEQ_5
+#error "please commit to git"
 		ana->getPUReweighter()->setMCDistrSum16("25ns_poisson");
+#endif
 	}	   
 
 	ana->getElecSF()->setInput(elecsffile,elecsfhisto);
