@@ -20,7 +20,7 @@ public:
 	~ttXsecPlots(){}
 
 private:
-	void makeControlPlotsPriv(const size_t& step);
+	void makeControlPlotsPriv();
 
 
 

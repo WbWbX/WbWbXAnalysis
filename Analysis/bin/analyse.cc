@@ -194,10 +194,7 @@ invokeApplication(){
 		ana->getPUReweighter()->setMCDistrSum12();
 	}
 	else if(energy == "13TeV"){
-#ifndef CMSSW_LEQ_5
-#error "please commit to git"
 		ana->getPUReweighter()->setMCDistrSum16("25ns_poisson");
-#endif
 	}	   
 
 	ana->getElecSF()->setInput(elecsffile,elecsfhisto);
