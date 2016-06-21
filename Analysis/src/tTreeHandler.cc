@@ -110,12 +110,19 @@ void tTreeHandler::setEntry(const Long64_t& in){
 void tTreeHandler::setPreCache(){
 	struct stat filestatus;
 	stat(file_->GetPath(), &filestatus );
-
+	Long64_t cache=filestatus.st_size/10;
 	tree()->SetCacheSize(filestatus.st_size/10);
-	if(tree()->GetCacheSize() > 100e6)
-		tree()->SetCacheSize(100e6);
-	tree()->SetCacheLearnEntries(1000);
+	if(cache > 20e6)
+		tree()->SetCacheSize(20e6);
+	else
+		tree()->SetCacheSize(cache/10);
+	tree()->SetCacheLearnEntries(200);
 
+}
+
+void tTreeHandler::printStats()const{
+	if(file_)
+		printf("Reading %lld bytes in %d transactions\n",file_->GetBytesRead(),  file_->GetReadCalls());
 }
 
 }

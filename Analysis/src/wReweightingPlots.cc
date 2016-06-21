@@ -37,15 +37,21 @@ void wReweightingPlots::bookPlots(){
 
 }
 void wReweightingPlots::fillPlots(){
+
 	if(!enabled_ || !signal_)return;
-	if(! event()->puweight) return;
-	if(! event()->genW) return;
-	if(! event()->genjets->size() || !event()->costheta_cs || !event()->phi_cs) return;
+	if(!event()->puweight) return;
+	if(!event()->genW) return;
+	if(!event()->genjets) return;
+	if(!event()->genjets->size()>0) return;
+	if(!event()->genjets->at(0))return;
+	if(!event()->costheta_cs) return;
+	if(!event()->phi_cs) return;
 
 
 
 	float detaWj=event()->genW->eta()-event()->genjets->at(0)->eta();
 	float dummy=0;
+
 	histo2D *h=getHisto(detaWj,event()->genW->pt(),dummy);
 
 	h->fill(std::acos(* event()->costheta_cs),* event()->phi_cs ,* event()->puweight);

@@ -28,6 +28,7 @@
 <bin name="movecontribution" file="movecontribution.cc" />
 
 <bin name="mtFromXsec2" file="mtFromXsec2.cc" />
+<bin name="wExtractA7" file="wExtractA7.cc" />
 
 <bin name="extractMtFromInclXsec" file="extractMtFromInclXsec.cc" />
 <Flags CXXFLAGS="-lXMLParser -lunfold -fopenmp"/>

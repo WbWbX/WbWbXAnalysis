@@ -114,30 +114,32 @@ bool analysisPlotsW::checkEventContentReco()const{
 }
 
 void analysisPlotsW::bookPlots(){
+	if(!use()) return;
 	if(etaRanges_.size()<2)
 		throw std::out_of_range("analysisPlotsW::bookPlots: no deta range defined!");
 
-	std::vector<float> asymmgenbins=histo1D::createBinning(40,-1.4,1.4);
+	std::vector<float> asymmbins=histo1D::createBinning(40,-1.4,1.4);
 	std::vector<float> mTbins      =histo1D::createBinning(50,10,130);
 
 	for(size_t i=0;i<etaRanges_.size()-1;i++){
 		TString etastring=produceDEtaString(i);
-		asymmiso_.push_back(addPlot(asymmgenbins,asymmgenbins,"asymm"+etastring,"asymm","Events"));
-		asymmnoniso_.push_back(addPlot(asymmgenbins,asymmgenbins,"asymm_noiso"+etastring,"asymm","Events"));
+		asymmiso_.push_back(addPlot1D(asymmbins,"pttrans"+etastring,"pttrans","Events"));
+		asymmnoniso_.push_back(addPlot1D(asymmbins,"pttrans_noiso"+etastring,"pttrans","Events"));
 	}
 
 	for(size_t i=0;i<etaRanges_.size()-1;i++){
 		TString etastring=produceDEtaString(i);
-		mTnoniso_.push_back(addPlot(mTbins,mTbins,"mT"+etastring,"M_{T} [GeV]","Events"));
+		mTnoniso_.push_back(addPlot1D(mTbins,"mT"+etastring,"M_{T} [GeV]","Events"));
 	}
 
 	std::vector<float> etabins=etaRanges_;
-	asymmisofull_ = addPlot(asymmgenbins,asymmgenbins,"asymm full deta", "asymm","Events");
-	asymmnonisofull_ = addPlot(asymmgenbins,asymmgenbins,"asymm_noiso full deta", "asymm","Events");
-	mTnonisofull_ = addPlot(mTbins,mTbins,"mT full deta","M_{T} [GeV]","Events") ;
+	asymmisofull_ = addPlot1D(asymmbins,"pttrans full deta", "pttrans","Events");
+	asymmnonisofull_ = addPlot1D(asymmbins,"pttrans_noiso full deta", "pttrans","Events");
+	mTnonisofull_ = addPlot1D(mTbins,"mT full deta","M_{T} [GeV]","Events") ;
 }
 
 void analysisPlotsW::fillPlotsReco(){
+
 	if(!use()) return;
 	if(!event()) return;
 
@@ -146,17 +148,17 @@ void analysisPlotsW::fillPlotsReco(){
 	size_t detabin=getEtaIndex(deta );
 	if(isiso_){
 		if(asymmval>-98){
-			asymmiso_.at(detabin)->fillReco(asymmval, puweight());
-			asymmisofull_->fillReco(asymmval, puweight());
+			asymmiso_.at(detabin)->fill(asymmval, puweight());
+			asymmisofull_->fill(asymmval, puweight());
 		}
 	}
 	else{
 		float deta=0;
 		float mT=calcMTReco(deta);
 		if(mT>0){
-			mTnoniso_.at(detabin)->fillReco(mT,puweight());
-			asymmnoniso_.at(detabin)->fillReco(asymmval, puweight());
-			asymmnonisofull_->fillReco(asymmval, puweight());
+			mTnoniso_.at(detabin)->fill(mT,puweight());
+			asymmnoniso_.at(detabin)->fill(asymmval, puweight());
+			asymmnonisofull_->fill(asymmval, puweight());
 		}
 	}
 }
@@ -165,6 +167,8 @@ void analysisPlotsW::fillPlotsGen(){
 	if(!use()) return;
 	if(!event()) return;
 
+	//no unfilding histos
+	/*
 	float deta;
 	float asymmval=calcAsymmGen(deta);
 	size_t detabin=getEtaIndex(deta );
@@ -183,7 +187,8 @@ void analysisPlotsW::fillPlotsGen(){
 		asymmnonisofull_->fillGen(asymmval, puweight());
 		//	mTnonisofull_->fillGen(mT, puweight());
 
-	}
+	}*/
+
 }
 
 

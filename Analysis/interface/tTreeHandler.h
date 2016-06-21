@@ -44,6 +44,8 @@ public:
 	 */
 	void setPreCache();
 
+	void printStats()const;
+
 	static bool debug;
 
 protected:

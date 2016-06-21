@@ -93,6 +93,12 @@ invokeApplication(){
 	else if(syst == "JES_down"){
 		ana.getJecUnc()->setSystematics("down");
 	}
+	else if(syst == "CHARGEFLIP_up"){
+		ana.getChargeFlip()->setRate(0.001);
+	}
+	else if(syst == "CHARGEFLIP_down"){
+		//nothing
+	}
 
 
 

@@ -179,6 +179,8 @@ public:
 	void getRelSystematicsFrom(const histo2D &);
 	void addRelSystematicsFrom(const histo2D &,bool ignorestat=false, bool strict=false);
 	void addGlobalRelError(TString,float);
+	void addGlobalRelErrorUp(TString,float);
+	void addGlobalRelErrorDown(TString,float);
 
 	/**
 	 * smoothens large unphysical variations that can occour in case of

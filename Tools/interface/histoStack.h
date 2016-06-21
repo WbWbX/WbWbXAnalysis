@@ -282,6 +282,8 @@ public:
 
 	int getContributionIdx(const TString&) const;
 
+	histoStack fitAllNorms(const std::vector<TString>& contributions, bool globalfloat);
+
 
 #ifndef __CINT__
 	template <class T>

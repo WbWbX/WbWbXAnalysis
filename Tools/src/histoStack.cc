@@ -3,6 +3,9 @@
 #include <vector>
 
 #include "../interface/systAdder.h"
+#include "../interface/variateHisto1D.h"
+#include "../interface/simpleFitter.h"
+#include "../interface/corrMatrix.h"
 
 namespace ztop{
 
@@ -628,8 +631,10 @@ void histoStack::addRelErrorToBackgrounds(double err ,bool aspartials , TString 
 		if(std::find(signals.begin(),signals.end(),i) != signals.end()) continue;
 		//add error to all of them
 		for(size_t j=0;j<containers_.size();j++){
-			if(j==i)
-				containers_.at(j).addGlobalRelError(nameprefix+legends_.at(i),err);
+			if(j==i){
+				containers_.at(j).addGlobalRelErrorUp(nameprefix+legends_.at(i),err);
+				containers_.at(j).addGlobalRelErrorDown(nameprefix+legends_.at(i),1/err);
+			}
 			else
 				containers_.at(j).addGlobalRelError(nameprefix+legends_.at(i),0);
 		}
@@ -638,8 +643,10 @@ void histoStack::addRelErrorToBackgrounds(double err ,bool aspartials , TString 
 	for(size_t i=0;i<containers2D_.size();i++){
 		if(std::find(signals.begin(),signals.end(),i) != signals.end()) continue;
 		for(size_t j=0;j<containers_.size();j++){
-			if(j==i)
-				containers2D_.at(j).addGlobalRelError(nameprefix+legends_.at(i),err);
+			if(j==i){
+				containers2D_.at(j).addGlobalRelErrorUp(nameprefix+legends_.at(i),err);
+				containers2D_.at(j).addGlobalRelErrorDown(nameprefix+legends_.at(i),1/err);
+			}
 			else
 				containers2D_.at(j).addGlobalRelError(nameprefix+legends_.at(i),0);
 		}
@@ -648,8 +655,10 @@ void histoStack::addRelErrorToBackgrounds(double err ,bool aspartials , TString 
 	for(size_t i=0;i<containers1DUnfold_.size();i++){
 		if(std::find(signals.begin(),signals.end(),i) != signals.end()) continue;
 		for(size_t j=0;j<containers_.size();j++){
-			if(j==i)
-				containers1DUnfold_.at(j).addGlobalRelError(nameprefix+legends_.at(i),err);
+			if(j==i){
+				containers1DUnfold_.at(j).addGlobalRelErrorUp(nameprefix+legends_.at(i),err);
+				containers1DUnfold_.at(j).addGlobalRelErrorDown(nameprefix+legends_.at(i),1/err);
+			}
 			else
 				containers1DUnfold_.at(j).addGlobalRelError(nameprefix+legends_.at(i),0);
 		}
@@ -2270,5 +2279,62 @@ bool histoStack::checkSignals(const std::vector<TString> &signs) const{
 	}
 	return true;
 }
+
+
+histoStack histoStack::fitAllNorms(const std::vector<TString>& contributions, bool globalfloat){
+	if(! is1D()) throw std::logic_error("histoStack::fitAllNorms: only implemented for 1D stacks");
+	if(containers_.size()<1) return *this;
+	if(contributions.size()<1) return *this;
+
+	histoStack thisstack=*this;
+	//create normalisation variations
+	std::vector<size_t > idx;
+	thisstack.removeAllSystematics(); //only BG vars
+	for(size_t i=0;i<contributions.size();i++){
+		idx.push_back(getContributionIdx(contributions.at(i)));
+		thisstack.addRelErrorToContribution(1,contributions.at(i),"BGvarFitAllNorms_");
+	}
+
+	//keep in mind format
+	histo1D fullMC=thisstack.getFullMCContainer();
+	if(globalfloat)
+		fullMC.addGlobalRelError("GLOBAL",1);
+
+	variateHisto1D varbg;
+	varbg.import(fullMC);
+
+	varbg.getSystNames();
+	simpleFitter fitter=varbg.fitToConstHisto(thisstack.getDataContainer());
+	if(!fitter.wasSuccess())
+		return histoStack();
+	//corrMatrix m=fitter.getCorrelationMatrix();
+	std::vector<double> pars=*fitter.getParameters();
+	histo1D mcfit=varbg.exportContainer(pars);
+
+	std::vector<TString> sysnames=varbg.getSystNames();
+
+	for(size_t i=0;i<idx.size();i++){
+		//if(pars.at(i)>0){
+			thisstack.containers_.at(idx.at(i)) *= 1+pars.at(i);
+			std::cout << sysnames.at(i) << " " << 1+pars.at(i) <<" " << thisstack.legends_.at(idx.at(i))<<std::endl;
+	////	}
+		//else{ //bg variations are intended to be log-normal. here we need linear
+		//	thisstack.containers_.at(idx.at(i)) *= (1/(1+pars.at(i)));
+	//	}
+	}
+	if(globalfloat){
+		thisstack.multiplyAllMCNorms(mcfit.integral()/fullMC.integral());
+	}
+	thisstack.removeAllSystematics();
+	//add all the uncertainty to one of them
+	//thisstack.getContainer(0).mergeAllErrors(); //etc TBI
+
+	return thisstack;
+
+}
+
+
+
+
 
 }//namespace

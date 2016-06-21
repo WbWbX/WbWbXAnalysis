@@ -29,6 +29,8 @@
 #include "../interface/wGenSelector.h"
 #include "../interface/wNTGoodEventInterface.h"
 
+#include "../interface/wChargeFlipGenerator.h"
+
 //small helper
 
 
@@ -53,7 +55,7 @@ void wAnalyzer::analyze(size_t id){
 
 
 	tTreeHandler t;
-	if(inputfile_.Contains("treeProducerSusySoftlepton") || inputfile_.Contains("SingleMu"))
+	if(inputfile_.Contains("treeProducerSusySoftlepton") || inputfile_.Contains("tree_SingleMu"))
 		t.load( datasetdirectory_+inputfile_ ,"treeProducerSusySoftlepton");
 	else
 		t.load( datasetdirectory_+inputfile_ ,"treeProducerA7W");
@@ -67,7 +69,7 @@ void wAnalyzer::analyze(size_t id){
 
 	wGenSelector selectGen;
 	if(isNLO){
-		if(0 && inputfile_.Contains("LN_")){ //FIXME
+		if(inputfile_.Contains("LN_")){
 			selectGen.addVeto(15);
 			selectGen.addVeto(-15);
 		}
@@ -82,12 +84,14 @@ void wAnalyzer::analyze(size_t id){
 	wControlplots_gen c_plots_gen;
 	c_plots_gen.linkEvent(evt);
 
+
 	analysisPlotsW anaplots(5);
 	anaplots.setEvent(evt);
-	anaplots.enable(false); //FIXME not used right now
+	anaplots.enable();
 	anaplots.bookPlots();
 	histo1DUnfold::setAllListedMC(isMC_);
 	histo1DUnfold::setAllListedLumi((float)lumi_);
+
 
 	wReweightingPlots rewplots;
 	rewplots.enable(true);
@@ -154,6 +158,8 @@ void wAnalyzer::analyze(size_t id){
 			"ptttransA7corr reco", "2 p_{T}^{#perp}/ M_{W} (reco)", "2 p_{T}^{#perp}/ M_{W} (gen)","Events");
 	histo2D ptttransA7corrgenrec (histo1D::createBinning(100,-1.1,1.1), histo1D::createBinning(100,-1.1,1.1),
 			"ptttransA7corr genreco", "2 p_{T}^{#perp}/ M_{W} (reco)", "sin(#phi*)sin(#theta*)","Events");
+	histo2D genstatHistDEtaJWpTW(histo1D::createBinning(100,-5.5,5.5), histo1D::createBinning(100,0,200),
+			"DEtaW pTW", "#Delta#eta(W,j)", "p_{T}^{W}","Events");
 	histo2D::c_makelist=false;
 
 	HTransformToCS cs_transformer(8000);
@@ -164,7 +170,7 @@ void wAnalyzer::analyze(size_t id){
 		entries/=2;
 	std::cout << "also full mode is restricted to 1/2 of the events because of problem with RunC sample"<<std::endl;
 	 */
-	//t.setPreCache();//better performance for large samples
+	t.setPreCache();//better performance for large samples
 
 	///////////////////////////////// Event loop //////////////////////////////
 
@@ -197,57 +203,60 @@ void wAnalyzer::analyze(size_t id){
 		/*
 		 * Generator part
 		 */
-		std::vector<NTGenJet *> genjets;
-		genjets=produceCollection(b_genjets.content() );
-		evt.genjets=&genjets;
-		std::vector<NTGenParticle*> allgenparticles;
-		allgenparticles=produceCollection(b_genparticles.content());
-		evt.allgenparticles=&allgenparticles;
-
-		////first gen selection step (problem with tau decays)
-		selectGen.setCollection(&allgenparticles);
-		if(!selectGen.pass()) continue;
-
-		NTGenParticle * lepton=0, *neutrino=0, Wbos;
 		float phi_cs=0,costheta_cs=0,pttrans_gen=0,A7=0;
-		evt.genlepton=lepton;
-		evt.genneutrino=neutrino;
+		std::vector<NTGenJet *> genjets;
+		std::vector<NTGenParticle*> allgenparticles;
+		NTGenParticle * lepton=0, *neutrino=0, Wbos;
+		if(isMC_){
+			genjets=produceCollection(b_genjets.content() );
+			evt.genjets=&genjets;
+			allgenparticles=produceCollection(b_genparticles.content());
+			evt.allgenparticles=&allgenparticles;
 
-		for(size_t i=0;i<allgenparticles.size();i++){
-			NTGenParticle * p = allgenparticles.at(i);
-			if(p->status() != 23 && p->status() != -23) continue; //only hard interaction. Also if it decays later
+			////first gen selection step (problem with tau decays)
+			selectGen.setCollection(&allgenparticles);
+			if(!selectGen.pass()) continue;
 
-			if(p->pdgId() == 13 || p->pdgId() == -13){ //should we also use taus and elecs here?!->more stat
-				if(p->pt()>25 && fabs(p->eta())<2.1){
-					lepton=p;
+			evt.genlepton=lepton;
+			evt.genneutrino=neutrino;
 
-					//remove from genjets
-					for(size_t j=0;j<genjets.size();j++){
-						if(dR(genjets.at(j),lepton)<0.0001) //FIXME see if necessary
-							genjets.erase(genjets.begin()+j);
+			for(size_t i=0;i<allgenparticles.size();i++){
+				NTGenParticle * p = allgenparticles.at(i);
+				if(p->status() != 23 && p->status() != -23) continue; //only hard interaction. Also if it decays later
+
+				if(p->pdgId() == 13 || p->pdgId() == -13){ //should we also use taus and elecs here!?!->more stat
+					if(p->pt()>25 && fabs(p->eta())<2.1){
+						lepton=p;
+
+						//remove from genjets
+					//	for(size_t j=0;j<genjets.size();j++){
+					//		if(dR(genjets.at(j),lepton)<0.0001) //FIXME see if necessary
+					//			genjets.erase(genjets.begin()+j);
+					//	}
 					}
 				}
+				else if(p->pdgId() == 14 || p->pdgId() == -14)
+					neutrino=p;
 			}
-			else if(p->pdgId() == 14 || p->pdgId() == -14)
-				neutrino=p;
+			if(lepton && neutrino){//construct W
+				Wbos.setP4( lepton->p4() + neutrino->p4() );
+				Wbos.setQ(lepton->q());
+				evt.genW=&Wbos;
+				cs_transformer.TransformToCS(neutrino,lepton);
+				phi_cs=cs_transformer.GetPhi();
+				costheta_cs=cs_transformer.GetCosTheta();
+				evt.phi_cs=&phi_cs;
+				evt.costheta_cs=&costheta_cs;
+				pttrans_gen=analysisPlotsW::asymmValue(lepton ,&Wbos,false); //dont invert W direction
+				evt.pttrans_gen=&pttrans_gen;
+				evt.A7=&A7;
+				A7=std::sin(phi_cs)*std::sqrt(1-costheta_cs*costheta_cs);
+				if(genjets.size() && genjets.at(0)->pt()>25 && fabs(genjets.at(0)->eta())<2.5)
+					ptttransA7corr.fill(pttrans_gen ,A7 ,puweight);
+				if(genjets.size())
+					genstatHistDEtaJWpTW.fill(genjets.at(0)->eta()-Wbos.eta(), Wbos.pt(),puweight);
+			}
 		}
-		if(lepton && neutrino){//construct W
-			Wbos.setP4( lepton->p4() + neutrino->p4() );
-			Wbos.setQ(lepton->q());
-			evt.genW=&Wbos;
-			cs_transformer.TransformToCS(neutrino,lepton);
-			phi_cs=cs_transformer.GetPhi();
-			costheta_cs=cs_transformer.GetCosTheta();
-			evt.phi_cs=&phi_cs;
-			evt.costheta_cs=&costheta_cs;
-			pttrans_gen=analysisPlotsW::asymmValue(lepton ,&Wbos,false); //dont invert W direction
-			evt.pttrans_gen=&pttrans_gen;
-			evt.A7=&A7;
-			A7=std::sin(phi_cs)*std::sqrt(1-costheta_cs*costheta_cs);
-			if(genjets.size() && genjets.at(0)->pt()>25 && fabs(genjets.at(0)->eta())<2.5)
-				ptttransA7corr.fill(pttrans_gen ,A7 ,puweight);
-		}
-
 
 		c_plots_gen.makeControlPlots(0);
 		rewplots.fillPlots();
@@ -259,6 +268,7 @@ void wAnalyzer::analyze(size_t id){
 		if(! b_goodevent.pass())continue;
 
 
+
 		//only event requirements: step 0
 		h.fill(step,puweight);
 		c_plots.makeControlPlots(step++);
@@ -266,6 +276,9 @@ void wAnalyzer::analyze(size_t id){
 
 		//trigger requirement: step 1
 		if(*b_trigger.content()<1) continue;
+
+
+
 
 		ntevt.setVertexMulti((float) (* b_vertices.content()) );
 
@@ -281,6 +294,8 @@ void wAnalyzer::analyze(size_t id){
 		std::vector<NTElectron*> allgoodelecs=produceCollection<NTElectron>(b_goodLeptons.e_content());
 		evt.allmuons=&allgoodmuons;
 		evt.allelectrons=&allgoodelecs;
+
+
 
 		std::vector<NTMuon*> kinmuons,idmuons,isomuons,vetomuons, nonisomuons;
 		evt.kinmuons=&kinmuons;
@@ -311,6 +326,9 @@ void wAnalyzer::analyze(size_t id){
 			//if(muon->dzV() > 00) continue;
 			idmuons << muon;
 
+			if(isMC_)
+				getChargeFlip()->flip(muon);
+
 			if(muon->isoVal() < 0.12) { ///INVERT SWITCH
 				isomuons << muon;
 			}
@@ -336,10 +354,11 @@ void wAnalyzer::analyze(size_t id){
 
 
 
+
 		//veto step: step 3
 		//the veto muons include one iso/noniso
 		if(vetomuons.size()>1)continue;
-		if(isomuons.size()+nonisomuons.size()>1) continue; //should be obsolete
+		if(isomuons.size()+nonisomuons.size()!=1) continue; //exactly one iso or exactly one noniso
 		//now there is exactly one muon
 		bool isiso=true;
 		if(nonisomuons.size()>0){
@@ -369,11 +388,14 @@ void wAnalyzer::analyze(size_t id){
 			idjets << jet;
 
 
-			if(jet->pt()<25)continue;
+			if(jet->pt()<50)continue;
 			if(fabs(jet->eta())>2.4)continue;
 			hardjets << jet;
 
 		}
+
+
+
 		if(isiso){
 			h.fill(step,puweight);
 			c_plots.makeControlPlots(step);
@@ -383,6 +405,8 @@ void wAnalyzer::analyze(size_t id){
 		//at least one jet: step 4
 		if(hardjets.size()<1) continue;
 		evt.leadingjet=hardjets.at(0);
+
+
 
 		float pttrans=analysisPlotsW::asymmValue(&leadinglep,hardjets.at(0));
 		evt.pttrans=&pttrans;
@@ -395,6 +419,7 @@ void wAnalyzer::analyze(size_t id){
 			c_plots.makeControlPlots(step);
 		}
 		step++;
+
 
 
 		//add control plots for iso muon and noniso muon areas
@@ -414,6 +439,8 @@ void wAnalyzer::analyze(size_t id){
 		else{
 			continue;
 		}
+
+
 
 		//the class is protected internally against the latter case
 		anaplots.fillPlotsReco();
@@ -435,6 +462,8 @@ void wAnalyzer::analyze(size_t id){
 	norm_*=mcweights.getRenormalization();
 
 	std::cout <<  inputfile_<< ": end norm " << norm_ << std::endl;
+	std::cout <<  inputfile_ << std::endl;
+	t.printStats();
 
 	//	std::cout << "end norm for " << inputfile_ << ": "<< norm_<<std::endl;
 	processEndFunction();
@@ -457,4 +486,12 @@ void wAnalyzer::createNormalizationInfo(tTreeHandler* t){
 
 }//ns
 
+
+/* Notes area
+ *
+ *
+ * Error in <TBranch::GetBasket>: File: /nfs/dust/cms/user/kiesej/trees_WA7/new/tree_SingleMuDI.root at byte:1990165022444925819, branch:checktrackingFailure, entry:14787546, badread=0, nerrors=1, basketnumber=2009
+ *
+ *
+ */
 

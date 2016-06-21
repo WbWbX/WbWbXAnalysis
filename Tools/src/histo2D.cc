@@ -933,6 +933,16 @@ void histo2D::addGlobalRelError(TString errname,float val){
 		conts_.at(i).addGlobalRelError(errname,val);
 	}
 }
+void histo2D::addGlobalRelErrorUp(TString errname,float val){
+	for(size_t i=0;i<conts_.size();i++){
+		conts_.at(i).addGlobalRelErrorUp(errname,val);
+	}
+}
+void histo2D::addGlobalRelErrorDown(TString errname,float val){
+	for(size_t i=0;i<conts_.size();i++){
+		conts_.at(i).addGlobalRelErrorDown(errname,val);
+	}
+}
 std::vector<size_t> histo2D::removeSpikes(bool inclUFOF,int limittoindex ,float strength,float sign,float threshold){
 	//scan for bins
 

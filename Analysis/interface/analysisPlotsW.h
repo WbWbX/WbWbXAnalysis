@@ -36,15 +36,15 @@ public:
 private:
 	bool isiso_;
 
-	std::vector< histo1DUnfold* >
+	std::vector< histo1D* >
 	asymmiso_;
-	histo1DUnfold* asymmisofull_;
-	std::vector< histo1DUnfold* >
+	histo1D* asymmisofull_;
+	std::vector< histo1D* >
 	asymmnoniso_;
-	histo1DUnfold* asymmnonisofull_;
-	std::vector< histo1DUnfold* >
+	histo1D* asymmnonisofull_;
+	std::vector< histo1D* >
 	mTnoniso_;
-	histo1DUnfold* mTnonisofull_;
+	histo1D* mTnonisofull_;
 
 	static double WMASS;
 

@@ -12,14 +12,24 @@ namespace ztop{
 
 
 histo1DUnfold* analysisPlots::addPlot(const std::vector<float>&genbins, const std::vector<float>&recobins,
-        const TString&name, const TString &xname, const TString &yname){
+		const TString&name, const TString &xname, const TString &yname){
 
-    bool tmp=histo1DUnfold::c_makelist;
-    histo1DUnfold::c_makelist=true;
-    histo1DUnfold*newplot=new histo1DUnfold(genbins,recobins,name+" step "+toTString(step_), xname, yname);
-    histo1DUnfold::c_makelist=tmp;
-    conts_.push_back(newplot);
-    return newplot;
+	bool tmp=histo1DUnfold::c_makelist;
+	histo1DUnfold::c_makelist=true;
+	histo1DUnfold*newplot=new histo1DUnfold(genbins,recobins,name+" step "+toTString(step_), xname, yname);
+	histo1DUnfold::c_makelist=tmp;
+	conts_.push_back(newplot);
+	return newplot;
+}
+
+histo1D* analysisPlots::addPlot1D(const std::vector<float>& bins, const TString& name, const TString &xname, const TString &yname){
+
+	bool tmp=histo1D::c_makelist;
+	histo1D::c_makelist=true;
+	histo1D *newplot=new histo1D (bins,name+" step "+toTString(step_), xname, yname);
+	histo1D::c_makelist=tmp;
+	conts1D_.push_back(newplot);
+	return newplot;
 }
 
 std::vector<float> analysisPlots::makebins(size_t nbins,float min,float max)const{

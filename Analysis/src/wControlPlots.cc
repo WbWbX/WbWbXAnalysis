@@ -149,14 +149,14 @@ void wControlPlots::makeControlPlotsPriv(){
 	FILL(leadingjet,eta());
 
 	SETBINSRANGE(40,-1.4,1.4);
-	addPlot("asymm full deta cp","2 p_{T}^{T} / M_{W}", "Events");
+	addPlot("pttrans full deta cp","2 p_{T}^{T} / M_{W}", "Events");
 	if(event()->leadinglep && event()->leadingjet){
 		float val=analysisPlotsW::asymmValue(event()->leadinglep,event()->leadingjet);
 		last()->fill(val,* event()->puweight);
 	}
 
 	SETBINS << -1.5 << -0.5 << 0.5 << 1.5;
-	addPlot("asymm full deta coarse","2 p_{T}^{T} / M_{W}", "Events");
+	addPlot("pttrans full deta coarse","2 p_{T}^{T} / M_{W}", "Events");
 	if(event()->leadinglep && event()->leadingjet){
 		float val=analysisPlotsW::asymmValue(event()->leadinglep,event()->leadingjet);
 		last()->fill(val,* event()->puweight);
@@ -165,21 +165,54 @@ void wControlPlots::makeControlPlotsPriv(){
 	if(event()->leadinglep && event()->leadingjet){
 		deta=fabs(event()->leadinglep->eta()-event()->leadingjet->eta());
 	}
-	addPlot("asymm deta geq 1 coarse","2 p_{T}^{T} / M_{W}", "Events");
+	addPlot("pttrans deta geq 1 coarse","2 p_{T}^{T} / M_{W}", "Events");
 	if(deta > 1.){
 		float val=analysisPlotsW::asymmValue(event()->leadinglep,event()->leadingjet);
 		last()->fill(val,* event()->puweight);
 	}
-	addPlot("asymm full geq 2 coarse","2 p_{T}^{T} / M_{W}", "Events");
+	addPlot("pttrans full geq 2 coarse","2 p_{T}^{T} / M_{W}", "Events");
 	if(deta > 2.){
 		float val=analysisPlotsW::asymmValue(event()->leadinglep,event()->leadingjet);
 		last()->fill(val,* event()->puweight);
 	}
-	addPlot("asymm full geq 2.5 coarse","2 p_{T}^{T} / M_{W}", "Events");
+	addPlot("pttrans full geq 2.5 coarse","2 p_{T}^{T} / M_{W}", "Events");
 	if(deta > 2.5){
 		float val=analysisPlotsW::asymmValue(event()->leadinglep,event()->leadingjet);
 		last()->fill(val,* event()->puweight);
 	}
+
+	bool isgood=event()->puweight && event()->pttrans && deta;
+	bool pos=false;
+	if(isgood)pos=*event()->pttrans>0;
+
+	float adaptedweight=0;
+	if(isgood) adaptedweight=*event()->puweight;
+	if(!pos)
+		adaptedweight*=-1;
+	float fabspttrans=0;
+	if(isgood) fabspttrans= fabs(*event()->pttrans);
+
+	SETBINS << 0 << 0.5 << 2 << 2.5 << 4 << 4.5 << 6 << 6.5 << 8 << 8.5 << 10;
+	addPlot("asymm full deta","#pm2p_{T}^{T} / M_{W}", "#DeltaEvents");
+	if(isgood){
+		if(deta>= 0. && deta < 1.)
+			last()->fill(fabspttrans,adaptedweight);
+		else if( deta < 2.)
+			last()->fill(fabspttrans+2,adaptedweight);
+		else if( deta < 3.)
+			last()->fill(fabspttrans+4,adaptedweight);
+		else if( deta < 4.)
+			last()->fill(fabspttrans+6,adaptedweight);
+		else if( deta < 6.)
+			last()->fill(fabspttrans+8,adaptedweight);
+
+	}
+
+
+
+
+
+
 }
 
 

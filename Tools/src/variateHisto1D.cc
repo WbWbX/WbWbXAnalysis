@@ -129,8 +129,9 @@ double variateHisto1D::toBeMinimizedInFit(const double * variations)const{
 		double binval=contents_.at(i).getValue(variations);
 
 		double chi2= (binval - comparehist_->getBinContent(i));
-		chi2/=comparehist_->getBinStat(i);
 		chi2*=chi2;
+		chi2/=(comparehist_->getBinStat(i)*comparehist_->getBinStat(i));
+
 
 		out+=chi2;
 	}
@@ -154,6 +155,8 @@ simpleFitter variateHisto1D::fitToConstHisto(const histo1D& h){
 	fitter.setParameters(paras,steps);
 	fitter.setMinFunction (&func);
 	fitter.fit();
+
+
 
 	return fitter;
 }

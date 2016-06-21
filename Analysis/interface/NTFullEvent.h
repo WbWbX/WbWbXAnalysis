@@ -23,67 +23,12 @@ class NTGenJet;
 
 class NTFullEvent{
 public:
-    NTFullEvent()
-/*
-: event(0),
-	allgenparticles(0),
-    gentops(0),
-    genbs(0),
-    genbsrad(0),
-    genbhadrons(0),
-    genleptons1(0),
-    genleptons3(0),
-    genjets(0),
-    genlepton(0),
-    genneutrino(0),
-    genW(0),
-
-    idjets(0),medjets(0),hardjets(0),medbjets(0),hardbjets(0),dphilljjets(0),dphiplushardjets(0),
-    selectedjets(0),selectedbjets(0),selectednonbjets(0),
-	leadingjet(0),
-    allmuons(0),kinmuons(0),idmuons(0),isomuons(0),vetomuons(0),nonisomuons(0),
-    allelectrons(0),kinelectrons(0),idelectrons(0),isoelectrons(0),
-    allleptons(0),kinleptons(0),idleptons(0),isoleptons(0),
-    leadinglep(0),secleadinglep(0),
-    //leadingjetbtag(0),secleadingjetbtag(0),
-    simplemet(0),adjustedmet(0),
-    mll(0),mlbmin(0),leplepdr(0),cosleplepangle(0),dphillj(0),dphilljj(0),detallj(0),detalljj(0),ht(0),ptllj(0),topdiscr(0),topdiscr2(0),topdiscr3(0),
-
-    lhi_dphillj(0),
-    lhi_cosleplepangle(0),
-    lhi_leadjetbtag(0),
-    lhi_sumdphimetl(0),
-    lhi_seljetmulti(0),
-    lhi_selbjetmulti(0),
-    lhi_leadleppt(0),
-    lhi_secleadleppt(0),
-    lhi_leadlepeta(0),
-    lhi_secleadlepeta(0),
-    lhi_leadlepphi(0),
-    lhi_secleadlepphi(0),
-    lhi_leadjetpt(0),
-    lhi_drlbl(0),
-    lhi_mll(0),
-    lhi_ptllj(0),
-
-
-    lhi_cosllvsetafirstlep(0),
-    lhi_etafirstvsetaseclep(0),
-    lhi_deltaphileps(0),
-    lhi_coslepanglevsmll(0),
-    lhi_mllvssumdphimetl(0),
-
-    lh_toplh(0),
-
-    midphi(0),
-
-    S4(0),
-    allobjects4(0),
-    puweight(0)*/
-{
+    NTFullEvent(){
     	reset();
     };
     ~NTFullEvent(){}
+
+    void printFullInfo()const;//for debugging
 
     void reset(){
         event=0;

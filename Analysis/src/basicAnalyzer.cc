@@ -150,8 +150,10 @@ fileForker::fileforker_status basicAnalyzer::runParallels(int interval){
 							std::setw(2) << std::setfill('0')<<(int)(estimate - minutes*60) ;
 				}
 				std::cout <<std::endl;
-				if(lastBusyStatus.at(i)!=getBusyStatus(i))
+				if(lastBusyStatus.at(i)!=getBusyStatus(i)){
+					lastBusyStatus.at(i)=getBusyStatus(i);
 					lastAliveSignals.at(i)=runningseconds;
+				}
 				else if(getStatus(i) == ff_status_child_busy){
 					if(runningseconds-lastAliveSignals.at(i) > killthreshold){
 						//for a long time no signal, but "busy" something is very likely wrong

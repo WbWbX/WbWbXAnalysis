@@ -11,6 +11,7 @@
 #include "basicAnalyzer.h"
 #include "TString.h"
 #include "TtZAnalysis/DataFormats/interface/NTJECUncertainties.h"
+#include "wChargeFlipGenerator.h"
 
 namespace ztop{
 
@@ -28,6 +29,8 @@ public:
 	NTJECUncertainties * getJecUnc(){return &jecunc_;}
 	const NTJECUncertainties * getJecUnc()const{return &jecunc_;}
 
+	wChargeFlipGenerator * getChargeFlip(){return &chargeflip_;}
+	const wChargeFlipGenerator * getChargeFlip()const {return &chargeflip_;}
 
 
 private:
@@ -41,7 +44,7 @@ private:
 	std::vector<size_t> weightindicies_;
 
 	NTJECUncertainties jecunc_;
-
+	wChargeFlipGenerator chargeflip_;
 };
 
 }
