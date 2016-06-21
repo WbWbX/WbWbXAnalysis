@@ -51,11 +51,13 @@ public:
 	TString getSyst(){return syst_;}
 
 
-	TString getOutFileName(){
-		if(syst_.Length())
-			return  (TString)getOutputFileName()+"_"+syst_;
-		else
-			return getOutputFileName();
+	virtual TString getOutFileName(){
+		if(syst_.Length()){
+                        std::cout<<"Hallo   "<<getOutputFileName()<<std::endl;
+			return  (TString)getOutputFileName()+"_"+syst_;}
+		else{
+                        std::cout<<"Hallo2   "<<getOutputFileName()<<std::endl;
+			return getOutputFileName();}
 	}
 
 private:
