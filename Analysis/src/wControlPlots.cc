@@ -208,7 +208,10 @@ void wControlPlots::makeControlPlotsPriv(){
 
 	}
 
-
+	SETBINS << 0 << 2;
+	addPlot("asymm full inclusive","", "#DeltaEvents");
+	if(isgood)
+		last()->fill(fabspttrans,adaptedweight);
 
 
 

@@ -595,13 +595,60 @@ void histoStack::addRelErrorToContribution(double err, const TString& contributi
 	if(debug)
 		std::cout << "containerStack::addRelErrorToContribution: " << contributionname <<std::endl;
 	size_t idx=getContributionIdx(contributionname);
-	std::vector<size_t> excludeidxs;
-	for(size_t i=0;i<size();i++){
-		if(i!=idx)
-			excludeidxs.push_back(i);
+	std::vector<size_t> idxs;
+	idxs.push_back(idx);
+
+
+	addRelErrorToContributions(err,idxs, nameprefix);
+}
+void histoStack::addRelErrorToContributions(double err, const std::vector<size_t> contribidxs, TString nameprefix){
+	if(debug)
+		std::cout << "containerStack::addRelErrorToContributions: " <<std::endl;
+
+	//quick check
+	for(size_t i=0;i<contribidxs.size();i++){
+		if(contribidxs.at(i)>=size())
+			throw std::out_of_range("histoStack::addRelErrorToContributions: at least one index out of range");
+	}
+	float errinv=1/err;
+	if(!err) errinv=0;
+	for(size_t i=0;i<containers_.size();i++){
+		if(std::find(contribidxs.begin(),contribidxs.end(),i) == contribidxs.end()) continue;
+		//add error to all of them
+		for(size_t j=0;j<containers_.size();j++){
+			if(j==i){
+				containers_.at(j).addGlobalRelErrorUp(nameprefix+legends_.at(i),err);
+				containers_.at(j).addGlobalRelErrorDown(nameprefix+legends_.at(i),errinv);
+			}
+			else
+				containers_.at(j).addGlobalRelError(nameprefix+legends_.at(i),0);
+		}
 	}
 
-	addRelErrorToBackgrounds(err,false, nameprefix, excludeidxs);
+	for(size_t i=0;i<containers2D_.size();i++){
+		if(std::find(contribidxs.begin(),contribidxs.end(),i) == contribidxs.end()) continue;
+		for(size_t j=0;j<containers_.size();j++){
+			if(j==i){
+				containers2D_.at(j).addGlobalRelErrorUp(nameprefix+legends_.at(i),err);
+				containers2D_.at(j).addGlobalRelErrorDown(nameprefix+legends_.at(i),errinv);
+			}
+			else
+				containers2D_.at(j).addGlobalRelError(nameprefix+legends_.at(i),0);
+		}
+	}
+
+	for(size_t i=0;i<containers1DUnfold_.size();i++){
+		if(std::find(contribidxs.begin(),contribidxs.end(),i) == contribidxs.end()) continue;
+		for(size_t j=0;j<containers_.size();j++){
+			if(j==i){
+				containers1DUnfold_.at(j).addGlobalRelErrorUp(nameprefix+legends_.at(i),err);
+				containers1DUnfold_.at(j).addGlobalRelErrorDown(nameprefix+legends_.at(i),errinv);
+			}
+			else
+				containers1DUnfold_.at(j).addGlobalRelError(nameprefix+legends_.at(i),0);
+		}
+	}
+
 }
 
 void histoStack::addRelErrorToBackgrounds(double err ,bool aspartials , TString nameprefix,const TString& excludecontr){
@@ -617,52 +664,21 @@ void histoStack::addRelErrorToBackgrounds(double err ,bool aspartials , TString 
 }
 
 void histoStack::addRelErrorToBackgrounds(double err ,bool aspartials , TString nameprefix,const std::vector<size_t> excludeidxs){
-	std::vector<size_t> signals = getSignalIdxs();
+	std::vector<size_t> exclude = getSignalIdxs();
 	size_t dataidx=std::find(legends_.begin(),legends_.end(),dataleg_)-legends_.begin();
-	signals.insert(signals.end(),excludeidxs.begin(),excludeidxs.end());
-	signals.push_back(dataidx);
+	exclude.insert(exclude.end(),excludeidxs.begin(),excludeidxs.end());
+	exclude.push_back(dataidx);
 	if(!nameprefix.EndsWith("_"))
 		nameprefix+="_";
 
 	if(aspartials)
 		nameprefix+=(TString)histo1D_partialvariationIDString+"_";
-
-	for(size_t i=0;i<containers_.size();i++){
-		if(std::find(signals.begin(),signals.end(),i) != signals.end()) continue;
-		//add error to all of them
-		for(size_t j=0;j<containers_.size();j++){
-			if(j==i){
-				containers_.at(j).addGlobalRelErrorUp(nameprefix+legends_.at(i),err);
-				containers_.at(j).addGlobalRelErrorDown(nameprefix+legends_.at(i),1/err);
-			}
-			else
-				containers_.at(j).addGlobalRelError(nameprefix+legends_.at(i),0);
-		}
+	std::vector<size_t> varidxs;
+	for(size_t i=0;i<size();i++){
+		if(std::find(exclude.begin(),exclude.end(),i)!=exclude.end()) continue;
+		varidxs.push_back(i);
 	}
-
-	for(size_t i=0;i<containers2D_.size();i++){
-		if(std::find(signals.begin(),signals.end(),i) != signals.end()) continue;
-		for(size_t j=0;j<containers_.size();j++){
-			if(j==i){
-				containers2D_.at(j).addGlobalRelErrorUp(nameprefix+legends_.at(i),err);
-				containers2D_.at(j).addGlobalRelErrorDown(nameprefix+legends_.at(i),1/err);
-			}
-			else
-				containers2D_.at(j).addGlobalRelError(nameprefix+legends_.at(i),0);
-		}
-	}
-
-	for(size_t i=0;i<containers1DUnfold_.size();i++){
-		if(std::find(signals.begin(),signals.end(),i) != signals.end()) continue;
-		for(size_t j=0;j<containers_.size();j++){
-			if(j==i){
-				containers1DUnfold_.at(j).addGlobalRelErrorUp(nameprefix+legends_.at(i),err);
-				containers1DUnfold_.at(j).addGlobalRelErrorDown(nameprefix+legends_.at(i),1/err);
-			}
-			else
-				containers1DUnfold_.at(j).addGlobalRelError(nameprefix+legends_.at(i),0);
-		}
-	}
+	addRelErrorToContributions(err,varidxs,nameprefix);
 }
 
 void histoStack::mergePartialVariations(const TString& identifier, bool strictpartialID){
@@ -2289,6 +2305,7 @@ histoStack histoStack::fitAllNorms(const std::vector<TString>& contributions, bo
 	histoStack thisstack=*this;
 	//create normalisation variations
 	std::vector<size_t > idx;
+
 	thisstack.removeAllSystematics(); //only BG vars
 	for(size_t i=0;i<contributions.size();i++){
 		idx.push_back(getContributionIdx(contributions.at(i)));
@@ -2303,7 +2320,7 @@ histoStack histoStack::fitAllNorms(const std::vector<TString>& contributions, bo
 	variateHisto1D varbg;
 	varbg.import(fullMC);
 
-	varbg.getSystNames();
+
 	simpleFitter fitter=varbg.fitToConstHisto(thisstack.getDataContainer());
 	if(!fitter.wasSuccess())
 		return histoStack();
@@ -2313,14 +2330,15 @@ histoStack histoStack::fitAllNorms(const std::vector<TString>& contributions, bo
 
 	std::vector<TString> sysnames=varbg.getSystNames();
 
-	for(size_t i=0;i<idx.size();i++){
+	for(size_t i=0;i<sysnames.size();i++){
 		//if(pars.at(i)>0){
-			thisstack.containers_.at(idx.at(i)) *= 1+pars.at(i);
-			std::cout << sysnames.at(i) << " " << 1+pars.at(i) <<" " << thisstack.legends_.at(idx.at(i))<<std::endl;
-	////	}
+		std::cout << sysnames.at(i) ;
+		thisstack.containers_.at(idx.at(i)) *= 1+pars.at(i);
+		std::cout << " " << 1+pars.at(i) <<" " << thisstack.legends_.at(idx.at(i))<<std::endl;
+		////	}
 		//else{ //bg variations are intended to be log-normal. here we need linear
 		//	thisstack.containers_.at(idx.at(i)) *= (1/(1+pars.at(i)));
-	//	}
+		//	}
 	}
 	if(globalfloat){
 		thisstack.multiplyAllMCNorms(mcfit.integral()/fullMC.integral());
@@ -2333,7 +2351,23 @@ histoStack histoStack::fitAllNorms(const std::vector<TString>& contributions, bo
 
 }
 
-
+void histoStack::poissonSmearMC(TRandom3* r,bool alsosys){
+	if(!is1D())
+		throw std::runtime_error("histoStack::poissonSmearMC: only implemented for 1D. But feel free to implement.");
+	for(int sys=-1;sys<(int)getSystSize();sys++){
+		if(!alsosys && sys>-1)
+			break;
+		for(size_t i=0;i<containers_.size();i++){
+			if(legends_.at(i)==dataleg_) continue;
+			float integralv=containers_.at(i).integral(true,sys);
+			histo1D h=containers_.at(i).createPseudoExperiment(r,0,histo1D::pseudodata_poisson,sys);
+			//feed back
+			float renorm= integralv/h.integral(true);
+			for(size_t bin=0;bin<h.getBins().size();bin++)
+				containers_.at(i).setBinContent(bin,h.getBinContent(bin)*renorm,sys);
+		}
+	}
+}
 
 
 

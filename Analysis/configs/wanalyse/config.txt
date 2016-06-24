@@ -8,23 +8,15 @@ $ inputfile,     legend entry,        color,   xsection,   legendNumber (for sor
 
 $treeProducerA7W_WJets.root,             signal,                     413,       37509,       1 ,true
 
-new/tree_W0JetsLN_Part1.root,             W+0jets,                     413,       15409, 1 , true   $factor: 302320   * 53856521/105970694
-new/tree_W0JetsLN_Part2.root,             W+0jets,                      413,       11436.5,       1 ,true  $factor: 39971603/105970694
-new/tree_W0JetsLN_Part3.root,             W+0jets,                      413,       3474.2,       1 ,true  $factor: 12142570/105970694
-new/more/W0JetsTN_tree.root,              W+0jets,                      413,       10107,       1 ,true
-
-new/more/W1JetsLN_tree_Part1.root,        W+1jet,                     414,       1979,   2, true $factor: 4230 * 48384785/103426679
-new/more/W1JetsLN_tree_Part2.root,        W+1jet,                     414,        2251,       2 ,true $factor: 4230 * 55041894/103426679
-new/more/W1JetTN_tree.root,               W+1jet,                     414,       1410,       2 ,true
-
-new/more/W2JetLN_tree.root,        W+2jets,                     415,       750,       3 ,true
-new/more/W2JetsTN_tree.root,       W+2jets,                     415,       250,       3 ,true
+new/more/W1JetTN_tree.root,               signal#tau,                     413,       2416,        1 ,true
+new/more/W1JetsLN_tree_Part1.root,        signal,                     414,       3391,        2, true  $factor: 7250/4230*4230 * 48384785/103426679
+new/more/W1JetsLN_tree_Part2.root,        signal,                     414,        3858,       2 ,true  $factor: 7250/4230*4230 * 55041894/103426679
 
 
-treeProducerSusySoftlepton_SingleMuAB.root,    data,                   1,         1,              99 
+new/data/SingleMuAB.root,    data,                   1,         1,              99 
 new/data/SingleMuC.root,                       data,                   1,         1,              99
-new/tree_SingleMuDI.root,                       data,                   1,         1,              99
-new/tree_SingleMuDII.root,                       data,                   1,         1,              99
+new/data/SingleMuDI.root,                       data,                   1,         1,              99
+new/data/SingleMuDII.root,                       data,                   1,         1,              99
 
 $ backgrounds
 
@@ -36,8 +28,20 @@ treeProducerA7W_DYJetsM50.root,         DY,                         868,       3
 
 treeProducerA7W_QCDMuPt15.root,         QCD,                        400,	  134680,       9
 
+ 
+ 
+$$$$$old stuff 
   
-  
+$new/tree_W0JetsLN_Part1.root,             W+0jets,                     413,       15409, 1 , true   $factor: 302320   * 53856521/105970694
+$new/tree_W0JetsLN_Part2.root,             W+0jets,                      413,       11436.5,       1 ,true  $factor: 39971603/105970694
+$new/tree_W0JetsLN_Part3.root,             W+0jets,                      413,       3474.2,       1 ,true  $factor: 12142570/105970694
+$new/more/W0JetsTN_tree.root,              W+0jets,                      413,       10107,       1 ,true
+
+$new/more/W2JetLN_tree.root,        W+2jets,                     415,       750,       3 ,true
+$new/more/W2JetsTN_tree.root,       W+2jets,                     415,       250,       3 ,true
+
+
+
 [inputfiles-end]
 
 [parameters-begin] 
@@ -45,7 +49,7 @@ treeProducerA7W_QCDMuPt15.root,         QCD,                        400,	  13468
 inputFilesDir = /nfs/dust/cms/user/kiesej/trees_WA7/
 Lumi = 19710
 JECUncertainties = /src/TtZAnalysis/Analysis/data/analyse/Summer13_V5_DATA_UncertaintySources_AK5PFchs.txt
-
+A7reweightFile = /src/TtZAnalysis/Analysis/data/wanalyse/rewdata.dat 
 
 [parameters-end]
 

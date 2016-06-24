@@ -20,11 +20,12 @@ invokeApplication(){
 		parser->coutHelp();
 	const std::string infile=infiles.at(0);
 
+
 	wA7Extractor ex;
 	ex.readConfig(configfile);
 	ex.loadPlots(infile);
 
-
+	ex.fitAll();
 
 
 	return 0;

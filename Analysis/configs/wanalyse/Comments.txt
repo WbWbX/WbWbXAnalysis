@@ -1,0 +1,43 @@
+
+
+/eos/cms/store/cmst3/user/mstoye
+
+SingleMuAB
+SingleMuC
+SingleMuDI
+SingleMuDII
+
+WJets
+WJets_PtW-100 (genV PT or alike should be in the ntuple)
+WJets_PtW-50To70
+WJets_PtW-70To100
+
+DYJetsM50
+DYJetsToLL_PtZ_100
+DYJetsToLL_PtZ_50To70
+DYJetsToLL_PtZ_70To100
+
+TTJetsSem
+TTJetsSem2
+TTfullyLep
+
+QCDMuPt15
+
+
+
+	eos/cms/store/cmst3/group/wa7/
+
+tree_W0JetsLN_Part1.root
+tree_W0JetsLN_Part2.root
+tree_W0JetsLN_Part3.root
+
+and the rest are under
+
+	eos/cms/store/cmst3/group/wa7/more
+
+W0JetsTN_tree.root
+W1JetsLN_tree_Part1.root
+W1JetsLN_tree_Part2.root
+W1JetTN_tree.root
+W2JetNL_tree.root
+W2JetsTN_tree.root

@@ -126,14 +126,19 @@ double variateHisto1D::toBeMinimizedInFit(const double * variations)const{
 		return 0;
 	double out=0;
 	for(size_t i=0;i<contents_.size();i++){
+		//use poisson likelihood here!
 		double binval=contents_.at(i).getValue(variations);
+		double compareto=comparehist_->getBinContent(i);
+		if(binval<0)binval=0;
 
+		out+=-2*logPoisson(compareto, binval);
+/*
 		double chi2= (binval - comparehist_->getBinContent(i));
 		chi2*=chi2;
 		chi2/=(comparehist_->getBinStat(i)*comparehist_->getBinStat(i));
 
 
-		out+=chi2;
+		out+=chi2;*/
 	}
 	return out;
 }
@@ -141,6 +146,12 @@ double variateHisto1D::toBeMinimizedInFit(const double * variations)const{
 simpleFitter variateHisto1D::fitToConstHisto(const histo1D& h){
 	if(h.getBins() != bins_){
 		throw std::runtime_error("variateHisto1D::fitToConstHisto: bins have to be the same");
+	}
+	//check if properly normalized
+	for(size_t i=1;i<=h.getNBins();i++){
+		if(h.getBinContent(i)<0 || fabs(h.getBinContent(i) - h.getBinStat(i)*h.getBinStat(i))/fabs(h.getBinContent(i)) > 0.0001){
+			throw std::runtime_error("variateHisto1D::fitToConstHisto: histo to fit to must have normalization with stat=sqrt(N)");
+		}
 	}
 
 	comparehist_=&h;

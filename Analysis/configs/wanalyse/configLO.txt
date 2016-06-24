@@ -8,22 +8,24 @@ $ inputfile,     legend entry,        color,   xsection,   legendNumber (for sor
 
 treeProducerA7W_WJets.root,             signal,                     413,       37509,       1 ,true
 
-treeProducerSusySoftlepton_SingleMuAB.root,    data,                   1,         1,              99 
-new/data/SingleMuC.root,                       data,                   1,         1,              99
-new/tree_SingleMuDI.root,                       data,                   1,         1,              99
-new/tree_SingleMuDII.root,                       data,                   1,         1,              99
+$treeProducerSusySoftlepton_SingleMuAB.root,    data,                   1,         1,              99 
+$new/data/SingleMuC.root,                       data,                   1,         1,              99
+$treeProducerSusySoftlepton_SingleMuDI.root,                       data,                   1,         1,              99
+$treeProducerSusySoftlepton_SingleMuDII.root,                       data,                   1,         1,              99
 
 $ backgrounds
 
-treeProducerA7W_TTJetsSem.root,         t#bar{t} ,               632,       106.15,      4
-treeProducerA7W_TTfullyLep.root,        t#bar{t} ,               632,       26.80,       4
+$treeProducerA7W_TTJetsSem.root,         t#bar{t} ,               632,       106.15,      4
+$treeProducerA7W_TTfullyLep.root,        t#bar{t} ,               632,       26.80,       4
 
-treeProducerA7W_DYJetsM50.root,         DY,                         868,       3532.8,      7
+$treeProducerA7W_DYJetsM50.root,         DY,                         868,       3532.8,      7
 
 
-treeProducerA7W_QCDMuPt15.root,         QCD,                        400,	  134680,       9
+$treeProducerA7W_QCDMuPt15.root,         QCD,                        400,	  134680,       9
 
   
+treeProducerA7W_DYJetsM50.root,         DUMMY,                         868,       3532.8,      7
+
   
 [inputfiles-end]
 

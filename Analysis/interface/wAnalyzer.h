@@ -12,6 +12,7 @@
 #include "TString.h"
 #include "TtZAnalysis/DataFormats/interface/NTJECUncertainties.h"
 #include "wChargeFlipGenerator.h"
+#include "wNLOReweighter.h"
 
 namespace ztop{
 
@@ -32,6 +33,9 @@ public:
 	wChargeFlipGenerator * getChargeFlip(){return &chargeflip_;}
 	const wChargeFlipGenerator * getChargeFlip()const {return &chargeflip_;}
 
+	wNLOReweighter * getNLOReweighter(){return &nlorew_;}
+	const wNLOReweighter * getNLOReweighter()const {return &nlorew_;}
+
 
 private:
 
@@ -45,6 +49,7 @@ private:
 
 	NTJECUncertainties jecunc_;
 	wChargeFlipGenerator chargeflip_;
+	wNLOReweighter nlorew_;
 };
 
 }

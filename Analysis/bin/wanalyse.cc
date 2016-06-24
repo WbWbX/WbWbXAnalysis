@@ -58,6 +58,8 @@ invokeApplication(){
 	std::string treedir=              fr.getValue<std::string>("inputFilesDir");
 	const double luminosity = fr.getValue<double>("Lumi");
 	const TString jecfile = cmssw_base+fr.getValue<TString>("JECUncertainties");
+	const std::string a7reweightfile= cmssw_base.Data()+fr.getValue<std::string>("A7reweightFile");
+
 	//fileForker::debug=true;
 	//basicAnalyzer::debug=true;
 
@@ -67,10 +69,15 @@ invokeApplication(){
 	ana.setTestMode(testmode);
 	ana.setDataSetDirectory(treedir);
 	ana.setOutputFileName("mu_8TeV_80");
+	if(testmode)
+		ana.setOutputFileName("mutest_8TeV_80");
 	ana.setOutDir(batchbase+"output");
 	ana.readFileList(configfile);
 	ana.setMaxChilds(maxchilds);
 	ana.getJecUnc()->setFile(jecfile.Data());
+	ana.getNLOReweighter()->readParameterFile(a7reweightfile);
+	ana.getNLOReweighter()->switchOff(true);
+
 
 	ana.setSyst(syst);
 	system(("rm -f "+ana.getOutPath()+".ztop").Data());
@@ -99,8 +106,16 @@ invokeApplication(){
 	else if(syst == "CHARGEFLIP_down"){
 		//nothing
 	}
-
-
+	else if(syst == "WparaA7_up"){
+		ana.getNLOReweighter()->switchOff(false);
+		ana.getNLOReweighter()->setUp(true);
+		ana.getNLOReweighter()->setReweightParameter(7,1);
+	}
+	else if(syst == "WparaA7_down"){
+		ana.getNLOReweighter()->switchOff(false);
+		ana.getNLOReweighter()->setUp(false);
+		ana.getNLOReweighter()->setReweightParameter(7,-1);
+	}
 
 	fileForker::fileforker_status status= ana.start();
 

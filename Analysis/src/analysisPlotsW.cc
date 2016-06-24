@@ -64,8 +64,8 @@ float analysisPlotsW::calcAsymmGen(float& absdeta)const{
 	NTGenJet *     sjet=0;
 	for(size_t i=0;i<event()->genjets->size();i++){
 		NTGenJet *     jet=event()->genjets->at(i);
-		if(jet->pt()<25) continue;
-		if(dR(muon,jet)<0.1) continue;
+		if(jet->pt()<50) continue;
+		if(dR(muon,jet)<0.01) continue;
 		if(fabs(jet->eta())>2.5) continue;
 		sjet=jet;
 		break;
@@ -118,7 +118,7 @@ void analysisPlotsW::bookPlots(){
 	if(etaRanges_.size()<2)
 		throw std::out_of_range("analysisPlotsW::bookPlots: no deta range defined!");
 
-	std::vector<float> asymmbins=histo1D::createBinning(40,-1.4,1.4);
+	std::vector<float> asymmbins=histo1D::createBinning(20,-1.4,1.4);
 	std::vector<float> mTbins      =histo1D::createBinning(50,10,130);
 
 	for(size_t i=0;i<etaRanges_.size()-1;i++){

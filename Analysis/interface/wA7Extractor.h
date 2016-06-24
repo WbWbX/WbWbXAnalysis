@@ -10,6 +10,10 @@
 
 #include <string>
 #include "TtZAnalysis/Tools/interface/tObjectList.h"
+#include "TtZAnalysis/Tools/interface/histoStack.h"
+#include "TtZAnalysis/Tools/interface/variateHisto1D.h"
+#include <algorithm>
+#include "TtZAnalysis/Tools/interface/simpleFitter.h"
 
 namespace ztop{
 
@@ -22,7 +26,6 @@ public:
 
 	void loadPlots(const std::string& infile);
 
-	void fit(){}
 
 	//get some results
 
@@ -31,14 +34,30 @@ public:
 	//make some plots
 
 
-
+	void fitAll();
 
 
 private:
+	void fit(int sysindex, bool up);
+
+	void createVariates(const std::vector<histoStack>& in);
+
+
+	std::pair<std::string, size_t> parameterasso_;
 
 	//std::vector<histo1D>
+	std::vector<histoStack> orig_inputstacks_;
+	std::vector<histoStack> orig_inputstacks_noniso_;
+	//! these have QCD from data
+	std::vector<histoStack> inputstacks_;
 
+	std::vector<variateHisto1D> mcdependencies_;
+	std::vector<histo1D> datahistos_;
 
+	simpleFitter fitter_;
+	ROOT::Math::Functor functor_;
+	double toBeMinimized(const double * variations);
+	std::vector<double> fittedparas_;
 };
 
 }

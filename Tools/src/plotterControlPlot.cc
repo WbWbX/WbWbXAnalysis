@@ -311,17 +311,85 @@ void plotterControlPlot::drawControlPlot(){
 		if(sorted.size() != usestack->size())
 			throw std::out_of_range("plotterControlPlot::drawControlPlot: serious: sorted.size() != usestack->size()");
 
-		for(size_t it=0;it<usestack->size();it++){ //it is the right ordering
-			size_t i=sorted.at(it);
-			if(i != dataentry){
-				histo1D tempcont;
-				if(usestack->is1DUnfold()){ //special treatment
-					tempcont = usestack->getContainer1DUnfold(i).getRecoContainer();
+		bool plotWithNegativeEntries=false;
+		if(usestack->is1D()){
+			const histo1D& fullMC=usestack->getFullMCContainer();
+			float max=fullMC.getYMax(true);
+			float min=fullMC.getYMin(true);
+			if(min<0 && -min>0.05*max){
+				plotWithNegativeEntries=true;
+				std::cout << "plotterControlPlot::drawControlPlot: plot "<<usestack->getName()
+							<<  " has significant negative entries. Will plot sum MC and no stacked histo" <<std::endl;
 
-					//is not signal
+
+			}
+		}
+		//check if it might be a control plot going well below 0, indicating a difference plot
+		//this is not a standard stack plot. Stacking will not work here!
+		if(plotWithNegativeEntries){ //only valid here, 2D is anyway not stacked
+			histo1D fullMC=usestack->getFullMCContainer();
+			histo1D fulldata=usestack->getDataContainer();
+			sumcont=fullMC;
+			TH1D * h=addObject(fullMC.getTH1D("MC "+usestack->getName()+"_stack_h",divbbw,true,true)); //no errors
+			h->SetFillColor(kRed);
+			stackedhistos.push_back(h);
+			legendentries.push_back("MC");
+			//data
+			stackedhistos.push_back(0);
+			legendentries.push_back(usestack->dataleg_);
+			axish->GetYaxis()->SetRangeUser(1.1*fullMC.getYMin(true),ymax*getYSpaceMulti(upperstyle.yAxisStyle()->log,divbbw));
+
+		}
+		else{
+			for(size_t it=0;it<usestack->size();it++){ //it is the right ordering
+				size_t i=sorted.at(it);
+				if(i != dataentry){
+					histo1D tempcont;
+					if(usestack->is1DUnfold()){ //special treatment
+						tempcont = usestack->getContainer1DUnfold(i).getRecoContainer();
+
+						//is not signal
 
 
-					if(std::find(signalidxs.begin(),signalidxs.end(),i)==signalidxs.end()){//is not signal
+						if(std::find(signalidxs.begin(),signalidxs.end(),i)==signalidxs.end()){//is not signal
+							sumcont+=tempcont;
+							TH1D * h=addObject(sumcont.getTH1D(usestack->getLegend(i)+" "+usestack->getName()+"_stack_h",divbbw,true,true)); //no errors
+							if(!h)
+								continue;
+							mcstyleupper_.applyContainerStyle(h,false);
+							h->SetFillColor(usestack->colors_.at(i));
+							stackedhistos.push_back(h);
+							legendentries.push_back(usestack->getLegend(i));
+						}
+						else{//this is signal but PS migrations!
+							tempcont = usestack->getContainer1DUnfold(i).getBackground();
+							sumcont+=tempcont;
+							histo1D visSig=usestack->getContainer1DUnfold(i).getVisibleSignal();
+							if(tempcont.integral(true) / visSig.integral(true) >psmigthresh_){
+								foundPSmig=true;
+								TH1D * h=addObject(sumcont.getTH1D(usestack->getLegend(i)+" PSmig "+usestack->getName()+"_stack_h",divbbw,true,true)); //no errors
+								mcstylepsmig_.applyContainerStyle(h,false);
+								h->SetFillColor(1);//usestack->colors_.at(i)+5);
+								stackedhistos.push_back(h);
+								legendentries.push_back("");
+							}
+							tempcont = visSig;
+							sumcont+=tempcont;
+							TH1D * hsig=addObject(sumcont.getTH1D(usestack->getLegend(i)+" "+usestack->getName()+"_stack_h",divbbw,true,true));
+							mcstyleupper_.applyContainerStyle(hsig,false);
+							hsig->SetFillColor(usestack->colors_.at(i));
+							stackedhistos.push_back(hsig);
+							legendentries.push_back(usestack->getLegend(i));
+							if(debug)
+								std::cout << "plotterControlPlot::drawControlPlot: added to stack: " << usestack->getLegend(i) <<std::endl;
+
+						}
+
+
+
+					}
+					else{
+						tempcont = usestack->getContainer(i);
 						sumcont+=tempcont;
 						TH1D * h=addObject(sumcont.getTH1D(usestack->getLegend(i)+" "+usestack->getName()+"_stack_h",divbbw,true,true)); //no errors
 						if(!h)
@@ -330,53 +398,16 @@ void plotterControlPlot::drawControlPlot(){
 						h->SetFillColor(usestack->colors_.at(i));
 						stackedhistos.push_back(h);
 						legendentries.push_back(usestack->getLegend(i));
-					}
-					else{//this is signal but PS migrations!
-						tempcont = usestack->getContainer1DUnfold(i).getBackground();
-						sumcont+=tempcont;
-						histo1D visSig=usestack->getContainer1DUnfold(i).getVisibleSignal();
-						if(tempcont.integral(true) / visSig.integral(true) >psmigthresh_){
-							foundPSmig=true;
-							TH1D * h=addObject(sumcont.getTH1D(usestack->getLegend(i)+" PSmig "+usestack->getName()+"_stack_h",divbbw,true,true)); //no errors
-							mcstylepsmig_.applyContainerStyle(h,false);
-							h->SetFillColor(1);//usestack->colors_.at(i)+5);
-							stackedhistos.push_back(h);
-							legendentries.push_back("");
-						}
-						tempcont = visSig;
-						sumcont+=tempcont;
-						TH1D * hsig=addObject(sumcont.getTH1D(usestack->getLegend(i)+" "+usestack->getName()+"_stack_h",divbbw,true,true));
-						mcstyleupper_.applyContainerStyle(hsig,false);
-						hsig->SetFillColor(usestack->colors_.at(i));
-						stackedhistos.push_back(hsig);
-						legendentries.push_back(usestack->getLegend(i));
 						if(debug)
 							std::cout << "plotterControlPlot::drawControlPlot: added to stack: " << usestack->getLegend(i) <<std::endl;
-
 					}
-
 
 
 				}
 				else{
-					tempcont = usestack->getContainer(i);
-					sumcont+=tempcont;
-					TH1D * h=addObject(sumcont.getTH1D(usestack->getLegend(i)+" "+usestack->getName()+"_stack_h",divbbw,true,true)); //no errors
-					if(!h)
-						continue;
-					mcstyleupper_.applyContainerStyle(h,false);
-					h->SetFillColor(usestack->colors_.at(i));
-					stackedhistos.push_back(h);
-					legendentries.push_back(usestack->getLegend(i));
-					if(debug)
-						std::cout << "plotterControlPlot::drawControlPlot: added to stack: " << usestack->getLegend(i) <<std::endl;
+					stackedhistos.push_back(0);
+					legendentries.push_back(usestack->dataleg_);
 				}
-
-
-			}
-			else{
-				stackedhistos.push_back(0);
-				legendentries.push_back(usestack->dataleg_);
 			}
 		}
 		//draw in inverse order
@@ -388,8 +419,9 @@ void plotterControlPlot::drawControlPlot(){
 				stackedhistos.at(i)->GetXaxis()->SetTickLength(0);
 				stackedhistos.at(i)->GetXaxis()->SetLabelSize(0);
 				stackedhistos.at(i)->Draw(mcstyleupper_.rootDrawOpt+"same");
-				if(legendentries.at(i)!="" && mcstyleupper_.legendDrawStyle != "none")
+				if(legendentries.at(i)!="" && mcstyleupper_.legendDrawStyle != "none"){
 					tmplegp_->AddEntry(stackedhistos.at(i),legendentries.at(i),mcstyleupper_.legendDrawStyle);
+				}
 				if(debug)
 					std::cout << "plotterControlPlot::drawControlPlot: drawn: " << legendentries.at(i) <<std::endl;
 
@@ -405,7 +437,7 @@ void plotterControlPlot::drawControlPlot(){
 		mcstyleupper_.applyContainerStyle(mcerr,true);
 		mcerr->GetXaxis()->SetTickLength(0);
 		if(mcsysstatleg_)
-		   tmplegp_->AddEntry(mcerr,systlabel_,"f");
+			tmplegp_->AddEntry(mcerr,systlabel_,"f");
 		if(usestack->is1DUnfold() && foundPSmig){ //
 			TH1D * dummy=addObject(new TH1D());
 			mcstylepsmig_.applyContainerStyle(dummy,false);
@@ -417,8 +449,8 @@ void plotterControlPlot::drawControlPlot(){
 		histoContent::addStatCorrelated=tmpaddStatCorrelated;
 	}
 	//plot data now
-        if(datastyleupper_.rootDrawOpt.Contains("X0"))
-            dataplottemp->removeXErrors();
+	if(datastyleupper_.rootDrawOpt.Contains("X0"))
+		dataplottemp->removeXErrors();
 	dataplottemp->getSystGraph()->Draw(datastyleupper_.sysRootDrawOpt+"same");
 	dataplottemp->getStatGraph()->Draw(datastyleupper_.rootDrawOpt+"same");
 
@@ -476,12 +508,12 @@ void plotterControlPlot::drawRatioPlot(){
 
 	///data
 	histo1D datac=stackp_->getDataContainer();
-
+	fullmc.removeStatFromAll(true);
 	datac.normalizeToContainer(fullmc);
 
 	plot * datar=new plot(&datac,false);
 	if(datastyleratio_.rootDrawOpt.Contains("X0"))
-           datar->removeXErrors();
+		datar->removeXErrors();
 
 	tempplots_.push_back(datar);
 	datastyleratio_.applyContainerStyle(datar);
@@ -502,7 +534,7 @@ void plotterControlPlot::drawRatioPlot(){
 	addTextBox(ndcx,ndcy-ratiostyle_.yAxisStyle()->labelOffset- ratiostyle_.yAxisStyle()->labelSize,"#geq   ",
 			ratiostyle_.yAxisStyle()->labelSize);
 	textboxes_.at(textboxes_.size()-1).setAlign(32);
-*/
+	 */
 
 	TLine * l = addObject(new TLine(datac.getXMin(),1,datac.getXMax(),1));
 	l->Draw("same");

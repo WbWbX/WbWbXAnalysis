@@ -6,7 +6,7 @@
  */
 
 #include "../interface/wReweightingPlots.h"
-
+#include "TtZAnalysis/Tools/interface/binFinder.h"
 #include "TtZAnalysis/DataFormats/src/classes.h"
 #include <algorithm>
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
@@ -17,7 +17,7 @@ namespace ztop{
 
 std::vector<float> wReweightingPlots::makeBins(float lowtha, float lowthb, float lowthc)const{
 	lowtha++;lowthb++;lowthc++;
-	std::vector<float> out = histo1D::createBinning(40,0,100);
+	std::vector<float> out = histo1D::createBinning(30,0,100);
 	return out;
 }
 
@@ -27,7 +27,8 @@ void wReweightingPlots::bookPlots(){
 	//hidden in createBinning
 
 	std::vector<float> dy=histo1D::createBinning(4,-5,5);
-	std::vector<float> ptW=histo1D::createBinning(3, 0,60);
+	std::vector<float> ptW;
+	ptW << 0 << 20 << 40 << 60 << 300;
 	std::vector<float> dummy; //for additional subvar
 
 	histo2D::c_makelist=true;
@@ -47,6 +48,7 @@ void wReweightingPlots::fillPlots(){
 	if(!event()->costheta_cs) return;
 	if(!event()->phi_cs) return;
 
+	if(event()->genjets->at(0)->pt()<50) return; ///jet pt cut
 
 
 	float detaWj=event()->genW->eta()-event()->genjets->at(0)->eta();
@@ -54,7 +56,7 @@ void wReweightingPlots::fillPlots(){
 
 	histo2D *h=getHisto(detaWj,event()->genW->pt(),dummy);
 
-	h->fill(std::acos(* event()->costheta_cs),* event()->phi_cs ,* event()->puweight);
+	h->fill(* event()->costheta_cs,* event()->phi_cs ,* event()->puweight);
 
 }
 
@@ -81,16 +83,16 @@ void wReweightingPlots::createBinning( const std::vector<float>& a, const std::v
 		for(size_t j=1;j<binsb_.size()-1;j++){
 			for(size_t k=1;k<binsc_.size()-1;k++){
 
-				std::vector<float> binsphi  =histo1D::createBinning(100,-M_PI,M_PI); //makeBins(binsa_.at(i) ,binsb_.at(j) ,binsc_.at(k) );
-				std::vector<float> binsth=histo1D::createBinning(100, 0,M_PI);
+				std::vector<float> binsphi  =histo1D::createBinning(18,-M_PI,M_PI); //makeBins(binsa_.at(i) ,binsb_.at(j) ,binsc_.at(k) );
+				std::vector<float> binsth=histo1D::createBinning(18, -1,1);
 
 				TString name="rewhist_";
-				name+=toTString( binsa_.at(i) )+"-"+toTString( binsa_.at(i+1) )+"_";
-				name+=toTString( binsb_.at(j) )+"-"+toTString( binsb_.at(j+1) )+"_";
-				name+=toTString( binsc_.at(k) )+"-"+toTString( binsc_.at(k+1) );
+				name+=toTString( binsa_.at(i) )+":"+toTString( binsa_.at(i+1) )+"_";
+				name+=toTString( binsb_.at(j) )+":"+toTString( binsb_.at(j+1) )+"_";
+				name+=toTString( binsc_.at(k) )+":"+toTString( binsc_.at(k+1) );
 
 
-				hists_.at(i).at(j).at(k) =  new histo2D(binsth,binsphi,name,"#theta","#phi", "Entries", true);
+				hists_.at(i).at(j).at(k) =  new histo2D(binsth,binsphi,name,"cos#theta","#phi", "Entries", true);
 			}
 		}
 	}
@@ -110,12 +112,17 @@ std::vector<float> wReweightingPlots::makeBinning(std::vector<float> bins)const{
 
 histo2D*  wReweightingPlots::getHisto(const float & vara,const float & varb,const float & varc){
 	size_t ai=get1DIndex(vara,binsa_);
-	size_t bi=get1DIndex(vara,binsb_);
-	size_t ci=get1DIndex(vara,binsc_);
+	size_t bi=get1DIndex(varb,binsb_);
+	size_t ci=get1DIndex(varc,binsc_);
 	return hists_.at(ai).at(bi).at(ci);
 }
 
-size_t wReweightingPlots::get1DIndex(const float & var, const std::vector<float> &bins_)const{
+size_t wReweightingPlots::get1DIndex(const float & var, const std::vector<float> &bins)const{
+
+	binFinder<float> fb(bins);
+	fb.setMergeUFOF(true);
+	return fb.findBin(var);
+/*
 	if(bins_.size()<1){
 		return 0;
 	}
@@ -135,7 +142,7 @@ size_t wReweightingPlots::get1DIndex(const float & var, const std::vector<float>
 	else if(binno == bins_.size()-1){
 		binno--;
 	}
-	return binno;
+	return binno;*/
 }
 size_t wReweightingPlots::getIndex(const size_t& a, const size_t& b, const size_t& c)const{
 	//the 0 indicies don't matter here!!

@@ -174,6 +174,17 @@ fileForker::fileforker_status basicAnalyzer::runParallels(int interval){
 		std::cout << textFormatter::fixLength(infiles_.at(i).Data(),50) << "     " << getStatus(i) <<"     " << "   " << getBusyStatus(i)<<"%"<<std::endl;
 	std::cout << std::endl;
 
+
+	//if no data, then create pseudodata
+	if(std::find(legentries_.begin(),legentries_.end(),datalegend_) == legentries_.end()){
+		std::cout << "no data found, generating pseudo data (Poisson smeared)" <<std::endl;
+		histoStackVector * hsv= new histoStackVector();
+		hsv->readFromFile(getOutputFileName());
+		TRandom3 rand;
+		hsv->addPseudoData(&rand);
+		hsv->writeToFile(getOutputFileName());
+	}
+
 	return stat;
 }
 

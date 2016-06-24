@@ -114,6 +114,7 @@ public:
 	void addGlobalRelMCError(TString,double);   //! adds a global systematic variation to the systematics stored (e.g. lumi) is o+err
 
 	void addRelErrorToContribution(double err, const TString& contributionname, TString nameprefix="BG");
+	void addRelErrorToContributions(double err, const std::vector<size_t> contribidxs, TString nameprefix="BG");
 	/**
 	 * adds error to all backgrounds (not signal nor data) that are not excluded by legendname
 	 * error is 0+error
@@ -153,7 +154,7 @@ public:
 
 	std::vector<size_t> removeSpikes(bool inclUFOF=false,int limittoindex=-1,float strength=100000,float sign=0.3,float threshold=8);
 
-	void clear(){containers_.clear();legends_.clear();colors_.clear();}
+	void clear(){*this=histoStack();}
 
 	/*
 	THStack * makeTHStack(TString stackname = "");
@@ -284,6 +285,7 @@ public:
 
 	histoStack fitAllNorms(const std::vector<TString>& contributions, bool globalfloat);
 
+	void poissonSmearMC(TRandom3* r, bool alsosys);
 
 #ifndef __CINT__
 	template <class T>

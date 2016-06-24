@@ -70,8 +70,8 @@ void wAnalyzer::analyze(size_t id){
 	wGenSelector selectGen;
 	if(isNLO){
 		if(inputfile_.Contains("LN_")){
-			selectGen.addVeto(15);
-			selectGen.addVeto(-15);
+		//	selectGen.addVeto(15);
+		//	selectGen.addVeto(-15);
 		}
 	}
 
@@ -163,9 +163,15 @@ void wAnalyzer::analyze(size_t id){
 	histo2D::c_makelist=false;
 
 	HTransformToCS cs_transformer(8000);
+	bool rewswon=!getNLOReweighter()->switchedOff() ;
+	rewswon = rewswon&& isNLO&& signal_;
+	getNLOReweighter()->switchOff(!rewswon);
+
 
 	if(testmode_)
 		entries/=20;//skip=(float) 1./0.05; //only consider 5 % of the events
+	if(legendname_=="DUMMY")
+		entries=0;
 	/*else
 		entries/=2;
 	std::cout << "also full mode is restricted to 1/2 of the events because of problem with RunC sample"<<std::endl;
@@ -219,25 +225,34 @@ void wAnalyzer::analyze(size_t id){
 
 			evt.genlepton=lepton;
 			evt.genneutrino=neutrino;
+			//get the first lepton. NO status code check
+
+			//maybe favour masses around W mass if mass < 10 GeV (taus)
+			for(size_t i=0;i<allgenparticles.size();i++){
+				NTGenParticle * p = allgenparticles.at(i);
+				if(p->pdgId() == 13
+						|| p->pdgId() == -13
+						|| p->pdgId() == 11
+						|| p->pdgId() == -11
+						|| p->pdgId() == 15
+						|| p->pdgId() == -15){
+					lepton=p;
+					for(size_t j=0;j<genjets.size();j++){
+						if(dR(genjets.at(j),lepton)<0.01) //FIXME see if necessary
+							;//genjets.erase(genjets.begin()+j);
+
+					}
+					break;
+				}
+			}
 
 			for(size_t i=0;i<allgenparticles.size();i++){
 				NTGenParticle * p = allgenparticles.at(i);
-				if(p->status() != 23 && p->status() != -23) continue; //only hard interaction. Also if it decays later
-
-				if(p->pdgId() == 13 || p->pdgId() == -13){ //should we also use taus and elecs here!?!->more stat
-					if(p->pt()>25 && fabs(p->eta())<2.1){
-						lepton=p;
-
-						//remove from genjets
-					//	for(size_t j=0;j<genjets.size();j++){
-					//		if(dR(genjets.at(j),lepton)<0.0001) //FIXME see if necessary
-					//			genjets.erase(genjets.begin()+j);
-					//	}
-					}
-				}
-				else if(p->pdgId() == 14 || p->pdgId() == -14)
+				if(lepton && std::abs(p->pdgId()) == lepton->pdgId()+1)
 					neutrino=p;
 			}
+			//both always fit another in the samples. no need for special check
+			//the tau only sample has no neutrinos
 			if(lepton && neutrino){//construct W
 				Wbos.setP4( lepton->p4() + neutrino->p4() );
 				Wbos.setQ(lepton->q());
@@ -250,8 +265,16 @@ void wAnalyzer::analyze(size_t id){
 				pttrans_gen=analysisPlotsW::asymmValue(lepton ,&Wbos,false); //dont invert W direction
 				evt.pttrans_gen=&pttrans_gen;
 				evt.A7=&A7;
+
 				A7=std::sin(phi_cs)*std::sqrt(1-costheta_cs*costheta_cs);
-				if(genjets.size() && genjets.at(0)->pt()>25 && fabs(genjets.at(0)->eta())<2.5)
+
+				if(genjets.size()>0){ //&& genjets.at(0)->pt()>50){
+					getNLOReweighter()->prepareWeight(costheta_cs,phi_cs,&Wbos,genjets.at(0));
+					//float oldweight=puweight;
+					getNLOReweighter()->reWeight(puweight);
+					//std::cout << puweight/oldweight << std::endl;
+				}
+				if(genjets.size() && genjets.at(0)->pt()>50)
 					ptttransA7corr.fill(pttrans_gen ,A7 ,puweight);
 				if(genjets.size())
 					genstatHistDEtaJWpTW.fill(genjets.at(0)->eta()-Wbos.eta(), Wbos.pt(),puweight);
@@ -457,7 +480,7 @@ void wAnalyzer::analyze(size_t id){
 
 
 	std::cout << inputfile_<< ": before renorm " << norm_ << std::endl;
-
+	norm_*=getNLOReweighter()->getRenormalization();
 	norm_*=lheReweighter.getRenormalization();
 	norm_*=mcweights.getRenormalization();
 
