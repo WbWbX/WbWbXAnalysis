@@ -13,6 +13,7 @@
 #include "Math/Functor.h"
 #include "Math/Minimizer.h"
 #include <algorithm>
+#include "../interface/texTabler.h"
 
 #include "corrMatrix.h"
 #include "TtZAnalysis/Tools/interface/graph.h"
@@ -138,11 +139,13 @@ public:
 	double getParameterErr(size_t idx)const;
 	const double&  getParameter(size_t idx)const;
 	const std::vector<TString> *getParameterNames()const {return &paranames_;}
+	 std::vector<TString> *getParameterNames() {return &paranames_;}
 
 
 	const double& getCorrelationCoefficient(size_t i, size_t j)const;
 	void  fillCorrelationCoefficients(histo2D *)const;
 	corrMatrix getCorrelationMatrix()const;
+	texTabler makeCorrTable() const;
 
 	graph getContourScan(size_t i, size_t j)const;
 	/**

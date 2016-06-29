@@ -36,12 +36,15 @@ invokeApplication(){
 	hsv->readFromFile(infile);
 
 	const TString prefix="rewhist_";
+	const TString  prefix1d="1D_rewhist_";
 	//hsv.listStacks();
 	std::vector<TString> stacknames=hsv->getStackNames(false);
 	std::vector<histo2D> selectedhistos;
 	const Int_t npar = wNLOReweighter::wdxsec_npars;
 	Double_t f2params[wNLOReweighter::wdxsec_npars];
 	TF2 *f2 = new TF2("f2",wNLOReweighter::wdxsec,-1,1,-M_PI,M_PI, npar);
+
+	TFile rootfile(outpath+"/rewhistos.root","RECREATE");
 
 	std::ofstream outfile((outpath+"data.dat").Data());
 	outfile <<  "$$$detamin, detamax, ptmin, ptmax, dummy, dummy, F_0, ..., F_7, F: A_i=F_i/F \n";
@@ -72,6 +75,7 @@ invokeApplication(){
 
 			for(size_t j=0;j<npar;j++)
 				outfile << " "<<f2->GetParameter(j);
+			outfile << " "<< textFormatter::makeCompatibleFileName(("1D_"+stacknames.at(i)).Data()) ;
 			outfile << "\n";
 
 			TCanvas cv(stacknames.at(i));
@@ -104,15 +108,35 @@ invokeApplication(){
 			std::cout << "\nfitted:"<<std::endl;
 			for(size_t par=0;par<npar-1;par++){
 				std::cout << "A"+toTString(par)+": " << f2->GetParameter(par)/f2->GetParameter(npar-1)
-								<<std::endl;
+																								<<std::endl;
 			}
+		}
+		else if(stacknames.at(i).BeginsWith(prefix1d)){
+			histo1D hist=hsv->getStack(stacknames.at(i)).getSignalContainer();
+			hist.removeAllSystematics();
+			histo1D symmetric=hist;
+			for(size_t hbin=0;hbin<hist.getBins().size();hbin++){
 
+				size_t rbin=hist.getBins().size()-1-hbin;
+				if(rbin<hbin){break;}
+				float cleft=hist.getBinContent(hbin);
+				float right=hist.getBinContent(rbin);
+				float cont=(cleft+right)/2;
+				symmetric.setBinContent(hbin,cont);
+				symmetric.setBinContent(rbin,cont);
+				if(rbin==hbin){break;}
+			}
+			histo1D scalefactorhist=symmetric/hist;
+			TH1D * thist=scalefactorhist.getTH1D(stacknames.at(i),false);
+			thist->Write();
+			scalefactorhist=hist/symmetric;
+			thist=scalefactorhist.getTH1D(stacknames.at(i)+"_inv",false);
+			thist->Write();
 		}
 	}
-
 	outfile.close();
 
-
+	rootfile.Close();
 
 	delete hsv;
 

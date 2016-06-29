@@ -220,7 +220,7 @@ fileForker::fileforker_status fileForker::getStatus()const{
 
 	if(debug){
 		std::cout << "fileForker::getStatus: "<< donechilds_<<"("<< runningchilds_<< ")/"<< inputfiles_.size()<<
-		" last "<< lastspawned_<< std::endl;
+				" last "<< lastspawned_<< std::endl;
 		std::cout << "child stats: " <<std::endl;
 		for(size_t c=0;c<inputfiles_.size();c++){
 			std::cout << c << "\t"  << (int)childstatus_.at(c) <<"\t"<<inputfiles_.at(c) <<std::endl;
@@ -265,6 +265,27 @@ void fileForker::writeDone(fileforker_status stat){
 	p_status.get(ownchildindex_)->pwrite(stat);
 
 }
+std::string fileForker::translateStatus(const fileforker_status& stat)const{
+#define RETURNSTATUSSTRING(x) {if(stat==ff_status_ ## x) str= #x;}
+	std::string str;
+	RETURNSTATUSSTRING(child_hold)
+	RETURNSTATUSSTRING(child_busy)
+	RETURNSTATUSSTRING(child_writing)
+	RETURNSTATUSSTRING(child_success)
+	RETURNSTATUSSTRING(child_generror)
+	RETURNSTATUSSTRING(child_exception)
+	RETURNSTATUSSTRING(child_aborted)
+	RETURNSTATUSSTRING(parent_childstospawn)
+	RETURNSTATUSSTRING(parent_success)
+	RETURNSTATUSSTRING(parent_busy)
+	RETURNSTATUSSTRING(parent_generror)
+	RETURNSTATUSSTRING(parent_exception)
+	RETURNSTATUSSTRING(parent_filewritten)
+	RETURNSTATUSSTRING(allowwrite)
+	RETURNSTATUSSTRING(askwrite)
+	return str;
+#undef RETURNSTATUSSTRING
+}
 
 void fileForker::reportStatus(fileforker_status stat){
 	p_status.get(ownchildindex_)->pwrite(stat);
@@ -300,7 +321,7 @@ void fileForker::abortChild(size_t idx){
 	std::string syscall="kill -9 ";
 	syscall+=toString(childPids_.at(idx));
 	system(syscall.data());
-	childstatus_.at(idx)=ff_status_child_generror;
+	childstatus_.at(idx)=ff_status_child_aborted;
 	runningchilds_--;
 	donechilds_++;
 }

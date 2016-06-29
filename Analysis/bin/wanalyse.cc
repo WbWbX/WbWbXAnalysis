@@ -75,9 +75,9 @@ invokeApplication(){
 	ana.readFileList(configfile);
 	ana.setMaxChilds(maxchilds);
 	ana.getJecUnc()->setFile(jecfile.Data());
-	ana.getNLOReweighter()->readParameterFile(a7reweightfile);
+	bool nlorewsimple=false;
 	ana.getNLOReweighter()->switchOff(true);
-
+	ana.getNLOReweighter()->setSimple(nlorewsimple);
 
 	ana.setSyst(syst);
 	system(("rm -f "+ana.getOutPath()+".ztop").Data());
@@ -107,14 +107,21 @@ invokeApplication(){
 		//nothing
 	}
 	else if(syst == "WparaA7_up"){
-		ana.getNLOReweighter()->switchOff(false);
-		ana.getNLOReweighter()->setUp(true);
-		ana.getNLOReweighter()->setReweightParameter(7,1);
+		//nothing
+		if(!nlorewsimple){
+			ana.getNLOReweighter()->switchOff(false);
+			ana.getNLOReweighter()->readParameterFile(a7reweightfile);
+			ana.getNLOReweighter()->setUp(true);
+			ana.getNLOReweighter()->setReweightParameter(7,1);
+		}
 	}
 	else if(syst == "WparaA7_down"){
 		ana.getNLOReweighter()->switchOff(false);
-		ana.getNLOReweighter()->setUp(false);
-		ana.getNLOReweighter()->setReweightParameter(7,-1);
+		ana.getNLOReweighter()->readParameterFile(a7reweightfile);
+		if(!nlorewsimple){
+			ana.getNLOReweighter()->setUp(false);
+			ana.getNLOReweighter()->setReweightParameter(7,-1);
+		}
 	}
 
 	fileForker::fileforker_status status= ana.start();

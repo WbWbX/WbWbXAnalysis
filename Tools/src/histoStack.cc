@@ -2297,7 +2297,7 @@ bool histoStack::checkSignals(const std::vector<TString> &signs) const{
 }
 
 
-histoStack histoStack::fitAllNorms(const std::vector<TString>& contributions, bool globalfloat){
+histoStack histoStack::fitAllNorms(const std::vector<TString>& contributions, bool globalfloat, std::vector<float>& fittedparas)const{
 	if(! is1D()) throw std::logic_error("histoStack::fitAllNorms: only implemented for 1D stacks");
 	if(containers_.size()<1) return *this;
 	if(contributions.size()<1) return *this;
@@ -2329,12 +2329,13 @@ histoStack histoStack::fitAllNorms(const std::vector<TString>& contributions, bo
 	histo1D mcfit=varbg.exportContainer(pars);
 
 	std::vector<TString> sysnames=varbg.getSystNames();
-
+	fittedparas.resize(legends_.size(),1);
 	for(size_t i=0;i<sysnames.size();i++){
+		fittedparas.at(idx.at(i))=1+pars.at(i);
 		//if(pars.at(i)>0){
-		std::cout << sysnames.at(i) ;
-		thisstack.containers_.at(idx.at(i)) *= 1+pars.at(i);
-		std::cout << " " << 1+pars.at(i) <<" " << thisstack.legends_.at(idx.at(i))<<std::endl;
+		//std::cout << sysnames.at(i) ;
+		///thisstack.containers_.at(idx.at(i)) *= 1+pars.at(i);
+		//std::cout << " " << 1+pars.at(i) <<" " << thisstack.legends_.at(idx.at(i))<<std::endl;
 		////	}
 		//else{ //bg variations are intended to be log-normal. here we need linear
 		//	thisstack.containers_.at(idx.at(i)) *= (1/(1+pars.at(i)));
@@ -2351,9 +2352,10 @@ histoStack histoStack::fitAllNorms(const std::vector<TString>& contributions, bo
 
 }
 
-void histoStack::poissonSmearMC(TRandom3* r,bool alsosys){
+void histoStack::poissonSmearMC(TRandom3* r,bool alsosys, bool syscorrelated){
 	if(!is1D())
 		throw std::runtime_error("histoStack::poissonSmearMC: only implemented for 1D. But feel free to implement.");
+	histoStack copystack=*this;
 	for(int sys=-1;sys<(int)getSystSize();sys++){
 		if(!alsosys && sys>-1)
 			break;
@@ -2363,8 +2365,14 @@ void histoStack::poissonSmearMC(TRandom3* r,bool alsosys){
 			histo1D h=containers_.at(i).createPseudoExperiment(r,0,histo1D::pseudodata_poisson,sys);
 			//feed back
 			float renorm= integralv/h.integral(true);
-			for(size_t bin=0;bin<h.getBins().size();bin++)
-				containers_.at(i).setBinContent(bin,h.getBinContent(bin)*renorm,sys);
+			for(size_t bin=0;bin<h.getBins().size();bin++){
+				float content=h.getBinContent(bin);
+				if(sys>-1&&syscorrelated){
+					content=containers_.at(i).getBinContent(bin)*copystack.containers_.at(i).getBinContent(bin,sys)/ copystack.containers_.at(i).getBinContent(bin);
+					renorm=1;
+				}
+				containers_.at(i).setBinContent(bin,content*renorm,sys);
+			}
 		}
 	}
 }

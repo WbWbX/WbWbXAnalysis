@@ -35,7 +35,40 @@
 
 
 
+
 namespace ztop{
+
+void wAnalyzer::pairLeptons( std::vector<NTGenParticle*> * v, NTGenParticle*& lep, NTGenParticle*& neutr)const{
+	lep=0;neutr=0;
+	for(size_t i=0;i<v->size();i++){
+		 NTGenParticle* p=v->at(i);
+		if(p->pdgId() == 13
+				|| p->pdgId() == -13
+				|| p->pdgId() == 11
+				|| p->pdgId() == -11
+				|| p->pdgId() == 15
+				|| p->pdgId() == -15){
+			//search for neutrino
+			for(size_t j=0;j<v->size();j++){
+				if(i==j)continue;
+				 NTGenParticle* p2=v->at(j);
+				if((int)std::abs(p2->pdgId()) == (int)(std::abs(p->pdgId())+1)){
+					//matching pair
+					if((p->p4()+p2->p4()).m()>5){
+						lep=p;
+						neutr=p2;
+						//std::cout << "got one: "<<(p->p4()+p2->p4()).m() <<std::endl;
+						break;
+					}
+				}
+			}
+
+		}
+		if(lep&&neutr)
+			break;
+
+	}
+}
 
 fileForker::fileforker_status  wAnalyzer::start(){
 	allplotsstackvector_.setName(getOutFileName());
@@ -70,8 +103,8 @@ void wAnalyzer::analyze(size_t id){
 	wGenSelector selectGen;
 	if(isNLO){
 		if(inputfile_.Contains("LN_")){
-		//	selectGen.addVeto(15);
-		//	selectGen.addVeto(-15);
+			//	selectGen.addVeto(15);
+			//	selectGen.addVeto(-15);
 		}
 	}
 
@@ -179,7 +212,7 @@ void wAnalyzer::analyze(size_t id){
 	t.setPreCache();//better performance for large samples
 
 	///////////////////////////////// Event loop //////////////////////////////
-
+	reportStatus(0,entries);//give first report
 	for(Long64_t event=0;event<entries;event++){
 		reportStatus(event,entries);
 
@@ -212,7 +245,8 @@ void wAnalyzer::analyze(size_t id){
 		float phi_cs=0,costheta_cs=0,pttrans_gen=0,A7=0;
 		std::vector<NTGenJet *> genjets;
 		std::vector<NTGenParticle*> allgenparticles;
-		NTGenParticle * lepton=0, *neutrino=0, Wbos;
+		NTGenParticle * lepton=0, *neutrino=0;
+		NTGenParticle Wbos;
 		if(isMC_){
 			genjets=produceCollection(b_genjets.content() );
 			evt.genjets=&genjets;
@@ -228,29 +262,13 @@ void wAnalyzer::analyze(size_t id){
 			//get the first lepton. NO status code check
 
 			//maybe favour masses around W mass if mass < 10 GeV (taus)
-			for(size_t i=0;i<allgenparticles.size();i++){
-				NTGenParticle * p = allgenparticles.at(i);
-				if(p->pdgId() == 13
-						|| p->pdgId() == -13
-						|| p->pdgId() == 11
-						|| p->pdgId() == -11
-						|| p->pdgId() == 15
-						|| p->pdgId() == -15){
-					lepton=p;
-					for(size_t j=0;j<genjets.size();j++){
-						if(dR(genjets.at(j),lepton)<0.01) //FIXME see if necessary
-							;//genjets.erase(genjets.begin()+j);
-
-					}
-					break;
-				}
+			pairLeptons(&allgenparticles,lepton,neutrino);
+			if(lepton){//remove from genjets
+				for(size_t i=0;i<genjets.size();i++)
+					if(dR(lepton,genjets.at(i))<0.05)
+						genjets.erase(genjets.begin()+i);
 			}
 
-			for(size_t i=0;i<allgenparticles.size();i++){
-				NTGenParticle * p = allgenparticles.at(i);
-				if(lepton && std::abs(p->pdgId()) == lepton->pdgId()+1)
-					neutrino=p;
-			}
 			//both always fit another in the samples. no need for special check
 			//the tau only sample has no neutrinos
 			if(lepton && neutrino){//construct W
@@ -272,13 +290,14 @@ void wAnalyzer::analyze(size_t id){
 					getNLOReweighter()->prepareWeight(costheta_cs,phi_cs,&Wbos,genjets.at(0));
 					//float oldweight=puweight;
 					getNLOReweighter()->reWeight(puweight);
-					//std::cout << puweight/oldweight << std::endl;
+					//std::cout << puweight << ":"<<oldweight << std::endl;
 				}
 				if(genjets.size() && genjets.at(0)->pt()>50)
 					ptttransA7corr.fill(pttrans_gen ,A7 ,puweight);
 				if(genjets.size())
 					genstatHistDEtaJWpTW.fill(genjets.at(0)->eta()-Wbos.eta(), Wbos.pt(),puweight);
 			}
+			if(signal_ && !lepton) continue; //gen W match requirement
 		}
 
 		c_plots_gen.makeControlPlots(0);

@@ -73,7 +73,7 @@ public:
 	const int& pdgId()const{return pdgid_;}
 	const int& status()const{return status_;}
 
-	const NTLorentzVector<float> & p4(){return p4_;}
+	const NTLorentzVector<float> & p4()const{return p4_;}
 	const float& pt()const{return p4_.Pt();}
 	float  E()const {return p4_.E();}
 	float  e()const {return p4_.E();}

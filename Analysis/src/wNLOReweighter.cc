@@ -13,6 +13,7 @@
 #include <algorithm>
 #include "TtZAnalysis/DataFormats/interface/NTGenJet.h"
 #include "TtZAnalysis/DataFormats/interface/NTGenParticle.h"
+#include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 
 namespace ztop{
 
@@ -61,13 +62,18 @@ double wNLOReweighter::wdxsec(double * angles, double* pars){
 
 
 void wNLOReweighter::readParameterFile(const std::string& infile){
+
 	fileReader fr;
 	fr.setDelimiter(" ");
 	fr.setComment("$");
 	fr.readFile(infile);
 
-	const size_t firstparaentry=6;
+	std::string datadir=textFormatter::getFileDir(infile);
+	if(datadir.length()>0)
+		datadir+="/";
 
+	const size_t firstparaentry=6;
+	const size_t lastparaentry=14;
 	//first read in then remove duplicates in binning vectors
 	for(size_t i=0;i<fr.nLines();i++){
 		if(fr.nEntries(i)<4)continue;
@@ -80,6 +86,8 @@ void wNLOReweighter::readParameterFile(const std::string& infile){
 
 	}
 
+
+
 	std::sort(detabins_.begin(),detabins_.end());
 	std::sort(Wptbins_.begin(),Wptbins_.end());
 	std::vector<float>::iterator it=std::unique(detabins_.begin(),detabins_.end());
@@ -91,7 +99,9 @@ void wNLOReweighter::readParameterFile(const std::string& infile){
 	Wptbins_.insert(Wptbins_.begin(),0); //create dummy underflow (not used)
 
 	origparas_.resize(detabins_.size());
+	simplerew_.resize(detabins_.size());
 	for(size_t i=0;i<detabins_.size();i++){
+		simplerew_.at(i).resize(Wptbins_.size(),0);
 		origparas_.at(i).resize(Wptbins_.size());
 		//for(size_t j=0;j<Wptbins_.size();j++){
 		//	origparas_.at(i).at(j).resize(Wptbins_.size());
@@ -105,9 +115,14 @@ void wNLOReweighter::readParameterFile(const std::string& infile){
 		for(size_t ptbin=1;ptbin<Wptbins_.size()-1;ptbin++){
 			//std::cout << Wptbins_.at(ptbin) << std::endl;
 			std::vector<double> paras;
-			for(size_t entr=firstparaentry;entr<fr.nEntries(line);entr++){
+			for(size_t entr=firstparaentry;entr<=lastparaentry;entr++){
 				paras.push_back(fr.getData<double>(line,entr));
 			}
+			//get histogram from file specified n last line
+			TString histname=fr.getData<TString>(line, lastparaentry+1);
+			simplerew_.at(detabin).at(ptbin)=new scalefactors();
+			simplerew_.at(detabin).at(ptbin)->setInput((TString)datadir.data() + "/rewhistos.root",histname);
+			simplerew_.at(detabin).at(ptbin)->setIsMC(true);
 			origparas_.at(detabin).at(ptbin)=paras;
 			line++;
 			if(line==fr.nLines()) break;
@@ -132,7 +147,7 @@ void wNLOReweighter::setReweightParameter(size_t paraindex, float reweightfactor
 		for(size_t ptbin=1;ptbin<Wptbins_.size()-1;ptbin++){
 			//std::cout << Wptbins_.at(ptbin) << std::endl;
 			if(paraindex >= origparas_.at(detabin).at(ptbin).size())
-					throw std::out_of_range("wNLOReweighter::setReweightParameter: para index out of range");
+				throw std::out_of_range("wNLOReweighter::setReweightParameter: para index out of range");
 
 			rewparas_.at(detabin).at(ptbin).at(paraindex) = origparas_.at(detabin).at(ptbin).at(paraindex) * (1+reweightfactorminusone);
 		}
@@ -146,18 +161,26 @@ void wNLOReweighter::prepareWeight(const float& costheta, const float& phi, cons
 	if(!W || !jet)
 		return;
 	if(switchedOff())return;
-	if(rewparas_.size()<1)
+	if(!simple_ && rewparas_.size()<1)
 		throw std::logic_error("wNLOReweighter::prepareWeight: no reweighting set");
 
 	float deta=W->eta()-jet->eta();
 	size_t detabin=bfdeta_.findBin(deta);
-	size_t ptbin=bfWpt_.findBin(deta);
+	size_t ptbin=bfWpt_.findBin(W->pt());
 	double angles[2]={costheta,phi};
-	double nom=wdxsec(angles,&(origparas_.at(detabin).at(ptbin).at(0)));
-	double var=wdxsec(angles,&(rewparas_.at(detabin).at(ptbin).at(0)));
 
-	setNewWeight(var/nom);
 
+	if(!simple_){
+		double nom=wdxsec(angles,&(origparas_.at(detabin).at(ptbin).at(0)));
+		double var=wdxsec(angles,&( rewparas_.at(detabin).at(ptbin).at(0)));
+		setNewWeight(var/nom);
+		return;
+	}
+	else{
+		setNewWeight(simplerew_.at(detabin).at(ptbin)->getScalefactor(std::sqrt(1-costheta*costheta)*std::sin(phi)));
+	}
 }
+
+
 
 }//ns

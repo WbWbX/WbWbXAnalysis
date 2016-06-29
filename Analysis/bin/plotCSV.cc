@@ -56,6 +56,7 @@ invokeApplication(){
 	AutoLibraryLoader::enable();
 
 	const bool debug=parser->getOpt<bool>("d",false,"debug switch");
+
 	const std::vector<TString> files=parser->getRest<TString> ();
 
 	parser->doneParsing();

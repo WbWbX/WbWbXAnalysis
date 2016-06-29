@@ -22,6 +22,7 @@ invokeApplication(){
 
 
 	wA7Extractor ex;
+	//ex.debug=true;
 	ex.readConfig(configfile);
 	ex.loadPlots(infile);
 

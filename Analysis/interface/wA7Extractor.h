@@ -19,7 +19,7 @@ namespace ztop{
 
 class wA7Extractor: public tObjectList{//just for garbage collection
 public:
-	wA7Extractor():tObjectList(){}
+	wA7Extractor():tObjectList(),debug(false){}
 	~wA7Extractor(){}
 
 	void readConfig(const std::string& infile);
@@ -36,11 +36,13 @@ public:
 
 	void fitAll();
 
+	bool debug;
 
 private:
-	void fit(int sysindex, bool up);
+	void fit(int sysindex, bool up, bool fixallbuta7,bool fixa7=false);
 
-	void createVariates(const std::vector<histoStack>& in);
+	void createVariates(const std::vector<histoStack>& in, const std::vector<double>* nominalparas,
+			TRandom3* rand);
 
 
 	std::pair<std::string, size_t> parameterasso_;
@@ -48,6 +50,7 @@ private:
 	//std::vector<histo1D>
 	std::vector<histoStack> orig_inputstacks_;
 	std::vector<histoStack> orig_inputstacks_noniso_;
+	std::vector<histoStack> normfitted_inputstacks_;
 	//! these have QCD from data
 	std::vector<histoStack> inputstacks_;
 

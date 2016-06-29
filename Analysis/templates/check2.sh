@@ -43,11 +43,13 @@ do
     jobname=$file
     jobid=""
     allj=( "${allj[@]}" "${file}" );
+    percent=""
     if [ ${JOBSONBATCH} ]
     then
 	if [ -e "../stdout/${file}" ];
 	then
 	    jobid=`ls ../batch/${file}.o* 2>&1 | awk -F".o" '{print $NF}'`
+	    percent="$(tail ../stdout/$file  | grep % | tail -1 | awk '{print $NF}')"
 	fi
 	jobrunning=`echo $rjobs | grep ${jobid} 2>/dev/null | head -c 3`;
 	jobEqw=`echo $Eqwjobs | grep ${jobid} 2>/dev/null | head -c 3`;
@@ -69,7 +71,7 @@ do
 		
 		if [ ${jobrunning} ]
 		then
-		    echo "${jobname} \e[1;32m partially done (${jobid})\e[0m"
+		    echo "${jobname} \e[1;32m partially done (${jobid}): ${percent}\e[0m"
 		elif [ ${jobEqw} ]
 		then
 		    echo "${jobname} \e[1;31m in Eqw state (${jobid})\e[0m"
@@ -98,7 +100,7 @@ do
 	then
 	    if [ ${jobrunning} ]
 	    then
-		echo "${jobname} \e[1;32m running (${jobid})\e[0m"
+		echo "${jobname} \e[1;32m running (${jobid}): ${percent}\e[0m"
 	    else
 		echo "${jobname} \e[1;31m aborted before producing output\e[0m"
 		tresubmit=( "${tresubmit[@]}" "../jobscripts/${jobname}" );
@@ -165,7 +167,7 @@ if [ "${#allj[@]}" -gt "${#jdone[@]}" ]
 then
 
     echo "you have still unfinished jobs: (${#jdone[@]} / ${#allj[@]} done)"
-    displayStatusBar ${#jdone[@]} ${#allj[@]}
+    #displayStatusBar ${#jdone[@]} ${#allj[@]}
     if [[ "${option}" == "cont" ]] || [[ "${2}" == "cont" ]]
     then
        sleep 10;
@@ -180,7 +182,7 @@ then
 
 else
     echo "all your jobs have finished"
-    displayStatusBar ${#jdone[@]} ${#allj[@]}
+    #displayStatusBar ${#jdone[@]} ${#allj[@]}
     if [[ "${option}" == "nomerge" ]]
         then
         exit 0

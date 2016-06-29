@@ -75,10 +75,10 @@ void wControlplots_gen::makeControlPlotsPriv(){
 	float deta=0;
 	isgood = isgood && jet;
 	if(isgood)
-		deta=fabs(jet->eta()-W->eta());
+		deta=(jet->eta()-W->eta());
 
-	addPlot("asymm dsig dA7 W deta 0-0.5","asymm A7","#DeltaEvents");
-	if(isgood && deta < 0.5)
+	addPlot("asymm dsig dA7 W deta leq -4","asymm A7","#DeltaEvents");
+	if(isgood && deta < -4 && deta > -50)
 		if(event()->A7){
 			if(* event()->A7 >0)
 				last()->fill(* event()->A7, *event()->puweight );
@@ -86,8 +86,8 @@ void wControlplots_gen::makeControlPlotsPriv(){
 				last()->fill(- * event()->A7, - *event()->puweight );
 		}
 
-	addPlot("asymm dsig dA7 W deta 0.5-1","asymm A7","#DeltaEvents");
-	if(isgood && deta >= 0.5 && deta < 1)
+	addPlot("asymm dsig dA7 W deta -4 -3","asymm A7","#DeltaEvents");
+	if(isgood && deta >= -4 && deta < -3)
 		if(event()->A7){
 			if(* event()->A7 >0)
 				last()->fill(* event()->A7, *event()->puweight );
@@ -95,8 +95,8 @@ void wControlplots_gen::makeControlPlotsPriv(){
 				last()->fill(- * event()->A7, - *event()->puweight );
 		}
 
-	addPlot("asymm dsig dA7 W deta 1-1.5","asymm A7","#DeltaEvents");
-	if(isgood && deta >= 1 && deta < 1.5)
+	addPlot("asymm dsig dA7 W deta -3 -2","asymm A7","#DeltaEvents");
+	if(isgood && deta >= -3 && deta < -2)
 		if(event()->A7){
 			if(* event()->A7 >0)
 				last()->fill(* event()->A7, *event()->puweight );
@@ -104,8 +104,8 @@ void wControlplots_gen::makeControlPlotsPriv(){
 				last()->fill(- * event()->A7, - *event()->puweight );
 		}
 
-	addPlot("asymm dsig dA7 W deta 1.5-2","asymm A7","#DeltaEvents");
-	if(isgood && deta >= 1.5 && deta < 2)
+	addPlot("asymm dsig dA7 W deta -2 -1","asymm A7","#DeltaEvents");
+	if(isgood && deta >= -2 && deta < -1)
 		if(event()->A7){
 			if(* event()->A7 >0)
 				last()->fill(* event()->A7, *event()->puweight );
@@ -113,8 +113,8 @@ void wControlplots_gen::makeControlPlotsPriv(){
 				last()->fill(- * event()->A7, - *event()->puweight );
 		}
 
-	addPlot("asymm dsig dA7 W deta 2-2.5","asymm A7","#DeltaEvents");
-	if(isgood && deta >= 2 && deta < 2.5)
+	addPlot("asymm dsig dA7 W deta -1 1","asymm A7","#DeltaEvents");
+	if(isgood && deta >= -1 && deta < 1)
 		if(event()->A7){
 			if(* event()->A7 >0)
 				last()->fill(* event()->A7, *event()->puweight );
@@ -122,8 +122,8 @@ void wControlplots_gen::makeControlPlotsPriv(){
 				last()->fill(- * event()->A7, - *event()->puweight );
 		}
 
-	addPlot("asymm dsig dA7 W deta 2.5-3","asymm A7","#DeltaEvents");
-	if(isgood && deta >= 2.5 && deta < 3)
+	addPlot("asymm dsig dA7 W deta 1 2","asymm A7","#DeltaEvents");
+	if(isgood && deta >= 1 && deta < 2)
 		if(event()->A7){
 			if(* event()->A7 >0)
 				last()->fill(* event()->A7, *event()->puweight );
@@ -131,8 +131,8 @@ void wControlplots_gen::makeControlPlotsPriv(){
 				last()->fill(- * event()->A7, - *event()->puweight );
 		}
 
-	addPlot("asymm dsig dA7 W deta 3-3.5","asymm A7","#DeltaEvents");
-	if(isgood && deta >= 3 && deta < 3.5)
+	addPlot("asymm dsig dA7 W deta 2 3","asymm A7","#DeltaEvents");
+	if(isgood && deta >= 2 && deta < 3.)
 		if(event()->A7){
 			if(* event()->A7 >0)
 				last()->fill(* event()->A7, *event()->puweight );
@@ -140,14 +140,52 @@ void wControlplots_gen::makeControlPlotsPriv(){
 				last()->fill(- * event()->A7, - *event()->puweight );
 		}
 
-	addPlot("asymm dsig dA7 W deta 3.5-5","asymm A7","#DeltaEvents");
-	if(isgood && deta >= 3.5 && deta < 5)
+	addPlot("asymm dsig dA7 W deta 3 4","asymm A7","#DeltaEvents");
+	if(isgood && deta >= 3 && deta < 4)
 		if(event()->A7){
 			if(* event()->A7 >0)
 				last()->fill(* event()->A7, *event()->puweight );
 			else
 				last()->fill(- * event()->A7, - *event()->puweight );
 		}
+	addPlot("asymm dsig dA7 W deta geq 4 ","asymm A7","#DeltaEvents");
+	if(isgood && deta >= 4 && deta < 50)
+		if(event()->A7){
+			if(* event()->A7 >0)
+				last()->fill(* event()->A7, *event()->puweight );
+			else
+				last()->fill(- * event()->A7, - *event()->puweight );
+		}
+
+	float weight=0;
+	float adja7=0;
+	if(isgood&& event()->A7){
+		weight =*event()->puweight ;
+		adja7=* event()->A7;
+		if(* event()->A7 <0){
+			weight*=-1;
+			adja7*=-1;
+		}
+	}
+
+
+	addPlot("asymm dsig dA7 W deta>0","asymm A7","#DeltaEvents");
+	if(weight)
+		if(event()->A7){
+			if(* event()->A7 >0)
+				last()->fill(* event()->A7, *event()->puweight );
+			else
+				last()->fill(- * event()->A7, - *event()->puweight );
+		}
+	addPlot("asymm dsig dA7 W deta<0","asymm A7","#DeltaEvents");
+		if(isgood && deta < 0)
+			if(event()->A7){
+				if(* event()->A7 >0)
+					last()->fill(* event()->A7, *event()->puweight );
+				else
+					last()->fill(- * event()->A7, - *event()->puweight );
+			}
+
 
 	SETBINSRANGE(20,-1.1,1.1);
 	addPlot("dsig dA7 W deta 0-1","sin#phising#theta","Events");
@@ -190,7 +228,7 @@ void wControlplots_gen::makeControlPlotsPriv(){
 	if(jet && event()->genlepton && event()->puweight)
 		last()->fill(dR(jet,event()->genlepton),* event()->puweight );
 
-	SETBINSRANGE(100,0,5);
+	SETBINSRANGE(160,0,160);
 	addPlot("W mass","m_{l#nu} [GeV]","Events");
 	FILL(genW,m());
 

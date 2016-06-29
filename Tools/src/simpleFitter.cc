@@ -6,6 +6,7 @@
  */
 
 #include "../interface/simpleFitter.h"
+#include "../interface/formatter.h"
 #include <TROOT.h>
 #include <TMinuit.h>
 #include "Minuit2/MnStrategy.h"
@@ -379,6 +380,50 @@ corrMatrix simpleFitter::getCorrelationMatrix()const{
 	}
 	return out;
 }
+
+
+texTabler simpleFitter::makeCorrTable() const{
+
+	TString format=" l ";
+	histo2D corr;
+	fillCorrelationCoefficients(&corr);
+	for(size_t i=1;i<corr.getBinsX().size()-1;i++)
+		format+=" | c ";
+	texTabler tab(format);
+	if(!minsuccessful_)
+		return tab;
+
+	formatter Formatter;
+	for(size_t j=0;j<corr.getBinsY().size()-1;j++){
+		for(size_t i=0;i<corr.getBinsX().size()-1;i++){
+			//names
+			if(i && !j)
+				tab << "";//Formatter.translateName(parameternames_.at(i-1));
+			else if(j && !i)
+				if(paranames_.size()<j-1)
+					tab << paranames_.at(j-1);
+				else
+					tab<< "";
+			else if (!j && !i)
+				tab << "";
+			else if(i<=j){
+				float content=corr.getBinContent(i,j);
+				if(fabs(content)<0.3)
+					tab << Formatter.toFixedCommaTString(corr.getBinContent(i,j),0.01);
+				else
+					tab <<  "\\textbf{" +Formatter.toFixedCommaTString(corr.getBinContent(i,j),0.01) +"}";
+			}
+			else
+				tab << "";
+		}
+		tab<<texLine(); //row done
+	}
+
+	return tab;
+}
+
+
+
 graph simpleFitter::getContourScan(size_t i, size_t j)const{
 
 	return graph();

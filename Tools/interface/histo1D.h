@@ -201,6 +201,12 @@ public:
 	 */
 	void setAllZero();
 
+	/**
+	 * removes underflow/overflow in all syst layers and nominal
+	 *
+	 */
+	void removeUFOF();
+
 	TH1D * getTH1D(TString name="", bool dividebybinwidth=true, bool onlystat=false, bool nostat=false,const int& systidx=-1) const; //! returns a TH1D pointer with symmetrized errors (TString name); small bug with content(bin)=0 and error(bin)=0
 	TH1D * getTH1DSyst(TString name, size_t systNo, bool dividebybinwidth=true, bool statErrors=false) const;
 	TH1D * getAxisTH1D()const;
@@ -466,6 +472,8 @@ public:
 	 */
 	ztop::graph getDependenceOnSystematic(const size_t& bin, TString  sys,float offset=0,TString replacename="")const;
 
+
+	float getMean(float& err, int sys=-1)const;
 
 	/**
 	 * appends a container to the last bin

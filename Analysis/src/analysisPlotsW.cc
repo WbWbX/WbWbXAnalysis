@@ -31,7 +31,7 @@ float analysisPlotsW::calcAsymmReco(float& absdeta)const{
 
 	NTJet * jet = event()->hardjets->at(0);
 
-	absdeta=std::abs(muon->eta() - jet->eta());
+	absdeta=fabs(muon->eta() - jet->eta());
 
 	return asymmValue(muon,jet);
 
@@ -74,7 +74,7 @@ float analysisPlotsW::calcAsymmGen(float& absdeta)const{
 
 	if(!sjet)
 		return -99;
-	absdeta=std::abs(muon->eta() - sjet->eta());
+	absdeta=fabs(muon->eta() - sjet->eta());
 
 	return asymmValue(muon,sjet);
 }
@@ -92,7 +92,7 @@ float analysisPlotsW::calcMTReco(float& absdeta)const{
 
 	NTJet * jet = event()->hardjets->at(0);
 
-	absdeta=std::abs(muon->eta() - jet->eta());
+	absdeta=(muon->eta() - jet->eta());
 
 	return 60;
 
@@ -118,7 +118,9 @@ void analysisPlotsW::bookPlots(){
 	if(etaRanges_.size()<2)
 		throw std::out_of_range("analysisPlotsW::bookPlots: no deta range defined!");
 
-	std::vector<float> asymmbins=histo1D::createBinning(20,-1.4,1.4);
+	std::vector<float> asymmbins=histo1D::createBinning(18,-1.0,1.0);
+	asymmbins.insert(asymmbins.begin(),-1.2);
+	asymmbins.push_back(1.2); //make larger first and last bin to capture resolution effects
 	std::vector<float> mTbins      =histo1D::createBinning(50,10,130);
 
 	for(size_t i=0;i<etaRanges_.size()-1;i++){
@@ -136,6 +138,9 @@ void analysisPlotsW::bookPlots(){
 	asymmisofull_ = addPlot1D(asymmbins,"pttrans full deta", "pttrans","Events");
 	asymmnonisofull_ = addPlot1D(asymmbins,"pttrans_noiso full deta", "pttrans","Events");
 	mTnonisofull_ = addPlot1D(mTbins,"mT full deta","M_{T} [GeV]","Events") ;
+	//std::vector<float> detabins=histo1D::createBinning(23,-4.5,4.5);
+	simpleDataAsymm_=addPlot1D(etaRanges_,"asymmdata","#Delta#eta(l,j)","<2 p_{T}^{T} / M_{W}>");
+
 }
 
 void analysisPlotsW::fillPlotsReco(){

@@ -41,22 +41,25 @@ public:
 
 	enum fileforker_status{
 		ff_status_child_hold=0,
-		ff_status_child_busy=1,
-		ff_status_child_writing=2,
-		ff_status_child_success=3,
-		ff_status_child_generror=4,
-		ff_status_child_exception=5,
+		ff_status_child_busy,
+		ff_status_child_writing,
+		ff_status_child_success,
+		ff_status_child_generror,
+		ff_status_child_exception,
+		ff_status_child_aborted,
 
-		ff_status_parent_childstospawn=6,
-		ff_status_parent_success=7,
-		ff_status_parent_busy=8,
-		ff_status_parent_generror=9,
-		ff_status_parent_exception=10,
-		ff_status_parent_filewritten=11,
+		ff_status_parent_childstospawn,
+		ff_status_parent_success,
+		ff_status_parent_busy,
+		ff_status_parent_generror,
+		ff_status_parent_exception,
+		ff_status_parent_filewritten,
 
-		ff_status_allowwrite=12,
-		ff_status_askwrite=13
+		ff_status_allowwrite,
+		ff_status_askwrite
 	};
+
+
 
 
 	void setMaxChilds(size_t max){maxchilds_=max;}
@@ -85,6 +88,9 @@ public:
 	static bool debug;
 
 protected:
+
+	std::string translateStatus(const fileforker_status&)const;
+
 	/**
 	 * implement the initial creation of an output file
 	 * return true is successful

@@ -1039,6 +1039,14 @@ void histo1D::setAllZero(){
 
 }
 
+void histo1D::removeUFOF(){
+	if(bins_.size()<3)return;
+	for(int i=-1;i<(int)getSystSize();i++){
+		contents_.getBin(0,i).multiply(0);
+		contents_.getBin(bins_.size()-1,i).multiply(0);
+	}
+}
+
 /**
  * creates new TH1D and returns pointer to it
  *  getTH1D(TString name="", bool dividebybinwidth=true, bool onlystat=false)
@@ -2414,6 +2422,37 @@ graph histo1D::getDependenceOnSystematic(const size_t & bin, TString sys,float o
 	graph::g_makelist=makelist;
 	return out;
 }
+
+
+float histo1D::getMean(float& err, int sys)const{
+	float sumweightedbins=0,sumweights=0;
+	float sumweightedunc=0;
+	float weightnorm=0;
+	for(size_t bin=0;bin<bins_.size();bin++){
+		float weight=getBinContent(bin,sys);
+		weightnorm+=weight;
+	}
+	for(size_t bin=0;bin<bins_.size();bin++){
+		//weight is stat unc
+		float weight=getBinContent(bin,sys);
+		float xval=getBinCenter(bin);
+		float stat2=getBin(bin,sys).getStat2();
+		sumweightedbins+= xval*weight/weightnorm;
+		sumweights+=weight;
+		float errweight = xval*(weightnorm-weight)/(weightnorm*weightnorm);
+		errweight*=errweight;
+		errweight*=stat2;
+		sumweightedunc+= errweight; //weight/weightnorm * weight/weightnorm * stat2;
+	}
+	float mean=sumweightedbins;
+	err=std::sqrt(sumweightedunc);
+	err=-1; //needs to be tested further FIXME
+	return mean;
+}
+
+
+
+
 //protected
 
 TString histo1D::stripVariation(const TString &in) const{

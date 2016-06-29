@@ -36,6 +36,7 @@ public:
 private:
 
 	histo2D*  getHisto(const float & vara,const float & varb,const float & varc);
+	histo1D* getHisto1D(const float & vara,const float & varb,const float & varc);
 
 	void createBinning( const std::vector<float>& a, const std::vector<float>& b, const std::vector<float>& c);
 	std::vector<float>  makeBinning(std::vector<float> a)const;
@@ -46,10 +47,10 @@ private:
 	bool enabled_,signal_;
 
 	std::vector< std::vector< std::vector<histo2D* > > >hists_;
+	std::vector< std::vector< std::vector<histo1D* > > >hists1D_;
 	std::vector<float> binsa_,binsb_,binsc_;
 
 	size_t get1DIndex(const float & val, const std::vector<float> &)const;
-	size_t getIndex(const size_t& a, const size_t& b, const size_t& c)const;
 
 	std::vector<float> makeBins(float lowtha, float lowthb, float lowthc)const;
 

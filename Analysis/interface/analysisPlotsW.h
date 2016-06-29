@@ -16,10 +16,10 @@ public:
 	analysisPlotsW(size_t step):analysisPlots(step),
 	isiso_(false),
 	asymmisofull_(0),asymmnonisofull_(0),
-	mTnonisofull_(0)
+	mTnonisofull_(0),
+	simpleDataAsymm_(0)
 	{
-		etaRanges_ << 0 << 0.4 << 0.8 << 1.2 << 1.6 << 2. << 2.4 << 2.8 << 3.2 << 3.6; //just for testing use only one
-
+		etaRanges_ << 0  << 0.6  << 1.2 << 1.8 << 2.4 <<  3.0 << 3.6; //just for testing use only one
 	}
 
 
@@ -29,6 +29,7 @@ public:
 
 	void setIsIso(const bool & is){isiso_=is;}
 
+	void createMeanPlots(){}
 
 	template <class T, class U>
 	static float asymmValue(T,U,bool invert=true);
@@ -45,6 +46,9 @@ private:
 	std::vector< histo1D* >
 	mTnoniso_;
 	histo1D* mTnonisofull_;
+
+	histo1D* simpleDataAsymm_;
+
 
 	static double WMASS;
 

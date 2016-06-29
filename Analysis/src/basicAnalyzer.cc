@@ -119,7 +119,7 @@ fileForker::fileforker_status basicAnalyzer::runParallels(int interval){
 	int counter=0;
 	interval*=4; //to make it roughly seconds
 
-	double killthreshold=300;
+	double killthreshold=600; //seconds. Kill after 10 Minutes without notice
 
 	time_t now;
 	time_t started;
@@ -135,14 +135,15 @@ fileForker::fileforker_status basicAnalyzer::runParallels(int interval){
 			time(&now);
 			double runningseconds = fabs(difftime(started,now));
 			std::cout << "PID    "<< textFormatter::fixLength("Filename",50)                << " statuscode " << " progress " <<std::endl;
+			int totalstatus=0;
 			for(size_t i=0;i<infiles_.size();i++){
-
+				totalstatus+=getBusyStatus(i);
 				double percentpersecond=getBusyStatus(i)/runningseconds;
 				double estimate=(100-getBusyStatus(i))/percentpersecond;
-				std::cout << textFormatter::fixLength(toString(getChildPids().at(i)),6)
-				<< " "<< textFormatter::fixLength(infiles_.at(i).Data(),50)
-				<< "     " << getStatus(i) <<"     "
-				<< "   " << textFormatter::fixLength(toString(getBusyStatus(i))+"%",4,false);
+				std::cout << textFormatter::fixLength(toString(getChildPids().at(i)),7)
+				<< textFormatter::fixLength(infiles_.at(i).Data(),50)
+				<< textFormatter::fixLength(translateStatus(getStatus(i)), 15)
+				<< textFormatter::fixLength(toString(getBusyStatus(i))+"%",4,false);
 				if(getBusyStatus(i)>4 && getStatus(i) == ff_status_child_busy){
 					std::cout  <<" ETA: ";
 					int minutes=estimate/60;
@@ -150,7 +151,7 @@ fileForker::fileforker_status basicAnalyzer::runParallels(int interval){
 							std::setw(2) << std::setfill('0')<<(int)(estimate - minutes*60) ;
 				}
 				std::cout <<std::endl;
-				if(lastBusyStatus.at(i)!=getBusyStatus(i)){
+				if(lastBusyStatus.at(i)!=getBusyStatus(i) || getStatus(i) != ff_status_child_busy){
 					lastBusyStatus.at(i)=getBusyStatus(i);
 					lastAliveSignals.at(i)=runningseconds;
 				}
@@ -162,6 +163,9 @@ fileForker::fileforker_status basicAnalyzer::runParallels(int interval){
 					}
 				}
 			}
+			std::cout << "total\n"<<std::endl;
+			displayStatusBar(totalstatus,100* infiles_.size() ,50,true);
+			std::cout << std::endl;
 			std::cout << std::endl;
 			counter=0;
 		}
@@ -171,7 +175,7 @@ fileForker::fileforker_status basicAnalyzer::runParallels(int interval){
 	std::cout << "End report:" <<std::endl;
 	std::cout << textFormatter::fixLength("Filename",30)                << " statuscode " << " progress " <<std::endl;
 	for(size_t i=0;i<infiles_.size();i++)
-		std::cout << textFormatter::fixLength(infiles_.at(i).Data(),50) << "     " << getStatus(i) <<"     " << "   " << getBusyStatus(i)<<"%"<<std::endl;
+		std::cout << textFormatter::fixLength(infiles_.at(i).Data(),50) << "     " << textFormatter::fixLength(translateStatus(getStatus(i)),15) <<"     " << "   " << getBusyStatus(i)<<"%"<<std::endl;
 	std::cout << std::endl;
 
 

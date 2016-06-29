@@ -26,14 +26,16 @@ void wReweightingPlots::bookPlots(){
 
 	//hidden in createBinning
 
-	std::vector<float> dy=histo1D::createBinning(4,-5,5);
+	std::vector<float> dy=histo1D::createBinning(10,-4,4);
 	std::vector<float> ptW;
-	ptW << 0 << 20 << 40 << 60 << 300;
+	ptW << 0 << 20 << 30 << 40 << 300;
 	std::vector<float> dummy; //for additional subvar
 
 	histo2D::c_makelist=true;
+	histo1D::c_makelist=true;
 	createBinning(dy,ptW,dummy);
 	histo2D::c_makelist=false;
+	histo1D::c_makelist=false;
 
 
 }
@@ -48,15 +50,31 @@ void wReweightingPlots::fillPlots(){
 	if(!event()->costheta_cs) return;
 	if(!event()->phi_cs) return;
 
-	if(event()->genjets->at(0)->pt()<50) return; ///jet pt cut
+	//if(event()->genjets->at(0)->pt()<50) return; ///jet pt cut
+	//if(event()->genW->q()<0)return; //only check W+ as test //DEBUG
 
-
-	float detaWj=event()->genW->eta()-event()->genjets->at(0)->eta();
+	float detaWj=(event()->genW->eta()-event()->genjets->at(0)->eta());
+	//detaWj*=(float)event()->genW->q();
+	//if(event()->genW->eta() < 0)
+	//	detaWj*=-1;
+	//detaWj*=
+	float phi=* event()->phi_cs ;
+	float costheta=* event()->costheta_cs;
 	float dummy=0;
+	//float multia= event()->genW->q()<0? 1: -1;
+	//float multib= detaWj? 1: -1;
+
+
+	//costheta*=multia*multib;
+	//phi*=multia*multib;
+
 
 	histo2D *h=getHisto(detaWj,event()->genW->pt(),dummy);
 
-	h->fill(* event()->costheta_cs,* event()->phi_cs ,* event()->puweight);
+	h->fill(costheta ,phi ,* event()->puweight);
+
+	if(!event()->A7) return;
+	getHisto1D(detaWj,event()->genW->pt(),dummy)->fill(*event()->A7,* event()->puweight);
 
 }
 
@@ -71,10 +89,13 @@ void wReweightingPlots::createBinning( const std::vector<float>& a, const std::v
 	clearHists();
 
 	hists_.resize(binsa_.size());
+	hists1D_.resize(binsa_.size());
 	for(size_t i=0;i<binsa_.size();i++){
 		hists_.at(i).resize(binsb_.size());
+		hists1D_.at(i).resize(binsb_.size());
 		for(size_t j=0;j<binsb_.size();j++){
 			hists_.at(i).at(j).resize(binsc_.size(),0);
+			hists1D_.at(i).at(j).resize(binsc_.size(),0);
 		}
 	}
 
@@ -92,7 +113,8 @@ void wReweightingPlots::createBinning( const std::vector<float>& a, const std::v
 				name+=toTString( binsc_.at(k) )+":"+toTString( binsc_.at(k+1) );
 
 
-				hists_.at(i).at(j).at(k) =  new histo2D(binsth,binsphi,name,"cos#theta","#phi", "Entries", true);
+				hists_.at(i).at(j).at(k) =  new histo2D(binsth,binsphi,name,"cos#theta","#phi", "Entries", false);
+				hists1D_.at(i).at(j).at(k) =  new histo1D(histo1D::createBinning(11,-1.1,1.1),"1D_"+name,"sin#phisin#theta","Events",true);
 			}
 		}
 	}
@@ -117,45 +139,31 @@ histo2D*  wReweightingPlots::getHisto(const float & vara,const float & varb,cons
 	return hists_.at(ai).at(bi).at(ci);
 }
 
+histo1D*  wReweightingPlots::getHisto1D(const float & vara,const float & varb,const float & varc){
+	size_t ai=get1DIndex(vara,binsa_);
+	size_t bi=get1DIndex(varb,binsb_);
+	size_t ci=get1DIndex(varc,binsc_);
+	return hists1D_.at(ai).at(bi).at(ci);
+}
 size_t wReweightingPlots::get1DIndex(const float & var, const std::vector<float> &bins)const{
 
 	binFinder<float> fb(bins);
 	fb.setMergeUFOF(true);
 	return fb.findBin(var);
-/*
-	if(bins_.size()<1){
-		return 0;
-	}
-	if(bins_.size() <2){
-		return 0;
-	}
-	size_t binno=0;
-	std::vector<float>::const_iterator it=std::lower_bound(bins_.begin()+1, bins_.end(), var);
-	if(var==*it)
-		binno= it-bins_.begin();
-	else
-		binno= it-bins_.begin()-1;
-	//no underflow or overflow, merge all in last/first
-	if(binno==0){
-		binno++;
-	}
-	else if(binno == bins_.size()-1){
-		binno--;
-	}
-	return binno;*/
-}
-size_t wReweightingPlots::getIndex(const size_t& a, const size_t& b, const size_t& c)const{
-	//the 0 indicies don't matter here!!
-
-	return 1;//think of something
 
 }
+
 void wReweightingPlots::clearHists(){
 	for(size_t i=0;i<hists_.size();i++)
 		for(size_t j=0;j<hists_.at(i).size();j++)
 			for(size_t k=0;k<hists_.at(i).at(j).size();k++)
 				if(hists_.at(i).at(j).at(k)) delete hists_.at(i).at(j).at(k);
 	hists_.clear();
+	for(size_t i=0;i<hists1D_.size();i++)
+		for(size_t j=0;j<hists1D_.at(i).size();j++)
+			for(size_t k=0;k<hists1D_.at(i).at(j).size();k++)
+				if(hists1D_.at(i).at(j).at(k)) delete hists1D_.at(i).at(j).at(k);
+	hists1D_.clear();
 }
 
 }

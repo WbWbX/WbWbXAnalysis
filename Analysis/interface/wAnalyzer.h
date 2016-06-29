@@ -36,8 +36,9 @@ public:
 	wNLOReweighter * getNLOReweighter(){return &nlorew_;}
 	const wNLOReweighter * getNLOReweighter()const {return &nlorew_;}
 
-
 private:
+
+	void pairLeptons( std::vector<NTGenParticle*> * v, NTGenParticle*& lep, NTGenParticle*& neutr)const;
 
 	fileForker::fileforker_status writeOutput();
 

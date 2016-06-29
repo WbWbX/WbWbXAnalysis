@@ -1,0 +1,218 @@
+$?cfg
+
+[plotterControlPlot]
+
+    divideat = 0.3
+    invertplots = false
+    PSMigThreshold =  0.001   $this is not %!
+    ySpaceMulti = 1.3
+
+[end - plotterControlPlot]
+ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  
+[textBoxes - boxes]
+
+[end - textBoxes]
+
+ [legendStyle]
+
+        x0  =  0.62
+	y0  =  0.22
+	x1  =  0.86
+	y1  =  0.88
+
+	
+	nColumns        = 1
+	columnSeparator = 0.1
+
+[end legendStyle]
+
+
+[containerStyle - MCUpperMigrations]
+	 
+	fillStyle    = 3002
+	$legendDrawStyle implicit
+ 
+[end containerStyle]
+
+[containerStyle - DataUpper]
+    
+    $same for ratio plot and control plot
+    
+	markerSize   = 1
+    markerStyle  = 20
+    markerColor  = 1
+ 
+    lineSize     = 1
+    lineStyle    = 1 
+    lineColor    = 1 $ will be changed for each sample
+
+    fillStyle    = 1001
+    fillColor    = 1 $ will be changed for each sample
+    
+    sysFillStyle = 1001
+    sysFillColor = 1
+
+    rootDrawOpt  = P
+    sysRootDrawOpt  = 0e1
+    drawStyle    = normal $ can be other options (TBI)
+    
+    legendDrawStyle = pe
+    
+ [end containerStyle]
+ [containerStyle - DataRatio]
+    
+    $same for ratio plot and control plot
+    
+    markerSize   = 1
+    markerStyle  = 20
+    markerColor  = 1
+ 
+    lineSize     = 1
+    lineStyle    = 1 
+    lineColor    = 1 
+
+    fillStyle    = 1001
+    fillColor    = 1
+    sysFillStyle = 1001
+    sysFillColor = 1
+
+    rootDrawOpt  = 0Pe1X0
+    sysRootDrawOpt  = 0e1
+    
+    drawStyle    = normal $ can be other options (TBI)
+    
+    legendDrawStyle = pe $not used
+    
+    
+ [end containerStyle]
+ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ [containerStyle - MCUpper]
+    
+    $same for ratio plot and control plot
+    
+    markerSize   = 0
+    markerStyle  = 20
+    markerColor  = 1
+ 
+    lineSize     = 1
+    lineStyle    = 1 
+    lineColor    = 1 $ will be changed for each sample
+
+    fillStyle    = 1001
+    fillColor    = 1 $ will be changed for each sample
+    
+    sysFillStyle = 3345
+    sysFillColor = 1
+
+    rootDrawOpt  = q  $ q does nothing
+    sysRootDrawOpt  = e2
+    drawStyle    = normal $ can be other options (TBI)
+    
+    legendDrawStyle = f
+    
+ [end containerStyle]
+ [containerStyle - MCRatio]
+    
+    
+    markerSize   = 0
+    markerStyle  = 26
+    markerColor  = 632
+ 
+    lineSize     = 0
+    lineStyle    = 1 
+    lineColor    = 632 
+
+    fillStyle    = 1001 $3004
+    fillColor    = 920 
+
+    sysFillStyle = 3345
+    sysFillColor = 1
+
+    rootDrawOpt  = e2 
+    sysRootDrawOpt  = e2
+    drawStyle    = normal $ can be other options (TBI)
+    
+    
+    legendDrawStyle = f $not used
+    
+ [end containerStyle]
+ 
+  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+[plotStyle - Upper]
+
+    bottomMargin  = 0.03
+    topMargin     = 0.1
+    leftMargin    = 0.15
+    rightMargin   = 0.1
+    
+    $both not used right now
+    
+    divideByBinWidth  = true
+    horizontal        = false
+    
+    $$ axis styles
+    
+    xaxis.titleSize   = 0.06
+    xaxis.labelSize   = 0.0
+    xaxis.titleOffset = 0.8
+    xaxis.labelOffset = 0.005
+    xaxis.tickLength  = 0.03
+    xaxis.ndiv        = 510
+    xaxis.max         = -1
+    xaxis.min         = 1
+    xaxis.log         = false
+    xaxis.name        = USEDEF
+    
+    
+    yaxis.titleSize   = 0.06
+    yaxis.labelSize   = 0.05
+    yaxis.titleOffset = 1
+    yaxis.labelOffset = 0.005
+    yaxis.tickLength  = 0.03
+    yaxis.ndiv        = 510
+    yaxis.max         = -2
+    yaxis.min         = -1
+    yaxis.log         = false
+    yaxis.name        = USEDEF
+    
+[end plotStyle]
+  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+[plotStyle - Ratio]
+    
+    bottomMargin  = 0.45
+    topMargin     = 0.01
+    leftMargin    = 0.15
+    rightMargin   = 0.1
+    
+    $both not used right now
+    
+    divideByBinWidth  = false
+    horizontal        = false
+    
+    $$ axis styles
+    
+    xaxis.titleSize   = 0.06
+    xaxis.labelSize   = 0.05
+    xaxis.titleOffset = 0.9
+    xaxis.labelOffset = 0.005
+    xaxis.tickLength  = 0.03
+    xaxis.ndiv        = 510
+    xaxis.max         = -1
+    xaxis.min         = 1
+    xaxis.log         = false
+    xaxis.name        = USEDEF
+    
+    yaxis.titleSize   = 0.06
+    yaxis.labelSize   = 0.05
+    yaxis.titleOffset = 0.95
+    yaxis.labelOffset = 0.005
+    yaxis.tickLength  = 0.03
+    yaxis.ndiv        = 505
+    yaxis.max         = 1.14
+    yaxis.log         = false
+    yaxis.min         = 0.86
+    yaxis.name        = #frac{obs}{pred}
+    
+[end plotStyle]
