@@ -365,14 +365,21 @@ if runOnMC :
 
 elif not runOnAOD:
      from TopAnalysis.ZTopUtils.NoiseFilter_cfi import noiseFilter
-     process.cscFilter=noiseFilter.clone(src = cms.InputTag('TriggerResults','','RECO'),flag=cms.string("Flag_CSCTightHalo2015Filter"))
+     process.cscFilter=noiseFilter.clone(src = cms.InputTag('TriggerResults','','RECO'),flag=cms.string("Flag_globalTightHalo2016Filter"))
      process.vertexFilter=noiseFilter.clone(src = cms.InputTag('TriggerResults','','RECO'),flag=cms.string("Flag_goodVertices"))
      process.badSCFilter=noiseFilter.clone(src=cms.InputTag('TriggerResults','','RECO'),flag=cms.string("Flag_eeBadScFilter"))
      process.HBHENoiseFilter=noiseFilter.clone(src=cms.InputTag('TriggerResults','','RECO'),flag=cms.string("Flag_HBHENoiseFilter"))
      process.HBHENoiseIsoFilter=noiseFilter.clone(src=cms.InputTag('TriggerResults','','RECO'),flag=cms.string("Flag_HBHENoiseIsoFilter"))
      process.ecalDeadCellFilter=noiseFilter.clone(src=cms.InputTag('TriggerResults','','RECO'),flag=cms.string("Flag_EcalDeadCellTriggerPrimitiveFilter"))
-#     process.chargedHadronTrackFilter=noiseFilter.clone(src=cms.InputTag('TriggerResults','','RECO'),flag=cms.string("Flag_chargedHadronTrackResolutionFilter"))
- #    process.muonBadTrackFilter=noiseFilter.clone(src=cms.InputTag('TriggerResults','','RECO'),flag=cms.string("Flag_muonBadTrackFilter"))
+
+     process.load('RecoMET.METFilters.BadChargedCandidateFilter_cfi')
+     process.BadChargedCandidateFilter.muons = cms.InputTag("slimmedMuons")
+     process.BadChargedCandidateFilter.PFCandidates = cms.InputTag("packedPFCandidates")
+
+     process.load('RecoMET.METFilters.BadPFMuonFilter_cfi')
+     process.BadPFMuonFilter.muons = cms.InputTag("slimmedMuons")
+     process.BadPFMuonFilter.PFCandidates = cms.InputTag("packedPFCandidates")
+
 
 
      from TopAnalysis.ZTopUtils.TriggerFilter_cfi import triggerOrFilter
@@ -393,9 +400,9 @@ elif not runOnAOD:
          process.cscFilter*
          process.vertexFilter*
          process.badSCFilter*
-         process.ecalDeadCellFilter
-  #       process.chargedHadronTrackFilter*
-   #      process.muonBadTrackFilter
+         process.ecalDeadCellFilter*
+         process.BadChargedCandidateFilter*
+         process.BadPFMuonFilter
      )
      if dataset== "emu":
          process.prefilterSequence+=process.emuTriggerFilter

@@ -295,7 +295,7 @@ void  top_analyzer_run2::analyze(size_t anaid){
 	analysisPlotsMlbMt mlbmtplots_step8(8);
 	analysisPlotsTtbarXsecFit xsecfitplots_step8(8);
 
-	//xsecfitplots_step8.enable();
+	xsecfitplots_step8.enable();
 	mlbmtplots_step8.enable();
 	mlbmtplots_step8.bookPlots();
 	xsecfitplots_step8.enable();
@@ -375,10 +375,10 @@ void  top_analyzer_run2::analyze(size_t anaid){
 	//agrohsje/tarndt include jes at ana level for testing 
 	NTJES jescorr = NTJES();
 	//took files from https://twiki.cern.ch/twiki/bin/view/CMS/JECDataMC
-	const TString* dataJECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Analysis/data/analyse/Fall15_25nsV2_DATA_L2L3Residual_AK4PFchs.txt");
-	const TString* mcL1JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Analysis/data/analyse/Fall15_25nsV2_MC_L1FastJet_AK4PFchs.txt");
-	const TString* mcL2JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Analysis/data/analyse/Fall15_25nsV2_MC_L2Relative_AK4PFchs.txt");
-	const TString* mcL3JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Analysis/data/analyse/Fall15_25nsV2_MC_L3Absolute_AK4PFchs.txt");
+	const TString* dataJECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Analysis/data/analyse/Spring16_25nsV3_DATA_L2L3Residual_AK4PFchs.txt");
+	const TString* mcL1JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Analysis/data/analyse/Spring16_25nsV3_MC_L1FastJet_AK4PFchs.txt");
+	const TString* mcL2JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Analysis/data/analyse/Spring16_25nsV3_MC_L2Relative_AK4PFchs.txt");
+	const TString* mcL3JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Analysis/data/analyse/Spring16_25nsV3_MC_L3Absolute_AK4PFchs.txt");
 
 	jescorr.setFilesCorrection(mcL1JECFile,mcL2JECFile,
 			mcL3JECFile,dataJECFile,(const bool) isMC);
@@ -878,7 +878,9 @@ void  top_analyzer_run2::analyze(size_t anaid){
 			lepweight*=getMuonSF()->getScalefactor(fabs(seclep->eta()),seclep->pt());
 			//agrohsje not used for time being
 			//lepweight*=getTrackingSF()->getScalefactor((seclep->eta()));
-			lepweight*=getTriggerSF()->getScalefactor(fabs(firstlep->eta()),fabs(seclep->eta()));
+			// tarndt 2016
+                        //lepweight*=getTriggerSF()->getScalefactor(fabs(firstlep->eta()),fabs(seclep->eta()));
+                        if(isMC) lepweight*=0.885;
 		}
 
 		//channel defined
@@ -1449,8 +1451,10 @@ void  top_analyzer_run2::analyze(size_t anaid){
 bool top_analyzer_run2::checkTrigger(std::vector<bool> * p_TriggerBools,ztop::NTEvent * pEvent, bool isMC,size_t anaid)
 {
 	if(b_emu_){
-		if(!(p_TriggerBools->at(35) || p_TriggerBools->at(37) || p_TriggerBools->at(39) || p_TriggerBools->at(40) || p_TriggerBools->at(41)) )
-			return false;
+		//tarndt 2016
+                //if(!(p_TriggerBools->at(35) || p_TriggerBools->at(37) || p_TriggerBools->at(39) || p_TriggerBools->at(40) || p_TriggerBools->at(41)) )
+			//return false
+                return true;
 	}
 	else if(b_mumu_){
 		if(! (p_TriggerBools->at(29)||p_TriggerBools->at(27)|| p_TriggerBools->at(39) || p_TriggerBools->at(40)  )) return false;
