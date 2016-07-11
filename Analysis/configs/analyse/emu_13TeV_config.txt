@@ -9,21 +9,17 @@ $  [parameters-begin] until [parameters-end]
 
 $ inputfile,                       legend entry,        color,   xsection,   legendNumber (for sorting,- allows for gaps),  (opt) isSignal
 
-   tree_13TeV_data_emu.root,              data,                1,        1,              99
-   tree_13TeV_data_emu_RunC.root,              data,                1,        1,              99
+   tree_13Tev_data_MuonEG_trigger.root,              data,                1,        1,              99
 $tree_13Tev_data_MET_RunC.root,              data,                1,        1,              99
 $tree_13Tev_data_MET.root,              data,                1,        1,              99
-$MuonEG_Trigger.root,               data,                1,        1,              99
-    tree_13TeV_data_singleEle.root,             data,                1,        1,              99
-    tree_13TeV_data_singleEle_RunC.root,            data,                1,        1,              99
-    tree_13TeV_data_singleMu.root,            data,                1,        1,              99
-    tree_13TeV_data_singleMu_RunC.root,            data,                1,        1,              99
+$    tree_13TeV_data_singleEle.root,             data,                1,        1,              99
+$    tree_13TeV_data_singleEle_RunC.root,            data,                1,        1,              99
+$    tree_13TeV_data_singleMu.root,            data,                1,        1,              99
+$    tree_13TeV_data_singleMu_RunC.root,            data,                1,        1,              99
 
 $ add tag "_mgbr" if W->lnu BR is 11.104% and not 10.620% 
-$tree_13TeV_emuttbar_amc_mgbr.root,     t#bar{t},		633,	  831.76,	  0,      true   
-$tree_13TeV_emuttbarbg_amc_mgbr.root,   t#bar{t}bg,		634,	  831.76,	  1,         
-$tree_13TeV_emuttbar_her.root,          t#bar{t},		633,      831.76,	  0,      true   
-$tree_13TeV_emuttbarbg_her.root,        t#bar{t}bg,	   	634,	  831.76,	  1
+$tree_13TeV_emuttbar_ttscaleup_alphas.root,     t#bar{t},		633,	  831.76,	  0,      true   
+$tree_13TeV_emuttbarbg_ttscaleup_alphas.root,   t#bar{t}bg,		634,	  831.76,	  1,         
    tree_13TeV_emuttbar.root,          t#bar{t},		633,      831.76,	  0,      true   
    tree_13TeV_emuttbarbg.root,        t#bar{t}bg,	   	634,	  831.76,	  1
 
@@ -49,10 +45,9 @@ $Sync.root,           t#bar{t},           633,      831.76,         0,      true
 [parameters-begin] 
 $$ all directories except for inputfiles are relative to $CMSSW_BASE
 
-inputFilesDir   = /nfs/dust/cms/user/tarndt/NTuples/Prod_763/ 
-$inputFilesDir  = /nfs/dust/cms/user/agrohsje/samples/cms/ttxsec_2015_goodvtx/ 
+inputFilesDir   = /nfs/dust/cms/user/tarndt/NTuples/Prod_806/ 
 
-Lumi            = 2225 $2109  $64.78  41.6
+Lumi            = 2071 
 
 JECFile         = /src/TtZAnalysis/Analysis/data/analyse/Fall15_25nsV2_DATA_UncertaintySources_AK4PFchs.txt 
                                                          
@@ -69,7 +64,7 @@ TriggerSFFile   = /src/TtZAnalysis/Analysis/data/analyse/triggerSummary_emu_13Te
 
 $without .root
 $PUFile         = /src/TtZAnalysis/Analysis/data/analyse/Legacy2012.json_PU  
-PUFile          = /src/TtZAnalysis/Analysis/data/analyse/2015D.json_PU 
+PUFile          = /src/TtZAnalysis/Analysis/data/analyse/2016.json_PU 
 $PUFile         = /src/TtZAnalysis/Analysis/data/analyse/nvtx_data_2015 
 $PUFile         = /src/TtZAnalysis/Analysis/data/analyse/ngoodvtx_data_2015 
 
@@ -81,6 +76,6 @@ btagFile        = btags_74
 
 $modeOptions = GsfelectronsNotoppt
 $modeOptions = GsfelectronsNotopptNoweights
-$modeOptions = GsfelectronsNozcutNometcutNotopptNobcut
-modeOptions = GsfelectronsZerojetNozcutNometcutNobcutNotoppt
+modeOptions = GsfelectronsNozcutNometcutNotoppt
+$modeOptions = GsfelectronsZerojetNozcutNometcutNobcutNotoppt
 [parameters-end]
