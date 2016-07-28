@@ -25,6 +25,9 @@ invokeApplication(){
 
 	const std::string config=CMSSWBASE+"/src/TtZAnalysis/Analysis/configs/submitjobs/"+
 			parser->getOpt<std::string>("i","","config file");
+
+	const bool dummyrun=parser->getOpt<bool>("-dummy",false,"dummy run. Does not submit jobs");
+
 	std::vector<std::string> args=parser->getRest<std::string>();
 	parser->doneParsing();
 	if(config.length()<1 || args.size()<1)
@@ -84,11 +87,17 @@ invokeApplication(){
 	const int npdf=fr.getValue<int>("npdf",0);
 	if(npdf>0)
 		for(size_t i=0;i<(size_t)npdf;i++){
-			if(!i)
-				systematics.push_back("PDF_sysnominal");
-			else{
-				systematics.push_back("PDF_sysnominal_PDF"+toString(i)+"_down");
-				systematics.push_back("PDF_sysnominal_PDF"+toString(i)+"_up");
+			if(analyzertype=="top"){
+				if(!i)
+					systematics.push_back("PDF_sysnominal");
+				else{
+					systematics.push_back("PDF_sysnominal_PDF"+toString(i)+"_down");
+					systematics.push_back("PDF_sysnominal_PDF"+toString(i)+"_up");
+				}
+			}
+			else if(analyzertype=="W"){
+				systematics.push_back("PDF"+toString(i)+"_down");
+				systematics.push_back("PDF"+toString(i)+"_up");
 			}
 		}
 
@@ -149,7 +158,7 @@ invokeApplication(){
 		}
 	}
 
-
+	js->setIsDummy(dummyrun);
 	js->start();
 
 	delete js;

@@ -18,7 +18,7 @@ namespace ztop{
 
 class wReweightingPlots {
 public:
-	wReweightingPlots():evt_(0),enabled_(false),signal_(false),transf_(8000){}
+	wReweightingPlots():evt_(0),enabled_(false),signal_(false),transf_(8000),save1D_(false),wonly_(false){}
 	~wReweightingPlots(){
 		clearHists();
 	}
@@ -32,6 +32,10 @@ public:
 	void enable(bool en=true){enabled_=en;}
 
 	void setSignal(bool sig=true){signal_=sig;}
+
+	void setSafe1D(bool set){save1D_=set;}
+
+	void setWKinematicsOnly(bool set){wonly_=set;}
 
 private:
 
@@ -57,7 +61,8 @@ private:
 	void clearHists();
 
 	HTransformToCS transf_;
-
+	bool save1D_;
+	bool wonly_;
 };
 
 

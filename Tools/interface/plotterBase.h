@@ -27,6 +27,9 @@ namespace ztop{
 /**
  * applies styles to TGraphs,TH1Ds, (TCanvas etc)
  */
+
+class histo1D;
+
 class plotterBase :protected tObjectList{
 public:
     plotterBase():tObjectList(), title_(""),tbndc_(true),lastplotidx_(0),
@@ -137,6 +140,7 @@ protected:
      */
     void convertUserCoordsToNDC(TVirtualPad *subpad, const float & ux, const float & uy, float& ndcx, float& ndcy)const;
 
+    virtual bool plotIsApproxSymmetric(float thresh)const=0;
 
     legendStyle legstyle_;
     bool tbndc_; //used for drawing text boxes if defined
@@ -150,6 +154,8 @@ protected:
     const corrMatrix* corrm_;
 
     float yspacemulti_;
+
+    std::string symmetric_styleadd_;
 
 private:
     TVirtualPad * pad_;

@@ -23,7 +23,7 @@ class histoBin{
 public:
 	histoBin():content_(0),entries_(0),stat2_(0){}//,name_(""){}
 	histoBin(const TString& name):content_(0),entries_(0),stat2_(0){}//,name_(name){
-		//cutName();
+	//cutName();
 	//}
 	~histoBin(){}
 	histoBin(const histoBin& rhs){
@@ -33,6 +33,10 @@ public:
 		copyFrom(rhs);
 		return *this;
 	}
+	histoBin & operator+=(const histoBin& rhs);
+	histoBin  operator+(const histoBin& rhs)const;
+	void add(const histoBin&);
+
 
 	const float & getContent() const {return content_;}
 	float getStat()            const {return std::sqrt(stat2_);}
@@ -51,7 +55,6 @@ public:
 	void addToStat2(const float &);
 	void addEntry();
 
-	void add(const histoBin&);
 
 	//void setName(const TString & name){name_=name;cutName();}
 	//const TString & getName() const {return name_;}
@@ -88,6 +91,7 @@ private:
 	float stat2_;
 	//TString name_;
 };
+
 
 inline void histoBin::setContent(const float & val){
 	content_=val;
@@ -167,12 +171,12 @@ public:
 	const histoBin & getBin(size_t binno) const {return bins_[binno];}
 	size_t size() const {return bins_.size();}
 
-/*
+	/*
 	void setName(const TString & name);
 	const TString & getName(){return name_;}
 	void setLayer(const int& Layer){layer_=Layer;}
 	int getLayer() const {return layer_;}
-*/
+	 */
 	int add(const histoBins&,bool statCorr);
 	int subtract(const histoBins&,bool statCorr);
 	int divide(const histoBins&,bool statCorr);

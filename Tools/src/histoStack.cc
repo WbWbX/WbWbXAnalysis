@@ -610,7 +610,7 @@ void histoStack::addRelErrorToContributions(double err, const std::vector<size_t
 		if(contribidxs.at(i)>=size())
 			throw std::out_of_range("histoStack::addRelErrorToContributions: at least one index out of range");
 	}
-	float errinv=1/err;
+	float errinv=1-1/(1+err);
 	if(!err) errinv=0;
 	for(size_t i=0;i<containers_.size();i++){
 		if(std::find(contribidxs.begin(),contribidxs.end(),i) == contribidxs.end()) continue;
@@ -737,16 +737,16 @@ void histoStack::addErrorStack(const TString & sysname,const histoStack& errorst
 			}
 			if(i<containers1DUnfold_.size() && j<errorstack.containers1DUnfold_.size() ){
 				if(containers1DUnfold_[i].addErrorContainer(sysname,errorstack.containers1DUnfold_[j])<0){
-					std::cout << "containerStack::addErrorStack: Problem in " << name_ <<std::endl;
+					std::cout << "histoStack::addErrorStack: Problem in " << name_ <<std::endl;
 				}
 			}
 		}//legfound
 		/*} */
 		else{ //if(!found)
 			if(addErrorsStrict){
-				throw std::runtime_error("containerStack::addErrorStack: legend in one stack not found. To allow this, switch containerStack::addErrorsStrict to false");
+				throw std::runtime_error((std::string)"histoStack::addErrorStack: legend in one stack "+(std::string)name_.Data()+ (std::string)" not found. To allow this, switch histoStack::addErrorsStrict to false");
 			}
-			std::cout << "containerStack::addErrorStack: "<< name_ << " legend " << legends_[i] << " not found. adding 0 error!" << std::endl;
+			std::cout << "histoStack::addErrorStack: "<< name_ << " legend " << legends_[i] << " not found. adding 0 error!" << std::endl;
 			if(i<containers_.size()){
 				containers_[i].addErrorContainer(sysname,containers_[i]);
 			}
@@ -759,7 +759,7 @@ void histoStack::addErrorStack(const TString & sysname,const histoStack& errorst
 		}
 	}
 	if(debug)
-		std::cout << "containerStack::addErrorStack: " << name_ << " done"<<std::endl;
+		std::cout << "histoStack::addErrorStack: " << name_ << " done"<<std::endl;
 }
 
 void histoStack::getRelSystematicsFrom(const ztop::histoStack & stack){
@@ -767,7 +767,7 @@ void histoStack::getRelSystematicsFrom(const ztop::histoStack & stack){
 		for(unsigned int i=0;i<legends_.size();i++){
 			if(legends_[i] == stack.legends_.at(j)){
 				if(debug)
-					std::cout << "containerStack::getRelSystematicsFrom: adding to stack " << name_ << std::endl;
+					std::cout << "histoStack::getRelSystematicsFrom: adding to stack " << name_ << std::endl;
 				if(i<containers_.size() && j<stack.containers_.size())
 					containers_[i].getRelSystematicsFrom(stack.containers_.at(j));
 				if(i<containers2D_.size() && j<stack.containers2D_.size())
@@ -788,7 +788,7 @@ void histoStack::addRelSystematicsFrom(const ztop::histoStack & stack,bool ignor
 		for(unsigned int i=0;i<legends_.size();i++){
 			if(legends_[i] == stack.legends_.at(j)){
 				if(debug)
-					std::cout << "containerStack::addRelSystematicsFrom: adding to stack " << name_ << std::endl;
+					std::cout << "histoStack::addRelSystematicsFrom: adding to stack " << name_ << std::endl;
 				if(i<containers_.size() && j<stack.containers_.size())
 					containers_[i].addRelSystematicsFrom(stack.containers_.at(j),ignorestat,strict);
 				if(i<containers2D_.size() && j<stack.containers2D_.size())
@@ -800,14 +800,14 @@ void histoStack::addRelSystematicsFrom(const ztop::histoStack & stack,bool ignor
 			}
 		}
 		if(!found){
-			errstr+= ("containerStack::addRelSystematicsFrom: adding to stack "+name_+ " legendentry "+
+			errstr+= ("histoStack::addRelSystematicsFrom: adding to stack "+name_+ " legendentry "+
 					stack.legends_.at(j) + " from rhs not found - empty entry will be added\n").Data();
 			excep=true;
 			addEmptyLegend(stack.legends_.at(j),stack.colors_.at(j),stack.legorder_.at(j));
 			for(unsigned int i=legends_.size()-1;i;i--){
 				if(legends_[i] == stack.legends_.at(j)){
 					if(debug)
-						std::cout << "containerStack::addRelSystematicsFrom: adding to stack " << name_ << std::endl;
+						std::cout << "histoStack::addRelSystematicsFrom: adding to stack " << name_ << std::endl;
 					if(i<containers_.size() && j<stack.containers_.size())
 						containers_[i].addRelSystematicsFrom(stack.containers_.at(j),ignorestat,strict);
 					if(i<containers2D_.size() && j<stack.containers2D_.size())
@@ -881,7 +881,7 @@ void histoStack::splitSystematic(const TString & name, const float& fracadivb,
 		const TString & splinamea,  const TString & splinameb){
 	size_t number=0;
 	if(name.EndsWith("_up") || name.EndsWith("_down") || splinamea.EndsWith("_up") || splinameb.EndsWith("_down"))
-		throw std::logic_error("containerStack::splitSystematic(name) works on up and down automatically, don't specify \"up\" or \"down\"");
+		throw std::logic_error("histoStack::splitSystematic(name) works on up and down automatically, don't specify \"up\" or \"down\"");
 
 	if(containers_.size()>0){
 		number=containers_.at(0).getSystErrorIndex(name+"_up");
@@ -1456,13 +1456,13 @@ std::map<TString, histoBin> histoStack::getAllContentsInBin(size_t bin,int syst,
 	if(is1D()){
 
 		if(containers_.size() < 1 || bin >= containers_.at(0).getBins().size()){
-			throw std::out_of_range("containerStack::getAllContentsInBin: bin out of range (getNBins()) or no 1D content");
+			throw std::out_of_range("histoStack::getAllContentsInBin: bin out of range (getNBins()) or no 1D content");
 		}
 		if(syst>=(int)containers_.at(0).getSystSize()){
-			throw std::out_of_range("containerStack::getAllContentsInBin: syst index out of range");
+			throw std::out_of_range("histoStack::getAllContentsInBin: syst index out of range");
 		}
 		std::map<TString, histoBin>  out;
-		if(print) std::cout << "Content of bin " << bin << " for containerStack " << name_ << std::endl;
+		if(print) std::cout << "Content of bin " << bin << " for histoStack " << name_ << std::endl;
 		for(size_t i=0;i<legends_.size();i++){
 			if(legends_.at(i)==dataleg_) continue;
 			if(print) std::cout <<legends_.at(i) << ": " << containers_.at(i).getBinContent(bin) << std::endl;
@@ -1477,13 +1477,13 @@ std::map<TString, histoBin> histoStack::getAllContentsInBin(size_t bin,int syst,
 	}
 	else if(is1DUnfold()){
 		if(containers1DUnfold_.size() < 1 || bin >= containers1DUnfold_.at(0).getRecoContainer().getBins().size()){
-			throw std::out_of_range("containerStack::coutAllInBin: bin out of range (getNBins()) or no 1D content");
+			throw std::out_of_range("histoStack::coutAllInBin: bin out of range (getNBins()) or no 1D content");
 		}
 		if(syst>=(int)containers1DUnfold_.at(0).getSystSize()){
-			throw std::out_of_range("containerStack::coutAllInBin: syst index out of range");
+			throw std::out_of_range("histoStack::coutAllInBin: syst index out of range");
 		}
 		std::map<TString, histoBin>  out;
-		if(print) std::cout << "Content of bin " << bin << " for containerStack " << name_ << std::endl;
+		if(print) std::cout << "Content of bin " << bin << " for histoStack " << name_ << std::endl;
 		for(size_t i=0;i<legends_.size();i++){
 			if(legends_.at(i)==dataleg_) continue;
 			if(print) std::cout <<legends_.at(i) << ": " << containers1DUnfold_.at(i).getRecoContainer().getBinContent(bin) << std::endl;
@@ -1498,7 +1498,7 @@ std::map<TString, histoBin> histoStack::getAllContentsInBin(size_t bin,int syst,
 	}
 
 
-	throw std::runtime_error("containerStack::getAllContentsInBin: only available for 1dim stacks");
+	throw std::runtime_error("histoStack::getAllContentsInBin: only available for 1dim stacks");
 }
 
 
@@ -1529,7 +1529,7 @@ histoStack histoStack::rebinYToBinning(const std::vector<float> & newbins)const{
 //just perform functions on the containers with same names
 ztop::histoStack histoStack::operator + (const histoStack& stackin){
 	if(mode!=stackin.mode){
-		std::cout << "containerStack::operator +: stacks must be of same dimension, returning input" << std::endl;
+		std::cout << "histoStack::operator +: stacks must be of same dimension, returning input" << std::endl;
 		return *this;
 	}
 	histoStack stack=stackin;
@@ -1537,7 +1537,7 @@ ztop::histoStack histoStack::operator + (const histoStack& stackin){
 		for(unsigned int i=0;i<legends_.size();i++){
 			if(legends_[i] == stack.legends_.at(j)){
 				if(debug)
-					std::cout << "containerStack::addRelSystematicsFrom: adding to stack " << name_ << std::endl;
+					std::cout << "histoStack::addRelSystematicsFrom: adding to stack " << name_ << std::endl;
 				if(i<containers_.size() && j<stack.containers_.size())
 					stack.containers_[j]+=containers_.at(i);
 				if(i<containers2D_.size() && j<stack.containers2D_.size())
@@ -1554,7 +1554,7 @@ ztop::histoStack histoStack::operator + (const histoStack& stackin){
 }
 ztop::histoStack histoStack::operator - (const histoStack& stackin){
 	if(mode!=stackin.mode){
-		std::cout << "containerStack::operator -: stacks must be of same dimension, returning input" << std::endl;
+		std::cout << "histoStack::operator -: stacks must be of same dimension, returning input" << std::endl;
 		return *this;
 	}
 	histoStack stack=stackin;
@@ -1562,7 +1562,7 @@ ztop::histoStack histoStack::operator - (const histoStack& stackin){
 		for(unsigned int i=0;i<legends_.size();i++){
 			if(legends_[i] == stack.legends_.at(j)){
 				if(debug)
-					std::cout << "containerStack::addRelSystematicsFrom: adding to stack " << name_ << std::endl;
+					std::cout << "histoStack::addRelSystematicsFrom: adding to stack " << name_ << std::endl;
 				if(i<containers_.size() && j<stack.containers_.size())
 					stack.containers_[j]-=containers_.at(i);
 				if(i<containers2D_.size() && j<stack.containers2D_.size())
@@ -1579,7 +1579,7 @@ ztop::histoStack histoStack::operator - (const histoStack& stackin){
 }
 ztop::histoStack histoStack::operator / (const histoStack&  stackin){
 	if(mode!=stackin.mode){
-		std::cout << "containerStack::operator /: stacks must be of same dimension, returning input" << std::endl;
+		std::cout << "histoStack::operator /: stacks must be of same dimension, returning input" << std::endl;
 		return *this;
 	}
 	histoStack stack=stackin;
@@ -1587,7 +1587,7 @@ ztop::histoStack histoStack::operator / (const histoStack&  stackin){
 		for(unsigned int i=0;i<legends_.size();i++){
 			if(legends_[i] == stack.legends_.at(j)){
 				if(debug)
-					std::cout << "containerStack::addRelSystematicsFrom: adding to stack " << name_ << std::endl;
+					std::cout << "histoStack::addRelSystematicsFrom: adding to stack " << name_ << std::endl;
 				if(i<containers_.size() && j<stack.containers_.size())
 					stack.containers_[j]/=containers_.at(i);
 				if(i<containers2D_.size() && j<stack.containers2D_.size())
@@ -1603,7 +1603,7 @@ ztop::histoStack histoStack::operator / (const histoStack&  stackin){
 }
 ztop::histoStack histoStack::operator * (const histoStack&  stackin){
 	if(mode!=stackin.mode){
-		std::cout << "containerStack::operator /: stacks must be of same dimension, returning input" << std::endl;
+		std::cout << "histoStack::operator /: stacks must be of same dimension, returning input" << std::endl;
 		return *this;
 	}
 	histoStack stack=stackin;
@@ -1611,7 +1611,7 @@ ztop::histoStack histoStack::operator * (const histoStack&  stackin){
 		for(unsigned int i=0;i<legends_.size();i++){
 			if(legends_[i] == stack.legends_.at(j)){
 				if(debug)
-					std::cout << "containerStack::addRelSystematicsFrom: adding to stack " << name_ << std::endl;
+					std::cout << "histoStack::addRelSystematicsFrom: adding to stack " << name_ << std::endl;
 				if(i<containers_.size() && j<stack.containers_.size())
 					stack.containers_[j]*=containers_.at(i);
 				if(i<containers2D_.size() && j<stack.containers2D_.size())
@@ -1657,7 +1657,7 @@ bool histoStack::operator == (const histoStack&rhs)const{
 histoStack histoStack::append(const histoStack& rhs)const{
 
 	if(rhs.containers_.size() <1){
-		throw std::logic_error("containerStack::append: only works for 1D stacks");
+		throw std::logic_error("histoStack::append: only works for 1D stacks");
 	}
 	if(containers_.size()<1) //empty stack
 		return rhs;
@@ -1696,7 +1696,7 @@ void histoStack::equalizeSystematicsIdxs(histoStack& rhs){
 
 	//no need to look at legends, syst are the same in stack by construction
 	if(rhs.size() < 1 || size() <1)
-		throw std::logic_error("containerStack::equalizeSystematicsIdxs: one is empty");
+		throw std::logic_error("histoStack::equalizeSystematicsIdxs: one is empty");
 
 	for(size_t i=0;i<containers_.size();i++){
 		containers_.at(i).equalizeSystematicsIdxs(rhs.containers_.at(0));
@@ -1732,7 +1732,7 @@ bool histoStack::setsignal(const TString& sign){
 			return true;
 		}
 	}
-	std::cout << "containerStack::setsignal: signalname " << sign << " not found in legend entries. doing nothing" <<std::endl;
+	std::cout << "histoStack::setsignal: signalname " << sign << " not found in legend entries. doing nothing" <<std::endl;
 	return false;
 }
 bool histoStack::addSignal(const TString& sign){
@@ -1744,12 +1744,12 @@ bool histoStack::addSignal(const TString& sign){
 			return true;
 		}
 	}
-	std::cout << "containerStack::setsignal: signalname " << sign << " not found in legend entries. doing nothing" <<std::endl;
+	std::cout << "histoStack::setsignal: signalname " << sign << " not found in legend entries. doing nothing" <<std::endl;
 	return false;
 }
 bool histoStack::setsignals(const std::vector<TString> & signs){
 	if(!checkSignals(signs)){
-		std::cout << "containerStack::setsignals: not all signals found in legend entries" <<std::endl;
+		std::cout << "histoStack::setsignals: not all signals found in legend entries" <<std::endl;
 		return false;
 	}
 	signals_=signs;
@@ -1771,7 +1771,7 @@ size_t histoStack::getDataIdx()const{
 		}
 	}
 	std::cout << "was searching for " << dataleg_ << std::endl;
-	throw std::runtime_error("containerStack::getDataIdx: no data index!");
+	throw std::runtime_error("histoStack::getDataIdx: no data index!");
 }
 
 
@@ -1824,7 +1824,7 @@ float histoStack::getYMin(bool dividebybinwidth, bool onlydata)const{
 
 histo1D histoStack::getSignalContainer()const{
 	if(mode != dim1 && mode !=unfolddim1){
-		if(debug) std::cout << "containerStack::getSignalContainer: return dummy" <<std::endl;
+		if(debug) std::cout << "histoStack::getSignalContainer: return dummy" <<std::endl;
 		return histo1D();
 	}
 	std::vector<size_t> sidx=getSignalIdxs();
@@ -1843,12 +1843,12 @@ histo1D histoStack::getSignalContainer()const{
 			out+=getContainer1DUnfold(sidx.at(i)).getRecoContainer();
 	}
 	if(sidx.size()<1)
-		throw std::logic_error("containerStack::getSignalContainer: No signal defined!");
+		throw std::logic_error("histoStack::getSignalContainer: No signal defined!");
 	return out;
 }
 histo1D histoStack::getBackgroundContainer()const{
 	if(mode != dim1 && mode !=unfolddim1){
-		throw std::logic_error("containerStack::getBackgroundContainer: only defined for 1D stacks");
+		throw std::logic_error("histoStack::getBackgroundContainer: only defined for 1D stacks");
 	}
 	std::vector<size_t> sidx=getSignalIdxs();
 	histo1D out;
@@ -1876,12 +1876,12 @@ histo1D histoStack::getDataContainer()const{
 	else if(mode ==dim1)
 		return getContainer(getDataIdx());
 	else
-		throw std::logic_error("containerStack::getDataContainer: only available for 1D or 1DUnfold stacks");
+		throw std::logic_error("histoStack::getDataContainer: only available for 1D or 1DUnfold stacks");
 	return histo1D();
 }
 histo2D histoStack::getSignalContainer2D()const{
 	if(mode != dim2){
-		if(debug) std::cout << "containerStack::getSignalContainer2D: return dummy" <<std::endl;
+		if(debug) std::cout << "histoStack::getSignalContainer2D: return dummy" <<std::endl;
 		return histo2D();
 	}
 	std::vector<size_t> sidx=getSignalIdxs();
@@ -1894,13 +1894,13 @@ histo2D histoStack::getSignalContainer2D()const{
 	for(size_t i=1;i<sidx.size();i++)
 		out+=getContainer2D(sidx.at(i));
 	if(sidx.size()<1)
-		throw std::logic_error("containerStack::getSignalContainer2D: No signal defined!");
+		throw std::logic_error("histoStack::getSignalContainer2D: No signal defined!");
 	return out;
 }
 
 histo2D histoStack::getBackgroundContainer2D()const{
 	if(mode != dim2){
-		if(debug) std::cout << "containerStack::getBackgroundContainer2D: return dummy" <<std::endl;
+		if(debug) std::cout << "histoStack::getBackgroundContainer2D: return dummy" <<std::endl;
 		return histo2D();
 	}
 	std::vector<size_t> sidx=getSignalIdxs();
@@ -1937,7 +1937,7 @@ histo1DUnfold histoStack::produceUnfoldingContainer(const std::vector<TString> &
 
 	histo1DUnfold out;
 	if(mode != unfolddim1 || containers1DUnfold_.size()<1){
-		std::cout << "containerStack::produceUnfoldingContainer: No unfolding information, return empty" <<std::endl;
+		std::cout << "histoStack::produceUnfoldingContainer: No unfolding information, return empty" <<std::endl;
 		return out;
 	}
 	bool temp=histo1DUnfold::c_makelist;
@@ -1965,7 +1965,7 @@ histo1DUnfold histoStack::produceUnfoldingContainer(const std::vector<TString> &
 		for(size_t sig=0;sig<signals.size();sig++){
 			if(signals.at(sig) == legends_.at(leg)){
 				if(debug)
-					std::cout << "containerStack::produceUnfoldingContainer: identified " << legends_.at(leg) << " as signal -> add to signal" <<std::endl;
+					std::cout << "histoStack::produceUnfoldingContainer: identified " << legends_.at(leg) << " as signal -> add to signal" <<std::endl;
 				histo1DUnfold normcuf= *cuf;
 				out  += normcuf;
 				issignal=true;
@@ -1974,13 +1974,13 @@ histo1DUnfold histoStack::produceUnfoldingContainer(const std::vector<TString> &
 		}
 		if(!issignal && legends_.at(leg) != dataleg_){
 			if(debug)
-				std::cout << "containerStack::produceUnfoldingContainer: identified as BG: "<< legends_.at(leg)  << std::endl;
+				std::cout << "histoStack::produceUnfoldingContainer: identified as BG: "<< legends_.at(leg)  << std::endl;
 			histo1D bg=cuf->getRecoContainer();
 			background  += bg;
 		}
 		if(legends_.at(leg) == dataleg_){
 			if(debug)
-				std::cout << "containerStack::produceUnfoldingContainer: identified as data: "<< legends_.at(leg) << std::endl;
+				std::cout << "histoStack::produceUnfoldingContainer: identified as data: "<< legends_.at(leg) << std::endl;
 			histo1D d=cuf->getRecoContainer();
 			data  += d;
 		}
@@ -2003,7 +2003,7 @@ histo1DUnfold histoStack::produceXCheckUnfoldingContainer(const std::vector<TStr
 	// also define += etc. and use container += if better, needs to be implemented (later)
 	histo1DUnfold out;
 	if(mode != unfolddim1 || containers1DUnfold_.size()<1){
-		std::cout << "containerStack::produceXCheckUnfoldingContainer: No unfolding information, return empty" <<std::endl;
+		std::cout << "histoStack::produceXCheckUnfoldingContainer: No unfolding information, return empty" <<std::endl;
 		return out;
 	}
 
@@ -2041,7 +2041,7 @@ histo1DUnfold histoStack::getSignalContainer1DUnfold(const std::vector<TString> 
 	bool mklist=histo1DUnfold::c_makelist;
 	histo1DUnfold::c_makelist=false;
 	if(mode!=unfolddim1){
-		std::cout << "containerStack::getSignalContainer1DUnfold: bo container1DUnfold content, return empty" <<std::endl;
+		std::cout << "histoStack::getSignalContainer1DUnfold: bo container1DUnfold content, return empty" <<std::endl;
 		histo1DUnfold c;
 		histo1DUnfold::c_makelist=mklist;
 		return c;
@@ -2058,7 +2058,7 @@ histo1DUnfold histoStack::getSignalContainer1DUnfold(const std::vector<TString> 
 		out = out + ctemp;
 	}
 	if(signals.size()<1)
-		throw std::logic_error("containerStack::getSignalContainer1DUnfold: No signal defined!");
+		throw std::logic_error("histoStack::getSignalContainer1DUnfold: No signal defined!");
 	histo1DUnfold::c_makelist=mklist;
 	return out;
 }
@@ -2258,7 +2258,7 @@ std::vector<size_t> histoStack::getSortedIdxs(bool inverse) const{
 		legasso.push_back(i);
 
 	if(debug){
-		std::cout << "containerStack::sortEntries: ";
+		std::cout << "histoStack::sortEntries: ";
 		for(size_t i=0;i<legasso.size();i++)
 			std::cout << legasso.at(i) << " " << legends_.at(i) << " ";
 		std::cout<<std::endl;

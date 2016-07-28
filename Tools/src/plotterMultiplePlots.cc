@@ -252,6 +252,22 @@ float plotterMultiplePlots::getMaximum()const{
 	return max;
 }
 
+bool plotterMultiplePlots::plotIsApproxSymmetric(float thresh)const{
+	if(plots_.size()<1)return false;
+	float summean=0;
+	float dummy=0;
+	for(size_t i=0;i<plots_.size();i++){
+		summean+=plots_.at(i).getInputGraph().getXMean(dummy);
+	}
+	summean/=(float)plots_.size();
+	float max=getXAxisHigherLimit();
+	float min=getXAxisLowerLimit();
+	//mean within 10% in the middle
+	float range=max-min;
+	float middle=range/2+min;
+	if(fabs(summean - middle)/fabs(range) < thresh) return true;
+	return false;
+}
 
 float plotterMultiplePlots::getMinimum()const{
 	float min=1e20;

@@ -1,7 +1,9 @@
-
+$?cfg
 
 [plotterControlPlot]
-
+ 
+ $$ new function. Automatically checks if a plot seems to be symmetric and then uses a symmetric style
+    symmetricStyleAdd = /src/TtZAnalysis/Tools/styles/controlPlots_symmetric_add.txt
     divideat = 0.3
     invertplots = false
     PSMigThreshold =  0.001   $this is not %!
@@ -15,7 +17,7 @@
 
  [legendStyle]
 
-        x0  =  0.62
+    x0  =  0.62
 	y0  =  0.22
 	x1  =  0.86
 	y1  =  0.88

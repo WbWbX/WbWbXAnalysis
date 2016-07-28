@@ -52,6 +52,7 @@ private:
     const plotStyle& getRatioStyle()const{throw std::logic_error("NA");}
     float getXAxisLowerLimit()const{return 0;}
     float getXAxisHigherLimit()const{return 0;}
+    bool plotIsApproxSymmetric(float thresh)const{return false;}
 
     histo2D plot_;
     bool dividebybinarea_;

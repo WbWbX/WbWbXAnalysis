@@ -20,7 +20,9 @@ class tTreeHandler;
 
 class wAnalyzer : public basicAnalyzer{
 public:
-	wAnalyzer():basicAnalyzer(){}
+	wAnalyzer():basicAnalyzer(),genonly_(false){
+
+	}
 	~wAnalyzer(){}
 
 	fileForker::fileforker_status  start();
@@ -35,6 +37,15 @@ public:
 
 	wNLOReweighter * getNLOReweighter(){return &nlorew_;}
 	const wNLOReweighter * getNLOReweighter()const {return &nlorew_;}
+
+	scalefactors * getMuonSF(){return &muonSF_;}
+	const scalefactors * getMuonSF()const {return &muonSF_;}
+
+	scalefactors * getMuonESF(){return &muonESF_;}
+	const scalefactors * getMuonESF()const {return &muonESF_;}
+
+	void setGenOnly(bool set){genonly_=set;}
+
 
 private:
 
@@ -51,6 +62,8 @@ private:
 	NTJECUncertainties jecunc_;
 	wChargeFlipGenerator chargeflip_;
 	wNLOReweighter nlorew_;
+	scalefactors muonSF_,muonESF_;
+	bool genonly_;
 };
 
 }

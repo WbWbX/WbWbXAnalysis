@@ -83,6 +83,10 @@ public:
 	void setBinStat(const size_t &bin, const float & err, const int &sysLayer=-1); //! sets bin stat, does not change error values!
 	void setBinEntries(const size_t &bin, const uint32_t & entries, const int &sysLayer=-1); //! sets bin stat, does not change error values!
 
+	/**
+	 * Mirrors histogram if it is symmetric around x=0
+	 */
+	bool mirror();
 
 	size_t getBinNo(const float&) const; //! returns bin index number for (float variable)
 	size_t getNBins() const;       //! returns nuberof bins
@@ -98,8 +102,8 @@ public:
 	float getBinCenter(const size_t &) const;
 	float getBinWidth(const size_t &) const; //! returns total bin width NOT 0.5* width
 
-	const float &getXMax() const{return bins_[getNBins()+1];}
-	const float &getXMin() const{return bins_[1];}
+	const float &getXMax() const{return bins_.at(getNBins()+1);}
+	const float &getXMin() const{return bins_.at(1);}
 
 	size_t getSystSize() const{return contents_.layerSize();}
 
@@ -294,6 +298,14 @@ public:
 	 */
 	histo1D rebin(size_t merge) const;
 
+	/**
+	 * merges bins until the relative stat error of the
+	 * nominal layer is smaller or equals <relstat>
+	 * starts with lowest stat bins
+	 * will ignore underflow and overflow!
+	 */
+	histo1D rebinToRelStat(float relstat)const;
+
 
 	int addErrorContainer(const TString &, histo1D, float);  //!< adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down"
 	int addErrorContainer(const TString &,const histo1D&);        //!< adds deviation to (this) as systematic uncertianty with name. name must be ".._up" or ".._down"
@@ -472,7 +484,10 @@ public:
 	 */
 	ztop::graph getDependenceOnSystematic(const size_t& bin, TString  sys,float offset=0,TString replacename="")const;
 
-
+	/**
+	 * ignores underflow and overflow!
+	 *
+	 */
 	float getMean(float& err, int sys=-1)const;
 
 	/**

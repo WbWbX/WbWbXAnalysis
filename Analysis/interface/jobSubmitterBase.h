@@ -26,14 +26,14 @@
 namespace ztop{
 class jobSubmitterBase{
 public:
-	jobSubmitterBase(){}
+	jobSubmitterBase():dummyrun_(false){}
 	virtual ~jobSubmitterBase(){}
 
 	void start()const;
 
 	void setGenArguments(std::string arg){genarguments_=arg;}
 
-
+	void setIsDummy(bool set){dummyrun_=set;}
 
 	void setWorkingDir(const std::string &);
 	void setExecutable(const std::string &);
@@ -55,6 +55,8 @@ protected:
 	virtual std::string generateCheckScriptTemplate()const=0;
 
 	const std::string& getSourceDir()const{return sourcedir_;}
+
+	const bool& isDummyRun()const{return dummyrun_;}
 
 private:
 	//works on jobnames
@@ -100,6 +102,8 @@ private:
 	//std::string submitexec_; //the one that subits to batch (e.g. qsub)
 	std::string genarguments_;
 	std::vector<std::string > jobnames_,arguments_;
+
+	bool dummyrun_;
 };
 
 /*

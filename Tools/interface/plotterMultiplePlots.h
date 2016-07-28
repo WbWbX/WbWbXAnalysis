@@ -81,6 +81,8 @@ private:
     float getMinimum()const;
 
 
+    bool plotIsApproxSymmetric(float thresh)const;
+
     void readStylePriv(const std::string & file, bool requireall);
 };
 

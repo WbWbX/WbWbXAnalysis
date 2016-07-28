@@ -52,7 +52,7 @@ histo1D::histo1D():taggedObject(taggedObject::type_container1D)
 }
 
 histo1D::histo1D(const std::vector<float>& bins,const TString& name,const TString& xaxisname,const TString& yaxisname, bool mergeufof):
-																																																																																											taggedObject(taggedObject::type_container1D)
+																																																																																																															taggedObject(taggedObject::type_container1D)
 
 {
 	setBins(bins);
@@ -193,6 +193,23 @@ void histo1D::setBinContent(const size_t & bin, const float &content, const int 
 	}
 }
 
+
+
+bool histo1D::mirror(){
+	if(!getNBins()) return false;
+	if(bins_.at(1) != -bins_.at(bins_.size()-1)) return false;
+	histo1D out=*this;
+
+	for(int sys=-1;sys<(int)getSystSize();sys++){
+		for(size_t i=0;i<getBins().size();i++){
+			size_t rightbin=getBins().size()-1-i;
+			out.getBin(rightbin)=getBin(i);
+
+		}
+	}
+	*this=out;
+	return true;
+}
 
 size_t histo1D::getNBins() const{
 	return bins_.size()-2;
@@ -900,6 +917,35 @@ histo1D histo1D::getIntegralBin(const bool& includeUFOF)const{
 	if(bins_.size()<2)
 		throw std::out_of_range("container1D::getIntegralBin: no bins!");
 
+	std::vector<float> newbins;
+	newbins.push_back(0);
+	newbins.push_back(1);
+	histo1D newcont=*this;
+	newcont.contents_.resizeBins(newbins.size()+1); //+1: UF
+	newcont.bins_=newbins;
+	newcont.bins_.insert(newcont.bins_.begin(),0);
+	newcont.setAllZero();
+	for(int lay=-1;lay<(int)contents_.layerSize();lay++){
+		for(size_t thisbin=0;thisbin<bins_.size();thisbin++){
+			size_t newbin=0;
+			if(includeUFOF || thisbin>0)//underflow extra
+				newbin=newcont.getBinNo(0.5);
+			if(!includeUFOF && thisbin<bins_.size()-1)
+				newbin=newcont.getBinNo(1.5);
+			newcont.getBin(newbin,lay)+=getBin(thisbin,lay);
+		}
+	}
+	//keep the debug here - still no idea where an error might come from
+	float debugtesta=integral(includeUFOF);
+	float debugtestb=newcont.integral(includeUFOF);
+
+	if(fabs((debugtesta-debugtestb)/debugtestb)>0.0001){
+		throw std::logic_error("histo1D::getIntegralBin: failed!");
+	}
+
+	return newcont;
+	/*
+	///////////////old implementation
 	size_t maxbin=bins_.size()-1;
 	std::vector<float> onebin;
 	onebin.push_back(bins_.at(1));
@@ -925,7 +971,7 @@ histo1D histo1D::getIntegralBin(const bool& includeUFOF)const{
 		throw std::logic_error("histo1D::getIntegralBin: failed!");
 	}
 
-	return out;
+	return out; */
 }
 
 /**
@@ -1651,7 +1697,8 @@ histo1D histo1D::rebinToBinning( std::vector<float>  newbins) const{
 	//check if same anyway
 	std::sort(newbins.begin(),newbins.end());
 	if(newbins.size() == bins_.size()-1){
-		if( std::equal ( newbins.begin(),newbins.end(),++bins_.begin()))
+		std::vector<float>  testbins(bins_.begin()+1,bins_.end());
+		if( testbins == newbins)//these are the same bins
 			return *this;
 	}
 	size_t maxbinssize=bins_.size();
@@ -1661,57 +1708,34 @@ histo1D histo1D::rebinToBinning( std::vector<float>  newbins) const{
 	sames.resize(it-sames.begin());
 	//check if possible at all:
 	if(sames.size()!=newbins.size()){
-		std::cout << "container1D::rebinToBinning: binning not compatible" <<std::endl;
+		std::cout << "histo1D::rebinToBinning: binning not compatible" <<std::endl;
 		return *this;
 	}
+	/*
+	 * All checks done, operation can be performed
+	 */
 	histo1D newcont=*this;
 	//set new binning
 	newcont.contents_.resizeBins(sames.size()+1); //+1: UF
 	newcont.bins_=sames;
-	newcont.bins_.insert(newcont.bins_.begin(),0); //create UF in newbins
-	//set all zero
+	newcont.bins_.insert(newcont.bins_.begin(),0);
+	newcont.setAllZero();//set all zero
 	for(int lay=-1;lay<(int)contents_.layerSize();lay++){
-		size_t oldbinno=1;
 		for(size_t thisbin=0;thisbin<bins_.size();thisbin++){
 			size_t newbin=0;
-			if(thisbin>0)
+			if(thisbin>0)//underflow extra
 				newbin=newcont.getBinNo(bins_.at(thisbin));
-			if(oldbinno==newbin){//bins are added
-				//if individual bins were rescaled for some reason,
-				/*  const float& newbincontent=newcont.getBin(newbin,lay).getContent();
-                const float& addbincontent=getBin(thisbin,lay).getContent(); */
-				const float& newbinentries=newcont.getBin(newbin,lay).getEntries();
-				const float& addbinentries=getBin(thisbin,lay).getEntries();
-				const float& newbinstat2=newcont.getBin(newbin,lay).getStat2();
-				const float& addbinstat2=getBin(thisbin,lay).getStat2();
-				/*
-                float errnewbinscale=newbinstat2/newbincontent;
-                float erraddbinscale=addbinstat2/addbincontent;
-				 */
-				float newbinnewstat2=newbinstat2+addbinstat2;//sq(errnewbinscale)*newbinentries + sq(erraddbinscale)*addbinentries;
-
-				newcont.getBin(newbin,lay).addToContent(getBin(thisbin,lay).getContent());
-				newcont.getBin(newbin,lay).setEntries(newbinentries+addbinentries);
-				//  newcont.getBin(newbin,lay).setStat2(newbinnewstat2);
-				newcont.getBin(newbin,lay).setStat2(newbinnewstat2);
-			}
-			else{//set
-				newcont.getBin(newbin,lay).setContent(getBin(thisbin,lay).getContent());
-				newcont.getBin(newbin,lay).setEntries(getBin(thisbin,lay).getEntries());
-				newcont.getBin(newbin,lay).setStat2(getBin(thisbin,lay).getStat2());
-				oldbinno=newbin;
-			}
-
+			newcont.getBin(newbin,lay)+=getBin(thisbin,lay);
 		}
 	}
 	return newcont;
-
 }
 /**
  * histo1D::rebinToBinning(const histo1D & cont)
  * reference(cont) needs a binning that is a subset of container to be rebinned
  * */
 histo1D histo1D::rebinToBinning(const histo1D & cont) const{
+	if(cont.bins_ == bins_) return *this;
 	std::vector<float> newbins=getCongruentBinBoundaries(cont);
 	return rebinToBinning(newbins);
 }
@@ -1722,6 +1746,135 @@ histo1D histo1D::rebin(size_t merge) const{
 	}
 	if(newbins.at(newbins.size()-1) != bins_.at(bins_.size()-1))
 		newbins.push_back(bins_.at(bins_.size()-1));
+	return rebinToBinning(newbins);
+}
+
+histo1D histo1D::rebinToRelStat(float relstatth)const{
+
+
+	class interval{
+	public:
+		interval(size_t l,size_t r):left(l),right(r){}
+		size_t left,right;
+		bool isIn(size_t i){return i>=left&&i<right;}
+		static bool compare(const interval& a, const interval& b){
+			return a.left < b.left;
+		}
+	};
+	class Intervals{
+	public:
+		void push_back(const interval& iv){ivs.push_back(iv);}
+		std::vector<interval> ivs;
+		bool isIn(size_t i){
+			for(size_t j=0;j<ivs.size();j++)
+				if(ivs.at(j).isIn(i)) return true;
+			return false;
+		}
+	};
+
+	//get stat and content of all bins
+	std::vector<float>v_contents(bins_.size()-2);
+	std::vector<float> relstat(bins_.size()-2);
+	std::vector<float> stat2(bins_.size()-2);
+
+	for(size_t i=1;i<bins_.size()-1;i++){
+		v_contents.at(i-1)=getBinContent(i);
+		stat2.at(i-1)=getBin(i).getStat2();
+		relstat.at(i-1)=fabs(getBin(i).getStat()/getBinContent(i));
+	}
+	Intervals merbins;
+	std::vector<size_t> statsort=retsort(relstat.begin(),relstat.end());
+	//indecies ordered by stat error
+	for(size_t i=0;i<statsort.size();i++){
+		const size_t & binidx=statsort.at(statsort.size()-i-1);
+		if(merbins.isIn(binidx)) continue;
+		float statm=stat2.at(binidx);
+		float contm=fabs(v_contents.at(binidx));
+		bool searchleft=true;
+		bool searchright=true;
+		if(binidx==0)searchleft=false;
+		if(binidx>=v_contents.size()-1)searchright=false;
+		if(std::sqrt(statm)/contm > relstatth){
+			size_t searchbinright=binidx;
+			size_t searchbinleft=binidx;
+			while(searchleft || searchright){
+				if(searchright){
+					if(searchbinright>=v_contents.size()-1){
+						if(!searchleft){//hit a limit
+							merbins.push_back(interval(searchbinleft,searchbinright));
+						}
+						searchright=false;//for next
+						continue;
+					}
+					searchbinright+=1;
+					if(merbins.isIn(searchbinright)){ //hit other boundary
+						searchright=false;//for next
+						continue;
+					}
+					statm+=stat2.at(searchbinright);
+					contm+=fabs(v_contents.at(searchbinright));
+					float relerr=std::sqrt(statm)/contm;
+					if(relerr<relstatth){
+						merbins.push_back(interval(searchbinleft,searchbinright));
+						break;
+					}
+				}
+				if(searchleft){
+					if(searchbinleft<1){
+						if(!searchright){//hit a limit
+							merbins.push_back(interval(searchbinleft,searchbinright));
+						}
+						searchleft=false;//for next
+						continue;
+					}
+					searchbinleft-=1;
+					if(merbins.isIn(searchbinleft)){ //hit other boundary
+						searchleft=false;//for next
+						continue;
+					}
+					statm+=stat2.at(searchbinleft);
+					contm+=fabs(v_contents.at(searchbinleft));
+					float relerr=std::sqrt(statm)/contm;
+					if(relerr<relstatth){
+						merbins.push_back(interval(searchbinleft,searchbinright));
+						break;
+					}
+				}
+
+			}
+		}
+	}
+	std::sort(merbins.ivs.begin(),merbins.ivs.end(),interval::compare);
+
+	std::vector<size_t> nmerbins;
+
+	for(size_t i=0;i<bins_.size()-1;i++){
+		if(merbins.isIn(i))continue;
+		nmerbins.push_back(i);
+	}
+
+	for(size_t i=0;i<merbins.ivs.size();i++){
+		nmerbins.push_back(merbins.ivs.at(i).left);
+	}
+	//last bin
+
+	std::sort(nmerbins.begin(),nmerbins.end());
+
+	std::vector<float> newbins;
+	//newbins.push_back(bins_.at(0));//uf
+	for(size_t i=0;i<nmerbins.size();i++){
+		if(nmerbins.at(i)>=bins_.size()-1)
+			throw std::out_of_range("histo1D::rebinToRelStat: fundamental error");
+		newbins.push_back(bins_.at(nmerbins.at(i)+1));
+	}
+	if(debug){
+		for(size_t i=0;i<bins_.size();i++)
+			std::cout << bins_.at(i) << " " ;
+		std::cout << std::endl;
+		for(size_t i=0;i<newbins.size();i++)
+			std::cout << newbins.at(i) << " " ;
+		std::cout << std::endl;
+	}
 	return rebinToBinning(newbins);
 }
 
@@ -1802,7 +1955,7 @@ void histo1D::addRelSystematicsFrom(const ztop::histo1D & rhs,bool ignorestat,bo
 			//contents_.getLayer(newlayerit).removeStat();
 			//stat are definitely not correlated
 			bool isnominalequal=(!strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i),1e-2))
-																																					        																																																																																										|| (strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i))) ;
+																																					        																																																																																																														|| (strict && rhs.contents_.getNominal().equalContent(rhs.contents_.getLayer(i))) ;
 
 			if(isnominalequal){ //this is just a copy leave it and add no variation
 				//contents_.getLayer(newlayerit).removeStat();
@@ -1943,7 +2096,7 @@ histo1D histo1D::createPseudoExperiment(TRandom3* rand,const histo1D* c, pseudod
 	std::vector<float> stat2(bins_.size(),0);
 	if(c){
 		if(c->bins_ != bins_){
-			throw std::out_of_range("container1D::createPseudoExperiment: parsed container does not match binning");
+			throw std::out_of_range("histo1D::createPseudoExperiment: parsed container does not match binning");
 		}
 		for(size_t i=0;i<bins_.size();i++)
 			stat2.at(i)=c->getBin(i).getStat2();
@@ -1978,7 +2131,7 @@ histo1D histo1D::createPseudoExperiment(TRandom3* rand,const histo1D* c, pseudod
 			if(newpoint<0) newpoint=0;
 		}
 		else{
-			throw std::runtime_error("container1D::createPseudoExperiment: mode not supported");
+			throw std::runtime_error("histo1D::createPseudoExperiment: mode not supported");
 		}
 		float scale= stat2.at(i) / contents_.getBin(i,syst).getContent() ;
 		float newstatorg=std::sqrt(newpoint);
@@ -1992,13 +2145,15 @@ histo1D histo1D::createPseudoExperiment(TRandom3* rand,const histo1D* c, pseudod
 
 	}
 	if(debug){
-		std::cout << "container1D::createPseudoExperiment: creating copies of nominal for syst "<< out.contents_.layerSize() <<std::endl;
+		std::cout << "histo1D::createPseudoExperiment: creating copies of nominal for syst "<< out.contents_.layerSize() <<std::endl;
 	}
 	//add the other layers as plain copies to maintain consistence
 	for(size_t i=0;i<getSystSize();i++)
 		out.contents_.addLayer(getSystErrorName(i),out.contents_.getNominal());
 
-
+	if(debug){
+		std::cout << "histo1D::createPseudoExperiment: done "<< out.contents_.layerSize() <<std::endl;
+	}
 	return out;
 
 }
@@ -2423,30 +2578,46 @@ graph histo1D::getDependenceOnSystematic(const size_t & bin, TString sys,float o
 	return out;
 }
 
-
+/**
+ * For weighted entries, this function returns different errors on the mean than
+ * root TH1 histograms do. The error calculation of for TH1 histograms relies on assumptions
+ * about Gaussian shapes and only takes into account effective entries.
+ * This function propagates the uncertainties on a per-bin level.
+ *
+ * The central values, however coincide. If they don't, it is a bug.
+ */
 float histo1D::getMean(float& err, int sys)const{
-	float sumweightedbins=0,sumweights=0;
+	if(isDummy())return 0;
+	float sumweightedbins=0;
 	float sumweightedunc=0;
 	float weightnorm=0;
-	for(size_t bin=0;bin<bins_.size();bin++){
+	for(size_t bin=1;bin<bins_.size()-1;bin++){
 		float weight=getBinContent(bin,sys);
 		weightnorm+=weight;
 	}
-	for(size_t bin=0;bin<bins_.size();bin++){
+	if(weightnorm==0)return 0; //protect against empty or not well defined
+	//calculate it once for performance reasons
+	for(size_t binj=1;binj<bins_.size()-1;binj++){
+		sumweightedbins+= getBinCenter(binj)*getBinContent(binj,sys);///(weightnorm*weightnorm);
+	}
+
+	for(size_t bin=1;bin<bins_.size()-1;bin++){
 		//weight is stat unc
 		float weight=getBinContent(bin,sys);
 		float xval=getBinCenter(bin);
 		float stat2=getBin(bin,sys).getStat2();
-		sumweightedbins+= xval*weight/weightnorm;
-		sumweights+=weight;
-		float errweight = xval*(weightnorm-weight)/(weightnorm*weightnorm);
-		errweight*=errweight;
-		errweight*=stat2;
-		sumweightedunc+= errweight; //weight/weightnorm * weight/weightnorm * stat2;
+
+		float weightnormminus=weightnorm-weight;
+
+		float dmdcontent=xval*weightnormminus;/// (weightnorm*weightnorm);//derivate of this part
+		dmdcontent-=sumweightedbins; //subtract all
+		dmdcontent+=xval*weight;///(weightnorm*weightnorm);//add only this bin
+
+		dmdcontent*=dmdcontent;
+		sumweightedunc+=  dmdcontent * stat2;
 	}
-	float mean=sumweightedbins;
-	err=std::sqrt(sumweightedunc);
-	err=-1; //needs to be tested further FIXME
+	float mean=sumweightedbins/weightnorm;
+	err=std::sqrt(sumweightedunc)/(weightnorm*weightnorm);//factored out the weightnorm, just divide once
 	return mean;
 }
 

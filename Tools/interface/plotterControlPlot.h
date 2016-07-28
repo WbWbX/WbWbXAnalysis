@@ -106,6 +106,8 @@ private:
 
     void readStylePriv(const std::string & file, bool requireall);
 
+    bool plotIsApproxSymmetric(float thresh)const;
+
     class legendmerge{
     public:
     	TString mergedname;

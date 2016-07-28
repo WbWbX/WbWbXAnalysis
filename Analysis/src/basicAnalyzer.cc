@@ -119,7 +119,7 @@ fileForker::fileforker_status basicAnalyzer::runParallels(int interval){
 	int counter=0;
 	interval*=4; //to make it roughly seconds
 
-	double killthreshold=600; //seconds. Kill after 10 Minutes without notice
+	double killthreshold=1800; //seconds. Kill after 30 Minutes without notice
 
 	time_t now;
 	time_t started;
@@ -140,8 +140,9 @@ fileForker::fileforker_status basicAnalyzer::runParallels(int interval){
 				totalstatus+=getBusyStatus(i);
 				double percentpersecond=getBusyStatus(i)/runningseconds;
 				double estimate=(100-getBusyStatus(i))/percentpersecond;
-				std::cout << textFormatter::fixLength(toString(getChildPids().at(i)),7)
-				<< textFormatter::fixLength(infiles_.at(i).Data(),50)
+				std::cout
+				<< textFormatter::fixLength(toString(getChildPids().at(i)),7)
+				<< textFormatter::fixLength(infiles_.at(i).Data(),         50)
 				<< textFormatter::fixLength(translateStatus(getStatus(i)), 15)
 				<< textFormatter::fixLength(toString(getBusyStatus(i))+"%",4,false);
 				if(getBusyStatus(i)>4 && getStatus(i) == ff_status_child_busy){

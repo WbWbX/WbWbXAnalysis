@@ -676,6 +676,11 @@ float graph::getPointYError(const size_t & point, bool onlystat,const TString &l
 	else return down;
 }
 
+float graph::getXMean(float& err)const{
+return 1;
+
+}
+
 const TString & graph::getPointName(const size_t& idx)const{
 	if(idx>=pointnames_.size())
 		throw std::out_of_range("graph::getPointName: idx out of range - no point names?");
@@ -1021,7 +1026,7 @@ void  graph::coutAllContent(bool rel)const{
 		cout << ":" <<endl;
 		cout << "  content "  << " (" <<getPointXContent(i) << ", " << getPointYContent(i) << ")" <<endl;
 		if(rel)
-			cout << "  staterr "  << " (" <<getPointXStat(i)/getPointXContent(i)-1 << ", " << getPointYStat(i)/getPointYContent(i)-1 << ")" <<endl;
+			cout << "  staterr "  << " (" <<getPointXStat(i)/getPointXContent(i) << ", " << getPointYStat(i)/getPointYContent(i) << ")" <<endl;
 		else
 			cout << "  staterr "  << " (" <<getPointXStat(i) << ", " << getPointYStat(i) << ")" <<endl;
 		for(int sys=0;sys<(int)getSystSize();sys++){
@@ -1032,7 +1037,7 @@ void  graph::coutAllContent(bool rel)const{
 
 		}
 		if(rel)
-			cout << "  total err "  << " (" <<getPointXError(i,false)/getPointXContent(i)-1 << ", " << getPointYError(i,false)/getPointYContent(i)-1   << ")" <<endl;
+			cout << "  total err "  << " (" <<getPointXError(i,false)/getPointXContent(i) << ", " << getPointYError(i,false)/getPointYContent(i)   << ")" <<endl;
 		else
 			cout << "  total err "  << " (" <<getPointXError(i,false) << ", " << getPointYError(i,false)  << ")" <<endl;
 

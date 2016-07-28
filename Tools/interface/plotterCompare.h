@@ -124,7 +124,7 @@ private:
     plot plotterCompareStyle(const plot&);
     void makeRatioPlots(); //sets mem*
 
-
+    bool plotIsApproxSymmetric(float thresh)const;
 
     void readStylePriv(const std::string & file, bool requireall);
 

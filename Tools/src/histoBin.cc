@@ -20,16 +20,33 @@ void histoBin::clear(){
 	stat2_=0;
 }
 
-void  histoBin::add(const histoBin&rhs){
+histoBin & histoBin::operator+=(const histoBin& rhs){
 	content_+=rhs.content_;
 	stat2_+=rhs.stat2_;
 	entries_+=rhs.entries_;
+	return *this;
+}
+histoBin  histoBin::operator+(const histoBin& rhs)const{
+	histoBin out=*this;
+	out+=rhs;
+	return out;
+}
+void  histoBin::add(const histoBin&rhs){
+	*this+=rhs;
 }
 
 void histoBin::multiply(const float&val){
-	content_*=val;
-	stat2_=stat2_*val*val;
-	entries_*=val;
+	if(val){
+		content_*=val;
+		stat2_= stat2_*val*val;
+		entries_*=val;
+	}
+	else{
+		content_=0;
+		stat2_=0;
+		entries_=0;
+	}
+
 }
 void histoBin::sqrt(){
 	if(content_ < 0){
@@ -73,15 +90,7 @@ void histoBin::copyFrom(const histoBin& rhs){
 /////binning//////
 
 bool histoBins::showwarnings=false;
-/*
-void histoBins::setName(const TString & name){
-	name_=name;
-	if(name_.Length() > UINT16_MAX){
-		std::cout << "histoBins: warning: bin name length than 16bit, will be chopped"<<std::endl;
-		name_=TString(name_.Data(),65535);
-	}
-}
- */
+
 histoBins::histoBins(size_t Size){// : name_(""),layer_(-1){
 	setSize(Size);
 }

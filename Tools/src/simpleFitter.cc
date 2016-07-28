@@ -400,7 +400,7 @@ texTabler simpleFitter::makeCorrTable() const{
 			if(i && !j)
 				tab << "";//Formatter.translateName(parameternames_.at(i-1));
 			else if(j && !i)
-				if(paranames_.size()<j-1)
+				if(paranames_.size()>j-1)
 					tab << paranames_.at(j-1);
 				else
 					tab<< "";

@@ -1,0 +1,12 @@
+General remarks:
+
+-> check veto lepton efficiency
+-> Apply assymmetry from W to DY (* 0.15 from V-A)
+-> Plot mean pttrans versus deltaeta modified by lepton charge*eta or similar (such that it is not symmetric)
+
+
+Wishlist for new ntuples:
+
+-> Generator info in DY
+-> Remove the exactly one good lepton preselection (if there is any) from ntuple writing. In any case there seem to be no events with more than 1 "good" lepton
+-> Is more than 1 veto lepton stored?

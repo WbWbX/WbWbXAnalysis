@@ -82,6 +82,8 @@ private:
 	void clear(){}
 	void clearPlots(){}
 
+	bool plotIsApproxSymmetric(float thresh)const{return false;}
+
 
 	const corrMatrix* corrm_;
 

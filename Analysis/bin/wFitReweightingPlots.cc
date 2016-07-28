@@ -10,6 +10,7 @@
 
 #include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
 #include "TtZAnalysis/Tools/interface/histoStackVector.h"
+#include "TtZAnalysis/Tools/interface/plotterMultiplePlots.h"
 #include "TtZAnalysis/Tools/interface/textFormatter.h"
 #include "math.h"
 #include "TF2.h"
@@ -44,6 +45,12 @@ invokeApplication(){
 	Double_t f2params[wNLOReweighter::wdxsec_npars];
 	TF2 *f2 = new TF2("f2",wNLOReweighter::wdxsec,-1,1,-M_PI,M_PI, npar);
 
+	bool has1Dplots=false;
+	for(size_t i=0;i<stacknames.size();i++){
+		if(stacknames.at(i).BeginsWith(prefix1d)){ has1Dplots=true;break;}
+	}
+
+
 	TFile rootfile(outpath+"/rewhistos.root","RECREATE");
 
 	std::ofstream outfile((outpath+"data.dat").Data());
@@ -56,7 +63,7 @@ invokeApplication(){
 			f2params[8]=selectedhistos.at(i).projectToX(true).integral(true);
 			f2->SetParameters(f2params);
 			//f2->SetParLimits(8,0,1e8); //fix to positive
-			th->Fit(f2);
+			TFitResultPtr  fitr=th->Fit(f2,"S");
 			//format for output
 			textFormatter tf;
 			TString startwith=stacknames.at(i);
@@ -69,16 +76,20 @@ invokeApplication(){
 				tf.setDelimiter(":");
 				std::vector<std::string> minmax=tf.getFormatted(ranges.at(range));
 				if(minmax.size()==2){
-					outfile<< minmax.at(0) << " " << minmax.at(1) << " ";
+					outfile<< textFormatter::fixLength(minmax.at(0),10)  << textFormatter::fixLength(minmax.at(1),10) ;
 				}
 			}
 
 			for(size_t j=0;j<npar;j++)
-				outfile << " "<<f2->GetParameter(j);
-			outfile << " "<< textFormatter::makeCompatibleFileName(("1D_"+stacknames.at(i)).Data()) ;
+				outfile << " "<<textFormatter::fixLength(toString(f2->GetParameter(j)),10);
+			if(has1Dplots)
+				outfile << " "<< textFormatter::makeCompatibleFileName(("1D_"+stacknames.at(i)).Data()) ;
 			outfile << "\n";
 
 			TCanvas cv(stacknames.at(i));
+			cv.SetBottomMargin(0.15);
+			cv.SetLeftMargin(0.15);
+			cv.SetRightMargin(0.2);
 
 			gStyle->SetOptStat(0);
 			Int_t NCont = 255;
@@ -105,10 +116,58 @@ invokeApplication(){
 			f2->Draw("cont1 same");
 			cv.Print(outpath+stacknames.at(i)+".pdf");
 
+
+			//make pull
+			histo2D h2d=selectedhistos.at(i);
+			h2d.setZAxisName("pull");
+			histo1D pulls(histo1D::createBinning(9,-10,10),"pull","nBins");
+			for(size_t xi=1;xi<h2d.getBinsX().size()-1;xi++){
+				for(size_t j=1;j<h2d.getBinsY().size()-1;j++){
+					float content=selectedhistos.at(i).getBinContent(xi,j);
+					float err=selectedhistos.at(i).getBinError(xi,j,true); //only stat
+					float centrex=0,centrey=0;
+					selectedhistos.at(i).getBinCenter(xi,j,centrex,centrey);
+					float func=f2->Eval(centrex, centrey);
+					float pull= (func-content)/err;
+					pulls.fill(pull);
+					h2d.getBin(xi,j).setContent(pull);
+				}
+			}
+
+
+			Double_t bbstops[NRGBs] = { 0.00, 0.34, 0.5, 0.84, 1.00 };
+			Double_t bbred[NRGBs]   = { 0.00, 0.00, 1., 1.00, 0.51 };
+			Double_t bbgreen[NRGBs] = { 0.00, 0.81, 1., 0.20, 0.00 };
+			Double_t bbblue[NRGBs]  = { 0.51, 1.00, 1., 0.00, 0.00 };
+
+			TColor::CreateGradientColorTable(NRGBs, bbstops, bbred, bbgreen, bbblue, NCont);
+			gStyle->SetNumberContours(NCont);
+			th=h2d.getTH2D("",false,true);
+			th->GetZaxis()->SetRangeUser(-10,10);
+			th->Draw("colz");
+			formatter fmt;
+			double chi2=fitr->Chi2();
+			TString chi2s=toTString(fmt.round( chi2,0.1));
+			TLatex* lat=new TLatex(0.15,0.03,"#chi^{2}="+chi2s);
+			lat->SetNDC(true);
+			lat->Draw("same");
+			chi2s=toTString(fmt.round( chi2/((h2d.getBinsY().size()-2)*(h2d.getBinsX().size()-2)),0.1));
+			 lat=new TLatex(0.3,0.03,"#chi^{2}/nbins="+chi2s);
+			 lat->SetNDC(true);
+			 lat->Draw("same");
+				th->GetZaxis()->SetRangeUser(-10,10);
+			 gPad->RedrawAxis();
+			cv.Print(outpath+stacknames.at(i)+"_pull.pdf");
+
+			plotterMultiplePlots pl;
+			pl.addPlot(&pulls,false);
+			pl.setLastNoLegend();
+			pl.printToPdf((outpath+stacknames.at(i)+"_pulls").Data());
+
 			std::cout << "\nfitted:"<<std::endl;
-			for(size_t par=0;par<npar-1;par++){
+			for(size_t par=0;par<npar;par++){
 				std::cout << "A"+toTString(par)+": " << f2->GetParameter(par)/f2->GetParameter(npar-1)
-																								<<std::endl;
+																										<<std::endl;
 			}
 		}
 		else if(stacknames.at(i).BeginsWith(prefix1d)){
@@ -140,11 +199,13 @@ invokeApplication(){
 
 	delete hsv;
 
+	std::cout << "fit done, testing read-back" <<std::endl;
+
 	//test read back
 
 	wNLOReweighter tr;
 	tr.readParameterFile((outpath+"data.dat").Data());//test
-
+	tr.makeTestPlots((outpath+"/").Data());
 
 
 	//make a plot with the variation of all parameters

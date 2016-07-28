@@ -1,0 +1,25 @@
+$?cfg
+
+[plotterControlPlot]
+
+    divideat = 0.3
+    invertplots = false
+    PSMigThreshold =  0.001   $this is not %!
+    ySpaceMulti = 1.5
+
+[end - plotterControlPlot]
+ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  
+
+ [legendStyle]
+
+    x0  =  0.3
+	y0  =  0.65
+	x1  =  0.86
+	y1  =  0.88
+
+	
+	nColumns        = 2
+	columnSeparator = 0.05
+
+[end legendStyle]
+

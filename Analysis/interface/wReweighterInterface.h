@@ -31,11 +31,14 @@ public:
 
 	double getRenormalization()const;
 
+	bool isActive()const{return enabled() && indicies_.size()>0;}
+
 private:
 	wReweighterInterface():wNTBaseInterface(){}
 
 	std::vector<size_t> indicies_;
 	std::vector<simpleReweighter> reweighter_;
+	std::vector<double> scalers_;
 
 };
 

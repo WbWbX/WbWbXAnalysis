@@ -232,6 +232,13 @@ fileForker::fileforker_status fileForker::getStatus()const{
 		return ff_status_parent_childstospawn;
 	if(donechilds_<inputfiles_.size())
 		return ff_status_parent_busy;
+	for(size_t i=0;i<childstatus_.size();i++){
+		if(childstatus_.at(i) == ff_status_child_aborted
+				|| childstatus_.at(i) == ff_status_child_exception
+				|| childstatus_.at(i) == ff_status_child_generror)
+			return ff_status_parent_generror;
+	}
+
 	return
 			ff_status_parent_success;
 }

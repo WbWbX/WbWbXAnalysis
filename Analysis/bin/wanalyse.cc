@@ -24,7 +24,10 @@ invokeApplication(){
 
 	const TString syst=parser->getOpt<TString>("s","nominal","systematics string");
 
+	const bool genonly=parser->getOpt<bool>("-genonly",false,"run only on generator part");
+
 	parser->doneParsing();
+
 
 
 	TString cmssw_base=getenv("CMSSW_BASE");
@@ -65,6 +68,7 @@ invokeApplication(){
 
 	//fileForker::debug=true;
 	wAnalyzer ana;
+	ana.setGenOnly(genonly);
 	ana.setLumi(luminosity);
 	ana.setTestMode(testmode);
 	ana.setDataSetDirectory(treedir);
@@ -75,7 +79,9 @@ invokeApplication(){
 	ana.readFileList(configfile);
 	ana.setMaxChilds(maxchilds);
 	ana.getJecUnc()->setFile(jecfile.Data());
-	bool nlorewsimple=false;
+	ana.getMuonSF()->setGlobal(1,0.015,0.015);
+	ana.getMuonESF()->setGlobal(1,0.005,0.005);
+	const bool nlorewsimple=false;
 	ana.getNLOReweighter()->switchOff(true);
 	ana.getNLOReweighter()->setSimple(nlorewsimple);
 
@@ -88,11 +94,62 @@ invokeApplication(){
 	if(syst == "nominal"){
 		//do nothing or?
 	}
-	else if(syst == "SCALE_up"){
+	else if(syst == "MUONSF_up"){
+		ana.getMuonSF()->setSystematics("up");
+	}
+	else if(syst == "MUONSF_down"){
+		ana.getMuonSF()->setSystematics("down");
+	}
+	else if(syst == "MUONESF_up"){
+		ana.getMuonESF()->setSystematics("up");
+	}
+	else if(syst == "MUONESF_down"){
+		ana.getMuonESF()->setSystematics("down");
+	}
+	else if(syst == "SCALEF_up"){
 		ana.addWeightIndex(1); //just dummy
 	}
-	else if(syst == "SCALE_down"){
+	else if(syst == "SCALEF_down"){
 		ana.addWeightIndex(2); //just dummy
+	}
+	else if(syst == "SCALER_up"){
+		ana.addWeightIndex(3); //just dummy
+	}
+	else if(syst == "SCALER_down"){
+		ana.addWeightIndex(6); //just dummy
+	}
+	else if(syst == "SCALERF_up"){
+		ana.addWeightIndex(4); //just dummy
+	}
+	else if(syst == "SCALERF_down"){
+		ana.addWeightIndex(8); //just dummy
+	}
+	else if(syst == "SCALERaF_up"){
+		ana.addWeightIndex(7); //just dummy
+	}
+	else if(syst == "SCALERaF_down"){
+		ana.addWeightIndex(5); //just dummy
+	}
+	else if(syst.BeginsWith("PDF")){
+		//just define up and down arbitrary. this is NNPDF. take care of Gaussian replicas later
+		//weights start at 9
+		const size_t weightoffset=9;
+		const size_t lastweight=110;
+		size_t runningindex=0;
+		for(size_t i=0; i<=lastweight-weightoffset;i++){
+			if(syst == "PDF" + toTString(i) + "_down"){
+				ana.addWeightIndex(runningindex+weightoffset);
+				std::cout << "setting index to " << runningindex << " for " << syst << std::endl;
+				break;
+			}
+			runningindex++;
+			if(syst == "PDF" + toTString(i) + "_up"){
+				ana.addWeightIndex(runningindex+weightoffset);
+				std::cout << "setting index to " << runningindex << " for " << syst << std::endl;
+				break;
+			}
+			runningindex++;
+		}
 	}
 	else if(syst == "JES_up"){
 		ana.getJecUnc()->setSystematics("up");
@@ -122,6 +179,29 @@ invokeApplication(){
 			ana.getNLOReweighter()->setUp(false);
 			ana.getNLOReweighter()->setReweightParameter(7,-1);
 		}
+	}
+	else if(syst == "WparaA7_minus_down"){ //not real syst....!
+		ana.getNLOReweighter()->switchOff(false);
+		ana.getNLOReweighter()->readParameterFile(a7reweightfile);
+		if(!nlorewsimple){
+			ana.getNLOReweighter()->setUp(false);
+			ana.getNLOReweighter()->setReweightParameter(7,-2);
+		}
+	}
+	else if(syst.BeginsWith("WparaA") ){
+		TString number=syst;number.ReplaceAll("WparaA","");
+		bool up=number.EndsWith("_up");
+		number.ReplaceAll("_up","");
+		number.ReplaceAll("_down","");
+		size_t parameter=number.Atoi();
+		ana.getNLOReweighter()->switchOff(false);
+		ana.getNLOReweighter()->readParameterFile(a7reweightfile);
+		ana.getNLOReweighter()->setUp(up);
+		if(up)
+			ana.getNLOReweighter()->setReweightParameter(parameter,0.3);
+		else
+			ana.getNLOReweighter()->setReweightParameter(parameter,-0.3);
+
 	}
 
 	fileForker::fileforker_status status= ana.start();

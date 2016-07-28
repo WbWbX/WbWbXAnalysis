@@ -30,6 +30,7 @@ void wReweighterInterface::addWeightIndex(const size_t index){
 		return;
 	indicies_.push_back(index);
 	reweighter_.resize(indicies_.size());
+	scalers_.resize(indicies_.size(),1);
 }
 
 void wReweighterInterface::reWeight(float & old){
@@ -48,7 +49,13 @@ void wReweighterInterface::reWeight(float & old){
 		size_t idx=indicies_.at(i);
 		if(idx>=brsize)
 			throw std::out_of_range("wReweighterInterface::reWeight ");
-		reweighter_.at(i).setNewWeight((* getBranchContent<float*>(1))[idx]);
+		float weight=(* getBranchContent<float*>(1))[idx];
+		if(scalers_.at(i)==1.)
+			scalers_.at(i)=fabs(weight);
+		weight/=scalers_.at(i);
+		//makes the weight of order 1 on average, assuming the weights are approx the same
+		//better numeric precision for the overall sum and reweighting factor.
+		reweighter_.at(i).setNewWeight(weight);
 		reweighter_.at(i).reWeight(old);
 	}
 }

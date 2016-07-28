@@ -48,8 +48,8 @@ $new/more/W2JetsTN_tree.root,       W+2jets,                     415,       250,
 
 inputFilesDir = /nfs/dust/cms/user/kiesej/trees_WA7/
 Lumi = 19710
-JECUncertainties = /src/TtZAnalysis/Analysis/data/analyse/Summer13_V5_DATA_UncertaintySources_AK5PFchs.txt
-A7reweightFile = /src/TtZAnalysis/Analysis/data/wanalyse/rewdata.dat 
+JECUncertainties = /src/TtZAnalysis/Analysis/data/analyse/Winter14_V5_DATA_UncertaintySources_AK5PFchs.txt
+A7reweightFile = /src/TtZAnalysis/Analysis/data/wanalyse/rew_jet5.dat 
 
 [parameters-end]
 

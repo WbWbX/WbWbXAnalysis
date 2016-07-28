@@ -105,7 +105,7 @@ void HTransformToCS::TransformToCS(TLorentzVector neutr,TLorentzVector muon,cons
 	PFMinus= true;
 	// choose what to call proton and what anti-proton
 	//if(Wv.Angle(PF.Vect())<Wv.Angle(PW.Vect()))
-	if(muforward<0)
+	if(muforward>0)
 	{
 		PW= -PW;
 	}

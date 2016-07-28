@@ -86,7 +86,7 @@ public:
 	float getPointYError(const size_t & point, bool onlystat,const TString &limittosys="")const;
 
 
-
+	float getXMean(float& err)const;
 
 
 	float  getXMax(size_t & point,bool includeerror=false) const;

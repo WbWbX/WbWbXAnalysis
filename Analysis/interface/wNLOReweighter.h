@@ -21,7 +21,7 @@ class NTGenParticle;
 
 class wNLOReweighter: public simpleReweighter{
 public:
-	wNLOReweighter():simpleReweighter(),up_(false),simple_(false){}
+	wNLOReweighter():simpleReweighter(),up_(false),simple_(false),wonly_(false),etasymm_(false),isreweight_(false){}
 	~wNLOReweighter(){}
 
 	void setUp(bool up){up_=up;}
@@ -36,10 +36,13 @@ public:
 	static const size_t wdxsec_npars;
 	static double wdxsec(double * angles, double* pars);
 
-	void prepareWeight(const float& costheta, const float& phi, const NTGenParticle* W, const NTGenJet * jet);
+	void prepareWeight(const float& costheta, const float& phi, const NTGenParticle* W, const NTGenJet * jet=0);
 
+	void makeTestPlots(const std::string& outpath)const;
 
+	void setWKinematicsOnly(bool set){wonly_=set;}
 
+	void reWeight(float &puweight);
 
 private:
 
@@ -57,8 +60,13 @@ private:
 
 	//in deta, Wpt bins, then para number
 	std::vector<  std::vector< std::vector<double> > > origparas_;
+	std::vector<  std::vector< std::vector<double> > > paraunc_;
 	std::vector<  std::vector< std::vector<double> > > rewparas_;
 	std::vector<  std::vector< scalefactors *> > simplerew_;
+
+	bool wonly_;
+	bool etasymm_;
+	bool isreweight_;
 };
 
 }

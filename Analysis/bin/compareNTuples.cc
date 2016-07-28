@@ -34,7 +34,6 @@ invokeApplication(){
         parser->coutHelp();
     }
 
-
     //for future set comparison
     std::vector<TString> filesa,filesb;
     //  filesa.push_back(files.at(0));

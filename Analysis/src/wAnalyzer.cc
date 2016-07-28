@@ -41,7 +41,7 @@ namespace ztop{
 void wAnalyzer::pairLeptons( std::vector<NTGenParticle*> * v, NTGenParticle*& lep, NTGenParticle*& neutr)const{
 	lep=0;neutr=0;
 	for(size_t i=0;i<v->size();i++){
-		 NTGenParticle* p=v->at(i);
+		NTGenParticle* p=v->at(i);
 		if(p->pdgId() == 13
 				|| p->pdgId() == -13
 				|| p->pdgId() == 11
@@ -51,7 +51,7 @@ void wAnalyzer::pairLeptons( std::vector<NTGenParticle*> * v, NTGenParticle*& le
 			//search for neutrino
 			for(size_t j=0;j<v->size();j++){
 				if(i==j)continue;
-				 NTGenParticle* p2=v->at(j);
+				NTGenParticle* p2=v->at(j);
 				if((int)std::abs(p2->pdgId()) == (int)(std::abs(p->pdgId())+1)){
 					//matching pair
 					if((p->p4()+p2->p4()).m()>5){
@@ -127,6 +127,7 @@ void wAnalyzer::analyze(size_t id){
 
 
 	wReweightingPlots rewplots;
+	rewplots.setWKinematicsOnly(false);//TEST
 	rewplots.enable(true);
 	rewplots.setSignal(signal_);
 	rewplots.setEvent(&evt);
@@ -158,9 +159,14 @@ void wAnalyzer::analyze(size_t id){
 		for(size_t i=0;i<weightindicies_.size();i++)
 			mcweights.addWeightIndex(weightindicies_.at(i));
 	simpleReweighter lheReweighter;
+	if(mcweights.isActive())
+		lheReweighter.switchOff(true); //LHE weights are included in mc weights
 
-	if(!isMC_)
+	if(!isMC_){
+		mcweights.disable();
+		lheReweighter.switchOff(true);
 		tBranchHandler<float>::allow_missing=true;
+	}
 	tBranchHandler<float> b_puweight(&t, "puWeight");
 	tBranchHandler<float> b_lep1weight(&t, "LepEff_1lep");
 	tBranchHandler<float> b_lep2weight(&t, "LepEff_2lep");
@@ -199,16 +205,16 @@ void wAnalyzer::analyze(size_t id){
 	bool rewswon=!getNLOReweighter()->switchedOff() ;
 	rewswon = rewswon&& isNLO&& signal_;
 	getNLOReweighter()->switchOff(!rewswon);
+	getMuonSF()->setIsMC(isMC_);
+	getMuonESF()->setIsMC(isMC_);
+
 
 
 	if(testmode_)
 		entries/=20;//skip=(float) 1./0.05; //only consider 5 % of the events
 	if(legendname_=="DUMMY")
 		entries=0;
-	/*else
-		entries/=2;
-	std::cout << "also full mode is restricted to 1/2 of the events because of problem with RunC sample"<<std::endl;
-	 */
+
 	t.setPreCache();//better performance for large samples
 
 	///////////////////////////////// Event loop //////////////////////////////
@@ -248,7 +254,7 @@ void wAnalyzer::analyze(size_t id){
 		NTGenParticle * lepton=0, *neutrino=0;
 		NTGenParticle Wbos;
 		if(isMC_){
-			genjets=produceCollection(b_genjets.content() );
+			genjets=produceCollection(b_genjets.content());
 			evt.genjets=&genjets;
 			allgenparticles=produceCollection(b_genparticles.content());
 			evt.allgenparticles=&allgenparticles;
@@ -286,13 +292,13 @@ void wAnalyzer::analyze(size_t id){
 
 				A7=std::sin(phi_cs)*std::sqrt(1-costheta_cs*costheta_cs);
 
-				if(genjets.size()>0){ //&& genjets.at(0)->pt()>50){
+				if(genjets.size()>0)
 					getNLOReweighter()->prepareWeight(costheta_cs,phi_cs,&Wbos,genjets.at(0));
-					//float oldweight=puweight;
-					getNLOReweighter()->reWeight(puweight);
-					//std::cout << puweight << ":"<<oldweight << std::endl;
-				}
-				if(genjets.size() && genjets.at(0)->pt()>50)
+				else
+					getNLOReweighter()->prepareWeight(costheta_cs,phi_cs,&Wbos);
+
+				getNLOReweighter()->reWeight(puweight);
+				if(genjets.size())
 					ptttransA7corr.fill(pttrans_gen ,A7 ,puweight);
 				if(genjets.size())
 					genstatHistDEtaJWpTW.fill(genjets.at(0)->eta()-Wbos.eta(), Wbos.pt(),puweight);
@@ -305,7 +311,7 @@ void wAnalyzer::analyze(size_t id){
 		//(at the end)
 		anaplots.fillPlotsGen();
 
-
+		if(genonly_)continue;
 
 		if(! b_goodevent.pass())continue;
 
@@ -354,6 +360,8 @@ void wAnalyzer::analyze(size_t id){
 
 		for(size_t i=0;i<allgoodmuons.size();i++){
 			NTMuon* muon=allgoodmuons.at(i);
+			if(isMC_)
+				muon->setP4(muon->p4()*getMuonESF()->getScalefactor(muon->pt()));
 
 			if(muon->pt()<15) continue;
 			if(fabs(muon->eta())>2.4)continue;
@@ -371,7 +379,7 @@ void wAnalyzer::analyze(size_t id){
 			if(isMC_)
 				getChargeFlip()->flip(muon);
 
-			if(muon->isoVal() < 0.12) { ///INVERT SWITCH
+			if(muon->isoVal() < 0.12) { //INVERT SWITCH
 				isomuons << muon;
 			}
 			else if(muon->isoVal() < 0.5){
@@ -382,7 +390,11 @@ void wAnalyzer::analyze(size_t id){
 
 		//at least one id muon: step 2
 		if(idmuons.size()<1) continue;
-		if(isMC_) puweight*= *b_lep1weight.content();
+		if(isMC_){
+			puweight*= *b_lep1weight.content();
+			puweight*=getMuonSF()->getScalefactor(1);//global
+		}
+
 		h.fill(step,puweight);
 		c_plots.makeControlPlots(step++);
 

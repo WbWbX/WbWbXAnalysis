@@ -15,7 +15,7 @@
 namespace ztop{
 
 plotterControlPlot::plotterControlPlot(): plotterBase(), divideat_(0),
-		stackp_(0),/*tempdataentry_(0),*/invertplots_(false),psmigthresh_(0),mcsysstatleg_(true),nolegend_(false),
+		stackp_(0),/*tempdataentry_(0),*/invertplots_(false),psmigthresh_(0),yspacemulti_(1.3),mcsysstatleg_(true),nolegend_(false),
 		systlabel_("MC syst+stat"){
 
 	readStyleFromFileInCMSSW("/src/TtZAnalysis/Tools/styles/controlPlots_standard.txt");
@@ -77,6 +77,7 @@ void plotterControlPlot::readStylePriv(const std::string& infile,bool requireall
 	//never required
 	yspacemulti_= fr.getValue<float>("ySpaceMulti",yspacemulti_);
 	nolegend_= fr.getValue<bool>("nolegend",nolegend_);
+	symmetric_styleadd_=fr.getValue<std::string>("symmetricStyleAdd",symmetric_styleadd_);
 	//merges are never required
 	fr.clear();
 	fr.setStartMarker("[merge legends]");
@@ -108,6 +109,22 @@ void plotterControlPlot::readStylePriv(const std::string& infile,bool requireall
 	textboxes_.readFromFile(infile,"boxes");
 	legstyle_.readFromFile(infile,"",requireall);
 
+}
+
+bool plotterControlPlot::plotIsApproxSymmetric(float thresh)const{
+	if(!stackp_) return false;
+	const histo1D & h=stackp_->getDataContainer();
+	if(h.isDummy()) return false;
+	float dummy=0;
+	float mean=h.getMean(dummy);
+	float max=h.getXMax();
+	float min=h.getXMin();
+	//mean within 10% in the middle
+	float range=max-min;
+	float middle=range/2+min;
+	float relative=fabs(mean - middle)/fabs(range);
+	if(relative < thresh) return true;
+	return false;
 }
 
 /**

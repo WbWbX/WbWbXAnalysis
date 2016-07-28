@@ -121,6 +121,23 @@ float plotterCompare::getXAxisHigherLimit()const{
 
 }
 
+bool plotterCompare::plotIsApproxSymmetric(float thresh)const{
+	if(nominalplot_.empty()) return false;
+	const graph& g=nominalplot_.getInputGraph();
+	 histo1D  h;
+	 h.import(g);
+	if(h.isDummy()) return false;
+	float dummy=0;
+	float mean=h.getMean(dummy);
+	float max=h.getXMax();
+	float min=h.getXMin();
+	//mean within 10% in the middle
+	float range=max-min;
+	float middle=range/2+min;
+	if(fabs(mean - middle)/fabs(range) < thresh) return true;
+	return false;
+}
+
 
 /**
  * clears plots, clears styles

@@ -49,6 +49,8 @@ TVirtualPad* plotterBase::getPad()const{
  * when plotting again
  */
 void plotterBase::draw(){
+	if(symmetric_styleadd_.length()>0 && plotIsApproxSymmetric(0.02))
+		readStylePriv(((std::string)getenv("CMSSW_BASE") +"/"+ symmetric_styleadd_).data(), false);
 	if(preparepad_)
 		preparePad();//adjusts canvas that lives outside
 	drawPlots(); //object handling by plot class

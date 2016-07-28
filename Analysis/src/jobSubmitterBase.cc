@@ -136,8 +136,10 @@ void jobSubmitterBase::submitJobs()const{
 	std::string cdbatch="cd "+batchdir_+"; ";
 	for(size_t i=0;i<jobnames_.size();i++){
 		std::string command=cdbatch+ getSubmissionExec() +" "+jobscriptdir_+"/"+jobnames_.at(i);
-		std::cout << command << std::endl;
-		system((command).data());
+		if(!isDummyRun())
+			system((command).data());
+		else
+			std::cout << "dummy run: " << command << std::endl;
 	}
 }
 

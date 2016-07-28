@@ -543,6 +543,9 @@ void histoStackVector::writeAllToTFile(TString filename, bool recreate, bool onl
 					delete stab;
 				}
 				c =new TCanvas("MResp","MResp");
+				c->SetBottomMargin(0.15);
+				c->SetLeftMargin(0.15);
+				c->SetRightMargin(0.2);
 				TH2D * resp=cuf.getResponseMatrix().getTH2D("respMatrix_nominal",false,true);
 				resp->Draw("colz");
 				c->Write();
@@ -563,6 +566,9 @@ void histoStackVector::writeAllToTFile(TString filename, bool recreate, bool onl
 				for(size_t i=0;i<cuf.getSystSize();i++){
 					c =new TCanvas("MResp_"+cuf.getSystErrorName(i),"MResp_"+cuf.getSystErrorName(i));
 					c->SetBatch(true);
+					c->SetBottomMargin(0.15);
+					c->SetLeftMargin(0.15);
+					c->SetRightMargin(0.2);
 					resp=cuf.getResponseMatrix().getTH2DSyst("respMatrix_"+cuf.getSystErrorName(i),i,false,true);;
 					resp->Draw("colz");
 					c->Write();
@@ -662,6 +668,9 @@ void histoStackVector::writeAllToTFile(TString filename, bool recreate, bool onl
 						canvasname+=+"_"+stack->getName();
 						TCanvas *  c= new TCanvas(canvasname);
 						c->SetBatch(true);
+						c->SetBottomMargin(0.15);
+						c->SetLeftMargin(0.15);
+						c->SetRightMargin(0.2);
 						th2d->Draw("colz");
 						c->Write(canvasname);
 
@@ -676,6 +685,9 @@ void histoStackVector::writeAllToTFile(TString filename, bool recreate, bool onl
 				if(th2d){
 					TCanvas *  c= new TCanvas("signal_"+stack->getName());
 					c->SetBatch(true);
+					c->SetBottomMargin(0.15);
+					c->SetLeftMargin(0.15);
+					c->SetRightMargin(0.2);
 					th2d->Draw("colz");
 					c->Write("signal_"+stack->getName());
 
@@ -687,6 +699,9 @@ void histoStackVector::writeAllToTFile(TString filename, bool recreate, bool onl
 				if(th2d){
 					TCanvas *  c= new TCanvas("background_"+stack->getName());
 					c->SetBatch(true);
+					c->SetBottomMargin(0.15);
+					c->SetLeftMargin(0.15);
+					c->SetRightMargin(0.2);
 					th2d->Draw("colz");
 					c->Write("background_"+stack->getName());
 

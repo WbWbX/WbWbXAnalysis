@@ -549,7 +549,15 @@ TH2D * histo2D::getTH2D(TString name, bool dividebybinarea, bool onlystat) const
 
 		}
 	}
+	h->GetZaxis()->SetTitleSize(0.07);
+	h->GetZaxis()->SetLabelSize(0.06);
 	h->GetXaxis()->SetTitle(xaxisname_);
+	h->GetZaxis()->SetLabelSize(0.06);
+	h->GetYaxis()->SetTitleSize(0.07);
+	h->GetYaxis()->SetLabelSize(0.06);
+	h->GetXaxis()->SetTitleSize(0.07);
+	h->GetXaxis()->SetLabelSize(0.06);
+	h->GetXaxis()->SetTitleOffset(0.95);
 	h->GetYaxis()->SetTitle(yaxisname_);
 	h->GetZaxis()->SetTitle(zaxisname_);
 	if(entries>0)

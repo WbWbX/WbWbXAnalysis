@@ -181,16 +181,22 @@ std::vector<TString>  systMerger::mergeAndSafe(){
 		for(size_t sys=0;sys<syst_.at(nom).size();sys++){
 			histoStackVector * sysvec=getFromFileToMem(dir,instrings_.at(syst_.at(nom).at(sys)));
 			if(debug) std::cout << "systMerger::mergeAndSafe: adding "<< sysvec->getName() << " to " << nominal->getName()<< std::endl;
-			if(nominalid_ == standardnominal_){
-				nominal->addMCErrorStackVector(*sysvec);
-			}
-			else{
-				TString sysname=sysvec->getSyst();
-				if(debug)std::cout << "replacing name " << sysname << " by ";
-				sysname.ReplaceAll(nominalid_+"_","");
-				sysname.ReplaceAll(nominalid_,"");
-				if(debug)std::cout << sysname << " removed "<< nominalid_<< std::endl;
-				nominal->addMCErrorStackVector(sysname,*sysvec);
+			try{
+				if(nominalid_ == standardnominal_){
+					nominal->addMCErrorStackVector(*sysvec);
+				}
+				else{
+					TString sysname=sysvec->getSyst();
+					if(debug)std::cout << "replacing name " << sysname << " by ";
+					sysname.ReplaceAll(nominalid_+"_","");
+					sysname.ReplaceAll(nominalid_,"");
+					if(debug)std::cout << sysname << " removed "<< nominalid_<< std::endl;
+					nominal->addMCErrorStackVector(sysname,*sysvec);
+				}
+			}catch(std::exception& e){
+				std::cerr << "systMerger::mergeAndSafe: problem when adding " << sysvec->getName() << " to " << nominal->getName()<< std::endl;
+				std::cerr << e.what() <<std::endl;
+				throw e;
 			}
 			delete sysvec;
 		}

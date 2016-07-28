@@ -19,6 +19,11 @@ void wControlplots_gen::makeControlPlotsPriv(){
 			&& event()->genjets->at(0)->pt()>50;
 	NTGenParticle * W=event()->genW;
 
+	SETBINSRANGE(100,-.2,.2);
+	addPlot("delta pttrans A7","#Delta(sin#phisin#theta, 2 p_{T}^{T} / M_{W})","Events");
+	if(event()->A7 && event()->pttrans_gen && event()->puweight){
+		last()->fill(*event()->A7-*event()->pttrans_gen , *event()->puweight);
+	}
 
 	SETBINSRANGE(4,0,1.1);
 	addPlot("asymm dsig dA7 W pt 0-10","asymm A7","#DeltaEvents");

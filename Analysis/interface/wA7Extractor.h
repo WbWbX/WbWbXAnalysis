@@ -14,12 +14,14 @@
 #include "TtZAnalysis/Tools/interface/variateHisto1D.h"
 #include <algorithm>
 #include "TtZAnalysis/Tools/interface/simpleFitter.h"
+#include "TtZAnalysis/Tools/interface/graph.h"
 
 namespace ztop{
 
 class wA7Extractor: public tObjectList{//just for garbage collection
 public:
-	wA7Extractor():tObjectList(),debug(false){}
+	wA7Extractor():tObjectList(),debug(false),wparaPrefix_("WparaA"),
+	npseudo_(0),enhancestat_(true),mcstatthresh_(0.02){}
 	~wA7Extractor(){}
 
 	void readConfig(const std::string& infile);
@@ -28,8 +30,11 @@ public:
 
 
 	//get some results
+	void setNPseude(size_t n){npseudo_=n;}
 
 
+	void setEnhanceStat(bool set){enhancestat_=set;}
+	void setMCStatThreshold(float thresh){mcstatthresh_=thresh;}
 
 	//make some plots
 
@@ -39,10 +44,18 @@ public:
 	bool debug;
 
 private:
-	void fit(int sysindex, bool up, bool fixallbuta7,bool fixa7=false);
 
-	void createVariates(const std::vector<histoStack>& in, const std::vector<double>* nominalparas,
+
+
+	graph fit(int sysindex, bool up, bool fixallbuta7,bool fixa7=false);
+
+	void createVariates(const std::vector<histoStack>& in, bool onlyMC,
 			TRandom3* rand);
+
+	/**
+	 * returns new binning
+	 */
+	std::vector<float> enhanceStatistics(histoStack& stack)const;
 
 
 	std::pair<std::string, size_t> parameterasso_;
@@ -61,6 +74,12 @@ private:
 	ROOT::Math::Functor functor_;
 	double toBeMinimized(const double * variations);
 	std::vector<double> fittedparas_;
+
+	const TString wparaPrefix_;
+
+	size_t npseudo_;
+	bool enhancestat_;
+	float mcstatthresh_;
 };
 
 }

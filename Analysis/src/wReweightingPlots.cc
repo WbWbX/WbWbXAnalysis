@@ -26,13 +26,13 @@ void wReweightingPlots::bookPlots(){
 
 	//hidden in createBinning
 
-	std::vector<float> dy=histo1D::createBinning(10,-4,4);
+	std::vector<float> dy=histo1D::createBinning(20,0,6);
 	std::vector<float> ptW;
-	ptW << 0 << 20 << 30 << 40 << 300;
+	ptW << 0 << 10 << 20 << 25 << 30 << 35 <<  40 << 50 << 60 << 80 << 300;
 	std::vector<float> dummy; //for additional subvar
 
 	histo2D::c_makelist=true;
-	histo1D::c_makelist=true;
+	histo1D::c_makelist=save1D_;
 	createBinning(dy,ptW,dummy);
 	histo2D::c_makelist=false;
 	histo1D::c_makelist=false;
@@ -44,36 +44,33 @@ void wReweightingPlots::fillPlots(){
 	if(!enabled_ || !signal_)return;
 	if(!event()->puweight) return;
 	if(!event()->genW) return;
-	if(!event()->genjets) return;
-	if(!event()->genjets->size()>0) return;
-	if(!event()->genjets->at(0))return;
+	if(!wonly_){
+		if(!event()->genjets) return;
+		if(!event()->genjets->size()>0) return;
+		if(!event()->genjets->at(0))return;
+	}
 	if(!event()->costheta_cs) return;
 	if(!event()->phi_cs) return;
 
-	//if(event()->genjets->at(0)->pt()<50) return; ///jet pt cut
-	//if(event()->genW->q()<0)return; //only check W+ as test //DEBUG
 
-	float detaWj=(event()->genW->eta()-event()->genjets->at(0)->eta());
-	//detaWj*=(float)event()->genW->q();
-	//if(event()->genW->eta() < 0)
-	//	detaWj*=-1;
-	//detaWj*=
+	float detaWj=0;
+	if(!wonly_){
+		detaWj=fabs(event()->genW->eta()-event()->genjets->at(0)->eta());
+	}
+	else{
+	    detaWj=fabs(event()->genW->eta());
+	}
+
 	float phi=* event()->phi_cs ;
 	float costheta=* event()->costheta_cs;
 	float dummy=0;
-	//float multia= event()->genW->q()<0? 1: -1;
-	//float multib= detaWj? 1: -1;
-
-
-	//costheta*=multia*multib;
-	//phi*=multia*multib;
-
 
 	histo2D *h=getHisto(detaWj,event()->genW->pt(),dummy);
 
 	h->fill(costheta ,phi ,* event()->puweight);
 
 	if(!event()->A7) return;
+	if(!save1D_) return;
 	getHisto1D(detaWj,event()->genW->pt(),dummy)->fill(*event()->A7,* event()->puweight);
 
 }
