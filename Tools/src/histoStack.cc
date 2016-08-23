@@ -591,7 +591,7 @@ void histoStack::addGlobalRelMCError(TString sysname,double error){
 		else containers1DUnfold_[i].addGlobalRelError(sysname,0);
 	}
 }
-void histoStack::addRelErrorToContribution(double err, const TString& contributionname, TString nameprefix){
+void histoStack::addRelErrorToContribution(double err, const TString& contributionname, TString nameprefix, bool lognormal){
 	if(debug)
 		std::cout << "containerStack::addRelErrorToContribution: " << contributionname <<std::endl;
 	size_t idx=getContributionIdx(contributionname);
@@ -599,9 +599,9 @@ void histoStack::addRelErrorToContribution(double err, const TString& contributi
 	idxs.push_back(idx);
 
 
-	addRelErrorToContributions(err,idxs, nameprefix);
+	addRelErrorToContributions(err,idxs, nameprefix, lognormal);
 }
-void histoStack::addRelErrorToContributions(double err, const std::vector<size_t> contribidxs, TString nameprefix){
+void histoStack::addRelErrorToContributions(double err, const std::vector<size_t> contribidxs, TString nameprefix, bool lognormal){
 	if(debug)
 		std::cout << "containerStack::addRelErrorToContributions: " <<std::endl;
 
@@ -611,10 +611,13 @@ void histoStack::addRelErrorToContributions(double err, const std::vector<size_t
 			throw std::out_of_range("histoStack::addRelErrorToContributions: at least one index out of range");
 	}
 	float errinv=1-1/(1+err);
+	if(!lognormal)
+		errinv=err;
 	if(!err) errinv=0;
-	for(size_t i=0;i<containers_.size();i++){
+	for(size_t i=0;i<legends_.size();i++){
 		if(std::find(contribidxs.begin(),contribidxs.end(),i) == contribidxs.end()) continue;
 		//add error to all of them
+
 		for(size_t j=0;j<containers_.size();j++){
 			if(j==i){
 				containers_.at(j).addGlobalRelErrorUp(nameprefix+legends_.at(i),err);
@@ -625,9 +628,9 @@ void histoStack::addRelErrorToContributions(double err, const std::vector<size_t
 		}
 	}
 
-	for(size_t i=0;i<containers2D_.size();i++){
+	for(size_t i=0;i<legends_.size();i++){
 		if(std::find(contribidxs.begin(),contribidxs.end(),i) == contribidxs.end()) continue;
-		for(size_t j=0;j<containers_.size();j++){
+		for(size_t j=0;j<containers2D_.size();j++){
 			if(j==i){
 				containers2D_.at(j).addGlobalRelErrorUp(nameprefix+legends_.at(i),err);
 				containers2D_.at(j).addGlobalRelErrorDown(nameprefix+legends_.at(i),errinv);
@@ -637,9 +640,9 @@ void histoStack::addRelErrorToContributions(double err, const std::vector<size_t
 		}
 	}
 
-	for(size_t i=0;i<containers1DUnfold_.size();i++){
+	for(size_t i=0;i<legends_.size();i++){
 		if(std::find(contribidxs.begin(),contribidxs.end(),i) == contribidxs.end()) continue;
-		for(size_t j=0;j<containers_.size();j++){
+		for(size_t j=0;j<containers1DUnfold_.size();j++){
 			if(j==i){
 				containers1DUnfold_.at(j).addGlobalRelErrorUp(nameprefix+legends_.at(i),err);
 				containers1DUnfold_.at(j).addGlobalRelErrorDown(nameprefix+legends_.at(i),errinv);
@@ -678,7 +681,7 @@ void histoStack::addRelErrorToBackgrounds(double err ,bool aspartials , TString 
 		if(std::find(exclude.begin(),exclude.end(),i)!=exclude.end()) continue;
 		varidxs.push_back(i);
 	}
-	addRelErrorToContributions(err,varidxs,nameprefix);
+	addRelErrorToContributions(err,varidxs,nameprefix,true);
 }
 
 void histoStack::mergePartialVariations(const TString& identifier, bool strictpartialID){

@@ -478,6 +478,9 @@ invokeApplication(){
 	texTabler corr=mainfitter.makeCorrTable();
 	corr.writeToFile(outfile+"_tabCorr.tex");
 	corr.writeToPdfFile(outfile+"_tabCorr.pdf");
+
+	mainfitter.writeCorrelationMatrix((outfile+"_corrRaw.txt").Data(),true);
+
 	//std::cout << corr.getTable() <<std::endl;
 
 	if(tmpcheck){

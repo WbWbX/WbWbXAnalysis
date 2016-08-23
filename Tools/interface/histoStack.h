@@ -113,8 +113,8 @@ public:
 	void multiplyAllMCNorms(float);
 	void addGlobalRelMCError(TString,double);   //! adds a global systematic variation to the systematics stored (e.g. lumi) is o+err
 
-	void addRelErrorToContribution(double err, const TString& contributionname, TString nameprefix="BG");
-	void addRelErrorToContributions(double err, const std::vector<size_t> contribidxs, TString nameprefix="BG");
+	void addRelErrorToContribution(double err, const TString& contributionname, TString nameprefix="BG", bool lognormal=false);
+	void addRelErrorToContributions(double err, const std::vector<size_t> contribidxs, TString nameprefix="BG", bool lognormal=false);
 	/**
 	 * adds error to all backgrounds (not signal nor data) that are not excluded by legendname
 	 * error is 0+error

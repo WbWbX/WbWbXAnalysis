@@ -141,6 +141,8 @@ public:
 	int addErrorContainer(const TString & ,const histo1DUnfold &);  //! adds deviation to (this) as systematic uncertianty with name and weight. name must be ".._up" or ".._down"
 	void getRelSystematicsFrom(const histo1DUnfold &);
 	void addRelSystematicsFrom(const histo1DUnfold &,bool ignorestat=false,bool strict=false);
+	void addGlobalRelErrorUp(TString name,float relerr);
+	void addGlobalRelErrorDown(TString name,float relerr);
 	void addGlobalRelError(TString,float);
 
 	static std::vector<histo1DUnfold *> c_list;

@@ -1885,7 +1885,7 @@ histo1D histo1D::rebinToRelStat(float relstatth)const{
  */
 int histo1D::addErrorContainer(const TString & sysname, histo1D  deviatingContainer, float weight){
 	if(hasTag(taggedObject::dontAddSyst_tag)){
-		if(showwarnings) std::cout << "container1D::addErrorContainer: not adding syst because histo1D.has tag \"dontAddSyst_tag\": " << getName()<<std::endl;
+		if(showwarnings) std::cout << "histo1D::addErrorContainer: not adding syst because histo1D.has tag \"dontAddSyst_tag\": " << getName()<<std::endl;
 		return 0;
 	}
 	if(bins_!=deviatingContainer.bins_){
@@ -1893,25 +1893,25 @@ int histo1D::addErrorContainer(const TString & sysname, histo1D  deviatingContai
 			deviatingContainer=*this;
 		}
 		else{
-			std::cout << "container1D::addErrorContainer(): not same binning! doing nothing for "<<name_ << " " << sysname << std::endl;
+			std::cout << "histo1D::addErrorContainer(): not same binning! doing nothing for "<<name_ << " " << sysname << std::endl;
 
 			return -11;
 		}
 	}
 	if(! (sysname.Contains("_up") || sysname.Contains("_down"))){
-		std::cout << "container1D::addErrorContainer: systematic variation must be named \".._up\"  or \".._down\"! for consistent treatment. doing nothing for "
+		std::cout << "histo1D::addErrorContainer: systematic variation must be named \".._up\"  or \".._down\"! for consistent treatment. doing nothing for "
 				<<name_ << " " << sysname  << std::endl;
 		return -1;
 	}
 	if(contents_.getLayerIndex(sysname) < contents_.layerSize()){
-		std::cout << "container1D::addErrorContainer: systematic variation already added. doing nothing for "
+		std::cout << "histo1D::addErrorContainer: systematic variation already added. doing nothing for "
 				<<name_ << " " << sysname  << std::endl;
 		return -2;
 	}
 	//add layer with name and fill with content..
 	manualerror_=false;
 	if(debug)
-		std::cout << "container1D::addErrorContainer: " << name_ << std::endl;
+		std::cout << "histo1D::addErrorContainer: " << name_ << std::endl;
 	contents_.setLayerFromNominal(sysname,deviatingContainer.contents_,weight);
 	return 0;
 }

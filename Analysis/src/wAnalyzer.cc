@@ -22,6 +22,7 @@
 #include "../interface/analysisPlotsW.h"
 #include "TtZAnalysis/DataFormats/interface/helpers.h"
 #include "TtZAnalysis/DataFormats/interface/NTEvent.h"
+#include "TtZAnalysis/DataFormats/interface/GenStatusFlags.h"
 
 #include "../interface/wReweightingPlots.h"
 
@@ -40,6 +41,7 @@ namespace ztop{
 
 void wAnalyzer::pairLeptons( std::vector<NTGenParticle*> * v, NTGenParticle*& lep, NTGenParticle*& neutr)const{
 	lep=0;neutr=0;
+
 	for(size_t i=0;i<v->size();i++){
 		NTGenParticle* p=v->at(i);
 		if(p->pdgId() == 13
@@ -54,12 +56,12 @@ void wAnalyzer::pairLeptons( std::vector<NTGenParticle*> * v, NTGenParticle*& le
 				NTGenParticle* p2=v->at(j);
 				if((int)std::abs(p2->pdgId()) == (int)(std::abs(p->pdgId())+1)){
 					//matching pair
-					if((p->p4()+p2->p4()).m()>5){
+				//	if((p->p4()+p2->p4()).m()>5){
 						lep=p;
 						neutr=p2;
 						//std::cout << "got one: "<<(p->p4()+p2->p4()).m() <<std::endl;
 						break;
-					}
+				//	}
 				}
 			}
 
@@ -257,6 +259,21 @@ void wAnalyzer::analyze(size_t id){
 			genjets=produceCollection(b_genjets.content());
 			evt.genjets=&genjets;
 			allgenparticles=produceCollection(b_genparticles.content());
+			//filter status
+			if(isNLO){
+				std::vector<NTGenParticle*> tempgen;
+				for(size_t i=0;i<allgenparticles.size();i++){
+					NTGenParticle * p=allgenparticles.at(i);
+					reco::GenStatusFlags flags;
+					int oldstatus=p->status();
+					flags.splitModifiedStatus(oldstatus);
+					if(! flags.isHardProcess())continue;
+					p->setStatus(3); //for compatibility
+					tempgen.push_back(p);
+				}
+				allgenparticles=tempgen; //copy back
+
+			}
 			evt.allgenparticles=&allgenparticles;
 
 			////first gen selection step (problem with tau decays)

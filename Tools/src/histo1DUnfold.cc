@@ -515,6 +515,24 @@ int histo1DUnfold::addErrorContainer(const TString & sysname,const histo1DUnfold
 	return addErrorContainer(sysname,cont,1);
 }
 
+void histo1DUnfold::addGlobalRelErrorUp(TString name,float relerr){
+	for(size_t i=0;i<conts_.size();i++)
+		conts_.at(i).addGlobalRelErrorUp(name,relerr);
+	gencont_.addGlobalRelErrorUp(name,relerr);
+	recocont_.addGlobalRelErrorUp(name,relerr);
+	unfolded_.addGlobalRelErrorUp(name,relerr);
+	refolded_.addGlobalRelErrorUp(name,relerr);
+}
+
+void histo1DUnfold::addGlobalRelErrorDown(TString name,float relerr){
+	for(size_t i=0;i<conts_.size();i++)
+		conts_.at(i).addGlobalRelErrorDown(name,relerr);
+	gencont_.addGlobalRelErrorDown(name,relerr);
+	recocont_.addGlobalRelErrorDown(name,relerr);
+	unfolded_.addGlobalRelErrorDown(name,relerr);
+	refolded_.addGlobalRelErrorDown(name,relerr);
+}
+
 void histo1DUnfold::addGlobalRelError(TString name,float relerr){
 	for(size_t i=0;i<conts_.size();i++)
 		conts_.at(i).addGlobalRelError(name,relerr);

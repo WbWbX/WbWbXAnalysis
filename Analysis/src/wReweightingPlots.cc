@@ -46,7 +46,7 @@ void wReweightingPlots::fillPlots(){
 	if(!event()->genW) return;
 	if(!wonly_){
 		if(!event()->genjets) return;
-		if(!event()->genjets->size()>0) return;
+		if(event()->genjets->size()<1) return;
 		if(!event()->genjets->at(0))return;
 	}
 	if(!event()->costheta_cs) return;

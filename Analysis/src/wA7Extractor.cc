@@ -205,9 +205,9 @@ void wA7Extractor::loadPlots(const std::string& infile){
 		symmmc.removeAllSystematics();
 		symmmc.setName("MC");
 		plotterMultiplePlots pl;
-		pl.addPlot(&asymm);
+		pl.addPlot(&asymm,false);
 		pl.setLastNoLegend();
-		pl.addPlot(&symmmc);
+		pl.addPlot(&symmmc,false);
 		pl.setLastNoLegend();
 		pl.printToPdf(textFormatter::makeCompatibleFileName(("dataasymm_"+selectedStacks.at(i).getName()).Data()));
 		asymm.writeToFile(("h_dataasymm_"+selectedStacks.at(i).getName()+".ztop").Data());

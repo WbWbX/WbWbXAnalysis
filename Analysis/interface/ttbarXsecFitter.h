@@ -155,6 +155,8 @@ public:
 
 	texTabler makeCorrTable() const;
 
+	void writeCorrelationMatrix(const std::string& filename, bool addconstraints=false)const;
+
 	graph getResultsGraph(size_t idx,const float x_coord)const;
 
 	void createPseudoDataFromMC(histo1D::pseudodatamodes mode=histo1D::pseudodata_poisson);

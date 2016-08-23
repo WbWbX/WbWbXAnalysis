@@ -43,7 +43,16 @@ invokeApplication(){
 	std::vector<histo2D> selectedhistos;
 	const Int_t npar = wNLOReweighter::wdxsec_npars;
 	Double_t f2params[wNLOReweighter::wdxsec_npars];
+	Double_t fphiparams[wNLOReweighter::wdxsec1DPhi_npars];
+	Double_t fthetaparams[wNLOReweighter::wdxsec1DCosTheta_npars];
+
+
 	TF2 *f2 = new TF2("f2",wNLOReweighter::wdxsec,-1,1,-M_PI,M_PI, npar);
+	TF1 *fphi = new TF1("fphi",wNLOReweighter::wdxsec1DPhi,-M_PI,M_PI, wNLOReweighter::wdxsec1DPhi_npars);
+	TF1 *ftheta = new TF1("ftheta",wNLOReweighter::wdxsec1DCosTheta,-1,1, wNLOReweighter::wdxsec1DCosTheta_npars);
+
+	fphi->SetParameters(fphiparams);
+	ftheta->SetParameters(fthetaparams);
 
 	bool has1Dplots=false;
 	for(size_t i=0;i<stacknames.size();i++){
@@ -152,11 +161,11 @@ invokeApplication(){
 			lat->SetNDC(true);
 			lat->Draw("same");
 			chi2s=toTString(fmt.round( chi2/((h2d.getBinsY().size()-2)*(h2d.getBinsX().size()-2)),0.1));
-			 lat=new TLatex(0.3,0.03,"#chi^{2}/nbins="+chi2s);
-			 lat->SetNDC(true);
-			 lat->Draw("same");
-				th->GetZaxis()->SetRangeUser(-10,10);
-			 gPad->RedrawAxis();
+			lat=new TLatex(0.3,0.03,"#chi^{2}/nbins="+chi2s);
+			lat->SetNDC(true);
+			lat->Draw("same");
+			th->GetZaxis()->SetRangeUser(-10,10);
+			gPad->RedrawAxis();
 			cv.Print(outpath+stacknames.at(i)+"_pull.pdf");
 
 			plotterMultiplePlots pl;
@@ -166,9 +175,31 @@ invokeApplication(){
 
 			std::cout << "\nfitted:"<<std::endl;
 			for(size_t par=0;par<npar;par++){
-				std::cout << "A"+toTString(par)+": " << f2->GetParameter(par)/f2->GetParameter(npar-1)
-																										<<std::endl;
+				std::cout << "A"+toTString(par)+": " << f2->GetParameter(par)/f2->GetParameter(npar-1)<<
+						std::endl;
 			}
+
+			//1D projection
+			histo2D h2d2=selectedhistos.at(i);
+			histo1D thetadep=h2d2.projectToX(false);
+			thetadep.setYAxisName("Events/binwidth");
+			histo1D phidep=h2d2.projectToY(false);
+			phidep.setYAxisName("Events/binwidth");
+
+			cv.Clear();
+			TH1D * h = thetadep.getTH1D("",true,true);
+			h->Fit(ftheta);
+			h->Draw();
+			ftheta->Draw("same");
+			cv.Print((outpath+stacknames.at(i)+"_costheta.pdf"));
+
+			cv.Clear();
+			h = phidep.getTH1D("",true,true);
+			h->Fit(fphi);
+			h->Draw();
+			fphi->Draw("same");
+			cv.Print((outpath+stacknames.at(i)+"_phi.pdf"));
+			cv.Clear();
 		}
 		else if(stacknames.at(i).BeginsWith(prefix1d)){
 			histo1D hist=hsv->getStack(stacknames.at(i)).getSignalContainer();

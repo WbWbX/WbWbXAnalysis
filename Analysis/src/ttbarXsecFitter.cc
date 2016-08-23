@@ -371,7 +371,7 @@ void  ttbarXsecFitter::printControlStack(bool fittedvalues,size_t bjetcat,size_t
 	}
 	plotterMultiStack plm;
 	plm.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiStack_standard.txt");
-	 if(!fittedvalues)
+	if(!fittedvalues)
 		plm.addStyleForAllPlots(getenv("CMSSW_BASE")
 				+(std::string)"/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/controlPlots_mergeleg.txt",
 				"[merge for pre-fit plots]",
@@ -1317,8 +1317,8 @@ void ttbarXsecFitter::printAdditionalControlplots(const std::string& inputfile, 
 			}
 		}
 		//if(plotnames.at(i).size()!=1){
-			stack.setName(plotnames.at(i).at(0).data());
-			poststack.setName(stack.getName()+"_postfit");
+		stack.setName(plotnames.at(i).at(0).data());
+		poststack.setName(stack.getName()+"_postfit");
 		//}
 		TString name=stack.getName();
 		name.ReplaceAll(" ","_");
@@ -1361,9 +1361,9 @@ void ttbarXsecFitter::printXsecScan(size_t datasetidx, const std::string & outna
 	g.setXAxisName("#sigma_{t#bar{t}} ("+datasets_.at(datasetidx).getName()+") [pb]");
 	g.setYAxisName("-2 ln(L)");
 
-    std::string outfile=outname;
-    outfile+="_LHScan_";
-    outfile+=datasets_.at(datasetidx).getName().Data();
+	std::string outfile=outname;
+	outfile+="_LHScan_";
+	outfile+=datasets_.at(datasetidx).getName().Data();
 
 	TFile f((TString)outfile.data()+".root","RECREATE");
 	TCanvas cv;
@@ -1785,6 +1785,37 @@ texTabler ttbarXsecFitter::makeSystBreakDownTable(size_t datasetidx,bool detaile
 
 }
 
+void ttbarXsecFitter::writeCorrelationMatrix(const std::string& filename, bool addconstraints)const{
+
+	corrMatrix m=fitter_.getCorrelationMatrix();
+	std::ofstream outfile(filename);
+	size_t maxlength=0;
+	for(size_t i=0;i<m.size();i++){
+		size_t length=textFormatter::makeCompatibleFileName(m.getEntryName(i).Data()).length();
+		if(length>maxlength) maxlength=length;
+	}
+
+	for(size_t i=0;i<m.size();i++){
+		outfile <<  textFormatter::fixLength(textFormatter::makeCompatibleFileName(m.getEntryName(i).Data()),maxlength) <<" ";
+
+		if(addconstraints){
+			outfile <<  " (";
+			outfile.precision(2);
+			outfile << fitter_.getParameterErr(i);
+			outfile <<  ") ";
+		}
+		for(size_t j=0;j<=i;j++){
+			outfile.precision(10);
+			outfile << m.getEntry(i,j) ;
+			outfile << " ";
+		}
+		outfile<<std::endl;
+	}
+	outfile<<std::endl;
+	outfile.close();
+}
+
+
 texTabler ttbarXsecFitter::makeCorrTable() const{
 
 	TString format=" l ";
@@ -2198,7 +2229,7 @@ variateHisto1D ttbarXsecFitter::dataset::createLeptonJetAcceptance(const std::ve
 	twobjetsignal=twobjetsignal.getIntegralBin(includeUFOF);
 
 	histo1D correction_b =  ((signalintegral * twobjetsignal) * 4.)
-																																																																						                																																																																																																																																																																																																																																																																																																																																																																																																																																		/ ( (onebjetsignal + (twobjetsignal * 2.)) * (onebjetsignal + (twobjetsignal * 2.)));
+																																																																						                																																																																																																																																																																																																																																																																																																																																																																																																																																								/ ( (onebjetsignal + (twobjetsignal * 2.)) * (onebjetsignal + (twobjetsignal * 2.)));
 
 	correction_b.removeStatFromAll();
 
@@ -2489,9 +2520,13 @@ void ttbarXsecFitter::dataset::addUncertainties(histoStack * stack,size_t nbjets
 	stack->addRelErrorToBackgrounds(0.3,false,"BG",excludefromglobal); //more sophisticated approaches can be chosen here - like DY float etc
 
 	if(getName().Contains("7TeV"))
-		stack->addRelErrorToContribution(0.6,"t#bar{t}V","BG");
+		stack->addRelErrorToContribution(0.6,"t#bar{t}V","BG_",true);
 	else
-		stack->addRelErrorToContribution(0.3,"t#bar{t}V","BG");
+		stack->addRelErrorToContribution(0.3,"t#bar{t}V","BG_",true);
+
+	if(debug)
+		std::cout << "ttbarXsecFitter::addUncertainties: added t#bar{t}V var" <<std::endl;
+
 
 	float dy0bjetserr=0,dy1bjetserr=0,dy2bjetserr=0;
 	if(nbjets==0)
@@ -2513,9 +2548,12 @@ void ttbarXsecFitter::dataset::addUncertainties(histoStack * stack,size_t nbjets
 		}
 	}
 
-	stack->addRelErrorToContribution(dy0bjetserr,"DY","BG_0_bjets");
-	stack->addRelErrorToContribution(dy1bjetserr,"DY","BG_1_bjets");
-	stack->addRelErrorToContribution(dy2bjetserr,"DY","BG_2_bjets");
+	stack->addRelErrorToContribution(dy0bjetserr,"DY","BG_0_bjets_");
+	stack->addRelErrorToContribution(dy1bjetserr,"DY","BG_1_bjets_");
+	stack->addRelErrorToContribution(dy2bjetserr,"DY","BG_2_bjets_");
+
+	if(debug)
+		std::cout << "ttbarXsecFitter::addUncertainties: added DY var" <<std::endl;
 
 	std::vector<TString> allsys=stack->getDataContainer().getSystNameList();
 
@@ -2523,27 +2561,42 @@ void ttbarXsecFitter::dataset::addUncertainties(histoStack * stack,size_t nbjets
 	addlumiunc=unclumi_/100;
 	stack->addGlobalRelMCError("Lumi" ,addlumiunc);
 
+
+	if(debug)
+		std::cout << "ttbarXsecFitter::addUncertainties: added lumi var" <<std::endl;
+
 	if(removesyst){
 		if(std::find(allsys.begin(),allsys.end(),"TOPMASS")!=allsys.end())
 			stack->removeAllSystematics("TOPMASS");
 		else
 			stack->removeAllSystematics();
 		//}catch(...){}
+
+		if(debug)
+			std::cout << "ttbarXsecFitter::addUncertainties: removed syst" <<std::endl;
 	}
-
-
-
+	if(debug){
+		std::vector<TString> names=stack->getContainer(0).getSystNameList();
+		for(size_t i=0;i<names.size();i++)
+			std::cout << names.at(i) <<std::endl;
+	}
 
 	//split uncertainties here
 	if(!removesyst){
 		for(size_t i=0;i<priorcorrcoeff.size();i++){
 			double corrcoeff = priorcorrcoeff.at(i).second * priorcorrcoeff.at(i).second;
+			if(debug)
+				std::cout << priorcorrcoeff.at(i).second
+				<< " " << priorcorrcoeff.at(i).first << " "
+				<< priorcorrcoeff.at(i).first+"_"+getName() << std::endl;
 			stack->splitSystematic(priorcorrcoeff.at(i).first,corrcoeff,priorcorrcoeff.at(i).first,priorcorrcoeff.at(i).first+"_"+getName());
 		}
 	}
 
+	if(debug)
+		std::cout << "ttbarXsecFitter::addUncertainties: split syst done" <<std::endl;
 
-	///fake uncertainty
+	//fake uncertainty
 	stack->addGlobalRelMCError("Xsec_"+name_,0);
 	if(debug)
 		std::cout << "ttbarXsecFitter::addUncertainties: done" <<std::endl;

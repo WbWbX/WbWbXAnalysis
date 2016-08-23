@@ -37,6 +37,10 @@ void HTransformToCS::TransformToCS(ztop::NTGenParticle * neutrino,ztop::NTGenPar
 			neutrino->p4().py(),
 			neutrino->p4().pz(),
 			neutrino->p4().e());
+	//next try:
+	// SetPtEtaPhiM
+
+
 	TransformToCS(neu,mu,muon->q());
 }
 
@@ -45,6 +49,58 @@ void HTransformToCS::TransformToCS(TLorentzVector neutr,TLorentzVector muon,cons
 {
 	using namespace std;
 	float muforward= muon.Eta()*mucharge;
+
+	TLorentzVector & muplus=muon;
+	TLorentzVector & muminus=neutr;
+	/*
+	 *
+	 */
+	Wv= muplus+muminus;// this is the Z boson 4vector
+	b = Wv.BoostVector();
+	muplus.Boost(-b);
+	muminus.Boost(-b);
+
+	PF = PF_org;
+	PW = PW_org;
+
+	PF.Boost(-b);
+	PW.Boost(-b);
+	PFMinus= true;
+	// choose what to call proton and what anti-proton
+	//if(Wv.Angle(PF.Vect())<Wv.Angle(PW.Vect()))
+	if(muforward>0)
+	{
+		PW= -PW;
+	}
+	else
+	{
+		PF= -PF;
+		PFMinus=false;
+	}
+	PF=PF*(1.0/PF.Vect().Mag());
+	PW=PW*(1.0/PW.Vect().Mag());
+
+	// Bisector is the new Z axis
+	PBiSec =PW+PF;
+	PhiSecZ =  PBiSec.Vect().Unit();
+
+	PhiSecY = (PhiSecZ.Cross(Wv.Vect().Unit())).Unit();
+
+	muminusVec = muminus.Vect();
+	TRotation roataeMe;
+
+	// build matrix for transformation into CS frame
+	roataeMe.RotateAxes(PhiSecY.Cross(PhiSecZ),PhiSecY,PhiSecZ);
+	roataeMe.Invert();
+	// tranfor into CS alos the "debugging" vectors
+	muminusVec.Transform(roataeMe);
+
+	theta_cs = muminusVec.Theta();
+	cos_theta_cs = TMath::Cos(theta_cs);
+	phi_cs = muminusVec.Phi();
+
+	return;
+
 
 
 	Wv= neutr+muon;// this is the Z boson 4vector
@@ -59,7 +115,7 @@ void HTransformToCS::TransformToCS(TLorentzVector neutr,TLorentzVector muon,cons
 	PW.Boost(-b);
 
 
-	const bool jansimpl=true;
+	const bool jansimpl=false;
 	/*
 	 * new impl (Jan)
 	 */

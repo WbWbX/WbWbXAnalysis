@@ -5,8 +5,8 @@ $?cfg#
 
 $ inputfile,     legend entry,        color,   xsection,   legendNumber (for sorting,- allows for gaps),  (opt) isSignal
 
-new/more/W1JetsLN_tree_Part1.root,        signal,                     414,       3391,   2, true $factor: 7250/4230*4230 * 48384785/103426679
-new/more/W1JetsLN_tree_Part2.root,        signal,                     414,        3858,       2 ,true $factor: 7250/4230*4230 * 55041894/103426679
+new/genFix/W1JetsLN_tree_Part1.root,        signal,                     414,       3391,   2, true $factor: 7250/4230*4230 * 48384785/103426679
+$new/genFix/W1JetsLN_tree_Part2.root,        signal,                     414,        3858,       2 ,true $factor: 7250/4230*4230 * 55041894/103426679
 $new/more/W1JetTN_tree.root,               W+1jet,                     414,       2416,       2 ,true
 
 

@@ -33,8 +33,10 @@ public:
 
 	void setSimple(bool set){simple_=set;}
 
-	static const size_t wdxsec_npars;
+	static const size_t wdxsec_npars,wdxsec1DPhi_npars,wdxsec1DCosTheta_npars;
 	static double wdxsec(double * angles, double* pars);
+	static double wdxsec1DPhi(double * angles, double* pars);
+	static double wdxsec1DCosTheta(double * angles, double* pars);
 
 	void prepareWeight(const float& costheta, const float& phi, const NTGenParticle* W, const NTGenJet * jet=0);
 
