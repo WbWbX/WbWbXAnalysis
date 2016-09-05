@@ -242,6 +242,34 @@ void wControlplots_gen::makeControlPlotsPriv(){
 	addPlot("W mass low","m_{l#nu} [GeV]","Events",false);
 	FILL(genW,m());
 
+	SETBINSRANGE(200,0,200);
+	addPlot("gen lepton pt","p_{T} [GeV]","Events",true);
+	FILL(genlepton, pt());
+
+	addPlot("gen neutrino pt","p_{T} [GeV]","Events",true);
+	FILL(genneutrino,pt());
+
+	SETBINSRANGE(120,-8,8);
+	addPlot("gen lepton eta","#eta","Events",true);
+	FILL(genlepton, eta());
+
+	addPlot("gen neutrino eta","#eta","Events",true);
+	FILL(genneutrino, eta());
+
+	SETBINSRANGE(120,-M_PI,M_PI);
+	addPlot("gen lepton phi","#phi","Events",true);
+	FILL(genlepton, phi());
+
+	addPlot("gen neutrino phi","#phi","Events",true);
+	FILL(genneutrino, phi());
+
+	SETBINSRANGE(120,-1,2);
+	addPlot("gen lepton m","m [GeV]","Events",true);
+	FILL(genlepton, m());
+
+	addPlot("gen neutrino m","m [GeV]","Events",true);
+	FILL(genneutrino, m());
+
 }
 
 

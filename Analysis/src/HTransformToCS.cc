@@ -39,7 +39,8 @@ void HTransformToCS::TransformToCS(ztop::NTGenParticle * neutrino,ztop::NTGenPar
 			neutrino->p4().e());
 	//next try:
 	// SetPtEtaPhiM
-
+	mu.SetPtEtaPhiM(muon->pt(),muon->eta(),muon->phi(),muon->m());
+	neu.SetPtEtaPhiM(neutrino->pt(),neutrino->eta(),neutrino->phi(),neutrino->m());
 
 	TransformToCS(neu,mu,muon->q());
 }
@@ -48,14 +49,16 @@ void HTransformToCS::TransformToCS(ztop::NTGenParticle * neutrino,ztop::NTGenPar
 void HTransformToCS::TransformToCS(TLorentzVector neutr,TLorentzVector muon,const int& mucharge)
 {
 	using namespace std;
-	float muforward= muon.Eta()*mucharge;
 
-	TLorentzVector & muplus=muon;
-	TLorentzVector & muminus=neutr;
+	TLorentzVector & muplus=neutr;
+	TLorentzVector & muminus=muon;
 	/*
 	 *
 	 */
 	Wv= muplus+muminus;// this is the Z boson 4vector
+
+	float multiplier=mucharge; //Wv.Eta()*mucharge;//same as W charge
+
 	b = Wv.BoostVector();
 	muplus.Boost(-b);
 	muminus.Boost(-b);
@@ -67,14 +70,16 @@ void HTransformToCS::TransformToCS(TLorentzVector neutr,TLorentzVector muon,cons
 	PW.Boost(-b);
 	PFMinus= true;
 	// choose what to call proton and what anti-proton
-	//if(Wv.Angle(PF.Vect())<Wv.Angle(PW.Vect()))
-	if(muforward>0)
+	if(Wv.Angle(PF.Vect())<Wv.Angle(PW.Vect()))
+	//if(multiplier<0)
 	{
-		PW= -PW;
+		PW= -multiplier*PW;
+		PF= multiplier*PF;
 	}
 	else
 	{
-		PF= -PF;
+		PF= -multiplier*PF;
+		PW= multiplier*PW;
 		PFMinus=false;
 	}
 	PF=PF*(1.0/PF.Vect().Mag());
@@ -101,7 +106,7 @@ void HTransformToCS::TransformToCS(TLorentzVector neutr,TLorentzVector muon,cons
 
 	return;
 
-
+#if 0
 
 	Wv= neutr+muon;// this is the Z boson 4vector
 	b = Wv.BoostVector();
@@ -124,7 +129,7 @@ void HTransformToCS::TransformToCS(TLorentzVector neutr,TLorentzVector muon,cons
 	TVector3 p2v=PW.Vect().Unit();
 	TVector3 zaxis;
 	TVector3 muonvec=muon.Vect();
-	if(muforward>0)
+	if(multiplier>0)
 		zaxis=(p1v-p2v).Unit();
 	else
 		zaxis=(p2v-p1v).Unit();
@@ -161,7 +166,7 @@ void HTransformToCS::TransformToCS(TLorentzVector neutr,TLorentzVector muon,cons
 	PFMinus= true;
 	// choose what to call proton and what anti-proton
 	//if(Wv.Angle(PF.Vect())<Wv.Angle(PW.Vect()))
-	if(muforward>0)
+	if(multiplier>0)
 	{
 		PW= -PW;
 	}
@@ -194,6 +199,6 @@ void HTransformToCS::TransformToCS(TLorentzVector neutr,TLorentzVector muon,cons
 
 	cos_theta_cs = TMath::Cos(theta_cs);
 	phi_cs = muminusVec.Phi();
-
+#endif
 
 }

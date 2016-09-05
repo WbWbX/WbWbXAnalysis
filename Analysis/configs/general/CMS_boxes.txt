@@ -34,6 +34,12 @@
 	   0.9,   0.91,   19.7 fb^{-1} (8 TeV),   0.048,  42, 31
 [end - textBoxes]
 
+[textBoxes - CMSnoSplitLeftNoSqrtSProjection]
+	   0.185,   0.83,   CMS,   0.06, 61, 11
+	   0.185,   0.77,   Preliminary Projection,   0.0456, 52, 11
+	  # 0.9,   0.91,   19.7 fb^{-1} (8 TeV),   0.048,  42, 31
+[end - textBoxes]
+
 [textBoxes - CMSPaperNoSplitLeft]
 	   0.185,   0.83,   CMS,   0.06, 61, 11
 	   0.9,   0.91,   19.7 fb^{-1} (8 TeV),   0.048,  42, 31

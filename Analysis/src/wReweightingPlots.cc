@@ -26,9 +26,9 @@ void wReweightingPlots::bookPlots(){
 
 	//hidden in createBinning
 
-	std::vector<float> dy=histo1D::createBinning(20,0,6);
+	std::vector<float> dy=histo1D::createBinning(5,0,6);
 	std::vector<float> ptW;
-	ptW << 0 << 10 << 20 << 25 << 30 << 35 <<  40 << 50 << 60 << 80 << 300;
+	ptW << 0 << 10 << 20  << 30 << 40 << 50 << 80 << 300;
 	std::vector<float> dummy; //for additional subvar
 
 	histo2D::c_makelist=true;
@@ -36,6 +36,9 @@ void wReweightingPlots::bookPlots(){
 	createBinning(dy,ptW,dummy);
 	histo2D::c_makelist=false;
 	histo1D::c_makelist=false;
+	etasymm_=true;
+	for(size_t i=0;i<dy.size();i++)
+		if(dy.at(i)<0) etasymm_=false;
 
 
 }
@@ -55,11 +58,13 @@ void wReweightingPlots::fillPlots(){
 
 	float detaWj=0;
 	if(!wonly_){
-		detaWj=fabs(event()->genW->eta()-event()->genjets->at(0)->eta());
+		detaWj=(event()->genW->eta() - event()->genjets->at(0)->eta());
 	}
 	else{
-	    detaWj=fabs(event()->genW->eta());
+	    detaWj=(event()->genW->eta());
 	}
+	if(etasymm_)
+		detaWj=fabs(detaWj);
 
 	float phi=* event()->phi_cs ;
 	float costheta=* event()->costheta_cs;
@@ -101,8 +106,17 @@ void wReweightingPlots::createBinning( const std::vector<float>& a, const std::v
 		for(size_t j=1;j<binsb_.size()-1;j++){
 			for(size_t k=1;k<binsc_.size()-1;k++){
 
-				std::vector<float> binsphi  =histo1D::createBinning(18,-M_PI,M_PI); //makeBins(binsa_.at(i) ,binsb_.at(j) ,binsc_.at(k) );
-				std::vector<float> binsth=histo1D::createBinning(18, -1,1);
+				std::vector<float> binsphi  =histo1D::createBinning(9,-M_PI,M_PI); //makeBins(binsa_.at(i) ,binsb_.at(j) ,binsc_.at(k) );
+				std::vector<float> binsth=histo1D::createBinning(9, -1,1);
+
+				if( (fabs(binsa_.at(i)) > 4|| fabs(binsa_.at(i+1)) > 4) && binsb_.at(j) > 40){
+					binsphi  =histo1D::createBinning(7,-M_PI,M_PI);
+					binsth=histo1D::createBinning(6, -1,1);
+				}
+				if ((fabs(binsa_.at(i)) > 5|| fabs(binsa_.at(i+1)) > 5) && binsb_.at(j) > 60){
+					binsphi  =histo1D::createBinning(5,-M_PI,M_PI);
+					binsth=histo1D::createBinning(4, -1,1);
+				}
 
 				TString name="rewhist_";
 				name+=toTString( binsa_.at(i) )+":"+toTString( binsa_.at(i+1) )+"_";

@@ -27,6 +27,7 @@ invokeApplication(){
 	const TString outpath=parser->getOpt<TString>("o","fitout","output path")+"/";
 	system(("mkdir -p "+outpath).Data());
 
+	const bool noplots=parser->getOpt<bool>("p",false);
 	std::vector<std::string> infiles=parser->getRest<std::string>();
 	if(infiles.size()<1)
 		parser->coutHelp();
@@ -112,7 +113,7 @@ invokeApplication(){
 			gStyle->SetNumberContours(NCont);
 			th->Draw("colz");
 
-			NCont=40;
+			NCont=20;
 			const Int_t NRGBs = 5;
 			Double_t bstops[NRGBs] = { 0.00, 0.34, 0.61, 0.84, 1.00 };
 			Double_t bred[NRGBs]   = { 1, 0.00, 0.87, 1.00, 0.51 };
@@ -122,9 +123,10 @@ invokeApplication(){
 			TColor::CreateGradientColorTable(NRGBs, bstops, bred, bgreen, bblue, NCont);
 			gStyle->SetNumberContours(NCont);
 
-			f2->Draw("cont1 same");
-			cv.Print(outpath+stacknames.at(i)+".pdf");
-
+			if(!noplots){
+				f2->Draw("cont1 same");
+				cv.Print(outpath+stacknames.at(i)+".pdf");
+			}
 
 			//make pull
 			histo2D h2d=selectedhistos.at(i);
@@ -166,12 +168,14 @@ invokeApplication(){
 			lat->Draw("same");
 			th->GetZaxis()->SetRangeUser(-10,10);
 			gPad->RedrawAxis();
-			cv.Print(outpath+stacknames.at(i)+"_pull.pdf");
+			if(!noplots)
+				cv.Print(outpath+stacknames.at(i)+"_pull.pdf");
 
 			plotterMultiplePlots pl;
 			pl.addPlot(&pulls,false);
 			pl.setLastNoLegend();
-			pl.printToPdf((outpath+stacknames.at(i)+"_pulls").Data());
+			if(!noplots)
+				pl.printToPdf((outpath+stacknames.at(i)+"_pulls").Data());
 
 			std::cout << "\nfitted:"<<std::endl;
 			for(size_t par=0;par<npar;par++){
@@ -189,17 +193,19 @@ invokeApplication(){
 			cv.Clear();
 			TH1D * h = thetadep.getTH1D("",true,true);
 			h->Fit(ftheta);
-			h->Draw();
-			ftheta->Draw("same");
-			cv.Print((outpath+stacknames.at(i)+"_costheta.pdf"));
+			if(!noplots){
+				h->Draw();
+				ftheta->Draw("same");
+				cv.Print((outpath+stacknames.at(i)+"_costheta.pdf"));
 
-			cv.Clear();
-			h = phidep.getTH1D("",true,true);
-			h->Fit(fphi);
-			h->Draw();
-			fphi->Draw("same");
-			cv.Print((outpath+stacknames.at(i)+"_phi.pdf"));
-			cv.Clear();
+				cv.Clear();
+				h = phidep.getTH1D("",true,true);
+				h->Fit(fphi);
+				h->Draw();
+				fphi->Draw("same");
+				cv.Print((outpath+stacknames.at(i)+"_phi.pdf"));
+				cv.Clear();
+			}
 		}
 		else if(stacknames.at(i).BeginsWith(prefix1d)){
 			histo1D hist=hsv->getStack(stacknames.at(i)).getSignalContainer();

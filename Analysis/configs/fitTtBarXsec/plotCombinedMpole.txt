@@ -1,0 +1,9 @@
+$comments
+
+
+  nozaxis=false
+  zaxis.min = 0
+  zaxis.max = 1.001
+  rootDrawOpt =colz
+
+  palette=bluewhitered

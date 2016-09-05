@@ -18,7 +18,7 @@ namespace ztop{
 
 class wReweightingPlots {
 public:
-	wReweightingPlots():evt_(0),enabled_(false),signal_(false),transf_(8000),save1D_(false),wonly_(false){}
+	wReweightingPlots():evt_(0),enabled_(false),signal_(false),transf_(8000),save1D_(false),wonly_(false),etasymm_(true){}
 	~wReweightingPlots(){
 		clearHists();
 	}
@@ -63,6 +63,7 @@ private:
 	HTransformToCS transf_;
 	bool save1D_;
 	bool wonly_;
+	bool etasymm_;
 };
 
 

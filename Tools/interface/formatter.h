@@ -47,7 +47,7 @@ public:
 		if(std::abs(prec)<1)
 			precision=log(1/std::abs(prec))/2.302585093 +1;
 		s<<std::fixed << std::setprecision(precision) ;
-		s << round(in,prec);
+		s << this->round(in,prec);
 		TString out = s.str();
 		return out;
 	}

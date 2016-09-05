@@ -39,29 +39,37 @@
 
 namespace ztop{
 
-void wAnalyzer::pairLeptons( std::vector<NTGenParticle*> * v, NTGenParticle*& lep, NTGenParticle*& neutr)const{
+void wAnalyzer::pairLeptons( std::vector<NTGenParticle*> * v, NTGenParticle*& lep, NTGenParticle*& neutr, bool isdy)const{
 	lep=0;neutr=0;
 
+	int addtopdg=1;
+	if(isdy)
+		addtopdg=0;
 	for(size_t i=0;i<v->size();i++){
 		NTGenParticle* p=v->at(i);
 		if(p->pdgId() == 13
 				|| p->pdgId() == -13
 				|| p->pdgId() == 11
 				|| p->pdgId() == -11
-				|| p->pdgId() == 15
+				|| p->pdgId() == 15   //taus are vetoed later
 				|| p->pdgId() == -15){
+			//){ //try muons, only
 			//search for neutrino
 			for(size_t j=0;j<v->size();j++){
 				if(i==j)continue;
 				NTGenParticle* p2=v->at(j);
-				if((int)std::abs(p2->pdgId()) == (int)(std::abs(p->pdgId())+1)){
-					//matching pair
-				//	if((p->p4()+p2->p4()).m()>5){
-						lep=p;
-						neutr=p2;
-						//std::cout << "got one: "<<(p->p4()+p2->p4()).m() <<std::endl;
-						break;
-				//	}
+				if(p2->pdgId() * p->pdgId() <0 &&
+						(int)std::abs(p2->pdgId()) == (int)(std::abs(p->pdgId()))+addtopdg){
+
+					lep=p;
+					neutr=p2;
+					if(isdy){
+						if(p->q()>0){//make the "lepton" always the negative charge one
+							lep=p2;
+							neutr=p;
+						}
+					}
+					break;
 				}
 			}
 
@@ -104,12 +112,12 @@ void wAnalyzer::analyze(size_t id){
 
 	wGenSelector selectGen;
 	if(isNLO){
-		if(inputfile_.Contains("LN_")){
-			//	selectGen.addVeto(15);
-			//	selectGen.addVeto(-15);
+		if(inputfile_.Contains("WLN1J")){
+				selectGen.addVeto(15);
+				selectGen.addVeto(-15);
 		}
 	}
-
+	const bool isDYsig=signal_ && inputfile_.Contains("DY");
 
 	NTFullEvent evt;
 	wControlPlots c_plots;
@@ -237,7 +245,6 @@ void wAnalyzer::analyze(size_t id){
 		 * Link collections to event
 		 */
 		float puweight=1;
-		if(isMC_)puweight*=* b_puweight.content();
 		evt.puweight=&puweight;
 		if(signal_ && isNLO){
 			float lheweight=(float) *b_lheweight.content() / (10000. * 4.3446); //only sign is important scale to make the weight plots look nice
@@ -267,7 +274,8 @@ void wAnalyzer::analyze(size_t id){
 					reco::GenStatusFlags flags;
 					int oldstatus=p->status();
 					flags.splitModifiedStatus(oldstatus);
-					if(! flags.isHardProcess())continue;
+					if(isNLO &&  ! flags.isHardProcess())continue;
+					//if(! flags.fromHardProcessBeforeFSR())continue; gives zero particles
 					p->setStatus(3); //for compatibility
 					tempgen.push_back(p);
 				}
@@ -277,20 +285,26 @@ void wAnalyzer::analyze(size_t id){
 			evt.allgenparticles=&allgenparticles;
 
 			////first gen selection step (problem with tau decays)
-			selectGen.setCollection(&allgenparticles);
-			if(!selectGen.pass()) continue;
 
-			evt.genlepton=lepton;
-			evt.genneutrino=neutrino;
 			//get the first lepton. NO status code check
 
 			//maybe favour masses around W mass if mass < 10 GeV (taus)
-			pairLeptons(&allgenparticles,lepton,neutrino);
+			pairLeptons(&allgenparticles,lepton,neutrino,isDYsig);
 			if(lepton){//remove from genjets
 				for(size_t i=0;i<genjets.size();i++)
 					if(dR(lepton,genjets.at(i))<0.05)
 						genjets.erase(genjets.begin()+i);
 			}
+
+			std::vector<NTGenParticle*> leptonsfromW;
+			leptonsfromW.push_back(lepton);
+			leptonsfromW.push_back(neutrino);
+
+			selectGen.setCollection(&leptonsfromW);
+			if(!selectGen.pass()) continue;
+
+			evt.genlepton=lepton;
+			evt.genneutrino=neutrino;
 
 			//both always fit another in the samples. no need for special check
 			//the tau only sample has no neutrinos
@@ -327,6 +341,9 @@ void wAnalyzer::analyze(size_t id){
 		rewplots.fillPlots();
 		//(at the end)
 		anaplots.fillPlotsGen();
+
+		//add pu weight
+		if(isMC_)puweight*=* b_puweight.content();
 
 		if(genonly_)continue;
 

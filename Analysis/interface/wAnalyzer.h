@@ -49,7 +49,7 @@ public:
 
 private:
 
-	void pairLeptons( std::vector<NTGenParticle*> * v, NTGenParticle*& lep, NTGenParticle*& neutr)const;
+	void pairLeptons( std::vector<NTGenParticle*> * v, NTGenParticle*& lep, NTGenParticle*& neutr, bool isdy=false)const;
 
 	fileForker::fileforker_status writeOutput();
 

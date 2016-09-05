@@ -24,20 +24,20 @@ wNTGenParticleInterface::wNTGenParticleInterface(tTreeHandler * t,
 		const TString& grandmotherpdgid_branch) : wNTBaseInterface(t,enable),missingstatusbranch_(false){
 
 	const size_t bufsize=128;
-	addBranch<int>(size_branch);
-	addBranch<float*>(pt_branch,bufsize);
-	addBranch<float*>(eta_branch,bufsize);
-	addBranch<float*>(phi_branch,bufsize);
-	addBranch<float*>(m_branch,bufsize);
-	addBranch<int*>(pdgid_branch,bufsize);
-	addBranch<float*>(charge_branch,bufsize);
+	addBranch<int>(size_branch);              //0
+	addBranch<float*>(pt_branch,bufsize);     //1
+	addBranch<float*>(eta_branch,bufsize);    //2
+	addBranch<float*>(phi_branch,bufsize);    //3
+	addBranch<float*>(m_branch,bufsize);      //4
+	addBranch<int*>(pdgid_branch,bufsize);    //5
+	addBranch<float*>(charge_branch,bufsize); //6
 	tBranchHandler<int*>::allow_missing=true;
-	tBranchHandler<int*> * b=addBranch<int*>(status_branch,bufsize);
+	tBranchHandler<int*> * b=addBranch<int*>(status_branch,bufsize); //7
 	if(b)
 		missingstatusbranch_=b->ismissing();
 	tBranchHandler<int*>::allow_missing=false;
-	addBranch<int*>(motherpdgid_branch,bufsize);
-	addBranch<int*>(grandmotherpdgid_branch,bufsize);
+	addBranch<int*>(motherpdgid_branch,bufsize); //8
+	addBranch<int*>(grandmotherpdgid_branch,bufsize); //9
 
 
 }
@@ -57,7 +57,11 @@ std::vector<NTGenParticle> * wNTGenParticleInterface::content(){
 			part.p4_.setM(  (* getBranchContent<float*>(4))[i]);
 
 			part.setPdgId(  (* getBranchContent<int*>(5))[i] );
-			part.setQ(      (* getBranchContent<float*>(6))[i] );
+			float charge= (* getBranchContent<float*>(6))[i] ;
+			if(charge>0)
+				part.setQ( 1 );
+			else
+				part.setQ( -1 );
 			if(!missingstatusbranch_)
 				part.setStatus( (* getBranchContent<int*>(7))[i] );
 			else

@@ -24,7 +24,7 @@ $treeProducerA7W_DYJetsM50.root,         DY,                         868,       
 $treeProducerA7W_QCDMuPt15.root,         QCD,                        400,	  134680,       9
 
   
-treeProducerA7W_DYJetsM50.root,         DUMMY,                         868,       3532.8,      7
+$treeProducerA7W_DYJetsM50.root,         DY,                         868,       3532.8,      7
 
   
 [inputfiles-end]

@@ -5,9 +5,9 @@ $?cfg#
 
 $ inputfile,     legend entry,        color,   xsection,   legendNumber (for sorting,- allows for gaps),  (opt) isSignal
 
-treeProducerA7W_WJets.root,        signal,                     414,       3391,   2, true $factor: 7250/4230*4230 * 48384785/103426679
+$ treeProducerA7W_DYJetsM50.root,         DY,                         868,       3532.8,      7, true
+treeProducerA7W_WJets.root,         DY,                         868,       3532.8,      7, true
 
-  
   
 [inputfiles-end]
 

@@ -103,8 +103,9 @@ public:
 	const textBox & at(size_t idx)const{return boxes_.at(idx);}
 
 	void clear(){boxes_.clear();}
-	void add(float x,float y,const TString & text,float textsize=0.05,int font=62,int align=11,int color=1){
+	textBox& add(float x,float y,const TString & text,float textsize=0.05,int font=62,int align=11,int color=1){
 		boxes_.push_back(textBox(x,y,text,textsize,font,align,color));
+		return boxes_.at(boxes_.size()-1);
 	}
 	size_t size(){return boxes_.size();}
 	void readFromFileInCMSSW(const std::string & filename, const std::string & markername);

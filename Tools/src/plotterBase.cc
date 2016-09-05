@@ -131,9 +131,9 @@ void plotterBase::drawTextBoxes(){
 }
 
 
-void plotterBase::addTextBox(float x,float y,const TString & text,float textsize,int align,int color){
+textBox&  plotterBase::addTextBox(float x,float y,const TString & text,float textsize,int align,int color){
 
-	textboxes_.add(x,y,text,textsize,align,color);
+	return textboxes_.add(x,y,text,textsize,62,align,color);
 
 }
 void plotterBase::readTextBoxesInCMSSW(const std::string& pathtofile,const std::string& marker){

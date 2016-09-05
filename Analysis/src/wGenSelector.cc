@@ -24,7 +24,6 @@ bool wGenSelector::pass()const{
 
 	for(size_t i=0;i<coll_->size();i++){
 		const NTGenParticle * p=coll_->at(i);
-		if(p->status() != 23 && p->status() != -23) continue;
 		for(size_t j=0;j<vetos_.size();j++){
 			if(p->pdgId() == vetos_.at(j)){
 				if(debug)
