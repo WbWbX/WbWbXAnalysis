@@ -1,0 +1,7 @@
+
+#!/bin/zsh
+
+file=$1
+
+
+root -l "$CMSSW_BASE/src/TtZAnalysis/Tools/scripts/macros/openhsv.C(\"${file}\")" 
