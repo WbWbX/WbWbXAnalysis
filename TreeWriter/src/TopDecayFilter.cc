@@ -127,7 +127,7 @@ bool TopDecayFilter::analyze(edm::Event& evt, const edm::EventSetup& es) {
         if(std::abs(leps.at(i)->pdgId()) == 11) elcounter ++;
         else if(std::abs(leps.at(i)->pdgId()) == 13) mucounter ++;
     }
-    if(mucounter >= 1 && elcounter >= 1) return 1;
+    if((mucounter >= 1 && elcounter >= 1) || mucounter >= 2 || elcounter >= 2) return 1;
     else return 0;
 } 
 

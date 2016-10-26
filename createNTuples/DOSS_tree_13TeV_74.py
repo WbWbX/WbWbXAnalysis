@@ -178,9 +178,9 @@ if globalTag != '':
 else:
     print "Determine global tag automatically"
     if options.runOnMC:
-        process.GlobalTag.globaltag = cms.string('80X_mcRun2_asymptotic_2016_miniAODv2')
+        process.GlobalTag.globaltag = cms.string('80X_mcRun2_asymptotic_2016_miniAODv2_v1')
     else:
-        process.GlobalTag.globaltag = cms.string('80X_dataRun2_Prompt_v8')
+        process.GlobalTag.globaltag = cms.string('80X_dataRun2_Prompt_ICHEP16JEC_v0')
         
 print "Using global tag: ", process.GlobalTag.globaltag
 
@@ -380,20 +380,6 @@ elif not runOnAOD:
      process.BadPFMuonFilter.muons = cms.InputTag("slimmedMuons")
      process.BadPFMuonFilter.PFCandidates = cms.InputTag("packedPFCandidates")
 
-
-
-     from TopAnalysis.ZTopUtils.TriggerFilter_cfi import triggerOrFilter
-     
-     process.emuTriggerFilter=triggerOrFilter.clone(trigger=cms.vstring("HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v","HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v"),src = cms.InputTag('TriggerResults','','HLT'),invert=cms.bool(False))
-     process.noEmuTriggerFilter=process.emuTriggerFilter.clone(invert=cms.bool(True))
-     process.mumuTriggerFilter=triggerOrFilter.clone(trigger=cms.vstring("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v","HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v"),src = cms.InputTag('TriggerResults','','HLT'),invert=cms.bool(False))
-     process.noMumuTriggerFilter=process.mumuTriggerFilter.clone(invert=cms.bool(True))
-     process.eeTriggerFilter=triggerOrFilter.clone(trigger=cms.vstring("HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"),src = cms.InputTag('TriggerResults','','HLT'),invert=cms.bool(False))
-     process.noEeTriggerFilter= process.eeTriggerFilter.clone(invert=cms.bool(True))
-     process.singleMuTriggerFilter=process.emuTriggerFilter.clone(trigger=cms.vstring("HLT_IsoMu20_v","HLT_IsoTkMu20_v"),invert=cms.bool(False)) 
-     process.noSingleMuTriggerFilter=process.singleMuTriggerFilter.clone(invert=cms.bool(True))
-     process.singleEleTriggerFilter=process.emuTriggerFilter.clone(trigger=cms.vstring("HLT_Ele23_WPLoose_Gsf_v"),invert=cms.bool(False))
-     process.noSingleEleTriggerFilter=process.singleEleTriggerFilter.clone(invert=cms.bool(True))
      process.prefilterSequence=cms.Sequence(
          process.HBHENoiseFilter* 
          process.HBHENoiseIsoFilter*    
@@ -404,28 +390,6 @@ elif not runOnAOD:
          process.BadChargedCandidateFilter*
          process.BadPFMuonFilter
      )
-     if dataset== "emu":
-         process.prefilterSequence+=process.emuTriggerFilter
-     elif dataset== "singleMu":
-         process.prefilterSequence+=process.noEmuTriggerFilter
-         process.prefilterSequence+=process.singleMuTriggerFilter
-     elif dataset=="singleEle":
-         process.prefilterSequence+=process.noEmuTriggerFilter
-         process.prefilterSequence+=process.noSingleMuTriggerFilter
-         process.prefilterSequence+=process.singleEleTriggerFilter
-     elif dataset=="mumu":
-         process.prefilterSequence+=process.mumuTriggerFilter
-     elif dataset== "singleMu_mumu":
-         process.prefilterSequence+=process.noMumuTriggerFilter
-         process.prefilterSequence+=process.singleMuTriggerFilter
-     elif dataset=="ee":
-         process.prefilterSequence+=process.eeTriggerFilter
-     elif dataset=="singleEle_ee":
-         process.prefilterSequence+=process.noEeTriggerFilter
-         process.prefilterSequence+=process.singleEleTriggerFilter
-
-
-
 
 
 
@@ -588,12 +552,11 @@ process.filterkinLeptons = cms.EDFilter("SimpleCounter",
                                         minNumber = cms.uint32(minleptons),
                                         debug=cms.bool(debug)
                                         )
-if isSignal:
-    process.kinLeptonFilterSequence = cms.Sequence()
-else:
+if not runOnMC and dataset !='MET':
     process.kinLeptonFilterSequence = cms.Sequence(process.filterkinLeptons)
-
-from PhysicsTools.PatAlgos.tools.jetTools import switchJetCollection
+else: 
+    process.kinLeptonFilterSequence = cms.Sequence()
+#from PhysicsTools.PatAlgos.tools.jetTools import switchJetCollection
 # Switch the default jet collection (done in order to use the above specified b-tag infos and discriminators)
 #switchJetCollection(
 #    process,
@@ -683,6 +646,7 @@ process.PFTree   = cms.EDAnalyzer('TreeWriterTtZ',
                                   triggerResults = cms.InputTag('TriggerResults','','HLT'), #needed for both AOD and MiniAOD
                                   triggerEvent   = cms.InputTag('patTriggerEvent'), ### "selectedPatTrigger" for MiniAODs
                                   triggerObjects = cms.vstring(""),
+                                  #triggerObjects = cms.vstring("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v","HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v","hltL3fL1sDoubleMu114L1f0L2f10OneMuL3Filtered17","hltDiMuonGlb17Glb8RelTrkIsoFiltered0p4","hltDiMuonGlb17Trk8RelTrkIsoFiltered0p4","hltL3pfL1sDoubleMu114L1f0L2pf0L3PreFiltered8","hltL2pfL1sDoubleMu114ORDoubleMu125L1f0L2PreFiltered0","hltDiMuonGlb17Trk8RelTrkIsoFiltered0p4","hltDiMuonGlbFiltered17TrkFiltered8"),
                                   
                                   #block for event information.  Essential (PU)
                                   PUInfo = cms.InputTag('slimmedAddPileupInfo'),
@@ -738,7 +702,7 @@ process.path = cms.Path(
 #    process.goodOfflinePrimaryVertices *   
     process.prefilterSequence * #for data only 
     #    process.dump *
-#    process.kinLeptonFilterSequence * # agrohsje 
+    process.kinLeptonFilterSequence * # agrohsje 
     process.PFTree
     )
 

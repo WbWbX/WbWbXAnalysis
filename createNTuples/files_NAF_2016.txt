@@ -1,39 +1,133 @@
 ####Trigger Data
 
-110    /MET/Run2016B-PromptReco-v2/MINIAOD        tree_13Tev_data_MET       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_806/CMSSW_8_0_6/src/TtZAnalysis/createNTuples/jsonfiles/Cert_271036-274421_13TeV_PromptReco_Collisions16_JSON.txt
+110    /MET/Run2016B-PromptReco-v2/MINIAOD        tree_13Tev_data_MET_RunB       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+#110    /JetHT/Run2016B-PromptReco-v2/MINIAOD        tree_13Tev_data_JetHT_RunB       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+40    /MET/Run2016C-PromptReco-v2/MINIAOD        tree_13Tev_data_MET_RunC       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+#40    /JetHT/Run2016C-PromptReco-v2/MINIAOD        tree_13Tev_data_JetHT_RunC       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+160    /MET/Run2016D-PromptReco-v2/MINIAOD        tree_13Tev_data_MET_RunD       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+#160    /JetHT/Run2016D-PromptReco-v2/MINIAOD        tree_13Tev_data_JetHT_RunD       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+160    /MET/Run2016E-PromptReco-v2/MINIAOD        tree_13Tev_data_MET_RunE       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+#160    /JetHT/Run2016E-PromptReco-v2/MINIAOD        tree_13Tev_data_JetHT_RunE       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+160    /MET/Run2016F-PromptReco-v1/MINIAOD        tree_13Tev_data_MET_RunF       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+#160    /JetHT/Run2016F-PromptReco-v1/MINIAOD        tree_13Tev_data_JetHT_RunF       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+#160    /MET/Run2016G-PromptReco-v1/MINIAOD        tree_13Tev_data_MET_RunG       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+#160    /JetHT/Run2016G-PromptReco-v1/MINIAOD        tree_13Tev_data_JetHT_RunG       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+############ Muon EG Stream
+
+#120     /MuonEG/Run2016B-PromptReco-v2/MINIAOD        tree_13Tev_data_MuonEG_trigger_RunB       runOnMC=False json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+#70     /MuonEG/Run2016C-PromptReco-v2/MINIAOD        tree_13Tev_data_MuonEG_trigger_RunC       runOnMC=False json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+#170     /MuonEG/Run2016D-PromptReco-v2/MINIAOD        tree_13Tev_data_MuonEG_trigger_RunD       runOnMC=False json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+#170     /MuonEG/Run2016E-PromptReco-v2/MINIAOD        tree_13Tev_data_MuonEG_trigger_RunE       runOnMC=False json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+#170     /MuonEG/Run2016F-PromptReco-v1/MINIAOD        tree_13Tev_data_MuonEG_trigger_RunF       runOnMC=False json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+#170     /MuonEG/Run2016G-PromptReco-v1/MINIAOD        tree_13Tev_data_MuonEG_trigger_RunG       runOnMC=False json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+###########Electron data Streams
+
+#150    /DoubleEG/Run2016B-PromptReco-v2/MINIAOD        tree_13Tev_data_DoubleEG_RunB       runOnMC=False json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+#170    /SingleElectron/Run2016B-PromptReco-v2/MINIAOD        tree_13Tev_data_SingleElectron_RunB       runOnMC=False json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+#50    /DoubleEG/Run2016C-PromptReco-v2/MINIAOD        tree_13Tev_data_DoubleEG_RunC       runOnMC=False json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+#170    /SingleElectron/Run2016C-PromptReco-v2/MINIAOD        tree_13Tev_data_SingleElectron_RunC       runOnMC=False json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+#150    /DoubleEG/Run2016D-PromptReco-v2/MINIAOD        tree_13Tev_data_DoubleEG_RunD       runOnMC=False json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+#170    /SingleElectron/Run2016D-PromptReco-v2/MINIAOD        tree_13Tev_data_SingleElectron_RunD       runOnMC=False json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+#70    /DoubleEG/Run2016E-PromptReco-v2/MINIAOD       tree_13Tev_data_DoubleEG_RunE       runOnMC=False json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+#100    /SingleElectron/Run2016E-PromptReco-v2/MINIAOD        tree_13Tev_data_SingleElectron_RunE       runOnMC=False json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+#50    /DoubleEG/Run2016F-PromptReco-v1/MINIAOD        tree_13Tev_data_DoubleEG_RunF       runOnMC=False json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+#90    /SingleElectron/Run2016F-PromptReco-v1/MINIAOD        tree_13Tev_data_SingleElectron_RunF       runOnMC=False json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+#120    /DoubleEG/Run2016G-PromptReco-v1/MINIAOD        tree_13Tev_data_DoubleEG_RunG       runOnMC=False json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+#170    /SingleElectron/Run2016G-PromptReco-v1/MINIAOD        tree_13Tev_data_SingleElectron_RunG       runOnMC=False json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+
+########Muon data streams
+
+#150    /DoubleMuon/Run2016B-PromptReco-v2/MINIAOD        tree_13Tev_data_DoubleMuon_RunB       runOnMC=False json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+#170    /SingleMuon/Run2016B-PromptReco-v2/MINIAOD        tree_13Tev_data_SingleMuon_RunB       runOnMC=False json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+#50    /DoubleMuon/Run2016C-PromptReco-v2/MINIAOD        tree_13Tev_data_DoubleMuon_RunC       runOnMC=False json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+#90    /SingleMuon/Run2016C-PromptReco-v2/MINIAOD        tree_13Tev_data_SingleMuon_RunC       runOnMC=False json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+#100    /DoubleMuon/Run2016D-PromptReco-v2/MINIAOD        tree_13Tev_data_DoubleMuon_RunD       runOnMC=False json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+#150    /SingleMuon/Run2016D-PromptReco-v2/MINIAOD        tree_13Tev_data_SingleMuon_RunD       runOnMC=False json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+#80    /DoubleMuon/Run2016E-PromptReco-v2/MINIAOD        tree_13Tev_data_DoubleMuon_RunE       runOnMC=False json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+#120    /SingleMuon/Run2016E-PromptReco-v2/MINIAOD        tree_13Tev_data_SingleMuon_RunE       runOnMC=False json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+#80    /DoubleMuon/Run2016F-PromptReco-v1/MINIAOD        tree_13Tev_data_DoubleMuon_RunF       runOnMC=False json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+#120   /SingleMuon/Run2016F-PromptReco-v1/MINIAOD        tree_13Tev_data_SingleMuon_RunF       runOnMC=False json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+#120   /DoubleMuon/Run2016G-PromptReco-v1/MINIAOD     tree_13Tev_data_DoubleMuon_RunG       runOnMC=False json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
+
+#170   /SingleMuon/Run2016G-PromptReco-v1/MINIAOD        tree_13Tev_data_SingleMuon_RunG       runOnMC=False json=/nfs/dust/cms/user/tarndt/Test_8014/CMSSW_8_0_14/src/TtZAnalysis/createNTuples/jsonfiles/RunEFG_DiEle.txt
 
 
 
-120     /MuonEG/Run2016B-PromptReco-v2/MINIAOD        tree_13Tev_data_MuonEG_trigger       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_806/CMSSW_8_0_6/src/TtZAnalysis/createNTuples/jsonfiles/Cert_271036-274421_13TeV_PromptReco_Collisions16_JSON.txt
+####TTBar-Dilep-alphaS
 
+#450  	/TTTo2L2Nu_13TeV-powheg/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/MINIAODSIM    tree_13TeV_emuttbar_dilep            runOnAOD=False isSignal=True includePDFWeights=True PDF=CT10 nominalPDF=3001 beginPDFVar=3002 endPDFVar=3053 genFilter=ttbar
 
+#150   	/TTTo2L2Nu_TuneCUETP8M1_alphaS01273_13TeV-powheg-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM    tree_13TeV_emuttbar_dilep_alphas         runOnAOD=False isSignal=True genFilter=ttbar
 
-150    /DoubleEG/Run2016B-PromptReco-v2/MINIAOD        tree_13Tev_data_DoubleEG_trigger       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_806/CMSSW_8_0_6/src/TtZAnalysis/createNTuples/jsonfiles/Cert_271036-274421_13TeV_PromptReco_Collisions16_JSON.txt
+#150    /TTTo2L2Nu_TuneCUETP8M1T4_alphaS01108_13TeV-powheg-pythia8/tarndt-TTto2L_AlphaS_MiniAOD-b773ac922eef67f3b5600ed596c9ce54/USER    tree_13TeV_emuttbar_dilep_alphas118_cust         runOnAOD=False isSignal=True genFilter=ttbar
 
-
-
-150    /DoubleMuon/Run2016B-PromptReco-v2/MINIAOD        tree_13Tev_data_DoubleMuon_trigger       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_806/CMSSW_8_0_6/src/TtZAnalysis/createNTuples/jsonfiles/Cert_271036-274421_13TeV_PromptReco_Collisions16_JSON.txt
-
-
-
-170    /SingleMuon/Run2016B-PromptReco-v2/MINIAOD        tree_13Tev_data_SingleMuon_trigger       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_806/CMSSW_8_0_6/src/TtZAnalysis/createNTuples/jsonfiles/Cert_271036-274421_13TeV_PromptReco_Collisions16_JSON.txt
-
-
-
-170    /SingleElectron/Run2016B-PromptReco-v2/MINIAOD        tree_13Tev_data_SingleElectron_trigger       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_806/CMSSW_8_0_6/src/TtZAnalysis/createNTuples/jsonfiles/Cert_271036-274421_13TeV_PromptReco_Collisions16_JSON.txt
-
+#150    /TTTo2L2Nu_TuneCUETP8M1T4_alphaS01108_13TeV-powheg-pythia8/RunIISpring16MiniAODv2-premix_withHLT_80X_mcRun2_asymptotic_v14-v1/MINIAODSIM    tree_13TeV_emuttbar_dilep_alphas118         runOnAOD=False isSignal=True genFilter=ttbar
 
 ######TTBar
-#450  /TT_TuneCUETP8M1_13TeV-powheg-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext3-v1/MINIAODSIM    tree_13TeV_emuttbar            runOnAOD=False isSignal=True includePDFWeights=True PDF=CT10 nominalPDF=3001 beginPDFVar=3002 endPDFVar=3053 genFilter=ttbar
+#450  /TT_TuneCUETP8M1_13TeV-powheg-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14_ext3-v1/MINIAODSIM    tree_13TeV_emuttbar            runOnAOD=False isSignal=True includePDFWeights=True PDF=CT10 nominalPDF=3001 beginPDFVar=3002 endPDFVar=3053 genFilter=ttbar
 
-#750   /TT_TuneCUETP8M1_13TeV-powheg-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext3-v1/MINIAODSIM    tree_13TeV_emuttbarbg            runOnAOD=False isSignal=True includePDFWeights=True PDF=CT10 nominalPDF=3001 beginPDFVar=3002 endPDFVar=3053 genFilter=ttbar genFilterInvert=True
+#750  /TT_TuneCUETP8M1_13TeV-powheg-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14_ext3-v1/MINIAODSIM     tree_13TeV_emuttbarbg            runOnAOD=False isSignal=True includePDFWeights=True PDF=CT10 nominalPDF=3001 beginPDFVar=3002 endPDFVar=3053 genFilter=ttbar genFilterInvert=True
 
 
+#300    /TTJets_TuneCUETP8M1_alphaS0118_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM      tree_13TeV_emuttbar_alphas_amc_mgbr    runOnAOD=False isSignal=True genFilter=ttbar
+
+#400    /TTJets_TuneCUETP8M1_alphaS0118_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM       tree_13TeV_emuttbarbgi_alphas_amc_mgbr      runOnAOD=False isSignal=True genFilter=ttbar genFilterInvert=True
 
 
 #300    /TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM      tree_13TeV_emuttbar_amc_mgbr    runOnAOD=False isSignal=True genFilter=ttbar
 
 #400    /TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM       tree_13TeV_emuttbarbg_amc_mgbr      runOnAOD=False isSignal=True genFilter=ttbar genFilterInvert=True
+
+
+#300    /TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM      tree_13TeV_emuttbar_mg5_mgbr    runOnAOD=False isSignal=True genFilter=ttbar
+
+#400    /TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM       tree_13TeV_emuttbarbg_mg5_mgbr      runOnAOD=False isSignal=True genFilter=ttbar genFilterInvert=True
+
+#300    /TT_TuneCUETP8M1_alphaS01273_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM      tree_13TeV_emuttbar_mg5_alphas_mgbr    runOnAOD=False isSignal=True genFilter=ttbar
+
+#400    /TT_TuneCUETP8M1_alphaS01273_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM       tree_13TeV_emuttbarbg_mg5_alphas_mgbr      runOnAOD=False isSignal=True genFilter=ttbar genFilterInvert=True
+
+
 
 #150   /TT_TuneEE5C_13TeV-powheg-herwigpp/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM    tree_13TeV_emuttbar_powher         runOnAOD=False isSignal=True genFilter=ttbar partonShower=herwigpp
 
@@ -70,7 +164,8 @@
 
 #400    /DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM      tree_13TeV_dy50inf             runOnAOD=False
 
-#400     /DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext1-v1/MINIAODSIM      tree_13TeV_dy50inf_lo             runOnAOD=False
+#400     /DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14_ext1-v1/MINIAODSIM      tree_13TeV_dy50inf_lo             runOnAOD=False
+
 
 #400      /DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM        tree_13TeV_dy1050       runOnAOD=False
 
