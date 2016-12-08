@@ -17,9 +17,9 @@ public:
 	isiso_(false),
 	asymmisofull_(0),asymmnonisofull_(0),
 	mTnonisofull_(0),
-	simpleDataAsymm_(0)
+	simpleDataAsymm_(0),detaresolution_(0)
 	{
-		etaRanges_ << 0  << 0.6  << 1.2 << 1.8 << 2.4 <<  3.0 << 3.6; //just for testing use only one
+		etaRanges_ << 0  << 0.8  << 1.6 << 2.4 <<  3.3  << 4.5; //just for testing use only one
 	}
 
 
@@ -49,6 +49,9 @@ private:
 
 	histo1D* simpleDataAsymm_;
 
+	histo1DUnfold * detaresolution_;
+	histo1DUnfold * jetetaresolution_;
+	histo1DUnfold * lepetaresolution_;
 
 	static double WMASS;
 

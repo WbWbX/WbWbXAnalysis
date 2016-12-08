@@ -30,6 +30,8 @@ invokeApplication(){
 
 
 
+
+
 	TString cmssw_base=getenv("CMSSW_BASE");
 	TString scram_arch=getenv("SCRAM_ARCH");
 	TString batchbase = getenv("ANALYSE_BATCH_BASE");
@@ -63,6 +65,11 @@ invokeApplication(){
 	const TString jecfile = cmssw_base+fr.getValue<TString>("JECUncertainties");
 	const std::string a7reweightfile= cmssw_base.Data()+fr.getValue<std::string>("A7reweightFile");
 
+	const float detamax=fr.getValue<float>("vis_DEtaMax");
+	const float detamin=fr.getValue<float>("vis_DEtaMin");
+	const float wptmax=fr.getValue<float>("vis_WPtMax");
+	const float wptmin=fr.getValue<float>("vis_WPtMin");
+
 	//fileForker::debug=true;
 	//basicAnalyzer::debug=true;
 
@@ -79,11 +86,13 @@ invokeApplication(){
 	ana.readFileList(configfile);
 	ana.setMaxChilds(maxchilds);
 	ana.getJecUnc()->setFile(jecfile.Data());
-	ana.getMuonSF()->setGlobal(1,0.015,0.015);
-	ana.getMuonESF()->setGlobal(1,0.005,0.005);
-	const bool nlorewsimple=false;
+	ana.getMuonSF()->setGlobal(1,1.5,1.5);
+	ana.getMuonESF()->setGlobal(1,0.5,0.5);
+
 	ana.getNLOReweighter()->switchOff(true);
-	ana.getNLOReweighter()->setSimple(nlorewsimple);
+	ana.getNLOReweighter()->setSimple(false);
+
+
 
 	ana.setSyst(syst);
 	system(("rm -f "+ana.getOutPath()+".ztop").Data());
@@ -163,29 +172,29 @@ invokeApplication(){
 	else if(syst == "CHARGEFLIP_down"){
 		//nothing
 	}
-	else if(syst == "WparaA7_up"){
-		//nothing
-		if(!nlorewsimple){
-			ana.getNLOReweighter()->switchOff(false);
-			ana.getNLOReweighter()->readParameterFile(a7reweightfile);
-			ana.getNLOReweighter()->setUp(true);
+	else if(syst.BeginsWith("WparaA7")){
+		ana.getNLOReweighter()->switchOff(false);
+		ana.getNLOReweighter()->readParameterFile(a7reweightfile);
+		ana.getNLOReweighter()->setDEtaMin(detamin);
+		ana.getNLOReweighter()->setDEtaMax(detamax);
+		ana.getNLOReweighter()->setWptMin(wptmin);
+		ana.getNLOReweighter()->setWptMax(wptmax);
+		if(syst == "WparaA7_up"){
 			ana.getNLOReweighter()->setReweightParameter(7,1);
 		}
-	}
-	else if(syst == "WparaA7_down"){
-		ana.getNLOReweighter()->switchOff(false);
-		ana.getNLOReweighter()->readParameterFile(a7reweightfile);
-		if(!nlorewsimple){
-			ana.getNLOReweighter()->setUp(false);
+		else if(syst == "WparaA7_down"){
 			ana.getNLOReweighter()->setReweightParameter(7,-1);
+
 		}
-	}
-	else if(syst == "WparaA7_minus_down"){ //not real syst....!
-		ana.getNLOReweighter()->switchOff(false);
-		ana.getNLOReweighter()->readParameterFile(a7reweightfile);
-		if(!nlorewsimple){
-			ana.getNLOReweighter()->setUp(false);
-			ana.getNLOReweighter()->setReweightParameter(7,-2);
+		else if(syst.BeginsWith("WparaA7_oops")){
+			ana.getNLOReweighter()->setDEtaMin(detamax);
+			ana.getNLOReweighter()->setDEtaMax(1e13);
+			ana.getNLOReweighter()->setWptMin(0);
+			ana.getNLOReweighter()->setWptMax(wptmin);
+			if(syst.EndsWith("up"))
+				ana.getNLOReweighter()->setReweightParameter(7,1);
+			else
+				ana.getNLOReweighter()->setReweightParameter(7,-1);
 		}
 	}
 	else if(syst.BeginsWith("WparaA") ){
@@ -196,7 +205,10 @@ invokeApplication(){
 		size_t parameter=number.Atoi();
 		ana.getNLOReweighter()->switchOff(false);
 		ana.getNLOReweighter()->readParameterFile(a7reweightfile);
-		ana.getNLOReweighter()->setUp(up);
+		ana.getNLOReweighter()->setDEtaMin(0);
+		ana.getNLOReweighter()->setDEtaMax(1e13);
+		ana.getNLOReweighter()->setWptMin(0);
+		ana.getNLOReweighter()->setWptMax(1e9);
 		if(up)
 			ana.getNLOReweighter()->setReweightParameter(parameter,0.3);
 		else

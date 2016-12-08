@@ -1,0 +1,31 @@
+$?cfg
+
+[inputfiles-begin]
+
+
+$ inputfile,     legend entry,        color,   xsection,   legendNumber (for sorting,- allows for gaps),  (opt) isSignal
+
+
+$treeProducerA7W_WJets.root,             signal,                     413,       37509,       1 ,true
+13TeV/susy_test.root,             susy,                     413,       37509,       1 ,true
+
+
+[inputfiles-end]
+
+[parameters-begin] 
+
+inputFilesDir = /nfs/dust/cms/user/kiesej/trees_WA7/
+Lumi = 19710
+JECUncertainties = /src/TtZAnalysis/Analysis/data/analyse/Winter14_V5_DATA_UncertaintySources_AK5PFchs.txt
+A7reweightFile = /src/TtZAnalysis/Analysis/data/wanalyse/rewdata.dat
+
+
+vis_DEtaMin = 0
+vis_DEtaMax = 4.5
+vis_WPtMin  = 20
+vis_WPtMax  = 10000000
+
+[parameters-end]
+
+
+

@@ -79,6 +79,7 @@ double wA7Extractor::toBeMinimized(const double * variations){
 	//no explicit fixing/constraints here
 	//make size check before
 
+	bool usechi2=true;
 
 	double out=0;
 	bool breakcond=false;
@@ -88,15 +89,22 @@ double wA7Extractor::toBeMinimized(const double * variations){
 		const size_t nbins=data->getBins().size();
 		for(size_t bin=1;bin<nbins-1;bin++){ //ignore UF/OF
 			double mcval=mc->getBin(bin)->getValue(variations);
-			if(mcval<0)mcval=0;
 			double datac=data->getBinContent(bin);
+			if(mcval<0)mcval=0;
 			if(datac<0)datac=0;
-			if(mcval)
-				out+=-2*logPoisson(datac, mcval);
-			else if (datac>0)
-				out+=1e3;
-			//else data==0 && mc==0 do nothing implicit
-
+			if(usechi2){
+				double delta = mcval-datac;
+				double mcerr=mc->getBinErr(bin) * mcval/mc->getBin(bin)->getNominal();
+				double err2 = mcval /*pearson*/ + mcerr*mcerr;
+				if(err2==0)err2=1e-5;
+				out+= delta*delta/err2;
+			}
+			else{
+				if(mcval)
+					out+=-2*logPoisson(datac, mcval);
+				else if (datac>0)
+					out+=1e3;
+			}
 			if(out != out || isinf(out)){
 				std::cout << "nan/inf produced..." <<std::endl;
 				ZTOP_COUTVAR(bin);
@@ -120,6 +128,9 @@ void wA7Extractor::readConfig(const std::string& infile){/*TBI*/}
 
 
 void wA7Extractor::loadPlots(const std::string& infile){
+
+	if(debug)
+		std::cout << "wA7Extractor::loadPlots" <<std::endl;
 
 	/*
 	 *
@@ -148,25 +159,72 @@ void wA7Extractor::loadPlots(const std::string& infile){
 	//search for plots
 	histo1D::c_makelist=true;
 
+
+	//make histo with means
+	//- get bins
+	std::vector<float> bins;
+	for(size_t i=0;i<stacknames.size();i++){
+		if(stacknames.at(i).BeginsWith(isoplots)){
+			textFormatter tf;
+			tf.setDelimiter("_");
+			std::vector<std::string> stmp=tf.getFormatted(stacknames.at(i).Data());
+			std::string range=stmp.at(2);
+			tf.setDelimiter("-");
+			stmp=tf.getFormatted(range);
+			float lowedge=atof(stmp.at(0).data());
+			float highedge=atof(stmp.at(1).data());
+
+			if(bins.size()<1){
+				bins.push_back(lowedge);
+			}
+			bins.push_back(highedge);
+		}
+	}
+	detaranges_=bins;
+
+	histo1D datadep=histo1D(bins,"delta eta data dep","#Delta#eta(l,j)","Mean(2p_{T}^{#perp}/M_{W})");
+	histo1D mcdep=histo1D(bins,"delta eta mc dep","#Delta#eta(l,j)","Mean(2p_{T}^{#perp}/M_{W})");
+
 	std::vector<TString> exclude;
 	exclude.push_back("QCD");
 	exclude.push_back("signal");
 	exclude.push_back("data");
-
+	size_t bin=1;
 	for(size_t i=0;i<stacknames.size();i++){
 		if(stacknames.at(i).BeginsWith(isoplots)){
+			std::cout << stacknames.at(i) << std::endl;
 			histoStack stack=hsv->getStack(stacknames.at(i));
+			float err=0;
+			float mean=stack.getDataContainer().getMean(err);
+			std::cout << "mean data: " << mean;
+			std::cout <<  " +- "<< err << std::endl;
+			datadep.setBinContent(bin,mean);
+			datadep.setBinError(bin,err);
+			//histo1D::debug=true;
+			mean=stack.getSignalContainer().getMean(err);
+			std::cout << "mean MC: " << mean;
+			std::cout <<  " +- "<< err << std::endl;
+			mcdep.setBinContent(bin,mean);
+			mcdep.setBinError(bin,err);
+			bin++;
+
 			//stack.removeError(wparaPrefix_+"7_minus_down");//actually not needed
 			stack.addRelErrorToBackgrounds(0.3,false,"BGvar",exclude); //excludes signal and data anyway
 
 			selectedStacks.push_back(stack);
-			std::cout << stacknames.at(i) << std::endl;
-			float err=0;
-			std::cout << "mean data: " << selectedStacks.at(selectedStacks.size()-1).getDataContainer().getMean(err) << std::endl;
-			std::cout << "mean MC: " << selectedStacks.at(selectedStacks.size()-1).getSignalContainer().getMean(err)  << std::endl;
+
 		}
 	}
 	histo1D::c_makelist=false;
+
+	plotterCompare plc;
+	plc.setNominalPlot(&datadep);
+	plc.setLastNoLegend();
+	plc.printToPdf("compareMeanPrefitData");
+	plc.setComparePlot(&mcdep,0);
+	plc.setLastNoLegend();
+	plc.printToPdf("compareMeanPrefit");
+
 	//now search for corresponding non-iso plots
 	for(size_t i=0;i<selectedStacks.size();i++){
 		TString searchname=selectedStacks.at(i).getName();
@@ -190,6 +248,7 @@ void wA7Extractor::loadPlots(const std::string& infile){
 	//replace QCD by noniso data-MC
 	for(size_t i=0;i<selectedStacks.size();i++){
 		histo1D nonisodata=nonisoStacks.at(i).getDataContainer();
+		nonisodata*=0.8; //good choice usually the fit output for better starting paras
 		histo1D nonisoMCother=nonisoStacks.at(i).getContributionsBut("QCD");
 		nonisodata-=nonisoMCother;
 		histo1D & href=selectedStacks.at(i).getContainer(selectedStacks.at(i).getContributionIdx("QCD"));
@@ -231,11 +290,55 @@ void wA7Extractor::loadPlots(const std::string& infile){
 	delete hsv;
 }
 
+void wA7Extractor::printVariations(const std::string& outdir)const{
+	if(debug)
+		std::cout << "wA7Extractor::printVariations" << std::endl;
+	if(inputstacks_.size()<1)
+		return;
+	system(("mkdir -p "+outdir).data());
+	plotterCompare plc;
+	//maybe style file
+	TFile * f = 0;
+	if(outdir.length()>0)
+		f =new TFile((outdir+"/vars.root").data(),"RECREATE");
+	else
+		f =new TFile("vars.root","RECREATE");
+
+	std::vector<TString> sysnames=inputstacks_.at(0).getSystNameList();
+	for(size_t i=0;i<inputstacks_.size();i++){
+		histo1D mc=inputstacks_.at(i).getFullMCContainer();
+		std::string plotname = textFormatter::makeCompatibleFileName( inputstacks_.at(i).getName().Data());
+		if(outdir.length()>0)
+			plotname="/"+plotname;
+		for(size_t sys=0;sys<sysnames.size();sys++){
+			std::string thisplotname = plotname+ sysnames.at(sys).Data();
+			TCanvas cv(thisplotname.data());
+			plc.usePad(&cv);
+			thisplotname+=".pdf";
+			std::vector<histo1D> var=mc.produceVariations(sysnames.at(sys));
+			plc.setNominalPlot(&var.at(0));
+			plc.setComparePlot(&var.at(1),0);
+			plc.setComparePlot(&var.at(2),1);
+			plc.draw();
+			cv.Write();
+			cv.Print((outdir+thisplotname).data());
+			plc.clearPlots();
+		}
+	}
+	f->Close();
+	delete f;
+
+
+}
+
 void wA7Extractor::fitAll(){
 
+	if(debug)
+		std::cout << "wA7Extractor::fitAll" << std::endl;
 
 	//use to do systematics etc.
 	createVariates(inputstacks_,false,0); //can be used for pseudo experiments
+
 	std::vector<TString> sysnames=mcdependencies_.at(0).getSystNames();
 	size_t a7index=0;
 	for(size_t i=0;i<sysnames.size();i++){
@@ -245,6 +348,8 @@ void wA7Extractor::fitAll(){
 			throw std::runtime_error("wA7Extractor::fitAll: could not find index for A7");
 	}
 	if(!npseudo_){
+		if(debug)
+			std::cout << "wA7Extractor::fitAll: nominal" <<std::endl;
 		fit(-1,false,false,true); //only nominal
 		graph resultgraph=fit(-1,false,false); //only nominal
 		//get stat contribution
@@ -315,12 +420,12 @@ void wA7Extractor::fitAll(){
 			float err=fitter_.getParameter(a7index)+1-A7;
 			std::string sysnamefix=textFormatter::fixLength(sysnames.at(i).Data(),10);
 			sysnamefix+=" ";
-			std::cout << "syst: " << sysnamefix << " up " << fmt.round(err/A7*100,0.1)<<"%" << std::endl;
+			std::cout << "syst: " << sysnamefix << " up " << fmt.round(err/A7*100,0.01)<<"%" << std::endl;
 			resultgraph.addErrorGraph(sysnames.at(i)+"_up",vargraph);
 
 			vargraph=fit(i,false,false);
 			err=fitter_.getParameter(a7index)+1-A7;
-			std::cout << "syst: " << sysnamefix << " down " << fmt.round(err/A7*100,0.1)<<"%" << std::endl;
+			std::cout << "syst: " << sysnamefix << " down " << fmt.round(err/A7*100,0.01)<<"%" << std::endl;
 			resultgraph.addErrorGraph(sysnames.at(i)+"_down",vargraph);
 		}
 
@@ -328,6 +433,30 @@ void wA7Extractor::fitAll(){
 		std::cout << "total error: +" << resultgraph.getPointYErrorUp(0,false)<< " " << resultgraph.getPointYErrorDown(0,false)  << std::endl;
 
 		resultgraph.coutAllContent(true);
+
+		std::vector<double> fitted(sysnames.size() ,0);
+		fitted.at(a7index)=A7;
+
+		//post fit means plot
+		histo1D datameans(detaranges_,"data","#Delta#eta(l,j)","Mean(2p_{T}^{#perp}/M_{W})");
+		histo1D mcfitted(detaranges_,"fitted MC","#Delta#eta(l,j)","Mean(2p_{T}^{#perp}/M_{W})");
+		for(size_t i=0;i<mcdependencies_.size();i++){
+			histo1D data=datahistos_.at(i);
+			histo1D mcfittedsingle=mcdependencies_.at(i).exportContainer(fitted);
+			float err;
+			datameans.setBinContent(i+1,data.getMean(err));
+			datameans.setBinError(i+1,err);
+			mcfitted.setBinContent(i+1,mcfittedsingle.getMean(err));
+			mcfitted.setBinError(i+1,err);
+		}
+
+		plotterCompare plc;
+		plc.setNominalPlot(&datameans);
+		plc.setLastNoLegend();
+		plc.setComparePlot(&mcfitted,0);
+		plc.setLastNoLegend();
+		plc.printToPdf("compareMeanPostfit");
+
 	}
 
 
@@ -422,6 +551,9 @@ void signalHandler(int signum){
 
 graph wA7Extractor::fit(int sysindex, bool up, bool fixallbuta7, bool fixa7){
 
+	if(debug)
+		std::cout << "wA7Extractor::fit" << std::endl;
+
 	if(mcdependencies_.size()<1)
 		throw std::logic_error("wA7Extractor::fit: no input"); //make some reasonable output here
 	//fix parameters here
@@ -460,11 +592,11 @@ graph wA7Extractor::fit(int sysindex, bool up, bool fixallbuta7, bool fixa7){
 
 	size_t a7idx=0;
 	for(size_t i=0;i<fittedparas_.size();i++){
-		if(systnames.at(i).BeginsWith(wparaPrefix_+"7")){
+		if(systnames.at(i) == (wparaPrefix_+"7")){
 			a7idx=i;
 			if(fixa7){
-				fitter_.setParameter(i,-1);
-				fittedparas_.at(i)=-1;
+				fitter_.setParameter(i,0);
+				fittedparas_.at(i)=0;
 				fitter_.setParameterFixed(i,true);
 				continue;
 			}
@@ -480,12 +612,21 @@ graph wA7Extractor::fit(int sysindex, bool up, bool fixallbuta7, bool fixa7){
 		}
 		if(sysindex>=0 && (int)i == sysindex){
 			if(up){
-				fitter_.setParameter(i,1);
-				fittedparas_.at(i)=1;
+				if(systnames.at(i)=="WparaA7_oops_up"){
+					fitter_.setParameter(i,5);
+					fittedparas_.at(i)=5;}
+				else{
+					fitter_.setParameter(i,1);
+					fittedparas_.at(i)=1;}
 			}
 			else{
-				fitter_.setParameter(i,-1);
-				fittedparas_.at(i)=-1;
+				if(systnames.at(i)=="WparaA7_oops_down"){
+					fitter_.setParameter(i,-5);
+					fittedparas_.at(i)=-5;
+				}
+				else{
+					fitter_.setParameter(i,-1);
+					fittedparas_.at(i)=-1;}
 			}
 		}
 		fitter_.setParameterFixed(i,true);
@@ -501,6 +642,8 @@ graph wA7Extractor::fit(int sysindex, bool up, bool fixallbuta7, bool fixa7){
 	fitter_.setMinFunction(&functor_);
 	fitter_.setMaxCalls(1e6);
 
+	if(debug)
+		simpleFitter::printlevel=2;
 	fitter_.fit();
 	if(fitter_.wasSuccess())
 		fitter_.feedErrorsToSteps();
@@ -554,7 +697,8 @@ graph wA7Extractor::fit(int sysindex, bool up, bool fixallbuta7, bool fixa7){
 
 			stack.clear();
 			stack.push_back(data,"data",kBlack,1,99);
-			mc=mcdependencies_.at(i).exportContainer(std::vector<double>(fittedparas_.size(),0));
+
+			mc=mcdependencies_.at(i).exportContainer();
 			stack.push_back(mc,"MC",412,1,1);
 			pl.clearPlots();
 			pl.cleanMem();
@@ -568,6 +712,8 @@ graph wA7Extractor::fit(int sysindex, bool up, bool fixallbuta7, bool fixa7){
 
 void wA7Extractor::createVariates(const std::vector<histoStack>& inputstacks, bool onlyMC,
 		TRandom3* rand){
+	if(debug)
+		std::cout << "wA7Extractor::createVariates" << std::endl;
 
 	//make randomization here
 	datahistos_.clear();
@@ -642,7 +788,7 @@ void wA7Extractor::createVariates(const std::vector<histoStack>& inputstacks, bo
 
 std::vector<float> wA7Extractor::enhanceStatistics(histoStack& stack)const{
 
-	if(!enhancestat_) return std::vector<float>();
+
 	std::vector<size_t> sigidxs=stack.getSignalIdxs();
 	if(sigidxs.size()>1 || sigidxs.size()<1)
 		throw std::runtime_error("wA7Extractor::enhanceStatistics: too many signals or too less");
@@ -652,7 +798,8 @@ std::vector<float> wA7Extractor::enhanceStatistics(histoStack& stack)const{
 	size_t sigidx=sigidxs.at(0);
 
 	histo1D signalhist=stack.getSignalContainer();
-	signalhist=signalhist.rebinToRelStat(mcstatthresh_);
+	if(enhancestat_)
+		signalhist=signalhist.rebinToRelStat(mcstatthresh_);
 	std::vector<float> bins(signalhist.getBins().begin()+1,signalhist.getBins().end()) ;
 
 	//can be done for all but data

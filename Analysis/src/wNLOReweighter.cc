@@ -62,34 +62,34 @@ double wNLOReweighter::wdxsec(double * angles, double* pars){
 }
 
 
- double wNLOReweighter::wdxsec1DPhi(double * angle, double* pars){
+double wNLOReweighter::wdxsec1DPhi(double * angle, double* pars){
 
-		//double F1=pars[0];
-		double F2=pars[1];
-		double F3=pars[2];
-		double F5=pars[3];
-		double F7=pars[4];
-		double F=pars[5];
+	//double F1=pars[0];
+	double F2=pars[1];
+	double F3=pars[2];
+	double F5=pars[3];
+	double F7=pars[4];
+	double F=pars[5];
 
-		double phi=angle[0];
+	double phi=angle[0];
 
-		double cosphi=std::cos(phi);
-		double cos2phi=std::cos(2*phi);
-		double sinphi=std::sin(phi);
-		double sin2phi=std::sin(2*phi);
+	double cosphi=std::cos(phi);
+	double cos2phi=std::cos(2*phi);
+	double sinphi=std::sin(phi);
+	double sin2phi=std::sin(2*phi);
 
 	double res=F + /*(1+ costheta*costheta)
 					+ F0*0.5*(1-3*costheta*costheta)*/ //constant
-					// 0 + F1*sin2theta*cosphi
-					+ F2*0.5* 3.1415/2  *cos2phi
-					+ F3*2*cosphi
-					/* + F4*costheta */ //const absorbed in F
-					+ F5* 3.1415/2 *sin2phi
-					// 0 + F6*sin2theta*sinphi
-					+ F7* 2 *sinphi;
+			// 0 + F1*sin2theta*cosphi
+			+ F2*0.5* 3.1415/2  *cos2phi
+			+ F3*2*cosphi
+			/* + F4*costheta */ //const absorbed in F
+			+ F5* 3.1415/2 *sin2phi
+			// 0 + F6*sin2theta*sinphi
+			+ F7* 2 *sinphi;
 	return res;
 }
- double wNLOReweighter::wdxsec1DCosTheta(double * angle, double* pars){
+double wNLOReweighter::wdxsec1DCosTheta(double * angle, double* pars){
 	//double theta=std::acos(angle[0]);
 	double costheta=angle[0];
 	double F=pars[0];
@@ -97,15 +97,15 @@ double wNLOReweighter::wdxsec(double * angles, double* pars){
 	double F4=pars[2];
 
 	double res= F*(1+ costheta*costheta)
-			+ F0*0.5*(1-3*costheta*costheta)
-			// ! -pi-pi zero + F1*sin2theta*cosphi
-			// ! 0 + F2*0.5*sintheta*sintheta*cos2phi
-			// ! 0 + F3*sintheta*cosphi
-			+ F4*costheta
-			// ! 0 + F5*sintheta*sintheta*sin2phi
-			// ! 0 + F6*sin2theta*sinphi
-			// !0 + F7*sintheta*sinphi;
-;
+									+ F0*0.5*(1-3*costheta*costheta)
+									// ! -pi-pi zero + F1*sin2theta*cosphi
+									// ! 0 + F2*0.5*sintheta*sintheta*cos2phi
+									// ! 0 + F3*sintheta*cosphi
+									+ F4*costheta
+									// ! 0 + F5*sintheta*sintheta*sin2phi
+									// ! 0 + F6*sin2theta*sinphi
+									// !0 + F7*sintheta*sinphi;
+									;
 
 	return res;
 }
@@ -219,6 +219,7 @@ void wNLOReweighter::prepareWeight(const float& costheta, const float& phi, cons
 	if(!W){setNewWeight(1);return;}
 	if(!wonly_ && !jet){setNewWeight(1);return;}
 
+
 	if(switchedOff())return;
 	if(simple_)
 		throw std::runtime_error("wNLOReweighter::prepareWeight: simple should not be used anymore (but still working)");
@@ -232,6 +233,21 @@ void wNLOReweighter::prepareWeight(const float& costheta, const float& phi, cons
 		deta=W->eta()-jet->eta();
 	if(etasymm_)
 		deta=fabs(deta);
+
+	if(detamax_>detamin_){
+		if(deta>detamax_){
+			setNewWeight(1);return;
+		}
+		if(deta<detamin_){
+			setNewWeight(1);return;
+		}
+	}
+	if(wptmax_>wptmin_){
+		if(W->pt() > wptmax_){
+			setNewWeight(1);return;}
+		if(W->pt() < wptmin_){
+			setNewWeight(1);return;}
+	}
 
 	size_t detabin=bfdeta_.findBin(deta);
 	size_t ptbin=bfWpt_.findBin(W->pt());
@@ -270,7 +286,7 @@ void wNLOReweighter::makeTestPlots(const std::string& outpath)const{
 		plotname+=toString(Wptbins_.at(ipt))+"_A7";
 		for(size_t ieta=1;ieta<detabins_.size()-1;ieta++){
 			float A7=origparas_.at(ieta).at(ipt).at(7)
-							/origparas_.at(ieta).at(ipt).at(origparas_.at(ieta).at(ipt).size()-1);
+													/origparas_.at(ieta).at(ipt).at(origparas_.at(ieta).at(ipt).size()-1);
 			h.setBinContent(ieta, A7);
 			h.setBinError(ieta, 0);
 			h2d.getBin(ieta,ipt).setContent(A7);

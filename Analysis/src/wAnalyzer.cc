@@ -41,11 +41,20 @@ namespace ztop{
 
 void wAnalyzer::pairLeptons( std::vector<NTGenParticle*> * v, NTGenParticle*& lep, NTGenParticle*& neutr, bool isdy)const{
 	lep=0;neutr=0;
-
+	if(v->size()<1)return;
 	int addtopdg=1;
 	if(isdy)
 		addtopdg=0;
+	size_t startat=0;
 	for(size_t i=0;i<v->size();i++){
+		NTGenParticle* p=v->at(i);
+		if(std::abs(p->pdgId())==15){
+			startat=i;
+			break;
+		}
+	}
+	size_t i=startat;
+	do{
 		NTGenParticle* p=v->at(i);
 		if(p->pdgId() == 13
 				|| p->pdgId() == -13
@@ -76,8 +85,12 @@ void wAnalyzer::pairLeptons( std::vector<NTGenParticle*> * v, NTGenParticle*& le
 		}
 		if(lep&&neutr)
 			break;
+		if(i+1<v->size())
+			i++;
+		else
+			i=0;
 
-	}
+	}while(i!=startat);
 }
 
 fileForker::fileforker_status  wAnalyzer::start(){
@@ -113,8 +126,8 @@ void wAnalyzer::analyze(size_t id){
 	wGenSelector selectGen;
 	if(isNLO){
 		if(inputfile_.Contains("WLN1J")){
-				selectGen.addVeto(15);
-				selectGen.addVeto(-15);
+			selectGen.addVeto(15);
+			selectGen.addVeto(-15);
 		}
 	}
 	const bool isDYsig=signal_ && inputfile_.Contains("DY");
@@ -126,7 +139,7 @@ void wAnalyzer::analyze(size_t id){
 
 	wControlplots_gen c_plots_gen;
 	c_plots_gen.linkEvent(evt);
-
+	c_plots_gen.enable(false);
 
 	analysisPlotsW anaplots(5);
 	anaplots.setEvent(evt);
@@ -137,7 +150,7 @@ void wAnalyzer::analyze(size_t id){
 
 
 	wReweightingPlots rewplots;
-	rewplots.setWKinematicsOnly(false);//TEST
+	rewplots.setWKinematicsOnly(true);//TEST
 	rewplots.enable(true);
 	rewplots.setSignal(signal_);
 	rewplots.setEvent(&evt);
@@ -209,6 +222,25 @@ void wAnalyzer::analyze(size_t id){
 			"ptttransA7corr genreco", "2 p_{T}^{#perp}/ M_{W} (reco)", "sin(#phi*)sin(#theta*)","Events");
 	histo2D genstatHistDEtaJWpTW(histo1D::createBinning(100,-5.5,5.5), histo1D::createBinning(100,0,200),
 			"DEtaW pTW", "#Delta#eta(W,j)", "p_{T}^{W}","Events");
+
+	histo2D wptjetpt  (histo1D::createBinning(100, 0 , 200), histo1D::createBinning(100, 0 , 200),
+			"gen Wpt gen Jetpt", "p_{T}(W) [GeV]", "p_{T}(jet) [GeV]","Events", false);
+
+	histo2D wptjetmulti  (histo1D::createBinning(100, 0 , 200), histo1D::createBinning(5 , -.5 , 4.5 ),
+			"gen Wpt gen Jet multi", "p_{T} [GeV]", "N_{jet}","Events", false);
+
+	histo2D jetmultijetpt  (histo1D::createBinning(100,  -.5 , 4.5 ), histo1D::createBinning(100, 0 , 200),
+			"gen Jet multi gen Jetpt", "N_{jet}", "p_{T}(jet) [GeV]","Events", false);
+
+	histo2D jetptpttrans  (histo1D::createBinning(100, 0 , 200), histo1D::createBinning(100, -1.1 , 1.1),
+			"jet pt vs pttrans", "p_{T}(jet) [GeV]", "2p_{T}^{#perp}/M_{W}","Events", false);
+
+	histo2D detapttrans  (histo1D::createBinning(100, 0 , 6), histo1D::createBinning(100, -1.1 , 1.1),
+			"deta vs pttrans", "#Delta#eta(l,j)", "2p_{T}^{#perp}/M_{W}","Events", false);
+
+	histo2D muptpttrans  (histo1D::createBinning(100, 0 , 200), histo1D::createBinning(100, -1.1 , 1.1),
+			"muon pt vs pttrans", "p_{T}(µ) [GeV]", "2p_{T}^{#perp}/M_{W}","Events", false);
+
 	histo2D::c_makelist=false;
 
 	HTransformToCS cs_transformer(8000);
@@ -217,7 +249,6 @@ void wAnalyzer::analyze(size_t id){
 	getNLOReweighter()->switchOff(!rewswon);
 	getMuonSF()->setIsMC(isMC_);
 	getMuonESF()->setIsMC(isMC_);
-
 
 
 	if(testmode_)
@@ -232,13 +263,14 @@ void wAnalyzer::analyze(size_t id){
 	for(Long64_t event=0;event<entries;event++){
 		reportStatus(event,entries);
 
+		histo1DUnfold::flushAllListed();
 		/*
 		 * Init event
 		 */
 		size_t step=0;
 		evt.reset();
 		t.setEntry(event);
-		histo1DUnfold::flushAllListed();
+
 
 
 		/*
@@ -275,12 +307,12 @@ void wAnalyzer::analyze(size_t id){
 					int oldstatus=p->status();
 					flags.splitModifiedStatus(oldstatus);
 					if(isNLO &&  ! flags.isHardProcess())continue;
+
 					//if(! flags.fromHardProcessBeforeFSR())continue; gives zero particles
 					p->setStatus(3); //for compatibility
 					tempgen.push_back(p);
 				}
 				allgenparticles=tempgen; //copy back
-
 			}
 			evt.allgenparticles=&allgenparticles;
 
@@ -327,12 +359,21 @@ void wAnalyzer::analyze(size_t id){
 					getNLOReweighter()->prepareWeight(costheta_cs,phi_cs,&Wbos,genjets.at(0));
 				else
 					getNLOReweighter()->prepareWeight(costheta_cs,phi_cs,&Wbos);
-
+				//std::cout << puweight << std::endl;
 				getNLOReweighter()->reWeight(puweight);
+				//std::cout << puweight << std::endl;
 				if(genjets.size())
 					ptttransA7corr.fill(pttrans_gen ,A7 ,puweight);
 				if(genjets.size())
 					genstatHistDEtaJWpTW.fill(genjets.at(0)->eta()-Wbos.eta(), Wbos.pt(),puweight);
+				if(genjets.size())
+					wptjetpt.fill(Wbos.pt(), genjets.at(0)->pt(),puweight);
+
+				wptjetmulti.fill(Wbos.pt(), genjets.size() ,puweight);
+				if(genjets.size())
+					jetmultijetpt.fill(genjets.size(),genjets.at(0)->pt(),puweight);
+				else
+					jetmultijetpt.fill(0,0,puweight);
 			}
 			if(signal_ && !lepton) continue; //gen W match requirement
 		}
@@ -476,12 +517,11 @@ void wAnalyzer::analyze(size_t id){
 			idjets << jet;
 
 
-			if(jet->pt()<50)continue;
+			if(jet->pt()<30)continue;
 			if(fabs(jet->eta())>2.4)continue;
 			hardjets << jet;
 
 		}
-
 
 
 		if(isiso){
@@ -505,6 +545,10 @@ void wAnalyzer::analyze(size_t id){
 		if(isiso){
 			h.fill(step,puweight);
 			c_plots.makeControlPlots(step);
+			jetptpttrans.fill( hardjets.at(0)->pt(), pttrans, puweight);
+			muptpttrans.fill( leadinglep.pt(), pttrans, puweight);
+			detapttrans.fill( fabs(hardjets.at(0)->eta() - leadinglep.eta()), pttrans, puweight);
+
 		}
 		step++;
 

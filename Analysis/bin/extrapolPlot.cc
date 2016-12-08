@@ -27,7 +27,7 @@ public:
 private:
 	float evaluate(float x)const;
 	std::vector<float> stepx,stepy;
-	float interpolate(float x, float x1, float x2, float y1, float y2, float smoothness=1)const;
+	float interpolate(float x, float x1, float x2, float y1, float y2, float smoothness=.15)const;
 };
 stepdependence::stepdependence(){
 	stepx.push_back(0);
@@ -102,13 +102,13 @@ invokeApplication(){
 
 	stepdependence mlsv;
 	mlsv.addPoint(firstx, 1.6);
-	mlsv.addPoint(secondx, 1.06);
-	mlsv.addPoint(thirdx, 0.66);
+	mlsv.addPoint(secondx, 0.95);
+	mlsv.addPoint(thirdx, 0.62);
 
 	stepdependence jpsi;
 	jpsi.addPoint(firstx, 3.16);
-	jpsi.addPoint(secondx, 1.08);
-	jpsi.addPoint(thirdx, 0.55);
+	jpsi.addPoint(secondx, 1.0);
+	jpsi.addPoint(thirdx, 0.58);
 
 	stepdependence fromxsec;
 	fromxsec.addPoint(firstx, 2);
@@ -116,17 +116,24 @@ invokeApplication(){
 	//fromxsec.addPoint(1.2, 2.7);
 	fromxsec.addPoint(secondx, 1.4);
 	fromxsec.addPoint(thirdx, 1.2);
-
+/*
 	graph gljets=ljets.createGraph("l+jets");
 	graph gsingletop=singletop.createGraph("single t");
 	graph gmlsv=mlsv.createGraph("sec. vtx");
 	graph gjpsi=jpsi.createGraph("J/#Psi");
 	graph gfromxsec=fromxsec.createGraph("#sigma (t#bar{t})");
+	*/
+
+	graph gljets=ljets.createGraph("l+jets, PRD 93(2016)2004");
+	graph gsingletop=singletop.createGraph("single t, PAS-TOP-15-001");
+	graph gmlsv=mlsv.createGraph("sec. vtx, PRD 93(2016)2006 ");
+	graph gjpsi=jpsi.createGraph("J/#Psi, arXiv:1608.03560");
+	graph gfromxsec=fromxsec.createGraph("#sigma (t#bar{t}), JHEP08 (2016) 029");
 
 
 	plotterMultiplePlots pl;
 	TFile outfile("extrapolplot.root","RECREATE");
-	TCanvas cv;//("","",800,600);
+	TCanvas cv("","",800,700);
 	pl.usePad(&cv);
 	pl.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/massextra/extraplot.txt");
 
@@ -136,9 +143,9 @@ invokeApplication(){
 	pl.addPlot(&gsingletop);
 	pl.addPlot(&gljets);
 
-	pl.addTextBox(0.275-0.05,0.10,"Present",0.05,21,kBlack).setFont(22);
-	pl.addTextBox(0.525-0.03,0.10,"300/fb, 14 TeV",0.05,21,kBlack).setFont(22);
-	pl.addTextBox(0.775+0.02,0.10,"3000/fb, 14 TeV",0.05,21,kBlack).setFont(22);
+	pl.addTextBox(0.275-0.02,0.10,"Run I",0.05,21,kBlack).setFont(22);
+	pl.addTextBox(0.525-0.02,0.10,"0.3/ab, 14 TeV",0.05,21,kBlack).setFont(22);
+	pl.addTextBox(0.775+0.02,0.10,"3/ab, 14 TeV",0.05,21,kBlack).setFont(22);
 
 
 	pl.draw();

@@ -26,9 +26,10 @@ void wReweightingPlots::bookPlots(){
 
 	//hidden in createBinning
 
-	std::vector<float> dy=histo1D::createBinning(5,0,6);
+	std::vector<float> dy;//=histo1D::createBinning(6,0,6);
+	dy << 0 << 0.5 << 1.2  << 2  << 3 << 4.5 << 10;
 	std::vector<float> ptW;
-	ptW << 0 << 10 << 20  << 30 << 40 << 50 << 80 << 300;
+	ptW << 0 << 10 << 20  << 30 << 40 << 50 << 300;
 	std::vector<float> dummy; //for additional subvar
 
 	histo2D::c_makelist=true;
@@ -51,6 +52,7 @@ void wReweightingPlots::fillPlots(){
 		if(!event()->genjets) return;
 		if(event()->genjets->size()<1) return;
 		if(!event()->genjets->at(0))return;
+		//if(event()->genjets->at(0)->pt()<30)return;
 	}
 	if(!event()->costheta_cs) return;
 	if(!event()->phi_cs) return;

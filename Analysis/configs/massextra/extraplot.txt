@@ -5,26 +5,33 @@ $!cfg
 
 [textBoxes - boxes]
           externalFile = CMSSW_BASE/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt
-          externalMarker = CMSnoSplitLeftNoSqrtSProjection
+          externalMarker = CMSnoSplitRightNoSqrtSProjection
+         $externalMarker = CMSnoSplitLeftNoSqrtSProjection
 [end - textBoxes]
 
 
  [legendStyle]
 
-   $ x0  =  0.45
-$	y0  =  0.72
+$    x0  =  0.45
+$	y0  =  0.55
 $	x1  =  0.85
-$	y1  =  0.88
+$	y1  =  0.71
 $	nColumns        = 2
 $	columnSeparator = 0.1
 	
-	
-    x0  =  0.67
-	y0  =  0.52
-	x1  =  0.82
-	y1  =  0.88
+	x0  =  0.42
+	y0  =  0.48
+	x1  =  0.87
+	y1  =  0.74
 	nColumns        = 1
 	columnSeparator = 0.1
+	
+$    x0  =  0.67
+$	y0  =  0.52
+$	x1  =  0.82
+$	y1  =  0.88
+$	nColumns        = 1
+$	columnSeparator = 0.1
 
 [end legendStyle]
 
@@ -34,7 +41,7 @@ $	columnSeparator = 0.1
 
     bottomMargin  = 0.15
     topMargin     = 0.1
-    leftMargin    = 0.15
+    leftMargin    = 0.18
     rightMargin   = 0.1
     
     $both not used right now
@@ -58,14 +65,15 @@ $	columnSeparator = 0.1
     
     yaxis.titleSize   = 0.06
     yaxis.labelSize   = 0.05
-    yaxis.titleOffset = 0.85
+    yaxis.titleOffset = 1$0.85
     yaxis.labelOffset = 0.005
     yaxis.tickLength  = 0.03
     yaxis.ndiv        = 510
-    yaxis.max         = 4.49
+    yaxis.max         = 3.49
     yaxis.min         = 0$0.15 
     yaxis.log         = false
     yaxis.name        = Total uncertainty on m_{ t} [GeV]
+    yaxis.ticksint    = 1
     
 [end plotStyle]
  
@@ -88,37 +96,42 @@ $	columnSeparator = 0.1
     sysFillStyle = 3005
     sysFillColor = 632
 
-    rootDrawOpt  = l 
+    rootDrawOpt  = l
     sysRootDrawOpt  = l
     drawStyle    = normal $ can be other options (TBI)
     
-    legendDrawStyle = lp
+    legendDrawStyle = l
     
  [end containerStyle]  
  
  [containerStyle - 4]
   markerColor  = 1
   lineColor    = 1
+  lineStyle    = 1 
  [end containerStyle]  
  
  [containerStyle - 0]
   markerColor  = 632
   lineColor    = 632 
+  lineStyle    = 6 
  [end containerStyle] 
   
  [containerStyle - 3]
   markerColor  = 600
   lineColor    = 600 
+  lineStyle    = 7 
  [end containerStyle]  
  
  [containerStyle - 2]
   markerColor  = 416
   lineColor    = 416 
+  lineStyle    = 3 
  [end containerStyle]  
  
  [containerStyle - 1]
   markerColor  = 619
   lineColor    = 619 
+  lineStyle    = 5 
  [end containerStyle]  
  
  [containerStyle - 5]

@@ -21,17 +21,21 @@ class NTGenParticle;
 
 class wNLOReweighter: public simpleReweighter{
 public:
-	wNLOReweighter():simpleReweighter(),up_(false),simple_(false),wonly_(false),etasymm_(false),isreweight_(false){}
+	wNLOReweighter():simpleReweighter(),simple_(false),
+	wonly_(false),etasymm_(false),isreweight_(false),detamin_(0),detamax_(-1),wptmin_(0),wptmax_(1e6){}
 	~wNLOReweighter(){}
 
-	void setUp(bool up){up_=up;}
-	const bool getUp()const{return up_;}
 
 	void readParameterFile(const std::string& infile);
 
 	void setReweightParameter(size_t paraindex, float reweightfactorminusone);
 
 	void setSimple(bool set){simple_=set;}
+
+	void setDEtaMin(float m){detamin_=m;}
+	void setDEtaMax(float m){detamax_=m;}
+	void setWptMin(float m){wptmin_=m;}
+	void setWptMax(float m){wptmax_=m;}
 
 	static const size_t wdxsec_npars,wdxsec1DPhi_npars,wdxsec1DCosTheta_npars;
 	static double wdxsec(double * angles, double* pars);
@@ -52,7 +56,7 @@ private:
 		simpleReweighter::setNewWeight(w);
 	}
 
-	bool up_;
+
 	bool simple_;
 
 
@@ -69,6 +73,9 @@ private:
 	bool wonly_;
 	bool etasymm_;
 	bool isreweight_;
+
+	float detamin_,detamax_;
+	float wptmin_,wptmax_;
 };
 
 }

@@ -115,6 +115,7 @@ bool analysisPlotsW::checkEventContentReco()const{
 
 void analysisPlotsW::bookPlots(){
 	if(!use()) return;
+
 	if(etaRanges_.size()<2)
 		throw std::out_of_range("analysisPlotsW::bookPlots: no deta range defined!");
 
@@ -125,21 +126,30 @@ void analysisPlotsW::bookPlots(){
 
 	for(size_t i=0;i<etaRanges_.size()-1;i++){
 		TString etastring=produceDEtaString(i);
-		asymmiso_.push_back(addPlot1D(asymmbins,"pttrans"+etastring,"pttrans","Events"));
-		asymmnoniso_.push_back(addPlot1D(asymmbins,"pttrans_noiso"+etastring,"pttrans","Events"));
+		asymmiso_.push_back(addPlot1D(asymmbins,"pttrans"+etastring,"p_{T}^{#perp}/M_{W}","Events"));
+		asymmnoniso_.push_back(addPlot1D(asymmbins,"pttrans_noiso"+etastring,"p_{T}^{#perp}/M_{W}","Events"));
 	}
 
 	for(size_t i=0;i<etaRanges_.size()-1;i++){
 		TString etastring=produceDEtaString(i);
 		mTnoniso_.push_back(addPlot1D(mTbins,"mT"+etastring,"M_{T} [GeV]","Events"));
 	}
+	bool tmpcm=histo1DUnfold::c_makelist;
+	histo1DUnfold::c_makelist=true;
+	detaresolution_=new histo1DUnfold(etaRanges_,etaRanges_,"DeltaEtaResolution","#Delta#eta(W,j)","Events");
 
-	std::vector<float> etabins=etaRanges_;
-	asymmisofull_ = addPlot1D(asymmbins,"pttrans full deta", "pttrans","Events");
-	asymmnonisofull_ = addPlot1D(asymmbins,"pttrans_noiso full deta", "pttrans","Events");
+	std::vector<float> etabins=histo1D::createBinning(20, -4, 4);
+	jetetaresolution_=new histo1DUnfold(etabins,etabins,"JetEtaResolution","#eta(j)","Events");
+	lepetaresolution_=new histo1DUnfold(etabins,etabins,"LepEtaResolution","#eta(l)","Events");
+	histo1DUnfold::c_makelist=tmpcm;
+
+
+	asymmisofull_ = addPlot1D(asymmbins,"pttrans full deta", "p_{T}^{#perp}/M_{W}","Events");
+	asymmnonisofull_ = addPlot1D(asymmbins,"pttrans_noiso full deta", "p_{T}^{#perp}/M_{W}","Events");
 	mTnonisofull_ = addPlot1D(mTbins,"mT full deta","M_{T} [GeV]","Events") ;
 	//std::vector<float> detabins=histo1D::createBinning(23,-4.5,4.5);
-	simpleDataAsymm_=addPlot1D(etaRanges_,"asymmdata","#Delta#eta(l,j)","<2 p_{T}^{T} / M_{W}>");
+	simpleDataAsymm_=addPlot1D(etaRanges_,"asymmdata","#Delta#eta(l,j)","<2 p_{T}^{#perp}/M_{W}>");
+
 
 }
 
@@ -166,12 +176,27 @@ void analysisPlotsW::fillPlotsReco(){
 			asymmnonisofull_->fill(asymmval, puweight());
 		}
 	}
+	if(event()->leadinglep && event()->leadingjet){
+		float deta=fabs(event()->leadinglep->eta() - event()->leadingjet->eta());
+		detaresolution_->fillReco(deta, puweight() );
+		jetetaresolution_->fillReco(event()->leadingjet->eta(), puweight() );
+	}
+	if(event()->leadinglep)
+		lepetaresolution_->fillReco(event()->leadinglep->eta(), puweight() );
+
 }
 
 void analysisPlotsW::fillPlotsGen(){
 	if(!use()) return;
 	if(!event()) return;
 
+	if(event()->genW && event()->genjets && event()->genjets->size()>0){
+		float deta=fabs(event()->genW->eta() - event()->genjets->at(0)->eta());
+		detaresolution_->fillGen(deta, puweight() );
+		jetetaresolution_->fillGen(event()->genjets->at(0)->eta(), puweight() );
+	}
+	if(event()->genlepton)
+		lepetaresolution_->fillGen(event()->genlepton->eta(), puweight() );
 	//no unfilding histos
 	/*
 	float deta;

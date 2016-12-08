@@ -28,6 +28,7 @@ public:
 
 	void loadPlots(const std::string& infile);
 
+	void printVariations(const std::string& outdir)const;
 
 	//get some results
 	void setNPseude(size_t n){npseudo_=n;}
@@ -69,6 +70,8 @@ private:
 
 	std::vector<variateHisto1D> mcdependencies_;
 	std::vector<histo1D> datahistos_;
+
+	std::vector<float> detaranges_;
 
 	simpleFitter fitter_;
 	ROOT::Math::Functor functor_;

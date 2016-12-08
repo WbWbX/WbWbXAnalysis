@@ -24,6 +24,12 @@ JECUncertainties = /src/TtZAnalysis/Analysis/data/analyse/Summer13_V5_DATA_Uncer
 
 A7reweightFile = /src/TtZAnalysis/Analysis/data/wanalyse/rewdata.dat 
 
+
+vis_DEtaMin = 0
+vis_DEtaMax = 1e6
+vis_WPtMin  = 0
+vis_WPtMax  = 1e6
+
 [parameters-end]
 
 

@@ -68,9 +68,11 @@ invokeApplication(){
 	for(size_t i=0;i<stacknames.size();i++){
 		if(stacknames.at(i).BeginsWith(prefix)){
 			selectedhistos.push_back(hsv->getStack(stacknames.at(i)).getSignalContainer2D());
+			histo2D & selectedhisto=selectedhistos.at(selectedhistos.size()-1);
 			std::cout << stacknames.at(i) << std::endl;
-			TH2D* th=selectedhistos.at(i).getTH2D("",false,true);
-			f2params[8]=selectedhistos.at(i).projectToX(true).integral(true);
+			TH2D* th=selectedhisto.getTH2D("",false,true);
+			std::cout << "project..." <<std::endl;
+			f2params[8]=selectedhisto.projectToX(true).integral(true);
 			f2->SetParameters(f2params);
 			//f2->SetParLimits(8,0,1e8); //fix to positive
 			TFitResultPtr  fitr=th->Fit(f2,"S");
@@ -129,15 +131,15 @@ invokeApplication(){
 			}
 
 			//make pull
-			histo2D h2d=selectedhistos.at(i);
+			histo2D h2d=selectedhisto;
 			h2d.setZAxisName("pull");
 			histo1D pulls(histo1D::createBinning(9,-10,10),"pull","nBins");
 			for(size_t xi=1;xi<h2d.getBinsX().size()-1;xi++){
 				for(size_t j=1;j<h2d.getBinsY().size()-1;j++){
-					float content=selectedhistos.at(i).getBinContent(xi,j);
-					float err=selectedhistos.at(i).getBinError(xi,j,true); //only stat
+					float content=selectedhisto.getBinContent(xi,j);
+					float err=selectedhisto.getBinError(xi,j,true); //only stat
 					float centrex=0,centrey=0;
-					selectedhistos.at(i).getBinCenter(xi,j,centrex,centrey);
+					selectedhisto.getBinCenter(xi,j,centrex,centrey);
 					float func=f2->Eval(centrex, centrey);
 					float pull= (func-content)/err;
 					pulls.fill(pull);
@@ -184,7 +186,7 @@ invokeApplication(){
 			}
 
 			//1D projection
-			histo2D h2d2=selectedhistos.at(i);
+			histo2D h2d2=selectedhisto;
 			histo1D thetadep=h2d2.projectToX(false);
 			thetadep.setYAxisName("Events/binwidth");
 			histo1D phidep=h2d2.projectToY(false);
