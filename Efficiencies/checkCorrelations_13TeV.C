@@ -1,4 +1,4 @@
-#include "TtZAnalysis/Analysis/triggerEfficiencies12/correlationChecker.h"
+#include "TtZAnalysis/Efficiencies/correlationChecker.h"
 #include <iostream>
 
 

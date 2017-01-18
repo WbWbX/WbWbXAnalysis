@@ -4,8 +4,8 @@
 #include "TTreePerfStats.h"
 #include "FWCore/FWLite/interface/AutoLibraryLoader.h"
 
-#define DEF_ELEC_PT 20
-#define DEF_MUON_PT 20
+#define DEF_ELEC_PT 15
+#define DEF_MUON_PT 15
 
 double 
 triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::vector<ztop::NTElectron> * inputElectrons){
@@ -65,8 +65,10 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
 		float suclueta = fabs(elec->ECalP4().eta());
 		if(abseta > 2.4) continue;
 		if(suclueta > 1.4442 && suclueta < 1.5660) continue; //transistion region
+                //if(elec->getMember(0)> 0.15) continue;
 		//kinelectrons  << elec;
-
+                if(suclueta < 1.4442 && (fabs(elec->d0V()) > 0.05 ||fabs(elec->dzV())>0.10) ) continue;
+                if(suclueta > 1.5660 && (fabs(elec->d0V()) > 0.10 ||fabs(elec->dzV())>0.20) ) continue;
 	//	if(fabs(elec->d0V()) < 0.02
 	//			&& elec->isNotConv()
 	//			&& elec->storedId() > 0.9
@@ -94,15 +96,19 @@ triggerAnalyzer::selectDileptons(std::vector<ztop::NTMuon> * inputMuons, std::ve
 
 	if(mode_<0){ //ee
 		if(selectedElecs_.size() < 2) return 0;
+                if(!(selectedElecs_.at(0)->pt() > 25.)) return 0;
 		mass=(selectedElecs_.at(0)->p4() + selectedElecs_.at(1)->p4()).M();
 	}
 	else if(mode_==0){ //emu
 		if(selectedElecs_.size() < 1 || selectedMuons_.size() <1) return 0;
+                if(!(selectedElecs_.at(0)->pt() > 25.||selectedMuons_.at(0)->pt() > 25.)) return 0;
 		mass=(selectedElecs_.at(0)->p4() + selectedMuons_.at(0)->p4()).M();
 
 	}
 	else{ //mumu
 		if(selectedMuons_.size() <2) return 0;
+                if(!(selectedMuons_.at(0)->pt() > 25.)) return 0;
+                //if(((selectedMuons_.at(0)->eta() < -1.2 && selectedMuons_.at(1)->eta() < -1.2) || (selectedMuons_.at(0)->eta() >1.2 && selectedMuons_.at(1)->eta() > 1.2)) && deltaPhi(selectedMuons_.at(0)->phi(),selectedMuons_.at(1)->phi()< 1.04 )) return 0;
 		mass=(selectedMuons_.at(0)->p4() + selectedMuons_.at(1)->p4()).M();
 	}
 
@@ -123,12 +129,15 @@ void trigger_tightLeptons(){
 	using namespace std;
 	using namespace ztop;
 
-	std::vector<float> binsmumueta, bins2dee, bins2dmue,binsptmu, binspte, bins2dmumu;
+	std::vector<float> binsmumueta, bins2dee, bins2dmue,binsptmu, binspte, bins2dmumu,binseeeta;
 
 	binsmumueta << -2.4 << -2.1 << -1.2 << -0.9 << 0.9 << 1.2 << 2.1 << 2.4;
-	bins2dmumu << 0 << 0.9 << 1.2 << 2.1 << 2.4;
+	bins2dmumu << 0<<0.4 << 0.9 << 1.2 << 2.1 << 2.4;
 	bins2dee <<0 << 1.47 << 2.4;
 	bins2dmue << 0 << 1.2 << 2.4;
+      
+        binseeeta<< -2.5<< -2.1<< -1.56<< -1.44<< -1.0<< -0.6<< -0.3<< -0.1<< 0.1<< 0.3<< 0.6<< 1.0<< 1.44<< 1.56<< 2.1<< 2.5;
+
 
 	bool includecorr=true;
 
@@ -152,11 +161,15 @@ void trigger_tightLeptons(){
 	//  ta_mumud.setDileptonTrigger("HLT_Mu17_Mu8_v");
 	ta_mumud.setMassCutLow(20);
 	ta_mumud.setIncludeCorr(includecorr);
+        std::vector<std::string> triggerObjects;
+        //triggerObjects <<"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v"<<"HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v"<<"hltL3fL1sDoubleMu114L1f0L2f10OneMuL3Filtered17"<<"hltDiMuonGlb17Glb8RelTrkIsoFiltered0p4"<<"hltDiMuonGlb17Trk8RelTrkIsoFiltered0p4"<<"hltL3pfL1sDoubleMu114L1f0L2pf0L3PreFiltered8"<<"hltL2pfL1sDoubleMu114ORDoubleMu125L1f0L2PreFiltered0"<<"hltDiMuonGlb17Trk8RelTrkIsoFiltered0p4"<<"hltDiMuonGlbFiltered17TrkFiltered8";
+        ta_mumud.setTriggerObjects(triggerObjects);
 
 	ta_mumud.setBinsEta(binsmumueta);
 	ta_mumud.setBinsEta2dX(bins2dmumu);
 	ta_mumud.setBinsEta2dY(bins2dmumu);
 
+        ta_eed.setBinsEta(binseeeta);
 	ta_eed.setBinsEta2dX(bins2dee);
 	ta_eed.setBinsEta2dY(bins2dee);
 	ta_emud.setBinsEta2dX(bins2dee);
@@ -175,7 +188,8 @@ void trigger_tightLeptons(){
         //ta_mumuMC.setIncludeCorr(false);
         //ta_emuMC.setIncludeCorr(false);
 
-	TString dir="/nfs/dust/cms/user/tarndt/NTuples/Prod_806/";
+	TString dir="/nfs/dust/cms/user/tarndt/NTuples/Prod_8020/";
+        //TString dir="/nfs/dust/cms/group/topcmsdesy/TTH_Trigger/";
 
 	TString cmssw_base=getenv("CMSSW_BASE");
 
@@ -184,13 +198,17 @@ void trigger_tightLeptons(){
 
 	std::vector<TString> mumumcfiles, eemcfiles, emumcfiles, datafilesFull,datafilesRunB,datafilesRunAB,datafilesRunC, datafilesRunA, datafilesRunD;
 
-	//mumumcfiles << dir+"def_out.root" ;
+	mumumcfiles << dir+"tree_13TeV_emuttbar_Mor17_trig.root"<< dir+"tree_13TeV_emuttbarbg_Mor17_trig.root" ;
+//
+	eemcfiles << dir+"tree_13TeV_emuttbar_Mor17_trig.root"<< dir+"tree_13TeV_emuttbarbg_Mor17_trig.root" ;
 
-	//eemcfiles << dir+"def_out.root" ;
+	emumcfiles << dir+"tree_13TeV_emuttbar_Mor17_trig.root"<< dir+"tree_13TeV_emuttbarbg_Mor17_trig.root" ;
 
-	//emumcfiles <<dir+"def_out.root" ;
-
-	datafilesFull  << dir + "tree_13Tev_data_MET_v2.root";
+	datafilesFull  << dir + "tree_13Tev_data_MET_RunC_golden.root"<< dir + "tree_13Tev_data_MET_RunB_golden.root"<< dir + "tree_13Tev_data_MET_RunD_golden.root"<< dir + "tree_13Tev_data_MET_RunE_golden.root"<< dir + "tree_13Tev_data_MET_RunF_golden.root"<< dir + "tree_13Tev_data_MET_RunG_golden.root";
+ 
+        //datafilesFull  << dir + "tree_13Tev_data_MET_RunG.root";
+      
+        //datafilesFull << dir + "tree_13TeV_dy50inf_lo.root";
 
 	TString pileuproot = cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13RunD.json.txt_PU.root";
 
@@ -217,7 +235,7 @@ void trigger_tightLeptons(){
 
 
     std::cout<<"before Analyze"<<std::endl;
-	analyzeAll( ta_eed,  ta_eeMC,  ta_mumud,  ta_mumuMC,  ta_emud,  ta_emuMC,"direct_comb","direct 19 fb^{-1}");
+	analyzeAll( ta_eed,  ta_eeMC,  ta_mumud,  ta_mumuMC, ta_emud,ta_emuMC,  "direct_comb","direct 19 fb^{-1}");
     std::cout<<"after Analyze"<<std::endl;
 
 

@@ -383,5 +383,149 @@ std::cout << "label:" << addlabel << std::endl;
 
 
 
+void plotEffs(std::vector<ztop::histWrapper>  hvec,std::vector<ztop::effTriple>  trip_mc, std::vector<ztop::effTriple> trip_data, TString addlabel="", TString dir = "./"){
+
+	//num,den,eff
+	size_t i=0;
+
+	if(dir != "./")
+		system(("mkdir -p "+dir).Data());
+
+
+
+	TCanvas * c=new TCanvas();
+	c->SetBatch();
+	TLegend * leg=new TLegend(0.35,0.15,0.70,0.42);
+	leg->SetFillStyle(0);
+	leg->SetBorderSize(0);
+
+
+	gStyle->SetOptTitle(0);
+	gStyle->SetOptStat(0);
+
+	gPad->SetLeftMargin(0.15);
+	gPad->SetBottomMargin(0.15);
+
+	gStyle->SetPaintTextFormat("5.3f");
+
+	TPaveText *label = new TPaveText();
+
+	label -> SetX1NDC(gStyle->GetPadLeftMargin());
+	label -> SetY1NDC(1.0-gStyle->GetPadTopMargin());
+	label -> SetX2NDC(1.0-gStyle->GetPadRightMargin());
+	label -> SetY2NDC(1.0);
+	label -> SetTextFont(42);
+
+std::cout << "label:" << addlabel << std::endl;
+	ztop::textBoxes txs;
+	if(addlabel.Contains("8TeV"))
+		txs.readFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSnoSplitLeft");
+	else if(addlabel.Contains("7TeV"))
+		txs.readFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSnoSplitLeft7TeV");
+	else
+		label -> AddText(Form(addlabel));
+
+
+
+	label->SetFillStyle(0);
+	label->SetBorderSize(0);
+	label->SetTextAlign(22);
+	//  label->Draw("same");
+
+	for(size_t i=0;i<trip_data.size();i++){
+		c->Clear();
+		leg->Clear();
+
+
+		if(trip_data.at(i).getNum().isTH1D()){ //do 1D plotting
+			TH1D  num_data=trip_data.at(i).getNum().getTH1D();
+                        TH1D  den_data=trip_data.at(i).getDen().getTH1D();
+                        TEfficiency * eff_data = new TEfficiency(num_data,den_data);
+                        eff_data->SetMarkerSize(1);
+                        eff_data->SetMarkerStyle(20);
+                        eff_data->SetLineWidth(2);
+                        eff_data->SetLineColor(1);
+			leg->AddEntry(eff_data,"data efficiency"  ,"pe");
+			//eff_data->GetYaxis()->SetTitle("#epsilon,SF");
+                        //eff_data->GetYaxis()->SetRangeUser(0,1.1);
+			//if(hvec.at(i).getFormatInfo().Contains("smallmarkers"))
+			//	h->SetMarkerSize(h->GetMarkerSize()*0.5);
+			eff_data->Draw("aPe1");
+                        gPad->Update();
+                        eff_data->GetPaintedGraph()->GetYaxis()->SetRangeUser(0.5,1.1);
+                        TH1D  num_mc=trip_mc.at(i).getNum().getTH1D();
+                        TH1D  den_mc=trip_mc.at(i).getDen().getTH1D();
+                        TEfficiency * eff_mc = new TEfficiency(num_mc,den_mc);
+                        eff_mc->SetMarkerSize(1);
+                        eff_mc->SetMarkerStyle(22);
+                        eff_mc->SetMarkerColor(kRed);
+                        eff_mc->SetLineWidth(2);
+                        eff_mc->SetLineColor(kRed);
+                        leg->AddEntry(eff_mc,"MC efficiency"  ,"pe");
+			eff_mc->Draw("Pe1,same");
+			/////////// Continue here .....
+                        TH1D  hist_eff_mc=trip_mc.at(i).getEff().getTH1D();
+                        TH1D  hist_eff_data=trip_data.at(i).getEff().getTH1D();
+                         
+                        //hist_eff_mc->Sumw2();
+                        //hist_eff_data->Sumw2();
+                        hist_eff_data.Divide(&hist_eff_mc);
+                        applySFStyle(hist_eff_data);
+
+			leg->AddEntry(&hist_eff_data,"scale factor"  ,"pe");
+			hist_eff_data.Draw("e1,same");
+
+			TString canvasname=trip_data.at(i).getName();
+			canvasname.ReplaceAll("_eff","");
+			c->SetName(canvasname);
+			c->SetTitle(canvasname);
+
+			leg->Draw("same");
+			//label->Draw("same");
+			txs.drawToPad(c);
+			c->Write();
+			c->Print(dir+canvasname+".pdf");
+
+		}
+        }
+        while(i<hvec.size()){
+                c->Clear();
+                leg->Clear();
+
+                if(!hvec.at(i).isTH1D()){ 
+                         //do 2d plotting
+	              size_t j=i;
+	              while(j<i+3){
+	                     c->Clear();
+                             TH2D * h=&(hvec.at(j).getTH2D());
+		             if(hvec.at(j).getFormatInfo().Contains("smallmarkers"))
+		             h->SetMarkerSize(h->GetMarkerSize()*0.5);
+		             TString canvasname=hvec.at(j).getName();
+		             c->SetName(canvasname);
+		             if(canvasname.Contains("_mc")){
+		                      label -> Clear();
+			              label -> AddText(Form(addlabel+" MC"));
+		             }
+		             c->SetTitle(canvasname);
+		             h->Draw("colz,text,e");
+		             txs.drawToPad(c);
+		             label->Draw("same");
+		             c->Write();
+		             c->Print(dir+canvasname+".pdf");
+		             label -> Clear();
+		             //label -> AddText(Form(addlabel));
+		             j++;
+		      }
+		      i+=3; //next
+		}
+                else i++;
+
+	}
+
+	delete c;
+	delete label;
+}
+
+
 
 #endif

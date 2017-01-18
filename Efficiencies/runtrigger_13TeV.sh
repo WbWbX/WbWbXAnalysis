@@ -2,6 +2,13 @@
 
 #runs analysis und puts analysis code and output to an extra directory with date flag
 
+cd ${CMSSW_BASE}/src/TtZAnalysis/Efficiencies
+
+source /cvmfs/cms.cern.ch/cmsset_default.sh
+
+eval `scramv1 runtime -sh`
+
+
 dirstring=$1"_13TeV_trigger_$(date +%F_%H:%M)__GI"
 
 echo '\n\nrunning in directory' "${dirstring}."

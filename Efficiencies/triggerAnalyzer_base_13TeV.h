@@ -70,7 +70,7 @@ public:
 		binseta_.push_back(-2.5);binseta_.push_back(-1.5);binseta_.push_back(-0.8);binseta_.push_back(0.8);binseta_.push_back(1.5);binseta_.push_back(2.5); // ee standard
 		//binspt_<<20<<25 << 30 << 35 << 40 << 50 << 60 << 100 << 200<<300;
 		binspt_<<15<<20<<30<<40<<60<<80<<100<<200<<300;
-		binseta2dx_ << 0 << 0.9 << 1.2 << 2.1 << 2.4; //mu standard
+		binseta2dx_ << 0<<0.5 << 0.9 << 1.2 << 2.1 << 2.4; //mu standard
 		binseta2dy_=binseta2dx_;
 		whichelectrons_="NTElectrons";
 
@@ -272,11 +272,12 @@ public:
 		vector<float> binsdrtrig;
 		binsdrtrig << 0 << 0.05 << 0.1 << 0.15 << 0.2 << 0.3 << 0.4 << 0.6 << 1 << 2 << 5;
 
-                vector<float> binsmet,binspt2d,binspt2d_lead,binspt2d_selead;
+                vector<float> binsmet,binspt2d,binspt2d_lead,binspt2d_selead,binsetaele_;
                 binsmet<< 0<<20<<40<<60<<80<<100<<125<<150<<175<<200;
                 binspt2d<<15<<20<<30<<40<<60<<80<<100;
-                binspt2d_lead<<15<<20<<40<<70<<100;
-                binspt2d_selead<<15<<40<<70<<100;
+                binspt2d_lead<<15<<20<<25<<30<<40<<60<<80<<100;
+                binspt2d_selead<<15<<20<<25<<30<<40<<60<<80<<100;
+                binsetaele_<< -2.5<< -2.1<< -1.56<< -1.44<< -1.0<< -0.6<< -0.3<< -0.1<< 0.1<< 0.3<< 0.6<< 1.0<< 1.44<< 1.56<< 2.1<< 2.5;
 		//pt
 		//eta
 		//et2d
@@ -307,17 +308,19 @@ public:
 
 
                 
-                effTriple t_eta2d_jetlow   (binsetasfmu_, binsetasfmu_, "lepton_eta2d_jetlow"   , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
-                effTriple t_eta2d_jethigh   (binsetasfmu_, binsetasfmu_, "lepton_eta2d_jethigh"   , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
-                effTriple t_eta2d_vertlow   (binsetasfmu_, binsetasfmu_, "lepton_eta2d_vertlow"   , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
-                effTriple t_eta2d_verthigh   (binsetasfmu_, binsetasfmu_, "lepton_eta2d_verthigh"   , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
+                effTriple t_eta2d_jetlow   (binseta2dx_, binseta2dy_, "lepton_eta2d_jetlow"   , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
+                effTriple t_eta2d_jethigh   (binseta2dx_, binseta2dy_, "lepton_eta2d_jethigh"   , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
+                effTriple t_eta2d_vertlow   (binseta2dx_, binseta2dy_, "lepton_eta2d_vertlow"   , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
+                effTriple t_eta2d_verthigh   (binseta2dx_, binseta2dy_, "lepton_eta2d_verthigh"   , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
+                effTriple t_eta2d_mllin   (binseta2dx_, binseta2dy_, "lepton_eta2d_mllin"   , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
+                effTriple t_eta2d_mllout   (binseta2dx_, binseta2dy_, "lepton_eta2d_mllout"   , "#eta_{l_{1}}"       , "#eta_{l_{2}}");
                 // Additional histos for eta and pt
 
                 effTriple t_pt_ele       (binspt_  , "electron_pt"   , "p_{T,e} [GeV]"            , "evts" );
                 effTriple t_pt_muon      (binspt_  , "muon_pt"       , "p_{T,#mu} [GeV]"          , "evts" );
                 effTriple t_pt_lead      (binspt_  , "leading_pt"    , "p_{T,l_{1}} [GeV]"        , "evts" );
                 effTriple t_pt_selead    (binspt_  , "seleading_pt"  , "p_{T,l_{2}} [GeV]"        , "evts" );
-                effTriple t_eta_ele      (binseta_ , "electron_eta"  , "#eta_{e} [GeV]"           , "evts" );
+                effTriple t_eta_ele      (binsetaele_ , "electron_eta"  , "#eta_{e} [GeV]"           , "evts" );
                 effTriple t_eta_muon     (binseta_ , "muon_eta"      , "#eta_{#mu} [GeV]"         , "evts" );
                 effTriple t_eta_lead     (binseta_ , "leading_eta"   , "#eta_{l_{1}} [GeV]"       , "evts" );
                 effTriple t_eta_selead   (binseta_ , "seleading_eta" , "#eta_{l_{2}} [GeV]"       , "evts" );
@@ -379,46 +382,24 @@ public:
 		//make triggers switchable from the outside in next iteration. leave right now as it is
 
 		if(mode_<-0.1){
-			//  pair<string, double> trig2("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999.);
-                        dileptriggers.push_back("HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");
-                 //       dileptriggers.push_back("HLT_Ele32_eta2p1_WPTight_Gsf_v");
-                        //dileptriggers.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v");
-                        //dileptriggers.push_back("HLT_Ele27_eta2p1_WP75_Gsf_v");
-
-
+                        dileptriggers.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");
+                        dileptriggers.push_back("HLT_Ele27_WPTight_Gsf_v");
 
 		}
 		if(mode_>0.1){
-			//   pair<string, double> trig3("HLT_Mu17_Mu8_v",999999);
-			//dileptriggers.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v");
-                        //dileptriggers.push_back("HLT_Mu17_TkMu8_DZ_v");
-                        //dileptriggers.push_back("HLT_Mu17_Mu8_DZ_v");
-                        //dileptriggers.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v");
-                        dileptriggers.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v");
-                        dileptriggers.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");
-                   //     dileptriggers.push_back("HLT_IsoTkMu22_v");
-                     //   dileptriggers.push_back("HLT_IsoMu22_v");
+                        dileptriggers.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v");
+                        dileptriggers.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v");
+                        dileptriggers.push_back("HLT_IsoTkMu24_v");
+                        dileptriggers.push_back("HLT_IsoMu24_v");
 
-                        //dileptriggers.push_back("HLT_IsoMu18_v");
-                        //dileptriggers.push_back("HLT_IsoMu17_eta2p1_v");
-                        //dileptriggers.push_back("HLT_IsoMu17_eta2p1_v");
-                        //dileptriggers.push_back("HLT_IsoTkMu20_v");
-                        //dileptriggers.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v");
-			// pair<string, double> trig4("HLT_Mu17_TkMu8_v",999999);
 		}
 
 		if(mode_==0){
-			//  pair<string, double> trig3("HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999);
-			dileptriggers.push_back("HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v");
-			//  pair<string, double> trig4("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v",999999);
-			dileptriggers.push_back("HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v");
-                        //dileptriggers.push_back("HLT_IsoTkMu22_v");
-                       //dileptriggers.push_back("HLT_IsoMu22_v");
-                        //dileptriggers.push_back("HLT_Ele32_eta2p1_WPTight_Gsf_v");
-                    //    dileptriggers.push_back("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v");
-                        //dileptriggers.push_back("HLT_IsoTkMu20_v");
-                        //dileptriggers.push_back("HLT_IsoMu20_v");
-                        //dileptriggers.push_back("HLT_Ele27_eta2p1_WPLoose_Gsf_v");
+			dileptriggers.push_back("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v");
+			dileptriggers.push_back("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v");
+                        dileptriggers.push_back("HLT_IsoTkMu24_v");
+                        dileptriggers.push_back("HLT_IsoMu24_v");
+                        dileptriggers.push_back("HLT_Ele27_WPTight_Gsf_v");
 		}
 
 		if(trigs_.size()>0){   //manually set
@@ -432,31 +413,25 @@ public:
 		vector<string> dileptriggersMC; // the version numbers where set as wildcards, so if statement obsolete!
 
 		if(mode_<-0.1){
-			dileptriggersMC.push_back("HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");
-                     //   dileptriggersMC.push_back("HLT_Ele32_eta2p1_WPTight_Gsf_v");            
-            //dileptriggersMC.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v");
-                      //  dileptriggersMC.push_back("HLT_Ele27_eta2p1_WP75_Gsf_v");
+			dileptriggersMC.push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");
+                 
+                      dileptriggersMC.push_back("HLT_Ele27_WPTight_Gsf_v");            
 		}
 		if(mode_>0.1){
-			dileptriggersMC.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v");
-                        dileptriggersMC.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");
-                        //dileptriggersMC.push_back("HLT_IsoTkMu22_v");
-                        //dileptriggersMC.push_back("HLT_IsoMu22_v");
+			dileptriggersMC.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v");
+                        dileptriggersMC.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v");
+                        dileptriggersMC.push_back("HLT_IsoTkMu24_v");
+                        dileptriggersMC.push_back("HLT_IsoMu24_v");
 
-                        //dileptriggersMC.push_back("HLT_IsoMu17_eta2p1_v");
-                        //dileptriggersMC.push_back("HLT_IsoTkMu20_v");
 
 		}
 		if(mode_==0){
-			dileptriggersMC.push_back("HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v");
-			dileptriggersMC.push_back("HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v");
-                       //dileptriggersMC.push_back("HLT_IsoTkMu22_v");
-                       // dileptriggersMC.push_back("HLT_IsoMu22_v");
-                       // dileptriggersMC.push_back("HLT_Ele32_eta2p1_WPTight_Gsf_v");
-                        //dileptriggersMC.push_back("HLT_IsoMu17_eta2p1_v");
-                       // dileptriggersMC.push_back("HLT_IsoMu17_eta2p1_v");
-                        //dileptriggersMC.push_back("HLT_IsoTkMu20_v");
-                       // dileptriggersMC.push_back("HLT_Ele27_eta2p1_WPLoose_Gsf_v");
+			dileptriggersMC.push_back("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v");
+			dileptriggersMC.push_back("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v");
+                        dileptriggersMC.push_back("HLT_IsoTkMu24_v");
+                        dileptriggersMC.push_back("HLT_IsoMu24_v");
+                        dileptriggersMC.push_back("HLT_Ele27_WPTight_Gsf_v");
+                        
 
 		}
 		if(trigsMC_.size()>0){   //manually set
@@ -465,7 +440,9 @@ public:
 				dileptriggersMC.push_back(trigsMC_.at(i));
 			}
 		}
-                TString fileName;
+
+               //Applies on the fly scale factors for cross check, only comment in when needed
+               /* TString fileName;
                 TH2D* h_TrigSFeta= new TH2D;
                 if(mode_>0.1 && isMC_) fileName= "/afs/desy.de/user/t/tarndt/xxl/TTZ/CMSSW_7_2_2_patch2/src/TtZAnalysis/Efficiencies/triggerSummary_mumu.root";
                 if(mode_<0.1 && isMC_) fileName= "/afs/desy.de/user/t/tarndt/xxl/TTZ/CMSSW_7_2_2_patch2/src/TtZAnalysis/Efficiencies/triggerSummary_ee.root";
@@ -482,6 +459,8 @@ public:
                             const TString histoName("scalefactor_eta2d_with_syst");
                             h_TrigSFeta = dynamic_cast<TH2D*>(trigEfficiencies.Get(histoName));
                         }
+
+                */
 		///////////PU reweighting
 
 		//PUReweighter PUweight;
@@ -596,7 +575,7 @@ public:
 		}
 		if(lowMCStat && isMC_){
 			//n*=0.01;
-			foo=100;
+			foo=10000;
 			cout  << " reduced to: " << n;
 		}
 		if(lowDataStat && !isMC_){
@@ -689,7 +668,7 @@ public:
 
 
 			unsigned int prescale=99999;
-			unsigned int largestprescale=0;
+			unsigned int largestprescale=1;
 
 			vector<size_t> firedidx;
 
@@ -957,6 +936,8 @@ public:
                                 else t_eta2d_jethigh.fillDen(fabs(eta1),fabs(eta2),puweight);
                                 if (vmulti < 11) t_eta2d_vertlow.fillDen(fabs(eta1),fabs(eta2),puweight);
                                 else t_eta2d_verthigh.fillDen(fabs(eta1),fabs(eta2),puweight); 
+                                if (76. < mass && mass < 106.) t_eta2d_mllin.fillDen(fabs(eta1),fabs(eta2),puweight);
+                                else t_eta2d_mllout.fillDen(fabs(eta1),fabs(eta2),puweight);
 
 				t_invmass.fillDen(mass,puweight);
 				t_lepmulti.fillDen(lepmulti,puweight);
@@ -1098,7 +1079,8 @@ public:
                                         else t_eta2d_jethigh.fillNum(fabs(eta1),fabs(eta2),puweight);
                                         if (vmulti < 11) t_eta2d_vertlow.fillNum(fabs(eta1),fabs(eta2),puweight);
                                         else t_eta2d_verthigh.fillNum(fabs(eta1),fabs(eta2),puweight);
-
+                                        if (76. < mass && mass < 106.) t_eta2d_mllin.fillNum(fabs(eta1),fabs(eta2),puweight);
+                                        else t_eta2d_mllout.fillNum(fabs(eta1),fabs(eta2),puweight);
 
 
 
@@ -1344,16 +1326,13 @@ public:
 
 	std::vector<string> initTriggers(){
 		std::vector<string> mettriggers;
-                mettriggers.push_back("HLT_PFMET170_JetIdCleaned_v");
-                mettriggers.push_back("HLT_PFMET120_PFMHT120_IDTight_v");
-                mettriggers.push_back("HLT_PFMET170_HBHECleaned_v");
-                //mettriggers.push_back("HLT_PFMETNoMu90_PFMHTNoMu90_IDTight_v");
-                mettriggers.push_back("HLT_PFHT300_PFMET110_v");
-                mettriggers.push_back("HLT_CaloMHTNoPU90_PFMET90_PFMHT90_IDTight_BTagCSV_p067_v"); 
-                mettriggers.push_back("HLT_PFHT750_4JetPt50_v");
-                mettriggers.push_back("HLT_PFHT800_v");
-                mettriggers.push_back("HLT_MET250_v");
-		//just for testing
+		mettriggers.push_back("HLT_PFHT300_PFMET110_v");
+                mettriggers.push_back("HLT_MET200_v");
+               // mettriggers.push_back("HLT_DiCentralPFJet55_PFMET110_v");
+                mettriggers.push_back("HLT_PFMET300_v");
+                mettriggers.push_back("HLT_PFMET110_PFMHT110_IDTight_v");
+                mettriggers.push_back("HLT_PFMET170_HBHECleaned_v");        
+                //just for testing
 		// mettriggers.clear();
 		//mettriggers.push_back("HLT_MET120_v10");
 
@@ -1522,7 +1501,8 @@ TString makeFullOutput(triggerAnalyzer & data, triggerAnalyzer & mc , TString di
 	//make plots
 
 	TFile *f3 = new TFile(dirname+"/sf_plots.root","RECREATE");
-	plotAll(sfs,label,dirname+"/");
+	//plotAll(sfs,label,dirname+"/");
+	plotEffs(sfs,mc.getTriples(),data.getTriples(),label,dirname+"/");
 	f3->Close();
 
 	delete f;
