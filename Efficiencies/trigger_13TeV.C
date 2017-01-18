@@ -188,7 +188,7 @@ void trigger_tightLeptons(){
         //ta_mumuMC.setIncludeCorr(false);
         //ta_emuMC.setIncludeCorr(false);
 
-	TString dir="/nfs/dust/cms/user/tarndt/NTuples/Prod_8020/";
+	TString dir="/nfs/dust/cms/user/tarndt/NTuples/Prod_8024/";
         //TString dir="/nfs/dust/cms/group/topcmsdesy/TTH_Trigger/";
 
 	TString cmssw_base=getenv("CMSSW_BASE");
@@ -196,16 +196,18 @@ void trigger_tightLeptons(){
 
 
 
-	std::vector<TString> mumumcfiles, eemcfiles, emumcfiles, datafilesFull,datafilesRunB,datafilesRunAB,datafilesRunC, datafilesRunA, datafilesRunD;
+	std::vector<TString> mumumcfiles, eemcfiles, emumcfiles, datafilesFull,datafilesRunH;
 
-	mumumcfiles << dir+"tree_13TeV_emuttbar_Mor17_trig.root"<< dir+"tree_13TeV_emuttbarbg_Mor17_trig.root" ;
+	mumumcfiles << dir+"tree_13TeV_emuttbar.root"<< dir+"tree_13TeV_emuttbarbg.root" ;
 //
-	eemcfiles << dir+"tree_13TeV_emuttbar_Mor17_trig.root"<< dir+"tree_13TeV_emuttbarbg_Mor17_trig.root" ;
+	eemcfiles << dir+"tree_13TeV_emuttbar.root"<< dir+"tree_13TeV_emuttbarbg.root" ;
 
-	emumcfiles << dir+"tree_13TeV_emuttbar_Mor17_trig.root"<< dir+"tree_13TeV_emuttbarbg_Mor17_trig.root" ;
+	emumcfiles << dir+"tree_13TeV_emuttbar.root"<< dir+"tree_13TeV_emuttbarbg.root" ;
 
-	datafilesFull  << dir + "tree_13Tev_data_MET_RunC_golden.root"<< dir + "tree_13Tev_data_MET_RunB_golden.root"<< dir + "tree_13Tev_data_MET_RunD_golden.root"<< dir + "tree_13Tev_data_MET_RunE_golden.root"<< dir + "tree_13Tev_data_MET_RunF_golden.root"<< dir + "tree_13Tev_data_MET_RunG_golden.root";
+	datafilesFull  << dir + "tree_13Tev_data_MET_RunC.root"<< dir + "tree_13Tev_data_MET_RunB.root"<< dir + "tree_13Tev_data_MET_RunD.root"<< dir + "tree_13Tev_data_MET_RunE.root"<< dir + "tree_13Tev_data_MET_RunF.root"<< dir + "tree_13Tev_data_MET_RunG.root";
  
+        datafilesRunH  << dir + "tree_13Tev_data_MET_RunH_v1.root" << dir + "tree_13Tev_data_MET_RunH_v2.root";
+
         //datafilesFull  << dir + "tree_13Tev_data_MET_RunG.root";
       
         //datafilesFull << dir + "tree_13TeV_dy50inf_lo.root";
@@ -238,14 +240,91 @@ void trigger_tightLeptons(){
 	analyzeAll( ta_eed,  ta_eeMC,  ta_mumud,  ta_mumuMC, ta_emud,ta_emuMC,  "direct_comb","direct 19 fb^{-1}");
     std::cout<<"after Analyze"<<std::endl;
 
+        std::vector<string> mumuTriggersRunH, emuTriggersRunH;
+
+        mumuTriggersRunH << "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v" << "HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v" << "HLT_IsoTkMu24_v"<<"HLT_IsoMu24_v"<<"HLT_Ele27_WPTight_Gsf_v";
+        emuTriggersRunH << "HLT_IsoTkMu24_v"<<"HLT_IsoMu24_v"<<"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v"<<"HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v";
+
+        triggerAnalyzer ta_eedH=ta_eed;
+        triggerAnalyzer ta_mumudH=ta_mumud;
+        triggerAnalyzer ta_emudH=ta_emud;
+
+        ta_eedH.setChain(datafilesRunH);
+        ta_mumudH.setChain(datafilesRunH);
+        ta_emudH.setChain(datafilesRunH);
+
+        triggerAnalyzer ta_eeMCH=ta_eeMC;
+        triggerAnalyzer ta_mumuMCH=ta_mumuMC;
+        triggerAnalyzer ta_emuMCH=ta_emuMC;
+
+        ta_mumudH.setDileptonTriggers(mumuTriggersRunH);
+        ta_emudH.setDileptonTriggers(emuTriggersRunH);
+ 
+        ta_mumuMCH.setDileptonTriggers(mumuTriggersRunH);
+        ta_emuMCH.setDileptonTriggers(emuTriggersRunH);
+
+        analyzeAll( ta_eedH,  ta_eeMCH,  ta_mumudH,  ta_mumuMCH, ta_emudH,ta_emuMCH,  "direct_comb","direct 19 fb^{-1}");
+
+        double lumi = 26.54;
+        double lumiH = 8.6;
+        
+        double lumitotal= lumi + lumiH;
+
+        double eetotal=ta_eed.getGlobalDen() + ta_eedH.getGlobalDen();
+        double eeMCtotal=ta_eeMC.getGlobalDen() + ta_eeMCH.getGlobalDen();
+
+        double eescale=eetotal/ta_eed.getGlobalDen() * lumi/lumitotal;
+        ta_eed.scale(eescale);
+        double eeMCscale=eeMCtotal/ta_eeMC.getGlobalDen() * lumi/lumitotal;
+        ta_eeMC.scale(eeMCscale);
+        double eeHscale=eetotal/ta_eedH.getGlobalDen() * lumiH/lumitotal;
+        ta_eedH.scale(eeHscale);
+        double eeMCHscale=eeMCtotal/ta_eeMCH.getGlobalDen() * lumiH/lumitotal;
+        ta_eeMCH.scale(eeMCHscale);
 
 
+        triggerAnalyzer eedFull = ta_eed + ta_eedH;
+        triggerAnalyzer eemcFull = ta_eeMC + ta_eeMCH;
+        TString eestring= makeFullOutput(eedFull, eemcFull, "ee_Full", "13TeV", 0.00);
 
-	triggerAnalyzer emudFull = ta_emud;
-	triggerAnalyzer emumcFull = ta_emuMC;
+
+        double emutotal=ta_emud.getGlobalDen() + ta_emudH.getGlobalDen();
+        double emuMCtotal=ta_emuMC.getGlobalDen() + ta_emuMCH.getGlobalDen();
+
+        double emuscale=eetotal/ta_emud.getGlobalDen() * lumi/lumitotal;
+        ta_emud.scale(emuscale);
+        double emuMCscale=emuMCtotal/ta_emuMC.getGlobalDen() * lumi/lumitotal;
+        ta_emuMC.scale(emuMCscale);
+        double emuHscale=emutotal/ta_emudH.getGlobalDen() * lumiH/lumitotal;
+        ta_emudH.scale(emuHscale);
+        double emuMCHscale=emuMCtotal/ta_emuMCH.getGlobalDen() * lumiH/lumitotal;
+        ta_emuMCH.scale(emuMCHscale);
+
+
+	triggerAnalyzer emudFull = ta_emud + ta_emudH;
+	triggerAnalyzer emumcFull = ta_emuMC + ta_emuMCH;
 	TString emustring=makeFullOutput(emudFull, emumcFull, "emu_Full", "emu Full", 0.0);
-        TString eestring=makeFullOutput(ta_eed,ta_eeMC,"ee_Full","ee Full",0.0);
-        TString mumustring=makeFullOutput(ta_mumud,ta_mumuMC,"mumu_Full","mumu_Full",0.0);
+
+
+
+        double mumutotal=ta_mumud.getGlobalDen() + ta_mumudH.getGlobalDen();
+        double mumuMCtotal=ta_mumuMC.getGlobalDen() + ta_mumuMCH.getGlobalDen();
+
+        double mumuscale=eetotal/ta_mumud.getGlobalDen() * lumi/lumitotal;
+        ta_mumud.scale(mumuscale);
+        double mumuMCscale=mumuMCtotal/ta_mumuMC.getGlobalDen() * lumi/lumitotal;
+        ta_mumuMC.scale(mumuMCscale);
+        double mumuHscale=mumutotal/ta_mumudH.getGlobalDen() * lumiH/lumitotal;
+        ta_mumudH.scale(mumuHscale);
+        double mumuMCHscale=mumuMCtotal/ta_mumuMCH.getGlobalDen() * lumiH/lumitotal;
+        ta_mumuMCH.scale(mumuMCHscale);
+
+
+        triggerAnalyzer mumudFull = ta_mumud + ta_mumudH;
+        triggerAnalyzer mumumcFull = ta_mumuMC + ta_mumuMCH;
+
+        TString mumustring=makeFullOutput(mumudFull,mumumcFull,"mumu_Full","mumu_Full",0.0);
+
 
 	std::cout << "\n\nweighted output summary: " << std::endl;
 
