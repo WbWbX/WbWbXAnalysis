@@ -260,8 +260,8 @@ void trigger_tightLeptons(){
         ta_mumudH.setDileptonTriggers(mumuTriggersRunH);
         ta_emudH.setDileptonTriggers(emuTriggersRunH);
  
-        ta_mumuMCH.setDileptonTriggers(mumuTriggersRunH);
-        ta_emuMCH.setDileptonTriggers(emuTriggersRunH);
+        //ta_mumuMCH.setDileptonTriggers(mumuTriggersRunH);
+        //ta_emuMCH.setDileptonTriggers(emuTriggersRunH);
 
         analyzeAll( ta_eedH,  ta_eeMCH,  ta_mumudH,  ta_mumuMCH, ta_emudH,ta_emuMCH,  "direct_comb","direct 19 fb^{-1}");
 
