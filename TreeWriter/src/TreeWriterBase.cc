@@ -1319,7 +1319,11 @@ void TreeWriterBase::setTriggers(){
         triggers_.push_back("HLT_PFMET300_v");//40
         triggers_.push_back("HLT_PFMET110_PFMHT110_IDTight_v");//41
         triggers_.push_back("HLT_PFMET170_HBHECleaned_v");//42
-       
+      
+
+        //Dilepton DZ Triggers, 2016 RunH
+        triggers_.push_back("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");     
+        triggers_.push_back("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v*");
 
 	//triggers_.push_back("");
 
