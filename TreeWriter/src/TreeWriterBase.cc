@@ -327,6 +327,19 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                 else if (partonShower_ == "herwigpp") ps= ztop::topDecaySelector::ps_herwigpp;
                 else  throw std::logic_error("TreeWriterBase::analyze: Wrong partonShower set in Config.");      
                 topDecay->setPartonShower(ps);
+
+                if(partonShower_== "herwigpp") {
+                        #ifndef CMSSW_LEQ_5
+                        for(size_t i=0;i<genParticles->size();i++){
+                                      if ((genParticles->at(i).isPromptFinalState() || genParticles->at(i).isDirectPromptTauDecayProductFinalState()) && (std::abs(genParticles->at(i).pdgId()) == 11 ||std::abs(genParticles->at(i).pdgId()) == 13 ) ) {
+                                     ztop::NTGenParticle temp=makeNTGen(&genParticles->at(i));
+                                     temp.setGenId(genidit++);
+                                     ntleps1<<temp;
+                             }
+                        }
+                        #endif
+                }
+                else {
 		if(debugmode) std::cout << "Filling tops" << std::endl;
                 topDecay->process();
                 tops = topDecay->getMETops();
@@ -461,6 +474,8 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 				}
 			}
 		}
+
+                }
 
 		/////further lep decay to stat 1 leps; the above can be stat 1, too
 		if(debugmode) std::cout << "filling genMet" << std::endl;
