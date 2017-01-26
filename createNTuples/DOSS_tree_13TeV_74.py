@@ -96,7 +96,8 @@ pfpostfix = "PFlow"
 
 # All Options are saved as dicts and have to be added in the definitionsOptions as empty dicts
 opt.globalOptions = {'runOnAod':options.runOnAOD,
-                 'signal':isSignal}
+                 'signal':isSignal,
+                 'isMC':runOnMC}
 opt.primaryVertexOptions = {'inputCollectionAod':'offlinePrimaryVertices',  # Input Collection for AOD
                  'inputCollectionMiniAod':'offlineSlimmedPrimaryVertices', # Input Collection for MiniAOD
                  'outputCollection':''}       # The Collection which is Produced, is set in the apropriate cff File
@@ -157,14 +158,6 @@ process.MessageLogger.cerr.FwkReport.reportEvery = reportEvery
 
 
 ####################################################################
-### define output (agrohsje: check why needed) 
-
-if runOnAOD:
-    process.out = cms.OutputModule("PoolOutputModule", 
-                                   outputCommands =  cms.untracked.vstring(), 
-                                   fileName = cms.untracked.string(outputFile+'_PatTuple'))
-
-####################################################################
 ### Geometry and Detector Conditions  
 
 
@@ -178,9 +171,9 @@ if globalTag != '':
 else:
     print "Determine global tag automatically"
     if options.runOnMC:
-        process.GlobalTag.globaltag = cms.string('80X_mcRun2_asymptotic_2016_miniAODv2_v1')
+        process.GlobalTag.globaltag = cms.string('80X_mcRun2_asymptotic_2016_TrancheIV_v7')
     else:
-        process.GlobalTag.globaltag = cms.string('80X_dataRun2_Prompt_ICHEP16JEC_v0')
+        process.GlobalTag.globaltag = cms.string('80X_dataRun2_2016SeptRepro_v6')
         
 print "Using global tag: ", process.GlobalTag.globaltag
 
@@ -240,13 +233,13 @@ process.scaleDown = cms.EDProducer("EventWeightMCSystematic",
 process.hDampUp = cms.EDProducer("EventWeightMCSystematic",
                                  genEventInfoTag=cms.InputTag("generator"),
                                  lheEventInfoTag=cms.InputTag("externalLHEProducer"),
-                                 weightID=cms.string("5014"),
+                                 weightID=cms.string("5019"),
                                  printLHE=cms.bool(False)
                                  )
 process.hDampDown = cms.EDProducer("EventWeightMCSystematic",
                                    genEventInfoTag=cms.InputTag("generator"),
                                    lheEventInfoTag=cms.InputTag("externalLHEProducer"),
-                                   weightID=cms.string("5027"),
+                                   weightID=cms.string("5010"),
                                    printLHE=cms.bool(False)
                                    )
 
@@ -358,28 +351,42 @@ else :
 ####################################################################
 ## Prefilter sequence
 
+if runOnMC :
+    filterProcess='PAT'
+else : 
+    filterProcess='RECO'
+
+from TopAnalysis.ZTopUtils.NoiseFilter_cfi import noiseFilter
+process.cscFilter=noiseFilter.clone(src = cms.InputTag('TriggerResults','',filterProcess),flag=cms.string("Flag_globalTightHalo2016Filter"))
+process.vertexFilter=noiseFilter.clone(src = cms.InputTag('TriggerResults','',filterProcess),flag=cms.string("Flag_goodVertices"))
+process.badSCFilter=noiseFilter.clone(src=cms.InputTag('TriggerResults','',filterProcess),flag=cms.string("Flag_eeBadScFilter"))
+process.HBHENoiseFilter=noiseFilter.clone(src=cms.InputTag('TriggerResults','',filterProcess),flag=cms.string("Flag_HBHENoiseFilter"))
+process.HBHENoiseIsoFilter=noiseFilter.clone(src=cms.InputTag('TriggerResults','',filterProcess),flag=cms.string("Flag_HBHENoiseIsoFilter"))
+process.ecalDeadCellFilter=noiseFilter.clone(src=cms.InputTag('TriggerResults','',filterProcess),flag=cms.string("Flag_EcalDeadCellTriggerPrimitiveFilter"))
+
+process.load('RecoMET.METFilters.BadChargedCandidateFilter_cfi')
+process.BadChargedCandidateFilter.muons = cms.InputTag("slimmedMuons")
+process.BadChargedCandidateFilter.PFCandidates = cms.InputTag("packedPFCandidates")
+
+process.load('RecoMET.METFilters.BadPFMuonFilter_cfi')
+process.BadPFMuonFilter.muons = cms.InputTag("slimmedMuons")
+process.BadPFMuonFilter.PFCandidates = cms.InputTag("packedPFCandidates")
+
+
 
 if runOnMC :
-     process.prefilterSequence = cms.Sequence()
+     process.prefilterSequence = cms.Sequence(
+         process.HBHENoiseFilter*
+         process.HBHENoiseIsoFilter*
+         process.cscFilter*
+         process.vertexFilter*
+         process.ecalDeadCellFilter*
+         process.BadChargedCandidateFilter*
+         process.BadPFMuonFilter
+     )
 
 
-elif not runOnAOD:
-     from TopAnalysis.ZTopUtils.NoiseFilter_cfi import noiseFilter
-     process.cscFilter=noiseFilter.clone(src = cms.InputTag('TriggerResults','','RECO'),flag=cms.string("Flag_globalTightHalo2016Filter"))
-     process.vertexFilter=noiseFilter.clone(src = cms.InputTag('TriggerResults','','RECO'),flag=cms.string("Flag_goodVertices"))
-     process.badSCFilter=noiseFilter.clone(src=cms.InputTag('TriggerResults','','RECO'),flag=cms.string("Flag_eeBadScFilter"))
-     process.HBHENoiseFilter=noiseFilter.clone(src=cms.InputTag('TriggerResults','','RECO'),flag=cms.string("Flag_HBHENoiseFilter"))
-     process.HBHENoiseIsoFilter=noiseFilter.clone(src=cms.InputTag('TriggerResults','','RECO'),flag=cms.string("Flag_HBHENoiseIsoFilter"))
-     process.ecalDeadCellFilter=noiseFilter.clone(src=cms.InputTag('TriggerResults','','RECO'),flag=cms.string("Flag_EcalDeadCellTriggerPrimitiveFilter"))
-
-     process.load('RecoMET.METFilters.BadChargedCandidateFilter_cfi')
-     process.BadChargedCandidateFilter.muons = cms.InputTag("slimmedMuons")
-     process.BadChargedCandidateFilter.PFCandidates = cms.InputTag("packedPFCandidates")
-
-     process.load('RecoMET.METFilters.BadPFMuonFilter_cfi')
-     process.BadPFMuonFilter.muons = cms.InputTag("slimmedMuons")
-     process.BadPFMuonFilter.PFCandidates = cms.InputTag("packedPFCandidates")
-
+else:
      process.prefilterSequence=cms.Sequence(
          process.HBHENoiseFilter* 
          process.HBHENoiseIsoFilter*    
@@ -391,50 +398,10 @@ elif not runOnAOD:
          process.BadPFMuonFilter
      )
 
-
-
-else:
-    ## HCAL noise filter
-    process.load('CommonTools/RecoAlgos/HBHENoiseFilter_cfi')
-    process.HBHENoiseFilter.minIsolatedNoiseSumE = cms.double(999999.)
-    process.HBHENoiseFilter.minNumIsolatedNoiseChannels = cms.int32(999999)
-    process.HBHENoiseFilter.minIsolatedNoiseSumEt = cms.double(999999.)
-    ## Beam scraping filter 
-    process.scrapingFilter = cms.EDFilter("FilterOutScraping",
-                                          applyfilter = cms.untracked.bool(True),
-                                          debugOn = cms.untracked.bool(False),
-                                          numtrack = cms.untracked.uint32(10),
-                                          thresh = cms.untracked.double(0.25)
-                                          )
-    ## ECAL laser correction filter 
-    process.load("RecoMET.METFilters.ecalLaserCorrFilter_cfi")
-    
-    
-    process.prefilterSequence = cms.Sequence(
-        process.HBHENoiseFilter *
-        process.scrapingFilter *
-        process.ecalLaserCorrFilter
-        )
-
-
 ####################################################################
 ## Primary vertex filtering
 process.load('TopAnalysis.Configuration.objectDefinitions13Tev.primaryVertex_cff')
 
-
-#################################################################### 
-## Trigger information  
-
-
-if runOnAOD:    
-    from PhysicsTools.PatAlgos.tools.trigTools import * 
-    switchOnTrigger( process ) 
-    process.patTrigger.onlyStandAlone = False
-    process.triggerSequence = cms.Sequence(process.patTrigger*
-                                           process.patTriggerEvent)
-else:
-    process.triggerSequence = cms.Sequence()
-    
     
 ####################################################################
 ## Full configuration for PF2PAT 
@@ -445,58 +412,17 @@ if runOnMC:
 else:
     jetCorr = ('AK4PFchs', ['L1FastJet','L2Relative','L3Absolute', 'L2L3Residual'])
 
-#process.userPatSequence = cms.Sequence() ;
 
-## Create and define reco objects 
-if runOnAOD:
-    muonTag = 'patMuons' + pfpostfix  
-    metTag = 'patMETs' + pfpostfix  
-    
-    ## Output module for edm files (needed for PAT sequence, even if not used in EndPath) 
-    from Configuration.EventContent.EventContent_cff import FEVTEventContent
-    process.out = cms.OutputModule("PoolOutputModule",
-                                   FEVTEventContent,
-                                   dataset = cms.untracked.PSet(dataTier = cms.untracked.string('RECO')),
-                                   fileName = cms.untracked.string("eh.root"),
-                                   )
-    # add particle flow
-    process.load("PhysicsTools.PatAlgos.patSequences_cff")
-    from PhysicsTools.PatAlgos.tools.pfTools import usePF2PAT
-    usePF2PAT(process, runPF2PAT=True, jetAlgo='AK4', runOnMC=runOnMC, postfix=pfpostfix, 
-              jetCorrections=jetCorr, pvCollection=cms.InputTag('offlinePrimaryVertices'),typeIMetCorrections=True) 
-
-    getattr(process, 'pfPileUp'+pfpostfix).checkClosestZVertex = False
-    
-    # switch off all top projections
-    getattr(process,'pfNoMuon'+pfpostfix).enable = False
-    getattr(process,'pfNoElectron'+pfpostfix).enable = False
-    getattr(process,'pfNoJet'+pfpostfix).enable = False
-    getattr(process,'pfNoTau'+pfpostfix).enable = False
-    # agrohsje don't require isolation on cmsRun level !!!
-    # tarndt especially don't require it in the default pf2pat process
-    #        PFBRECO is subset of pf2pat processes 
-    getattr(process,'pfIsolatedElectronsPFBRECO'+pfpostfix).cut=''
-    getattr(process,'pfElectronsFromVertexPFBRECO'+pfpostfix).d0Cut = cms.double(999999.)
-    getattr(process,'pfElectronsFromVertexPFBRECO'+pfpostfix).dzCut = cms.double(999999.) 
-    getattr(process,'pfIsolatedMuonsPFBRECO'+pfpostfix).cut = ''
-    getattr(process,'pfMuonsFromVertexPFBRECO'+pfpostfix).d0Cut = cms.double(999999.)
-    getattr(process,'pfMuonsFromVertexPFBRECO'+pfpostfix).dzCut = cms.double(999999.)
-
-
-else :
-    #default values for MiniAODs 
-    muonTag = 'slimmedMuons' 
-    metTag = 'slimmedMETs'
-
-    #redo jets to adjust b-tagging/JEC info  
-    from RecoJets.JetProducers.ak4PFJets_cfi import ak4PFJets
-    from RecoJets.JetProducers.ak4GenJets_cfi import ak4GenJets
-    process.pfCHS = cms.EDFilter("CandPtrSelector", 
-                                 src = cms.InputTag("packedPFCandidates"), 
-                                 cut = cms.string("fromPV"))
-    process.ak4PFJetsCHS = ak4PFJets.clone(src = 'pfCHS', doAreaFastjet = True)
-    
-    
+#default values for MiniAODs 
+muonTag = 'slimmedMuons' 
+metTag = 'slimmedMETs'
+#redo jets to adjust b-tagging/JEC info  
+from RecoJets.JetProducers.ak4PFJets_cfi import ak4PFJets
+from RecoJets.JetProducers.ak4GenJets_cfi import ak4GenJets
+process.pfCHS = cms.EDFilter("CandPtrSelector", 
+                             src = cms.InputTag("packedPFCandidates"), 
+                             cut = cms.string("fromPV"))
+process.ak4PFJetsCHS = ak4PFJets.clone(src = 'pfCHS', doAreaFastjet = True)
 
 ###########################################################################
 # Electron IDs are calculated in a function
@@ -513,20 +439,12 @@ electron.electron(process)
 bTagDiscriminators = ['pfCombinedInclusiveSecondaryVertexV2BJetTags'
                       ]
 ## Jets, tracks, and vertices 
-if runOnAOD:
-    jetSource = 'pfJets'+pfpostfix
-    pfCandidates = 'particleFlow'
-    pvSource = 'offlinePrimaryVertices'
-    svSource = cms.InputTag('inclusiveCandidateSecondaryVertices')
-    electronSource=cms.InputTag(opt.electronOptions['inputCollectionAod'])
-    muonSource=cms.InputTag(opt.muonOptions['inputCollectionAod'])
-else:
-    jetSource = 'ak4PFJetsCHS' 
-    pfCandidates = 'packedPFCandidates'
-    pvSource = opt.primaryVertexOptions['outputCollection']
-    svSource = cms.InputTag('slimmedSecondaryVertices')
-    electronSource=cms.InputTag(opt.electronOptions['inputCollectionMiniAod'])
-    muonSource=cms.InputTag(opt.muonOptions['inputCollectionMiniAod'])
+jetSource = 'ak4PFJetsCHS' 
+pfCandidates = 'packedPFCandidates'
+pvSource = opt.primaryVertexOptions['outputCollection']
+svSource = cms.InputTag('slimmedSecondaryVertices')
+electronSource=cms.InputTag(opt.electronOptions['inputCollectionMiniAod'])
+muonSource=cms.InputTag(opt.muonOptions['inputCollectionMiniAod'])
     
 ####################################################################
 ## Lepton information and dilepton filter at reco level 
@@ -592,17 +510,10 @@ else:
 #        setattr( getattr(process,m), 'addJetFlavourInfo', cms.bool(True) )
 
 
-
-
-
-
 ####################################################################
 ## Jet information 
 
-if options.runOnAOD:
-    jetColl= 'patJets'+pfpostfix
-else :
-    jetColl= "slimmedJets"
+jetColl= "slimmedJets"
 
 process.treeJets = selectedPatJets.clone( 
     src=jetColl,   #'patJets'+pfpostfix, 
@@ -695,12 +606,13 @@ process.PFTree   = cms.EDAnalyzer('TreeWriterTtZ',
 
 process.dump=cms.EDAnalyzer('EventContentAnalyzer')
 
-process.path = cms.Path( 
+process.path = cms.Path(
+   # process.regressionApplication* 
     process.preCutPUInfo*
     process.fsFilterSequence*
     process.postCutPUInfo*
 #    process.goodOfflinePrimaryVertices *   
-    process.prefilterSequence * #for data only 
+    process.prefilterSequence * 
     #    process.dump *
     process.kinLeptonFilterSequence * # agrohsje 
     process.PFTree
