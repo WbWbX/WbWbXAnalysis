@@ -221,7 +221,7 @@ ztop::NTElectron TreeWriterTtZ::makeNTElectron(const pat::Electron & electron){
 	tempelec.setId(electron.electronIDs(),keepelecidOnly_);
 	tempelec.setIso(Iso);                        //
 	tempelec.setMHits(mhits);
-
+        tempelec.setMember(0,electron.userFloat("electronIsolation"));
 
 
 	if(includereco_ || includetrigger_){
@@ -272,17 +272,20 @@ ztop::NTJet TreeWriterTtZ::makeNTJet(const pat::Jet & jet){
 	if(jet.genJet()){
 		tempjet.setGenP4(jet.genJet()->p4());
 		tempjet.setGenPartonFlavour(jet.partonFlavour());
+                tempjet.setMember(1,jet.hadronFlavour());
 
 	}
 	else{
 		tempjet.setGenP4(p4zero);
 		tempjet.setGenPartonFlavour(0);
+                tempjet.setMember(1,0);
 	}
 	tempjet.setBtag(jet.bDiscriminator(btagalgo_));    //
 	double emEnergyfraction=0;
 	if(jet.isPFJet()) emEnergyfraction=jet.chargedEmEnergyFraction()+jet.neutralEmEnergyFraction();
 	else emEnergyfraction=jet.emEnergyFraction();
 	tempjet.setEmEnergyFraction(emEnergyfraction);
+        tempjet.setMember(0,jet.jetArea());
 
 	return tempjet;
 }
