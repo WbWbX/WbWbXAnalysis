@@ -37,8 +37,8 @@ public:
 
 	void switchOff(bool switchoff){switchedoff_=switchoff;}
 
-	bool isSystematicsUp(){return (syst_ <100 && syst_>0);}
-	bool isSystematicsDown(){return ( syst_<0);}
+	bool isSystematicsUp(){return (syst_ == sys_up);}
+	bool isSystematicsDown(){return ( syst_ == sys_down);}
 
 	double getScalefactor(double xval,double yval=0)const;
 
