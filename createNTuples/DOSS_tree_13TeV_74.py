@@ -607,7 +607,7 @@ process.PFTree   = cms.EDAnalyzer('TreeWriterTtZ',
 process.dump=cms.EDAnalyzer('EventContentAnalyzer')
 
 process.path = cms.Path(
-   # process.regressionApplication* 
+    process.regressionApplication* 
     process.preCutPUInfo*
     process.fsFilterSequence*
     process.postCutPUInfo*
