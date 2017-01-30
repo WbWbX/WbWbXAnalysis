@@ -17,7 +17,7 @@ namespace ztop{
 bool WDecaySelector::debug=false;
 
 //C++ initialize all members here that need an initial value. keep ordering
-WDecaySelector::WDecaySelector(): partonshower_(ps_pythia6),incollectionp_(0)
+WDecaySelector::WDecaySelector(): DecaySelector()
 {
     // I usually put this kind of debug ouput on top of each function call, it makes debugging
     // much easier. Also in case it is done long after the class was developed
@@ -51,11 +51,14 @@ void  WDecaySelector::process(){
     mews_.clear();
     meneutrinos_.clear();
 
+    melepton_mothers_.clear();
+    meneutrino_mothers_.clear();
+
     finalstateleptons_.clear();
     finalstateleptonsfromw_.clear();
     finalstateneutrinos_.clear();
 
-    if(!incollectionp_){// pointer 0 -> real check, no example! ;)
+    if(!incollectionp_){//
         throw std::logic_error("WDecaySelector::process: input collection not defined");
     }
 
@@ -78,6 +81,8 @@ void  WDecaySelector::process(){
             meneutrinos_.push_back(p);
         }
     }
+
+
 }
 
 
@@ -94,7 +99,8 @@ void WDecaySelector::copyFrom(const WDecaySelector& rhs){
     mews_=rhs.mews_;
     finalstateneutrinos_=rhs.finalstateneutrinos_;
     meneutrinos_=rhs.meneutrinos_;
-
+    meneutrino_mothers_=rhs.meneutrino_mothers_;
+    melepton_mothers_=rhs.melepton_mothers_;
 }
 
 //Function to find last particle in decay chain

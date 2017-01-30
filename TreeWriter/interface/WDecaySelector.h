@@ -10,7 +10,7 @@
 
 
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
-
+#include "DecaySelector.h"
 
 /*
  * I added some C++ programming comments, can be deleted afterwards
@@ -19,9 +19,8 @@
  */
 namespace ztop{
 
-class WDecaySelector {
+class WDecaySelector : public DecaySelector{
 public:
-    enum partonShowers{ps_pythia6,ps_pythia8,ps_herwig,ps_herwigpp};
 
     //C++: constructor. initialize private members!
     WDecaySelector();
@@ -40,12 +39,6 @@ public:
     //C++: nice for debug output
     static bool debug;
 
-    // This is the input collection (in TreeWriterBase this would be "allgen")
-    //C++: this function is just inlined, should be done for simple setter and getter
-    void setGenCollection( std::vector<const reco::GenParticle *>* in){
-        incollectionp_=in;}
-
-    void setPartonShower(partonShowers ps){partonshower_=ps;}
 
     // I would suggest to put this in one function and produce the collections here
     // afterwards, they are just asked for with getBlabla()
@@ -65,17 +58,14 @@ public:
     //returns collection of the Neutrinos directly form the Ws
     const std::vector<const reco::GenParticle *>& getMENeutrinos()const{return meneutrinos_;}
 
+
+
     //returns collection of all Status 1 Neutrinos
     const std::vector<const reco::GenParticle *>& getFinalStateNeutrinos()const{return finalstateneutrinos_;}
 
 
 private:
 
-    //configuration members
-    partonShowers partonshower_;
-
-    //input collection
-    std::vector<const reco::GenParticle *>* incollectionp_;
 
 
     //Function to follow up decay chains
@@ -87,12 +77,12 @@ private:
     std::vector<const reco::GenParticle *> finalstateleptons_;
     std::vector<const reco::GenParticle *> finalstateleptonsfromw_;
     //leps directly from w on ME level
-    std::vector<const reco::GenParticle *> meleptons_;
+    std::vector<const reco::GenParticle *> meleptons_, melepton_mothers_;
     std::vector<const reco::GenParticle *> mews_;
 
     //Neutrinos
     std::vector<const reco::GenParticle *> finalstateneutrinos_;
-    std::vector<const reco::GenParticle *> meneutrinos_;
+    std::vector<const reco::GenParticle *> meneutrinos_, meneutrino_mothers_;
 
     // function used by operator= and copy-constructor.
     // needs to be adapted to the members

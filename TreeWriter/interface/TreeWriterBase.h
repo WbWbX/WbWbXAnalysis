@@ -9,7 +9,7 @@
 
  Implementation:
      [Notes on implementation]
-*/
+ */
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Fri May 11 14:22:43 CEST 2012
@@ -116,6 +116,7 @@
 #include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 #include "HLTrigger/HLTcore/interface/HLTEventAnalyzerAOD.h"
 #include "../interface/topDecaySelector.h"
+#include "../interface/WDecaySelector.h"
 
 //
 // class declaration
@@ -123,143 +124,149 @@
 
 class TreeWriterBase : public AnalyzerTemplate {
 public:
-  // explicit TreeWriterBase(){};
-  explicit TreeWriterBase(const edm::ParameterSet&);
-      ~TreeWriterBase();
+    // explicit TreeWriterBase(){};
+    explicit TreeWriterBase(const edm::ParameterSet&);
+    ~TreeWriterBase();
 
-      static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
-
-
-  virtual ztop::NTMuon makeNTMuon(const pat::Muon &)=0;
-  virtual ztop::NTElectron makeNTElectron(const pat::Electron &)=0;
-  virtual ztop::NTJet makeNTJet(const pat::Jet &)=0;
+    static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
 
-  //  protected: //nasty
- 
-       virtual void beginJob() ;
-       virtual void analyze(const edm::Event&, const edm::EventSetup&);
-       virtual void endJob() ;
-
-       virtual void beginRun(edm::Run const&, edm::EventSetup const&);
-       virtual void endRun(edm::Run const&, edm::EventSetup const&);
-       virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
-       virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
+    virtual ztop::NTMuon makeNTMuon(const pat::Muon &)=0;
+    virtual ztop::NTElectron makeNTElectron(const pat::Electron &)=0;
+    virtual ztop::NTJet makeNTJet(const pat::Jet &)=0;
 
 
-       // void beginJob() ;
-       // void analyze(const edm::Event&, const edm::EventSetup&);
-       // void endJob() ;
+    //  protected: //nasty
 
-       // void beginRun(edm::Run const&, edm::EventSetup const&);
-       // void endRun(edm::Run const&, edm::EventSetup const&);
-       // void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
-       // void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
+    virtual void beginJob() ;
+    virtual void analyze(const edm::Event&, const edm::EventSetup&);
+    virtual void endJob() ;
 
-      // ----------member data ---------------------------
-
-  bool checkJetID(const pat::Jet &);
-
-  std::vector<bool> checkTriggers(const edm::Event&);
-  std::vector<std::string> triggers_;
-  std::vector<bool> triggerBools_;
-  std::vector<unsigned int> triggerPrescales_;
-  std::map<std::string,unsigned int> alltriggerswithprescales_;
-  std::vector<std::string> firedtriggers_;//not used, but left for comparisons 
-  std::string triggerProcess_;
-
-  void setTriggers();
-  void runTriggerAOD(const edm::Event&);
-  void runTriggerMiniAOD(const edm::Event&);
-    
-  ztop::NTGenParticle makeNTGen(const reco::GenParticle *, const std::map<const reco::GenParticle*, int>&);
-  ztop::NTGenParticle  makeNTGen(const reco::GenParticle * p);
-  ztop::NTGenJet  makeNTGenJet(const reco::GenJet * p);
-  bool isInGenCollection(const reco::GenParticle * , const std::vector<const reco::GenParticle * > &);
-  bool isInGenCollection(const reco::GenJet * , const std::vector<const reco::GenJet * > &);
-  template<typename t,typename u>
-  int findGenMatchIdx(t * , std::vector<u> & , double dR=0.4);
-
-  std::vector<std::string> triggerObjects_;
-  std::vector<std::vector<ztop::NTTriggerObject> > trigObjVec;
-  //HLTConfigProvider hltConfig_;
-  
-  std::vector<std::string> weightnames_;
-  std::vector<ztop::NTWeight> weights_;
-
-  bool pfElecCands_;
-  bool pfMuonCands_;
-  bool rho2011_;
-  bool usegsf_;
-
-  edm::InputTag muons_, recomuons_, pfelecs_, gsfelecs_,recoelecs_, jets_, met_, vertices_, trigresults_, puinfo_, recotracks_, recosuclus_,rhojetsiso_,rhojetsisonopu_,rhoiso_,pdfweights_, genparticles_, genjets_,mvamet_,pattriggerevent_;
-  edm::InputTag  t1met_,t0t1txymet_,t0t1met_,t1txymet_;
-
-  bool includereco_, includetrigger_, pfinput_,includepdfweights_,includegen_,susy_,jpsi_;
-  TTree * Ntuple;
-  std::vector<ztop::NTMuon> ntmuons;
-  std::vector<ztop::NTLepton> ntleptons;
-  std::vector<ztop::NTElectron> ntpfelectrons;
-  std::vector<ztop::NTElectron> ntgsfelectrons;
-  std::vector<ztop::NTJet> ntjets;
-  std::vector<ztop::NTTrack> nttracks;
-  std::vector<ztop::NTSuClu> ntsuclus;
-  ztop::NTMet ntmet;
-  ztop::NTMet ntmvamet,ntt1met,ntt0t1txymet,ntt0t1met,ntt1txymet;
-  ztop::NTEvent ntevent;
-  ULong64_t runno_,lumiblock_,eventno_;
-  #ifndef CMSSW_LEQ_5
-  ULong64_t skim_;
-  #endif 
-
-  ztop::NTTrigger nttrigger;
-  float genmet_f;
-
-  std::vector<ztop::NTVertex> goodvtx,jetvtx,dimuonvtx;
-
-  std::vector<ztop::NTGenParticle> nttops,ntws,ntzs,ntbs,ntradbs,ntbhadrons,ntnus,ntleps3,ntleps1,ntallnus,ntpart;
-  std::vector<ztop::NTGenJet> ntgenjets;
-  int channel_; // 11 for ee 13 for mumu 1113 for emu 151113 etc for via tau
+    virtual void beginRun(edm::Run const&, edm::EventSetup const&);
+    virtual void endRun(edm::Run const&, edm::EventSetup const&);
+    virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
+    virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
 
 
-  std::vector<float> vstopmass,vchimass;
+    // void beginJob() ;
+    // void analyze(const edm::Event&, const edm::EventSetup&);
+    // void endJob() ;
 
-  bool viaTau_;
+    // void beginRun(edm::Run const&, edm::EventSetup const&);
+    // void endRun(edm::Run const&, edm::EventSetup const&);
+    // void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
+    // void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
 
-  std::string treename_, btagalgo_;
+    // ----------member data ---------------------------
 
-  edm::Service<TFileService> fs;
+    bool checkJetID(const pat::Jet &);
+
+    std::vector<bool> checkTriggers(const edm::Event&);
+    std::vector<std::string> triggers_;
+    std::vector<bool> triggerBools_;
+    std::vector<unsigned int> triggerPrescales_;
+    std::map<std::string,unsigned int> alltriggerswithprescales_;
+    std::vector<std::string> firedtriggers_;//not used, but left for comparisons
+    std::string triggerProcess_;
+
+    void setTriggers();
+    void runTriggerAOD(const edm::Event&);
+    void runTriggerMiniAOD(const edm::Event&);
+
+    ztop::NTGenParticle makeNTGen(const reco::GenParticle *, const std::map<const reco::GenParticle*, int>&);
+    ztop::NTGenParticle  makeNTGen(const reco::GenParticle * p);
+    ztop::NTGenJet  makeNTGenJet(const reco::GenJet * p);
+    bool isInGenCollection(const reco::GenParticle * , const std::vector<const reco::GenParticle * > &);
+    bool isInGenCollection(const reco::GenJet * , const std::vector<const reco::GenJet * > &);
+    template<typename t,typename u>
+    int findGenMatchIdx(t * , std::vector<u> & , double dR=0.4);
+
+    std::vector<std::string> triggerObjects_;
+    std::vector<std::vector<ztop::NTTriggerObject> > trigObjVec;
+    //HLTConfigProvider hltConfig_;
+
+    std::vector<std::string> weightnames_;
+    std::vector<ztop::NTWeight> weights_;
+
+    bool pfElecCands_;
+    bool pfMuonCands_;
+    bool rho2011_;
+    bool usegsf_;
+
+    edm::InputTag muons_, recomuons_, pfelecs_, gsfelecs_,recoelecs_, jets_, met_, vertices_, trigresults_, puinfo_, recotracks_, recosuclus_,rhojetsiso_,rhojetsisonopu_,rhoiso_,pdfweights_, genparticles_, genjets_,mvamet_,pattriggerevent_;
+    edm::InputTag  t1met_,t0t1txymet_,t0t1met_,t1txymet_;
+
+    bool includereco_, includetrigger_, pfinput_,includepdfweights_,includegen_,susy_,jpsi_;
+    TTree * Ntuple;
+    std::vector<ztop::NTMuon> ntmuons;
+    std::vector<ztop::NTLepton> ntleptons;
+    std::vector<ztop::NTElectron> ntpfelectrons;
+    std::vector<ztop::NTElectron> ntgsfelectrons;
+    std::vector<ztop::NTJet> ntjets;
+    std::vector<ztop::NTTrack> nttracks;
+    std::vector<ztop::NTSuClu> ntsuclus;
+    ztop::NTMet ntmet;
+    ztop::NTMet ntmvamet,ntt1met,ntt0t1txymet,ntt0t1met,ntt1txymet;
+    ztop::NTEvent ntevent;
+    ULong64_t runno_,lumiblock_,eventno_;
+#ifndef CMSSW_LEQ_5
+    ULong64_t skim_;
+#endif
+
+    ztop::NTTrigger nttrigger;
+    float genmet_f;
+
+    std::vector<ztop::NTVertex> goodvtx,jetvtx,dimuonvtx;
+
+    ztop::WDecaySelector * wDecay_;
+    ztop::topDecaySelector * topDecay_;
+
+    std::vector<ztop::NTGenParticle> nttops,ntws,ntzs,ntbs,ntradbs,ntbhadrons,ntnus,ntleps3,ntleps1,ntallnus,ntpart;
+    std::vector<ztop::NTGenJet> ntgenjets;
+    int channel_; // 11 for ee 13 for mumu 1113 for emu 151113 etc for via tau
+
+
+    std::vector<float> vstopmass,vchimass;
+
+    bool viaTau_;
+
+    std::string treename_, btagalgo_;
+
+    edm::Service<TFileService> fs;
 
 
 
-  bool debugmode;
+    bool debugmode;
 
-  bool runonaod_;
-    
-  ///b-hardon stuff
+    bool runonaod_;
 
-  edm::InputTag bHadJetIdx_, antibHadJetIdx_;
-  edm::InputTag BHadrons_, AntiBHadrons_;
-  edm::InputTag BHadronFromTopB_, AntiBHadronFromTopB_;
-  edm::InputTag BHadronVsJet_, AntiBHadronVsJet_;
-  
-  edm::InputTag genBHadPlusMothers_, genBHadPlusMothersIndices_;
-  edm::InputTag genBHadIndex_, genBHadFlavour_, genBHadJetIndex_;
+    ///b-hardon stuff
 
-  bool useBHadrons_;
+    edm::InputTag bHadJetIdx_, antibHadJetIdx_;
+    edm::InputTag BHadrons_, AntiBHadrons_;
+    edm::InputTag BHadronFromTopB_, AntiBHadronFromTopB_;
+    edm::InputTag BHadronVsJet_, AntiBHadronVsJet_;
+
+    edm::InputTag genBHadPlusMothers_, genBHadPlusMothersIndices_;
+    edm::InputTag genBHadIndex_, genBHadFlavour_, genBHadJetIndex_;
+
+    bool useBHadrons_;
 
 
-  //some handles that also need to be used in virtual functions
+    //some handles that also need to be used in virtual functions
 
-  reco::VertexCollection vtxs;
-  math::XYZPoint beamSpotPosition;
+    reco::VertexCollection vtxs;
+    math::XYZPoint beamSpotPosition;
 
-	edm::Handle<reco::BeamSpot> bsHandle;
-  edm::Handle<std::vector<reco::Vertex> > vertices;
-  edm::Handle<reco::ConversionCollection> conversions;
+    edm::Handle<reco::BeamSpot> bsHandle;
+    edm::Handle<std::vector<reco::Vertex> > vertices;
+    edm::Handle<reco::ConversionCollection> conversions;
 
-  std::string keepelecidOnly_;
-  std::string partonShower_;
+    std::string keepelecidOnly_;
+    std::string partonShower_;
+
+    enum genModes{gm_top,gm_w} genMode_;
+
 };
 
 //

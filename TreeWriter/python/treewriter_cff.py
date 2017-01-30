@@ -31,7 +31,7 @@ PFTree   = cms.EDAnalyzer('TreeWriter',
                           includeGen = cms.bool(False),
                           genParticles = cms.InputTag('genParticles'),
                           genJets = cms.InputTag('ak5GenJets'),
-
+                          genMode = cms.InputTag('top'),
 
                           additionalWeights = cms.vstring()
                           )

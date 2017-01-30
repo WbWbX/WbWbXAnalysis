@@ -80,6 +80,12 @@ TreeWriterBase::TreeWriterBase(const edm::ParameterSet& iConfig)
     keepelecidOnly_            =iConfig.getParameter<std::string>               ("keepElecIdOnly");
 
     partonShower_              =iConfig.getParameter<std::string>               ("partonShower");
+    TString genmodestring      =iConfig.getParameter<std::string>               ("genMode");
+    if(genmodestring == "W")
+        genMode_ = gm_w;
+    else
+        genMode_ = gm_top;
+
 
     std::cout << "n\n################## Tree writer ########################"
             <<  "\n#" << treename_
@@ -197,6 +203,34 @@ TreeWriterBase::TreeWriterBase(const edm::ParameterSet& iConfig)
             consumeTemplate<double>(edm::InputTag(weightnames_.at(i)));
         }
     }
+
+
+
+    topDecay_ = new ztop::topDecaySelector();
+    wDecay_ = new ztop::WDecaySelector();
+
+
+    if(partonShower_ == "pythia6"){
+        topDecay_->setPartonShower(ztop::DecaySelector::ps_pythia6);
+        wDecay_->setPartonShower(ztop::DecaySelector::ps_pythia6);
+    }
+    else if (partonShower_ == "pythia8"){
+        topDecay_->setPartonShower(ztop::DecaySelector::ps_pythia8);
+        wDecay_->setPartonShower(ztop::DecaySelector::ps_pythia8);
+    }
+    else if (partonShower_ == "herwig"){
+        topDecay_->setPartonShower(ztop::DecaySelector::ps_herwig);
+        wDecay_->setPartonShower(ztop::DecaySelector::ps_herwig);
+    }
+    else if (partonShower_ == "herwigpp"){
+        topDecay_->setPartonShower(ztop::DecaySelector::ps_herwigpp);
+        wDecay_->setPartonShower(ztop::DecaySelector::ps_herwigpp);
+    }
+    else{
+        throw std::logic_error("TreeWriterBase::TreeWriterBase: parton shower not recognized");
+    }
+
+
 }
 
 
@@ -205,6 +239,9 @@ TreeWriterBase::~TreeWriterBase()
 
     // do anything here that needs to be done at desctruction time
     // (e.g. close files, deallocate resources etc.)
+
+    delete topDecay_;
+    delete wDecay_;
 
 }
 
@@ -286,7 +323,39 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
     std::map<const reco::GenParticle *  , size_t> smallIdMap; ////
 
-    if(!IsRealData && includegen_){ ///
+
+    if(!IsRealData && includegen_ && genMode_ == gm_w){
+
+        std::vector<const reco::GenParticle *> allgen;
+        int genidit=0;
+
+        for(size_t i=0;i<genParticles->size();i++){
+            allgen << &genParticles->at(i);
+        }
+        wDecay_->setGenCollection(&allgen);
+        wDecay_->process();
+
+        for(const auto& p: wDecay_->getMEWs()){
+            ztop::NTGenParticle temp=makeNTGen(p);
+            temp.setGenId(genidit++);
+            ntws << temp;
+        }
+        for(const auto& p: wDecay_->getMELeptons()){
+            ztop::NTGenParticle temp=makeNTGen(p);
+            temp.setGenId(genidit++);
+            ntleps3 << temp;
+        }
+        for(const auto& p: wDecay_->getMENeutrinos()){
+            ztop::NTGenParticle temp=makeNTGen(p);
+            temp.setGenId(genidit++);
+            ntnus << temp;
+        }
+        //mother-daughter relations neglected for now.
+
+
+
+    }//else kind of, but did not want to interfere too much here
+    if(!IsRealData && includegen_ && genMode_ == gm_top){ ///
 
 
 
@@ -318,18 +387,10 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             allgen << &genParticles->at(i);
         }
         std::vector<const reco::GenParticle *>* allgenForDec(&allgen);
-        ztop::topDecaySelector * topDecay = new topDecaySelector();
-        topDecay->setGenCollection(allgenForDec);
-        ztop::topDecaySelector::partonShowers ps;
-        if(partonShower_ == "pythia6")  ps = ztop::topDecaySelector::ps_pythia6;
-        else if (partonShower_ == "pythia8") ps = ztop::topDecaySelector::ps_pythia8;
-        else if (partonShower_ == "herwig")  ps = ztop::topDecaySelector::ps_herwig;
-        else if (partonShower_ == "herwigpp") ps= ztop::topDecaySelector::ps_herwigpp;
-        else  throw std::logic_error("TreeWriterBase::analyze: Wrong partonShower set in Config.");
-        topDecay->setPartonShower(ps);
 
-        if(partonShower_== "herwigpp") {
-#ifndef CMSSW_LEQ_5
+        topDecay_->setGenCollection(allgenForDec);
+
+        if(topDecay_->getPartonShower() == ztop::DecaySelector::ps_herwigpp) {
             for(size_t i=0;i<genParticles->size();i++){
                 if ((genParticles->at(i).isPromptFinalState() || genParticles->at(i).isDirectPromptTauDecayProductFinalState()) && (std::abs(genParticles->at(i).pdgId()) == 11 ||std::abs(genParticles->at(i).pdgId()) == 13 ) ) {
                     ztop::NTGenParticle temp=makeNTGen(&genParticles->at(i));
@@ -337,12 +398,11 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                     ntleps1<<temp;
                 }
             }
-#endif
         }
         else {
             if(debugmode) std::cout << "Filling tops" << std::endl;
-            topDecay->process();
-            tops = topDecay->getMETops();
+            topDecay_->process();
+            tops = topDecay_->getMETops();
             for(size_t i=0;i<tops.size();i++){
                 ztop::NTGenParticle temp=makeNTGen(tops.at(i));
                 temp.setGenId(genidit++);
@@ -350,8 +410,8 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                 gotTop=true;
             }
             bool gotWFromTop=false;
-            Ws = topDecay->getMEWs();
-            wmothers = topDecay->getMEWsMothers();
+            Ws = topDecay_->getMEWs();
+            wmothers = topDecay_->getMEWsMothers();
             for(size_t i=0;i<Ws.size();i++){
                 ztop::NTGenParticle temp=makeNTGen(Ws.at(i));
                 temp.setGenId(genidit++);
@@ -365,8 +425,8 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                 ntws << temp;
                 gotWFromTop=true;
             }
-            leps3 = topDecay->getMELeptons();
-            leps3mothers= topDecay->getMELeptonsMothers();
+            leps3 = topDecay_->getMELeptons();
+            leps3mothers= topDecay_->getMELeptonsMothers();
             for(size_t i=0;i<leps3.size();i++){
                 ztop::NTGenParticle temp=makeNTGen(leps3.at(i));
                 temp.setGenId(genidit++);
@@ -379,8 +439,8 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                 }
                 ntleps3 << temp;
             }
-            nus=topDecay->getMENeutrinos();
-            numothers=topDecay->getMENeutrinosMothers();
+            nus=topDecay_->getMENeutrinos();
+            numothers=topDecay_->getMENeutrinosMothers();
             for(size_t i=0;i<nus.size();i++){
                 ztop::NTGenParticle temp=makeNTGen(nus.at(i));
                 temp.setGenId(genidit++);
@@ -393,8 +453,8 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                 }
                 ntnus << temp;
             }
-            leps1=topDecay->getFinalStateLeptonsFromW();
-            leps1mothers=topDecay->getFinalStateLeptonsFromWMothers();
+            leps1=topDecay_->getFinalStateLeptonsFromW();
+            leps1mothers=topDecay_->getFinalStateLeptonsFromWMothers();
             for(size_t i=0;i<leps1.size();i++){
                 ztop::NTGenParticle temp=makeNTGen(leps1.at(i));
                 temp.setGenId(genidit++);
@@ -407,7 +467,7 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                 }
                 ntleps1 << temp;
             }
-            allnus=topDecay->getFinalStateNeutrinos();
+            allnus=topDecay_->getFinalStateNeutrinos();
             for(size_t i=0;i<allnus.size();i++){
                 ztop::NTGenParticle temp=makeNTGen(allnus.at(i));
                 temp.setGenId(genidit++);
@@ -417,8 +477,8 @@ TreeWriterBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                 genmet_f+=allnus.at(i)->pt();
             }
             //FIXME:NTBRads is no longer implemented, needs to be added to topDecayselector
-            bs=topDecay->getMEBs();
-            bmothers = topDecay->getMEBsMothers();
+            bs=topDecay_->getMEBs();
+            bmothers = topDecay_->getMEBsMothers();
             for(size_t i=0;i<bs.size();i++){
                 ztop::NTGenParticle temp=makeNTGen(bs.at(i));
                 temp.setGenId(genidit++);

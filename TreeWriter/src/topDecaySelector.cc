@@ -17,7 +17,7 @@ namespace ztop{
 bool topDecaySelector::debug=false;
 
 //C++ initialize all members here that need an initial value. keep ordering
-topDecaySelector::topDecaySelector(): partonshower_(ps_pythia6),incollectionp_(0),statTop_(3)
+topDecaySelector::topDecaySelector():DecaySelector(), statTop_(3)
 {
 	// I usually put this kind of debug ouput on top of each function call, it makes debugging
 	// much easier. Also in case it is done long after the class was developed
