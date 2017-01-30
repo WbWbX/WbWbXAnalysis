@@ -97,14 +97,7 @@ inline double scalefactors::getScalefactor(double xval,double yval)const{
 		if(content<0.001){
 			return 1;
 		}
-		//	if(syst_>99)
 		return content;
-		/*	else if(syst_<0) //down
-			return content-h->GetBinError(bin);
-		else if(syst_>0) //up
-			return content+h->GetBinError(bin);
-		else
-			return 0; //never reached */
 	}
 	else{ //global sf
 		if(syst_==sys_nominal)

@@ -40,7 +40,7 @@ PFTree   = cms.EDAnalyzer('TreeWriterTtZ',
                           includeGen = cms.bool(False),
                           genParticles = cms.InputTag('genParticles'),
                           genJets = cms.InputTag('ak5GenJetsNoNu'),
-                          genMode = cms.InputTag('top'),
+                          genMode = cms.string('top'),
 
                           debugmode = cms.bool(False),
 

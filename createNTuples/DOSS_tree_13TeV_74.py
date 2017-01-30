@@ -572,7 +572,7 @@ process.PFTree   = cms.EDAnalyzer('TreeWriterTtZ',
                                   # agrohsje fix later 
                                   genJets = cms.InputTag("ak4GenJetsNoNuNoLepton"), 
                                   #cms.InputTag(""), # in miniaod:slimmedGenJets, in aod:ak4GenJets
-                                  
+                                  genMode = cms.string("top"), 
 
                                   ##improved jet-hadron matching block. Not implemented in the configuration above!
                                   useBHadrons = cms.bool(False),
