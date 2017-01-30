@@ -21,7 +21,8 @@ wNTGenParticleInterface::wNTGenParticleInterface(tTreeHandler * t,
 		const TString& charge_branch,
 		const TString& status_branch,
 		const TString& motherpdgid_branch,
-		const TString& grandmotherpdgid_branch) : wNTBaseInterface(t,enable),missingstatusbranch_(false){
+		const TString& grandmotherpdgid_branch,
+		const TString& isprompthard_branch) : wNTBaseInterface(t,enable),missingstatusbranch_(false){
 
 	const size_t bufsize=128;
 	addBranch<int>(size_branch);              //0
@@ -38,7 +39,7 @@ wNTGenParticleInterface::wNTGenParticleInterface(tTreeHandler * t,
 	tBranchHandler<int*>::allow_missing=false;
 	addBranch<int*>(motherpdgid_branch,bufsize); //8
 	addBranch<int*>(grandmotherpdgid_branch,bufsize); //9
-
+	addBranch<int*>(isprompthard_branch,bufsize); //10
 
 }
 
@@ -68,7 +69,9 @@ std::vector<NTGenParticle> * wNTGenParticleInterface::content(){
 				part.setStatus(3);
 			part.setMotherPdgID(  (* getBranchContent<int*>(8))[i] );
 			part.setGrandMotherPdgID(  (* getBranchContent<int*>(9))[i] );
-
+			bool promptandhard= (* getBranchContent<int*>(10))[i];
+			if(promptandhard)
+				part.setStatus(3);
 		}
 	}
 	return &content_;

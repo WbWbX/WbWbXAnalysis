@@ -27,7 +27,8 @@ public:
 			const TString& charge_branch,
 			const TString& status_branch,
 			const TString& motherpdgid_branch,
-			const TString& grandmotherpdgid_branch);
+			const TString& grandmotherpdgid_branch,
+			const TString& isprompthard_branch);
 	~wNTGenParticleInterface();
 
 	std::vector<NTGenParticle> * content();
