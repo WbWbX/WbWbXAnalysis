@@ -6,6 +6,7 @@
  */
 
 #include "../interface/variateHisto1D.h"
+#include "TMath.h"
 
 namespace ztop{
 
@@ -36,6 +37,15 @@ void variateHisto1D::import(const histo1D& cont){
 	errsup_.resize(cont.getBins().size());
 	errsdown_.resize(cont.getBins().size());
 	bins_=cont.getBins();
+
+        priors_.clear(); nsigma_.clear();
+        variations_=cont.getSystNameList();
+
+        priors_.resize(variations_.size());
+        nsigma_.resize(variations_.size());
+
+        cont_ = cont;
+
 	std::vector<TString> variations=cont.getSystNameList();
 
 	for(size_t sys=0;sys<variations.size();sys++){
@@ -52,6 +62,9 @@ void variateHisto1D::import(const histo1D& cont){
 				std::cout << "variateContainer1D::import added: " << sysdown << " " << content << " " << sysup << " "<< sysname << std::endl;
 
 		}
+
+                priors_.at(sys) = Prior::Gauss;
+                nsigma_.at(sys) = 1.;
 	}
 	if(variations.size() == 0){
 		for(size_t bin=0;bin<bins_.size();bin++){
@@ -121,6 +134,87 @@ extendedVariable variateHisto1D::getIntegral()const{
 	return out;
 }
 
+
+    void variateHisto1D::setPrior(const TString syst, const Prior prior, const float nsigma, const bool multiple){
+
+        bool foundSyst = false;
+        TString systName = syst;
+        systName.ReplaceAll("*","");
+
+        if ( variations_.size() != priors_.size())
+            throw std::runtime_error("Error! Function variateHisto1D::setPrior: vectors have different sizes");
+
+        if ( variations_.size() != nsigma_.size())
+            throw std::runtime_error("Error! Function variateHisto1D::setPrior: vectors have different sizes");
+            
+
+        if (!multiple){
+            for (size_t isys=0; isys<variations_.size(); ++isys)
+                if (variations_.at(isys)==systName){
+                    priors_.at(isys)=prior;
+                    nsigma_.at(isys)=nsigma;
+                    foundSyst = true;
+                    break;
+                } 
+        }
+
+        else if (syst.BeginsWith("*") && syst.EndsWith("*")){
+            for (size_t isys=0; isys<variations_.size(); ++isys)
+                if (variations_.at(isys).Contains(systName)){
+                    priors_.at(isys)=prior;
+                    nsigma_.at(isys)=nsigma;
+                    foundSyst = true;
+                } 
+        }
+
+        else if (syst.BeginsWith("*")){
+            for (size_t isys=0; isys<variations_.size(); ++isys)
+                if (variations_.at(isys).EndsWith(systName)){
+                    priors_.at(isys)=prior;
+                    nsigma_.at(isys)=nsigma;
+                    foundSyst = true;
+                } 
+        }
+
+        else if (syst.EndsWith("*")){
+            for (size_t isys=0; isys<variations_.size(); ++isys)
+                if (variations_.at(isys).BeginsWith(systName)){
+                    priors_.at(isys)=prior;
+                    nsigma_.at(isys)=nsigma;
+                    foundSyst = true;
+                } 
+        }
+
+        else {
+            std::cout << "Runtime error: expression " << syst << " is malformed!" << std::endl;
+            throw std::runtime_error("Error: malformed expression");
+
+        }
+
+
+        if (!foundSyst){
+            std::cout << "Runtime error: variation " << syst << " not found !" << std::endl;
+            throw std::runtime_error("Error: variation not found");
+        }
+        
+        return;
+
+    }
+
+    void variateHisto1D::printPriors(){
+
+        if ( variations_.size() != priors_.size())
+            throw std::runtime_error("Error! Function variateHisto1D::printPriors: vectors have different sizes");
+
+        if ( variations_.size() != nsigma_.size())
+            throw std::runtime_error("Error! Function variateHisto1D::printPriors: vectors have different sizes");
+            
+
+            for (size_t isys=0; isys<variations_.size(); ++isys)
+                std::cout<<isys<<"\t"<<variations_.at(isys)<<"\t"<<priors_.at(isys)<<"\t"<<nsigma_.at(isys)<<std::endl;
+    }
+
+
 double variateHisto1D::toBeMinimizedInFit(const double * variations)const{
 	if(!comparehist_)
 		return 0;
@@ -143,7 +237,44 @@ double variateHisto1D::toBeMinimizedInFit(const double * variations)const{
 	return out;
 }
 
-simpleFitter variateHisto1D::fitToConstHisto(const histo1D& h){
+
+    double variateHisto1D::toBeMinimizedInFitWithPriors(const double * variations)const{
+	if(!comparehist_)
+            return 0;
+	double out=0;
+
+        size_t nsys = getNDependencies();
+        for(size_t sys = 0; sys<nsys ; sys++){
+
+            if ( priors_.at(sys) != Prior::Gauss ) continue;
+            out+=variations[sys]*variations[sys] * ( nsigma_.at(sys)*nsigma_.at(sys) );
+
+        }
+
+        for(size_t i=0;i<contents_.size();i++){
+
+            double binval=contents_.at(i).getValue(variations);
+            double compareto=comparehist_->getBinContent(i);
+            if(binval<0)binval=0;
+
+            if( comparehist_->getBinStat(i) <= 0 )  continue;
+
+            double chi2= (binval - compareto);
+            chi2*=chi2;
+
+            float stat= std::max(errsdown_.at(i),errsup_.at(i))*contents_.at(i).getMultiplicationFactor(zeroVar());
+            if(stat!=stat) stat = 0;
+
+            chi2/=(comparehist_->getBinStat(i)*comparehist_->getBinStat(i) + stat*stat );
+
+            out+=chi2;
+        }
+
+	return out;
+    }
+
+
+    simpleFitter variateHisto1D::fitToConstHisto(const histo1D& h, const bool usepriors){
 	if(h.getBins() != bins_){
 		throw std::runtime_error("variateHisto1D::fitToConstHisto: bins have to be the same");
 	}
@@ -154,23 +285,102 @@ simpleFitter variateHisto1D::fitToConstHisto(const histo1D& h){
 		}
 	}
 
+        if (usepriors){
+            if ( variations_.size() != priors_.size())
+                throw std::runtime_error("Error! Function variateHisto1D::setPrior: vectors have different sizes");
+
+            if ( variations_.size() != nsigma_.size())
+                throw std::runtime_error("Error! Function variateHisto1D::setPrior: vectors have different sizes");
+        }
+
+
 	comparehist_=&h;
 	simpleFitter fitter;
 	fitter.setRequireFitFunction(false);
 	//fitter.setRequireFitFunction()
 	///define function object somewhere
 	size_t ndep= getNDependencies();
-	ROOT::Math::Functor func=ROOT::Math::Functor(this,&variateHisto1D::toBeMinimizedInFit,ndep);
+
+        if (ndep != variations_.size())
+            throw std::runtime_error("variateHisto1D::fitToConstHisto: number of dependencies does not correspond to number of variations");
+
+	ROOT::Math::Functor func;
+        if (usepriors) func=ROOT::Math::Functor(this,&variateHisto1D::toBeMinimizedInFitWithPriors,ndep);
+        else func=ROOT::Math::Functor(this,&variateHisto1D::toBeMinimizedInFit,ndep);
+
 	std::vector<double> paras(ndep,0);
 	std::vector<double> steps(ndep,0.1);
 	fitter.setParameters(paras,steps);
+        fitter.setParameterNames(variations_);
 	fitter.setMinFunction (&func);
+
+        if (usepriors) setAllParameterLimits(fitter);
+
 	fitter.fit();
 
 
 
 	return fitter;
 }
+
+    void variateHisto1D::setAllParameterLimits(simpleFitter & fitter){
+
+        for (size_t sys=0; sys<variations_.size(); ++sys){
+
+            size_t idxdown=cont_.getSystErrorIndex(variations_.at(sys)+"_down");
+            size_t idxup=cont_.getSystErrorIndex(variations_.at(sys)+"_up");
+
+            switch (priors_.at(sys)){
+
+            case Prior::Box :
+                fitter.setParameterLowerLimit(sys,-1./nsigma_.at(sys));
+                fitter.setParameterUpperLimit(sys,1./nsigma_.at(sys));
+                break;
+                
+            case Prior::BoxLeft :
+                fitter.setParameterLowerLimit(sys,-1./nsigma_.at(sys));
+                fitter.setParameterUpperLimit(sys,0);
+                break;
+
+            case Prior::BoxRight :
+                fitter.setParameterLowerLimit(sys,0);
+                fitter.setParameterUpperLimit(sys,1./nsigma_.at(sys));
+                break;
+
+            case Prior::Fixed :
+                fitter.setParameterFixed(sys);
+                break;
+
+            case Prior::BoxAuto :
+
+                if (cont_ != cont_.getSystContainer(idxdown) && cont_ != cont_.getSystContainer(idxup)){
+                    fitter.setParameterLowerLimit(sys,-1./nsigma_.at(sys));
+                    fitter.setParameterUpperLimit(sys,1./nsigma_.at(sys));
+                }
+
+                else if (cont_ != cont_.getSystContainer(idxdown) ){
+                    fitter.setParameterLowerLimit(sys,-1./nsigma_.at(sys));
+                    fitter.setParameterUpperLimit(sys,0);
+                }
+
+                else if (cont_ != cont_.getSystContainer(idxup) ){
+                    fitter.setParameterLowerLimit(sys,0);
+                    fitter.setParameterUpperLimit(sys,1./nsigma_.at(sys));
+                }
+                
+                else fitter.setParameterFixed(sys);
+                
+                break;
+
+            default:
+                break;
+                
+            }
+
+        }
+
+        return;
+    }
 
 variateHisto1D& variateHisto1D::operator *= (const variateHisto1D&rhs){
 	checkCompat(rhs);
