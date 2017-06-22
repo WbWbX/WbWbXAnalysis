@@ -15,6 +15,8 @@
 #include "taggedObject.h"
 #include "simpleFitter.h"
 
+#include "TtZAnalysis/Tools/interface/Priors.h"
+
 namespace ztop{
 
 class variateHisto1D : public taggedObject{
@@ -62,12 +64,17 @@ public:
 	double getIntegral(const double * vars)const;
 	extendedVariable getIntegral()const;
 
+        void setPrior(const TString, const Prior, const float nsigma = 1., const bool multiple = false);
+        void printPriors();
+
+
 	/*
 	 * Function only works for data-like histos with stat=sqrt(events)
 	 * Uses Poisson likelihood, neglecting MC statistics
 	 */
-	simpleFitter fitToConstHisto(const histo1D&);
+	simpleFitter fitToConstHisto(const histo1D&, const bool usepriors = false );
 
+        void setAllParameterLimits(simpleFitter&);
 
 	/*
 	 * Warning: All operations are assumed to have no statistical limitations!
@@ -102,6 +109,10 @@ private:
 	std::vector<extendedVariable> contents_;
 	std::vector<float> bins_;
 
+        std::vector<Prior> priors_;
+        std::vector<double> nsigma_;
+        std::vector<TString> variations_;
+
 	std::vector<double> zeroVar()const;
 
 	//this is for stat uncertainties
@@ -111,7 +122,10 @@ private:
 	void checkCompat(const variateHisto1D& rhs)const;
 
 	double toBeMinimizedInFit(const double * variations)const;
+	double toBeMinimizedInFitWithPriors(const double * variations)const;
 	const histo1D* comparehist_;//fot fit
+
+        histo1D cont_;
 
 };
 
