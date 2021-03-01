@@ -1,5 +1,17 @@
 
-This package contains the WbWbXAnalysis Framework. 
+### Instructions
+
+* setup a not-so-old CMSSW env (tested with CMSSW_11_1_7)
+* clone `https://gitlab.cern.ch/cms-desy-top/TopAnalysis` into `$CMSSW_BASE/src`
+* go to `$CMSSW_BASE/src/TopAnalysis/ZTopUtils` and build the subpackage with `scram b -j16`
+* go back to `$CMSSW_BASE/src` and clone `https://github.com/WbWbX/WbWbXAnalysis`
+* run `./prepareEnv.sh` twice inside `$CMSSW_BASE/src/WbWbXAnalysis` (TUnfold lib fails the first time)
+* go to `$CMSSW_BASE/src/WbWbXAnalysis/Tools` and build the subpackage with `scram b -j16`
+
+
+### Previous info
+
+This package contains the WbWbXAnalysis Framework.
 
 (For the impatient user: A doxygen documentation can be created with WbWbXAnalysis/Doxygen/create_docu.sh <optional output directory>)
 
@@ -53,7 +65,7 @@ Sample _cff files (file lists to run on) for testing only. The corresponding fil
 
 WbWbXAnalysis /Data
 
-Historically data files were located here, and some still are. New files should go in the subpackage they are used in.tbipackage. 
+Historically data files were located here, and some still are. New files should go in the subpackage they are used in.tbipackage.
 
 
 
@@ -67,4 +79,4 @@ The rest of the code MUST NOT have any dependence to this package.
 
 
 For details, see
-https://twiki.cern.ch/twiki/bin/viewauth/CMS/DesyWbWbXAnalysisFramework
+https://twiki.cern.ch/twiki/bin/viewauth/CMS/DesyTtZAnalysisFramework
