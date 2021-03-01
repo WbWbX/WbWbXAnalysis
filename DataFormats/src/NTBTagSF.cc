@@ -22,7 +22,7 @@ void NTBTagSF::changeNTJetTags( std::vector<ztop::NTJet *> *jets)const{
 		if(std::abs(jet->genPartonFlavour()) == 0) continue;
 		bool shouldbetagged=false;
 		shouldbetagged= jetIsTagged(jet->pt(),jet->eta(),jet->genPartonFlavour(),jet->btag(),
-				std::abs<int>(1.e6 * sin(jet->phi())));
+					    std::abs(int(1.e6 * sin(jet->phi()))));
 
 		// throw std::logic_error(" NTBTagSF::changeNTJetTags wrong type (undefined");
 

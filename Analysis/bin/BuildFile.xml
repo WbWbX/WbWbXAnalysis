@@ -30,7 +30,7 @@
 <bin name="mtFromXsec2" file="mtFromXsec2.cc" />
 <bin name="wExtractA7" file="wExtractA7.cc" />
 
-<bin name="compareContributions" file="compareContributions.cc" />
+<!--- <bin name="compareContributions" file="compareContributions.cc" /> --->
 
 <bin name="extractMtFromInclXsec" file="extractMtFromInclXsec.cc" />
 <Flags CXXFLAGS="-lXMLParser -lunfold -fopenmp"/>

@@ -14,4 +14,4 @@
 </export>
 <lib name="Minuit"/>
 <lib name="Minuit2"/>
-<Flags CXXFLAGS="-lunfold -fopenmp -std=c++0x"/>
+<Flags CXXFLAGS="-lunfold -fopenmp -std=c++17"/>
