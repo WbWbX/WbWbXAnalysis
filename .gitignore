@@ -56,3 +56,7 @@ Analysis/output
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# TUnfold lib #
+######################
+*.pcm
