@@ -56,7 +56,7 @@ genFilterString=options.genFilterString     # 'none'
 genFilterInvert=options.genFilterInvert     # False
 includePDFWeights=options.includePDFWeights # False
 PDF=options.PDF                             # CT10
-inputScript=options.inputScript             # TtZAnalysis.Configuration.samples.mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12-PU_S7_START52_V9-v2_cff
+inputScript=options.inputScript             # WbWbXAnalysis.Configuration.samples.mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12-PU_S7_START52_V9-v2_cff
 print 'Using input script: ', inputScript
 json=options.json                           # parse absolute paths here!
 print 'Using json path: ', json
@@ -73,7 +73,7 @@ print 'Minimum 2 leptons required!'
 
 # if sets are not in official paths
 if includePDFWeights:
-    newlha = os.environ['CMSSW_BASE']+'/src/TtZAnalysis/Data/data/PDFSets'
+    newlha = os.environ['CMSSW_BASE']+'/src/WbWbXAnalysis/Data/data/PDFSets'
     #os.environ['LHAPATH']=newlha
 
 
@@ -199,7 +199,7 @@ process.TFileService = cms.Service("TFileService",
 #                                 )
 
 ## Infos for proper normalization
-process.load('TtZAnalysis.TreeWriter.puinfo_cff')
+process.load('WbWbXAnalysis.TreeWriter.puinfo_cff')
 
 process.PUInfo.includePDFWeights = includePDFWeights
 process.PUInfo.pdfWeights = "pdfWeights:"+PDF

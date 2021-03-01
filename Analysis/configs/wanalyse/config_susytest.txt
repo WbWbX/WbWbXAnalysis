@@ -16,8 +16,8 @@ $treeProducerA7W_WJets.root,             signal,                     413,       
 
 inputFilesDir = /nfs/dust/cms/user/kiesej/trees_WA7/
 Lumi = 19710
-JECUncertainties = /src/TtZAnalysis/Analysis/data/analyse/Winter14_V5_DATA_UncertaintySources_AK5PFchs.txt
-A7reweightFile = /src/TtZAnalysis/Analysis/data/wanalyse/rewdata.dat
+JECUncertainties = /src/WbWbXAnalysis/Analysis/data/analyse/Winter14_V5_DATA_UncertaintySources_AK5PFchs.txt
+A7reweightFile = /src/WbWbXAnalysis/Analysis/data/wanalyse/rewdata.dat
 
 
 vis_DEtaMin = 0

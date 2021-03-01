@@ -4,12 +4,12 @@
 #include "HathorPdf.h"
 #include <iostream>
 #include <fstream>
-#include "TtZAnalysis/Tools/interface/optParser.h"
-#include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
+#include "WbWbXAnalysis/Tools/interface/optParser.h"
+#include "WbWbXAnalysis/Tools/interface/applicationMainMacro.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
-#include "TtZAnalysis/Tools/interface/graph.h"
-#include "TtZAnalysis/Tools/interface/graphFitter.h"
-#include "TtZAnalysis/Tools/interface/plotterMultiplePlots.h"
+#include "WbWbXAnalysis/Tools/interface/graph.h"
+#include "WbWbXAnalysis/Tools/interface/graphFitter.h"
+#include "WbWbXAnalysis/Tools/interface/plotterMultiplePlots.h"
 #include <string>
 #include <vector>
 #include "TFile.h"

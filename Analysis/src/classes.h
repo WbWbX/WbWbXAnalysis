@@ -1,10 +1,10 @@
-#include "TtZAnalysis/Analysis/interface/scalefactors.h"
-#include "TtZAnalysis/Analysis/interface/reweightfunctions.h"
-#include "TtZAnalysis/Analysis/interface/discriminatorFactory.h"
+#include "WbWbXAnalysis/Analysis/interface/scalefactors.h"
+#include "WbWbXAnalysis/Analysis/interface/reweightfunctions.h"
+#include "WbWbXAnalysis/Analysis/interface/discriminatorFactory.h"
 #include <string>
 
 
-//#include "TtZAnalysis/Tools/interface/histo1D.h"
+//#include "WbWbXAnalysis/Tools/interface/histo1D.h"
 
 namespace
 {

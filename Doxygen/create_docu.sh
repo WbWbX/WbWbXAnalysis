@@ -8,7 +8,7 @@ fi
 
 
 
-DOXYOUT=$CMSSW_BASE/src/TtZAnalysis/Doxygen/docu
+DOXYOUT=$CMSSW_BASE/src/WbWbXAnalysis/Doxygen/docu
 if [[ $1 != "" ]]
 then
 DOXYOUT=$1
@@ -27,7 +27,7 @@ mkdir -p $DOXYOUT
 cd $DOXYOUT
 export DOXYOUT=$DOXYOUT
 
-doxygen $CMSSW_BASE/src/TtZAnalysis/Doxygen/config/doxy_config
+doxygen $CMSSW_BASE/src/WbWbXAnalysis/Doxygen/config/doxy_config
 
 echo Documentation created. The documentation for the browser can be opened with:
 

@@ -9,7 +9,7 @@
 #define MAINMACRO_H_
 
 
-#include "TtZAnalysis/Tools/interface/optParser.h"
+#include "WbWbXAnalysis/Tools/interface/optParser.h"
 /**
  * invokes main and passes arguments to ztop::optParser parser
  */

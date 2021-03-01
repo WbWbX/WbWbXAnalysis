@@ -2,7 +2,7 @@
 
 #runs analysis und puts analysis code and output to an extra directory with date flag
 
-cd ${CMSSW_BASE}/src/TtZAnalysis/Efficiencies
+cd ${CMSSW_BASE}/src/WbWbXAnalysis/Efficiencies
 
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 

@@ -1,46 +1,46 @@
 #####Data
 
 
-#200    /MET/Run2015D-16Dec2015-v1/MINIAOD         tree_13Tev_data_MET       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
+#200    /MET/Run2015D-16Dec2015-v1/MINIAOD         tree_13Tev_data_MET       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
 
 
-#20    /MET/Run2015C_25ns-16Dec2015-v1/MINIAOD         tree_13Tev_data_MET_RunC       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
+#20    /MET/Run2015C_25ns-16Dec2015-v1/MINIAOD         tree_13Tev_data_MET_RunC       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
 
-#20   /MuonEG/Run2015C_25ns-16Dec2015-v1/MINIAOD       tree_13TeV_data_emu_RunC              runOnMC=False dataset=emu json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
+#20   /MuonEG/Run2015C_25ns-16Dec2015-v1/MINIAOD       tree_13TeV_data_emu_RunC              runOnMC=False dataset=emu json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
 
-#200     /MuonEG/Run2015D-16Dec2015-v1/MINIAOD             tree_13TeV_data_emu              runOnMC=False dataset=emu json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
+#200     /MuonEG/Run2015D-16Dec2015-v1/MINIAOD             tree_13TeV_data_emu              runOnMC=False dataset=emu json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
 
-#200     /DoubleMuon/Run2015D-16Dec2015-v1/MINIAOD             tree_13TeV_data_mumu              runOnMC=False dataset=mumu json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
+#200     /DoubleMuon/Run2015D-16Dec2015-v1/MINIAOD             tree_13TeV_data_mumu              runOnMC=False dataset=mumu json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
 
-#20   /DoubleMuon/Run2015C_25ns-16Dec2015-v1/MINIAOD       tree_13TeV_data_mumu_RunC              runOnMC=False dataset=mumu json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
+#20   /DoubleMuon/Run2015C_25ns-16Dec2015-v1/MINIAOD       tree_13TeV_data_mumu_RunC              runOnMC=False dataset=mumu json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
 
-#20   /DoubleEG/Run2015C_25ns-16Dec2015-v1/MINIAOD       tree_13TeV_data_ee_RunC              runOnMC=False dataset=ee json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
+#20   /DoubleEG/Run2015C_25ns-16Dec2015-v1/MINIAOD       tree_13TeV_data_ee_RunC              runOnMC=False dataset=ee json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
 
-#200     /DoubleEG/Run2015D-16Dec2015-v2/MINIAOD             tree_13TeV_data_ee              runOnMC=False dataset=ee json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
+#200     /DoubleEG/Run2015D-16Dec2015-v2/MINIAOD             tree_13TeV_data_ee              runOnMC=False dataset=ee json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
 
-#20   /SingleElectron/Run2015C_25ns-16Dec2015-v1/MINIAOD       tree_13TeV_data_singleEle_RunC              runOnMC=False dataset=singleEle json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
+#20   /SingleElectron/Run2015C_25ns-16Dec2015-v1/MINIAOD       tree_13TeV_data_singleEle_RunC              runOnMC=False dataset=singleEle json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
 
-#20   /SingleElectron/Run2015C_25ns-16Dec2015-v1/MINIAOD       tree_13TeV_data_singleEle_ee_RunC              runOnMC=False dataset=singleEle_ee json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
+#20   /SingleElectron/Run2015C_25ns-16Dec2015-v1/MINIAOD       tree_13TeV_data_singleEle_ee_RunC              runOnMC=False dataset=singleEle_ee json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
 
-#20   /SingleElectron/Run2015C_25ns-16Dec2015-v1/MINIAOD       tree_13TeV_data_singleEle_RunC_trigger         runOnMC=False dataset=ele json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
+#20   /SingleElectron/Run2015C_25ns-16Dec2015-v1/MINIAOD       tree_13TeV_data_singleEle_RunC_trigger         runOnMC=False dataset=ele json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
 
-#200     /SingleElectron/Run2015D-16Dec2015-v1/MINIAOD             tree_13TeV_data_singleEle              runOnMC=False dataset=singleEle json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
+#200     /SingleElectron/Run2015D-16Dec2015-v1/MINIAOD             tree_13TeV_data_singleEle              runOnMC=False dataset=singleEle json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
 
-#200     /SingleElectron/Run2015D-16Dec2015-v1/MINIAOD             tree_13TeV_data_singleEle_ee              runOnMC=False dataset=singleEle_ee json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
+#200     /SingleElectron/Run2015D-16Dec2015-v1/MINIAOD             tree_13TeV_data_singleEle_ee              runOnMC=False dataset=singleEle_ee json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
 
-#200     /SingleElectron/Run2015D-16Dec2015-v1/MINIAOD             tree_13TeV_data_singleEle_trigger              runOnMC=False dataset=ele json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
+#200     /SingleElectron/Run2015D-16Dec2015-v1/MINIAOD             tree_13TeV_data_singleEle_trigger              runOnMC=False dataset=ele json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
 
-#200     /SingleMuon/Run2015D-16Dec2015-v1/MINIAOD             tree_13TeV_data_singleMu              runOnMC=False dataset=singleMu json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
+#200     /SingleMuon/Run2015D-16Dec2015-v1/MINIAOD             tree_13TeV_data_singleMu              runOnMC=False dataset=singleMu json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
 
-#200     /SingleMuon/Run2015D-16Dec2015-v1/MINIAOD             tree_13TeV_data_singleMu_mumu              runOnMC=False dataset=singleMu_mumu json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
+#200     /SingleMuon/Run2015D-16Dec2015-v1/MINIAOD             tree_13TeV_data_singleMu_mumu              runOnMC=False dataset=singleMu_mumu json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
 
-#200     /SingleMuon/Run2015D-16Dec2015-v1/MINIAOD             tree_13TeV_data_singleMu_trigger              runOnMC=False dataset=mu json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
+#200     /SingleMuon/Run2015D-16Dec2015-v1/MINIAOD             tree_13TeV_data_singleMu_trigger              runOnMC=False dataset=mu json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
 
-#20   /SingleMuon/Run2015C_25ns-16Dec2015-v1/MINIAOD       tree_13TeV_data_singleMu_RunC              runOnMC=False dataset=singleMu json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
+#20   /SingleMuon/Run2015C_25ns-16Dec2015-v1/MINIAOD       tree_13TeV_data_singleMu_RunC              runOnMC=False dataset=singleMu json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
 
-#20   /SingleMuon/Run2015C_25ns-16Dec2015-v1/MINIAOD       tree_13TeV_data_singleMu_mumu_RunC              runOnMC=False dataset=singleMu_mumu json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
+#20   /SingleMuon/Run2015C_25ns-16Dec2015-v1/MINIAOD       tree_13TeV_data_singleMu_mumu_RunC              runOnMC=False dataset=singleMu_mumu json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
 
-#20   /SingleMuon/Run2015C_25ns-16Dec2015-v1/MINIAOD       tree_13TeV_data_singleMu_RunC_trigger              runOnMC=False dataset=mu json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
+#20   /SingleMuon/Run2015C_25ns-16Dec2015-v1/MINIAOD       tree_13TeV_data_singleMu_RunC_trigger              runOnMC=False dataset=mu json=/nfs/dust/cms/user/tarndt/Test_76_v2/CMSSW_7_6_3/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_v2_noBadBeamSpot.txt
 
 ######TTBar
 

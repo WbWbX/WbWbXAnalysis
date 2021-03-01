@@ -155,7 +155,7 @@ int main(){
 	newtoypois.setAllErrorsZero();
 
 	plotterCompare genplotter;
-	genplotter.readStyleFromFileInCMSSW("src/TtZAnalysis/Tools/styles/comparePlots_3MC.txt");
+	genplotter.readStyleFromFileInCMSSW("src/WbWbXAnalysis/Tools/styles/comparePlots_3MC.txt");
 	TCanvas cvgen;
 	genplotter.usePad(&cvgen);
 	genplotter.setNominalPlot(&generated);
@@ -211,7 +211,7 @@ int main(){
 	std::cout << "4: " << c4.integral(true)*bindiv <<std::endl;
 	plotterMultiplePlots::debug=false;
 	plotterMultiplePlots plotter;
-	plotter.readStyleFromFileInCMSSW("src/TtZAnalysis/Tools/styles/multiplePlots.txt");
+	plotter.readStyleFromFileInCMSSW("src/WbWbXAnalysis/Tools/styles/multiplePlots.txt");
 	plotter.usePad(&cv1);
 
 	plotter.addPlot(&c1,false);

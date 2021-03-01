@@ -18,7 +18,7 @@ plotterControlPlot::plotterControlPlot(): plotterBase(), divideat_(0),
 		stackp_(0),/*tempdataentry_(0),*/invertplots_(false),psmigthresh_(0),yspacemulti_(1.3),mcsysstatleg_(true),nolegend_(false),
 		systlabel_("MC syst+stat"){
 
-	readStyleFromFileInCMSSW("/src/TtZAnalysis/Tools/styles/controlPlots_standard.txt");
+	readStyleFromFileInCMSSW("/src/WbWbXAnalysis/Tools/styles/controlPlots_standard.txt");
 	gStyle->SetOptStat(0);
 }
 

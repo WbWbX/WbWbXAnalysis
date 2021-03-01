@@ -5,10 +5,10 @@
  *      Author: kiesej
  */
 
-#include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
+#include "WbWbXAnalysis/Tools/interface/applicationMainMacro.h"
 #include <string>
-#include "TtZAnalysis/Tools/interface/fileReader.h"
-#include "TtZAnalysis/Analysis/interface/wAnalyzer.h"
+#include "WbWbXAnalysis/Tools/interface/fileReader.h"
+#include "WbWbXAnalysis/Analysis/interface/wAnalyzer.h"
 #include "TString.h"
 
 invokeApplication(){
@@ -46,8 +46,8 @@ invokeApplication(){
 		std::cout << "Batch run from " << batchbase << std::endl;
 	}
 	else{
-		database=cmssw_base+"/src/TtZAnalysis/Analysis/"+database;
-		configbase=cmssw_base+"/src/TtZAnalysis/Analysis/"+configbase;
+		database=cmssw_base+"/src/WbWbXAnalysis/Analysis/"+database;
+		configbase=cmssw_base+"/src/WbWbXAnalysis/Analysis/"+configbase;
 	}
 
 	configfile=configbase+configfile;

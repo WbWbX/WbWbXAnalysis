@@ -8,7 +8,7 @@
 
 
 
-#include <TtZAnalysis/Tools/interface/plotterMultiColumn.h>
+#include <WbWbXAnalysis/Tools/interface/plotterMultiColumn.h>
 #include "../interface/histoStack.h"
 #include "../interface/fileReader.h"
 

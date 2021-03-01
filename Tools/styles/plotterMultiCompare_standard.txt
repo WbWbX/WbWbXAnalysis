@@ -5,14 +5,14 @@ $$$ comments
 [plotterMultiCompare]
 
       $this is the main file
-	    controlPlotStyleFile = src/TtZAnalysis/Tools/styles/plotterMultiCompare_ctrDef.txt
+	    controlPlotStyleFile = src/WbWbXAnalysis/Tools/styles/plotterMultiCompare_ctrDef.txt
 	   
 	    nplots = 4
 	    
-	    addStyle0 =   src/TtZAnalysis/Tools/styles/plotterMultiCompare_sub0.txt
-	    addStyle1 =   src/TtZAnalysis/Tools/styles/plotterMultiCompare_sub1.txt
-	    addStyle2 =   src/TtZAnalysis/Tools/styles/plotterMultiCompare_sub2.txt
-	    addStyle3 =   src/TtZAnalysis/Tools/styles/plotterMultiCompare_sub3.txt
+	    addStyle0 =   src/WbWbXAnalysis/Tools/styles/plotterMultiCompare_sub0.txt
+	    addStyle1 =   src/WbWbXAnalysis/Tools/styles/plotterMultiCompare_sub1.txt
+	    addStyle2 =   src/WbWbXAnalysis/Tools/styles/plotterMultiCompare_sub2.txt
+	    addStyle3 =   src/WbWbXAnalysis/Tools/styles/plotterMultiCompare_sub3.txt
 	    
 	    
 	    frac0=0.7

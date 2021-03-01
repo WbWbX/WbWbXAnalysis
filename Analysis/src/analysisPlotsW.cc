@@ -7,10 +7,10 @@
 
 
 #include "../interface/analysisPlotsW.h"
-#include "TtZAnalysis/DataFormats/interface/NTJet.h"
-#include "TtZAnalysis/DataFormats/interface/NTMuon.h"
-#include "TtZAnalysis/DataFormats/interface/NTGenParticle.h"
-#include "TtZAnalysis/DataFormats/interface/NTGenJet.h"
+#include "WbWbXAnalysis/DataFormats/interface/NTJet.h"
+#include "WbWbXAnalysis/DataFormats/interface/NTMuon.h"
+#include "WbWbXAnalysis/DataFormats/interface/NTGenParticle.h"
+#include "WbWbXAnalysis/DataFormats/interface/NTGenJet.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 
 namespace ztop{

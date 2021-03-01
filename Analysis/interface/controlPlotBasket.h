@@ -8,8 +8,8 @@
 #ifndef CONTROLPLOTBASKET_H_
 #define CONTROLPLOTBASKET_H_
 
-#include "TtZAnalysis/Tools/interface/histo1D.h"
-#include "TtZAnalysis/Analysis/interface/NTFullEvent.h"
+#include "WbWbXAnalysis/Tools/interface/histo1D.h"
+#include "WbWbXAnalysis/Analysis/interface/NTFullEvent.h"
 #include <vector>
 
 //helper

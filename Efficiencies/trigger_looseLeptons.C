@@ -1,5 +1,5 @@
 #include "triggerAnalyzer_base3.h"
-#include "TtZAnalysis/Analysis/interface/leptonSelector2.h"
+#include "WbWbXAnalysis/Analysis/interface/leptonSelector2.h"
 #include "TTreePerfStats.h"
 #include "FWCore/FWLite/interface/AutoLibraryLoader.h"
 
@@ -180,13 +180,13 @@ void trigger_tightLeptons(){
 	TString cmssw_base=getenv("CMSSW_BASE");
 
 
-	TString PURunA = cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13RunA.json.txt_PU.root";
-	TString PURunB = cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13RunB.json.txt_PU.root";
-	//  TString PURunAB = cmssw_base+"/src/TtZAnalysis/Data/RunABComp_PU.root";
-	TString PURunC = cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13RunC.json.txt_PU.root";
-	TString PURunD = cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13RunD.json.txt_PU.root";
+	TString PURunA = cmssw_base+"/src/WbWbXAnalysis/Data/ReRecoJan13RunA.json.txt_PU.root";
+	TString PURunB = cmssw_base+"/src/WbWbXAnalysis/Data/ReRecoJan13RunB.json.txt_PU.root";
+	//  TString PURunAB = cmssw_base+"/src/WbWbXAnalysis/Data/RunABComp_PU.root";
+	TString PURunC = cmssw_base+"/src/WbWbXAnalysis/Data/ReRecoJan13RunC.json.txt_PU.root";
+	TString PURunD = cmssw_base+"/src/WbWbXAnalysis/Data/ReRecoJan13RunD.json.txt_PU.root";
 
-	TString pileuproot = cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13.json.txt_PU.root";
+	TString pileuproot = cmssw_base+"/src/WbWbXAnalysis/Data/ReRecoJan13.json.txt_PU.root";
 
 
 	std::vector<TString> mumumcfiles, eemcfiles, emumcfiles, datafilesFull,datafilesRunB,datafilesRunAB,datafilesRunC, datafilesRunA, datafilesRunD;

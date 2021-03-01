@@ -43,7 +43,7 @@ int main(){
     TCanvas *c=new TCanvas();
     testPlotter::debug=true;
 
-    std::string stylePath="/afs/naf.desy.de/user/k/kieseler/recentProj/src/TtZAnalysis/Tools/styles/";
+    std::string stylePath="/afs/naf.desy.de/user/k/kieseler/recentProj/src/WbWbXAnalysis/Tools/styles/";
 
     //fileReader::debug=true;
     plotStyle ps;

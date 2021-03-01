@@ -12,7 +12,7 @@
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 #include "../interface/plotter2D.h"
 
-#include "TtZAnalysis/Analysis/app_src/mainMacro.h"
+#include "WbWbXAnalysis/Analysis/app_src/mainMacro.h"
 #include "TString.h"
 #include "TStyle.h"
 

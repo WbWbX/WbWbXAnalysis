@@ -1,6 +1,6 @@
 
-To use TtZAnalysis classes interactively (with some limits), load them when starting root in the following way:
+To use WbWbXAnalysis classes interactively (with some limits), load them when starting root in the following way:
 
 Add the file rootlogon.C located here to your ~/.rootrc. Edit the line:
 
-Rint.Logon:              $(CMSSW_BASE)/src/TtZAnalysis/Tools/root/rootlogon.C
+Rint.Logon:              $(CMSSW_BASE)/src/WbWbXAnalysis/Tools/root/rootlogon.C

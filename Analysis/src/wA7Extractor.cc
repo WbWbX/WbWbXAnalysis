@@ -6,15 +6,15 @@
  */
 
 #include "../interface/wA7Extractor.h"
-#include "TtZAnalysis/Tools/interface/histoStackVector.h" //all histos
-#include "TtZAnalysis/Tools/interface/textFormatter.h"
-#include "TtZAnalysis/Tools/interface/plotterControlPlot.h"
-#include "TtZAnalysis/Tools/interface/plotterCompare.h"
-#include "TtZAnalysis/Tools/interface/plotterMultiplePlots.h"
+#include "WbWbXAnalysis/Tools/interface/histoStackVector.h" //all histos
+#include "WbWbXAnalysis/Tools/interface/textFormatter.h"
+#include "WbWbXAnalysis/Tools/interface/plotterControlPlot.h"
+#include "WbWbXAnalysis/Tools/interface/plotterCompare.h"
+#include "WbWbXAnalysis/Tools/interface/plotterMultiplePlots.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 
 
-#include "TtZAnalysis/Tools/interface/semiconst.h"
+#include "WbWbXAnalysis/Tools/interface/semiconst.h"
 
 #include <cmath>
 
@@ -510,7 +510,7 @@ void wA7Extractor::fitAll(){
 			graphFitter gf;
 			graph fitg;
 			fitg.import(ph,false);
-			pl.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/wExtractA7/multiplePlots_pulls.txt");
+			pl.readStyleFromFileInCMSSW("/src/WbWbXAnalysis/Analysis/configs/wExtractA7/multiplePlots_pulls.txt");
 
 			gf.setFitMode(graphFitter::fm_gaus);
 			gf.readGraph(&fitg);
@@ -691,7 +691,7 @@ graph wA7Extractor::fit(int sysindex, bool up, bool fixallbuta7, bool fixa7){
 			stack.push_back(mc,"MC",413,1,1);
 			stack.push_back(data,"data",kBlack,1,99);
 			plotterControlPlot pl;
-			pl.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/wExtractA7/prefitplots_style.txt");
+			pl.readStyleFromFileInCMSSW("/src/WbWbXAnalysis/Analysis/configs/wExtractA7/prefitplots_style.txt");
 			pl.setStack(&stack);
 			pl.printToPdf((prefix+"fitted_"+toTString(i)).Data());
 

@@ -1,12 +1,12 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TH1D.h"
-#include "TtZAnalysis/DataFormats/interface/NTInflatedMuon.h"
-#include "TtZAnalysis/DataFormats/interface/NTInflatedElectron.h"
-#include "TtZAnalysis/DataFormats/interface/NTEvent.h"
-#include "TtZAnalysis/DataFormats/interface/NTJet.h"
-#include "TtZAnalysis/DataFormats/interface/NTMet.h"
-#include "TtZAnalysis/plugins/reweightPU.h"
+#include "WbWbXAnalysis/DataFormats/interface/NTInflatedMuon.h"
+#include "WbWbXAnalysis/DataFormats/interface/NTInflatedElectron.h"
+#include "WbWbXAnalysis/DataFormats/interface/NTEvent.h"
+#include "WbWbXAnalysis/DataFormats/interface/NTJet.h"
+#include "WbWbXAnalysis/DataFormats/interface/NTMet.h"
+#include "WbWbXAnalysis/plugins/reweightPU.h"
 #include <vector>
 #include <algorithm>
 #include <string>
@@ -15,8 +15,8 @@
 #include "TROOT.h"
 #include "TChain.h"
 #include "makeplotsnice.h"
-#include "TtZAnalysis/Tools/interface/histo1D.h"
-#include "TtZAnalysis/Tools/interface/miscUtils.h"
+#include "WbWbXAnalysis/Tools/interface/histo1D.h"
+#include "WbWbXAnalysis/Tools/interface/miscUtils.h"
 #include <map>
 #include <fstream>
 
@@ -1169,7 +1169,7 @@ TChain * makeChain(TString path){
 std::vector<TString> getPaths(int divider=9){
   using namespace std;
   std::vector<TString> out;
-  ifstream inputfiles ("/afs/naf.desy.de/user/k/kieseler/scratch/2012/HCP2/CMSSW_5_3_3_patch3/src/TtZAnalysis/Analysis/triggerEfficiencies12/lsout.txt");
+  ifstream inputfiles ("/afs/naf.desy.de/user/k/kieseler/scratch/2012/HCP2/CMSSW_5_3_3_patch3/src/WbWbXAnalysis/Analysis/triggerEfficiencies12/lsout.txt");
 
   TString filename;
   int i=0;
@@ -1219,9 +1219,9 @@ void analyze(){
   //	     << datadir + "tree_8TeV_MET_runC_prompt.root";
  
 
-  const char * pileuproot = "/afs/naf.desy.de/user/k/kieseler/HCP2/TtZAnalysis/Data/HCP.json.txt_PU.root";//HCP_PU.root";//HCP_5.3fb_PU.root";
+  const char * pileuproot = "/afs/naf.desy.de/user/k/kieseler/HCP2/WbWbXAnalysis/Data/HCP.json.txt_PU.root";//HCP_PU.root";//HCP_5.3fb_PU.root";
 
-  if(breakat5fb) pileuproot = "/afs/naf.desy.de/user/k/kieseler/scratch/2012/HCP2/CMSSW_5_3_3_patch3/src/TtZAnalysis/Data/HCP_5.3fb.json_PU.root";
+  if(breakat5fb) pileuproot = "/afs/naf.desy.de/user/k/kieseler/scratch/2012/HCP2/CMSSW_5_3_3_patch3/src/WbWbXAnalysis/Data/HCP_5.3fb.json_PU.root";
   //////// NOT REALLY VALID PU reweighting!!!
 
   TChain * datachain=makeChain(datafiles);

@@ -6,7 +6,7 @@
  */
 
 #include "../interface/wGenSelector.h"
-#include "TtZAnalysis/DataFormats/interface/NTGenParticle.h"
+#include "WbWbXAnalysis/DataFormats/interface/NTGenParticle.h"
 
 namespace ztop{
 bool wGenSelector::debug=false;

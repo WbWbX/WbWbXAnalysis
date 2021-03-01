@@ -52,7 +52,7 @@ indent: {
 
 comment: {type: singleLine, sequence: '$'}
 
-name: TtZAnalysis_cfg
+name: WbWbXAnalysis_cfg
 
 auto_edit:
   - {auto_close_scopes: [tag], scope: default} #To work, the scopes must be: SingleLineRule(sequence used for start/end)

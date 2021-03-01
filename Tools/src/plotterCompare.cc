@@ -22,7 +22,7 @@ namespace ztop{
 
 plotterCompare::plotterCompare(): plotterBase(),
 		divideat_(0.5),memnom_(0),memratio_(0),size_(0){
-	readStyleFromFileInCMSSW("/src/TtZAnalysis/Tools/styles/comparePlots_3MC.txt");
+	readStyleFromFileInCMSSW("/src/WbWbXAnalysis/Tools/styles/comparePlots_3MC.txt");
 }
 plotterCompare::plotterCompare(const plotterCompare &rhs): plotterBase(rhs){
 	COPYFROMRHS(upperstyle_);

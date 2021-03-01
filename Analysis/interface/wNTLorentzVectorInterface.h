@@ -8,8 +8,8 @@
 #ifndef TTZANALYSIS_ANALYSIS_INTERFACE_WNTLORENTZVECTORINTERFACE_H_
 #define TTZANALYSIS_ANALYSIS_INTERFACE_WNTLORENTZVECTORINTERFACE_H_
 
-#include "TtZAnalysis/Analysis/interface/wNTBaseInterface.h"
-#include "TtZAnalysis/DataFormats/interface/NTLorentzVector.h"
+#include "WbWbXAnalysis/Analysis/interface/wNTBaseInterface.h"
+#include "WbWbXAnalysis/DataFormats/interface/NTLorentzVector.h"
 namespace ztop{
 class tTreeHandler;
 

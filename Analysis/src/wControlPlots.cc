@@ -10,7 +10,7 @@
 
 #include "../interface/wControlPlots.h"
 #include "../interface/analysisPlotsW.h"
-#include "TtZAnalysis/DataFormats/src/classes.h"
+#include "WbWbXAnalysis/DataFormats/src/classes.h"
 
 namespace ztop{
 

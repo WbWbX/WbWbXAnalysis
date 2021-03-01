@@ -8,18 +8,18 @@
 
 
 
-#include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
+#include "WbWbXAnalysis/Tools/interface/applicationMainMacro.h"
 
 #include "TFile.h"
 #include "TString.h"
 #include "TGraph.h"
 #include "TH1D.h"
 
-#include "TtZAnalysis/Tools/interface/histo1D.h"
-#include "TtZAnalysis/Tools/interface/graph.h"
-#include "TtZAnalysis/Tools/interface/graphFitter.h"
-#include "TtZAnalysis/Tools/interface/plotterCompare.h"
-#include "TtZAnalysis/Tools/interface/plotterMultiplePlots.h"
+#include "WbWbXAnalysis/Tools/interface/histo1D.h"
+#include "WbWbXAnalysis/Tools/interface/graph.h"
+#include "WbWbXAnalysis/Tools/interface/graphFitter.h"
+#include "WbWbXAnalysis/Tools/interface/plotterCompare.h"
+#include "WbWbXAnalysis/Tools/interface/plotterMultiplePlots.h"
 
 
 invokeApplication(){

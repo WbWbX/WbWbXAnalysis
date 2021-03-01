@@ -1,5 +1,5 @@
 #include "triggerAnalyzer_base3.h"
-#include "TtZAnalysis/Analysis/interface/leptonSelector2.h"
+#include "WbWbXAnalysis/Analysis/interface/leptonSelector2.h"
 #include "TTreePerfStats.h"
 
 
@@ -119,13 +119,13 @@ void trigger_028(){
   TString dir="/nfs/dust/cms/user/kiesej/trees_ES_Apr14/";
 
   TString cmssw_base=getenv("CMSSW_BASE");
-  TString PURunA = cmssw_base+"/src/TtZAnalysis/Data/RunAComp.json.txt_PU.root";
-  TString PURunB = cmssw_base+"/src/TtZAnalysis/Data/RunB13Jul.json.txt_PU.root";
-  //  TString PURunAB = cmssw_base+"/src/TtZAnalysis/Data/RunABComp_PU.root";
-  TString PURunC = cmssw_base+"/src/TtZAnalysis/Data/RunCComp.json.txt_PU.root";
-  TString PURunD = cmssw_base+"/src/TtZAnalysis/Data/RunDprompt.json.txt_PU.root";
+  TString PURunA = cmssw_base+"/src/WbWbXAnalysis/Data/RunAComp.json.txt_PU.root";
+  TString PURunB = cmssw_base+"/src/WbWbXAnalysis/Data/RunB13Jul.json.txt_PU.root";
+  //  TString PURunAB = cmssw_base+"/src/WbWbXAnalysis/Data/RunABComp_PU.root";
+  TString PURunC = cmssw_base+"/src/WbWbXAnalysis/Data/RunCComp.json.txt_PU.root";
+  TString PURunD = cmssw_base+"/src/WbWbXAnalysis/Data/RunDprompt.json.txt_PU.root";
 
-  TString pileuproot = cmssw_base+"/src/TtZAnalysis/Data/Full19.json.txt_PU.root";
+  TString pileuproot = cmssw_base+"/src/WbWbXAnalysis/Data/Full19.json.txt_PU.root";
 
 
   std::vector<TString> mumumcfiles, eemcfiles, emumcfiles, datafilesFull,datafilesRunB,datafilesRunAB,datafilesRunC, datafilesRunA, datafilesRunD;

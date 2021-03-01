@@ -7,7 +7,7 @@
 
 #ifndef EVENTLOOP_H_
 #define EVENTLOOP_H_
-#include <TtZAnalysis/Analysis/interface/topAnalyzer.h>
+#include <WbWbXAnalysis/Analysis/interface/topAnalyzer.h>
 
 
 /**

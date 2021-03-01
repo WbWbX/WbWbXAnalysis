@@ -9,7 +9,7 @@
 #define ZControlPlots_H_
 
 #include "controlPlotBasket.h"
-#include "TtZAnalysis/DataFormats/interface/NTLepton.h"
+#include "WbWbXAnalysis/DataFormats/interface/NTLepton.h"
 
 namespace ztop{
 

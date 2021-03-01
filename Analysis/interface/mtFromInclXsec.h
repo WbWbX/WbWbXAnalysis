@@ -10,10 +10,10 @@
 #include "TString.h"
 #include <vector>
 #include <string>
-#include "TtZAnalysis/Tools/interface/graph.h"
-#include "TtZAnalysis/Tools/interface/graphFitter.h"
-#include "TtZAnalysis/Tools/interface/histo2D.h"
-#include "TtZAnalysis/Analysis/interface/predictions.h"
+#include "WbWbXAnalysis/Tools/interface/graph.h"
+#include "WbWbXAnalysis/Tools/interface/graphFitter.h"
+#include "WbWbXAnalysis/Tools/interface/histo2D.h"
+#include "WbWbXAnalysis/Analysis/interface/predictions.h"
 
 namespace ztop{
 

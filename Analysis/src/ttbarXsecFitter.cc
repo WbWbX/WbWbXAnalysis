@@ -6,17 +6,17 @@
  */
 
 
-#include <TtZAnalysis/Tools/interface/plotterMultiStack.h>
-#include <TtZAnalysis/Tools/interface/plotterMultiCompare.h>
-#include <TtZAnalysis/Tools/interface/plotterMultiplePlots.h>
+#include <WbWbXAnalysis/Tools/interface/plotterMultiStack.h>
+#include <WbWbXAnalysis/Tools/interface/plotterMultiCompare.h>
+#include <WbWbXAnalysis/Tools/interface/plotterMultiplePlots.h>
 #include "../interface/ttbarXsecFitter.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
-#include "TtZAnalysis/Tools/interface/histoStack.h"
-#include "TtZAnalysis/Tools/interface/histoStackVector.h"
-#include "TtZAnalysis/Tools/interface/fileReader.h"
+#include "WbWbXAnalysis/Tools/interface/histoStack.h"
+#include "WbWbXAnalysis/Tools/interface/histoStackVector.h"
+#include "WbWbXAnalysis/Tools/interface/fileReader.h"
 #include "Math/Functor.h"
-#include "TtZAnalysis/Tools/interface/plotterControlPlot.h"
-#include "TtZAnalysis/Tools/interface/texTabler.h"
+#include "WbWbXAnalysis/Tools/interface/plotterControlPlot.h"
+#include "WbWbXAnalysis/Tools/interface/texTabler.h"
 #include "limits.h"
 
 namespace ztop{
@@ -41,7 +41,7 @@ void ttbarXsecFitter::readInput(const std::string & configfilename){
 	fr.setRequireValues(false);
 	wjetsrescalefactor_=fr.getValue<float>("rescaleWjets",1.);
 	fr.setRequireValues(true);
-	mergesystfile_="/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/"+fr.getValue<std::string>("mergeSystFile");
+	mergesystfile_="/src/WbWbXAnalysis/Analysis/configs/fitTtBarXsec/"+fr.getValue<std::string>("mergeSystFile");
 	if(!fileExists((getenv("CMSSW_BASE")+mergesystfile_).data()))
 		throw std::runtime_error("mergeSystFile does not exists");
 	std::cout << "reading syst merging from " << mergesystfile_ << std::endl;
@@ -370,14 +370,14 @@ void  ttbarXsecFitter::printControlStack(bool fittedvalues,size_t bjetcat,size_t
 		return;
 	}
 	plotterMultiStack plm;
-	plm.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiStack_standard.txt");
+	plm.readStyleFromFileInCMSSW("/src/WbWbXAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiStack_standard.txt");
 	if(!fittedvalues)
 		plm.addStyleForAllPlots(getenv("CMSSW_BASE")
-				+(std::string)"/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/controlPlots_mergeleg.txt",
+				+(std::string)"/src/WbWbXAnalysis/Analysis/configs/fitTtBarXsec/controlPlots_mergeleg.txt",
 				"[merge for pre-fit plots]",
 				"[end - merge for pre-fit plots]");
 
-	plm.readTextBoxesInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiStack_standard.txt",
+	plm.readTextBoxesInCMSSW("/src/WbWbXAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiStack_standard.txt",
 			toString(bjetcat)+"btag"+toString( datasets_.at(datasetidx).getName()));
 
 	std::vector<histoStack> stacks=datasets_.at(datasetidx).getOriginalInputStacks(bjetcat);
@@ -544,8 +544,8 @@ void ttbarXsecFitter::printVariations(size_t bjetcat,size_t datasetidx,const std
 			}
 		}
 		plotterMultiCompare pl;
-		pl.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiCompare_standard.txt");
-		pl.readTextBoxesInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiStack_standard.txt",
+		pl.readStyleFromFileInCMSSW("/src/WbWbXAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiCompare_standard.txt");
+		pl.readTextBoxesInCMSSW("/src/WbWbXAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiStack_standard.txt",
 				toString(bjetcat)+"btag"+toString( datasets_.at(datasetidx).getName()));
 
 
@@ -1282,9 +1282,9 @@ void ttbarXsecFitter::printAdditionalControlplots(const std::string& inputfile, 
 		if(plotnames.at(i).size()<1)continue;
 		plotterControlPlot pl;
 		if( inputfile.find("8TeV")!=std::string::npos)
-			pl.readTextBoxesInCMSSW("/src/TtZAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSSplit03Left");
+			pl.readTextBoxesInCMSSW("/src/WbWbXAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSSplit03Left");
 		else if(inputfile.find("7TeV")!=std::string::npos)
-			pl.readTextBoxesInCMSSW("/src/TtZAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSSplit03Left7TeV");
+			pl.readTextBoxesInCMSSW("/src/WbWbXAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSSplit03Left7TeV");
 
 		if(hasmtvar)
 			pl.setSystLabel("#splitline{MC stat+syst}{+#Deltam_{t}^{MC}}");
@@ -1393,7 +1393,7 @@ void ttbarXsecFitter::createSystematicsBreakdown(size_t datasetidx, const TStrin
 
 	formatter fmt;
 	TString cmsswbase=getenv("CMSSW_BASE");
-	fmt.readInNameTranslateFile((cmsswbase+"/src/TtZAnalysis/Analysis/configs/general/SystNames.txt").Data());
+	fmt.readInNameTranslateFile((cmsswbase+"/src/WbWbXAnalysis/Analysis/configs/general/SystNames.txt").Data());
 
 	//bool completetable=false; //make configureable later
 
@@ -1705,7 +1705,7 @@ texTabler ttbarXsecFitter::makeSystBreakDownTable(size_t datasetidx,bool detaile
 
 	formatter fmt;
 	TString cmsswbase=getenv("CMSSW_BASE");
-	fmt.readInNameTranslateFile((cmsswbase+"/src/TtZAnalysis/Analysis/configs/general/SystNames.txt").Data());
+	fmt.readInNameTranslateFile((cmsswbase+"/src/WbWbXAnalysis/Analysis/configs/general/SystNames.txt").Data());
 	texTabler table(" l | c | c | c ");
 	if(!fitsucc_)
 		return table;
@@ -1828,7 +1828,7 @@ texTabler ttbarXsecFitter::makeCorrTable() const{
 
 	formatter Formatter;
 	TString cmsswbase=getenv("CMSSW_BASE");
-	Formatter.readInNameTranslateFile((cmsswbase+"/src/TtZAnalysis/Analysis/configs/general/SystNames.txt").Data());
+	Formatter.readInNameTranslateFile((cmsswbase+"/src/WbWbXAnalysis/Analysis/configs/general/SystNames.txt").Data());
 	for(size_t j=0;j<corr.getBinsY().size()-1;j++){
 		for(size_t i=0;i<corr.getBinsX().size()-1;i++){
 			//names

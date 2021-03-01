@@ -9,7 +9,7 @@
 #include "TLorentzVector.h"
 #include "TVector3.h"
 
-#include "TtZAnalysis/DataFormats/interface/NTGenParticle.h"
+#include "WbWbXAnalysis/DataFormats/interface/NTGenParticle.h"
 
 //! class to compute the polar and azimuthal angle in the Collins-Soper frame
 class HTransformToCS {

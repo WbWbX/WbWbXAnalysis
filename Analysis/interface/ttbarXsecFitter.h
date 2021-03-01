@@ -8,14 +8,14 @@
 #ifndef TTBARXSECFITTER_H_
 #define TTBARXSECFITTER_H_
 #include <vector>
-#include "TtZAnalysis/Tools/interface/variateHisto1D.h"
-#include "TtZAnalysis/Tools/interface/simpleFitter.h"
-#include "TtZAnalysis/Tools/interface/formatter.h"
-#include "TtZAnalysis/Tools/interface/histo2D.h"
-#include "TtZAnalysis/Tools/interface/texTabler.h"
+#include "WbWbXAnalysis/Tools/interface/variateHisto1D.h"
+#include "WbWbXAnalysis/Tools/interface/simpleFitter.h"
+#include "WbWbXAnalysis/Tools/interface/formatter.h"
+#include "WbWbXAnalysis/Tools/interface/histo2D.h"
+#include "WbWbXAnalysis/Tools/interface/texTabler.h"
 #include "TString.h"
 #include "TRandom3.h"
-#include "TtZAnalysis/Configuration/interface/version.h"
+#include "WbWbXAnalysis/Configuration/interface/version.h"
 
 namespace ztop{
 class histoStack;

@@ -23,7 +23,7 @@
 #ifndef TREEWRITERBASE_H
 #define TREEWRITERBASE_H
 
-#include "TtZAnalysis/Configuration/interface/version.h"
+#include "WbWbXAnalysis/Configuration/interface/version.h"
 #include "TopAnalysis/ZTopUtils/interface/consumeTemplate.h"
 
 #include <memory>

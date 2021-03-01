@@ -19,7 +19,7 @@ int main(){
   //  specialcplots.setStartMarker("[additional plots]");
   //  specialcplots.setEndMarker("[end additional plots]");
     specialcplots.setDelimiter(",");
-    specialcplots.readFile("/afs/desy.de/user/k/kiesej/xxl-af-cms/recProject/CMSSW_5_3_14/src/TtZAnalysis/Analysis/configs/mtExtractor_config.txt");
+    specialcplots.readFile("/afs/desy.de/user/k/kiesej/xxl-af-cms/recProject/CMSSW_5_3_14/src/WbWbXAnalysis/Analysis/configs/mtExtractor_config.txt");
 
     //get plot names
     std::vector<std::string> plotnames= specialcplots.getMarkerValues("plot");

@@ -3,15 +3,15 @@
   AutoLibraryLoader::enable();
 
   gSystem->Load("libDataFormatsFWLite.so");
-  gSystem->Load("libTtZAnalysisDataFormats.so");
-  gSystem->Load("libTtZAnalysisTools.so");
+  gSystem->Load("libWbWbXAnalysisDataFormats.so");
+  gSystem->Load("libWbWbXAnalysisTools.so");
   gSystem->Load("libTopAnalysisZTopUtils.so");
 
-  cout << "TtZAnalysis libs loaded" <<endl;
+  cout << "WbWbXAnalysis libs loaded" <<endl;
 
 
   //this would make inlined functions working (root bug), but takes a lot of loading time
-  //#include "TtZAnalysis/DataFormats/src/classes.h"
+  //#include "WbWbXAnalysis/DataFormats/src/classes.h"
   //for interactive vector handling 
 
 

@@ -7,12 +7,12 @@
 
 #ifndef PARAEXTRPULL_H_
 #define PARAEXTRPULL_H_
-#include "TtZAnalysis/Tools/interface/parameterExtractor.h"
-#include "TtZAnalysis/Tools/interface/histo1D.h"
-#include "TtZAnalysis/Tools/interface/graph.h"
+#include "WbWbXAnalysis/Tools/interface/parameterExtractor.h"
+#include "WbWbXAnalysis/Tools/interface/histo1D.h"
+#include "WbWbXAnalysis/Tools/interface/graph.h"
 #include <vector>
 #include "TRandom3.h"
-#include "TtZAnalysis/Tools/interface/graphFitter.h"
+#include "WbWbXAnalysis/Tools/interface/graphFitter.h"
 
 namespace ztop{
 

@@ -10,7 +10,7 @@
 
 [textBoxes - boxes]
 
-externalFile = CMSSW_BASE/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt
+externalFile = CMSSW_BASE/src/WbWbXAnalysis/Analysis/configs/general/CMS_boxes.txt
 externalMarker = CMSSplit03Left
 
 [end textBoxes]

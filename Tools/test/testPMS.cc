@@ -8,7 +8,7 @@
 
 
 
-#include <TtZAnalysis/Tools/interface/plotterMultiColumn.h>
+#include <WbWbXAnalysis/Tools/interface/plotterMultiColumn.h>
 #include "../interface/histoStack.h"
 #include "fillContainerRandom.h"
 #include "TRandom3.h"
@@ -43,14 +43,14 @@ int main(){
 	stack2.push_back(h2,"data",0,1);
 
 	plotterControlPlot pl;
-	pl.addStyleFromFile((std::string)getenv("CMSSW_BASE")+"/src/TtZAnalysis/Tools/styles/controlPlots_standard.txt");
+	pl.addStyleFromFile((std::string)getenv("CMSSW_BASE")+"/src/WbWbXAnalysis/Tools/styles/controlPlots_standard.txt");
 	pl.setStack(&stack);
 	pl.printToPdf("test_single");
 
 	//plotterBase::debug=true;
 
 	plotterMultiStack plm;
-	plm.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiStack_standard.txt");
+	plm.readStyleFromFileInCMSSW("/src/WbWbXAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiStack_standard.txt");
 	plm.addStack(&stack2);
 	histoStack stack3=stack*0.2;
 	plm.addStack(&stack);
@@ -60,7 +60,7 @@ int main(){
 	plm.printToPdf("test_multi");
 	 */
 	histoStackVector hsv;
-	hsv.readFromFile("/afs/desy.de/user/k/kiesej/recentProject/src/TtZAnalysis/Analysis/output/emu_7TeV_172.5_nominal.ztop");
+	hsv.readFromFile("/afs/desy.de/user/k/kiesej/recentProject/src/WbWbXAnalysis/Analysis/output/emu_7TeV_172.5_nominal.ztop");
 
 	histoStack tot=hsv.getStack("total 0,0 b-jets step 8");
 	histoStack j1=hsv.getStack("lead jet pt 0,1 b-jets step 8");
@@ -69,10 +69,10 @@ int main(){
 
 
 	plotterMultiStack plm;
-	plm.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiStack_standard.txt");
+	plm.readStyleFromFileInCMSSW("/src/WbWbXAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiStack_standard.txt");
 
 	TCanvas cv;
-	plm.readTextBoxesInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiStack_standard.txt","0btag7TeV");
+	plm.readTextBoxesInCMSSW("/src/WbWbXAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiStack_standard.txt","0btag7TeV");
 	plm.addStack(&tot);
 	plm.addStack(&j1);
 	plm.addStack(&j2);

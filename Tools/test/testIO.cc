@@ -8,13 +8,13 @@
 
 
 
-#include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
+#include "WbWbXAnalysis/Tools/interface/applicationMainMacro.h"
 #include <fstream>
 #include <string>
-#include "TtZAnalysis/Tools/interface/histoBin.h"
-#include "TtZAnalysis/Tools/interface/histo1D.h"
-#include "TtZAnalysis/Tools/interface/histoStack.h"
-#include "TtZAnalysis/Tools/interface/histoStackVector.h"
+#include "WbWbXAnalysis/Tools/interface/histoBin.h"
+#include "WbWbXAnalysis/Tools/interface/histo1D.h"
+#include "WbWbXAnalysis/Tools/interface/histoStack.h"
+#include "WbWbXAnalysis/Tools/interface/histoStackVector.h"
 #include <ctime>
 
 void WriteString(std::ofstream& file,const std::string& str)

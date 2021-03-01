@@ -20,9 +20,9 @@
 #include "../interface/wControlPlots.h"
 #include "../interface/wControlplots_gen.h"
 #include "../interface/analysisPlotsW.h"
-#include "TtZAnalysis/DataFormats/interface/helpers.h"
-#include "TtZAnalysis/DataFormats/interface/NTEvent.h"
-#include "TtZAnalysis/DataFormats/interface/GenStatusFlags.h"
+#include "WbWbXAnalysis/DataFormats/interface/helpers.h"
+#include "WbWbXAnalysis/DataFormats/interface/NTEvent.h"
+#include "WbWbXAnalysis/DataFormats/interface/GenStatusFlags.h"
 
 #include "../interface/wReweightingPlots.h"
 

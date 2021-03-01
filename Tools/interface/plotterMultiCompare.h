@@ -21,7 +21,7 @@ public:
 
 
 	plotterMultiCompare():plotterMultiColumn(){
-		readStyleFromFileInCMSSW("/src/TtZAnalysis/Tools/styles/plotterMultiCompare_standard.txt");
+		readStyleFromFileInCMSSW("/src/WbWbXAnalysis/Tools/styles/plotterMultiCompare_standard.txt");
 	}
 	~plotterMultiCompare(){}
 

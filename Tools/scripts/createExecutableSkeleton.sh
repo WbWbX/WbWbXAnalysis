@@ -21,7 +21,7 @@ cat >> $1 << EOF
  *    help text
  */
 
-#include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
+#include "WbWbXAnalysis/Tools/interface/applicationMainMacro.h"
 
 /*
  *  Document the purpose shortly

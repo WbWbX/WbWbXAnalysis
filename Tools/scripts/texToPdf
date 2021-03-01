@@ -12,7 +12,7 @@ then
     tmpfile=/tmp/$(date +%s%N)
     trap "rm -rf $tmpfile; exit" SIGHUP SIGINT SIGTERM
     
-    export TEXINPUTS=$CMSSW_BASE/src/TtZAnalysis/Tools/scripts/tex_packages:$TEXINPUTS
+    export TEXINPUTS=$CMSSW_BASE/src/WbWbXAnalysis/Tools/scripts/tex_packages:$TEXINPUTS
     
     printf "\\\documentclass[11pt]{article}">>| $tmpfile
 #printf "\\\usepackage{blindtext}">>| $tmpfile

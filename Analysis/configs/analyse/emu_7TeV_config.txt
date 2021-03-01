@@ -68,26 +68,26 @@ inputFilesDir = /nfs/dust/cms/user/kiesej/trees_Xmas1415/
 
 Lumi           = 5049
 
-JECFile        = /src/TtZAnalysis/Analysis/data/analyse/Legacy11_V1_DATA_UncertaintySources_AK5PFchs.txt
+JECFile        = /src/WbWbXAnalysis/Analysis/data/analyse/Legacy11_V1_DATA_UncertaintySources_AK5PFchs.txt
 
-MuonSFFile     = /src/TtZAnalysis/Analysis/data/analyse/muon_tight_sf2D_7TeV.root
+MuonSFFile     = /src/WbWbXAnalysis/Analysis/data/analyse/muon_tight_sf2D_7TeV.root
 MuonSFHisto    = GlobalSF
-TrackingSFFile = /src/TtZAnalysis/Analysis/data/analyse/muon_trackSF_8TeV.root
+TrackingSFFile = /src/WbWbXAnalysis/Analysis/data/analyse/muon_trackSF_8TeV.root
 TrackingSFHisto = tracking_eff
 
 
 
-ElecSFFile     = /src/TtZAnalysis/Analysis/data/analyse/elec_tight_sf2D_7TeV.root
+ElecSFFile     = /src/WbWbXAnalysis/Analysis/data/analyse/elec_tight_sf2D_7TeV.root
 ElecSFHisto    = GlobalSF
 
 
- ElecEnergySFFile = /src/TtZAnalysis/Analysis/data/analyse/ElecEnergySF_7TeV.root
+ ElecEnergySFFile = /src/WbWbXAnalysis/Analysis/data/analyse/ElecEnergySF_7TeV.root
  ElecEnergySFHisto= sf
 
 
-TriggerSFFile  = /src/TtZAnalysis/Analysis/data/analyse/triggerSummary_emu_7TeV_tight20.root
+TriggerSFFile  = /src/WbWbXAnalysis/Analysis/data/analyse/triggerSummary_emu_7TeV_tight20.root
 
-PUFile         = /src/TtZAnalysis/Analysis/data/analyse/Legacy2011.json_PU    $without .root
+PUFile         = /src/WbWbXAnalysis/Analysis/data/analyse/Legacy2011.json_PU    $without .root
 
 
 

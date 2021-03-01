@@ -15,7 +15,7 @@ fi
 mkdir -p /nfs/dust/cms/user/$USER/cmssw_full_tarballs
 
 targetfile=/nfs/dust/cms/user/$USER/cmssw_full_tarballs/$CMSSW_VERSION.tar
-excludefile=$CMSSW_BASE/src/TtZAnalysis/EclipseTools/.advanced_exclude_fromtar.txt 
+excludefile=$CMSSW_BASE/src/WbWbXAnalysis/EclipseTools/.advanced_exclude_fromtar.txt 
 
 if [ -e $targetfile ]
 then

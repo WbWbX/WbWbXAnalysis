@@ -7,17 +7,17 @@
 
 
 #include "../interface/mtFromInclXsec.h"
-#include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
-#include "TtZAnalysis/Tools/interface/plotter2D.h"
-#include "TtZAnalysis/Tools/interface/plotterMultiplePlots.h"
-#include "TtZAnalysis/Tools/interface/resultCombiner.h"
-#include "TtZAnalysis/Tools/interface/textFormatter.h"
+#include "WbWbXAnalysis/Tools/interface/applicationMainMacro.h"
+#include "WbWbXAnalysis/Tools/interface/plotter2D.h"
+#include "WbWbXAnalysis/Tools/interface/plotterMultiplePlots.h"
+#include "WbWbXAnalysis/Tools/interface/resultCombiner.h"
+#include "WbWbXAnalysis/Tools/interface/textFormatter.h"
 #include "TCanvas.h"
 #include "TStyle.h"
-#include  "TtZAnalysis/Tools/interface/formatter.h"
+#include  "WbWbXAnalysis/Tools/interface/formatter.h"
 #include "TFile.h"
 #include "TLegend.h"
-#include "TtZAnalysis/Tools/interface/fileReader.h"
+#include "WbWbXAnalysis/Tools/interface/fileReader.h"
 invokeApplication(){
 
 	using namespace ztop;
@@ -27,7 +27,7 @@ invokeApplication(){
 	//const float energy = parser->getOpt<float>("e",8,"energy -  TESTMODE!");
 	const std::vector<std::string> in=parser->getRest<std::string>();
 
-	const std::string predfile=getenv("CMSSW_BASE") +(std::string)"/src/TtZAnalysis/Analysis/data/predicitions/"+ parser->getOpt<std::string>("i",
+	const std::string predfile=getenv("CMSSW_BASE") +(std::string)"/src/WbWbXAnalysis/Analysis/data/predicitions/"+ parser->getOpt<std::string>("i",
 			"ttbar_predictions.txt","input file for prediction");
 	const std::string predids=parser->getOpt<std::string>("p","8TeV:Top++_NNPDF30_nnlo_as_0118NNLO8000_pole,7TeV:Top++_NNPDF30_nnlo_as_0118NNLO7000_pole","prediction ids <energy>:<id>");
 
@@ -116,20 +116,20 @@ invokeApplication(){
 			textBoxes tb2d,tb22d;;
 
 			if(energies.at(ergy).find("8TeV") != std::string::npos){
-				tb2d.readFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt","CMSPaperNoSplitRight2D");
+				tb2d.readFromFileInCMSSW("/src/WbWbXAnalysis/Analysis/configs/general/CMS_boxes.txt","CMSPaperNoSplitRight2D");
 			}else{
-				tb2d.readFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt","CMSPaperNoSplitRight2D7TeV");
+				tb2d.readFromFileInCMSSW("/src/WbWbXAnalysis/Analysis/configs/general/CMS_boxes.txt","CMSPaperNoSplitRight2D7TeV");
 			}
 
 
 
 			textBoxes tbtheo;
-			pl.readStyleFromFileInCMSSW("src/TtZAnalysis/Analysis/configs/mtFromXsec2/plot2D_0to1.txt");
+			pl.readStyleFromFileInCMSSW("src/WbWbXAnalysis/Analysis/configs/mtFromXsec2/plot2D_0to1.txt");
 			//pl.setZAxis("L_{pred}(m_{t},#sigma_{t#bar{t}})");
 			if(energies.at(ergy).find("8TeV") != std::string::npos){
-				tbtheo.readFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt","nodataCMSnoSplitRight2D");
+				tbtheo.readFromFileInCMSSW("/src/WbWbXAnalysis/Analysis/configs/general/CMS_boxes.txt","nodataCMSnoSplitRight2D");
 			}else{
-				tbtheo.readFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt","nodataCMSnoSplitRight2D7TeV");
+				tbtheo.readFromFileInCMSSW("/src/WbWbXAnalysis/Analysis/configs/general/CMS_boxes.txt","nodataCMSnoSplitRight2D7TeV");
 			}
 			pl.usePad(&cv);
 			pl.setPlot(&ex.getTheoLikelihood());
@@ -339,7 +339,7 @@ invokeApplication(){
 		plotter2D pl;
 		pl.usePad(&cvfin);
 		pl.setPlot(&alljoint);
-		pl.readStyleFromFileInCMSSW("src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plotCombinedMpole.txt");
+		pl.readStyleFromFileInCMSSW("src/WbWbXAnalysis/Analysis/configs/fitTtBarXsec/plotCombinedMpole.txt");
 		pl.draw();
 		for(size_t i=0;i<forfinalPoint.size();i++){
 			forfinalPoint.at(i)->Draw("P");

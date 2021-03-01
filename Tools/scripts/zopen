@@ -4,4 +4,4 @@
 file=$1
 
 
-root -l "$CMSSW_BASE/src/TtZAnalysis/Tools/scripts/macros/openhsv.C(\"${file}\")" 
+root -l "$CMSSW_BASE/src/WbWbXAnalysis/Tools/scripts/macros/openhsv.C(\"${file}\")" 

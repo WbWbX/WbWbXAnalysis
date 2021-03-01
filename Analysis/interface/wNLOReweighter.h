@@ -8,7 +8,7 @@
 #ifndef TTZANALYSIS_ANALYSIS_INTERFACE_WNLOREWEIGHTER_H_
 #define TTZANALYSIS_ANALYSIS_INTERFACE_WNLOREWEIGHTER_H_
 
-#include "TtZAnalysis/Tools/interface/binFinder.h"
+#include "WbWbXAnalysis/Tools/interface/binFinder.h"
 #include "scalefactors.h"
 #include "simpleReweighter.h"
 #include <string>

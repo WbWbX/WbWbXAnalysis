@@ -63,21 +63,21 @@ inputFilesDir = /nfs/dust/cms/user/kiesej/trees_Xmas1415/ $for naf
 
 Lumi           = 19741
 
-JECFile        = /src/TtZAnalysis/Analysis/data/analyse/Summer13_V5_DATA_UncertaintySources_AK5PFchs.txt
+JECFile        = /src/WbWbXAnalysis/Analysis/data/analyse/Summer13_V5_DATA_UncertaintySources_AK5PFchs.txt
 
-MuonSFFile     = /src/TtZAnalysis/Analysis/data/analyse/muon_tight_sf2D_8TeV.root
+MuonSFFile     = /src/WbWbXAnalysis/Analysis/data/analyse/muon_tight_sf2D_8TeV.root
 MuonSFHisto    = eff_pt_eta_fullwithtrackerr
-TrackingSFFile = /src/TtZAnalysis/Analysis/data/analyse/muon_trackSF_8TeV.root
+TrackingSFFile = /src/WbWbXAnalysis/Analysis/data/analyse/muon_trackSF_8TeV.root
 TrackingSFHisto = tracking_eff
 
 
 
-ElecSFFile     = /src/TtZAnalysis/Analysis/data/analyse/elec_tight_sf2D_8TeV.root
+ElecSFFile     = /src/WbWbXAnalysis/Analysis/data/analyse/elec_tight_sf2D_8TeV.root
 ElecSFHisto    = GlobalSF
 
-TriggerSFFile  = /src/TtZAnalysis/Analysis/data/analyse/trigger_emu_8TeV_pt30.root
+TriggerSFFile  = /src/WbWbXAnalysis/Analysis/data/analyse/trigger_emu_8TeV_pt30.root
 
-PUFile         = /src/TtZAnalysis/Analysis/data/analyse/Legacy2012.json_PU    $without .root
+PUFile         = /src/WbWbXAnalysis/Analysis/data/analyse/Legacy2012.json_PU    $without .root
 
 btagWP         = csvl
 btagFile       = all_btags

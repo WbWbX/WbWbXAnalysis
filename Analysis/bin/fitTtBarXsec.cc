@@ -6,20 +6,20 @@
  */
 
 
-#include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
+#include "WbWbXAnalysis/Tools/interface/applicationMainMacro.h"
 #include "../interface/ttbarXsecFitter.h"
 #include <iostream>
 #include <string>
-#include "TtZAnalysis/Tools/interface/histoStack.h"
-#include "TtZAnalysis/Tools/interface/plotterControlPlot.h"
-#include "TtZAnalysis/Tools/interface/plotterMultiplePlots.h"
-#include "TtZAnalysis/Tools/interface/plotterCompare.h"
-#include "TtZAnalysis/Tools/interface/plotter2D.h"
+#include "WbWbXAnalysis/Tools/interface/histoStack.h"
+#include "WbWbXAnalysis/Tools/interface/plotterControlPlot.h"
+#include "WbWbXAnalysis/Tools/interface/plotterMultiplePlots.h"
+#include "WbWbXAnalysis/Tools/interface/plotterCompare.h"
+#include "WbWbXAnalysis/Tools/interface/plotter2D.h"
 #include "TFile.h"
 #include <TError.h>
-#include <TtZAnalysis/Tools/interface/plotterMultiColumn.h>
-#include "TtZAnalysis/Tools/interface/fileReader.h"
-#include "TtZAnalysis/Tools/interface/histoStackVector.h"
+#include <WbWbXAnalysis/Tools/interface/plotterMultiColumn.h>
+#include "WbWbXAnalysis/Tools/interface/fileReader.h"
+#include "WbWbXAnalysis/Tools/interface/histoStackVector.h"
 
 invokeApplication(){
 	using namespace ztop;
@@ -27,7 +27,7 @@ invokeApplication(){
 	parser->bepicky=true;
 	const TString lhmode = parser->getOpt<TString>("m","poissondata",
 			"modes for the likelihood assumption in the fit.  possible: chi2data, chi2datamc, poissondata default: poissondata");
-	const TString inputconfig = parser->getOpt<TString>("i","ttbarXsecFitter_mll.txt","input config (located in TtZAnalysis/Analysis/configs");
+	const TString inputconfig = parser->getOpt<TString>("i","ttbarXsecFitter_mll.txt","input config (located in WbWbXAnalysis/Analysis/configs");
 	const bool onlyMC=parser->getOpt<bool>("-onlyMC",false,"use plain MC, no data. Compare sum(MC) to MC. useful to check if a fit could work theoretically");
 	if(lhmode!="chi2datamc" && lhmode!="chi2data" && lhmode!="poissondata"){
 		parser->coutHelp();
@@ -66,9 +66,9 @@ invokeApplication(){
 
 	const std::string fullcfgpath=
 			inputconfig.BeginsWith("/") || inputconfig.BeginsWith("./") ? "" :
-					(cmsswbase+"/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/");
+					(cmsswbase+"/src/WbWbXAnalysis/Analysis/configs/fitTtBarXsec/");
 	if(!fileExists((fullcfgpath+inputconfig).Data())){
-		std::cout << "fitTtBarXsec: input file not found. \nAvailable files in " <<cmsswbase+"/src/TtZAnalysis/Analysis/configs/fitTtBarXsec:"<<std::endl;
+		std::cout << "fitTtBarXsec: input file not found. \nAvailable files in " <<cmsswbase+"/src/WbWbXAnalysis/Analysis/configs/fitTtBarXsec:"<<std::endl;
 		system(("ls "+fullcfgpath).data());
 		return -1;
 	}
@@ -152,7 +152,7 @@ invokeApplication(){
 			}
 		}
 
-		std::string specialplotsfile=cmsswbase+"/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/selected_controlplots.txt";
+		std::string specialplotsfile=cmsswbase+"/src/WbWbXAnalysis/Analysis/configs/fitTtBarXsec/selected_controlplots.txt";
 
 
 		//get files
@@ -192,14 +192,14 @@ invokeApplication(){
 				//plotterControlPlot::debug=true;
 				//histoStack::debug=true;
 				pl.readStyleFromFileInCMSSW(specialcplots.getValue<std::string>("defaultStyle"));
-				std::string mergelgdefs=(std::string)getenv("CMSSW_BASE")+(std::string)"/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/controlPlots_mergeleg.txt";
+				std::string mergelgdefs=(std::string)getenv("CMSSW_BASE")+(std::string)"/src/WbWbXAnalysis/Analysis/configs/fitTtBarXsec/controlPlots_mergeleg.txt";
 				pl.addStyleFromFile( mergelgdefs,"[merge for control plots]","[end - merge for control plots]");
 				//	textBoxes::debug=true;
 				if(stackit+1<plotnames.size())
 					pl.addStyleFromFile(fracfile,  "[plot - " + plotnames.at(stackit)+"]", "[plot - "+ plotnames.at(stackit+1) +"]" );
 				else
 					pl.addStyleFromFile(fracfile,  "[plot - " + plotnames.at(stackit) +"]","[end - additional plots]");
-				//pl.readTextBoxesInCMSSW("/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt","CMSPaperSplit03Left");
+				//pl.readTextBoxesInCMSSW("/src/WbWbXAnalysis/Analysis/configs/general/CMS_boxes.txt","CMSPaperSplit03Left");
 				size_t datasetidx=mainfitter.getDatasetIndex(datasets.at(file).data() );
 				mainfitter.addUncertainties(&stack, datasetidx);
 				pl.setStack(&stack);
@@ -333,7 +333,7 @@ invokeApplication(){
 
 			TCanvas * cv=new TCanvas();
 			plotterMultiplePlots plm;
-			plm.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/multiplePlots_pulls.txt");
+			plm.readStyleFromFileInCMSSW("/src/WbWbXAnalysis/Analysis/configs/fitTtBarXsec/multiplePlots_pulls.txt");
 			plm.usePad(cv);
 			plm.addPlot(c);
 			plm.setLastNoLegend();
@@ -390,7 +390,7 @@ invokeApplication(){
 
 		histoStack stack;
 		//plotterControlPlot pl;
-		//pl.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/controlPlots_combined.txt");
+		//pl.readStyleFromFileInCMSSW("/src/WbWbXAnalysis/Analysis/configs/fitTtBarXsec/controlPlots_combined.txt");
 		TCanvas c;
 		c.Print(outfile+".pdf(");
 		//pl.usePad(&c);
@@ -420,7 +420,7 @@ invokeApplication(){
 			std::cout << "printing correlations" << std::endl;
 		c.SetName("correlations");
 		plotter2D pl2d;
-		pl2d.readStyleFromFileInCMSSW("src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plot2D_-1to1.txt");
+		pl2d.readStyleFromFileInCMSSW("src/WbWbXAnalysis/Analysis/configs/fitTtBarXsec/plot2D_-1to1.txt");
 		pl2d.usePad(&c);
 		histo2D corr2d=mainfitter.getCorrelations();
 		pl2d.setPlot(&corr2d);
@@ -508,7 +508,7 @@ invokeApplication(){
 			dir+=mainfitter.datasetName(ndts).Data();
 			system(("mkdir -p "+dir).data());
 			dir+="/";
-			mainfitter.printAdditionalControlplots(infile,cmsswbase+"/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/prefit_postfit_plots.txt",dir);
+			mainfitter.printAdditionalControlplots(infile,cmsswbase+"/src/WbWbXAnalysis/Analysis/configs/fitTtBarXsec/prefit_postfit_plots.txt",dir);
 
 
 		}

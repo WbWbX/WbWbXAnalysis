@@ -21,7 +21,7 @@ options.register ('includereco',False,VarParsing.VarParsing.multiplicity.singlet
 options.register ('includetrigger',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"includes full trigger string info for event")
 options.register ('includePDF',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"includes pdf weights info for event")
 options.register ('PDF','cteq66',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"pdf set for weights")
-options.register ('inputScript','TtZAnalysis.Configuration.samples.mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"input Script")
+options.register ('inputScript','WbWbXAnalysis.Configuration.samples.mc.TTJets_MassiveBinDECAY_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"input Script")
 options.register ('json','nojson',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string,"json files")
 options.register ('isSync',False,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool,"switch on for sync")
 options.register('oppoQ', True, VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.bool, "require opposite charge leptons (for data and BG only)")
@@ -66,14 +66,14 @@ includereco=options.includereco          # False
 includetrigger=options.includetrigger    # True
 includePDFWeights=options.includePDF     # False
 PDF=options.PDF                          # cteq65
-inputScript=options.inputScript          # TtZAnalysis.Configuration.samples.mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12-PU_S7_START52_V9-v2_cff
+inputScript=options.inputScript          # WbWbXAnalysis.Configuration.samples.mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12-PU_S7_START52_V9-v2_cff
 is2011=False
 if "_7TeV_" in outputFile:
     is2011=True
     print 'running on 7TeV'
 if is2011:
-    inputScript='TtZAnalysis.Configuration.samples.mc.TTJets_MSDecays_central_TuneZ2_7TeV-madgraph-tauola_Summer11LegDR_PU_S13_START53_LV6_v1_cff'
-json=options.json                        # give full path!!json files in TtZAnalysis/Data/data ONLY needed with nafjobsplitter
+    inputScript='WbWbXAnalysis.Configuration.samples.mc.TTJets_MSDecays_central_TuneZ2_7TeV-madgraph-tauola_Summer11LegDR_PU_S13_START53_LV6_v1_cff'
+json=options.json                        # give full path!!json files in WbWbXAnalysis/Data/data ONLY needed with nafjobsplitter
 laseroff=options.laseroff
 susy=options.susy
 jpsi=options.jpsi
@@ -118,7 +118,7 @@ if syncfile:
 
 if includePDFWeights:
     import os
-    newlha = os.environ['CMSSW_BASE']+'/src/TtZAnalysis/Data/data/PDFSets'
+    newlha = os.environ['CMSSW_BASE']+'/src/WbWbXAnalysis/Data/data/PDFSets'
     #os.environ['LHAPATH']=newlha
 
 
@@ -206,7 +206,7 @@ process.pdfWeights = cms.EDProducer("PdfWeightProducer",
                                     )
 
 
-process.load('TtZAnalysis.TreeWriter.puinfo_cff')
+process.load('WbWbXAnalysis.TreeWriter.puinfo_cff')
 
 process.PUInfo.includePDFWeights = includePDFWeights
 process.PUInfo.pdfWeights = "pdfWeights:"+PDF
@@ -479,7 +479,7 @@ process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
 if options.extraJetCorrections and not is2011:
     import os
-    jecFile=os.path.relpath( os.environ['CMSSW_BASE']+'/src/TtZAnalysis/Data/PTFIXV2_FT_53_V21_AN5_private.db') 
+    jecFile=os.path.relpath( os.environ['CMSSW_BASE']+'/src/WbWbXAnalysis/Data/PTFIXV2_FT_53_V21_AN5_private.db') 
     jecEra= 'FT_53_V21_AN5' #'Summer13_PTFIXV2_DATA'
     process.jec = cms.ESSource( "PoolDBESSource"
                                 , DBParameters = cms.PSet(messageLevel = cms.untracked.int32(0))
@@ -564,7 +564,7 @@ getattr(process,'patElectrons'+pfpostfix).electronIDSources = cms.PSet(mvaTrigV0
 ########
 #   adapt electrons to R=03 and use gsf
 
-from TtZAnalysis.Workarounds.useGsfElectrons import *
+from WbWbXAnalysis.Workarounds.useGsfElectrons import *
 
 process.patPFElectronsPFlow = getattr(process,'patElectrons'+pfpostfix).clone()
 getattr(process,'patPF2PATSequence'+pfpostfix).replace(getattr(process,'patElectrons'+pfpostfix),
@@ -958,18 +958,18 @@ if not isSignal:
 
 ########## Prepare Tree ##
 if ttH:
-    process.load('TtZAnalysis.TreeWriter.treewriter_tth_cff')
+    process.load('WbWbXAnalysis.TreeWriter.treewriter_tth_cff')
 
 elif susy:
-    process.load('TtZAnalysis.TreeWriter.treewriter_susy_cff')
-    from TtZAnalysis.Workarounds.usePFIsoCone import *
+    process.load('WbWbXAnalysis.TreeWriter.treewriter_susy_cff')
+    from WbWbXAnalysis.Workarounds.usePFIsoCone import *
     usePFIsoCone(process)
     #load the standard pat objects
     #process.kinMuons.src = 'patMuons'
     #process.kinElectrons.src = 'patElectrons'
 
 else:
-    process.load('TtZAnalysis.TreeWriter.treewriter_ttz_cff')
+    process.load('WbWbXAnalysis.TreeWriter.treewriter_ttz_cff')
 
 
 

@@ -7,7 +7,7 @@
 
 #ifndef WWWDUMPER_H_
 #define WWWDUMPER_H_
-#include "TtZAnalysis/Tools/interface/histoStackVector.h"
+#include "WbWbXAnalysis/Tools/interface/histoStackVector.h"
 #include "TString.h"
 
 namespace ztop{

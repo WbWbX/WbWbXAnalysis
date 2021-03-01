@@ -4,9 +4,9 @@
  *  Created on: Feb 20, 2014
  *      Author: kiesej
  */
-#include "TtZAnalysis/Tools/interface/optParser.h"
-#include "TtZAnalysis/Tools/interface/graph.h"
-#include "TtZAnalysis/Tools/interface/histo1D.h"
+#include "WbWbXAnalysis/Tools/interface/optParser.h"
+#include "WbWbXAnalysis/Tools/interface/graph.h"
+#include "WbWbXAnalysis/Tools/interface/histo1D.h"
 #include "../interface/mtExtractor.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 
@@ -14,25 +14,25 @@
 #include <vector>
 #include "TFile.h"
 
-#include "TtZAnalysis/Tools/interface/textFormatter.h"
+#include "WbWbXAnalysis/Tools/interface/textFormatter.h"
 #include "TCanvas.h"
 #include "TPavesText.h"
 #include "TLatex.h"
-#include "TtZAnalysis/Tools/interface/plotterControlPlot.h"
+#include "WbWbXAnalysis/Tools/interface/plotterControlPlot.h"
 
-#include "TtZAnalysis/Tools/interface/fileReader.h"
+#include "WbWbXAnalysis/Tools/interface/fileReader.h"
 #include "TStyle.h"
-#include "TtZAnalysis/Tools/interface/formatter.h"
+#include "WbWbXAnalysis/Tools/interface/formatter.h"
 
-#include "TtZAnalysis/Tools/interface/plotterMultiplePlots.h"
-#include "TtZAnalysis/Tools/interface/parameterExtractor.h"
+#include "WbWbXAnalysis/Tools/interface/plotterMultiplePlots.h"
+#include "WbWbXAnalysis/Tools/interface/parameterExtractor.h"
 #include "TColor.h"
 #include <iomanip>
 #include "TError.h"
 
 #include "../interface/paraExtrPull.h"
 #include "TRandom3.h"
-#include "TtZAnalysis/Tools/interface/systAdder.h"
+#include "WbWbXAnalysis/Tools/interface/systAdder.h"
 
 #include <omp.h>
 
@@ -116,7 +116,7 @@ void makePseudoExperiments(ztop::mtExtractor* ex,size_t niter,float evalpoint, T
 
 
 	plotterMultiplePlots plotterm;
-	plotterm.readStyleFromFileInCMSSW("src/TtZAnalysis/Analysis/configs/mtFromXsec2/multiplePlots_pulls.txt");
+	plotterm.readStyleFromFileInCMSSW("src/WbWbXAnalysis/Analysis/configs/mtFromXsec2/multiplePlots_pulls.txt");
 	plotterm.usePad(&cv1);
 	plotterm.cleanMem();
 	plotterm.clear();
@@ -239,7 +239,7 @@ int main(int argc, char* argv[]){
 	const bool nosyst     =  parse.getOpt<bool>   ("-nosyst",false,"skip systematics");
 	const bool onlysignalstat     =  parse.getOpt<bool>   ("-onlysignalstat",false,"skip systematics");
 	std::string extconfigfile      =  parse.getOpt<std::string>    ("-config",
-			((TString)cmsswbase+"/src/TtZAnalysis/Analysis/configs/mtFromXsec2/mtExtractor_config.txt").Data(),
+			((TString)cmsswbase+"/src/WbWbXAnalysis/Analysis/configs/mtFromXsec2/mtExtractor_config.txt").Data(),
 			"specify config file for external gen input");
 	const bool normalize  = parse.getOpt<bool>   ("-normalize",false,"normalize all distributions");
 	const bool makepdfs   =  parse.getOpt<bool>   ("-makepdfs",false,"converts output from eps to pdf");
@@ -625,9 +625,9 @@ int main(int argc, char* argv[]){
 				plotterControlPlot pl;
 				//textBoxes::debug=true;
 				pl.setTextBoxNDC(true);
-				pl.readStyleFromFileInCMSSW("/src/TtZAnalysis/Tools/styles/controlPlots_standard.txt");
+				pl.readStyleFromFileInCMSSW("/src/WbWbXAnalysis/Tools/styles/controlPlots_standard.txt");
 				pl.addStyleFromFile(extconfigfile,startmarker,endmarker);
-				pl.readTextBoxesInCMSSW("/src/TtZAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSSplit03Left");
+				pl.readTextBoxesInCMSSW("/src/WbWbXAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSSplit03Left");
 				pl.setStack(&stack2);
 				pl.usePad(&cv);
 				pl.draw();
@@ -739,7 +739,7 @@ int main(int argc, char* argv[]){
 	mrespth2d->GetXaxis()->SetLabelSize(0.05);
 	mrespth2d->Draw("colz");
 	textBoxes tb2d;
-	tb2d.readFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSnoSplitLeft2DSim");
+	tb2d.readFromFileInCMSSW("/src/WbWbXAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSnoSplitLeft2DSim");
 	for(size_t i=0;i<tb2d.size();i++)
 			tb2d.at(i).setColor(0);
 	tb2d.drawToPad(c);
@@ -760,7 +760,7 @@ int main(int argc, char* argv[]){
 	//efficiency.setXAxisName(tmp.ReplaceAll("reco","gen"));
 	ineff.setAllErrorsZero();
 	plotterMultiplePlots effplotter;
-	effplotter.readStyleFromFileInCMSSW("src/TtZAnalysis/Analysis/configs/mtFromXsec2/multiplePlots_efficiency.txt");
+	effplotter.readStyleFromFileInCMSSW("src/WbWbXAnalysis/Analysis/configs/mtFromXsec2/multiplePlots_efficiency.txt");
 	c->SetName("efficiency");
 	effplotter.usePad(c);
 	effplotter.addPlot(&efficiency,false);

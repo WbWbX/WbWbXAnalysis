@@ -1,6 +1,6 @@
 #include "triggerAnalyzer_base_13TeV.h"
-#include "TtZAnalysis/Analysis/interface/leptonSelector2.h"
-#include "TtZAnalysis/Tools/TUnfold/TUnfold.h"
+#include "WbWbXAnalysis/Analysis/interface/leptonSelector2.h"
+#include "WbWbXAnalysis/Tools/TUnfold/TUnfold.h"
 #include "TTreePerfStats.h"
 #include "FWCore/FWLite/interface/AutoLibraryLoader.h"
 
@@ -212,7 +212,7 @@ void trigger_tightLeptons(){
       
         //datafilesFull << dir + "tree_13TeV_dy50inf_lo.root";
 
-	TString pileuproot = cmssw_base+"/src/TtZAnalysis/Data/ReRecoJan13RunD.json.txt_PU.root";
+	TString pileuproot = cmssw_base+"/src/WbWbXAnalysis/Data/ReRecoJan13RunD.json.txt_PU.root";
 
 	//for others just copy data and mc, change input and pu file
 

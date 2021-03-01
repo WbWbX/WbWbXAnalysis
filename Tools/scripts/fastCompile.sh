@@ -18,15 +18,15 @@ ROOTLIBS="${ROOTLIBS} -lXMLParser" #for TUnfold
 
 CMSLIBS=$CMSSW_BASE/lib/$SCRAM_ARCH/
 EXTLIBS=${CMSSW_BASE}/external/${SCRAM_ARCH}/lib/
-LOCBIN=$CMSSW_BASE/src/TtZAnalysis/Analysis/bin
-BUILDDIR=$CMSSW_BASE/src/TtZAnalysis/Analysis/build
-SRCDIR=$CMSSW_BASE/src/TtZAnalysis/Analysis/app_src
-LOCLIB=$CMSSW_BASE/src/TtZAnalysis/Analysis/lib
+LOCBIN=$CMSSW_BASE/src/WbWbXAnalysis/Analysis/bin
+BUILDDIR=$CMSSW_BASE/src/WbWbXAnalysis/Analysis/build
+SRCDIR=$CMSSW_BASE/src/WbWbXAnalysis/Analysis/app_src
+LOCLIB=$CMSSW_BASE/src/WbWbXAnalysis/Analysis/lib
 
 libs=("TopAnalysisZTopUtils" 
-    "TtZAnalysisDataFormats" 
-    "TtZAnalysisTools"
-    "TtZAnalysisAnalysis"
+    "WbWbXAnalysisDataFormats" 
+    "WbWbXAnalysisTools"
+    "WbWbXAnalysisAnalysis"
     "FWCoreFWLite"
 #"DataFormatsStdDictionaries"
 #"CondFormatsJetMETObjects"

@@ -4,50 +4,50 @@
 
 ### data
 
-#100    /MuonEG/Run2015D-PromptReco-v4/MINIAOD      tree_13TeV_data_emu            runOnMC=False dataset=emu json=/nfs/dust/cms/user/tarndt/Test_7414/CMSSW_7_4_14/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt
+#100    /MuonEG/Run2015D-PromptReco-v4/MINIAOD      tree_13TeV_data_emu            runOnMC=False dataset=emu json=/nfs/dust/cms/user/tarndt/Test_7414/CMSSW_7_4_14/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt
 
-#175    /SingleMuon/Run2015D-PromptReco-v4/MINIAOD         tree_13TeV_data_singleMu           runOnMC=False dataset=singleMu json=/nfs/dust/cms/user/tarndt/Test_7414/CMSSW_7_4_14/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt
-
-
-#175    /SingleElectron/Run2015D-PromptReco-v4/MINIAOD         tree_13TeV_data_singleEle           runOnMC=False dataset=singleEle json=/nfs/dust/cms/user/tarndt/Test_7414/CMSSW_7_4_14/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt
-
-#175    /DoubleMuon/Run2015D-PromptReco-v4/MINIAOD      tree_13TeV_data_doubleMu           runOnMC=False dataset=doubleMu json=/nfs/dust/cms/user/tarndt/Test_7414/CMSSW_7_4_14/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt
-
-#175    /DoubleEG/Run2015D-PromptReco-v4/MINIAOD       tree_13TeV_data_doubleEG           runOnMC=False dataset=doubleEle json=/nfs/dust/cms/user/tarndt/Test_7414/CMSSW_7_4_14/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt
+#175    /SingleMuon/Run2015D-PromptReco-v4/MINIAOD         tree_13TeV_data_singleMu           runOnMC=False dataset=singleMu json=/nfs/dust/cms/user/tarndt/Test_7414/CMSSW_7_4_14/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt
 
 
+#175    /SingleElectron/Run2015D-PromptReco-v4/MINIAOD         tree_13TeV_data_singleEle           runOnMC=False dataset=singleEle json=/nfs/dust/cms/user/tarndt/Test_7414/CMSSW_7_4_14/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt
 
-#150    /MuonEG/Run2015D-05Oct2015-v2/MINIAOD      tree_13TeV_data_emu_oct5            runOnMC=False dataset=emu json=/nfs/dust/cms/user/tarndt/Test_7414/CMSSW_7_4_14/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt
+#175    /DoubleMuon/Run2015D-PromptReco-v4/MINIAOD      tree_13TeV_data_doubleMu           runOnMC=False dataset=doubleMu json=/nfs/dust/cms/user/tarndt/Test_7414/CMSSW_7_4_14/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt
 
-#200    /SingleMuon/Run2015D-05Oct2015-v1/MINIAOD         tree_13TeV_data_singleMu_oct5           runOnMC=False dataset=singleMu json=/nfs/dust/cms/user/tarndt/Test_7414/CMSSW_7_4_14/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt
-
-
-#200    /SingleElectron/Run2015D-05Oct2015-v1/MINIAOD         tree_13TeV_data_singleEle_oct5           runOnMC=False dataset=singleEle json=/nfs/dust/cms/user/tarndt/Test_7414/CMSSW_7_4_14/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt
-
-#200    /DoubleMuon/Run2015D-05Oct2015-v1/MINIAOD          tree_13TeV_data_doubleMu_oct5           runOnMC=False dataset=doubleMu json=/nfs/dust/cms/user/tarndt/Test_7414/CMSSW_7_4_14/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt
-
-
-#200    /DoubleEG/Run2015D-05Oct2015-v1/MINIAOD           tree_13TeV_data_doubleEle_oct5           runOnMC=False dataset=doubleEle json=/nfs/dust/cms/user/tarndt/Test_7414/CMSSW_7_4_14/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt
-
-#20    /MuonEG/Run2015C_25ns-05Oct2015-v1/MINIAOD      tree_13TeV_data_emu_runc            runOnMC=False dataset=emu json=/nfs/dust/cms/user/tarndt/Test_7414/CMSSW_7_4_14/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt
-
-#20    /SingleMuon/Run2015C_25ns-05Oct2015-v1/MINIAOD         tree_13TeV_data_singleMu_runc           runOnMC=False dataset=singleMu json=/nfs/dust/cms/user/tarndt/Test_7414/CMSSW_7_4_14/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt
-
-
-#20    /SingleElectron/Run2015C_25ns-05Oct2015-v1/MINIAOD         tree_13TeV_data_singleEle_runc           runOnMC=False dataset=singleEle json=/nfs/dust/cms/user/tarndt/Test_7414/CMSSW_7_4_14/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt
-
-#20    /DoubleMuon/Run2015C_25ns-05Oct2015-v1/MINIAOD         tree_13TeV_data_doubleMu_runc           runOnMC=False dataset=doubleMu json=/nfs/dust/cms/user/tarndt/Test_7414/CMSSW_7_4_14/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt
-
-
-#20     /DoubleEG/Run2015C_25ns-05Oct2015-v1/MINIAOD         tree_13TeV_data_doubleEle_runc           runOnMC=False dataset=doubleEle json=/nfs/dust/cms/user/tarndt/Test_7414/CMSSW_7_4_14/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt
+#175    /DoubleEG/Run2015D-PromptReco-v4/MINIAOD       tree_13TeV_data_doubleEG           runOnMC=False dataset=doubleEle json=/nfs/dust/cms/user/tarndt/Test_7414/CMSSW_7_4_14/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt
 
 
 
-#200    /MET/Run2015D-PromptReco-v4/MINIAOD         tree_13Tev_data_MET       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_7414/CMSSW_7_4_14/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt
+#150    /MuonEG/Run2015D-05Oct2015-v2/MINIAOD      tree_13TeV_data_emu_oct5            runOnMC=False dataset=emu json=/nfs/dust/cms/user/tarndt/Test_7414/CMSSW_7_4_14/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt
 
-#200    /MET/Run2015D-05Oct2015-v1/MINIAOD         tree_13Tev_data_MET_oct5       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_7414/CMSSW_7_4_14/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt
+#200    /SingleMuon/Run2015D-05Oct2015-v1/MINIAOD         tree_13TeV_data_singleMu_oct5           runOnMC=False dataset=singleMu json=/nfs/dust/cms/user/tarndt/Test_7414/CMSSW_7_4_14/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt
 
-#20    /MET/Run2015C_25ns-05Oct2015-v1/MINIAOD         tree_13Tev_data_MET_runc       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_7414/CMSSW_7_4_14/src/TtZAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt
+
+#200    /SingleElectron/Run2015D-05Oct2015-v1/MINIAOD         tree_13TeV_data_singleEle_oct5           runOnMC=False dataset=singleEle json=/nfs/dust/cms/user/tarndt/Test_7414/CMSSW_7_4_14/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt
+
+#200    /DoubleMuon/Run2015D-05Oct2015-v1/MINIAOD          tree_13TeV_data_doubleMu_oct5           runOnMC=False dataset=doubleMu json=/nfs/dust/cms/user/tarndt/Test_7414/CMSSW_7_4_14/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt
+
+
+#200    /DoubleEG/Run2015D-05Oct2015-v1/MINIAOD           tree_13TeV_data_doubleEle_oct5           runOnMC=False dataset=doubleEle json=/nfs/dust/cms/user/tarndt/Test_7414/CMSSW_7_4_14/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt
+
+#20    /MuonEG/Run2015C_25ns-05Oct2015-v1/MINIAOD      tree_13TeV_data_emu_runc            runOnMC=False dataset=emu json=/nfs/dust/cms/user/tarndt/Test_7414/CMSSW_7_4_14/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt
+
+#20    /SingleMuon/Run2015C_25ns-05Oct2015-v1/MINIAOD         tree_13TeV_data_singleMu_runc           runOnMC=False dataset=singleMu json=/nfs/dust/cms/user/tarndt/Test_7414/CMSSW_7_4_14/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt
+
+
+#20    /SingleElectron/Run2015C_25ns-05Oct2015-v1/MINIAOD         tree_13TeV_data_singleEle_runc           runOnMC=False dataset=singleEle json=/nfs/dust/cms/user/tarndt/Test_7414/CMSSW_7_4_14/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt
+
+#20    /DoubleMuon/Run2015C_25ns-05Oct2015-v1/MINIAOD         tree_13TeV_data_doubleMu_runc           runOnMC=False dataset=doubleMu json=/nfs/dust/cms/user/tarndt/Test_7414/CMSSW_7_4_14/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt
+
+
+#20     /DoubleEG/Run2015C_25ns-05Oct2015-v1/MINIAOD         tree_13TeV_data_doubleEle_runc           runOnMC=False dataset=doubleEle json=/nfs/dust/cms/user/tarndt/Test_7414/CMSSW_7_4_14/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt
+
+
+
+#200    /MET/Run2015D-PromptReco-v4/MINIAOD         tree_13Tev_data_MET       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_7414/CMSSW_7_4_14/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt
+
+#200    /MET/Run2015D-05Oct2015-v1/MINIAOD         tree_13Tev_data_MET_oct5       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_7414/CMSSW_7_4_14/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt
+
+#20    /MET/Run2015C_25ns-05Oct2015-v1/MINIAOD         tree_13Tev_data_MET_runc       runOnMC=False dataset=MET json=/nfs/dust/cms/user/tarndt/Test_7414/CMSSW_7_4_14/src/WbWbXAnalysis/createNTuples/jsonfiles/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON.txt
 
 
 

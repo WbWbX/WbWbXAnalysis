@@ -63,7 +63,7 @@ int main(){
 
     histoStack::batchmode = false;
 
-    std::string stylePath="/afs/naf.desy.de/user/k/kieseler/recentProj/src/TtZAnalysis/Tools/styles/";
+    std::string stylePath="/afs/naf.desy.de/user/k/kieseler/recentProj/src/WbWbXAnalysis/Tools/styles/";
 
     plotterControlPlot::debug=true;
     plotterControlPlot pl;

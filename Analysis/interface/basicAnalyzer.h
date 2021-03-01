@@ -8,8 +8,8 @@
 #ifndef TTZANALYSIS_ANALYSIS_INTERFACE_BASICANALYZER_H_
 #define TTZANALYSIS_ANALYSIS_INTERFACE_BASICANALYZER_H_
 
-#include "TtZAnalysis/Tools/interface/fileForker.h"
-#include "TtZAnalysis/Tools/interface/histoStackVector.h"
+#include "WbWbXAnalysis/Tools/interface/fileForker.h"
+#include "WbWbXAnalysis/Tools/interface/histoStackVector.h"
 #include "TString.h"
 #include <vector>
 

@@ -7,7 +7,7 @@
 
 
 #include "../interface/pdfReweighter.h"
-#include "TtZAnalysis/DataFormats/interface/NTEvent.h"
+#include "WbWbXAnalysis/DataFormats/interface/NTEvent.h"
 #include <stdexcept>
 
 namespace ztop{

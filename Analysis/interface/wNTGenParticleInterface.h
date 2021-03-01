@@ -9,7 +9,7 @@
 #define TTZANALYSIS_ANALYSIS_INTERFACE_WNTGENPARTICLEINTERFACE_H_
 
 
-#include "TtZAnalysis/DataFormats/interface/NTGenParticle.h"
+#include "WbWbXAnalysis/DataFormats/interface/NTGenParticle.h"
 #include "wNTBaseInterface.h"
 
 namespace ztop{

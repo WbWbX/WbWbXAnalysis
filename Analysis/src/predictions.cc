@@ -8,7 +8,7 @@
 
 #include "../interface/predictions.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
-#include "TtZAnalysis/Tools/interface/fileReader.h"
+#include "WbWbXAnalysis/Tools/interface/fileReader.h"
 #include <ctgmath>
 
 namespace ztop{

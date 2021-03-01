@@ -9,8 +9,8 @@
 #include "../interface/analysisPlotsTtbarXsecFit.h"
 #include "../interface/AnalysisUtils.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
-#include "TtZAnalysis/DataFormats/src/classes.h"
-#include "TtZAnalysis/DataFormats/interface/helpers.h"
+#include "WbWbXAnalysis/DataFormats/src/classes.h"
+#include "WbWbXAnalysis/DataFormats/interface/helpers.h"
 
 namespace ztop{
 

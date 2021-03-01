@@ -6,8 +6,8 @@
  */
 
 #include "../interface/wReweightingPlots.h"
-#include "TtZAnalysis/Tools/interface/binFinder.h"
-#include "TtZAnalysis/DataFormats/src/classes.h"
+#include "WbWbXAnalysis/Tools/interface/binFinder.h"
+#include "WbWbXAnalysis/DataFormats/src/classes.h"
 #include <algorithm>
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 #include <stdexcept>

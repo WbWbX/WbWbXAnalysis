@@ -21,7 +21,7 @@ public:
 
 
 	plotterMultiStack():plotterMultiColumn(){
-		readStyleFromFileInCMSSW("/src/TtZAnalysis/Tools/styles/plotterMultiStack_standard.txt");
+		readStyleFromFileInCMSSW("/src/WbWbXAnalysis/Tools/styles/plotterMultiStack_standard.txt");
 	}
 	~plotterMultiStack(){}
 

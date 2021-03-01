@@ -2,7 +2,7 @@
 #define NTJECUNCERTAINTIES_H
 
 #include "TopAnalysis/ZTopUtils/interface/JECBase.h"
-#include "TtZAnalysis/DataFormats/interface/NTJet.h"
+#include "WbWbXAnalysis/DataFormats/interface/NTJet.h"
 
 #include "NTLorentzVector.h"
 #include <iostream>

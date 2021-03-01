@@ -15,7 +15,7 @@ namespace ztop{
 
 
 plotter2D::plotter2D(): plotterBase(),dividebybinarea_(false),zaxismin_(1),zaxismax_(-1),nozaxis_(false){
-	// not here, defaults set by constr : readStyleFromFileInCMSSW("/src/TtZAnalysis/Tools/styles/plot2D_default.txt");
+	// not here, defaults set by constr : readStyleFromFileInCMSSW("/src/WbWbXAnalysis/Tools/styles/plot2D_default.txt");
 }
 plotter2D::~plotter2D(){}
 

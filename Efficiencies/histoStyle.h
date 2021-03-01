@@ -1,6 +1,6 @@
 #include "TH1D.h"
 #include "TH2D.h"
-#include "TtZAnalysis/Tools/interface/effTriple.h"
+#include "WbWbXAnalysis/Tools/interface/effTriple.h"
 #include "TStyle.h"
 #include "TCanvas.h"
 #include "TLegend.h"
@@ -8,7 +8,7 @@
 #include "TPad.h"
 #include "TPaveText.h"
 #include <vector>
-#include "TtZAnalysis/Tools/interface/histoStyle.h"
+#include "WbWbXAnalysis/Tools/interface/histoStyle.h"
 
 #ifndef histoStyle_h
 #define histoStyle_h
@@ -188,9 +188,9 @@ void plotRaw(std::vector<ztop::effTriple> trips, TString add="", TString addlabe
 
 	textBoxes txs;
 	if(addlabel.Contains("8TeV"))
-		txs.readFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSnoSplitLeft");
+		txs.readFromFileInCMSSW("/src/WbWbXAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSnoSplitLeft");
 	else if(addlabel.Contains("7TeV"))
-		txs.readFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSnoSplitLeft7TeV");
+		txs.readFromFileInCMSSW("/src/WbWbXAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSnoSplitLeft7TeV");
 	else
 		label -> AddText(Form(addlabel));
 
@@ -301,9 +301,9 @@ void plotAll(std::vector<ztop::histWrapper>  hvec, TString addlabel="", TString 
 std::cout << "label:" << addlabel << std::endl;
 	ztop::textBoxes txs;
 	if(addlabel.Contains("8TeV"))
-		txs.readFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSnoSplitLeft");
+		txs.readFromFileInCMSSW("/src/WbWbXAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSnoSplitLeft");
 	else if(addlabel.Contains("7TeV"))
-		txs.readFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSnoSplitLeft7TeV");
+		txs.readFromFileInCMSSW("/src/WbWbXAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSnoSplitLeft7TeV");
 	else
 		label -> AddText(Form(addlabel));
 
@@ -419,9 +419,9 @@ void plotEffs(std::vector<ztop::histWrapper>  hvec,std::vector<ztop::effTriple> 
 std::cout << "label:" << addlabel << std::endl;
 	ztop::textBoxes txs;
 	if(addlabel.Contains("8TeV"))
-		txs.readFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSnoSplitLeft");
+		txs.readFromFileInCMSSW("/src/WbWbXAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSnoSplitLeft");
 	else if(addlabel.Contains("7TeV"))
-		txs.readFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSnoSplitLeft7TeV");
+		txs.readFromFileInCMSSW("/src/WbWbXAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSnoSplitLeft7TeV");
 	else
 		label -> AddText(Form(addlabel));
 

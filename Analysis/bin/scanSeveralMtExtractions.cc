@@ -5,14 +5,14 @@
  *      Author: kiesej
  */
 
-#include "TtZAnalysis/Tools/interface/optParser.h"
+#include "WbWbXAnalysis/Tools/interface/optParser.h"
 #include <iostream>
-#include "TtZAnalysis/Tools/interface/textFormatter.h"
-#include "TtZAnalysis/Tools/interface/formatter.h"
+#include "WbWbXAnalysis/Tools/interface/textFormatter.h"
+#include "WbWbXAnalysis/Tools/interface/formatter.h"
 #include <string>
-#include "TtZAnalysis/Tools/interface/fileReader.h"
+#include "WbWbXAnalysis/Tools/interface/fileReader.h"
 #include "TString.h"
-#include "TtZAnalysis/Tools/interface/plotterMultiplePlots.h"
+#include "WbWbXAnalysis/Tools/interface/plotterMultiplePlots.h"
 #include "TCanvas.h"
 #include <sys/param.h>
 #include <unistd.h>
@@ -26,7 +26,7 @@
  *
  */
 
-#include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
+#include "WbWbXAnalysis/Tools/interface/applicationMainMacro.h"
 
 invokeApplication(){
 	using namespace ztop;
@@ -97,11 +97,11 @@ invokeApplication(){
 	sumgraph.setYAxisName("m_{t}^{out}-m_{t}^{in} [GeV]");
 	if(!makecalib){
 		sumgraph.setXAxisName("Subset");
-		pl.readStyleFromFileInCMSSW("src/TtZAnalysis/Analysis/configs/topmass/multiplePlots_pull.txt");
+		pl.readStyleFromFileInCMSSW("src/WbWbXAnalysis/Analysis/configs/topmass/multiplePlots_pull.txt");
 	}
 	else{
 		sumgraph.setXAxisName("m_{t}^{in} [GeV]");
-		pl.readStyleFromFileInCMSSW("src/TtZAnalysis/Analysis/configs/topmass/multiplePlots_calib.txt");
+		pl.readStyleFromFileInCMSSW("src/WbWbXAnalysis/Analysis/configs/topmass/multiplePlots_calib.txt");
 	}
 
 

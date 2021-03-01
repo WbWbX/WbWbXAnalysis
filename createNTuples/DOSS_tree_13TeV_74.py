@@ -66,7 +66,7 @@ PDF=options.PDF                             # CT10
 nominalPDF=options.nominalPDF
 beginPDFVar=options.beginPDFVar
 endPDFVar=options.endPDFVar
-inputScript=options.inputScript             # TtZAnalysis.Configuration.samples.mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12-PU_S7_START52_V9-v2_cff
+inputScript=options.inputScript             # WbWbXAnalysis.Configuration.samples.mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12-PU_S7_START52_V9-v2_cff
 print 'Using input script: ', inputScript
 json=options.json                           # parse absolute paths here!
 print 'Using json path: ', json
@@ -85,7 +85,7 @@ print 'Minimum 2 leptons required!'
 
 # if sets are not in official paths
 if includePDFWeights:
-    newlha = os.environ['CMSSW_BASE']+'/src/TtZAnalysis/Data/data/PDFSets'
+    newlha = os.environ['CMSSW_BASE']+'/src/WbWbXAnalysis/Data/data/PDFSets'
 
 
 ###############################################################
@@ -178,7 +178,7 @@ else:
 print "Using global tag: ", process.GlobalTag.globaltag
 
 
-#jecFile=os.path.relpath( os.environ['CMSSW_BASE']+'/src/TtZAnalysis/Data/Run2/PY8_RunIISpring15DR74_bx50_MC.db')
+#jecFile=os.path.relpath( os.environ['CMSSW_BASE']+'/src/WbWbXAnalysis/Data/Run2/PY8_RunIISpring15DR74_bx50_MC.db')
 #from CondCore.DBCommon.CondDBSetup_cfi import *
 #process.jec = cms.ESSource("PoolDBESSource",CondDBSetup,
 #    connect = cms.string('sqlite_file:'+jecFile),
@@ -266,7 +266,7 @@ if includePDFWeights:
 #PdfSetNames = cms.untracked.vstring(PDF+".LHgrid"))
 
 ## Infos for proper normalization
-process.load('TtZAnalysis.TreeWriter.puinfo_cff')
+process.load('WbWbXAnalysis.TreeWriter.puinfo_cff')
 
 process.PUInfo.includePDFWeights = includePDFWeights
 process.PUInfo.pdfWeights = "pdfWeights:"+PDF
@@ -340,7 +340,7 @@ process.ak4GenJetFlavourPlusLeptonInfos = ak4JetFlavourInfos.clone(
 ## Generator-level selection 
 
 if genFilter == "ttbar":
-    process.load('TtZAnalysis.TreeWriter.topDecayFilter_cff')
+    process.load('WbWbXAnalysis.TreeWriter.topDecayFilter_cff')
     process.topDecayFilter.src=genParticleCollection
     process.topDecayFilter.invert=genFilterInvert
     process.topDecayFilter.partonShower=partonShower

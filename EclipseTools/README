@@ -15,7 +15,7 @@ Click on "Next"
 Uncheck "Debug"
 Finish
 Select the project (left panel) and uncheck Project -> Build Automatically from the upper menu
-Skip all "Refreshing workspace" etc. actions and quit eclipse again and run TtZAnalysis/EclipseTools/configureProject.sh
+Skip all "Refreshing workspace" etc. actions and quit eclipse again and run WbWbXAnalysis/EclipseTools/configureProject.sh
 Your project is set up and can be used. The first time, when the index will be built it will take a long time - just wait.
 Advanced Setup
 It is also possible to edit the files locally using eclipse. This won't allow to compile but might be beneficial in case of slow/unstable internet connection. To do this, you need to be able to access the CMSSW_BASE directory from your local machine and need to have the same eclipse version installed as on the NAF/WGS. It is easiest if the CMSSW_BASE directory has the same path on your laptop, you can achieve this by mounts/symlinks. Afs is recommended because it behaves better in case of connection losses, bur sshfs can be used, too.
@@ -23,7 +23,7 @@ Set up the project on the NAF as described above. Now, you can simple run runEcl
 If there are some problems, in particular with std::string, go to Project->Properties->Preprocessor Include Paths->Providers and move "CDT Built-in Compiler Settings" one up. Rebuild the index.
 Some hints on using Eclipse
 Line numbers: If you need line numbers in your text editor, you can switch them on by Window->Preferences (Linux) or Eclipse->Preferences (Mac), then General->Editors->Text Editors: Show line numbers
-Code formatting: As a starting point, please import the formatting template: Window->Preferences (Linux) or Eclipse->Preferences (Mac), then C/C++->Code Style->Formatter: Import. Now import the file TtZAnalysis/EclipseTools/CodeFormat.xml. It is no special style, but replaces tabs with spaces. And using the same format style should prevent hundreds of line changes every commit that are just related to different auto-format options.
+Code formatting: As a starting point, please import the formatting template: Window->Preferences (Linux) or Eclipse->Preferences (Mac), then C/C++->Code Style->Formatter: Import. Now import the file WbWbXAnalysis/EclipseTools/CodeFormat.xml. It is no special style, but replaces tabs with spaces. And using the same format style should prevent hundreds of line changes every commit that are just related to different auto-format options.
 Some commands:
 Auto-complete, open available  (most important command, just try a bit in the beginning): Command(Mac)/Ctr(Linux) + Space
 Indent Line/Region: Command(Mac)/Ctr(Linux) + I
@@ -36,4 +36,4 @@ Addmethods,
 
 For more information of how to use the scripts here, please refer to:
 
-https://twiki.cern.ch/twiki/bin/viewauth/CMS/DesyTtZAnalysisFramework#Set_up_Eclipse_IDE
+https://twiki.cern.ch/twiki/bin/viewauth/CMS/DesyWbWbXAnalysisFramework#Set_up_Eclipse_IDE

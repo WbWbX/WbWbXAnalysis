@@ -5,8 +5,8 @@
  *      Author: kiesej
  */
 
-#include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
-#include "TtZAnalysis/Tools/interface/histoStackVector.h"
+#include "WbWbXAnalysis/Tools/interface/applicationMainMacro.h"
+#include "WbWbXAnalysis/Tools/interface/histoStackVector.h"
 
 
 invokeApplication(){

@@ -37,8 +37,8 @@ invokeApplication(){
 		stackstmp.push_back(hsv.getStack("second jet pt "+toTString(i) +",2 b-jets step 8"));
 		stackstmp.push_back(hsv.getStack("third jet pt "+toTString(i) +",3 b-jets step 8"));
 		for(size_t j=0;j<stackstmp.size();j++){
-			//stackstmp.at(j).mergeVariationsFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/combine_syst.txt");
-			//stackstmp.at(j).mergeVariationsFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/combine_syst.txt","merge for plots");
+			//stackstmp.at(j).mergeVariationsFromFileInCMSSW("/src/WbWbXAnalysis/Analysis/configs/fitTtBarXsec/combine_syst.txt");
+			//stackstmp.at(j).mergeVariationsFromFileInCMSSW("/src/WbWbXAnalysis/Analysis/configs/fitTtBarXsec/combine_syst.txt","merge for plots");
 
 			if(nomcontr=="signal")
 				totsignorm+=stackstmp.at(j).getSignalContainer().integral(false);
@@ -100,7 +100,7 @@ invokeApplication(){
 			ups.push_back(tmp);
 		}
 		plotterMultiCompare pl;
-		pl.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiCompare_standard.txt");
+		pl.readStyleFromFileInCMSSW("/src/WbWbXAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiCompare_standard.txt");
 		std::cout << "nominals " <<std::endl;
 		pl.setNominalPlots(&nominals);
 		std::cout << "comps " <<std::endl;

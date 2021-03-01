@@ -289,28 +289,28 @@ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 $$ paths wrt CMSSW_BASE
 
-compareAllMassesMC   =  /src/TtZAnalysis/Analysis/configs/mtFromXsec2/comparePlots_mlbMCvsmt_fold.txt   
-compareAllMassesMCnormd   =  /src/TtZAnalysis/Analysis/configs/mtFromXsec2/comparePlots_mlbMCvsmt_fold_norm.txt       
-compareAllMassesData =  /src/TtZAnalysis/Analysis/configs/mtFromXsec2/comparePlots_mlbDatavsmt_fold.txt 
+compareAllMassesMC   =  /src/WbWbXAnalysis/Analysis/configs/mtFromXsec2/comparePlots_mlbMCvsmt_fold.txt   
+compareAllMassesMCnormd   =  /src/WbWbXAnalysis/Analysis/configs/mtFromXsec2/comparePlots_mlbMCvsmt_fold_norm.txt       
+compareAllMassesData =  /src/WbWbXAnalysis/Analysis/configs/mtFromXsec2/comparePlots_mlbDatavsmt_fold.txt 
 
 
-$compareAllMassesMC   =  /src/TtZAnalysis/Analysis/configs/mtFromXsec2/comparePlots_mlbMCvsmt_fold2.txt   
-$compareAllMassesMCnormd   =  /src/TtZAnalysis/Analysis/configs/mtFromXsec2/comparePlots_mlbMCvsmt_fold_norm2.txt       
-$compareAllMassesData =  /src/TtZAnalysis/Analysis/configs/mtFromXsec2/comparePlots_mlbDatavsmt_fold2.txt 
+$compareAllMassesMC   =  /src/WbWbXAnalysis/Analysis/configs/mtFromXsec2/comparePlots_mlbMCvsmt_fold2.txt   
+$compareAllMassesMCnormd   =  /src/WbWbXAnalysis/Analysis/configs/mtFromXsec2/comparePlots_mlbMCvsmt_fold_norm2.txt       
+$compareAllMassesData =  /src/WbWbXAnalysis/Analysis/configs/mtFromXsec2/comparePlots_mlbDatavsmt_fold2.txt 
 
-binDependencies         =  /src/TtZAnalysis/Analysis/configs/mtFromXsec2/multiplePlots_mlbbins.txt          
-binDependenciesPlusFits =  /src/TtZAnalysis/Analysis/configs/mtFromXsec2/multiplePlots_mlbbinsPlusFit.txt   
-totalDependencePlusFit  =  /src/TtZAnalysis/Analysis/configs/mtFromXsec2/multiplePlots_totalPlusFit.txt  
-chi2PerBin             =  /src/TtZAnalysis/Analysis/configs/mtFromXsec2/multiplePlots_mlbbinsChi2.txt      
-chi2total              =  /src/TtZAnalysis/Analysis/configs/mtFromXsec2/multiplePlots_mlbbinsChi2.txt
-systematicsVariations       =  /src/TtZAnalysis/Analysis/configs/mtFromXsec2/comparePlots_systVar.txt
-systematicsVariationsnormd  =  /src/TtZAnalysis/Analysis/configs/mtFromXsec2/comparePlots_systVar.txt $$$ same
+binDependencies         =  /src/WbWbXAnalysis/Analysis/configs/mtFromXsec2/multiplePlots_mlbbins.txt          
+binDependenciesPlusFits =  /src/WbWbXAnalysis/Analysis/configs/mtFromXsec2/multiplePlots_mlbbinsPlusFit.txt   
+totalDependencePlusFit  =  /src/WbWbXAnalysis/Analysis/configs/mtFromXsec2/multiplePlots_totalPlusFit.txt  
+chi2PerBin             =  /src/WbWbXAnalysis/Analysis/configs/mtFromXsec2/multiplePlots_mlbbinsChi2.txt      
+chi2total              =  /src/WbWbXAnalysis/Analysis/configs/mtFromXsec2/multiplePlots_mlbbinsChi2.txt
+systematicsVariations       =  /src/WbWbXAnalysis/Analysis/configs/mtFromXsec2/comparePlots_systVar.txt
+systematicsVariationsnormd  =  /src/WbWbXAnalysis/Analysis/configs/mtFromXsec2/comparePlots_systVar.txt $$$ same
 
-spreadWithInlay        =  /src/TtZAnalysis/Analysis/configs/mtFromXsec2/inlayPlot_spread.txt
-spreadWithInlaynormd   =  /src/TtZAnalysis/Analysis/configs/mtFromXsec2/inlayPlot_spread_norm.txt
-results                =  /src/TtZAnalysis/Analysis/configs/mtFromXsec2/multiplePlots_mlbbinsTotalSyst.txt
+spreadWithInlay        =  /src/WbWbXAnalysis/Analysis/configs/mtFromXsec2/inlayPlot_spread.txt
+spreadWithInlaynormd   =  /src/WbWbXAnalysis/Analysis/configs/mtFromXsec2/inlayPlot_spread_norm.txt
+results                =  /src/WbWbXAnalysis/Analysis/configs/mtFromXsec2/multiplePlots_mlbbinsTotalSyst.txt
 
-textBoxesFile          =  /src/TtZAnalysis/Analysis/configs/general/noCMS_boxes.txt
+textBoxesFile          =  /src/WbWbXAnalysis/Analysis/configs/general/noCMS_boxes.txt
 
 [end plotter styles]
 

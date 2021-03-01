@@ -4,11 +4,11 @@
 #include <vector>
 #include "TString.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
-#include "TtZAnalysis/DataFormats/interface/NTMuon.h"
-#include "TtZAnalysis/DataFormats/interface/NTElectron.h"
-#include "TtZAnalysis/DataFormats/interface/NTEvent.h"
-#include "TtZAnalysis/DataFormats/interface/NTJet.h"
-#include "TtZAnalysis/DataFormats/interface/NTMet.h"
+#include "WbWbXAnalysis/DataFormats/interface/NTMuon.h"
+#include "WbWbXAnalysis/DataFormats/interface/NTElectron.h"
+#include "WbWbXAnalysis/DataFormats/interface/NTEvent.h"
+#include "WbWbXAnalysis/DataFormats/interface/NTJet.h"
+#include "WbWbXAnalysis/DataFormats/interface/NTMet.h"
 
 #include <iostream>
 #include "TFile.h"

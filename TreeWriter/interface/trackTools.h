@@ -2,7 +2,7 @@
 #ifndef TRACKTOOLS_H_
 #define TRACKTOOLS_H_
 
-#include "TtZAnalysis/Configuration/interface/version.h"
+#include "WbWbXAnalysis/Configuration/interface/version.h"
 
 #include "DataFormats/TrackReco/interface/Track.h"
 

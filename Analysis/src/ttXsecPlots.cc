@@ -8,9 +8,9 @@
 
 #include "../interface/ttXsecPlots.h"
 #include "../interface/NTFullEvent.h"
-#include "TtZAnalysis/DataFormats/interface/mathdefs.h"
+#include "WbWbXAnalysis/DataFormats/interface/mathdefs.h"
 
-#include "TtZAnalysis/DataFormats/src/classes.h"
+#include "WbWbXAnalysis/DataFormats/src/classes.h"
 
 /*
  * These plots here are NOT used to extract the cross section!

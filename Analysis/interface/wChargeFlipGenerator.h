@@ -8,7 +8,7 @@
 #ifndef TTZANALYSIS_ANALYSIS_INTERFACE_WCHARGEFLIPGENERATOR_H_
 #define TTZANALYSIS_ANALYSIS_INTERFACE_WCHARGEFLIPGENERATOR_H_
 #include  "TRandom3.h"
-#include "TtZAnalysis/DataFormats/interface/NTLepton.h"
+#include "WbWbXAnalysis/DataFormats/interface/NTLepton.h"
 namespace ztop{
 
 

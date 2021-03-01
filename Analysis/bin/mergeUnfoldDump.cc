@@ -18,7 +18,7 @@
 #include "../interface/TtBarUnfolder.h"
 #include "../interface/systMerger.h"
 #include "../interface/wwwDumper.h"
-#include "TtZAnalysis/Tools/interface/optParser.h"
+#include "WbWbXAnalysis/Tools/interface/optParser.h"
 
 namespace application{
 int mergeUnfoldDump(std::vector<std::string> infiles, TString outfile, TString title,TString descr,

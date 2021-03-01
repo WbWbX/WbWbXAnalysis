@@ -10,7 +10,7 @@
  *      Do not include it in any other file than MainAnalyzer.cc
  */
 
-#include <TtZAnalysis/Analysis/interface/top_analyzer_run2.h>
+#include <WbWbXAnalysis/Analysis/interface/top_analyzer_run2.h>
 #include "../../DataFormats/interface/NTJES.h"
 
 /*
@@ -374,10 +374,10 @@ void  top_analyzer_run2::analyze(size_t anaid){
 	//agrohsje/tarndt include jes at ana level for testing 
 	NTJES jescorr = NTJES();
 	//took files from https://twiki.cern.ch/twiki/bin/view/CMS/JECDataMC
-	const TString* dataJECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Analysis/data/analyse/Spring16_25nsV3_DATA_L2L3Residual_AK4PFchs.txt");
-	const TString* mcL1JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Analysis/data/analyse/Spring16_25nsV3_MC_L1FastJet_AK4PFchs.txt");
-	const TString* mcL2JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Analysis/data/analyse/Spring16_25nsV3_MC_L2Relative_AK4PFchs.txt");
-	const TString* mcL3JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/TtZAnalysis/Analysis/data/analyse/Spring16_25nsV3_MC_L3Absolute_AK4PFchs.txt");
+	const TString* dataJECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/WbWbXAnalysis/Analysis/data/analyse/Spring16_25nsV3_DATA_L2L3Residual_AK4PFchs.txt");
+	const TString* mcL1JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/WbWbXAnalysis/Analysis/data/analyse/Spring16_25nsV3_MC_L1FastJet_AK4PFchs.txt");
+	const TString* mcL2JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/WbWbXAnalysis/Analysis/data/analyse/Spring16_25nsV3_MC_L2Relative_AK4PFchs.txt");
+	const TString* mcL3JECFile = new TString((std::string) getenv("CMSSW_BASE")+"/src/WbWbXAnalysis/Analysis/data/analyse/Spring16_25nsV3_MC_L3Absolute_AK4PFchs.txt");
 
 	jescorr.setFilesCorrection(mcL1JECFile,mcL2JECFile,
 			mcL3JECFile,dataJECFile,(const bool) isMC);

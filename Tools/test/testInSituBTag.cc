@@ -4,7 +4,7 @@
  *  Created on: Apr 17, 2014
  *      Author: kiesej
  */
-#include "TtZAnalysis/Tools/interface/histoStackVector.h"
+#include "WbWbXAnalysis/Tools/interface/histoStackVector.h"
 #include "TString.h"
 #include <iostream>
 
@@ -25,8 +25,8 @@
  * For reference check the include files below
  *
  */
-#include "TtZAnalysis/Tools/interface/histoStack.h"
-#include "TtZAnalysis/Tools/interface/histo1D.h"
+#include "WbWbXAnalysis/Tools/interface/histoStack.h"
+#include "WbWbXAnalysis/Tools/interface/histo1D.h"
 
 /*
  * the input file is located in /nfs/dust/cms/user/kiesej/testtemp/emu_8TeV_172.5_nominal_syst.root
@@ -38,7 +38,7 @@ int main(){
     using namespace ztop;
 
    // TString infilelocation="/nfs/dust/cms/user/kiesej/testtemp/emu_8TeV_172.5_nominal_syst.root";
-    TString infilelocation="/nfs/dust/cms/user/dolinska/inclusive/CMSSW_5_3_14/src/TtZAnalysis/Analysis/output/emu_8TeV_172.5_nominal_pseudodata230.root";
+    TString infilelocation="/nfs/dust/cms/user/dolinska/inclusive/CMSSW_5_3_14/src/WbWbXAnalysis/Analysis/output/emu_8TeV_172.5_nominal_pseudodata230.root";
     TString btagmultiplot="selected b jet multi step 4"; //we use step 7 here, one ONE jet is required
     TString jetmultiplot="hard jet multi step 4";
 

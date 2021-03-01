@@ -58,7 +58,7 @@ int main(){
     plotterCompare::debug=true;
 
 
-    std::string stylePath=(std::string)getenv("CMSSW_BASE")+"/src/TtZAnalysis/Tools/styles/";
+    std::string stylePath=(std::string)getenv("CMSSW_BASE")+"/src/WbWbXAnalysis/Tools/styles/";
 
     tp.compareIds() << "_mt171.5" << "_mt173.5" << "_mt175.5" << "_mt169.5" << "_mt178.5" << "_mt166.5" ;
 

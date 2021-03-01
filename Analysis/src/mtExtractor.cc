@@ -6,14 +6,14 @@
  */
 
 #include "../interface/mtExtractor.h"
-#include "TtZAnalysis/Tools/interface/histo1DUnfold.h"
+#include "WbWbXAnalysis/Tools/interface/histo1DUnfold.h"
 #include <stdexcept>
 #include <string>
 #include <cstdlib>
 #include <omp.h>
 
-#include "TtZAnalysis/Tools/interface/plotterCompare.h"
-#include "TtZAnalysis/Tools/interface/plotterMultiplePlots.h"
+#include "WbWbXAnalysis/Tools/interface/plotterCompare.h"
+#include "WbWbXAnalysis/Tools/interface/plotterMultiplePlots.h"
 #include "TCanvas.h"
 #include "TStyle.h"
 #include <cmath>
@@ -21,12 +21,12 @@
 #include "TList.h"
 #include "TIterator.h"
 #include "TKey.h"
-#include "TtZAnalysis/Tools/interface/fileReader.h"
+#include "WbWbXAnalysis/Tools/interface/fileReader.h"
 #include "TLatex.h"
-#include "TtZAnalysis/Tools/interface/textFormatter.h"
-#include "TtZAnalysis/Tools/interface/formatter.h"
+#include "WbWbXAnalysis/Tools/interface/textFormatter.h"
+#include "WbWbXAnalysis/Tools/interface/formatter.h"
 
-#include "TtZAnalysis/Tools/interface/plotterInlay.h"
+#include "WbWbXAnalysis/Tools/interface/plotterInlay.h"
 
 namespace ztop{
 
@@ -322,7 +322,7 @@ void mtExtractor::drawSystVariation(TCanvas *c,const TString & sys){
 
 	//do translation
 	formatter fmt;
-	fmt.readInNameTranslateFile((std::string)getenv("CMSSW_BASE") + (std::string)"/src/TtZAnalysis/Analysis/configs/general/SystNames.txt");
+	fmt.readInNameTranslateFile((std::string)getenv("CMSSW_BASE") + (std::string)"/src/WbWbXAnalysis/Analysis/configs/general/SystNames.txt");
 	fmt.setRootLatex(true);//this is root
 
 	up.setName(fmt.translateName(sys)+" up");
@@ -674,7 +674,7 @@ void mtExtractor::readFiles(){
 			TString yaxis=nominal.getYAxisName();
 			yaxis.ReplaceAll("["+previousxsecunits+"]","["+newxsecunits+"]");
 			formatter formatsys;
-			formatsys.readInNameTranslateFile((std::string)getenv("CMSSW_BASE")+"/src/TtZAnalysis/Analysis/configs/mtFromXsec2/MCFM_SystNames.txt");
+			formatsys.readInNameTranslateFile((std::string)getenv("CMSSW_BASE")+"/src/WbWbXAnalysis/Analysis/configs/mtFromXsec2/MCFM_SystNames.txt");
 
 			for(size_t histpos=0;histpos<histnames.size();histpos++){
 				if(histpos==nompos) continue;
@@ -1551,7 +1551,7 @@ texTabler  mtExtractor::makeSystBreakdown(bool merge,bool removeneg,float prec,b
 	if(results_.nEntries()<1){
 		throw std::runtime_error("mtExtractor::makeSystBreakdown: first create syst vars");
 	}
-	std::string sysnamesfile=(std::string)getenv("CMSSW_BASE") + (std::string)"/src/TtZAnalysis/Analysis/configs/mtFromXsec2/mergeForSystBreak.txt";
+	std::string sysnamesfile=(std::string)getenv("CMSSW_BASE") + (std::string)"/src/WbWbXAnalysis/Analysis/configs/mtFromXsec2/mergeForSystBreak.txt";
 	resultsSummary cp=results_;
 
 	if(merge)
@@ -1562,7 +1562,7 @@ texTabler  mtExtractor::makeSystBreakdown(bool merge,bool removeneg,float prec,b
 	formatter fmt;
 
 
-	fmt.readInNameTranslateFile((std::string)getenv("CMSSW_BASE") + (std::string)"/src/TtZAnalysis/Analysis/configs/general/SystNames.txt");
+	fmt.readInNameTranslateFile((std::string)getenv("CMSSW_BASE") + (std::string)"/src/WbWbXAnalysis/Analysis/configs/general/SystNames.txt");
 	//formatter::debug=true;
 
 

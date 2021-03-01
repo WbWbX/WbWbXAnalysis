@@ -16,7 +16,7 @@ int main(){
 
 	TString plot="m_lb step 8";
 
-	TString filedir="/afs/desy.de/user/k/kiesej/recentProject/src/TtZAnalysis/Analysis/workdir/tWShapeComparison/";
+	TString filedir="/afs/desy.de/user/k/kiesej/recentProject/src/WbWbXAnalysis/Analysis/workdir/tWShapeComparison/";
 
 	using namespace ztop;
 
@@ -61,7 +61,7 @@ int main(){
 
 	TCanvas cv;
 	plotterMultiplePlots pl;
-	pl.readStyleFromFileInCMSSW( "/src/TtZAnalysis/Analysis/configs/topmass/multiplePlots_tWvar.txt"  );//"src/TtZAnalysis/Tools/styles/comparePlots_3MC.txt");
+	pl.readStyleFromFileInCMSSW( "/src/WbWbXAnalysis/Analysis/configs/topmass/multiplePlots_tWvar.txt"  );//"src/WbWbXAnalysis/Tools/styles/comparePlots_3MC.txt");
 	pl.usePad(&cv);
 
 	nominal.normalize(false,false);

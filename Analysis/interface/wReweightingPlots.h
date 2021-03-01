@@ -8,7 +8,7 @@
 #ifndef TTZANALYSIS_ANALYSIS_INTERFACE_WREWEIGHTINGPLOTS_H_
 #define TTZANALYSIS_ANALYSIS_INTERFACE_WREWEIGHTINGPLOTS_H_
 
-#include "TtZAnalysis/Tools/interface/histo2D.h"
+#include "WbWbXAnalysis/Tools/interface/histo2D.h"
 #include <stdexcept>
 #include <vector>
 #include "NTFullEvent.h"

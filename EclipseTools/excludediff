@@ -1,1 +1,1 @@
-<sourceEntries>\n<entry excluding="TtZAnalysis/Analysis/workdir/*" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>\n </sourceEntries>
+<sourceEntries>\n<entry excluding="WbWbXAnalysis/Analysis/workdir/*" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>\n </sourceEntries>

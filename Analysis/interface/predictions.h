@@ -8,8 +8,8 @@
 #ifndef TTZANALYSIS_ANALYSIS_INTERFACE_PREDICTIONS_H_
 #define TTZANALYSIS_ANALYSIS_INTERFACE_PREDICTIONS_H_
 
-#include "TtZAnalysis/Tools/interface/graphFitter.h"
-#include "TtZAnalysis/Tools/interface/likelihood2D.h"
+#include "WbWbXAnalysis/Tools/interface/graphFitter.h"
+#include "WbWbXAnalysis/Tools/interface/likelihood2D.h"
 #include <vector>
 #include <algorithm>
 #include <string>

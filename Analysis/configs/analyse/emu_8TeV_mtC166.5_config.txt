@@ -89,22 +89,22 @@ $inputFilesDir = /data/user/kiesej/Analysis2012/trees/trees_Jun13_03/ $for desy-
 
 Lumi           = 19741
 
-JECFile        = /src/TtZAnalysis/Data/Summer13_V5_DATA_UncertaintySources_AK5PFchs.txt
-$JECFile        = /src/TtZAnalysis/Data/Fall12_V7_DATA_UncertaintySources_AK5PF.txt
+JECFile        = /src/WbWbXAnalysis/Data/Summer13_V5_DATA_UncertaintySources_AK5PFchs.txt
+$JECFile        = /src/WbWbXAnalysis/Data/Fall12_V7_DATA_UncertaintySources_AK5PF.txt
 
-MuonSFFile     = /src/TtZAnalysis/Data/muonEffTop2D.root
+MuonSFFile     = /src/WbWbXAnalysis/Data/muonEffTop2D.root
 MuonSFHisto    = eff_pt_eta_fullwithtrackerr
-TrackingSFFile = /src/TtZAnalysis/Data/muon_tracking_eff.root
+TrackingSFFile = /src/WbWbXAnalysis/Data/muon_tracking_eff.root
 TrackingSFHisto = tracking_eff
 
 
 
-ElecSFFile     = /src/TtZAnalysis/Data/elec_tight_SF.root
+ElecSFFile     = /src/WbWbXAnalysis/Data/elec_tight_SF.root
 ElecSFHisto    = GlobalSF
 
 TriggerSFFile  = /src/TopAnalysis/Configuration/analysis/common/data/triggerSummary_emu_tightleps.root
 
-PUFile         = /src/TtZAnalysis/Data/ReRecoJan13.json.txt_PU $without .root
+PUFile         = /src/WbWbXAnalysis/Data/ReRecoJan13.json.txt_PU $without .root
 
 btagWP         = csvl
 btagFile       = all_btags.root

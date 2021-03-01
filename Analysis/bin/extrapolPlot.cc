@@ -7,10 +7,10 @@
 
 
 
-#include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
-#include "TtZAnalysis/Tools/interface/graph.h"
-#include "TtZAnalysis/Tools/interface/plotterMultiplePlots.h"
-#include "TtZAnalysis/Tools/interface/binFinder.h"
+#include "WbWbXAnalysis/Tools/interface/applicationMainMacro.h"
+#include "WbWbXAnalysis/Tools/interface/graph.h"
+#include "WbWbXAnalysis/Tools/interface/plotterMultiplePlots.h"
+#include "WbWbXAnalysis/Tools/interface/binFinder.h"
 #include <vector>
 #include <math.h>
 #include "TFile.h"
@@ -135,7 +135,7 @@ invokeApplication(){
 	TFile outfile("extrapolplot.root","RECREATE");
 	TCanvas cv("","",800,700);
 	pl.usePad(&cv);
-	pl.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/massextra/extraplot.txt");
+	pl.readStyleFromFileInCMSSW("/src/WbWbXAnalysis/Analysis/configs/massextra/extraplot.txt");
 
 	pl.addPlot(&gjpsi);
 	pl.addPlot(&gfromxsec);

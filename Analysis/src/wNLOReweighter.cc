@@ -9,12 +9,12 @@
 
 #include "../interface/wNLOReweighter.h"
 #include <cmath>
-#include "TtZAnalysis/Tools/interface/fileReader.h"
-#include "TtZAnalysis/Tools/interface/plotterMultiplePlots.h"
-#include "TtZAnalysis/Tools/interface/plotter2D.h"
+#include "WbWbXAnalysis/Tools/interface/fileReader.h"
+#include "WbWbXAnalysis/Tools/interface/plotterMultiplePlots.h"
+#include "WbWbXAnalysis/Tools/interface/plotter2D.h"
 #include <algorithm>
-#include "TtZAnalysis/DataFormats/interface/NTGenJet.h"
-#include "TtZAnalysis/DataFormats/interface/NTGenParticle.h"
+#include "WbWbXAnalysis/DataFormats/interface/NTGenJet.h"
+#include "WbWbXAnalysis/DataFormats/interface/NTGenParticle.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 
 namespace ztop{
@@ -297,7 +297,7 @@ void wNLOReweighter::makeTestPlots(const std::string& outpath)const{
 		pl.printToPdf(outpath+plotname);
 	}
 	pl2d.setPlot(&h2d,false);
-	pl2d.readStyleFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/wNLOReweighter/plot2D_A7.txt");
+	pl2d.readStyleFromFileInCMSSW("/src/WbWbXAnalysis/Analysis/configs/wNLOReweighter/plot2D_A7.txt");
 	pl2d.printToPdf(outpath+"A7_deta_pt");
 }
 

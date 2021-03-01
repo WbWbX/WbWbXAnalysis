@@ -15,7 +15,7 @@
 #include "taggedObject.h"
 #include "simpleFitter.h"
 
-#include "TtZAnalysis/Tools/interface/Priors.h"
+#include "WbWbXAnalysis/Tools/interface/Priors.h"
 
 namespace ztop{
 

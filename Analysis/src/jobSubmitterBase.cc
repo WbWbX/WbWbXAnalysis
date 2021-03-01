@@ -9,7 +9,7 @@
 
 #include "../interface/jobSubmitterBase.h"
 #include "fstream"
-#include "TtZAnalysis/Tools/interface/textFormatter.h"
+#include "WbWbXAnalysis/Tools/interface/textFormatter.h"
 #include <stdexcept>
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 

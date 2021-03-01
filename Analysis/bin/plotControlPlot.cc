@@ -6,11 +6,11 @@
  */
 
 
-#include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
-#include "TtZAnalysis/Tools/interface/plotterControlPlot.h"
-#include "TtZAnalysis/Tools/interface/histoStackVector.h"
-#include "TtZAnalysis/Tools/interface/fileReader.h"
-#include "TtZAnalysis/Tools/interface/textFormatter.h"
+#include "WbWbXAnalysis/Tools/interface/applicationMainMacro.h"
+#include "WbWbXAnalysis/Tools/interface/plotterControlPlot.h"
+#include "WbWbXAnalysis/Tools/interface/histoStackVector.h"
+#include "WbWbXAnalysis/Tools/interface/fileReader.h"
+#include "WbWbXAnalysis/Tools/interface/textFormatter.h"
 #include "TCanvas.h"
 #include "TFile.h"
 /**
@@ -21,7 +21,7 @@ invokeApplication(){
 	parser->setAdditionalDesciption("Small application to plot control plots in a fast and efficient way.Separate with \"%%\". Returns pdf files");
 
 	const std::string stylefile=parser->getOpt<std::string>("i",
-			getenv("CMSSW_BASE")+(std::string)"/src/TtZAnalysis/Tools/styles/controlPlots_standard.txt",
+			getenv("CMSSW_BASE")+(std::string)"/src/WbWbXAnalysis/Tools/styles/controlPlots_standard.txt",
 			"Specify (optional) control plot style file");
 	const std::string plotnames=parser->getOpt<std::string>("p","","specify plot names as list plot1 %% plot2 %% ...");
 	const std::string inlist=parser->getOpt<std::string>("-list","","specify a file that represents a list of all plots to be plotted. One line for each plot or %% as delimiter");

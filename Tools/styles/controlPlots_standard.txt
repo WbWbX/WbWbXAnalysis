@@ -3,7 +3,7 @@ $?cfg
 [plotterControlPlot]
  
  $$ new function. Automatically checks if a plot seems to be symmetric and then uses a symmetric style
-    symmetricStyleAdd = /src/TtZAnalysis/Tools/styles/controlPlots_symmetric_add.txt
+    symmetricStyleAdd = /src/WbWbXAnalysis/Tools/styles/controlPlots_symmetric_add.txt
     divideat = 0.3
     invertplots = false
     PSMigThreshold =  0.001   $this is not %!

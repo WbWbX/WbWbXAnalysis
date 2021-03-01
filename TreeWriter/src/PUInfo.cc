@@ -26,7 +26,7 @@
 #include "PhysicsTools/SelectorUtils/interface/PFJetIDSelectionFunctor.h"
 #include "SimDataFormats/GeneratorProducts/interface/LHERunInfoProduct.h"
 #include "FWCore/Framework/interface/Run.h"
-#include "TtZAnalysis/Configuration/interface/version.h"
+#include "WbWbXAnalysis/Configuration/interface/version.h"
 
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"

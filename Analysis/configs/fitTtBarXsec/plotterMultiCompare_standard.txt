@@ -4,14 +4,14 @@ $$$ comments
 [plotterMultiCompare]
 
       $$this is the main file
-	    controlPlotStyleFile = src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiCompare_ctrDef.txt
+	    controlPlotStyleFile = src/WbWbXAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiCompare_ctrDef.txt
 	   
 	    nplots = 4
 	    
-	    addStyle0 =   src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiCompare_sub0.txt
-	    addStyle1 =   src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiCompare_sub1.txt
-	    addStyle2 =   src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiCompare_sub2.txt
-	    addStyle3 =   src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiCompare_sub3.txt
+	    addStyle0 =   src/WbWbXAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiCompare_sub0.txt
+	    addStyle1 =   src/WbWbXAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiCompare_sub1.txt
+	    addStyle2 =   src/WbWbXAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiCompare_sub2.txt
+	    addStyle3 =   src/WbWbXAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiCompare_sub3.txt
 	    
 	    
 	   

@@ -12,7 +12,7 @@ fi
 ## add includes
 
 
-cd $CMSSW_BASE/src/TtZAnalysis/EclipseTools
+cd $CMSSW_BASE/src/WbWbXAnalysis/EclipseTools
 ln -s $CMSSW_BASE/bin/$SCRAM_ARCH bin
 
 #### build within eclipse
@@ -49,19 +49,19 @@ function append_after_line {
 # <builder buildPath="${workspace_loc:/testProj/Release}" id="cdt.managedbuild.target.gnu.builder.exe.release.1873982263" managedBuildOn="true" name="Gnu Make Builder.Release" superClass="cdt.managedbuild.target.gnu.builder.exe.release"/>
 # with
 # <builder arguments="b -j12" autoBuildTarget="all" buildPath="${workspace_loc:/testProj}" cleanBuildTarget="clean" command="scram" enableAutoBuild="false" enableCleanBuild="true" enabledIncrementalBuild="true" id="cdt.managedbuild.target.gnu.builder.exe.release.1873982263" incrementalBuildTarget=" " keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" parallelizationNumber="1" superClass="cdt.managedbuild.target.gnu.builder.exe.release"/>
-REPLACEWITH=$( cat $CMSSW_BASE/src/TtZAnalysis/EclipseTools/buildconfigdiff | sed 's/#USER#/'$USER'/g'  | escape_ws )
+REPLACEWITH=$( cat $CMSSW_BASE/src/WbWbXAnalysis/EclipseTools/buildconfigdiff | sed 's/#USER#/'$USER'/g'  | escape_ws )
 
 change_line "<builder buildPath=" "${REPLACEWITH}" $CMSSW_BASE/src/.cproject .tmp
-ADDINCLUDES=$( cat $CMSSW_BASE/src/TtZAnalysis/EclipseTools/includeconfigdiff | escape_ws )
+ADDINCLUDES=$( cat $CMSSW_BASE/src/WbWbXAnalysis/EclipseTools/includeconfigdiff | escape_ws )
 
 append_after_line "name=\"GCC C++ Compiler\"" "${ADDINCLUDES}\n" .tmp .tmp2
 rm -f .tmp
 append_after_line "${ADDINCLUDES}" "<listOptionValue builtIn=\"false\" value=\"${CMSSW_RELEASE_BASE}/src\"/>\n<listOptionValue builtIn=\"false\" value=\"${ROOTSYS}/include\"/>\n</option>" .tmp2 .tmp3 
 rm -f .tmp2
-STORAGE=$( cat $CMSSW_BASE/src/TtZAnalysis/EclipseTools/refreshpolicydiff | escape_ws )
+STORAGE=$( cat $CMSSW_BASE/src/WbWbXAnalysis/EclipseTools/refreshpolicydiff | escape_ws )
 append_after_line "<storageModule moduleId=\"org.eclipse.cdt.core.LanguageSettingsProviders\"/>" "${STORAGE}" .tmp3 .tmp4
 
-EXCLUDEINFO=$( cat $CMSSW_BASE/src/TtZAnalysis/EclipseTools/excludediff | escape_ws )
+EXCLUDEINFO=$( cat $CMSSW_BASE/src/WbWbXAnalysis/EclipseTools/excludediff | escape_ws )
 append_after_line "</folderInfo>" "${EXCLUDEINFO}" .tmp4 .tmp3
 
 cp $CMSSW_BASE/src/.cproject $CMSSW_BASE/src/.cproject.bak

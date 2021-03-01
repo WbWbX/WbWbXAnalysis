@@ -8,14 +8,14 @@
 
 
 
-#include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
-#include "TtZAnalysis/Tools/interface/histo2D.h"
+#include "WbWbXAnalysis/Tools/interface/applicationMainMacro.h"
+#include "WbWbXAnalysis/Tools/interface/histo2D.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 #include "TCanvas.h"
-#include "TtZAnalysis/Tools/interface/plotter2D.h"
-#include "TtZAnalysis/Tools/interface/plotterMultiplePlots.h"
+#include "WbWbXAnalysis/Tools/interface/plotter2D.h"
+#include "WbWbXAnalysis/Tools/interface/plotterMultiplePlots.h"
 #include "TStyle.h"
-#include "TtZAnalysis/Tools/interface/graphFitter.h"
+#include "WbWbXAnalysis/Tools/interface/graphFitter.h"
 
 ztop::histo2D lhtochi2(const ztop::histo2D& in){
 	using namespace ztop;
@@ -176,12 +176,12 @@ invokeApplication(){
 	gStyle->SetOptStat(0);
 	plotter2D pl;
 	textBoxes tb2d;
-	tb2d.readFromFileInCMSSW("/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt","CMSnoSplitRight2D");
+	tb2d.readFromFileInCMSSW("/src/WbWbXAnalysis/Analysis/configs/general/CMS_boxes.txt","CMSnoSplitRight2D");
 	for(size_t i=0;i<tb2d.size();i++)
 		tb2d.at(i).setColor(0);
 
 
-	pl.readStyleFromFileInCMSSW("src/TtZAnalysis/Analysis/configs/mtFromXsec2/plot2D_0to1.txt");
+	pl.readStyleFromFileInCMSSW("src/WbWbXAnalysis/Analysis/configs/mtFromXsec2/plot2D_0to1.txt");
 	pl.setZAxis("L_{pred}(m_{t},#sigma_{t#bar{t}})");
 	pl.setPlot(&c);
 	pl.printToPdf(("theoOnly" +nrgstr).Data());
@@ -224,7 +224,7 @@ invokeApplication(){
 	plm.usePad(&cv);
 	plm.addPlot(&marginalized);
 	plm.setLastNoLegend();
-	plm.readTextBoxesInCMSSW("/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt","CMSnoSplitRight2D");
+	plm.readTextBoxesInCMSSW("/src/WbWbXAnalysis/Analysis/configs/general/CMS_boxes.txt","CMSnoSplitRight2D");
 	plm.draw();
 	cv.Print("expTheoMarg" +nrgstr+".pdf");
 	 */

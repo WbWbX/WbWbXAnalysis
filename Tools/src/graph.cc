@@ -13,8 +13,8 @@
 #include "TTree.h"
 #include "TFile.h"
 #include "FWCore/FWLite/interface/AutoLibraryLoader.h"
-#include "TtZAnalysis/Tools/interface/histoStyle.h"
-#include "TtZAnalysis/Tools/interface/textFormatter.h"
+#include "WbWbXAnalysis/Tools/interface/histoStyle.h"
+#include "WbWbXAnalysis/Tools/interface/textFormatter.h"
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/zlib.hpp>
 

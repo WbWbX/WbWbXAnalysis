@@ -6,10 +6,10 @@
  */
 
 
-#include "TtZAnalysis/Tools/interface/optParser.h"
-#include "TtZAnalysis/Tools/interface/resultCombiner.h"
-#include "TtZAnalysis/Tools/interface/histo1D.h"
-#include "TtZAnalysis/Tools/interface/fileReader.h"
+#include "WbWbXAnalysis/Tools/interface/optParser.h"
+#include "WbWbXAnalysis/Tools/interface/resultCombiner.h"
+#include "WbWbXAnalysis/Tools/interface/histo1D.h"
+#include "WbWbXAnalysis/Tools/interface/fileReader.h"
 #include "TString.h"
 
 double sq(const double & in){
@@ -17,7 +17,7 @@ double sq(const double & in){
 }
 
 
-#include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
+#include "WbWbXAnalysis/Tools/interface/applicationMainMacro.h"
 
 invokeApplication(){
 

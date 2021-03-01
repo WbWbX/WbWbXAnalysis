@@ -14,7 +14,7 @@
 #include <iostream>
 #include "TFile.h"
 #include "TTree.h"
-#include "TtZAnalysis/Tools/interface/histo2D.h"
+#include "WbWbXAnalysis/Tools/interface/histo2D.h"
 
 
 #define VAR_TO_TSTRING(variable) ztop::toTString(#variable)

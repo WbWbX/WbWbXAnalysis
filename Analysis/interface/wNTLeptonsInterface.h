@@ -9,8 +9,8 @@
 #define TTZANALYSIS_ANALYSIS_INTERFACE_WNTLEPTONSINTERFACE_H_
 
 #include "wNTBaseInterface.h"
-#include "TtZAnalysis/DataFormats/interface/NTMuon.h"
-#include "TtZAnalysis/DataFormats/interface/NTElectron.h"
+#include "WbWbXAnalysis/DataFormats/interface/NTMuon.h"
+#include "WbWbXAnalysis/DataFormats/interface/NTElectron.h"
 
 namespace ztop{
 

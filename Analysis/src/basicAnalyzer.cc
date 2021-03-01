@@ -7,7 +7,7 @@
 
 
 #include "../interface/basicAnalyzer.h"
-#include "TtZAnalysis/Tools/interface/fileReader.h"
+#include "WbWbXAnalysis/Tools/interface/fileReader.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 
 namespace ztop{

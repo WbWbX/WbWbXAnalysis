@@ -25,8 +25,8 @@ $inputFilesDir = /data/user/kiesej/Analysis2012/trees/trees_Jun13_03/ $for desy-
 
 Lumi           = 19741
 
-JECFile        = /src/TtZAnalysis/Data/Summer13_V4_DATA_UncertaintySources_AK5PFchs.txt
-$JECFile        = /src/TtZAnalysis/Data/Fall12_V7_DATA_UncertaintySources_AK5PF.txt
+JECFile        = /src/WbWbXAnalysis/Data/Summer13_V4_DATA_UncertaintySources_AK5PFchs.txt
+$JECFile        = /src/WbWbXAnalysis/Data/Fall12_V7_DATA_UncertaintySources_AK5PF.txt
 
 MuonSFFile     = /src/TopAnalysis/Configuration/analysis/common/data/MuonSF_198fbReReco.root
 MuonSFHisto    = MuonIdIsoSF
@@ -36,7 +36,7 @@ ElecSFHisto    = ElectronIdIsoSF
 
 TriggerSFFile  = /src/TopAnalysis/Configuration/analysis/common/data/triggerSummary_ee_19fb.root
 
-PUFile         = /src/TtZAnalysis/Data/ReRecoJan13.json.txt_PU $without .root
+PUFile         = /src/WbWbXAnalysis/Data/ReRecoJan13.json.txt_PU $without .root
 
 btagWP         = csvl
 btagFile       = all_btags.root

@@ -9,7 +9,7 @@
 #define TTZANALYSIS_ANALYSIS_INTERFACE_FLATJETWRAPPER_H_
 
 #include "flatBranchesWrapper.h"
-#include "TtZAnalysis/DataFormats/interface/NTJet.h"
+#include "WbWbXAnalysis/DataFormats/interface/NTJet.h"
 #include "TString.h"
 
 namespace ztop{

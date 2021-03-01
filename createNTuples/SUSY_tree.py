@@ -50,8 +50,8 @@ includereco=options.includereco          # False
 includetrigger=options.includetrigger    # True
 includePDFWeights=options.includePDF     # False
 PDF=options.PDF                          # cteq65
-inputScript=options.inputScript          # TtZAnalysis.Configuration.samples.mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12-PU_S7_START52_V9-v2_cff
-json=options.json                        # give full path!!json files in TtZAnalysis/Data/data ONLY needed with nafjobsplitter
+inputScript=options.inputScript          # WbWbXAnalysis.Configuration.samples.mc.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12-PU_S7_START52_V9-v2_cff
+json=options.json                        # give full path!!json files in WbWbXAnalysis/Data/data ONLY needed with nafjobsplitter
 
 isSignal=options.isSignal
 isFastSim=options.isFastSim
@@ -89,7 +89,7 @@ if syncfile:
 
 if includePDFWeights:
     import os
-    newlha = os.environ['CMSSW_BASE']+'/src/TtZAnalysis/Data/data/PDFSets'
+    newlha = os.environ['CMSSW_BASE']+'/src/WbWbXAnalysis/Data/data/PDFSets'
     os.environ['LHAPATH']=newlha
 
 
@@ -151,7 +151,7 @@ if isMC:
     realdata=False
 if realdata and not (json=="nojson"):
     import os
-    jsonpath = os.environ['CMSSW_BASE']+'/src/TtZAnalysis/Data/data/'+json 
+    jsonpath = os.environ['CMSSW_BASE']+'/src/WbWbXAnalysis/Data/data/'+json 
 
     import FWCore.PythonUtilities.LumiList as LumiList
     import FWCore.ParameterSet.Types as CfgTypes
@@ -192,7 +192,7 @@ process.pdfWeights = cms.EDProducer("PdfWeightProducer",
                                     )
 
 
-process.load('TtZAnalysis.TreeWriter.puinfo_cff')
+process.load('WbWbXAnalysis.TreeWriter.puinfo_cff')
 
 process.PUInfo.includePDFWeights = includePDFWeights
 process.PUInfo.pdfWeights = "pdfWeights:"+PDF
@@ -377,7 +377,7 @@ getattr(process, 'patPF2PATSequence'+pfpostfix).replace(getattr(process,'patElec
 ########
 #   adapt electrons to R=03 and use gsf
 
-from TtZAnalysis.Workarounds.useGsfElectrons import *
+from WbWbXAnalysis.Workarounds.useGsfElectrons import *
 
 process.patPFElectronsPFlow = getattr(process,'patElectrons'+pfpostfix).clone()
 getattr(process,'patPF2PATSequence'+pfpostfix).replace(getattr(process,'patElectrons'+pfpostfix),
@@ -406,7 +406,7 @@ getattr(process,'patPFElectrons'+pfpostfix).isolationValues = cms.PSet(
 ######SUSY STUFF####### adapt Muons to get pfIso in reco muons BRUTAL but fast..elecs the same
 
 
-from TtZAnalysis.Workarounds.usePFIsoCone import *
+from WbWbXAnalysis.Workarounds.usePFIsoCone import *
 
 usePFIsoCone(process) #adapts iso cone usePFIsoCone(process, postfix = "PFIso", dRMuons = "03", dRElectrons="03") for RECO!!! objects
 
@@ -602,7 +602,7 @@ else:
 
 ########## Prepare Tree ##
 
-process.load('TtZAnalysis.TreeWriter.susytreewriter_cff')
+process.load('WbWbXAnalysis.TreeWriter.susytreewriter_cff')
 
 process.PFTree.metSrc            = 'patMETs'+pfpostfix
 process.PFTree.includeTrigger    = includetrigger

@@ -4,14 +4,14 @@ $$$ comments
 [plotterMultiStack]
 
       $$this is the main file
-	    controlPlotStyleFile = src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiStack_ctrDef.txt
+	    controlPlotStyleFile = src/WbWbXAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiStack_ctrDef.txt
 	   
 	    nplots = 4
 	    
-	    addStyle0 =   src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiStack_sub0.txt
-	    addStyle1 =   src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiStack_sub1.txt
-	    addStyle2 =   src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiStack_sub2.txt
-	    addStyle3 =   src/TtZAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiStack_sub3.txt
+	    addStyle0 =   src/WbWbXAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiStack_sub0.txt
+	    addStyle1 =   src/WbWbXAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiStack_sub1.txt
+	    addStyle2 =   src/WbWbXAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiStack_sub2.txt
+	    addStyle3 =   src/WbWbXAnalysis/Analysis/configs/fitTtBarXsec/plotterMultiStack_sub3.txt
 	    
 	    
 	  $  frac0=0.7

@@ -6,14 +6,14 @@
  */
 
 
-#include "TtZAnalysis/Analysis/interface/discriminatorFactory.h"
+#include "WbWbXAnalysis/Analysis/interface/discriminatorFactory.h"
 #include "../interface/histo1D.h"
 #include "../interface/histoStack.h"
 #include "../interface/histoStackVector.h"
 #include "../interface/plotterBase.h"
 
 #include <iostream>
-#include "TtZAnalysis/Analysis/interface/NTFullEvent.h"
+#include "WbWbXAnalysis/Analysis/interface/NTFullEvent.h"
 #include "TRandom.h"
 
 void setupDF(ztop::discriminatorFactory & discf, ztop::NTFullEvent& evt){

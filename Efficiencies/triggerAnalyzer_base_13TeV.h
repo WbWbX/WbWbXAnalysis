@@ -4,11 +4,11 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TH1D.h"
-#include "TtZAnalysis/DataFormats/src/classes.h"
-// #include "TtZAnalysis/DataFormats/interface/NTElectron.h"
-// #include "TtZAnalysis/DataFormats/interface/NTEvent.h"
-// #include "TtZAnalysis/DataFormats/interface/NTJet.h"
-// #include "TtZAnalysis/DataFormats/interface/NTMet.h"
+#include "WbWbXAnalysis/DataFormats/src/classes.h"
+// #include "WbWbXAnalysis/DataFormats/interface/NTElectron.h"
+// #include "WbWbXAnalysis/DataFormats/interface/NTEvent.h"
+// #include "WbWbXAnalysis/DataFormats/interface/NTJet.h"
+// #include "WbWbXAnalysis/DataFormats/interface/NTMet.h"
 #include <vector>
 #include <algorithm>
 #include <string>
@@ -17,7 +17,7 @@
 #include "TROOT.h"
 #include "TChain.h"
 //#include "makeplotsnice.h"
-#include "TtZAnalysis/Tools/interface/histo1D.h"
+#include "WbWbXAnalysis/Tools/interface/histo1D.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 #include "TopAnalysis/ZTopUtils/interface/PUReweighter.h"
 #include <map>
@@ -26,8 +26,8 @@
 #include "TEfficiency.h"
 #include <cmath>
 
-#include "TtZAnalysis/Tools/interface/effTriple.h"
-#include "TtZAnalysis/Tools/interface/namedPairs.h" 
+#include "WbWbXAnalysis/Tools/interface/effTriple.h"
+#include "WbWbXAnalysis/Tools/interface/namedPairs.h" 
 
 
 using namespace ztop;
@@ -444,9 +444,9 @@ public:
                //Applies on the fly scale factors for cross check, only comment in when needed
                /* TString fileName;
                 TH2D* h_TrigSFeta= new TH2D;
-                if(mode_>0.1 && isMC_) fileName= "/afs/desy.de/user/t/tarndt/xxl/TTZ/CMSSW_7_2_2_patch2/src/TtZAnalysis/Efficiencies/triggerSummary_mumu.root";
-                if(mode_<0.1 && isMC_) fileName= "/afs/desy.de/user/t/tarndt/xxl/TTZ/CMSSW_7_2_2_patch2/src/TtZAnalysis/Efficiencies/triggerSummary_ee.root";
-                if(mode_==0 && isMC_) fileName= "/afs/desy.de/user/t/tarndt/xxl/TTZ/CMSSW_7_2_2_patch2/src/TtZAnalysis/Efficiencies/triggerSummary_emu.root";
+                if(mode_>0.1 && isMC_) fileName= "/afs/desy.de/user/t/tarndt/xxl/TTZ/CMSSW_7_2_2_patch2/src/WbWbXAnalysis/Efficiencies/triggerSummary_mumu.root";
+                if(mode_<0.1 && isMC_) fileName= "/afs/desy.de/user/t/tarndt/xxl/TTZ/CMSSW_7_2_2_patch2/src/WbWbXAnalysis/Efficiencies/triggerSummary_ee.root";
+                if(mode_==0 && isMC_) fileName= "/afs/desy.de/user/t/tarndt/xxl/TTZ/CMSSW_7_2_2_patch2/src/WbWbXAnalysis/Efficiencies/triggerSummary_emu.root";
                 if(isMC_){
                        TFile trigEfficiencies(fileName);
                        std::ifstream inputfile(fileName);

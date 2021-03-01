@@ -7,7 +7,7 @@
 <use name="FWCore/Common"/>
 <use name="CommonTools/UtilAlgos"/>
 <use name="FWCore/ServiceRegistry"/>
-<use name="TtZAnalysis/DataFormats"/>
+<use name="WbWbXAnalysis/DataFormats"/>
 <use name="DataFormats/TrackReco"/>
 <use name="RecoVertex/KalmanVertexFit"/>
 <use name="TrackingTools/TransientTrack"/>

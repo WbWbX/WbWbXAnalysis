@@ -9,17 +9,17 @@
 
 
 #include "../interface/predictions.h"
-#include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
-#include "TtZAnalysis/Tools/interface/fileReader.h"
-#include "TtZAnalysis/Tools/interface/histo2D.h"
-#include "TtZAnalysis/Tools/interface/plotter2D.h"
-#include "TtZAnalysis/Tools/interface/plotterMultiplePlots.h"
-#include "TtZAnalysis/Tools/interface/likelihood2D.h"
-#include "TtZAnalysis/Tools/interface/resultCombiner.h"
+#include "WbWbXAnalysis/Tools/interface/applicationMainMacro.h"
+#include "WbWbXAnalysis/Tools/interface/fileReader.h"
+#include "WbWbXAnalysis/Tools/interface/histo2D.h"
+#include "WbWbXAnalysis/Tools/interface/plotter2D.h"
+#include "WbWbXAnalysis/Tools/interface/plotterMultiplePlots.h"
+#include "WbWbXAnalysis/Tools/interface/likelihood2D.h"
+#include "WbWbXAnalysis/Tools/interface/resultCombiner.h"
 #include "TCanvas.h"
 #include "TLegend.h"
 #include "TLegendEntry.h"
-#include "TtZAnalysis/Tools/interface/formatter.h"
+#include "WbWbXAnalysis/Tools/interface/formatter.h"
 
 
 //all errors relative
@@ -70,9 +70,9 @@ void extract(const float & corrcoeff, const bool& seventev, const bool& onlycorr
 
 	std::vector<top_prediction> preds(3);//prednnlo,prednlo,predlo;
 	//fileReader::debug=true;
-	//std::string predfile=getenv("CMSSW_BASE")+(std::string)"/src/TtZAnalysis/Analysis/data/predicitions/ttbar_predictions.txt";
-	std::string predfile=getenv("CMSSW_BASE")+(std::string)"/src/TtZAnalysis/Analysis/data/predicitions/ttbar_predictions.txt";
-	//predfile=getenv("CMSSW_BASE")+(std::string)"/src/TtZAnalysis/Analysis/data/predicitions/toppp_pole.txt";
+	//std::string predfile=getenv("CMSSW_BASE")+(std::string)"/src/WbWbXAnalysis/Analysis/data/predicitions/ttbar_predictions.txt";
+	std::string predfile=getenv("CMSSW_BASE")+(std::string)"/src/WbWbXAnalysis/Analysis/data/predicitions/ttbar_predictions.txt";
+	//predfile=getenv("CMSSW_BASE")+(std::string)"/src/WbWbXAnalysis/Analysis/data/predicitions/toppp_pole.txt";
 
 	//bool seventev=false;
 
@@ -104,7 +104,7 @@ void extract(const float & corrcoeff, const bool& seventev, const bool& onlycorr
 	}
 
 	if(pole){
-		//predfile=getenv("CMSSW_BASE")+(std::string)"/src/TtZAnalysis/Analysis/data/predicitions/toppp_pole.txt";
+		//predfile=getenv("CMSSW_BASE")+(std::string)"/src/WbWbXAnalysis/Analysis/data/predicitions/toppp_pole.txt";
 
 		if(seventev){
 			if(onlynnlo){
@@ -219,12 +219,12 @@ void extract(const float & corrcoeff, const bool& seventev, const bool& onlycorr
 	plotter2D pl;
 	TCanvas cvexp;
 	pl.usePad(&cvexp);
-	pl.readStyleFromFileInCMSSW("src/TtZAnalysis/Analysis/configs/mtFromXsec2/plot2D_0to1.txt");
+	pl.readStyleFromFileInCMSSW("src/WbWbXAnalysis/Analysis/configs/mtFromXsec2/plot2D_0to1.txt");
 	pl.setPlot(&expfordraw);
 	if(seventev)
-		pl.readTextBoxesInCMSSW("/src/TtZAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSnoSplitRight2D7TeV");
+		pl.readTextBoxesInCMSSW("/src/WbWbXAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSnoSplitRight2D7TeV");
 	else
-		pl.readTextBoxesInCMSSW("/src/TtZAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSnoSplitRight2D");
+		pl.readTextBoxesInCMSSW("/src/WbWbXAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSnoSplitRight2D");
 	if(!noplots){
 		pl.draw();
 		expcontour.getTGraph()->Draw("L");
@@ -411,9 +411,9 @@ void extract(const float & corrcoeff, const bool& seventev, const bool& onlycorr
 	pl.setPlot(&exphist_ext);
 	pl.usePad(&c);
 	if(seventev)
-		pl.readTextBoxesInCMSSW("/src/TtZAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSnoSplitRight2D7TeV");
+		pl.readTextBoxesInCMSSW("/src/WbWbXAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSnoSplitRight2D7TeV");
 	else
-		pl.readTextBoxesInCMSSW("/src/TtZAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSnoSplitRight2D");
+		pl.readTextBoxesInCMSSW("/src/WbWbXAnalysis/Analysis/configs/general/noCMS_boxes.txt","CMSnoSplitRight2D");
 
 	if(!noplots){
 		pl.draw(); //get margins right.. temp!

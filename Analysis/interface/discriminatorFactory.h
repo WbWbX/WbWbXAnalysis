@@ -11,8 +11,8 @@
 
 #include <string>
 #include "TString.h"
-#include "TtZAnalysis/Tools/interface/histo1D.h"
-#include "TtZAnalysis/Tools/interface/histoStackVector.h"
+#include "WbWbXAnalysis/Tools/interface/histo1D.h"
+#include "WbWbXAnalysis/Tools/interface/histoStackVector.h"
 
 class TFile;
 

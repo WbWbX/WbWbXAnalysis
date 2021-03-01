@@ -228,8 +228,8 @@ dir=$(date +"%Y%m%d_%H%M")_${dirname}
 
 echo "running in dir $dir"
 
-analysisDir=$CMSSW_BASE/src/TtZAnalysis/Analysis/
-templatesDir=$CMSSW_BASE/src/TtZAnalysis/Analysis/templates
+analysisDir=$CMSSW_BASE/src/WbWbXAnalysis/Analysis/
+templatesDir=$CMSSW_BASE/src/WbWbXAnalysis/Analysis/templates
 
 JOBSONBATCH=$SGE_CELL
 if [ ${INTERACTIVE_ANALYSIS_JOBS} ]
@@ -278,9 +278,9 @@ RELBASELIBS=$CMSSW_RELEASE_BASE/lib/$SCRAM_ARCH/
 LOCLIB=$workdir/lib
 
 libs=("TopAnalysisZTopUtils" 
-    "TtZAnalysisDataFormats" 
-    "TtZAnalysisTools"
-    "TtZAnalysisAnalysis"
+    "WbWbXAnalysisDataFormats" 
+    "WbWbXAnalysisTools"
+    "WbWbXAnalysisAnalysis"
     "FWCoreFWLite"
 );
 rellibs=(""

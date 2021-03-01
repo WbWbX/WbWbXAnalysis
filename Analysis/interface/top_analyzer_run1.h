@@ -9,7 +9,7 @@
 #define ANALYZER_RUN1_H_
 
 #include "../interface/topAnalyzer.h"
-#include "TtZAnalysis/DataFormats/interface/NTLepton.h"
+#include "WbWbXAnalysis/DataFormats/interface/NTLepton.h"
 class top_analyzer_run1 : public ztop::topAnalyzer{
 public:
 

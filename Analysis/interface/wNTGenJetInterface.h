@@ -8,7 +8,7 @@
 #ifndef TTZANALYSIS_ANALYSIS_INTERFACE_WNTGENJETINTERFACE_H_
 #define TTZANALYSIS_ANALYSIS_INTERFACE_WNTGENJETINTERFACE_H_
 
-#include "TtZAnalysis/DataFormats/interface/NTGenJet.h"
+#include "WbWbXAnalysis/DataFormats/interface/NTGenJet.h"
 #include "wNTBaseInterface.h"
 
 namespace ztop{

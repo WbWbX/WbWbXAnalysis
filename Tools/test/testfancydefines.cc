@@ -7,8 +7,8 @@
 
 
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
-#include "TtZAnalysis/Analysis/interface/NTFullEvent.h"
-#include "TtZAnalysis/DataFormats/src/classes.h"
+#include "WbWbXAnalysis/Analysis/interface/NTFullEvent.h"
+#include "WbWbXAnalysis/DataFormats/src/classes.h"
 
 
 #define SHOW(a) std::cout << #a << ": " << (a) << std::endl

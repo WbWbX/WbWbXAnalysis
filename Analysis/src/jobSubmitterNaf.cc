@@ -48,9 +48,9 @@ std::string  jobSubmitterNaf::getSubmissionExec()const{
 }
 std::string  jobSubmitterNaf::createWorkingBaseDir()const{
 	system("mkdir -p /nfs/dust/cms/user/$USER/AnalysisWorkdir");
-	system("cd $CMSSW_BASE/src/TtZAnalysis/Analysis; ln -s /nfs/dust/cms/user/$USER/AnalysisWorkdir workdir > /dev/null &2>1");
+	system("cd $CMSSW_BASE/src/WbWbXAnalysis/Analysis; ln -s /nfs/dust/cms/user/$USER/AnalysisWorkdir workdir > /dev/null &2>1");
 	std::string out=getenv("CMSSW_BASE");
-	out+="/src/TtZAnalysis/Analysis/workdir";
+	out+="/src/WbWbXAnalysis/Analysis/workdir";
 	return out;
 }
 

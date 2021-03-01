@@ -13,7 +13,7 @@
 #include <cstdlib>
 #include <cmath>
 #include "TEfficiency.h"
-#include "TtZAnalysis/Configuration/interface/version.h"
+#include "WbWbXAnalysis/Configuration/interface/version.h"
 
 namespace ztop{
 

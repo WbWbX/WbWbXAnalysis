@@ -1,7 +1,7 @@
 #ifndef NTBTagSF_H
 #define NTBTagSF_H
 #include "TopAnalysis/ZTopUtils/interface/bTagSFBase.h"
-#include "TtZAnalysis/DataFormats/interface/NTJet.h"
+#include "WbWbXAnalysis/DataFormats/interface/NTJet.h"
 #include "FWCore/FWLite/interface/AutoLibraryLoader.h"
 //#include "mathdefs.h"
 #include <iostream>

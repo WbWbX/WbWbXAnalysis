@@ -10,8 +10,8 @@
  *    help text
  */
 
-#include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
-#include "TtZAnalysis/Tools/interface/textFormatter.h"
+#include "WbWbXAnalysis/Tools/interface/applicationMainMacro.h"
+#include "WbWbXAnalysis/Tools/interface/textFormatter.h"
 #include <iostream>
 /*
  *  Test line break capabilities of textFormatter

@@ -220,8 +220,8 @@ thisscript=$(pwd)/$0
 dirname=$1
 addParameters=$2
 
-analysisDir=$CMSSW_BASE/src/TtZAnalysis/Analysis/
-templatesDir=$CMSSW_BASE/src/TtZAnalysis/Analysis/templates
+analysisDir=$CMSSW_BASE/src/WbWbXAnalysis/Analysis/
+templatesDir=$CMSSW_BASE/src/WbWbXAnalysis/Analysis/templates
 
 
 ########add pdf variations#######

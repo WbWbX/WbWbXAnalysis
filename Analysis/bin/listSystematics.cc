@@ -8,10 +8,10 @@
 
 
 
-#include "TtZAnalysis/Tools/interface/histoStackVector.h"
-#include "TtZAnalysis/Tools/interface/optParser.h"
+#include "WbWbXAnalysis/Tools/interface/histoStackVector.h"
+#include "WbWbXAnalysis/Tools/interface/optParser.h"
 
-#include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
+#include "WbWbXAnalysis/Tools/interface/applicationMainMacro.h"
 
 invokeApplication(){
 	using namespace ztop;

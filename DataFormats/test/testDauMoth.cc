@@ -12,7 +12,7 @@
 #include "../interface/NTGenParticle.h"
 #include "TTree.h"
 #include "TFile.h"
-#include "TtZAnalysis/Analysis/interface/tBranchHandler.h"
+#include "WbWbXAnalysis/Analysis/interface/tBranchHandler.h"
 #include "FWCore/FWLite/interface/AutoLibraryLoader.h"
 
 

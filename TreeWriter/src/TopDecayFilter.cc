@@ -7,7 +7,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
-#include "TtZAnalysis/TreeWriter/interface/topDecaySelector.h"
+#include "WbWbXAnalysis/TreeWriter/interface/topDecaySelector.h"
 #include <vector>
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 #include "../../DataFormats/interface/mathdefs.h"
@@ -15,7 +15,7 @@
 #include "TopAnalysis/ZTopUtils/interface/consumeTemplate.h"
 
 /**
-  \class   TopDecayFilter TopDecayFilter.cc "TtZAnalysis/Treewriter/src/TopDecayFilter.cc"
+  \class   TopDecayFilter TopDecayFilter.cc "WbWbXAnalysis/Treewriter/src/TopDecayFilter.cc"
 
   \brief   EDFilter to select the decay of ttbar events on generator level
  

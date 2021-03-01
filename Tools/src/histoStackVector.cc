@@ -469,7 +469,7 @@ void histoStackVector::writeAllToTFile(TString filename, bool recreate, bool onl
 
 		plotterControlPlot pl;
 		std::string cmsswbase=getenv("CMSSW_BASE");
-		pl.readStyleFromFile(cmsswbase+"/src/TtZAnalysis/Tools/styles/controlPlots_standard.txt");
+		pl.readStyleFromFile(cmsswbase+"/src/WbWbXAnalysis/Tools/styles/controlPlots_standard.txt");
 
 		gStyle->SetOptStat(0);
 
@@ -555,7 +555,7 @@ void histoStackVector::writeAllToTFile(TString filename, bool recreate, bool onl
 				c->SetBatch(true);
 				histo1D gen= cuf.getGenContainer();
 				plotterMultiplePlots plgen;
-				plgen.readStyleFromFileInCMSSW("/src/TtZAnalysis/Tools/styles/multiplePlots.txt");
+				plgen.readStyleFromFileInCMSSW("/src/WbWbXAnalysis/Tools/styles/multiplePlots.txt");
 				plgen.usePad(c);
 				plgen.addPlot(&gen,true);
 				plgen.draw();

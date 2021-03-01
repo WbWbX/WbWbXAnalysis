@@ -8,8 +8,8 @@
 #ifndef TTZANALYSIS_FLATNTUPLEINTERFACE_INTERFACE_WNTJETINTERFACE_H_
 #define TTZANALYSIS_FLATNTUPLEINTERFACE_INTERFACE_WNTJETINTERFACE_H_
 
-#include "TtZAnalysis/Analysis/interface/wNTBaseInterface.h"
-#include "TtZAnalysis/DataFormats/interface/NTJet.h"
+#include "WbWbXAnalysis/Analysis/interface/wNTBaseInterface.h"
+#include "WbWbXAnalysis/DataFormats/interface/NTJet.h"
 #include <vector>
 
 namespace ztop{

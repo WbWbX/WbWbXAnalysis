@@ -6,12 +6,12 @@
  */
 
 
-#include "TtZAnalysis/Tools/interface/textFormatter.h"
+#include "WbWbXAnalysis/Tools/interface/textFormatter.h"
 #include <iostream>
-#include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
+#include "WbWbXAnalysis/Tools/interface/applicationMainMacro.h"
 #include "../interface/jobSubmitterNaf.h"
 #include "../interface/jobSubmitterLxBatch.h"
-#include "TtZAnalysis/Tools/interface/fileReader.h"
+#include "WbWbXAnalysis/Tools/interface/fileReader.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 #include "TString.h"
 #include <time.h>
@@ -23,7 +23,7 @@ invokeApplication(){
 
 	const std::string CMSSWBASE=getenv("CMSSW_BASE");
 
-	const std::string config=CMSSWBASE+"/src/TtZAnalysis/Analysis/configs/submitjobs/"+
+	const std::string config=CMSSWBASE+"/src/WbWbXAnalysis/Analysis/configs/submitjobs/"+
 			parser->getOpt<std::string>("i","","config file");
 
 	const bool dummyrun=parser->getOpt<bool>("-dummy",false,"dummy run. Does not submit jobs");
@@ -59,7 +59,7 @@ invokeApplication(){
 
 	js->setGenArguments(arg);
 	js->setWorkingDir(workdir);
-	js->setSourceDir(CMSSWBASE+"/src/TtZAnalysis/Analysis");
+	js->setSourceDir(CMSSWBASE+"/src/WbWbXAnalysis/Analysis");
 
 
 	std::vector<std::string> systematics;

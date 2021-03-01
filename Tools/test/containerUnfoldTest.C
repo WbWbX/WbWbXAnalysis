@@ -6,9 +6,9 @@
  */
 
 
-#include "TtZAnalysis/Tools/interface/histo1DUnfold.h"
-#include "TtZAnalysis/Tools/interface/histoUnfolder.h"
-#include "TtZAnalysis/Tools/interface/histoStack.h"
+#include "WbWbXAnalysis/Tools/interface/histo1DUnfold.h"
+#include "WbWbXAnalysis/Tools/interface/histoUnfolder.h"
+#include "WbWbXAnalysis/Tools/interface/histoStack.h"
 #include "TRandom.h"
 #include "TCanvas.h"
 #include "TStyle.h"
@@ -221,7 +221,7 @@ void test(){
     plotterCompare plc;
     plotterCompare::debug=true;
     std::string cmsswbase=getenv("CMSSW_BASE");
-    plc.readStyleFromFile(cmsswbase+"/src/TtZAnalysis/Tools/styles/comparePlots_3MC.txt");
+    plc.readStyleFromFile(cmsswbase+"/src/WbWbXAnalysis/Tools/styles/comparePlots_3MC.txt");
 
     plc.setNominalPlot(&simsignalreco,true);
     plc.setComparePlot(&simsignalfolded,0,true);

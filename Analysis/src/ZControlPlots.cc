@@ -8,7 +8,7 @@
 #include "../interface/ZControlPlots.h"
 #include "../interface/NTFullEvent.h"
 
-#include "TtZAnalysis/DataFormats/src/classes.h"
+#include "WbWbXAnalysis/DataFormats/src/classes.h"
 
 namespace ztop{
 /*

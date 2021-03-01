@@ -16,10 +16,10 @@
  * To execute: addVariation <var_name> <nominal file> <up_file> <down_file> (optional -o <output>)
  */
 
-#include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
+#include "WbWbXAnalysis/Tools/interface/applicationMainMacro.h"
 #include <vector>
 #include "TString.h"
-#include "TtZAnalysis/Tools/interface/histoStackVector.h"
+#include "WbWbXAnalysis/Tools/interface/histoStackVector.h"
 
 invokeApplication(){
 	using namespace ztop;

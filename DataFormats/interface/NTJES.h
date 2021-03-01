@@ -1,7 +1,7 @@
 #ifndef NTJES_H
 #define NTJES_H
 
-#include "TtZAnalysis/Configuration/interface/version.h"
+#include "WbWbXAnalysis/Configuration/interface/version.h"
 #ifndef CMSSW_LEQ_5
 #include "TopAnalysis/ZTopUtils/interface/JESBase.h"
 #else
@@ -22,7 +22,7 @@ public:
 };
 
 #endif
-#include "TtZAnalysis/DataFormats/interface/NTJet.h"
+#include "WbWbXAnalysis/DataFormats/interface/NTJet.h"
 
 #include "NTLorentzVector.h"
 #include <iostream>

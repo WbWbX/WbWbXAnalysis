@@ -8,10 +8,10 @@
 
 
 
-#include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
-#include "TtZAnalysis/Tools/interface/histoStackVector.h"
-#include "TtZAnalysis/Tools/interface/plotterMultiplePlots.h"
-#include "TtZAnalysis/Tools/interface/textFormatter.h"
+#include "WbWbXAnalysis/Tools/interface/applicationMainMacro.h"
+#include "WbWbXAnalysis/Tools/interface/histoStackVector.h"
+#include "WbWbXAnalysis/Tools/interface/plotterMultiplePlots.h"
+#include "WbWbXAnalysis/Tools/interface/textFormatter.h"
 #include "math.h"
 #include "TF2.h"
 #include "TH2D.h"
@@ -19,7 +19,7 @@
 #include "TFitResult.h"
 #include "TColor.h"
 #include "TStyle.h"
-#include "TtZAnalysis/Analysis/interface/wNLOReweighter.h"
+#include "WbWbXAnalysis/Analysis/interface/wNLOReweighter.h"
 
 invokeApplication(){
 	using namespace ztop;

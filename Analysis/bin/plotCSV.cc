@@ -1,11 +1,11 @@
-#include "TtZAnalysis/Tools/interface/histoStackVector.h"
-#include "TtZAnalysis/Tools/interface/fileReader.h"
+#include "WbWbXAnalysis/Tools/interface/histoStackVector.h"
+#include "WbWbXAnalysis/Tools/interface/fileReader.h"
 #include <vector>
 #include "TString.h"
 #include "TFile.h"
 #include "FWCore/FWLite/interface/AutoLibraryLoader.h"
-#include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
-#include "TtZAnalysis/Tools/interface/plotterControlPlot.h"
+#include "WbWbXAnalysis/Tools/interface/applicationMainMacro.h"
+#include "WbWbXAnalysis/Tools/interface/plotterControlPlot.h"
 
 TString stripRoot(TString s){
 	if(s.EndsWith(".root")){ //cut ".root"

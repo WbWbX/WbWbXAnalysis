@@ -59,15 +59,15 @@ cd $targetdir
 eval `scramv1 runtime -sh`
 
 
-echo "doing TtZAnalysis specific adjustments (library symlinks)... "
+echo "doing WbWbXAnalysis specific adjustments (library symlinks)... "
 
-$CMSSW_BASE/src/TtZAnalysis/prepareEnv.sh
+$CMSSW_BASE/src/WbWbXAnalysis/prepareEnv.sh
 
 scram setup lhapdffull
 
 scram b USER_CXXFLAGS="-Wno-delete-non-virtual-dtor" -j16
 
-echo "to create ntuples, go to ${targetdir}/TtZAnalysis/createNTuples"
+echo "to create ntuples, go to ${targetdir}/WbWbXAnalysis/createNTuples"
 echo "and set the environment. Don't pull anything or push anything, this"
 echo "is just a plain copy"
 echo "!!!!! please do cmsenv and compile (scram b)  again in ${targetdir}!!"

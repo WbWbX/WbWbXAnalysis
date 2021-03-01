@@ -9,12 +9,12 @@
 #define TTZANALYSIS_ANALYSIS_INTERFACE_WA7EXTRACTOR_H_
 
 #include <string>
-#include "TtZAnalysis/Tools/interface/tObjectList.h"
-#include "TtZAnalysis/Tools/interface/histoStack.h"
-#include "TtZAnalysis/Tools/interface/variateHisto1D.h"
+#include "WbWbXAnalysis/Tools/interface/tObjectList.h"
+#include "WbWbXAnalysis/Tools/interface/histoStack.h"
+#include "WbWbXAnalysis/Tools/interface/variateHisto1D.h"
 #include <algorithm>
-#include "TtZAnalysis/Tools/interface/simpleFitter.h"
-#include "TtZAnalysis/Tools/interface/graph.h"
+#include "WbWbXAnalysis/Tools/interface/simpleFitter.h"
+#include "WbWbXAnalysis/Tools/interface/graph.h"
 
 namespace ztop{
 

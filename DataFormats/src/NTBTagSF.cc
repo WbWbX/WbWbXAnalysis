@@ -1,7 +1,7 @@
 #include "../interface/NTBTagSF.h"
 #include "TFile.h"
 #include "TTree.h"
-#include "TtZAnalysis/Configuration/interface/version.h"
+#include "WbWbXAnalysis/Configuration/interface/version.h"
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
 
 

@@ -9,7 +9,7 @@
 
 
 #include "../interface/wControlplots_gen.h"
-#include "TtZAnalysis/DataFormats/src/classes.h"
+#include "WbWbXAnalysis/DataFormats/src/classes.h"
 
 namespace ztop{
 void wControlplots_gen::makeControlPlotsPriv(){

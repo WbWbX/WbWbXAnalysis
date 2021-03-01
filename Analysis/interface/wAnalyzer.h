@@ -10,7 +10,7 @@
 
 #include "basicAnalyzer.h"
 #include "TString.h"
-#include "TtZAnalysis/DataFormats/interface/NTJECUncertainties.h"
+#include "WbWbXAnalysis/DataFormats/interface/NTJECUncertainties.h"
 #include "wChargeFlipGenerator.h"
 #include "wNLOReweighter.h"
 

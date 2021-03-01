@@ -5,12 +5,12 @@
  *      Author: kiesej
  */
 
-#include "TtZAnalysis/Tools/interface/optParser.h"
+#include "WbWbXAnalysis/Tools/interface/optParser.h"
 #include <cmath>
 #include <vector>
 #include <iostream>
 
-#include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
+#include "WbWbXAnalysis/Tools/interface/applicationMainMacro.h"
 
 invokeApplication(){
 	using namespace ztop;

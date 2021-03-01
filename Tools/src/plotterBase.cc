@@ -15,7 +15,7 @@
 #include <stdexcept>
 #include <iostream>
 #include "TLatex.h"
-#include "TtZAnalysis/Tools/interface/textFormatter.h"
+#include "WbWbXAnalysis/Tools/interface/textFormatter.h"
 #include "TFile.h"
 
 namespace ztop{

@@ -4,7 +4,7 @@ $!cfg
 [end plotterMultiplePlots]
 
 [textBoxes - boxes]
-          externalFile = CMSSW_BASE/src/TtZAnalysis/Analysis/configs/general/CMS_boxes.txt
+          externalFile = CMSSW_BASE/src/WbWbXAnalysis/Analysis/configs/general/CMS_boxes.txt
           externalMarker = CMSnoSplitRightNoSqrtSProjection
          $externalMarker = CMSnoSplitLeftNoSqrtSProjection
 [end - textBoxes]

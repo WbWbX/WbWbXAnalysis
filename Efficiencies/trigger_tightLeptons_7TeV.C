@@ -1,5 +1,5 @@
 #include "triggerAnalyzer_base3.h"
-#include "TtZAnalysis/Analysis/interface/leptonSelector2.h"
+#include "WbWbXAnalysis/Analysis/interface/leptonSelector2.h"
 #include "TTreePerfStats.h"
 #include "FWCore/FWLite/interface/AutoLibraryLoader.h"
 
@@ -222,10 +222,10 @@ void trigger_tightLeptons(){
 	TString cmssw_base=getenv("CMSSW_BASE");
 
 
-	TString PURunA = cmssw_base+"/src/TtZAnalysis/Data/Legacy2011_RunA.json_PU.root";
-	TString PURunB = cmssw_base+"/src/TtZAnalysis/Data/Legacy2011_RunB.json_PU.root";
+	TString PURunA = cmssw_base+"/src/WbWbXAnalysis/Data/Legacy2011_RunA.json_PU.root";
+	TString PURunB = cmssw_base+"/src/WbWbXAnalysis/Data/Legacy2011_RunB.json_PU.root";
 
-	//TString pileuproot = cmssw_base+"/src/TtZAnalysis/Data/Legacy2011.json_PU.root";
+	//TString pileuproot = cmssw_base+"/src/WbWbXAnalysis/Data/Legacy2011.json_PU.root";
 
 
 	std::vector<TString> mumumcfiles, eemcfiles, emumcfiles, datafilesFull,datafilesRunB, datafilesRunA;

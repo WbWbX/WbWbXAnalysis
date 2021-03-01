@@ -199,7 +199,7 @@ void trigger_test(){
   TString dir="/scratch/hh/dust/naf/cms/user/kieseler/trees_ES_tth/";
 
   TString cmssw_base=getenv("CMSSW_BASE");
-  TString pileuproot = cmssw_base+"/src/TtZAnalysis/Data/ttH.json_PU.root";//HCP_PU.root";//HCP_5.3fb_PU.root";
+  TString pileuproot = cmssw_base+"/src/WbWbXAnalysis/Data/ttH.json_PU.root";//HCP_PU.root";//HCP_5.3fb_PU.root";
 
 
   std::vector<TString> eemcfiles,mumumcfiles,emumcfiles, datafiles;

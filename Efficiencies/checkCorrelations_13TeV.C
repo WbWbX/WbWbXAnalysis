@@ -1,4 +1,4 @@
-#include "TtZAnalysis/Efficiencies/correlationChecker.h"
+#include "WbWbXAnalysis/Efficiencies/correlationChecker.h"
 #include <iostream>
 
 
@@ -27,7 +27,7 @@ void checkCorrelations_13TeV(){
 				<<"HLT_Photon300_NoHE_PFMET40_v1";
 
 
-	TString MCdir="/afs/desy.de/user/t/tarndt/xxl/TTZ/CMSSW_7_2_2_patch2/src/TtZAnalysis/createNTuples/";
+	TString MCdir="/afs/desy.de/user/t/tarndt/xxl/TTZ/CMSSW_7_2_2_patch2/src/WbWbXAnalysis/createNTuples/";
 
 	std::vector<TString> eemcfiles,mumumcfiles,emumcfiles;
 /*	eemcfiles << MCdir+"tree_7TeV_eettbar_trig.root"

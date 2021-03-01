@@ -12,7 +12,7 @@
  *      Do not include it in any other file than MainAnalyzer.cc
  */
 
-#include <TtZAnalysis/Analysis/interface/top_analyzer_run1.h>
+#include <WbWbXAnalysis/Analysis/interface/top_analyzer_run1.h>
 
 
 bool top_analyzer_run1::passesLeptonId(const ztop::NTLepton* lep, bool ismuon)const{

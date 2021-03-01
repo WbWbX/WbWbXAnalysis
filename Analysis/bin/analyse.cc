@@ -1,12 +1,12 @@
-#include "TtZAnalysis/Analysis/interface/AnalysisUtils.h"
-#include "TtZAnalysis/Tools/interface/fileReader.h"
+#include "WbWbXAnalysis/Analysis/interface/AnalysisUtils.h"
+#include "WbWbXAnalysis/Tools/interface/fileReader.h"
 #include "../interface/discriminatorFactory.h"
 #include <time.h>
-#include <TtZAnalysis/Analysis/interface/top_analyzer_run1.h>
-#include <TtZAnalysis/Analysis/interface/top_analyzer_run2.h>
-#include <TtZAnalysis/Analysis/interface/topAnalyzer.h>
+#include <WbWbXAnalysis/Analysis/interface/top_analyzer_run1.h>
+#include <WbWbXAnalysis/Analysis/interface/top_analyzer_run2.h>
+#include <WbWbXAnalysis/Analysis/interface/topAnalyzer.h>
 
-#include "TtZAnalysis/Tools/interface/applicationMainMacro.h"
+#include "WbWbXAnalysis/Tools/interface/applicationMainMacro.h"
 
 #include "TopAnalysis/ZTopUtils/interface/version.h"
 //#include "Analyzer.cc"
@@ -68,8 +68,8 @@ invokeApplication(){
 		std::cout << "Batch run from " << batchbase << std::endl;
 	}
 	else{
-		database=cmssw_base+"/src/TtZAnalysis/Analysis/"+database;
-		configbase=cmssw_base+"/src/TtZAnalysis/Analysis/"+configbase;
+		database=cmssw_base+"/src/WbWbXAnalysis/Analysis/"+database;
+		configbase=cmssw_base+"/src/WbWbXAnalysis/Analysis/"+configbase;
 	}
 
 	using namespace std;

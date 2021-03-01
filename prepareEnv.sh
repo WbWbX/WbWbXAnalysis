@@ -15,20 +15,20 @@ fi
 
 
 mkdir -p ${CMSSW_BASE}/external/${SCRAM_ARCH}/lib
-cd ${CMSSW_BASE}/src/TtZAnalysis
+cd ${CMSSW_BASE}/src/WbWbXAnalysis
 
-if [[ -a ${CMSSW_BASE}/external/${SCRAM_ARCH}/lib/libunfold.so && -a ../TopAnalysis/ZTopUtils/BuildFile.xml &&  -a ../FWCore/FWLite/BuildFile.xml && -a ${CMSSW_BASE}/src/TtZAnalysis/Tools/TUnfold/libunfold.so  && -a ${CMSSW_BASE}/runEclipse.sh ]]
+if [[ -a ${CMSSW_BASE}/external/${SCRAM_ARCH}/lib/libunfold.so && -a ../TopAnalysis/ZTopUtils/BuildFile.xml &&  -a ../FWCore/FWLite/BuildFile.xml && -a ${CMSSW_BASE}/src/WbWbXAnalysis/Tools/TUnfold/libunfold.so  && -a ${CMSSW_BASE}/runEclipse.sh ]]
 then
-    echo "CMSSW release already prepared for TtZAnalysis Framework"
+    echo "CMSSW release already prepared for WbWbXAnalysis Framework"
 else
     if [[ ! -a ../TopAnalysis/ZTopUtils/BuildFile.xml ]]
     then
-	echo "TtZAnalysis depends on the TopAnalysis/ZTopUtils package. Please check it out by hand"
+	echo "WbWbXAnalysis depends on the TopAnalysis/ZTopUtils package. Please check it out by hand"
 	exit 1
     fi
-    if  [[ ! -a ${CMSSW_BASE}/src/TtZAnalysis/Tools/TUnfold/libunfold.so ]]
+    if  [[ ! -a ${CMSSW_BASE}/src/WbWbXAnalysis/Tools/TUnfold/libunfold.so ]]
     then
-	cd ${CMSSW_BASE}/src/TtZAnalysis/Tools/TUnfold
+	cd ${CMSSW_BASE}/src/WbWbXAnalysis/Tools/TUnfold
 	make lib
 	cd -
 	echo "***********************"
@@ -36,16 +36,16 @@ else
 	echo "***********************"
     fi
     #if  [[ ! -a ${CMSSW_BASE}/external/${SCRAM_ARCH}/lib/libunfold.so ]]
-        #ln -s ${CMSSW_BASE}/src/TtZAnalysis/Tools/TUnfold/libunfold.so ${CMSSW_BASE}/external/${SCRAM_ARCH}/lib/libunfold.so
+        #ln -s ${CMSSW_BASE}/src/WbWbXAnalysis/Tools/TUnfold/libunfold.so ${CMSSW_BASE}/external/${SCRAM_ARCH}/lib/libunfold.so
     if  [[ ! -a ${CMSSW_BASE}/lib/${SCRAM_ARCH}/libunfold.so ]]
     then
-	ln -s  ${CMSSW_BASE}/src/TtZAnalysis/Tools/TUnfold/libunfold.so ${CMSSW_BASE}/lib/${SCRAM_ARCH}/libunfold.so
-	ln -s ${CMSSW_BASE}/src/TtZAnalysis/Tools/TUnfold/libunfold.so ${CMSSW_BASE}/external/${SCRAM_ARCH}/lib/libunfold.so
-        ln -s  ${CMSSW_BASE}/src/TtZAnalysis/Tools/TUnfold/TUnfoldBinningV17Dict_rdict.pcm ${CMSSW_BASE}/lib/${SCRAM_ARCH}/TUnfoldBinningV17Dict_rdict.pcm
-        ln -s  ${CMSSW_BASE}/src/TtZAnalysis/Tools/TUnfold/TUnfoldBinningXMLV17Dict_rdict.pcm ${CMSSW_BASE}/lib/${SCRAM_ARCH}/TUnfoldBinningXMLV17Dict_rdict.pcm
-        ln -s  ${CMSSW_BASE}/src/TtZAnalysis/Tools/TUnfold/TUnfoldDensityV17Dict_rdict.pcm ${CMSSW_BASE}/lib/${SCRAM_ARCH}/TUnfoldDensityV17Dict_rdict.pcm
-        ln -s  ${CMSSW_BASE}/src/TtZAnalysis/Tools/TUnfold/TUnfoldSysV17Dict_rdict.pcm ${CMSSW_BASE}/lib/${SCRAM_ARCH}/TUnfoldSysV17Dict_rdict.pcm
-        ln -s  ${CMSSW_BASE}/src/TtZAnalysis/Tools/TUnfold/TUnfoldV17Dict_rdict.pcm ${CMSSW_BASE}/lib/${SCRAM_ARCH}/TUnfoldV17Dict_rdict.pcm
+	ln -s  ${CMSSW_BASE}/src/WbWbXAnalysis/Tools/TUnfold/libunfold.so ${CMSSW_BASE}/lib/${SCRAM_ARCH}/libunfold.so
+	ln -s ${CMSSW_BASE}/src/WbWbXAnalysis/Tools/TUnfold/libunfold.so ${CMSSW_BASE}/external/${SCRAM_ARCH}/lib/libunfold.so
+        ln -s  ${CMSSW_BASE}/src/WbWbXAnalysis/Tools/TUnfold/TUnfoldBinningV17Dict_rdict.pcm ${CMSSW_BASE}/lib/${SCRAM_ARCH}/TUnfoldBinningV17Dict_rdict.pcm
+        ln -s  ${CMSSW_BASE}/src/WbWbXAnalysis/Tools/TUnfold/TUnfoldBinningXMLV17Dict_rdict.pcm ${CMSSW_BASE}/lib/${SCRAM_ARCH}/TUnfoldBinningXMLV17Dict_rdict.pcm
+        ln -s  ${CMSSW_BASE}/src/WbWbXAnalysis/Tools/TUnfold/TUnfoldDensityV17Dict_rdict.pcm ${CMSSW_BASE}/lib/${SCRAM_ARCH}/TUnfoldDensityV17Dict_rdict.pcm
+        ln -s  ${CMSSW_BASE}/src/WbWbXAnalysis/Tools/TUnfold/TUnfoldSysV17Dict_rdict.pcm ${CMSSW_BASE}/lib/${SCRAM_ARCH}/TUnfoldSysV17Dict_rdict.pcm
+        ln -s  ${CMSSW_BASE}/src/WbWbXAnalysis/Tools/TUnfold/TUnfoldV17Dict_rdict.pcm ${CMSSW_BASE}/lib/${SCRAM_ARCH}/TUnfoldV17Dict_rdict.pcm
 
 	echo "*******************"
 	echo "library symlink set"
@@ -69,7 +69,7 @@ fi
 	echo "Eclipse launcher prepared"
 	echo "*************************"
 fi
-    echo "CMSSW release prepared for TtZAnalysis Framework"
+    echo "CMSSW release prepared for WbWbXAnalysis Framework"
 
 fi
 

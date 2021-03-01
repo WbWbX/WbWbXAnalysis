@@ -1,7 +1,7 @@
 #ifndef JERADJUSTER_H
 #define JERADJUSTER_H
 
-#include "TtZAnalysis/DataFormats/interface/NTJet.h"
+#include "WbWbXAnalysis/DataFormats/interface/NTJet.h"
 #include "TopAnalysis/ZTopUtils/interface/JERBase.h"
 #include "NTLorentzVector.h"
 

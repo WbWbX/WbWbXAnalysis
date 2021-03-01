@@ -21,7 +21,7 @@ namespace ztop{
 
 plotterMultiplePlots::plotterMultiplePlots():plotterBase(),drawlegend_(true),tightyaxis_(false),tightxaxis_(true){
 
-	readStyleFromFileInCMSSW("/src/TtZAnalysis/Tools/styles/multiplePlots.txt");
+	readStyleFromFileInCMSSW("/src/WbWbXAnalysis/Tools/styles/multiplePlots.txt");
 
 }
 

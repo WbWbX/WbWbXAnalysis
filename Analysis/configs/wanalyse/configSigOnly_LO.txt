@@ -18,9 +18,9 @@ $new/genFix/W1JetsLN_tree_Part4.root,        NLO,                     414,      
 
 inputFilesDir = /nfs/dust/cms/user/kiesej/trees_WA7/
 Lumi = 19710
-JECUncertainties = /src/TtZAnalysis/Analysis/data/analyse/Summer13_V5_DATA_UncertaintySources_AK5PFchs.txt
+JECUncertainties = /src/WbWbXAnalysis/Analysis/data/analyse/Summer13_V5_DATA_UncertaintySources_AK5PFchs.txt
 
-A7reweightFile = /src/TtZAnalysis/Analysis/data/wanalyse/rewdata.dat 
+A7reweightFile = /src/WbWbXAnalysis/Analysis/data/wanalyse/rewdata.dat 
 
 
 vis_DEtaMin = 0

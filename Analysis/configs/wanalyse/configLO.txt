@@ -33,7 +33,7 @@ $treeProducerA7W_DYJetsM50.root,         DY,                         868,       
 
 inputFilesDir = /nfs/dust/cms/user/kiesej/trees_WA7/
 Lumi = 19710
-JECUncertainties = /src/TtZAnalysis/Analysis/data/analyse/Summer13_V5_DATA_UncertaintySources_AK5PFchs.txt
+JECUncertainties = /src/WbWbXAnalysis/Analysis/data/analyse/Summer13_V5_DATA_UncertaintySources_AK5PFchs.txt
 
 
 [parameters-end]

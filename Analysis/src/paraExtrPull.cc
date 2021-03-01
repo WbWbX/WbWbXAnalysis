@@ -9,7 +9,7 @@
 #include "../interface/paraExtrPull.h"
 #include <stdexcept>
 #include "TopAnalysis/ZTopUtils/interface/miscUtils.h"
-#include "TtZAnalysis/Tools/interface/graphFitter.h"
+#include "WbWbXAnalysis/Tools/interface/graphFitter.h"
 #include "TCanvas.h"
 #include "TFile.h"
 
