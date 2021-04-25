@@ -11,7 +11,7 @@ $ inputfile,                       legend entry,        color,   xsection,   leg
 
 $ "data"
 $
-ST_4f_w_lo_WbWbX.root,     data,1,1,99
+ST_4f_w_lo_WbWbX.root,     data, 1, 1, 99
 
 
 ST_4f_w_lo_WbWbX.root,       t,		620,	  51.7,	  0, true

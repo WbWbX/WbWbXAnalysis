@@ -188,13 +188,13 @@ invokeApplication(){
 	ana->setSyst(Syst);
 	ana->setTopMass(topmass);
 	if(energy == "7TeV"){
-		ana->getPUReweighter()->setMCDistrSummer11Leg();
+	//	ana->getPUReweighter()->setMCDistrSummer11Leg();
 	}
 	else if(energy == "8TeV"){
-		ana->getPUReweighter()->setMCDistrSum12();
+	//	ana->getPUReweighter()->setMCDistrSum12();
 	}
 	else if(energy == "13TeV"){
-		ana->getPUReweighter()->setMCDistrSum16("25ns_poisson");
+	//	ana->getPUReweighter()->setMCDistrSum16("25ns_poisson");
 	}	   
 
 	ana->getElecSF()->setInput(elecsffile,elecsfhisto);

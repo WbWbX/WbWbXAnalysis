@@ -9,6 +9,9 @@
 <use   name="FWCore/FWLite"/>
 
 
+<bin name="WbWbXanalyse" file="WbWbXanalyse.cc" />
+
+
 <bin name="analyse" file="analyse.cc" />
 <bin name="wanalyse" file="wanalyse.cc" />
 <bin name="submitjobs" file="submitjobs.cc" />
