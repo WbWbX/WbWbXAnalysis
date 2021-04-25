@@ -201,7 +201,7 @@ void  top_analyzer_run1::analyze(size_t anaid){
 	if(!inputfile_.Contains("TeV")){
 		std::cout << "this file does not contain an energy specifier. It will be assumed that"
 				<<" it is an 8TeV sample used for 7TeV. the PU reweighting will be adjusted" <<std::endl;
-		getPUReweighter()->setMCDistrSum12();
+	//	getPUReweighter()->setMCDistrSum12();
 		is7TeV_=false;
 	}
 

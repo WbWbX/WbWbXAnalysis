@@ -12,6 +12,7 @@ invokeApplication(){
 
 	TString outputadd=parser->getOpt<TString>("o","","additional string to be added to output file names");
 	TString inputadd =parser->getOpt<TString>("i","","additional string to be added to input file names");
+	const bool drawcanvases = parser->getOpt<bool> ("D",false,"Draw canvases to an additional output root file");
 	const bool keeprealvars= parser->getOpt<bool> ("K",false,"keep relative variation output files");
 	const std::string addextension = parser->getOpt<std::string>("-addextension","","additional extension to be added to input file names");
 
@@ -72,7 +73,7 @@ invokeApplication(){
 	//main merger
 	systMerger * merger=new systMerger();
 	//systMerger::debug=false;
-	merger->setDrawCanvases(false);
+	merger->setDrawCanvases(drawcanvases);
 	merger->setInFileAdd(inputadd);
 	merger->setOutFileAdd(outputadd);
 	merger->setInputStrings(allfiles);
